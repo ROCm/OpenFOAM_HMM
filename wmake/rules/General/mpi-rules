@@ -1,0 +1,32 @@
+#------------------------------------------------------------------------------
+# MPI rules
+
+PFLAGS  =
+PINC    =
+PLIBS   =
+
+# The stem name. Eg, SYSTEMOPENMPI4 -> SYSTEMOPENMPI
+MPLIB_STEMNAME = $(shell echo "$(WM_MPLIB)" | sed -e 's/[-.0-9]*$$//')
+
+ifneq ("$(MPLIB_STEMNAME)","$(WM_MPLIB)")
+    sinclude $(GENERAL_RULES)/mplib$(MPLIB_STEMNAME)
+    sinclude $(DEFAULT_RULES)/mplib$(MPLIB_STEMNAME)
+    ifneq ("$(RULES)","$(DEFAULT_RULES)")
+        sinclude $(RULES)/mplib$(MPLIB_STEMNAME)
+    endif
+endif
+
+ifneq ("","$(WM_MPLIB)")
+    sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
+    sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
+    ifneq ("$(RULES)","$(DEFAULT_RULES)")
+        sinclude $(RULES)/mplib$(WM_MPLIB)
+    endif
+endif
+
+# Default target MPI libdir is PROJECT lib/<mpi-name>
+ifeq (,$(FOAM_MPI_LIBBIN))
+    FOAM_MPI_LIBBIN := $(FOAM_LIBBIN)/$(FOAM_MPI)
+endif
+
+#------------------------------------------------------------------------------

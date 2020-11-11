@@ -6,20 +6,22 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
-#     config.sh/example/openmpi
-#     - sourced by OpenFOAM-*/etc/config.sh/mpi
+#     config.sh/example/prefs.openmpi
 #
 # Description
-#     Example of fine tuning openmpi settings for OpenFOAM
+#     Tuning example for openmpi (POSIX shell).
+#
+#     Copy to etc/config.sh (or ~/.OpenFOAM/config.sh) and it will be
+#     sourced by OpenFOAM-*/etc/config.sh/mpi
 #
 #------------------------------------------------------------------------------
 
-export FOAM_MPI=openmpi-3.0.0
+export FOAM_MPI=openmpi-4.0.5
 
 #------------------------------------------------------------------------------

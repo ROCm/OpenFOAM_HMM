@@ -41,7 +41,7 @@ printHelp() {
 usage: ${0##*/} options
 
 options:
-  -dry-run          Report but do not write config files
+  -dry-run, -n      Report but do not write config files
   -no-mpicc         Bypass any use of mpicc
   -query-openmpi    Report installation directory for system openmpi
   -write-openmpi    Query system openmpi and write config files
@@ -75,7 +75,7 @@ die()
 #------------------------------------------------------------------------------
 # Options
 unset optDryRun
-useMpicc=true
+withMpicc="mpicc"
 
 # Get installation directory for system openmpi
 # - from "mpicc --showme:link"
@@ -83,17 +83,19 @@ useMpicc=true
 #
 # The mpicc content looks like this:
 # ----
-# -pthread -L/usr/lib64/mpi/gcc/openmpi/lib64 -lmpi
+# ... -L/usr/lib64/mpi/gcc/openmpi/lib64 -lmpi
+# ... -L/usr/lib64/mpi/gcc/openmpi2/lib64 -lmpi
+# ... -L/usr/lib64/openmpi/lib -lmpi
 # ----
 
 query_system_openmpi()
 {
     unset arch_path
 
-    if [ "$useMpicc" = true ]
+    if [ -n "$withMpicc" ]
     then
-        arch_path=$(mpicc --showme:link 2>/dev/null | sed -e 's#^.*-L\([^ ]*\).*#\1#')
-        arch_path="${arch_path%/*}"
+        arch_path=$(mpicc --showme:link 2>/dev/null | sed -e 's/^.*-L\([^ ]*\).*/\1/')
+        arch_path="${arch_path%/*}"  # prefix from libdir
 
         if [ -n "$arch_path" ]
         then
@@ -112,14 +114,16 @@ query_system_openmpi()
     fi
 
     # Include is under /usr/lib...  (eg, debian, openSUSE)
+    # Note this cannot handle (openmpi | openmpi1 | openmpi2 | ...) include directories
+    # unless we also try to grab information out of PATH or LD_LIBRARY_PATH
     for testdir in \
-        /usr/lib/"${DEB_TARGET_MULTIARCH:+${DEB_TARGET_MULTIARCH}/}"openmpi/include \
-        /usr/lib64/mpi/gcc/openmpi/include \
+        /usr/lib/"${DEB_TARGET_MULTIARCH:+${DEB_TARGET_MULTIARCH}/}"openmpi \
+        /usr/lib64/mpi/gcc/openmpi \
     ;
     do
-        if [ -e "$testdir/mpi.h" ]
+        if [ -e "$testdir/include/mpi.h" ]
         then
-            echo "${testdir%/*}"
+            echo "$testdir"
             return 0  # Clean exit
         fi
     done
@@ -137,6 +141,16 @@ query_system_openmpi()
         fi
     done
 
+    # Partial env from RedHat "module load mpi/openmpi-x86_64"
+    #
+    ## MPI_COMPILER=openmpi-x86_64
+    ## MPI_HOME=/usr/lib64/openmpi
+    ## MPI_BIN=/usr/lib64/openmpi/bin
+    ## MPI_LIB=/usr/lib64/openmpi/lib
+    ## MPI_INCLUDE=/usr/include/openmpi-x86_64
+    ## MPI_SUFFIX=_openmpi
+
+
     # Failed (should not happen)
     # - report '/usr', but with error code 2
     echo "/usr"
@@ -151,60 +165,68 @@ create_files()
 {
     [ -n "$FOAM_MPI" ] || die "FOAM_MPI not set"
 
+    # MPI-name without trailing major version
+    mpiName="${FOAM_MPI%[0-9]}"
+
+    # The prefs name
+    prefsName="prefs.$mpiName"
+
     if [ -d "$MPI_ARCH_PATH" ]
     then
         echo "Define $FOAM_MPI with $MPI_ARCH_PATH" 1>&2
 
-        case "$FOAM_MPI" in
-        (openmpi-system)
-            configDir="etc/config.sh"
-            if [ "$optDryRun" = true ]
+        case "$mpiName" in
+        (sys-openmpi | openmpi-system)
+
+            # POSIX shell
+            prefsFile="etc/config.sh/$prefsName"
+            if [ -d "${prefsFile%/*}" ] || [ -n "$optDryRun" ]
             then
-                cat << CONTENT 1>&2
-dry-run: $configDir/$FOAM_MPI
+            (
+                if [ -n "$optDryRun" ]
+                then
+                    exec 1>&2
+                else
+                    exec 1> "$prefsFile"
+                fi
+
+                echo "${optDryRun}Write $prefsFile" 1>&2
+                cat << CONTENT
+# $prefsFile
 #
 # Packaging configured value for $FOAM_MPI
-export MPI_ARCH_PATH="$MPI_ARCH_PATH"
-
-CONTENT
-            elif [ -d "$configDir" ]
-            then
-                echo "Write $configDir/$FOAM_MPI" 1>&2
-                cat << CONTENT > "$configDir/$FOAM_MPI"
-# $configDir/$FOAM_MPI
-#
-# Packaging configured value for $FOAM_MPI
-
 export MPI_ARCH_PATH="$MPI_ARCH_PATH"
 #----
 CONTENT
+            )
             else
-                echo "Cannot write $configDir/$FOAM_MPI - no directory" 1>&2
+                echo "Cannot write $prefsFile - no directory" 1>&2
             fi
 
-            configDir="etc/config.csh"
-            if [ "$optDryRun" = true ]
+
+            # C-shell
+            prefsFile="etc/config.csh/$prefsName"
+            if [ -d "${prefsFile%/*}" ] || [ -n "$optDryRun" ]
             then
-                cat << CONTENT 1>&2
-dry-run: $configDir/$FOAM_MPI
+            (
+                if [ -n "$optDryRun" ]
+                then
+                    exec 1>&2
+                else
+                    exec 1> "$prefsFile"
+                fi
+
+                echo "${optDryRun}Write $prefsFile" 1>&2
+                cat << CONTENT
+# $prefsFile
 #
 # Packaging configured value for $FOAM_MPI
-setenv MPI_ARCH_PATH "$MPI_ARCH_PATH"
-
-CONTENT
-            elif [ -d "$configDir" ]
-            then
-                echo "Write $configDir/$FOAM_MPI" 1>&2
-                cat << CONTENT > "$configDir/$FOAM_MPI"
-# $configDir/$FOAM_MPI
-#
-# Packaging configured value for $FOAM_MPI
-
 setenv MPI_ARCH_PATH "$MPI_ARCH_PATH"
 #----
 CONTENT
+            )
             else
-                echo "Cannot write $configDir/$FOAM_MPI - no directory" 1>&2
+                echo "Cannot write $prefsFile - no directory" 1>&2
             fi
             ;;
         esac
@@ -212,10 +234,7 @@ CONTENT
         echo "Warning: $FOAM_MPI with bad MPI_ARCH_PATH: $MPI_ARCH_PATH" 1>&2
         # TBD - remove old/bad entries?
         #
-        # for file in "etc/config.sh/$FOAM_MPI" "etc/config.csh/$FOAM_MPI"
-        # do
-        #     [ -f "$file" ] && rm -f "$file"
-        # done
+        # rm -f "etc/config.sh/$prefsName" "etc/config.csh/$prefsName"
     fi
 }
 
@@ -226,19 +245,12 @@ CONTENT
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help* | --help*)
-        printHelp
-        ;;
-    '')
-        # Discard empty arguments
-        ;;
-
-    -dry-run)
-        optDryRun=true
-        ;;
+    '') true ;; # Discard empty arguments
+    -h | -help* | --help*) printHelp ;;
+    -n | -dry-run) optDryRun="(dry-run) " ;;
 
     -no-mpicc)
-        unset useMpicc
+        unset withMpicc
         ;;
 
     -query-openmpi | -query-system-openmpi)
@@ -249,8 +261,7 @@ do
     -write-openmpi | -write-system-openmpi)
         if MPI_ARCH_PATH=$(query_system_openmpi)
         then
-            FOAM_MPI="openmpi-system"
-            create_files
+            FOAM_MPI="sys-openmpi" create_files
         else
             die "Failed query for system openmpi"
         fi

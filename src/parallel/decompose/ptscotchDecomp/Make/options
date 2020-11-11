@@ -1,14 +1,8 @@
 /*
- * NB: mplib PINC must appear after PTSCOTCH_INC_DIR to ensure we
- * do not accidentally get a ptscotch header from the MPI distribution.
+ * NB: PINC must appear after PTSCOTCH_INC_DIR to ensure we do not
+ * accidentally get a ptscotch header from the MPI distribution
  */
-sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
-sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
-
-/* Default is PROJECT LIB/mpi target */
-ifeq (,$(strip $(FOAM_MPI_LIBBIN)))
-    FOAM_MPI_LIBBIN := $(FOAM_LIBBIN)/$(FOAM_MPI)
-endif
+include $(GENERAL_RULES)/mpi-rules
 
 EXE_INC = \
     -I$(PTSCOTCH_INC_DIR) \

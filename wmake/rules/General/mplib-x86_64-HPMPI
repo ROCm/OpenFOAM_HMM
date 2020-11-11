@@ -1,7 +1,8 @@
 #------------------------------------------------------------------------------
+# HPMPI rules (x86_64)
 
 PFLAGS     =
-PINC       = -isystem $(MPI_ARCH_PATH)/include
-PLIBS      = -L$(MPI_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) -L$(MPI_ARCH_PATH)/lib -lmpich -L$(GM_LIB_PATH) -lgm
+PINC       = -isystem $(MPI_ARCH_PATH)/include -D_MPICC_H
+PLIBS      = -L$(MPI_ARCH_PATH)/lib/linux_amd64 -lmpi
 
 #------------------------------------------------------------------------------
