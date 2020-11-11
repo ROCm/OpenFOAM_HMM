@@ -85,11 +85,10 @@ public:
     :
         public ParcelType::constantProperties
     {
-
     public:
 
             //- Type of activity coefficient models
-            enum volumeUpadteType
+            enum volumeUpdateType
             {
                 mConstRho,
                 mConstVol,

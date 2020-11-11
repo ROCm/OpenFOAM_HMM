@@ -431,7 +431,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     if
     (
         cloud.constProps().volUpdateType()
-     == constantProperties::volumeUpadteType::mUndefined
+     == constantProperties::volumeUpdateType::mUndefined
     )
     {
         if (cloud.constProps().constantVolume())
@@ -447,17 +447,17 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     {
         switch (cloud.constProps().volUpdateType())
         {
-            case constantProperties::volumeUpadteType::mConstRho :
+            case constantProperties::volumeUpdateType::mConstRho :
             {
                 this->d_ = cbrt(mass1/this->rho_*6/pi);
                 break;
             }
-            case constantProperties::volumeUpadteType::mConstVol :
+            case constantProperties::volumeUpdateType::mConstVol :
             {
                 this->rho_ = mass1/this->volume();
                 break;
             }
-            case constantProperties::volumeUpadteType::mUpdateRhoAndVol :
+            case constantProperties::volumeUpdateType::mUpdateRhoAndVol :
             {
                 scalar deltaVol =
                     updatedDeltaVolume

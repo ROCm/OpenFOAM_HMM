@@ -61,7 +61,12 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     ParcelType::constantProperties(parentDict),
     pMin_(this->dict_, "pMin", 1000.0),
     constantVolume_(this->dict_, "constantVolume", false),
-    volUpdateType_(this->dict_, "volumeUpdateMethod", volumeUpadteType::mConstRho)
+    volUpdateType_
+    (
+        this->dict_,
+        "volumeUpdateMethod",
+        volumeUpdateType::mConstRho
+    )
 {
     // If constantVolume found use it
     if (this->dict_.found("constantVolume"))
