@@ -41,6 +41,7 @@ static inline int apiYear()
     return 2000 + (foamVersion::api / 100);
 }
 
+
 // Footer for manpage
 static inline void printManFooter()
 {
@@ -52,31 +53,55 @@ static inline void printManFooter()
 }
 
 
-// Regular option
-static void printManOption(const word& optName)
+// Option output (manpage formatted)
+static inline void printManOption
+(
+    const word& optName,
+    const string& optArg,
+    const string& optUsage
+)
 {
     Info<< ".TP\n\\fB\\-" << optName << "\\fR";
 
-    // Option has arg?
-    const auto optIter = argList::validOptions.cfind(optName);
-
-    if (optIter.found() && optIter().size())
+    if (optArg.size())
     {
-        Info<< " \\fI" << optIter().c_str() << "\\fR";
+        Info<< " \\fI" << optArg.c_str() << "\\fR";
     }
     Info<< nl;
 
-    // Option has usage information?
-
-    const auto usageIter = argList::optionUsage.cfind(optName);
-    if (usageIter.found())
+    if (optUsage.size())
     {
-        stringOps::writeWrapped(Info, *usageIter, argList::usageMax, 0, true);
+        stringOps::writeWrapped(Info, optUsage, argList::usageMax, 0, true);
     }
     else
     {
         Info<< nl;
     }
+}
+
+
+// Bool option output (manpage formatted)
+static inline void printManOption
+(
+    const word& optName,
+    const string& optUsage
+)
+{
+    printManOption(optName, string::null, optUsage);
+}
+
+
+// Option output (manpage formatted)
+// - uses static HashTables to obtain values
+static void printManOption(const word& optName)
+{
+    printManOption
+    (
+        optName,
+        argList::validOptions.lookup(optName, string::null),
+        argList::optionUsage.lookup(optName, string::null)
+    );
+
     if (argList::validParOptions.found(optName))
     {
         Info<< "\\fB[Parallel option]\\fR" << nl;
@@ -84,14 +109,7 @@ static void printManOption(const word& optName)
 }
 
 
-// Simple, hard-coded option
-static inline void printManOption(const char* optName, const char* optUsage)
-{
-    Info<< ".TP\n\\fB\\-" << optName << "\\fR" << nl
-        << optUsage << nl;
-}
-
-
+// Wrapped output with initial start column
 static void printOptionUsage
 (
     std::string::size_type start,
@@ -112,7 +130,7 @@ static void printOptionUsage
     }
     while (start < argList::usageMin)
     {
-        Info<<' ';
+        Info<< ' ';
         ++start;
     }
 
@@ -126,39 +144,52 @@ static void printOptionUsage
 }
 
 
-// Regular option
-static void printOption(const word& optName)
+// Option output (usage formatted)
+static inline void printOption
+(
+    const word& optName,
+    const string& optArg,
+    const string& optUsage
+)
 {
     Info<< "  -" << optName;
 
-    // Length includes leading '  -'
-    label len = optName.size() + 3;
+    // Length with leading '  -'
+    std::string::size_type len = optName.size() + 3;
 
-    const auto optIter = argList::validOptions.cfind(optName);
-    if (optIter.found() && optIter().size())
+    if (optArg.size())
     {
-        // Length includes space between option/param and '<>'
-        len += optIter().size() + 3;
-        Info<< " <" << optIter().c_str() << '>';
+        Info<< " <" << optArg.c_str() << '>';
+
+        // Length with space between option/param and '<>'
+        len += optArg.size() + 3;
     }
 
-    const auto usageIter = argList::optionUsage.cfind(optName);
-    if (usageIter.found())
-    {
-        printOptionUsage(len, usageIter());
-    }
-    else
-    {
-        Info<< nl;
-    }
+    printOptionUsage(len, optUsage);
 }
 
 
-// Simple, hard-coded option
-static inline void printOption(const char* optName, const char* optUsage)
+// Bool option output (usage formatted)
+static inline void printOption
+(
+    const word& optName,
+    const string& optUsage
+)
 {
-    Info<< "  -" << optName;
-    printOptionUsage(3 + strlen(optName), optUsage);
+    printOption(optName, string::null, optUsage);
+}
+
+
+// Option output (usage formatted)
+// - uses static HashTables to obtain values
+static void printOption(const word& optName)
+{
+    printOption
+    (
+        optName,
+        argList::validOptions.lookup(optName, string::null),
+        argList::optionUsage.lookup(optName, string::null)
+    );
 }
 
 } // End namespace Foam
@@ -262,12 +293,12 @@ void Foam::argList::printMan() const
             Info<< ".TP\n\\fI" << argName.c_str() << "\\fR";
             Info<< nl;
 
-            // Arg has usage information?
+            const string& text =
+                argList::argUsage.lookup(argIndex, string::null);
 
-            const auto usageIter = argList::argUsage.cfind(argIndex);
-            if (usageIter.found())
+            if (text.size())
             {
-                stringOps::writeWrapped(Info, *usageIter, usageMax, 0, true);
+                stringOps::writeWrapped(Info, text, usageMax, 0, true);
             }
             else
             {
@@ -373,17 +404,12 @@ void Foam::argList::printUsage(bool full) const
 
             Info<< "  <" << argName.c_str() << '>';
 
-            const auto usageIter = argList::argUsage.cfind(argIndex);
-            if (usageIter.found())
-            {
-                const label len = argName.size() + 4;
-
-                printOptionUsage(len, usageIter());
-            }
-            else
-            {
-                Info<< nl;
-            }
+            printOptionUsage
+            (
+                // Length with leading spaces and surround '<>'
+                (argName.size() + 4),
+                argList::argUsage.lookup(argIndex, string::null)
+            );
         }
     }
 
