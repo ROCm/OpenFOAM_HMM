@@ -89,7 +89,7 @@ protected:
         //- Target value, in case the objective is used as a constraint
         //  Should be used in caution and with updateMethods than get affected
         //  by the target value, without requiring a sqr (e.g. SQP, MMA)
-        scalar target_;
+        autoPtr<scalar> target_;
 
         //- Objective integration start and end times (for unsteady flows)
         autoPtr<scalar> integrationStartTimePtr_;
@@ -153,6 +153,9 @@ protected:
         //- File to keep the average objective values after the end of the
         //- primal solver
         mutable autoPtr<OFstream> meanValueFilePtr_;
+
+        //- Default width of entries when writing in the objective files
+        unsigned int width_;
 
 
     // Protected Member Functions
@@ -378,7 +381,9 @@ public:
         //- Write objective function history at each primal solver iteration
         virtual void writeInstantaneousValue() const;
 
-        //- Write objective function history at each primal solver iteration
+        //- Append a blank line after the end of optimisation cycle to the
+        //- file holding the instantaneous objective values to facilitate
+        //- plotting
         virtual void writeInstantaneousSeparator() const;
 
         //- Write mean objective function history
@@ -387,8 +392,22 @@ public:
         //- Write averaged objective for continuation
         virtual bool writeData(Ostream& os) const;
 
-        // Inline functions for checking whether pointers are set or not
+        // Helper write functions
+
+            //- Write any information that needs to go the header of the file
+            //  (e.g. targets, directions, etc)
+            virtual void addHeaderInfo() const;
+
+            //- Write headers for additional columns
+            virtual void addHeaderColumns() const;
+
+            //- Write information to additional columns
+            virtual void addColumnValues() const;
+
+        //- Return the objective name
         inline const word& objectiveName() const;
+
+        // Inline functions for checking whether pointers are set or not
         inline bool hasdJdb() const;
         inline bool hasBoundarydJdb() const;
         inline bool hasdSdbMult() const;

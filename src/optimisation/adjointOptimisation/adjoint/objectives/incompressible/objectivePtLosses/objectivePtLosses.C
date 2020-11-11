@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -234,40 +234,23 @@ void objectivePtLosses::update_boundarydJdvt()
 }
 
 
-bool objectivePtLosses::write(const bool valid) const
+void objectivePtLosses::addHeaderColumns() const
 {
-    if (Pstream::master())
+    for (const label patchI : patches_)
     {
-        // file is opened only upon invocation of the write function
-        // in order to avoid various instantiations of the same objective
-        // opening the same file
-        unsigned int width = IOstream::defaultPrecision() + 5;
-        if (!objFunctionFilePtr_)
-        {
-            setObjectiveFilePtr();
-            objFunctionFilePtr_() << setw(4)     << "#"        << " ";
-            objFunctionFilePtr_() << setw(width) << "ptLosses" << " ";
-            objFunctionFilePtr_() << setw(width) << "JCycle"   << " ";
-            forAll(patches_, oI)
-            {
-                label patchI = patches_[oI];
-                objFunctionFilePtr_()
-                    << setw(width) << mesh_.boundary()[patchI].name() <<  " ";
-            }
-            objFunctionFilePtr_() << endl;
-        }
-
-        objFunctionFilePtr_() << setw(4)     << mesh_.time().value() << " ";
-        objFunctionFilePtr_() << setw(width) << J_ << " ";
-        objFunctionFilePtr_() << setw(width) << JCycle() << " ";
-        forAll(patchPt_, pI)
-        {
-            objFunctionFilePtr_() << setw(width) << patchPt_[pI] << " ";
-        }
-        objFunctionFilePtr_() << endl;
+        objFunctionFilePtr_()
+            << setw(width_) << mesh_.boundary()[patchI].name() <<  " ";
     }
+}
 
-    return true;
+
+void objectivePtLosses::addColumnValues() const
+{
+    for (const scalar pt : patchPt_)
+    {
+        objFunctionFilePtr_()
+            << setw(width_) << pt << " ";
+    }
 }
 
 
