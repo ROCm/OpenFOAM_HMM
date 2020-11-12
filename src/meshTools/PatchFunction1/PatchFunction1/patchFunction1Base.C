@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,37 +25,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ZeroConstant.H"
+#include "patchFunction1Base.H"
+#include "polyPatch.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Function1Types::ZeroConstant<Type>::ZeroConstant(const word& entryName)
+Foam::patchFunction1Base::patchFunction1Base
+(
+    const polyPatch& pp,
+    const word& entryName,
+    const bool faceValues
+)
 :
-    Function1<Type>(entryName)
+    refCount(),
+    name_(entryName),
+    patch_(pp),
+    faceValues_(faceValues)
 {}
 
 
-template<class Type>
-Foam::Function1Types::ZeroConstant<Type>::ZeroConstant
+Foam::patchFunction1Base::patchFunction1Base
 (
+    const polyPatch& pp,
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool faceValues
 )
 :
-    Function1<Type>(entryName, dict)
+    refCount(),
+    name_(entryName),
+    patch_(pp),
+    faceValues_(faceValues)
+{}
+
+
+Foam::patchFunction1Base::patchFunction1Base(const patchFunction1Base& rhs)
+:
+    patchFunction1Base(rhs, rhs.patch())
+{}
+
+
+Foam::patchFunction1Base::patchFunction1Base
+(
+    const patchFunction1Base& rhs,
+    const polyPatch& pp
+)
+:
+    refCount(),
+    name_(rhs.name_),
+    patch_(pp),
+    faceValues_(rhs.faceValues_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::Function1Types::ZeroConstant<Type>::writeData(Ostream& os) const
-{
-    Function1<Type>::writeData(os);
-
-    os  << token::END_STATEMENT << nl;
-}
+void Foam::patchFunction1Base::convertTimeBase(const Time&)
+{}
 
 
 // ************************************************************************* //

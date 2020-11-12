@@ -75,7 +75,7 @@ public:
         ${typeName}PatchFunction1${FieldType}
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
@@ -84,13 +84,13 @@ public:
         //- Copy construct
         ${typeName}PatchFunction1${FieldType}
         (
-            const ${typeName}PatchFunction1${FieldType}&
+            const ${typeName}PatchFunction1${FieldType}& rhs
         );
 
         //- Copy construct, resetting patch
         ${typeName}PatchFunction1${FieldType}
         (
-            const ${typeName}PatchFunction1${FieldType}&,
+            const ${typeName}PatchFunction1${FieldType}& rhs,
             const polyPatch& pp
         );
 

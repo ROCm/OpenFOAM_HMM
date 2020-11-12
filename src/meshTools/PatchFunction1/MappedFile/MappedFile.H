@@ -73,11 +73,11 @@ class MappedFile
         //- Whether constructed from dictionary
         const bool dictConstructed_;
 
-        //- Name of the field data table, defaults to the name of the field
-        word fieldTableName_;
-
         //- If true adjust the mapped field to maintain average value
         bool setAverage_;
+
+        //- Name of the field data table, defaults to the name of the field
+        word fieldTableName_;
 
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;
@@ -120,14 +120,16 @@ class MappedFile
 
         void checkTable(const scalar t) const;
 
-        //- No copy assignment
-        void operator=(const MappedFile<Type>&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("mappedFile");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const MappedFile<Type>&) = delete;
 
 
     // Constructors
@@ -136,7 +138,7 @@ public:
         MappedFile
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
@@ -152,13 +154,13 @@ public:
             const bool faceValues
         );
 
-        //- Copy constructor
-        explicit MappedFile(const MappedFile<Type>& ut);
+        //- Copy construct
+        explicit MappedFile(const MappedFile<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct setting patch
         explicit MappedFile
         (
-            const MappedFile<Type>& ut,
+            const MappedFile<Type>& rhs,
             const polyPatch& pp
         );
 

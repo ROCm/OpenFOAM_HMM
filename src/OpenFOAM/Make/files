@@ -106,6 +106,7 @@ primitives/septernion/septernion.C
 primitives/triad/triad.C
 
 /* Run-time selectable functions */
+primitives/functions/Function1/Function1/function1Base.C
 primitives/functions/Function1/makeFunction1s.C
 primitives/functions/Function1/ramp/ramp.C
 primitives/functions/Function1/step/stepFunction.C

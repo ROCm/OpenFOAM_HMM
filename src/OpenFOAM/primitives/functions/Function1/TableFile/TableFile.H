@@ -59,9 +59,7 @@ SourceFiles
 #ifndef TableFile_H
 #define TableFile_H
 
-#include "Function1.H"
 #include "TableBase.H"
-#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

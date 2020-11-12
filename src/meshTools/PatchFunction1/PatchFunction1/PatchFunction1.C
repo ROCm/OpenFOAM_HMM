@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +39,7 @@ Foam::PatchFunction1<Type>::PatchFunction1
     const bool faceValues
 )
 :
-    refCount(),
-    name_(entryName),
-    patch_(pp),
-    faceValues_(faceValues),
+    patchFunction1Base(pp, entryName, faceValues),
     coordSys_()
 {}
 
@@ -56,67 +53,31 @@ Foam::PatchFunction1<Type>::PatchFunction1
     const bool faceValues
 )
 :
-    refCount(),
-    name_(entryName),
-    patch_(pp),
-    faceValues_(faceValues),
+    patchFunction1Base(pp, entryName, dict, faceValues),
     coordSys_(pp.boundaryMesh().mesh().thisDb(), dict)
 {}
 
 
 template<class Type>
-Foam::PatchFunction1<Type>::PatchFunction1(const PatchFunction1<Type>& pf1)
+Foam::PatchFunction1<Type>::PatchFunction1(const PatchFunction1<Type>& rhs)
 :
-    refCount(),
-    name_(pf1.name_),
-    patch_(pf1.patch_),
-    faceValues_(pf1.faceValues_),
-    coordSys_(pf1.coordSys_)
+    PatchFunction1<Type>(rhs, rhs.patch())
 {}
 
 
 template<class Type>
 Foam::PatchFunction1<Type>::PatchFunction1
 (
-    const PatchFunction1<Type>& pf1,
+    const PatchFunction1<Type>& rhs,
     const polyPatch& pp
 )
 :
-    refCount(),
-    name_(pf1.name_),
-    patch_(pp),
-    faceValues_(pf1.faceValues_),
-    coordSys_(pf1.coordSys_)
+    patchFunction1Base(pp, rhs.name(), rhs.faceValues()),
+    coordSys_(rhs.coordSys_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::PatchFunction1<Type>::name() const
-{
-    return name_;
-}
-
-
-template<class Type>
-const Foam::polyPatch& Foam::PatchFunction1<Type>::patch() const
-{
-    return patch_;
-}
-
-
-template<class Type>
-bool Foam::PatchFunction1<Type>::faceValues() const
-{
-    return faceValues_;
-}
-
-
-template<class Type>
-void Foam::PatchFunction1<Type>::convertTimeBase(const Time&)
-{}
-
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::value
@@ -125,8 +86,7 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::value
 ) const
 {
     NotImplemented;
-
-    return Field<Type>();
+    return nullptr;
 }
 
 template<class Type>
@@ -144,8 +104,7 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::integrate
 ) const
 {
     NotImplemented;
-
-    return Field<Type>();
+    return nullptr;
 }
 
 
@@ -175,7 +134,7 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::transform
 
     tmp<Field<Type>> tresult =
     (
-        faceValues_
+        this->faceValues()
       ? this->coordSys_.transform(this->patch_.faceCentres(), tfld())
       : this->coordSys_.transform(this->patch_.localPoints(), tfld())
     );
@@ -196,7 +155,7 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::transform
         return fld;
     }
 
-    if (faceValues_)
+    if (this->faceValues())
     {
         return this->coordSys_.transform(this->patch_.faceCentres(), fld);
     }
@@ -215,7 +174,7 @@ void Foam::PatchFunction1<Type>::autoMap(const FieldMapper& mapper)
 template<class Type>
 void Foam::PatchFunction1<Type>::rmap
 (
-    const PatchFunction1<Type>& pf1,
+    const PatchFunction1<Type>& rhs,
     const labelList& addr
 )
 {}
@@ -228,7 +187,7 @@ void Foam::PatchFunction1<Type>::writeData(Ostream& os) const
 
     // Leave type() output up to derived type. This is so 'Constant'&Uniform
     // can do backwards compatibility.
-    //os.writeKeyword(name_) << type();
+    //os.writeKeyword(this->name()) << this->type();
 }
 
 
@@ -243,7 +202,7 @@ Foam::Ostream& Foam::operator<<
 {
     os.check(FUNCTION_NAME);
 
-    os  << rhs.name_;
+    os  << rhs.name();
     rhs.writeData(os);
 
     return os;

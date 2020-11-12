@@ -99,27 +99,22 @@ class Function1Expression
         mutable expressions::fieldExprDriver driver_;
 
 
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const Function1Expression<Type>&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("expression");
 
 
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const Function1Expression<Type>&) = delete;
+
+
     // Constructors
 
-        //- Construct from patch, entry name and dictionary
-        //  The patch must correspond to an fvPatch!
-        Function1Expression
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        //- Construct from entry name and dictionary
+        Function1Expression(const word& entryName, const dictionary& dict);
 
         //- Copy construct
         explicit Function1Expression(const Function1Expression<Type>& rhs);

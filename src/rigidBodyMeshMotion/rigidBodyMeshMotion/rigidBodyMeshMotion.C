@@ -33,7 +33,6 @@ License
 #include "pointConstraints.H"
 #include "uniformDimensionedFields.H"
 #include "forces.H"
-#include "OneConstant.H"
 #include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -120,21 +119,12 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     test_(coeffDict().getOrDefault("test", false)),
     rhoInf_(1.0),
     rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
-    ramp_(nullptr),
+    ramp_(Function1<scalar>::NewIfPresent("ramp", coeffDict())),
     curTimeIndex_(-1)
 {
     if (rhoName_ == "rhoInf")
     {
         readEntry("rhoInf", rhoInf_);
-    }
-
-    if (coeffDict().found("ramp"))
-    {
-        ramp_ = Function1<scalar>::New("ramp", coeffDict());
-    }
-    else
-    {
-        ramp_.reset(new Function1Types::OneConstant<scalar>("ramp"));
     }
 
     const dictionary& bodiesDict = coeffDict().subDict("bodies");
@@ -242,7 +232,7 @@ void Foam::rigidBodyMeshMotion::solve()
         curTimeIndex_ = this->db().time().timeIndex();
     }
 
-    const scalar ramp = ramp_->value(t.value());
+    const scalar ramp = (ramp_ ? ramp_->value(t.value()) : 1.0);
 
     if (t.foundObject<uniformDimensionedVectorField>("g"))
     {

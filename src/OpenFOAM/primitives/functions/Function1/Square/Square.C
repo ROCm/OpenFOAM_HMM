@@ -49,7 +49,7 @@ Foam::Function1Types::Square<Type>::Square
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName)
+    Function1<Type>(entryName, dict)
 {
     read(dict);
 }
@@ -71,20 +71,25 @@ Foam::Function1Types::Square<Type>::Square(const Square<Type>& se)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Square<Type>::writeData(Ostream& os) const
+void Foam::Function1Types::Square<Type>::writeEntries(Ostream& os) const
 {
-    Function1<Type>::writeData(os);
-    os.endEntry();
-
-    os.beginBlock(word(this->name() + "Coeffs"));
-
     os.writeEntry("t0", t0_);
     os.writeEntry("markSpace", markSpace_);
     amplitude_->writeData(os);
     frequency_->writeData(os);
     scale_->writeData(os);
     level_->writeData(os);
+}
 
+
+template<class Type>
+void Foam::Function1Types::Square<Type>::writeData(Ostream& os) const
+{
+    Function1<Type>::writeData(os);
+    os.endEntry();
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+    writeEntries(os);
     os.endBlock();
 }
 

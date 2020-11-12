@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,7 @@ namespace PatchFunction1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class Sampled Declaration
+                           Class Sampled Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -124,14 +124,17 @@ protected:
         //- Field to sample. Either on my or nbr mesh
         bool haveSampleField() const;
 
-        //- No copy assignment
-        void operator=(const Sampled<Type>&) = delete;
-
 
 public:
 
     // Runtime type information
     TypeName("sampled");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const Sampled<Type>&) = delete;
 
 
     // Constructors
@@ -140,19 +143,19 @@ public:
         Sampled
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
         );
 
-        //- Copy constructor
-        explicit Sampled(const Sampled<Type>& ut);
+        //- Copy construct
+        explicit Sampled(const Sampled<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct setting patch
         explicit Sampled
         (
-            const Sampled<Type>& ut,
+            const Sampled<Type>& rhs,
             const polyPatch& pp
         );
 

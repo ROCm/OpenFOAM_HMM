@@ -34,7 +34,7 @@ template<class Type>
 Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
@@ -42,8 +42,8 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     dictConstructed_(true),
-    fieldTableName_(entryName),
     setAverage_(dict.getOrDefault("setAverage", false)),
+    fieldTableName_(entryName),
     perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
     pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
@@ -62,13 +62,8 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_(nullptr)
+    offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
-    if (dict.found("offset"))
-    {
-        offset_ = Function1<Type>::New("offset", dict);
-    }
-
     if
     (
         mapMethod_ != "planarInterpolation"
@@ -96,8 +91,8 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     dictConstructed_(false),
-    fieldTableName_(fieldTableName),
     setAverage_(dict.getOrDefault("setAverage", false)),
+    fieldTableName_(fieldTableName),
     perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
     pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
@@ -116,13 +111,8 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_(nullptr)
+    offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
-    if (dict.found("offset"))
-    {
-        offset_ = Function1<Type>::New("offset", dict);
-    }
-
     if
     (
         mapMethod_ != "planarInterpolation"
@@ -139,51 +129,36 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 template<class Type>
 Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 (
-    const MappedFile<Type>& ut
+    const MappedFile<Type>& rhs
 )
 :
-    PatchFunction1<Type>(ut),
-    dictConstructed_(ut.dictConstructed_),
-    fieldTableName_(ut.fieldTableName_),
-    setAverage_(ut.setAverage_),
-    perturb_(ut.perturb_),
-    pointsName_(ut.pointsName_),
-    mapMethod_(ut.mapMethod_),
-    mapperPtr_(ut.mapperPtr_.clone()),
-    sampleTimes_(ut.sampleTimes_),
-    startSampleTime_(ut.startSampleTime_),
-    startSampledValues_(ut.startSampledValues_),
-    startAverage_(ut.startAverage_),
-    endSampleTime_(ut.endSampleTime_),
-    endSampledValues_(ut.endSampledValues_),
-    endAverage_(ut.endAverage_),
-    offset_(ut.offset_.clone())
+    MappedFile<Type>(rhs, rhs.patch())
 {}
 
 
 template<class Type>
 Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
 (
-    const MappedFile<Type>& ut,
+    const MappedFile<Type>& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<Type>(ut, pp),
-    dictConstructed_(ut.dictConstructed_),
-    fieldTableName_(ut.fieldTableName_),
-    setAverage_(ut.setAverage_),
-    perturb_(ut.perturb_),
-    pointsName_(ut.pointsName_),
-    mapMethod_(ut.mapMethod_),
-    mapperPtr_(ut.mapperPtr_.clone()),
-    sampleTimes_(ut.sampleTimes_),
-    startSampleTime_(ut.startSampleTime_),
-    startSampledValues_(ut.startSampledValues_),
-    startAverage_(ut.startAverage_),
-    endSampleTime_(ut.endSampleTime_),
-    endSampledValues_(ut.endSampledValues_),
-    endAverage_(ut.endAverage_),
-    offset_(ut.offset_.clone())
+    PatchFunction1<Type>(rhs, pp),
+    dictConstructed_(rhs.dictConstructed_),
+    setAverage_(rhs.setAverage_),
+    fieldTableName_(rhs.fieldTableName_),
+    perturb_(rhs.perturb_),
+    pointsName_(rhs.pointsName_),
+    mapMethod_(rhs.mapMethod_),
+    mapperPtr_(rhs.mapperPtr_.clone()),
+    sampleTimes_(rhs.sampleTimes_),
+    startSampleTime_(rhs.startSampleTime_),
+    startSampledValues_(rhs.startSampledValues_),
+    startAverage_(rhs.startAverage_),
+    endSampleTime_(rhs.endSampleTime_),
+    endSampledValues_(rhs.endSampledValues_),
+    endAverage_(rhs.endAverage_),
+    offset_(rhs.offset_.clone())
 {}
 
 
@@ -279,7 +254,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         );
 
         // Allocate the interpolator
-        if (this->faceValues_)
+        if (this->faceValues())
         {
             mapperPtr_.reset
             (
@@ -536,7 +511,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::value
     if (setAverage_)
     {
         Type averagePsi;
-        if (this->faceValues_)
+        if (this->faceValues())
         {
             const scalarField magSf(mag(this->patch_.faceAreas()));
             averagePsi = gSum(magSf*fld)/gSum(magSf);

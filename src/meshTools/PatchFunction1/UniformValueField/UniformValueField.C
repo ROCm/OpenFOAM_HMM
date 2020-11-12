@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ template<class Type>
 Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
@@ -47,7 +47,7 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
         (
             entryName,
             dict,
-            type
+            redirectType
         )
     )
 {}
@@ -56,23 +56,22 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 template<class Type>
 Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 (
-    const UniformValueField<Type>& ut
+    const UniformValueField<Type>& rhs
 )
 :
-    PatchFunction1<Type>(ut),
-    uniformValuePtr_(ut.uniformValuePtr_.clone())
+    UniformValueField<Type>(rhs, rhs.patch())
 {}
 
 
 template<class Type>
 Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 (
-    const UniformValueField<Type>& ut,
+    const UniformValueField<Type>& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<Type>(ut, pp),
-    uniformValuePtr_(ut.uniformValuePtr_.clone())
+    PatchFunction1<Type>(rhs, pp),
+    uniformValuePtr_(rhs.uniformValuePtr_.clone())
 {}
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,14 +119,16 @@ class Sine
         //- Read the coefficients from the given dictionary
         void read(const dictionary& coeffs);
 
-        //- No copy assignment
-        void operator=(const Sine<Type>&) = delete;
-
-
 public:
 
     // Runtime type information
     TypeName("sine");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const Sine<Type>&) = delete;
 
 
     // Constructors
@@ -152,6 +155,9 @@ public:
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
+
+        //- Write coefficient entries in dictionary format
+        void writeEntries(Ostream& os) const;
 };
 
 

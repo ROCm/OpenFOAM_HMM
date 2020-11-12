@@ -65,8 +65,7 @@ Foam::Function1Types::TableBase<Type>::TableBase
     const dictionary& dict
 )
 :
-    Function1<Type>(name),
-    name_(name),
+    Function1<Type>(name, dict),
     bounding_
     (
         bounds::repeatableBoundingNames.getOrDefault
@@ -91,7 +90,6 @@ template<class Type>
 Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 :
     Function1<Type>(tbl),
-    name_(tbl.name_),
     bounding_(tbl.bounding_),
     interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
@@ -115,7 +113,7 @@ void Foam::Function1Types::TableBase<Type>::check() const
     if (!table_.size())
     {
         FatalErrorInFunction
-            << "Table for entry " << this->name_ << " is invalid (empty)"
+            << "Table for entry " << this->name() << " is invalid (empty)"
             << nl << exit(FatalError);
     }
 

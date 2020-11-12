@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,69 +25,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Sine.H"
+#include "function1Base.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::Function1Types::Sine<Type>::read(const dictionary& coeffs)
-{
-    t0_ = coeffs.getOrDefault<scalar>("t0", 0);
-    amplitude_ = Function1<scalar>::New("amplitude", coeffs);
-    frequency_ = Function1<scalar>::New("frequency", coeffs);
-    scale_ = Function1<Type>::New("scale", coeffs);
-    level_ = Function1<Type>::New("level", coeffs);
-}
+Foam::function1Base::function1Base(const word& entryName)
+:
+    refCount(),
+    name_(entryName)
+{}
 
 
-template<class Type>
-Foam::Function1Types::Sine<Type>::Sine
+Foam::function1Base::function1Base
 (
     const word& entryName,
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName, dict)
-{
-    read(dict);
-}
+    refCount(),
+    name_(entryName)
+{}
 
 
-template<class Type>
-Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& se)
+Foam::function1Base::function1Base(const function1Base& rhs)
 :
-    Function1<Type>(se),
-    t0_(se.t0_),
-    amplitude_(se.amplitude_.clone()),
-    frequency_(se.frequency_.clone()),
-    scale_(se.scale_.clone()),
-    level_(se.level_.clone())
+    refCount(),
+    name_(rhs.name_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::Function1Types::Sine<Type>::writeEntries(Ostream& os) const
-{
-    os.writeEntry("t0", t0_);
-    amplitude_->writeData(os);
-    frequency_->writeData(os);
-    scale_->writeData(os);
-    level_->writeData(os);
-}
-
-
-template<class Type>
-void Foam::Function1Types::Sine<Type>::writeData(Ostream& os) const
-{
-    Function1<Type>::writeData(os);
-    os.endEntry();
-
-    os.beginBlock(word(this->name() + "Coeffs"));
-    writeEntries(os);
-    os.endBlock();
-}
+void Foam::function1Base::convertTimeBase(const Time& t)
+{}
 
 
 // ************************************************************************* //

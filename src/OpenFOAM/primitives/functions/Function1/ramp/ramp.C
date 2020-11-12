@@ -43,7 +43,7 @@ Foam::Function1Types::ramp::ramp
     const dictionary& dict
 )
 :
-    Function1<scalar>(entryName)
+    Function1<scalar>(entryName, dict)
 {
     read(dict);
 }
@@ -51,16 +51,20 @@ Foam::Function1Types::ramp::ramp
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::Function1Types::ramp::writeEntries(Ostream& os) const
+{
+    os.writeEntry("start", start_);
+    os.writeEntry("duration", duration_);
+}
+
+
 void Foam::Function1Types::ramp::writeData(Ostream& os) const
 {
     Function1<scalar>::writeData(os);
     os  << token::END_STATEMENT << nl;
 
     os.beginBlock(word(this->name() + "Coeffs"));
-
-    os.writeEntry("start", start_);
-    os.writeEntry("duration", duration_);
-
+    writeEntries(os);
     os.endBlock();
 }
 

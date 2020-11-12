@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,13 +56,8 @@ surfaceNormalFixedValueFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF, dict, false),
     refValue_("refValue", dict, p.size()),
-    ramp_(nullptr)
+    ramp_(Function1<scalar>::NewIfPresent("ramp", dict))
 {
-    if (dict.found("ramp"))
-    {
-        ramp_ = Function1<scalar>::New("ramp", dict);
-    }
-
     tmp<vectorField> tvalues(refValue_*patch().nf());
 
     if (ramp_)

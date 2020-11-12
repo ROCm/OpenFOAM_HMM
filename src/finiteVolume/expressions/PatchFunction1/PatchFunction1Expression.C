@@ -34,7 +34,7 @@ template<class Type>
 Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
@@ -72,10 +72,7 @@ Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
     const PatchExprField<Type>& rhs
 )
 :
-    PatchFunction1<Type>(rhs),
-    dict_(rhs.dict_),
-    valueExpr_(rhs.valueExpr_),
-    driver_(fvPatch::lookupPatch(this->patch()), rhs.driver_)
+    PatchExprField<Type>(rhs, rhs.patch())
 {}
 
 
@@ -156,7 +153,7 @@ void Foam::PatchFunction1Types::PatchExprField<Type>::writeData
     Ostream& os
 ) const
 {
-    // PatchFunction1-from-subdict so out dictionary contains
+    // PatchFunction1-from-subdict so output dictionary contains
     // only the relevant entries.
     dict_.writeEntry(this->name(), os);
 }

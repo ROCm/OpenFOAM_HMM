@@ -36,31 +36,25 @@ License
 template<class Type>
 Foam::Function1<Type>::Function1(const word& entryName)
 :
-    name_(entryName)
+    function1Base(entryName)
+{}
+
+
+template<class Type>
+Foam::Function1<Type>::Function1(const word& entryName, const dictionary& dict)
+:
+    function1Base(entryName, dict)
 {}
 
 
 template<class Type>
 Foam::Function1<Type>::Function1(const Function1<Type>& rhs)
 :
-    refCount(),
-    name_(rhs.name_)
+    function1Base(rhs)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::Function1<Type>::name() const
-{
-    return name_;
-}
-
-
-template<class Type>
-void Foam::Function1<Type>::convertTimeBase(const Time&)
-{}
-
 
 template<class Type>
 Type Foam::Function1<Type>::value(const scalar x) const
@@ -71,7 +65,8 @@ Type Foam::Function1<Type>::value(const scalar x) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::value
+Foam::tmp<Foam::Field<Type>>
+Foam::Function1<Type>::value
 (
     const scalarField& x
 ) const
@@ -90,7 +85,8 @@ Type Foam::Function1<Type>::integrate(const scalar x1, const scalar x2) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::integrate
+Foam::tmp<Foam::Field<Type>>
+Foam::Function1<Type>::integrate
 (
     const scalarField& x1,
     const scalarField& x2
@@ -162,6 +158,11 @@ Foam::FieldFunction1<Function1Type>::integrate
 
 
 template<class Type>
+void Foam::Function1<Type>::writeEntries(Ostream& os) const
+{}
+
+
+template<class Type>
 void Foam::Function1<Type>::writeData(Ostream& os) const
 {
     os.writeKeyword(name_) << type();
@@ -179,7 +180,7 @@ Foam::Ostream& Foam::operator<<
 {
     os.check(FUNCTION_NAME);
 
-    os  << rhs.name_;
+    os  << rhs.name();
     rhs.writeData(os);
 
     return os;

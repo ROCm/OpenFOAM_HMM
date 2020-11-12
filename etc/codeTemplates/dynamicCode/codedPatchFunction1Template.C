@@ -90,7 +90,7 @@ ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues

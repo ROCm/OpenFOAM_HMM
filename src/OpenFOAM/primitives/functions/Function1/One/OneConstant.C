@@ -43,7 +43,7 @@ Foam::Function1Types::OneConstant<Type>::OneConstant
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName)
+    Function1<Type>(entryName, dict)
 {}
 
 

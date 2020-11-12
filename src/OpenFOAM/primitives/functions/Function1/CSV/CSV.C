@@ -250,13 +250,8 @@ const Foam::fileName& Foam::Function1Types::CSV<Type>::fName() const
 
 
 template<class Type>
-void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
+void Foam::Function1Types::CSV<Type>::writeEntries(Ostream& os) const
 {
-    Function1<Type>::writeData(os);
-    os.endEntry();
-
-    os.beginBlock(word(this->name() + "Coeffs"));
-
     // Note: for TableBase write the dictionary entries it needs but not
     // the values themselves
     TableBase<Type>::writeEntries(os);
@@ -273,7 +268,17 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
     os.writeEntry("separator", string(separator_));
     os.writeEntry("mergeSeparators", mergeSeparators_);
     os.writeEntry("file", fName_);
+}
 
+
+template<class Type>
+void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
+{
+    Function1<Type>::writeData(os);
+    os.endEntry();
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+    writeEntries(os);
     os.endBlock();
 }
 

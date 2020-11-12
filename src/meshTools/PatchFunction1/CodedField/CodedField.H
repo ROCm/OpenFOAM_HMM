@@ -135,10 +135,6 @@ protected:
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
 
-        //- No copy assignment
-        void operator=(const CodedField<Type>&) = delete;
-
-
 public:
 
     // Static Data Members
@@ -156,13 +152,19 @@ public:
     TypeName("coded");
 
 
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const CodedField<Type>&) = delete;
+
+
     // Constructors
 
         //- Construct from entry name and dictionary
         CodedField
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true

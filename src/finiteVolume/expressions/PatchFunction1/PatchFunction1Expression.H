@@ -97,16 +97,16 @@ class PatchExprField
         mutable expressions::patchExpr::parseDriver driver_;
 
 
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const PatchExprField<Type>&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("expression");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const PatchExprField<Type>&) = delete;
 
 
     // Constructors
@@ -116,7 +116,7 @@ public:
         PatchExprField
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true

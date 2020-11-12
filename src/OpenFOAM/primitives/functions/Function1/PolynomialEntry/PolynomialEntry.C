@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +37,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName),
+    Function1<Type>(entryName, dict),
     coeffs_(),
     canIntegrate_(true)
 {
@@ -48,8 +49,9 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     if (!coeffs_.size())
     {
         FatalErrorInFunction
-            << "Polynomial coefficients for entry " << this->name_
-            << " are invalid (empty)" << nl << exit(FatalError);
+            << "Invalid (empty) polynomial coefficients for "
+            << this->name() << nl
+            << exit(FatalError);
     }
 
     forAll(coeffs_, i)
@@ -66,7 +68,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
         if (!canIntegrate_)
         {
             WarningInFunction
-                << "Polynomial " << this->name_ << " cannot be integrated"
+                << "Polynomial " << this->name() << " cannot be integrated"
                 << endl;
         }
     }
@@ -87,8 +89,9 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     if (!coeffs_.size())
     {
         FatalErrorInFunction
-            << "Polynomial coefficients for entry " << this->name_
-            << " are invalid (empty)" << nl << exit(FatalError);
+            << "Invalid (empty) polynomial coefficients for "
+            << this->name() << nl
+            << exit(FatalError);
     }
 
     forAll(coeffs_, i)
@@ -105,7 +108,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
         if (!canIntegrate_)
         {
             WarningInFunction
-                << "Polynomial " << this->name_ << " cannot be integrated"
+                << "Polynomial " << this->name() << " cannot be integrated"
                 << endl;
         }
     }
