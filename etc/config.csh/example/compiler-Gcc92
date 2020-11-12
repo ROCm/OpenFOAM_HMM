@@ -12,10 +12,12 @@
 #
 # File
 #     config.csh/example/compiler-Gcc92
-#     - sourced by OpenFOAM-*/etc/config.csh/compiler
 #
 # Description
-#     Example of fine tuning compiler settings with a hook
+#     Example of tuning compiler settings with a hook (C-shell).
+#
+#     Copy to etc/config.csh (or ~/.OpenFOAM/config.csh) and it will be
+#     sourced by OpenFOAM-*/etc/config.csh/compiler
 #
 #------------------------------------------------------------------------------
 

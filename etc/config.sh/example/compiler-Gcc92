@@ -12,10 +12,12 @@
 #
 # File
 #     config.sh/example/compiler-Gcc92
-#     - sourced by OpenFOAM-*/etc/config.sh/compiler
 #
 # Description
-#     Example of fine tuning compiler settings with a hook
+#     Example of tuning compiler settings with a hook (POSIX shell).
+#
+#     Copy to etc/config.sh (or ~/.OpenFOAM/config.sh) and it will be
+#     sourced by OpenFOAM-*/etc/config.sh/compiler
 #
 #------------------------------------------------------------------------------
 

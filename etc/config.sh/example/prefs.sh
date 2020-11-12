@@ -6,21 +6,22 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     config.sh/example/prefs.sh
-#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
-#     Example of preset variables for the OpenFOAM configuration (POSIX shell)
+#     Example of preset variables for configuring OpenFOAM (POSIX shell)
+#
+#     Copy to OpenFOAM-*/etc (or ~/.OpenFOAM) and it will be sourced by
+#     OpenFOAM-*/etc/bashrc
 #
 # See also
-#     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
-#     paths searched
+#     'foamEtcFile -help' or 'foamEtcFile -list' for the paths searched
 #
 #------------------------------------------------------------------------------
 

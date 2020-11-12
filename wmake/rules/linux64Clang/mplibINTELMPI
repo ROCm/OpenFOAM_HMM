@@ -1,3 +1,1 @@
-PFLAGS     = -DMPICH_SKIP_MPICXX -DOMPI_SKIP_MPICXX
-PINC       = -isystem $(MPI_ARCH_PATH)/intel64/include
-PLIBS      = -L$(MPI_ARCH_PATH)/intel64/lib -lmpi
+include $(GENERAL_RULES)/mplib-x86_64-INTELMPI

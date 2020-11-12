@@ -1,8 +1,7 @@
-#-------------------------------*- makefile -*---------------------------------
+#------------------------------------------------------------------------------
 # ADIOS2 includes/libraries
 
-sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
-sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
+include $(GENERAL_RULES)/mpi-rules
 
 # May need to strip off rpath ...
 
