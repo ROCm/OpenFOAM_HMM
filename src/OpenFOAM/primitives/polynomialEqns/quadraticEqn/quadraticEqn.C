@@ -46,7 +46,7 @@ Foam::Roots<2> Foam::quadraticEqn::roots() const
     // (JLM:p. 2246) [discriminant = b*b/4 - a*c]
     const scalar w = a*c;
     const scalar numDiscr = fma(-a, c, w) + fma(b, b/4, -w);
-    const scalar discr = (mag(numDiscr) > SMALL) ? numDiscr : 0;
+    const scalar discr = (mag(numDiscr) > VSMALL) ? numDiscr : 0;
 
     // Find how many roots of what types are available
     const bool twoReal = discr > 0;

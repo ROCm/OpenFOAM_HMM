@@ -114,6 +114,9 @@ public:
 
     // Member Functions
 
+        //- Return true if this patch field is coupled
+        virtual bool coupled() const;
+
         //- Return the constraint type this pointPatch implements.
         virtual const word& constraintType() const
         {

@@ -433,6 +433,16 @@ actions
         normal  (1 0 0);
     }
 
+    {
+        name        planeToFaceZone1;
+        type        faceZoneSet;
+        action      new;
+        source      planeToFaceZone;
+        point       (0.05 0 0);
+        normal      (1 0 0);
+        option      closest;
+    }
+
     // {
     //     name    faceZone1;
     //     type    faceZoneSet;

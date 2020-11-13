@@ -30,11 +30,23 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Computes the heat transfer coefficient as a \c volScalarField
-    for a set of patches.
+    Computes the heat transfer coefficient [W/(m2 K)]
+    as a \c volScalarField for a given set of patches.
 
-    The field is stored on the mesh database so that it can be retrieved and
-    used for other applications.
+    Optionally, the Nusselt number (i.e. the ratio of convective
+    to conductive heat transfer at a boundary in a fluid) can be output:
+
+    \f[
+        Nu = \frac{h L}{\kappa}
+    \f]
+
+    where
+    \vartable
+      Nu | Nusselt number
+      h  | Convective heat transfer coefficient of the flow
+      L  | Characteristic length that defines the scale of the physical system
+      \kappa | Thermal conductivity of the fluid
+    \endvartable
 
     Operands:
     \table
@@ -53,99 +65,61 @@ Usage
         type        heatTransferCoeff;
         libs        (fieldFunctionObjects);
 
-        field       T;
-        patches     ("walls.*");
+        // Mandatory (inherited) entries (runtime modifiable)
+        field       <field>;
+        patches     (<patch1> <patch2> ... <patchN>);
+        htcModel    <htcModel>;
 
-        htcModel    ReynoldsAnalogy;
-        UInf        (20 0 0);
-        Cp          CpInf;
-        CpInf       1000;
-        rho         rhoInf;
-        rhoInf      1.2;
+        // Optional entries (runtime modifable)
+        qr          <qrName>;
+        L           1.0;
+        kappa       1.0;
+
+        // Conditional mandatory and optional
+        // entries based on selected <htcModel> (runtime modifiable)
+        ...
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Example usage for mode \c ReynoldsAnalogy for incompressible case:
-    \verbatim
-    heatTransferCoeff1
-    {
-        // Mandatory entries (unmodifiable)
-        type        heatTransferCoeff;
-        libs        (fieldFunctionObjects);
+    where the entries mean:
+    \table
+      Property    | Description                        | Type | Reqd | Dflt
+      type        | Type name: heatTransferCoeff       | word | yes  | -
+      libs        | Library name: fieldFunctionObjects | word | yes  | -
+      field       | Name of the operand field          | word | yes  | -
+      patches     | Names of operand patches        | wordRes | yes  | -
+      htcModel    | Heat transfer coefficient model <!--
+                -->                        - see below | word | yes  | -
+      qr          | Name of radiative heat flux        | word | no   | qr
+      L           | Characteristic length that defines <!--
+                --> the scale of the physical system | scalar | no   | 1
+      kappa       | Thermal conductivity of fluid    | scalar | no   | 1
+    \endtable
 
-        field       T;
-        patches     ("walls.*");
-
-        htcModel    ReynoldsAnalogy;
-        UInf        (20 0 0);
-        Cp          CpInf;
-        CpInf       1000;
-        rho         rhoInf;
-        rhoInf      1.2;
-    }
-    \endverbatim
-
-    Example usage for mode \c ReynoldsAnalogy for compressible case:
-    \verbatim
-    htc
-    {
-        type        heatTransferCoeff;
-        libs        (fieldFunctionObjects);
-
-        field       T;
-        patches     ("walls.*");
-
-        htcModel    ReynoldsAnalogy;
-        UInf        (20 0 0);
-    }
-    \endverbatim
-
-    Example usage for mode \c localReferenceTemperature for compressible case:
-    \verbatim
-    htc
-    {
-        type        heatTransferCoeff;
-        libs        (fieldFunctionObjects);
-
-        field       T;
-        patches     ("walls.*");
-        htcModel    localReferenceTemperature;
-    }
-    \endverbatim
-
-    Example usage for mode \c fixedReferenceTemperature for compressible case:
-    \verbatim
-    htc
-    {
-        type        heatTransferCoeff;
-        libs        (fieldFunctionObjects);
-
-        field       T;
-        patches     ("walls.*");
-        htcModel    fixedReferenceTemperature;
-        TRef        300;
-    }
-    \endverbatim
+    The inherited entries are elaborated in:
+      - \link functionObject.H \endlink
+      - \link fieldExpression.H \endlink
+      - \link heatTransferCoeffModel.H \endlink
 
     Options for the \c htcModel entry:
     \verbatim
-        ReynoldsAnalogy           | Reynold's analogy
-        localReferenceTemperature | Local reference temperature
-        fixedReferenceTemperature | Specified reference temperature
+      ReynoldsAnalogy           | Reynold's analogy
+      localReferenceTemperature | Local reference temperature
+      fixedReferenceTemperature | Specified reference temperature
     \endverbatim
-
-    The inherited entries are elaborated in:
-     - \link functionObject.H \endlink
-     - \link fieldExpression.H \endlink
 
     Usage by the \c postProcess utility is not available.
 
 See also
-    - Foam::functionObject
-    - Foam::functionObjects::fieldExpression
-    - Foam::heatTransferCoeffModels::fixedReferenceTemperature
-    - Foam::heatTransferCoeffModels::localReferenceTemperature
-    - ExtendedCodeGuide::functionObjects::field::heatTransferCoeff
+  - Foam::functionObject
+  - Foam::functionObjects::fieldExpression
+  - Foam::heatTransferCoeffModels::fixedReferenceTemperature
+  - Foam::heatTransferCoeffModels::localReferenceTemperature
+  - Foam::heatTransferCoeffModels::ReynoldsAnalogy
+  - ExtendedCodeGuide::functionObjects::field::heatTransferCoeff
 
 SourceFiles
     heatTransferCoeff.C
@@ -178,6 +152,12 @@ class heatTransferCoeff
 {
     // Private Data
 
+        //- Characteristic length that defines the scale of the physical system
+        scalar L_;
+
+        //- Thermal conductivity of the fluid
+        scalar kappa_;
+
         //- Heat transfer coefficient model
         autoPtr<heatTransferCoeffModel> htcModelPtr_;
 
@@ -196,6 +176,9 @@ public:
 
 
     // Constructors
+
+        //- No default construct
+        heatTransferCoeff() = delete;
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files

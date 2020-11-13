@@ -32,7 +32,7 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on velocity, i.e. \c U, to enable actuator disk models
+    Applies sources on velocity (i.e. \c U) to enable actuator disk models
     for aero/hydro thrust loading of horizontal axis turbines on surrounding
     flow field in terms of energy conversion processes.
 
@@ -56,7 +56,7 @@ Description
       \rho      | Monitored incoming fluid density
       A         | Actuator disk planar surface area
       \vec{U_o} | Incoming velocity spatial-averaged on monitored region
-      \vec{n}   | Surface-normal vector of the actuator disk pointing upstream
+      \vec{n}   | Surface-normal vector of the actuator disk pointing downstream
       a         | Axial induction factor
       C_p       | Power coefficient
       C_T       | Thrust coefficient
@@ -72,14 +72,14 @@ Description
     \f]
     where
     \vartable
-        T         | Thrust magnitude
-        \rho      | Monitored incoming fluid density
-        A         | Actuator disk planar surface area
-        \vec{U_m} | Incoming velocity spatial-averaged on actuator disk
-        \vec{n}   | Surface-normal vector of the actuator disk pointing upstream
-        \vec{U_{ref}} | Incoming velocity spatial-averaged on monitored region
-        C_T       | Thrust coefficient
-        C_T^*     | Calibrated thrust coefficient
+      T         | Thrust magnitude
+      \rho      | Monitored incoming fluid density
+      A         | Actuator disk planar surface area
+      \vec{U_m} | Incoming velocity spatial-averaged on actuator disk
+      \vec{n}   | Surface-normal vector of the actuator disk pointing downstream
+      \vec{U_{ref}} | Incoming velocity spatial-averaged on monitored region
+      C_T       | Thrust coefficient
+      C_T^*     | Calibrated thrust coefficient
     \endvartable
 
     Reference
@@ -169,19 +169,19 @@ Usage
 
     where the entries mean:
     \table
-      Property   | Description                         | Type | Req'd    | Dflt
+      Property   | Description                         | Type | Reqd     | Dflt
       type       | Type name: actuationDiskSource      | word | yes      | -
-      diskArea   | Actuator disk planar surface area   | scalar | yes | -
+      diskArea   | Actuator disk planar surface area   | scalar | yes    | -
       diskDir    | Surface-normal vector of the actuator disk <!--
-               --> pointing upstream                   | vector    | yes | -
+               --> pointing downstream                 | vector    | yes | -
       Cp         | Power coefficient                   | Function1 | yes | -
       Ct         | Thrust coefficient                  | Function1 | yes | -
       monitorMethod | Type of incoming velocity monitoring method   <!--
                -->    - see below                      | word | no  | points
       variant    | Type of the force computation method - see below <!--
                -->                                     | word | no  | Froude
-      sink        | Flag for body forces to act as a source (true)  <!--
-               -->  or a sink (false)                  | bool   | no  | true
+      sink       | Flag for body forces to act as a source (false)  <!--
+               -->  or a sink (true)                   | bool   | no  | true
       writeFileStart | Start time for file output      | scalar | no  | 0
       writeFileEnd   | End time for file output        | scalar | no  | VGREAT
     \endtable
@@ -266,7 +266,7 @@ protected:
         //- The type of incoming velocity monitoring method
         const enum monitorMethodType monitorMethod_;
 
-        //- Flag for body forces to act as a source (true) or a sink (false)
+        //- Flag for body forces to act as a source (false) or a sink (true)
         label sink_;
 
         //- Start time for file output
@@ -278,7 +278,7 @@ protected:
         //- Actuator disk planar surface area [m2]
         scalar diskArea_;
 
-        //- Surface-normal vector of the actuator disk pointing upstream
+        //- Surface-normal vector of the actuator disk pointing downstream
         vector diskDir_;
 
         //- Velocity vs power coefficients
@@ -339,6 +339,9 @@ public:
 
 
     // Constructors
+
+        //- No default construct
+        actuationDiskSource() = delete;
 
         //- Construct from components
         actuationDiskSource

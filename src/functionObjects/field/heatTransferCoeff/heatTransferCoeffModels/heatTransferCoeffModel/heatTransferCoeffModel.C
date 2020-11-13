@@ -45,7 +45,7 @@ namespace Foam
 Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar>>
 Foam::heatTransferCoeffModel::q() const
 {
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
     const volScalarField::Boundary& Tbf = T.boundaryField();
 
     auto tq = tmp<FieldField<Field, scalar>>::New(Tbf.size());
@@ -60,7 +60,7 @@ Foam::heatTransferCoeffModel::q() const
 
     if (mesh_.foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
     {
-        const cmpTurbModel& turb =
+        const auto& turb =
             mesh_.lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
 
         const volScalarField& he = turb.transport().he();
@@ -76,7 +76,7 @@ Foam::heatTransferCoeffModel::q() const
     }
     else if (mesh_.foundObject<fluidThermo>(fluidThermo::dictName))
     {
-        const fluidThermo& thermo =
+        const auto& thermo =
             mesh_.lookupObject<fluidThermo>(fluidThermo::dictName);
 
         const volScalarField& he = thermo.he();
@@ -99,7 +99,7 @@ Foam::heatTransferCoeffModel::q() const
 
     // Add radiative heat flux contribution if present
 
-    const volScalarField* qrPtr = mesh_.cfindObject<volScalarField>(qrName_);
+    const auto* qrPtr = mesh_.cfindObject<volScalarField>(qrName_);
 
     if (qrPtr)
     {

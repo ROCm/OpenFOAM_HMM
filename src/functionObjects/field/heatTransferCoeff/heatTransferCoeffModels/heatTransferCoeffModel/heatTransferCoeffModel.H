@@ -35,9 +35,32 @@ Class
 Description
     An abstract base class for heat transfer coeffcient models.
 
+Usage
+    Minimal example by using \c system/controlDict.functions:
+    \verbatim
+    heatTransferCoeff1
+    {
+        // Mandatory and other optional entries
+        ...
+
+        // Mandatory (inherited) entries (runtime modifiable)
+        patches     (<patch1> <patch2> ... <patchN>);
+
+        // Optional (inherited) entries (runtime modifiable)
+        qr          <qrName>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                  | Type | Reqd | Dflt
+      patches   | Names of operand patches  | wordRes | yes  | -
+      qr        | Name of radiative heat flux  | word | no   | qr
+    \endtable
+
 SourceFiles
-    heatTransferCoeffModel.C
-    heatTransferCoeffModelNew.C
+  - heatTransferCoeffModel.C
+  - heatTransferCoeffModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,7 +88,7 @@ class heatTransferCoeffModel
 {
 protected:
 
-    // Public Data
+    // Protected Data
 
         //- Mesh reference
         const fvMesh& mesh_;
@@ -76,11 +99,9 @@ protected:
         //- Temperature name
         const word TName_;
 
-        //- Name of radiative heat flux (default = qr)
+        //- Name of radiative heat flux
         word qrName_;
 
-
-protected:
 
     // Protected Member Functions
 
@@ -90,12 +111,6 @@ protected:
             volScalarField& htc,
             const FieldField<Field, scalar>& q
         ) = 0;
-
-        //- No copy construct
-        heatTransferCoeffModel(const heatTransferCoeffModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const heatTransferCoeffModel&) = delete;
 
 
 public:
@@ -141,6 +156,12 @@ public:
             const word& TName
         );
 
+        //- No copy construct
+        heatTransferCoeffModel(const heatTransferCoeffModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const heatTransferCoeffModel&) = delete;
+
 
     //- Destructor
     virtual ~heatTransferCoeffModel() = default;
@@ -171,7 +192,6 @@ public:
         {
             return qrName_;
         }
-
 
         //- Read from dictionary
         virtual bool read(const dictionary& dict);

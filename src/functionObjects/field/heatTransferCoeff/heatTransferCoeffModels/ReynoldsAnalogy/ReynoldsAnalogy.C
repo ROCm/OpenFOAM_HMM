@@ -60,8 +60,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::rho(const label patchi) const
     }
     else if (mesh_.foundObject<volScalarField>(rhoName_, false))
     {
-        const volScalarField& rho =
-            mesh_.lookupObject<volScalarField>(rhoName_);
+        const auto& rho = mesh_.lookupObject<volScalarField>(rhoName_);
         return rho.boundaryField()[patchi];
     }
 
@@ -83,7 +82,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cp(const label patchi) const
     }
     else if (mesh_.foundObject<fluidThermo>(fluidThermo::dictName))
     {
-        const fluidThermo& thermo =
+        const auto& thermo =
             mesh_.lookupObject<fluidThermo>(fluidThermo::dictName);
 
         const scalarField& pp = thermo.p().boundaryField()[patchi];
@@ -108,7 +107,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 
     if (mesh_.foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
     {
-        const cmpTurbModel& turb =
+        const auto& turb =
             mesh_.lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
 
         return turb.devRhoReff()/turb.rho();
@@ -122,30 +121,30 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
     }
     else if (mesh_.foundObject<fluidThermo>(fluidThermo::dictName))
     {
-        const fluidThermo& thermo =
+        const auto& thermo =
             mesh_.lookupObject<fluidThermo>(fluidThermo::dictName);
 
-        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+        const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
         return -thermo.nu()*dev(twoSymm(fvc::grad(U)));
     }
     else if (mesh_.foundObject<transportModel>("transportProperties"))
     {
-        const transportModel& laminarT =
+        const auto& laminarT =
             mesh_.lookupObject<transportModel>("transportProperties");
 
-        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+        const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
         return -laminarT.nu()*dev(twoSymm(fvc::grad(U)));
     }
     else if (mesh_.foundObject<dictionary>("transportProperties"))
     {
-        const dictionary& transportProperties =
+        const auto& transportProperties =
             mesh_.lookupObject<dictionary>("transportProperties");
 
-        dimensionedScalar nu("nu", dimViscosity, transportProperties);
+        const dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
-        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+        const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
         return -nu*dev(twoSymm(fvc::grad(U)));
     }
@@ -161,7 +160,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 Foam::tmp<Foam::FieldField<Foam::Field, Foam::scalar>>
 Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cf() const
 {
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+    const auto& U = mesh_.lookupObject<volVectorField>(UName_);
     const volVectorField::Boundary& Ubf = U.boundaryField();
 
     auto tCf = tmp<FieldField<Field, scalar>>::New(Ubf.size());
@@ -205,9 +204,9 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::ReynoldsAnalogy
     UName_("U"),
     URef_(Zero),
     rhoName_("rho"),
-    rhoRef_(0.0),
+    rhoRef_(0),
     CpName_("Cp"),
-    CpRef_(0.0)
+    CpRef_(0)
 {
     read(dict);
 }
