@@ -161,6 +161,20 @@ subModels
 
 cloudFunctions
 {
+    patchParticleHistogram1
+    {
+        type            patchParticleHistogram;
+        patches
+        (
+            cycLeft_half0
+            cycLeft_half1
+        );
+        nBins            30;
+        min              0.0009;
+        max              0.001;
+        maxStoredParcels 20;
+    }
+
     patchPostProcessing1
     {
         type            patchPostProcessing;
