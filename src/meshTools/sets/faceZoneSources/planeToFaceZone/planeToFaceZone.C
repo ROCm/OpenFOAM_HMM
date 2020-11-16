@@ -73,12 +73,12 @@ Foam::topoSetSource::addToUsageTable Foam::planeToFaceZone::usage_
 
 const Foam::Enum
 <
-    Foam::planeToFaceZone::faceZoneAction
+    Foam::planeToFaceZone::faceAction
 >
-Foam::planeToFaceZone::faceZoneActionNames_
+Foam::planeToFaceZone::faceActionNames_
 ({
-    { faceZoneAction::ALL, "all" },
-    { faceZoneAction::CLOSEST, "closest" },
+    { faceAction::ALL, "all" },
+    { faceAction::CLOSEST, "closest" },
 });
 
 
@@ -112,14 +112,14 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                 patch.coupled() && cellIsAbovePlane[mesh_.faceOwner()[facei]];
         }
     }
-    syncTools::syncFaceList(mesh_, faceIsOnPlane, notEqualOp<bool>());
+    syncTools::syncFaceList(mesh_, faceIsOnPlane, xorEqOp<bool>());
 
     // Convert marked faces to a list of indices
     labelList newSetFaces(findIndices(faceIsOnPlane, true));
 
     // If constructing a single contiguous set, remove all faces except those
     // connected to the contiguous region closest to the specified point
-    if (option_ == faceZoneAction::CLOSEST)
+    if (option_ == faceAction::CLOSEST)
     {
         // Step 1: Get locally contiguous regions for the new face set and the
         // total number of regions across all processors.
@@ -188,7 +188,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
             (
                 mesh_,
                 meshEdgeRegions,
-                globalMeshData::ListPlusEqOp<labelList>(),
+                ListOps::appendEqOp<label>(),
                 labelList()
             );
 
@@ -367,15 +367,30 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
 Foam::planeToFaceZone::planeToFaceZone
 (
     const polyMesh& mesh,
-    const dictionary& dict
+    const point& basePoint,
+    const vector& normal,
+    const faceAction action
 )
 :
     topoSetFaceZoneSource(mesh),
-    point_(dict.get<vector>("point")),
-    normal_(dict.get<vector>("normal")),
-    option_
+    point_(basePoint),
+    normal_(normal),
+    option_(action)
+{}
+
+
+Foam::planeToFaceZone::planeToFaceZone
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    planeToFaceZone
     (
-        faceZoneActionNames_.getOrDefault("option", dict, faceZoneAction::ALL)
+        mesh,
+        dict.get<vector>("point"),
+        dict.get<vector>("normal"),
+        faceActionNames_.getOrDefault("option", dict, faceAction::ALL)
     )
 {}
 
@@ -389,7 +404,7 @@ Foam::planeToFaceZone::planeToFaceZone
     topoSetFaceZoneSource(mesh),
     point_(checkIs(is)),
     normal_(checkIs(is)),
-    option_(faceZoneActionNames_.read(checkIs(is)))
+    option_(faceActionNames_.read(checkIs(is)))
 {}
 
 

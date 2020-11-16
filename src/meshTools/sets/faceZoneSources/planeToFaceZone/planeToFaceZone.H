@@ -34,8 +34,8 @@ Description
     Operands:
     \table
       Operand   | Type     | Location
-      output 1  | faceSet  | $FOAM_CASE/constant/polyMesh/sets/\<set\>
-      output 2  | faceZone | $FOAM_CASE/constant/polyMesh/faceZones
+      output 1  | faceSet  | \<constant\>/polyMesh/sets/\<set\>
+      output 2  | faceZone | \<constant\>/polyMesh/faceZones
     \endtable
 
 Usage
@@ -119,7 +119,7 @@ class planeToFaceZone
 public:
 
         //- Enumeration defining the valid options
-        enum faceZoneAction
+        enum faceAction
         {
             ALL,       //<!- Select all faces that meet the criteria
             CLOSEST    //<!- Select faces belong to the closest contiguous plane
@@ -134,7 +134,7 @@ private:
         static addToUsageTable usage_;
 
         //- Plane selection methods
-        static const Enum<faceZoneAction> faceZoneActionNames_;
+        static const Enum<faceAction> faceActionNames_;
 
         //- Point on the input plane
         const vector point_;
@@ -143,7 +143,7 @@ private:
         const vector normal_;
 
         //- Input plane selection method
-        const faceZoneAction option_;
+        const faceAction option_;
 
 
     // Private Member Functions
@@ -161,6 +161,15 @@ public:
 
         //- No default construct
         planeToFaceZone() = delete;
+
+        //- Construct from components
+        planeToFaceZone
+        (
+            const polyMesh& mesh,
+            const point& basePoint,
+            const vector& normal,
+            const faceAction action = faceAction::ALL
+        );
 
         //- Construct from dictionary
         planeToFaceZone(const polyMesh& mesh, const dictionary& dict);
