@@ -31,40 +31,24 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Square<Type>::read(const dictionary& coeffs)
-{
-    t0_ = coeffs.getOrDefault<scalar>("t0", 0);
-    markSpace_ = coeffs.getOrDefault<scalar>("markSpace", 1);
-    amplitude_ = Function1<scalar>::New("amplitude", coeffs);
-    frequency_ = Function1<scalar>::New("frequency", coeffs);
-    scale_ = Function1<Type>::New("scale", coeffs);
-    level_ = Function1<Type>::New("level", coeffs);
-}
-
-
-template<class Type>
 Foam::Function1Types::Square<Type>::Square
 (
     const word& entryName,
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName, dict)
-{
-    read(dict);
-}
+    Sine<Type>(entryName, dict),
+    mark_(dict.getOrDefaultCompat<scalar>("mark", {{"markSpace", 2006}}, 1)),
+    space_(dict.getOrDefault<scalar>("space", 1))
+{}
 
 
 template<class Type>
-Foam::Function1Types::Square<Type>::Square(const Square<Type>& se)
+Foam::Function1Types::Square<Type>::Square(const Square<Type>& rhs)
 :
-    Function1<Type>(se),
-    t0_(se.t0_),
-    markSpace_(se.markSpace_),
-    amplitude_(se.amplitude_.clone()),
-    frequency_(se.frequency_.clone()),
-    scale_(se.scale_.clone()),
-    level_(se.level_.clone())
+    Sine<Type>(rhs),
+    mark_(rhs.mark_),
+    space_(rhs.space_)
 {}
 
 
@@ -73,12 +57,9 @@ Foam::Function1Types::Square<Type>::Square(const Square<Type>& se)
 template<class Type>
 void Foam::Function1Types::Square<Type>::writeEntries(Ostream& os) const
 {
-    os.writeEntry("t0", t0_);
-    os.writeEntry("markSpace", markSpace_);
-    amplitude_->writeData(os);
-    frequency_->writeData(os);
-    scale_->writeData(os);
-    level_->writeData(os);
+    os.writeEntryIfDifferent<scalar>("mark", 1, mark_);
+    os.writeEntryIfDifferent<scalar>("space", 1, space_);
+    Sine<Type>::writeEntries(os);
 }
 
 
