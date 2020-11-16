@@ -584,11 +584,7 @@ void Foam::snappyLayerDriver::handleNonManifolds
     // 2. Remote check for boundary edges on coupled boundaries
     forAll(edgeGlobalFaces, edgei)
     {
-        if
-        (
-            pp.edgeFaces()[edgei].size() == 1
-         && edgeGlobalFaces[edgei].size() > 2
-        )
+        if (edgeGlobalFaces[edgei].size() > 2)
         {
             // So boundary edges that are connected to more than 2 processors
             // i.e. a non-manifold edge which is exactly on a processor
@@ -599,44 +595,6 @@ void Foam::snappyLayerDriver::handleNonManifolds
         }
     }
 
-    // 3. Remote check for end of layer across coupled boundaries
-    {
-        bitSet isCoupledEdge(mesh.nEdges());
-
-        const labelList& cpEdges = mesh.globalData().coupledPatchMeshEdges();
-        isCoupledEdge.set(cpEdges);
-
-        syncTools::syncEdgeList
-        (
-            mesh,
-            isCoupledEdge,
-            orEqOp<unsigned int>(),
-            0
-        );
-
-        forAll(edgeGlobalFaces, edgei)
-        {
-            label meshEdgei = meshEdges[edgei];
-
-            if
-            (
-                pp.edgeFaces()[edgei].size() == 1
-             && edgeGlobalFaces[edgei].size() == 1
-             && isCoupledEdge.test(meshEdgei)
-            )
-            {
-                // Edge of patch but no continuation across processor.
-                const edge& e = pp.edges()[edgei];
-                //Pout<< "** Stopping extrusion on edge "
-                //    << pp.localPoints()[e[0]]
-                //    << pp.localPoints()[e[1]] << endl;
-                nonManifoldPoints.insert(pp.meshPoints()[e[0]]);
-                nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
-            }
-        }
-    }
-
-
 
     label nNonManif = returnReduce(nonManifoldPoints.size(), sumOp<label>());
 
@@ -645,6 +603,11 @@ void Foam::snappyLayerDriver::handleNonManifolds
 
     if (nNonManif > 0)
     {
+        // Make sure all processors use the same information. The edge might
+        // not exist locally but remotely there might be a problem with this
+        // edge.
+        nonManifoldPoints.sync(mesh);
+
         const labelList& meshPoints = pp.meshPoints();
 
         forAll(meshPoints, patchPointi)
@@ -1338,6 +1301,9 @@ void Foam::snappyLayerDriver::determineSidePatches
     // Determine edgePatchID. Any additional processor boundary gets added to
     // patchToNbrProc,nbrProcToPatch and nPatches gets set to the new number
     // of patches.
+    // Note: faceZones are at this point split into baffles so any zone
+    //       information might also come from boundary faces (hence
+    //       zoneFromAnyFace set in call to calcExtrudeInfo)
     label nPatches;
     Map<label> nbrProcToPatch;
     Map<label> patchToNbrProc;

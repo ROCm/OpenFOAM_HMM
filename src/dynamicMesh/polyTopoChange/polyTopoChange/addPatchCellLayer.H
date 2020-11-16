@@ -248,6 +248,39 @@ class addPatchCellLayer
             bool& zoneFlip
         );
 
+        //- Mark internal and boundary edges of patch. In mesh edges
+        //- since processor might not have pp but does have edge.
+        static void markPatchEdges
+        (
+            const polyMesh& mesh,
+            const indirectPrimitivePatch& pp,
+            const labelListList& edgeGlobalFaces,
+            const labelList& meshEdges,
+
+            bitSet& isPatchEdge,
+            bitSet& isPatchBoundaryEdge
+        );
+
+        //- For every edge on pp return
+        //  - patchEdgeToFace : face (in global indexing) to inflate from
+        //  - patchEdgeToPatch : patch (only for boundary edges of pp)
+        //  - patchEdgeToZone,flip : zone info
+        static void globalEdgeInfo
+        (
+            const bool zoneFromAnyFace,
+
+            const polyMesh& mesh,
+            const globalIndex& globalFaces,
+            const labelListList& edgeGlobalFaces,
+            const indirectPrimitivePatch& pp,
+            const labelList& meshEdges,
+
+            labelList& patchEdgeToFace,  // face (in globalFaces index)
+            labelList& patchEdgeToPatch, // patch on face (or -1 for int faces)
+            labelList& patchEdgeToZone,  // zone on face
+            bitSet& patchEdgeToFlip      // flip orientation on face
+        );
+
         //- No copy construct
         addPatchCellLayer(const addPatchCellLayer&) = delete;
 

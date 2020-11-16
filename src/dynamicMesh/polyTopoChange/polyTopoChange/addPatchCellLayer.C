@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2017,2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -643,7 +643,6 @@ Foam::labelListList Foam::addPatchCellLayer::addedCells() const
 }
 
 
-// Calculate global faces per pp edge.
 Foam::labelListList Foam::addPatchCellLayer::globalEdgeFaces
 (
     const polyMesh& mesh,
@@ -689,6 +688,404 @@ Foam::labelListList Foam::addPatchCellLayer::globalEdgeFaces
 }
 
 
+void Foam::addPatchCellLayer::markPatchEdges
+(
+    const polyMesh& mesh,
+    const indirectPrimitivePatch& pp,
+    const labelListList& edgeGlobalFaces,
+    const labelList& meshEdges,
+
+    bitSet& isPatchEdge,
+    bitSet& isPatchBoundaryEdge
+)
+{
+    // Mark (mesh) edges:
+    // - anywhere on extrusion
+    // - where the extrusion ends
+
+    isPatchEdge.setSize(mesh.nEdges());
+    isPatchEdge = false;
+    isPatchEdge.set(meshEdges);
+    // Synchronise across coupled edges
+    syncTools::syncEdgeList
+    (
+        mesh,
+        isPatchEdge,
+        orEqOp<unsigned int>(),
+        false                   // initial value
+    );
+
+    isPatchBoundaryEdge.setSize(mesh.nEdges());
+    isPatchBoundaryEdge = false;
+    forAll(edgeGlobalFaces, edgei)
+    {
+        // Test that edge has single global extruded face.
+        // Mark on processor that holds the face (since edgeGlobalFaces
+        // only gets filled from pp faces so if there is only one this
+        // is it)
+        if (edgeGlobalFaces[edgei].size() == 1)
+        {
+            isPatchBoundaryEdge.set(meshEdges[edgei]);
+        }
+    }
+    // Synchronise across coupled edges
+    syncTools::syncEdgeList
+    (
+        mesh,
+        isPatchBoundaryEdge,
+        orEqOp<unsigned int>(),
+        false                   // initial value
+    );
+}
+
+
+void Foam::addPatchCellLayer::globalEdgeInfo
+(
+    const bool zoneFromAnyFace,
+
+    const polyMesh& mesh,
+    const globalIndex& globalFaces,
+    const labelListList& edgeGlobalFaces,
+    const indirectPrimitivePatch& pp,
+    const labelList& meshEdges,
+
+    labelList& patchEdgeToFace,     // face (in globalFaces index)
+    labelList& patchEdgeToPatch,    // patch on face (or -1 for internal faces)
+    labelList& patchEdgeToZone,     // zone on face
+    bitSet& patchEdgeToFlip         // flip orientation on face
+)
+{
+    // For every edge on the outside of the patch return a potential patch/
+    // faceZone to extrude into.
+
+    // Mark (mesh) edges on pp.
+    bitSet isExtrudeEdge;
+    bitSet isBoundaryEdge;
+    markPatchEdges
+    (
+        mesh,
+        pp,
+        edgeGlobalFaces,
+        meshEdges,
+
+        isExtrudeEdge,
+        isBoundaryEdge
+    );
+
+    // Build map of pp edges (in mesh point indexing). Note that this
+    // is now also on processors that do not have pp (but do have the edge)
+    EdgeMap<label> isBoundaryEdgeSet(pp.nEdges());
+    for (const label edgei : isBoundaryEdge)
+    {
+        isBoundaryEdgeSet.insert(mesh.edges()[edgei], edgei);
+    }
+    EdgeMap<label> isExtrudeEdgeSet(pp.nEdges());
+    for (const label edgei : isExtrudeEdge)
+    {
+        isExtrudeEdgeSet.insert(mesh.edges()[edgei], edgei);
+    }
+
+
+    const faceZoneMesh& fzs = mesh.faceZones();
+
+    // Extract zone info into mesh face indexing for ease of addressing
+    labelList faceToZone(mesh.nFaces(), -1);
+    bitSet faceToFlip(mesh.nFaces());
+    for (const faceZone& fz: fzs)
+    {
+        const labelList& addressing = fz;
+        UIndirectList<label>(faceToZone, addressing) = fz.index();
+
+        const boolList& fm = fz.flipMap();
+        forAll(addressing, i)
+        {
+            faceToFlip[addressing[i]] = fm[i];
+        }
+    }
+
+
+    // Storage (over all mesh edges)
+    // - face that data originates from (in globalFaces indexing)
+    labelList meshEdgeToFace(mesh.nEdges(), -1);
+    // - patch (for boundary faces)
+    labelList meshEdgeToPatch(mesh.nEdges(), -1);
+    // - faceZone
+    labelList meshEdgeToZone(mesh.nEdges(), -1);
+    // - faceZone orientation
+    bitSet meshEdgeToFlip(mesh.nEdges());
+
+    //if (useInternalFaces)
+    {
+        const bitSet isInternalOrCoupled
+        (
+            syncTools::getInternalOrCoupledFaces(mesh)
+        );
+
+        // Loop over edges of the face to find any faceZone.
+        // Edges kept as point pair so we don't construct mesh.faceEdges etc.
+
+        for (const label facei : isInternalOrCoupled)
+        {
+            const face& f = mesh.faces()[facei];
+
+            label prevPointi = f.last();
+            for (const label pointi : f)
+            {
+                const edge e(prevPointi, pointi);
+
+                // Check if edge is internal to extrusion. Take over faceZone
+                // etc from internal face.
+                const auto eFnd = isExtrudeEdgeSet.cfind(e);
+                if (eFnd)
+                {
+                    const label edgei = eFnd();
+
+                    if (faceToZone[facei] != -1)
+                    {
+                        // Found a zoned internal face. Use.
+                        meshEdgeToFace[edgei] = globalFaces.toGlobal(facei);
+                        meshEdgeToZone[edgei] = faceToZone[facei];
+                        const edge& meshE = mesh.edges()[edgei];
+                        const int d = edge::compare(e, meshE);
+                        if (d == 1)
+                        {
+                            meshEdgeToFlip[edgei] = faceToFlip[facei];
+                        }
+                        else if (d == -1)
+                        {
+                            meshEdgeToFlip[edgei] = !faceToFlip[facei];
+                        }
+                        else
+                        {
+                            FatalErrorInFunction << "big problem"
+                                << exit(FatalError);
+                        }
+                    }
+                }
+
+                prevPointi = pointi;
+            }
+        }
+    }
+
+
+    //if (useBoundaryFaces)
+    {
+        // Loop over all patches and find 'best' one (non-coupled,
+        // non-extrusion, non-constraint(?)). Note that logic is slightly
+        // different from internal faces loop above - first patch face
+        // is being used instead of first zoned face for internal faces
+
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+        bitSet isPpFace(mesh.nFaces());
+        isPpFace.set(pp.addressing());
+        // Note: no need to sync ppFace since does not include processor patches
+
+        for (const polyPatch& pp : patches)
+        {
+            if (!pp.coupled())
+            {
+                // TBD. Check for constraint? This is usually a geometric
+                //      constraint and not a topological one so should
+                //      be handled in the extrusion vector calculation instead?
+
+                forAll(pp, i)
+                {
+                    const label facei = pp.start()+i;
+
+                    if (!isPpFace[facei])
+                    {
+                        const face& f = pp[i];
+
+                        label prevPointi = f.last();
+                        for (const label pointi : f)
+                        {
+                            const edge e(prevPointi, pointi);
+                            const auto eFnd =
+                            (
+                                zoneFromAnyFace
+                              ? isExtrudeEdgeSet.cfind(e)
+                              : isBoundaryEdgeSet.cfind(e)
+                            );
+                            if (eFnd)
+                            {
+                                const label edgei = eFnd();
+                                if (meshEdgeToFace[edgei] == -1)
+                                {
+                                    // Found unassigned face. Use its
+                                    // information.
+                                    // Note that we use the lowest numbered
+                                    // patch face.
+
+                                    meshEdgeToFace[edgei] =
+                                        globalFaces.toGlobal(facei);
+
+                                    // Override any patch info
+                                    if (meshEdgeToPatch[edgei] == -1)
+                                    {
+                                        meshEdgeToPatch[edgei] = pp.index();
+                                    }
+
+                                    // Override any zone info
+                                    if (meshEdgeToZone[edgei] == -1)
+                                    {
+                                        meshEdgeToZone[edgei] =
+                                            faceToZone[facei];
+                                        const edge& meshE = mesh.edges()[edgei];
+                                        const int d = edge::compare(e, meshE);
+                                        if (d == 1)
+                                        {
+                                            meshEdgeToFlip[edgei] =
+                                                faceToFlip[facei];
+                                        }
+                                        else if (d == -1)
+                                        {
+                                            meshEdgeToFlip[edgei] =
+                                               !faceToFlip[facei];
+                                        }
+                                        else
+                                        {
+                                            FatalErrorInFunction
+                                                << "big problem"
+                                                << exit(FatalError);
+                                        }
+                                    }
+                                }
+                            }
+
+                            prevPointi = pointi;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Synchronise across coupled edges. Max patch/face/faceZone wins
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdgeToFace,
+        maxEqOp<label>(),
+        -1
+    );
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdgeToPatch,
+        maxEqOp<label>(),
+        -1
+    );
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdgeToZone,
+        maxEqOp<label>(),
+        -1
+    );
+//    // Note: flipMap not yet done. Needs edge orientation. This is handled
+//    // later on.
+//    if (Pstream::parRun())
+//    {
+//        const globalMeshData& gd = mesh.globalData();
+//        const indirectPrimitivePatch& cpp = gd.coupledPatch();
+//
+//        labelList patchEdges;
+//        labelList coupledEdges;
+//        bitSet sameEdgeOrientation;
+//        PatchTools::matchEdges
+//        (
+//            pp,
+//            cpp,
+//            patchEdges,
+//            coupledEdges,
+//            sameEdgeOrientation
+//        );
+//
+//        // Convert data on pp edges to data on coupled patch
+//        labelList cppEdgeZoneID(cpp.nEdges(), -1);
+//        boolList cppEdgeFlip(cpp.nEdges(), false);
+//        forAll(coupledEdges, i)
+//        {
+//            label cppEdgei = coupledEdges[i];
+//            label ppEdgei = patchEdges[i];
+//
+//            cppEdgeZoneID[cppEdgei] = edgeZoneID[ppEdgei];
+//            if (sameEdgeOrientation[i])
+//            {
+//                cppEdgeFlip[cppEdgei] = edgeFlip[ppEdgei];
+//            }
+//            else
+//            {
+//                cppEdgeFlip[cppEdgei] = !edgeFlip[ppEdgei];
+//            }
+//        }
+//
+//        // Sync
+//        const globalIndexAndTransform& git = gd.globalTransforms();
+//        const mapDistribute& edgeMap = gd.globalEdgeSlavesMap();
+//
+//        globalMeshData::syncData
+//        (
+//            cppEdgeZoneID,
+//            gd.globalEdgeSlaves(),
+//            gd.globalEdgeTransformedSlaves(),
+//            edgeMap,
+//            git,
+//            maxEqOp<label>(),
+//            dummyTransform()
+//        );
+//        globalMeshData::syncData
+//        (
+//            cppEdgeFlip,
+//            gd.globalEdgeSlaves(),
+//            gd.globalEdgeTransformedSlaves(),
+//            edgeMap,
+//            git,
+//            andEqOp<bool>(),
+//            dummyTransform()
+//        );
+//
+//        // Convert data on coupled edges to pp edges
+//        forAll(coupledEdges, i)
+//        {
+//            label cppEdgei = coupledEdges[i];
+//            label ppEdgei = patchEdges[i];
+//
+//            edgeZoneID[ppEdgei] = cppEdgeZoneID[cppEdgei];
+//            if (sameEdgeOrientation[i])
+//            {
+//                edgeFlip[ppEdgei] = cppEdgeFlip[cppEdgei];
+//            }
+//            else
+//            {
+//                edgeFlip[ppEdgei] = !cppEdgeFlip[cppEdgei];
+//            }
+//        }
+//    }
+
+    syncTools::syncEdgeList
+    (
+        mesh,
+        meshEdgeToFlip,
+        orEqOp<unsigned int>(),
+        0
+    );
+
+    // Extract pp info
+    patchEdgeToFace = UIndirectList<label>(meshEdgeToFace, meshEdges);
+    patchEdgeToPatch = UIndirectList<label>(meshEdgeToPatch, meshEdges);
+    patchEdgeToZone = UIndirectList<label>(meshEdgeToZone, meshEdges);
+    patchEdgeToFlip.setSize(meshEdges.size());
+    patchEdgeToFlip = false;
+    forAll(meshEdges, i)
+    {
+        patchEdgeToFlip[i] = meshEdgeToFlip[meshEdges[i]];
+    }
+}
+
+
 void Foam::addPatchCellLayer::calcExtrudeInfo
 (
     const bool zoneFromAnyFace,
@@ -715,10 +1112,12 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
 
     edgePatchID.setSize(pp.nEdges());
     edgePatchID = -1;
+    nPatches = patches.size();
     edgeZoneID.setSize(pp.nEdges());
     edgeZoneID = -1;
     edgeFlip.setSize(pp.nEdges());
     edgeFlip = false;
+    inflateFaceID.setSize(pp.nEdges(), -1);
 
 
     // Determine properties for faces extruded from edges
@@ -727,16 +1126,6 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
     // - edge at end of patch (so edgeFaces.size() == 1):
     //      - use mesh face that is a boundary face
     // - edge internal to patch (so edgeFaces.size() == 2):
-
-
-
-    // These also get determined but not (yet) exported:
-    // - whether face is created from other face or edge
-
-    inflateFaceID.setSize(pp.nEdges(), -1);
-
-    nPatches = patches.size();
-
 
 
     // Pass1:
@@ -804,6 +1193,27 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
     // Pass2: determine face properties for all other edges
     // ----------------------------------------------------
 
+    // Info for edges of pp
+    labelList edgeToFace;
+    labelList edgeToPatch;
+    labelList edgeToZone;
+    bitSet edgeToFlip;
+    globalEdgeInfo
+    (
+        zoneFromAnyFace,    // internal edge info also from boundary faces
+
+        mesh,
+        globalFaces,
+        globalEdgeFaces,
+        pp,
+        meshEdges,
+
+        edgeToFace,         // face (in globalFaces index)
+        edgeToPatch,        // patch on face (or -1 for internal faces)
+        edgeToZone,         // zone on face
+        edgeToFlip          // flip orientation on face
+    );
+
     const labelListList& edgeFaces = pp.edgeFaces();
 
     DynamicList<label> dynMeshEdgeFaces;
@@ -812,63 +1222,32 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
     {
         if (edgePatchID[edgei] == -1)
         {
-            labelUIndList ppFaces(pp.addressing(), edgeFaces[edgei]);
-
-            label meshEdgei = meshEdges[edgei];
-            const labelList& meshFaces = mesh.edgeFaces
-            (
-                meshEdgei,
-                dynMeshEdgeFaces
-            );
-
             if (edgeFaces[edgei].size() == 2)
             {
                 // Internal edge. Look at any face (internal or boundary) to
                 // determine extrusion properties. First one that has zone
                 // info wins
-
-                label dummyPatchi = -1;
-                findZoneFace
-                (
-                    true,               // useInternalFaces,
-                    zoneFromAnyFace,    // useBoundaryFaces,
-
-                    mesh,
-                    pp,
-                    edgei,
-
-
-                    ppFaces,            // excludeFaces,
-                    meshFaces,          // meshFaces,
-
-                    inflateFaceID[edgei],
-                    dummyPatchi,        // do not use patch info
-                    edgeZoneID[edgei],
-                    edgeFlip[edgei]
-                );
+                if (globalFaces.isLocal(edgeToFace[edgei]))
+                {
+                    inflateFaceID[edgei] =
+                        globalFaces.toLocal(edgeToFace[edgei]);
+                }
+                edgeZoneID[edgei] = edgeToZone[edgei];
+                edgeFlip[edgei] = edgeToFlip[edgei];
             }
             else
             {
-                // Proper, uncoupled patch edge
+                // Proper, uncoupled patch edge. Boundary to get info from
+                // might be on a different processor!
 
-                findZoneFace
-                (
-                    false,      // useInternalFaces,
-                    true,       // useBoundaryFaces,
-
-                    mesh,
-                    pp,
-                    edgei,
-
-
-                    ppFaces,    // excludeFaces,
-                    meshFaces,  // meshFaces,
-
-                    inflateFaceID[edgei],
-                    edgePatchID[edgei],
-                    edgeZoneID[edgei],
-                    edgeFlip[edgei]
-                );
+                if (globalFaces.isLocal(edgeToFace[edgei]))
+                {
+                    inflateFaceID[edgei] =
+                        globalFaces.toLocal(edgeToFace[edgei]);
+                }
+                edgePatchID[edgei] = edgeToPatch[edgei];
+                edgeZoneID[edgei] = edgeToZone[edgei];
+                edgeFlip[edgei] = edgeToFlip[edgei];
             }
         }
     }
@@ -901,11 +1280,12 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
         if
         (
             edgeFaces[edgei].size() == 1
+         && globalEdgeFaces[edgei].size() == 2
          && edgePatchID[edgei] != -1
          && inflateFaceID[edgei] == -1
         )
         {
-            // 1. Do we have a boundary face to inflate from
+            // 1. Do we have a local boundary face to inflate from
 
             label myFaceI = pp.addressing()[edgeFaces[edgei][0]];
 
