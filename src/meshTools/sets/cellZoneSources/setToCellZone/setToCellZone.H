@@ -82,7 +82,7 @@ SourceFiles
 #ifndef setToCellZone_H
 #define setToCellZone_H
 
-#include "topoSetSource.H"
+#include "topoSetCellZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,7 +95,7 @@ namespace Foam
 
 class setToCellZone
 :
-    public topoSetSource
+    public topoSetCellZoneSource
 {
     // Private Data
 
@@ -129,12 +129,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a cellZone
-        virtual topoSetSource::sourceType setType() const
-        {
-            return CELLZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

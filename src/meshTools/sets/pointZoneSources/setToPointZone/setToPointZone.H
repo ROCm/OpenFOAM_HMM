@@ -83,7 +83,7 @@ SourceFiles
 #ifndef setToPointZone_H
 #define setToPointZone_H
 
-#include "topoSetSource.H"
+#include "topoSetPointZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,7 +96,7 @@ namespace Foam
 
 class setToPointZone
 :
-    public topoSetSource
+    public topoSetPointZoneSource
 {
     // Private Data
 
@@ -134,12 +134,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a pointZone
-        virtual topoSetSource::sourceType setType() const
-        {
-            return POINTZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

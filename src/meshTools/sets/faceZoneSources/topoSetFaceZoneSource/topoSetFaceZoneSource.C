@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,21 +25,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "topoSetCellSource.H"
+#include "topoSetFaceZoneSource.H"
 #include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineRunTimeSelectionTable(topoSetCellSource, word);
-    defineRunTimeSelectionTable(topoSetCellSource, istream);
+    defineRunTimeSelectionTable(topoSetFaceZoneSource, word);
+    defineRunTimeSelectionTable(topoSetFaceZoneSource, istream);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::topoSetCellSource::topoSetCellSource(const polyMesh& mesh)
+Foam::topoSetFaceZoneSource::topoSetFaceZoneSource(const polyMesh& mesh)
 :
     topoSetSource(mesh)
 {}
@@ -47,8 +47,8 @@ Foam::topoSetCellSource::topoSetCellSource(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::topoSetCellSource>
-Foam::topoSetCellSource::New
+Foam::autoPtr<Foam::topoSetFaceZoneSource>
+Foam::topoSetFaceZoneSource::New
 (
     const word& sourceType,
     const polyMesh& mesh,
@@ -62,18 +62,18 @@ Foam::topoSetCellSource::New
         FatalIOErrorInLookup
         (
             dict,
-            "cellSetSource",
+            "faceZoneSource",
             sourceType,
             *wordConstructorTablePtr_
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<topoSetCellSource>(cstrIter()(mesh, dict));
+    return autoPtr<topoSetFaceZoneSource>(cstrIter()(mesh, dict));
 }
 
 
-Foam::autoPtr<Foam::topoSetCellSource>
-Foam::topoSetCellSource::New
+Foam::autoPtr<Foam::topoSetFaceZoneSource>
+Foam::topoSetFaceZoneSource::New
 (
     const word& sourceType,
     const polyMesh& mesh,
@@ -86,13 +86,13 @@ Foam::topoSetCellSource::New
     {
         FatalErrorInLookup
         (
-            "cellSetSource",
+            "faceZoneSource",
             sourceType,
             *istreamConstructorTablePtr_
         ) << exit(FatalError);
     }
 
-    return autoPtr<topoSetCellSource>(cstrIter()(mesh, is));
+    return autoPtr<topoSetFaceZoneSource>(cstrIter()(mesh, is));
 }
 
 

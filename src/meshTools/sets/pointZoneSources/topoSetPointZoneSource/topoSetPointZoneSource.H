@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,22 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::topoSetCellSource
+    Foam::topoSetPointZoneSource
 
 Description
-    The \c topoSetCellSource is a intermediate class
-    for handling \c topoSet sources for selecting cells.
+    The \c topoSetPointZoneSource is a intermediate class
+    for handling \c topoSet sources for selecting point zones.
 
     The class is not an executable \c topoSet itself,
     yet a provider for common entries to its derived \c topoSet.
 
 SourceFiles
-    topoSetCellSource.C
+    topoSetPointZoneSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef topoSetCellSource_H
-#define topoSetCellSource_H
+#ifndef topoSetPointZoneSource_H
+#define topoSetPointZoneSource_H
 
 #include "topoSetSource.H"
 
@@ -48,11 +48,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class pointZoneSet;
+
 /*---------------------------------------------------------------------------*\
-                      Class topoSetCellSource Declaration
+                    Class topoSetPointZoneSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class topoSetCellSource
+class topoSetPointZoneSource
 :
     public topoSetSource
 {
@@ -64,7 +67,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            topoSetCellSource,
+            topoSetPointZoneSource,
             word,
             (
                 const polyMesh& mesh,
@@ -77,7 +80,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            topoSetCellSource,
+            topoSetPointZoneSource,
             istream,
             (
                 const polyMesh& mesh,
@@ -90,10 +93,10 @@ public:
     // Constructors
 
         //- Construct from components
-        explicit topoSetCellSource(const polyMesh& mesh);
+        explicit topoSetPointZoneSource(const polyMesh& mesh);
 
         //- Clone (disallowed)
-        autoPtr<topoSetCellSource> clone() const
+        autoPtr<topoSetPointZoneSource> clone() const
         {
             NotImplemented;
             return nullptr;
@@ -103,7 +106,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected source type
-        static autoPtr<topoSetCellSource> New
+        static autoPtr<topoSetPointZoneSource> New
         (
             const word& sourceType,
             const polyMesh& mesh,
@@ -111,7 +114,7 @@ public:
         );
 
         //- Return a reference to the selected source type
-        static autoPtr<topoSetCellSource> New
+        static autoPtr<topoSetPointZoneSource> New
         (
             const word& sourceType,
             const polyMesh& mesh,
@@ -120,15 +123,15 @@ public:
 
 
     //- Destructor
-    virtual ~topoSetCellSource() = default;
+    virtual ~topoSetPointZoneSource() = default;
 
 
     // Member Functions
 
-        //- The source category is a cellSet
+        //- The source category is a pointZone
         virtual topoSetSource::sourceType setType() const
         {
-            return CELLSET_SOURCE;
+            return POINTZONE_SOURCE;
         }
 };
 

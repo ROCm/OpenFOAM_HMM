@@ -41,6 +41,24 @@ namespace Foam
     defineTypeNameAndDebug(planeToFaceZone, 0);
     addToRunTimeSelectionTable(topoSetSource, planeToFaceZone, word);
     addToRunTimeSelectionTable(topoSetSource, planeToFaceZone, istream);
+
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, planeToFaceZone, word);
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, planeToFaceZone, istream);
+
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        planeToFaceZone,
+        word,
+        plane
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        planeToFaceZone,
+        istream,
+        plane
+    );
 }
 
 
@@ -352,7 +370,7 @@ Foam::planeToFaceZone::planeToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     point_(dict.get<vector>("point")),
     normal_(dict.get<vector>("normal")),
     option_
@@ -368,7 +386,7 @@ Foam::planeToFaceZone::planeToFaceZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     point_(checkIs(is)),
     normal_(checkIs(is)),
     option_(faceZoneActionNames_.read(checkIs(is)))
@@ -387,25 +405,30 @@ void Foam::planeToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
-    else
+
+    faceZoneSet& zoneSet = refCast<faceZoneSet>(set);
+
+    if (action == topoSetSource::NEW || action == topoSetSource::ADD)
     {
-        faceZoneSet& fzSet = refCast<faceZoneSet>(set);
-
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (verbose_)
         {
-            Info<< "    Adding faces which form a plane at " << point_
-                << " with normal " << normal_ << endl;
-
-            combine(fzSet, true);
+            Info<< "    Adding faces that form a plane at "
+                << point_ << " with normal " << normal_ << endl;
         }
-        else if (action == topoSetSource::DELETE)
+
+        combine(zoneSet, true);
+    }
+    else if (action == topoSetSource::SUBTRACT)
+    {
+        if (verbose_)
         {
-            Info<< "    Removing faces which form a plane at " << point_
-                << " with normal " << normal_ << endl;
-
-            combine(fzSet, false);
+            Info<< "    Removing faces that form a plane at "
+                << point_ << " with normal " << normal_ << endl;
         }
+
+        combine(zoneSet, false);
     }
 }
 

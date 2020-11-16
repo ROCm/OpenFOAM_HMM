@@ -58,9 +58,6 @@ class topoSetPointSource
 {
 public:
 
-    //- Runtime type information
-    TypeName("topoSetPointSource");
-
     // Declare run-time constructor selection table
 
         // For the dictionary constructor

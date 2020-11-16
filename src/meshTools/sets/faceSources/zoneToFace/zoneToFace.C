@@ -37,6 +37,7 @@ namespace Foam
     defineTypeNameAndDebug(zoneToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, zoneToFace, word);
     addToRunTimeSelectionTable(topoSetSource, zoneToFace, istream);
+
     addToRunTimeSelectionTable(topoSetFaceSource, zoneToFace, word);
     addToRunTimeSelectionTable(topoSetFaceSource, zoneToFace, istream);
     addNamedToRunTimeSelectionTable

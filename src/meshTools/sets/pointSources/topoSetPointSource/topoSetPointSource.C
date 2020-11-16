@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(topoSetPointSource, 0);
     defineRunTimeSelectionTable(topoSetPointSource, word);
     defineRunTimeSelectionTable(topoSetPointSource, istream);
 }
@@ -48,7 +47,8 @@ Foam::topoSetPointSource::topoSetPointSource(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::topoSetPointSource> Foam::topoSetPointSource::New
+Foam::autoPtr<Foam::topoSetPointSource>
+Foam::topoSetPointSource::New
 (
     const word& sourceType,
     const polyMesh& mesh,
@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::topoSetPointSource> Foam::topoSetPointSource::New
         FatalIOErrorInLookup
         (
             dict,
-            "topoSetPointSource",
+            "pointSetSource",
             sourceType,
             *wordConstructorTablePtr_
         ) << exit(FatalIOError);
@@ -85,7 +85,7 @@ Foam::autoPtr<Foam::topoSetPointSource> Foam::topoSetPointSource::New
     {
         FatalErrorInLookup
         (
-            "topoSetPointSource",
+            "pointSetSource",
             sourceType,
             *istreamConstructorTablePtr_
         ) << exit(FatalError);

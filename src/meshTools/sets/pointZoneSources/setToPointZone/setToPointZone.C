@@ -38,6 +38,9 @@ namespace Foam
     defineTypeNameAndDebug(setToPointZone, 0);
     addToRunTimeSelectionTable(topoSetSource, setToPointZone, word);
     addToRunTimeSelectionTable(topoSetSource, setToPointZone, istream);
+
+    addToRunTimeSelectionTable(topoSetPointZoneSource, setToPointZone, word);
+    addToRunTimeSelectionTable(topoSetPointZoneSource, setToPointZone, istream);
 }
 
 
@@ -57,7 +60,7 @@ Foam::setToPointZone::setToPointZone
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetPointZoneSource(mesh),
     setName_(setName)
 {}
 
@@ -68,7 +71,7 @@ Foam::setToPointZone::setToPointZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetPointZoneSource(mesh),
     setName_(dict.get<word>("set"))
 {}
 
@@ -79,7 +82,7 @@ Foam::setToPointZone::setToPointZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointZoneSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -96,6 +99,7 @@ void Foam::setToPointZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a pointZoneSet." << endl;
+        return;
     }
     else
     {

@@ -80,7 +80,7 @@ SourceFiles
 #ifndef setAndNormalToFaceZone_H
 #define setAndNormalToFaceZone_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,7 +93,7 @@ namespace Foam
 
 class setAndNormalToFaceZone
 :
-    public topoSetSource
+    public topoSetFaceZoneSource
 {
     // Private Data
 
@@ -134,12 +134,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a faceZone
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACEZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

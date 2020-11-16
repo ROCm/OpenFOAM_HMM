@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,9 @@ namespace Foam
     defineTypeNameAndDebug(setToFaceZone, 0);
     addToRunTimeSelectionTable(topoSetSource, setToFaceZone, word);
     addToRunTimeSelectionTable(topoSetSource, setToFaceZone, istream);
+
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, setToFaceZone, word);
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, setToFaceZone, istream);
 }
 
 
@@ -58,7 +61,7 @@ Foam::setToFaceZone::setToFaceZone
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(setName)
 {}
 
@@ -69,7 +72,7 @@ Foam::setToFaceZone::setToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(dict.get<word>("faceSet"))
 {
     if (dict.found("cellSet"))
@@ -87,7 +90,7 @@ Foam::setToFaceZone::setToFaceZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -104,6 +107,7 @@ void Foam::setToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
     else
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,19 @@ namespace Foam
     defineTypeNameAndDebug(faceZoneToFaceZone, 0);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToFaceZone, word);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToFaceZone, istream);
+
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        faceZoneToFaceZone,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        faceZoneToFaceZone,
+        istream
+    );
 }
 
 
@@ -57,7 +70,7 @@ Foam::faceZoneToFaceZone::faceZoneToFaceZone
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(setName)
 {}
 
@@ -68,7 +81,7 @@ Foam::faceZoneToFaceZone::faceZoneToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(dict.get<word>("zone"))
 {}
 
@@ -79,7 +92,7 @@ Foam::faceZoneToFaceZone::faceZoneToFaceZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -96,6 +109,7 @@ void Foam::faceZoneToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
     else
     {

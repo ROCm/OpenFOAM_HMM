@@ -58,9 +58,6 @@ class topoSetFaceSource
 {
 public:
 
-    //- Runtime type information
-    TypeName("topoSetFaceSource");
-
     // Declare run-time constructor selection table
 
         // For the dictionary constructor

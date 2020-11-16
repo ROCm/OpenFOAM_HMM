@@ -101,15 +101,12 @@ SourceFiles
 #ifndef planeToFaceZone_H
 #define planeToFaceZone_H
 
-#include "topoSetSource.H"
-#include "Enum.H"
+#include "topoSetFaceZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class faceZoneSet;
 
 /*---------------------------------------------------------------------------*\
                          Class planeToFaceZone Declaration
@@ -117,7 +114,7 @@ class faceZoneSet;
 
 class planeToFaceZone
 :
-    public topoSetSource
+    public topoSetFaceZoneSource
 {
 public:
 
@@ -166,18 +163,10 @@ public:
         planeToFaceZone() = delete;
 
         //- Construct from dictionary
-        planeToFaceZone
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        planeToFaceZone(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        planeToFaceZone
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        planeToFaceZone(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
@@ -185,11 +174,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
 
         virtual void applyToSet
         (

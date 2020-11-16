@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,9 @@ namespace Foam
     defineTypeNameAndDebug(setToCellZone, 0);
     addToRunTimeSelectionTable(topoSetSource, setToCellZone, word);
     addToRunTimeSelectionTable(topoSetSource, setToCellZone, istream);
+
+    addToRunTimeSelectionTable(topoSetCellZoneSource, setToCellZone, word);
+    addToRunTimeSelectionTable(topoSetCellZoneSource, setToCellZone, istream);
 }
 
 
@@ -57,7 +60,7 @@ Foam::setToCellZone::setToCellZone
     const word& setName
 )
 :
-    topoSetSource(mesh),
+    topoSetCellZoneSource(mesh),
     setName_(setName)
 {}
 
@@ -68,7 +71,7 @@ Foam::setToCellZone::setToCellZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetCellZoneSource(mesh),
     setName_(dict.get<word>("set"))
 {}
 
@@ -79,7 +82,7 @@ Foam::setToCellZone::setToCellZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellZoneSource(mesh),
     setName_(checkIs(is))
 {}
 
@@ -96,6 +99,7 @@ void Foam::setToCellZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a cellZoneSet." << endl;
+        return;
     }
     else
     {

@@ -89,7 +89,7 @@ SourceFiles
 #ifndef setsToFaceZone_H
 #define setsToFaceZone_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,7 +102,7 @@ namespace Foam
 
 class setsToFaceZone
 :
-    public topoSetSource
+    public topoSetFaceZoneSource
 {
     // Private Data
 
@@ -148,12 +148,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a pointSet
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACEZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

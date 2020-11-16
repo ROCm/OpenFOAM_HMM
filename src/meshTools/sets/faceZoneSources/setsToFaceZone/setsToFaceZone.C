@@ -39,6 +39,9 @@ namespace Foam
     defineTypeNameAndDebug(setsToFaceZone, 0);
     addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, word);
     addToRunTimeSelectionTable(topoSetSource, setsToFaceZone, istream);
+
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, setsToFaceZone, word);
+    addToRunTimeSelectionTable(topoSetFaceZoneSource, setsToFaceZone, istream);
 }
 
 
@@ -61,7 +64,7 @@ Foam::setsToFaceZone::setsToFaceZone
     const bool flip
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     faceSetName_(faceSetName),
     cellSetName_(cellSetName),
     flip_(flip)
@@ -74,7 +77,7 @@ Foam::setsToFaceZone::setsToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     faceSetName_(dict.get<word>("faceSet")),
     cellSetName_(dict.get<word>("cellSet")),
     flip_(dict.getOrDefault("flip", false))
@@ -87,7 +90,7 @@ Foam::setsToFaceZone::setsToFaceZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     faceSetName_(checkIs(is)),
     cellSetName_(checkIs(is)),
     flip_(false)
@@ -106,6 +109,7 @@ void Foam::setsToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
     else
     {

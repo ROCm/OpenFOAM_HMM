@@ -45,6 +45,20 @@ namespace Foam
         searchableSurfaceToFaceZone,
         word
     );
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        searchableSurfaceToFaceZone,
+        word
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        searchableSurfaceToFaceZone,
+        word,
+        surface
+    );
+
 }
 
 
@@ -92,7 +106,7 @@ Foam::searchableSurfaceToFaceZone::searchableSurfaceToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     surfacePtr_
     (
         searchableSurface::New
@@ -140,6 +154,7 @@ void Foam::searchableSurfaceToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
     else
     {

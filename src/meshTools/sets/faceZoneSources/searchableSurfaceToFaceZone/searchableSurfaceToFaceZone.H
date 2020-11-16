@@ -86,13 +86,14 @@ SourceFiles
 #ifndef searchableSurfaceToFaceZone_H
 #define searchableSurfaceToFaceZone_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class searchableSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -101,7 +102,7 @@ class searchableSurface;
 
 class searchableSurfaceToFaceZone
 :
-    public topoSetSource
+    public topoSetFaceZoneSource
 {
     // Private Data
 
@@ -154,12 +155,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a faceZone
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACEZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -81,7 +81,7 @@ SourceFiles
 #ifndef faceZoneToFaceZone_H
 #define faceZoneToFaceZone_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceZoneSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,7 +94,7 @@ namespace Foam
 
 class faceZoneToFaceZone
 :
-    public topoSetSource
+    public topoSetFaceZoneSource
 {
     // Private Data
 
@@ -114,11 +114,7 @@ public:
     // Constructors
 
         //- Construct from components
-        faceZoneToFaceZone
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        faceZoneToFaceZone(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
         faceZoneToFaceZone(const polyMesh& mesh, const dictionary& dict);
@@ -132,12 +128,6 @@ public:
 
 
     // Member Functions
-
-        //- The source category is a faceZone
-        virtual topoSetSource::sourceType setType() const
-        {
-            return FACEZONE_SOURCE;
-        }
 
         virtual void applyToSet
         (

@@ -206,6 +206,7 @@ $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
 
 faceZoneSources = sets/faceZoneSources
+$(faceZoneSources)/topoSetFaceZoneSource/topoSetFaceZoneSource.C
 $(faceZoneSources)/faceZoneToFaceZone/faceZoneToFaceZone.C
 $(faceZoneSources)/setsToFaceZone/setsToFaceZone.C
 $(faceZoneSources)/setToFaceZone/setToFaceZone.C
@@ -214,9 +215,11 @@ $(faceZoneSources)/searchableSurfaceToFaceZone/searchableSurfaceToFaceZone.C
 $(faceZoneSources)/planeToFaceZone/planeToFaceZone.C
 
 cellZoneSources = sets/cellZoneSources
+$(cellZoneSources)/topoSetCellZoneSource/topoSetCellZoneSource.C
 $(cellZoneSources)/setToCellZone/setToCellZone.C
 
 pointZoneSources = sets/pointZoneSources
+$(pointZoneSources)/topoSetPointZoneSource/topoSetPointZoneSource.C
 $(pointZoneSources)/setToPointZone/setToPointZone.C
 
 momentOfInertia/momentOfInertia.C

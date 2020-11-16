@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(topoSetFaceSource, 0);
     defineRunTimeSelectionTable(topoSetFaceSource, word);
     defineRunTimeSelectionTable(topoSetFaceSource, istream);
 }
@@ -48,7 +47,8 @@ Foam::topoSetFaceSource::topoSetFaceSource(const polyMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::topoSetFaceSource> Foam::topoSetFaceSource::New
+Foam::autoPtr<Foam::topoSetFaceSource>
+Foam::topoSetFaceSource::New
 (
     const word& sourceType,
     const polyMesh& mesh,
@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::topoSetFaceSource> Foam::topoSetFaceSource::New
         FatalIOErrorInLookup
         (
             dict,
-            "topoSetFaceSource",
+            "faceSetSource",
             sourceType,
             *wordConstructorTablePtr_
         ) << exit(FatalIOError);
@@ -72,7 +72,8 @@ Foam::autoPtr<Foam::topoSetFaceSource> Foam::topoSetFaceSource::New
 }
 
 
-Foam::autoPtr<Foam::topoSetFaceSource> Foam::topoSetFaceSource::New
+Foam::autoPtr<Foam::topoSetFaceSource>
+Foam::topoSetFaceSource::New
 (
     const word& sourceType,
     const polyMesh& mesh,
@@ -85,7 +86,7 @@ Foam::autoPtr<Foam::topoSetFaceSource> Foam::topoSetFaceSource::New
     {
         FatalErrorInLookup
         (
-            "topoSetFaceSource",
+            "faceSetSource",
             sourceType,
             *istreamConstructorTablePtr_
         ) << exit(FatalError);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,19 @@ namespace Foam
     defineTypeNameAndDebug(setAndNormalToFaceZone, 0);
     addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, word);
     addToRunTimeSelectionTable(topoSetSource, setAndNormalToFaceZone, istream);
+
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        setAndNormalToFaceZone,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceZoneSource,
+        setAndNormalToFaceZone,
+        istream
+    );
 }
 
 
@@ -58,7 +71,7 @@ Foam::setAndNormalToFaceZone::setAndNormalToFaceZone
     const vector& normal
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(setName),
     normal_(normal)
 {}
@@ -70,7 +83,7 @@ Foam::setAndNormalToFaceZone::setAndNormalToFaceZone
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(dict.get<word>("faceSet")),
     normal_(dict.get<vector>("normal"))
 {}
@@ -82,7 +95,7 @@ Foam::setAndNormalToFaceZone::setAndNormalToFaceZone
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceZoneSource(mesh),
     setName_(checkIs(is)),
     normal_(checkIs(is))
 {}
@@ -100,6 +113,7 @@ void Foam::setAndNormalToFaceZone::applyToSet
     {
         WarningInFunction
             << "Operation only allowed on a faceZoneSet." << endl;
+        return;
     }
     else
     {
