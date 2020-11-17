@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2016-2020 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,10 +32,13 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ThermoType>
-void Foam::moleFractions<ThermoType>::calculateMoleFractions()
+void Foam::moleFractions<ThermoType>::calcMoleFractions()
 {
-    const ThermoType& thermo =
-        mesh_.lookupObject<ThermoType>(basicThermo::dictName);
+    const auto& thermo =
+        mesh_.lookupObject<ThermoType>
+        (
+            IOobject::groupName(basicThermo::dictName, phaseName_)
+        );
 
     const PtrList<volScalarField>& Y = thermo.composition().Y();
 
@@ -44,7 +48,6 @@ void Foam::moleFractions<ThermoType>::calculateMoleFractions()
     {
         const dimensionedScalar Wi
         (
-            "W",
             dimMass/dimMoles,
             thermo.composition().W(i)
         );
@@ -64,14 +67,19 @@ Foam::moleFractions<ThermoType>::moleFractions
     const dictionary& dict
 )
 :
-    fvMeshFunctionObject(name, runTime, dict)
+    fvMeshFunctionObject(name, runTime, dict),
+    phaseName_(dict.getOrDefault<word>("phase", word::null))
 {
-    const ThermoType* thermo =
-        mesh_.findObject<ThermoType>(basicThermo::dictName);
+    const word dictName
+    (
+        IOobject::groupName(basicThermo::dictName, phaseName_)
+    );
 
-    if (thermo)
+    if (mesh_.foundObject<ThermoType>(dictName))
     {
-        const PtrList<volScalarField>& Y = thermo->composition().Y();
+        const auto& thermo = mesh_.lookupObject<ThermoType>(dictName);
+
+        const PtrList<volScalarField>& Y = thermo.composition().Y();
 
         X_.setSize(Y.size());
 
@@ -96,23 +104,25 @@ Foam::moleFractions<ThermoType>::moleFractions
             );
         }
 
-        calculateMoleFractions();
+        calcMoleFractions();
     }
     else
     {
+        if (phaseName_ != word::null)
+        {
+            FatalErrorInFunction
+                << "Cannot find thermodynamics model of type "
+                << ThermoType::typeName
+                << " for phase " << phaseName_
+                << exit(FatalError);
+        }
+
         FatalErrorInFunction
             << "Cannot find thermodynamics model of type "
             << ThermoType::typeName
             << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-Foam::moleFractions<ThermoType>::~moleFractions()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -123,21 +133,23 @@ bool Foam::moleFractions<ThermoType>::read
     const dictionary& dict
 )
 {
-    return true;
+    if (functionObjects::fvMeshFunctionObject::read(dict))
+    {
+        phaseName_ = dict.getOrDefault<word>("phase", word::null);
+
+        return true;
+    }
+
+    return false;
 }
+
 
 
 template<class ThermoType>
 bool Foam::moleFractions<ThermoType>::execute()
 {
-    calculateMoleFractions();
-    return true;
-}
+    calcMoleFractions();
 
-
-template<class ThermoType>
-bool Foam::moleFractions<ThermoType>::write()
-{
     return true;
 }
 
