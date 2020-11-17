@@ -5,7 +5,7 @@ c++CGALWARN = -Wno-old-style-cast
 
 /*-- Define CGAL_INEXACT to use inexact CGAL constructions */
 
-include $(GENERAL_RULES)/CGAL
+include $(GENERAL_RULES)/cgal
 
 EXE_INC = \
     ${ROUNDING_MATH} \

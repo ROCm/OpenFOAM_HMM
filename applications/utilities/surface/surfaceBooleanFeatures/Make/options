@@ -7,7 +7,7 @@ c++CGALWARN = -Wno-old-style-cast
 /*-- Define CGAL_INEXACT to use inexact CGAL constructions */
 
 ifeq (,$(findstring NO_CGAL,$(COMP_FLAGS)))
-include $(GENERAL_RULES)/CGAL
+include $(GENERAL_RULES)/cgal
 endif
 
 EXE_INC = \

@@ -1,7 +1,7 @@
 EXE_DEBUG = -DFULLDEBUG -g -O0
 EXE_NDEBUG = -DNDEBUG
 
-include $(GENERAL_RULES)/CGAL
+include $(GENERAL_RULES)/cgal
 
 EXE_INC = \
     ${ROUNDING_MATH} \

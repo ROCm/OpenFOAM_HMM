@@ -1,6 +1,6 @@
 MarchingCubes = fastdualoctree_sgp
 
-include $(GENERAL_RULES)/CGAL
+include $(GENERAL_RULES)/cgal
 
 EXE_INC = \
     -DUNIX \
