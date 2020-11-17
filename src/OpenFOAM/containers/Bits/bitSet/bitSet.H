@@ -244,6 +244,11 @@ public:
         //  \note Method name compatibility with std::bitset
         inline bool test(const label pos) const;
 
+        //- Test value at specified position, never auto-vivify entries.
+        //
+        //  \note Method name compatibility with HashSet
+        inline bool found(const label pos) const;
+
         //- Locate the first bit that is set.
         //  \return the location or -1 if there are no bits set.
         //

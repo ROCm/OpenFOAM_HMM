@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -510,6 +510,12 @@ inline unsigned int Foam::bitSet::count(const bool on) const
 
 
 inline bool Foam::bitSet::test(const label pos) const
+{
+    return get(pos);
+}
+
+
+inline bool Foam::bitSet::found(const label pos) const
 {
     return get(pos);
 }
