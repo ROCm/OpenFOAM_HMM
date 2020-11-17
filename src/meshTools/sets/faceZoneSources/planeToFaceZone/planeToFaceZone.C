@@ -87,20 +87,27 @@ Foam::planeToFaceZone::faceActionNames_
 void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
 {
     // Mark all cells with centres above the plane
-    boolList cellIsAbovePlane(mesh_.nCells());
+    bitSet cellIsAbovePlane(mesh_.nCells());
     forAll(mesh_.cells(), celli)
     {
-        cellIsAbovePlane[celli] =
-            ((mesh_.cellCentres()[celli] - point_) & normal_) > 0;
+        if (((mesh_.cellCentres()[celli] - point_) & normal_) > 0)
+        {
+            cellIsAbovePlane.set(celli);
+        }
     }
 
     // Mark all faces that sit between cells above and below the plane
-    boolList faceIsOnPlane(mesh_.nFaces());
+    bitSet faceIsOnPlane(mesh_.nFaces());
     forAll(mesh_.faceNeighbour(), facei)
     {
-        faceIsOnPlane[facei] =
+        if
+        (
             cellIsAbovePlane[mesh_.faceOwner()[facei]]
-         != cellIsAbovePlane[mesh_.faceNeighbour()[facei]];
+         != cellIsAbovePlane[mesh_.faceNeighbour()[facei]]
+        )
+        {
+            faceIsOnPlane.set(facei);
+        }
     }
     forAll(mesh_.boundaryMesh(), patchi)
     {
@@ -108,14 +115,17 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
         forAll(patch, patchFacei)
         {
             const label facei = patch.start() + patchFacei;
-            faceIsOnPlane[facei] =
-                patch.coupled() && cellIsAbovePlane[mesh_.faceOwner()[facei]];
+            if (patch.coupled() && cellIsAbovePlane[mesh_.faceOwner()[facei]])
+            {
+                faceIsOnPlane.set(facei);
+            }
         }
     }
-    syncTools::syncFaceList(mesh_, faceIsOnPlane, xorEqOp<bool>());
+    syncTools::syncFaceList(mesh_, faceIsOnPlane, xorEqOp<unsigned int>());
 
     // Convert marked faces to a list of indices
-    labelList newSetFaces(findIndices(faceIsOnPlane, true));
+    labelList newSetFaces(faceIsOnPlane.sortedToc());
+    faceIsOnPlane.clear();
 
     // If constructing a single contiguous set, remove all faces except those
     // connected to the contiguous region closest to the specified point
@@ -140,7 +150,7 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                 PatchTools::markZones
                 (
                     newSetPatch,
-                    boolList(newSetPatch.nEdges(), false),
+                    bitSet(),  // No border edges
                     newSetFaceRegions
                 );
             Pstream::gatherList(procNRegions);
@@ -148,19 +158,18 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
 
             // Cumulative sum the number of regions on each processor to get an
             // offset which makes the local region ID-s globally unique
-            labelList procRegionOffset(Pstream::nProcs(), 0);
+            labelList procRegionOffset(Pstream::nProcs(), Zero);
             for (label proci = 1; proci < Pstream::nProcs(); ++proci)
             {
-                procRegionOffset[proci] +=
+                procRegionOffset[proci] =
                     procRegionOffset[proci - 1]
                   + procNRegions[proci - 1];
             }
 
             // Apply the offset
-            forAll(newSetFaces, newSetFacei)
+            for (label& regioni : newSetFaceRegions)
             {
-                newSetFaceRegions[newSetFacei] +=
-                    procRegionOffset[Pstream::myProcNo()];
+                regioni += procRegionOffset[Pstream::myProcNo()];
             }
 
             // Store the total number of regions across all processors
@@ -178,10 +187,9 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
             {
                 const label facei = newSetFaces[newSetFacei];
                 const label regioni = newSetFaceRegions[newSetFacei];
-                forAll(mesh_.faceEdges()[facei], faceEdgei)
+                for (const label edgei : mesh_.faceEdges()[facei])
                 {
-                    const label edgei = mesh_.faceEdges()[facei][faceEdgei];
-                    meshEdgeRegions[edgei] = labelList(1, regioni);
+                    meshEdgeRegions[edgei] = labelList(one{}, regioni);
                 }
             }
             syncTools::syncEdgeList
@@ -194,37 +202,33 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
 
             // Combine edge regions to create a list of what regions a given
             // region is connected to
-            List<labelHashSet> regionRegions(nRegions);
+            List<bitSet> regionRegions(nRegions);
             forAll(newSetFaces, newSetFacei)
             {
                 const label facei = newSetFaces[newSetFacei];
                 const label regioni = newSetFaceRegions[newSetFacei];
-                forAll(mesh_.faceEdges()[facei], faceEdgei)
+                for (const label edgei : mesh_.faceEdges()[facei])
                 {
-                    const label edgei = mesh_.faceEdges()[facei][faceEdgei];
-                    forAll(meshEdgeRegions[edgei], edgeRegioni)
-                    {
-                        if (meshEdgeRegions[edgei][edgeRegioni] != regioni)
-                        {
-                            regionRegions[regioni].insert
-                            (
-                                meshEdgeRegions[edgei][edgeRegioni]
-                            );
-                        }
-                    }
+                    // Includes self region (removed below)
+                    regionRegions[regioni].set(meshEdgeRegions[edgei]);
+                }
+                forAll(regionRegions, regioni)
+                {
+                    // Remove self region
+                    regionRegions[regioni].unset(regioni);
                 }
             }
-            Pstream::listCombineGather(regionRegions, plusEqOp<labelHashSet>());
+            Pstream::listCombineGather(regionRegions, bitOrEqOp<bitSet>());
             Pstream::listCombineScatter(regionRegions);
 
             // Collapse the region connections into a map between each region
             // and the lowest numbered region that it connects to
             forAll(regionRegions, regioni)
             {
-                forAllConstIter(labelHashSet, regionRegions[regioni], iter)
+                for (const label regi : regionRegions[regioni])
                 {
-                    regionMap[iter.key()] =
-                        min(regionMap[iter.key()], regionMap[regioni]);
+                    // minEqOp<label>()
+                    regionMap[regi] = min(regionMap[regi], regionMap[regioni]);
                 }
             }
         }
@@ -251,10 +255,10 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
                 IndirectList<label>(regionMap, newSetFaceRegions);
 
             // Report the final number and size of the regions
-            regionNFaces = labelList(nRegions, 0);
-            forAll(newSetFaces, newSetFacei)
+            regionNFaces = labelList(nRegions, Zero);
+            for (const label regioni : newSetFaceRegions)
             {
-                regionNFaces[newSetFaceRegions[newSetFacei]] ++;
+                ++ regionNFaces[regioni];
             }
             Pstream::listCombineGather(regionNFaces, plusEqOp<label>());
             Pstream::listCombineScatter(regionNFaces);
@@ -266,24 +270,24 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
         label selectedRegioni = -1;
         {
             // Compute the region centres
-            scalarField regionMagAreas(nRegions, 0);
+            scalarField regionWeights(nRegions, Zero);
             pointField regionCentres(nRegions, Zero);
             forAll(newSetFaces, newSetFacei)
             {
                 const label facei = newSetFaces[newSetFacei];
                 const label regioni = newSetFaceRegions[newSetFacei];
 
-                const vector& a = mesh_.faceAreas()[facei];
+                const scalar w = mag(mesh_.faceAreas()[facei]);
                 const point& c = mesh_.faceCentres()[facei];
 
-                regionMagAreas[regioni] += mag(a);
-                regionCentres[regioni] += mag(a)*c;
+                regionWeights[regioni] += w;
+                regionCentres[regioni] += w*c;
             }
-            Pstream::listCombineGather(regionMagAreas, plusEqOp<scalar>());
+            Pstream::listCombineGather(regionWeights, plusEqOp<scalar>());
             Pstream::listCombineGather(regionCentres, plusEqOp<point>());
-            Pstream::listCombineScatter(regionMagAreas);
+            Pstream::listCombineScatter(regionWeights);
             Pstream::listCombineScatter(regionCentres);
-            regionCentres /= regionMagAreas;
+            regionCentres /= regionWeights;
 
             // Find the region centroid closest to the reference point
             selectedRegioni =
@@ -322,15 +326,14 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
     if (add)
     {
         // Start from copy
-        newAddressing = DynamicList<label>(fzSet.addressing());
-        newFlipMap = DynamicList<bool>(fzSet.flipMap());
+        newAddressing = fzSet.addressing();
+        newFlipMap = fzSet.flipMap();
 
         // Add anything from the new set that is not already in the zone set
-        forAll(newSetFaces, newSetFacei)
+        const auto& exclude = fzSet;
+        for (const label facei : newSetFaces)
         {
-            const label facei = newSetFaces[newSetFacei];
-
-            if (!fzSet.found(facei))
+            if (!exclude.found(facei))
             {
                 newAddressing.append(facei);
                 newFlipMap.append(cellIsAbovePlane[mesh_.faceOwner()[facei]]);
@@ -340,16 +343,14 @@ void Foam::planeToFaceZone::combine(faceZoneSet& fzSet, const bool add) const
     else
     {
         // Start from empty
-        newAddressing = DynamicList<label>(fzSet.addressing().size());
-        newFlipMap = DynamicList<bool>(fzSet.flipMap().size());
+        newAddressing.reserve(fzSet.addressing().size());
+        newFlipMap.reserve(newAddressing.capacity());
 
         // Add everything from the zone set that is not also in the new set
-        labelHashSet newSet(newSetFaces);
-        forAll(fzSet.addressing(), i)
+        bitSet exclude(newSetFaces);
+        for (const label facei : fzSet.addressing())
         {
-            const label facei = fzSet.addressing()[i];
-
-            if (!newSet.found(facei))
+            if (!exclude.found(facei))
             {
                 newAddressing.append(facei);
                 newFlipMap.append(cellIsAbovePlane[mesh_.faceOwner()[facei]]);
