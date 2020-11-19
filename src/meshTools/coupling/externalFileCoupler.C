@@ -77,7 +77,7 @@ static enum Time::stopAtControls getStopAction(const std::string& filename)
         const word actionName(word::validate(fileContent.substr(equals+1)));
 
         return
-            Time::stopAtControlNames
+            Time::stopAtControlNames.lookup
             (
                 actionName,
                 Time::stopAtControls::saUnknown

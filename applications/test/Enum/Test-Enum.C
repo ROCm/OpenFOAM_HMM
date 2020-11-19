@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,6 +125,17 @@ int main(int argc, char *argv[])
         <<"stdout: "<< otherNames2
         << nl << nl;
 
+    Info<< "iterate:" << nl;
+    forAllConstIters(otherNames2, iter)
+    {
+        Info<< "key=" << iter.key() << " val=" << iter.val() << nl;
+    }
+
+    for (const word& k : otherNames2)
+    {
+        Info<< "    " << k << " is " << otherNames2[k] << nl;
+    }
+    Info<< nl;
 
     otherNames2.clear();
     otherNames2.append

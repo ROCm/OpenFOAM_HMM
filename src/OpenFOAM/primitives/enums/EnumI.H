@@ -42,23 +42,38 @@ inline Foam::label Foam::Enum<EnumType>::size() const noexcept
 
 
 template<class EnumType>
-inline const Foam::wordList& Foam::Enum<EnumType>::names() const
+inline const Foam::List<Foam::word>&
+Foam::Enum<EnumType>::names() const noexcept
 {
     return keys_;
 }
 
 
 template<class EnumType>
-inline const Foam::wordList& Foam::Enum<EnumType>::toc() const
-{
-    return keys_;
-}
-
-
-template<class EnumType>
-inline const Foam::List<int>& Foam::Enum<EnumType>::values() const
+inline const Foam::List<int>&
+Foam::Enum<EnumType>::values() const noexcept
 {
     return vals_;
+}
+
+
+template<class EnumType>
+inline const Foam::List<Foam::word>&
+Foam::Enum<EnumType>::toc() const noexcept
+{
+    return keys_;
+}
+
+
+template<class EnumType>
+inline Foam::List<Foam::word>
+Foam::Enum<EnumType>::sortedToc() const
+{
+    List<word> list(keys_);
+
+    Foam::sort(list);
+
+    return list;
 }
 
 
@@ -155,6 +170,80 @@ inline OS& Foam::Enum<EnumType>::writeList(OS& os, const label) const
 }
 
 
+// * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
+
+template<class EnumType>
+inline Foam::Enum<EnumType>::const_iterator::const_iterator
+(
+    const Enum* eptr,
+    const label idx
+) noexcept
+:
+    ptr_(eptr),
+    idx_(idx)
+{}
+
+
+template<class EnumType>
+inline const Foam::word&
+Foam::Enum<EnumType>::const_iterator::key() const
+{
+    return ptr_->names()[idx_];
+}
+
+
+template<class EnumType>
+inline EnumType Foam::Enum<EnumType>::const_iterator::val() const
+{
+    return EnumType(ptr_->values()[idx_]);
+}
+
+
+template<class EnumType>
+inline typename Foam::Enum<EnumType>::const_iterator&
+Foam::Enum<EnumType>::const_iterator::operator++() noexcept
+{
+    ++idx_;
+    return *this;
+}
+
+
+template<class EnumType>
+inline bool Foam::Enum<EnumType>::const_iterator::operator==
+(
+    const const_iterator& iter
+) const noexcept
+{
+    return idx_ == iter.idx_;
+}
+
+
+template<class EnumType>
+inline bool Foam::Enum<EnumType>::const_iterator::operator!=
+(
+    const const_iterator& iter
+) const noexcept
+{
+    return idx_ != iter.idx_;
+}
+
+
+template<class EnumType>
+inline typename Foam::Enum<EnumType>::const_iterator
+Foam::Enum<EnumType>::cbegin() const
+{
+    return typename Enum<EnumType>::const_iterator(this);
+}
+
+
+template<class EnumType>
+inline typename Foam::Enum<EnumType>::const_iterator
+Foam::Enum<EnumType>::cend() const
+{
+    return typename Enum<EnumType>::const_iterator(this, this->size());
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class EnumType>
@@ -174,34 +263,6 @@ inline const Foam::word& Foam::Enum<EnumType>::operator[]
 ) const
 {
     return get(e);
-}
-
-
-template<class EnumType>
-inline const Foam::word& Foam::Enum<EnumType>::operator()
-(
-    const EnumType e
-) const
-{
-    return get(e);
-}
-
-
-template<class EnumType>
-inline EnumType Foam::Enum<EnumType>::operator()
-(
-    const word& enumName,
-    const EnumType deflt
-) const
-{
-    const label idx = find(enumName);
-
-    if (idx >= 0)
-    {
-        return EnumType(vals_[idx]);
-    }
-
-    return deflt;
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,17 +52,6 @@ Foam::Enum<EnumType>::Enum
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EnumType>
-Foam::List<Foam::word> Foam::Enum<EnumType>::sortedToc() const
-{
-    List<word> list(keys_);
-
-    Foam::sort(list);
-
-    return list;
-}
-
-
-template<class EnumType>
 void Foam::Enum<EnumType>::append
 (
     std::initializer_list<std::pair<EnumType, const char*>> list
@@ -99,7 +88,7 @@ EnumType Foam::Enum<EnumType>::get(const word& enumName) const
 
 
 template<class EnumType>
-EnumType Foam::Enum<EnumType>::get
+EnumType Foam::Enum<EnumType>::lookup
 (
     const word& enumName,
     const EnumType deflt

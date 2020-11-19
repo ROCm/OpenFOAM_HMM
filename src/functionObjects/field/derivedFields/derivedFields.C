@@ -202,7 +202,7 @@ bool Foam::functionObjects::derivedFields::read(const dictionary& dict)
 
     for (const word& key : derivedNames)
     {
-        derivedTypes_[ngood] = knownNames.get(key, derivedType::UNKNOWN);
+        derivedTypes_[ngood] = knownNames.lookup(key, derivedType::UNKNOWN);
 
         switch (derivedTypes_[ngood])
         {

@@ -66,14 +66,9 @@ class Enum
         //- The names for the enum
         List<word> keys_;
 
-        //- The values for the enum
+        //- The values for the enum, stored as int
         List<int> vals_;
 
-
-public:
-
-    //- The type of enumeration represented by the Enum
-    typedef EnumType value_type;
 
     // Allow enums and integrals (should fit within an int)
     static_assert
@@ -81,6 +76,16 @@ public:
         std::is_enum<EnumType>::value || std::is_integral<EnumType>::value,
         "Enum must be enum or an integral type"
     );
+
+public:
+
+    // Typedefs
+
+        //- The type of keys used
+        typedef word key_type;
+
+        //- The type of enumeration represented by the Enum
+        typedef EnumType value_type;
 
 
     // Constructors
@@ -108,16 +113,16 @@ public:
         inline label size() const noexcept;
 
         //- The list of enum names, in construction order. Same as toc()
-        inline const List<word>& names() const;
-
-        //- The list of enum names, in construction order. Same as names()
-        inline const List<word>& toc() const;
-
-        //- The sorted list of enum names.
-        List<word> sortedToc() const;
+        inline const List<word>& names() const noexcept;
 
         //- The list of enum values, in construction order.
-        inline const List<int>& values() const;
+        inline const List<int>& values() const noexcept;
+
+        //- The list of enum names, in construction order. Same as names()
+        inline const List<word>& toc() const noexcept;
+
+        //- The sorted list of enum names.
+        inline List<word> sortedToc() const;
 
 
     // Modify
@@ -143,23 +148,24 @@ public:
         //  \return position in list or -1 if not found.
         inline label find(const EnumType e) const;
 
-        //- Test if there is an enumeration corresponding to the given name.
+        //- True if there is an enumeration corresponding to the given name.
         inline bool found(const word& enumName) const;
 
-        //- Test if there is a name corresponding to the given enumeration.
+        //- True if there is a name corresponding to the given enumeration.
         inline bool found(const EnumType e) const;
 
         //- The enumeration corresponding to the given name.
         //  FatalError if not found.
         EnumType get(const word& enumName) const;
 
+        //- The name corresponding to the given enumeration.
+        //  Return an empty word if there is no corresponding name for it.
+        inline const word& get(const EnumType e) const;
+
         //- The enumeration corresponding to the given name.
         //  \return The enumeration or default if not found.
-        EnumType get(const word& enumName, const EnumType deflt) const;
-
-        //- The name corresponding to the given enumeration.
-        //  Return an empty word if not found.
-        inline const word& get(const EnumType e) const;
+        //  \note Method name compatibility with HashTable
+        EnumType lookup(const word& enumName, const EnumType deflt) const;
 
 
     // Read
@@ -241,26 +247,59 @@ public:
 
         //- Return the enumeration corresponding to the given name
         //  FatalError if the name is not found.
-        //  Identical to single parameter get()
+        //  Identical to get()
         inline EnumType operator[](const word& enumName) const;
 
         //- Return the first name corresponding to the given enumeration,
         //- or an empty word on failure.
-        //  Identical to single parameter get()
+        //  Identical to get()
         inline const word& operator[](const EnumType e) const;
 
-        //- Return the first name corresponding to the given enumeration,
-        //- or an empty word on failure.
-        //  Identical to single parameter get()
-        inline const word& operator()(const EnumType e) const;
 
-        //- Return the enumeration corresponding to the given name,
-        //- or deflt if the name is not found.
-        inline EnumType operator()
-        (
-            const word& enumName,
-            const EnumType deflt
-        ) const;
+    // Iteration
+
+        //- A const_iterator for iterating an Enum list
+        //  \note The iterator dereference returns the \b key
+        class const_iterator
+        {
+            //- The list being iterated
+            const Enum* ptr_;
+
+            //- Index in the list
+            label idx_;
+
+        public:
+
+            //- Default construct, construct at given position
+            inline explicit const_iterator
+            (
+                const Enum* eptr = nullptr,
+                const label idx = 0
+            ) noexcept;
+
+            //- The name at the current index
+            inline const word& key() const;
+
+            //- Enumeration value at the current index
+            inline EnumType val() const;
+
+            //- De-referencing returns the name (key)
+            //  This is similar to HashSet (not HashTable!) and allows
+            //  convenient output and traversing of the names
+            const word& operator*() const { return key(); }
+
+            //- Move to the next index
+            inline const_iterator& operator++() noexcept;
+
+            inline bool operator==(const const_iterator& iter) const noexcept;
+            inline bool operator!=(const const_iterator& iter) const noexcept;
+        };
+
+        inline const_iterator cbegin() const;
+        inline const_iterator cend() const;
+
+        const_iterator begin() const { return cbegin(); }
+        const_iterator end() const { return cend(); }
 
 
     // Housekeeping
@@ -281,7 +320,32 @@ public:
             return getOrDefault(key, dict, deflt, failsafe);
         }
 
-        //- Deprecated(2018-10) same as two-parameter get()
+
+        //- Deprecated(2020-11) use get() method
+        //  \deprecated(2020-11) - use get() method
+        FOAM_DEPRECATED_FOR(2020-11, "get() method")
+        const word& operator()(const EnumType e) const
+        {
+            return get(e);
+        }
+
+        //- Deprecated(2020-11) use two-parameter lookup() method
+        //  \deprecated(2020-11) - use two-parameter lookup() method
+        FOAM_DEPRECATED_FOR(2020-11, "lookup() method")
+        EnumType operator()(const word& key, const EnumType deflt) const
+        {
+            return lookup(key, deflt);
+        }
+
+        //- Deprecated(2020-11) use two-parameter lookup() method
+        //  \deprecated(2020-11) - use two-parameter lookup() method
+        FOAM_DEPRECATED_FOR(2020-11, "lookup() method")
+        EnumType get(const word& key, const EnumType deflt) const
+        {
+            return lookup(key, deflt);
+        }
+
+        //- Deprecated(2018-10) same as two-parameter get() method
         //  \deprecated(2018-10) - use two-parameter get() method
         FOAM_DEPRECATED_FOR(2018-10, "get() method")
         EnumType lookup(const word& key, const dictionary& dict) const

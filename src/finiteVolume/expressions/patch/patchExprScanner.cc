@@ -258,7 +258,7 @@ static int driverTokenType
     {
         const word fieldType(driver_.getFieldClassName(ident));
 
-        int tokType = fieldTokenEnums().get(fieldType, -1);
+        int tokType = fieldTokenEnums().lookup(fieldType, -1);
 
         if (tokType > 0)
         {
@@ -328,7 +328,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_method
         << "Method:" << ident
         << " at " << driver_.parsePosition() << nl;
 
-    const int methType = fieldMethodEnums.get(ident, -1);
+    const int methType = fieldMethodEnums.lookup(ident, -1);
 
     if (methType > 0)
     {
@@ -367,7 +367,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
     else
     {
         // Check for function name
-        tokType = funcTokenEnums.get(ident, -1);
+        tokType = funcTokenEnums.lookup(ident, -1);
 
         if (tokType > 0)
         {
@@ -381,7 +381,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
 
         #ifdef HAS_LOOKBEHIND_TOKENS
         // Specials such "cset" also reset the look-behind
-        tokType = lookBehindTokenEnums.get(ident, -1);
+        tokType = lookBehindTokenEnums.lookup(ident, -1);
 
         if (tokType > 0)
         {
@@ -423,7 +423,7 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
     (
         quoted || dot == std::string::npos
       ? -1
-      : fieldMethodEnums.get(ident.substr(dot+1), -1)
+      : fieldMethodEnums.lookup(ident.substr(dot+1), -1)
     );
 
     if
