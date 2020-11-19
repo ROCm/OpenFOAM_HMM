@@ -88,9 +88,9 @@ Foam::functionObjects::columnAverage::meshAddressing(const polyMesh& mesh) const
             mesh.points()
         );
 
-        globalFaces_.set(new globalIndex(uip.size()));
-        globalEdges_.set(new globalIndex(uip.nEdges()));
-        globalPoints_.set(new globalIndex(uip.nPoints()));
+        globalFaces_.reset(new globalIndex(uip.size()));
+        globalEdges_.reset(new globalIndex(uip.nEdges()));
+        globalPoints_.reset(new globalIndex(uip.nPoints()));
         meshStructurePtr_.reset
         (
             new meshStructure

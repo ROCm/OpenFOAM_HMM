@@ -348,7 +348,7 @@ bool Foam::processorCyclicPolyPatch::order
         UIPstream fromNeighbour(neighbProcNo(), pBufs);
         fromNeighbour >> masterPts >> masterFaces;
         SubList<face> fcs(masterFaces, masterFaces.size());
-        masterPtr.set(new primitivePatch(fcs, masterPts));
+        masterPtr.reset(new primitivePatch(fcs, masterPts));
     }
 
     const cyclicPolyPatch& cycPatch =

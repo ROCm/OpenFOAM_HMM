@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "PurePhaseModel.H"
 #include "phaseSystem.H"
 #include "basicThermo.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasePhaseModel, class phaseThermo>
@@ -39,14 +40,14 @@ Foam::PurePhaseModel<BasePhaseModel, phaseThermo>::PurePhaseModel
 :
     BasePhaseModel(fluid, phaseName)
 {
-    thermoPtr_.set
+    thermoPtr_.reset
     (
         phaseThermo::New
         (
             fluid.mesh(),
             phaseName,
             basicThermo::phasePropertyName(basicThermo::dictName, phaseName)
-        ).ptr()
+        )
     );
 
 }

@@ -3098,9 +3098,9 @@ void Foam::distributedTriSurfaceMesh::findNearest
         {
             sendMap[proci].transfer(dynSendMap[proci]);
         }
-        map1Ptr.set(new mapDistribute(std::move(sendMap)));
+        map1Ptr.reset(new mapDistribute(std::move(sendMap)));
     }
-    const mapDistribute& map1 = map1Ptr();
+    const mapDistribute& map1 = *map1Ptr;
 
 
     if (debug)
@@ -4116,9 +4116,9 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
             }
         }
 
-        mapPtr.set(new mapDistribute(std::move(sendMap)));
+        mapPtr.reset(new mapDistribute(std::move(sendMap)));
     }
-    const mapDistribute& map = mapPtr();
+    const mapDistribute& map = *mapPtr;
 
     // Get the points I need to test
     pointField localPoints(samples);

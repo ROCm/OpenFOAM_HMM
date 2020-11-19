@@ -49,6 +49,7 @@ SourceFiles
 // Transitional features/misfeatures
 #define Foam_autoPtr_copyConstruct
 #define Foam_autoPtr_castOperator
+// #define Foam_autoPtr_deprecate_setMethod
 
 #include "stdFoam.H"
 
@@ -163,7 +164,7 @@ public:
 
         //- Return reference to the managed object without nullptr checking.
         //  When get() == nullptr, additional guards may be required to avoid
-        //  inadvertent access to a nullptr.
+        //  inadvertent access of a nullptr.
         T& ref() { return *ptr_; }
 
 
@@ -274,6 +275,9 @@ public:
         //      enforced a run-time check (Fatal if pointer was already set)
         //      but this was rarely used.
         //  \deprecated(2018-02) Identical to reset().
+        #ifdef Foam_autoPtr_deprecate_setMethod
+        FOAM_DEPRECATED_FOR(2018-02, "reset() - same behaviour")
+        #endif
         void set(T* p) noexcept { reset(p); }
 
         //- Deprecated(2018-02) No copy assignment from plain pointer

@@ -1087,7 +1087,16 @@ void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 
 Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
 {
-    prevTimeState_.set(new TimeState(*this));  // Fatal if already set
+    #ifdef FULLDEBUG
+    if (prevTimeState_)
+    {
+        FatalErrorInFunction
+            << "previous time state already set" << nl
+            << exit(FatalError);
+    }
+    #endif
+
+    prevTimeState_.reset(new TimeState(*this));
 
     setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
     deltaT_ /= nSubCycles;
@@ -1118,7 +1127,7 @@ void Foam::Time::endSubCycle()
     if (subCycling_)
     {
         TimeState::operator=(prevTimeState());
-        prevTimeState_.clear();
+        prevTimeState_.reset(nullptr);
     }
 
     subCycling_ = 0;

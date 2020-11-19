@@ -25,6 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// #define Foam_autoPtr_deprecate_setMethod
+
 #include <memory>
 #include "autoPtr.H"
 #include "labelList.H"
@@ -236,6 +238,11 @@ int main(int argc, char *argv[])
         // Does compile (good!):   ptr1 = nullptr;
 
         ptr1.reset(std::move(ptr2));
+
+        autoPtr<labelList> ptr3;
+
+        // set() method - deprecated warning?
+        ptr3.set(ptr1.release());
     }
 
 

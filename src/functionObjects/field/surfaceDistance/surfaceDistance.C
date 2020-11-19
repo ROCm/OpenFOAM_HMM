@@ -85,8 +85,8 @@ bool Foam::functionObjects::surfaceDistance::read
 
     doCells_ = dict.getOrDefault("calculateCells", true);
 
-    geomPtr_.clear();
-    geomPtr_.set
+    geomPtr_.reset(nullptr);
+    geomPtr_.reset
     (
         new searchableSurfaces
         (

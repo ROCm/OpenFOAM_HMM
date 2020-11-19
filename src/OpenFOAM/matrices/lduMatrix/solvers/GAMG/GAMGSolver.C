@@ -288,7 +288,7 @@ Foam::GAMGSolver::GAMGSolver
                 }
                 else if (matrixLevels_[coarsestLevel].asymmetric())
                 {
-                    coarsestSolverPtr_.set
+                    coarsestSolverPtr_.reset
                     (
                         new PBiCGStab
                         (
@@ -303,7 +303,7 @@ Foam::GAMGSolver::GAMGSolver
                 }
                 else
                 {
-                    coarsestSolverPtr_.set
+                    coarsestSolverPtr_.reset
                     (
                         new PCG
                         (

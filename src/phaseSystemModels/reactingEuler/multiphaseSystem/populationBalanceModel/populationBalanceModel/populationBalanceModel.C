@@ -953,7 +953,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (coalescence_.size() != 0)
     {
-        coalescenceRate_.set
+        coalescenceRate_.reset
         (
             new volScalarField
             (
@@ -971,7 +971,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (breakup_.size() != 0)
     {
-        breakupRate_.set
+        breakupRate_.reset
         (
             new volScalarField
             (
@@ -989,7 +989,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (binaryBreakup_.size() != 0)
     {
-        binaryBreakupRate_.set
+        binaryBreakupRate_.reset
         (
             new volScalarField
             (
@@ -1012,7 +1012,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (drift_.size() != 0)
     {
-        driftRate_.set
+        driftRate_.reset
         (
             new volScalarField
             (
@@ -1027,7 +1027,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
             )
         );
 
-        rx_.set
+        rx_.reset
         (
             new volScalarField
             (
@@ -1042,7 +1042,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
             )
         );
 
-        rdx_.set
+        rdx_.reset
         (
             new volScalarField
             (
@@ -1060,7 +1060,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (nucleation_.size() != 0)
     {
-        nucleationRate_.set
+        nucleationRate_.reset
         (
             new volScalarField
             (
@@ -1083,7 +1083,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
     if (velocityGroups_.size() > 1)
     {
-        alphas_.set
+        alphas_.reset
         (
             new volScalarField
             (
@@ -1100,7 +1100,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
             )
         );
 
-        dsm_.set
+        dsm_.reset
         (
             new volScalarField
             (
@@ -1117,7 +1117,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
             )
         );
 
-        U_.set
+        U_.reset
         (
             new volVectorField
             (
@@ -1140,6 +1140,7 @@ Foam::diameterModels::populationBalanceModel::populationBalanceModel
 
 Foam::diameterModels::populationBalanceModel::~populationBalanceModel()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
