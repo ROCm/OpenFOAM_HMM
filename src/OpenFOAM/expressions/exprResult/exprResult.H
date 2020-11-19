@@ -341,7 +341,7 @@ public:
 
         #undef exprResult_Construct
         #define exprResult_Construct(Type)                                \
-            /*! Construct from single value of Type */                    \
+            /*! \brief Construct from single value of Type */             \
             explicit exprResult(const Type& val) : exprResult()           \
             {                                                             \
                 setSingleValue(val);                                      \

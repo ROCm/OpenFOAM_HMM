@@ -49,10 +49,10 @@ namespace exprTools
     /*! \brief Create an expression string from a DimType as its value */     \
     struct DimType##Entry : public exprTools::expressionEntry                 \
     {                                                                         \
-        /*! To string */                                                      \
+        /*! \brief Entry to string */                                         \
         static string evaluate(const entry& e);                               \
                                                                               \
-        /*! To string */                                                      \
+        /*! \brief Entry to string */                                         \
         virtual string toExpr(const entry& e) const                           \
         {                                                                     \
             return evaluate(e);                                               \

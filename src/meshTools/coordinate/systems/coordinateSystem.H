@@ -638,37 +638,37 @@ public:
 #undef  defineCoordinateSystemTransform
 #define defineCoordinateSystemTransform(Op, RetType, Type)                    \
                                                                               \
-    /**! With constant rotation tensor */                                     \
+    /*! \brief With constant rotation tensor */                               \
     virtual RetType Op(const Type& input) const;                              \
                                                                               \
-    /**! With constant rotation tensor */                                     \
+    /*! \brief With constant rotation tensor */                               \
     virtual tmp<Field<RetType>> Op(const UList<Type>& input) const;           \
                                                                               \
-    /**! With rotation tensor at given global position */                     \
+    /*! \brief With rotation tensor at given global position */               \
     virtual RetType Op(const point& global, const Type& input) const;         \
                                                                               \
-    /**! With rotation tensors at given global positions */                   \
+    /*! \brief With rotation tensors at given global positions */             \
     virtual tmp<Field<RetType>> Op                                            \
     (                                                                         \
         const UList<point>& global,                                           \
         const Type& input                                                     \
     ) const;                                                                  \
                                                                               \
-    /**! With rotation tensors at given global positions */                   \
+    /*! \brief With rotation tensors at given global positions */             \
     virtual tmp<Field<RetType>> Op                                            \
     (                                                                         \
         const pointUIndList& global,                                          \
         const Type& input                                                     \
     ) const;                                                                  \
                                                                               \
-    /**! With rotation tensors at given global positions */                   \
+    /*! \brief With rotation tensors at given global positions */             \
     virtual tmp<Field<RetType>> Op                                            \
     (                                                                         \
         const UList<point>& global,                                           \
         const UList<Type>& input                                              \
     ) const;                                                                  \
                                                                               \
-    /**! With rotation tensors at given global positions */                   \
+    /*! \brief With rotation tensors at given global positions */             \
     virtual tmp<Field<RetType>> Op                                            \
     (                                                                         \
         const pointUIndList& global,                                          \

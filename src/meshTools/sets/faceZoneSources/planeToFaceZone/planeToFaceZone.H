@@ -121,8 +121,8 @@ public:
         //- Enumeration defining the valid options
         enum faceAction
         {
-            ALL,       //<!- Select all faces that meet the criteria
-            CLOSEST    //<!- Select faces belong to the closest contiguous plane
+            ALL,       //!< Select all faces that meet the criteria
+            CLOSEST    //!< Select faces belong to the closest contiguous plane
         };
 
 

@@ -499,7 +499,7 @@ public:
 
 #undef  declareSurfaceWriterWriteMethod
 #define declareSurfaceWriterWriteMethod(Type)                                  \
-        /**! Write field of Type (per face or vertex) */                       \
+        /*! \brief Write field of Type (per face or vertex) */                 \
         virtual fileName write                                                 \
         (                                                                      \
             const word& fieldName,          /*!< Name of field */              \
@@ -517,7 +517,7 @@ public:
 #undef  declareSurfaceWriterWriteMethod
 #define declareSurfaceWriterWriteMethod(Type)                                  \
                                                                                \
-        /**! Write field of Type (per face or vertex) */                       \
+        /*! \brief Write field of Type (per face or vertex) */                 \
         virtual fileName write                                                 \
         (                                                                      \
             const word& fieldName,          /*!< Name of field */              \

@@ -1464,10 +1464,10 @@ public:
         }
 
         #ifdef COMPAT_OPENFOAM_ORG
-        //! \cond compat_openfoam_org
-        //  Accommodate name changes from 2019-11
+        //! Handle new openfoam-org method type (2019-11)
+        //  Only available if compiled with COMPAT_OPENFOAM_ORG
         template<class T>
-        FOAM_DEPRECATED_FOR(2019-11, "get(). openfoam.org compatibility")
+        FOAM_DEPRECATED_FOR(2019-11, "get() method - openfoam.org compat")
         T lookup
         (
             const word& keyword,
@@ -1484,7 +1484,7 @@ public:
 
         #undef defineDictionaryGetter
         #define defineDictionaryGetter(Func, Type)                            \
-            /** \brief Same as get\<Type\>(const word&, keyType::option) */   \
+            /*! \brief Same as get\<Type\>(const word&, keyType::option) */   \
             Type Func                                                         \
             (                                                                 \
                 const word& keyword,                                          \

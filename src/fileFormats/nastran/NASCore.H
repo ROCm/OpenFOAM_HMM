@@ -63,9 +63,9 @@ public:
         //- File field formats
         enum fieldFormat
         {
-            SHORT,      //<! Short format (field width = 8)
-            LONG,       //<! Long format (field width = 16)
-            FREE        //<! Free format (comma-separated fields)
+            SHORT,      //!< Short format (field width = 8)
+            LONG,       //!< Long format (field width = 16)
+            FREE        //!< Free format (comma-separated fields)
         };
 
         //- Selection names for the NASTRAN file field formats

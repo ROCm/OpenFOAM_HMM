@@ -62,10 +62,10 @@ public:
         //- Internal bookkeeping for subset type
         enum subsetType
         {
-            NONE,       //<! No subset
-            SET,        //<! Subset with a cellSet
-            ZONE,       //<! Subset with a cellZone
-            ZONES       //<! Subset with multiple cellZones
+            NONE,       //!< No subset
+            SET,        //!< Subset with a cellSet
+            ZONE,       //!< Subset with a cellZone
+            ZONES       //!< Subset with multiple cellZones
         };
 
 

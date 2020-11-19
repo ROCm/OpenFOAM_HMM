@@ -53,7 +53,7 @@ inline bool equal(const T& s1, const T& s2)
                                                         \
 MAXMIN(retType, type1, type2)                           \
                                                         \
-/** \brief Raise base to the power expon */             \
+/*! \brief Raise base to the power expon */             \
 inline double pow(const type1 base, const type2 expon)  \
 {                                                       \
     return ::pow(double(base), double(expon));          \

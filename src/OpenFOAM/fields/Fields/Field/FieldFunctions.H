@@ -180,7 +180,7 @@ tmp<Field<Type>> cmptMagSqr(const tmp<Field<Type>>& tf);
 
 #define TMP_UNARY_FUNCTION(ReturnType, Func)                                   \
                                                                                \
-/** \brief  Apply the \c Func() function on the tmp field */                   \
+/*! \brief Apply the \c Func() function on the tmp field */                    \
 template<class Type>                                                           \
 ReturnType Func(const tmp<Field<Type>>& tf1);
 

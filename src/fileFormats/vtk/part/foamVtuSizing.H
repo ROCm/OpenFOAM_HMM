@@ -339,7 +339,7 @@ public:
 #undef  declarePopulateInternalMethod
 #define declarePopulateInternalMethod(Type)                                   \
                                                                               \
-        /*! Populate lists for Internal VTK format */                         \
+        /*! \brief Populate lists for Internal VTK format */                  \
         void populateInternal                                                 \
         (                                                                     \
             const polyMesh& mesh,                                             \
@@ -352,7 +352,7 @@ public:
             const enum contentType output                                     \
         ) const;                                                              \
                                                                               \
-        /*! Populate lists for Internal VTK format */                         \
+        /*! \brief Populate lists for Internal VTK format */                  \
         void populateInternal                                                 \
         (                                                                     \
             const polyMesh& mesh,                                             \

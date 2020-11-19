@@ -54,9 +54,9 @@ namespace vtk
     //- The context when outputting a VTK file (XML or legacy).
     enum OutputContext
     {
-        INLINE,     //<! Generate header and inline data
-        HEADER,     //<! Generate header only
-        APPEND      //<! Generate append-data
+        INLINE,     //!< Generate header and inline data
+        HEADER,     //!< Generate header only
+        APPEND      //!< Generate append-data
     };
 
 
