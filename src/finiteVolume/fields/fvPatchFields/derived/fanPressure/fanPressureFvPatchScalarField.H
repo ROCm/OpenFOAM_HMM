@@ -56,13 +56,13 @@ Usage
     \table
         Property     | Description                       | Required | Default
         fanCurve     | Pressure vs flow-rate             | yes |
-        outOfBounds  | out of bounds handling            | yes |
         direction    | direction of flow through fan [in/out] | yes |
         p0           | environmental total pressure      | yes |
         nonDimensional | uses non-dimensional table      | no  | false
         rpm          | fan rpm for non-dimensional table | no  | 0
         dm           | mean diameter for non-dimensional table | no | 0.0
         file         | fan curve file name               | legacy |
+        outOfBounds  | out of bounds handling            | legacy |
     \endtable
 
     Example of the boundary condition specification:
@@ -104,7 +104,7 @@ See also
     Foam::Function1
 
 SourceFiles
-   fanPressureFvPatchScalarField.C
+    fanPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -127,11 +127,10 @@ class fanPressureFvPatchScalarField
 :
     public totalPressureFvPatchScalarField
 {
-
 public:
 
         //- Fan flow direction
-        enum fanFlowDirection
+        enum fanFlowDirection : uint8_t
         {
             ffdIn,
             ffdOut
@@ -151,14 +150,14 @@ private:
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;
 
+        //- Use non-dimensional curve
+        bool nonDimensional_;
+
         //- Fan rpm (for non-dimensional curve)
         scalar rpm_;
 
         //- Fan mean diameter (for non-dimensional curve)
         scalar dm_;
-
-        //- Use non-dimensional curve
-        bool nonDimensional_;
 
 
 public:

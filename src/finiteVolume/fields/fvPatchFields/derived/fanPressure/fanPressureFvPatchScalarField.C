@@ -56,9 +56,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(p, iF),
     fanCurve_(nullptr),
     direction_(ffdOut),
+    nonDimensional_(false),
     rpm_(0),
-    dm_(0),
-    nonDimensional_(false)
+    dm_(0)
 {}
 
 
@@ -71,11 +71,11 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(ptf, p, iF, mapper),
-    fanCurve_(ptf.fanCurve_),
+    fanCurve_(ptf.fanCurve_.clone()),
     direction_(ptf.direction_),
+    nonDimensional_(ptf.nonDimensional_),
     rpm_(ptf.rpm_),
-    dm_(ptf.dm_),
-    nonDimensional_(ptf.nonDimensional_)
+    dm_(ptf.dm_)
 {}
 
 
@@ -89,13 +89,13 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(p, iF, dict),
     fanCurve_(nullptr),
     direction_(fanFlowDirectionNames_.get("direction", dict)),
+    nonDimensional_(dict.getOrDefault("nonDimensional", false)),
     rpm_(0),
-    dm_(0),
-    nonDimensional_(dict.getOrDefault("nonDimensional", false))
+    dm_(0)
 {
-    if (dict.found("file") && !dict.found("fanCurve"))
+    // Backwards compatibility
+    if (dict.found("file"))
     {
-        // Backwards compatibility (2006 and earlier)
         fanCurve_.reset
         (
             new Function1Types::TableFile<scalar>("fanCurve", dict)
@@ -125,9 +125,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(fppsf),
     fanCurve_(fppsf.fanCurve_.clone()),
     direction_(fppsf.direction_),
+    nonDimensional_(fppsf.nonDimensional_),
     rpm_(fppsf.rpm_),
-    dm_(fppsf.dm_),
-    nonDimensional_(fppsf.nonDimensional_)
+    dm_(fppsf.dm_)
 {}
 
 
@@ -140,9 +140,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(fppsf, iF),
     fanCurve_(fppsf.fanCurve_.clone()),
     direction_(fppsf.direction_),
+    nonDimensional_(fppsf.nonDimensional_),
     rpm_(fppsf.rpm_),
-    dm_(fppsf.dm_),
-    nonDimensional_(fppsf.nonDimensional_)
+    dm_(fppsf.dm_)
 {}
 
 
