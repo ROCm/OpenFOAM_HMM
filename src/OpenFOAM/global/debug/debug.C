@@ -348,10 +348,26 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionedConstantObjects()
 namespace Foam
 {
 
+// Print the switch status
+static inline void printStatus
+(
+    const char * const message,
+    const wordList& list
+)
+{
+    // Use writeList with length = -1 to ensure we always have newlines,
+    // even for short lists
+
+    Info<< message << nl;
+    list.writeList(Info, -1) << nl;
+}
+
+
 // Write the switch names.
 //
-// Use flatOutput with -1 for the length to ensure we always have newlines,
+// Use writeList with -1 for the length to ensure we always have newlines,
 // even if the lists are short
+
 static void listSwitches
 (
     const wordList& debugSwitches,
@@ -373,7 +389,7 @@ static void listSwitches
             controlDict.merge(dictionary(is));
         }
 
-        // Use a HashSet to track switches that have not been set
+        // HashSet to track switches that have not been set
         wordHashSet hashed;
 
         // DebugSwitches
@@ -381,9 +397,7 @@ static void listSwitches
         {
             hashed = debugSwitches;
             hashed.unset(controlDict.subDict("DebugSwitches").toc());
-
-            Info<< "Unset DebugSwitches"
-                << flatOutput(hashed.sortedToc(), -1) << nl;
+            printStatus("Unset DebugSwitches", hashed.sortedToc());
         }
 
         // InfoSwitches
@@ -391,9 +405,7 @@ static void listSwitches
         {
             hashed = infoSwitches;
             hashed.unset(controlDict.subDict("InfoSwitches").toc());
-
-            Info<< "Unset InfoSwitches"
-                << flatOutput(hashed.sortedToc(), -1) << nl;
+            printStatus("Unset InfoSwitches", hashed.sortedToc());
         }
 
         // OptimisationSwitches
@@ -401,9 +413,7 @@ static void listSwitches
         {
             hashed = optSwitches;
             hashed.unset(controlDict.subDict("OptimisationSwitches").toc());
-
-            Info<< "Unset OptimisationSwitches"
-                << flatOutput(hashed.sortedToc(), -1) << nl;
+            printStatus("Unset OptimisationSwitches", hashed.sortedToc());
         }
     }
     else
@@ -411,22 +421,19 @@ static void listSwitches
         // DebugSwitches
         if (notNull(debugSwitches))
         {
-            Info<< "DebugSwitches"
-                << flatOutput(debugSwitches, -1) << nl;
+            printStatus("DebugSwitches", debugSwitches);
         }
 
         // InfoSwitches
         if (notNull(infoSwitches))
         {
-            Info<< "InfoSwitches"
-                << flatOutput(infoSwitches, -1) << nl;
+            printStatus("InfoSwitches", infoSwitches);
         }
 
         // OptimisationSwitches
         if (notNull(optSwitches))
         {
-            Info<< "OptimisationSwitches"
-                << flatOutput(optSwitches, -1) << nl;
+            printStatus("OptimisationSwitches", optSwitches);
         }
     }
 }
