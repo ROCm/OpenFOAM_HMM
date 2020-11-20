@@ -298,6 +298,7 @@ public:
     // Housekeeping
 
         //- Identical to the indices() method (AUG-2018)
+        FOAM_DEPRECATED_FOR(2018-08, "indices() method")
         labelList findIndices
         (
             const keyType& key,

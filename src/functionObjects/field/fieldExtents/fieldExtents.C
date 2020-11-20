@@ -140,7 +140,7 @@ bool Foam::functionObjects::fieldExtents::read(const dictionary& dict)
         {
             for (const wordRe& name : patchNames)
             {
-                patchIDs_.insert(pbm.findIndices(name));
+                patchIDs_.insert(pbm.indices(name));
             }
         }
         else

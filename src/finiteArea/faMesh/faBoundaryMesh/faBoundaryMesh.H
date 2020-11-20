@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,11 +131,11 @@ public:
             wordList types() const;
 
             //- Return patch indices for all matches.
-            //  Matching patchGroups currently not supported
+            //  \not Matching patchGroups currently not supported
             labelList indices
             (
                 const keyType& key,
-                const bool useGroups = false
+                const bool useGroups = false  /* ignored */
             ) const;
 
             //- Return patch index for the first match, return -1 if not found
@@ -171,6 +171,7 @@ public:
     // Housekeeping
 
         //- Identical to the indices() method (AUG-2018)
+        FOAM_DEPRECATED_FOR(2018-08, "indices() method")
         labelList findIndices
         (
             const keyType& key,
@@ -179,7 +180,6 @@ public:
         {
             return indices(key, useGroups);
         }
-
 };
 
 

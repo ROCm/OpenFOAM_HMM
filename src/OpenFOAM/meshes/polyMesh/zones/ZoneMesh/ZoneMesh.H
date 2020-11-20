@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class ZoneType, class MeshType> class ZoneMesh;
 
@@ -68,7 +68,7 @@ class ZoneMesh
     public PtrList<ZoneType>,
     public regIOobject
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const MeshType& mesh_;
@@ -289,7 +289,7 @@ public:
         ZoneType& operator()(const word& zoneName, const bool verbose=false);
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<< <ZoneType, MeshType>
         (
@@ -301,6 +301,7 @@ public:
     // Housekeeping
 
         //- Identical to the indices() method (AUG-2018)
+        FOAM_DEPRECATED_FOR(2018-08, "indices() method")
         labelList findIndices(const keyType& key) const
         {
             return indices(key);

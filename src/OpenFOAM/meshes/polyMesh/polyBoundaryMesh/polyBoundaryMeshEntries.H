@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::polyBoundaryMeshEntries
 
 Description
-    Foam::polyBoundaryMeshEntries
+    Read and store dictionary entries for boundary patches
 
 SourceFiles
     polyBoundaryMeshEntries.C
@@ -46,18 +47,19 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                   Class polyBoundaryMeshEntries Declaration
+\*---------------------------------------------------------------------------*/
 
 class polyBoundaryMeshEntries
 :
     public regIOobject,
     public PtrList<entry>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("polyBoundaryMesh");
+    TypeNameNoDebug("polyBoundaryMesh");
 
 
     // Constructors
