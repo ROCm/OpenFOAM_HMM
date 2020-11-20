@@ -198,16 +198,20 @@ public:
         //- Return zone indices for all matches
         labelList indices(const wordRes& matcher) const;
 
-
-        //- Return zone index for the first match, return -1 if not found
+        //- Zone index for the first match, return -1 if not found
         label findIndex(const keyType& key) const;
 
-        //- Return zone index for the first match, return -1 if not found
+        //- Zone index for the first match, return -1 if not found
         label findIndex(const wordRes& matcher) const;
 
-
-        //- Find zone index given a name, return -1 if not found
+        //- Find zone index by name, return -1 if not found
         label findZoneID(const word& zoneName) const;
+
+        //- Find zone by name and return const pointer, nullptr on error
+        const ZoneType* cfindZone(const word& zoneName) const;
+
+        //- Find zone by name and return pointer, nullptr on error
+        ZoneType* findZone(const word& zoneName);
 
 
         //- Return all elements (cells, faces, points) contained in the
@@ -227,13 +231,6 @@ public:
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
         bitSet selection(const wordRes& matcher) const;
-
-
-        //- Lookup zone by name and return const pointer, nullptr on error.
-        const ZoneType* zonePtr(const word& zoneName) const;
-
-        //- Lookup zone by name and return pointer, nullptr on error.
-        ZoneType* zonePtr(const word& zoneName);
 
 
         //- Clear addressing

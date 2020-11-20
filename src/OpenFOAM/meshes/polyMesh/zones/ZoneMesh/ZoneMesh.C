@@ -487,36 +487,65 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 {
     label zoneId = findIndexImpl(*this, zoneName);
 
-    if (zoneId >= 0)
+    if (zoneId < 0)
     {
-        return zoneId;
-    }
+        DebugInFunction
+            << "Zone named " << zoneName << " not found.  "
+            << "List of available zone names: " << names() << endl;
 
-    // Zone not found
-    DebugInFunction
-        << "Zone named " << zoneName << " not found.  "
-        << "List of available zone names: " << names() << endl;
+        // Used for -dry-run, for example
+        if (disallowGenericZones != 0)
+        {
+            auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
+            zoneId = zm.size();
 
-    if (disallowGenericZones != 0)
-    {
-        // Create a new ...
-
-        Info<< "Creating dummy zone " << zoneName << endl;
-        dictionary dict;
-        dict.set("type", ZoneType::typeName);
-        dict.set(ZoneType::labelsName, labelList());
-
-        // flipMap only really applicable for face zones, but should not get
-        // in the way for cell- and point-zones...
-        dict.set("flipMap", boolList());
-
-        auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
-        zoneId = zm.size();
-
-        zm.append(new ZoneType(zoneName, dict, zoneId, zm));
+            Info<< "Creating dummy zone " << zoneName << endl;
+            zm.append(new ZoneType(zoneName, zoneId, zm));
+        }
     }
 
     return zoneId;
+}
+
+
+template<class ZoneType, class MeshType>
+const ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::cfindZone
+(
+    const word& zoneName
+) const
+{
+    const PtrList<ZoneType>& zones = *this;
+
+    for (auto iter = zones.begin(); iter != zones.end(); ++iter)
+    {
+        const ZoneType* ptr = iter.get();
+
+        if (ptr && zoneName == ptr->name())
+        {
+            return ptr;
+        }
+    }
+
+    // Used for -dry-run, for example
+    if (disallowGenericZones != 0)
+    {
+        auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
+
+        Info<< "Creating dummy zone " << zoneName << endl;
+        zm.append(new ZoneType(zoneName, zm.size(), zm));
+    }
+
+    return nullptr;
+}
+
+
+template<class ZoneType, class MeshType>
+ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::findZone
+(
+    const word& zoneName
+)
+{
+    return const_cast<ZoneType*>(this->cfindZone(zoneName));
 }
 
 
@@ -567,50 +596,6 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 ) const
 {
     return this->selection(this->indices(matcher));
-}
-
-
-template<class ZoneType, class MeshType>
-const ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::zonePtr
-(
-    const word& zoneName
-) const
-{
-    const PtrList<ZoneType>& zones = *this;
-
-    for (auto iter = zones.begin(); iter != zones.end(); ++iter)
-    {
-        const ZoneType* ptr = iter.get();
-
-        if (ptr && zoneName == ptr->name())
-        {
-            return ptr;
-        }
-    }
-
-    return nullptr;
-}
-
-
-template<class ZoneType, class MeshType>
-ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::zonePtr
-(
-    const word& zoneName
-)
-{
-    PtrList<ZoneType>& zones = *this;
-
-    for (auto iter = zones.begin(); iter != zones.end(); ++iter)
-    {
-        ZoneType* ptr = iter.get();
-
-        if (ptr && zoneName == ptr->name())
-        {
-            return ptr;
-        }
-    }
-
-    return nullptr;
 }
 
 
@@ -801,34 +786,25 @@ ZoneType& Foam::ZoneMesh<ZoneType, MeshType>::operator()
     const bool verbose
 )
 {
-    PtrList<ZoneType>& zones = *this;
+    ZoneType* ptr = findZone(zoneName);
 
-    label zoneId = findZoneID(zoneName);
+    const bool existing = bool(ptr);
 
-    if (zoneId < 0)
+    if (!ptr)
     {
-        zoneId = zones.size();
-        zones.resize(zoneId+1);
-        zones.set(zoneId, new ZoneType(zoneName, zoneId, *this));
-
-        if (verbose)
-        {
-            Info<< ZoneType::typeName << " " << zoneName
-                << " (new at index " << zoneId << ")"
-                << endl;
-        }
-    }
-    else
-    {
-        if (verbose)
-        {
-            Info<< ZoneType::typeName << " " << zoneName
-                << " (existing at index " << zoneId << ")"
-                << endl;
-        }
+        ptr = new ZoneType(zoneName, this->size(), *this);
+        this->append(ptr);
     }
 
-    return zones[zoneId];
+    if (verbose)
+    {
+        Info<< ZoneType::typeName << ' ' << zoneName
+            << " (" << (existing ? "existing" : "new")
+            << " at index " << ptr->index() << ')'
+            << endl;
+    }
+
+    return *ptr;
 }
 
 
