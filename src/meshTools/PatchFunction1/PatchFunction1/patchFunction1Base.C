@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,31 +25,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Square.H"
+#include "patchFunction1Base.H"
+#include "polyPatch.H"
+#include "Time.H"
+
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+
+Foam::patchFunction1Base::patchFunction1Base
+(
+    const polyPatch& pp,
+    const word& entryName,
+    const bool faceValues
+)
+:
+    refCount(),
+    name_(entryName),
+    patch_(pp),
+    faceValues_(faceValues)
+{}
+
+
+Foam::patchFunction1Base::patchFunction1Base
+(
+    const polyPatch& pp,
+    const word& entryName,
+    const dictionary& dict,
+    const bool faceValues
+)
+:
+    refCount(),
+    name_(entryName),
+    patch_(pp),
+    faceValues_(faceValues)
+{}
+
+
+Foam::patchFunction1Base::patchFunction1Base(const patchFunction1Base& rhs)
+:
+    patchFunction1Base(rhs, rhs.patch())
+{}
+
+
+Foam::patchFunction1Base::patchFunction1Base
+(
+    const patchFunction1Base& rhs,
+    const polyPatch& pp
+)
+:
+    refCount(),
+    name_(rhs.name_),
+    patch_(pp),
+    faceValues_(rhs.faceValues_)
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-inline Type Foam::Function1Types::Square<Type>::value(const scalar t) const
-{
-    // Number of waves including fractions
-    scalar waves = frequency_->value(t)*(t - t0_);
-
-    // Number of complete waves
-    scalar nWaves;
-
-    // Fraction of last incomplete wave
-    scalar waveFrac = std::modf(waves, &nWaves);
-
-    // Mark fraction of a wave
-    scalar markFrac = markSpace_/(1.0 + markSpace_);
-
-    return
-        amplitude_->value(t)
-       *(waveFrac < markFrac ? 1 : -1)
-       *scale_->value(t)
-      + level_->value(t);
-}
+void Foam::patchFunction1Base::convertTimeBase(const Time&)
+{}
 
 
 // ************************************************************************* //

@@ -63,12 +63,10 @@ functions
         libs            (fieldFunctionObjects);
         writeControl    writeTime;
         mode            vortex2D;
-        scale           sine;
+        scale           cosine;
         scaleCoeffs
         {
-            amplitude       1;
-            frequency       0.0625; // = 1/16
-            t0              -4;     // want cos -> time shift = -(pi/2)/(2 pi f)
+            period          16
             scale           1;
             level           0;
         }

@@ -23,11 +23,10 @@ boundaryField
 {
     inlet
     {
-        type            uniformFixedValue; // oscillatingFixedValue;
+        type            uniformFixedValue;
         uniformValue    sine;
         uniformValueCoeffs
         {
-            amplitude       constant 1;
             frequency       constant 3000;
             scale           constant 50;
             level           constant 101325;

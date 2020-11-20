@@ -53,7 +53,7 @@ template<class Type>
 Foam::PatchFunction1Types::Sampled<Type>::Sampled
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
@@ -76,31 +76,26 @@ Foam::PatchFunction1Types::Sampled<Type>::Sampled
 template<class Type>
 Foam::PatchFunction1Types::Sampled<Type>::Sampled
 (
-    const Sampled<Type>& ut
+    const Sampled<Type>& rhs
 )
 :
-    PatchFunction1<Type>(ut),
-    mappedPatchBase(ut),
-    fieldName_(ut.fieldName_),
-    setAverage_(ut.setAverage_),
-    average_(ut.average_),
-    interpolationScheme_(ut.interpolationScheme_)
+    Sampled<Type>(rhs, rhs.patch())
 {}
 
 
 template<class Type>
 Foam::PatchFunction1Types::Sampled<Type>::Sampled
 (
-    const Sampled<Type>& ut,
+    const Sampled<Type>& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<Type>(ut, pp),
-    mappedPatchBase(pp, ut),
-    fieldName_(ut.fieldName_),
-    setAverage_(ut.setAverage_),
-    average_(ut.average_),
-    interpolationScheme_(ut.interpolationScheme_)
+    PatchFunction1<Type>(rhs, pp),
+    mappedPatchBase(pp, rhs),
+    fieldName_(rhs.fieldName_),
+    setAverage_(rhs.setAverage_),
+    average_(rhs.average_),
+    interpolationScheme_(rhs.interpolationScheme_)
 {}
 
 
@@ -286,7 +281,7 @@ Foam::PatchFunction1Types::Sampled<Type>::value
     if (setAverage_ && returnReduce(newValues.size(), sumOp<label>()))
     {
         Type averagePsi;
-        if (this->faceValues_)
+        if (this->faceValues())
         {
             const scalarField magSf
             (

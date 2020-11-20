@@ -74,7 +74,7 @@ SourceFiles
 #ifndef Function1_H
 #define Function1_H
 
-#include "dictionary.H"
+#include "function1Base.H"
 #include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -94,15 +94,22 @@ template<class Type> Ostream& operator<<(Ostream&, const Function1<Type>&);
 template<class Type>
 class Function1
 :
-    public refCount
+    public function1Base
 {
+    // Private Member Functions
+
+        //- Selector, with alternative entry, fallback redirection, etc
+        static autoPtr<Function1<Type>> New
+        (
+            const word& entryName,   // Entry name for function
+            const entry* eptr,       // Eg, dict.findEntry(entryName)
+            const dictionary& dict,
+            const word& redirectType,
+            const bool mandatory
+        );
+
+
 protected:
-
-    // Protected Data
-
-        //- Name of entry
-        const word name_;
-
 
     // Protected Member Functions
 
@@ -136,20 +143,52 @@ public:
         //- Construct from entry name
         explicit Function1(const word& entryName);
 
-        //- Copy constructor
+        //- Construct from entry name and dictionary
+        Function1(const word& entryName, const dictionary& dict);
+
+        //- Copy construct
         explicit Function1(const Function1<Type>& rhs);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const = 0;
 
 
-    //- Selector
-    static autoPtr<Function1<Type>> New
-    (
-        const word& entryName,
-        const dictionary& dict,
-        const word& redirectType = word::null
-    );
+    // Selectors
+
+        //- Selector, with fallback redirection
+        static autoPtr<Function1<Type>> New
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const word& redirectType,
+            const bool mandatory = true
+        );
+
+        //- Compatibility selector, with fallback redirection
+        static autoPtr<Function1<Type>> NewCompat
+        (
+            const word& entryName,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            const dictionary& dict,
+            const word& redirectType = word::null,
+            const bool mandatory = true
+        );
+
+        //- Selector, without fallback redirection
+        static autoPtr<Function1<Type>> New
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const bool mandatory = true
+        );
+
+        //- An optional selector
+        static autoPtr<Function1<Type>> NewIfPresent
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const word& redirectType = word::null
+        );
 
 
     //- Destructor
@@ -157,18 +196,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return the name of the entry
-            const word& name() const;
-
-
-        // Manipulation
-
-            //- Convert time
-            virtual void convertTimeBase(const Time& t);
-
 
         // Evaluation
 
@@ -189,17 +216,22 @@ public:
             ) const;
 
 
-        // I/O
+    // I/O
 
-            //- Ostream Operator
-            friend Ostream& operator<< <Type>
-            (
-                Ostream& os,
-                const Function1<Type>& func
-            );
+        //- Ostream Operator
+        friend Ostream& operator<< <Type>
+        (
+            Ostream& os,
+            const Function1<Type>& func
+        );
 
-            //- Write in dictionary format
-            virtual void writeData(Ostream& os) const;
+
+        //- Write in dictionary format.
+        //  \note The base output is \em without an END_STATEMENT
+        virtual void writeData(Ostream& os) const;
+
+        //- Write coefficient entries in dictionary format
+        void writeEntries(Ostream& os) const;
 };
 
 
@@ -212,7 +244,6 @@ class FieldFunction1
 :
     public Function1Type
 {
-
 public:
 
     typedef typename Function1Type::returnType Type;
@@ -256,6 +287,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Define Function1 run-time selection
 #define makeFunction1(Type)                                                    \
                                                                                \
     defineNamedTemplateTypeNameAndDebug(Function1<Type>, 0);                   \
@@ -267,6 +299,7 @@ public:
     );
 
 
+// Define (templated) Function1, add to (templated) run-time selection
 #define makeFunction1Type(SS, Type)                                            \
                                                                                \
     defineNamedTemplateTypeNameAndDebug(Function1Types::SS<Type>, 0);          \
@@ -276,12 +309,20 @@ public:
         add##SS##Type##ConstructorToTable_;
 
 
-#define makeScalarFunction1(SS)                                                \
+// Define a non-templated Function1 and add to (templated) run-time selection
+#define makeConcreteFunction1(SS, Type)                                        \
                                                                                \
     defineTypeNameAndDebug(SS, 0);                                             \
                                                                                \
-    Function1<scalar>::adddictionaryConstructorToTable<FieldFunction1<SS>>     \
-        add##SS##ConstructorToTable_;
+    Function1<Type>::adddictionaryConstructorToTable                           \
+        <FieldFunction1<SS>>                                                   \
+        add##SS##Type##ConstructorToTable_;
+
+
+// Define scalar Function1 and add to (templated) run-time selection
+#define makeScalarFunction1(SS)                                                \
+                                                                               \
+    makeConcreteFunction1(SS, scalar);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

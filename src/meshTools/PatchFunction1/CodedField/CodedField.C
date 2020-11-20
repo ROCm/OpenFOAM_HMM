@@ -135,7 +135,7 @@ template<class Type>
 Foam::PatchFunction1Types::CodedField<Type>::CodedField
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
@@ -156,10 +156,7 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     const CodedField<Type>& rhs
 )
 :
-    PatchFunction1<Type>(rhs),
-    codedBase(),
-    dict_(rhs.dict_),
-    name_(rhs.name_)
+    CodedField<Type>(rhs, rhs.patch())
 {}
 
 
@@ -202,7 +199,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
                 this->patch(),
                 name_,
                 dict,
-                this->faceValues_
+                this->faceValues()
             )
         );
     }

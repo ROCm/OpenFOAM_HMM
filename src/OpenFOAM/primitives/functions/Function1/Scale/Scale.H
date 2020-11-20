@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,14 +107,17 @@ class Scale
         //- Read the coefficients from the given dictionary
         void read(const dictionary& coeffs);
 
-        //- No copy assignment
-        void operator=(const Scale<Type>&) = delete;
-
 
 public:
 
     //- Runtime type information
     TypeName("scale");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const Scale<Type>&) = delete;
 
 
     // Constructors
@@ -140,6 +144,9 @@ public:
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
+
+        //- Write coefficient entries in dictionary format
+        void writeEntries(Ostream& os) const;
 };
 
 

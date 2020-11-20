@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,9 +65,6 @@ class TableBase
 protected:
 
     // Protected Data
-
-        //- Table name
-        const word name_;
 
         //- Handling for out-of-bound values
         const bounds::repeatableBounding bounding_;

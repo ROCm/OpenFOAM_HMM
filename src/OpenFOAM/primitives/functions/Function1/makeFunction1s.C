@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +32,7 @@ License
 #include "OneConstant.H"
 #include "PolynomialEntry.H"
 #include "Sine.H"
+#include "Cosine.H"
 #include "Square.H"
 #include "CSV.H"
 #include "Table.H"
@@ -48,6 +50,7 @@ License
     makeFunction1Type(ZeroConstant, Type);                                     \
     makeFunction1Type(OneConstant, Type);                                      \
     makeFunction1Type(Polynomial, Type);                                       \
+    makeFunction1Type(Cosine, Type);                                           \
     makeFunction1Type(Sine, Type);                                             \
     makeFunction1Type(Square, Type);                                           \
     makeFunction1Type(CSV, Type);                                              \

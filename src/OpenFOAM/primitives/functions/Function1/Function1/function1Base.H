@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,92 +24,95 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::ZeroConstant
+    Foam::function1Base
 
 Description
-    Templated function that returns the corresponding 0 (zero).
+    Top level data entry class for use in dictionaries. Provides a mechanism
+    to specify a variable as a certain type, e.g. constant or time varying, and
+    provide functions to return the (interpolated) value, and integral between
+    limits.
 
-    Usage:
-    \verbatim
-        <entryName> zero;
-    \endverbatim
+    Extends the Function1 class by adding autoMap and rMap functions
 
 SourceFiles
-    ZeroConstant.C
+    function1Base.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ZeroConstant_H
-#define ZeroConstant_H
+#ifndef function1Base_H
+#define function1Base_H
 
-#include "Function1.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace Function1Types
-{
+
+// Forward Declarations
+class Time;
 
 /*---------------------------------------------------------------------------*\
-                           Class ZeroConstant Declaration
+                     Class function1Base Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class ZeroConstant
+class function1Base
 :
-    public Function1<Type>
+    public refCount
 {
-public:
+protected:
 
-    //- Runtime type information
-    TypeName("zero");
+    // Protected Data
+
+        //- Name of entry
+        const word name_;
 
 
-    // Generated Methods
+    // Protected Member Functions
 
         //- No copy assignment
-        void operator=(const ZeroConstant<Type>&) = delete;
+        void operator=(const function1Base&) = delete;
 
+
+public:
 
     // Constructors
 
         //- Construct from entry name
-        explicit ZeroConstant(const word& entryName);
+        explicit function1Base(const word& entryName);
 
         //- Construct from entry name and dictionary
-        ZeroConstant(const word& entryName, const dictionary& dict);
+        function1Base(const word& entryName, const dictionary& dict);
+
+        //- Copy construct
+        explicit function1Base(const function1Base& rhs);
 
 
     //- Destructor
-    virtual ~ZeroConstant() = default;
+    virtual ~function1Base() = default;
 
 
     // Member Functions
 
-        //- Return constant value
-        virtual inline Type value(const scalar) const;
+    // Access
 
-        //- Integrate between two values
-        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+        //- The name of the entry
+        const word& name() const
+        {
+            return name_;
+        }
 
-        //- Write in dictionary format
-        virtual void writeData(Ostream& os) const;
+
+    // Manipulation
+
+        //- Convert time
+        virtual void convertTimeBase(const Time& t);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Function1Types
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "ZeroConstantI.H"
-
-#ifdef NoRepository
-    #include "ZeroConstant.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

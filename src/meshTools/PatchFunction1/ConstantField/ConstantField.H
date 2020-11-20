@@ -74,11 +74,11 @@ class ConstantField
 
     // Private Member Functions
 
-        //- Helper to read value from dictionary
+        //- Helper to read value from dictionary entry
         static Field<Type> getValue
         (
-            const word& keyword,
-            const dictionary& dict,
+            const entry* eptr,  // primitiveEntry
+            const dictionary& dict,  // For error context
             const label len,
             bool& isUniform,
             Type& uniformValue
@@ -122,19 +122,29 @@ public:
         ConstantField
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
+            const word& entryName,
+            const dictionary& dict,
+            const bool faceValues = true
+        );
+
+        //- Construct from primitive entry, entry name and dictionary
+        ConstantField
+        (
+            const polyPatch& pp,
+            const entry* eptr,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
         );
 
         //- Copy construct
-        explicit ConstantField(const ConstantField<Type>& cnst);
+        explicit ConstantField(const ConstantField<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct setting patch
         explicit ConstantField
         (
-            const ConstantField<Type>& cnst,
+            const ConstantField<Type>& rhs,
             const polyPatch& pp
         );
 

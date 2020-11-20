@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,16 +63,21 @@ Foam::Function1Types::Scale<Type>::Scale(const Scale<Type>& rhs)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+void Foam::Function1Types::Scale<Type>::writeEntries(Ostream& os) const
+{
+    scale_->writeData(os);
+    value_->writeData(os);
+}
+
+
+template<class Type>
 void Foam::Function1Types::Scale<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
     os  << token::END_STATEMENT << nl;
 
     os.beginBlock(word(this->name() + "Coeffs"));
-
-    scale_->writeData(os);
-    value_->writeData(os);
-
+    writeEntries(os);
     os.endBlock();
 }
 

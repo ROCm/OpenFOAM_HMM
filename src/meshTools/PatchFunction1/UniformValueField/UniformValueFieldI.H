@@ -46,13 +46,10 @@ Foam::PatchFunction1Types::UniformValueField<Type>::value
     const scalar x
 ) const
 {
-    const label len =
-        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints());
-
     auto tfld =
         tmp<Field<Type>>::New
         (
-            len,
+            this->size(),
             uniformValuePtr_->value(x)
         );
 
@@ -68,13 +65,10 @@ Foam::PatchFunction1Types::UniformValueField<Type>::integrate
     const scalar x2
 ) const
 {
-    const label len =
-        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints());
-
     auto tfld =
         tmp<Field<Type>>::New
         (
-            len,
+            this->size(),
             uniformValuePtr_->integrate(x1, x2)
         );
 

@@ -305,8 +305,10 @@ mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 polyTopoChange/topoAction/topoActions.C
 polyTopoChange/polyTopoChange.C
 
+/* Run-time selectable functions */
+PatchFunction1/PatchFunction1/patchFunction1Base.C
 PatchFunction1/makePatchFunction1s.C
-PatchFunction1/coordinateLabelScaling.C
+PatchFunction1/coordinateScaling/coordinateScalings.C
 PatchFunction1/CodedField/makeCodedFields.C
 PatchFunction1/MappedFile/rawIOFields.C
 

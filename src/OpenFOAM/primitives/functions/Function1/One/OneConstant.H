@@ -61,16 +61,16 @@ class OneConstant
 :
     public Function1<Type>
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const OneConstant<Type>&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("one");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const OneConstant<Type>&) = delete;
 
 
     // Constructors

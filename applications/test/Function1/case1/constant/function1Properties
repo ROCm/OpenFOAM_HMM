@@ -61,4 +61,48 @@ rampf1
 }
 
 
+sine1
+{
+    type        sine;
+    frequency   0.1;
+    scale       1;
+    level       0;
+}
+
+sine2
+{
+    type        sine;
+    period      10;
+    scale       1;
+    level       0;
+}
+
+cosine1
+{
+    type        cosine;
+    period      10;
+    scale       1;
+    level       0;
+}
+
+
+sine6
+{
+    type        sine;
+    period      6;
+    t0          -1.5;  // want cos
+    scale       1;
+    level       0;
+}
+
+
+cosine6
+{
+    type        cosine;
+    period      6;
+    scale       1;
+    level       0;
+}
+
+
 // ************************************************************************* //

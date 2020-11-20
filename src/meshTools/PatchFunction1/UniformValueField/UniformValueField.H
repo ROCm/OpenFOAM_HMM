@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,17 +67,16 @@ class UniformValueField
         //- Source of uniform values (in local coordinate system)
         autoPtr<Foam::Function1<Type>> uniformValuePtr_;
 
-
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const UniformValueField<Type>&) = delete;
-
-
 public:
 
     // Runtime type information
     TypeName("uniformValue");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const UniformValueField<Type>&) = delete;
 
 
     // Constructors
@@ -86,19 +85,19 @@ public:
         UniformValueField
         (
             const polyPatch& pp,
-            const word& type,
+            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
         );
 
-        //- Copy constructor
-        explicit UniformValueField(const UniformValueField<Type>& ut);
+        //- Copy construct
+        explicit UniformValueField(const UniformValueField<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct setting patch
         explicit UniformValueField
         (
-            const UniformValueField<Type>& ut,
+            const UniformValueField<Type>& rhs,
             const polyPatch& pp
         );
 

@@ -42,7 +42,7 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     isUniform_(true),
     uniformValue_(uniformValue),
-    value_((faceValues ? pp.size() : pp.nPoints()), uniformValue_)
+    value_(this->size(), uniformValue_)
 {}
 
 
@@ -63,24 +63,23 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     uniformValue_(uniformValue),
     value_(fieldValues)
 {
-    const label len = (faceValues ? pp.size() : pp.nPoints());
-
-    if (fieldValues.size() != len)
+    if (fieldValues.size() != this->size())
     {
         FatalIOErrorInFunction(dict)
             << "Supplied field size " << fieldValues.size()
             << " is not equal to the number of "
             << (faceValues ? "faces" : "points") << ' '
-            << len << " of patch " << pp.name() << nl
+            << this->size() << " of patch " << pp.name() << nl
             << exit(FatalIOError);
     }
 }
 
 
 template<class Type>
-Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
+Foam::Field<Type>
+Foam::PatchFunction1Types::ConstantField<Type>::getValue
 (
-    const word& keyword,
+    const entry* eptr,
     const dictionary& dict,
     const label len,
     bool& isUniform,
@@ -94,7 +93,13 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
 
     if (len)
     {
-        ITstream& is = dict.lookup(keyword);
+        if (!eptr || !eptr->isStream())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Null or invalid entry" << nl
+                << exit(FatalIOError);
+        }
+        ITstream& is = eptr->stream();
 
         // Read first token
         token firstToken(is);
@@ -172,20 +177,22 @@ template<class Type>
 Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
     const polyPatch& pp,
-    const word& type,
+    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
     const bool faceValues
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
+    isUniform_(true),  // overwritten by getValue()
+    uniformValue_(Zero),  // overwritten by getValue()
     value_
     (
         getValue
         (
-            entryName,
+            dict.findEntry(entryName, keyType::LITERAL),
             dict,
-            (faceValues ? pp.size() : pp.nPoints()),
+            this->size(),
             isUniform_,
             uniformValue_
         )
@@ -196,34 +203,54 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 template<class Type>
 Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
-    const ConstantField<Type>& cnst
+    const polyPatch& pp,
+    const entry* eptr,
+    const word& entryName,
+    const dictionary& dict,
+    const bool faceValues
 )
 :
-    PatchFunction1<Type>(cnst),
-    isUniform_(cnst.isUniform_),
-    uniformValue_(cnst.uniformValue_),
-    value_(cnst.value_)
+    PatchFunction1<Type>(pp, entryName, dict, faceValues),
+    isUniform_(true),  // overwritten by getValue()
+    uniformValue_(Zero),  // overwritten by getValue()
+    value_
+    (
+        getValue
+        (
+            eptr,
+            dict,
+            this->size(),
+            isUniform_,
+            uniformValue_
+        )
+    )
 {}
 
 
 template<class Type>
 Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 (
-    const ConstantField<Type>& cnst,
+    const ConstantField<Type>& rhs
+)
+:
+    ConstantField<Type>(rhs, rhs.patch())
+{}
+
+
+template<class Type>
+Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
+(
+    const ConstantField<Type>& rhs,
     const polyPatch& pp
 )
 :
-    PatchFunction1<Type>(cnst, pp),
-    isUniform_(cnst.isUniform_),
-    uniformValue_(cnst.uniformValue_),
-    value_(cnst.value_)
+    PatchFunction1<Type>(rhs, pp),
+    isUniform_(rhs.isUniform_),
+    uniformValue_(rhs.uniformValue_),
+    value_(rhs.value_)
 {
     // If sizes are different...
-    value_.resize
-    (
-        (this->faceValues_ ? this->patch_.size() : this->patch_.nPoints()),
-        Zero
-    );
+    value_.resize(this->size(), Zero);
 
     if (isUniform_)
     {
@@ -272,13 +299,13 @@ void Foam::PatchFunction1Types::ConstantField<Type>::writeData
 
     if (isUniform_)
     {
-        os.writeKeyword(this->name_)
+        os.writeKeyword(this->name())
             << word("constant") << token::SPACE << uniformValue_
             << token::END_STATEMENT << nl;
     }
     else
     {
-        value_.writeEntry(this->name_, os);
+        value_.writeEntry(this->name(), os);
     }
 }
 

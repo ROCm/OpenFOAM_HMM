@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ License
 #define makePatchFunction1s(Type)                                              \
     makePatchFunction1(Type);                                                  \
     makePatchFunction1Type(ConstantField, Type);                               \
-    makePatchFunction1Type(MappedFile, Type);                                 \
+    makePatchFunction1Type(MappedFile, Type);                                  \
     makePatchFunction1Type(UniformValueField, Type);
 
 #define addUniformValueFieldFunction1s(F1Type, Type)                           \
@@ -76,6 +76,12 @@ namespace Foam
     addUniformValueFieldFunction1s(polynomial, sphericalTensor);
     addUniformValueFieldFunction1s(polynomial, symmTensor);
     addUniformValueFieldFunction1s(polynomial, tensor);
+
+    addUniformValueFieldFunction1s(cosine, scalar);
+    addUniformValueFieldFunction1s(cosine, vector);
+    addUniformValueFieldFunction1s(cosine, sphericalTensor);
+    addUniformValueFieldFunction1s(cosine, symmTensor);
+    addUniformValueFieldFunction1s(cosine, tensor);
 
     addUniformValueFieldFunction1s(sine, scalar);
     addUniformValueFieldFunction1s(sine, vector);

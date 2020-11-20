@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,37 +25,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ZeroConstant.H"
+#include "function1Base.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Function1Types::ZeroConstant<Type>::ZeroConstant(const word& entryName)
+Foam::function1Base::function1Base(const word& entryName)
 :
-    Function1<Type>(entryName)
+    refCount(),
+    name_(entryName)
 {}
 
 
-template<class Type>
-Foam::Function1Types::ZeroConstant<Type>::ZeroConstant
+Foam::function1Base::function1Base
 (
     const word& entryName,
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName, dict)
+    refCount(),
+    name_(entryName)
+{}
+
+
+Foam::function1Base::function1Base(const function1Base& rhs)
+:
+    refCount(),
+    name_(rhs.name_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::Function1Types::ZeroConstant<Type>::writeData(Ostream& os) const
-{
-    Function1<Type>::writeData(os);
-
-    os  << token::END_STATEMENT << nl;
-}
+void Foam::function1Base::convertTimeBase(const Time& t)
+{}
 
 
 // ************************************************************************* //

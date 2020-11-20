@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,30 +24,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::Square
+    Foam::Function1Types::Cosine
 
 Description
-    A templated square-wave function with support for offset, etc.
+    A templated cosine function, with support for offset etc.
 
     The wave period can be specified directly
 
-    \f[
-        a square((t - t0) / p)) s + l
-    \f]
+        \f[
+            a cos(2 \pi (t - t0) / p)) s + l
+        \f]
 
     Or it can be specified by the frequency
 
-    \f[
-        a square(f (t - t0)) s + l
-    \f]
+        \f[
+            a cos(2 \pi f (t - t0)) s + l
+        \f]
 
     where
-
-    \f$ square(t) \f$ is the square-wave function in range \f$ [-1, 1] \f$
-    with a mark/space ratio of \f$ r \f$
-
     \vartable
-        symbol  | Description       | Units
+        Symbol  | Description       | Units
         a       | Amplitude         | -
         f       | Frequency         | [1/s]
         p       | Period            | [s]
@@ -56,14 +51,13 @@ Description
         l       | Type offset level | -
         t       | Time              | [s]
         t0      | Start time offset | [s]
-        r       | mark/space ratio  | -
     \endvartable
 
     The dictionary specification would typically resemble this:
     \verbatim
     entry1
     {
-        type        square;
+        type        cosine;
         frequency   10;
         amplitude   0.1;
 
@@ -73,7 +67,7 @@ Description
     }
     entry2
     {
-        type        square;
+        type        cosine;
         frequency   10;
 
         // A vector Function1
@@ -85,24 +79,25 @@ Description
     where the entries mean:
     \table
         Property  | Description             | Type | Reqd | Default
-        type      | Function type: square   | word | yes |
+        type      | Function type: cosine   | word | yes |
         amplitude | Amplitude               | Function1<scalar> | no | 1
         frequency | Frequency [1/s]         | Function1<scalar> | or period |
         period    | Period [s]              | Function1<scalar> | or frequency |
         scale     | Scale factor (Type)     | Function1<Type> | yes |
         level     | Offset level (Type)     | Function1<Type> | yes |
         t0        | Start time offset       | scalar       | no | 0
-        mark      | Positive amount         | scalar       | no | 1
-        space     | Negative amount         | scalar       | no | 1
     \endtable
 
 Note
     For slow oscillations it can be more intuitive to specify the period.
 
+SourceFiles
+    Cosine.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1Types_Square_H
-#define function1Types_Square_H
+#ifndef function1Types_Cosine_H
+#define function1Types_Cosine_H
 
 #include "Sine.H"
 
@@ -114,45 +109,43 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Square Declaration
+                            Class Cosine Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class Square
+class Cosine
 :
     public Function1Types::Sine<Type>
 {
-    // Private Data
-
-        //- Mark/space ratio (square function only)
-        scalar mark_;
-
-        //- Mark/space ratio (square function only)
-        scalar space_;
-
 public:
 
     // Runtime type information
-    TypeName("square");
+    TypeName("cosine");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const Square<Type>&) = delete;
+        void operator=(const Cosine<Type>&) = delete;
 
 
     // Constructors
 
         //- Construct from entry name and dictionary
-        Square(const word& entryName, const dictionary& dict);
+        Cosine(const word& entryName, const dictionary& dict)
+        :
+            Sine<Type>(entryName, dict)
+        {}
 
         //- Copy construct
-        explicit Square(const Square<Type>& rhs);
+        explicit Cosine(const Cosine<Type>& rhs)
+        :
+            Sine<Type>(rhs)
+        {}
 
 
     //- Destructor
-    virtual ~Square() = default;
+    virtual ~Cosine() = default;
 
 
     // Member Functions
@@ -160,14 +153,8 @@ public:
         //- Return value for time t
         virtual inline Type value(const scalar t) const
         {
-            return Sine<Type>::squareValue(t, mark_ / (mark_ + space_));
+            return Sine<Type>::cosValue(t);
         }
-
-        //- Write in dictionary format
-        virtual void writeData(Ostream& os) const;
-
-        //- Write coefficient entries in dictionary format
-        void writeEntries(Ostream& os) const;
 };
 
 
@@ -175,12 +162,6 @@ public:
 
 } // End namespace Function1Types
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "Square.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,22 +61,23 @@ class Constant
 :
     public Function1<Type>
 {
-    // Private data
+    // Private Data
 
         //- Constant value
         Type value_;
-
-
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const Constant<Type>&) = delete;
 
 
 public:
 
     // Runtime type information
     TypeName("constant");
+
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const Constant<Type>&) = delete;
 
 
     // Constructors

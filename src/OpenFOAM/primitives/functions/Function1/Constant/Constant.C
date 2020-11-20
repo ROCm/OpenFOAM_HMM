@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Foam::Function1Types::Constant<Type>::Constant
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName),
+    Function1<Type>(entryName, dict),
     value_(Zero)
 {
     Istream& is = dict.lookup(entryName);

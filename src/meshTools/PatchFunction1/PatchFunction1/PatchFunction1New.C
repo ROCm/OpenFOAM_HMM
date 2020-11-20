@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,22 +25,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Constant.H"
+#include "ConstantField.H"
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::Function1<Type>>
-Foam::Function1<Type>::New
+Foam::autoPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::New
 (
+    const polyPatch& pp,
     const word& entryName,
     const entry* eptr,
     const dictionary& dict,
-    const word& redirectType,
+    const bool faceValues,
     const bool mandatory
 )
 {
-    word modelType(redirectType);
+    word modelType;
 
     const dictionary* coeffs = (eptr ? eptr->dictPtr() : nullptr);
 
@@ -53,22 +53,21 @@ Foam::Function1<Type>::New
         (
             "type",
             modelType,
-            keyType::LITERAL,
-            modelType.empty()  // "type" entry is mandatory if no 'redirect'
+            keyType::LITERAL
+            // "type" entry is mandatory, there is no 'redirect'
         );
-
-        // Fallthrough
     }
     else if (eptr)
     {
         // Primitive entry
-        // - non-word : value for constant function
-        // - word : the modelType
+        // - non-word : value for constant (uniform) function
+        // - word : the modelType, or uniform/nonuniform
 
-        Istream& is = eptr->stream();
+        ITstream& is = eptr->stream();
 
         token firstToken(is);
 
+        // Compatibility for reading straight fields
         if (!firstToken.isWord())
         {
             // A value
@@ -76,14 +75,35 @@ Foam::Function1<Type>::New
 
             const Type constValue = pTraits<Type>(is);
 
-            return autoPtr<Function1<Type>>
+            return autoPtr<PatchFunction1<Type>>
             (
-                new Function1Types::Constant<Type>(entryName, constValue)
+                new PatchFunction1Types::ConstantField<Type>
+                (
+                    pp,
+                    entryName,
+                    constValue,
+                    dict,
+                    faceValues
+                )
             );
         }
-        else
+
+        modelType = firstToken.wordToken();
+
+        // Looks like a normal field entry?
+        if (modelType == "uniform" || modelType == "nonuniform")
         {
-            modelType = firstToken.wordToken();
+            return autoPtr<PatchFunction1<Type>>
+            (
+                new PatchFunction1Types::ConstantField<Type>
+                (
+                    pp,
+                    eptr,
+                    entryName,
+                    dict,
+                    faceValues
+                )
+            );
         }
 
         // Fallthrough
@@ -97,7 +117,7 @@ Foam::Function1<Type>::New
         if (mandatory)
         {
             FatalIOErrorInFunction(dict)
-                << "Missing or invalid Function1 entry: "
+                << "Missing or invalid PatchFunction1 entry: "
                 << entryName << nl
                 << exit(FatalIOError);
         }
@@ -123,84 +143,76 @@ Foam::Function1<Type>::New
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
-            << "Unknown Function1 type "
+            << "Unknown PatchFunction1 type "
             << modelType << " for " << entryName
-            << "\n\nValid Function1 types :\n"
+            << "\n\nValid PatchFunction1 types :\n"
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalIOError);
     }
 
-    return cstrIter()(entryName, *coeffs);
+    return cstrIter()(pp, modelType, entryName, *coeffs, faceValues);
 }
 
 
 template<class Type>
-Foam::autoPtr<Foam::Function1<Type>>
-Foam::Function1<Type>::New
+Foam::autoPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::New
 (
+    const polyPatch& pp,
     const word& entryName,
     const dictionary& dict,
-    const word& redirectType,
+    const bool faceValues,
     const bool mandatory
 )
 {
-    return Function1<Type>::New
+    return PatchFunction1<Type>::New
     (
+        pp,
         entryName,
         dict.findEntry(entryName, keyType::LITERAL),
         dict,
-        redirectType,
+        faceValues,
         mandatory
     );
 }
 
 
 template<class Type>
-Foam::autoPtr<Foam::Function1<Type>>
-Foam::Function1<Type>::NewCompat
+Foam::autoPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::NewCompat
 (
+    const polyPatch& pp,
     const word& entryName,
     std::initializer_list<std::pair<const char*,int>> compat,
     const dictionary& dict,
-    const word& redirectType,
+    const bool faceValues,
     const bool mandatory
 )
 {
-    return Function1<Type>::New
+    return PatchFunction1<Type>::New
     (
+        pp,
         entryName,
         dict.findCompat(entryName, compat, keyType::LITERAL),
         dict,
-        redirectType,
+        faceValues,
         mandatory
     );
 }
 
 
 template<class Type>
-Foam::autoPtr<Foam::Function1<Type>>
-Foam::Function1<Type>::New
+Foam::autoPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::NewIfPresent
 (
+    const polyPatch& pp,
     const word& entryName,
     const dictionary& dict,
-    const bool mandatory
-)
-{
-    return Function1<Type>::New(entryName, dict, word::null, mandatory);
-}
-
-
-template<class Type>
-Foam::autoPtr<Foam::Function1<Type>>
-Foam::Function1<Type>::NewIfPresent
-(
-    const word& entryName,
-    const dictionary& dict,
-    const word& redirectType
+    const bool faceValues
 )
 {
     // mandatory = false
-    return Function1<Type>::New(entryName, dict, redirectType, false);
+    return PatchFunction1<Type>::New(pp, entryName, dict, faceValues, false);
 }
 
 

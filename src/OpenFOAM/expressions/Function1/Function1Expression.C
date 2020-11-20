@@ -36,7 +36,7 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName),
+    Function1<Type>(entryName, dict),
     dict_(dict),
     valueExpr_(),
     driver_(1, dict_)

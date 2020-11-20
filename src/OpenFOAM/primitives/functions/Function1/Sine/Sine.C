@@ -31,42 +31,62 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Sine<Type>::read(const dictionary& coeffs)
-{
-    t0_ = coeffs.getOrDefault<scalar>("t0", 0);
-    amplitude_ = Function1<scalar>::New("amplitude", coeffs);
-    frequency_ = Function1<scalar>::New("frequency", coeffs);
-    scale_ = Function1<Type>::New("scale", coeffs);
-    level_ = Function1<Type>::New("level", coeffs);
-}
-
-
-template<class Type>
 Foam::Function1Types::Sine<Type>::Sine
 (
     const word& entryName,
     const dictionary& dict
 )
 :
-    Function1<Type>(entryName)
+    Function1<Type>(entryName, dict),
+    t0_(dict.getOrDefault<scalar>("t0", 0)),
+    amplitude_(Function1<scalar>::NewIfPresent("amplitude", dict)),
+    period_(Function1<scalar>::NewIfPresent("period", dict)),
+    frequency_(nullptr),
+    scale_(Function1<Type>::New("scale", dict)),
+    level_(Function1<Type>::New("level", dict))
 {
-    read(dict);
+    if (!period_)
+    {
+        frequency_ = Function1<scalar>::New("frequency", dict);
+    }
 }
 
 
 template<class Type>
-Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& se)
+Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& rhs)
 :
-    Function1<Type>(se),
-    t0_(se.t0_),
-    amplitude_(se.amplitude_.clone()),
-    frequency_(se.frequency_.clone()),
-    scale_(se.scale_.clone()),
-    level_(se.level_.clone())
+    Function1<Type>(rhs),
+    t0_(rhs.t0_),
+    amplitude_(rhs.amplitude_.clone()),
+    period_(rhs.period_.clone()),
+    frequency_(rhs.frequency_.clone()),
+    scale_(rhs.scale_.clone()),
+    level_(rhs.level_.clone())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::Function1Types::Sine<Type>::writeEntries(Ostream& os) const
+{
+    os.writeEntryIfDifferent<scalar>("t0", 0, t0_);
+    if (amplitude_)
+    {
+        amplitude_->writeData(os);
+    }
+    if (period_)
+    {
+        period_->writeData(os);
+    }
+    if (frequency_)
+    {
+        frequency_->writeData(os);
+    }
+    scale_->writeData(os);
+    level_->writeData(os);
+}
+
 
 template<class Type>
 void Foam::Function1Types::Sine<Type>::writeData(Ostream& os) const
@@ -75,13 +95,7 @@ void Foam::Function1Types::Sine<Type>::writeData(Ostream& os) const
     os.endEntry();
 
     os.beginBlock(word(this->name() + "Coeffs"));
-
-    os.writeEntry("t0", t0_);
-    amplitude_->writeData(os);
-    frequency_->writeData(os);
-    scale_->writeData(os);
-    level_->writeData(os);
-
+    writeEntries(os);
     os.endBlock();
 }
 

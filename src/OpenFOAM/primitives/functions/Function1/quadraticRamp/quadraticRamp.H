@@ -29,7 +29,7 @@ Class
 
 Description
     Quadratic ramp function starting from 0 and increasing quadratically
-    to 1 from \c t_0 over the \c duration and remaining at 1 thereafter.
+    to 1 from \c start over the \c duration and remaining at 1 thereafter.
 
 See also
     Foam::Function1Types::ramp

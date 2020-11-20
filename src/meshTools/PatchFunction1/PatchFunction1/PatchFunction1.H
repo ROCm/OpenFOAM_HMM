@@ -46,10 +46,9 @@ SeeAlso
 #ifndef PatchFunction1_H
 #define PatchFunction1_H
 
-#include "dictionary.H"
-#include "Field.H"
-#include "polyPatch.H"
+#include "patchFunction1Base.H"
 #include "coordinateScaling.H"
+#include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,20 +69,25 @@ Ostream& operator<<(Ostream&, const PatchFunction1<Type>&);
 template<class Type>
 class PatchFunction1
 :
-    public refCount
+    public patchFunction1Base
 {
+    // Private Member Functions
+
+        //- Selector, with alternative entry etc
+        static autoPtr<PatchFunction1<Type>> New
+        (
+            const polyPatch& pp,
+            const word& entryName,
+            const entry* eptr,
+            const dictionary& dict,
+            const bool faceValues,
+            const bool mandatory
+        );
+
+
 protected:
 
     // Protected Data
-
-        //- Name of entry
-        const word name_;
-
-        //- Reference to the patch
-        const polyPatch& patch_;
-
-        //- Whether to generate face or point values on patch
-        const bool faceValues_;
 
         //- Optional local co-ordinate system and scaling
         coordinateScaling<Type> coordSys_;
@@ -138,31 +142,54 @@ public:
             const bool faceValues = true
         );
 
-        //- Copy constructor
-        explicit PatchFunction1(const PatchFunction1<Type>& pf1);
+        //- Copy construct
+        explicit PatchFunction1(const PatchFunction1<Type>& rhs);
 
-        //- Copy constructor setting patch
+        //- Copy construct setting patch
         explicit PatchFunction1
         (
-            const PatchFunction1<Type>& pf1,
+            const PatchFunction1<Type>& rhs,
             const polyPatch& pp
         );
 
-        //- Construct and return a clone
+        //- Return a clone
         virtual tmp<PatchFunction1<Type>> clone() const = 0;
 
-        //- Construct and return a clone setting patch
+        //- Return a clone, setting patch
         virtual tmp<PatchFunction1<Type>> clone(const polyPatch& pp) const = 0;
 
 
-    //- Selector
-    static autoPtr<PatchFunction1<Type>> New
-    (
-        const polyPatch& pp,
-        const word& entryName,
-        const dictionary& dict,
-        const bool faceValues = true
-    );
+    // Selectors
+
+        //- Selector
+        static autoPtr<PatchFunction1<Type>> New
+        (
+            const polyPatch& pp,
+            const word& entryName,
+            const dictionary& dict,
+            const bool faceValues = true,
+            const bool mandatory = true
+        );
+
+        //- Compatibility selector
+        static autoPtr<PatchFunction1<Type>> NewCompat
+        (
+            const polyPatch& pp,
+            const word& entryName,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            const dictionary& dict,
+            const bool faceValues = true,
+            const bool mandatory = true
+        );
+
+        //- An optional selector
+        static autoPtr<PatchFunction1<Type>> NewIfPresent
+        (
+            const polyPatch& pp,
+            const word& entryName,
+            const dictionary& dict,
+            const bool faceValues = true
+        );
 
 
     //- Destructor
@@ -170,24 +197,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return the name of the entry
-            const word& name() const;
-
-            //- Reference to the patch
-            const polyPatch& patch() const;
-
-            //- Whether to generate face or point values on patch
-            bool faceValues() const;
-
-
-        // Manipulation
-
-            //- Convert time
-            virtual void convertTimeBase(const Time& t);
-
 
         // Evaluation
 
@@ -231,7 +240,7 @@ public:
             //- Reverse map the given PatchFunction1 onto this PatchFunction1
             virtual void rmap
             (
-                const PatchFunction1<Type>& pf1,
+                const PatchFunction1<Type>& rhs,
                 const labelList& addr
             );
 
@@ -256,6 +265,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Define PatchFunction1 run-time selection
 #define makePatchFunction1(Type)                                               \
                                                                                \
     defineNamedTemplateTypeNameAndDebug(PatchFunction1<Type>, 0);              \
@@ -266,6 +276,8 @@ public:
         dictionary                                                             \
     );
 
+
+// Define (templated) PatchFunction1, add to (templated) run-time selection
 #define makePatchFunction1Type(SS, Type)                                       \
                                                                                \
     defineNamedTemplateTypeNameAndDebug(PatchFunction1Types::SS<Type>, 0);     \
@@ -273,6 +285,23 @@ public:
     PatchFunction1<Type>::adddictionaryConstructorToTable                      \
         <PatchFunction1Types::SS<Type>>                                        \
         add##SS##Type##ConstructorToTable_;
+
+
+// Define (non-templated) PatchFunction1, add to (templated) run-time selection
+#define makeConcretePatchFunction1Type(SS, Type)                               \
+                                                                               \
+    defineTypeNameAndDebug(SS, 0);                                             \
+                                                                               \
+    PatchFunction1<Type>::adddictionaryConstructorToTable                      \
+        <PatchFunction1Types::SS>                                              \
+        add##SS##Type##ConstructorToTable_;
+
+
+// Define scalar PatchFunction1 and add to (templated) run-time selection
+#define makeScalarPatchFunction1(SS)                                           \
+                                                                               \
+    makeConcretePatchFunction1Type(SS, scalar);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

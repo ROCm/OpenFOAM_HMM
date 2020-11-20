@@ -85,13 +85,8 @@ timeVaryingMappedFixedValuePointPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_()
+    offset_(Function1<Type>::NewIfPresent("offset", dict))
 {
-    if (dict.found("offset"))
-    {
-        offset_ = Function1<Type>::New("offset", dict);
-    }
-
     if
     (
         mapMethod_ != "planarInterpolation"
