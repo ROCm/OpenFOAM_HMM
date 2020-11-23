@@ -47,6 +47,7 @@ License
 #include "ListOps.H"
 #include "globalIndex.H"
 #include "cyclicACMIPolyPatch.H"
+#include "mappedPatchBase.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -335,7 +336,12 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
     {
         const polyPatch& pp = patches[patchi];
 
-        if (!isA<emptyPolyPatch>(pp) && !isCoupledPatch(patchi))
+        if
+        (
+           !isA<emptyPolyPatch>(pp)
+        && !isCoupledPatch(patchi)
+        && !isA<mappedPatchBase>(pp)
+        )
         {
             nonEmptyPatchi = patchi;
             break;

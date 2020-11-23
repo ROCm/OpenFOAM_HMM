@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1055,14 +1055,37 @@ void Foam::fvMeshSubset::setCellSubset
     {
         const label newSize = boundaryPatchSizes[globalPatchMap[oldPatchi]];
 
-        // Clone (even if 0 size)
-        newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
-        (
-            fvMeshSubsetPtr_().boundaryMesh(),
-            nNewPatches,
-            newSize,
-            patchStart
-        ).ptr();
+        if (oldInternalPatchID != oldPatchi)
+        {
+            // Pure subset of patch faces (no internal faces added to this
+            // patch). Can use mapping.
+            labelList map(newSize);
+            for (label patchFacei = 0; patchFacei < newSize; patchFacei++)
+            {
+                const label facei = patchStart+patchFacei;
+                const label oldFacei = faceMap_[facei];
+                map[patchFacei] = oldPatches[oldPatchi].whichFace(oldFacei);
+            }
+
+            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            (
+                fvMeshSubsetPtr_().boundaryMesh(),
+                nNewPatches,
+                map,
+                patchStart
+            ).ptr();
+        }
+        else
+        {
+            // Clone (even if 0 size)
+            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            (
+                fvMeshSubsetPtr_().boundaryMesh(),
+                nNewPatches,
+                newSize,
+                patchStart
+            ).ptr();
+        }
 
         patchStart += newSize;
         patchMap_[nNewPatches] = oldPatchi;    // compact patchMap
@@ -1115,14 +1138,37 @@ void Foam::fvMeshSubset::setCellSubset
     {
         const label newSize = boundaryPatchSizes[globalPatchMap[oldPatchi]];
 
-        // Patch still exists. Add it
-        newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
-        (
-            fvMeshSubsetPtr_().boundaryMesh(),
-            nNewPatches,
-            newSize,
-            patchStart
-        ).ptr();
+        if (oldInternalPatchID != oldPatchi)
+        {
+            // Pure subset of patch faces (no internal faces added to this
+            // patch). Can use mapping.
+            labelList map(newSize);
+            for (label patchFacei = 0; patchFacei < newSize; patchFacei++)
+            {
+                const label facei = patchStart+patchFacei;
+                const label oldFacei = faceMap_[facei];
+                map[patchFacei] = oldPatches[oldPatchi].whichFace(oldFacei);
+            }
+
+            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            (
+                fvMeshSubsetPtr_().boundaryMesh(),
+                nNewPatches,
+                map,
+                patchStart
+            ).ptr();
+        }
+        else
+        {
+            // Patch still exists. Add it
+            newBoundary[nNewPatches] = oldPatches[oldPatchi].clone
+            (
+                fvMeshSubsetPtr_().boundaryMesh(),
+                nNewPatches,
+                newSize,
+                patchStart
+            ).ptr();
+        }
 
         //Pout<< "    " << oldPatches[oldPatchi].name() << " : "
         //    << newSize << endl;
