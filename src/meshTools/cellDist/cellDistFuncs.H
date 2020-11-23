@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,11 +71,6 @@ class cellDistFuncs
 
     // Private Member Functions
 
-        //- Search for element in first n elements of labelList. Return index
-        //  or -1.
-        static label findIndex(const label n, const labelList&, const label);
-
-
         //- No copy construct
         cellDistFuncs(const cellDistFuncs&) = delete;
 
@@ -115,17 +111,16 @@ public:
         (
             const point& p,
             const polyPatch& patch,
-            const label nWallFaces,
-            const labelList& wallFaces,
+            const labelUList& wallFaces,
             label& meshFacei
         ) const;
 
         //- Get faces sharing point with face on patch
-        label getPointNeighbours
+        void getPointNeighbours
         (
             const primitivePatch&,
             const label patchFacei,
-            labelList&
+            DynamicList<label>&
         ) const;
 
         //- Size of largest patch (out of supplied subset of patches)
@@ -143,7 +138,6 @@ public:
             scalarField& wallDistCorrected,
             Map<label>& nearestFace
         ) const;
-
 
         //- Correct all cells connected to wall (via point). Sets values in
         //  wallDistCorrected. Uses/sets nearest wallFace in nearestFace.

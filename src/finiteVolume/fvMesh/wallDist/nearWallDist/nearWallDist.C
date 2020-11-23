@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,7 @@ void Foam::nearWallDist::calculate()
 
     // Size neighbours array for maximum possible
 
-    labelList neighbours(wallUtils.maxPatchSize(wallPatchIDs));
+    DynamicList<label> neighbours(wallUtils.maxPatchSize(wallPatchIDs));
 
 
     // Correct all cells with face on wall
@@ -64,12 +65,7 @@ void Foam::nearWallDist::calculate()
             // Check cells with face on wall
             forAll(patch, patchFacei)
             {
-                label nNeighbours = wallUtils.getPointNeighbours
-                (
-                    pPatch,
-                    patchFacei,
-                    neighbours
-                );
+                wallUtils.getPointNeighbours(pPatch, patchFacei, neighbours);
 
                 label minFacei = -1;
 
@@ -77,7 +73,6 @@ void Foam::nearWallDist::calculate()
                 (
                     cellCentres[faceCells[patchFacei]],
                     pPatch,
-                    nNeighbours,
                     neighbours,
                     minFacei
                 );

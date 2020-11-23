@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,6 @@ License
 
 #include "cellDistFuncs.H"
 #include "polyMesh.H"
-#include "wallPolyPatch.H"
 #include "polyBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -36,28 +36,6 @@ namespace Foam
 {
 defineTypeNameAndDebug(cellDistFuncs, 0);
 }
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Find val in first nElems elements of elems.
-Foam::label Foam::cellDistFuncs::findIndex
-(
-    const label nElems,
-    const labelList& elems,
-    const label val
-)
-{
-    for (label i = 0; i < nElems; i++)
-    {
-        if (elems[i] == val)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -85,8 +63,7 @@ Foam::scalar Foam::cellDistFuncs::smallestDist
 (
     const point& p,
     const polyPatch& patch,
-    const label nWallFaces,
-    const labelList& wallFaces,
+    const labelUList& wallFaces,
     label& minFacei
 ) const
 {
@@ -95,11 +72,9 @@ Foam::scalar Foam::cellDistFuncs::smallestDist
     scalar minDist = GREAT;
     minFacei = -1;
 
-    for (label wallFacei = 0; wallFacei < nWallFaces; wallFacei++)
+    for (const label patchFacei : wallFaces)
     {
-        label patchFacei = wallFaces[wallFacei];
-
-        pointHit curHit = patch[patchFacei].nearestPoint(p, points);
+        const pointHit curHit = patch[patchFacei].nearestPoint(p, points);
 
         if (curHit.distance() < minDist)
         {
@@ -115,29 +90,28 @@ Foam::scalar Foam::cellDistFuncs::smallestDist
 // Get point neighbours of facei (including facei). Returns number of faces.
 // Note: does not allocate storage but does use linear search to determine
 // uniqueness. For polygonal faces this might be quite inefficient.
-Foam::label Foam::cellDistFuncs::getPointNeighbours
+void Foam::cellDistFuncs::getPointNeighbours
 (
     const primitivePatch& patch,
     const label patchFacei,
-    labelList& neighbours
+    DynamicList<label>& neighbours
 ) const
 {
-    label nNeighbours = 0;
+    neighbours.clear();
 
     // Add myself
-    neighbours[nNeighbours++] = patchFacei;
+    neighbours.append(patchFacei);
 
     // Add all face neighbours
     const labelList& faceNeighbours = patch.faceFaces()[patchFacei];
 
-    forAll(faceNeighbours, faceNeighbourI)
+    for (const label nbr : faceNeighbours)
     {
-        neighbours[nNeighbours++] = faceNeighbours[faceNeighbourI];
+        if (!neighbours.found(nbr))
+        {
+            neighbours.append(nbr);
+        }
     }
-
-    // Remember part of neighbours that contains edge-connected faces.
-    label nEdgeNbs = nNeighbours;
-
 
     // Add all point-only neighbours by linear searching in edge neighbours.
     // Assumes that point-only neighbours are not using multiple points on
@@ -151,14 +125,12 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
 
         const labelList& pointNbs = patch.pointFaces()[pointi];
 
-        forAll(pointNbs, nbI)
+        for (const label facei : pointNbs)
         {
-            label facei = pointNbs[nbI];
-
             // Check for facei in edge-neighbours part of neighbours
-            if (findIndex(nEdgeNbs, neighbours, facei) == -1)
+            if (!neighbours.found(facei))
             {
-                neighbours[nNeighbours++] = facei;
+                neighbours.append(facei);
             }
         }
     }
@@ -178,10 +150,8 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
         }
 
         // Subtract ours.
-        for (label i = 0; i < nNeighbours; i++)
+        for (const label nb : neighbours)
         {
-            label nb = neighbours[i];
-
             if (!nbs.found(nb))
             {
                 SeriousErrorInFunction
@@ -195,10 +165,10 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
                         << patch.pointFaces()[f[fp]] << endl;
                 }
 
-                for (label i = 0; i < nNeighbours; i++)
+                for (const label facei : neighbours)
                 {
                     SeriousErrorInFunction
-                        << "fast nbr:" << neighbours[i]
+                        << "fast nbr:" << facei
                         << endl;
                 }
 
@@ -217,8 +187,6 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
                 << nbs.toc() << abort(FatalError);
         }
     }
-
-    return nNeighbours;
 }
 
 
@@ -274,10 +242,7 @@ void Foam::cellDistFuncs::correctBoundaryFaceCells
 ) const
 {
     // Size neighbours array for maximum possible (= size of largest patch)
-    label maxPointNeighbours = maxPatchSize(patchIDs);
-
-    labelList neighbours(maxPointNeighbours);
-
+    DynamicList<label> neighbours(maxPatchSize(patchIDs));
 
     // Correct all cells with face on wall
     const vectorField& cellCentres = mesh().cellCentres();
@@ -292,12 +257,7 @@ void Foam::cellDistFuncs::correctBoundaryFaceCells
             // Check cells with face on wall
             forAll(patch, patchFacei)
             {
-                label nNeighbours = getPointNeighbours
-                (
-                    patch,
-                    patchFacei,
-                    neighbours
-                );
+                getPointNeighbours(patch, patchFacei, neighbours);
 
                 label celli = faceOwner[patch.start() + patchFacei];
 
@@ -307,7 +267,6 @@ void Foam::cellDistFuncs::correctBoundaryFaceCells
                 (
                     cellCentres[celli],
                     patch,
-                    nNeighbours,
                     neighbours,
                     minFacei
                 );
@@ -317,7 +276,6 @@ void Foam::cellDistFuncs::correctBoundaryFaceCells
             }
         }
     }
-
 }
 
 
@@ -344,14 +302,12 @@ void Foam::cellDistFuncs::correctBoundaryPointCells
 
             forAll(meshPoints, meshPointi)
             {
-                label vertI = meshPoints[meshPointi];
+                const label vertI = meshPoints[meshPointi];
 
                 const labelList& neighbours = mesh().pointCells(vertI);
 
-                forAll(neighbours, neighbourI)
+                for (const label celli : neighbours)
                 {
-                    label celli = neighbours[neighbourI];
-
                     if (!nearestFace.found(celli))
                     {
                         const labelList& wallFaces = pointFaces[meshPointi];
@@ -362,7 +318,6 @@ void Foam::cellDistFuncs::correctBoundaryPointCells
                         (
                             cellCentres[celli],
                             patch,
-                            wallFaces.size(),
                             wallFaces,
                             minFacei
                         );
