@@ -167,12 +167,6 @@ void Foam::snappyLayerDriver::checkMeshManifold() const
 
     Info<< nl << "Checking mesh manifoldness ..." << endl;
 
-    // Get all outside faces
-    labelList outsideFaces
-    (
-        identity(mesh.nBoundaryFaces(), mesh.nInternalFaces())
-    );
-
     pointSet nonManifoldPoints
     (
         mesh,
@@ -185,7 +179,11 @@ void Foam::snappyLayerDriver::checkMeshManifold() const
     (
         indirectPrimitivePatch
         (
-            IndirectList<face>(mesh.faces(), outsideFaces),
+            IndirectList<face>
+            (
+                mesh.faces(),
+                identity(mesh.boundaryMesh().range())  // All outside faces
+            ),
             mesh.points()
         ),
         nonManifoldPoints

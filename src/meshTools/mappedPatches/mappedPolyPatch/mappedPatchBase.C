@@ -284,9 +284,6 @@ void Foam::mappedPatchBase::findSamples
             }
             else
             {
-                // patch faces
-                const labelList patchFaces(identity(pp.size(), pp.start()));
-
                 treeBoundBox patchBb
                 (
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
@@ -304,7 +301,7 @@ void Foam::mappedPatchBase::findSamples
                     (
                         false,      // do not cache bb
                         mesh,
-                        patchFaces  // boundary faces only
+                        identity(pp.range())  // boundary faces only
                     ),
                     patchBb,        // overall search domain
                     8,              // maxLevel

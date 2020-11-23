@@ -88,7 +88,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     fz[0] = new faceZone
     (
         "insideSliderZone",
-        identity(innerSlider.size(), innerSlider.start()),
+        identity(innerSlider.range()),
         false, // none are flipped
         0,
         faceZones()
@@ -104,7 +104,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     fz[1] = new faceZone
     (
         "outsideSliderZone",
-        identity(outerSlider.size(), outerSlider.start()),
+        identity(outerSlider.range()),
         false, // none are flipped
         1,
         faceZones()

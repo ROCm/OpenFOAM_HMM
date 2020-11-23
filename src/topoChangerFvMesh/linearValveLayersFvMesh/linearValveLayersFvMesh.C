@@ -95,7 +95,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     fz[0] = new faceZone
     (
         "insideSliderZone",
-        identity(innerSlider.size(), innerSlider.start()),
+        identity(innerSlider.range()),
         false, // none are flipped
         0,
         faceZones()
@@ -111,7 +111,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     fz[1] = new faceZone
     (
         "outsideSliderZone",
-        identity(outsideSlider.size(), outsideSlider.start()),
+        identity(outsideSlider.range()),
         false, // none are flipped
         1,
         faceZones()
@@ -131,7 +131,7 @@ void Foam::linearValveLayersFvMesh::addZonesAndModifiers()
     fz[3] = new faceZone
     (
         "valveLayerZone",
-        identity(layerPatch.size(), layerPatch.start()),
+        identity(layerPatch.range()),
         lpf,
         true, // all are flipped
         0,

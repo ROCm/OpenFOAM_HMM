@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    testPatchTools
+    Test-PatchTools
 
 Description
     Test app for PatchTools functionality
@@ -261,7 +262,7 @@ int main(int argc, char *argv[])
 //            (
 //                mesh,
 //                pp,
-//                identity(pp.size(), pp.start())
+//                identity(pp.range())
 //            )
 //        );
 //        forAll(pn, pointi)
@@ -278,7 +279,7 @@ int main(int argc, char *argv[])
 //            (
 //                mesh,
 //                pp,
-//                identity(pp.size(), pp.start())
+//                identity(pp.range())
 //            )
 //        );
 //        forAll(pn, pointi)

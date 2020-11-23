@@ -41,7 +41,7 @@
             fz[3*pairi] = new faceZone
             (
                 mergeName + "MasterZone",
-                identity(masterPatch.size(), masterPatch.start()),
+                identity(masterPatch.range()),
                 false, // none are flipped
                 0,
                 mesh.faceZones()
@@ -55,7 +55,7 @@
             fz[3*pairi + 1] = new faceZone
             (
                 mergeName + "SlaveZone",
-                identity(slavePatch.size(), slavePatch.start()),
+                identity(slavePatch.range()),
                 false, // none are flipped
                 1,
                 mesh.faceZones()

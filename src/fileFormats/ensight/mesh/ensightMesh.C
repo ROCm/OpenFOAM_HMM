@@ -333,7 +333,7 @@ void Foam::ensightMesh::correct()
         part.classify
         (
             mesh_.faces(),
-            identity(p.size(), p.start()),
+            identity(p.range()),
             boolList(),  // no flip map
             excludeFace
         );
