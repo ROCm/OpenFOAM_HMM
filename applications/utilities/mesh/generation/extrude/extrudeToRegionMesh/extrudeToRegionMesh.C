@@ -1134,18 +1134,55 @@ void setCouplingInfo
 
             if (isA<mappedWallPolyPatch>(pp))
             {
-                newPatches[patchi] = new mappedWallPolyPatch
-                (
-                    pp.name(),
-                    pp.size(),
-                    pp.start(),
-                    patchi,
-                    sampleRegion,                           // sampleRegion
-                    mode,                                   // sampleMode
-                    pp.name(),                              // samplePatch
-                    offsets[zoneI],                         // offset
-                    patches
-                );
+                const boundBox bb(pp.points(), pp.meshPoints(), true);
+                const vector avgOffset = gAverage(offsets[zoneI]);
+                const scalar mergeSqrDist =
+                    gMax(magSqr(offsets[zoneI]-avgOffset));
+
+                // Verify uniformity of offset
+                // (same check as blockMesh geom merge)
+                if (mergeSqrDist < magSqr(10*SMALL*bb.span()))
+                {
+                    Info<< "Adding on " << mesh.name()
+                        << " coupling patch " << pp.name()
+                        << " with uniform offset " << avgOffset << endl;
+
+                    // Uniform offset
+                    newPatches[patchi] = new mappedWallPolyPatch
+                    (
+                        pp.name(),
+                        pp.size(),
+                        pp.start(),
+                        patchi,
+                        sampleRegion,       // sampleRegion
+                        mode,               // sampleMode
+                        pp.name(),          // samplePatch
+
+                        avgOffset,          // uniform offset
+                        patches
+                    );
+                }
+                else
+                {
+                    Info<< "Adding on " << mesh.name()
+                        << " coupling patch " << pp.name()
+                        << " with non-uniform offset" << endl;
+
+                    // Uniform offset
+                    newPatches[patchi] = new mappedWallPolyPatch
+                    (
+                        pp.name(),
+                        pp.size(),
+                        pp.start(),
+                        patchi,
+                        sampleRegion,       // sampleRegion
+                        mode,               // sampleMode
+                        pp.name(),          // samplePatch
+
+                        offsets[zoneI],     // non-uniform offsets
+                        patches
+                    );
+                }
             }
         }
     }
