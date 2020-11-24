@@ -308,7 +308,7 @@ public:
         //  (auto-vivifies).
         inline void set(const bitSet& bitset);
 
-        //- Set the specified range of bits specified
+        //- Set the specified range of bits
         //  The current set size may grow to accommodate any new bits
         //  (auto-vivifies).
         //  \note this operation is generally more efficient than calling

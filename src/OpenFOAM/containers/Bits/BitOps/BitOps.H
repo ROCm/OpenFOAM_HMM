@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ Namespace
 
 Description
     Factory and other methods for bitSet.
+    Adaptor methods for other containers that are somewhat similar to
+    bitSet (eg, boolList, labelHashSet).
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,8 +58,9 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
+template<class T> class List;
 
 /*---------------------------------------------------------------------------*\
                          Namespace BitOps Declaration
@@ -96,6 +99,30 @@ inline bool none(const UList<bool>& bools)
 {
     return std::none_of(bools.begin(), bools.end(), [](bool b){return b;});
 }
+
+
+//- Set the specified range 'on' in a boolList.
+//  For compatibility with bitSet::set(labelRange)
+void set(List<bool>& bools, const labelRange& range);
+
+//- Set the specified range in a labelHashSet.
+//  For compatibility with bitSet::set(labelRange)
+void set(labelHashSet& hashset, const labelRange& range);
+
+//- Forward to bitSet::set(labelRange)
+void set(bitSet& bitset, const labelRange& range);
+
+
+//- Unset the specified range 'on' in a boolList.
+//  For compatibility with bitSet::unset(labelRange)
+void unset(List<bool>& bools, const labelRange& range);
+
+//- Unset the specified range in a labelHashSet.
+//  For compatibility with bitSet::unset(labelRange)
+void unset(labelHashSet& hashset, const labelRange& range);
+
+//- Forward to bitSet::unset(labelRange)
+void unset(bitSet& bitset, const labelRange& range);
 
 
 //- Count arbitrary number of bits (of an integral type)

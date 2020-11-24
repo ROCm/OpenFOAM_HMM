@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,96 @@ License
 #include "BitOps.H"
 #include "bitSet.H"
 #include "HashSet.H"
+#include "List.H"
+#include "labelRange.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * BitOps  * * * * * * * * * * * * * * * * //
+
+// See bitSet::set(labelRange) for original implementation
+void Foam::BitOps::set(List<bool>& bools, const labelRange& range)
+{
+    labelRange slice(range);
+    slice.adjust();  // No negative start, size adjusted accordingly
+
+    // Range is invalid (zero-sized or entirely negative) - noop
+    if (slice.empty())
+    {
+        return;
+    }
+
+    // Range finishes at or beyond the right side.
+    // - zero fill any gaps that we might create.
+    // - flood-fill the rest, which now corresponds to the full range.
+    //
+    // NB: use labelRange after() for the exclusive end-value, which
+    // corresponds to our new set size.
+    if (slice.after() >= bools.size())
+    {
+        label i = bools.size();
+
+        bools.resize(slice.after(), true);
+
+        // Backfill with false
+        while (i < slice.start())
+        {
+            bools.unset(i);
+            ++i;
+        }
+        return;
+    }
+
+    for (label i = slice.first(); i <= slice.last(); ++i)
+    {
+        bools.set(i);
+    }
+}
+
+
+// See bitSet::set(labelRange) for original implementation
+void Foam::BitOps::set(labelHashSet& hashset, const labelRange& range)
+{
+    labelRange slice(range);
+    slice.adjust();  // No negative start, size adjusted accordingly
+
+    for (label i = slice.first(); i <= slice.last(); ++i)
+    {
+        hashset.set(i);
+    }
+}
+
+
+void Foam::BitOps::set(bitSet& bitset, const labelRange& range)
+{
+    bitset.set(range);
+}
+
+
+// See bitSet::unset(labelRange) for original implementation
+void Foam::BitOps::unset(List<bool>& bools, const labelRange& range)
+{
+    for (label i = range.first(); i <= range.last(); ++i)
+    {
+        bools.unset(i);
+    }
+}
+
+
+void Foam::BitOps::unset(labelHashSet& hashset, const labelRange& range)
+{
+    for (label i = range.first(); i <= range.last(); ++i)
+    {
+        hashset.unset(i);
+    }
+}
+
+
+void Foam::BitOps::unset(bitSet& bitset, const labelRange& range)
+{
+    bitset.unset(range);
+}
+
+
+// * * * * * * * * * * * * * * * * BitSetOps * * * * * * * * * * * * * * * * //
 
 Foam::bitSet Foam::BitSetOps::create
 (
