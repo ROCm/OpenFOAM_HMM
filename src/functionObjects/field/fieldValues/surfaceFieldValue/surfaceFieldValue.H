@@ -84,7 +84,7 @@ Usage
         names           (<zone-name> <zone-regex>);
 
         postOperation   none;
-        weightField     alpha1;
+        weightFields    (rho U);
         scaleFactor     1.0;
         writeArea       false;
         surfaceFormat   none;
@@ -105,7 +105,8 @@ Usage
       names        | Extended selection                 | word/regex list | no | -
       operation    | Operation type: see below          | word |  yes  | -
       postOperation | Post-operation type: see below    | word |  no   | none
-      weightField  | Name of field to apply weighting   | word |  no   | none
+      weightField   | Name of field to apply weighting   | word |  maybe |
+      weightFields  | Names of fields to apply weighting | wordList | maybe |
       scaleFactor  | Output value scaling factor        | scalar |  no  | 1.0
       writeArea    | Write the surface area             | bool |  no   | false
       surfaceFormat | Output value format               | word <!--
@@ -403,8 +404,8 @@ protected:
         //- Extended selections
         wordRes selectionNames_;
 
-        //- Weight field name - optional
-        word weightFieldName_;
+        //- Weight field name(s) - optional
+        wordList weightFieldNames_;
 
         //- Total area of the surfaceFieldValue
         scalar totalArea_;

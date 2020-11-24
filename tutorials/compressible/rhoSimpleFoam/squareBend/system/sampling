@@ -182,6 +182,7 @@ areaAverage
 
     operation       weightedAreaAverage;
     weightField     rhoU;
+    weightFields    ( rho U none );  // 2012 and later
     fields          ( p pTotal );
 }
 
@@ -194,6 +195,7 @@ areaIntegrate
 
     operation       weightedAreaIntegrate;
     weightField     rhoU;
+    weightFields    ( rho U );  // 2012 and later
     fields          ( T );
 }
 

@@ -645,9 +645,14 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
         writeHeaderValue(os, "Area", totalArea_);
         writeHeaderValue(os, "Scale factor", scaleFactor_);
 
-        if (weightFieldName_ != "none")
+        if (weightFieldNames_.size())
         {
-            writeHeaderValue(os, "Weight field", weightFieldName_);
+            writeHeaderValue
+            (
+                os,
+                "Weight field",
+                flatOutput(weightFieldNames_, FlatOutput::BareComma{})
+            );
         }
 
         writeCommented(os, "Time");
@@ -915,7 +920,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     needsUpdate_(true),
     writeArea_(false),
     selectionNames_(),
-    weightFieldName_("none"),
+    weightFieldNames_(),
     totalArea_(0),
     nFaces_(0),
     faceId_(),
@@ -949,7 +954,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     needsUpdate_(true),
     writeArea_(false),
     selectionNames_(),
-    weightFieldName_("none"),
+    weightFieldNames_(),
     totalArea_(0),
     nFaces_(0),
     faceId_(),
@@ -971,7 +976,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     needsUpdate_ = true;
     writeArea_ = dict.getOrDefault("writeArea", false);
-    weightFieldName_ = "none";
+    weightFieldNames_.clear();
+
     totalArea_ = 0;
     nFaces_ = 0;
     faceId_.clear();
@@ -1054,11 +1060,29 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
                 << exit(FatalIOError);
         }
 
-        if (dict.readIfPresent("weightField", weightFieldName_))
+        // Can have "weightFields" or "weightField"
+
+        bool missing = true;
+        if (dict.readIfPresent("weightFields", weightFieldNames_))
         {
-            Info<< "    weight field  = " << weightFieldName_ << nl;
+            missing = false;
         }
         else
+        {
+            weightFieldNames_.resize(1);
+
+            if (dict.readIfPresent("weightField", weightFieldNames_.first()))
+            {
+                missing = false;
+                if ("none" == weightFieldNames_.first())
+                {
+                    // "none" == no weighting
+                    weightFieldNames_.clear();
+                }
+            }
+        }
+
+        if (missing)
         {
             // Suggest possible alternative unweighted operation?
             FatalIOErrorInFunction(dict)
@@ -1068,6 +1092,16 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
                 << "use weightField 'none' to suppress weighting," << nl
                 << "or use a different operation."
                 << exit(FatalIOError);
+        }
+
+        Info<< "    weight field  = ";
+        if (weightFieldNames_.empty())
+        {
+            Info<< "none" << nl;
+        }
+        else
+        {
+            Info<< flatOutput(weightFieldNames_) << nl;
         }
     }
 
@@ -1177,45 +1211,78 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         }
     }
 
-    // Only a few weight types (scalar, vector)
-    if (weightFieldName_ != "none")
+
+    // Check availability and type of weight field
+    // Only support a few weight types:
+    // scalar: 0-N fields
+    // vector: 0-1 fields
+
+    // Default is a zero-size scalar weight field (ie, weight = 1)
+    scalarField scalarWeights;
+    vectorField vectorWeights;
+
+    for (const word& weightName : weightFieldNames_)
     {
-        if (validField<scalar>(weightFieldName_))
+        if (validField<scalar>(weightName))
         {
-            scalarField weightField
-            (
-                getFieldValues<scalar>(weightFieldName_, true)
-            );
+            tmp<scalarField> tfld = getFieldValues<scalar>(weightName, true);
 
-            // Process the fields
-            writeAll(Sf, weightField, points, faces);
+            if (scalarWeights.empty())
+            {
+                scalarWeights = tfld;
+            }
+            else
+            {
+                scalarWeights *= tfld;
+            }
         }
-        else if (validField<vector>(weightFieldName_))
+        else if (validField<vector>(weightName))
         {
-            vectorField weightField
-            (
-                getFieldValues<vector>(weightFieldName_, true)
-            );
+            tmp<vectorField> tfld = getFieldValues<vector>(weightName, true);
 
-            // Process the fields
-            writeAll(Sf, weightField, points, faces);
+            if (vectorWeights.empty())
+            {
+                vectorWeights = tfld;
+            }
+            else
+            {
+                FatalErrorInFunction
+                    << "weightField " << weightName
+                    << " - only one vector weight field allowed. " << nl
+                    << "weights: " << flatOutput(weightFieldNames_) << nl
+                    << abort(FatalError);
+            }
         }
-        else
+        else if (weightName != "none")
         {
+            // Silently ignore "none", flag everything else as an error
+
+            // TBD: treat missing "rho" like incompressible with rho = 1
+            // and/or provided rhoRef value
+
             FatalErrorInFunction
-                << "weightField " << weightFieldName_
-                << " not found or an unsupported type"
+                << "weightField " << weightName
+                << " not found or an unsupported type" << nl
                 << abort(FatalError);
         }
     }
+
+
+    // Process the fields
+    if (vectorWeights.size())
+    {
+        if (scalarWeights.size())
+        {
+            vectorWeights *= scalarWeights;
+        }
+
+        writeAll(Sf, vectorWeights, points, faces);
+    }
     else
     {
-        // Default is a zero-size scalar weight field (ie, weight = 1)
-        scalarField weightField;
-
-        // Process the fields
-        writeAll(Sf, weightField, points, faces);
+        writeAll(Sf, scalarWeights, points, faces);
     }
+
 
     if (operation_ != opNone)
     {
