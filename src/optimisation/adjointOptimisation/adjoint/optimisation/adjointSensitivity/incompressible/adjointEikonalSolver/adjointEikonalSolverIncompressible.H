@@ -127,7 +127,7 @@ SourceFiles
 #define adjointEikonalSolverIncompressible_H
 
 #include "IOdictionary.H"
-#include "adjointRASModel.H"
+#include "incompressibleAdjointVars.H"
 #include "createZeroField.H"
 #include "boundaryFieldsFwd.H"
 #include "RASModelVariables.H"
@@ -215,8 +215,7 @@ public:
             const fvMesh& mesh,
             const dictionary& dict,
             const autoPtr<incompressible::RASModelVariables>& RASModelVars,
-            autoPtr<Foam::incompressibleAdjoint::adjointRASModel>&
-                  adjointTurbulence,
+            incompressibleAdjointVars& adjointVars,
             const labelHashSet& sensitivityPatchIDs
         );
 

@@ -65,7 +65,7 @@ void FIBase::read()
                 mesh_,
                 dict_,
                 primalVars_.RASModelVariables(),
-                adjointVars_.adjointTurbulence(),
+                adjointVars_,
                 sensitivityPatchIDs_
             )
         );

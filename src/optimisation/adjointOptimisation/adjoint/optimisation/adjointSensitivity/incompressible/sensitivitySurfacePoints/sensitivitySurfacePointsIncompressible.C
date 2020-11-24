@@ -86,7 +86,7 @@ void sensitivitySurfacePoints::read()
                 mesh_,
                 dict(),
                 primalVars_.RASModelVariables(),
-                adjointVars_.adjointTurbulence(),
+                adjointVars_,
                 sensitivityPatchIDs_
             )
         );
