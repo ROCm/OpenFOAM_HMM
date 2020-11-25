@@ -657,7 +657,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 {
                     // Note: handle compression ourselves since size cannot
                     // be determined without actually uncompressing
-                    readAndSend(fPath, labelList(1, proci), pBufs);
+                    readAndSend(fPath, labelList(one{}, proci), pBufs);
                 }
             }
         }
@@ -2390,7 +2390,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
                     readAndSend
                     (
                         filePaths[proci],
-                        labelList(1, proci),
+                        labelList(one{}, proci),
                         pBufs
                     );
                 }

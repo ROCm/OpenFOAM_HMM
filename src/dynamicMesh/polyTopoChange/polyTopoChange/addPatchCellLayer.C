@@ -968,21 +968,21 @@ void Foam::addPatchCellLayer::globalEdgeInfo
         mesh,
         meshEdgeToFace,
         maxEqOp<label>(),
-        -1
+        label(-1)
     );
     syncTools::syncEdgeList
     (
         mesh,
         meshEdgeToPatch,
         maxEqOp<label>(),
-        -1
+        label(-1)
     );
     syncTools::syncEdgeList
     (
         mesh,
         meshEdgeToZone,
         maxEqOp<label>(),
-        -1
+        label(-1)
     );
 //    // Note: flipMap not yet done. Needs edge orientation. This is handled
 //    // later on.
