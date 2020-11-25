@@ -115,10 +115,11 @@ then
 cat<<HELP_SUBCOMMANDS
   -build-info       Query/manage status of {api,branch,build} information
   -check-dir        Check directory equality
+  -with-bear        Call wmake via 'bear' to create json output
 HELP_SUBCOMMANDS
 else
 cat<<HELP_SUBCOMMANDS
-  -build-info -check-dir
+  -build-info -check-dir -with-bear
 HELP_SUBCOMMANDS
 fi
 
@@ -205,6 +206,9 @@ fi
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+        '') ;;
+        --) shift; break ;;
+
         -help-f*)   # Full help
             printHelp -full
             ;;
@@ -223,6 +227,12 @@ do
         -check-dir) shift
             exec "$scriptsDir/wmake-check-dir" \
                 ${optQuiet:+-silent} "$@"
+            exit $?
+            ;;
+
+        # Forward to scripts/wmake-with-bear
+        -with-bear) shift
+            exec "$scriptsDir/wmake-with-bear" "$@"
             exit $?
             ;;
 
@@ -328,10 +338,6 @@ do
             printInfo api
             optShow=true
             break;
-            ;;
-        --)
-            shift
-            break
             ;;
         -*)
             die "unknown option: '$1'"

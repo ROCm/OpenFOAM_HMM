@@ -38,6 +38,13 @@
 #     -l | -log | -log=FILE
 #     -prefix=...   same as -module-prefix=...
 #
+# Trapped options
+#     -with-bear
+#
+# Note
+#     Locally handled options (eg, -log) must preceeded trapped options
+#     such as -with-bear. This is non-intuitive, but not easily fixed.
+#
 #------------------------------------------------------------------------------
 # Check environment
 [ -d "$WM_PROJECT_DIR" ] || {
@@ -80,6 +87,7 @@ USAGE
 #------------------------------------------------------------------------------
 
 unset optDebug optLog optNonRecursive optPrefix optQueue
+unset optWmakeFrontend
 
 for arg in "$@"
 do
@@ -89,6 +97,12 @@ do
     case "$arg" in
     -h | -help*)
         usage
+        ;;
+
+    -with-bear)
+        # Everything wrapped via 'bear'
+        optWmakeFrontend="-with-bear"
+        break  # Stop now, continue with wmake
         ;;
 
     -no-recurs* | -fromWmake)
@@ -183,12 +197,14 @@ if [ -z "$optNonRecursive" ]
 then
     if [ -z "$optLog" ]
     then
-        exec wmake -all $optDebug $optQueue $*
+        exec wmake $optWmakeFrontend -all \
+            $optDebug $optQueue $*
         exit $? # Unneeded, but just in case something went wrong
     else
         echo "Logging wmake -all output to '$optLog'" 1>&2
         echo 1>&2
-        exec wmake -all $optDebug $optQueue $* 2>&1 | /usr/bin/tee $optLog
+        exec wmake $optWmakeFrontend -all \
+            $optDebug $optQueue $* 2>&1 | /usr/bin/tee $optLog
         # Need to cleanup after the tee
         rc=$? # Error code from tee (not wmake), but not entirely important
         echo "Done logging to '$optLog'" 1>&2
@@ -211,6 +227,7 @@ fi
 # Cleanup local variables and functions
 #------------------------------------------------------------------------------
 
+unset optWmakeFrontend
 unset optNonRecursive optDebug optLog optPrefix optQueue
 unset -f usage
 
