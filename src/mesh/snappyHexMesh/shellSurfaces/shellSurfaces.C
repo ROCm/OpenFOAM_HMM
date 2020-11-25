@@ -153,43 +153,6 @@ void Foam::shellSurfaces::setAndCheckLevels
 }
 
 
-void Foam::shellSurfaces::checkGapLevels
-(
-    const dictionary& shellDict,
-    const label shellI,
-    const List<FixedList<label, 3>>& levels
-)
-{
-    const searchableSurface& shell = allGeometry_[shells_[shellI]];
-
-    forAll(levels, regionI)
-    {
-        const FixedList<label, 3>& info = levels[regionI];
-
-        if (info[2] > 0)
-        {
-            if (modes_[shellI] == DISTANCE)
-            {
-                FatalIOErrorInFunction(shellDict)
-                    << "'gapLevel' specification cannot be used with mode "
-                    << refineModeNames_[DISTANCE]
-                    << " for shell " << shell.name()
-                    << exit(FatalIOError);
-            }
-        }
-    }
-
-    // Hardcode for region 0
-    if (levels[0][0] > 0)
-    {
-        Info<< "Refinement level up to " << levels[0][2]
-            << " for all cells in gaps for shell "
-            << shell.name() << endl;
-    }
-}
-
-
-
 // Specifically orient triSurfaces using a calculated point outside.
 // Done since quite often triSurfaces not of consistent orientation which
 // is (currently) necessary for sideness calculation
@@ -281,7 +244,6 @@ void Foam::shellSurfaces::findHigherLevel
         // (any of) the shell. Also collect the furthest distance allowable
         // to any shell with a higher level.
 
-        pointField candidates(pt.size());
         labelList candidateMap(pt.size());
         scalarField candidateDistSqr(pt.size());
         label candidateI = 0;
@@ -292,7 +254,6 @@ void Foam::shellSurfaces::findHigherLevel
             {
                 if (levels[levelI] > maxLevel[pointi])
                 {
-                    candidates[candidateI] = pt[pointi];
                     candidateMap[candidateI] = pointi;
                     candidateDistSqr[candidateI] = sqr(distances[levelI]);
                     candidateI++;
@@ -300,7 +261,6 @@ void Foam::shellSurfaces::findHigherLevel
                 }
             }
         }
-        candidates.setSize(candidateI);
         candidateMap.setSize(candidateI);
         candidateDistSqr.setSize(candidateI);
 
@@ -308,7 +268,7 @@ void Foam::shellSurfaces::findHigherLevel
         List<pointIndexHit> nearInfo;
         allGeometry_[shells_[shellI]].findNearest
         (
-            candidates,
+            pointField(pt, candidateMap),
             candidateDistSqr,
             nearInfo
         );
@@ -318,14 +278,14 @@ void Foam::shellSurfaces::findHigherLevel
         {
             if (nearInfo[i].hit())
             {
+                const label pointi = candidateMap[i];
+
                 // Check which level it actually is in.
-                label minDistI = findLower
+                const label minDistI = findLower
                 (
                     distances,
-                    mag(nearInfo[i].hitPoint()-candidates[i])
+                    mag(nearInfo[i].hitPoint()-pt[pointi])
                 );
-
-                label pointi = candidateMap[i];
 
                 // pt is inbetween shell[minDistI] and shell[minDistI+1]
                 maxLevel[pointi] = levels[minDistI+1];
@@ -394,55 +354,98 @@ void Foam::shellSurfaces::findHigherGapLevel
 {
     //TBD: hardcoded for region 0 information
     const FixedList<label, 3>& info = extendedGapLevel_[shellI][0];
-    volumeType mode = extendedGapMode_[shellI][0];
+    const volumeType mode = extendedGapMode_[shellI][0];
 
     if (info[2] == 0)
     {
         return;
     }
 
-
-    // Collect all those points that have a current maxLevel less than the
-    // shell.
-
-    labelList candidateMap(pt.size());
-    label candidateI = 0;
-
-    forAll(ptLevel, pointI)
+    if (modes_[shellI] == DISTANCE)
     {
-        if (ptLevel[pointI] >= info[1] && ptLevel[pointI] < info[2])
+        // Distance mode.
+        const scalar distance = distances_[shellI][0];
+
+        labelList candidateMap(pt.size());
+        scalarField candidateDistSqr(pt.size());
+        label candidateI = 0;
+
+        forAll(ptLevel, pointI)
         {
-            candidateMap[candidateI++] = pointI;
+            if (ptLevel[pointI] >= info[1] && ptLevel[pointI] < info[2])
+            {
+                candidateMap[candidateI] = pointI;
+                candidateDistSqr[candidateI] = sqr(distance);
+                candidateI++;
+            }
+        }
+        candidateMap.setSize(candidateI);
+        candidateDistSqr.setSize(candidateI);
+
+        // Do the expensive nearest test only for the candidate points.
+        List<pointIndexHit> nearInfo;
+        allGeometry_[shells_[shellI]].findNearest
+        (
+            pointField(pt, candidateMap),
+            candidateDistSqr,
+            nearInfo
+        );
+
+        // Update info
+        forAll(nearInfo, i)
+        {
+            if (nearInfo[i].hit())
+            {
+                const label pointI = candidateMap[i];
+                gapShell[pointI] = shellI;
+                gapInfo[pointI] = info;
+                gapMode[pointI] = mode;
+            }
         }
     }
-    candidateMap.setSize(candidateI);
-
-    // Do the expensive nearest test only for the candidate points.
-    List<volumeType> volType;
-    allGeometry_[shells_[shellI]].getVolumeType
-    (
-        pointField(pt, candidateMap),
-        volType
-    );
-
-    forAll(volType, i)
+    else
     {
-        label pointI = candidateMap[i];
+        // Collect all those points that have a current maxLevel less than the
+        // shell.
 
-        bool isInside = (volType[i] == volumeType::INSIDE);
+        labelList candidateMap(pt.size());
+        label candidateI = 0;
 
-        if
-        (
-            (
-                (modes_[shellI] == INSIDE && isInside)
-             || (modes_[shellI] == OUTSIDE && !isInside)
-            )
-         && info[2] > gapInfo[pointI][2]
-        )
+        forAll(ptLevel, pointI)
         {
-            gapShell[pointI] = shellI;
-            gapInfo[pointI] = info;
-            gapMode[pointI] = mode;
+            if (ptLevel[pointI] >= info[1] && ptLevel[pointI] < info[2])
+            {
+                candidateMap[candidateI++] = pointI;
+            }
+        }
+        candidateMap.setSize(candidateI);
+
+        // Do the expensive nearest test only for the candidate points.
+        List<volumeType> volType;
+        allGeometry_[shells_[shellI]].getVolumeType
+        (
+            pointField(pt, candidateMap),
+            volType
+        );
+
+        forAll(volType, i)
+        {
+            const label pointI = candidateMap[i];
+            const bool isInside = (volType[i] == volumeType::INSIDE);
+
+            if
+            (
+                (
+                    (modes_[shellI] == INSIDE && isInside)
+                 || (modes_[shellI] == OUTSIDE && !isInside)
+                )
+             && info[2] > gapInfo[pointI][2]
+            )
+            {
+                gapShell[pointI] = shellI;
+                gapInfo[pointI] = info;
+                gapMode[pointI] = mode;
+            }
         }
     }
 }
@@ -612,11 +615,7 @@ Foam::shellSurfaces::shellSurfaces
     extendedGapMode_.setSize(shellI);
     selfProximity_.setSize(shellI);
 
-    FixedList<label, 3> nullGapLevel;
-    nullGapLevel[0] = 0;
-    nullGapLevel[1] = 0;
-    nullGapLevel[2] = 0;
-
+    const FixedList<label, 3> nullGapLevel({0, 0, 0});
 
     wordHashSet unmatchedKeys(shellsDict.toc());
     shellI = 0;
@@ -775,7 +774,20 @@ Foam::shellSurfaces::shellSurfaces
                 }
             }
 
-            checkGapLevels(dict, shellI, extendedGapLevel_[shellI]);
+            if (extendedGapLevel_[shellI][0][0] > 0)
+            {
+                Info<< "Refinement level up to "
+                    << extendedGapLevel_[shellI][0][2]
+                    << " for all cells in gaps for shell "
+                    << geomName << endl;
+
+                if (distances_[shellI].size() > 1)
+                {
+                    WarningInFunction << "Using first distance only out of "
+                        << distances_[shellI] << " to detect gaps for shell "
+                        << geomName << endl;
+                }
+            }
 
             shellI++;
         }
@@ -885,13 +897,8 @@ void Foam::shellSurfaces::findHigherGapLevel
     gapShell.setSize(pt.size());
     gapShell = -1;
 
-    FixedList<label, 3> nullGapLevel;
-    nullGapLevel[0] = 0;
-    nullGapLevel[1] = 0;
-    nullGapLevel[2] = 0;
-
     gapInfo.setSize(pt.size());
-    gapInfo = nullGapLevel;
+    gapInfo = FixedList<label, 3>({0, 0, 0});
 
     gapMode.setSize(pt.size());
     gapMode = volumeType::MIXED;

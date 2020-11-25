@@ -135,14 +135,6 @@ private:
             const List<Tuple2<scalar, label>>&
         );
 
-        //- Helper function for checking of gap information
-        void checkGapLevels
-        (
-            const dictionary&,
-            const label shellI,
-            const List<FixedList<label, 3>>& levels
-        );
-
         void orient();
 
         //- Find first shell with a level higher than maxLevel
