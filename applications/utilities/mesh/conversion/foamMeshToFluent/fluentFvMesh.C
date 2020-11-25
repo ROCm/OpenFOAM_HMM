@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,13 +63,13 @@ void Foam::fluentFvMesh::writeFluentMesh() const
       / time().caseName() + ".msh"
     );
 
-    Info<< "Writing Header" << endl;
+    Info<< "Writing Fluent Mesh" << endl;
 
     fluentMeshFile
-        << "(0 \"FOAM to Fluent Mesh File\")" << std::endl << std::endl
-        << "(0 \"Dimension:\")" << std::endl
-        << "(2 3)" << std::endl << std::endl
-        << "(0 \"Grid dimensions:\")" << std::endl;
+        << "(0 \"OpenFOAM to Fluent Mesh File\")" << nl << nl
+        << "(0 \"Dimension:\")" << nl
+        << "(2 3)" << nl << nl
+        << "(0 \"Grid dimensions:\")" << nl;
 
     // Writing number of points
     fluentMeshFile
@@ -217,8 +218,8 @@ void Foam::fluentFvMesh::writeFluentMesh() const
 
     // Writing cells
     fluentMeshFile
-        << "(12 (1 1 "
-        << nCells() << " 1 0)(" << std::endl;
+        << "(12 (1 1 " << nCells() << " 1 0)" << nl
+        << '(';
 
     const cellModel& hex = cellModel::ref(cellModel::HEX);
     const cellModel& prism = cellModel::ref(cellModel::PRISM);
@@ -227,44 +228,59 @@ void Foam::fluentFvMesh::writeFluentMesh() const
 
     const cellShapeList& cells = cellShapes();
 
-    bool hasWarned = false;
+    label nPolys = 0;
+
+    int nElemPerLine = 25;  // Start with linebreak and indent
 
     forAll(cells, celli)
     {
+        if (nElemPerLine == 25)
+        {
+            // 25 elements per line with initial indent (readability)
+            fluentMeshFile << "\n   ";
+            nElemPerLine = 0;
+        }
+        else if (!(nElemPerLine % 5))
+        {
+            // Format in blocks of 5 (readability)
+            fluentMeshFile << token::SPACE;
+        }
+        fluentMeshFile << token::SPACE;
+        ++nElemPerLine;
+
+
         if (cells[celli].model() == tet)
         {
-            fluentMeshFile << " " << 2;
+            fluentMeshFile << 2;
         }
         else if (cells[celli].model() == hex)
         {
-            fluentMeshFile << " " << 4;
+            fluentMeshFile << 4;
         }
         else if (cells[celli].model() == pyr)
         {
-            fluentMeshFile << " " << 5;
+            fluentMeshFile << 5;
         }
         else if (cells[celli].model() == prism)
         {
-            fluentMeshFile << " " << 6;
+            fluentMeshFile << 6;
         }
         else
         {
-            if (!hasWarned)
-            {
-                hasWarned = true;
-
-                WarningInFunction
-                    << "foamMeshToFluent: cell shape for cell "
-                    << celli << " only supported by Fluent polyhedral meshes."
-                    << nl
-                    << "    Suppressing any further messages for polyhedral"
-                    << " cells." << endl;
-            }
-            fluentMeshFile << " " << 7;
+            fluentMeshFile << 7;
+            ++nPolys;
         }
     }
 
-    fluentMeshFile << ")())" << std::endl;
+    fluentMeshFile
+        << nl << "))" << nl;
+
+
+    if (nPolys)
+    {
+        Info<< "Mesh had " << nPolys << " polyhedrals." << endl;
+    }
+
 
     // Return to dec
     fluentMeshFile.setf(ios::dec, ios::basefield);

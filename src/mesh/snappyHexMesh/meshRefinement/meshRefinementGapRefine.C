@@ -453,12 +453,13 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 
         forAll(surf1, i)
         {
-            // Combine selfProx of shell and surfaces. Ignore regions for
-            // now
+            // Combine selfProx of shell and surfaces.
+            // Ignore regions for now
             const label cellI = cellMap[i];
+
             const label shelli =
             (
-                cellToCompact[cellI] != -1
+                (cellI != -1 && cellToCompact[cellI] != -1)
               ? gapShell[cellToCompact[cellI]]
               : -1
             );
@@ -482,8 +483,6 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
             )
             {
                 // Found intersection with surface. Check opposite normal.
-                label cellI = cellMap[i];
-
                 if
                 (
                     cellI != -1

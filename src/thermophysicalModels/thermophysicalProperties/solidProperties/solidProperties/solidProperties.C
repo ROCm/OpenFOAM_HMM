@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ void Foam::solidProperties::readIfPresent(const dictionary& dict)
     dict.readIfPresent("rho", rho_);
     dict.readIfPresent("Cp", Cp_);
     dict.readIfPresentCompat("kappa", {{"K", 1612}}, kappa_);
-    dict.readIfPresent("Hf_", Hf_);
+    dict.readIfPresent("Hf", Hf_);
     dict.readIfPresent("emissivity", emissivity_);
     dict.readIfPresent("W", W_);
 }
