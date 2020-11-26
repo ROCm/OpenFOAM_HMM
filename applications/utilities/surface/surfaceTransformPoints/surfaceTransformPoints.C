@@ -135,16 +135,7 @@ List<scalar> getScalingOpt(const word& optName, const argList& args)
         scaling.clear();
     }
 
-    for (const scalar scale : scaling)
-    {
-        if (scale <= 0)
-        {
-            FatalError
-                << "Invalid scaling value, must be positive." << nl
-                << "    -" << optName << ' ' << args[optName].c_str() << endl
-                << exit(FatalError);
-        }
-    }
+    // Zero and negative scaling are permitted
 
     return scaling;
 }
