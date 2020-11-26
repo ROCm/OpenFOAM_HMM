@@ -179,7 +179,15 @@ die()
 make="make"
 
 # Print compiler/system information (serial only)
-printInfo() { make --no-print-directory -f "$WM_DIR"/makefiles/info "$@"; }
+printInfo() {
+    if [ -f "$WM_DIR"/makefiles/info ]
+    then
+        make --no-print-directory -f "$WM_DIR"/makefiles/info "$@"
+    else
+        echo "OpenFOAM environment not set?" 1>&2
+        return 1
+    fi
+}
 
 #------------------------------------------------------------------------------
 
@@ -245,36 +253,7 @@ do
             ;;
 
         -module-prefix=*)
-            optPrefix="${1#*=}"
-            case "$optPrefix" in
-            # Prefix: user
-            (u | user)
-                export FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}"
-                ;;
-
-            # Prefix: group
-            (g | group)
-                export FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}"
-                ;;
-
-            # Prefix: openfoam (other)
-            (o | openfoam)
-                export FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}"
-                ;;
-
-            # Prefix: custom (absolute or relative)
-            (*)
-                export FOAM_MODULE_PREFIX="$optPrefix"
-                : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Default (autoconf)
-
-                # Require absolute path
-                [ "${FOAM_MODULE_PREFIX#/}" != "${FOAM_MODULE_PREFIX}" ] || \
-                    FOAM_MODULE_PREFIX="${PWD}/${FOAM_MODULE_PREFIX}"
-                ;;
-            esac
-
-            unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
-            echo "Module prefix = $FOAM_MODULE_PREFIX" 1>&2
+            setModulePrefix "${1#*=}"
             ;;
 
         -show-api | -show-ext-so | \
@@ -461,7 +440,7 @@ else
                 echo "$Script error: could not change to directory '$dir'" 1>&2
                 exit 1
             }
-        elif [ -f "$MakeDir/files" ]
+        elif [ -f "$MakeDir"/files ]
         then
             dir="(${PWD##*/})"  # Implicit directory information
         fi
@@ -552,7 +531,7 @@ then
     then
         # Compile all applications in sub-directories
         $make ${WM_CONTINUE_ON_ERROR:+-k} \
-              -f $WM_DIR/makefiles/apps \
+              -f "$WM_DIR"/makefiles/apps \
               TARGET="$targetType" FOAM_APPS="$FOAM_APPS"
         exitCode=$?
     fi
@@ -600,11 +579,11 @@ cdSource
 # so that the call to make builds the application
 if [ -z "$targetType" ]
 then
-    if grep -qe '^ *LIB *=' "$MakeDir/files" 2>/dev/null
+    if grep -qe '^ *LIB *=' "$MakeDir"/files 2>/dev/null
     then
         targetType=libso
     fi
-elif grep -qe '^ *EXE *=' "$MakeDir/files" 2>/dev/null
+elif grep -qe '^ *EXE *=' "$MakeDir"/files 2>/dev/null
 then
     # Application. Remove any nonsense targetType
     case "$targetType" in
@@ -644,11 +623,11 @@ fi
 
     # Pre-build the $WM_OPTIONS/options file
     # which is included when building the $WM_OPTIONS/files file
-    $make -s -f $WM_DIR/makefiles/files \
+    $make -s -f "$WM_DIR"/makefiles/files \
         MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" "$objectsDir"/options
 
-    $make -s -f $WM_DIR/makefiles/files \
-        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir
+    $make -s -f "$WM_DIR"/makefiles/files \
+        MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir"
 )
 
 
@@ -656,7 +635,7 @@ fi
 # Check the $objectsDir/sourceFiles file was created successfully
 #------------------------------------------------------------------------------
 
-[ -r $objectsDir/sourceFiles ] || {
+[ -r "$objectsDir"/sourceFiles ] || {
     echo "$Script error: file '$objectsDir/sourceFiles'" \
          "could not be created in $PWD" 1>&2
     exit 1
@@ -670,10 +649,10 @@ fi
 # For libraries create lnInclude, but only if 'LIB' is declared in 'Make/files'
 case "$targetType" in
 (lib | libo | libso | dep)
-    if grep -qe '^ *LIB *=' "$MakeDir/files" 2>/dev/null
+    if grep -qe '^ *LIB *=' "$MakeDir"/files 2>/dev/null
     then
-        $make -s -f $WM_DIR/makefiles/general \
-            MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir lnInclude
+        $make -s -f "$WM_DIR"/makefiles/general \
+            MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" lnInclude
     fi
     ;;
 esac
@@ -686,8 +665,8 @@ esac
 if [ -n "$WM_UPDATE_DEPENDENCIES" ]
 then
 
-    $make -f $WM_DIR/makefiles/general \
-        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir updatedep
+    $make -f "$WM_DIR"/makefiles/general \
+        MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" updatedep
     exitCode="$?"
 
     [ "$exitCode" -eq 0 ] || exit "$exitCode"
@@ -698,8 +677,8 @@ fi
 # Make the dependency files or object files and link
 #------------------------------------------------------------------------------
 
-exec $make -f $WM_DIR/makefiles/general \
-     MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $targetType
+exec $make -f "$WM_DIR"/makefiles/general \
+     MAKE_DIR="$MakeDir" OBJECTS_DIR="$objectsDir" $targetType
 
 exit 0 # clean exit
 

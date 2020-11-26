@@ -26,11 +26,11 @@ MakeDir=Make
 : "${Script:=wmakeFunctions}"
 
 # Environment defaults
-if [ -z "$WM_DIR" ]
+if [ -z "$WM_DIR" ] && [ -n "$WM_PROJECT_DIR" ]
 then
     WM_DIR="$WM_PROJECT_DIR/wmake"
-    export WM_DIR
 fi
+[ -n "$WM_DIR" ] && export WM_DIR
 
 
 #------------------------------------------------------------------------------
@@ -40,20 +40,54 @@ checkEnv()
 {
     local check failed
 
-    # Default for WM_DIR already provided above
-
-    for check in WM_PROJECT_DIR WM_OPTIONS
+    # Possibly redundant check for WM_DIR
+    for check in WM_PROJECT_DIR WM_DIR WM_OPTIONS
     do
         eval test -n "\$$check" || failed="$failed $check"
     done
 
-    [ -z "$failed" ] || {
-        echo "$Script error: Environment variable(s) not set" 1>&2
+    if [ -n "$failed" ]
+    then
+        echo "$Script error: OpenFOAM environment variable(s) not set" 1>&2
         echo "   $failed" 1>&2
         exit 1
-    }
+    fi
 }
 
+
+# Set FOAM_MODULE_PREFIX according to
+# - absolute/relative path
+# - predefined type (u,user | g,group | o,openfoam)
+setModulePrefix()
+{
+    export FOAM_MODULE_PREFIX="$1"
+    case "$FOAM_MODULE_PREFIX" in
+    # Prefix: user
+    (u | user)      FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}" ;;
+
+    # Prefix: group
+    (g | group)     FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}" ;;
+
+    # Prefix: openfoam (other)
+    (o | openfoam)  FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}" ;;
+
+    # Prefix: directory (absolute or relative)
+    (*)
+        : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Fallback (autoconf-like)
+
+        # Require absolute path
+        [ "${FOAM_MODULE_PREFIX#/}" != "${FOAM_MODULE_PREFIX}" ] || \
+            FOAM_MODULE_PREFIX="${PWD}/${FOAM_MODULE_PREFIX}"
+        ;;
+    esac
+
+    # Avoid potential conflicts
+    unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
+    echo "Module prefix = ${FOAM_MODULE_PREFIX:-[]}" 1>&2
+}
+
+
+#------------------------------------------------------------------------------
 
 # Return the absolute (physical) path for a directory or
 # for a file's parent directory

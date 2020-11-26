@@ -86,7 +86,7 @@ USAGE
 # Parse the arguments and options
 #------------------------------------------------------------------------------
 
-unset optDebug optLog optNonRecursive optPrefix optQueue
+unset optDebug optLog optNonRecursive optQueue
 unset optWmakeFrontend
 
 for arg in "$@"
@@ -112,27 +112,21 @@ do
         ;;
 
     -module-prefix=* | -prefix=* | --prefix=*)
-        optPrefix="${arg#*=}"
-        case "$optPrefix" in
+        # As per setModulePrefix (wmakeFunctions)
+        export FOAM_MODULE_PREFIX="${arg#*=}"
+        case "$FOAM_MODULE_PREFIX" in
         # Prefix: user
-        (u | user)
-            export FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}"
-            ;;
+        (u | user)      FOAM_MODULE_PREFIX="${FOAM_USER_LIBBIN%/*}" ;;
 
         # Prefix: group
-        (g | group)
-            export FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}"
-            ;;
+        (g | group)     FOAM_MODULE_PREFIX="${FOAM_SITE_LIBBIN%/*}" ;;
 
         # Prefix: openfoam (other)
-        (o | openfoam)
-            export FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}"
-            ;;
+        (o | openfoam)  FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}" ;;
 
-        # Prefix: custom (absolute or relative)
+        # Prefix: directory (absolute or relative)
         (*)
-            export FOAM_MODULE_PREFIX="$optPrefix"
-            : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Default (autoconf)
+            : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Fallback (autoconf-like)
 
             # Require absolute path
             [ "${FOAM_MODULE_PREFIX#/}" != "${FOAM_MODULE_PREFIX}" ] || \
@@ -140,8 +134,9 @@ do
             ;;
         esac
 
+        # Avoid potential conflicts
         unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
-        echo "Module prefix = $FOAM_MODULE_PREFIX" 1>&2
+        echo "Module prefix = ${FOAM_MODULE_PREFIX:-[]}" 1>&2
         continue    # Handled argument
         ;;
 
@@ -228,7 +223,7 @@ fi
 #------------------------------------------------------------------------------
 
 unset optWmakeFrontend
-unset optNonRecursive optDebug optLog optPrefix optQueue
+unset optNonRecursive optDebug optLog optQueue
 unset -f usage
 
 

@@ -389,7 +389,7 @@ esac
 # Final
 
 # Ensure MPI_ARCH_PATH is marked for export
-[ -n "$MPI_ARCH_PATH" ] && export  MPI_ARCH_PATH
+[ -n "$MPI_ARCH_PATH" ] && export MPI_ARCH_PATH
 
 
 # A real (non-dummy) MPI
