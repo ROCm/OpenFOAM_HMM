@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,8 @@ Foam::fvMeshSubset::interpolate
     const fvMesh& sMesh,
     const labelUList& patchMap,
     const labelUList& cellMap,
-    const labelUList& faceMap
+    const labelUList& faceMap,
+    const bool allowUnmapped
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -139,6 +140,17 @@ Foam::fvMeshSubset::interpolate
                 }
             }
 
+
+            directFvPatchFieldMapper mapper(directAddressing);
+
+            // allowUnmapped : special mode for if we do not want to be
+            // warned for unmapped faces (e.g. from fvMeshDistribute).
+            const bool hasUnmapped = mapper.hasUnmapped();
+            if (allowUnmapped)
+            {
+                mapper.hasUnmapped() = false;
+            }
+
             bf.set
             (
                 patchi,
@@ -147,9 +159,30 @@ Foam::fvMeshSubset::interpolate
                     vf.boundaryField()[basePatchId],
                     subPatch,
                     result(),
-                    directFvPatchFieldMapper(directAddressing)
+                    mapper
                 )
             );
+
+            if (allowUnmapped && hasUnmapped)
+            {
+                // Set unmapped values to zeroGradient. This is the default
+                // action for unmapped fvPatchFields. Note that this bypasses
+                // any special logic for handling unmapped fvPatchFields but
+                // since this is only used inside fvMeshDistribute ...
+
+                tmp<Field<Type>> tfld(bf[patchi].patchInternalField());
+                const Field<Type>& fld = tfld();
+
+                Field<Type> value(bf[patchi]);
+                forAll(directAddressing, i)
+                {
+                    if (directAddressing[i] == -1)
+                    {
+                        value[i] = fld[i];
+                    }
+                }
+                bf[patchi].fvPatchField<Type>::operator=(value);
+            }
         }
     }
 
@@ -164,7 +197,8 @@ Foam::tmp
 >
 Foam::fvMeshSubset::interpolate
 (
-    const GeometricField<Type, fvPatchField, volMesh>& vf
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const bool allowUnmapped
 ) const
 {
     return interpolate
@@ -173,7 +207,8 @@ Foam::fvMeshSubset::interpolate
         subMesh(),
         patchMap(),
         cellMap(),
-        faceMap()
+        faceMap(),
+        allowUnmapped
     );
 }
 
@@ -347,7 +382,8 @@ Foam::tmp
 >
 Foam::fvMeshSubset::interpolate
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf,
+    const bool allowUnmapped
 ) const
 {
     return interpolate
@@ -499,7 +535,8 @@ Foam::tmp
 >
 Foam::fvMeshSubset::interpolate
 (
-    const GeometricField<Type, pointPatchField, pointMesh>& sf
+    const GeometricField<Type, pointPatchField, pointMesh>& sf,
+    const bool allowUnmapped
 ) const
 {
     return interpolate
@@ -551,7 +588,8 @@ Foam::tmp
 >
 Foam::fvMeshSubset::interpolate
 (
-    const DimensionedField<Type, volMesh>& df
+    const DimensionedField<Type, volMesh>& df,
+    const bool allowUnmapped
 ) const
 {
     return interpolate(df, subMesh(), cellMap());

@@ -372,7 +372,9 @@ void Foam::fvMeshDistribute::sendFields
         const GeoField& fld =
             subsetter.baseMesh().lookupObject<GeoField>(fieldName);
 
-        tmp<GeoField> tsubfld = subsetter.interpolate(fld);
+        // Note: use subsetter to get sub field. Override default behaviour
+        //       to warn for unset fields since they will be reset later on
+        tmp<GeoField> tsubfld = subsetter.interpolate(fld, true);
 
         toNbr
             << fieldName << token::NL << token::BEGIN_BLOCK

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -339,7 +339,8 @@ public:
 
     // Field Mapping
 
-        //- Map volume field
+        //- Map volume field. Optionally allow unmapped faces not to produce
+        //  a warning
         template<class Type>
         static tmp<GeometricField<Type, fvPatchField, volMesh>>
         interpolate
@@ -348,14 +349,16 @@ public:
             const fvMesh& sMesh,
             const labelUList& patchMap,
             const labelUList& cellMap,
-            const labelUList& faceMap
+            const labelUList& faceMap,
+            const bool allowUnmapped = false
         );
 
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>>
         interpolate
         (
-            const GeometricField<Type, fvPatchField, volMesh>&
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const bool allowUnmapped = false
         ) const;
 
         //- Map surface field. Optionally negates value if flipping
@@ -371,11 +374,14 @@ public:
             const labelUList& faceMap
         );
 
+        //- Map surface field. Optionally allow unmapped faces not to produce
+        //  a warning (not currently used)
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         interpolate
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>&
+            const GeometricField<Type, fvsPatchField, surfaceMesh>&,
+            const bool allowUnmapped = false
         ) const;
 
         //- Map point field
@@ -389,11 +395,14 @@ public:
             const labelUList& pointMap
         );
 
+        //- Map point field. Optionally allow unmapped points not to produce
+        //  a warning (not currently used)
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh>>
         interpolate
         (
-            const GeometricField<Type, pointPatchField, pointMesh>&
+            const GeometricField<Type, pointPatchField, pointMesh>&,
+            const bool allowUnmapped = false
         ) const;
 
         //- Map dimensioned field
@@ -406,9 +415,14 @@ public:
             const labelUList& cellMap
         );
 
+        //- Map Dimensioned. Optional unmapped argument not used
         template<class Type>
         tmp<DimensionedField<Type, volMesh>>
-        interpolate(const DimensionedField<Type, volMesh>&) const;
+        interpolate
+        (
+            const DimensionedField<Type, volMesh>&,
+            const bool allowUnmapped = false
+        ) const;
 
 
     // Compatibility
