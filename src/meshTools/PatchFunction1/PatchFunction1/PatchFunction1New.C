@@ -129,12 +129,14 @@ Foam::PatchFunction1<Type>::New
         // Primitive entry. Coeffs dictionary is optional.
         // Use keyword() - not entryName - for compatibility lookup!
 
-        coeffs =
-           &dict.optionalSubDict
-            (
-                eptr->keyword() + "Coeffs",
-                keyType::LITERAL
-            );
+        const word& kw =
+        (
+            eptr
+          ? eptr->keyword()  // Could be a compatibility lookup
+          : entryName
+        );
+
+        coeffs = &dict.optionalSubDict(kw + "Coeffs", keyType::LITERAL);
     }
 
 
