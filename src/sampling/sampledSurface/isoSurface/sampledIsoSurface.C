@@ -354,7 +354,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     getIsoFields();
 
     // Clear any stored topo
-    surfPtr_.clear();
+    isoSurfacePtr_.clear();
 
     // Clear derived data
     clearGeom();
@@ -363,9 +363,9 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     {
         const volScalarField& vfld = *volSubFieldPtr_;
 
-        surfPtr_.reset
+        isoSurfacePtr_.reset
         (
-            new isoSurface
+            new isoSurfacePoint
             (
                 vfld,
                 *pointSubFieldPtr_,
@@ -378,9 +378,9 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     {
         const volScalarField& vfld = *volFieldPtr_;
 
-        surfPtr_.reset
+        isoSurfacePtr_.reset
         (
-            new isoSurface
+            new isoSurfacePoint
             (
                 vfld,
                 *pointFieldPtr_,
@@ -393,7 +393,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
 
     if (debug)
     {
-        Pout<< "sampledIsoSurface::updateGeometry() : constructed iso:"
+        Pout<< "isoSurfacePoint::updateGeometry() : constructed iso:"
             << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
@@ -431,7 +431,7 @@ Foam::sampledIsoSurface::sampledIsoSurface
     average_(dict.getOrDefault("average", false)),
     zoneNames_(),
     exposedPatchName_(),
-    surfPtr_(nullptr),
+    isoSurfacePtr_(nullptr),
     prevTimeIndex_(-1),
     storedVolFieldPtr_(nullptr),
     volFieldPtr_(nullptr),
@@ -492,7 +492,7 @@ bool Foam::sampledIsoSurface::needsUpdate() const
 
 bool Foam::sampledIsoSurface::expire()
 {
-    surfPtr_.clear();
+    isoSurfacePtr_.clear();
     subMeshPtr_.clear();
 
     // Clear derived data
@@ -617,7 +617,7 @@ Foam::sampledIsoSurface::interpolate
 
 void Foam::sampledIsoSurface::print(Ostream& os) const
 {
-    os  << "sampledIsoSurface: " << name() << " :"
+    os  << "isoSurfacePoint: " << name() << " :"
         << "  field   :" << isoField_
         << "  value   :" << isoVal_;
 }

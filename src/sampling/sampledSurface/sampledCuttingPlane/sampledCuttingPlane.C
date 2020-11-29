@@ -106,8 +106,8 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
     // Clear any stored topologies
-    isoSurfPtr_.clear();
     isoSurfCellPtr_.clear();
+    isoSurfPointPtr_.clear();
     isoSurfTopoPtr_.clear();
     pointDistance_.clear();
     cellDistancePtr_.clear();
@@ -303,9 +303,9 @@ void Foam::sampledCuttingPlane::createGeometry()
     // Direct from cell field and point field.
     if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
     {
-        isoSurfPtr_.reset
+        isoSurfPointPtr_.reset
         (
-            new isoSurface
+            new isoSurfacePoint
             (
                 cellDistance,
                 pointDistance_,
@@ -375,8 +375,8 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     needsUpdate_(true),
     subMeshPtr_(nullptr),
     cellDistancePtr_(nullptr),
-    isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
+    isoSurfPointPtr_(nullptr),
     isoSurfTopoPtr_(nullptr)
 {
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))

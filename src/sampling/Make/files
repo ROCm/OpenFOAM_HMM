@@ -31,7 +31,7 @@ surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurfaceBase.C
 surface/isoSurface/isoSurfaceParams.C
 surface/isoSurface/isoSurfaceCell.C
-surface/isoSurface/isoSurface.C
+surface/isoSurface/isoSurfacePoint.C
 surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 

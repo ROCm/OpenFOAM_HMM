@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,14 +41,11 @@ Foam::distanceSurface::interpolate
     {
         return isoSurfCellPtr_->interpolate(cellValues, pointValues);
     }
-    else if (isoSurfTopoPtr_)
+    else if (isoSurfPointPtr_)
     {
-        return isoSurfTopoPtr_->interpolate(cellValues, pointValues);
+        return isoSurfPointPtr_->interpolate(cellValues, pointValues);
     }
-    else
-    {
-        return isoSurfPtr_->interpolate(cellValues, pointValues);
-    }
+    return isoSurfTopoPtr_->interpolate(cellValues, pointValues);
 }
 
 

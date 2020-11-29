@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isoSurface
+    Foam::isoSurfacePoint
 
 Description
     A surface formed by the iso value.
@@ -58,13 +58,13 @@ Description
     face gets handled just like any boundary face.
 
 SourceFiles
-    isoSurface.C
-    isoSurfaceTemplates.C
+    isoSurfacePoint.C
+    isoSurfacePointTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isoSurface_H
-#define isoSurface_H
+#ifndef isoSurfacePoint_H
+#define isoSurfacePoint_H
 
 #include "bitSet.H"
 #include "volFields.H"
@@ -84,14 +84,14 @@ class treeBoundBox;
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
-                       Class isoSurface Declaration
+                       Class isoSurfacePoint Declaration
 \*---------------------------------------------------------------------------*/
 
-class isoSurface
+class isoSurfacePoint
 :
     public isoSurfaceBase
 {
-    // Private data
+    // Private Data
 
         enum segmentCutType
         {
@@ -385,7 +385,7 @@ public:
 
 
     //- Runtime type information
-    TypeName("isoSurface");
+    TypeName("isoSurfacePoint");
 
 
     // Constructors
@@ -397,7 +397,7 @@ public:
         //  Control parameters include
         //  - bounds optional bounding box for trimming
         //  - mergeTol fraction of mesh bounding box for merging points
-        isoSurface
+        isoSurfacePoint
         (
             const volScalarField& cellValues,
             const scalarField& pointValues,
@@ -429,7 +429,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "isoSurfaceTemplates.C"
+    #include "isoSurfacePointTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

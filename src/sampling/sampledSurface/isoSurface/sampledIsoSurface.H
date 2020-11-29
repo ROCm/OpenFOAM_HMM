@@ -71,7 +71,7 @@ SourceFiles
 #ifndef sampledIsoSurface_H
 #define sampledIsoSurface_H
 
-#include "isoSurface.H"
+#include "isoSurfacePoint.H"
 #include "sampledSurface.H"
 #include "fvMeshSubset.H"
 
@@ -108,7 +108,7 @@ class sampledIsoSurface
         //- For zones: patch to put exposed faces into
         mutable word exposedPatchName_;
 
-        mutable autoPtr<isoSurface> surfPtr_;
+        mutable autoPtr<isoSurfacePoint> isoSurfacePtr_;
 
 
     // Recreated for every isoSurface
@@ -164,7 +164,7 @@ class sampledIsoSurface
 public:
 
     //- Runtime type information
-    TypeName("sampledIsoSurface");
+    TypeName("samplediIsoSurfacePoint");
 
 
     // Constructors
@@ -184,9 +184,9 @@ public:
 
     // Member Functions
 
-        const isoSurface& surface() const
+        const isoSurfacePoint& surface() const
         {
-            return *surfPtr_;
+            return *isoSurfacePtr_;
         }
 
         //- Does the surface need an update?

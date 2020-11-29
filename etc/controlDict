@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2006                                 |
+|  \\    /   O peration     | Version:  v2012                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -638,8 +638,9 @@ DebugSwitches
     inverseFaceDistance 0;
     inversePointDistance 0;
     inverseVolume       0;
-    isoSurface          0;
     isoSurfaceCell      0;
+    isoSurfacePoint     0;
+    isoSurfaceTopo      0;
     jplot               0;
     jumpCyclic          0;
     kEpsilon            0;

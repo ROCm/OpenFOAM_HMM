@@ -29,6 +29,13 @@ Class
 Description
     Low-level components common to various iso-surface algorithms.
 
+    Some common dictionary properties:
+    \table
+        Property | Description                              | Required | Default
+        isoAlgorithm | (cell/topo/point)                    | no  | point
+        regularise | point snapping (bool or enum)          | no  | true
+    \endtable
+
 SourceFiles
     isoSurfaceBase.C
 

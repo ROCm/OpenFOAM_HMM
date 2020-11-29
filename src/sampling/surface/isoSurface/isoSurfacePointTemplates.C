@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "isoSurface.H"
+#include "isoSurfacePoint.H"
 #include "polyMesh.H"
 #include "syncTools.H"
 #include "surfaceFields.H"
@@ -43,7 +43,7 @@ Foam::tmp<Foam::SlicedGeometricField
     Foam::slicedFvPatchField,
     Foam::volMesh
 >>
-Foam::isoSurface::adaptPatchFields
+Foam::isoSurfacePoint::adaptPatchFields
 (
     const GeometricField<Type, fvPatchField, volMesh>& fld
 ) const
@@ -150,7 +150,7 @@ Foam::isoSurface::adaptPatchFields
 
 
 template<class Type>
-Type Foam::isoSurface::generatePoint
+Type Foam::isoSurfacePoint::generatePoint
 (
     const scalar s0,
     const Type& p0,
@@ -192,7 +192,7 @@ Type Foam::isoSurface::generatePoint
 
 
 template<class Type>
-void Foam::isoSurface::generateTriPoints
+void Foam::isoSurfacePoint::generateTriPoints
 (
     const scalar s0,
     const Type& p0,
@@ -443,7 +443,7 @@ void Foam::isoSurface::generateTriPoints
 
 
 template<class Type>
-Foam::label Foam::isoSurface::generateFaceTriPoints
+Foam::label Foam::isoSurfacePoint::generateFaceTriPoints
 (
     const volScalarField& cVals,
     const scalarField& pVals,
@@ -526,7 +526,7 @@ Foam::label Foam::isoSurface::generateFaceTriPoints
 
 
 template<class Type>
-void Foam::isoSurface::generateTriPoints
+void Foam::isoSurfacePoint::generateTriPoints
 (
     const volScalarField& cVals,
     const scalarField& pVals,
@@ -744,7 +744,7 @@ void Foam::isoSurface::generateTriPoints
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::isoSurface::interpolate
+Foam::isoSurfacePoint::interpolate
 (
     const label nPoints,
     const labelList& triPointMergeMap,
@@ -807,7 +807,7 @@ Foam::isoSurface::interpolate
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::isoSurface::interpolate
+Foam::isoSurfacePoint::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& cCoords,
     const Field<Type>& pCoords

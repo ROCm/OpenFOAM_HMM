@@ -79,8 +79,8 @@ Foam::distanceSurface::distanceSurface
         isoSurfaceParams::ALGO_CELL,
         isoSurfaceParams::filterType::DIAGCELL
     ),
-    isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
+    isoSurfPointPtr_(nullptr),
     isoSurfTopoPtr_(nullptr)
 {}
 
@@ -120,8 +120,8 @@ Foam::distanceSurface::distanceSurface
         useSignedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
     isoParams_(params),
-    isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
+    isoSurfPointPtr_(nullptr),
     isoSurfTopoPtr_(nullptr)
 {}
 
@@ -136,8 +136,8 @@ void Foam::distanceSurface::createGeometry()
     }
 
     // Clear any stored topologies
-    isoSurfPtr_.clear();
     isoSurfCellPtr_.clear();
+    isoSurfPointPtr_.clear();
     isoSurfTopoPtr_.clear();
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
@@ -361,9 +361,9 @@ void Foam::distanceSurface::createGeometry()
     // Direct from cell field and point field.
     if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
     {
-        isoSurfPtr_.reset
+        isoSurfPointPtr_.reset
         (
-            new isoSurface
+            new isoSurfacePoint
             (
                 cellDistance,
                 pointDistance_,

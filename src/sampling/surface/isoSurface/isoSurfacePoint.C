@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "isoSurface.H"
+#include "isoSurfacePoint.H"
 #include "mergePoints.H"
 #include "slicedVolFields.H"
 #include "volFields.H"
@@ -38,7 +38,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(isoSurface, 0);
+    defineTypeNameAndDebug(isoSurfacePoint, 0);
 }
 
 
@@ -68,7 +68,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::isoSurface::noTransform(const tensor& tt) const
+bool Foam::isoSurfacePoint::noTransform(const tensor& tt) const
 {
     return
         (mag(tt.xx()-1) < mergeDistance_)
@@ -83,14 +83,14 @@ bool Foam::isoSurface::noTransform(const tensor& tt) const
 }
 
 
-bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
+bool Foam::isoSurfacePoint::collocatedPatch(const polyPatch& pp)
 {
     const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
     return cpp.parallel() && !cpp.separated();
 }
 
 
-Foam::bitSet Foam::isoSurface::collocatedFaces
+Foam::bitSet Foam::isoSurfacePoint::collocatedFaces
 (
     const coupledPolyPatch& pp
 ) const
@@ -128,7 +128,7 @@ Foam::bitSet Foam::isoSurface::collocatedFaces
 }
 
 
-void Foam::isoSurface::syncUnseparatedPoints
+void Foam::isoSurfacePoint::syncUnseparatedPoints
 (
     pointField& pointValues,
     const point& nullValue
@@ -283,7 +283,7 @@ void Foam::isoSurface::syncUnseparatedPoints
 }
 
 
-Foam::scalar Foam::isoSurface::isoFraction
+Foam::scalar Foam::isoSurfacePoint::isoFraction
 (
     const scalar s0,
     const scalar s1
@@ -300,7 +300,7 @@ Foam::scalar Foam::isoSurface::isoFraction
 }
 
 
-bool Foam::isoSurface::isEdgeOfFaceCut
+bool Foam::isoSurfacePoint::isEdgeOfFaceCut
 (
     const scalarField& pVals,
     const face& f,
@@ -327,7 +327,7 @@ bool Foam::isoSurface::isEdgeOfFaceCut
 }
 
 
-void Foam::isoSurface::getNeighbour
+void Foam::isoSurfacePoint::getNeighbour
 (
     const labelList& boundaryRegion,
     const volVectorField& meshC,
@@ -360,7 +360,7 @@ void Foam::isoSurface::getNeighbour
 }
 
 
-void Foam::isoSurface::calcCutTypes
+void Foam::isoSurfacePoint::calcCutTypes
 (
     const labelList& boundaryRegion,
     const volVectorField& meshC,
@@ -501,13 +501,13 @@ void Foam::isoSurface::calcCutTypes
 
     if (debug)
     {
-        Pout<< "isoSurface : candidate cut cells "
+        Pout<< "isoSurfacePoint : candidate cut cells "
             << nCutCells_ << " / " << mesh_.nCells() << endl;
     }
 }
 
 
-Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
+Foam::point Foam::isoSurfacePoint::calcCentre(const triSurface& s)
 {
     // Calculate centre of surface.
 
@@ -521,7 +521,7 @@ Foam::point Foam::isoSurface::calcCentre(const triSurface& s)
 }
 
 
-void Foam::isoSurface::calcSnappedCc
+void Foam::isoSurfacePoint::calcSnappedCc
 (
     const labelList& boundaryRegion,
     const volVectorField& meshC,
@@ -686,7 +686,7 @@ void Foam::isoSurface::calcSnappedCc
 }
 
 
-void Foam::isoSurface::calcSnappedPoint
+void Foam::isoSurfacePoint::calcSnappedPoint
 (
     const bitSet& isBoundaryPoint,
     const labelList& boundaryRegion,
@@ -877,7 +877,7 @@ void Foam::isoSurface::calcSnappedPoint
 }
 
 
-Foam::triSurface Foam::isoSurface::stitchTriPoints
+Foam::triSurface Foam::isoSurfacePoint::stitchTriPoints
 (
     const bool checkDuplicates,
     const List<point>& triPoints,
@@ -907,7 +907,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
     // Check that enough merged.
     if (debug)
     {
-        Pout<< "isoSurface : merged from " << triPoints.size()
+        Pout<< "isoSurfacePoint : merged from " << triPoints.size()
             << " down to " << newPoints.size() << " unique points." << endl;
 
         pointField newNewPoints;
@@ -1012,7 +1012,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         if (debug)
         {
-            Pout<< "isoSurface : merged from " << nTris
+            Pout<< "isoSurfacePoint : merged from " << nTris
                 << " down to " << tris.size() << " unique triangles." << endl;
         }
 
@@ -1058,7 +1058,7 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 }
 
 
-void Foam::isoSurface::trimToPlanes
+void Foam::isoSurfacePoint::trimToPlanes
 (
     const PtrList<plane>& planes,
     const triPointRef& tri,
@@ -1131,7 +1131,7 @@ void Foam::isoSurface::trimToPlanes
 }
 
 
-void Foam::isoSurface::trimToBox
+void Foam::isoSurfacePoint::trimToBox
 (
     const treeBoundBox& bb,
     DynamicList<point>& triPoints,
@@ -1140,7 +1140,7 @@ void Foam::isoSurface::trimToBox
 {
     if (debug)
     {
-        Pout<< "isoSurface : trimming to " << bb << endl;
+        Pout<< "isoSurfacePoint : trimming to " << bb << endl;
     }
 
     // Generate inwards pointing planes
@@ -1180,7 +1180,7 @@ void Foam::isoSurface::trimToBox
 
     if (debug)
     {
-        Pout<< "isoSurface : trimmed from " << nTris
+        Pout<< "isoSurfacePoint : trimmed from " << nTris
             << " down to " << triMap.size()
             << " triangles." << endl;
     }
@@ -1189,7 +1189,7 @@ void Foam::isoSurface::trimToBox
 }
 
 
-void Foam::isoSurface::trimToBox
+void Foam::isoSurfacePoint::trimToBox
 (
     const treeBoundBox& bb,
     DynamicList<point>& triPoints,  // new points
@@ -1267,7 +1267,7 @@ void Foam::isoSurface::trimToBox
 }
 
 
-Foam::triSurface Foam::isoSurface::subsetMesh
+Foam::triSurface Foam::isoSurfacePoint::subsetMesh
 (
     const triSurface& s,
     const labelList& newToOldFaces,
@@ -1335,7 +1335,7 @@ Foam::triSurface Foam::isoSurface::subsetMesh
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::isoSurface::isoSurface
+Foam::isoSurfacePoint::isoSurfacePoint
 (
     const volScalarField& cellValues,
     const scalarField& pointValues,
@@ -1353,7 +1353,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface:" << nl
+        Pout<< "isoSurfacePoint:" << nl
             << "    isoField      : " << cellValues.name() << nl
             << "    cell min/max  : "
             << minMax(cellValues.primitiveField()) << nl
@@ -1479,7 +1479,7 @@ Foam::isoSurface::isoSurface
         (
             IOobject
             (
-                "isoSurface.cutType",
+                "isoSurfacePoint.cutType",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,
@@ -1531,7 +1531,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : shifted " << snappedPoints.size()
+        Pout<< "isoSurfacePoint : shifted " << snappedPoints.size()
             << " cell centres to intersection." << endl;
     }
 
@@ -1598,7 +1598,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : shifted " << snappedPoints.size()-nCellSnaps
+        Pout<< "isoSurfacePoint : shifted " << snappedPoints.size()-nCellSnaps
             << " vertices to intersection." << endl;
     }
 
@@ -1628,7 +1628,7 @@ Foam::isoSurface::isoSurface
 
         if (debug)
         {
-            Pout<< "isoSurface : generated " << triMeshCells.size()
+            Pout<< "isoSurfacePoint : generated " << triMeshCells.size()
                 << " unmerged triangles from " << triPoints.size()
                 << " unmerged points." << endl;
         }
@@ -1667,7 +1667,7 @@ Foam::isoSurface::isoSurface
 
         if (debug)
         {
-            Pout<< "isoSurface : generated " << triMap.size()
+            Pout<< "isoSurfacePoint : generated " << triMap.size()
                 << " merged triangles." << endl;
         }
 
@@ -1703,7 +1703,7 @@ Foam::isoSurface::isoSurface
 
     if (debug)
     {
-        Pout<< "isoSurface : checking " << tmpsurf.size()
+        Pout<< "isoSurfacePoint : checking " << tmpsurf.size()
             << " triangles for validity." << endl;
 
         forAll(tmpsurf, facei)
