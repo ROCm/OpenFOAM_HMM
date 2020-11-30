@@ -68,9 +68,7 @@ CrossPowerLaw
     m_("m", dimTime, CrossPowerLawCoeffs_),
     n_("n", dimless, CrossPowerLawCoeffs_),
     tauStar_("tauStar", dimViscosity/dimTime, CrossPowerLawCoeffs_)
-{
-    read(viscosityProperties);
-}
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

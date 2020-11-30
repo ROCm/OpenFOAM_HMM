@@ -62,9 +62,7 @@ Foam::laminarModels::generalizedNewtonianViscosityModels::Casson::Casson
     tau0_("tau0", dimViscosity/dimTime, viscosityProperties),
     nuMin_("nuMin", dimViscosity, viscosityProperties),
     nuMax_("nuMax", dimViscosity, viscosityProperties)
-{
-    read(viscosityProperties);
-}
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

@@ -74,9 +74,7 @@ BirdCarreau
             dimensionedScalar("a", dimless, 2)
         )
     )
-{
-    read(viscosityProperties);
-}
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

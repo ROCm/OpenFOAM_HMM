@@ -63,9 +63,7 @@ Foam::laminarModels::generalizedNewtonianViscosityModels::powerLaw::powerLaw
     n_("n", dimless, powerLawCoeffs_),
     nuMin_("nuMin", dimViscosity, powerLawCoeffs_),
     nuMax_("nuMax", dimViscosity, powerLawCoeffs_)
-{
-    read(viscosityProperties);
-}
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

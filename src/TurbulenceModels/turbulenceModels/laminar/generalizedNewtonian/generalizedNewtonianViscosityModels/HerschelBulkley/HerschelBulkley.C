@@ -66,9 +66,7 @@ HerschelBulkley
     ),
     n_("n", dimless, HerschelBulkleyCoeffs_),
     tau0_("tau0", dimViscosity/dimTime, HerschelBulkleyCoeffs_)
-{
-    read(viscosityProperties);
-}
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
