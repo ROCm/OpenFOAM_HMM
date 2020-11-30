@@ -139,6 +139,9 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         }
     }
 
+
+    meshedSurface& mySurface = const_cast<sampledIsoSurfaceCell&>(*this);
+
     isoSurfaceCell surf
     (
         fvm,
@@ -148,11 +151,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         isoParams_
     );
 
-    // Replace current geomety
-    const_cast<sampledIsoSurfaceCell&>
-    (
-        *this
-    ).transfer(static_cast<meshedSurface&>(surf));
+    mySurface.transfer(static_cast<meshedSurface&>(surf));
     meshCells_.transfer(surf.meshCells());
 
     if (debug)

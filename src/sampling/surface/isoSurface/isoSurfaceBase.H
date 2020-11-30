@@ -54,6 +54,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class tetCell;
+
 /*---------------------------------------------------------------------------*\
                        Class isoSurfaceBase Declaration
 \*---------------------------------------------------------------------------*/
@@ -75,6 +78,29 @@ protected:
 
         //- For every face, the original cell in mesh
         labelList meshCells_;
+
+
+    // Protected Member Functions
+
+        //- Check for tet values above/below given (iso) value
+        //  Result encoded as a single integer
+        inline static constexpr int getTetCutIndex
+        (
+            const scalar a,
+            const scalar b,
+            const scalar c,
+            const scalar d,
+            const scalar isoval
+        ) noexcept
+        {
+            return
+            (
+                (a < isoval ? 1 : 0)
+              | (b < isoval ? 2 : 0)
+              | (c < isoval ? 4 : 0)
+              | (d < isoval ? 8 : 0)
+            );
+        }
 
 
 public:

@@ -33,13 +33,13 @@ Description
 
 SourceFiles
     isoSurfaceTopo.C
+    isoSurfaceTopoTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef isoSurfaceTopo_H
 #define isoSurfaceTopo_H
 
-#include "labelPair.H"
 #include "bitSet.H"
 #include "edgeList.H"
 #include "isoSurfaceBase.H"
@@ -128,9 +128,8 @@ class isoSurfaceTopo
         void generateTriPoints
         (
             const label facei,
-            const FixedList<scalar, 4>& s,
-            const FixedList<point, 4>& p,
-            const FixedList<label, 4>& pIndex,
+            const int tetCutIndex,  //!< Encoded tet cuts. getTetCutIndex()
+            const tetCell& tetLabels,
             const FixedList<bool, 6>& edgeIsDiag,
 
             DynamicList<edge>& pointToVerts,
@@ -163,8 +162,9 @@ class isoSurfaceTopo
             (
                 const bool filterDiag,
                 const primitivePatch& pp,
-                const boolList& pointFromDiag,
-                const labelList& pointToFace,
+
+                const boolUList& pointFromDiag,
+                const labelUList& pointToFace,
                 const label cellID,
 
                 DynamicList<face>& compactFaces,
@@ -175,9 +175,13 @@ class isoSurfaceTopo
             (
                 const bool filterDiag,
                 const Mesh& s,
-                const boolList& pointFromDiag,
-                const labelList& pointToFace,
-                const labelList& start,              // Per cell:starting tri
+
+                // Inputs
+                const boolUList& pointFromDiag,
+                const labelUList& pointToFace,
+                const labelUList& start,            // Per cell:starting tri
+
+                // Outputs
                 DynamicList<label>& pointCompactMap, // Per point the original
                 DynamicList<label>& compactCellIDs   // Per face the cellID
             ) const;

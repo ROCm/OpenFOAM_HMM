@@ -46,22 +46,53 @@ namespace Foam
 
 namespace Foam
 {
-    // Helper class for slicing triangles
-    class storeOp
+
+// Helper class for slicing triangles
+struct storeOp
+{
+    DynamicList<triPoints>& list;
+
+    storeOp(DynamicList<triPoints>& tris)
+    :
+        list(tris)
+    {}
+
+    void operator()(const triPoints& tri)
     {
-    public:
-        DynamicList<triPoints>& tris_;
+        list.append(tri);
+    }
 
-        inline storeOp(DynamicList<triPoints>& tris)
-        :
-            tris_(tris)
-        {}
+    void operator()(triPoints&& tri)
+    {
+        list.append(std::move(tri));
+    }
+};
 
-        inline void operator()(const triPoints& tri)
-        {
-            tris_.append(tri);
-        }
-    };
+
+// Is patch co-located (i.e. non-separated) coupled patch?
+static inline bool collocatedPatch(const polyPatch& pp)
+{
+    const auto* cpp = isA<coupledPolyPatch>(pp);
+    return bool(cpp) && cpp->parallel() && !cpp->separated();
+}
+
+
+// Collocated patch, with extra checks
+#if 0
+static bool isCollocatedPatch(const coupledPolyPatch& pp)
+{
+    if (isA<processorPolyPatch>(pp) || isA<cyclicPolyPatch>(pp))
+    {
+        return collocatedPatch(pp);
+    }
+
+    FatalErrorInFunction
+        << "Unhandled coupledPolyPatch type " << pp.type() << nl
+        << abort(FatalError);
+
+    return false;
+}
+#endif
 
 } // End namespace Foam
 
@@ -83,39 +114,20 @@ bool Foam::isoSurfacePoint::noTransform(const tensor& tt) const
 }
 
 
-bool Foam::isoSurfacePoint::collocatedPatch(const polyPatch& pp)
-{
-    const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
-    return cpp.parallel() && !cpp.separated();
-}
-
-
 Foam::bitSet Foam::isoSurfacePoint::collocatedFaces
 (
     const coupledPolyPatch& pp
-) const
+)
 {
     // Initialise to false
     bitSet collocated(pp.size());
 
-    if (isA<processorPolyPatch>(pp))
+    if (isA<processorPolyPatch>(pp) || isA<cyclicPolyPatch>(pp))
     {
         if (collocatedPatch(pp))
         {
-            forAll(pp, i)
-            {
-                collocated.set(i);
-            }
-        }
-    }
-    else if (isA<cyclicPolyPatch>(pp))
-    {
-        if (collocatedPatch(pp))
-        {
-            forAll(pp, i)
-            {
-                collocated.set(i);
-            }
+            // All on
+            collocated = true;
         }
     }
     else
@@ -377,7 +389,7 @@ void Foam::isoSurfacePoint::calcCutTypes
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        const scalar& ownValue = cVals[own[facei]];
+        const scalar ownValue = cVals[own[facei]];
         const bool ownLower = (ownValue < iso_);
 
         scalar nbrValue;
@@ -403,7 +415,7 @@ void Foam::isoSurfacePoint::calcCutTypes
         {
             // Is mesh edge cut?
             // - by looping over all the edges of the face.
-            const face f = mesh_.faces()[facei];
+            const face& f = mesh_.faces()[facei];
 
             if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
             {
@@ -414,11 +426,9 @@ void Foam::isoSurfacePoint::calcCutTypes
 
     for (const polyPatch& pp : patches)
     {
-        label facei = pp.start();
-
-        forAll(pp, i)
+        for (const label facei : pp.range())
         {
-            const scalar& ownValue = cVals[own[facei]];
+            const scalar ownValue = cVals[own[facei]];
             const bool ownLower = (ownValue < iso_);
 
             scalar nbrValue;
@@ -444,15 +454,13 @@ void Foam::isoSurfacePoint::calcCutTypes
             {
                 // Is mesh edge cut?
                 // - by looping over all the edges of the face.
-                const face f = mesh_.faces()[facei];
+                const face& f = mesh_.faces()[facei];
 
                 if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
                 {
                     faceCutType_[facei] = CUT;
                 }
             }
-
-            ++facei;
         }
     }
 
@@ -545,9 +553,7 @@ void Foam::isoSurfacePoint::calcSnappedCc
     {
         if (cellCutType_[celli] == CUT)
         {
-            scalar cVal = cVals[celli];
-
-            const cell& cFaces = mesh_.cells()[celli];
+            const scalar cVal = cVals[celli];
 
             localTriPoints.clear();
             label nOther = 0;
@@ -556,9 +562,9 @@ void Foam::isoSurfacePoint::calcSnappedCc
             // Create points for all intersections close to cell centre
             // (i.e. from pyramid edges)
 
-            forAll(cFaces, cFacei)
+            for (const label facei : mesh_.cells()[celli])
             {
-                label facei = cFaces[cFacei];
+                const face& f = mesh_.faces()[facei];
 
                 scalar nbrValue;
                 point nbrPoint;
@@ -580,8 +586,6 @@ void Foam::isoSurfacePoint::calcSnappedCc
                 // From cc to neighbour cc.
                 s[2] = isoFraction(cVal, nbrValue);
                 pt[2] = (1.0-s[2])*cc[celli] + s[2]*nbrPoint;
-
-                const face& f = mesh_.faces()[cFaces[cFacei]];
 
                 forAll(f, fp)
                 {
@@ -638,10 +642,9 @@ void Foam::isoSurfacePoint::calcSnappedCc
             else if (localTriPoints.size() == 3)
             {
                 // Single triangle. No need for any analysis. Average points.
-                pointField points;
-                points.transfer(localTriPoints);
                 snappedCc[celli] = snappedPoints.size();
-                snappedPoints.append(sum(points)/points.size());
+                snappedPoints.append(sum(localTriPoints)/3);
+                localTriPoints.clear();
 
                 //Pout<< "    point:" << pointi
                 //    << " replacing coord:" << mesh_.points()[pointi]
@@ -741,7 +744,7 @@ void Foam::isoSurfacePoint::calcSnappedPoint
             // Create points for all intersections close to point
             // (i.e. from pyramid edges)
             const face& f = mesh_.faces()[facei];
-            label own = mesh_.faceOwner()[facei];
+            const label own = mesh_.faceOwner()[facei];
 
             // Get neighbour value
             scalar nbrValue;
@@ -1087,19 +1090,17 @@ void Foam::isoSurfacePoint::trimToPlanes
 
         if (useA)
         {
-            insideOpB.tris_.clear();
-            forAll(insideOpA.tris_, i)
+            insideTrisB.clear();
+            for (const triPoints& tri : insideTrisA)
             {
-                const triPoints& tri = insideOpA.tris_[i];
                 triPointRef(tri).sliceWithPlane(pln, insideOpB, dop);
             }
         }
         else
         {
-            insideOpA.tris_.clear();
-            forAll(insideOpB.tris_, i)
+            insideTrisA.clear();
+            for (const triPoints& tri : insideTrisB)
             {
-                const triPoints& tri = insideOpB.tris_[i];
                 triPointRef(tri).sliceWithPlane(pln, insideOpA, dop);
             }
         }
@@ -1107,26 +1108,16 @@ void Foam::isoSurfacePoint::trimToPlanes
     }
 
 
+    DynamicList<triPoints>& newTris = (useA ? insideTrisA : insideTrisB);
+
+    newTriPoints.reserve(newTriPoints.size() + 3*newTris.size());
+
     // Transfer
-    if (useA)
+    for (const triPoints& tri : newTris)
     {
-        forAll(insideOpA.tris_, i)
-        {
-            const triPoints& tri = insideOpA.tris_[i];
-            newTriPoints.append(tri[0]);
-            newTriPoints.append(tri[1]);
-            newTriPoints.append(tri[2]);
-        }
-    }
-    else
-    {
-        forAll(insideOpB.tris_, i)
-        {
-            const triPoints& tri = insideOpB.tris_[i];
-            newTriPoints.append(tri[0]);
-            newTriPoints.append(tri[1]);
-            newTriPoints.append(tri[2]);
-        }
+        newTriPoints.append(tri[0]);
+        newTriPoints.append(tri[1]);
+        newTriPoints.append(tri[2]);
     }
 }
 
@@ -1449,23 +1440,13 @@ Foam::isoSurfacePoint::isoSurfacePoint
     }
 
 
-
     // Pre-calculate patch-per-face to avoid whichPatch call.
     labelList boundaryRegion(mesh_.nBoundaryFaces());
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
-        label facei = pp.start();
-
-        forAll(pp, i)
-        {
-            boundaryRegion[facei-mesh_.nInternalFaces()] = patchi;
-            ++facei;
-        }
+        SubList<label>(boundaryRegion, pp.size(), pp.offset()) = pp.index();
     }
-
 
 
     // Determine if any cut through face/cell

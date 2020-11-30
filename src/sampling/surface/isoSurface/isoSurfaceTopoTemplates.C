@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,49 +36,53 @@ Foam::isoSurfaceTopo::interpolate
     const Field<Type>& pointCoords
 ) const
 {
-    tmp<Field<Type>> tfld(new Field<Type>(pointToVerts_.size()));
-    Field<Type>& fld = tfld.ref();
+    auto tfld = tmp<Field<Type>>::New(pointToVerts_.size());
+    auto& fld = tfld.ref();
 
     forAll(pointToVerts_, i)
     {
         scalar s0;
         Type p0;
         {
-            label v0 = pointToVerts_[i][0];
-            if (v0 < mesh_.nPoints())
+            label idx = pointToVerts_[i].first();
+            if (idx < mesh_.nPoints())
             {
-                s0 = pVals_[v0];
-                p0 = pointCoords[v0];
+                // Point index
+                s0 = pVals_[idx];
+                p0 = pointCoords[idx];
             }
             else
             {
-                label celli = v0-mesh_.nPoints();
-                s0 = cVals_[celli];
-                p0 = cellCoords[celli];
+                // Cell index
+                idx -= mesh_.nPoints();
+                s0 = cVals_[idx];
+                p0 = cellCoords[idx];
             }
         }
 
         scalar s1;
         Type p1;
         {
-            label v1 = pointToVerts_[i][1];
-            if (v1 < mesh_.nPoints())
+            label idx = pointToVerts_[i].second();
+            if (idx < mesh_.nPoints())
             {
-                s1 = pVals_[v1];
-                p1 = pointCoords[v1];
+                // Point index
+                s1 = pVals_[idx];
+                p1 = pointCoords[idx];
             }
             else
             {
-                label celli = v1-mesh_.nPoints();
-                s1 = cVals_[celli];
-                p1 = cellCoords[celli];
+                // Cell index
+                idx -= mesh_.nPoints();
+                s1 = cVals_[idx];
+                p1 = cellCoords[idx];
             }
         }
 
-        scalar d = s1-s0;
+        const scalar d = s1-s0;
         if (mag(d) > VSMALL)
         {
-            scalar s = (iso_-s0)/d;
+            const scalar s = (iso_-s0)/d;
             fld[i] = s*p1+(1.0-s)*p0;
         }
         else

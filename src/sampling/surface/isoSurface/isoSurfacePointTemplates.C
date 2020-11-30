@@ -184,7 +184,7 @@ Type Foam::isoSurfacePoint::generatePoint
     }
     else
     {
-        scalar s = 0.4999;
+        constexpr scalar s = 0.4999;
 
         return s*p1 + (1.0-s)*p0;
     }

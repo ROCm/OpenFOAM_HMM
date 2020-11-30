@@ -148,11 +148,8 @@ class isoSurfacePoint
             //- Does tensor differ (to within mergeTolerance) from identity
             bool noTransform(const tensor& tt) const;
 
-            //- Is patch a collocated (i.e. non-separated) coupled patch?
-            static bool collocatedPatch(const polyPatch& pp);
-
             //- Per face whether is collocated
-            bitSet collocatedFaces(const coupledPolyPatch&) const;
+            static bitSet collocatedFaces(const coupledPolyPatch& cpp);
 
             //- Synchronise points on all non-separated coupled patches
             void syncUnseparatedPoints
