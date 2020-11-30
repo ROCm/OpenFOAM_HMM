@@ -90,7 +90,6 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace fileFormats
 {
 
@@ -148,10 +147,61 @@ public:
             return (tag & 0x80);
         }
 
+        //- Is a combined (synthetic) face Id?
+        inline static bool isEncodedSolidId(const label combinedId)
+        {
+            return (combinedId < 0);
+        }
+
+        //- Combine solid element Id and side Id into synthetic face Id
+        inline static label encodeSolidId(const label id, const label side)
+        {
+            return -(10 * id + side);
+        }
+
+        //- Entangle solid element id from synthetic face Id
+        inline static label decodeSolidElementId(const label combinedId)
+        {
+            return
+            (
+                isEncodedSolidId(combinedId)
+              ? (-combinedId / 10)
+              : combinedId
+            );
+        }
+
+        //- Entangle solid side id from synthetic face Id
+        //- Synthesize faceId from solid element Id and sideId
+        inline static label decodeSolidSideNum(const label combinedId)
+        {
+            return
+            (
+                isEncodedSolidId(combinedId)
+              ? (-combinedId % 10)
+              : 0
+            );
+        }
+
 
 protected:
 
     // Protected Member Functions
+
+        //- From 1-based to 0-based
+        inline static void renumber0_elemId(label& elemId)
+        {
+            if (isEncodedSolidId(elemId))
+            {
+                // Eg,
+                // 1-based (solid 4, side 2) is -42
+                // 0-based (solid 3, side 2) is -32
+                elemId += 10;
+            }
+            else
+            {
+                --elemId;
+            }
+        }
 
         //- Face addressing from ABAQUS faces to OpenFOAM faces.
         //  For hex, prism, tet primitive shapes.
@@ -249,12 +299,26 @@ protected:
                     const label setId = 0
                 );
 
+                //- Read elements within an "*Surface" section.
+                //  If the shape is known/supported, appends to
+                //  connectivity, elemType, elemIds lists.
+                //
+                //  \return the number of elements read
+                label readSurfaceElements
+                (
+                    ISstream& is,
+                    const label setId = 0
+                );
+
 
                 //- Remove non-shell elements and compact the points
                 void purge_solids();
 
                 //- Compact unused points and relabel connectivity
                 void compact_nodes();
+
+                //- Renumber elements from 1-based to 0-based
+                void renumber_elements_1to0();
         };
 
 

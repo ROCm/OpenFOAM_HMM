@@ -83,6 +83,27 @@ functions
             ( 60    "<system>/solverControls.60")
         );
     }
+
+    // Verify values for sampling multiple faceZones
+    inletFaces
+    {
+        type    surfaces;
+        libs    (sampling);
+        writeControl    onEnd;
+        region          cabin;
+        surfaceFormat   vtk;
+        fields  (H2O U);
+
+        surfaces
+        {
+            inletFaces
+            {
+                type    faceZone;
+                zones   (inletFaces f1Zone);
+                interpolate false;
+            }
+        }
+    }
 }
 
 

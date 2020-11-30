@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,8 @@ Foam::sampledSurface::sampleOnFaces
     const interpolation<Type>& sampler,
     const labelUList& elements,
     const faceList& fcs,
-    const pointField& pts
+    const pointField& pts,
+    const Type& defaultValue
 )
 {
     const label len = elements.size();
@@ -57,9 +58,16 @@ Foam::sampledSurface::sampleOnFaces
     for (label i=0; i < len; ++i)
     {
         const label celli = elements[i];
-        const point pt = fcs[i].centre(pts);
+        if (celli < 0)
+        {
+            values[i] = defaultValue;
+        }
+        else
+        {
+            const point pt = fcs[i].centre(pts);
 
-        values[i] = sampler.interpolate(pt, celli);
+            values[i] = sampler.interpolate(pt, celli);
+        }
     }
 
     return tvalues;

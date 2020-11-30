@@ -47,11 +47,18 @@ Usage
 
     where the entries mean:
     \table
-      Property        | Description                      | Type | Req'd | Dflt
-      writePrecision  | Number of decimal points | label | no  | \<system dflt\>
-      writeToFile     | Flag to produce text file output | bool | no    | true
-      useUserTime | Flag to use user time, e.g. degrees  | bool | no    | true
+      Property        | Description                      | Type | Reqd | Dflt
+      writePrecision  | Number of decimal points | int  | no  | \<system dflt\>
+      writeToFile     | Produce text file output?        | bool | no  | true
+      useUserTime     | Use user time (e.g. degrees)?    | bool | no  | true
+      updateHeader    | Update header on mesh changes?   | bool | no  | true
     \endtable
+
+Note
+    The file header is normally updated whenver the mesh points or
+    topology changes. In some cases, the function object is actually
+    unaffected by these changes.
+    Use the \c updateHeader flag to override the default behaviour.
 
 See also
     - Foam::functionObject

@@ -69,7 +69,8 @@ Usage
       name         | Name for regionType                | word |  yes  | -
       operation    | Operation type: see below          | word |  yes  | -
       postOperation | Post-operation type: see below    | word |  no   | none
-      weightField  | Name of field to apply weighting   | word |  no   | none
+      weightField   | Name of field to apply weighting   | word |  maybe |
+      weightFields  | Names of fields to apply weighting | wordList | maybe |
     \endtable
 
     The inherited entries are elaborated in:
@@ -214,8 +215,8 @@ protected:
         //- Optional post-evaluation operation
         postOperationType postOperation_;
 
-        //- Weight field name - only used for weighted modes
-        word weightFieldName_;
+        //- Weight field name(s) - optional
+        wordList weightFieldNames_;
 
 
     // Protected Member Functions
@@ -233,7 +234,7 @@ protected:
         //  Checks for availability on any processor.
         inline bool canWeight(const scalarField& weightField) const;
 
-        //- True if the field name is valid (exists, and a supported type)
+        //- Return true if the field name is valid
         template<class Type>
         bool validField(const word& fieldName) const;
 

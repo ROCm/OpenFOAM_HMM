@@ -30,8 +30,9 @@ License
 #include "ListOps.H"
 #include "stringOps.H"
 #include "UIListStream.H"
-
-#undef Foam_readAbaqusSurface
+#include "cellModel.H"
+#include <algorithm>
+#include <cctype>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -319,10 +320,9 @@ Foam::fileFormats::ABAQUSCore::readHelper::readPoints
     const label initialCount = points_.size();
 
     char sep; // Comma separator (dummy)
+    string line;
     label id;
     point p;
-
-    string line;
 
     // Read nodes (points) until next "*Section"
     while (is.peek() != '*' && is.peek() != EOF)
@@ -368,10 +368,10 @@ Foam::fileFormats::ABAQUSCore::readHelper::readElements
     const label initialCount = elemTypes_.size();
 
     char sep; // Comma separator (dummy)
-    label id;
-    labelList elemNodes(nNodes, Zero);
-
     string line;
+    label id;
+
+    labelList elemNodes(nNodes, Zero);
 
     // Read element connectivity until next "*Section"
 
@@ -403,6 +403,130 @@ Foam::fileFormats::ABAQUSCore::readHelper::readElements
 }
 
 
+Foam::label
+Foam::fileFormats::ABAQUSCore::readHelper::readSurfaceElements
+(
+    ISstream& is,
+    const label setId
+)
+{
+    // Info<< "*Surface" << nl;
+
+    // Models for supported solids (need to face mapping)
+    const cellModel& tet   = cellModel::ref(cellModel::TET);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& hex   = cellModel::ref(cellModel::HEX);
+
+    // Face mapping from Abaqus cellModel to OpenFOAM cellModel
+    const auto& abqToFoamFaceMap = abaqusToFoamFaceAddr();
+
+    const label initialCount = elemTypes_.size();
+
+    char sep; // Comma separator (dummy)
+    string line;
+    label id;
+
+    // Read until next "*Section"
+
+    // Parse for elemId, sideId.
+    // Eg, "1235, S1"
+    while (is.peek() != '*' && is.peek() != EOF)
+    {
+        is >> id >> sep;
+        is.getLine(line);
+
+        const word sideName(word::validate(stringOps::upper(line)));
+
+        if
+        (
+            sideName.size() != 2
+         || sideName[0] != 'S'
+         || !std::isdigit(sideName[1])
+        )
+        {
+            Info<< "Abaqus reader: unsupported surface element side "
+                << id << ", " << sideName << nl;
+            continue;
+        }
+
+        const label index = elemIds_.find(id);
+        if (id <= 0 || index < 0)
+        {
+            Info<< "Abaqus reader: unsupported surface element "
+                << id << nl;
+            continue;
+        }
+
+        const auto faceIdIter = abqToFoamFaceMap.cfind(elemTypes_[index]);
+        if (!faceIdIter.found())
+        {
+            Info<< "Abaqus reader: reject non-solid shape: " << nl;
+        }
+
+        // The abaqus element side number (1-based)
+        const label sideNum = (sideName[1] - '0');
+
+        const label foamFaceNum = (*faceIdIter)[sideNum - 1];
+
+        const labelList& connect = connectivity_[index];
+
+        // Nodes for the derived shell element
+        labelList elemNodes;
+
+        switch (elemTypes_[index])
+        {
+            case shapeType::abaqusTet:
+            {
+                elemNodes = labelList(connect, tet.modelFaces()[foamFaceNum]);
+                break;
+            }
+            case shapeType::abaqusPrism:
+            {
+                elemNodes = labelList(connect, prism.modelFaces()[foamFaceNum]);
+                break;
+            }
+            case shapeType::abaqusHex:
+            {
+                elemNodes = labelList(connect, hex.modelFaces()[foamFaceNum]);
+                break;
+            }
+            default:
+                break;
+        }
+
+        enum shapeType shape = shapeType::abaqusUnknownShape;
+
+        if (elemNodes.size() == 3)
+        {
+            shape = shapeType::abaqusTria;
+        }
+        else if (elemNodes.size() == 4)
+        {
+            shape = shapeType::abaqusQuad;
+        }
+        else
+        {
+            // Cannot happen
+            FatalErrorInFunction
+                << "Could not map face side for "
+                << id << ", " << sideName << nl
+                << exit(FatalError);
+        }
+
+        // Synthesize face Id from solid element Id and side Id
+        const label newElemId = ABAQUSCore::encodeSolidId(id, sideNum);
+
+        // Further checks?
+        connectivity_.append(std::move(elemNodes));
+        elemTypes_.append(shape);
+        elemIds_.append(newElemId);
+        elsetIds_.append(setId);
+    }
+
+    return (elemTypes_.size() - initialCount);
+}
+
+
 void Foam::fileFormats::ABAQUSCore::readHelper::read
 (
     ISstream& is
@@ -427,9 +551,11 @@ void Foam::fileFormats::ABAQUSCore::readHelper::read
         // Some abaqus files use upper-case or mixed-case for section names,
         // convert all to upper-case for ease.
 
-        string upperLine(stringOps::upper(line));
+        const string upperLine(stringOps::upper(line));
 
+        //
         // "*Nodes" section
+        //
         if (upperLine.starts_with("*NODE"))
         {
             // Ignore "NSET=...", we cannot do anything useful with it
@@ -446,14 +572,16 @@ void Foam::fileFormats::ABAQUSCore::readHelper::read
             continue;
         }
 
+        //
         // "*Element" section
+        //
         if (upperLine.starts_with("*ELEMENT,"))
         {
             // Must have "TYPE=..."
-            auto elemTypeName = getIdentifier("TYPE", line);
+            const string elemTypeName(getIdentifier("TYPE", line));
 
             // May have "ELSET=..." on the same line
-            string elsetName(getIdentifier("ELSET", line));
+            const string elsetName(getIdentifier("ELSET", line));
 
             const shapeType shape(getElementType(elemTypeName));
 
@@ -485,18 +613,42 @@ void Foam::fileFormats::ABAQUSCore::readHelper::read
             continue;
         }
 
-
+        //
         // "*Surface" section
+        //
         if (upperLine.starts_with("*SURFACE,"))
         {
-            #ifdef Foam_readAbaqusSurface
+            // Require "NAME=..." on the same line
+            const string elsetName(getIdentifier("NAME", line));
+
+            // May have "TYPE=..." on the same line.
+            // If missing, default is ELEMENT.
+            const string surfTypeName(getIdentifier("TYPE", line));
+
+            if
+            (
+                !surfTypeName.empty()
+             && stringOps::upper(surfTypeName) != "ELEMENT"
+            )
+            {
+                Info<< "Reading abaqus surface type "
+                    << surfTypeName << " is not implemented" << nl;
+                continue;
+            }
+
+            // Treat like an element set
+            const label elsetId = addNewElset(elsetName);
 
             skipComments(is);
 
-            #else
-            Info<< "Reading of abaqus surfaces not implemented" << nl;
-            #endif
+            nread = readSurfaceElements(is, elsetId);
 
+            if (verbose_)
+            {
+                InfoErr
+                    << "Read " << nread << " *SURFACE entries for "
+                    << elsetName << nl;
+            }
             continue;
         }
     }
@@ -619,6 +771,15 @@ void Foam::fileFormats::ABAQUSCore::readHelper::compact_nodes()
         {
             inplaceRenumber(oldToNewLocal, elem);
         }
+    }
+}
+
+
+void Foam::fileFormats::ABAQUSCore::readHelper::renumber_elements_1to0()
+{
+    for (label& elemId : elemIds_)
+    {
+        renumber0_elemId(elemId);
     }
 }
 

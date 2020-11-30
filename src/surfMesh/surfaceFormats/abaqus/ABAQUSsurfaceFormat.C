@@ -154,6 +154,7 @@ bool Foam::fileFormats::ABAQUSsurfaceFormat<Face>::read
     // No solids
     reader.purge_solids();
     reader.compact_nodes();
+    reader.renumber_elements_1to0();  // Convert 1-based -> 0-based
 
 
     // Convert connectivity to faces

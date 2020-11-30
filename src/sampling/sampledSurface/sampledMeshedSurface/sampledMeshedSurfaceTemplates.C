@@ -37,7 +37,13 @@ Foam::sampledMeshedSurface::sampleOnFaces
     const interpolation<Type>& sampler
 ) const
 {
+    const Type deflt
+    (
+        defaultValues_.getOrDefault<Type>(sampler.psi().name(), Zero)
+    );
+
     const labelList& elements = sampleElements_;
+
 
     if (!onBoundary())
     {
@@ -48,7 +54,8 @@ Foam::sampledMeshedSurface::sampleOnFaces
             sampler,
             elements,
             faces(),
-            points()
+            points(),
+            deflt
         );
     }
 
@@ -60,33 +67,33 @@ Foam::sampledMeshedSurface::sampleOnFaces
     auto tvalues = tmp<Field<Type>>::New(elements.size());
     auto& values = tvalues.ref();
 
-    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-    const label nBnd = mesh().nBoundaryFaces();
-
     // Create flat boundary field
 
-    Field<Type> bVals(nBnd, Zero);
+    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+
+    Field<Type> bVals(mesh().nBoundaryFaces(), Zero);
 
     const auto& bField = sampler.psi().boundaryField();
 
     forAll(bField, patchi)
     {
-        const label bFacei = (pbm[patchi].start() - mesh().nInternalFaces());
-
-        SubList<Type>
-        (
-            bVals,
-            bField[patchi].size(),
-            bFacei
-        ) = bField[patchi];
+        SubList<Type>(bVals, pbm[patchi].range()) = bField[patchi];
     }
 
-    // Sample in flat boundary field
+    // Sample within the flat boundary field
 
     forAll(elements, i)
     {
         const label bFacei = (elements[i] - mesh().nInternalFaces());
-        values[i] = bVals[bFacei];
+
+        if (bFacei < 0)
+        {
+            values[i] = deflt;
+        }
+        else
+        {
+            values[i] = bVals[bFacei];
+        }
     }
 
     return tvalues;
@@ -100,34 +107,60 @@ Foam::sampledMeshedSurface::sampleOnPoints
     const interpolation<Type>& interpolator
 ) const
 {
-    // One value per vertex
-    auto tvalues = tmp<Field<Type>>::New(sampleElements_.size());
+    const Type deflt
+    (
+        defaultValues_.getOrDefault<Type>(interpolator.psi().name(), Zero)
+    );
+
+    const labelList& elements = sampleElements_;
+
+
+    // One value per vertex.
+    // - sampleElements_ and samplePoints_ have the identical size
+    auto tvalues = tmp<Field<Type>>::New(elements.size());
     auto& values = tvalues.ref();
 
     if (!onBoundary())
     {
         // Sample cells
 
-        forAll(sampleElements_, pointi)
+        forAll(elements, i)
         {
-            values[pointi] = interpolator.interpolate
-            (
-                samplePoints_[pointi],
-                sampleElements_[pointi]
-            );
+            const label celli = elements[i];
+
+            if (celli < 0)
+            {
+                values[i] = deflt;
+            }
+            else
+            {
+                values[i] = interpolator.interpolate
+                (
+                    samplePoints_[i],
+                    celli
+                );
+            }
         }
     }
-    else
+
+
+    //
+    // Sample boundary faces
+    //
+
+    forAll(elements, i)
     {
-        // Sample boundary faces
+        const label facei = elements[i];
 
-        forAll(samplePoints_, pointi)
+        if (facei < 0)
         {
-            const label facei = sampleElements_[pointi];
-
-            values[pointi] = interpolator.interpolate
+            values[i] = deflt;
+        }
+        else
+        {
+            values[i] = interpolator.interpolate
             (
-                samplePoints_[pointi],
+                samplePoints_[i],
                 mesh().faceOwner()[facei],
                 facei
             );

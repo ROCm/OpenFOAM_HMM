@@ -48,7 +48,7 @@ runTimeModifiable yes;
 
 functions
 {
-    surfaceFieldValue1
+    avgOutlets
     {
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);

@@ -118,7 +118,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     if (mandatory)
     {
         FatalErrorInFunction
-            << "Field " << fieldName << " not found in database"
+            << "Field " << fieldName << " not found in database" << nl
             << abort(FatalError);
     }
 

@@ -44,6 +44,28 @@ actions
         type    cellSet;
         action  invert;
     }
+
+    {
+        name    f0tmp;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        patch   inlet;
+    }
+
+    {
+        name    inletFaces;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        faceSet f0tmp;
+    }
+
+    {
+        name    f0tmp;
+        type    faceSet;
+        action  remove;
+    }
 );
 
 

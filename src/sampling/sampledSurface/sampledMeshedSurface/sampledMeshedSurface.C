@@ -170,9 +170,9 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // Does approximation by looking at the face centres only
     const pointField& fc = surface_.faceCentres();
 
-    List<nearInfo> nearest(fc.size(), nearInfo(GREAT, labelMax));
+    List<nearInfo> nearest(fc.size(), nearInfo(Foam::sqr(GREAT), labelMax));
 
-    if (sampleSource_ == cells)
+    if (sampleSource_ == samplingSource::cells)
     {
         // Search for nearest cell
 
@@ -181,17 +181,18 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         forAll(fc, facei)
         {
             const point& pt = fc[facei];
+            auto& near = nearest[facei];
 
-            pointIndexHit info = cellTree.findNearest(pt, sqr(GREAT));
+            pointIndexHit info = cellTree.findNearest(pt, Foam::sqr(GREAT));
 
             if (info.hit())
             {
-                nearest[facei].first()  = magSqr(info.hitPoint()-pt);
-                nearest[facei].second() = globalCells.toGlobal(info.index());
+                near.first()  = magSqr(info.hitPoint()-pt);
+                near.second() = globalCells.toGlobal(info.index());
             }
         }
     }
-    else if (sampleSource_ == insideCells)
+    else if (sampleSource_ == samplingSource::insideCells)
     {
         // Search for cell containing point
 
@@ -200,35 +201,37 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         forAll(fc, facei)
         {
             const point& pt = fc[facei];
+            auto& near = nearest[facei];
 
             if (cellTree.bb().contains(pt))
             {
                 const label index = cellTree.findInside(pt);
                 if (index != -1)
                 {
-                    nearest[facei].first()  = 0;
-                    nearest[facei].second() = globalCells.toGlobal(index);
+                    near.first()  = 0;
+                    near.second() = globalCells.toGlobal(index);
                 }
             }
         }
     }
-    else
+    else  // samplingSource::boundaryFaces
     {
-        // Search for nearest boundaryFace
+        // Search for nearest boundary face
+        // on all non-coupled boundary faces
 
-        //- Search on all non-coupled boundary faces
         const auto& bndTree = meshSearcher.nonCoupledBoundaryTree();
 
         forAll(fc, facei)
         {
             const point& pt = fc[facei];
+            auto& near = nearest[facei];
 
             pointIndexHit info = bndTree.findNearest(pt, sqr(GREAT));
 
             if (info.hit())
             {
-                nearest[facei].first()  = magSqr(info.hitPoint()-pt);
-                nearest[facei].second() =
+                near.first()  = magSqr(info.hitPoint()-pt);
+                near.second() =
                     globalCells.toGlobal
                     (
                         bndTree.shapes().faceLabels()[info.index()]
@@ -250,16 +253,26 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
 
     forAll(nearest, facei)
     {
-        const label index = nearest[facei].second();
+        const auto& near = nearest[facei];
+
+        const label index = near.second();
 
         if (index == labelMax)
         {
-            // Not found on any processor. How to map?
+            // Not found on any processor, or simply too far.
+            // How to map?
         }
         else if (globalCells.isLocal(index))
         {
-            cellOrFaceLabels[facei] = globalCells.toLocal(index);
             facesToSubset.set(facei);
+
+            // Mark as special if too far away
+            cellOrFaceLabels[facei] =
+            (
+                (near.first() < maxDistanceSqr_)
+              ? globalCells.toLocal(index)
+              : -1
+            );
         }
     }
 
@@ -295,7 +308,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     {
         // With point interpolation
 
-        samplePoints_.resize(pointMap.size());
+        samplePoints_ = points();
         sampleElements_.resize(pointMap.size(), -1);
 
         // Store any face per point (without using pointFaces())
@@ -312,34 +325,27 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
         }
 
 
-        if (sampleSource_ == cells)
+        if (sampleSource_ == samplingSource::cells)
         {
-            // samplePoints_   : per surface point a location inside the cell
-            // sampleElements_ : per surface point the cell
+            // sampleElements_ : per surface point, the cell
+            // samplePoints_   : per surface point, a location inside the cell
 
-            forAll(points(), pointi)
+            forAll(samplePoints_, pointi)
             {
-                const point& pt = points()[pointi];
+                // Use _copy_ of point
+                const point pt = samplePoints_[pointi];
 
                 const label celli = cellOrFaceLabels[pointToFace[pointi]];
 
                 sampleElements_[pointi] = celli;
 
-                // Check if point inside cell
                 if
                 (
-                    mesh().pointInCell
-                    (
-                        pt,
-                        sampleElements_[pointi],
-                        meshSearcher.decompMode()
-                    )
+                    celli >= 0
+                 && !mesh().pointInCell(pt, celli, meshSearcher.decompMode())
                 )
                 {
-                    samplePoints_[pointi] = pt;
-                }
-                else
-                {
+                    // Point not inside cell
                     // Find nearest point on faces of cell
 
                     scalar minDistSqr = VGREAT;
@@ -348,7 +354,12 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                     {
                         const face& f = mesh().faces()[facei];
 
-                        pointHit info = f.nearestPoint(pt, mesh().points());
+                        pointHit info =
+                            f.nearestPoint
+                            (
+                                pt,
+                                mesh().points()
+                            );
 
                         if (info.distance() < minDistSqr)
                         {
@@ -359,53 +370,56 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
                 }
             }
         }
-        else if (sampleSource_ == insideCells)
+        else if (sampleSource_ == samplingSource::insideCells)
         {
-            // samplePoints_   : per surface point a location inside the cell
             // sampleElements_ : per surface point the cell
+            // samplePoints_   : per surface point a location inside the cell
 
-            forAll(points(), pointi)
+            forAll(samplePoints_, pointi)
             {
-                const point& pt = points()[pointi];
-
                 const label celli = cellOrFaceLabels[pointToFace[pointi]];
 
                 sampleElements_[pointi] = celli;
-                samplePoints_[pointi] = pt;
             }
         }
-        else
+        else  // samplingSource::boundaryFaces
         {
-            // samplePoints_   : per surface point a location on the boundary
-            // sampleElements_ : per surface point the boundary face containing
+            // sampleElements_ : per surface point, the boundary face containing
             //                   the location
+            // samplePoints_   : per surface point, a location on the boundary
 
-            forAll(points(), pointi)
+            forAll(samplePoints_, pointi)
             {
-                const point& pt = points()[pointi];
+                const point& pt = samplePoints_[pointi];
 
                 const label facei = cellOrFaceLabels[pointToFace[pointi]];
 
                 sampleElements_[pointi] = facei;
-                samplePoints_[pointi] = mesh().faces()[facei].nearestPoint
-                (
-                    pt,
-                    mesh().points()
-                ).rawPoint();
+
+                if (facei >= 0)
+                {
+                    samplePoints_[pointi] =
+                        mesh().faces()[facei].nearestPoint
+                        (
+                            pt,
+                            mesh().points()
+                        ).rawPoint();
+                }
             }
         }
     }
     else
     {
         // if sampleSource_ == cells:
-        //      sampleElements_ : per surface triangle the cell
+        //      sampleElements_ : per surface face, the cell
         //      samplePoints_   : n/a
         // if sampleSource_ == insideCells:
-        //      sampleElements_ : -1 or per surface triangle the cell
+        //      sampleElements_ : -1 or per surface face, the cell
         //      samplePoints_   : n/a
-        // else:
-        //      sampleElements_ : per surface triangle the boundary face
+        // if sampleSource_ == boundaryFaces:
+        //      sampleElements_ : per surface face, the boundary face
         //      samplePoints_   : n/a
+
         sampleElements_.transfer(cellOrFaceLabels);
         samplePoints_.clear();
     }
@@ -431,14 +445,14 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
             forAll(samplePoints_, pointi)
             {
                 meshTools::writeOBJ(str, points()[pointi]);
-                vertI++;
+                ++vertI;
 
                 meshTools::writeOBJ(str, samplePoints_[pointi]);
-                vertI++;
+                ++vertI;
 
                 label elemi = sampleElements_[pointi];
                 meshTools::writeOBJ(str, centres[elemi]);
-                vertI++;
+                ++vertI;
                 str << "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI << nl;
             }
         }
@@ -448,11 +462,11 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
             forAll(sampleElements_, triI)
             {
                 meshTools::writeOBJ(str, faceCentres()[triI]);
-                vertI++;
+                ++vertI;
 
                 label elemi = sampleElements_[triI];
                 meshTools::writeOBJ(str, centres[elemi]);
-                vertI++;
+                ++vertI;
                 str << "l " << vertI-1 << ' ' << vertI << nl;
             }
         }
@@ -474,7 +488,7 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
 )
 :
     sampledSurface(name, mesh),
-    MeshStorage(),
+    meshedSurface(),
     surfaceName_(surfaceName),
     surface_
     (
@@ -486,7 +500,9 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
     keepIds_(true),
     zoneIds_(),
     sampleElements_(),
-    samplePoints_()
+    samplePoints_(),
+    maxDistanceSqr_(Foam::sqr(GREAT)),
+    defaultValues_()
 {}
 
 
@@ -498,7 +514,7 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
 )
 :
     sampledSurface(name, mesh, dict),
-    MeshStorage(),
+    meshedSurface(),
     surfaceName_
     (
         meshedSurface::findFile
@@ -517,8 +533,25 @@ Foam::sampledMeshedSurface::sampledMeshedSurface
     keepIds_(dict.getOrDefault("keepIds", true)),
     zoneIds_(),
     sampleElements_(),
-    samplePoints_()
+    samplePoints_(),
+    maxDistanceSqr_(Foam::sqr(GREAT)),
+    defaultValues_(dict.subOrEmptyDict("defaultValue"))
 {
+    if (dict.readIfPresent("maxDistance", maxDistanceSqr_))
+    {
+        // Info<< "Limit to maxDistance " << maxDistanceSqr_ << nl;
+        // if (defaultValues_.empty())
+        // {
+        //     Info<< "defaultValues = zero" << nl;
+        // }
+        // else
+        // {
+        //     defaultValues_.writeEntry(Info);
+        // }
+
+        maxDistanceSqr_ = Foam::sqr(maxDistanceSqr_);
+    }
+
     wordRes includePatches;
     dict.readIfPresent("patches", includePatches);
     includePatches.uniq();
@@ -596,7 +629,7 @@ bool Foam::sampledMeshedSurface::expire()
     }
 
     sampledSurface::clearGeom();
-    MeshStorage::clear();
+    meshedSurface::clear();
     zoneIds_.clear();
 
     sampleElements_.clear();

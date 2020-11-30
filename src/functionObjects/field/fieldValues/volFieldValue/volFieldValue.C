@@ -135,9 +135,15 @@ void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
 ) const
 {
     volRegion::writeFileHeader(*this, os);
-    if (weightFieldName_ != "none")
+
+    if (weightFieldNames_.size())
     {
-        writeHeaderValue(os, "Weight field", weightFieldName_);
+        writeHeaderValue
+        (
+            os,
+            "Weight field",
+            flatOutput(weightFieldNames_, FlatOutput::BareComma{})
+        );
     }
 
     writeCommented(os, "Time");
@@ -210,7 +216,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
             true  // Failsafe behaviour
         )
     ),
-    weightFieldName_("none")
+    weightFieldNames_()
 {
     read(dict);
     writeFileHeader(file());
@@ -237,7 +243,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
             true  // Failsafe behaviour
         )
     ),
-    weightFieldName_("none")
+    weightFieldNames_()
 {
     read(dict);
 }
@@ -252,15 +258,33 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
 {
     fieldValue::read(dict);
 
-    weightFieldName_ = "none";
+    weightFieldNames_.clear();
 
     if (usesWeight())
     {
-        if (dict.readIfPresent("weightField", weightFieldName_))
+        // Can have "weightFields" or "weightField"
+
+        bool missing = true;
+        if (dict.readIfPresent("weightFields", weightFieldNames_))
         {
-            Info<< "    weight field = " << weightFieldName_;
+            missing = false;
         }
         else
+        {
+            weightFieldNames_.resize(1);
+
+            if (dict.readIfPresent("weightField", weightFieldNames_.first()))
+            {
+                missing = false;
+                if ("none" == weightFieldNames_.first())
+                {
+                    // "none" == no weighting
+                    weightFieldNames_.clear();
+                }
+            }
+        }
+
+        if (missing)
         {
             // Suggest possible alternative unweighted operation?
             FatalIOErrorInFunction(dict)
@@ -270,6 +294,16 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
                 << "use weightField 'none' to suppress weighting," << nl
                 << "or use a different operation."
                 << exit(FatalIOError);
+        }
+
+        Info<< "    weight field  = ";
+        if (weightFieldNames_.empty())
+        {
+            Info<< "none" << nl;
+        }
+        else
+        {
+            Info<< flatOutput(weightFieldNames_) << nl;
         }
     }
 
@@ -297,14 +331,45 @@ bool Foam::functionObjects::fieldValues::volFieldValue::write()
         V = filterField(fieldValue::mesh_.V());
     }
 
-    // Weight field - zero-size means weight = 1
-    scalarField weightField;
-    if (weightFieldName_ != "none")
+    // Check availability and type of weight field
+    // Only support a few weight types:
+    // scalar: 0-N fields
+
+    // Default is a zero-size scalar weight field (ie, weight = 1)
+    scalarField scalarWeights;
+
+    for (const word& weightName : weightFieldNames_)
     {
-        weightField = getFieldValues<scalar>(weightFieldName_, true);
+        if (validField<scalar>(weightName))
+        {
+            tmp<scalarField> tfld = getFieldValues<scalar>(weightName, true);
+
+            if (scalarWeights.empty())
+            {
+                scalarWeights = tfld;
+            }
+            else
+            {
+                scalarWeights *= tfld;
+            }
+        }
+        else if (weightName != "none")
+        {
+            // Silently ignore "none", flag everything else as an error
+
+            // TBD: treat missing "rho" like incompressible with rho = 1
+            // and/or provided rhoRef value
+
+            FatalErrorInFunction
+                << "weightField " << weightName
+                << " not found or an unsupported type" << nl
+                << abort(FatalError);
+        }
     }
 
-    writeAll(V, weightField);
+
+    // Process the fields
+    writeAll(V, scalarWeights);
 
     if (Pstream::master())
     {

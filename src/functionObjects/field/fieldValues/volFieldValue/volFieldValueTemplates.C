@@ -71,7 +71,7 @@ Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
     if (mandatory)
     {
         FatalErrorInFunction
-            << "Field " << fieldName << " not found in database"
+            << "Field " << fieldName << " not found in database" << nl
             << abort(FatalError);
     }
 
