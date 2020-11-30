@@ -366,7 +366,7 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     isoParams_
     (
         dict,
-        isoSurfaceParams::ALGO_POINT,
+        isoSurfaceParams::ALGO_TOPO,
         isoSurfaceParams::filterType::DIAGCELL
     ),
     average_(dict.getOrDefault("average", false)),

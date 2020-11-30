@@ -32,7 +32,7 @@ Description
     Some common dictionary properties:
     \table
         Property | Description                              | Required | Default
-        isoAlgorithm | (cell/topo/point)                    | no  | point
+        isoAlgorithm | (cell/topo/point)                    | no  | topo
         regularise | point snapping (bool or enum)          | no  | true
     \endtable
 

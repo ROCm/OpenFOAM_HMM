@@ -50,7 +50,7 @@ Usage
         type     | distanceSurface                          | yes |
         distance | Distance from surface                    | yes |
         signed   | Use sign when distance is positive       | partly |
-        isoMethod | Iso-algorithm (cell/topo/point)         | no  | cell
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
         regularise | Point snapping for iso-surface         | no  | true
         average  | Cell values from averaged point values   | no  | false
         bounds   | Limit with bounding box                  | no  |

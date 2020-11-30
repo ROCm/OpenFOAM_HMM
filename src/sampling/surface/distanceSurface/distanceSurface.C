@@ -76,8 +76,7 @@ Foam::distanceSurface::distanceSurface
     isoParams_
     (
         dict,
-        isoSurfaceParams::ALGO_CELL,
-        isoSurfaceParams::filterType::DIAGCELL
+        isoSurfaceBase::ALGO_TOPO
     ),
     isoSurfCellPtr_(nullptr),
     isoSurfPointPtr_(nullptr),

@@ -56,8 +56,8 @@ Usage
         type     | cuttingPlane                             | yes |
         planeType | plane description (pointAndNormal etc)  | yes |
         mergeTol | tolerance for merging points             | no  | 1e-6
-        isoMethod | Iso-algorithm (cell/topo/point)         | no  | point
-        regularise | point snapping (bool or enum)          | no  | true
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
+        regularise | Face simplification (enum or bool)     | no  | true
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
         zones    | limit to cell zones (names, regexs)      | no  |
