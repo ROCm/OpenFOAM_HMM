@@ -99,7 +99,7 @@ public:
         //- Move construct
         inline PtrList(PtrList<T>&& list);
 
-        //- Take ownerskip of pointers in the list, set old pointers to null.
+        //- Take ownership of pointers in the list, set old pointers to null.
         inline explicit PtrList(UList<T*>& list);
 
         //- Copy construct using 'clone()' method on each element

@@ -90,7 +90,7 @@ template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
     const label len,
-    const zero
+    const Foam::zero
 )
 :
     Field<T>(len, Zero),

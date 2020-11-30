@@ -109,9 +109,6 @@ namespace Foam
 template<unsigned Width> class PackedList;
 class labelRange;
 
-class Istream;
-class Ostream;
-
 template<unsigned Width>
 Istream& operator>>(Istream& is, PackedList<Width>& list);
 
@@ -136,9 +133,11 @@ public:
     // Types and dimension information
 
         //- The storage block type for bit elements
+        //  \note Type name compatibility with boost::dynamic_bitset
         typedef unsigned int block_type;
 
         //- The number of bits in a single block
+        //  \note Type name compatibility with boost::dynamic_bitset
         static constexpr unsigned bits_per_block
             = (std::numeric_limits<block_type>::digits);
 
@@ -218,6 +217,9 @@ protected:
         //- Clear any partial rubbish in the last addressable block
         //  This \a rubbish may have arisen from block-wise operations etc.
         inline void clear_trailing_bits();
+
+        //- Copy assignment
+        inline void copyAssign(const PackedList<Width>& rhs);
 
 
 public:
@@ -335,11 +337,8 @@ public:
 
     // Edit
 
-        //- Assign all entries to the given value. Takes linear time.
-        inline void assign(const unsigned int val);
-
-        //- Copy assignment.
-        inline void assign(const PackedList<Width>& rhs);
+        //- Assign all entries to the given value.
+        inline void fill(const unsigned int val);
 
         //- Trim any trailing zero elements, optionally specifying a
         //- a minimum position, below which trimming will not occur.
@@ -348,6 +347,7 @@ public:
         inline bool trim(label minpos=-1);
 
         //- Clear all bits but do not adjust the addressable size.
+        //  \note Method name compatibility with boost::dynamic_bitset
         inline void reset();
 
         //- Alter the size of the underlying storage.
@@ -358,9 +358,6 @@ public:
         //- Reset addressable list size, does not shrink the allocated size.
         //  Optionally specify a value for new elements.
         inline void resize(const label nElem, const unsigned int val = 0u);
-
-        //- Alias for resize()
-        inline void setSize(const label nElem, const unsigned int val = 0u);
 
         //- Reserve allocation space for at least this size.
         //  Never shrinks the allocated size.
@@ -382,7 +379,7 @@ public:
         inline void swap(PackedList<Width>& rhs);
 
         //- Transfer the contents of the argument list into this list
-        //  and annul the argument list.
+        //- and annul the argument list.
         inline void transfer(PackedList<Width>& rhs);
 
 
@@ -435,14 +432,14 @@ public:
         //  Fatal for out-of-range indices
         inline reference operator[](const label i);
 
-        //- Assignment of all entries to the given value. Takes linear time.
-        inline void operator=(const unsigned int val);
-
         //- Copy assignment.
         inline void operator=(const PackedList<Width>& lst);
 
         //- Move assignment.
         inline void operator=(PackedList<Width>&& lst);
+
+        //- Assign all entries to the given value. fill()
+        inline void operator=(const unsigned int val);
 
 
     // Access helpers
@@ -509,6 +506,23 @@ public:
             Istream& is,
             PackedList<Width>& list
         );
+
+
+    // Housekeeping
+
+        //- Deprecated(2020-11) use fill()
+        //  \deprecated(2020-11) use fill()
+        void assign(const unsigned int val) { this->fill(val); }
+
+        //- Deprecated(2020-11) use operator=
+        //  \deprecated(2020-11) use operator=
+        void assign(const PackedList<Width>& rhs) { (*this) = rhs; }
+
+        //- Alias for resize()
+        void setSize(const label len, unsigned int val = 0u)
+        {
+            resize(len, val);
+        }
 };
 
 

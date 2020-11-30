@@ -56,7 +56,6 @@ namespace Foam
 
 // Forward Declarations
 class bitSet;
-class labelRange;
 
 /*---------------------------------------------------------------------------*\
                            Class bitSet Declaration
@@ -66,8 +65,6 @@ class bitSet
 :
     public PackedList<1>
 {
-private:
-
     // Private Member Functions
 
         //- Find the first block with a '0' bit
@@ -218,12 +215,15 @@ public:
     // Query
 
         //- True if all bits in this bitset are set or if the set is empty.
+        //  \note Method name compatibility with boost::dynamic_bitset
         inline bool all() const;
 
         //- True if any bits in this bitset are set.
+        //  \note Method name compatibility with boost::dynamic_bitset
         inline bool any() const;
 
         //- True if no bits in this bitset are set.
+        //  \note Method name compatibility with boost::dynamic_bitset
         inline bool none() const;
 
         //- True if all entries have identical values, and the set is non-empty
@@ -232,6 +232,7 @@ public:
         //- Count number of bits set.
         //  \param on can be set to false to count the number of unset bits
         //     instead.
+        //  \note Method name compatibility with boost::dynamic_bitset
         inline unsigned int count(const bool on=true) const;
 
         //- True if any bits in the other bitset intersect (are the same).
@@ -292,7 +293,7 @@ public:
     // Assignment
 
         //- Assign all entries to the given value.
-        inline void assign(const bool val);
+        inline void fill(const bool val);
 
         //- Copy assign all entries from a list of bools.
         void assign(const UList<bool>& bools);
@@ -544,14 +545,14 @@ public:
         //  Fatal for out-of-range indices
         inline reference operator[](const label i);
 
-        //- Assignment of all entries to the given value.
-        inline bitSet& operator=(const bool val);
-
         //- Copy assignment
         inline bitSet& operator=(const bitSet& bitset);
 
         //- Move assignment
         inline bitSet& operator=(bitSet&& bitset);
+
+        //- Assign all entries to the given value. fill()
+        inline bitSet& operator=(const bool val);
 
         //- Bitwise-AND all the bits in other with the bits in this bitset.
         //  The operands may have dissimilar sizes without affecting the size
@@ -591,6 +592,13 @@ public:
         {
             return *this;
         }
+
+
+    // Housekeeping
+
+        //- Deprecated(2020-11) use fill()
+        //  \deprecated(2020-11) use fill()
+        void assign(const unsigned int val) { this->fill(val); }
 };
 
 

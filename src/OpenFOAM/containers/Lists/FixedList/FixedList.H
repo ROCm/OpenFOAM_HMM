@@ -275,11 +275,17 @@ public:
 
     // Edit
 
-        //- Dummy resize function, to make FixedList consistent with List
+        //- Dummy function, to make FixedList consistent with List
         inline void resize(const label n);
 
-        //- Dummy setSize function, to make FixedList consistent with List
+        //- Dummy function, to make FixedList consistent with List
         inline void setSize(const label n);
+
+        //- Assign all entries to the given value
+        inline void fill(const T& val);
+
+        //- Assign all entries to zero
+        inline void fill(const Foam::zero);
 
         //- Move element to the first position.
         void moveFirst(const label i);
@@ -318,8 +324,11 @@ public:
         //- Assignment to an initializer list. Takes linear time
         inline void operator=(std::initializer_list<T> list);
 
-        //- Assignment of all entries to the given value
+        //- Assign all entries to the given value. fill()
         inline void operator=(const T& val);
+
+        //- Assign all entries to zero. fill()
+        inline void operator=(const Foam::zero);
 
         //- Copy assignment
         inline void operator=(const FixedList<T, N>& list);

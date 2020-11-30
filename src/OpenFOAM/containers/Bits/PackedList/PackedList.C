@@ -123,10 +123,10 @@ bool Foam::PackedList<Width>::uniform() const
     }
     else if (nblocks > 1)
     {
-        // Check all blocks that are completely occupied: (nblocks-1)
-        const unsigned int blockval =
-            BitOps::repeat_value<block_type,Width>(val);
+        // Fill value for complete blocks
+        const unsigned int blockval = repeated_value(val);
 
+        // Check each complete block (nblocks-1)
         for (label blocki = 0; identical && blocki < (nblocks-1); ++blocki)
         {
             identical = (blocks_[blocki] == blockval);

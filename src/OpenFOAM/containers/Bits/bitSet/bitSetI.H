@@ -90,7 +90,7 @@ inline Foam::bitSet::bitSet(const label n, const bool val)
 :
     bitSet(n)
 {
-    if (val) assign(val);
+    if (val) fill(val);
 }
 
 
@@ -539,7 +539,7 @@ inline void Foam::bitSet::transfer(bitSet& bitset)
 }
 
 
-inline void Foam::bitSet::assign(const bool val)
+inline void Foam::bitSet::fill(const bool val)
 {
     if (empty())
     {
@@ -548,20 +548,17 @@ inline void Foam::bitSet::assign(const bool val)
 
     const label nblocks = num_blocks(size());
 
+    // Fill value for complete blocks
+    const unsigned int blockval = (val ? ~0u : 0u);
+
+    for (label blocki=0; blocki < nblocks; ++blocki)
+    {
+        blocks_[blocki] = blockval;
+    }
+
     if (val)
     {
-        for (label blocki=0; blocki < nblocks; ++blocki)
-        {
-            blocks_[blocki] = (~0u);
-        }
         clear_trailing_bits();
-    }
-    else
-    {
-        for (label blocki=0; blocki < nblocks; ++blocki)
-        {
-            blocks_[blocki] = (0u);
-        }
     }
 }
 
@@ -691,13 +688,6 @@ inline Foam::bitSet::reference Foam::bitSet::operator[](const label i)
 }
 
 
-inline Foam::bitSet& Foam::bitSet::operator=(const bool val)
-{
-    PackedList<1>::operator=(val);
-    return *this;
-}
-
-
 inline Foam::bitSet& Foam::bitSet::operator=(const bitSet& bitset)
 {
     PackedList<1>::operator=(bitset);
@@ -708,6 +698,13 @@ inline Foam::bitSet& Foam::bitSet::operator=(const bitSet& bitset)
 inline Foam::bitSet& Foam::bitSet::operator=(bitSet&& bitset)
 {
     transfer(bitset);
+    return *this;
+}
+
+
+inline Foam::bitSet& Foam::bitSet::operator=(const bool val)
+{
+    fill(val);
     return *this;
 }
 

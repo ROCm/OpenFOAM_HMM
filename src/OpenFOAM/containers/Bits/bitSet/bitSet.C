@@ -329,8 +329,8 @@ void Foam::bitSet::assign(const UList<bool>& bools)
 {
     const label len = bools.size();
 
+    clear();
     resize(len);
-    assign(false);
 
     // Could also handle block-wise (in the future?)
 

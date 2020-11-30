@@ -45,20 +45,14 @@ inline const Foam::FixedList<T, N>& Foam::FixedList<T, N>::null()
 template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(const T& val)
 {
-    for (unsigned i=0; i<N; ++i)
-    {
-        v_[i] = val;
-    }
+    this->fill(val);
 }
 
 
 template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(const Foam::zero)
 {
-    for (unsigned i=0; i<N; ++i)
-    {
-        v_[i] = Zero;
-    }
+    this->fill(Zero);
 }
 
 
@@ -343,6 +337,26 @@ inline void Foam::FixedList<T, N>::setSize(const label n)
 
 
 template<class T, unsigned N>
+inline void Foam::FixedList<T, N>::fill(const T& val)
+{
+    for (unsigned i=0; i<N; ++i)
+    {
+        v_[i] = val;
+    }
+}
+
+
+template<class T, unsigned N>
+inline void Foam::FixedList<T, N>::fill(const Foam::zero)
+{
+    for (unsigned i=0; i<N; ++i)
+    {
+        v_[i] = Zero;
+    }
+}
+
+
+template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& list)
 {
     if (this == &list)
@@ -443,11 +457,16 @@ inline void Foam::FixedList<T, N>::operator=(std::initializer_list<T> list)
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::operator=(const T& val)
 {
-    for (unsigned i=0; i<N; ++i)
-    {
-        v_[i] = val;
-    }
+    this->fill(val);
 }
+
+
+template<class T, unsigned N>
+inline void Foam::FixedList<T, N>::operator=(const Foam::zero)
+{
+    this->fill(Zero);
+}
+
 
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::operator=(const FixedList<T, N>& list)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,24 +138,35 @@ inline bool Foam::PackedList<Width>::trim(label minpos)
 }
 
 
+template<unsigned Width>
+inline void Foam::PackedList<Width>::copyAssign(const PackedList<Width>& rhs)
+{
+    // Self-assignment silently ignored
+    blocks_ = rhs.blocks_;
+    size_ = rhs.size_;
+}
+
+
 // * * * * * * * * * * * * * * * Specializations * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    template<> inline unsigned int PackedList<1>::repeated_value(unsigned val)
-    {
-        return (val ? ~0u : 0u);
-    }
 
-    template<> inline unsigned int PackedList<1>::readValue(Istream& is)
-    {
-        return readBool(is);
-    }
+// constexpr noexcept
+template<> inline unsigned int PackedList<1>::repeated_value(unsigned val)
+{
+    return (val ? ~0u : 0u);
+}
 
-    template<> inline void PackedList<1>::setPair(Istream& is)
-    {
-        set(readLabel(is), true);
-    }
+template<> inline unsigned int PackedList<1>::readValue(Istream& is)
+{
+    return readBool(is);
+}
+
+template<> inline void PackedList<1>::setPair(Istream& is)
+{
+    set(readLabel(is), true);
+}
 
 } // End namespace Foam
 
@@ -447,17 +458,6 @@ inline void Foam::PackedList<Width>::resize
 
 
 template<unsigned Width>
-inline void Foam::PackedList<Width>::setSize
-(
-    const label newSize,
-    const unsigned int val
-)
-{
-    resize(newSize, val);
-}
-
-
-template<unsigned Width>
 inline void Foam::PackedList<Width>::setCapacity(const label numElem)
 {
     const label nblocks = num_blocks(numElem);
@@ -680,41 +680,27 @@ inline unsigned int Foam::PackedList<Width>::remove()
 
 
 template<unsigned Width>
-inline void Foam::PackedList<Width>::assign(const unsigned int val)
+inline void Foam::PackedList<Width>::fill(const unsigned int val)
 {
+    if (empty())
+    {
+        return;  // Trivial case
+    }
+
     const label nblocks = num_blocks(size());
 
-    // Trivial cases first
-    if (!nblocks)
-    {
-        return;
-    }
-    else if (!val)
-    {
-        for (label blocki=0; blocki < nblocks; ++blocki)
-        {
-            blocks_[blocki] = 0u;
-        }
-        return;
-    }
-
     // Fill value for complete blocks
-    const unsigned int blockval = repeated_value(val);
+    const unsigned int blockval = (val ? repeated_value(val) : 0u);
 
     for (label blocki=0; blocki < nblocks; ++blocki)
     {
         blocks_[blocki] = blockval;
     }
 
-    clear_trailing_bits();
-}
-
-
-template<unsigned Width>
-inline void Foam::PackedList<Width>::assign(const PackedList<Width>& list)
-{
-    blocks_ = list.blocks_;
-    size_ = list.size_;
+    if (val)
+    {
+        clear_trailing_bits();
+    }
 }
 
 
@@ -739,16 +725,9 @@ Foam::PackedList<Width>::operator[](const label i)
 
 
 template<unsigned Width>
-inline void Foam::PackedList<Width>::operator=(const unsigned int val)
-{
-    assign(val);
-}
-
-
-template<unsigned Width>
 inline void Foam::PackedList<Width>::operator=(const PackedList<Width>& rhs)
 {
-    assign(rhs);
+    copyAssign(rhs);
 }
 
 
@@ -756,6 +735,13 @@ template<unsigned Width>
 inline void Foam::PackedList<Width>::operator=(PackedList<Width>&& rhs)
 {
     transfer(rhs);
+}
+
+
+template<unsigned Width>
+inline void Foam::PackedList<Width>::operator=(const unsigned int val)
+{
+    fill(val);
 }
 
 

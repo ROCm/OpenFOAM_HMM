@@ -93,7 +93,7 @@ public:
         //- Move construct
         inline PtrDynList(PtrDynList<T, SizeMin>&& list);
 
-        //- Take ownerskip of pointers in the list, set old pointers to null.
+        //- Take ownership of pointers in the list, set old pointers to null.
         inline explicit PtrDynList(UList<T*>& list);
 
 
