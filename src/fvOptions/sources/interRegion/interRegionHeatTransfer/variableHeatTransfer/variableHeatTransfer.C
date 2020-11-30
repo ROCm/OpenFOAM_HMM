@@ -37,12 +37,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(variableHeatTransfer, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        variableHeatTransfer,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, variableHeatTransfer, dictionary);
 }
 }
 
@@ -97,30 +92,28 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 
 void Foam::fv::variableHeatTransfer::calculateHtc()
 {
-    const fvMesh& nbrMesh =
-        mesh_.time().lookupObject<fvMesh>(nbrRegionName());
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
-    const compressible::turbulenceModel& nbrTurb =
+    const auto& nbrTurb =
         nbrMesh.lookupObject<compressible::turbulenceModel>
         (
             turbulenceModel::propertiesName
         );
 
-    const fluidThermo& nbrThermo =
+    const auto& nbrThermo =
         nbrMesh.lookupObject<fluidThermo>(basicThermo::dictName);
 
-    const volVectorField& UNbr =
-        nbrMesh.lookupObject<volVectorField>(UNbrName_);
+    const auto& UNbr = nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
-    const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
+    tmp<volScalarField> ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
 
-    const volScalarField NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
+    tmp<volScalarField> NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
 
-    const scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
+    scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
 
-    const scalarField htcNbrMapped(interpolate(htcNbr));
+    tmp<scalarField> htcNbrMapped(interpolate(htcNbr));
 
-    htc_.primitiveFieldRef() = htcNbrMapped * AoV_();
+    htc_.primitiveFieldRef() = htcNbrMapped*AoV_();
 }
 
 

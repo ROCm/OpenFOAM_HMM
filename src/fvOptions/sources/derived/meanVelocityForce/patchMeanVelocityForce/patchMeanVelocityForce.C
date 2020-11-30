@@ -36,13 +36,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(patchMeanVelocityForce, 0);
-
-    addToRunTimeSelectionTable
-    (
-        option,
-        patchMeanVelocityForce,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, patchMeanVelocityForce, dictionary);
 }
 }
 
@@ -63,9 +57,9 @@ Foam::fv::patchMeanVelocityForce::patchMeanVelocityForce
 {
     if (patchi_ < 0)
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "Cannot find patch " << patch_
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 }
 

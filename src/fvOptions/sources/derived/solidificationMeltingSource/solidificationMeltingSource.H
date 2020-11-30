@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,66 +31,104 @@ Group
     grpFvOptionsSources
 
 Description
-    This source is designed to model the effect of solidification and melting
-    processes, e.g. windhield defrosting.  The phase change occurs at the
-    melting temperature, \c Tmelt.
+    This source is designed to model the effect of solidification and
+    melting processes, e.g. windhield defrosting, within a specified region.
+    The phase change occurs at the melting temperature, \c Tmelt.
 
     The presence of the solid phase in the flow field is incorporated into the
     model as a momentum porosity contribution; the energy associated with the
     phase change is added as an enthalpy contribution.
 
-    Based on the references:
-    -# V.R. Voller and C. Prakash, A fixed grid numerical modelling
-       methodology for convection-diffusion mushy phase-change problems,
-       Int. J. Heat Mass Transfer 30(8):17091719, 1987.
-    -# C.R. Swaminathan. and V.R. Voller, A general enthalpy model for
-       modeling solidification processes, Metallurgical Transactions
-       23B:651664, 1992.
+    References:
+    \verbatim
+        Voller, V. R., & Prakash, C. (1987).
+        A fixed grid numerical modelling methodology for
+        convection-diffusion mushy region phase-change problems.
+        International Journal of Heat and Mass Transfer, 30(8), 1709-1719.
+        DOI:10.1016/0017-9310(87)90317-6
+
+        Swaminathan, C. R., & Voller, V. R. (1992).
+        A general enthalpy method for modeling solidification processes.
+        Metallurgical transactions B, 23(5), 651-664.
+        DOI:10.1007/BF02649725
+    \endverbatim
 
     The model generates a field \c \<name\>:alpha1 which can be visualised to
-    to show the melt distribution as a fraction [0-1]
+    to show the melt distribution as a fraction [0-1].
 
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
     solidificationMeltingSource1
     {
-        type            solidificationMeltingSource;
-        active          yes;
+        // Mandatory entries (unmodifiable)
+        type           solidificationMeltingSource;
 
-        selectionMode   cellZone;
-        cellZone        iceZone;
+        // Mandatory entries (runtime modifiable)
+        Tmelt          273;
+        L              334000;
+        thermoMode     <thermoModeName>;
+        rhoRef         800;
+        beta           5e-6;
 
-        Tmelt           273;
-        L               334000;
-        thermoMode      thermo;
-        beta            50e-6;
-        rhoRef          800;
+        // Optional entries (runtime modifiable)
+        relax          0.9;
+        T              <Tname>;
+        rho            <rhoName>;
+        U              <Uname>;
+        phi            <phiName>;
+        Cu             1e5;
+        q              1e-2;
+
+        // Conditional optional entries (runtime modifiable)
+
+            // when thermoMode=lookup
+            Cp         Cp;
+
+        // Conditional mandatory entries (runtime modifiable)
+
+            // when Cp=CpRef
+            CpRef  1000;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Where:
+    where the entries mean:
     \table
-        Property     | Description             | Required    | Default value
-        Tmelt        | Melting temperature [K] | yes         |
-        L            | Latent heat of fusion [J/kg] | yes    |
-        relax        | Relaxation coefficient [0-1] | no     | 0.9
-        thermoMode   | Thermo mode [thermo|lookup] | yes     |
-        rhoRef       | Reference (solid) density | yes       |
-        rho          | Name of density field   | no          | rho
-        T            | Name of temperature field | no        | T
-        Cp           | Name of specific heat capacity field | no | Cp
-        U            | Name of velocity field  | no          | U
-        phi          | Name of flux field      | no          | phi
-        Cu           | Model coefficient       | no          | 100000
-        q            | Model coefficient       | no          | 0.001
-        beta         | Thermal expansion coefficient [1/K] | yes |
-        g            | Accelerartion due to gravity | no     |
+      Property  | Description                       | Type   | Reqd | Dflt
+      type      | Type name: solidificationMeltingSource  | word   | yes   | -
+      Tmelt     | Melting temperature [K]           | scalar | yes  | -
+      L         | Latent heat of fusion [J/kg]      | scalar | yes  | -
+      thermoMode  | Thermo mode                     | word   | yes  | -
+      rhoRef    | Reference (solid) density         | scalar | yes  | -
+      beta      | Thermal expansion coefficient [1/K] | scalar | yes | -
+      relax     | Relaxation factor [0-1]           | scakar | no   | 0.9
+      T         | Name of operand temperature field | word   | no   | T
+      rho       | Name of operand density field     | word   | no   | rho
+      U         | Name of operand velocity field    | word   | no   | U
+      phi       | Name of operand flux field        | word   | no   | phi
+      Cu        | Mushy region momentum sink coefficient [1/s] <!--
+                -->                                 | scalar | no   | 1e5
+      q         | Coefficient used in porosity calc | scalar | no   | 1e-2
+      Cp        | Name of specific heat capacity field | word | cndtnl | Cp
+      CpRef     | Specific heat capacity value      | scalar | cndtnl  | -
     \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
+    Options for the \c thermoMode entry:
+    \verbatim
+      thermo    | Access Cp information from database
+      lookup    | Access Cp information by looking up from dictionary
+    \endverbatim
 
 SourceFiles
     solidificationMeltingSource.C
-    solidificationMeltingSourceIO.C
+    solidificationMeltingSourceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -119,18 +157,22 @@ class solidificationMeltingSource
 {
 public:
 
-    enum thermoMode
-    {
-        mdThermo,
-        mdLookup
-    };
+    // Public Enumerations
 
-    static const Enum<thermoMode> thermoModeTypeNames_;
+        //- Options for the thermo mode specification
+        enum thermoMode
+        {
+            mdThermo,
+            mdLookup
+        };
+
+        //- Names for thermoMode
+        static const Enum<thermoMode> thermoModeTypeNames_;
 
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Temperature at which melting occurs [K]
         scalar Tmelt_;
@@ -147,22 +189,22 @@ private:
         //- Reference density - typically the solid density
         scalar rhoRef_;
 
-        //- Name of temperature field - default = "T" (optional)
+        //- Name of operand temperature field
         word TName_;
 
-        //- Name of specific heat capacity field - default = "Cp" (optional)
+        //- Name of specific heat capacity field
         word CpName_;
 
-        //- Name of velocity field - default = "U" (optional)
+        //- Name of operand velocity field
         word UName_;
 
-        //- Name of flux field - default = "phi" (optional)
+        //- Name of operand flux field
         word phiName_;
 
-        //- Mushy region momentum sink coefficient [1/s]; default = 10^5
+        //- Mushy region momentum sink coefficient [1/s]
         scalar Cu_;
 
-        //- Coefficient used in porosity calc - default = 0.001
+        //- Coefficient used in porosity calculation
         scalar q_;
 
         //- Thermal expansion coefficient [1/K]
@@ -190,15 +232,6 @@ private:
         template<class RhoFieldType>
         void apply(const RhoFieldType& rho, fvMatrix<scalar>& eqn);
 
-        //- No copy construct
-        solidificationMeltingSource
-        (
-            const solidificationMeltingSource&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const solidificationMeltingSource&) = delete;
-
 
 public:
 
@@ -217,6 +250,15 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        solidificationMeltingSource
+        (
+            const solidificationMeltingSource&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const solidificationMeltingSource&) = delete;
+
 
     //- Destructor
     ~solidificationMeltingSource() = default;
@@ -229,7 +271,6 @@ public:
 
         //- Add implicit contribution to momentum equation
         virtual void addSup(fvMatrix<vector>& eqn, const label fieldi);
-
 
         //- Add explicit contribution to compressible enthalpy equation
         virtual void addSup

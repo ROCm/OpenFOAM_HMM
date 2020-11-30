@@ -55,7 +55,7 @@ class profileModelList
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Dictionary
         const dictionary dict_;

@@ -96,11 +96,10 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
     }
 
 
-    // Set the field name to that of the energy field from which the temperature
-    // is obtained
+    // Set the field name to that of the energy
+    // field from which the temperature is obtained
 
-    const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
     fieldNames_.setSize(1, thermo.he().name());
 
@@ -116,8 +115,7 @@ void Foam::fv::fixedTemperatureConstraint::constrain
     const label
 )
 {
-    const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
     switch (mode_)
     {
@@ -131,8 +129,7 @@ void Foam::fv::fixedTemperatureConstraint::constrain
         }
         case tmLookup:
         {
-            const volScalarField& T =
-                mesh().lookupObject<volScalarField>(TName_);
+            const auto& T = mesh().lookupObject<volScalarField>(TName_);
 
             scalarField Tlkp(T, cells_);
             eqn.setValues(cells_, thermo.he(thermo.p(), Tlkp, cells_));

@@ -39,12 +39,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(tabulatedAccelerationSource, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        tabulatedAccelerationSource,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, tabulatedAccelerationSource, dictionary);
 }
 }
 

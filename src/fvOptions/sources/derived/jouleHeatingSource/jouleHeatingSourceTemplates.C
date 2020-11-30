@@ -92,8 +92,7 @@ Foam::fv::jouleHeatingSource::updateSigma
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    VolFieldType& sigma =
-        mesh_.lookupObjectRef<VolFieldType>(typeName + ":sigma");
+    auto& sigma = mesh_.lookupObjectRef<VolFieldType>(typeName + ":sigma");
 
     if (!sigmaVsTPtr)
     {
@@ -101,7 +100,7 @@ Foam::fv::jouleHeatingSource::updateSigma
         return sigma;
     }
 
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
 
     // Internal field
     forAll(sigma, i)

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,13 +31,59 @@ Group
     grpFvOptionsSources
 
 Description
-    Base class for inter region heat exchange. The derived classes must
-    provide the heat transfer coeffisine (htc) which is used as follows
-    in the energy equation.
+    Intermediate class for handling inter-region heat exchanges.
 
-     \f[
+    The derived classes must provide the heat transfer
+    coefficients (htc) which is used as follows in the energy equation.
+
+    \f[
         -htc*Tmapped + Sp(htc, T)
-     \f]
+    \f]
+
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    <userDefinedName1>
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
+
+        // Mandatory entries (unmodifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+        nbrModel        <nbrModelName>;
+        semiImplicit    true;
+
+        // Optional entries (unmodifiable)
+        T               <Tname>;
+        Tnbr            <TnbrName>;
+
+        // Mandatory/Optional (derived) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type  | Reqd | Dflt
+      nbrModel  | Name of the model in the neighbour mesh | word  | yes  | -
+      fields    | Names of operand fields              | wordList | yes  | -
+      semiImplicit | Flag to activate semi-implicit coupling | bool | yes | -
+      T         | Name of operand temperature field       | word  | no   | T
+      Tnbr      | Name of operand neighbour temperature field | word | no | T
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link interRegionOption.H \endlink
+
+See also
+  - Foam::fv::constantHeatTransfer
+  - Foam::fv::tabulatedHeatTransfer
+  - Foam::fv::tabulatedNTUHeatTransfer
+  - Foam::fv::variableHeatTransfer
+
+SourceFiles
+    interRegionHeatTransferModel.C
+    interRegionHeatTransferModelTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,7 +110,7 @@ class interRegionHeatTransferModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of the model in the neighbour mesh
         word nbrModelName_;
@@ -71,7 +118,7 @@ protected:
         //- Pointer to neighbour interRegionHeatTransferModel
         interRegionHeatTransferModel* nbrModel_;
 
-        //- First iteration
+        //- Flag to determine the first iteration
         bool firstIter_;
 
         //- Flag to activate semi-implicit coupling
@@ -83,14 +130,14 @@ protected:
         //- Heat transfer coefficient [W/m2/k] times area/volume [1/m]
         volScalarField htc_;
 
-        //- Name of temperature field; default = "T"
+        //- Name of operand temperature field
         word TName_;
 
-        //- Name of neighbour temperature field; default = "T"
+        //- Name of operand neighbour temperature field
         word TNbrName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Set the neighbour interRegionHeatTransferModel
         void setNbrModel();
@@ -196,7 +243,7 @@ public:
 
         // IO
 
-            //- Read dictionary
+            //- Read source dictionary
             virtual bool read(const dictionary& dict);
 };
 

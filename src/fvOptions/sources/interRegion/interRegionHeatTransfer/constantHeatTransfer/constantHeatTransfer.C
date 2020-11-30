@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,12 +36,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(constantHeatTransfer, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        constantHeatTransfer,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, constantHeatTransfer, dictionary);
 }
 }
 
@@ -96,12 +92,6 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
         htc_ = htcConst_()*AoV_();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::constantHeatTransfer::~constantHeatTransfer()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

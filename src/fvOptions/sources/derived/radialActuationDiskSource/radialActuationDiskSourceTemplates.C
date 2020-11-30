@@ -103,7 +103,7 @@ addRadialActuationDiskAxialInertialResistance
         FatalErrorInFunction
            << "Cp and Ct must be greater than zero." << nl
            << "Cp = " << Cp << ", Ct = " << Ct
-           << exit(FatalIOError);
+           << exit(FatalError);
     }
 
     const scalar a = 1.0 - Cp/Ct;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,8 +31,8 @@ Group
     grpFvOptionsSources
 
 Description
-    Heat exchanger source model, in which the heat exchanger is defined as an
-    energy source using a selection of cells.
+    Heat exchanger source model for compressible flows, in which the heat
+    exchanger is defined as an energy source using a selection of cells.
 
     The total heat exchange source is given by:
     \f[
@@ -65,33 +65,81 @@ Description
         T_{ref} | min or max(T) in cell zone depending on the sign of Q_t [K]
     \endvartable
 
+    Sources applied to either of the below, if exist:
+    \verbatim
+      e         | Internal energy                            [m2/s2]
+      h         | Enthalphy                                  [m2/s2]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      T         | Temperature                                [K]
+      U         | Velocity                                   [m/s]
+      phi       | Mass flux                                  [kg/s]
+    \endverbatim
+
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
     effectivenessHeatExchangerSource1
     {
-        type            effectivenessHeatExchangerSource;
-        active          yes;
+        // Mandatory entries (unmodifiable)
+        type                effectivenessHeatExchangerSource;
 
-        selectionMode   cellZone;
-        cellZone        porosity;
+        // Mandatory entries (runtime modifiable)
+        faceZone                 <faceZoneName>;
+        secondaryMassFlowRate    1.0;
+        secondaryInletT          336;
 
-        secondaryMassFlowRate   1.0;
-        secondaryInletT 336;
-        faceZone        facesZoneInletOriented;
-        outOfBounds     clamp;
-        file            "effTable";
+        outOfBounds              clamp;
+        file                     "effTable";
 
-        // Optional
-        // primaryInletT 293;
-        // targetQdot   1500;
+        // Optional entries (runtime modifiable)
+        primaryInletT            293;
+        targetQdot               1500;
+        U                        <Uname>;
+        T                        <Tname>;
+        phi                      <phiName>;
+
+        // Conditional optional entries (runtime modifiable)
+
+            // when the entry "targetQdot" is present
+            targetQdotCalcInterval  1;
+            targetQdotRelax         1.0;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Optional entries:
-    - \c primaryInletT : sets the primary inlet temperature.  If not set, the
-      flux-averaged temperature is used.
-    - \c targetQdot : target heat rejection
+    where the entries mean:
+    \table
+      Property  | Description                       | Type  | Reqd | Dflt
+      type      | Type name: effectivenessHeatExchangerSource <!--
+                -->                                 | word  | yes  | -
+      secondaryMassFlowRate | Secondary flow mass rate [kg/s] <!--
+                -->                                 | scalar | yes | -
+      secondaryInletT | Inlet secondary temperature [K]       <!--
+                -->                                 | scalar | yes | -
+      faceZone  | Name of the faceZone at the heat exchange inlet <!--
+                -->                                 | word   | yes | -
+      file       | 2D look up table efficiency = function of primary <!--
+                --> and secondary mass flow rates [kg/s] | file | yes | -
+      primaryInletT | Primary air temperature at the heat exchanger inlet <!--
+                -->                                 | scalar | no  | -
+      targetQdot |  Target heat rejection           | scalar | no  | -
+      targetQdotCalcInterval | Target heat rejection calculation interval <!--
+                -->                                 | label  | no  | -
+      targetQdotRelax | Target heat rejection temperature <!--
+                --> under-relaxation coefficient    | scalar | no  | -
+      U          | Name of operand velocity field   | word   | no  | U
+      T          | Name of operand temperature field  | word   | no  | T
+      phi        | Name of operand flux field   | word   | no  | phi
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
 
     The effectiveness table is described in terms of the primary and secondary
     mass flow rates.  For example, the table:
@@ -104,7 +152,6 @@ Usage
      primary MFR  0.04 |   D     E     F
                   0.06 |   G     H     I
     \endverbatim
-
 
     is specified by the following:
 
@@ -138,12 +185,13 @@ Usage
     \endverbatim
 
 Note
-- the table with name \c file should have the same units as the
-  secondary mass flow rate and kg/s for phi
-- \c faceZone is the faces at the inlet of the \c cellzone, it needs to be
+  - The table with name \c file should have the same units as the
+  secondary mass flow rate and kg/s for \c phi.
+  - \c faceZone is the faces at the inlet of the \c cellZone, it needs to be
   created with flip map flags. It is used to integrate the net mass flow
-  rate into the heat exchanger
-
+  rate into the heat exchanger.
+  - \c primaryInletT sets the primary inlet temperature.  If not set, the
+  flux-averaged temperature is used.
 
 SourceFiles
     effectivenessHeatExchangerSource.C
@@ -172,10 +220,9 @@ class effectivenessHeatExchangerSource
 :
     public cellSetOption
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Secondary flow mass rate [kg/s]
         scalar secondaryMassFlowRate_;
@@ -202,7 +249,7 @@ protected:
         scalar targetQdotRelax_;
 
         //- 2D look up table efficiency = function of primary and secondary
-        // mass flow rates [kg/s]
+        //- mass flow rates [kg/s]
         autoPtr<interpolation2DTable<scalar>> eTable_;
 
         //- Name of velocity field; default = U
@@ -231,15 +278,6 @@ private:
 
     // Private Member Functions
 
-        //- No copy construct
-        effectivenessHeatExchangerSource
-        (
-            const effectivenessHeatExchangerSource&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const effectivenessHeatExchangerSource&) = delete;
-
         //- Initialise heat exchanger source model
         void initialise();
 
@@ -264,6 +302,15 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        effectivenessHeatExchangerSource
+        (
+            const effectivenessHeatExchangerSource&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const effectivenessHeatExchangerSource&) = delete;
+
 
     //- Destructor
     virtual ~effectivenessHeatExchangerSource() = default;
@@ -271,28 +318,24 @@ public:
 
     // Member Functions
 
-        // Explicit and implicit source
+        //- Add explicit/implicit contribution to momentum equation
+        virtual void addSup
+        (
+            fvMatrix<scalar>& eqn,
+            const label fieldi
+        )
+        {
+            NotImplemented;
+        }
 
-            //- Scalar
-            virtual void addSup
-            (
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            )
-            {
-                NotImplemented;
-            }
-
-
-        // Explicit and implicit source for compressible equation
-
-            //- Scalar
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            );
+        //- Add explicit/implicit contribution
+        //- to compressible momentum equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<scalar>& eqn,
+            const label fieldi
+        );
 
 
         // IO

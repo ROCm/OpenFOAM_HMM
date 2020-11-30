@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,20 +28,44 @@ Class
     Foam::fv::patchMeanVelocityForce
 
 Description
-    Calculates and applies the force necessary to maintain the specified mean
-    velocity averaged over the specified patch.
+    Applies the force over the specified patch to maintain
+    the specified mean velocity for incompressible flows.
 
-    Note: Currently only handles kinematic pressure (incompressible solvers).
+    Sources applied to:
+    \verbatim
+      U         | Velocity                                   [m/s]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      U         | Velocity                                   [m/s]
+    \endverbatim
 
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    selectionMode   all;                    // Apply force to all cells
-    fields          (U);                    // Name of velocity field
-    patch           inlet;                  // Name of the patch
-    Ubar            (10.0 0 0);             // Desired mean velocity
-    relaxation      0.2;                    // Optional relaxation factor
-    \endverbatim
+    patchMeanVelocityForce1
+    {
+        // Mandatory entries (unmodifiable)
+        type                 patchMeanVelocityForce;
+        patch                <patchName>;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd  | Dflt
+      type      | Type name: patchMeanVelocityForce | word   | yes   | -
+      patch     | Name of operand patch             | word   | yes   | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link meanVelocityForce.H \endlink
+
+See also
+  - Foam::fv::meanVelocityForce
 
 SourceFiles
     patchMeanVelocityForce.C
@@ -69,9 +94,9 @@ class patchMeanVelocityForce
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Patch name
+        //- Name of operand patch
         word patch_;
 
         //- Patch index
@@ -81,19 +106,8 @@ protected:
     // Protected Member Functions
 
         //- Calculate and return the magnitude of the mean velocity
-        //  averaged over the specified patch
+        //- averaged over the specified patch
         virtual scalar magUbarAve(const volVectorField& U) const;
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        patchMeanVelocityForce(const patchMeanVelocityForce&) = delete;
-
-        //- No copy assignment
-        void operator=(const patchMeanVelocityForce&) = delete;
 
 
 public:
@@ -112,6 +126,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        patchMeanVelocityForce(const patchMeanVelocityForce&) = delete;
+
+        //- No copy assignment
+        void operator=(const patchMeanVelocityForce&) = delete;
 
 
     //- Destructor

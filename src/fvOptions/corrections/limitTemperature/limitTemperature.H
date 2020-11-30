@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,23 +31,55 @@ Group
     grpFvOptionsCorrections
 
 Description
-    Correction for temperature to apply limits between minimum and maximum
-    values.
+    Corrects temperature field (i.e. \c T) within a specified
+    region by applying limits between a given minimum and maximum.
+
+    Corrections applied to:
+    \verbatim
+      T    | Temperature                   [K]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      T    | Temperature                   [K]
+      e/h  | Internal energy/Enthalphy     [m2/s2]
+    \endverbatim
 
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    limitT
+    limitTemperature1
     {
+        // Mandatory entries (unmodifiable)
         type            limitTemperature;
-        active          yes;
 
-        selectionMode   all;
-        min             200;
-        max             500;
-        phase           gas; //optional
+        // Mandatory entries (runtime modifiable)
+        min             <minValue>;
+        max             <maxValue>;
+
+        // Optional entries (runtime modifiable)
+        phase           <phaseName>;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                   | Type   | Reqd  | Dflt
+      type      | Type name: limitTemperature   | word   | yes   | -
+      min       | Minimum temperature limit [K] | scalar | yes   | -
+      max       | Maximum temperature limit [K] | scalar | yes   | -
+      phase     | Name of operand phase field   | word   | no    | ""
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
+See also
+  - Foam::fv::fixedTemperatureConstraint
 
 SourceFiles
     limitTemperature.C
@@ -75,7 +108,7 @@ class limitTemperature
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Minimum temperature limit [K]
         scalar Tmin_;
@@ -85,17 +118,6 @@ protected:
 
         //- Optional phase name [K]
         word phase_;
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        limitTemperature(const limitTemperature&) = delete;
-
-        //- No copy assignment
-        void operator=(const limitTemperature&) = delete;
 
 
 public:
@@ -114,6 +136,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        limitTemperature(const limitTemperature&) = delete;
+
+        //- No copy assignment
+        void operator=(const limitTemperature&) = delete;
 
 
     //- Destructor

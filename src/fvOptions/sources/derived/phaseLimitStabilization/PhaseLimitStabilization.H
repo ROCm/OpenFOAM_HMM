@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,8 @@ Class
     Foam::fv::PhaseLimitStabilization
 
 Description
-    Stabilization source for phase transport equations
+    Stabilization source for phase transport equations of \c Type,
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
     Applies an implicit source to the phase transport equation for the specified
     \c field when the phase volume fraction is below \c residualAlpha.  The
@@ -39,6 +41,36 @@ Description
     specified value or a value or field looked-up from the database.
 
 Usage
+    Minimal example by using \c constant/fvOptions:
+    <Type>PhaseLimitStabilization1
+    {
+        // Mandatory entries (unmodifiable)
+        type            <Type>PhaseLimitStabilization;
+        field           <fieldName>;
+        rate            <rateName>;
+
+        // Mandatory entries (runtime modifiable)
+        residualAlpha   1.0;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                          | Type | Reqd | Dflt
+      type      | Type name: \<Type\>PhaseLimitStabilization <!--
+                -->                                    | word | yes  | -
+      field     | Name of operand field                | word | yes  | -
+      rate      | Name of rate field                   | word | yes  | -
+      residualAlpha | Residual alpha value below which <!--
+                --> stabilization is applied           | scalar | yes | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+
     Example usage:
     \verbatim
     stabilization
@@ -77,25 +109,16 @@ class PhaseLimitStabilization
 :
     public option
 {
-    // Private data
+    // Private Data
 
-        //- Field name
+        //- Name of operand field
         word fieldName_;
 
-        //- Rate field name
+        //- Name of rate field
         word rateName_;
 
         //- Residual alpha value below which stabilization is applied
         scalar residualAlpha_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        PhaseLimitStabilization(const PhaseLimitStabilization&) = delete;
-
-        //- No copy assignment
-        void operator=(const PhaseLimitStabilization&) = delete;
 
 
 public:
@@ -114,6 +137,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        PhaseLimitStabilization(const PhaseLimitStabilization&) = delete;
+
+        //- No copy assignment
+        void operator=(const PhaseLimitStabilization&) = delete;
 
 
     //- Destructor

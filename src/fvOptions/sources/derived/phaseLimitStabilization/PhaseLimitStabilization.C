@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +65,7 @@ void Foam::fv::PhaseLimitStabilization<Type>::addSup
 {
     const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
 
-    uniformDimensionedScalarField& rate =
+    auto& rate =
         mesh_.lookupObjectRef<uniformDimensionedScalarField>(rateName_);
 
     eqn -= fvm::Sp(max(residualAlpha_ - alpha, scalar(0))*rho*rate, psi);

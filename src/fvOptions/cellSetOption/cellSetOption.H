@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,26 +28,71 @@ Class
     Foam::fv::cellSetOption
 
 Description
-    Cell-set options abstract base class.  Provides a base set of controls,
-    e.g.:
-    \verbatim
-        type            scalarExplicitSource    // Source type
-        active          on;                     // on/off switch
+    Intermediate abstract class for handling
+    cell-set options for the derived fvOptions.
 
-        timeStart       0.0;        // Start time
-        duration        1000.0;     // Duration
-        selectionMode   cellSet;    // cellSet, points, cellZone
-        .
-        .
-        .
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    <userDefinedName1>
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
+
+        // Mandatory entries (unmodifiable)
+        selectionMode     all;
+
+        // Optional entries (runtime modifiable)
+        timeStart         1.0;
+
+        // Conditional mandatory entries (runtime modifiable)
+
+            // when timeStart entry is present
+            duration          1.4;
+
+            // when selectionMode=cellSet
+            cellSet           <cellSetName>;
+
+            // when selectionMode=cellZone
+            cellZone          <cellZoneName>;
+
+            // when selectionMode=points
+            points            (<point1> <point2> ... <pointN>);
+
+        // Mandatory/Optional (derived) entries
+        ...
+    }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property      | Description                        | Type  | Reqd | Dflt
+      selectionMode | Mode of cell selection - see below | word  | yes  | -
+      timeStart     | Start time of fvOption             | scalar | no  | -1
+      duration      | Duration of fvOption execution <!--
+                          --> starting from timeStart    | scalar | cndtnl | 0
+      cellSet       | Name of operand cellSet            | word  | cndtnl | -
+      cellZone      | Name of operand cellZone           | word  | cndtnl | -
+      points        | Set of points in global coordinate <!--
+                            --> system              | vectorList | cndtnl | -
+    \endtable
+
+    Options for the \c selectionMode entry:
+    \verbatim
+      all       | Use all cells in the computational domain
+      cellZone  | Use a given cellZone
+      cellSet   | Use a given cellSet
+      points    | Use cells containing a given set of points
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+
 Note
-    Source/sink options are to be added to the equation R.H.S.
+  - Source/sink options are to be added to the right-hand side of equations.
 
 SourceFiles
     cellSetOption.C
-    cellSetOptionIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,7 +121,7 @@ class cellSetOption
 {
 public:
 
-    // Public data
+    // Public Data
 
         //- Enumeration for selection mode types
         enum selectionModeType
@@ -95,10 +140,10 @@ protected:
 
     // Protected data
 
-        //- Time start
+        //- Start time of fvOption
         scalar timeStart_;
 
-        //- Duration
+        //- Duration of fvOption execution starting from timeStart
         scalar duration_;
 
         //- Cell selection mode

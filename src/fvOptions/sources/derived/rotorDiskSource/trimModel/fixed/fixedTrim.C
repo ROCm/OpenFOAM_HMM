@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +38,6 @@ using namespace Foam::constant;
 namespace Foam
 {
     defineTypeNameAndDebug(fixedTrim, 0);
-
     addToRunTimeSelectionTable(trimModel, fixedTrim, dictionary);
 }
 

@@ -37,12 +37,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(limitVelocity, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        limitVelocity,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, limitVelocity, dictionary);
 }
 }
 
@@ -121,8 +116,8 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
         }
     }
 
-    // We've changed internal values so give boundary conditions opportunity
-    // to correct.
+    // We've changed internal values so give
+    // boundary conditions opportunity to correct
     U.correctBoundaryConditions();
 }
 

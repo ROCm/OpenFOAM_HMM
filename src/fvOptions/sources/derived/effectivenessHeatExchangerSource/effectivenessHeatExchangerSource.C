@@ -63,7 +63,7 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
             << type() << " " << this->name() << ": "
             << "    Unknown face zone name: " << faceZoneName_
             << ". Valid face zones are: " << mesh_.faceZones().names()
-            << nl << exit(FatalError);
+            << exit(FatalError);
     }
 
     const faceZone& fZone = mesh_.faceZones()[zoneID];
@@ -160,11 +160,10 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 {
     read(dict);
 
-    // Set the field name to that of the energy field from which the temperature
-    // is obtained
+    // Set the field name to that of the energy
+    // field from which the temperature is obtained
 
-    const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
     fieldNames_.setSize(1, thermo.he().name());
 
@@ -185,15 +184,13 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     const label
 )
 {
-    const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
     const surfaceScalarField Cpf(fvc::interpolate(thermo.Cp()));
 
-    const surfaceScalarField& phi =
-        mesh_.lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = mesh_.lookupObject<surfaceScalarField>(phiName_);
 
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
     const surfaceScalarField Tf(fvc::interpolate(T));
 
     scalar sumPhi = 0;
@@ -278,7 +275,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     }
 
 
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+    const auto& U = mesh_.lookupObject<volVectorField>(UName_);
     const scalarField& V = mesh_.V();
     scalar sumWeight = 0;
     forAll(cells_, i)
@@ -357,7 +354,6 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 
             Info<< indent << "temperature relaxation:  "
                 << targetQdotRelax_ << endl;
-
         }
 
         return true;

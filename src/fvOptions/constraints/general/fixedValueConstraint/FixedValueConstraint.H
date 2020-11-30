@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,9 +31,44 @@ Group
     grpFvOptionsConstraints
 
 Description
-    Constrain the field values within a specified region.
+    Constrain values of given fields of \c Type with
+    a given maximum value within a specified region,
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
 
 Usage
+    Minimal example by using \c constant/fvOptions:
+    <Type>FixedValueConstraint1
+    {
+        // Mandatory entries (unmodifiable)
+        type            <Type>FixedValueConstraint;
+
+        // Mandatory entries (runtime modifiable)
+        fieldValues
+        {
+            <fieldName1>           <value1>;
+            <fieldName2>           <value2>;
+            ...
+            <fieldNameN>           <valueN>;
+        }
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type | Reqd  | Dflt
+      type      | Type name: \<Type\>FixedValueConstraint | word | yes   | -
+      fieldValues | Dictionary containing pairs of names and maximum <!--
+           --> values of operand fields of \<Type\> | dictionary | yes   | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
+
     For example to set the turbulence properties within a porous region:
     \verbatim
     porosityTurbulence
@@ -51,7 +87,8 @@ Usage
     \endverbatim
 
 See also
-    Foam::fvOption
+  - Foam::fv::fixedTemperatureConstraint
+  - Foam::fv::velocityDampingConstraint
 
 SourceFiles
     FixedValueConstraint.C
@@ -80,7 +117,7 @@ class FixedValueConstraint
 :
     public cellSetOption
 {
-    // Private member data
+    // Private Data
 
         //- Field values
         List<Type> fieldValues_;
@@ -102,6 +139,16 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        FixedValueConstraint(const FixedValueConstraint&) = delete;
+
+        //- No copy assignment
+        void operator=(const FixedValueConstraint&) = delete;
+
+
+    //- Destructor
+    virtual ~FixedValueConstraint() = default;
 
 
     // Member Functions

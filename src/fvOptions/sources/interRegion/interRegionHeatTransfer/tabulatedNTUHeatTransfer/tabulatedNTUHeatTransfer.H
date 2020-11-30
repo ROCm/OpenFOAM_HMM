@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,11 @@ Group
     grpFvOptionsSources
 
 Description
-    Tabulated heat transfer model.
-
+    Applies a tabulated heat transfer model for inter-region heat exchanges.
     The heat flux is calculated based on the Number of Thermal Units (NTU).
-    A 2-D table of NTU as functions of the primary and secondary mass flow
-    rates is required.
+
+    A 2-D table of NTU as functions of the primary
+    and secondary mass flow rates is required.
 
     The exchanger geometry can be specified using either:
     - \c calculated:
@@ -59,8 +59,80 @@ Description
         C_{min} = min \left(Cp_1 \dot{m}_1, Cp_2 \dot{m}_2 \right)
     \f]
 
-    \heading Example usage
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    tabulatedNTUHeatTransfer1
+    {
+        // Mandatory entries (unmodifiable)
+        type            tabulatedNTUHeatTransfer;
 
+        // Mandatory entries (runtime modifiable)
+        geometryMode    <geometryMode>;
+        outOfBounds     clamp;
+        file            "ntuTable";
+
+        // Optional entries (runtime modifiable)
+        U               <Uname>;
+        Unbr            <UnbrName>;
+        rho             <rhoName>;
+        rhoNbr          <rhoNbrName>;
+
+        // Conditional mandatory entries (runtime modifiable)
+
+            // when geometryMode=user
+            Ain             0.01728;
+            AinNbr          0.3456;
+
+            // when geometryMode=calculated
+            inletPatch      inlet_HWK;
+            inletPatchNbr   inlet_air;
+            inletBlockageRatio 0.10;
+            inletBlockageRatioNbr 0.04;
+            coreBlockageRatio 0;
+
+        // Conditional optional entries (runtime modifiable)
+
+            // when geometryMode=user
+            Vcore           0.01244;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type  | Reqd | Dflt
+      type      | Type name: tabulatedNTUHeatTransfer | word  | yes  | -
+      geometryMode | Geometry mode type               | word  | yes  | -
+      file  | Heat transfer coefficient table  | interpolate2DTable | yes | -
+      U         | Name of operand velocity field   | word  | no   | U
+      Unbr      | Name of operand neighbour velocity field | word | no | U
+      Ain       | Inlet area [m2]                     | scalar | cndtnl | -
+      AinNbr    | Neighbour region inlet area [m2]    | scalar | cndtnl | -
+      Vcore     | Heat exchanger core volume          | scalar | cndtnl | -
+      inletPatch | Name of inlet patch                | word   | cndtnl | -
+      inletNbrPatch | Name of inlet patch neighbour   | word   | cndtnl | -
+      inletBlockageRatio | Inlet patch blockage ratio [0, 1]   <!--
+                    -->                               | scalar | cndtnl | -
+      inletBlockageRatioNbr | Inlet neighbour patch blockage ratio [0, 1] <!--
+                    -->                               | scalar | cndtnl | -
+      coreBlockageRatio  | Core volume blockage ratio [0, 1] <!--
+                    -->                               | scalar | cndtnl | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link interRegionHeatTransfer.H \endlink
+     - \link interpolate2DTable.H \endlink
+
+    Options for the \c geometryMode entry:
+    \verbatim
+      calculated    | Use settings computed internally
+      user          | Use settings provided by the user
+    \endverbatim
+
+    Example usage:
     \verbatim
     coolerToAir
     {
@@ -95,11 +167,14 @@ Description
     }
     \endverbatim
 
+See also
+  - Foam::fv::interRegionHeatTransferModel
+  - Foam::fv::constantHeatTransfer
+  - Foam::fv::tabulatedHeatTransfer
+  - Foam::fv::variableHeatTransfer
+
 SourceFiles
     tabulatedNTUHeatTransfer.C
-
-SeeAlso
-    interRegionHeatTransferModel.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -129,31 +204,33 @@ class tabulatedNTUHeatTransfer
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
+        //- Options for the geometry mode type
         enum geometryModeType
         {
             gmCalculated,
             gmUser
         };
 
+        //- Names for geometryModeType
         static const Enum<geometryModeType> geometryModelNames_;
 
 
 private:
 
-    // Private data
+    // Private Data
 
-        //- Name of velocity field; default = U
+        //- Name of operand velocity field
         word UName_;
 
-        //- Name of neighbour velocity field; default = U
+        //- Name of operand neighbour velocity field
         word UNbrName_;
 
-        //- Name of density field; default = rho
+        //- Name of operand density field
         word rhoName_;
 
-        //- Name of neighbour density field; default = rho
+        //- Name of operand neighbour density field
         word rhoNbrName_;
 
         //- Pointer to 2-D look-up table of NTU f(mDot1, mDot2)
@@ -172,7 +249,7 @@ private:
         scalar Vcore_;
 
 
-    // Private Member functions
+    // Private Member Functions
 
         //- NTU table helper
         const interpolation2DTable<Foam::scalar>& ntuTable();
@@ -192,7 +269,7 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from components
         tabulatedNTUHeatTransfer
         (
             const word& name,
@@ -201,9 +278,15 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        tabulatedNTUHeatTransfer(const tabulatedNTUHeatTransfer&) = delete;
+
+        //- No copy assignment
+        void operator=(const tabulatedNTUHeatTransfer&) = delete;
+
 
     //- Destructor
-    virtual ~tabulatedNTUHeatTransfer();
+    virtual ~tabulatedNTUHeatTransfer() = default;
 
 
     // Public Functions

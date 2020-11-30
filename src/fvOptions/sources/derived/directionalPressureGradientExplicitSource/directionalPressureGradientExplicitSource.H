@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,50 +30,84 @@ Group
     grpFvOptionsSources
 
 Description
-    Creates an explicit  pressure gradient source in such a way to deflect the
-    flow towards an specific direction (flowDir). Alternatively add an extra
-    pressure drop in the flowDir direction using a model.
+    Applies an explicit pressure gradient source in such a way to deflect the
+    flow towards an specific direction (\c flowDir). Alternatively add an extra
+    pressure drop in the \c flowDir direction using a model.
 
-    \heading Source usage
-    Example usage:
+Usage
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    airDeflection
+    directionalPressureGradientExplicitSource1
     {
+        // Mandatory entries (unmodifiable)
         type            directionalPressureGradientExplicitSource;
-        active          true;
 
-        directionalPressureGradientExplicitSourceCoeffs
-        {
-            selectionMode   cellZone;
-            cellZone        cZone;
+        // Mandatory entries (unmodifiable)
+        model       <modelName>;
+        fields      (<fieldName>);
 
-            fields      (U);            // Name of the field
-            flowDir     (1 1 0);        // Desired flow direction
-            faceZone    f0Zone;         // Face zone upstream cell zone
-            relaxationFactor    0.3;    // Relaxation factor for flow
-                                        // deflection (default 0.3)
+        // Mandatory entries (runtime modifiable)
+        flowDir     (1 1 0);
+        faceZone    <faceZoneName>;
 
-            //Pressure drop model [Pa]
-            model       volumetricFlowRateTable;//constant;//DarcyForchheimer;
+        // Conditional mandatory entries (unmodifiable)
 
-            //DarcyForchheimer model
-            // deltaP = (D*mu + 0.5*rho*magUn)*magUn*length_
+            // when <timePath>/uniform/<name>Properties file exists
+            gradient    <vectorField>; // reading from the aforementioned file
 
+            // when model=DarcyForchheimer
+            // deltaP = (D*mu + 0.5*rho*magUn)*magUn*length
             D           5e7;
             I           0;
             length      1e-3;
 
-            //constant model
+            // when model=constant
             pressureDrop    40;
 
-            //volumetricFlowRateTable model
+            // when model=volumetricFlowRateTable
             outOfBounds     clamp;
             fileName        "volFlowRateTable";
-        }
+
+        // Optional entries (runtime modifiable)
+        relaxationFactor    0.3;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    NOTE: In order to obtain the upwind velocities this function loops over
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd  | Dflt
+      type      | Type name: directionalPressureGradientExplicitSource <!--
+                -->                                 | word   | yes   | -
+      model     | Pressure drop model [Pa]          | word   | yes   | -
+      fields    | Name of operand field             | word   | yes   | -
+      gradient  | Initial pressure gradient field   | vectorField | cndtnl | -
+      flowDir   | Deflection flow direction         | vector | yes   | -
+      faceZone  | Name of upstream faceZone         | word   | yes   | -
+      relaxationFactor | Relaxation factor for flow deflection | scalar | no | 0.3
+      D         | Darcy pressure loss coefficient   | scalar | cndtnl | -
+      I         | Inertia pressure lost coefficient | scalar | cndtnl | -
+      length    | Porous media length               | scalar | cndtnl | -
+      presssureDrop | Constant pressure drop        | scalar | cndtnl | -
+      fileName  | Interpolation table for volumetric flow rate <!--
+                -->                     | interpolationTable | cndtnl | -
+    \endtable
+
+    Options for the \c model entry:
+    \verbatim
+      volumetricFlowRateTable | Pressure-gradient file
+      constant                | Constant pressure drop
+      DarcyForchheimer        | Darcy-Forchheimer model
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
+Note
+  - In order to obtain the upwind velocities this function loops over
     the slaves cells of the faceZone specified in the dictionary, on the other
     hand, the cellZone to which this source term is applied should be composed
     of the master cells and they should be 'downwind' the faceZone.
@@ -93,7 +127,6 @@ SourceFiles
 #include "cellSetOption.H"
 #include "interpolationTable.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -111,7 +144,7 @@ class directionalPressureGradientExplicitSource
 {
 public:
 
-    //  Public enumeration
+    //  Public Enumeration
 
         //- Modes of pressure drop
         enum pressureDropModel
@@ -124,7 +157,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         static const Enum<pressureDropModel> pressureDropModelNames_;
 
@@ -191,18 +224,6 @@ private:
         //- Correct driving force for a constant mass flow rate
         void update(fvMatrix<vector>& eqn);
 
-        //- No copy construct
-        directionalPressureGradientExplicitSource
-        (
-            const directionalPressureGradientExplicitSource&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=
-        (
-            const directionalPressureGradientExplicitSource&
-        ) = delete;
-
 
 public:
 
@@ -221,10 +242,26 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        directionalPressureGradientExplicitSource
+        (
+            const directionalPressureGradientExplicitSource&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=
+        (
+            const directionalPressureGradientExplicitSource&
+        ) = delete;
+
+
+    //- Destructor
+    virtual ~directionalPressureGradientExplicitSource() = default;
+
 
     // Member Functions
 
-        // Evaluate
+        // Evaluation
 
             //- Correct the pressure gradient
             virtual void correct(volVectorField& U);

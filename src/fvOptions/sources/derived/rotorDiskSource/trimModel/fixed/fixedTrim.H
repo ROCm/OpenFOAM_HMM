@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,35 @@ Class
     Foam::fixedTrim
 
 Description
-    Fixed trim coefficients
+    Trim model where the operating characteristics of rotor
+    (e.g. blade pitch angle) are fixed, hence the possibility
+    of varying thrust and torque.
+
+Usage
+    Minimal example by using \c constant/fvOptions:
+    rotorDiskSource1
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
+
+        // Mandatory entries (runtime modifiable)
+        trimModel    fixedTrim;
+
+        fixedTrimCoeffs
+        {
+            // Conditional mandatory entries (runtime modifiable)
+
+                // when trimModel=fixedTrim
+                theta0   5.0;
+                theta1c  1.0;
+                theta1s  4.0;
+        }
+    }
+
+See also
+  - Foam::fv::rotorDiskSource
+  - Foam::trimModel
+  - Foam::targetCoeffTrim
 
 SourceFiles
     fixedTrim.C
@@ -54,7 +83,7 @@ class fixedTrim
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Geometric angle of attack [rad]
         scalarField thetag_;
@@ -65,14 +94,24 @@ public:
     //- Run-time type information
     TypeName("fixedTrim");
 
-    //- Constructor
-    fixedTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
+
+    // Constructors
+
+        //- Constructor from rotor and dictionary
+        fixedTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
+
+        //- No copy construct
+        fixedTrim(const fixedTrim&) = delete;
+
+        //- No copy assignment
+        void operator=(const fixedTrim&) = delete;
+
 
     //- Destructor
     virtual ~fixedTrim() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Read
         void read(const dictionary& dict);

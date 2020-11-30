@@ -39,12 +39,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(explicitPorositySource, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        explicitPorositySource,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, explicitPorositySource, dictionary);
 }
 }
 

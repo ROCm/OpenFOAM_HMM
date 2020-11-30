@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,8 +129,9 @@ Foam::lookupProfile::lookupProfile
     }
     else
     {
-        FatalErrorInFunction
-            << "No profile data specified" << exit(FatalError);
+        FatalIOErrorInFunction(dict)
+            << "No profile data specified"
+            << exit(FatalIOError);
     }
 }
 
