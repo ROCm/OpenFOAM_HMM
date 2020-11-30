@@ -41,10 +41,6 @@
 # Trapped options
 #     -with-bear
 #
-# Note
-#     Locally handled options (eg, -log) must preceeded trapped options
-#     such as -with-bear. This is non-intuitive, but not easily fixed.
-#
 #------------------------------------------------------------------------------
 # Check environment
 [ -d "$WM_PROJECT_DIR" ] || {
@@ -69,7 +65,7 @@ Executing ${0##*/} is equivalent to
 
 With additional options:
     -l | -log       Tee output to log.\$WM_OPTIONS
-    -log=NAME       Tee output to given filename
+    -log=FILE       Tee output to given filename
     -prefix=...     Define FOAM_MODULE_PREFIX (same as wmake -module-prefix)
     -no-recursion   Prevent recursive call (do NOT call 'wmake -all')
     -fromWmake      Same as -no-recursion
@@ -100,9 +96,9 @@ do
         ;;
 
     -with-bear)
-        # Everything wrapped via 'bear'
+        # Use 'bear' as frontend wrapper to wmake
         optWmakeFrontend="-with-bear"
-        break  # Stop now, continue with wmake
+        continue    # Argument handled, remove it
         ;;
 
     -no-recurs* | -fromWmake)
@@ -137,18 +133,18 @@ do
         # Avoid potential conflicts
         unset FOAM_MODULE_APPBIN FOAM_MODULE_LIBBIN
         echo "Module prefix = ${FOAM_MODULE_PREFIX:-[]}" 1>&2
-        continue    # Handled argument
+        continue    # Argument handled, remove it
         ;;
 
     -k | -keep-going | -non-stop)
         # Keep going, ignoring errors
         export WM_CONTINUE_ON_ERROR=true
-        continue    # Permanently remove arg
+        continue    # Argument handled, remove it
         ;;
 
     -l | -log)
         optLog="log.${WM_OPTIONS:-build}"
-        continue    # Permanently remove arg
+        continue    # Argument handled, remove it
         ;;
 
     -log=*)
@@ -160,17 +156,17 @@ do
         then
             optLog="log.${WM_OPTIONS:-build}"
         fi
-        continue    # Permanently remove arg
+        continue    # Argument handled, remove it
         ;;
 
     -debug)
         optDebug="-debug"
-        continue    # Permanently remove arg
+        continue    # Argument handled, remove it
         ;;
 
     -q | -queue)
         optQueue="-queue"
-        continue    # Permanently remove arg
+        continue    # Argument handled, remove it
         ;;
 
     lib | libo | libso | dep | objects)
