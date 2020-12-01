@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 #include "constrainPressure.H"
 #include "adjustPhi.H"
 #include "Time.H"
+#include "fvOptions.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -101,10 +102,6 @@ Foam::simple::simple
     cumulativeContErr_(Zero),
     objectives_(0)
 {
-    fvOptions_.reset
-    (
-        new fv::optionList(mesh_, dict.subOrEmptyDict("fvOptions"))
-    );
     addExtraSchemes();
     setRefCell
     (
@@ -130,9 +127,20 @@ bool Foam::simple::readDict(const dictionary& dict)
 
 void Foam::simple::solveIter()
 {
-    const Time& time = mesh_.time();
-    Info<< "Time = " << time.timeName() << "\n" << endl;
+    preIter();
+    mainIter();
+    postIter();
+}
 
+
+void Foam::simple::preIter()
+{
+    Info<< "Time = " << mesh_.time().timeName() << "\n" << endl;
+}
+
+
+void Foam::simple::mainIter()
+{
     // Grab references
     volScalarField& p = incoVars_.pInst();
     volVectorField& U = incoVars_.UInst();
@@ -141,6 +149,7 @@ void Foam::simple::solveIter()
         incoVars_.turbulence();
     label&  pRefCell  = solverControl_().pRefCell();
     scalar& pRefValue = solverControl_().pRefValue();
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     // Momentum predictor
     //~~~~~~~~~~~~~~~~~~~
@@ -153,21 +162,19 @@ void Foam::simple::solveIter()
       + MRF_.DDt(U)
       + turbulence->divDevReff(U)
       ==
-        fvOptions_()(U)
+        fvOptions(U)
     );
     fvVectorMatrix& UEqn = tUEqn.ref();
 
-    addOptimisationTypeSource(UEqn);
-
     UEqn.relax();
 
-    fvOptions_().constrain(UEqn);
+    fvOptions.constrain(UEqn);
 
     if (solverControl_().momentumPredictor())
     {
         Foam::solve(UEqn == -fvc::grad(p));
 
-        fvOptions_().correct(U);
+        fvOptions.correct(U);
     }
 
     // Pressure Eq
@@ -220,12 +227,16 @@ void Foam::simple::solveIter()
         // Momentum corrector
         U = HbyA - rAtU()*fvc::grad(p);
         U.correctBoundaryConditions();
-        fvOptions_().correct(U);
+        fvOptions.correct(U);
     }
 
     incoVars_.laminarTransport().correct();
     turbulence->correct();
+}
 
+
+void Foam::simple::postIter()
+{
     solverControl_().write();
 
     // Print objective values to screen and compute mean value
@@ -241,7 +252,7 @@ void Foam::simple::solveIter()
     incoVars_.computeMeanFields();
 
     // Print execution time
-    time.printExecutionTime(Info);
+    mesh_.time().printExecutionTime(Info);
 }
 
 
@@ -250,26 +261,12 @@ void Foam::simple::solve()
     // Iterate
     if (active_)
     {
-        // Get the objectives for this solver
-        if (objectives_.empty())
-        {
-            objectives_ = getObjectiveFunctions();
-        }
-
-        // Reset initial and mean fields before solving
-        restoreInitValues();
-        incoVars_.resetMeanFields();
-
-        // Validate turbulence model fields
-        incoVars_.turbulence()->validate();
-
+        preLoop();
         while (solverControl_().loop())
         {
             solveIter();
         }
-
-        // Safety
-        objectives_.clear();
+        postLoop();
     }
 }
 
@@ -283,6 +280,35 @@ bool Foam::simple::loop()
 void Foam::simple::restoreInitValues()
 {
     incoVars_.restoreInitValues();
+}
+
+
+void Foam::simple::preLoop()
+{
+    // Get the objectives for this solver
+    if (objectives_.empty())
+    {
+        objectives_ = getObjectiveFunctions();
+    }
+
+    // Reset initial and mean fields before solving
+    restoreInitValues();
+    incoVars_.resetMeanFields();
+
+    // Validate turbulence model fields
+    incoVars_.turbulence()->validate();
+}
+
+
+void Foam::simple::postLoop()
+{
+    for (objective* obj : objectives_)
+    {
+        obj->writeInstantaneousSeparator();
+    }
+
+    // Safety
+    objectives_.clear();
 }
 
 

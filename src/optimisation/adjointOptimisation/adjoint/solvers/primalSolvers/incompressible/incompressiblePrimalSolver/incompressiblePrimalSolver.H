@@ -39,7 +39,6 @@ Description
 
 #include "primalSolver.H"
 #include "incompressibleVars.H"
-#include "fvOptionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,9 +75,6 @@ protected:
 
         //- Max iterations  for reconstructing phi from U and p
         label phiReconstructionIters_;
-
-        //- optionList for source terms addition
-        autoPtr<fv::optionList> fvOptions_;
 
 
 public:
