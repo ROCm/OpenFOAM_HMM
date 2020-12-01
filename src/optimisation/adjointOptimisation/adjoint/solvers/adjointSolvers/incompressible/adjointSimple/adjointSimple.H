@@ -149,11 +149,23 @@ public:
             //- Execute one iteration of the solution algorithm
             virtual void solveIter();
 
+            //- Steps to be executed before each main SIMPLE iteration
+            virtual void preIter();
+
+            //- The main SIMPLE iter
+            virtual void mainIter();
+
+            //- Steps to be executed before each main SIMPLE iteration
+            virtual void postIter();
+
             //- Main control loop
             virtual void solve();
 
             //- Looper (advances iters, time step)
             virtual bool loop();
+
+            //- Functions to be called before loop
+            virtual void preLoop();
 
             //- Compute sensitivities of the underlaying objectives
             virtual void computeObjectiveSensitivities();
@@ -167,6 +179,15 @@ public:
 
             //- Return the base sensitivity object
             virtual sensitivity& getSensitivityBase();
+
+
+            // Source terms to be added to the adjoint equations
+
+                //- Source terms for the momentum equations
+                virtual void addMomentumSource(fvVectorMatrix& matrix);
+
+                //- Source terms for the continuity equation
+                virtual void addPressureSource(fvScalarMatrix& matrix);
 
             //- Update primal based quantities
             //- related to the objective functions.

@@ -181,9 +181,20 @@ bool Foam::adjointSimple::readDict(const dictionary& dict)
 
 void Foam::adjointSimple::solveIter()
 {
-    const Time& time = mesh_.time();
-    Info<< "Time = " << time.timeName() << "\n" << endl;
+    preIter();
+    mainIter();
+    postIter();
+}
 
+
+void Foam::adjointSimple::preIter()
+{
+    Info<< "Time = " << mesh_.time().timeName() << "\n" << endl;
+}
+
+
+void Foam::adjointSimple::mainIter()
+{
     // Grab primal references
     const surfaceScalarField& phi = primalVars_.phi();
     // Grab adjoint references
@@ -217,8 +228,8 @@ void Foam::adjointSimple::solveIter()
     // Add ATC term
     ATCModel_->addATC(UaEqn);
 
-    // Add source from optimisationType (e.g. topology)
-    addOptimisationTypeSource(UaEqn);
+    // Additional source terms (e.g. energy equation)
+    addMomentumSource(UaEqn);
 
     UaEqn.relax();
 
@@ -266,6 +277,8 @@ void Foam::adjointSimple::solveIter()
 
             paEqn.boundaryManipulate(pa.boundaryFieldRef());
 
+            addPressureSource(paEqn);
+
             paEqn.setReference(paRefCell, paRefValue);
 
             paEqn.solve();
@@ -292,19 +305,23 @@ void Foam::adjointSimple::solveIter()
 
     if (solverControl_().printMaxMags())
     {
-        dimensionedScalar maxUa = max(mag(Ua));
-        dimensionedScalar maxpa = max(mag(pa));
+        dimensionedScalar maxUa = gMax(mag(Ua)());
+        dimensionedScalar maxpa = gMax(mag(pa)());
         Info<< "Max mag of adjoint velocity = " << maxUa.value() << endl;
         Info<< "Max mag of adjoint pressure = " << maxpa.value() << endl;
     }
+}
 
+
+void Foam::adjointSimple::postIter()
+{
     solverControl_().write();
 
     // Average fields if necessary
     adjointVars_.computeMeanFields();
 
     // Print execution time
-    time.printExecutionTime(Info);
+    mesh_.time().printExecutionTime(Info);
 }
 
 
@@ -312,10 +329,7 @@ void Foam::adjointSimple::solve()
 {
     if (active_)
     {
-        // Reset mean fields before solving
-        adjointVars_.resetMeanFields();
-
-        // Iterate
+        preLoop();
         while (solverControl_().loop())
         {
             solveIter();
@@ -327,6 +341,13 @@ void Foam::adjointSimple::solve()
 bool Foam::adjointSimple::loop()
 {
     return solverControl_().loop();
+}
+
+
+void Foam::adjointSimple::preLoop()
+{
+    // Reset mean fields before solving
+    adjointVars_.resetMeanFields();
 }
 
 
@@ -372,7 +393,7 @@ void Foam::adjointSimple::clearSensitivities()
 
 Foam::sensitivity& Foam::adjointSimple::getSensitivityBase()
 {
-    if (!adjointSensitivity_)
+    if (!adjointSensitivity_.valid())
     {
         FatalErrorInFunction
             << "Sensitivity object not allocated" << nl
@@ -383,6 +404,18 @@ Foam::sensitivity& Foam::adjointSimple::getSensitivityBase()
     }
 
     return adjointSensitivity_();
+}
+
+
+void Foam::adjointSimple::addMomentumSource(fvVectorMatrix& matrix)
+{
+    // Does nothing
+}
+
+
+void Foam::adjointSimple::addPressureSource(fvScalarMatrix& matrix)
+{
+    // Does nothing
 }
 
 
