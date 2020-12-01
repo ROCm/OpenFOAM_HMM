@@ -97,7 +97,7 @@ Foam::simple::simple
     incompressiblePrimalSolver(mesh, managerType, dict),
     solverControl_(SIMPLEControl::New(mesh, managerType, *this)),
     incoVars_(allocateVars()),
-    MRF_(mesh),
+    MRF_(mesh, word(useSolverNameForFields() ? solverName() : word::null)),
     cumulativeContErr_(Zero),
     objectives_(0)
 {
