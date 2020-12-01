@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +33,10 @@ License
 
 #include "LocalInteraction.H"
 #include "NoInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
 #include "MultiInteraction.H"
+#include "Rebound.H"
+#include "RecycleInteraction.H"
+#include "StandardWallInteraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,9 +46,10 @@ License
                                                                                \
     makePatchInteractionModelType(LocalInteraction, CloudType);                \
     makePatchInteractionModelType(NoInteraction, CloudType);                   \
+    makePatchInteractionModelType(MultiInteraction, CloudType);                \
     makePatchInteractionModelType(Rebound, CloudType);                         \
-    makePatchInteractionModelType(StandardWallInteraction, CloudType);         \
-    makePatchInteractionModelType(MultiInteraction, CloudType);
+    makePatchInteractionModelType(RecycleInteraction, CloudType);              \
+    makePatchInteractionModelType(StandardWallInteraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
