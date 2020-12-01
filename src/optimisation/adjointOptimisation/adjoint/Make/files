@@ -53,7 +53,6 @@ objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C
 objectives/incompressible/objectiveForce/objectiveForce.C
 objectives/incompressible/objectiveMoment/objectiveMoment.C
 objectives/incompressible/objectivePtLosses/objectivePtLosses.C
-objectives/incompressible/objectiveForceTarget/objectiveForceTarget.C
 objectives/incompressible/objectivePartialVolume/objectivePartialVolume.C
 objectives/incompressible/objectiveNutSqr/objectiveNutSqr.C
 
