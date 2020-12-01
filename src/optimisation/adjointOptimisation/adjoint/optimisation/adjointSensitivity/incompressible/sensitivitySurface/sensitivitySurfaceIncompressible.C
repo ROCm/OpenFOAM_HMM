@@ -240,6 +240,7 @@ sensitivitySurface::sensitivitySurface
     includePressureTerm_(false),
     includeGradStressTerm_(false),
     includeTransposeStresses_(false),
+    useSnGradInTranposeStresses_(false),
     includeDivTerm_(false),
     includeDistance_(false),
     includeMeshMovement_(false),
@@ -332,6 +333,8 @@ void sensitivitySurface::read()
         dict().getOrDefault<bool>("includeGradStressTerm", true);
     includeTransposeStresses_ =
         dict().getOrDefault<bool>("includeTransposeStresses", true);
+    useSnGradInTranposeStresses_ =
+        dict().getOrDefault<bool>("useSnGradInTranposeStresses", false);
     includeDivTerm_ = dict().getOrDefault<bool>("includeDivTerm", false);
     includeDistance_ =
         dict().getOrDefault<bool>
@@ -528,16 +531,17 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
 
         if (includeTransposeStresses_)
         {
+            vectorField gradUaNf
+                (
+                    useSnGradInTranposeStresses_ ?
+                    (Ua.boundaryField()[patchI].snGrad() & nf)*nf :
+                    (gradUa.boundaryField()[patchI] & nf)
+                );
+
             stressTerm -=
                 nuEff.boundaryField()[patchI]
-              * (
-                    // Note: in case of laminar or low-Re flows,
-                    // includes a spurious tangential gradUa component
-                    // (gradUa.boundaryField()[patchI] & nf)
-                    ((Ua.boundaryField()[patchI].snGrad() &nf)*nf)
-                    & U.boundaryField()[patchI].snGrad()
-                )
-              * nf;
+               *(gradUaNf & U.boundaryField()[patchI].snGrad())
+               *nf;
         }
 
         if (includeDivTerm_)

@@ -79,6 +79,9 @@ protected:
         //- Include the transpose part of the adjoint stresses
         bool includeTransposeStresses_;
 
+        //- Use snGrad in the transpose part of the adjoint stresses
+        bool useSnGradInTranposeStresses_;
+
         //- Include the term from the deviatoric part of the stresses
         bool includeDivTerm_;
 
