@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ License
 #include "Time.H"
 #include "deltaBoundary.H"
 #include "coupledFvPatch.H"
+#include "controlPointsDefinition.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,20 +46,6 @@ namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-Foam::label Foam::NURBS3DVolume::getCPID
-(
-    const label i,
-    const label j,
-    const label k
-) const
-{
-    const label nCPsU = basisU_.nCPs();
-    const label nCPsV = basisV_.nCPs();
-
-    return k*nCPsU*nCPsV + j*nCPsU + i;
-}
-
 
 void Foam::NURBS3DVolume::findPointsInBox(const vectorField& meshPoints)
 {
@@ -645,6 +632,7 @@ Foam::NURBS3DVolume::NURBS3DVolume
 )
 :
     mesh_(mesh),
+    dict_(dict),
     name_(dict.dictName()),
     basisU_(dict.get<label>("nCPsU"), dict.get<label>("degreeU")),
     basisV_(dict.get<label>("nCPsV"), dict.get<label>("degreeV")),
@@ -749,84 +737,8 @@ Foam::NURBS3DVolume::NURBS3DVolume
            << exit(FatalError);
     }
 
-    word controlPointsDefinition(dict.get<word>("controlPointsDefinition"));
-
-    // Read specific control points if given
-    if (controlPointsDefinition == "fromFile")
-    {
-        Info<< "Reading control points from file " << endl;
-        IOdictionary cpsDict
-        (
-            IOobject
-            (
-                name_ + "cpsBsplines" + mesh_.time().timeName(),
-                mesh_.time().caseConstant(),
-                cpsFolder_,
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-
-        cpsDict.readEntry("controlPoints", cps_);
-        if (cps_.size() != (basisU_.nCPs()*basisV_.nCPs()*basisW_.nCPs()))
-        {
-            FatalErrorInFunction
-               << "Number of control points does not agree with "
-               << "nCPsU*nCPv*nCPsW"
-               << exit(FatalError);
-        }
-    }
-    // Else, construct control points based on their min, max coordinates and
-    // their number
-    else if (controlPointsDefinition == "axisAligned")
-    {
-        const label nCPsU = basisU_.nCPs();
-        const label nCPsV = basisV_.nCPs();
-        const label nCPsW = basisW_.nCPs();
-
-        cps_.setSize(nCPsU * nCPsV * nCPsW);
-
-        vector lowerBounds(dict.get<vector>("lowerCpBounds"));
-        vector upperBounds(dict.get<vector>("upperCpBounds"));
-
-        // Equidistribute cps in th u,v,w directions
-        for (label iCPw = 0; iCPw < nCPsW; ++iCPw)
-        {
-            for (label iCPv = 0; iCPv < nCPsV; ++iCPv)
-            {
-                for (label iCPu = 0; iCPu < nCPsU; ++iCPu)
-                {
-                    cps_[getCPID(iCPu, iCPv, iCPw)] =
-                        (
-                            lowerBounds.x()
-                           +scalar(iCPu)/scalar(nCPsU - 1)
-                           *(upperBounds.x()-lowerBounds.x())
-                        )*vector(1, 0, 0)
-                      + (
-                            lowerBounds.y()
-                           +scalar(iCPv)/scalar(nCPsV - 1)
-                           *(upperBounds.y()-lowerBounds.y())
-                        )*vector(0, 1, 0)
-                      + (
-                            lowerBounds.z()
-                           +scalar(iCPw)/scalar(nCPsW - 1)
-                           *(upperBounds.z()-lowerBounds.z())
-                        )*vector(0, 0, 1);
-                }
-            }
-        }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Unknown controlPointsDefinition type "
-            << controlPointsDefinition
-            << endl << endl
-            << "Valid types are : axisAligned, fromFile" << endl
-            << exit(FatalError);
-    }
+    // Define control points
+    controlPointsDefinition::New(*this);
     determineActiveDesignVariablesAndPoints();
     writeCpsInDict();
 }
@@ -883,15 +795,16 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeU
 
     for (label iCPw = 0; iCPw < nCPsW; ++iCPw)
     {
+        const scalar basisW(basisW_.basisValue(iCPw, degreeW, w));
         for (label iCPv = 0; iCPv < nCPsV; ++iCPv)
         {
+            const scalar basisVW = basisW*basisV_.basisValue(iCPv, degreeV, v);
             for (label iCPu = 0; iCPu < nCPsU; ++iCPu)
             {
                 derivative +=
                     cps_[getCPID(iCPu, iCPv, iCPw)]
                    *basisU_.basisDerivativeU(iCPu, degreeU, u)
-                   *basisV_.basisValue(iCPv, degreeV, v)
-                   *basisW_.basisValue(iCPw, degreeW, w);
+                   *basisVW;
             }
         }
     }
@@ -919,15 +832,17 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeV
 
     for (label iCPw = 0; iCPw < nCPsW; ++iCPw)
     {
+        const scalar basisW(basisW_.basisValue(iCPw, degreeW, w));
         for (label iCPv = 0; iCPv < nCPsV; ++iCPv)
         {
+            const scalar basisWDeriV =
+                basisW*basisV_.basisDerivativeU(iCPv, degreeV, v);
             for (label iCPu = 0; iCPu < nCPsU; ++iCPu)
             {
                 derivative +=
                     cps_[getCPID(iCPu, iCPv, iCPw)]
                    *basisU_.basisValue(iCPu, degreeU, u)
-                   *basisV_.basisDerivativeU(iCPv, degreeV, v)
-                   *basisW_.basisValue(iCPw, degreeW, w);
+                   *basisWDeriV;
             }
         }
     }
@@ -955,15 +870,17 @@ Foam::vector Foam::NURBS3DVolume::volumeDerivativeW
 
     for (label iCPw = 0; iCPw < nCPsW; iCPw++)
     {
+        const scalar derivW(basisW_.basisDerivativeU(iCPw, degreeW, w));
         for (label iCPv = 0; iCPv < nCPsV; iCPv++)
         {
+            const scalar derivWBasisV =
+                derivW*basisV_.basisValue(iCPv, degreeV, v);
             for (label iCPu = 0; iCPu < nCPsU; iCPu++)
             {
                 derivative +=
                     cps_[getCPID(iCPu, iCPv, iCPw)]
                    *basisU_.basisValue(iCPu, degreeU, u)
-                   *basisV_.basisValue(iCPv, degreeV, v)
-                   *basisW_.basisDerivativeU(iCPw, degreeW, w);
+                   *derivWBasisV;
             }
         }
     }
@@ -1402,14 +1319,6 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::coordinates
     const vectorField& uVector
 ) const
 {
-    const label degreeU = basisU_.degree();
-    const label degreeV = basisV_.degree();
-    const label degreeW = basisW_.degree();
-
-    const label nCPsU = basisU_.nCPs();
-    const label nCPsV = basisV_.nCPs();
-    const label nCPsW = basisW_.nCPs();
-
     const label nPoints = mapPtr_().size();
     auto tpoints = tmp<vectorField>::New(nPoints, Zero);
     auto& points = tpoints.ref();
@@ -1417,23 +1326,7 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::coordinates
     forAll(points, pI)
     {
         const label globalPI = mapPtr_()[pI];
-        const scalar u = uVector[globalPI].x();
-        const scalar v = uVector[globalPI].y();
-        const scalar w = uVector[globalPI].z();
-        for (label iCPw = 0; iCPw < nCPsW; iCPw++)
-        {
-            for (label iCPv = 0; iCPv < nCPsV; iCPv++)
-            {
-                for (label iCPu = 0; iCPu < nCPsU; iCPu++)
-                {
-                    points[pI] +=
-                       cps_[getCPID(iCPu, iCPv, iCPw)]
-                      *basisU_.basisValue(iCPu, degreeU, u)
-                      *basisV_.basisValue(iCPv, degreeV, v)
-                      *basisW_.basisValue(iCPw, degreeW, w);
-                }
-            }
-        }
+        points[pI] = coordinates(uVector[globalPI]);
     }
 
     return tpoints;
@@ -1460,15 +1353,17 @@ Foam::vector Foam::NURBS3DVolume::coordinates
     vector point(Zero);
     for (label iCPw = 0; iCPw < nCPsW; iCPw++)
     {
+        const scalar basisW(basisW_.basisValue(iCPw, degreeW, w));
         for (label iCPv = 0; iCPv < nCPsV; iCPv++)
         {
+            const scalar basisVW =
+                basisW*basisV_.basisValue(iCPv, degreeV, v);
             for (label iCPu = 0; iCPu < nCPsU; iCPu++)
             {
                 point +=
-                    cps_[getCPID(iCPu, iCPv, iCPw)]
-                   *basisU_.basisValue(iCPu, degreeU, u)
-                   *basisV_.basisValue(iCPv, degreeV, v)
-                   *basisW_.basisValue(iCPw, degreeW, w);
+                   cps_[getCPID(iCPu, iCPv, iCPw)]
+                  *basisU_.basisValue(iCPu, degreeU, u)
+                  *basisVW;
             }
         }
     }
@@ -1566,6 +1461,20 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewBoundaryPoints
         << gMax(mag(newPoints - mesh_.points())) << endl;
 
     return tnewPoints;
+}
+
+
+Foam::label Foam::NURBS3DVolume::getCPID
+(
+    const label i,
+    const label j,
+    const label k
+) const
+{
+    const label nCPsU = basisU_.nCPs();
+    const label nCPsV = basisV_.nCPs();
+
+    return k*nCPsU*nCPsV + j*nCPsU + i;
 }
 
 
@@ -1867,15 +1776,22 @@ Foam::label Foam::NURBS3DVolume::nWSymmetry() const
 }
 
 
-void Foam::NURBS3DVolume::writeCps(const fileName& baseName) const
+void Foam::NURBS3DVolume::writeCps
+(
+    const fileName& baseName,
+    const bool transform
+) const
 {
     const label nCPsU = basisU_.nCPs();
     const label nCPsV = basisV_.nCPs();
 
-    vectorField cpsInCartesian(cps_.size(), Zero);
-    forAll(cpsInCartesian, cpI)
+    vectorField cpsInCartesian(cps_);
+    if (transform)
     {
-        cpsInCartesian[cpI] = transformPointToCartesian(cps_[cpI]);
+        forAll(cpsInCartesian, cpI)
+        {
+            cpsInCartesian[cpI] = transformPointToCartesian(cps_[cpI]);
+        }
     }
 
     Info<< "Writing control point positions to file" << endl;
