@@ -33,6 +33,7 @@ It is likely incomplete...
 - Haakan Nilsson
 - Niklas Nordin
 - Mark Olesen
+- Victor Olesen
 - Evangelos Papoutsis-Kiachagias
 - Juho Peltola
 - Johan Roenby
