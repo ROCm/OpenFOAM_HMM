@@ -134,8 +134,7 @@ shapeSensitivities::shapeSensitivities
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     adjointSensitivity
@@ -144,8 +143,7 @@ shapeSensitivities::shapeSensitivities
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     shapeSensitivitiesBase(mesh, dict),
     dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),

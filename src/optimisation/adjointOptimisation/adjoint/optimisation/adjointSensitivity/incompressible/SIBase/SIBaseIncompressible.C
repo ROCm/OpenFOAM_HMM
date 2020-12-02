@@ -81,8 +81,7 @@ SIBase::SIBase
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     shapeSensitivities
@@ -91,8 +90,7 @@ SIBase::SIBase
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     surfaceSensitivity_
     (
@@ -104,8 +102,7 @@ SIBase::SIBase
         dict.optionalSubDict("surfaceSensitivities"),
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     includeObjective_(true),
     writeSensitivityMap_(true)

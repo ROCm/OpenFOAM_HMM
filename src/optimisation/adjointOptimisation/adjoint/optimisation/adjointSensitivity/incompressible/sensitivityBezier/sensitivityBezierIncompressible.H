@@ -109,8 +109,7 @@ public:
             const dictionary& dict,
             incompressibleVars& primalVars,
             incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager,
-            fv::optionAdjointList& fvOptionsAdjoint
+            objectiveManager& objectiveManager
         );
 
 

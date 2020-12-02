@@ -41,7 +41,6 @@ Description
 #include "incompressibleVars.H"
 #include "incompressibleAdjointVars.H"
 #include "ATCModel.H"
-#include "fvOptionAdjointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,9 +78,6 @@ protected:
 
         //- Adjoint Transpose Convection options
         autoPtr<ATCModel> ATCModel_;
-
-        //- optionList for source terms addition
-        fv::optionAdjointList fvOptionsAdjoint_;
 
 
 public:
@@ -163,9 +159,6 @@ public:
 
             //- Access to the ATC model
             autoPtr<ATCModel>& getATCModel();
-
-            //- Access to fvOptionsAdjointList
-            fv::optionAdjointList& getFvOptionsAdjoint();
 
 
         // Evolution

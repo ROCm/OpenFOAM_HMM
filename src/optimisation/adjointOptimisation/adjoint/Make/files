@@ -42,11 +42,6 @@ ATCModel/ATCstandard/ATCstandard.C
 ATCModel/ATCUaGradU/ATCUaGradU.C
 ATCModel/cancelATC/cancelATC.C
 
-/* ADJOINT FVOPTIONS */
-fvOptionsAdjoint/fvOptions/fvOptionAdjoint.C
-fvOptionsAdjoint/fvOptions/fvOptionAdjointList.C
-fvOptionsAdjoint/fvOptions/fvIOoptionListAdjoint.C
-
 /* OBJECTIVES */
 objectives/objective/objective.C
 objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C

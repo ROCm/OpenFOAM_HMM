@@ -335,8 +335,7 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     adjointSensitivity
@@ -345,8 +344,7 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     shapeSensitivitiesBase(mesh, dict),
     includeSurfaceArea_(false),

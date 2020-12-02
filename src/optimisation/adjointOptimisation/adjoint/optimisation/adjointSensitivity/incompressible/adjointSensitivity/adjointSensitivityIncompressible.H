@@ -59,7 +59,6 @@ SourceFiles
 #include "sensitivity.H"
 #include "incompressibleVars.H"
 #include "incompressibleAdjointVars.H"
-#include "fvOptionAdjointList.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -86,7 +85,6 @@ protected:
         incompressibleVars& primalVars_;
         incompressibleAdjointVars& adjointVars_;
         objectiveManager& objectiveManager_;
-        fv::optionAdjointList& fvOptionsAdjoint_;
 
 
 private:
@@ -118,16 +116,14 @@ public:
                 const dictionary& dict,
                 incompressibleVars& primalVars,
                 incompressibleAdjointVars& adjointVars,
-                objectiveManager& objectiveManager,
-                fv::optionAdjointList& fvOptionsAdjoint
+                objectiveManager& objectiveManager
             ),
             (
                 mesh,
                 dict,
                 primalVars,
                 adjointVars,
-                objectiveManager,
-                fvOptionsAdjoint
+                objectiveManager
             )
         );
 
@@ -141,8 +137,7 @@ public:
             const dictionary& dict,
             incompressibleVars& primalVars,
             incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager,
-            fv::optionAdjointList& fvOptionsAdjoint
+            objectiveManager& objectiveManager
         );
 
     // Selectors
@@ -154,8 +149,7 @@ public:
             const dictionary& dict,
             incompressibleVars& primalVars,
             incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager,
-            fv::optionAdjointList& fvOptionsAdjoint
+            objectiveManager& objectiveManager
         );
 
 

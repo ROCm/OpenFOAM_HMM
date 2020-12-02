@@ -31,6 +31,7 @@ License
 #include "findRefCell.H"
 #include "constrainHbyA.H"
 #include "adjustPhi.H"
+#include "fvOptions.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -147,8 +148,7 @@ Foam::adjointSimple::adjointSimple
                 optDict.subDict("optimisation").subDict("sensitivities"),
                 primalVars_,
                 adjointVars_,
-                objectiveManagerPtr_(),
-                fvOptionsAdjoint_
+                objectiveManagerPtr_()
             ).ptr()
         );
     }
@@ -205,6 +205,7 @@ void Foam::adjointSimple::mainIter()
         adjointVars_.adjointTurbulence();
     const label&  paRefCell  = solverControl_().pRefCell();
     const scalar& paRefValue = solverControl_().pRefValue();
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     // Momentum predictor
     //~~~~~~~~~~~~~~~~~~~
@@ -215,7 +216,7 @@ void Foam::adjointSimple::mainIter()
       + adjointTurbulence->divDevReff(Ua)
       + adjointTurbulence->adjointMeanFlowSource()
       ==
-        fvOptionsAdjoint_(Ua)
+        fvOptions(Ua)
     );
     fvVectorMatrix& UaEqn = tUaEqn.ref();
 
@@ -233,13 +234,13 @@ void Foam::adjointSimple::mainIter()
 
     UaEqn.relax();
 
-    fvOptionsAdjoint_.constrain(UaEqn);
+    fvOptions.constrain(UaEqn);
 
     if (solverControl_().momentumPredictor())
     {
         Foam::solve(UaEqn == -fvc::grad(pa));
 
-        fvOptionsAdjoint_.correct(Ua);
+        fvOptions.correct(Ua);
     }
 
     // Pressure Eq
@@ -297,7 +298,7 @@ void Foam::adjointSimple::mainIter()
         // Momentum corrector
         Ua = HabyA - rAtUa()*fvc::grad(pa);
         Ua.correctBoundaryConditions();
-        fvOptionsAdjoint_.correct(Ua);
+        fvOptions.correct(Ua);
         pa.correctBoundaryConditions();
     }
 

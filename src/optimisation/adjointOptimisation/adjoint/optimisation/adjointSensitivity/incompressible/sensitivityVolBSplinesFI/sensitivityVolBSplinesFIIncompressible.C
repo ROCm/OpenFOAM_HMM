@@ -29,7 +29,6 @@ License
 
 #include "sensitivityVolBSplinesFIIncompressible.H"
 #include "pointVolInterpolation.H"
-#include "fvOptionAdjoint.H"
 #include "IOmanip.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -59,8 +58,7 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     FIBase
@@ -69,8 +67,7 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     volBSplinesBase_
     (

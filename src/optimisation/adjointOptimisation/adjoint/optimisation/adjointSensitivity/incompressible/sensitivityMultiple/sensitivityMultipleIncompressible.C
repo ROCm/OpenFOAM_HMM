@@ -56,8 +56,7 @@ sensitivityMultiple::sensitivityMultiple
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     adjointSensitivity
@@ -66,8 +65,7 @@ sensitivityMultiple::sensitivityMultiple
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     sensTypes_(dict.subDict("sensTypes").toc()),
     sens_(sensTypes_.size())
@@ -83,8 +81,7 @@ sensitivityMultiple::sensitivityMultiple
                 dict.subDict("sensTypes").subDict(sensTypes_[sI]),
                 primalVars,
                 adjointVars,
-                objectiveManager,
-                fvOptionsAdjoint
+                objectiveManager
             )
         );
     }
