@@ -284,12 +284,12 @@ Foam::slidingInterface::slidingInterface
         }
 
         // The face zone addressing is written out in the definition dictionary
-        masterFaceCellsPtr_.reset(new labelList{});
-        slaveFaceCellsPtr_.reset(new labelList{});
-        masterStickOutFacesPtr_.reset(new labelList{});
-        slaveStickOutFacesPtr_.reset(new labelList{});
-        retiredPointMapPtr_.reset(new Map<label>{});
-        cutPointEdgePairMapPtr_.reset(new Map<Pair<edge>>{});
+        masterFaceCellsPtr_.reset(new labelList());
+        slaveFaceCellsPtr_.reset(new labelList());
+        masterStickOutFacesPtr_.reset(new labelList());
+        slaveStickOutFacesPtr_.reset(new labelList());
+        retiredPointMapPtr_.reset(new Map<label>());
+        cutPointEdgePairMapPtr_.reset(new Map<Pair<edge>>());
 
         dict.readEntry("masterFaceCells", *masterFaceCellsPtr_);
         dict.readEntry("slaveFaceCells", *slaveFaceCellsPtr_);

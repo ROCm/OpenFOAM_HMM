@@ -127,7 +127,7 @@ public:
                     const labelList& meshCells
                 )
                 :
-                    meshedSurface(pointLst, faceLst, surfZoneList{}),
+                    meshedSurface(pointLst, faceLst, surfZoneList()),
                     meshCells_(meshCells)
                 {}
 
@@ -142,7 +142,7 @@ public:
                     (
                         std::move(pointLst),
                         std::move(faceLst),
-                        surfZoneList{}
+                        surfZoneList()
                     ),
                     meshCells_(std::move(meshCells))
                 {}
