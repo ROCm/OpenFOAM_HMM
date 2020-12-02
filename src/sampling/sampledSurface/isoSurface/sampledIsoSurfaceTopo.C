@@ -111,7 +111,8 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 
-    //- Direct from cell field and point field. Gives bad continuity.
+    Mesh& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
+
     isoSurfaceTopo surf
     (
         fvm,
@@ -120,8 +121,6 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         isoVal_,
         filter_
     );
-
-    MeshedSurface<face>& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
 
     mySurface.transfer(static_cast<meshedSurface&>(surf));
     meshCells_ = std::move(surf.meshCells());
@@ -147,7 +146,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
             << "    points         : " << points().size() << nl
-            << "    faces          : " << MeshStorage::size() << nl
+            << "    faces          : " << Mesh::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
     }
 
@@ -165,7 +164,7 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
 )
 :
     sampledSurface(name, mesh, dict),
-    MeshStorage(),
+    Mesh(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
     filter_

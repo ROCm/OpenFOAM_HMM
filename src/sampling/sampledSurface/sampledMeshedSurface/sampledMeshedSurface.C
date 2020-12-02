@@ -69,25 +69,6 @@ namespace Foam
         sampledTriSurfaceMesh
     );
 
-    //- Private class for finding nearest
-    //  Comprising:
-    //  - global index
-    //  - sqr(distance)
-    typedef Tuple2<scalar, label> nearInfo;
-
-    class nearestEqOp
-    {
-    public:
-
-        void operator()(nearInfo& x, const nearInfo& y) const
-        {
-            if (y.first() < x.first())
-            {
-                x = y;
-            }
-        }
-    };
-
 } // End namespace Foam
 
 
@@ -170,6 +151,8 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // Does approximation by looking at the face centres only
     const pointField& fc = surface_.faceCentres();
 
+    // sqr(distance), global index
+    typedef Tuple2<scalar, label> nearInfo;
     List<nearInfo> nearest(fc.size(), nearInfo(Foam::sqr(GREAT), labelMax));
 
     if (sampleSource_ == samplingSource::cells)
@@ -244,7 +227,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // See which processor has the nearest. Mark and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Pstream::listCombineGather(nearest, nearestEqOp());
+    Pstream::listCombineGather(nearest, minFirstEqOp<scalar>{});
     Pstream::listCombineScatter(nearest);
 
     labelList cellOrFaceLabels(fc.size(), -1);

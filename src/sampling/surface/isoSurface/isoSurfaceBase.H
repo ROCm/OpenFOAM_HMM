@@ -59,7 +59,7 @@ class isoSurfaceBase
 protected:
 
     // Protected typedefs for convenience
-    typedef meshedSurface MeshStorage;
+    typedef meshedSurface Mesh;
 
     // Protected Data
 

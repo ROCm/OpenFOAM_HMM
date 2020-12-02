@@ -36,13 +36,13 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
             type    patch;
             patches (inlet "outlet.*");
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:

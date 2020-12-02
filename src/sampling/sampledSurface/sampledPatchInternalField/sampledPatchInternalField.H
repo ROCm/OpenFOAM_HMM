@@ -41,7 +41,7 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
             type    patchInternalField;
@@ -49,7 +49,7 @@ Usage
             offsetMode  normal;
             distance    0.05;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:

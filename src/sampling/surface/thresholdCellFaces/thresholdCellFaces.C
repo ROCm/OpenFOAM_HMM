@@ -27,10 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thresholdCellFaces.H"
-
 #include "polyMesh.H"
 #include "DynamicList.H"
-
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
 

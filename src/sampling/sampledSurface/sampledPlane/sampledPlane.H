@@ -37,7 +37,7 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
             type        plane;
@@ -47,7 +47,7 @@ Usage
                 ...
             }
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:

@@ -1335,13 +1335,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
 {
     if (debug)
     {
-        Pout<< "isoSurfaceCell::"
-            << "    cell min/max  : "
-            << min(cVals_) << " / "
-            << max(cVals_) << nl
-            << "    point min/max : "
-            << min(pVals_) << " / "
-            << max(pVals_) << nl
+        Pout<< "isoSurfaceCell:" << nl
+            << "    cell min/max  : " << minMax(cVals_) << nl
+            << "    point min/max : " << minMax(pVals_) << nl
             << "    isoValue      : " << iso << nl
             << "    filter        : " << Switch(regularise) << nl
             << "    mergeTol      : " << mergeTol << nl
@@ -1638,9 +1634,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
         tmpsurf.clearOut();
 
-        MeshStorage updated(std::move(pts), std::move(faces), surfZoneList());
+        Mesh updated(std::move(pts), std::move(faces), surfZoneList());
 
-        this->MeshStorage::transfer(updated);
+        this->Mesh::transfer(updated);
     }
 }
 

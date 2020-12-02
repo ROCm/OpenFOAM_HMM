@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,13 +44,14 @@ SourceFiles
 #include "bitSet.H"
 #include "faceList.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class primitiveMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -59,12 +60,12 @@ class primitiveMesh;
 
 class cuttingSurfaceBase
 :
-    public MeshedSurface<face>
+    public meshedSurface
 {
 protected:
 
     //- Typedef for convenience
-    typedef MeshedSurface<face> MeshStorage;
+    typedef meshedSurface Mesh;
 
 
     // Protected Data
@@ -183,8 +184,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        cuttingSurfaceBase();
+        //- Default construct
+        cuttingSurfaceBase() = default;
 
 
     //- Destructors

@@ -171,10 +171,10 @@ class isoSurfaceTopo
                 DynamicList<label>& compactCellIDs
             ) const;
 
-            MeshStorage removeInsidePoints
+            Mesh removeInsidePoints
             (
                 const bool filterDiag,
-                const MeshStorage& s,
+                const Mesh& s,
                 const boolList& pointFromDiag,
                 const labelList& pointToFace,
                 const labelList& start,              // Per cell:starting tri

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,24 +28,23 @@ Class
     Foam::sampledIsoSurfaceTopo
 
 Description
-    A sampledSurface defined by a surface of iso value.
-    To be used in sampleSurfaces / functionObjects. Recalculates iso surface
-    only if time changes.
-
-    This is often embedded as part of a sampled surfaces function object.
+    A sampledSurface defined by a surface of iso value using a
+    \em topo algorithm.
+    It only recalculates the iso-surface if time changes.
+    To be used in sampleSurfaces / functionObjects.
 
 Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
-            type    isoSurfaceTopo;
-            isoField        p;
-            isoValue        0.0;
+            type     isoSurfaceTopo;
+            isoField T;
+            isoValue 373;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
@@ -55,7 +54,7 @@ Usage
         isoField | field name for obtaining iso-surface     | yes |
         isoValue | value of iso-surface                     | yes |
         regularise | filter faces (bool or enum)            | no  | true
-        triangulate | triangulate faces (if regularise)     | no  | false
+        triangulate | triangulate faces (requires regularise) | no  | false
     \endtable
 
 Note
@@ -63,6 +62,7 @@ Note
 
 SourceFiles
     sampledIsoSurfaceTopo.C
+    sampledIsoSurfaceTopoTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -86,12 +86,13 @@ namespace Foam
 class sampledIsoSurfaceTopo
 :
     public sampledSurface,
-    public MeshedSurface<face>
+    public meshedSurface
 {
     // Private typedefs for convenience
-    typedef MeshedSurface<face> MeshStorage;
+    typedef meshedSurface Mesh;
 
-    // Private data
+
+    // Private Data
 
         //- Field to get isoSurface of
         const word isoField_;
@@ -175,7 +176,7 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
@@ -193,19 +194,19 @@ public:
         //- Face area magnitudes
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
+            return Mesh::Cf();
         }
 
 
@@ -275,7 +276,7 @@ public:
         ) const;
 
         //- Write
-        virtual void print(Ostream&) const;
+        virtual void print(Ostream& os) const;
 };
 
 

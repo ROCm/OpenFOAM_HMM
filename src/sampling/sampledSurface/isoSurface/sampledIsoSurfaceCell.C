@@ -111,10 +111,15 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 
+    // Non-averaged? Use reference
+    tmp<scalarField> tcellValues(cellFld.primitiveField());
+
     if (average_)
     {
-        //- From point field and interpolated cell.
-        scalarField cellAvg(fvm.nCells(), Zero);
+        // From point field and interpolated cell.
+        tcellValues = tmp<scalarField>::New(fvm.nCells(), Zero);
+        auto& cellAvg = tcellValues.ref();
+
         labelField nPointCells(fvm.nCells(), Zero);
 
         for (label pointi = 0; pointi < fvm.nPoints(); ++pointi)
@@ -132,47 +137,29 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         {
             cellAvg[celli] /= nPointCells[celli];
         }
-
-        isoSurfaceCell surf
-        (
-            fvm,
-            cellAvg,
-            tpointFld().primitiveField(),
-            isoVal_,
-            filter_,
-            bounds_
-        );
-
-        const_cast<sampledIsoSurfaceCell&>
-        (
-            *this
-        ).transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
-    else
-    {
-        //- Direct from cell field and point field. Gives bad continuity.
-        isoSurfaceCell surf
-        (
-            fvm,
-            cellFld.primitiveField(),
-            tpointFld().primitiveField(),
-            isoVal_,
-            filter_,
-            bounds_
-        );
-
-        const_cast<sampledIsoSurfaceCell&>
-        (
-            *this
-        ).transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
     }
 
+    isoSurfaceCell surf
+    (
+        fvm,
+        tcellValues(),
+        tpointFld().primitiveField(),
+        isoVal_,
+        filter_,
+        bounds_,
+        1e-6  // mergeTol
+    );
+
+    // Replace current geomety
+    const_cast<sampledIsoSurfaceCell&>
+    (
+        *this
+    ).transfer(static_cast<meshedSurface&>(surf));
+    meshCells_.transfer(surf.meshCells());
 
     if (debug)
     {
-        Pout<< "sampledIsoSurfaceCell::updateGeometry() : constructed iso:"
+        Pout<< "isoSurfaceCell::updateGeometry() : constructed iso:"
             << nl
             << "    filter         : " << Switch(bool(filter_)) << nl
             << "    average        : " << Switch(average_) << nl
@@ -180,7 +167,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             << "    isoValue       : " << isoVal_ << nl
             << "    bounds         : " << bounds_ << nl
             << "    points         : " << points().size() << nl
-            << "    faces          : " << MeshStorage::size() << nl
+            << "    faces          : " << Mesh::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
     }
 
@@ -198,7 +185,7 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
 )
 :
     sampledSurface(name, mesh, dict),
-    MeshStorage(),
+    Mesh(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
     filter_
@@ -356,7 +343,7 @@ Foam::sampledIsoSurfaceCell::interpolate
 
 void Foam::sampledIsoSurfaceCell::print(Ostream& os) const
 {
-    os  << "sampledIsoSurfaceCell: " << name() << " :"
+    os  << "isoSurfaceCell: " << name() << " :"
         << "  field:" << isoField_
         << "  value:" << isoVal_;
         //<< "  faces:" << faces().size()   // possibly no geom yet

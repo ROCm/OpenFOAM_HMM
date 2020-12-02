@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,12 +33,6 @@ int Foam::cuttingSurfaceBase::debug
 (
     Foam::debug::debugSwitch("cuttingSurfaceBase", 0)
 );
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::cuttingSurfaceBase::cuttingSurfaceBase()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -80,7 +74,7 @@ void Foam::cuttingSurfaceBase::remapFaces(const labelUList& faceMap)
 {
     if (!faceMap.empty())
     {
-        MeshStorage::remapFaces(faceMap);
+        Mesh::remapFaces(faceMap);
 
         List<label> remappedCells(faceMap.size());
         forAll(faceMap, facei)
@@ -101,7 +95,7 @@ void Foam::cuttingSurfaceBase::operator=(const cuttingSurfaceBase& rhs)
         return;  // Self-assignment is a no-op
     }
 
-    static_cast<MeshStorage&>(*this) = rhs;
+    static_cast<Mesh&>(*this) = rhs;
     meshCells_ = rhs.meshCells();
 }
 

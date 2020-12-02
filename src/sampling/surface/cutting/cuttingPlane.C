@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ void Foam::cuttingPlane::performCut
     const plane& pln = *this;
     const pointField& pts = mesh.points();
 
-    MeshStorage::clear();
+    Mesh::clear();
     meshCells_.clear();
 
     // Pre-populate with restriction
@@ -153,7 +153,7 @@ void Foam::cuttingPlane::operator=(const cuttingPlane& rhs)
         return;  // Self-assignment is a no-op
     }
 
-    static_cast<MeshStorage&>(*this) = rhs;
+    static_cast<Mesh&>(*this) = rhs;
     static_cast<plane&>(*this) = rhs;
     meshCells_ = rhs.meshCells();
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,42 +28,43 @@ Class
     Foam::sampledIsoSurface
 
 Description
-    A sampledSurface defined by a surface of iso value. Always triangulated.
-    To be used in sampleSurfaces / functionObjects. Recalculates iso surface
-    only if time changes.
-
-    This is often embedded as part of a sampled surfaces function object.
+    A sampledSurface defined by a surface of iso value using a
+    \em point algorithm (always triangulated!).
+    It only recalculates the iso-surface if time changes.
+    To be used in sampleSurfaces / functionObjects.
 
 Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
-            type    sampledIsoSurface;
-            cell    false;
+            type     isoSurfacePoint;
+            isoField T;
+            isoValue 373;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
     \table
         Property | Description                              | Required | Default
-        type     | sampledIsoSurface                        | yes |
+        type     | isoSurfacePoint / isoSurface             | yes |
         isoField | field name for obtaining iso-surface     | yes |
         isoValue | value of iso-surface                     | yes |
-        mergeTol | tolerance for merging points             | no  | 1e-6
-        regularise | point snapping (bool or enum)          | no  | true
         average  | cell values from averaged point values   | no  | false
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
         zones    | limit to cell zones (names, regexs)      | no  |
         exposedPatchName | name for zone subset             | partly |
+        regularise | point snapping (bool or enum)          | no  | true
+        mergeTol | tolerance for merging points             | no  | 1e-6
     \endtable
 
 SourceFiles
     sampledIsoSurface.C
+    sampledIsoSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -80,14 +81,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sampledIsoSurface Declaration
+                      Class sampledIsoSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledIsoSurface
 :
     public sampledSurface
 {
-    // Private data
+    // Private Data
 
         //- Field to get isoSurface of
         const word isoField_;
@@ -127,6 +128,7 @@ class sampledIsoSurface
 
         //- Cached pointfield
         mutable const pointScalarField* pointFieldPtr_;
+
 
     // And on subsetted mesh
 
@@ -243,11 +245,6 @@ public:
         }
 
 
-        //- Lookup or read isoField.
-        //  Sets volFieldPtr_ and pointFieldPtr_.
-        void getIsoField();
-
-
     // Sample
 
         //- Sample volume field onto surface faces
@@ -317,7 +314,7 @@ public:
     // Output
 
         //- Write
-        virtual void print(Ostream&) const;
+        virtual void print(Ostream& os) const;
 };
 
 

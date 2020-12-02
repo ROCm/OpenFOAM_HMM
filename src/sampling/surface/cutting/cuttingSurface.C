@@ -98,7 +98,7 @@ void Foam::cuttingSurface::performCut
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh);
 
-    MeshStorage::clear();
+    Mesh::clear();
     meshCells_.clear();
 
     // Pre-populate with restriction
@@ -170,8 +170,8 @@ void Foam::cuttingSurface::performCut
 void Foam::cuttingSurface::print(Ostream& os) const
 {
     os  << "  surface:" << surfaceName()
-        << "  faces:" << MeshStorage::surfFaces().size()
-        << "  points:" << MeshStorage::points().size();
+        << "  faces:" << Mesh::surfFaces().size()
+        << "  points:" << Mesh::points().size();
 }
 
 

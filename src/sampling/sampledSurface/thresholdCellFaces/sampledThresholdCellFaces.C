@@ -27,12 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledThresholdCellFaces.H"
+#include "thresholdCellFaces.H"
 #include "dictionary.H"
 #include "volFields.H"
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "thresholdCellFaces.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,6 +47,7 @@ namespace Foam
         thresholdCellFaces
     );
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -106,6 +107,7 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
     const volScalarField& cellFld =
         (fieldReadPtr ? *fieldReadPtr : *cellFldPtr);
 
+    Mesh& mySurface = const_cast<sampledThresholdCellFaces&>(*this);
 
     thresholdCellFaces surf
     (
@@ -116,10 +118,7 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
         triangulate_
     );
 
-    const_cast<sampledThresholdCellFaces&>
-    (
-        *this
-    ).MeshedSurface<face>::transfer(surf);
+    mySurface.transfer(static_cast<Mesh&>(surf));
     meshCells_.transfer(surf.meshCells());
 
     // Clear derived data

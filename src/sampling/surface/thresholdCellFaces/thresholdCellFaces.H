@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,12 +40,14 @@ SourceFiles
 #define thresholdCellFaces_H
 
 #include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -54,10 +56,13 @@ class polyMesh;
 
 class thresholdCellFaces
 :
-    public MeshedSurface<face>
+    public meshedSurface
 {
-    //- Private typedefs for convenience
-        typedef MeshedSurface<face> MeshStorage;
+    // Private typedefs for convenience
+    typedef meshedSurface Mesh;
+
+
+    // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
@@ -108,7 +113,6 @@ public:
         {
             return meshCells_;
         }
-
 };
 
 

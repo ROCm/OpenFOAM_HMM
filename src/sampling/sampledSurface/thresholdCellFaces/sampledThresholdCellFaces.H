@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,14 +37,14 @@ Usage
     Example of function object partial specification:
     \verbatim
     surfaces
-    (
+    {
         surface1
         {
             type    thresholdCellFaces;
             field   rho;
             lowerLimit 0.1;
         }
-    );
+    }
     \endverbatim
 
     Where the sub-entries comprise:
@@ -73,6 +73,7 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfacesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,12 +87,13 @@ namespace Foam
 class sampledThresholdCellFaces
 :
     public sampledSurface,
-    public MeshedSurface<face>
+    public meshedSurface
 {
-        //- Private typedefs for convenience
-        typedef MeshedSurface<face> MeshStorage;
+        // Private typedef for convenience
+        typedef meshedSurface Mesh;
 
-    // Private data
+
+    // Private Data
 
         //- Threshold field
         const word fieldName_;
@@ -173,13 +175,13 @@ public:
         //- Points of surface
         virtual const pointField& points() const
         {
-            return MeshStorage::points();
+            return Mesh::points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return MeshStorage::surfFaces();
+            return Mesh::surfFaces();
         }
 
         //- Per-face zone/region information
@@ -191,19 +193,19 @@ public:
         //- Face area vectors (normals)
         virtual const vectorField& Sf() const
         {
-            return MeshStorage::Sf();
+            return Mesh::Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return MeshStorage::magSf();
+            return Mesh::magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return MeshStorage::Cf();
+            return Mesh::Cf();
         }
 
 
