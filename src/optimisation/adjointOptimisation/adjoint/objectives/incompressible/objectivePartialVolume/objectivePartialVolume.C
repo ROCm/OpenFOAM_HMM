@@ -132,8 +132,8 @@ void objectivePartialVolume::update_dSdbMultiplier()
 void objectivePartialVolume::addHeaderInfo() const
 {
     objFunctionFilePtr_()
-        << setw(width_) << "VInit" << " "
-        << setw(width_) << initVol_ << " ";
+        << setw(width_) << "#VInit" << " "
+        << setw(width_) << initVol_ << endl;
 }
 
 
