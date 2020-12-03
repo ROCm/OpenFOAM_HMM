@@ -81,7 +81,7 @@ HELP_HEAD
 if [ -n "$1" ]
 then
 cat<<HELP_FULL
-  -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
+  -debug            Define c++DBUG='-DFULLDEBUG -g' as override
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
@@ -208,7 +208,12 @@ unset optAll optUpdate optCxx optDebug optQuiet optShow optPwd
 
 # Consistency with inherited values
 if [ "$WM_QUIET" = true ]
-then optQuiet=true
+then
+    optQuiet=true
+elif [ "$WM_QUIET" = false ]
+then
+    # Makefile syntax only checks set/unset, so handle true/false here
+    unset WM_QUIET
 fi
 
 while [ "$#" -gt 0 ]
@@ -328,6 +333,7 @@ do
     shift
 done
 
+# Can terminate now if it was one of the -showXXX options
 if [ "$optShow" = true ]
 then
     exit 0
