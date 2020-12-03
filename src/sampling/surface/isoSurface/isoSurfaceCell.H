@@ -50,7 +50,6 @@ SourceFiles
 
 #include "labelPair.H"
 #include "pointIndexHit.H"
-#include "bitSet.H"
 #include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,8 +58,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
-class polyMesh;
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -71,38 +68,13 @@ class isoSurfaceCell
 :
     public isoSurfaceBase
 {
-    // Private data
-
-        enum segmentCutType
-        {
-            NEARFIRST,      //!< Intersection close to e.first()
-            NEARSECOND,     //!< Intersection close to e.second()
-            NOTNEAR         //!< No intersection
-        };
-
-        enum cellCutType
-        {
-            NOTCUT,     //!< Cell not cut
-            SPHERE,     //!< All edges to cell centre cut
-            CUT         //!< Normal cut
-        };
-
-
-        //- Reference to mesh
-        const polyMesh& mesh_;
-
-        const scalarField& cVals_;
-
-        const scalarField& pVals_;
-
-        //- Optional cells to ignore
-        const bitSet& ignoreCells_;
+    // Private Data
 
         //- When to merge points
         const scalar mergeDistance_;
 
-        //- Whether cell might be cut
-        List<cellCutType> cellCutType_;
+        //- The cell cut type
+        List<cutType> cellCutType_;
 
         //- Estimated number of cut cells
         label nCutCells_;
@@ -123,28 +95,7 @@ class isoSurfaceCell
     // Private Member Functions
 
         //- Get location of iso value as fraction inbetween s0,s1
-        scalar isoFraction
-        (
-            const scalar s0,
-            const scalar s1
-        ) const;
-
-
-        //- Determine whether cell is cut
-        cellCutType calcCutType
-        (
-            const bitSet&,
-            const scalarField& cellValues,
-            const scalarField& pointValues,
-            const label
-        ) const;
-
-        void calcCutTypes
-        (
-            const bitSet&,
-            const scalarField& cellValues,
-            const scalarField& pointValues
-        );
+        scalar isoFraction(const scalar s0, const scalar s1) const;
 
         //- Return the two common points between two triangles
         static labelPair findCommonPoints
@@ -166,7 +117,7 @@ class isoSurfaceCell
         ) const;
 
         //- Determine per cc whether all near cuts can be snapped to single
-        //  point.
+        //- point.
         void calcSnappedCc
         (
             const bitSet& isTet,
@@ -301,8 +252,17 @@ class isoSurfaceCell
         );
 
 
-public:
+    // Sampling
 
+        //- Interpolates cCoords, pCoords.
+        template<class Type>
+        tmp<Field<Type>> interpolateTemplate
+        (
+            const Field<Type>& cCoords,
+            const Field<Type>& pCoords
+        ) const;
+
+public:
 
     //- Runtime type information
     TypeName("isoSurfaceCell");
@@ -328,15 +288,17 @@ public:
         );
 
 
-    // Member Functions
+    //- Destructor
+    virtual ~isoSurfaceCell() = default;
 
-        //- Interpolates cCoords, pCoords.
-        template<class Type>
-        tmp<Field<Type>> interpolate
-        (
-            const Field<Type>& cCoords,
-            const Field<Type>& pCoords
-        ) const;
+
+    // Sampling
+
+        declareIsoSurfaceInterpolateMethod(scalar);
+        declareIsoSurfaceInterpolateMethod(vector);
+        declareIsoSurfaceInterpolateMethod(sphericalTensor);
+        declareIsoSurfaceInterpolateMethod(symmTensor);
+        declareIsoSurfaceInterpolateMethod(tensor);
 };
 
 

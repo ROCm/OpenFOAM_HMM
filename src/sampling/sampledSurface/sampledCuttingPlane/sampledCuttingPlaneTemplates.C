@@ -91,7 +91,6 @@ Foam::sampledCuttingPlane::sampleOnIsoSurfacePoints
 }
 
 
-
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::sampledCuttingPlane::sampleOnPoints

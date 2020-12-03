@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -407,7 +407,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             if (triIndex == 0x09)
             {
                 // Flip normals
-                label sz = pts.size();
+                const label sz = pts.size();
                 Swap(pts[sz-5], pts[sz-4]);
                 Swap(pts[sz-2], pts[sz-1]);
             }
@@ -433,7 +433,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             if (triIndex == 0x07)
             {
                 // Flip normals
-                label sz = pts.size();
+                const label sz = pts.size();
                 Swap(pts[sz-2], pts[sz-1]);
             }
         }
@@ -465,7 +465,7 @@ Foam::label Foam::isoSurfacePoint::generateFaceTriPoints
     DynamicList<label>& triMeshCells
 ) const
 {
-    label own = mesh_.faceOwner()[facei];
+    const label own = mesh_.faceOwner()[facei];
 
     label oldNPoints = triPoints.size();
 
@@ -577,7 +577,7 @@ void Foam::isoSurfacePoint::generateTriPoints
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        if (faceCutType_[facei] != NOTCUT)
+        if ((faceCutType_[facei] & cutType::ANYCUT) != 0)
         {
             generateFaceTriPoints
             (
@@ -647,9 +647,9 @@ void Foam::isoSurfacePoint::generateTriPoints
 
             forAll(isCollocated, i)
             {
-                label facei = pp.start()+i;
+                const label facei = pp.start()+i;
 
-                if (faceCutType_[facei] != NOTCUT)
+                if ((faceCutType_[facei] & cutType::ANYCUT) != 0)
                 {
                     if (isCollocated[i])
                     {
@@ -708,7 +708,7 @@ void Foam::isoSurfacePoint::generateTriPoints
 
             forAll(pp, i)
             {
-                if (faceCutType_[facei] != NOTCUT)
+                if ((faceCutType_[facei] & cutType::ANYCUT) != 0)
                 {
                     generateFaceTriPoints
                     (
@@ -807,7 +807,7 @@ Foam::isoSurfacePoint::interpolate
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::isoSurfacePoint::interpolate
+Foam::isoSurfacePoint::interpolateTemplate
 (
     const GeometricField<Type, fvPatchField, volMesh>& cCoords,
     const Field<Type>& pCoords

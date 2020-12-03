@@ -176,7 +176,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         );
 
         surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_ = std::move(surf.meshCells());
+        meshCells_.transfer(surf.meshCells());
     }
 
     // if (subMeshPtr_ && meshCells_.size())
@@ -185,6 +185,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
     //     meshCells_ =
     //         UIndirectList<label>(subMeshPtr_->cellMap(), meshCells_);
     // }
+
 
     // triangulate uses remapFaces()
     // - this is somewhat less efficient since it recopies the faces

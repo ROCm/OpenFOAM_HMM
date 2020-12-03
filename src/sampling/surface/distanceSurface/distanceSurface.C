@@ -76,7 +76,8 @@ Foam::distanceSurface::distanceSurface
     isoParams_
     (
         dict,
-        isoSurfaceBase::ALGO_TOPO
+        isoSurfaceParams::ALGO_TOPO,
+        isoSurfaceParams::filterType::DIAGCELL
     ),
     surface_(),
     meshCells_(),
@@ -357,53 +358,28 @@ void Foam::distanceSurface::createGeometry()
     }
 
 
-    // This will soon improve (reduced clutter)
-
-    // Direct from cell field and point field.
-    if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
-    {
-        isoSurfacePtr_.reset
+    isoSurfacePtr_.reset
+    (
+        isoSurfaceBase::New
         (
-            new isoSurfacePoint
-            (
-                cellDistance,
-                pointDistance_,
-                distance_,
-                isoParams_,
-                ignoreCells
-            )
-        );
-    }
-    else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
-    {
-        isoSurfaceCell surf
-        (
-            fvm,
+            isoParams_,
             cellDistance,
             pointDistance_,
             distance_,
-            isoParams_,
             ignoreCells
-        );
+        )
+    );
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
-    else
+    // ALGO_POINT still needs cell, point fields (for interpolate)
+    // The others can do straight transfer
+    if (isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT)
     {
-        // ALGO_TOPO
-        isoSurfaceTopo surf
-        (
-            fvm,
-            cellDistance,
-            pointDistance_,
-            distance_,
-            isoParams_,
-            ignoreCells
-        );
+        surface_.transfer(static_cast<meshedSurface&>(*isoSurfacePtr_));
+        meshCells_.transfer(isoSurfacePtr_->meshCells());
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
+        isoSurfacePtr_.reset(nullptr);
+        cellDistancePtr_.reset(nullptr);
+        pointDistance_.clear();
     }
 
     if (debug)

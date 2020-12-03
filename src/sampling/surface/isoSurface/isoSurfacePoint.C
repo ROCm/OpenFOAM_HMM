@@ -34,6 +34,12 @@ License
 #include "triSurface.H"
 #include "triPoints.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "isoSurfaceBaseMethods.H"
+defineIsoSurfaceInterpolateMethods(Foam::isoSurfacePoint);
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -384,8 +390,8 @@ void Foam::isoSurfacePoint::calcCutTypes
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
-    faceCutType_.setSize(mesh_.nFaces());
-    faceCutType_ = NOTCUT;
+    faceCutType_.resize(mesh_.nFaces());
+    faceCutType_ = cutType::NOTCUT;
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
@@ -409,7 +415,7 @@ void Foam::isoSurfacePoint::calcCutTypes
 
         if (ownLower != neiLower)
         {
-            faceCutType_[facei] = CUT;
+            faceCutType_[facei] = cutType::CUT;
         }
         else
         {
@@ -419,7 +425,7 @@ void Foam::isoSurfacePoint::calcCutTypes
 
             if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
             {
-                faceCutType_[facei] = CUT;
+                faceCutType_[facei] = cutType::CUT;
             }
         }
     }
@@ -448,7 +454,7 @@ void Foam::isoSurfacePoint::calcCutTypes
 
             if (ownLower != neiLower)
             {
-                faceCutType_[facei] = CUT;
+                faceCutType_[facei] = cutType::CUT;
             }
             else
             {
@@ -458,34 +464,34 @@ void Foam::isoSurfacePoint::calcCutTypes
 
                 if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
                 {
-                    faceCutType_[facei] = CUT;
+                    faceCutType_[facei] = cutType::CUT;
                 }
             }
         }
     }
 
     nCutCells_ = 0;
-    cellCutType_.setSize(mesh_.nCells());
-    cellCutType_ = NOTCUT;
+    cellCutType_.resize(mesh_.nCells());
+    cellCutType_ = cutType::NOTCUT;
 
 
     // Propagate internal face cuts into the cells.
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        if (faceCutType_[facei] == NOTCUT)
+        if (faceCutType_[facei] == cutType::NOTCUT)
         {
             continue;
         }
 
-        if (cellCutType_[own[facei]] == NOTCUT)
+        if (cellCutType_[own[facei]] == cutType::NOTCUT)
         {
-            cellCutType_[own[facei]] = CUT;
+            cellCutType_[own[facei]] = cutType::CUT;
             ++nCutCells_;
         }
-        if (cellCutType_[nei[facei]] == NOTCUT)
+        if (cellCutType_[nei[facei]] == cutType::NOTCUT)
         {
-            cellCutType_[nei[facei]] = CUT;
+            cellCutType_[nei[facei]] = cutType::CUT;
             ++nCutCells_;
         }
     }
@@ -495,14 +501,14 @@ void Foam::isoSurfacePoint::calcCutTypes
 
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
     {
-        if (faceCutType_[facei] == NOTCUT)
+        if (faceCutType_[facei] == cutType::NOTCUT)
         {
             continue;
         }
 
-        if (cellCutType_[own[facei]] == NOTCUT)
+        if (cellCutType_[own[facei]] == cutType::NOTCUT)
         {
-            cellCutType_[own[facei]] = CUT;
+            cellCutType_[own[facei]] = cutType::CUT;
             ++nCutCells_;
         }
     }
@@ -551,7 +557,7 @@ void Foam::isoSurfacePoint::calcSnappedCc
 
     forAll(mesh_.cells(), celli)
     {
-        if (cellCutType_[celli] == CUT)
+        if (cellCutType_[celli] == cutType::CUT)
         {
             const scalar cVal = cVals[celli];
 
@@ -722,7 +728,7 @@ void Foam::isoSurfacePoint::calcSnappedPoint
 
         for (const label facei : pFaces)
         {
-            if (faceCutType_[facei] == CUT)
+            if (faceCutType_[facei] == cutType::CUT)
             {
                 anyCut = true;
                 break;
@@ -1335,19 +1341,25 @@ Foam::isoSurfacePoint::isoSurfacePoint
     const bitSet& /*unused*/
 )
 :
-    isoSurfaceBase(iso, params),
-    mesh_(cellValues.mesh()),
-    pVals_(pointValues),
+    isoSurfaceBase
+    (
+        cellValues.mesh(),
+        cellValues.primitiveField(),
+        pointValues,
+        iso,
+        params
+    ),
+    cValsPtr_(nullptr),
     mergeDistance_(params.mergeTol()*mesh_.bounds().mag())
 {
     const bool regularise = (params.filter() != filterType::NONE);
+    const fvMesh& fvmesh = cellValues.mesh();
 
     if (debug)
     {
         Pout<< "isoSurfacePoint:" << nl
             << "    isoField      : " << cellValues.name() << nl
-            << "    cell min/max  : "
-            << minMax(cellValues.primitiveField()) << nl
+            << "    cell min/max  : " << minMax(cVals_) << nl
             << "    point min/max : " << minMax(pVals_) << nl
             << "    isoValue      : " << iso << nl
             << "    filter        : " << Switch(regularise) << nl
@@ -1356,7 +1368,6 @@ Foam::isoSurfacePoint::isoSurfacePoint
     }
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
 
     // Rewrite input field
     // ~~~~~~~~~~~~~~~~~~~
@@ -1376,17 +1387,17 @@ Foam::isoSurfacePoint::isoSurfacePoint
         IOobject
         (
             "C",
-            mesh_.pointsInstance(),
-            mesh_.meshSubDir,
-            mesh_,
+            fvmesh.pointsInstance(),
+            fvmesh.meshSubDir,
+            fvmesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
         ),
-        mesh_,
+        fvmesh,
         dimLength,
-        mesh_.cellCentres(),
-        mesh_.faceCentres()
+        fvmesh.cellCentres(),
+        fvmesh.faceCentres()
     );
     forAll(patches, patchi)
     {
@@ -1429,7 +1440,7 @@ Foam::isoSurfacePoint::isoSurfacePoint
                 patchi,
                 new calculatedFvPatchField<vector>
                 (
-                    mesh_.boundary()[patchi],
+                    fvmesh.boundary()[patchi],
                     meshC
                 )
             );
@@ -1454,20 +1465,18 @@ Foam::isoSurfacePoint::isoSurfacePoint
 
     if (debug)
     {
-        const fvMesh& fvm = mesh_;
-
         volScalarField debugField
         (
             IOobject
             (
                 "isoSurfacePoint.cutType",
-                fvm.time().timeName(),
-                fvm.time(),
+                fvmesh.time().timeName(),
+                fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            fvm,
+            fvmesh,
             dimensionedScalar(dimless, Zero)
         );
 

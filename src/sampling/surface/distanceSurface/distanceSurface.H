@@ -69,9 +69,7 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "searchableSurface.H"
-#include "isoSurfaceCell.H"
-#include "isoSurfacePoint.H"
-#include "isoSurfaceTopo.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -117,7 +115,7 @@ class distanceSurface
         mutable labelList meshCells_;
 
         //- Extracted iso-surface, for interpolators
-        mutable autoPtr<isoSurfacePoint> isoSurfacePtr_;
+        mutable autoPtr<isoSurfaceBase> isoSurfacePtr_;
 
 
 protected:

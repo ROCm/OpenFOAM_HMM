@@ -198,9 +198,12 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
     // Clear any previously stored topologies
-    isoSurfacePtr_.reset(nullptr);
     surface_.clear();
     meshCells_.clear();
+    isoSurfacePtr_.reset(nullptr);
+
+    // Clear derived data
+    sampledSurface::clearGeom();
 
     // Clear any stored fields
     pointDistance_.clear();
@@ -318,55 +321,26 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
 
-    // This will soon improve (reduced clutter)
-
-    // Direct from cell field and point field.
-    if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
-    {
-        isoSurfacePtr_.reset
+    isoSurfacePtr_.reset
+    (
+        isoSurfaceBase::New
         (
-            new isoSurfacePoint
-            (
-                cellDistance,
-                pointDistance_,
-                scalar(0),  // distance
-                isoParams_
-            )
-        );
-    }
-    else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
-    {
-        isoSurfaceCell surf
-        (
-            fvm,
+            isoParams_,
             cellDistance,
             pointDistance_,
-            scalar(0),  // distance
-            isoParams_
-        );
+            scalar(0)
+            // nothing ignored: ignoreCells
+        )
+    );
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
-    else
+    // ALGO_POINT uses cell field and point field
+    // The others can do straight transfer
+    if (isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT)
     {
-        // ALGO_TOPO
-        isoSurfaceTopo surf
-        (
-            fvm,
-            cellDistance,
-            pointDistance_,
-            scalar(0),  // distance
-            isoParams_
-        );
+        surface_.transfer(static_cast<meshedSurface&>(*isoSurfacePtr_));
+        meshCells_.transfer(isoSurfacePtr_->meshCells());
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
-
-    // Only retain for iso-surface
-    if (!isoSurfacePtr_)
-    {
+        isoSurfacePtr_.reset(nullptr);
         cellDistancePtr_.reset(nullptr);
         pointDistance_.clear();
     }

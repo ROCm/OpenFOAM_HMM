@@ -29,6 +29,7 @@ surface/cutting/cuttingSurfaceBase.C
 surface/cutting/cuttingSurfaceBaseSelection.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurfaceBase.C
+surface/isoSurface/isoSurfaceBaseNew.C
 surface/isoSurface/isoSurfaceParams.C
 surface/isoSurface/isoSurfaceCell.C
 surface/isoSurface/isoSurfacePoint.C

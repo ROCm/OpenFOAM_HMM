@@ -81,7 +81,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "plane.H"
 #include "fvMeshSubset.H"
-#include "isoSurfacePoint.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -136,7 +136,7 @@ class sampledCuttingPlane
         mutable labelList meshCells_;
 
         //- Constructed iso-surface (ALGO_POINT), for interpolators
-        autoPtr<isoSurfacePoint> isoSurfacePtr_;
+        autoPtr<isoSurfaceBase> isoSurfacePtr_;
 
 
     // Private Member Functions
