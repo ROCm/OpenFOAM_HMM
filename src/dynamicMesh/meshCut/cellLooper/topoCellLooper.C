@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -700,7 +701,7 @@ bool Foam::topoCellLooper::cut
     {
         cellFeatures superCell(mesh(), featureCos, celli);
 
-        if (hexMatcher().isA(superCell.faces()))
+        if (hexMatcher::test(superCell.faces()))
         {
             label edgeI =
                 getAlignedNonFeatureEdge

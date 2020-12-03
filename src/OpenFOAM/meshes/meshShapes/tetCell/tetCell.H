@@ -102,7 +102,7 @@ public:
         // Access
 
             //- Return i-th face
-            inline triFace face(const label facei) const;
+            inline Foam::triFace face(const label facei) const;
 
             //- Return first face adjacent to the given edge
             inline label edgeFace(const label edgei) const;
@@ -114,8 +114,14 @@ public:
                 const label facei
             ) const;
 
-            //- Return i-th edge
-            inline edge tetEdge(const label edgei) const;
+            //- Return i-th edge from tet.
+            inline Foam::edge tetEdge(const label edgei) const;
+
+            //- Return i-th edge. Identical to tetEdge but with generic name
+            inline Foam::edge edge(const label edgei) const;
+
+            //- Return i-th edge reversed
+            inline Foam::edge reverseEdge(const label edgei) const;
 
 
         // Operations

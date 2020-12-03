@@ -280,7 +280,6 @@ void Foam::isoSurfaceCell::generateTriPoints
     DynamicList<label>& triMeshCells
 ) const
 {
-    tetMatcher tet;
     label countNotFoundTets = 0;
 
     forAll(mesh_.cells(), celli)
@@ -291,7 +290,7 @@ void Foam::isoSurfaceCell::generateTriPoints
 
             const cell& cFaces = mesh_.cells()[celli];
 
-            if (tet.isA(mesh_, celli))
+            if (tetMatcher::test(mesh_, celli))
             {
                 // For tets don't do cell-centre decomposition, just use the
                 // tet points and values

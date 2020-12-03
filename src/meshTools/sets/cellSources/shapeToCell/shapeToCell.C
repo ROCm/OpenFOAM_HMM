@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
         {
             cellFeatures superCell(mesh_, featureCos, celli);
 
-            if (hexMatcher().isA(superCell.faces()))
+            if (hexMatcher::test(superCell.faces()))
             {
                 addOrDelete(set, celli, add);
             }

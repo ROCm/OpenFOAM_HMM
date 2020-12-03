@@ -1355,11 +1355,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
     // Determine if cell is tet
     bitSet isTet(mesh_.nCells());
     {
-        tetMatcher tet;
-
         forAll(isTet, celli)
         {
-            if (tet.isA(mesh_, celli))
+            if (tetMatcher::test(mesh_, celli))
             {
                 isTet.set(celli);
             }

@@ -24,11 +24,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
-
-#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -182,7 +178,20 @@ inline Foam::edge Foam::tetCell::tetEdge(const label edgei) const
     }
     #endif
 
-    return edge(operator[](pt0[edgei]), operator[](pt1[edgei]));
+    return Foam::edge(operator[](pt0[edgei]), operator[](pt1[edgei]));
+}
+
+
+inline Foam::edge Foam::tetCell::edge(const label edgei) const
+{
+    return tetEdge(edgei);
+}
+
+
+inline Foam::edge Foam::tetCell::reverseEdge(const label edgei) const
+{
+    // Reverse edge. Using a copy is cheaper than inplace flip
+    return tetEdge(edgei).reverseEdge();
 }
 
 

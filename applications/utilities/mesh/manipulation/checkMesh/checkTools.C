@@ -133,12 +133,9 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
         << endl;
 
     // Construct shape recognizers
-    hexMatcher hex;
     prismMatcher prism;
     wedgeMatcher wedge;
-    pyrMatcher pyr;
     tetWedgeMatcher tetWedge;
-    tetMatcher tet;
 
     // Counters for different cell types
     label nHex = 0;
@@ -153,15 +150,15 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 
     for (label celli = 0; celli < mesh.nCells(); celli++)
     {
-        if (hex.isA(mesh, celli))
+        if (hexMatcher::test(mesh, celli))
         {
             nHex++;
         }
-        else if (tet.isA(mesh, celli))
+        else if (tetMatcher::test(mesh, celli))
         {
             nTet++;
         }
-        else if (pyr.isA(mesh, celli))
+        else if (pyrMatcher::test(mesh, celli))
         {
             nPyr++;
         }

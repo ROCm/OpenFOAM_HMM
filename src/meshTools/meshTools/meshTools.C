@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -766,7 +766,7 @@ Foam::vector Foam::meshTools::edgeToCutDir
     const label startEdgeI
 )
 {
-    if (!hexMatcher().isA(mesh, celli))
+    if (!hexMatcher::test(mesh, celli))
     {
         FatalErrorInFunction
             << "Not a hex : cell:" << celli << abort(FatalError);
@@ -813,7 +813,7 @@ Foam::label Foam::meshTools::cutDirToEdge
     const vector& cutDir
 )
 {
-    if (!hexMatcher().isA(mesh, celli))
+    if (!hexMatcher::test(mesh, celli))
     {
         FatalErrorInFunction
             << "Not a hex : cell:" << celli << abort(FatalError);

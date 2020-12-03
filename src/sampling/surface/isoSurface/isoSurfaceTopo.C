@@ -71,7 +71,6 @@ namespace Foam
 
 Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 (
-    const bool isTet,
     const label celli
 ) const
 {
@@ -82,7 +81,7 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 
     const cell& cFaces = mesh_.cells()[celli];
 
-    if (isTet)
+    if (tetMatcher::test(mesh_, celli))
     {
         for (const label facei : cFaces)
         {
@@ -200,7 +199,6 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 
 Foam::label Foam::isoSurfaceTopo::calcCutTypes
 (
-    tetMatcher& tet,
     List<cellCutType>& cellCutTypes
 )
 {
@@ -209,7 +207,7 @@ Foam::label Foam::isoSurfaceTopo::calcCutTypes
     label nCutCells = 0;
     forAll(cellCutTypes, celli)
     {
-        cellCutTypes[celli] = calcCutType(tet.isA(mesh_, celli), celli);
+        cellCutTypes[celli] = calcCutType(celli);
 
         if (cellCutTypes[celli] == CUT)
         {
@@ -1246,11 +1244,9 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
     fixTetBasePtIs();
 
-    tetMatcher tet;
-
     // Determine if any cut through cell
     List<cellCutType> cellCutTypes;
-    const label nCutCells = calcCutTypes(tet, cellCutTypes);
+    const label nCutCells = calcCutTypes(cellCutTypes);
 
     // Per cell: 5 pyramids cut, each generating 2 triangles
     //  - pointToVerts : from generated iso point to originating mesh verts
@@ -1280,7 +1276,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             generateTriPoints
             (
                 celli,
-                tet.isA(mesh_, celli),
+                tetMatcher::test(mesh_, celli),
 
                 pointToVerts,
                 pointToFace,

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +31,72 @@ License
 #include "primitiveMesh.H"
 #include "cellModel.H"
 #include "ListOps.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Check (4 tri)
+static inline bool checkFaceSizeMatch(const UList<face>& faces)
+{
+    if (faces.size() != 4)  // facePerCell
+    {
+        return false;
+    }
+
+    for (const face& f : faces)
+    {
+        if (f.size() != 3)  // tri
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// Check (4 tri)
+static inline bool checkFaceSizeMatch
+(
+    const UList<face>& meshFaces,
+    const labelUList& cellFaces
+)
+{
+    if (cellFaces.size() != 4)  // facePerCell
+    {
+        return false;
+    }
+
+    for (const label facei : cellFaces)
+    {
+        if (meshFaces[facei].size() != 3)  // tri
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::tetMatcher::test(const UList<face>& faces)
+{
+    return checkFaceSizeMatch(faces);
+}
+
+
+bool Foam::tetMatcher::test(const primitiveMesh& mesh, const label celli)
+{
+    return checkFaceSizeMatch(mesh.faces(), mesh.cells()[celli]);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -180,53 +247,11 @@ Foam::label Foam::tetMatcher::faceHashValue() const
 
 bool Foam::tetMatcher::faceSizeMatch
 (
-    const faceList& faces,
-    const labelList& myFaces
+    const faceList& meshFaces,
+    const labelList& cellFaces
 ) const
 {
-    if (myFaces.size() != 4)
-    {
-        return false;
-    }
-
-    for (const label facei : myFaces)
-    {
-        const label size = faces[facei].size();
-
-        if (size != 3)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-bool Foam::tetMatcher::isA(const primitiveMesh& mesh, const label celli)
-{
-    return matchShape
-    (
-        true,
-        mesh.faces(),
-        mesh.faceOwner(),
-        celli,
-        mesh.cells()[celli]
-    );
-}
-
-
-bool Foam::tetMatcher::isA(const faceList& faces)
-{
-    // Do as if mesh with one cell only
-    return matchShape
-    (
-        true,
-        faces,                          // all faces in mesh
-        labelList(faces.size(), Zero),  // cell 0 is owner of all faces
-        0,                              // cell label
-        identity(faces.size())          // faces of cell 0
-    );
+    return checkFaceSizeMatch(meshFaces, cellFaces);
 }
 
 

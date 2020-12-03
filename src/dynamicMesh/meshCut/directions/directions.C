@@ -151,7 +151,7 @@ Foam::vectorField Foam::directions::propagateDirection
 
             label celli = mesh.faceOwner()[meshFacei];
 
-            if (!hexMatcher().isA(mesh, celli))
+            if (!hexMatcher::test(mesh, celli))
             {
                 FatalErrorInFunction
                     << "useHexTopology specified but cell " << celli

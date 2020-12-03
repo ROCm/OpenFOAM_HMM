@@ -51,7 +51,6 @@ namespace Foam
 
 // Forward Declarations
 class polyMesh;
-class tetMatcher;
 
 /*---------------------------------------------------------------------------*\
                        Class isoSurfaceTopo Declaration
@@ -106,19 +105,11 @@ class isoSurfaceTopo
         void fixTetBasePtIs();
 
         //- Determine whether cell is cut
-        cellCutType calcCutType
-        (
-            const bool isTet,
-            const label
-        ) const;
+        cellCutType calcCutType(const label celli) const;
 
         //- Determine for all mesh whether cell is cut
         //  \return number of cells cut
-        label calcCutTypes
-        (
-            tetMatcher& tet,
-            List<cellCutType>& cellCutTypes
-        );
+        label calcCutTypes(List<cellCutType>& cellCutTypes);
 
         //- Generate single point on edge
         label generatePoint

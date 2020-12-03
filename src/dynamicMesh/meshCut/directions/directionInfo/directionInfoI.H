@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,7 +138,7 @@ inline bool Foam::directionInfo::updateCell
         return false;
     }
 
-    if (hexMatcher().isA(mesh, thisCelli))
+    if (hexMatcher::test(mesh, thisCelli))
     {
         const face& f = mesh.faces()[neighbourFacei];
 

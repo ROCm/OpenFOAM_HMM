@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +85,17 @@ public:
     ~tetMatcher() = default;
 
 
+    // Static Functions
+
+        //- Test if given list of faces satisfies criteria for TET.
+        //- (4 tri)
+        static bool test(const UList<face>& faces);
+
+        //- Test if given cell satisfies criteria for TET.
+        //- (4 tri)
+        static bool test(const primitiveMesh& mesh, const label celli);
+
+
     // Member Functions
 
         virtual label nVertPerCell() const
@@ -114,9 +126,15 @@ public:
             const labelList& myFaces
         );
 
-        virtual bool isA(const primitiveMesh& mesh, const label celli);
+        virtual bool isA(const primitiveMesh& mesh, const label celli)
+        {
+            return tetMatcher::test(mesh, celli);
+        }
 
-        virtual bool isA(const faceList&);
+        virtual bool isA(const faceList& faces)
+        {
+            return tetMatcher::test(faces);
+        }
 
         virtual bool matches
         (
