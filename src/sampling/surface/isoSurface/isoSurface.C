@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1340,39 +1340,17 @@ Foam::isoSurface::isoSurface
     const volScalarField& cellValues,
     const scalarField& pointValues,
     const scalar iso,
-    const isoSurfaceBase::filterType filter,
-    const boundBox& bounds,
-    const scalar mergeTol
+    const isoSurfaceParams& params,
+    const bitSet& /*unused*/
 )
 :
-    isoSurface
-    (
-        cellValues,
-        pointValues,
-        iso,
-        (filter != filterType::NONE),
-        bounds,
-        mergeTol
-    )
-{}
-
-
-Foam::isoSurface::isoSurface
-(
-    const volScalarField& cellValues,
-    const scalarField& pointValues,
-    const scalar iso,
-    const bool regularise,
-    const boundBox& bounds,
-    const scalar mergeTol
-)
-:
-    isoSurfaceBase(iso, bounds),
+    isoSurfaceBase(iso, params),
     mesh_(cellValues.mesh()),
     pVals_(pointValues),
-    regularise_(regularise),
-    mergeDistance_(mergeTol*mesh_.bounds().mag())
+    mergeDistance_(params.mergeTol()*mesh_.bounds().mag())
 {
+    const bool regularise = (params.filter() != filterType::NONE);
+
     if (debug)
     {
         Pout<< "isoSurface:" << nl
@@ -1381,8 +1359,8 @@ Foam::isoSurface::isoSurface
             << minMax(cellValues.primitiveField()) << nl
             << "    point min/max : " << minMax(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    filter        : " << Switch(regularise_) << nl
-            << "    mergeTol      : " << mergeTol << nl
+            << "    filter        : " << Switch(regularise) << nl
+            << "    mergeTol      : " << params.mergeTol() << nl
             << endl;
     }
 
@@ -1530,7 +1508,7 @@ Foam::isoSurface::isoSurface
 
     // Per cc -1 or a point inside snappedPoints.
     labelList snappedCc;
-    if (regularise_)
+    if (regularise)
     {
         calcSnappedCc
         (
@@ -1562,7 +1540,7 @@ Foam::isoSurface::isoSurface
 
     // Per point -1 or a point inside snappedPoints.
     labelList snappedPoint;
-    if (regularise_)
+    if (regularise)
     {
         // Determine if point is on boundary.
         bitSet isBoundaryPoint(mesh_.nPoints());
@@ -1661,11 +1639,11 @@ Foam::isoSurface::isoSurface
         DynamicList<label> trimTriMap;
         // Trimmed to original point
         labelList trimTriPointMap;
-        if (bounds_.valid())
+        if (getClipBounds().valid())
         {
             trimToBox
             (
-                treeBoundBox(bounds_),
+                treeBoundBox(getClipBounds()),
                 triPoints,              // new points
                 trimTriMap,             // map from (new) triangle to original
                 trimTriPointMap,        // map from (new) point to original
@@ -1694,7 +1672,7 @@ Foam::isoSurface::isoSurface
         }
 
 
-        if (bounds_.valid())
+        if (getClipBounds().valid())
         {
             // Adjust interpolatedPoints_
             inplaceRenumber(triPointMergeMap_, interpolatedPoints_);

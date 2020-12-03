@@ -102,14 +102,11 @@ class sampledIsoSurfaceCell
         //- Iso value
         const scalar isoVal_;
 
-        //- Filtering for iso-surface triangles
-        const isoSurfaceBase::filterType filter_;
+        //- Parameters (filtering etc) for iso-surface
+        isoSurfaceParams isoParams_;
 
         //- Whether to recalculate cell values as average of point values
-        const bool average_;
-
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
+        bool average_;
 
 
     // Recreated for every isoSurface

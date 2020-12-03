@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,16 +50,13 @@ Usage
         type     | distanceSurface                          | yes |
         distance | Distance from surface                    | yes |
         signed   | Use sign when distance is positive       | partly |
-        isoAlgorithm | (cell/topo/point)                    | no  | cell
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | cell
         regularise | Point snapping for iso-surface         | no  | true
         average  | Cell values from averaged point values   | no  | false
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
     \endtable
-
-Note
-    For compatibility, the keyword 'cell' (as a bool) is accepted
 
 SourceFiles
     sampledDistanceSurface.C
@@ -89,7 +86,7 @@ class sampledDistanceSurface
     // Private data
 
         //- Whether to recalculate cell values as average of point values
-        const bool average_;
+        bool average_;
 
         //- Track if the surface needs an update
         mutable bool needsUpdate_;

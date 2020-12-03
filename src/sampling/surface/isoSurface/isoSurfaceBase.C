@@ -27,87 +27,17 @@ License
 
 #include "isoSurfaceBase.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::Enum
-<
-    Foam::isoSurfaceBase::algorithmType
->
-Foam::isoSurfaceBase::algorithmNames
-({
-    { algorithmType::ALGO_CELL, "cell" },
-    { algorithmType::ALGO_TOPO, "topo" },
-    { algorithmType::ALGO_POINT, "point" },
-});
-
-
-const Foam::Enum
-<
-    Foam::isoSurfaceBase::filterType
->
-Foam::isoSurfaceBase::filterNames
-({
-    { filterType::NONE, "none" },
-    { filterType::CELL, "cell" },
-    { filterType::DIAGCELL, "diagcell" },
-    { filterType::PARTIAL, "partial" },
-    { filterType::FULL, "full" },
-});
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::isoSurfaceBase::filterType
-Foam::isoSurfaceBase::getFilterType
-(
-    const dictionary& dict,
-    const isoSurfaceBase::filterType deflt
-)
-{
-    word filterName;
-
-    if (!dict.readIfPresent("regularise", filterName, keyType::LITERAL))
-    {
-        return deflt;
-    }
-
-    // Try as bool/switch
-    Switch sw = Switch::find(filterName);
-
-    if (sw.good())
-    {
-        return
-        (
-            sw
-          ? deflt
-          : isoSurfaceBase::filterType::NONE
-        );
-    }
-
-    // As enum
-    if (!isoSurfaceBase::filterNames.found(filterName))
-    {
-        FatalIOErrorInFunction(dict)
-            << filterName << " is not in enumeration: "
-            << isoSurfaceBase::filterNames << nl
-            << exit(FatalIOError);
-    }
-
-    return isoSurfaceBase::filterNames[filterName];
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::isoSurfaceBase::isoSurfaceBase
 (
     const scalar iso,
-    const boundBox& bounds
+    const isoSurfaceParams& params
 )
 :
     meshedSurface(),
-    iso_(iso),
-    bounds_(bounds)
+    isoSurfaceParams(params),
+    iso_(iso)
 {}
 
 

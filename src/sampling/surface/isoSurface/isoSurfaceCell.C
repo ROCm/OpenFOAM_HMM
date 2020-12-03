@@ -1294,45 +1294,19 @@ Foam::isoSurfaceCell::isoSurfaceCell
     const scalarField& cellValues,
     const scalarField& pointValues,
     const scalar iso,
-    const isoSurfaceBase::filterType filter,
-    const boundBox& bounds,
-    const scalar mergeTol,
+    const isoSurfaceParams& params,
     const bitSet& ignoreCells
 )
 :
-    isoSurfaceCell
-    (
-        mesh,
-        cellValues,
-        pointValues,
-        iso,
-        (filter != filterType::NONE),
-        bounds,
-        mergeTol,
-        ignoreCells
-    )
-{}
-
-
-Foam::isoSurfaceCell::isoSurfaceCell
-(
-    const polyMesh& mesh,
-    const scalarField& cellValues,
-    const scalarField& pointValues,
-    const scalar iso,
-    const bool regularise,
-    const boundBox& bounds,
-    const scalar mergeTol,
-    const bitSet& ignoreCells
-)
-:
-    isoSurfaceBase(iso, bounds),
+    isoSurfaceBase(iso, params),
     mesh_(mesh),
     cVals_(cellValues),
     pVals_(pointValues),
     ignoreCells_(ignoreCells),
-    mergeDistance_(mergeTol*mesh.bounds().mag())
+    mergeDistance_(params.mergeTol()*mesh.bounds().mag())
 {
+    const bool regularise = (params.filter() != filterType::NONE);
+
     if (debug)
     {
         Pout<< "isoSurfaceCell:" << nl
@@ -1340,7 +1314,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
             << "    point min/max : " << minMax(pVals_) << nl
             << "    isoValue      : " << iso << nl
             << "    filter        : " << Switch(regularise) << nl
-            << "    mergeTol      : " << mergeTol << nl
+            << "    mergeTol      : " << params.mergeTol() << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    mergeDistance : " << mergeDistance_ << nl
             << "    ignoreCells   : " << ignoreCells_.count()
@@ -1489,11 +1463,11 @@ Foam::isoSurfaceCell::isoSurfaceCell
         DynamicList<label> trimTriMap;
         // Trimmed to original point
         labelList trimTriPointMap;
-        if (bounds_.valid())
+        if (getClipBounds().valid())
         {
             isoSurface::trimToBox
             (
-                treeBoundBox(bounds_),
+                treeBoundBox(getClipBounds()),
                 triPoints,              // new points
                 trimTriMap,             // map from (new) triangle to original
                 trimTriPointMap,        // map from (new) point to original
@@ -1521,7 +1495,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
                 << " merged triangles." << endl;
         }
 
-        if (bounds_.valid())
+        if (getClipBounds().valid())
         {
             // Adjust interpolatedPoints_
             inplaceRenumber(triPointMergeMap_, interpolatedPoints_);

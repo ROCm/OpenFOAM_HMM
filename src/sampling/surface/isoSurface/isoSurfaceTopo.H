@@ -185,9 +185,6 @@ class isoSurfaceTopo
 
 public:
 
-    //- Filtering type
-    using isoSurfaceBase::filterType;
-
 
     //- Runtime type information
     TypeName("isoSurfaceTopo");
@@ -195,15 +192,20 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from cell and point values
+        //
+        //  \param ignoreCells cells to ignore in the cellValues
+        //
+        //  Control parameters include
+        //  - bounds optional bounding box for trimming
+        //  - mergeTol fraction of mesh bounding box for merging points
         isoSurfaceTopo
         (
             const polyMesh& mesh,
             const scalarField& cellValues,
             const scalarField& pointValues,
             const scalar iso,
-            const filterType filter = filterType::DIAGCELL,
-            const boundBox& bounds = boundBox::invertedBox,
+            const isoSurfaceParams& params = isoSurfaceParams(),
             const bitSet& ignoreCells = bitSet()
         );
 

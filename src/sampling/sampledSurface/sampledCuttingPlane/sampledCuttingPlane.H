@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ Usage
         type     | cuttingPlane                             | yes |
         planeType | plane description (pointAndNormal etc)  | yes |
         mergeTol | tolerance for merging points             | no  | 1e-6
-        isoAlgorithm | (cell/topo/point)                    | no  | point
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | point
         regularise | point snapping (bool or enum)          | no  | true
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
@@ -98,25 +98,16 @@ class sampledCuttingPlane
 :
     public sampledSurface
 {
-    // Private data
+    // Private Data
 
         //- Plane
         const plane plane_;
 
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
-        //- Merge tolerance
-        const scalar mergeTol_;
-
-        //- The iso-surface algorithm type
-        const isoSurfaceBase::algorithmType isoAlgo_;
-
-        //- Filtering for iso-surface triangles
-        const isoSurfaceBase::filterType filter_;
+        //- Parameters (filtering etc) for iso-surface
+        isoSurfaceParams isoParams_;
 
         //- Whether to recalculate cell values as average of point values
-        const bool average_;
+        bool average_;
 
         //- The zone or zones in which cutting is to occur
         wordRes zoneNames_;

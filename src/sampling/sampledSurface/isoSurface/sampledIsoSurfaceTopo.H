@@ -100,11 +100,11 @@ class sampledIsoSurfaceTopo
         //- Iso value
         const scalar isoVal_;
 
-        //- Filtering for iso-surface triangles
-        const isoSurfaceBase::filterType filter_;
+        //- Parameters (filtering etc) for iso-surface
+        isoSurfaceParams isoParams_;
 
         //- Whether to triangulate (after filtering)
-        const bool triangulate_;
+        bool triangulate_;
 
 
     // Recreated for every isoSurface

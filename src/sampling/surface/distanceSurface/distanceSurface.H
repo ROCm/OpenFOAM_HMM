@@ -38,7 +38,7 @@ Usage
         Property | Description                              | Required | Default
         distance | distance from surface                    | yes |
         signed   | Use sign when distance is positive       | partly |
-        isoAlgorithm | (cell/topo/point)                    | no  | cell
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | cell
         regularise | Point snapping (enum or bool)          | no  | true
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
@@ -54,7 +54,8 @@ Note
       surface. The resulting surface elements will not, however, contain
       partial cell coverage.
 
-    For compatibility, the keyword 'cell' (as a bool) is accepted
+The keyword \c cell (bool value) which was use in 1906 and earlier to switch
+between point/cell algorithms is now ignored (2020-12).
 
 SourceFiles
     distanceSurface.C
@@ -95,14 +96,8 @@ class distanceSurface
         //- Signed distance
         const bool signed_;
 
-        //- The iso-surface algorithm type
-        const isoSurfaceBase::algorithmType isoAlgo_;
-
-        //- Filtering for iso-surface triangles
-        const isoSurfaceBase::filterType filter_;
-
-        //- Optional bounding box to trim against
-        const boundBox bounds_;
+        //- Parameters for iso-surface (algorithm, filter, mergeTol, etc)
+        isoSurfaceParams isoParams_;
 
         //- Distance to cell centres
         autoPtr<volScalarField> cellDistancePtr_;
@@ -143,10 +138,8 @@ public:
             const word& surfaceType,
             const word& surfaceName,
             const scalar distance,
-            const bool signedDistance,
-            const isoSurfaceBase::algorithmType algo,
-            const isoSurfaceBase::filterType filter,
-            const boundBox& bounds = boundBox::invertedBox
+            const bool useSignedDistance,
+            const isoSurfaceParams& params = isoSurfaceParams()
         );
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +37,8 @@ SourceFiles
 #ifndef isoSurfaceBase_H
 #define isoSurfaceBase_H
 
+#include "isoSurfaceParams.H"
 #include "scalar.H"
-#include "Enum.H"
-#include "boundBox.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
 
@@ -54,7 +53,8 @@ namespace Foam
 
 class isoSurfaceBase
 :
-    public meshedSurface
+    public meshedSurface,
+    public isoSurfaceParams
 {
 protected:
 
@@ -66,81 +66,38 @@ protected:
         //- Iso value
         const scalar iso_;
 
-        //- Optional bounds
-        const boundBox bounds_;
-
         //- For every face, the original cell in mesh
         labelList meshCells_;
 
 
 public:
 
-    //- The algorithm types
-    enum algorithmType : uint8_t
-    {
-        ALGO_POINT,
-        ALGO_CELL,
-        ALGO_TOPO
-    };
-
-
-    //- The filtering (regularization) to apply
-    enum class filterType : uint8_t
-    {
-        NONE = 0,   //!< No filtering
-        CELL,       //!< Remove points from pyramid edges
-        DIAGCELL,   //!< Remove points from pyramid edges and face-diagonals
-        PARTIAL = CELL,     //!< Same as CELL
-        FULL = DIAGCELL,    //!< Same as DIAGCELL
-    };
-
-
-    // Public Data
-
-        //- Names for the iso-surface algorithms
-        static const Enum<algorithmType> algorithmNames;
-
-        //- Names for the filtering types
-        static const Enum<filterType> filterNames;
-
-
-
-    // Static Member Functions
-
-        //- Get 'regularise' as bool or enumeration
-        static filterType getFilterType
-        (
-            const dictionary& dict,
-            const isoSurfaceBase::filterType deflt
-        );
-
-
     // Constructors
 
-        //- Construct with iso value
-        explicit isoSurfaceBase
+        //- Create for specified algorithm type/filter and iso-value
+        isoSurfaceBase
         (
             const scalar iso,
-            const boundBox& bounds = boundBox::invertedBox
+            const isoSurfaceParams& params = isoSurfaceParams()
         );
 
 
     // Member Functions
 
         //- The iso-value associated with the surface
-        inline scalar isoValue() const
+        scalar isoValue() const noexcept
         {
             return iso_;
         }
 
         //- For each face, the original cell in mesh
-        const labelList& meshCells() const
+        const labelList& meshCells() const noexcept
         {
             return meshCells_;
         }
 
         //- For each face, the original cell in mesh
-        labelList& meshCells()
+        labelList& meshCells() noexcept
         {
             return meshCells_;
         }

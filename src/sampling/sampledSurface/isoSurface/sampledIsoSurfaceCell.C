@@ -145,9 +145,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         tcellValues(),
         tpointFld().primitiveField(),
         isoVal_,
-        filter_,
-        bounds_,
-        1e-6  // mergeTol
+        isoParams_
     );
 
     // Replace current geomety
@@ -161,11 +159,12 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     {
         Pout<< "isoSurfaceCell::updateGeometry() : constructed iso:"
             << nl
-            << "    filter         : " << Switch(bool(filter_)) << nl
-            << "    average        : " << Switch(average_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
-            << "    bounds         : " << bounds_ << nl
+            << "    average        : " << Switch(average_) << nl
+            << "    filter         : "
+            << Switch(bool(isoParams_.filter())) << nl
+            << "    bounds         : " << isoParams_.getClipBounds() << nl
             << "    points         : " << points().size() << nl
             << "    faces          : " << Mesh::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
@@ -188,19 +187,13 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     Mesh(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
-    filter_
-    (
-        isoSurfaceBase::getFilterType
-        (
-            dict,
-            isoSurfaceBase::filterType::DIAGCELL
-        )
-    ),
+    isoParams_(dict),
     average_(dict.getOrDefault("average", true)),
-    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     prevTimeIndex_(-1),
     meshCells_()
-{}
+{
+    isoParams_.algorithm(isoSurfaceParams::ALGO_CELL);  // Force
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

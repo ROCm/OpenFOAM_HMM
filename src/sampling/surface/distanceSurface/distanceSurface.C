@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,47 +41,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    static isoSurfaceBase::algorithmType getIsoAlgorithm(const dictionary& dict)
-    {
-        // Previously 'cell' (bool), but now 'isoAlgorithm' (enum)
-
-        // Default (bool) for 1906 and earlier
-        bool useCell = true;
-
-        // Default (enum) after 1906
-        isoSurfaceBase::algorithmType algo = isoSurfaceBase::ALGO_CELL;
-
-        if
-        (
-            !isoSurfaceBase::algorithmNames.readIfPresent
-            (
-                "isoAlgorithm", dict, algo
-            )
-            // When above fails, use 'compat' to also get upgrade messages
-         && dict.readIfPresentCompat
-            (
-                "isoAlgorithm", {{"cell", 1906}}, useCell
-            )
-        )
-        {
-            return
-            (
-                useCell
-              ? isoSurfaceBase::ALGO_CELL
-              : isoSurfaceBase::ALGO_POINT
-            );
-        }
-
-        return algo;
-    }
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::distanceSurface::distanceSurface
@@ -114,16 +73,12 @@ Foam::distanceSurface::distanceSurface
     (
         distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
     ),
-    isoAlgo_(getIsoAlgorithm(dict)),
-    filter_
+    isoParams_
     (
-        isoSurfaceBase::getFilterType
-        (
-            dict,
-            isoSurfaceBase::filterType::DIAGCELL
-        )
+        dict,
+        isoSurfaceParams::ALGO_CELL,
+        isoSurfaceParams::filterType::DIAGCELL
     ),
-    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
     isoSurfTopoPtr_(nullptr)
@@ -137,10 +92,8 @@ Foam::distanceSurface::distanceSurface
     const word& surfaceType,
     const word& surfaceName,
     const scalar distance,
-    const bool signedDistance,
-    const isoSurfaceBase::algorithmType algo,
-    const isoSurfaceBase::filterType filter,
-    const boundBox& bounds
+    const bool useSignedDistance,
+    const isoSurfaceParams& params
 )
 :
     mesh_(mesh),
@@ -164,11 +117,9 @@ Foam::distanceSurface::distanceSurface
     distance_(distance),
     signed_
     (
-        signedDistance || distance_ < 0 || equal(distance_, Zero)
+        useSignedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
-    isoAlgo_(algo),
-    filter_(filter),
-    bounds_(bounds),
+    isoParams_(params),
     isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
     isoSurfTopoPtr_(nullptr)
@@ -220,7 +171,7 @@ void Foam::distanceSurface::createGeometry()
     const bool filterCells =
     (
         isZeroDist
-     && isoAlgo_ != isoSurfaceBase::ALGO_POINT
+     && isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT
     );
 
     bitSet ignoreCells;
@@ -408,7 +359,21 @@ void Foam::distanceSurface::createGeometry()
 
 
     // Direct from cell field and point field.
-    if (isoAlgo_ == isoSurfaceBase::ALGO_CELL)
+    if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
+    {
+        isoSurfPtr_.reset
+        (
+            new isoSurface
+            (
+                cellDistance,
+                pointDistance_,
+                distance_,
+                isoParams_,
+                ignoreCells
+            )
+        );
+    }
+    else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
     {
         isoSurfCellPtr_.reset
         (
@@ -418,15 +383,14 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                filter_,
-                bounds_,
-                1e-6,  // mergeTol
+                isoParams_,
                 ignoreCells
             )
         );
     }
-    else if (isoAlgo_ == isoSurfaceBase::ALGO_TOPO)
+    else
     {
+        // ALGO_TOPO
         isoSurfTopoPtr_.reset
         (
             new isoSurfaceTopo
@@ -435,24 +399,8 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                filter_,
-                bounds_,
+                isoParams_,
                 ignoreCells
-            )
-        );
-    }
-    else
-    {
-        isoSurfPtr_.reset
-        (
-            new isoSurface
-            (
-                cellDistance,
-                pointDistance_,
-                distance_,
-                filter_,
-                bounds_,
-                1e-6
             )
         );
     }

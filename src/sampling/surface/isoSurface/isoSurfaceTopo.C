@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurfaceTopo.H"
-#include "isoSurface.H"
 #include "polyMesh.H"
 #include "volFields.H"
 #include "tetMatcher.H"
@@ -1193,12 +1192,11 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     const scalarField& cVals,
     const scalarField& pVals,
     const scalar iso,
-    const filterType filter,
-    const boundBox& bounds,
+    const isoSurfaceParams& params,
     const bitSet& ignoreCells
 )
 :
-    isoSurfaceBase(iso, bounds),
+    isoSurfaceBase(iso, params),
     mesh_(mesh),
     cVals_(cVals),
     pVals_(pVals),
@@ -1210,8 +1208,8 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             << "    cell min/max  : " << minMax(cVals_) << nl
             << "    point min/max : " << minMax(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    filter        : " << isoSurfaceBase::filterNames[filter]
-            << nl
+            << "    filter        : "
+            << isoSurfaceParams::filterNames[params.filter()] << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    ignoreCells   : " << ignoreCells_.count()
             << " / " << cVals_.size() << nl
@@ -1345,7 +1343,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     }
 
 
-    if (filter != filterType::NONE)
+    if (params.filter() != filterType::NONE)
     {
         // Triangulate outside (filter edges to cell centres and optionally
         // face diagonals)
@@ -1355,7 +1353,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         (
             removeInsidePoints
             (
-                (filter == filterType::DIAGCELL ? true : false),
+                (params.filter() == filterType::DIAGCELL ? true : false),
                 *this,
                 pointFromDiag,
                 pointToFace_,
@@ -1378,7 +1376,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         }
 
 
-        if (filter == filterType::DIAGCELL)
+        if (params.filter() == filterType::DIAGCELL)
         {
             // We remove verts on face diagonals. This is in fact just
             // straightening the edges of the face through the cell. This can

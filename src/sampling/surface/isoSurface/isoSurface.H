@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,9 +115,6 @@ class isoSurface
 
         //- Input volScalarField with separated coupled patches rewritten
         autoPtr<slicedVolScalarField> cValsPtr_;
-
-        //- Regularise?
-        const bool regularise_;
 
         //- When to merge points
         const scalar mergeDistance_;
@@ -386,9 +383,6 @@ public:
     friend class isoSurfaceCell;
     friend class isoSurfaceTopo;
 
-    //- Filtering type
-    using isoSurfaceBase::filterType;
-
 
     //- Runtime type information
     TypeName("isoSurface");
@@ -400,33 +394,16 @@ public:
         //  Uses boundaryField for boundary values.
         //  Holds reference to cellIsoVals and pointIsoVals.
         //
-        //  \param bounds optional bounding box for trimming
-        //  \param mergeTol fraction of mesh bounding box for merging points
+        //  Control parameters include
+        //  - bounds optional bounding box for trimming
+        //  - mergeTol fraction of mesh bounding box for merging points
         isoSurface
         (
             const volScalarField& cellValues,
             const scalarField& pointValues,
             const scalar iso,
-            const isoSurfaceBase::filterType filter,
-            const boundBox& bounds = boundBox::invertedBox,
-            const scalar mergeTol = 1e-6
-        );
-
-
-        //- Construct from cell values and point values.
-        //  Uses boundaryField for boundary values.
-        //  Holds reference to cellIsoVals and pointIsoVals.
-        //
-        //  \param bounds optional bounding box for trimming
-        //  \param mergeTol fraction of mesh bounding box for merging points
-        isoSurface
-        (
-            const volScalarField& cellValues,
-            const scalarField& pointValues,
-            const scalar iso,
-            const bool regularise,
-            const boundBox& bounds = boundBox::invertedBox,
-            const scalar mergeTol = 1e-6
+            const isoSurfaceParams& params = isoSurfaceParams(),
+            const bitSet& ignoreCells = bitSet()  //!< unused
         );
 
 

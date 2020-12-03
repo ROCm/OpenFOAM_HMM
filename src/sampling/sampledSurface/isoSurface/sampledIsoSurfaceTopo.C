@@ -27,12 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledIsoSurfaceTopo.H"
+#include "isoSurfaceTopo.H"
 #include "dictionary.H"
+#include "fvMesh.H"
 #include "volFields.H"
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvMesh.H"
-#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -119,7 +119,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         cellFld.primitiveField(),
         tpointFld().primitiveField(),
         isoVal_,
-        filter_
+        isoParams_
     );
 
     mySurface.transfer(static_cast<meshedSurface&>(surf));
@@ -138,13 +138,13 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
 
     if (debug)
     {
-        Pout<< "sampledIsoSurfaceTopo::updateGeometry() : constructed iso:"
-            << nl
-            << "    filter         : " << isoSurfaceBase::filterNames[filter_]
-            << nl
-            << "    triangulate    : " << Switch(triangulate_) << nl
+        Pout<< "isoSurfaceTopo::updateGeometry() : constructed iso:" << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
+            << "    filter         : "
+            << isoSurfaceParams::filterNames[isoParams_.filter()] << nl
+            << "    triangulate    : " << Switch(triangulate_) << nl
+            << "    bounds         : " << isoParams_.getClipBounds() << nl
             << "    points         : " << points().size() << nl
             << "    faces          : " << Mesh::size() << nl
             << "    cut cells      : " << meshCells_.size() << endl;
@@ -167,19 +167,18 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
     Mesh(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
-    filter_
-    (
-        isoSurfaceBase::getFilterType
-        (
-            dict,
-            isoSurfaceBase::filterType::DIAGCELL
-        )
-    ),
+    isoParams_(dict),
     triangulate_(dict.getOrDefault("triangulate", false)),
     prevTimeIndex_(-1),
     meshCells_()
 {
-    if (triangulate_ && filter_ == isoSurfaceBase::filterType::NONE)
+    isoParams_.algorithm(isoSurfaceParams::ALGO_TOPO);  // Force
+
+    if
+    (
+        triangulate_
+     && (isoParams_.filter() == isoSurfaceParams::filterType::NONE)
+    )
     {
         FatalIOErrorInFunction(dict)
             << "Cannot triangulate without a regularise filter" << nl
@@ -328,7 +327,7 @@ Foam::sampledIsoSurfaceTopo::interpolate
 
 void Foam::sampledIsoSurfaceTopo::print(Ostream& os) const
 {
-    os  << "sampledIsoSurfaceTopo: " << name() << " :"
+    os  << "isoSurfaceTopo: " << name() << " :"
         << "  field:" << isoField_
         << "  value:" << isoVal_;
         //<< "  faces:" << faces().size()   // possibly no geom yet
