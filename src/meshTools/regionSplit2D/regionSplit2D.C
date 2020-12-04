@@ -30,6 +30,13 @@ License
 #include "PatchEdgeFaceWave.H"
 #include "edgeTopoDistanceData.H"
 
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+static constexpr Foam::label UNASSIGNED = -1;
+static constexpr Foam::label BLOCKED = -2;
+
+
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::regionSplit2D::regionSplit2D
@@ -40,7 +47,7 @@ Foam::regionSplit2D::regionSplit2D
     const label offset
 )
 :
-    labelList(patch.size(), -1),
+    labelList(patch.size(), UNASSIGNED),
     nRegions_(0)
 {
     globalIndex globalFaces(blockedFaces.size());
@@ -49,15 +56,15 @@ Foam::regionSplit2D::regionSplit2D
     List<edgeTopoDistanceData<label>> allFaceInfo(patch.size());
     DynamicList<label> changedEdges;
     DynamicList<edgeTopoDistanceData<label>> changedRegions;
+
     label nBlockedFaces = 0;
-    forAll(blockedFaces, faceI)
+    forAll(blockedFaces, facei)
     {
-        if (blockedFaces[faceI])
+        if (blockedFaces.test(facei))
         {
-            const labelList& fEdges = patch.faceEdges()[faceI];
-            forAll(fEdges, feI)
+            for (const label edgei : patch.faceEdges()[facei])
             {
-                changedEdges.append(fEdges[feI]);
+                changedEdges.append(edgei);
 
                 // Append globally unique value
                 changedRegions.append
@@ -75,10 +82,10 @@ Foam::regionSplit2D::regionSplit2D
         else
         {
             // Block all non-seeded faces from the walk
-            allFaceInfo[faceI] = edgeTopoDistanceData<label>
+            allFaceInfo[facei] = edgeTopoDistanceData<label>
             (
                 0,              // distance
-                -2         // passive data
+                BLOCKED         // passive data
             );
         }
     }
@@ -147,12 +154,6 @@ Foam::regionSplit2D::regionSplit2D
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionSplit2D::~regionSplit2D()
-{}
 
 
 // ************************************************************************* //

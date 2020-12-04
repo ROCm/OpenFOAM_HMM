@@ -70,6 +70,36 @@ static labelList containerSizes(const UList<Container>& input)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::regionSplit::checkBoundaryFaceSync
+(
+    const boolList& blockedFace
+) const
+{
+    if (blockedFace.size())
+    {
+        // Check that blockedFace is synced.
+        boolList syncBlockedFace(blockedFace);
+        syncTools::swapFaceList(mesh(), syncBlockedFace);
+
+        forAll(syncBlockedFace, facei)
+        {
+            if
+            (
+                blockedFace.test(facei)
+             != syncBlockedFace.test(facei)
+            )
+            {
+                FatalErrorInFunction
+                    << "Face " << facei << " not synchronised. My value:"
+                    << blockedFace.test(facei) << "  coupled value:"
+                    << syncBlockedFace.test(facei) << nl
+                    << abort(FatalError);
+            }
+        }
+    }
+}
+
+
 void Foam::regionSplit::updateFacePair
 (
     const label face0,
@@ -122,7 +152,7 @@ void Foam::regionSplit::updateFacePair
 
 void Foam::regionSplit::fillSeedMask
 (
-    const List<labelPair>& explicitConnections,
+    const UList<labelPair>& explicitConnections,
     const label seedCellId,
     const label markValue,
     labelList& cellRegion,
@@ -200,16 +230,12 @@ void Foam::regionSplit::fillSeedMask
 
         for (const polyPatch& pp : patches)
         {
-            if
-            (
-                isA<cyclicPolyPatch>(pp)
-             && refCast<const cyclicPolyPatch>(pp).owner()
-            )
+            const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+            if (bool(cpp) && cpp->owner())
             {
                 // Transfer from neighbourPatch to here or vice versa.
-
-                const cyclicPolyPatch& cycPatch =
-                    refCast<const cyclicPolyPatch>(pp);
+                const auto& cycPatch = *cpp;
 
                 label face0 = cycPatch.start();
 
@@ -251,56 +277,18 @@ void Foam::regionSplit::fillSeedMask
 }
 
 
-Foam::label Foam::regionSplit::calcLocalRegionSplit
+Foam::label Foam::regionSplit::localRegionSplit
 (
-    const boolList& blockedFace,
-    const List<labelPair>& explicitConnections,
+    const UList<labelPair>& explicitConnections,
 
-    labelList& cellRegion
+    labelList& cellRegion,
+    labelList& faceRegion
 ) const
 {
     clockValue timing(debug);
 
-    if (debug)
-    {
-        if (blockedFace.size())
-        {
-            // Check that blockedFace is synced.
-            boolList syncBlockedFace(blockedFace);
-            syncTools::swapFaceList(mesh(), syncBlockedFace);
-
-            forAll(syncBlockedFace, facei)
-            {
-                if (syncBlockedFace[facei] != blockedFace[facei])
-                {
-                    FatalErrorInFunction
-                        << "Face " << facei << " not synchronised. My value:"
-                        << blockedFace[facei] << "  coupled value:"
-                        << syncBlockedFace[facei]
-                        << abort(FatalError);
-                }
-            }
-        }
-    }
-
     changedCells_.reserve(mesh_.nCells());
     changedFaces_.reserve(mesh_.nFaces());
-
-    // Region per face.
-    // -1 = unassigned
-    // -2 = blocked
-    labelList faceRegion(mesh().nFaces(), UNASSIGNED);
-
-    if (blockedFace.size())
-    {
-        forAll(blockedFace, facei)
-        {
-            if (blockedFace[facei])
-            {
-                faceRegion[facei] = BLOCKED;
-            }
-        }
-    }
 
 
     // Assign local regions
@@ -371,31 +359,6 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
 }
 
 
-Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
-(
-    const bool doGlobalRegions,
-    const boolList& blockedFace,
-    const List<labelPair>& explicitConnections,
-
-    labelList& cellRegion
-) const
-{
-    const label nLocalRegions = calcLocalRegionSplit
-    (
-        blockedFace,
-        explicitConnections,
-        cellRegion
-    );
-
-    if (!doGlobalRegions)
-    {
-        return autoPtr<globalIndex>::New(nLocalRegions);
-    }
-
-    return reduceRegions(nLocalRegions, blockedFace, cellRegion);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regionSplit::regionSplit
@@ -404,36 +367,60 @@ Foam::regionSplit::regionSplit
     const bool doGlobalRegions
 )
 :
-    MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
-    labelList(mesh.nCells(), -1)
-{
-    globalNumberingPtr_ = calcRegionSplit
+    regionSplit
     (
-        doGlobalRegions,
-        boolList(),         // No blockedFace
+        mesh,
+        bitSet(),           // No blockedFace
         List<labelPair>(),  // No explicitConnections
-        *this
-    );
-}
+        doGlobalRegions
+    )
+{}
 
 
 Foam::regionSplit::regionSplit
 (
     const polyMesh& mesh,
-    const boolList& blockedFace,
+    const bitSet& blockedFace,
+    const List<labelPair>& explicitConnections,
     const bool doGlobalRegions
 )
 :
     MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
-    labelList(mesh.nCells(), -1)
+    labelList(mesh.nCells(), UNASSIGNED),
+    globalNumbering_()
 {
-    globalNumberingPtr_ = calcRegionSplit
-    (
-        doGlobalRegions,
-        blockedFace,
-        List<labelPair>(),  // No explicitConnections
-        *this
-    );
+    // if (debug)
+    // {
+    //     checkBoundaryFaceSync(blockedFace);
+    // }
+
+    labelList& cellRegion = *this;
+
+    labelList faceRegion(mesh.nFaces(), UNASSIGNED);
+
+    for (const label facei : blockedFace)
+    {
+        faceRegion[facei] = BLOCKED;
+    }
+
+    const label numLocalRegions =
+        localRegionSplit(explicitConnections, cellRegion, faceRegion);
+
+    faceRegion.clear();
+
+    if (doGlobalRegions)
+    {
+        // Wrap bitset or bools
+        bitSetOrBoolList hasBlockedFace(blockedFace);
+
+        globalNumbering_ =
+            reduceRegionsImpl(numLocalRegions, hasBlockedFace, cellRegion);
+
+    }
+    else
+    {
+        globalNumbering_ = globalIndex(numLocalRegions);
+    }
 }
 
 
@@ -446,25 +433,54 @@ Foam::regionSplit::regionSplit
 )
 :
     MeshObject<polyMesh, Foam::TopologicalMeshObject, regionSplit>(mesh),
-    labelList(mesh.nCells(), -1)
+    labelList(mesh.nCells(), UNASSIGNED),
+    globalNumbering_()
 {
-    globalNumberingPtr_ = calcRegionSplit
-    (
-        doGlobalRegions,
-        blockedFace,
-        explicitConnections,
-        *this
-    );
+    if (debug)
+    {
+        checkBoundaryFaceSync(blockedFace);
+    }
+
+    labelList& cellRegion = *this;
+
+    labelList faceRegion(mesh.nFaces(), UNASSIGNED);
+
+    forAll(blockedFace, facei)
+    {
+        if (blockedFace.test(facei))
+        {
+            faceRegion[facei] = BLOCKED;
+        }
+    }
+
+
+    const label numLocalRegions =
+        localRegionSplit(explicitConnections, cellRegion, faceRegion);
+
+    faceRegion.clear();
+
+    if (doGlobalRegions)
+    {
+        // Wrap bitset or bools
+        bitSetOrBoolList hasBlockedFace(blockedFace);
+
+        globalNumbering_ =
+            reduceRegionsImpl(numLocalRegions, hasBlockedFace, cellRegion);
+    }
+    else
+    {
+        globalNumbering_ = globalIndex(numLocalRegions);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
+Foam::globalIndex
+Foam::regionSplit::reduceRegionsImpl
 (
     const label numLocalRegions,
-    const boolList& blockedFace,
-
+    const bitSetOrBoolList& blockedFace,
     labelList& cellRegion
 ) const
 {
@@ -474,8 +490,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
     {
         FatalErrorInFunction
             << "The cellRegion size " << cellRegion.size()
-            << " is not equal to the of number of cells "
-            << mesh().nCells() << endl
+            << " != number of cells " << mesh().nCells() << endl
             << abort(FatalError);
     }
 
@@ -549,22 +564,23 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
         {
             if (pp.coupled())
             {
-                const labelUList& faceCells = pp.faceCells();
                 SubList<label> patchNbrRegion
                 (
                     nbrRegion,
                     pp.size(),
-                    pp.start()-mesh().nInternalFaces()
+                    pp.offset()
                 );
 
+                const labelUList& faceCells = pp.faceCells();
                 forAll(faceCells, patchFacei)
                 {
+                    const label celli = faceCells[patchFacei];
                     const label meshFacei = pp.start()+patchFacei;
 
-                    if (!blockedFace[meshFacei])
+                    if (!blockedFace.test(meshFacei))
                     {
                         // Send the most currently updated region Id
-                        const label orig = cellRegion[faceCells[patchFacei]];
+                        const label orig = cellRegion[celli];
 
                         patchNbrRegion[patchFacei] = localToGlobal[orig];
                     }
@@ -578,23 +594,24 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
         {
             if (pp.coupled())
             {
-                const labelUList& faceCells = pp.faceCells();
                 SubList<label> patchNbrRegion
                 (
                     nbrRegion,
                     pp.size(),
-                    pp.start()-mesh().nInternalFaces()
+                    pp.offset()
                 );
 
+                const labelUList& faceCells = pp.faceCells();
                 forAll(faceCells, patchFacei)
                 {
+                    const label celli = faceCells[patchFacei];
                     const label meshFacei = pp.start()+patchFacei;
 
-                    if (!blockedFace[meshFacei])
+                    if (!blockedFace.test(meshFacei))
                     {
                         // Reduction by retaining the min region id.
 
-                        const label orig = cellRegion[faceCells[patchFacei]];
+                        const label orig = cellRegion[celli];
 
                         const label sent = localToGlobal[orig];
                         const label recv = patchNbrRegion[patchFacei];
@@ -689,8 +706,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
 
 
     // The new global numbering using compacted local regions
-    auto globalCompactPtr = autoPtr<globalIndex>::New(nCompact);
-    const auto& globalCompact = *globalCompactPtr;
+    globalIndex globalCompact(nCompact);
 
 
     // Determine the following:
@@ -817,7 +833,23 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
     DebugInfo
         <<"regionSplit::reduceRegions = " << double(timing.elapsed()) << "s\n";
 
-    return globalCompactPtr;
+    return globalCompact;
+}
+
+
+Foam::globalIndex
+Foam::regionSplit::reduceRegions
+(
+    const label numLocalRegions,
+    const bitSet& blockedFace,
+
+    labelList& cellRegion
+) const
+{
+    // Wrap bitset or bools
+    bitSetOrBoolList hasBlockedFace(blockedFace);
+
+    return reduceRegionsImpl(numLocalRegions, hasBlockedFace, cellRegion);
 }
 
 

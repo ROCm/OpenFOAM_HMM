@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,6 +122,7 @@ SourceFiles
 
 #include "globalIndex.H"
 #include "labelPair.H"
+#include "bitSet.H"
 #include "boolList.H"
 #include "MeshObject.H"
 
@@ -130,8 +131,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -143,9 +143,10 @@ class regionSplit
     public MeshObject<polyMesh, TopologicalMeshObject, regionSplit>,
     public labelList
 {
-    // Private data
+    // Private Data
 
-        autoPtr<globalIndex> globalNumberingPtr_;
+        //- Indexing into the regions
+        globalIndex globalNumbering_;
 
         //- Temporary list of cells that have changed
         mutable DynamicList<label> changedCells_;
@@ -154,7 +155,42 @@ class regionSplit
         mutable DynamicList<label> changedFaces_;
 
 
+    // Private Class
+
+
+        //- Simple wrapper for handling test() on bitSet or boolList
+        //- without a templating layer or lambda expresssion.
+        class bitSetOrBoolList
+        {
+            const bitSet& a_;
+            const boolList& b_;
+
+        public:
+
+            explicit bitSetOrBoolList(const bitSet& select)
+            :
+                a_(select),
+                b_(boolList::null())
+            {}
+
+            explicit bitSetOrBoolList(const boolList& select)
+            :
+                a_(bitSet::null()),
+                b_(select)
+            {}
+
+            //- Test function
+            bool test(const label i) const
+            {
+                return a_.test(i) || b_.test(i);
+            }
+        };
+
+
     // Private Member Functions
+
+        //- Check that boundary faces are synchronised, or Fatal
+        void checkBoundaryFaceSync(const boolList& blockedFace) const;
 
         //- Update faceRegion data between (non-processor) coupled faces.
         void updateFacePair
@@ -169,7 +205,7 @@ class regionSplit
         //- for contiguous region around it
         void fillSeedMask
         (
-            const List<labelPair>& explicitConnections,
+            const UList<labelPair>& explicitConnections,
             const label seedCellID,
             const label markValue,
             labelList& cellRegion,
@@ -180,22 +216,21 @@ class regionSplit
         //- Calculate the local region split.
         //  \return number of processor-local regions,
         //      without consolidation between procesors
-        label calcLocalRegionSplit
+        label localRegionSplit
         (
-            const boolList& blockedFace,
-            const List<labelPair>& explicitConnections,
-            labelList& cellRegion
+            const UList<labelPair>& explicitConnections,
+            labelList& cellRegion,
+            labelList& faceRegion
         ) const;
 
-
-        //- Calculate the local region split.
-        //  \return number of processor-local regions,
-        //      without consolidation between procesors
-        autoPtr<globalIndex> calcRegionSplit
+        //- Manually consolidate regions globally by swapping information
+        //  between processor domains and reducing the regions accordingly.
+        //
+        //  \return globalIndex into the local regions after reduction.
+        globalIndex reduceRegionsImpl
         (
-            const bool doGlobalRegions,
-            const boolList& blockedFace,
-            const List<labelPair>& explicitConnections,
+            const label numLocalRegions,
+            const bitSetOrBoolList& blockedFace,
             labelList& cellRegion
         ) const;
 
@@ -215,23 +250,29 @@ public:
             const bool doGlobalRegions = Pstream::parRun()
         );
 
-        //- Construct from mesh and whether face is blocked
+        //- Construct from mesh and whether face is blocked, optionally
+        //- with additional explicit connections between
+        //- normal boundary faces.
+        //
         //  \note blockedFace must be consistent across coupled faces!
         regionSplit
         (
             const polyMesh& mesh,
-            const boolList& blockedFace,
+            const bitSet& blockedFace,
+            const List<labelPair>& explicitConnections = List<labelPair>(),
             const bool doGlobalRegions = Pstream::parRun()
         );
 
-        //- Construct from mesh and whether face is blocked, with additional
-        //- explicit connections between normal boundary faces.
+        //- Construct from mesh and whether face is blocked, optionally
+        //- with additional explicit connections between
+        //- normal boundary faces.
+        //
         //  \note blockedFace must be consistent across coupled faces!
         regionSplit
         (
             const polyMesh& mesh,
             const boolList& blockedFace,
-            const List<labelPair>& explicitConnections,
+            const List<labelPair>& explicitConnections = List<labelPair>(),
             const bool doGlobalRegions = Pstream::parRun()
         );
 
@@ -239,9 +280,9 @@ public:
     // Member Functions
 
         //- Return global region numbering
-        const globalIndex& globalNumbering() const
+        const globalIndex& globalNumbering() const noexcept
         {
-            return *globalNumberingPtr_;
+            return globalNumbering_;
         }
 
         //- Return local number of regions
@@ -256,18 +297,16 @@ public:
             return globalNumbering().size();
         }
 
-
-        //- Manually consolidate the regions globally by swapping information
+        //- Manually consolidate regions globally by swapping information
         //  between processor domains and reducing the regions accordingly.
         //
-        //  \return number of local regions after reduction.
-        autoPtr<globalIndex> reduceRegions
+        //  \return globalIndex into the local regions after reduction.
+        globalIndex reduceRegions
         (
             const label numLocalRegions,
-            const boolList& blockedFace,
+            const bitSet& blockedFace,
             labelList& cellRegion
         ) const;
-
 };
 
 

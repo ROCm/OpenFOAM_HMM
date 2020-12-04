@@ -49,6 +49,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class faceZone;
 class polyMesh;
 
@@ -60,7 +61,7 @@ class regionSplit2D
 :
     public labelList
 {
-    // Private data
+    // Private Data
 
         //- Number of regions
         label nRegions_;
@@ -90,13 +91,13 @@ public:
 
 
     //- Destructor
-    ~regionSplit2D();
+    ~regionSplit2D() = default;
 
 
     // Member Functions
 
         //- Return the global number of regions
-        label nRegions() const
+        label nRegions() const noexcept
         {
             return nRegions_;
         }
