@@ -128,6 +128,11 @@ public:
         class const_iterator;
         typedef unsigned int const_reference;
 
+    // Static Member Functions
+
+        //- Return a null bitSet reference
+        inline static const bitSet& null();
+
 
     //- Declare type-name (with debug switch)
     ClassName("bitSet");
@@ -214,7 +219,9 @@ public:
 
     // Query
 
-        //- True if all bits in this bitset are set or if the set is empty.
+        //- True if all bits in this bitset are set or if the set is \b empty.
+        //  Returning true for an empty set may not seem intuitive, but
+        //  conforms to how boost has defined things.
         //  \note Method name compatibility with boost::dynamic_bitset
         inline bool all() const;
 

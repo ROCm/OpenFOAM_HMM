@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,6 +164,23 @@ inline bool compare
 
 int main(int argc, char *argv[])
 {
+    Info<< "bitSet::null()" << nl
+        << "sizeof : " << sizeof(bitSet::null()) << " bytes" << nl;
+
+    info(bitSet::null());
+
+    {
+        bitSet emptySet;
+        info(emptySet);
+        extent(emptySet);
+
+        emptySet.resize(10);
+        info(emptySet);
+        extent(emptySet);
+    }
+
+    Info<< nl << "Tests" << nl;
+
     bitSet list1(22);
     // Set every third one on
     forAll(list1, i)

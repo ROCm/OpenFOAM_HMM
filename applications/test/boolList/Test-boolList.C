@@ -36,6 +36,7 @@ Description
 #include "bitSet.H"
 #include "BitOps.H"
 #include "FlatOutput.H"
+#include "bitSetOrBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -152,6 +153,24 @@ int main(int argc, char *argv[])
     BitOps::set(list1, labelRange(13, 5));  // In range
     Info<< "\nafter set [13,5]\n";
     compare(list1, "1..1..1..1..111111....");
+
+    {
+        boolList list2(5, true);
+        list2.unset(2);
+
+        Info<< "Test wrapper idea" << nl;
+
+        bitSetOrBoolList wrapper(list2);
+
+        if (wrapper.test(1))
+        {
+            Info<< "1 is on" << nl;
+        }
+        if (!wrapper.test(2))
+        {
+            Info<< "2 is off" << nl;
+        }
+    }
 
     Info<< "\nDone" << nl << endl;
     return 0;
