@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,63 +56,55 @@ laminar::laminar
 {
     TMVar1Ptr_.reset
     (
-        new tmp<volScalarField>
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "dummylaminarVar1",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "dummylaminarVar1",
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimless, Zero)
         )
     );
 
     TMVar2Ptr_.reset
     (
-        new tmp<volScalarField>
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "dummylaminarVar2",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "dummylaminarVar2",
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimless, Zero)
         )
     );
 
     nutPtr_.reset
     (
-        new tmp<volScalarField>
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "dummylaminarNut",
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "dummylaminarNut",
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(sqr(dimLength)/dimTime, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(sqr(dimLength)/dimTime, Zero)
         )
     );
+
     allocateInitValues();
 }
 

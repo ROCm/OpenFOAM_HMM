@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ SourceFiles
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "runTimeSelectionTables.H"
+#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,61 +59,44 @@ namespace incompressible
 
 class RASModelVariables
 {
-
-public:
-
-    // Public typedefs
-
-        typedef autoPtr<tmp<volScalarField>> autoTmp;
-
 protected:
 
-    // Protected data
-
+    // Protected Data
 
         const fvMesh& mesh_;
         const solverControl& solverControl_;
 
-        // autoPtrs delete the memory on destruction
-        // Can cause memory mishandling issues in this case
-        // Use regular ptrs instead
-        bool hasTMVar1_;
-        bool hasTMVar2_;
-        bool hasNut_;
-        bool hasDist_;
-        autoTmp TMVar1Ptr_;
-        autoTmp TMVar2Ptr_;
-        autoTmp nutPtr_;
-        autoTmp dPtr_;
         // Base names of the turbulent fields
         word TMVar1BaseName_;
         word TMVar2BaseName_;
         word nutBaseName_;
 
-        // conditionally store initial values
-        // For finite differences and optimisation runs
-        autoPtr<volScalarField> TMVar1InitPtr_;
-        autoPtr<volScalarField> TMVar2InitPtr_;
-        autoPtr<volScalarField> nutInitPtr_;
+        refPtr<volScalarField> TMVar1Ptr_;
+        refPtr<volScalarField> TMVar2Ptr_;
+        refPtr<volScalarField> nutPtr_;
+        refPtr<volScalarField> distPtr_;
 
-        // conditionally store mean values
-        autoPtr<volScalarField> TMVar1MeanPtr_;
-        autoPtr<volScalarField> TMVar2MeanPtr_;
-        autoPtr<volScalarField> nutMeanPtr_;
+        // Initial values (demand-driven)
+        // For finite differences and optimisation runs
+        refPtr<volScalarField> TMVar1InitPtr_;
+        refPtr<volScalarField> TMVar2InitPtr_;
+        refPtr<volScalarField> nutInitPtr_;
+
+        // Mean values (demand-driven)
+        refPtr<volScalarField> TMVar1MeanPtr_;
+        refPtr<volScalarField> TMVar2MeanPtr_;
+        refPtr<volScalarField> nutMeanPtr_;
 
 
     // Protected Member functions
 
         void allocateInitValues();
         void allocateMeanFields();
-        autoTmp cloneAutoTmp(const autoTmp& source) const;
+
+        refPtr<volScalarField>
+        cloneRefPtr(const refPtr<volScalarField>& obj) const;
+
         void copyAndRename(volScalarField& f1, volScalarField& f2);
-
-
-private:
-
-    // Private Member Functions
-
 
         //- No copy assignment
         void operator=(const RASModelVariables&) = delete;
@@ -186,43 +170,44 @@ public:
 
     // Member Functions
 
+        //- Turbulence field names
+        inline const word& TMVar1BaseName() const;
+        inline const word& TMVar2BaseName() const;
+        inline const word& nutBaseName() const;
 
         //- Bools to idenify which turbulent fields are present
-        bool hasTMVar1() const;
-        bool hasTMVar2() const;
-        bool hasNut() const;
-        bool hasDist() const;
-
-        //- Turbulence field names
-        const word& TMVar1BaseName() const;
-        const word& TMVar2BaseName() const;
-        const word& nutBaseName() const;
+        inline bool hasTMVar1() const;
+        inline bool hasTMVar2() const;
+        inline bool hasNut() const;
+        inline bool hasDist() const;
 
         //- Return references to turbulence fields
         //  will return the mean field if it exists, otherwise the
         //  instantaneous one
-        const volScalarField& TMVar1() const;
-              volScalarField& TMVar1();
-        const volScalarField& TMVar2() const;
-              volScalarField& TMVar2();
-        const volScalarField& nutRef() const;
-              volScalarField& nutRef();
-        const volScalarField& d() const;
-              volScalarField& d();
+        inline const volScalarField& TMVar1() const;
+        inline       volScalarField& TMVar1();
+        inline const volScalarField& TMVar2() const;
+        inline       volScalarField& TMVar2();
+        inline const volScalarField& nutRef() const;
+        inline       volScalarField& nutRef();
+        inline const volScalarField& d() const;
+        inline       volScalarField& d();
 
         //- return references to instantaneous turbulence fields
-        const volScalarField& TMVar1Inst() const;
-              volScalarField& TMVar1Inst();
-        const volScalarField& TMVar2Inst() const;
-              volScalarField& TMVar2Inst();
-        const volScalarField& nutRefInst() const;
-              volScalarField& nutRefInst();
+        inline const volScalarField& TMVar1Inst() const;
+        inline       volScalarField& TMVar1Inst();
+        inline const volScalarField& TMVar2Inst() const;
+        inline       volScalarField& TMVar2Inst();
+        inline const volScalarField& nutRefInst() const;
+        inline       volScalarField& nutRefInst();
+
 
         //- Return nut Jacobian wrt the TM vars
         virtual tmp<volScalarField> nutJacobianVar1
         (
             const singlePhaseTransportModel& laminarTransport
         ) const;
+
         virtual tmp<volScalarField> nutJacobianVar2
         (
             const singlePhaseTransportModel& laminarTransport
@@ -261,6 +246,10 @@ public:
 
 } // End namespace incompressible
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "RASModelVariablesI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
