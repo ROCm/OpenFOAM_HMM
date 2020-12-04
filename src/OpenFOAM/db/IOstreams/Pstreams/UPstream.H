@@ -63,6 +63,9 @@ class UPstream
 {
 public:
 
+    //- Int ranges are used for MPI ranks (processes)
+    typedef IntRange<int> rangeType;
+
     //- Types of communications
     enum class commsTypes
     {
@@ -259,7 +262,7 @@ public:
     ClassName("UPstream");
 
 
-    // Static data
+    // Static Data
 
         //- Should compact transfer be used in which floats replace doubles
         //- reducing the bandwidth requirement at the expense of some loss
@@ -421,7 +424,7 @@ public:
             return old;
         }
 
-        //- Is this a parallel run?
+        //- Test if this a parallel run, or allow modify access
         static bool& parRun()
         {
             return parRun_;
@@ -439,7 +442,7 @@ public:
             return procIDs_[communicator].size();
         }
 
-        //- Process index of the master
+        //- Process index of the master (always 0)
         static constexpr int masterNo() noexcept
         {
             return 0;
@@ -469,17 +472,17 @@ public:
         }
 
         //- Range of process indices for all processes
-        static IntRange<int> allProcs(const label communicator = 0)
+        static rangeType allProcs(const label communicator = 0)
         {
-            // Proc 0 -> nProcs
-            return IntRange<int>(static_cast<int>(nProcs(communicator)));
+            // Proc 0 -> nProcs (int value)
+            return rangeType(static_cast<int>(nProcs(communicator)));
         }
 
         //- Range of process indices for sub-processes
-        static IntRange<int> subProcs(const label communicator = 0)
+        static rangeType subProcs(const label communicator = 0)
         {
-            // Proc 1 -> nProcs
-            return IntRange<int>(1, static_cast<int>(nProcs(communicator)-1));
+            // Proc 1 -> nProcs (int value)
+            return rangeType(1, static_cast<int>(nProcs(communicator)-1));
         }
 
         //- Communication schedule for linear all-to-master (proc 0)
