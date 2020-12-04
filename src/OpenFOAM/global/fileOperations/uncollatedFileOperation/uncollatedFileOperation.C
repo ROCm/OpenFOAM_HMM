@@ -119,12 +119,13 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
                     fileOperation::lookupAndCacheProcessorsPath
                     (
                         io.objectPath(),
-                        false
+                        false // No additional parallel synchronisation
                     )
                 );
-                forAll(pDirs(), i)
+
+                for (const dirIndex& dirIdx : pDirs())
                 {
-                    const fileName& pDir = pDirs()[i].first();
+                    const fileName& pDir = dirIdx.first();
                     fileName objPath =
                         processorsPath(io, io.instance(), pDir)
                        /io.name();
@@ -172,8 +173,8 @@ Foam::fileOperations::uncollatedFileOperation::lookupProcessorsPath
     const fileName& fName
 ) const
 {
-    // Do not use parallel synchronisation
-    return lookupAndCacheProcessorsPath(fName, false);
+    // No additional parallel synchronisation
+    return fileOperation::lookupAndCacheProcessorsPath(fName, false);
 }
 
 
@@ -592,20 +593,14 @@ Foam::fileOperations::uncollatedFileOperation::readStream
         // should really be part of filePath() which should return
         // both file and index in file.
         fileName path, procDir, local;
-        label groupStart, groupSize, nProcs;
-        splitProcessorPath
-        (
-            fName,
-            path,
-            procDir,
-            local,
-            groupStart,
-            groupSize,
-            nProcs
-        );
-        if (groupStart != -1 && groupSize > 0)
+        procRangeType group;
+        label nProcs;
+        splitProcessorPath(fName, path, procDir, local, group, nProcs);
+
+        // The local rank (offset)
+        if (!group.empty())
         {
-            proci = proci-groupStart;
+            proci = proci - group.start();
         }
 
         // Read data and return as stream

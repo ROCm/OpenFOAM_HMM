@@ -69,7 +69,7 @@ protected:
         ) const;
 
         //- Lookup name of processorsDDD using cache.
-        //  \not Do not use any parallel synchronisation
+        //  \note Do not use any parallel synchronisation
         //  \return empty fileName if not found.
         virtual refPtr<dirIndexList> lookupProcessorsPath
         (
@@ -85,7 +85,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         uncollatedFileOperation(bool verbose);
 
 

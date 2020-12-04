@@ -151,9 +151,9 @@ bool Foam::OFstreamCollator::writeFile
         if (UPstream::master(comm))
         {
             off_t sum = 0;
-            forAll(recvSizes, i)
+            for (const label recv : recvSizes)
             {
-                sum += recvSizes[i];
+                sum += recv;
             }
             // Use ostringstream to display long int (until writing these is
             // supported)

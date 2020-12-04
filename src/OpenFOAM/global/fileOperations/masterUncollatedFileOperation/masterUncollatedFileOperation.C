@@ -200,15 +200,16 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
         if (io.time().processorCase())
         {
             refPtr<dirIndexList> pDirs(lookupProcessorsPath(io.objectPath()));
-            forAll(pDirs(), i)
+
+            for (const dirIndex& dirIdx : pDirs())
             {
-                const fileName& pDir = pDirs()[i].first();
+                const fileName& pDir = dirIdx.first();
                 fileName objPath =
                     processorsPath(io, io.instance(), pDir)
                    /io.name();
                 if (objPath != writePath && isFileOrDir(isFile, objPath))
                 {
-                    searchType = pDirs()[i].second().first();
+                    searchType = dirIdx.second().first();
                     procsDir = pDir;
                     return objPath;
                 }
@@ -272,9 +273,10 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
                 (
                     lookupProcessorsPath(io.objectPath())
                 );
-                forAll(pDirs(), i)
+
+                for (const dirIndex& dirIdx : pDirs())
                 {
-                    const fileName& pDir = pDirs()[i].first();
+                    const fileName& pDir = dirIdx.first();
 
                     fileName fName
                     (
@@ -283,7 +285,7 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
                     );
                     if (isFileOrDir(isFile, fName))
                     {
-                        switch (pDirs()[i].second().first())
+                        switch (dirIdx.second().first())
                         {
                             case fileOperation::PROCUNCOLLATED:
                             {
@@ -1435,9 +1437,9 @@ bool Foam::fileOperations::masterUncollatedFileOperation::exists
     // 2. Check processors/
     if (io.time().processorCase())
     {
-        forAll(pDirs, i)
+        for (const dirIndex& dirIdx : pDirs)
         {
-            const fileName& pDir = pDirs[i].first();
+            const fileName& pDir = dirIdx.first();
             fileName procPath =
                 processorsPath(io, io.instance(), pDir)
                /io.name();
@@ -1953,18 +1955,13 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
 
 
         // Analyse the file path (on (co)master) to see the processors type
+        // Note: this should really be part of filePath() which should return
+        // both file and index in file.
+
         fileName path, procDir, local;
-        label groupStart, groupSize, nProcs;
-        splitProcessorPath
-        (
-            fName,
-            path,
-            procDir,
-            local,
-            groupStart,
-            groupSize,
-            nProcs
-        );
+        procRangeType group;
+        label nProcs;
+        splitProcessorPath(fName, path, procDir, local, group, nProcs);
 
 
         if (!Pstream::parRun())
@@ -1981,12 +1978,10 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
                     << exit(FatalIOError);
             }
 
-            // Analyse the fileName for any processor subset. Note: this
-            // should really be part of filePath() which should return
-            // both file and index in file.
-            if (groupStart != -1 && groupSize > 0)
+            // The local rank (offset)
+            if (!group.empty())
             {
-                proci = proci-groupStart;
+                proci = proci - group.start();
             }
 
             if (debug)
@@ -2009,7 +2004,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             // Are we reading from single-master file ('processors256') or
             // from multi-master files ('processors256_0-9')
             label readComm = -1;
-            if (groupStart != -1 && groupSize > 0)
+            if (!group.empty())
             {
                 readComm = comm_;
                 if (UPstream::master(comm_) && !isPtr && !fName.empty())

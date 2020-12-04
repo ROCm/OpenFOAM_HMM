@@ -71,19 +71,14 @@ using namespace Foam;
 // Many ways to name processor directories
 //
 // Uncollated       | "processor0", "processor1" ...
-// Collated (old)   | "processors"
-// Collated (new)   | "processors<N>"
+// Collated         | "processors<N>"
 // Host collated    | "processors<N>_<low>-<high>"
 
 const regExp matcher("processors?[0-9]+(_[0-9]+-[0-9]+)?");
 
 bool isProcessorDir(const string& dir)
 {
-    return
-    (
-        dir.starts_with("processor")
-     && (dir == "processors" || matcher.match(dir))
-    );
+    return (dir.starts_with("processor") && matcher.match(dir));
 }
 
 
@@ -384,13 +379,7 @@ int main(int argc, char *argv[])
         {
             if (leadProcIdx < 0)
             {
-                // Collated (old)
-                leadProcIdx = procDirs.find("processors");
-            }
-
-            if (leadProcIdx < 0)
-            {
-                // Collated (new)
+                // Collated
                 leadProcIdx = procDirs.find("processors" + Foam::name(nProcs));
             }
 

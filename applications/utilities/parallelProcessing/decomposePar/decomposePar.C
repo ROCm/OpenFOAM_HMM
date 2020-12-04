@@ -519,27 +519,24 @@ int main(int argc, char *argv[])
                 {
                     const fileName& d = dirs[diri];
 
-                    // Starts with 'processors'
-                    if (d.find("processors") == 0)
+                    label proci = -1;
+
+                    if
+                    (
+                        d.starts_with("processor")
+                     &&
+                        (
+                            // Collated is "processors"
+                            d[9] == 's'
+
+                            // Uncollated has integer(s) after 'processor'
+                         || Foam::read(d.substr(9), proci)
+                        )
+                    )
                     {
                         if (fileHandler().exists(d))
                         {
                             fileHandler().rmDir(d);
-                        }
-                    }
-
-                    // Starts with 'processor'
-                    if (d.find("processor") == 0)
-                    {
-                        // Check that integer after processor
-                        fileName num(d.substr(9));
-                        label proci = -1;
-                        if (Foam::read(num.c_str(), proci))
-                        {
-                            if (fileHandler().exists(d))
-                            {
-                                fileHandler().rmDir(d);
-                            }
                         }
                     }
                 }

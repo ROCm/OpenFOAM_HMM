@@ -99,26 +99,36 @@ public:
         };
         static const Enum<pathType> pathTypeNames_;
 
+
+        //- A dirIndex adds the path type and local offset to a fileName
         typedef Tuple2<fileName, Tuple2<pathType, label>> dirIndex;
         typedef List<dirIndex> dirIndexList;
+
+        //- For addressing a range of processors,
+        //- identical to UPstream::rangeType
+        typedef IntRange<int> procRangeType;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Communicator to use
         const label comm_;
 
+        //- Distributed roots (parallel run)
+        bool distributed_;
+
         //- Detected processors directories
         mutable HashTable<dirIndexList> procsDirs_;
 
-        //- file-change monitor for all registered files
+        //- File-change monitor for all registered files
         mutable autoPtr<fileMonitor> monitorPtr_;
 
 
    // Protected Member Functions
 
+        //- Get or create fileMonitor singleton
         fileMonitor& monitor() const;
 
         //- Sort directory entries according to time value
@@ -148,7 +158,7 @@ protected:
         //  \return empty fileName if not found.
         virtual refPtr<dirIndexList> lookupProcessorsPath
         (
-            const fileName&
+            const fileName& objectPath
         ) const;
 
         //- Does ioobject exist. Is either a directory (empty name()) or
@@ -158,16 +168,16 @@ protected:
 
 public:
 
-    // Static data
+    // Static Data
 
         //- Return the processors directory name (usually "processors")
         static word processorsBaseDir;
 
-        //- Default fileHandler
+        //- Name of the default fileHandler
         static word defaultFileHandler;
 
 
-    // Public data types
+    // Public Data Types
 
         //- Runtime type information
         TypeName("fileOperation");
@@ -179,8 +189,12 @@ public:
 
     // Constructors
 
-        //- Construct from communicator
-        explicit fileOperation(const label comm);
+        //- Construct from communicator, optionally with distributed roots
+        explicit fileOperation
+        (
+            const label comm,
+            const bool distributedRoots = false
+        );
 
 
     // Declare run-time constructor selection table
@@ -212,6 +226,21 @@ public:
 
 
     // Member Functions
+
+        //- Distributed roots (parallel run)
+        bool distributed() const noexcept
+        {
+            return distributed_;
+        }
+
+        //- Set distributed roots on/off, return old value
+        bool distributed(bool on) noexcept
+        {
+            bool old(distributed_);
+            distributed_ = on;
+            return old;
+        }
+
 
         // OSSpecific equivalents
 
@@ -538,7 +567,8 @@ public:
             //- Operating on fileName: replace processorXXX with procDir
             fileName processorsPath(const fileName&, const word& procDir) const;
 
-            //- Split fileName into part before 'processor' and part after.
+            //- Split objectPath into part before 'processor' and part after.
+            //
             //  Returns -1 or processor number and optionally number
             //  of processors. Use with care.
             //  - path/"processor"+Foam::name(proci)/local reconstructs input
@@ -546,17 +576,16 @@ public:
             //    collated processors equivalence
             static label splitProcessorPath
             (
-                const fileName&,
+                const fileName& objectPath,
                 fileName& path,
                 fileName& procDir,
                 fileName& local,
-                label& groupStart,
-                label& groupSize,
+                procRangeType& group,
                 label& nProcs
             );
 
             //- Detect processor number from '/aa/bb/processorDDD/cc'
-            static label detectProcessorPath(const fileName&);
+            static label detectProcessorPath(const fileName& objPath);
 };
 
 

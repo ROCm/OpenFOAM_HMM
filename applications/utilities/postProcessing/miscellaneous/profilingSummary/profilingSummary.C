@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,15 +86,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     // Determine the processor count
-    #ifdef fileOperation_H
     const label nProcs = fileHandler().nProcs(args.path());
-    #else
-    label nProcs = 0;
-    while (isDir(args.path()/("processor" + Foam::name(nProcs))))
-    {
-        ++nProcs;
-    }
-    #endif
 
     // Create the processor databases
     PtrList<Time> databases(nProcs);

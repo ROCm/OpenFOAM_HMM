@@ -142,24 +142,18 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
     const bool isMaster = isMasterRank(proci);
 
-    // Determine the local rank if the pathName is a per-rank one
+    // Determine local rank (offset) if the pathName is a per-rank one
     label localProci = proci;
     {
         fileName path, procDir, local;
-        label groupStart, groupSize, nProcs;
-        splitProcessorPath
-        (
-            pathName,
-            path,
-            procDir,
-            local,
-            groupStart,
-            groupSize,
-            nProcs
-        );
-        if (groupSize > 0 && groupStart != -1)
+        procRangeType group;
+        label nProcs;
+        splitProcessorPath(pathName, path, procDir, local, group, nProcs);
+
+        // The local rank (offset)
+        if (!group.empty())
         {
-            localProci = proci-groupStart;
+            localProci = proci - group.start();
         }
     }
 
