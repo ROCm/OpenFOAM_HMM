@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,38 +54,13 @@ Foam::sampledPlane::sampleOnPoints
     const interpolation<Type>& interpolator
 ) const
 {
-    // elements to sample
-    const labelList& elements = meshCells();
-
-    // One value per point.
-    // Initialize with Zero to handle missed/degenerate faces
-
-    auto tvalues = tmp<Field<Type>>::New(points().size(), Zero);
-    auto& values = tvalues.ref();
-
-    bitSet pointDone(points().size());
-
-    const faceList& fcs = faces();
-
-    forAll(fcs, facei)
-    {
-        const face& f = fcs[facei];
-        const label celli = elements[facei];
-
-        for (const label pointi : f)
-        {
-            if (pointDone.set(pointi))
-            {
-                values[pointi] = interpolator.interpolate
-                (
-                    points()[pointi],
-                    celli
-                );
-            }
-        }
-    }
-
-    return tvalues;
+    return sampledSurface::sampleOnPoints
+    (
+        interpolator,
+        meshCells(),
+        faces(),
+        points()
+    );
 }
 
 

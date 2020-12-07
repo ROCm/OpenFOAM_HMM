@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,27 +42,15 @@ Foam::sampledThresholdCellFaces::sampleOnFaces
     const interpolation<Type>& sampler
 ) const
 {
-    updateGeometry(); // Recreate geometry if time has changed
+    updateGeometry();  // Recreate geometry if time has changed
 
-    const labelList& elements = meshCells_;
-
-    const label len = faces().size();
-
-    auto tvalues = tmp<Field<Type>>::New(len);
-    auto& values = tvalues.ref();
-
-    const faceList& fcs = faces();
-    const pointField& pts = points();
-
-    for (label i=0; i < len; ++i)
-    {
-        const label celli = elements[i];
-        const point pt = fcs[i].centre(pts);
-
-        values[i] = sampler.interpolate(pt, celli);
-    }
-
-    return tvalues;
+    return sampledSurface::sampleOnFaces
+    (
+        sampler,
+        meshCells_,
+        faces(),
+        points()
+    );
 }
 
 
@@ -73,38 +61,15 @@ Foam::sampledThresholdCellFaces::sampleOnPoints
     const interpolation<Type>& interpolator
 ) const
 {
-    updateGeometry(); // Recreate geometry if time has changed
+    updateGeometry();  // Recreate geometry if time has changed
 
-    const labelList& elements = meshCells_;
-
-    // One value per point
-    auto tvalues = tmp<Field<Type>>::New(points().size(), Zero);
-    auto& values = tvalues.ref();
-
-    bitSet pointDone(points().size());
-
-    const faceList& fcs = faces();
-    const pointField& pts = points();
-
-    forAll(fcs, i)
-    {
-        const face& f = fcs[i];
-        const label celli = elements[i];
-
-        for (const label pointi : f)
-        {
-            if (pointDone.set(pointi))
-            {
-                values[pointi] = interpolator.interpolate
-                (
-                    pts[pointi],
-                    celli
-                );
-            }
-        }
-    }
-
-    return tvalues;
+    return sampledSurface::sampleOnPoints
+    (
+        interpolator,
+        meshCells_,
+        faces(),
+        points()
+    );
 }
 
 

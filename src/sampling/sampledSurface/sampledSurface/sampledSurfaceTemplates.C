@@ -75,6 +75,56 @@ Foam::sampledSurface::sampleOnFaces
 
 
 template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::sampledSurface::sampleOnPoints
+(
+    const interpolation<Type>& interpolator,
+    const labelUList& elements,
+    const faceList& fcs,
+    const pointField& pts
+)
+{
+    const label len = elements.size();
+
+    if (len != fcs.size())
+    {
+        FatalErrorInFunction
+            << "size mismatch: "
+            << "sampled elements (" << len
+            << ") != faces (" << fcs.size() << ')'
+            << exit(FatalError);
+    }
+
+    // One value per point
+    // Initialize with Zero to handle missed/degenerate faces
+    auto tvalues = tmp<Field<Type>>::New(pts.size(), Zero);
+    auto& values = tvalues.ref();
+
+    bitSet pointDone(pts.size());
+
+    forAll(fcs, facei)
+    {
+        const face& f = fcs[facei];
+        const label celli = elements[facei];
+
+        for (const label pointi : f)
+        {
+            if (pointDone.set(pointi))
+            {
+                values[pointi] = interpolator.interpolate
+                (
+                    pts[pointi],
+                    celli
+                );
+            }
+        }
+    }
+
+    return tvalues;
+}
+
+
+template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::sampledSurface::pointAverage
 (

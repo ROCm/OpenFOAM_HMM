@@ -61,36 +61,13 @@ Foam::sampledIsoSurfaceTopo::sampleOnPoints
 {
     updateGeometry();  // Recreate geometry if time has changed
 
-    const labelList& elements = meshCells_;
-
-    // One value per point
-    auto tvalues = tmp<Field<Type>>::New(points().size());
-    auto& values = tvalues.ref();
-
-    const faceList& fcs = faces();
-    const pointField& pts = points();
-
-    bitSet pointDone(points().size());
-
-    forAll(faces(), cutFacei)
-    {
-        const face& f = fcs[cutFacei];
-        const label celli = elements[cutFacei];
-
-        for (const label pointi : f)
-        {
-            if (pointDone.set(pointi))
-            {
-                values[pointi] = interpolator.interpolate
-                (
-                    pts[pointi],
-                    celli
-                );
-            }
-        }
-    }
-
-    return tvalues;
+    return sampledSurface::sampleOnPoints
+    (
+        interpolator,
+        meshCells_,
+        faces(),
+        points()
+    );
 }
 
 

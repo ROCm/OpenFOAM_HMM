@@ -132,7 +132,7 @@ protected:
 
     // Protected Member Functions
 
-        //- General loop for sampling elements to faces.
+        //- Loop for sampling volume elements to faces.
         //  The defaultValue is used for invalid (negative) elements
         template<class Type>
         static tmp<Field<Type>> sampleOnFaces
@@ -142,6 +142,17 @@ protected:
             const faceList& fcs,
             const pointField& pts,
             const Type& defaultValue = Type(Zero)
+        );
+
+
+        //- Loop for interpolating volume elements to face points.
+        template<class Type>
+        static tmp<Field<Type>> sampleOnPoints
+        (
+            const interpolation<Type>& interpolator,
+            const labelUList& elements,
+            const faceList& fcs,
+            const pointField& pts
         );
 
 
