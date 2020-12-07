@@ -147,6 +147,7 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
 void Foam::patchInjectionBase::setPositionAndCell
 (
     const fvMesh& mesh,
+    const scalar fraction01,
     Random& rnd,
     vector& position,
     label& cellOwner,
@@ -154,23 +155,15 @@ void Foam::patchInjectionBase::setPositionAndCell
     label& tetPti
 )
 {
-    scalar areaFraction = rnd.globalPosition(scalar(0), patchArea_);
-
     if (cellOwners_.size() > 0)
     {
         // Determine which processor to inject from
-        label proci = 0;
-        forAllReverse(sumTriMagSf_, i)
-        {
-            if (areaFraction >= sumTriMagSf_[i])
-            {
-                proci = i;
-                break;
-            }
-        }
+        const label proci = whichProc(fraction01);
 
         if (Pstream::myProcNo() == proci)
         {
+            const scalar areaFraction = fraction01*patchArea_;
+
             // Find corresponding decomposed face triangle
             label trii = 0;
             scalar offset = sumTriMagSf_[proci];
@@ -268,6 +261,48 @@ void Foam::patchInjectionBase::setPositionAndCell
         // Dummy position
         position = pTraits<vector>::max;
     }
+}
+
+
+void Foam::patchInjectionBase::setPositionAndCell
+(
+    const fvMesh& mesh,
+    Random& rnd,
+    vector& position,
+    label& cellOwner,
+    label& tetFacei,
+    label& tetPti
+)
+{
+    scalar fraction01 = rnd.globalSample01<scalar>();
+
+    setPositionAndCell
+    (
+        mesh,
+        fraction01,
+        rnd,
+        position,
+        cellOwner,
+        tetFacei,
+        tetPti
+    );
+}
+
+
+Foam::label Foam::patchInjectionBase::whichProc(const scalar fraction01) const
+{
+    const scalar areaFraction = fraction01*patchArea_;
+
+    // Determine which processor to inject from
+    forAllReverse(sumTriMagSf_, i)
+    {
+        if (areaFraction >= sumTriMagSf_[i])
+        {
+            return i;
+        }
+    }
+
+    return 0;
 }
 
 

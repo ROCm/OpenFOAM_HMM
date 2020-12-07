@@ -117,6 +117,19 @@ public:
         virtual void updateMesh(const polyMesh& mesh);
 
         //- Set the injection position and owner cell, tetFace and tetPt
+        //  Supply the fraction used to determine the location on the patch
+        void setPositionAndCell
+        (
+            const fvMesh& mesh,
+            const scalar fraction01,
+            Random& rnd,
+            vector& position,
+            label& cellOwner,
+            label& tetFacei,
+            label& tetPti
+        );
+
+        //- Set the injection position and owner cell, tetFace and tetPt
         virtual void setPositionAndCell
         (
             const fvMesh& mesh,
@@ -126,6 +139,9 @@ public:
             label& tetFacei,
             label& tetPti
         );
+
+        //- Return the processor that has the location specified by the fraction
+        label whichProc(const scalar fraction01) const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -199,6 +199,11 @@ void Foam::PatchInteractionModel<CloudType>::addToEscapedParcels
 
 
 template<class CloudType>
+void Foam::PatchInteractionModel<CloudType>::postEvolve()
+{}
+
+
+template<class CloudType>
 void Foam::PatchInteractionModel<CloudType>::info(Ostream& os)
 {
     const label escapedParcels0 =
