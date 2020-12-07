@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +27,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sampledIsoSurfaceCell.H"
+#include "isoSurfaceCell.H"
 #include "dictionary.H"
+#include "fvMesh.H"
 #include "volFields.H"
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
-#include "isoSurfaceCell.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -65,8 +66,28 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     // Clear derived data
     sampledSurface::clearGeom();
 
-    // Use field from database, or try to read it in
 
+    // Handle cell zones as inverse (blocked) selection
+    if (!ignoreCellsPtr_)
+    {
+        ignoreCellsPtr_.reset(new bitSet);
+
+        if (-1 != mesh().cellZones().findIndex(zoneNames_))
+        {
+            bitSet select(mesh().cellZones().selection(zoneNames_));
+
+            if (select.any() && !select.all())
+            {
+                // From selection to blocking
+                select.flip();
+
+                *ignoreCellsPtr_ = std::move(select);
+            }
+        }
+    }
+
+
+    // Use field from database, or try to read it in
     const auto* cellFldPtr = fvm.findObject<volScalarField>(isoField_);
 
     if (debug)
@@ -111,7 +132,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 
-    // Non-averaged? Use reference
+    // Field reference (assuming non-averaged)
     tmp<scalarField> tcellValues(cellFld.primitiveField());
 
     if (average_)
@@ -139,25 +160,25 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
         }
     }
 
-
     meshedSurface& mySurface = const_cast<sampledIsoSurfaceCell&>(*this);
+    {
+        isoSurfaceCell surf
+        (
+            fvm,
+            tcellValues(), // A primitiveField
+            tpointFld().primitiveField(),
+            isoVal_,
+            isoParams_,
+            *ignoreCellsPtr_
+        );
 
-    isoSurfaceCell surf
-    (
-        fvm,
-        tcellValues(),
-        tpointFld().primitiveField(),
-        isoVal_,
-        isoParams_
-    );
-
-    mySurface.transfer(static_cast<meshedSurface&>(surf));
-    meshCells_.transfer(surf.meshCells());
+        mySurface.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
+    }
 
     if (debug)
     {
-        Pout<< "isoSurfaceCell::updateGeometry() : constructed iso:"
-            << nl
+        Pout<< "isoSurfaceCell::updateGeometry() : constructed iso:" << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
             << "    average        : " << Switch(average_) << nl
@@ -188,10 +209,24 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     isoVal_(dict.get<scalar>("isoValue")),
     isoParams_(dict),
     average_(dict.getOrDefault("average", true)),
+    zoneNames_(),
     prevTimeIndex_(-1),
-    meshCells_()
+    meshCells_(),
+    ignoreCellsPtr_(nullptr)
 {
     isoParams_.algorithm(isoSurfaceParams::ALGO_CELL);  // Force
+
+    if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
+    {
+        zoneNames_.resize(1);
+        dict.readEntry("zone", zoneNames_.first());
+    }
+
+    if (-1 != mesh.cellZones().findIndex(zoneNames_))
+    {
+        DebugInfo
+            << "Restricting to cellZone(s) " << flatOutput(zoneNames_) << endl;
+    }
 }
 
 
@@ -215,6 +250,8 @@ bool Foam::sampledIsoSurfaceCell::expire()
 {
     // Clear derived data
     sampledSurface::clearGeom();
+
+    ignoreCellsPtr_.reset(nullptr);
 
     // Already marked as expired
     if (prevTimeIndex_ == -1)

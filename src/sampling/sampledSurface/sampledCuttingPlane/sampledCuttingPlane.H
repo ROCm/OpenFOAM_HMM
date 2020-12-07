@@ -55,13 +55,13 @@ Usage
         Property | Description                              | Required | Default
         type     | cuttingPlane                             | yes |
         planeType | plane description (pointAndNormal etc)  | yes |
-        mergeTol | tolerance for merging points             | no  | 1e-6
         isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
-        regularise | Face simplification (enum or bool)     | no  | true
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
         zones    | limit to cell zones (names, regexs)      | no  |
-        exposedPatchName | name for zone subset             | partly |
+        exposedPatchName | name for zone subset             | optional |
+        regularise | Face simplification (enum or bool)     | no  | true
+        mergeTol | tolerance for merging points             | no  | 1e-6
     \endtable
 
 Note

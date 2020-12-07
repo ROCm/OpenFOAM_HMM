@@ -55,12 +55,11 @@ Usage
         isoValue | value of iso-surface                     | yes |
         average  | cell values from averaged point values   | no  | false
         bounds   | limit with bounding box                  | no  |
+        zone     | limit to cell zone (name or regex)       | no  |
+        zones    | limit to cell zones (names, regexs)      | no  |
         regularise | point snapping                         | yes |
         mergeTol | tolerance for merging points             | no  | 1e-6
     \endtable
-
-Note
-    Does not currently support cell zones.
 
 SourceFiles
     sampledIsoSurfaceCell.C
@@ -105,8 +104,11 @@ class sampledIsoSurfaceCell
         //- Parameters (filtering etc) for iso-surface
         isoSurfaceParams isoParams_;
 
-        //- Whether to recalculate cell values as average of point values
+        //- Recalculate cell values as average of point values
         bool average_;
+
+        //- The zone or zones for the iso-surface
+        wordRes zoneNames_;
 
 
     // Recreated for every isoSurface
@@ -114,8 +116,14 @@ class sampledIsoSurfaceCell
         //- Time at last call, also track if surface needs an update
         mutable label prevTimeIndex_;
 
-        //- For every triangle the original cell in mesh
+        //- For every face the original cell in mesh (direct storage)
         mutable labelList meshCells_;
+
+
+    // Mesh subsetting
+
+        //- Cached ignore cells for sub-mesh (zoned)
+        mutable autoPtr<bitSet> ignoreCellsPtr_;
 
 
     // Private Member Functions

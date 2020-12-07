@@ -60,14 +60,21 @@ Foam::sampledDistanceSurface::sampleOnPoints
     // Assume volPointInterpolation for the point field!
     const auto& volFld = interpolator.psi();
 
-    auto tpointFld =
-        volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvolFld(volFld);
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointFld;
 
-    return distanceSurface::interpolate
+    // Interpolated point field
+    tpointFld.reset
     (
-        (average_ ? pointAverage(tpointFld())() : volFld),
-        tpointFld()
+        volPointInterpolation::New(tvolFld().mesh()).interpolate(tvolFld())
     );
+
+    if (average_)
+    {
+        tvolFld.reset(pointAverage(tpointFld()));
+    }
+
+    return distanceSurface::interpolate(tvolFld(), tpointFld());
 }
 
 

@@ -60,30 +60,27 @@ Foam::sampledCuttingPlane::sampleOnPoints
     // Assume volPointInterpolation for the point field!
     const auto& volFld = interpolator.psi();
 
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvolFld(volFld);
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointFld;
+
     if (subMeshPtr_)
     {
-        auto tvolSubFld = subMeshPtr_->interpolate(volFld);
-        const auto& volSubFld = tvolSubFld();
-
-        auto tpointFld =
-            volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
-
-        return this->isoSurfaceInterpolate
-        (
-            (average_ ? pointAverage(tpointFld())() : volSubFld),
-            tpointFld()
-        );
+        // Replace with subset
+        tvolFld.reset(subMeshPtr_->interpolate(volFld));
     }
 
-
-    auto tpointFld =
-        volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
-
-    return this->isoSurfaceInterpolate
+    // Interpolated point field
+    tpointFld.reset
     (
-        (average_ ? pointAverage(tpointFld())() : volFld),
-        tpointFld()
+        volPointInterpolation::New(tvolFld().mesh()).interpolate(tvolFld())
     );
+
+    if (average_)
+    {
+        tvolFld.reset(pointAverage(tpointFld()));
+    }
+
+    return this->isoSurfaceInterpolate(tvolFld(), tpointFld());
 }
 
 

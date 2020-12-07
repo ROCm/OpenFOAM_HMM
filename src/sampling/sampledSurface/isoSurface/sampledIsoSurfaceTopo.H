@@ -53,12 +53,13 @@ Usage
         type     | isoSurfaceTopo                           | yes |
         isoField | field name for obtaining iso-surface     | yes |
         isoValue | value of iso-surface                     | yes |
+        average  | cell values from averaged point values   | no  | false
+        bounds   | limit with bounding box                  | no  |
+        zone     | limit to cell zone (name or regex)       | no  |
+        zones    | limit to cell zones (names, regexs)      | no  |
         regularise | filter faces (bool or enum)            | no  | true
         triangulate | triangulate faces (requires regularise) | no  | false
     \endtable
-
-Note
-    Does not currently support cell zones.
 
 SourceFiles
     sampledIsoSurfaceTopo.C
@@ -103,8 +104,14 @@ class sampledIsoSurfaceTopo
         //- Parameters (filtering etc) for iso-surface
         isoSurfaceParams isoParams_;
 
+        //- Recalculate cell values as average of point values?
+        bool average_;
+
         //- Whether to triangulate (after filtering)
         bool triangulate_;
+
+        //- The zone or zones for the iso-surface
+        wordRes zoneNames_;
 
 
     // Recreated for every isoSurface
@@ -112,8 +119,15 @@ class sampledIsoSurfaceTopo
         //- Time at last call, also track it surface needs an update
         mutable label prevTimeIndex_;
 
-        //- For every triangle/face the original cell in mesh
+        //- For every face the original cell in mesh (direct storage)
         mutable labelList meshCells_;
+
+
+
+    // Mesh subsetting
+
+        //- Cached ignore cells for sub-mesh (zoned)
+        mutable autoPtr<bitSet> ignoreCellsPtr_;
 
 
     // Private Member Functions

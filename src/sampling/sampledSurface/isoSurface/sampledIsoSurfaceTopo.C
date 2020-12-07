@@ -65,8 +65,28 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
     // Clear derived data
     sampledSurface::clearGeom();
 
-    // Use field from database, or try to read it in
 
+    // Handle cell zones as inverse (blocked) selection
+    if (!ignoreCellsPtr_)
+    {
+        ignoreCellsPtr_.reset(new bitSet);
+
+        if (-1 != mesh().cellZones().findIndex(zoneNames_))
+        {
+            bitSet select(mesh().cellZones().selection(zoneNames_));
+
+            if (select.any() && !select.all())
+            {
+                // From selection to blocking
+                select.flip();
+
+                *ignoreCellsPtr_ = std::move(select);
+            }
+        }
+    }
+
+
+    // Use field from database, or try to read it in
     const auto* cellFldPtr = fvm.findObject<volScalarField>(isoField_);
 
     if (debug)
@@ -111,19 +131,50 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
 
     auto tpointFld = volPointInterpolation::New(fvm).interpolate(cellFld);
 
-    Mesh& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
+    // Field reference (assuming non-averaged)
+    tmp<scalarField> tcellValues(cellFld.primitiveField());
 
-    isoSurfaceTopo surf
-    (
-        fvm,
-        cellFld.primitiveField(),
-        tpointFld().primitiveField(),
-        isoVal_,
-        isoParams_
-    );
+    if (average_)
+    {
+        // From point field and interpolated cell.
+        tcellValues = tmp<scalarField>::New(fvm.nCells(), Zero);
+        auto& cellAvg = tcellValues.ref();
 
-    mySurface.transfer(static_cast<meshedSurface&>(surf));
-    meshCells_ = std::move(surf.meshCells());
+        labelField nPointCells(fvm.nCells(), Zero);
+
+        for (label pointi = 0; pointi < fvm.nPoints(); ++pointi)
+        {
+            const scalar& val = tpointFld().primitiveField()[pointi];
+            const labelList& pCells = fvm.pointCells(pointi);
+
+            for (const label celli : pCells)
+            {
+                cellAvg[celli] += val;
+                ++nPointCells[celli];
+            }
+        }
+        forAll(cellAvg, celli)
+        {
+            cellAvg[celli] /= nPointCells[celli];
+        }
+    }
+
+    meshedSurface& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
+
+    {
+        isoSurfaceTopo surf
+        (
+            fvm,
+            cellFld.primitiveField(),
+            tpointFld().primitiveField(),
+            isoVal_,
+            isoParams_,
+            *ignoreCellsPtr_
+        );
+
+        mySurface.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
+    }
 
     // triangulate uses remapFaces()
     // - this is somewhat less efficient since it recopies the faces
@@ -141,6 +192,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         Pout<< "isoSurfaceTopo::updateGeometry() : constructed iso:" << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
+            << "    average        : " << Switch(average_) << nl
             << "    filter         : "
             << isoSurfaceParams::filterNames[isoParams_.filter()] << nl
             << "    triangulate    : " << Switch(triangulate_) << nl
@@ -168,9 +220,12 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
     isoParams_(dict),
+    average_(dict.getOrDefault("average", false)),
     triangulate_(dict.getOrDefault("triangulate", false)),
+    zoneNames_(),
     prevTimeIndex_(-1),
-    meshCells_()
+    meshCells_(),
+    ignoreCellsPtr_(nullptr)
 {
     isoParams_.algorithm(isoSurfaceParams::ALGO_TOPO);  // Force
 
@@ -183,6 +238,18 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
         FatalIOErrorInFunction(dict)
             << "Cannot triangulate without a regularise filter" << nl
             << exit(FatalIOError);
+    }
+
+    if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
+    {
+        zoneNames_.resize(1);
+        dict.readEntry("zone", zoneNames_.first());
+    }
+
+    if (-1 != mesh.cellZones().findIndex(zoneNames_))
+    {
+        DebugInfo
+            << "Restricting to cellZone(s) " << flatOutput(zoneNames_) << endl;
     }
 }
 
@@ -207,6 +274,8 @@ bool Foam::sampledIsoSurfaceTopo::expire()
 {
     // Clear derived data
     sampledSurface::clearGeom();
+
+    ignoreCellsPtr_.reset(nullptr);
 
     // Already marked as expired
     if (prevTimeIndex_ == -1)

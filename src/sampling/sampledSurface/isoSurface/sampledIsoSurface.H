@@ -57,7 +57,7 @@ Usage
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
         zones    | limit to cell zones (names, regexs)      | no  |
-        exposedPatchName | name for zone subset             | partly |
+        exposedPatchName | name for zone subset             | optional |
         regularise | point snapping (bool or enum)          | no  | true
         mergeTol | tolerance for merging points             | no  | 1e-6
     \endtable
