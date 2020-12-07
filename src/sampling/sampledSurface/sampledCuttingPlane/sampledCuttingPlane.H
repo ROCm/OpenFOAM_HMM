@@ -81,9 +81,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "plane.H"
 #include "fvMeshSubset.H"
-#include "isoSurfaceCell.H"
 #include "isoSurfacePoint.H"
-#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -128,14 +126,17 @@ class sampledCuttingPlane
         //- Distance to points
         scalarField pointDistance_;
 
-        //- Constructed iso surface (ALGO_CELL)
-        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
 
-        //- Constructed iso surface (ALGO_POINT)
-        autoPtr<isoSurfacePoint> isoSurfPointPtr_;
+    // Sampling geometry. Directly stored or via an iso-surface (ALGO_POINT)
 
-        //- Constructed iso surface (ALGO_TOPO)
-        autoPtr<isoSurfaceTopo> isoSurfTopoPtr_;
+        //- The extracted surface (direct storage)
+        mutable meshedSurface surface_;
+
+        //- For every face the original cell in mesh (direct storage)
+        mutable labelList meshCells_;
+
+        //- Constructed iso-surface (ALGO_POINT), for interpolators
+        autoPtr<isoSurfacePoint> isoSurfacePtr_;
 
 
     // Private Member Functions
@@ -146,6 +147,9 @@ class sampledCuttingPlane
             const plane& pln,
             const boundBox& meshBb
         ) const;
+
+        //- Fill cellDistance, pointDistance fields for the specified plane
+        void setDistanceFields(const plane& pln);
 
         //- Create iso surface
         void createGeometry();
@@ -164,13 +168,23 @@ class sampledCuttingPlane
             const interpolation<Type>& interpolator
         ) const;
 
-        //- Interpolates cCoords,pCoords.
+        //- Use isoSurfacePtr_ for point interpolation
         template<class Type>
-        tmp<Field<Type>> isoSurfaceInterpolate
+        tmp<Field<Type>> sampleOnIsoSurfacePoints
         (
-            const GeometricField<Type, fvPatchField, volMesh>& cellValues,
-            const Field<Type>& pointValues
+            const interpolation<Type>& interpolator
         ) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Is currently backed by an isoSurfacePtr_
+        bool hasIsoSurface() const
+        {
+            return bool(isoSurfacePtr_);
+        }
 
 public:
 
@@ -207,6 +221,26 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
+        //- The current surface geometry
+        const meshedSurface& surface() const
+        {
+            if (isoSurfacePtr_)
+            {
+                return *isoSurfacePtr_;
+            }
+            return surface_;
+        }
+
+        //- For each face, the original cell in mesh
+        const labelList& meshCells() const
+        {
+            if (isoSurfacePtr_)
+            {
+                return isoSurfacePtr_->meshCells();
+            }
+            return meshCells_;
+        }
+
         //- Points of surface
         virtual const pointField& points() const
         {
@@ -241,63 +275,6 @@ public:
         virtual const vectorField& Cf() const
         {
             return surface().Cf();
-        }
-
-
-        //- The underlying surface
-        const meshedSurface& surface() const
-        {
-            if (isoSurfCellPtr_)
-            {
-                return *isoSurfCellPtr_;
-            }
-            else if (isoSurfPointPtr_)
-            {
-                return *isoSurfPointPtr_;
-            }
-            return *isoSurfTopoPtr_;
-        }
-
-        //- The underlying surface
-        meshedSurface& surface()
-        {
-            if (isoSurfCellPtr_)
-            {
-                return *isoSurfCellPtr_;
-            }
-            else if (isoSurfPointPtr_)
-            {
-                return *isoSurfPointPtr_;
-            }
-            return *isoSurfTopoPtr_;
-        }
-
-        //- For each face, the original cell in mesh
-        const labelList& meshCells() const
-        {
-            if (isoSurfCellPtr_)
-            {
-                return isoSurfCellPtr_->meshCells();
-            }
-            else if (isoSurfPointPtr_)
-            {
-                return isoSurfPointPtr_->meshCells();
-            }
-            return isoSurfTopoPtr_->meshCells();
-        }
-
-        //- For each face, the original cell in mesh
-        labelList& meshCells()
-        {
-            if (isoSurfCellPtr_)
-            {
-                return isoSurfCellPtr_->meshCells();
-            }
-            else if (isoSurfPointPtr_)
-            {
-                return isoSurfPointPtr_->meshCells();
-            }
-            return isoSurfTopoPtr_->meshCells();
         }
 
 

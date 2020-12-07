@@ -78,9 +78,9 @@ Foam::distanceSurface::distanceSurface
         dict,
         isoSurfaceBase::ALGO_TOPO
     ),
-    isoSurfCellPtr_(nullptr),
-    isoSurfPointPtr_(nullptr),
-    isoSurfTopoPtr_(nullptr)
+    surface_(),
+    meshCells_(),
+    isoSurfacePtr_(nullptr)
 {}
 
 
@@ -119,9 +119,9 @@ Foam::distanceSurface::distanceSurface
         useSignedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
     isoParams_(params),
-    isoSurfCellPtr_(nullptr),
-    isoSurfPointPtr_(nullptr),
-    isoSurfTopoPtr_(nullptr)
+    surface_(),
+    meshCells_(),
+    isoSurfacePtr_(nullptr)
 {}
 
 
@@ -134,10 +134,10 @@ void Foam::distanceSurface::createGeometry()
         Pout<< "distanceSurface::createGeometry updating geometry." << endl;
     }
 
-    // Clear any stored topologies
-    isoSurfCellPtr_.clear();
-    isoSurfPointPtr_.clear();
-    isoSurfTopoPtr_.clear();
+    // Clear any previously stored topologies
+    isoSurfacePtr_.reset(nullptr);
+    surface_.clear();
+    meshCells_.clear();
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
 
@@ -287,7 +287,7 @@ void Foam::distanceSurface::createGeometry()
 
 
     // Distance to points
-    pointDistance_.setSize(fvm.nPoints());
+    pointDistance_.resize(fvm.nPoints());
     {
         const pointField& pts = fvm.points();
 
@@ -357,10 +357,12 @@ void Foam::distanceSurface::createGeometry()
     }
 
 
+    // This will soon improve (reduced clutter)
+
     // Direct from cell field and point field.
     if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
     {
-        isoSurfPointPtr_.reset
+        isoSurfacePtr_.reset
         (
             new isoSurfacePoint
             (
@@ -374,34 +376,34 @@ void Foam::distanceSurface::createGeometry()
     }
     else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
     {
-        isoSurfCellPtr_.reset
+        isoSurfaceCell surf
         (
-            new isoSurfaceCell
-            (
-                fvm,
-                cellDistance,
-                pointDistance_,
-                distance_,
-                isoParams_,
-                ignoreCells
-            )
+            fvm,
+            cellDistance,
+            pointDistance_,
+            distance_,
+            isoParams_,
+            ignoreCells
         );
+
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
     }
     else
     {
         // ALGO_TOPO
-        isoSurfTopoPtr_.reset
+        isoSurfaceTopo surf
         (
-            new isoSurfaceTopo
-            (
-                fvm,
-                cellDistance,
-                pointDistance_,
-                distance_,
-                isoParams_,
-                ignoreCells
-            )
+            fvm,
+            cellDistance,
+            pointDistance_,
+            distance_,
+            isoParams_,
+            ignoreCells
         );
+
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
     }
 
     if (debug)

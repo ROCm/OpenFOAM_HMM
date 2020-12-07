@@ -44,7 +44,7 @@ Foam::sampledCuttingPlane::sampleOnFaces
     (
         sampler,
         meshCells(),
-        faces(),
+        surface(),
         points()
     );
 }
@@ -52,11 +52,18 @@ Foam::sampledCuttingPlane::sampleOnFaces
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledCuttingPlane::sampleOnPoints
+Foam::sampledCuttingPlane::sampleOnIsoSurfacePoints
 (
     const interpolation<Type>& interpolator
 ) const
 {
+    if (!isoSurfacePtr_)
+    {
+        FatalErrorInFunction
+            << "cannot call without an iso-surface" << nl
+            << exit(FatalError);
+    }
+
     // Assume volPointInterpolation for the point field!
     const auto& volFld = interpolator.psi();
 
@@ -80,27 +87,30 @@ Foam::sampledCuttingPlane::sampleOnPoints
         tvolFld.reset(pointAverage(tpointFld()));
     }
 
-    return this->isoSurfaceInterpolate(tvolFld(), tpointFld());
+    return isoSurfacePtr_->interpolate(tvolFld(), tpointFld());
 }
+
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::sampledCuttingPlane::isoSurfaceInterpolate
+Foam::sampledCuttingPlane::sampleOnPoints
 (
-    const GeometricField<Type, fvPatchField, volMesh>& cellValues,
-    const Field<Type>& pointValues
+    const interpolation<Type>& interpolator
 ) const
 {
-    if (isoSurfCellPtr_)
+    if (isoSurfacePtr_)
     {
-        return isoSurfCellPtr_->interpolate(cellValues, pointValues);
+        return this->sampleOnIsoSurfacePoints(interpolator);
     }
-    else if (isoSurfPointPtr_)
-    {
-        return isoSurfPointPtr_->interpolate(cellValues, pointValues);
-    }
-    return isoSurfTopoPtr_->interpolate(cellValues, pointValues);
+
+    return sampledSurface::sampleOnPoints
+    (
+        interpolator,
+        meshCells(),
+        surface(),
+        points()
+    );
 }
 
 

@@ -62,6 +62,11 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
 
     prevTimeIndex_ = fvm.time().timeIndex();
 
+    // Clear any previously stored topologies
+    surface_.clear();
+    meshCells_.clear();
+    isoSurfacePtr_.reset(nullptr);
+
     // Clear derived data
     sampledSurface::clearGeom();
 
@@ -159,8 +164,6 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         }
     }
 
-    meshedSurface& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
-
     {
         isoSurfaceTopo surf
         (
@@ -172,18 +175,25 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
             *ignoreCellsPtr_
         );
 
-        mySurface.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_ = std::move(surf.meshCells());
     }
+
+    // if (subMeshPtr_ && meshCells_.size())
+    // {
+    //     // With the correct addressing into the full mesh
+    //     meshCells_ =
+    //         UIndirectList<label>(subMeshPtr_->cellMap(), meshCells_);
+    // }
 
     // triangulate uses remapFaces()
     // - this is somewhat less efficient since it recopies the faces
     // that we just created, but we probably don't want to do this
     // too often anyhow.
-    if (triangulate_)
+    if (triangulate_ && surface_.size())
     {
         labelList faceMap;
-        mySurface.triangulate(faceMap);
+        surface_.triangulate(faceMap);
         meshCells_ = UIndirectList<label>(meshCells_, faceMap)();
     }
 
@@ -198,8 +208,8 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
             << "    triangulate    : " << Switch(triangulate_) << nl
             << "    bounds         : " << isoParams_.getClipBounds() << nl
             << "    points         : " << points().size() << nl
-            << "    faces          : " << Mesh::size() << nl
-            << "    cut cells      : " << meshCells_.size() << endl;
+            << "    faces          : " << surface().size() << nl
+            << "    cut cells      : " << meshCells().size() << endl;
     }
 
     return true;
@@ -216,7 +226,6 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
 )
 :
     sampledSurface(name, mesh, dict),
-    Mesh(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
     isoParams_(dict),
@@ -224,8 +233,9 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
     triangulate_(dict.getOrDefault("triangulate", false)),
     zoneNames_(),
     prevTimeIndex_(-1),
+    surface_(),
     meshCells_(),
-    ignoreCellsPtr_(nullptr)
+    isoSurfacePtr_(nullptr)
 {
     isoParams_.algorithm(isoSurfaceParams::ALGO_TOPO);  // Force
 
@@ -272,6 +282,10 @@ bool Foam::sampledIsoSurfaceTopo::needsUpdate() const
 
 bool Foam::sampledIsoSurfaceTopo::expire()
 {
+    surface_.clear();
+    meshCells_.clear();
+    isoSurfacePtr_.reset(nullptr);
+
     // Clear derived data
     sampledSurface::clearGeom();
 

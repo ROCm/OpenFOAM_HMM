@@ -73,7 +73,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
-#include "isoSurfaceBase.H"
+#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,8 +86,7 @@ namespace Foam
 
 class sampledIsoSurfaceTopo
 :
-    public sampledSurface,
-    public meshedSurface
+    public sampledSurface
 {
     // Private typedefs for convenience
     typedef meshedSurface Mesh;
@@ -114,14 +113,19 @@ class sampledIsoSurfaceTopo
         wordRes zoneNames_;
 
 
-    // Recreated for every isoSurface
+    // Sampling geometry. Directly stored or via an iso-surface (ALGO_POINT)
 
         //- Time at last call, also track it surface needs an update
         mutable label prevTimeIndex_;
 
+        //- The extracted surface (direct storage)
+        mutable meshedSurface surface_;
+
         //- For every face the original cell in mesh (direct storage)
         mutable labelList meshCells_;
 
+        //- Extracted iso-surface, for interpolators
+        mutable autoPtr<isoSurfaceTopo> isoSurfacePtr_;
 
 
     // Mesh subsetting
@@ -149,6 +153,24 @@ class sampledIsoSurfaceTopo
         (
             const interpolation<Type>& interpolator
         ) const;
+
+        //- Use isoSurfacePtr_ for point interpolation
+        template<class Type>
+        tmp<Field<Type>> sampleOnIsoSurfacePoints
+        (
+            const interpolation<Type>& interpolator
+        ) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Is currently backed by an isoSurfacePtr_
+        bool hasIsoSurface() const
+        {
+            return bool(isoSurfacePtr_);
+        }
 
 
 public:
@@ -186,17 +208,36 @@ public:
         //  Do nothing (and return false) if no update was needed
         virtual bool update();
 
+        //- The currently created surface geometry
+        const meshedSurface& surface() const
+        {
+            if (isoSurfacePtr_)
+            {
+                return *isoSurfacePtr_;
+            }
+            return surface_;
+        }
+
+        //- For each face, the original cell in mesh
+        const labelList& meshCells() const
+        {
+            if (isoSurfacePtr_)
+            {
+                return isoSurfacePtr_->meshCells();
+            }
+            return meshCells_;
+        }
 
         //- Points of surface
         virtual const pointField& points() const
         {
-            return Mesh::points();
+            return surface().points();
         }
 
         //- Faces of surface
         virtual const faceList& faces() const
         {
-            return *this;
+            return surface().surfFaces();
         }
 
         //- Per-face zone/region information
@@ -208,19 +249,19 @@ public:
         //- Face area magnitudes
         virtual const vectorField& Sf() const
         {
-            return Mesh::Sf();
+            return surface().Sf();
         }
 
         //- Face area magnitudes
         virtual const scalarField& magSf() const
         {
-            return Mesh::magSf();
+            return surface().magSf();
         }
 
         //- Face centres
         virtual const vectorField& Cf() const
         {
-            return Mesh::Cf();
+            return surface().Cf();
         }
 
 

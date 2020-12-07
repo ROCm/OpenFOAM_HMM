@@ -107,14 +107,45 @@ class distanceSurface
         //- Distance to points
         scalarField pointDistance_;
 
-        //- Constructed iso surface (ALGO_CELL)
-        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
 
-        //- Constructed iso surface (ALGO_POINT)
-        autoPtr<isoSurfacePoint> isoSurfPointPtr_;
+    // Sampling geometry. Directly stored or via an iso-surface (ALGO_POINT)
 
-        //- Constructed iso surface (ALGO_TOPO)
-        autoPtr<isoSurfaceTopo> isoSurfTopoPtr_;
+        //- The extracted surface (direct storage)
+        mutable meshedSurface surface_;
+
+        //- For every face the original cell in mesh (direct storage)
+        mutable labelList meshCells_;
+
+        //- Extracted iso-surface, for interpolators
+        mutable autoPtr<isoSurfacePoint> isoSurfacePtr_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Is currently backed by an isoSurfacePtr_
+        bool hasIsoSurface() const
+        {
+            return bool(isoSurfacePtr_);
+        }
+
+        //- Interpolate volume field onto surface points
+        template<class Type>
+        tmp<Field<Type>> isoSurfaceInterpolate
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& cellValues,
+            const Field<Type>& pointValues
+        ) const
+        {
+            if (isoSurfacePtr_)
+            {
+                return isoSurfacePtr_->interpolate(cellValues, pointValues);
+            }
+
+            return nullptr;
+        }
+
 
 public:
 
@@ -166,74 +197,45 @@ public:
             return distance_;
         }
 
-
         //- The underlying surface
         const meshedSurface& surface() const
         {
-            if (isoSurfCellPtr_)
+            if (isoSurfacePtr_)
             {
-                return *isoSurfCellPtr_;
+                return *isoSurfacePtr_;
             }
-            else if (isoSurfPointPtr_)
-            {
-                return *isoSurfPointPtr_;
-            }
-            return *isoSurfTopoPtr_;
+            return surface_;
         }
-
 
         //- The underlying surface
         meshedSurface& surface()
         {
-            if (isoSurfCellPtr_)
+            if (isoSurfacePtr_)
             {
-                return *isoSurfCellPtr_;
+                return *isoSurfacePtr_;
             }
-            else if (isoSurfPointPtr_)
-            {
-                return *isoSurfPointPtr_;
-            }
-            return *isoSurfTopoPtr_;
+            return surface_;
         }
 
         //- For each face, the original cell in mesh
         const labelList& meshCells() const
         {
-            if (isoSurfCellPtr_)
+            if (isoSurfacePtr_)
             {
-                return isoSurfCellPtr_->meshCells();
+                return isoSurfacePtr_->meshCells();
             }
-            else if (isoSurfPointPtr_)
-            {
-                return isoSurfPointPtr_->meshCells();
-            }
-            return isoSurfTopoPtr_->meshCells();
+            return meshCells_;
         }
 
         //- For each face, the original cell in mesh
         labelList& meshCells()
         {
-            if (isoSurfCellPtr_)
+            if (isoSurfacePtr_)
             {
-                return isoSurfCellPtr_->meshCells();
+                return isoSurfacePtr_->meshCells();
             }
-            else if (isoSurfPointPtr_)
-            {
-                return isoSurfPointPtr_->meshCells();
-            }
-            return isoSurfTopoPtr_->meshCells();
+            return meshCells_;
         }
-
-
-    // Interpolate
-
-        //- Interpolate volume field onto surface points
-        template<class Type>
-        tmp<Field<Type>> interpolate
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& cellValues,
-            const Field<Type>& pointValues
-        ) const;
 
 
     // Output
@@ -246,12 +248,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "distanceSurfaceTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

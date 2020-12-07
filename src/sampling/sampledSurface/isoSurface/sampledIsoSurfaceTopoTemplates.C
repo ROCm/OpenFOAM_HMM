@@ -45,7 +45,7 @@ Foam::sampledIsoSurfaceTopo::sampleOnFaces
     return sampledSurface::sampleOnFaces
     (
         sampler,
-        meshCells_,
+        meshCells(),
         faces(),
         points()
     );
@@ -61,13 +61,59 @@ Foam::sampledIsoSurfaceTopo::sampleOnPoints
 {
     updateGeometry();  // Recreate geometry if time has changed
 
+    if (isoSurfacePtr_)
+    {
+        return this->sampleOnIsoSurfacePoints(interpolator);
+    }
+
     return sampledSurface::sampleOnPoints
     (
         interpolator,
-        meshCells_,
+        meshCells(),
         faces(),
         points()
     );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::sampledIsoSurfaceTopo::sampleOnIsoSurfacePoints
+(
+    const interpolation<Type>& interpolator
+) const
+{
+    if (!isoSurfacePtr_)
+    {
+        FatalErrorInFunction
+            << "cannot call without an iso-surface" << nl
+            << exit(FatalError);
+    }
+
+    // Assume volPointInterpolation for the point field!
+    const auto& volFld = interpolator.psi();
+
+    tmp<GeometricField<Type, fvPatchField, volMesh>> tvolFld(volFld);
+    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpointFld;
+
+    // if (subMeshPtr_)
+    // {
+    //     // Replace with subset
+    //     tvolFld.reset(subMeshPtr_->interpolate(volFld));
+    // }
+
+    // Interpolated point field
+    tpointFld.reset
+    (
+        volPointInterpolation::New(tvolFld().mesh()).interpolate(tvolFld())
+    );
+
+    if (average_)
+    {
+        tvolFld.reset(pointAverage(tpointFld()));
+    }
+
+    return isoSurfacePtr_->interpolate(tvolFld(), tpointFld());
 }
 
 

@@ -108,6 +108,13 @@ class sampledDistanceSurface
             const interpolation<Type>& interpolation
         ) const;
 
+        //- Use distance surface isoSurfacePtr_ for point interpolation
+        template<class Type>
+        tmp<Field<Type>> sampleOnIsoSurfacePoints
+        (
+            const interpolation<Type>& interpolator
+        ) const;
+
 
 public:
 

@@ -57,6 +57,35 @@ Foam::sampledDistanceSurface::sampleOnPoints
     const interpolation<Type>& interpolator
 ) const
 {
+    if (this->hasIsoSurface())
+    {
+        return this->sampleOnIsoSurfacePoints(interpolator);
+    }
+
+    return sampledSurface::sampleOnPoints
+    (
+        interpolator,
+        meshCells(),
+        faces(),
+        points()
+    );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::sampledDistanceSurface::sampleOnIsoSurfacePoints
+(
+    const interpolation<Type>& interpolator
+) const
+{
+    if (!this->hasIsoSurface())
+    {
+        FatalErrorInFunction
+            << "cannot call without an iso-surface" << nl
+            << exit(FatalError);
+    }
+
     // Assume volPointInterpolation for the point field!
     const auto& volFld = interpolator.psi();
 
@@ -74,7 +103,7 @@ Foam::sampledDistanceSurface::sampleOnPoints
         tvolFld.reset(pointAverage(tpointFld()));
     }
 
-    return distanceSurface::interpolate(tvolFld(), tpointFld());
+    return this->isoSurfaceInterpolate(tvolFld(), tpointFld());
 }
 
 

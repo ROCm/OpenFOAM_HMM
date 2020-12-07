@@ -32,6 +32,9 @@ License
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "isoSurfaceCell.H"
+#include "isoSurfacePoint.H"
+#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -97,6 +100,95 @@ void Foam::sampledCuttingPlane::checkBoundsIntersection
 }
 
 
+void Foam::sampledCuttingPlane::setDistanceFields(const plane& pln)
+{
+    volScalarField& cellDistance = cellDistancePtr_();
+
+    // Get mesh from volField,
+    // so automatically submesh or baseMesh
+
+    const fvMesh& mesh = cellDistance.mesh();
+
+    // Distance to cell centres
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Internal field
+    {
+        const auto& cc = mesh.cellCentres();
+        scalarField& fld = cellDistance.primitiveFieldRef();
+
+        forAll(cc, i)
+        {
+            fld[i] = pln.signedDistance(cc[i]);
+        }
+    }
+
+    // Patch fields
+    {
+        volScalarField::Boundary& cellDistanceBf =
+            cellDistance.boundaryFieldRef();
+
+        forAll(cellDistanceBf, patchi)
+        {
+            if
+            (
+                isA<emptyFvPatchScalarField>
+                (
+                    cellDistanceBf[patchi]
+                )
+            )
+            {
+                cellDistanceBf.set
+                (
+                    patchi,
+                    new calculatedFvPatchScalarField
+                    (
+                        mesh.boundary()[patchi],
+                        cellDistance
+                    )
+                );
+
+                const polyPatch& pp = mesh.boundary()[patchi].patch();
+                pointField::subField cc = pp.patchSlice(mesh.faceCentres());
+
+                fvPatchScalarField& fld = cellDistanceBf[patchi];
+                fld.setSize(pp.size());
+                forAll(fld, i)
+                {
+                    fld[i] = pln.signedDistance(cc[i]);
+                }
+            }
+            else
+            {
+                // Other side cell centres?
+                const pointField& cc = mesh.C().boundaryField()[patchi];
+                fvPatchScalarField& fld = cellDistanceBf[patchi];
+
+                forAll(fld, i)
+                {
+                    fld[i] = pln.signedDistance(cc[i]);
+                }
+            }
+        }
+    }
+
+
+    // On processor patches the mesh.C() will already be the cell centre
+    // on the opposite side so no need to swap cellDistance.
+
+    // Distance to points
+    pointDistance_.resize(mesh.nPoints());
+    {
+        const pointField& pts = mesh.points();
+
+        forAll(pointDistance_, i)
+        {
+            pointDistance_[i] = pln.signedDistance(pts[i]);
+        }
+    }
+}
+
+
 void Foam::sampledCuttingPlane::createGeometry()
 {
     if (debug)
@@ -105,15 +197,14 @@ void Foam::sampledCuttingPlane::createGeometry()
             << endl;
     }
 
-    // Clear any stored topologies
-    isoSurfCellPtr_.clear();
-    isoSurfPointPtr_.clear();
-    isoSurfTopoPtr_.clear();
+    // Clear any previously stored topologies
+    isoSurfacePtr_.reset(nullptr);
+    surface_.clear();
+    meshCells_.clear();
+
+    // Clear any stored fields
     pointDistance_.clear();
     cellDistancePtr_.clear();
-
-    // Clear derived data
-    clearGeom();
 
     const fvMesh& fvm = static_cast<const fvMesh&>(this->mesh());
 
@@ -197,90 +288,16 @@ void Foam::sampledCuttingPlane::createGeometry()
             dimensionedScalar(dimLength, Zero)
         )
     );
-    volScalarField& cellDistance = cellDistancePtr_();
 
-    // Internal field
-    {
-        const auto& cc = mesh.cellCentres();
-        scalarField& fld = cellDistance.primitiveFieldRef();
+    const volScalarField& cellDistance = cellDistancePtr_();
 
-        forAll(cc, i)
-        {
-            fld[i] = plane_.signedDistance(cc[i]);
-        }
-    }
-
-    // Patch fields
-    {
-        volScalarField::Boundary& cellDistanceBf =
-            cellDistance.boundaryFieldRef();
-
-        forAll(cellDistanceBf, patchi)
-        {
-            if
-            (
-                isA<emptyFvPatchScalarField>
-                (
-                    cellDistanceBf[patchi]
-                )
-            )
-            {
-                cellDistanceBf.set
-                (
-                    patchi,
-                    new calculatedFvPatchScalarField
-                    (
-                        mesh.boundary()[patchi],
-                        cellDistance
-                    )
-                );
-
-                const polyPatch& pp = mesh.boundary()[patchi].patch();
-                pointField::subField cc = pp.patchSlice(mesh.faceCentres());
-
-                fvPatchScalarField& fld = cellDistanceBf[patchi];
-                fld.setSize(pp.size());
-                forAll(fld, i)
-                {
-                    fld[i] = plane_.signedDistance(cc[i]);
-                }
-            }
-            else
-            {
-                // Other side cell centres?
-                const pointField& cc = mesh.C().boundaryField()[patchi];
-                fvPatchScalarField& fld = cellDistanceBf[patchi];
-
-                forAll(fld, i)
-                {
-                    fld[i] = plane_.signedDistance(cc[i]);
-                }
-            }
-        }
-    }
-
-
-    // On processor patches the mesh.C() will already be the cell centre
-    // on the opposite side so no need to swap cellDistance.
-
-
-    // Distance to points
-    pointDistance_.setSize(mesh.nPoints());
-    {
-        const pointField& pts = mesh.points();
-
-        forAll(pointDistance_, i)
-        {
-            pointDistance_[i] = plane_.signedDistance(pts[i]);
-        }
-    }
-
+    setDistanceFields(plane_);
 
     if (debug)
     {
         Pout<< "Writing cell distance:" << cellDistance.objectPath() << endl;
         cellDistance.write();
-        pointScalarField pDist
+        pointScalarField pointDist
         (
             IOobject
             (
@@ -294,17 +311,19 @@ void Foam::sampledCuttingPlane::createGeometry()
             pointMesh::New(mesh),
             dimensionedScalar(dimLength, Zero)
         );
-        pDist.primitiveFieldRef() = pointDistance_;
+        pointDist.primitiveFieldRef() = pointDistance_;
 
-        Pout<< "Writing point distance:" << pDist.objectPath() << endl;
-        pDist.write();
+        Pout<< "Writing point distance:" << pointDist.objectPath() << endl;
+        pointDist.write();
     }
 
+
+    // This will soon improve (reduced clutter)
 
     // Direct from cell field and point field.
     if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
     {
-        isoSurfPointPtr_.reset
+        isoSurfacePtr_.reset
         (
             new isoSurfacePoint
             (
@@ -317,32 +336,46 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
     else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
     {
-        isoSurfCellPtr_.reset
+        isoSurfaceCell surf
         (
-            new isoSurfaceCell
-            (
-                fvm,
-                cellDistance,
-                pointDistance_,
-                scalar(0),  // distance
-                isoParams_
-            )
+            fvm,
+            cellDistance,
+            pointDistance_,
+            scalar(0),  // distance
+            isoParams_
         );
+
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
     }
     else
     {
         // ALGO_TOPO
-        isoSurfTopoPtr_.reset
+        isoSurfaceTopo surf
         (
-            new isoSurfaceTopo
-            (
-                fvm,
-                cellDistance,
-                pointDistance_,
-                scalar(0),  // distance
-                isoParams_
-            )
+            fvm,
+            cellDistance,
+            pointDistance_,
+            scalar(0),  // distance
+            isoParams_
         );
+
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
+    }
+
+    // Only retain for iso-surface
+    if (!isoSurfacePtr_)
+    {
+        cellDistancePtr_.reset(nullptr);
+        pointDistance_.clear();
+    }
+
+    if (subMeshPtr_ && meshCells_.size())
+    {
+        // With the correct addressing into the full mesh
+        meshCells_ =
+            UIndirectList<label>(subMeshPtr_->cellMap(), meshCells_);
     }
 
     if (debug)
@@ -376,9 +409,9 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     needsUpdate_(true),
     subMeshPtr_(nullptr),
     cellDistancePtr_(nullptr),
-    isoSurfCellPtr_(nullptr),
-    isoSurfPointPtr_(nullptr),
-    isoSurfTopoPtr_(nullptr)
+    surface_(),
+    meshCells_(),
+    isoSurfacePtr_(nullptr)
 {
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
     {
@@ -414,8 +447,12 @@ bool Foam::sampledCuttingPlane::expire()
             << " needsUpdate:" << needsUpdate_ << endl;
     }
 
+    surface_.clear();
+    meshCells_.clear();
+    isoSurfacePtr_.reset(nullptr);
+
     // Clear derived data
-    clearGeom();
+    sampledSurface::clearGeom();
 
     // Already marked as expired
     if (needsUpdate_)
