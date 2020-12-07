@@ -46,8 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class fvMesh;
 class polyBoundaryMesh;
 
@@ -59,7 +58,7 @@ class fvBoundaryMesh
 :
     public fvPatchList
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const fvMesh& mesh_;
@@ -107,13 +106,15 @@ public:
         }
 
         //- Return a list of pointers for each patch
-        //  with only those pointing to interfaces being set
+        //- with only those pointing to interfaces being set
         lduInterfacePtrsList interfaces() const;
 
         //- Return patch indices for all matches.
+        //  A no-op (returns empty list) for an empty key
         labelList indices(const keyType& key, const bool useGroups) const;
 
         //- Find patch index given a name
+        //  A no-op (returns -1) for an empty patchName
         label findPatchID(const word& patchName) const;
 
         //- Correct patches after moving points

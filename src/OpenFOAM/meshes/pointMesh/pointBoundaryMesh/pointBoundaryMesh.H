@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class pointMesh;
 class polyBoundaryMesh;
 
@@ -57,7 +57,7 @@ class pointBoundaryMesh
 :
     public pointPatchList
 {
-    // Private data
+    // Private Data
 
         //- Reference to mesh
         const pointMesh& mesh_;
@@ -100,9 +100,11 @@ public:
         }
 
         //- Find patch indices given a name
+        //  A no-op (returns empty list) for an empty key
         labelList indices(const keyType& key, const bool useGroups) const;
 
         //- Find patch index given a name
+        //  A no-op (returns -1) for an empty patchName
         label findPatchID(const word& patchName) const;
 
         //- Correct polyBoundaryMesh after moving points

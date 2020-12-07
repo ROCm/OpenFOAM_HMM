@@ -193,24 +193,31 @@ public:
 
 
         //- Return zone indices for all matches
+        //  A no-op (returns empty list) for an empty key
         labelList indices(const keyType& key) const;
 
         //- Return zone indices for all matches
+        //  A no-op (returns empty list) for an empty matcher
         labelList indices(const wordRes& matcher) const;
 
         //- Zone index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty key
         label findIndex(const keyType& key) const;
 
         //- Zone index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty matcher
         label findIndex(const wordRes& matcher) const;
 
         //- Find zone index by name, return -1 if not found
+        //  A no-op (returns -1) for an empty zoneName
         label findZoneID(const word& zoneName) const;
 
         //- Find zone by name and return const pointer, nullptr on error
+        //  A no-op (returns nullptr) for an empty zoneName
         const ZoneType* cfindZone(const word& zoneName) const;
 
         //- Find zone by name and return pointer, nullptr on error
+        //  A no-op (returns nullptr) for an empty zoneName
         ZoneType* findZone(const word& zoneName);
 
 
@@ -224,12 +231,14 @@ public:
         //- specification as a bitSet.
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
+        //  A no-op (returns empty bitSet) for an empty key
         bitSet selection(const keyType& key) const;
 
         //- Return all elements (cells, faces, points) that match the zone
         //- specification as a bitSet.
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
+        //  A no-op (returns empty bitSet) for an empty matcher
         bitSet selection(const wordRes& matcher) const;
 
 

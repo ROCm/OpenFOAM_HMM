@@ -44,13 +44,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward Declarations
 class areaMesh;
 
-template<class Type>
-class faPatchField;
+template<class Type> class faPatchField;
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 class GeometricField;
+
+// Typedefs
 
 typedef GeometricField<scalar, faPatchField, areaMesh> areaScalarField;
 typedef GeometricField<vector, faPatchField, areaMesh> areaVectorField;
@@ -58,7 +60,6 @@ typedef GeometricField<sphericalTensor, faPatchField, areaMesh>
     areaSphericalTensorField;
 typedef GeometricField<symmTensor, faPatchField, areaMesh> areaSymmTensorField;
 typedef GeometricField<tensor, faPatchField, areaMesh> areaTensorField;
-
 
 
 /*---------------------------------------------------------------------------*\

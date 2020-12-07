@@ -43,25 +43,6 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef GeometricField<scalar, pointPatchField, pointMesh> pointScalarField;
-typedef GeometricField<vector, pointPatchField, pointMesh> pointVectorField;
-typedef GeometricField<sphericalTensor, pointPatchField, pointMesh>
-    pointSphericalTensorField;
-typedef GeometricField<symmTensor, pointPatchField, pointMesh>
-    pointSymmTensorField;
-typedef GeometricField<tensor, pointPatchField, pointMesh> pointTensorField;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -289,6 +289,11 @@ Foam::label Foam::faBoundaryMesh::findIndex(const keyType& key) const
 
 Foam::label Foam::faBoundaryMesh::findPatchID(const word& patchName) const
 {
+    if (patchName.empty())
+    {
+        return -1;
+    }
+
     return findIndexImpl(*this, patchName);
 }
 

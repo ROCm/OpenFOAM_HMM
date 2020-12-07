@@ -291,6 +291,10 @@ Foam::labelList Foam::coordinateSystems::indices(const keyType& key) const
 
 Foam::labelList Foam::coordinateSystems::indices(const wordRes& matcher) const
 {
+    if (matcher.empty())
+    {
+        return labelList();
+    }
     return indicesImpl(*this, matcher);
 }
 
@@ -319,6 +323,10 @@ Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
 
 Foam::label Foam::coordinateSystems::findIndex(const wordRes& matcher) const
 {
+    if (matcher.empty())
+    {
+        return -1;
+    }
     return findIndexImpl(*this, matcher);
 }
 

@@ -43,13 +43,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward Declarations
 class edgeMesh;
 
-template<class Type>
-class faePatchField;
+template<class Type> class faePatchField;
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 class GeometricField;
+
+// Typedefs
 
 typedef GeometricField<scalar, faePatchField, edgeMesh> edgeScalarField;
 typedef GeometricField<vector, faePatchField, edgeMesh> edgeVectorField;

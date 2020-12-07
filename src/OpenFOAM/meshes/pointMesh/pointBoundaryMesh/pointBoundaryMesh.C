@@ -61,7 +61,6 @@ Foam::pointBoundaryMesh::pointBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 Foam::labelList Foam::pointBoundaryMesh::indices
 (
     const keyType& key,

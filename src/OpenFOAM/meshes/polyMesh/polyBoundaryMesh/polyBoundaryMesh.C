@@ -768,6 +768,11 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
     bool allowNotFound
 ) const
 {
+    if (patchName.empty())
+    {
+        return -1;
+    }
+
     const label patchId = findIndexImpl(*this, patchName);
 
     if (patchId >= 0)

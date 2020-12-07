@@ -133,15 +133,19 @@ public:
     // Member Functions
 
         //- Find and return indices for all matches
+        //  A no-op (returns empty list) for an empty key
         labelList indices(const keyType& key) const;
 
         //- Find and return indices for all matches
+        //  A no-op (returns empty list) for an empty matcher
         labelList indices(const wordRes& matcher) const;
 
         //- Find and return index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty key
         label findIndex(const keyType& key) const;
 
         //- Find and return index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty matcher
         label findIndex(const wordRes& matcher) const;
 
         //- Search if given key exists

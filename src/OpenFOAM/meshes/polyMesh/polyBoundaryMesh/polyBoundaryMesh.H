@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
 class wordRe;
 
@@ -194,6 +194,7 @@ public:
 
         //- Return patch indices for all matches.
         //  Optionally matches patchGroups
+        //  A no-op (returns empty list) for an empty key
         labelList indices
         (
             const keyType& key,
@@ -202,9 +203,11 @@ public:
 
 
         //- Return patch index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty key
         label findIndex(const keyType& key) const;
 
         //- Find patch index given a name, return -1 if not found
+        //  A no-op (returns -1) for an empty patchName
         label findPatchID
         (
             const word& patchName,

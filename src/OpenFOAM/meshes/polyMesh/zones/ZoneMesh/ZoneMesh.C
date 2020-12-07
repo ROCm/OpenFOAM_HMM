@@ -485,6 +485,11 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
     const word& zoneName
 ) const
 {
+    if (zoneName.empty())
+    {
+        return -1;
+    }
+
     label zoneId = findIndexImpl(*this, zoneName);
 
     if (zoneId < 0)
@@ -514,6 +519,11 @@ const ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::cfindZone
     const word& zoneName
 ) const
 {
+    if (zoneName.empty())
+    {
+        return nullptr;
+    }
+
     const PtrList<ZoneType>& zones = *this;
 
     for (auto iter = zones.begin(); iter != zones.end(); ++iter)
@@ -585,6 +595,7 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
     const keyType& key
 ) const
 {
+    // key.empty() is handled by indices()
     return this->selection(this->indices(key));
 }
 
@@ -595,6 +606,7 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
     const wordRes& matcher
 ) const
 {
+    // matcher.empty() is handled by indices()
     return this->selection(this->indices(matcher));
 }
 

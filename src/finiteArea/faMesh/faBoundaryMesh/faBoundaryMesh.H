@@ -55,7 +55,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations
 class faMesh;
 class faBoundaryMesh;
 Ostream& operator<<(Ostream&, const faBoundaryMesh&);
@@ -121,7 +121,7 @@ public:
             const faMesh& mesh() const;
 
             //- Return a list of pointers for each patch
-            //  with only those pointing to interfaces being set
+            //- with only those pointing to interfaces being set
             lduInterfacePtrsList interfaces() const;
 
             //- Return a list of patch names
@@ -131,7 +131,8 @@ public:
             wordList types() const;
 
             //- Return patch indices for all matches.
-            //  \not Matching patchGroups currently not supported
+            //  A no-op (returns -1) for an empty key
+            //  \note Matching patchGroups currently not supported
             labelList indices
             (
                 const keyType& key,
@@ -139,9 +140,11 @@ public:
             ) const;
 
             //- Return patch index for the first match, return -1 if not found
+            //  A no-op (returns -1) for an empty key
             label findIndex(const keyType& key) const;
 
             //- Find patch index given a name, return -1 if not found
+            //  A no-op (returns -1) for an empty name
             label findPatchID(const word& patchName) const;
 
             //- Return patch index for a given edge label
