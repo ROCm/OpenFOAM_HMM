@@ -1,0 +1,7 @@
+-np 2 laplacianFoam -case ./left -world LEFT -parallel
+-np 2 laplacianFoam -case ./right -world RIGHT -parallel
+
+#-np 1 xterm -font fixed -title processor0 -geometry 200x15+0+0 -e /home/mattijs/OpenFOAM/OpenFOAM-plus.feature-localWorld/applications/test/multiWorld/processor0.sh
+#-np 1 xterm -font fixed -title processor1 -geometry 200x15+0+200 -e /home/mattijs/OpenFOAM/OpenFOAM-plus.feature-localWorld/applications/test/multiWorld/processor1.sh
+#-np 1 xterm -font fixed -title processor2 -geometry 200x15+0+400 -e /home/mattijs/OpenFOAM/OpenFOAM-plus.feature-localWorld/applications/test/multiWorld/processor2.sh
+#-np 1 xterm -font fixed -title processor3 -geometry 200x15+0+600 -e /home/mattijs/OpenFOAM/OpenFOAM-plus.feature-localWorld/applications/test/multiWorld/processor3.sh

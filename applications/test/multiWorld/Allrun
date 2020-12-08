@@ -1,0 +1,18 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+# Run serial
+(cd left && runApplication blockMesh)
+(cd right && runApplication blockMesh)
+mpirun -app ./mpirun_left_right.schema
+
+## Run parallel
+#(cd left && runApplication blockMesh)
+#(cd left && runApplication decomposePar)
+#(cd right && runApplication blockMesh)
+#(cd right && runApplication decomposePar)
+#
+#mpirun -app ./mpirun.schema
+
+#------------------------------------------------------------------------------
