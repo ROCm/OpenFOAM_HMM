@@ -116,7 +116,7 @@ atmAlphatkWallFunctionFvPatchScalarField
         (
             "Cmu",
             0.09,
-            scalarMinMax::ge(0)
+            scalarMinMax::ge(SMALL)
         )
     ),
     kappa_
@@ -125,7 +125,7 @@ atmAlphatkWallFunctionFvPatchScalarField
         (
             "kappa",
             0.41,
-            scalarMinMax::ge(0)
+            scalarMinMax::ge(SMALL)
         )
     ),
     Pr_(TimeFunction1<scalar>(db().time(), "Pr", dict)),
@@ -183,14 +183,15 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
-    (
-        IOobject::groupName
+    const auto& turbModel =
+        db().lookupObject<turbulenceModel>
         (
-            turbulenceModel::propertiesName,
-            internalField().group()
-        )
-    );
+            IOobject::groupName
+            (
+                turbulenceModel::propertiesName,
+                internalField().group()
+            )
+        );
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -211,7 +212,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
         FatalErrorInFunction
             << "Pr cannot be negative or zero. "
             << "Please check input Pr = " << Pr
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
     #endif
 
@@ -226,7 +227,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
             FatalErrorInFunction
                 << "Elements of input surface fields can only be positive. "
                 << "Please check input fields z0 and Prt."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif

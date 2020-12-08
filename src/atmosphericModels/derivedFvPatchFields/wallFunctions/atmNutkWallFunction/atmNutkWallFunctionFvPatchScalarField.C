@@ -45,14 +45,15 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
-    (
-        IOobject::groupName
+    const auto& turbModel =
+        db().lookupObject<turbulenceModel>
         (
-            turbulenceModel::propertiesName,
-            internalField().group()
-        )
-    );
+            IOobject::groupName
+            (
+                turbulenceModel::propertiesName,
+                internalField().group()
+            )
+        );
     const scalarField& y = turbModel.y()[patchi];
 
     const tmp<volScalarField> tk = turbModel.k();
@@ -61,8 +62,8 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    tmp<scalarField> tnutw(new scalarField(*this));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(*this);
+    auto& nutw = tnutw.ref();
 
     const scalar Cmu25 = pow025(Cmu_);
 
@@ -70,14 +71,14 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
     const scalarField z0(z0_->value(t));
 
     #ifdef FULLDEBUG
-    for (const auto& z : z0)
+    for (const scalar z : z0)
     {
         if (z < VSMALL)
         {
             FatalErrorInFunction
                 << "z0 field can only contain positive values. "
                 << "Please check input field z0."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif
@@ -98,7 +99,7 @@ tmp<scalarField> atmNutkWallFunctionFvPatchScalarField::calcNut() const
 
     if (boundNut_)
     {
-        nutw = max(nutw, scalar(0.0));
+        nutw = max(nutw, scalar(0));
     }
 
     return tnutw;
@@ -141,7 +142,7 @@ atmNutkWallFunctionFvPatchScalarField::atmNutkWallFunctionFvPatchScalarField
 )
 :
     nutkWallFunctionFvPatchScalarField(p, iF, dict),
-    boundNut_(dict.getOrDefault<Switch>("boundNut", false)),
+    boundNut_(dict.getOrDefault<bool>("boundNut", false)),
     z0_(PatchFunction1<scalar>::New(p.patch(), "z0", dict))
 {}
 
@@ -198,7 +199,8 @@ void atmNutkWallFunctionFvPatchScalarField::rmap
 
 void atmNutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    nutkWallFunctionFvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
     os.writeEntry("boundNut", boundNut_);
     z0_->writeData(os);
     writeEntry("value", os);

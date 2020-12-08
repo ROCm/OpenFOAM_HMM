@@ -20,13 +20,13 @@ internalField  uniform  Q_PLANT;
 
 boundaryField
 {
-    "bottom|top"
+    "(bottom|top)"
     {
         type            fixedValue;
         value           uniform 0;
     }
 
-    "inlet|outlet|left|right"
+    "(inlet|outlet|left|right)"
     {
         type            cyclic;
     }

@@ -33,7 +33,7 @@ Group
 
 Description
     This boundary condition provides a wall constraint on the turbulent
-    viscosity, i.e. \c nut, based on the turbulent kinetic energy, i.e. \c k,
+    viscosity (i.e. \c nut) based on the turbulent kinetic energy (i.e. \c k)
     for atmospheric boundary layer modelling.  It is designed to be used in
     conjunction with the \c atmBoundaryLayerInletVelocity boundary condition.
 
@@ -47,7 +47,7 @@ Description
     \vartable
       \u^*     | Friction velocity
       \kappa   | von Kármán constant
-      z_0      | Surface roughness length [m]
+      z_0      | Surface roughness length       [m]
       z        | Ground-normal coordinate
     \endvartable
 
@@ -94,10 +94,10 @@ Usage
 
     where the entries mean:
     \table
-      Property | Description                      | Type   | Req'd    | Dflt
-      type     | Type name: atmNutkWallFunction   | word   | yes      | -
+      Property | Description                      | Type   | Reqd    | Dflt
+      type     | Type name: atmNutkWallFunction   | word   | yes     | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
-      boundNut | Flag: zero-bound nut near wall   | bool   | no       | false
+      boundNut | Flag to zero-bound nut near wall | bool   | no      | false
     \endtable
 
     The inherited entries are elaborated in:
@@ -139,7 +139,7 @@ class atmNutkWallFunctionFvPatchScalarField
 
         //- Flag to zero-bound nut to prevent negative nut
         //- at the wall arising from negative heat fluxes
-        const Switch boundNut_;
+        const bool boundNut_;
 
         //- Surface roughness length field [m]
         autoPtr<PatchFunction1<scalar>> z0_;
@@ -224,7 +224,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);

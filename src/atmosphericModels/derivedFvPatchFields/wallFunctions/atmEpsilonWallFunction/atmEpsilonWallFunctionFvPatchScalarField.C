@@ -74,7 +74,7 @@ void Foam::atmEpsilonWallFunctionFvPatchScalarField::calculate
             FatalErrorInFunction
                 << "z0 field can only contain positive values. "
                 << "Please check input field z0."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif

@@ -18,4 +18,6 @@ runParallel renumberMesh -overwrite
 
 runParallel $(getApplication)
 
+runParallel redistributePar -reconstruct -latestTime
+
 #------------------------------------------------------------------------------

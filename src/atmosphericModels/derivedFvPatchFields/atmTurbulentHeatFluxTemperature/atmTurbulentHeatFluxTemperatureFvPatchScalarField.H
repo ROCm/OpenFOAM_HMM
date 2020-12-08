@@ -31,8 +31,8 @@ Group
     grpAtmWallFunctions
 
 Description
-    This boundary condition provides a fixed heat constraint on temperature,
-    i.e. \c T, to specify temperature gradient through an input heat source
+    This boundary condition provides a fixed heat constraint on temperature
+    (i.e. \c T) to specify temperature gradient through an input heat source
     which can either be specified as absolute power [W], or as flux [W/m2].
 
     Required fields:
@@ -62,7 +62,7 @@ Usage
 
     where the entries mean:
     \table
-      Property     | Description                         | Type | Req'd | Dflt
+      Property     | Description                         | Type | Reqd  | Dflt
       heatSource   | Heat source type                    | word |  yes  | -
       alphaEff     | Name of turbulent thermal diff. field [kg/m/s] <!--
                                                      --> | word | yes   | -
@@ -80,7 +80,7 @@ Usage
     Options for the \c heatSource entry:
     \verbatim
       power  | Absolute power heat source [W]
-      flux   | Flux heat source [W/m2]
+      flux   | Flux heat source           [W/m2]
     \endverbatim
 
 SourceFiles
@@ -212,7 +212,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper&);
@@ -225,7 +225,7 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

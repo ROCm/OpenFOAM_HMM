@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,6 +25,7 @@ pressureGradient
     }
 }
 
+
 atmCoriolisUSource1
 {
     type                atmCoriolisUSource;
@@ -35,6 +35,7 @@ atmCoriolisUSource1
         Omega           (0 0 5.65156e-05);
     }
 }
+
 
 atmAmbientTurbSource1
 {
@@ -47,6 +48,7 @@ atmAmbientTurbSource1
     }
 }
 
+
 atmBuoyancyTurbSource1
 {
     type                atmBuoyancyTurbSource;
@@ -58,6 +60,7 @@ atmBuoyancyTurbSource1
         beta            3.3e-03;
     }
 }
+
 
 atmLengthScaleTurbSource1
 {

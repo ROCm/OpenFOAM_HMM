@@ -36,7 +36,7 @@ boundaryField
         value          uniform 300;
     }
 
-    "inlet|outlet|left|right"
+    "(inlet|outlet|left|right)"
     {
         type            cyclic;
     }

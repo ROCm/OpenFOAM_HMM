@@ -66,14 +66,14 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::calculate
     const scalarField z0(z0_->value(t));
 
     #ifdef FULLDEBUG
-    for (const auto& z : z0)
+    for (const scalar z : z0)
     {
         if (z < VSMALL)
         {
             FatalErrorInFunction
                 << "z0 field can only contain positive values. "
                 << "Please check input field z0."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif
@@ -198,7 +198,6 @@ void Foam::atmOmegaWallFunctionFvPatchScalarField::write
 {
     omegaWallFunctionFvPatchScalarField::write(os);
     z0_->writeData(os);
-    writeEntry("value", os);
 }
 
 

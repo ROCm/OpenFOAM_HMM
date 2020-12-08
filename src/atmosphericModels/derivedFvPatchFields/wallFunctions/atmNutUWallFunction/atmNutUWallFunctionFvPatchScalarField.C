@@ -43,14 +43,15 @@ tmp<scalarField> atmNutUWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
-    (
-        IOobject::groupName
+    const auto& turbModel =
+        db().lookupObject<turbulenceModel>
         (
-            turbulenceModel::propertiesName,
-            internalField().group()
-        )
-    );
+            IOobject::groupName
+            (
+                turbulenceModel::propertiesName,
+                internalField().group()
+            )
+        );
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -65,20 +66,20 @@ tmp<scalarField> atmNutUWallFunctionFvPatchScalarField::calcNut() const
     const scalarField z0(z0_->value(t));
 
     #ifdef FULLDEBUG
-    for (const auto& z : z0)
+    for (const scalar z : z0)
     {
         if (z < VSMALL)
         {
             FatalErrorInFunction
                 << "z0 field can only contain positive values. "
                 << "Please check input field z0."
-                << exit(FatalIOError);
+                << exit(FatalError);
         }
     }
     #endif
 
-    tmp<scalarField> tnutw(new scalarField(*this));
-    scalarField& nutw = tnutw.ref();
+    auto tnutw = tmp<scalarField>::New(*this);
+    auto& nutw = tnutw.ref();
 
     forAll(nutw, facei)
     {
@@ -90,7 +91,7 @@ tmp<scalarField> atmNutUWallFunctionFvPatchScalarField::calcNut() const
 
     if (boundNut_)
     {
-        nutw = max(nutw, scalar(0.0));
+        nutw = max(nutw, scalar(0));
     }
 
     return tnutw;
@@ -133,7 +134,7 @@ atmNutUWallFunctionFvPatchScalarField::atmNutUWallFunctionFvPatchScalarField
 )
 :
     nutUWallFunctionFvPatchScalarField(p, iF, dict),
-    boundNut_(dict.getOrDefault<Switch>("boundNut", true)),
+    boundNut_(dict.getOrDefault<bool>("boundNut", true)),
     z0_(PatchFunction1<scalar>::New(p.patch(), "z0", dict))
 {}
 
@@ -190,7 +191,8 @@ void atmNutUWallFunctionFvPatchScalarField::rmap
 
 void atmNutUWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    nutUWallFunctionFvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
     os.writeEntry("boundNut", boundNut_);
     z0_->writeData(os);
     writeEntry("value", os);
