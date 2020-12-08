@@ -67,6 +67,7 @@ namespace Foam
 // Forward declarations
 class mappedPatchBase;
 template<class> class interpolation;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                     Class mappedPatchFieldBase Declaration
@@ -79,6 +80,7 @@ class mappedPatchFieldBase
 
         //- Selective retrieval of "average" entry from the dictionary
         static Type getAverage(const dictionary& dict, bool mandatory);
+
 
 protected:
 
@@ -104,6 +106,21 @@ protected:
         word interpolationScheme_;
 
 
+    // Protected Member Functions
+
+        //- Construct field from registered elements
+        template<class T>
+        void initRetrieveField
+        (
+            const objectRegistry& obr,
+            const word& region,
+            const word& patch,
+            const mapDistribute& map,
+            const word& fieldName,
+            const Field<T>& fld
+        ) const;
+
+
 public:
 
     // Constructors
@@ -127,6 +144,16 @@ public:
             const dictionary& dict
         );
 
+        //- Construct from dictionary and initial field value
+        //  (for when running in database mode)
+        mappedPatchFieldBase
+        (
+            const mappedPatchBase& mapper,
+            const fvPatchField<Type>& patchField,
+            const dictionary& dict,
+            const Field<Type>& fld
+        );
+
         //- Construct empty
         mappedPatchFieldBase
         (
@@ -135,7 +162,7 @@ public:
         );
 
         //- Construct copy
-        mappedPatchFieldBase
+        explicit mappedPatchFieldBase
         (
             const mappedPatchFieldBase<Type>& mapper
         );
@@ -156,13 +183,83 @@ public:
     // Member Functions
 
         //- Field to sample. Either on my or nbr mesh
+        template<class T>
+        const GeometricField<T, fvPatchField, volMesh>& sampleField
+        (
+            const word& fieldName
+        ) const;
+
+        //- Field to sample. Either on my or nbr mesh
         const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
 
         //- Map sampleField onto *this patch
         virtual tmp<Field<Type>> mappedField() const;
 
+        //- Map internal of sampleField onto *this patch
+        virtual tmp<Field<Type>> mappedInternalField() const;
+
+        //- Map optional weightField onto *this patch. Default is deltaCoeffs
+        virtual tmp<scalarField> mappedWeightField() const;
+
+        //- Map optional weightField (given by name) onto *this patch
+        virtual void mappedWeightField
+        (    
+            const word& weightFieldName,
+            tmp<scalarField>& thisWeights,
+            tmp<scalarField>& nbrWeights
+        ) const;
+
         //- Write
         virtual void write(Ostream& os) const;
+
+
+        // Helpers
+
+            //- Check that patch is of correct type
+            static const mappedPatchBase& mapper
+            (
+                const fvPatch& p,
+                const DimensionedField<Type, volMesh>& iF
+            );
+
+            //- Initialise field to retrieve (used e.g. when value read from
+            //  dictionary)
+            template<class T>
+            void initRetrieveField
+            (
+                const word& fieldName,
+                const Field<T>& fld
+            ) const;
+
+            //- Store elements of field onto (sub) registry
+            template<class T>
+            void storeField
+            (
+                const objectRegistry& obr,
+                const word& region,
+                const word& patch,
+                const labelListList& procToMap,
+                const word& fieldName,
+                const Field<T>& fld
+            ) const;
+
+            //- Construct field from registered elements
+            template<class T>
+            void retrieveField
+            (
+                const bool allowUnset,
+                const objectRegistry& obr,
+                const word& region,
+                const word& patch,
+                const labelListList& procToMap,
+                const word& fieldName,
+                Field<T>& fld
+            ) const;
+
+            //- Wrapper for mapDistribute::distribute that knows about
+            //- dabase mapping
+            template<class T>
+            void distribute(const word& fieldName, Field<T>& newValues) const;
 };
 
 

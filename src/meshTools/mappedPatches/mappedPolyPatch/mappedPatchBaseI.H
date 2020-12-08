@@ -33,6 +33,12 @@ Foam::mappedPatchBase::mode() const
 }
 
 
+inline const Foam::word& Foam::mappedPatchBase::sampleWorld() const
+{
+    return sampleWorld_;
+}
+
+
 inline const Foam::word& Foam::mappedPatchBase::sampleRegion() const
 {
     if (sampleRegion_.empty())
@@ -138,6 +144,20 @@ inline const Foam::vectorField& Foam::mappedPatchBase::offsets() const
 }
 
 
+inline Foam::label Foam::mappedPatchBase::comm() const
+{
+    return comm_;
+}
+
+
+inline bool Foam::mappedPatchBase::sameWorld() const
+{
+    return
+        UPstream::allWorlds().size() == 1
+     || UPstream::myWorld() == sampleWorld_;
+}
+
+
 inline bool Foam::mappedPatchBase::sameRegion() const
 {
     return sameRegion_;
@@ -147,7 +167,9 @@ inline bool Foam::mappedPatchBase::sameRegion() const
 inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
 {
     const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
-    bool topoChange = sampleMesh().topoChanging() || thisMesh.topoChanging();
+    bool topoChange =
+        (sameWorld() && sampleMesh().topoChanging())
+     || thisMesh.topoChanging();
 
     if (topoChange)
     {
@@ -169,7 +191,9 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
 ) const
 {
     const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
-    bool topoChange = sampleMesh().topoChanging() || thisMesh.topoChanging();
+    bool topoChange =
+        (sameWorld() && sampleMesh().topoChanging())
+     || thisMesh.topoChanging();
 
     if (topoChange || forceUpdate)
     {

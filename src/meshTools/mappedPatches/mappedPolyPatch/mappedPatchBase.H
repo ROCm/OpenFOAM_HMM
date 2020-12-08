@@ -33,6 +33,13 @@ Description
 
     If constructed from dictionary:
     \verbatim
+        // Optional world to sample (default is all)
+        //sampleWorld solidSim;
+
+        // Optional explicit coupling (requires functionObject to synchronise
+        // databases. Default is close coupling (bc to bc)
+        //sampleDatabase true;
+
         // Region to sample (default is region0)
         sampleRegion region0;
 
@@ -184,12 +191,47 @@ public:
     };
 
 
+    //- nearest + world
+    //  Used to only look at entries from same world
+    typedef Tuple2<nearInfo, label> nearInfoWorld;
+
+    class nearestWorldEqOp
+    {
+
+    public:
+
+        void operator()(nearInfoWorld& x, const nearInfoWorld& y) const
+        {
+            // Is there a hit and is it sampling the same world
+            const nearInfo& xi = x.first();
+            const nearInfo& yi = y.first();
+            if (yi.first().hit())
+            {
+                if (x.second() == y.second())
+                {
+                    if (!xi.first().hit())
+                    {
+                        x = y;
+                    }
+                    else if (yi.second().first() < xi.second().first())
+                    {
+                        x = y;
+                    }
+                }
+            }
+        }
+    };
+
+
 protected:
 
     // Protected data
 
         //- Patch to sample
         const polyPatch& patch_;
+
+        //- World to sample
+        mutable word sampleWorld_;
 
         //- Region to sample
         mutable word sampleRegion_;
@@ -203,6 +245,9 @@ protected:
         //- PatchGroup (if in sampleMode NEARESTPATCH*)
         const coupleGroupIdentifier coupleGroup_;
 
+        //- Empty or location of database
+        const autoPtr<fileName> sampleDatabasePtr_;
+
         //- How to obtain samples
         offsetMode offsetMode_;
 
@@ -214,6 +259,9 @@ protected:
 
         //- Offset distance (normal)
         scalar distance_;
+
+        //- Communicator
+        label comm_;
 
         //- Same region
         mutable bool sameRegion_;
@@ -246,25 +294,59 @@ protected:
 
     // Protected Member Functions
 
+        //- Optionally allocate a world-local communicator
+        static label communicator(const word& sampleWorld);
+
+        //- Lookup mesh
+        const polyMesh& lookupMesh(const word& region) const;
+
+        //- Lookup patch
+        const polyPatch& lookupPatch
+        (
+            const word& sampleRegion,
+            const word& samplePatch
+        ) const;
+
+
         //- Get the points from face-centre-decomposition face centres
         //  and project them onto the face-diagonal-decomposition triangles.
         tmp<pointField> facePoints(const polyPatch&) const;
 
-        //- Collect single list of samples and originating processor+face.
+        //- Collect single list of samples and originating processor+face + 
+        //  wanted world
         void collectSamples
         (
+            const label mySampleWorld,  // My wanted sampling world
             const pointField& facePoints,
-            pointField&,
-            labelList& patchFaceProcs,
-            labelList& patchFaces,
+            pointField& samples,        // Per sample: coordinate
+            labelList& patchFaceWorlds, // Per sample: wanted world
+            labelList& patchFaceProcs,  // Per sample: originating proc
+            labelList& patchFaces,      // Per sample: originating face
             pointField& patchFc
         ) const;
 
-        //- Find cells/faces containing samples
+        //- Find (local) cells/faces containing samples
+        void findLocalSamples
+        (
+            const sampleMode mode,
+            const label sampleWorld,        // my world as index
+            const word& sampleRegion,
+            const word& samplePatch,
+            const pointField& samplePoints,
+
+            List<nearInfoWorld>& nearest
+        ) const;
+
+        //- Find (global) cells/faces containing samples
         void findSamples
         (
             const sampleMode mode,      // search mode
+            const label myWorldIndex,   // my world (in index form)
+
             const pointField&,
+            const labelList& wantedWorlds,
+            const labelList& origProcs, // per sample the originating proc
+
             labelList& sampleProcs,     // processor containing sample
             labelList& sampleIndices,   // local index of cell/face
             pointField& sampleLocations // actual representative location
@@ -280,6 +362,38 @@ protected:
         void calcAMI() const;
 
 
+        // Database handling
+
+            //- Read optional database name from dictionary
+            static autoPtr<fileName> readDatabase(const dictionary& dict);
+
+            //- Lookup (sub)objectRegistry by following names of sub registries.
+            //- Creates non-existing intermediate ones.
+            static const objectRegistry& subRegistry
+            (
+                const objectRegistry& obr,
+                const wordList& names,
+                const label index
+            );
+
+            //- Attempt to detect an IOField<Type> and write to dictionary
+            template<class Type>
+            static bool writeIOField
+            (
+                const regIOobject& obj,
+                dictionary& dict
+            );
+
+            //- Attempt to read an IOField<Type> and store on objectRegistry
+            template<class Type>
+            static bool constructIOField
+            (
+                const word& name,
+                token& tok,
+                Istream& is,
+                objectRegistry& obr
+            );
+
 public:
 
     //- Runtime type information
@@ -289,7 +403,7 @@ public:
     // Constructors
 
         //- Construct from patch
-        mappedPatchBase(const polyPatch&);
+        explicit mappedPatchBase(const polyPatch&);
 
         //- Construct with offsetMode=non-uniform
         mappedPatchBase
@@ -354,6 +468,9 @@ public:
             //- What to sample
             inline const sampleMode& mode() const;
 
+            //- World to sample
+            inline const word& sampleWorld() const;
+
             //- Region to sample
             inline const word& sampleRegion() const;
 
@@ -371,6 +488,12 @@ public:
 
             //- Offset vector (from patch faces to destination mesh objects)
             inline const vectorField& offsets() const;
+
+            //- Communicator
+            inline label comm() const;
+
+            //- Is world the local world
+            inline bool sameWorld() const;
 
             //- Cached sampleRegion != mesh.name()
             inline bool sameRegion() const;
@@ -411,6 +534,60 @@ public:
                 const label facei,
                 const polyMesh::cellDecomposition
             );
+
+        // For database storage
+
+            inline const fileName& sampleDatabasePath() const
+            {
+                return *sampleDatabasePtr_;
+            }
+
+            inline bool sampleDatabase() const
+            {
+                return sampleDatabasePtr_.valid();
+            }
+
+            //- Helper: return path to store data to be sent to processor i
+            static fileName sendPath(const fileName& root, const label proci);
+
+            virtual fileName sendPath(const label proci) const;
+
+            //- Helper: return path to store data to be received from
+            //- processor i
+            static fileName receivePath
+            (
+                const fileName& root,
+                const label proci
+            );
+
+            virtual fileName receivePath(const label proci) const;
+
+            //- Lookup (sub)objectRegistry from '/' separated path (relative to
+            //- objectRegistry). Creates non-existing intermediate ones.
+            static const objectRegistry& subRegistry
+            (
+                const objectRegistry& obr,
+                const fileName& path
+            );
+
+            //- Store an IOField on the objectRegistry relative to obr
+            template<class Type>
+            static void storeField
+            (
+                objectRegistry& obr,
+                const word& fieldName,
+                const Field<Type>& values
+            );
+
+            //- Convert objectRegistry contents into dictionary
+            static void writeDict
+            (
+                const objectRegistry& obr,
+                dictionary& dict
+            );
+
+            //- (recursively) construct and register IOFields from dictionary
+            static void readDict(const dictionary& d, objectRegistry& obr);
 
 
         // Distribute

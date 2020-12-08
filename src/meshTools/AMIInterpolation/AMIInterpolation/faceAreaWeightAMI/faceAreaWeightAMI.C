@@ -737,9 +737,9 @@ bool Foam::faceAreaWeightAMI::calculate
             extendedTgtMapPtr_->subMap(),
             false,                      // has flip
             tgtAddress_,
+            labelList(),
             ListOps::appendEqOp<label>(),
-            flipOp(),                   // flip operation
-            labelList()
+            flipOp()                    // flip operation
         );
 
         mapDistributeBase::distribute
@@ -752,9 +752,9 @@ bool Foam::faceAreaWeightAMI::calculate
             extendedTgtMapPtr_->subMap(),
             false,
             tgtWeights_,
+            scalarList(),
             ListOps::appendEqOp<scalar>(),
-            flipOp(),
-            scalarList()
+            flipOp()
         );
 
         // Note: using patch face areas calculated by the AMI method

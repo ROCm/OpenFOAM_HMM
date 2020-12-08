@@ -122,6 +122,8 @@ protected:
         //- Whether constructMap includes flip or not
         bool constructHasFlip_;
 
+        //- Communicator to use for parallel operations
+        label comm_;
 
         //- Schedule
         mutable autoPtr<List<labelPair>> schedulePtr_;
@@ -199,7 +201,7 @@ public:
     // Constructors
 
         //- Construct null
-        mapDistributeBase();
+        mapDistributeBase(const label comm = UPstream::worldComm);
 
         //- Copy construct
         mapDistributeBase(const mapDistributeBase& map);
@@ -214,7 +216,8 @@ public:
             labelListList&& subMap,
             labelListList&& constructMap,
             const bool subHasFlip = false,
-            const bool constructHasFlip = false
+            const bool constructHasFlip = false,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from reverse addressing: per data item the send
@@ -223,7 +226,8 @@ public:
         mapDistributeBase
         (
             const labelUList& sendProcs,
-            const labelUList& recvProcs
+            const labelUList& recvProcs,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
@@ -235,7 +239,8 @@ public:
             const globalIndex&,
             labelList& elements,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- Special variant that works with the info sorted into bins
@@ -246,7 +251,8 @@ public:
             const globalIndex&,
             labelListList& cellCells,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from my elements to send. Assumes layout is my elements
@@ -256,7 +262,8 @@ public:
         (
             labelListList&& subMap,
             const bool subHasFlip = false,
-            const bool constructHasFlip = false
+            const bool constructHasFlip = false,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from Istream
@@ -327,12 +334,18 @@ public:
                 return constructHasFlip_;
             }
 
+            label comm() const
+            {
+                return comm_;
+            }
+
             //- Calculate a schedule. See above.
             static List<labelPair> schedule
             (
                 const labelListList& subMap,
                 const labelListList& constructMap,
-                const int tag
+                const int tag,
+                const label comm = UPstream::worldComm
             );
 
             //- Return a schedule. Demand driven. See above.
@@ -389,7 +402,8 @@ public:
                 const bool constructHasFlip,
                 List<T>&,
                 const negateOp& negOp,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
             //- Distribute data. If multiple processors writing to same
@@ -405,10 +419,11 @@ public:
                 const labelListList& constructMap,
                 const bool constructHasFlip,
                 List<T>&,
+                const T& nullValue,
                 const CombineOp& cop,
                 const negateOp& negOp,
-                const T& nullValue,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
             //- Distribute data using default commsType.

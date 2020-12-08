@@ -245,16 +245,46 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         ourMpi = true;
     }
 
+    // Check argument list for local world
+    label worldIndex = -1;
+    word world;
+    for (int argi = 1; argi < argc; ++argi)
+    {
+        if (strcmp(argv[argi], "-world") == 0)
+        {
+            worldIndex = argi++;
+            if (argi >= argc)
+            {
+                FatalErrorInFunction
+                    << "Missing world name to argument \"world\""
+                    << Foam::abort(FatalError);
+            }
+            world = argv[argi];
+            break;
+        }
+    }
+
+    // Filter 'world' option
+    if (worldIndex != -1)
+    {
+        for (label i = worldIndex+2; i < argc; i++)
+        {
+            argv[i-2] = argv[i];
+        }
+        argc -= 2;
+    }
+
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     if (debug)
     {
-        Pout<< "UPstream::init : procs=" << numprocs
-            << " rank:" << myRank << endl;
+        Pout<< "UPstream::init : procs:" << numprocs
+            << " rank:" << myRank
+            << " world:" << world << endl;
     }
 
-    if (numprocs <= 1)
+    if (worldIndex == -1 && numprocs <= 1)
     {
         FatalErrorInFunction
             << "attempt to run parallel on 1 processor"
@@ -263,6 +293,85 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
     // Initialise parallel structure
     setParRun(numprocs, provided_thread_support == MPI_THREAD_MULTIPLE);
+
+    if (worldIndex != -1)
+    {
+        wordList worlds(numprocs);
+        worlds[Pstream::myProcNo()] = world;
+        Pstream::gatherList(worlds);
+        Pstream::scatterList(worlds);
+
+        // Compact
+        if (Pstream::master())
+        {
+            DynamicList<word> allWorlds(numprocs);
+            for (const auto& world : worlds)
+            {
+                if (!allWorlds.found(world))
+                {
+                    allWorlds.append(world);
+                }
+            }
+            allWorlds_ = std::move(allWorlds);
+
+            worldIDs_.setSize(numprocs);
+            forAll(worlds, proci)
+            {
+                const word& world = worlds[proci];
+                worldIDs_[proci] = allWorlds_.find(world);
+            }
+        }
+        Pstream::scatter(allWorlds_);
+        Pstream::scatter(worldIDs_);
+
+        DynamicList<label> subRanks;
+        forAll(worlds, proci)
+        {
+            if (worlds[proci] == worlds[Pstream::myProcNo()])
+            {
+                subRanks.append(proci);
+            }
+        }
+
+        // Allocate new communicator 1 with parent 0 (= mpi_world)
+        const label subComm = allocateCommunicator(0, subRanks, true);
+
+        // Override worldComm
+        UPstream::worldComm = subComm;
+        // For testing: warn use of non-worldComm
+        UPstream::warnComm = UPstream::worldComm;
+
+        if (debug)
+        {
+            // Check
+            int subNProcs, subRank;
+            MPI_Comm_size
+            (
+                PstreamGlobals::MPICommunicators_[subComm],
+                &subNProcs
+            );
+            MPI_Comm_rank
+            (
+                PstreamGlobals::MPICommunicators_[subComm],
+                &subRank
+            );
+
+            Pout<< "UPstream::init : in world:" << world
+                << " using local communicator:" << subComm
+                << " with procs:" << subNProcs
+                << " and rank:" << subRank
+                << endl;
+        }
+
+        // Override Pout prefix (move to setParRun?)
+        Pout.prefix() = '[' + world + '/' +  name(myProcNo(subComm)) + "] ";
+        Perr.prefix() = '[' + world + '/' +  name(myProcNo(subComm)) + "] ";
+    }
+    else
+    {
+        // All processors use world 0
+        worldIDs_.setSize(numprocs, 0);
+    }
 
     attachOurBuffers();
 
@@ -357,6 +466,7 @@ void Foam::UPstream::shutdown(int errNo)
         }
         else
         {
+            // Abort only locally or world?
             MPI_Abort(MPI_COMM_WORLD, errNo);
         }
     }
@@ -443,7 +553,7 @@ void Foam::sumReduce
 {
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** reducing:" << Value << " with comm:" << communicator
+        Pout<< "** sumReduce:" << Value << " with comm:" << communicator
             << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
@@ -623,7 +733,18 @@ void Foam::UPstream::allToAll
     const label communicator
 )
 {
-    label np = nProcs(communicator);
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** allToAll :"
+            << " np:" << np
+            << " sendData:" << sendData.size()
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
 
     if (sendData.size() != np || recvData.size() != np)
     {
@@ -683,7 +804,18 @@ void Foam::UPstream::allToAll
     const label communicator
 )
 {
-    label np = nProcs(communicator);
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** allToAll :"
+            << " sendSizes:" << sendSizes
+            << " sendOffsets:" << sendOffsets
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
 
     if
     (
@@ -757,7 +889,19 @@ void Foam::UPstream::gather
     const label communicator
 )
 {
-    label np = nProcs(communicator);
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** allToAll :"
+            << " np:" << np
+            << " recvSizes:" << recvSizes
+            << " recvOffsets:" << recvOffsets
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
 
     if
     (
@@ -823,7 +967,19 @@ void Foam::UPstream::scatter
     const label communicator
 )
 {
-    label np = nProcs(communicator);
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** allToAll :"
+            << " np:" << np
+            << " sendSizes:" << sendSizes
+            << " sendOffsets:" << sendOffsets
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
 
     if
     (
@@ -976,7 +1132,7 @@ void Foam::UPstream::allocatePstreamCommunicator
 
 void Foam::UPstream::freePstreamCommunicator(const label communicator)
 {
-    if (communicator != UPstream::worldComm)
+    if (communicator != 0)
     {
         if (PstreamGlobals::MPICommunicators_[communicator] != MPI_COMM_NULL)
         {

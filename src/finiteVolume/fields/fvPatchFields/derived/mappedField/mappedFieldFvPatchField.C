@@ -54,7 +54,7 @@ Foam::mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
     mappedPatchBase(p.patch(), dict),
-    mappedPatchFieldBase<Type>(*this, *this, dict)
+    mappedPatchFieldBase<Type>(*this, *this, dict, *this)
 {}
 
 

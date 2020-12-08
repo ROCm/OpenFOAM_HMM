@@ -93,7 +93,7 @@ inline Foam::label Foam::globalIndex::size() const
 
 inline void Foam::globalIndex::reset(const label localSize)
 {
-    reset(localSize, Pstream::msgType(), 0, true);
+    reset(localSize, Pstream::msgType(), UPstream::worldComm, true);
 }
 
 

@@ -1552,9 +1552,11 @@ void Foam::cellCellStencils::inverseDistance::createStencil
             cellInterpolationMap().subMap(),
             false,
             samples,
+            greatPoint,                             // nullValue
             minMagSqrEqOp<point>(),
             flipOp(),                               // negateOp
-            greatPoint                              // nullValue
+            UPstream::msgType(),
+            cellInterpolationMap().comm()
         );
 
         // All the donor cells will now have a valid cell centre. Construct a

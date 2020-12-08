@@ -48,6 +48,174 @@ Type Foam::mappedPatchFieldBase<Type>::getAverage
 }
 
 
+template<class Type>
+template<class T>
+void Foam::mappedPatchFieldBase<Type>::storeField
+(
+    const objectRegistry& obr,
+    const word& region,
+    const word& patch,
+    const labelListList& procToMap,
+    const word& fieldName,
+    const Field<T>& fld
+) const
+{
+    // Store my data onto database
+    //const label myRank = Pstream::myProcNo(0);  // comm_
+    const label nProcs = Pstream::nProcs(0);    // comm_
+
+    for (label domain = 0; domain < nProcs; domain++)
+    {
+        const labelList& map = procToMap[domain];
+        if (map.size())
+        {
+            const Field<T> subFld(fld, map);
+
+            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            (
+                obr,
+                mapper_.sendPath(domain)
+              / region
+              / patch
+            );
+
+            if (fvPatchField<Type>::debug)
+            {
+                Pout<< "*** STORING :"
+                    << " field:" << fieldName
+                    << " values:" << flatOutput(subFld)
+                    << " as:" << subObr.objectPath() << endl; 
+            }
+
+            mappedPatchBase::storeField
+            (
+                const_cast<objectRegistry&>(subObr),
+                fieldName,
+                subFld
+            );
+        }
+    }
+}
+
+
+template<class Type>
+template<class T>
+void Foam::mappedPatchFieldBase<Type>::retrieveField
+(
+    const bool allowUnset,
+    const objectRegistry& obr,
+    const word& region,
+    const word& patch,
+    const labelListList& procToMap,
+    const word& fieldName,
+    Field<T>& fld
+) const
+{
+    // Store my data onto database
+    //const label myRank = Pstream::myProcNo(0);  // comm_
+    const label nProcs = Pstream::nProcs(0);    // comm_
+
+    for (label domain = 0; domain < nProcs; domain++)
+    {
+        const labelList& map = procToMap[domain];
+        if (map.size())
+        {
+            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            (
+                obr,
+                mapper_.receivePath(domain)
+              / region
+              / patch
+            );
+
+            //const IOField<T>& subFld = subObr.lookupObject<IOField<T>>
+            //(
+            //    fieldName
+            //);
+            const IOField<T>* subFldPtr = subObr.getObjectPtr<IOField<T>>
+            (
+                fieldName
+            );
+            if (subFldPtr)
+            {
+                UIndirectList<T>(fld, map) = *subFldPtr;
+
+                if (fvPatchField<Type>::debug)
+                {
+                    Pout<< "*** RETRIEVED :"
+                        << " field:" << fieldName
+                        << " values:" << flatOutput(fld)
+                        << " from:" << subObr.objectPath() << endl;
+                }
+            }
+            else if (allowUnset)
+            {
+                WarningInFunction << "Not found"
+                    << " field:" << fieldName
+                    << " in:" << subObr.objectPath() << endl;
+            }
+            else
+            {
+                // Not found. Make it fail
+                (void)subObr.lookupObject<IOField<T>>(fieldName);
+            }
+        }
+    }
+}
+
+
+template<class Type>
+template<class T>
+void Foam::mappedPatchFieldBase<Type>::initRetrieveField
+(
+    const objectRegistry& obr,
+    const word& region,
+    const word& patch,
+    const mapDistribute& map,
+    const word& fieldName,
+    const Field<T>& fld
+) const
+{
+    // Store my data onto database
+    //const label myRank = Pstream::myProcNo(0);  // comm_
+    const label nProcs = Pstream::nProcs(0);    // comm_
+
+    for (label domain = 0; domain < nProcs; domain++)
+    {
+        const labelList& constructMap = map.constructMap()[domain];
+        if (constructMap.size())
+        {
+            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            (
+                obr,
+                mapper_.receivePath(domain)
+              / region
+              / patch
+            );
+
+            const Field<T> receiveFld(fld, constructMap);
+
+            if (fvPatchField<Type>::debug)
+            {
+                Pout<< "*** STORING INITIAL :"
+                    << " field:" << fieldName << " values:"
+                    << flatOutput(receiveFld)
+                    << " from:" << flatOutput(fld)
+                    << " constructMap:" << flatOutput(constructMap)
+                    << " as:" << subObr.objectPath() << endl; 
+            }
+
+            mappedPatchBase::storeField
+            (
+                const_cast<objectRegistry&>(subObr),
+                fieldName,
+                receiveFld
+            );
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -92,9 +260,59 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
     average_(getAverage(dict, setAverage_)),
     interpolationScheme_(interpolationCell<Type>::typeName)
 {
+    if
+    (
+        mapper_.sampleDatabase()
+     && mapper_.mode() != mappedPatchBase::NEARESTPATCHFACE
+    )
+    {
+        FatalErrorInFunction
+            << "Mapping using the database only supported for "
+            << "sampleMode "
+            <<  mappedPatchBase::sampleModeNames_
+                [
+                    mappedPatchBase::NEARESTPATCHFACE
+                ]
+            << exit(FatalError);
+    }
+
     if (mapper_.mode() == mappedPatchBase::NEARESTCELL)
     {
         dict.readEntry("interpolationScheme", interpolationScheme_);
+    }
+
+    // Note: in database mode derived boundary conditions need to initialise
+    //       fields
+}
+
+
+template<class Type>
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
+(
+    const mappedPatchBase& mapper,
+    const fvPatchField<Type>& patchField,
+    const dictionary& dict,
+    const Field<Type>& fld
+)
+:
+    mappedPatchFieldBase<Type>::mappedPatchFieldBase(mapper, patchField, dict)
+{
+    if
+    (
+        mapper_.mode() == mappedPatchBase::NEARESTPATCHFACE
+     && mapper_.sampleDatabase()
+    )
+    {
+        // Store my data on receive buffers so we have some initial data
+        initRetrieveField
+        (
+            patchField_.internalField().time(),
+            patchField_.patch().boundaryMesh().mesh().name(),
+            patchField_.patch().name(),
+            mapper_.map(),
+            patchField_.internalField().name(),
+            patchField_
+        );
     }
 }
 
@@ -150,14 +368,15 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&
-Foam::mappedPatchFieldBase<Type>::sampleField() const
+template<class Type2>
+const Foam::GeometricField<Type2, Foam::fvPatchField, Foam::volMesh>&
+Foam::mappedPatchFieldBase<Type>::sampleField(const word& fieldName) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type2, fvPatchField, volMesh> fieldType;
 
     if (mapper_.sameRegion())
     {
-        if (fieldName_ == patchField_.internalField().name())
+        if (fieldName == patchField_.internalField().name())
         {
             // Optimisation: bypass field lookup
             return
@@ -169,18 +388,70 @@ Foam::mappedPatchFieldBase<Type>::sampleField() const
         else
         {
             const fvMesh& thisMesh = patchField_.patch().boundaryMesh().mesh();
-            return thisMesh.template lookupObject<fieldType>(fieldName_);
+            return thisMesh.template lookupObject<fieldType>(fieldName);
         }
     }
 
     const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
-    return nbrMesh.template lookupObject<fieldType>(fieldName_);
+    return nbrMesh.template lookupObject<fieldType>(fieldName);
 }
 
 
 template<class Type>
+const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&
+Foam::mappedPatchFieldBase<Type>::sampleField() const
+{
+    return sampleField<Type>(fieldName_);
+}
+
+
+template<class Type>
+template<class T>
+void Foam::mappedPatchFieldBase<Type>::distribute
+(
+    const word& fieldName,
+    Field<T>& newValues
+) const
+{
+    if (mapper_.sampleDatabase())
+    {
+        // Store my data on send buffers
+        storeField
+        (
+            patchField_.internalField().time(),
+            patchField_.patch().boundaryMesh().mesh().name(),
+            patchField_.patch().name(),
+            mapper_.map().subMap(),
+            fieldName,
+            newValues
+        );
+        // Construct my data from receive buffers
+        newValues.setSize(mapper_.map().constructSize());
+        retrieveField
+        (
+            true,                           // allow unset
+            patchField_.internalField().time(),
+            mapper_.sampleRegion(),
+            mapper_.samplePatch(),
+            mapper_.map().constructMap(),
+            fieldName,
+            newValues
+        );
+    }
+    else
+    {
+        mapper_.distribute(newValues);
+    }
+}
+
+
+template<class Type>
+//template<class T>
 Foam::tmp<Foam::Field<Type>>
-Foam::mappedPatchFieldBase<Type>::mappedField() const
+Foam::mappedPatchFieldBase<Type>::mappedField
+(
+//    const GeometricField<T, fvPatchField, volMesh>& fld
+) const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
@@ -190,7 +461,6 @@ Foam::mappedPatchFieldBase<Type>::mappedField() const
     UPstream::msgType() = oldTag + 1;
 
     const fvMesh& thisMesh = patchField_.patch().boundaryMesh().mesh();
-    const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
 
     // Result of obtaining remote values
     auto tnewValues = tmp<Field<Type>>::New();
@@ -200,12 +470,25 @@ Foam::mappedPatchFieldBase<Type>::mappedField() const
     {
         case mappedPatchBase::NEARESTCELL:
         {
+            const fieldType& fld = sampleField();
             const mapDistribute& distMap = mapper_.map();
 
             if (interpolationScheme_ != interpolationCell<Type>::typeName)
             {
+                if (!mapper_.sameWorld() || mapper_.sampleDatabase())
+                {
+                    FatalErrorInFunction
+                        << "Interpolating cell values from different world"
+                        << " or database currently not supported"
+                        << exit(FatalError);
+                }
+
+                const fvMesh& nbrMesh =
+                    refCast<const fvMesh>(mapper_.sampleMesh());
+
                 // Send back sample points to the processor that holds the cell
                 vectorField samples(mapper_.samplePoints());
+
                 distMap.reverseDistribute
                 (
                     (
@@ -221,7 +504,7 @@ Foam::mappedPatchFieldBase<Type>::mappedField() const
                     interpolation<Type>::New
                     (
                         interpolationScheme_,
-                        sampleField()
+                        fld
                     );
 
                 const auto& interp = *interpolator;
@@ -241,52 +524,94 @@ Foam::mappedPatchFieldBase<Type>::mappedField() const
             }
             else
             {
-                newValues = sampleField();
+                newValues = fld;
             }
 
-            distMap.distribute(newValues);
+            distribute(fieldName_, newValues);
 
             break;
         }
         case mappedPatchBase::NEARESTPATCHFACE:
         case mappedPatchBase::NEARESTPATCHFACEAMI:
         {
-            const label nbrPatchID =
-                nbrMesh.boundaryMesh().findPatchID(mapper_.samplePatch());
-
-            if (nbrPatchID < 0)
+            if (mapper_.sameWorld())
             {
-                FatalErrorInFunction
-                 << "Unable to find sample patch " << mapper_.samplePatch()
-                 << " in region " << mapper_.sampleRegion()
-                 << " for patch " << patchField_.patch().name() << nl
-                 << abort(FatalError);
+                const fvMesh& nbrMesh =
+                    refCast<const fvMesh>(mapper_.sampleMesh());
+                const fieldType& fld = sampleField();
+
+                const label nbrPatchID =
+                    nbrMesh.boundaryMesh().findPatchID(mapper_.samplePatch());
+
+                if (nbrPatchID < 0)
+                {
+                    FatalErrorInFunction
+                     << "Unable to find sample patch " << mapper_.samplePatch()
+                     << " in region " << mapper_.sampleRegion()
+                     << " for patch " << patchField_.patch().name() << nl
+                     << abort(FatalError);
+                }
+
+                const auto& nbrField = fld;
+
+                newValues = nbrField.boundaryField()[nbrPatchID];
             }
-
-            const fieldType& nbrField = sampleField();
-
-            newValues = nbrField.boundaryField()[nbrPatchID];
-            mapper_.distribute(newValues);
+            else
+            {
+                // Start off from my patch values, let distribute function below
+                // do all the work
+                newValues = patchField_;
+            }
+            distribute(fieldName_, newValues);
 
             break;
         }
         case mappedPatchBase::NEARESTFACE:
         {
-            Field<Type> allValues(nbrMesh.nFaces(), Zero);
-
-            const fieldType& nbrField = sampleField();
-
-            for (const fvPatchField<Type>& pf : nbrField.boundaryField())
+            Field<Type> allValues;
+            if (mapper_.sameWorld())
             {
-                label faceStart = pf.patch().start();
+                const fvMesh& nbrMesh =
+                    refCast<const fvMesh>(mapper_.sampleMesh());
+                const fieldType& fld = sampleField();
 
-                forAll(pf, facei)
+                allValues.setSize(nbrMesh.nFaces(), Zero);
+
+                const auto& nbrField = fld;
+
+                for (const fvPatchField<Type>& pf : nbrField.boundaryField())
                 {
-                    allValues[faceStart++] = pf[facei];
+                    label faceStart = pf.patch().start();
+
+                    forAll(pf, facei)
+                    {
+                        allValues[faceStart++] = pf[facei];
+                    }
+                }
+            }
+            else
+            {
+                // Start off from my patch values. Let distribute function below
+                // do all the work
+                allValues.setSize(thisMesh.nFaces(), Zero);
+
+                const fieldType& thisFld = dynamic_cast<const fieldType&>
+                (
+                    patchField_.internalField()
+                );
+
+                for (const fvPatchField<Type>& pf : thisFld.boundaryField())
+                {
+                    label faceStart = pf.patch().start();
+
+                    forAll(pf, facei)
+                    {
+                        allValues[faceStart++] = pf[facei];
+                    }
                 }
             }
 
-            mapper_.distribute(allValues);
+            distribute(fieldName_, allValues);
             newValues.transfer(allValues);
 
             break;
@@ -322,6 +647,197 @@ Foam::mappedPatchFieldBase<Type>::mappedField() const
 }
 
 
+//template<class Type>
+//Foam::tmp<Foam::Field<Type>>
+//Foam::mappedPatchFieldBase<Type>::mappedField() const
+//{
+//    const GeometricField<Type, fvPatchField, volMesh>& fld = sampleField();
+//    return mappedField<Type>(fld);
+//}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::mappedPatchFieldBase<Type>::mappedInternalField() const
+{
+    // Swap to obtain full local values of neighbour internal field
+    tmp<Field<Type>> tnbrIntFld(new Field<Type>());
+    Field<Type>& nbrIntFld = tnbrIntFld.ref();
+
+    if (mapper_.sameWorld())
+    {
+        // Same world so lookup
+        const label nbrPatchID = mapper_.samplePolyPatch().index();
+        const auto& nbrField = this->sampleField();
+        nbrIntFld = nbrField.boundaryField()[nbrPatchID].patchInternalField();
+    }
+    else
+    {
+        // Different world so use my region,patch. Distribution below will
+        // do the reordering
+        nbrIntFld = patchField_.patchInternalField();
+    }
+
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
+    distribute(fieldName_, nbrIntFld);
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
+
+    return tnbrIntFld;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::scalarField>
+Foam::mappedPatchFieldBase<Type>::mappedWeightField() const
+{
+    // Swap to obtain full local values of neighbour internal field
+    tmp<scalarField> tnbrKDelta(new scalarField());
+    scalarField& nbrKDelta = tnbrKDelta.ref();
+
+    if (mapper_.sameWorld())
+    {
+        // Same world so lookup
+        const auto& nbrMesh = refCast<const fvMesh>(this->mapper_.sampleMesh());
+        const label nbrPatchID = mapper_.samplePolyPatch().index();
+        const auto& nbrPatch = nbrMesh.boundary()[nbrPatchID];
+        nbrKDelta = nbrPatch.deltaCoeffs();
+    }
+    else
+    {
+        // Different world so use my region,patch. Distribution below will
+        // do the reordering
+        nbrKDelta = patchField_.patch().deltaCoeffs();
+    }
+
+
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    const int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
+    distribute(fieldName_ + "_deltaCoeffs", nbrKDelta);
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
+
+    return tnbrKDelta;
+}
+
+
+template<class Type>
+void Foam::mappedPatchFieldBase<Type>::mappedWeightField
+(
+    const word& fieldName,
+    tmp<scalarField>& thisWeights,
+    tmp<scalarField>& nbrWeights
+) const
+{
+    thisWeights = new scalarField(patchField_.patch().deltaCoeffs());
+    if (!fieldName.empty())
+    {
+        thisWeights.ref() *=
+            patchField_.patch().template lookupPatchField
+            <
+                volScalarField,
+                scalar
+            >
+            (
+                fieldName
+            ).patchInternalField();
+    }
+
+
+    // Swap to obtain full local values of neighbour internal field
+
+    if (mapper_.sameWorld())
+    {
+        // Same world so lookup
+        const auto& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
+        const label nbrPatchID = mapper_.samplePolyPatch().index();
+        const auto& nbrPatch = nbrMesh.boundary()[nbrPatchID];
+
+        nbrWeights = new scalarField(nbrPatch.deltaCoeffs());
+
+        if (!fieldName.empty())
+        {
+            // Weightfield is volScalarField
+            const auto& nbrWeightField =
+                nbrMesh.template lookupObject<volScalarField>(fieldName);
+            nbrWeights.ref() *=
+                nbrWeightField.boundaryField()[nbrPatchID].patchInternalField();
+        }
+    }
+    else
+    {
+        // Different world so use my region,patch. Distribution below will
+        // do the reordering
+        nbrWeights = new scalarField(thisWeights());
+    }
+
+    // Since we're inside initEvaluate/evaluate there might be processor
+    // comms underway. Change the tag we use.
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag+1;
+
+    distribute(fieldName_ + "_weights", nbrWeights.ref());
+
+    // Restore tag
+    UPstream::msgType() = oldTag;
+}
+
+
+template<class Type>
+const Foam::mappedPatchBase& Foam::mappedPatchFieldBase<Type>::mapper
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF
+)
+{
+    if (!isA<mappedPatchBase>(p.patch()))
+    {
+        FatalErrorInFunction
+            << "Incorrect patch type " << p.patch().type()
+            << " for patch " << p.patch().name()
+            << " of field " << iF.name()
+            << " in file " << iF.objectPath() << nl
+            << "Type should be a mappedPatch"
+            << exit(FatalError);
+    }
+    return refCast<const mappedPatchBase>(p.patch());
+}
+
+
+template<class Type>
+template<class T>
+void Foam::mappedPatchFieldBase<Type>::initRetrieveField
+(
+    const word& fieldName,
+    const Field<T>& fld
+) const
+{
+    if (mapper_.sampleDatabase())
+    {
+        // Store my data on receive buffers (reverse of storeField;
+        // i.e. retrieveField will obtain patchField)
+        initRetrieveField
+        (
+            patchField_.internalField().time(),
+            mapper_.sampleRegion(),
+            mapper_.samplePatch(),
+            mapper_.map(),
+            fieldName,
+            fld
+        );
+    }
+}
+
+
 template<class Type>
 void Foam::mappedPatchFieldBase<Type>::write(Ostream& os) const
 {
@@ -333,7 +849,10 @@ void Foam::mappedPatchFieldBase<Type>::write(Ostream& os) const
         os.writeEntry("average", average_);
     }
 
-    os.writeEntry("interpolationScheme", interpolationScheme_);
+    if (mapper_.mode() == mappedPatchBase::NEARESTCELL)
+    {
+        os.writeEntry("interpolationScheme", interpolationScheme_);
+    }
 }
 
 

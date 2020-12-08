@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::mappedFixedValueFvPatchField
+    Foam::mappedMixedFvPatchField
 
 Group
     grpGenericBoundaryConditions grpCoupledBoundaryConditions
@@ -40,53 +39,56 @@ Description
 Usage
     \table
         Property     | Description                      | Required | Default
-        field        | Field name to be mapped          | no | this field name
-        setAverage   | Use average value                | no | false
+        field        | Name of field to be mapped       | no  | this field name
+        weightField  | Name of field to use as weight   | no |
+        setAverage   | Use average value                | no  | false |
         average      | Average value to use if \c setAverage = yes | partly |
-        interpolationScheme | type of interpolation scheme | partly |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type            mapped;
-        field           T;
-        setAverage      no;
-        average         0;
-        interpolationScheme cell;
-        value           uniform 0;
+        type            mappedMixed;
+        field           T;              // optional field name
+
+        value           uniform 273.0;
+
+        refValue        $value;
+        refGradient     uniform 0.0;
+        valueFraction   uniform 1.0;
     }
     \endverbatim
 
-    When employing the \c nearestCell sample mode, the user must also specify
-    the interpolation scheme using the \c interpolationScheme entry.
-
-    In case of interpolation (where scheme != cell) the limitation is that
-    there is only one value per cell.  For example, if you have a cell with two
-    boundary faces and both faces sample into the cell, both faces will get the
-    same value.
-
 Note
-    It is not possible to sample internal faces since volume fields are not
-    defined on faces.
+    Supports multi-world operation:
+
+    +----+                      +----+
+    |    |                      |    |
+    |    |                      |    |
+    +----+                      +----+
+    worldA                      worldB
+    regionA                     regionB
+    patchA                      patchB
+
 
 See also
     Foam::mappedPatchBase
-    Foam::interpolation
-    Foam::fixedValueFvPatchField
+    Foam::mappedPolyPatch
+    Foam::mappedFvPatch
+    Foam::mappedFieldFvPatchField
+    Foam::mixedFvPatchField
 
 SourceFiles
-    mappedFixedValueFvPatchField.C
+    mappedMixedFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mappedFixedValueFvPatchField_H
-#define mappedFixedValueFvPatchField_H
+#ifndef mappedMixedFvPatchField_H
+#define mappedMixedFvPatchField_H
 
-#include "fixedValueFvPatchFields.H"
-//#include "interpolation.H"
 #include "mappedPatchFieldBase.H"
+#include "mixedFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,52 +96,58 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class mappedFixedValueFvPatchField Declaration
+                  Class mappedMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class mappedFixedValueFvPatchField
+class mappedMixedFvPatchField
 :
-    public fixedValueFvPatchField<Type>,
+    public mixedFvPatchField<Type>,
     public mappedPatchFieldBase<Type>
 {
+
+        //- Name of weight field to sample
+        word weightFieldName_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("mapped");
+    TypeName("mappedMixed");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        mappedFixedValueFvPatchField
+        mappedMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        mappedFixedValueFvPatchField
+        mappedMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given mappedFixedValueFvPatchField
+        //- Construct by mapping given
+        //  mappedMixedFvPatchField
         //  onto a new patch
-        mappedFixedValueFvPatchField
+        mappedMixedFvPatchField
         (
-            const mappedFixedValueFvPatchField<Type>&,
+            const mappedMixedFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        mappedFixedValueFvPatchField
+        mappedMixedFvPatchField
         (
-            const mappedFixedValueFvPatchField<Type>&
+            const mappedMixedFvPatchField<Type>&
         );
 
         //- Construct and return a clone
@@ -147,14 +155,17 @@ public:
         {
             return tmp<fvPatchField<Type>>
             (
-                new mappedFixedValueFvPatchField<Type>(*this)
+                new mappedMixedFvPatchField<Type>
+                (
+                    *this
+                )
             );
         }
 
         //- Construct as copy setting internal field reference
-        mappedFixedValueFvPatchField
+        mappedMixedFvPatchField
         (
-            const mappedFixedValueFvPatchField<Type>&,
+            const mappedMixedFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -166,12 +177,32 @@ public:
         {
             return tmp<fvPatchField<Type>>
             (
-                new mappedFixedValueFvPatchField<Type>(*this, iF)
+                new mappedMixedFvPatchField<Type>
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
 
     // Member functions
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<Type>&,
+                const labelList&
+            );
+
 
         // Evaluation functions
 
@@ -191,7 +222,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "mappedFixedValueFvPatchField.C"
+    #include "mappedMixedFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

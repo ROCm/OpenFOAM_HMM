@@ -328,7 +328,7 @@ public:
     // Constructors
 
         //- Construct null
-        mapDistribute();
+        mapDistribute(const label comm = UPstream::worldComm);
 
         //- Copy construct
         explicit mapDistribute(const mapDistribute& map);
@@ -343,7 +343,8 @@ public:
             labelListList&& subMap,
             labelListList&& constructMap,
             const bool subHasFlip = false,
-            const bool constructHasFlip = false
+            const bool constructHasFlip = false,
+            const label comm = UPstream::worldComm
         );
 
         //- Move construct from components
@@ -355,7 +356,8 @@ public:
             labelListList&& transformElements,
             labelList&& transformStart,
             const bool subHasFlip = false,
-            const bool constructHasFlip = false
+            const bool constructHasFlip = false,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from reverse addressing: per data item the send
@@ -365,7 +367,8 @@ public:
         mapDistribute
         (
             const labelUList& sendProcs,
-            const labelUList& recvProcs
+            const labelUList& recvProcs,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
@@ -378,7 +381,8 @@ public:
             const globalIndex&,
             labelList& elements,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- Special variant that works with the info sorted into bins
@@ -390,7 +394,8 @@ public:
             const globalIndex&,
             labelListList& cellCells,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from list of (possibly remote) untransformed elements
@@ -407,7 +412,8 @@ public:
             const labelPairList& transformedElements,
             labelList& transformedIndices,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- As above but with ListLists.
@@ -419,7 +425,8 @@ public:
             const List<labelPairList>& transformedElements,
             labelListList& transformedIndices,
             List<Map<label>>& compactMap,
-            const int tag = Pstream::msgType()
+            const int tag = Pstream::msgType(),
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from my elements to send. Assumes layout is my elements
@@ -429,7 +436,8 @@ public:
         (
             labelListList&& subMap,
             const bool subHasFlip = false,
-            const bool constructHasFlip = false
+            const bool constructHasFlip = false,
+            const label comm = UPstream::worldComm
         );
 
         //- Construct from Istream

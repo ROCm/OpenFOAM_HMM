@@ -39,4 +39,6 @@ writeObjects/writeObjects.C
 
 thermoCoupleProbes/thermoCoupleProbes.C
 
+syncObjects/syncObjects.C
+
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects

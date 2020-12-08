@@ -194,6 +194,13 @@ private:
         //- Standard transfer message type
         static int msgType_;
 
+        //- Names of all worlds
+        static wordList allWorlds_;
+
+        //- Per processor the name of the world
+        static labelList worldIDs_;
+
+
         // Communicator specific data
 
         //- Free communicators
@@ -437,7 +444,7 @@ public:
         }
 
         //- Number of processes in parallel run, and 1 for serial run
-        static label nProcs(const label communicator = 0)
+        static label nProcs(const label communicator = worldComm)
         {
             return procIDs_[communicator].size();
         }
@@ -449,13 +456,13 @@ public:
         }
 
         //- Am I the master process
-        static bool master(const label communicator = 0)
+        static bool master(const label communicator = worldComm)
         {
             return myProcNo_[communicator] == masterNo();
         }
 
         //- Number of this process (starting from masterNo() = 0)
-        static int myProcNo(const label communicator = 0)
+        static int myProcNo(const label communicator = worldComm)
         {
             return myProcNo_[communicator];
         }
@@ -471,15 +478,43 @@ public:
             return procIDs_[communicator];
         }
 
+
+        // Worlds
+
+            //- All worlds
+            static const wordList& allWorlds()
+            {
+                return allWorlds_;
+            }
+
+            //- worldID (index in allWorlds) of all processes
+            static const labelList& worldIDs()
+            {
+                return worldIDs_;
+            }
+
+            //- My worldID
+            static label myWorldID()
+            {
+                return worldIDs_[myProcNo(0)];
+            }
+
+            //- My world
+            static const word& myWorld()
+            {
+                return allWorlds()[myWorldID()];
+            }
+
+
         //- Range of process indices for all processes
-        static rangeType allProcs(const label communicator = 0)
+        static rangeType allProcs(const label communicator = worldComm)
         {
             // Proc 0 -> nProcs (int value)
             return rangeType(static_cast<int>(nProcs(communicator)));
         }
 
         //- Range of process indices for sub-processes
-        static rangeType subProcs(const label communicator = 0)
+        static rangeType subProcs(const label communicator = worldComm)
         {
             // Proc 1 -> nProcs (int value)
             return rangeType(1, static_cast<int>(nProcs(communicator)-1));
@@ -488,7 +523,7 @@ public:
         //- Communication schedule for linear all-to-master (proc 0)
         static const List<commsStruct>& linearCommunication
         (
-            const label communicator = 0
+            const label communicator = worldComm
         )
         {
             return linearCommunication_[communicator];
@@ -497,7 +532,7 @@ public:
         //- Communication schedule for tree all-to-master (proc 0)
         static const List<commsStruct>& treeCommunication
         (
-            const label communicator = 0
+            const label communicator = worldComm
         )
         {
             return treeCommunication_[communicator];
@@ -542,7 +577,7 @@ public:
         (
             const labelUList& sendData,
             labelUList& recvData,
-            const label communicator = 0
+            const label communicator = worldComm
         );
 
         //- Exchange data with all processors (in the communicator)
@@ -559,7 +594,7 @@ public:
             const UList<int>& recvSizes,
             const UList<int>& recvOffsets,
 
-            const label communicator = 0
+            const label communicator = worldComm
         );
 
         //- Receive data from all processors on the master
@@ -571,7 +606,7 @@ public:
             char* recvData,
             const UList<int>& recvSizes,
             const UList<int>& recvOffsets,
-            const label communicator = 0
+            const label communicator = worldComm
         );
 
         //- Send data to all processors from the root of the communicator
@@ -583,7 +618,7 @@ public:
 
             char* recvData,
             int recvSize,
-            const label communicator = 0
+            const label communicator = worldComm
         );
 
 
@@ -598,7 +633,7 @@ public:
 
         //- Process index of last sub-process
         //  \deprecated(2020-09) use subProcs() method instead
-        static int lastSlave(const label communicator = 0)
+        static int lastSlave(const label communicator = worldComm)
         {
             return nProcs(communicator) - 1;
         }
