@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,31 +31,71 @@ Group
     grpFvOptionsConstraints
 
 Description
-    Fixed temperature equation constraint
+    Constrain temperature equation (i.e. \c T) with
+    a given set of fixed values within a specified region.
+
+    Constraints applied to:
+    \verbatim
+      T    | Temperature                   [K]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      T    | Temperature                   [K]
+      e/h  | Internal energy/Enthalphy     [m2/s2]
+    \endverbatim
 
 Usage
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    fixedTemperature
+    fixedTemperatureConstraint1
     {
+        // Mandatory entries (unmodifiable)
         type            fixedTemperatureConstraint;
-        active          yes;
+        mode            <mode>;
 
-        mode            uniform;      // uniform or lookup
+        // Conditional mandatory/optional entries (runtime modifiable)
 
-        // For uniform option
-        temperature     constant 500; // fixed temperature with time [K]
+            // when mode=uniform (mandatory)
+            temperature     constant 500; // fixed temperature with time [K]
 
-        // For lookup option
-        // T            <Tname>;      // optional temperature field name
+            // when mode=lookup (optional)
+            T            <Tname>;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property  | Description                           | Type   | Reqd  | Dflt
+      type      | Type name: fixedTemperatureConstraint | word   | yes   | -
+      mode      | Temperature mode - see below          | word   | yes   | -
+      temperature | Function1 type temperature field    | Function1 | cndtnl | -
+      T         | Name of operand temperature field     | word   | cndtnl | T
+    \endtable
+
+    Options for the \c mode entry:
+    \verbatim
+      uniform | Use Function1 type temperature field
+      lookup  | Use temperature field given field name
+    \endverbatim
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
 Note:
-    The 'uniform' option allows the use of a time-varying uniform temperature
-    by means of the Function1 type.
+  - The \c uniform option allows the use of a time-varying
+    uniform temperature by means of the \c Function1 type.
+
+See also
+  - Foam::fv::limitTemperature
+  - Foam::Function1
 
 SourceFiles
-    fvOption.C
+    fixedTemperatureConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -89,14 +130,13 @@ public:
         tmLookup
     };
 
-
     //- String representation of temperatureMode enums
     static const Enum<temperatureMode> temperatureModeNames_;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Operation mode
         temperatureMode mode_;
@@ -106,17 +146,6 @@ protected:
 
         //- Temperature field name
         word TName_;
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        fixedTemperatureConstraint(const fixedTemperatureConstraint&) = delete;
-
-        //- No copy assignment
-        void operator=(const fixedTemperatureConstraint&) = delete;
 
 
 public:
@@ -135,6 +164,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        fixedTemperatureConstraint(const fixedTemperatureConstraint&) = delete;
+
+        //- No copy assignment
+        void operator=(const fixedTemperatureConstraint&) = delete;
 
 
     //- Destructor

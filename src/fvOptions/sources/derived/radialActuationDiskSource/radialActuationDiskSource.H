@@ -31,11 +31,12 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on \c U to enable actuator disk models with radial thrust
-    distribution for aero/hydro thrust loading of horizontal axis turbines
-    on surrounding flow field in terms of energy conversion processes.
+    Applies sources on velocity field (i.e. \c U) within a specified region
+    to enable actuator disk models with radial thrust distribution for
+    aero/hydro thrust loading of horizontal axis turbines on surrounding
+    flow field in terms of energy conversion processes.
 
-    Corrections applied to:
+    Sources applied to:
     \verbatim
       U         | Velocity    [m/s]
     \endverbatim
@@ -61,36 +62,38 @@ Description
     \endvartable
 
 Usage
-    Example by using \c constant/fvOptions:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
     radialActuationDiskSource1
     {
         // Mandatory entries (unmodifiable)
         type            radialActuationDiskSource;
+
+        // Mandatory entries (runtime modifiable)
         coeffs          (0.1 0.5 0.01);
 
-        // Mandatory and optional (inherited) entries
+        // Mandatory/Optional (inherited) entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property | Description                            | Type | Req'd | Dflt
-      type     | Type name: radialActuationDiskSource   | word | yes   | -
+      Property | Description                            | Type | Reqd | Dflt
+      type     | Type name: radialActuationDiskSource   | word | yes  | -
       coeffs   | Radial distribution function coefficients | vector | yes | -
     \endtable
 
     The inherited entries are elaborated in:
-      - \link fvOption.H \endlink
-      - \link cellSetOption.H \endlink
-      - \link writeFile.H \endlink
-      - \link Function1.H \endlink
-      - \link actuationDiskSource.H \endlink
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+     - \link writeFile.H \endlink
+     - \link Function1.H \endlink
+     - \link actuationDiskSource.H \endlink
 
 Note
-    - \c radialActuationDiskSource computes only \c Froude force computation
-    method of \c actuationDiskSource.
+  - \c radialActuationDiskSource computes only
+    \c Froude force computation method of \c actuationDiskSource.
 
 SourceFiles
     radialActuationDiskSource.C
@@ -169,14 +172,14 @@ public:
 
     // Member Functions
 
-        //- Source term to momentum equation
+        //- Add explicit contribution to momentum equation
         virtual void addSup
         (
             fvMatrix<vector>& eqn,
             const label fieldi
         );
 
-        //- Source term to compressible momentum equation
+        //- Add explicit contribution to compressible momentum equation
         virtual void addSup
         (
             const volScalarField& rho,
@@ -185,7 +188,7 @@ public:
         );
 
 
-        //- Read dictionary
+        //- Read source dictionary
         virtual bool read(const dictionary& dict);
 };
 

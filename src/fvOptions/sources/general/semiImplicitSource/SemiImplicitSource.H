@@ -31,62 +31,82 @@ Group
     grpFvOptionsSources
 
 Description
-    Semi-implicit source, described using an input dictionary.  The injection
-    rate coefficients are specified as pairs of Su-Sp coefficients, i.e.
+    Applies semi-implicit source within a specified region for \c Type,
+    where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.
+    The injection rate coefficients are specified
+    as pairs of Su-Sp coefficients, i.e.:
 
-        \f[
-            S(x) = S_u + S_p x
-        \f]
+    \f[
+        S(x) = S_u + S_p x
+    \f]
 
     where
     \vartable
-        S(x)    | net source for field 'x'
-        S_u     | explicit source contribution
-        S_p     | linearised implicit contribution
+      S(x)    | net source for field 'x'
+      S_u     | explicit source contribution
+      S_p     | linearised implicit contribution
     \endvartable
 
-    Example of the source specification:
-
+Usage
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    volumeMode      absolute; // specific
-    injectionRateSuSp
+    <Type>SemiImplicitSource1
     {
-        k           (30.7 0);
-        epsilon     (1.5  0);
+        // Mandatory entries (unmodifiable)
+        type                <Type>SemiImplicitSource;
+
+        // Mandatory entries (runtime modifiable)
+        volumeMode          <volumeModeType>;
+        injectionRateSuSp
+        {
+            k           (30.7 0);
+            epsilon     (1.5  0);
+
+            // The injectionRate can also be specified as a Function1
+            // by having dictionaries for the field entries instead
+            k
+            {
+                // Time-ramp from 0 to 30.7 at time 5
+                Su table
+                (
+                    (0 0.0)
+                    (5 30.7)
+                );
+                Sp      0.0;
+            }
+            epsilon
+            {
+                Su      1.5;
+                Sp      0.0;
+            }
+        }
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Valid options for the \c volumeMode entry include:
-    - absolute: values are given as \<quantity\>
-    - specific: values are given as \<quantity\>/m3
+    where the entries mean:
+    \table
+      Property   | Description                          | Type | Reqd | Dflt
+      type       | Type name: \<Type\>SemiImplicitSource <!--
+                -->                                     | word | yes  | -
+      volumeMode | Volume mode type                     | word | yes  | -
+      injectionRateSuSp | Injection rate settings  | dictionary | yes | -
+    \endtable
 
-    The injectionRate can also be specified as a Function1 by having
-    dictionaries for the field entries instead:
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
 
+    Options for the \c volumeMode entry:
     \verbatim
-    injectionRateSuSp
-    {
-        k
-        {
-            // Time-ramp from 0 to 30.7 at time 5
-            Su table
-            (
-                (0 0.0)
-                (5 30.7)
-            );
-            Sp      0.0;
-        }
-        epsilon
-        {
-            Su      1.5;
-            Sp      0.0;
-        }
-    }
+      absolute  | Values are given as \<quantity\>
+      specific  | Values are given as \<quantity\>/m3
     \endverbatim
-
 
 See also
-    Foam::fvOption
+  - Foam::fvOption
 
 SourceFiles
     SemiImplicitSource.C
@@ -130,22 +150,22 @@ class SemiImplicitSource
 {
 public:
 
-    // Public data
+    // Public Enumerations
 
-        //- Enumeration for volume types
+        //- Options for the volume mode type
         enum volumeModeType
         {
             vmAbsolute,
             vmSpecific
         };
 
-        //- Word list of volume mode type names
+        //- Names for volumeModeType
         static const Enum<volumeModeType> volumeModeTypeNames_;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Volume mode
         volumeModeType volumeMode_;
@@ -158,7 +178,7 @@ protected:
         PtrList<Function1<scalar>> Sp_;
 
 
-    // Protected functions
+    // Protected Functions
 
         //- Set the local field data
         void setFieldData(const dictionary& dict);

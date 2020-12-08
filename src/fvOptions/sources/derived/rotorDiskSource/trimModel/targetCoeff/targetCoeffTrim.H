@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2014 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,44 +28,125 @@ Class
     Foam::targetCoeffTrim
 
 Description
-    Target trim forces/coefficients
+    Trim model where the operating characteristics of rotor
+    (e.g. blade pitch angle) can vary to reach a specified
+    target thrust and torque.
 
     Solves:
 
-        c^old + J.d(theta) = c^target
+    \f[
+        c^{old} + J.d(\theta) = c^{target}
+    \f]
 
-    Where:
-
-        n     = time level
-        c     = coefficient vector (thrust force, roll moment, pitch moment)
-        theta = pitch angle vector (collective, roll, pitch)
-        J     = Jacobian [3x3] matrix
-
+    where
+    \vartable
+      n      | Time level
+      c      | Coefficient vector (thrust force, roll moment, pitch moment)
+      \theta | Pitch angle vector (collective, roll, pitch)
+      J      | Jacobian [3x3] matrix
+    \endvartable
 
     The trimmed pitch angles are found via solving the above with a
     Newton-Raphson iterative method.  The solver tolerance can be user-input,
     using the 'tol' entry.
 
-    If coefficients are requested (useCoeffs = true), the force and moments
-    are normalised using:
+    If coefficients are requested (useCoeffs = true),
+    the force and moments are normalised using:
 
-                         force
-        c = ---------------------------------
-            alpha*pi*rho*(omega^2)*(radius^4)
+    \f[
+        c = \frac{F}{\alpha \pi \rho \omega^2 R^4}
+    \f]
 
     and
 
-                         moment
-        c = ---------------------------------
-            alpha*pi*rho*(omega^2)*(radius^5)
+    \f[
+        c = \frac{M}{\alpha \pi \rho \omega^2 R^5}
+    \f]
 
-    Where:
+    where
+    \vartable
+      F      | Force
+      M      | Moment
+      \alpha | User-input conversion coefficient (default = 1)
+      \rho   | Fluid desity
+      \omega | Rotor angular velocity
+      \pi    | Mathematical pi
+      R      | Rotor radius
+    \endvartable
 
-        alpha = user-input conversion coefficient (default = 1)
-        rho   = desity
-        omega = rotor angulr velocity
-        pi    = mathematical pi
+Usage
+    Minimal example by using \c constant/fvOptions:
+    rotorDiskSource1
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
 
+        // Mandatory entries (runtime modifiable)
+        trimModel    targetForce;
+
+        targetForceCoeffs
+        {
+            // Conditional mandatory entries (runtime modifiable)
+
+                // when trimModel=targetForce
+                target
+                {
+                    // Mandatory entries (runtime modifiable)
+                    thrust       0.5;
+                    pitch        0.5;
+                    roll         0.5;
+
+                    // Optional entries (runtime modifiable)
+                    useCoeffs    true;
+                }
+
+                pitchAngles
+                {
+                    theta0Ini    0.1;
+                    theta1cIni   0.1;
+                    theta1sIni   0.1;
+                }
+
+                calcFrequency    1;
+
+                // Optional entries (runtime modifiable)
+                nIter            50;
+                tol              1e-8;
+                relax            1;
+                dTheta           0.1;
+                alpha            1.0;
+        }
+    }
+
+    where the entries mean:
+    \table
+      Property       | Description                   | Type  | Reqd | Dflt
+      calcFrequency  | Number of iterations between calls to 'correct' <!--
+                     -->                             | label | yes  | -
+      useCoeffs      | Flag to indicate whether to solve coeffs <!--
+                     --> (true) or forces (false)    | bool  | no   | true
+      thrust         | Target thrust (coefficient)   | scalar | yes | -
+      pitch          | Target pitch (coefficient)    | scalar | yes | -
+      roll           | Target roll moment (coefficient)   | scalar | yes | -
+      theta0Ini  | Initial pitch angle [deg]         | scalar | yes | -
+      theta1cIni | Initial lateral pitch angle (cos coeff) [deg] <!--
+                 -->                                 | scalar | yes | -
+      theta1sIni | Initial longitudinal pitch angle (sin coeff) [deg] <!--
+                 -->                                 | scalar | yes | -
+      nIter      | Maximum number of iterations in trim routine <!--
+                 -->                                 | label  | no  | 50
+      tol        | Convergence tolerance in trim routine | scalar | no | 1e-8
+      relax      | Relaxation factor in trim routine | scalar | no  | 1
+      dTheta     | Perturbation angle used to determine Jacobian [deg] <!--
+                 -->                                 | scalar | no  | 0.1
+      alpha          | Coefficient to allow for conversion between US <!--
+                     --> and EU definitions          | scalar | no  | 1
+    \endtable
+
+See also
+  - Foam::fv::rotorDiskSource
+  - Foam::trimModel
+  - Foam::fixedTrim
 
 SourceFiles
     targetCoeffTrim.C
@@ -93,7 +175,7 @@ class targetCoeffTrim
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Number of iterations between calls to 'correct'
         label calcFrequency_;
@@ -123,7 +205,7 @@ protected:
         scalar alpha_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Calculate the rotor force and moment coefficients vector
         template<class RhoFieldType>
@@ -150,8 +232,21 @@ public:
     //- Run-time type information
     TypeName("targetCoeffTrim");
 
-    //- Constructor
-    targetCoeffTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
+    // Constructors
+
+        //- Constructor from rotor and dictionary
+        targetCoeffTrim
+        (
+            const fv::rotorDiskSource& rotor,
+            const dictionary& dict
+        );
+
+        //- No copy construct
+        targetCoeffTrim(const targetCoeffTrim&) = delete;
+
+        //- No copy assignment
+        void operator=(const targetCoeffTrim&) = delete;
+
 
     //- Destructor
     virtual ~targetCoeffTrim() = default;

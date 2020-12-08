@@ -32,9 +32,10 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies sources on velocity (i.e. \c U) to enable actuator disk models
-    for aero/hydro thrust loading of horizontal axis turbines on surrounding
-    flow field in terms of energy conversion processes.
+    Applies sources on velocity (i.e. \c U) within a specified region
+    to enable actuator disk models for aero/hydro thrust loading of
+    horizontal axis turbines on surrounding flow field in terms of
+    energy conversion processes.
 
     Available options for force computations:
     \verbatim
@@ -110,7 +111,7 @@ Description
             DOI:10.1002/we.1804
     \endverbatim
 
-    Corrections applied to:
+    Sources applied to:
     \verbatim
       U         | Velocity    [m/s]
     \endverbatim
@@ -121,16 +122,12 @@ Description
     \endverbatim
 
 Usage
-    Example by using \c constant/fvOptions:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
     actuationDiskSource1
     {
         // Mandatory entries (unmodifiable)
         type            actuationDiskSource;
-
-        // Mandatory (inherited) entries (unmodifiable)
-        selectionMode   <mode>;    // e.g. cellSet as shown below
-        cellSet         <cellSetName>;
 
         // Mandatory entries (runtime modifiable)
         diskArea        40.0;
@@ -162,7 +159,7 @@ Usage
         writeFileStart  0;
         writeFileEnd    100;
 
-        // Optional (inherited) entries
+        // Mandatory/Optional (inherited) entries
         ...
     }
     \endverbatim

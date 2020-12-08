@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd
+    Copyright (C) 2019-2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,52 +30,84 @@ Group
     grpFvOptionsSources
 
 Description
-    Applies corrections to the turbulence kinetic energy equation and turbulence
-    viscosity field for incompressible multiphase flow cases.
+    Applies corrections to the turbulent kinetic energy equation (i.e. \c k)
+    and turbulent viscosity field (i.e. \c nut) for incompressible multiphase
+    flow cases.
 
-    Turbulence kinetic energy is over-predicted in VOF solvers at the phase
+    Turbulent kinetic energy is over-predicted in VOF solvers at the phase
     interface and throughout the water column in nearly-potential flow regions
     beneath surface waves.
 
-    This fvOption applies corrections based on the references:
+    References:
     \verbatim
-        Buoyancy source term in turbulence kinetic energy equation:
+        Buoyancy source term in turbulent kinetic energy equation:
             Devolder, B., Rauwoens, P., and Troch, P. (2017).
             Application of a buoyancy-modified k-w SST turbulence model to
             simulate wave run-up around a monopile subjected to regular waves
             using OpenFOAM.
             Coastal Engineering, 125, 81-94.
+            DOI:10.1016/j.coastaleng.2017.04.004
 
-        Correction to turbulence viscosity:
+        Correction to turbulent viscosity:
             Larsen, B.E. and Fuhrman, D.R. (2018).
             On the over-production of turbulence beneath surface waves in
             Reynolds-averaged Navier-Stokes models
-            J. Fluid Mech, 853, 419-460
+            J. Fluid Mech, 853, 419-460.
+            DOI:10.1017/jfm.2018.577
+    \endverbatim
+
+    Sources applied to:
+    \verbatim
+      k         | Turbulent kinetic energy                   [m2/s2]
+      nut       | Turbulent viscosity                        [m/s2]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      epsilon   | Turbulent kinetic energy dissipation rate  [m2/s3]
+      k         | Turbulent kinetic energy                   [m2/s2]
+      nut       | Turbulent viscosity                        [m/s2]
     \endverbatim
 
 Usage
-    Example usage:
-
+    Minimal example by using \c constant/fvOptions:
     \verbatim
     multiphaseStabilizedTurbulence1
     {
-        type            multiphaseStabilizedTurbulence;
-        active          yes;
+        // Mandatory entries (unmodifiable)
+        type                 multiphaseStabilizedTurbulence;
 
-        multiphaseStabilizedTurbulenceCoeffs
-        {
-            // Optional coefficients
-            lambda2         0.1;   // A value of 0 sets the nut correction to 0
-            Cmu             0.09;  // from k-epsilon model
-            C               1.51;  // from k-omega model
-            alpha           1.36;  // 1/Prt
-        }
+        // Optional entries (unmodifiable)
+        rho             <rhoName>;
+        Cmu             0.09;  // from k-epsilon model
+        C               1.51;  // from k-omega model
+        lambda2         0.1;   // A value of 0 sets the nut correction to 0
+        alpha           1.36;  // 1/Prt
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    The model C coefficient for the k-epsilon model equates to C2/C1 = 1.33;
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd | Dflt
+      type      | Type name: multiphaseStabilizedTurbulence  | word | yes | -
+      rho       | Name of operand density field     | word   | yes  | rho
+      Cmu       | Model coefficient                 | scalar | no   | 0.09
+      C         | Model coefficient                 | scalar | no   | 1.51
+      lambda2   | Ratio of nut correction           | scalar | no   | 0.1
+      alpha     | Inverse of turbulent Prandtl number | scalar | no | 1.36
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+
+Note
+  - The model C coefficient for the k-epsilon model equates to C2/C1 = 1.33;
     the (default) value of 1.51 comes from the k-omega model and is more
     conservative.
+  - Only applicable to epsilon-based turbulence closure models.
 
 SourceFiles
     multiphaseStabilizedTurbulence.C
@@ -103,7 +135,7 @@ class multiphaseStabilizedTurbulence
 :
     public option
 {
-    // Private data
+    // Private Data
 
         //- Name of density field
         const word rhoName_;
@@ -126,18 +158,6 @@ class multiphaseStabilizedTurbulence
             dimensionedScalar alpha_;
 
 
-     // Private Member Functions
-
-        //- No copy construct
-        multiphaseStabilizedTurbulence
-        (
-            const multiphaseStabilizedTurbulence&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const multiphaseStabilizedTurbulence&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -154,6 +174,19 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        multiphaseStabilizedTurbulence
+        (
+            const multiphaseStabilizedTurbulence&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const multiphaseStabilizedTurbulence&) = delete;
+
+
+    //- Destructor
+    virtual ~multiphaseStabilizedTurbulence() = default;
 
 
     // Member Functions
@@ -173,7 +206,7 @@ public:
             const label fieldi
         );
 
-        //- Correct the turbulence viscosity
+        //- Correct the turbulent viscosity
         virtual void correct(volScalarField& field);
 
         //- Read source dictionary

@@ -46,7 +46,6 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(directionalPressureGradientExplicitSource, 0);
-
     addToRunTimeSelectionTable
     (
         option,
@@ -203,7 +202,7 @@ directionalPressureGradientExplicitSource
             << type() << " " << this->name() << ": "
             << "    Unknown face zone name: " << faceZoneName_
             << ". Valid face zones are: " << mesh_.faceZones().names()
-            << nl << exit(FatalError);
+            << exit(FatalError);
     }
 
     if (model_ == pVolumetricFlowRateTable)
@@ -223,8 +222,7 @@ directionalPressureGradientExplicitSource
     else
     {
         FatalErrorInFunction
-            << "Did not find mode " << model_
-            << nl
+            << "Did not find mode " << model_ << nl
             << "Please set 'model' to one of "
             << pressureDropModelNames_
             << exit(FatalError);
@@ -262,8 +260,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
 
     const scalarField magUn(mag(U), cells_);
 
-    const surfaceScalarField& phi =
-            mesh().lookupObject<surfaceScalarField>("phi");
+    const auto& phi = mesh().lookupObject<surfaceScalarField>("phi");
 
     switch (model_)
     {
@@ -271,7 +268,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
         {
             if (phi.dimensions() == dimVelocity*dimArea)
             {
-                const incompressible::turbulenceModel& turbModel =
+                const auto& turbModel =
                     mesh().lookupObject<incompressible::turbulenceModel>
                     (
                         turbulenceModel::propertiesName
@@ -283,7 +280,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             }
             else
             {
-                const compressible::turbulenceModel& turbModel =
+                const auto& turbModel =
                     mesh().lookupObject<compressible::turbulenceModel>
                     (
                         turbulenceModel::propertiesName
@@ -330,7 +327,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             }
             else
             {
-                const compressible::turbulenceModel& turbModel =
+                const auto& turbModel =
                     mesh().lookupObject<compressible::turbulenceModel>
                     (
                         turbulenceModel::propertiesName
@@ -433,9 +430,9 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
     {
         label cellI = cells_[i];
 
-        const vector Ufnorm = UfCells[i]/(mag(UfCells[i]) + SMALL);
+        const vector Ufnorm(UfCells[i]/(mag(UfCells[i]) + SMALL));
 
-        const tensor D = rotationTensor(Ufnorm, flowDir_);
+        const tensor D(rotationTensor(Ufnorm, flowDir_));
 
         dGradP_[i] +=
             relaxationFactor_*

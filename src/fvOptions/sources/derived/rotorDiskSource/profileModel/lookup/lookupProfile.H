@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,23 +28,56 @@ Class
     Foam::lookupProfile
 
 Description
-    Look-up based profile data - drag and lift coefficients are lineraly
-    interpolated based on the supplied angle of attack
+    Profile model where polar lift and drag coefficients are linearly
+    interpolated from a polar table by using an input angle of attack.
 
-    Input in list format:
+Usage
+    Minimal example by using \c constant/fvOptions:
+    rotorDiskSource1
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
 
-        data
-        (
-            (AOA1 Cd1 Cl2)
-            (AOA2 Cd2 Cl2)
+        // Mandatory entries (runtime modifiable)
+        profiles
+        {
+            // Mandatory entries (runtime modifiable)
+            <profile1>
+            {
+                // Mandatory entries (runtime modifiable)
+                type     lookup;
+                data
+                (
+                    (AOA1 Cd1 Cl2)
+                    (AOA2 Cd2 Cl2)
+                    ([0]  [1] [2])
+                    ...
+                    (AOAN CdN CdN)
+                );
+            }
+
+            // Mandatory/Optional (inherited) entries
             ...
-            (AOAN CdN CdN)
-        );
+        }
+    }
 
-    where:
-        AOA = angle of attack [deg] converted to [rad] internally
-        Cd  = drag coefficient
-        Cl  = lift coefficient
+    where the entries mean:
+    \table
+      Property   | Description              | Type   | Reqd | Dflt
+      [0] AOA    | Angle of attack          | scalar | yes  | -
+      [1] Cd     | Drag coefficient corresponding to the angle attack <!--
+                 -->                        | scalar | yes  | -
+      [2] Cl     | Lift coefficient corresponding to the angle attack <!--
+                 -->                        | scalar | yes  | -
+    \endtable
+
+Note
+  - Angle of attack is internally converted from [deg] to [rad].
+
+See also
+  - Foam::fv::rotorDiskSource
+  - Foam::profileModel
+  - Foam::seriesProfile
 
 SourceFiles
     lookupProfile.C
@@ -71,7 +105,7 @@ class lookupProfile
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- List of angle-of-attack values [deg] on input, converted to [rad]
         List<scalar> AOA_;
@@ -101,8 +135,18 @@ public:
     //- Runtime type information
     TypeName("lookup");
 
-    //- Constructor
-    lookupProfile(const dictionary& dict, const word& modelName);
+
+    // Constructors
+
+        //- Constructor from dictionary and model name
+        lookupProfile(const dictionary& dict, const word& modelName);
+
+        //- No copy construct
+        lookupProfile(const lookupProfile&) = delete;
+
+        //- No copy assignment
+        void operator=(const lookupProfile&) = delete;
+
 
     //- Destructor
     ~lookupProfile() = default;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +46,10 @@ void Foam::fv::tabulatedAccelerationSource::addSup
     // If gravitational force is present combine with the linear acceleration
     if (mesh_.time().foundObject<uniformDimensionedVectorField>("g"))
     {
-        uniformDimensionedVectorField& g =
+        auto& g =
             mesh_.time().lookupObjectRef<uniformDimensionedVectorField>("g");
 
-        const uniformDimensionedScalarField& hRef =
+        const auto& hRef =
             mesh_.lookupObject<uniformDimensionedScalarField>("hRef");
 
         g = g0_ - dimensionedVector("a", dimAcceleration, acceleration.x());

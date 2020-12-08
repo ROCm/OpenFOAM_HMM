@@ -38,7 +38,6 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(multiphaseStabilizedTurbulence, 0);
-
     addToRunTimeSelectionTable
     (
         option,

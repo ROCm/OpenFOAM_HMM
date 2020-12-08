@@ -114,6 +114,7 @@ bool Foam::fv::radialActuationDiskSource::read(const dictionary& dict)
     if (actuationDiskSource::read(dict))
     {
         coeffs_.readEntry("coeffs", radialCoeffs_);
+
         return true;
     }
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +31,44 @@ Group
     grpFvOptionsSources
 
 Description
-    Constant heat transfer model. htcConst [W/m2/K] and area/volume [1/m]
-    must be provided.
+    Applies a constant heat transfer model for inter-region heat exchanges.
+
+    Required fields:
+    \verbatim
+      htcConst  | Constant heat transfer coefficient        [W/m2/K]
+      AoV       | Area per unit volume of heat exchanger    [1/m]
+    \endverbatim
+
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    constantHeatTransfer1
+    {
+        // Mandatory entries (unmodifiable)
+        type                 constantHeatTransfer;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                     | Type  | Reqd | Dflt
+      type      | Type name: constantHeatTransfer | word  | yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link interRegionHeatTransfer.H \endlink
+
+See also
+  - Foam::fv::interRegionHeatTransferModel
+  - Foam::fv::tabulatedHeatTransfer
+  - Foam::fv::tabulatedNTUHeatTransfer
+  - Foam::fv::variableHeatTransfer
+
+SourceFiles
+    constantHeatTransfer.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,7 +93,7 @@ class constantHeatTransfer
 :
     public interRegionHeatTransferModel
 {
-    // Private data
+    // Private Data
 
         //- Constant heat transfer coefficient [W/m2/K]
         autoPtr<volScalarField> htcConst_;
@@ -73,7 +110,7 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from components
         constantHeatTransfer
         (
             const word& name,
@@ -82,9 +119,15 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        constantHeatTransfer(const constantHeatTransfer&) = delete;
+
+        //- No copy assignment
+        void operator=(const constantHeatTransfer&) = delete;
+
 
     //- Destructor
-    virtual ~constantHeatTransfer();
+    virtual ~constantHeatTransfer() = default;
 
 
     // Public Functions

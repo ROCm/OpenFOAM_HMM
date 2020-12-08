@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,13 +103,15 @@ Foam::seriesProfile::seriesProfile
 
     if (CdCoeffs_.empty())
     {
-        FatalErrorInFunction
-            << "CdCoeffs must be specified" << exit(FatalError);
+        FatalIOErrorInFunction(dict)
+            << "CdCoeffs must be specified"
+            << exit(FatalIOError);
     }
     if (ClCoeffs_.empty())
     {
-        FatalErrorInFunction
-            << "ClCoeffs must be specified" << exit(FatalError);
+        FatalIOErrorInFunction(dict)
+            << "ClCoeffs must be specified"
+            << exit(FatalIOError);
     }
 }
 

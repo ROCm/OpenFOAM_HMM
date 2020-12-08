@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,15 +28,37 @@ Class
     Foam::fv::option
 
 Description
-    Finite volume options abstract base class.  Provides a base set of
-    controls, e.g.:
+    Base abstract class for handling finite volume options (i.e. \c fvOption).
+
+Usage
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-        type            scalarExplicitSource    // source type
-        active          on;                     // on/off switch
+    <userDefinedName1>
+    {
+        // Mandatory entries (unmodifiable)
+        type              <fvOptionName>;
+
+        // Optional entries (unmodifiable/runtime modifiable)
+        <fvOption>Coeffs
+        {
+            // subdictionary entries
+        }
+
+        // Optional entries (runtime modifiable)
+        active            true;
+        log               true;
+    }
     \endverbatim
 
-Note
-    On evaluation, source/sink options are to be added to the equation R.H.S.
+    where the entries mean:
+    \table
+      Property         | Description                   | Type  | Reqd | Dflt
+      type             | Name of operand fvOption      | word  | yes  | -
+      \<fvOption\>Coeffs | Dictionary containing settings of <!--
+                    --> the selected fvOption settings | dictionary | no | -
+      active   | Flag to (de)activate fvOption         | bool  | no   | true
+      log      | Flag to log fvOption-related info     | bool  | no   | true
+    \endtable
 
 SourceFiles
     fvOption.C
@@ -71,7 +93,7 @@ class option
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Source name
         const word name_;
@@ -164,7 +186,6 @@ public:
 
             autoPtr<option> operator()(Istream& is) const
             {
-                //const word name(is);
                 const dictionary dict(is);
 
                 return autoPtr<option>

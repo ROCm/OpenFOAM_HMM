@@ -39,13 +39,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(meanVelocityForce, 0);
-
-    addToRunTimeSelectionTable
-    (
-        option,
-        meanVelocityForce,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, meanVelocityForce, dictionary);
 }
 }
 

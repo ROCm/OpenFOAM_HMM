@@ -36,12 +36,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(tabulatedHeatTransfer, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        tabulatedHeatTransfer,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, tabulatedHeatTransfer, dictionary);
 }
 }
 
@@ -104,26 +99,19 @@ Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::tabulatedHeatTransfer::~tabulatedHeatTransfer()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
-    const volVectorField& UNbr =
-        nbrMesh.lookupObject<volVectorField>(UNbrName_);
+    const auto& UNbr = nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
     const scalarField UMagNbr(mag(UNbr));
 
     const scalarField UMagNbrMapped(interpolate(UMagNbr));
 
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+    const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
     scalarField& htcc = htc_.primitiveFieldRef();
 

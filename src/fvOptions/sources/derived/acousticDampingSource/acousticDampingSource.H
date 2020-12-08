@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,24 +30,68 @@ Group
     grpFvOptionsSources
 
 Description
-    Acoustic damping source
+    Applies sources on velocity (i.e. \c U)
+    within a specified region to enable acoustic damping.
 
-    \heading Source usage
-
-    Example usage:
+    Sources applied to:
     \verbatim
-    acousticDampingSourceCoeffs
+      U         | Velocity                                   [m/s]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      U         | Velocity                                   [m/s]
+    \endverbatim
+
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    acousticDampingSource1
     {
-        timeStart        0.004;
-        duration         1000.0;
-        selectionMode    all;
+        // Mandatory entries (unmodifiable)
+        type                 acousticDampingSource;
+
+        // Mandatory entries (runtime modifiable)
+        frequency        3000;
+        URef             UMean;
         origin           (-1.25 0 0);
         radius1          1.2;
         radius2          1.65;
-        frequency        3000;
-        URef             UMean;
+
+        // Optional entries (runtime modifiable)
+        w                20;
+
+        // Conditional optional entries (runtime modifiable)
+        // Either of the below
+
+            // Option-1
+            UNames           (<UName1> <UName2> ... <UNameN>);
+
+            // Option-2
+            U                U;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd  | Dflt
+      type      | Type name: acousticDampingSource  | word   | yes   | -
+      frequency | Frequency value [Hz]              | scalar | yes   | -
+      URef      | Name of reference velocity field  | word   | yes   | -
+      origin    | Sphere centre location or damping | vector | yes   | -
+      radius1   | Inner radius at which to start damping | scalar | yes | -
+      radius2 | Outer radius beyond which damping is applied | scalar | yes | -
+      w         | Stencil width                     | label  | no    | 20
+      UNames    | Names of operand velocity fields  | wordList | cndtnl | -
+      U         | Name of operand velocity field    | word   | cndtnl   | U
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
 
 SourceFiles
     acousticDampingSource.C
@@ -70,7 +114,6 @@ class porosityModel;
 namespace fv
 {
 
-
 /*---------------------------------------------------------------------------*\
                     Class acousticDampingSource Declaration
 \*---------------------------------------------------------------------------*/
@@ -79,19 +122,15 @@ class acousticDampingSource
 :
     public cellSetOption
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- Blending factor [-]
+        volScalarField blendFactor_;
 
         //- Frequency [Hz]
         dimensionedScalar frequency_;
-
-        //- Blending factor []
-        volScalarField blendFactor_;
-
-        //- Name of reference velocity field
-        word URefName_;
 
         // Sphere centre location or damping
         point x0_;
@@ -102,7 +141,10 @@ protected:
         // Outer radius beyond which damping is applied
         scalar r2_;
 
-        //- Stencil width, default = 20
+        //- Name of reference velocity field
+        word URefName_;
+
+        //- Stencil width
         label w_;
 
 
@@ -110,17 +152,6 @@ protected:
 
         //- Helper function to set the blending factor
         void setBlendingFactor();
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        acousticDampingSource(const acousticDampingSource&) = delete;
-
-        //- No copy assignment
-        void operator=(const acousticDampingSource&) = delete;
 
 
 public:
@@ -139,6 +170,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        acousticDampingSource(const acousticDampingSource&) = delete;
+
+        //- No copy assignment
+        void operator=(const acousticDampingSource&) = delete;
 
 
     //- Destructor

@@ -38,13 +38,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(buoyancyEnergy, 0);
-
-    addToRunTimeSelectionTable
-    (
-        option,
-        buoyancyEnergy,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, buoyancyEnergy, dictionary);
 }
 }
 
@@ -86,7 +80,7 @@ void Foam::fv::buoyancyEnergy::addSup
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(mesh_.time());
 
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+    const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
     eqn += rho*(U&g);
 }
@@ -94,7 +88,12 @@ void Foam::fv::buoyancyEnergy::addSup
 
 bool Foam::fv::buoyancyEnergy::read(const dictionary& dict)
 {
-    NotImplemented;
+    if (option::read(dict))
+    {
+        coeffs_.readIfPresent("UName", UName_);
+
+        return true;
+    }
 
     return false;
 }

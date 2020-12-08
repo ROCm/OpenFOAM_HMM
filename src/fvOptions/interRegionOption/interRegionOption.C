@@ -47,8 +47,7 @@ void Foam::fv::interRegionOption::setMapper()
     {
         Info<< indent << "- selecting inter region mapping" << endl;
 
-        const fvMesh& nbrMesh =
-            mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+        const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
         if (mesh_.name() == nbrMesh.name())
         {
@@ -121,12 +120,6 @@ Foam::fv::interRegionOption::interRegionOption
         setMapper();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::interRegionOption::~interRegionOption()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

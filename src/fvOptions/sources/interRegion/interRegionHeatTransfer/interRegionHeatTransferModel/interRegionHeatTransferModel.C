@@ -53,9 +53,9 @@ void Foam::fv::interRegionHeatTransferModel::setNbrModel()
         return;
     }
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-    const optionList& fvOptions = nbrMesh.lookupObject<optionList>("fvOptions");
+    const auto& fvOptions = nbrMesh.lookupObject<optionList>("fvOptions");
 
     bool nbrModelFound = false;
 
@@ -168,7 +168,7 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const volScalarField& he = eqn.psi();
 
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
 
     auto tTmapped = tmp<volScalarField>::New
     (
@@ -185,10 +185,9 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     auto& Tmapped = tTmapped.ref();
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-    const volScalarField& Tnbr =
-        nbrMesh.lookupObject<volScalarField>(TNbrName_);
+    const auto& Tnbr = nbrMesh.lookupObject<volScalarField>(TNbrName_);
 
     interpolate(Tnbr, Tmapped.primitiveFieldRef());
 
@@ -209,7 +208,7 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     {
         if (he.dimensions() == dimEnergy/dimMass)
         {
-            const basicThermo* thermoPtr =
+            const auto* thermoPtr =
                 mesh_.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermoPtr)

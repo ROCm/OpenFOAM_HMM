@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,70 +23,42 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::profileModelList
-
-Description
-    Base class for profile models
-
-SourceFiles
-    profileModelList.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef profileModelList_H
-#define profileModelList_H
+#include "buoyancyTurbSource.H"
 
-#include "PtrList.H"
-#include "profileModel.H"
+// * * * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class AlphaFieldType, class RhoFieldType>
+void Foam::fv::buoyancyTurbSource::buoyancyTurbSourceK
+(
+    const AlphaFieldType& alpha,
+    const RhoFieldType& rho,
+    fvMatrix<scalar>& eqn,
+    const label fieldi
+) const
 {
+    const volScalarField& k = eqn.psi();
+    const dimensionedScalar k0(k.dimensions(), SMALL);
 
-/*---------------------------------------------------------------------------*\
-                      Class profileModelList Declaration
-\*---------------------------------------------------------------------------*/
-
-class profileModelList
-:
-    public PtrList<profileModel>
-{
-protected:
-
-    // Protected Data
-
-        //- Dictionary
-        const dictionary dict_;
-
-
-public:
-
-    //- Constructor
-    profileModelList(const dictionary& dict, const bool readFields = true);
-
-    //- Destructor
-    ~profileModelList() = default;
-
-
-    // Member Functions
-
-        //- Set blade->profile addressing
-        void connectBlades
+    const auto* turbPtr =
+        mesh_.findObject<turbulenceModel>
         (
-            const List<word>& names,
-            List<label>& addr
-        ) const;
-};
+            turbulenceModel::propertiesName
+        );
+    const volScalarField& nut = turbPtr->nut();
 
+    const dictionary& turbDict = turbPtr->coeffDict();
+    const scalar Prt
+    (
+        turbDict.getCheckOrDefault<scalar>("Prt", 0.85, scalarMinMax::ge(SMALL))
+    );
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // (DTR:Eq. 21, buoyancy correction term)
+    const tmp<volScalarField> GbByK((nut/Prt)*(fvc::grad(rho) & g_)/max(k, k0));
 
-} // End namespace Foam
+    eqn -= fvm::Sp(GbByK, k);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

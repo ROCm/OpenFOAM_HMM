@@ -39,17 +39,11 @@ License
 
 namespace Foam
 {
-    namespace fv
-    {
-        defineTypeNameAndDebug(solidificationMeltingSource, 0);
-
-        addToRunTimeSelectionTable
-        (
-            option,
-            solidificationMeltingSource,
-            dictionary
-        );
-    }
+namespace fv
+{
+    defineTypeNameAndDebug(solidificationMeltingSource, 0);
+    addToRunTimeSelectionTable(option, solidificationMeltingSource, dictionary);
+}
 }
 
 const Foam::Enum
@@ -72,7 +66,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
     {
         case mdThermo:
         {
-            const basicThermo& thermo =
+            const auto& thermo =
                 mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
             return thermo.Cp();
@@ -138,7 +132,7 @@ void Foam::fv::solidificationMeltingSource::update(const volScalarField& Cp)
     // update old time alpha1 field
     alpha1_.oldTime();
 
-    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
+    const auto& T = mesh_.lookupObject<volScalarField>(TName_);
 
     forAll(cells_, i)
     {
@@ -205,7 +199,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     {
         case mdThermo:
         {
-            const basicThermo& thermo =
+            const auto& thermo =
                 mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
             fieldNames_[1] = thermo.he().name();
@@ -280,7 +274,7 @@ void Foam::fv::solidificationMeltingSource::addSup
         scalar alpha1c = alpha1_[celli];
 
         scalar S = -Cu_*sqr(1.0 - alpha1c)/(pow3(alpha1c) + q_);
-        vector Sb = rhoRef_*g*beta_*deltaT_[i];
+        vector Sb(rhoRef_*g*beta_*deltaT_[i]);
 
         Sp[celli] += Vc*S;
         Su[celli] += Vc*Sb;
@@ -318,7 +312,7 @@ bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
         coeffs_.readIfPresent("Cu", Cu_);
         coeffs_.readIfPresent("q", q_);
 
-        coeffs_.readIfPresent("beta", beta_);
+        coeffs_.readEntry("beta", beta_);
 
         return true;
     }

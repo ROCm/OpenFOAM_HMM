@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,10 +56,12 @@ namespace Foam
 
 class tabulated6DoFAcceleration
 {
-    // Private data
+    // Private Data
 
+        //- Reference to Time
         const Time& time_;
 
+        //- Dictionary
         dictionary accelerationCoeffs_;
 
         //- Time data file name read from dictionary
@@ -72,15 +75,6 @@ class tabulated6DoFAcceleration
 
         //- Field of acceleration "vectors"
         Field<accelerationVectors> values_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        tabulated6DoFAcceleration(const tabulated6DoFAcceleration&) = delete;
-
-        //- No copy assignment
-        void operator=(const tabulated6DoFAcceleration&) = delete;
 
 
 public:
@@ -97,6 +91,12 @@ public:
             const dictionary& accelerationCoeffs,
             const Time& runTime
         );
+
+        //- No copy construct
+        tabulated6DoFAcceleration(const tabulated6DoFAcceleration&) = delete;
+
+        //- No copy assignment
+        void operator=(const tabulated6DoFAcceleration&) = delete;
 
 
     //- Destructor

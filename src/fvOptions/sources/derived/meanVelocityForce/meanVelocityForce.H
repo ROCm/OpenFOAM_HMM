@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,19 +31,60 @@ Group
     grpFvOptionsSources
 
 Description
-    Calculates and applies the force necessary to maintain the specified mean
-    velocity.
+    Applies the force within a specified region to maintain
+    the specified mean velocity for incompressible flows.
 
-    Note: Currently only handles kinematic pressure (incompressible solvers).
+    Sources applied to:
+    \verbatim
+      U         | Velocity                                   [m/s]
+    \endverbatim
+
+    Required fields:
+    \verbatim
+      U         | Velocity                                   [m/s]
+    \endverbatim
 
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    selectionMode   all;                    // Apply force to all cells
-    fields          (U);                    // Name of velocity field
-    Ubar            (10.0 0 0);             // Desired mean velocity
-    relaxation      0.2;                    // Optional relaxation factor
+    meanVelocityForce1
+    {
+        // Mandatory entries (unmodifiable)
+        type                 meanVelocityForce;
+
+        // Mandatory entries (unmodifiable)
+        Ubar             (1 0 0);
+        fields           (<fieldName>);
+
+        // Optional entries (unmodifiable)
+        relaxation       1.0;
+
+        // Conditional mandatory entries (unmodifiable)
+
+            // when <timePath>/uniform/<name>Properties file exists
+            gradient    <vectorField>; // reading from the aforementioned file
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd  | Dflt
+      type      | Type name: meanVelocityForce      | word   | yes   | -
+      Ubar      | Desired mean velocity             | vector | yes   | -
+      fields    | Name of operand velocity field    | word   | yes   | -
+      relaxation | Relaxation factor                | scalar | no    | 1
+      gradient  | Initial pressure gradient field   | vectorField | cndtnl | -
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+     - \link cellSetOption.H \endlink
+
+Note
+  - Currently only handles kinematic pressure (incompressible solvers).
 
 SourceFiles
     meanVelocityForce.C
@@ -74,9 +116,9 @@ class meanVelocityForce
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Average velocity
+        //- Desired mean velocity
         vector Ubar_;
 
         //- Pressure gradient before correction
@@ -98,7 +140,7 @@ protected:
     // Protected Member Functions
 
         //- Calculate and return the magnitude of the mean velocity
-        //  averaged over the selected cellSet
+        //- averaged over the selected cellSet
         virtual scalar magUbarAve(const volVectorField& U) const;
 
         //- Write the pressure gradient to file (for restarts etc)
@@ -106,17 +148,6 @@ protected:
 
         //- Correct driving force for a constant mass flow rate
         void update(fvMatrix<vector>& eqn);
-
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        meanVelocityForce(const meanVelocityForce&) = delete;
-
-        //- No copy assignment
-        void operator=(const meanVelocityForce&) = delete;
 
 
 public:
@@ -136,10 +167,20 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        meanVelocityForce(const meanVelocityForce&) = delete;
+
+        //- No copy assignment
+        void operator=(const meanVelocityForce&) = delete;
+
+
+    //- Destructor
+    virtual ~meanVelocityForce() = default;
+
 
     // Member Functions
 
-        // Evaluate
+        // Evaluation
 
             //- Correct the pressure gradient
             virtual void correct(volVectorField& U);

@@ -33,16 +33,11 @@ License
 
 namespace Foam
 {
-    namespace fv
-    {
-        defineTypeNameAndDebug(tabulatedNTUHeatTransfer, 0);
-        addToRunTimeSelectionTable
-        (
-            option,
-            tabulatedNTUHeatTransfer,
-            dictionary
-        );
-    }
+namespace fv
+{
+    defineTypeNameAndDebug(tabulatedNTUHeatTransfer, 0);
+    addToRunTimeSelectionTable(option, tabulatedNTUHeatTransfer, dictionary);
+}
 }
 
 const Foam::Enum
@@ -100,7 +95,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
         {
             case gmCalculated:
             {
-                const fvMesh& nbrMesh =
+                const auto& nbrMesh =
                     mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
                 word inletPatchName(coeffs_.get<word>("inletPatch"));
@@ -213,19 +208,13 @@ Foam::fv::tabulatedNTUHeatTransfer::tabulatedNTUHeatTransfer
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::tabulatedNTUHeatTransfer::~tabulatedNTUHeatTransfer()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fv::tabulatedNTUHeatTransfer::calculateHtc()
 {
     initialiseGeometry();
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
     const basicThermo& thermo = this->thermo(mesh_);
     const basicThermo& thermoNbr = this->thermo(nbrMesh);
@@ -233,20 +222,18 @@ void Foam::fv::tabulatedNTUHeatTransfer::calculateHtc()
     const volScalarField CpNbr(thermoNbr.Cp());
 
     // Calculate scaled mass flow for primary region
-    const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-    const volScalarField& rho = mesh_.lookupObject<volScalarField>(rhoName_);
+    const auto& U = mesh_.lookupObject<volVectorField>(UName_);
+    const auto& rho = mesh_.lookupObject<volScalarField>(rhoName_);
     const scalarField mDot(mag(U)*rho*Ain_);
 
     // Calculate scaled mass flow for neighbour region
-    const volVectorField& UNbr =
-        nbrMesh.lookupObject<volVectorField>(UNbrName_);
+    const auto& UNbr = nbrMesh.lookupObject<volVectorField>(UNbrName_);
     const scalarField UMagNbr(mag(UNbr));
     const scalarField UMagNbrMapped(interpolate(UMagNbr));
-    const scalarField& rhoNbr =
+    const auto& rhoNbr =
         nbrMesh.lookupObject<volScalarField>(rhoNbrName_).internalField();
     const scalarField rhoNbrMapped(interpolate(rhoNbr));
     const scalarField mDotNbr(UMagNbrMapped*rhoNbrMapped*AinNbr_);
-
 
     scalarField& htcc = htc_.primitiveFieldRef();
     const interpolation2DTable<Foam::scalar>& ntuTable = this->ntuTable();

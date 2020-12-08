@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,18 +31,82 @@ Group
     grpFvOptionsSources
 
 Description
-    Variable heat transfer model depending on local values. The area of contact
-    between regions (area) must be provided. The Nu number is calculated as:
+    Applies a variable heat transfer model depending
+    on local values for inter-region heat exchanges.
 
-        Nu = a*pow(Re, b)*pow(Pr, c)
+    The area of contact between regions (area) must be provided.
+    The Nu number is calculated as:
+
+    \f[
+        Nu = a \, \text{Re}^b \, \text{Pr}^c
+    \f]
 
     and the heat transfer coefficient as:
 
-        htc = Nu*K/ds
+    \f[
+        htc = \frac{\text{Nu} \, K}{ds}
+    \f]
 
-    where:
-        K is the heat conduction
-        ds is the strut diameter
+    where
+    \vartable
+      htc     | Heat transfer coefficient
+      Nu      | Nusselt number
+      Re      | Reynolds number
+      Pr      | Fluid Prandtl number
+      K       | Heat conduction
+      ds      | Strut diameter
+      a, b, c | Model constants
+    \endvartable
+
+    Required fields:
+    \verbatim
+      AoV       | Area per unit volume of heat exchanger    [1/m]
+    \endverbatim
+
+Usage
+    Minimal example by using \c constant/fvOptions:
+    \verbatim
+    variableHeatTransfer1
+    {
+        // Mandatory entries (unmodifiable)
+        type             variableHeatTransfer;
+
+        // Optional entries (runtime modifiable)
+        UNbr             U;
+        a                0.0;
+        b                0.0;
+        c                0.0;
+        ds               0.0;
+        Pr               0.0;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                     | Type  | Reqd | Dflt
+      type      | Type name: variableHeatTransfer | word  | yes  | -
+      UNbr      | Name of operand neighbour velocity field | word | no | U
+      a         | Model constant                  | scalar | no  | 0
+      b         | Model constant                  | scalar | no  | 0
+      c         | Model constant                  | scalar | no  | 0
+      ds        | Struct diameter                 | scalar | no  | 0
+      Pr        | Fluid Prandtl number            | scalar | no  | 0
+      \endtable
+
+    The inherited entries are elaborated in:
+     - \link interRegionHeatTransfer.H \endlink
+
+See also
+  - Foam::fv::interRegionHeatTransferModel
+  - Foam::fv::tabulatedHeatTransfer
+  - Foam::fv::tabulatedNTUHeatTransfer
+  - Foam::fv::constantHeatTransfer
+
+SourceFiles
+    variableHeatTransfer.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -66,11 +131,10 @@ class variableHeatTransfer
 :
     public interRegionHeatTransferModel
 {
-private:
 
-    // Private data
+    // Private Data
 
-        //- Name of neighbour velocity field; default = U
+        //- Name of operand neighbour velocity field
         word UNbrName_;
 
         //- Model constants
@@ -104,6 +168,12 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
+        //- No copy construct
+        variableHeatTransfer(const variableHeatTransfer&) = delete;
+
+        //- No copy assignment
+        void operator=(const variableHeatTransfer&) = delete;
 
 
     //- Destructor

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,22 +31,39 @@ Group
     grpFvOptionsSources
 
 Description
-    Solid-body 6-DoF acceleration source
+    Solid-body 6-DoF acceleration source.
 
 Usage
-    Example usage:
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    SBM
+    tabulatedAccelerationSource1
     {
-        type            tabulatedAccelerationSource;
-        active          yes;
-
+        // Mandatory entries (unmodifiable)
+        type             tabulatedAccelerationSource;
         timeDataFileName "constant/acceleration-terms.dat";
+
+        // Optional entries (unmodifiable)
+        U                U;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property  | Description                            | Type  | Reqd | Dflt
+      type      | Type name: tabulatedAccelerationSource | word  | yes  | -
+      timeDataFileName | Name of tabulated data file     | word  | yes  | -
+      U         | Name of operand velocity field         | word  | no   | U
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+
 SourceFiles
     tabulatedAccelerationSource.C
+    tabulatedAccelerationSourceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,30 +91,21 @@ class tabulatedAccelerationSource
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Run-time selectable acceleration model
         tabulated6DoFAcceleration motion_;
 
-        //- Velocity field name, default = U
+        //- Name of operand velocity field
         word UName_;
 
+        //- Gravitational accelaration
         dimensionedVector g0_;
 
 
 private:
 
     // Private Member Functions
-
-        //- No copy construct
-        tabulatedAccelerationSource
-        (
-            const tabulatedAccelerationSource&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const tabulatedAccelerationSource&) = delete;
-
 
         //- Source term to momentum equation
         template<class RhoFieldType>
@@ -125,6 +134,15 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        tabulatedAccelerationSource
+        (
+            const tabulatedAccelerationSource&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const tabulatedAccelerationSource&) = delete;
+
 
     //- Destructor
     virtual ~tabulatedAccelerationSource() = default;
@@ -132,14 +150,14 @@ public:
 
     // Member Functions
 
-        //- Source term to momentum equation
+        //- Add explicit contribution to momentum equation
         virtual void addSup
         (
             fvMatrix<vector>& eqn,
             const label fieldi
         );
 
-        //- Source term to compressible momentum equation
+        //- Add explicit contribution to compressible momentum equation
         virtual void addSup
         (
             const volScalarField& rho,
@@ -147,7 +165,8 @@ public:
             const label fieldi
         );
 
-        //- Read dictionary
+
+        //- Read source dictionary
         virtual bool read(const dictionary& dict);
 };
 

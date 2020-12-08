@@ -59,7 +59,7 @@ void Foam::fv::interRegionExplicitPorositySource::initialise()
 
     const word zoneName(name_ + ":porous");
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
     const cellZoneMesh& cellZones = nbrMesh.cellZones();
     label zoneID = cellZones.findZoneID(zoneName);
 
@@ -142,7 +142,7 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
 {
     initialise();
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
     const volVectorField& U = eqn.psi();
 
@@ -196,7 +196,7 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
 {
     initialise();
 
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
     const volVectorField& U = eqn.psi();
 
@@ -252,8 +252,7 @@ void Foam::fv::interRegionExplicitPorositySource::addSup
         dimensionedScalar(dimViscosity, Zero)
     );
 
-    const volScalarField& mu =
-        mesh_.lookupObject<volScalarField>(muName_);
+    const auto& mu = mesh_.lookupObject<volScalarField>(muName_);
 
     // Map local rho onto neighbour region
     meshInterp().mapSrcToTgt

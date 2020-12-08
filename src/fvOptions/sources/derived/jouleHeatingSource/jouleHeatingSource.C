@@ -40,13 +40,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(jouleHeatingSource, 0);
-
-    addToRunTimeSelectionTable
-    (
-        option,
-        jouleHeatingSource,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, jouleHeatingSource, dictionary);
 }
 }
 
@@ -135,11 +129,10 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
     csysPtr_(nullptr),
     curTimeIndex_(-1)
 {
-    // Set the field name to that of the energy field from which the temperature
-    // is obtained
+    // Set the field name to that of the energy
+    // field from which the temperature is obtained
 
-    const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName);
+    const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
     fieldNames_.setSize(1, thermo.he().name());
 
@@ -193,8 +186,7 @@ void Foam::fv::jouleHeatingSource::addSup
     const volVectorField gradV(fvc::grad(V_));
     if (anisotropicElectricalConductivity_)
     {
-        const volVectorField& sigmaLocal =
-            mesh_.lookupObject<volVectorField>(sigmaName);
+        const auto& sigmaLocal = mesh_.lookupObject<volVectorField>(sigmaName);
 
         tmp<volSymmTensorField> sigma = transformSigma(sigmaLocal);
 
@@ -202,8 +194,7 @@ void Foam::fv::jouleHeatingSource::addSup
     }
     else
     {
-        const volScalarField& sigma =
-            mesh_.lookupObject<volScalarField>(sigmaName);
+        const auto& sigma = mesh_.lookupObject<volScalarField>(sigmaName);
 
         eqn += (sigma*gradV) & gradV;
     }

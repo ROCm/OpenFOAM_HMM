@@ -38,12 +38,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(limitTemperature, 0);
-    addToRunTimeSelectionTable
-    (
-        option,
-        limitTemperature,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, limitTemperature, dictionary);
 }
 }
 
@@ -63,9 +58,9 @@ Foam::fv::limitTemperature::limitTemperature
     Tmax_(coeffs_.get<scalar>("max")),
     phase_(coeffs_.getOrDefault<word>("phase", word::null))
 {
-    // Set the field name to that of the energy field from which the temperature
-    // is obtained
-    const basicThermo& thermo =
+    // Set the field name to that of the energy
+    // field from which the temperature is obtained
+    const auto& thermo =
         mesh_.lookupObject<basicThermo>
         (
             IOobject::groupName(basicThermo::dictName, phase_)
@@ -86,6 +81,23 @@ bool Foam::fv::limitTemperature::read(const dictionary& dict)
         coeffs_.readEntry("min", Tmin_);
         coeffs_.readEntry("max", Tmax_);
 
+        if (Tmax_ < Tmin_)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Minimum temperature limit cannot exceed maximum limit" << nl
+                << "min = " << Tmin_ << nl
+                << "max = " << Tmax_
+                << exit(FatalIOError);
+        }
+
+        if (Tmin_ < 0)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Minimum temperature limit cannot be negative" << nl
+                << "min = " << Tmin_
+                << exit(FatalIOError);
+        }
+
         return true;
     }
 
@@ -95,7 +107,7 @@ bool Foam::fv::limitTemperature::read(const dictionary& dict)
 
 void Foam::fv::limitTemperature::correct(volScalarField& he)
 {
-    const basicThermo& thermo =
+    const auto& thermo =
         mesh_.lookupObject<basicThermo>
         (
             IOobject::groupName(basicThermo::dictName, phase_)
@@ -178,8 +190,8 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
         }
     }
 
-    // We've changed internal values so give boundary conditions opportunity
-    // to correct.
+    // We've changed internal values so give
+    // boundary conditions opportunity to correct
     he.correctBoundaryConditions();
 }
 

@@ -35,6 +35,7 @@ $(derivedSources)/solidificationMeltingSource/solidificationMeltingSource.C
 $(derivedSources)/tabulatedAccelerationSource/tabulatedAccelerationSource.C
 $(derivedSources)/tabulatedAccelerationSource/tabulated6DoFAcceleration/tabulated6DoFAcceleration.C
 $(derivedSources)/viscousDissipation/viscousDissipation.C
+$(derivedSources)/buoyancyTurbSource/buoyancyTurbSource.C
 
 interRegion = sources/interRegion
 $(interRegion)/interRegionHeatTransfer/interRegionHeatTransferModel/interRegionHeatTransferModel.C

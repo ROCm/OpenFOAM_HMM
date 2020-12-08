@@ -37,7 +37,6 @@ using namespace Foam::constant;
 namespace Foam
 {
     defineTypeNameAndDebug(targetCoeffTrim, 0);
-
     addToRunTimeSelectionTable(trimModel, targetCoeffTrim, dictionary);
 }
 
@@ -248,7 +247,7 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
         dTheta_ = degToRad(dTheta_);
     }
 
-    coeffs_.readEntry("alpha", alpha_);
+    coeffs_.readIfPresent("alpha", alpha_);
 }
 
 

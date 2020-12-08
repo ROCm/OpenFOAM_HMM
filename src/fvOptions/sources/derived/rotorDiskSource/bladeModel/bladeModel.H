@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,21 +29,50 @@ Class
 
 Description
     Blade model class calculates:
-        Linear interpolated blade twist and chord based on radial position
-        Interpolation factor (for interpolating profile performance)
+      - Linear interpolated blade twist and chord based on radial position
+      - Interpolation factor (for interpolating profile performance)
 
-    Input in list format:
+Usage
+    Minimal example by using \c constant/fvOptions:
+    rotorDiskSource1
+    {
+        // Mandatory/Optional (inherited) entries
+        ...
 
-        data
-        (
-            (profile1 (radius1 twist1 chord1))
-            (profile1 (radius2 twist2 chord2))
-        );
+        // Mandatory entries (runtime modifiable)
+        blade
+        {
+            // Mandatory entries (runtime modifiable)
+            data
+            (
+                (profile1 (radius1 twist1 chord1))
+                (profile1 (radius2 twist2 chord2))
+                ...
+                ([0]      ([1]     [2]    [3]))
+            );
 
-    where:
-        radius [m]
-        twist [deg], converted to [rad] internally
-        chord [m]
+            // Optional entries (runtime modifiable)
+            file    <fileName>;
+        }
+    }
+
+    where the entries mean:
+    \table
+      Property   | Description                          | Type  | Reqd | Dflt
+      blade      | Dictionary name: blade               | word  | yes  | -
+      data       | Blade characteristics in list format | list  | yes  | -
+      [0] (profile) | Corresponding profile name per section | word   | yes | -
+      [1] (radius) | Radial position of the blade section [m] | scalar | yes | -
+      [2] (twist)   | Twist angle of the blade section [deg] | scalar | yes | -
+      [3] (chord)   | Chord length of the blade section [m]  | scalar | yes | -
+      file  | Name of file containing blade characteristics  | word   | no  | -
+    \endtable
+
+Note
+  - The entry \c twist is internally converted from [deg] to [rad].
+
+See also
+  - Foam::fv::rotorDiskSource
 
 SourceFiles
     bladeModel.C
@@ -68,7 +98,7 @@ class bladeModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Corresponding profile name per section
         List<word> profileName_;
@@ -107,15 +137,23 @@ protected:
 
 public:
 
-    //- Constructor
-    bladeModel(const dictionary& dict);
+    // Constructors
+
+        //- Construct from dictionary
+        bladeModel(const dictionary& dict);
+
+        //- No copy construct
+        bladeModel(const bladeModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const bladeModel&) = delete;
 
 
     //- Destructor
     virtual ~bladeModel() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

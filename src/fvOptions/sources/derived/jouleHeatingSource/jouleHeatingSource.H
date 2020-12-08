@@ -36,8 +36,8 @@ Description
         \grad \left( \sigma \grad V \right)
     \f]
 
-    where \f$ V \f$ is electrical potential and \f$\sigma\f$ is the
-    electrical current
+    where \f$ V \f$ is electrical potential
+    and \f$\sigma\f$ is the electrical current.
 
     To provide a Joule heating contribution according to:
 
@@ -68,67 +68,89 @@ Description
                           = (sigma \grad V) \cdot \grad V
     \f]
 
-
 Usage
-    Isotropic (scalar) electrical conductivity
+    Minimal example by using \c constant/fvOptions:
     \verbatim
-    jouleHeatingSourceCoeffs
+    jouleHeatingSource1
     {
-        anisotropicElectricalConductivity no;
+        // Mandatory entries (unmodifiable)
+        type                 jouleHeatingSource;
 
-        // Optionally specify the conductivity as a function of temperature
-        // Note: if not supplied, this will be read from the time directory
-        sigma           table
-        (
-            (273        1e5)
-            (1000       1e5)
-        );
+        // Mandatory entries (runtime modifiable)
+        anisotropicElectricalConductivity true;
+
+        // Optional entries (runtime modifiable)
+        T       <Tname>;
+
+        // Conditional mandatory entries (runtime modifiable)
+
+            // when anisotropicElectricalConductivity=true
+            coordinateSystem
+            {
+                origin  (0 0 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+
+        // Conditional optional entries (runtime modifiable)
+
+            // when anisotropicElectricalConductivity=false
+            // Specify the conductivity as a function of temperature
+            // If not supplied, this will be read from the time directory
+            sigma           table
+            (
+                (273        1e5)
+                (1000       1e5)
+            );
+
+            // when anisotropicElectricalConductivity=true
+            sigma           (31900 63800 127600);
+            //sigma           table
+            //(
+            //    (0      (0 0 0))
+            //    (1000   (127600 127600 127600))
+            //);
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-    Anisotropic (vectorial) electrical conductivity
-    jouleHeatingSourceCoeffs
-    {
-        anisotropicElectricalConductivity yes;
-
-        coordinateSystem
-        {
-            origin  (0 0 0);
-            e1      (1 0 0);
-            e3      (0 0 1);
-        }
-
-        // Optionally specify sigma as a function of temperature
-        //sigma           (31900 63800 127600);
-        //
-        //sigma           table
-        //(
-        //    (0      (0 0 0))
-        //    (1000   (127600 127600 127600))
-        //);
-    }
-
-
-    Where:
+    where the entries mean:
     \table
-        Property     | Description               | Required  | Default value
-        T            | Name of temperature field | no        | T
-        sigma        | Electrical conductivity as a function of temperature |no|
-        anisotropicElectricalConductivity | Anisotropic flag | yes |
+      Property  | Description                       | Type  | Reqd | Dflt
+      type      | Type name: jouleHeatingSource     | word  | yes  | -
+      anisotropicElectricalConductivity | Flag to indicate that <!--
+                --> if the electrical conductivity is anisotropic <!--
+                -->                                 | bool  | yes  | -
+      T         | Name of operand temperature field | word  | no   | T
+      sigma     | Electrical conductivity as a function of temperature <!--
+                -->                                 | table | no   | -
+      coordinateSystem | User-specified coordinate system | coordSystem | no | -
     \endtable
 
-    The electrical conductivity can be specified using either:
+    The inherited entries are elaborated in:
+     - \link fvOption.H \endlink
+
+Note
+  - \c anisotropicElectricalConductivity=true enables
+  anisotropic (vectorial) electrical conductivity.
+  - \c anisotropicElectricalConductivity=false enables
+  isotropic (scalar) electrical conductivity.
+  - The electrical conductivity can be specified using either:
     - If the \c sigma entry is present the electrical conductivity is specified
-      as a function of temperature using a Function1 type
-    - If not present the sigma field will be read from file
-    - If the anisotropicElectricalConductivity flag is set to 'true', sigma
-      should be specified as a vector quantity
+    as a function of temperature using a \c Function1 type.
+    - If not present the \c sigma field will be read from file.
+    - If the \c anisotropicElectricalConductivity flag is set to \c true,
+    \c sigma should be specified as a vector quantity.
+
+See also
+  - Foam::Function1
+  - Foam::coordSystem
 
 SourceFiles
     jouleHeatingSource.C
-
-SeeAlso
-    Foam::Function1
+    jouleHeatingSourceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -160,7 +182,7 @@ class jouleHeatingSource
         //- Name of electrical conductivity field
         static const word sigmaName;
 
-        //- Name of temperature field - default = "T" (optional)
+        //- Name of temperature field
         word TName_;
 
         //- Electrical potential field / [V]
@@ -183,12 +205,6 @@ class jouleHeatingSource
 
 
     // Private Member Functions
-
-        //- No copy construct
-        jouleHeatingSource(const jouleHeatingSource&) = delete;
-
-        //- No copy assignment
-        void operator=(const jouleHeatingSource&) = delete;
 
         //- Transform the anisotropic electrical conductivity into global system
         tmp<volSymmTensorField> transformSigma
@@ -227,6 +243,12 @@ public:
             const fvMesh& mesh
         );
 
+        //- No copy construct
+        jouleHeatingSource(const jouleHeatingSource&) = delete;
+
+        //- No copy assignment
+        void operator=(const jouleHeatingSource&) = delete;
+
 
     //- Destructor
     virtual ~jouleHeatingSource() = default;
@@ -234,7 +256,7 @@ public:
 
     // Member Functions
 
-        // Evaluate
+        // Evaluation
 
             //- Add explicit contribution to compressible momentum equation
             virtual void addSup

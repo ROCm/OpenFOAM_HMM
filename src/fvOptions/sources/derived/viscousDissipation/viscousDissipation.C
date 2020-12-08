@@ -39,13 +39,7 @@ namespace Foam
 namespace fv
 {
     defineTypeNameAndDebug(viscousDissipation, 0);
-
-    addToRunTimeSelectionTable
-    (
-        option,
-        viscousDissipation,
-        dictionary
-    );
+    addToRunTimeSelectionTable(option, viscousDissipation, dictionary);
 }
 }
 
@@ -103,11 +97,11 @@ Foam::fv::viscousDissipation::viscousDissipation
         coeffs_.getOrDefault
         (
             "rhoInf",
-            dimensionedScalar("rho", dimDensity, 0)
+            dimensionedScalar(dimDensity, 0)
         )
     )
 {
-    const basicThermo* thermoPtr =
+    const auto* thermoPtr =
         mesh_.findObject<basicThermo>(basicThermo::dictName);
 
     if (thermoPtr)
@@ -198,7 +192,7 @@ void Foam::fv::viscousDissipation::addSup
     );
 
     // Cached?
-    const GradFieldType* gradUPtr = mesh_.findObject<GradFieldType>(gradUName);
+    const auto* gradUPtr = mesh_.findObject<GradFieldType>(gradUName);
 
     if (gradUPtr)
     {
@@ -206,7 +200,7 @@ void Foam::fv::viscousDissipation::addSup
     }
     else
     {
-        const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
+        const auto& U = mesh_.lookupObject<volVectorField>(UName_);
         tgradU.ref() = fvc::grad(U);
     }
 
