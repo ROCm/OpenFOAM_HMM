@@ -43,6 +43,7 @@ sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
+sampledSurface/isoSurface/sampledIsoSurfacePoint.C
 sampledSurface/isoSurface/sampledIsoSurfaceTopo.C
 sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C

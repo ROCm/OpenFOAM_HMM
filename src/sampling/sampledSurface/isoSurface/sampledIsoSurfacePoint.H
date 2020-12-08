@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sampledIsoSurfaceCell
+    Foam::sampledIsoSurfacePoint
 
 Description
     A sampledSurface defined by a surface of iso value using a
-    \em cell algorithm.
+    \em point algorithm (always triangulated!).
     It only recalculates the iso-surface if time changes.
     To be used in sampleSurfaces / functionObjects.
 
@@ -40,7 +39,7 @@ Usage
     {
         surface1
         {
-            type     isoSurfaceCell;
+            type     isoSurfacePoint;
             isoField T;
             isoValue 373;
         }
@@ -50,7 +49,7 @@ Usage
     Where the sub-entries comprise:
     \table
         Property | Description                              | Required | Default
-        type     | isoSurfaceCell                           | yes |
+        type     | isoSurfacePoint                          | yes |
         isoField | field name for obtaining iso-surface     | yes |
         isoValue | value of iso-surface                     | yes |
         average  | cell values from averaged point values   | no  | false
@@ -62,12 +61,12 @@ Usage
     \endtable
 
 SourceFiles
-    sampledIsoSurfaceCell.C
+    sampledIsoSurfacePoint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sampledIsoSurfaceCell_H
-#define sampledIsoSurfaceCell_H
+#ifndef sampledIsoSurfacePoint_H
+#define sampledIsoSurfacePoint_H
 
 #include "sampledIsoSurface.H"
 
@@ -77,23 +76,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class sampledIsoSurfaceCell Declaration
+                    Class sampledIsoSurfacePoint Declaration
 \*---------------------------------------------------------------------------*/
 
-class sampledIsoSurfaceCell
+class sampledIsoSurfacePoint
 :
     public sampledIsoSurface
 {
 public:
 
     //- Runtime type information
-    TypeNameNoDebug("sampledIsoSurfaceCell");
+    TypeNameNoDebug("sampledIsoSurfacePoint");
 
 
     // Constructors
 
         //- Construct from dictionary
-        sampledIsoSurfaceCell
+        sampledIsoSurfacePoint
         (
             const word& name,
             const polyMesh& mesh,
@@ -102,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledIsoSurfaceCell() = default;
+    virtual ~sampledIsoSurfacePoint() = default;
 };
 
 

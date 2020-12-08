@@ -25,27 +25,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sampledIsoSurfaceCell.H"
+#include "sampledIsoSurfacePoint.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeName(sampledIsoSurfaceCell);
+    defineTypeName(sampledIsoSurfacePoint);
     addNamedToRunTimeSelectionTable
     (
         sampledSurface,
-        sampledIsoSurfaceCell,
+        sampledIsoSurfacePoint,
         word,
-        isoSurfaceCell
+        isoSurfacePoint
     );
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
+Foam::sampledIsoSurfacePoint::sampledIsoSurfacePoint
 (
     const word& name,
     const polyMesh& mesh,
@@ -54,7 +53,7 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
 :
     sampledIsoSurface
     (
-        isoSurfaceParams(isoSurfaceParams::ALGO_CELL),
+        isoSurfaceParams(isoSurfaceParams::ALGO_POINT),
         name,
         mesh,
         dict
