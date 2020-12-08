@@ -142,7 +142,6 @@ public:
 
         //- Calculate
         virtual void calculate();
-
 };
 
 

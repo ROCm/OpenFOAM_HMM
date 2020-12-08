@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,8 @@ License
 #include "noiseModel.H"
 #include "functionObject.H"
 #include "argList.H"
+#include "fft.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +38,86 @@ namespace Foam
     defineTypeNameAndDebug(noiseModel, 0);
     defineRunTimeSelectionTable(noiseModel, dictionary);
 }
+
+
+const Foam::Enum<Foam::noiseModel::weightingType>
+Foam::noiseModel::weightingTypeNames_
+({
+    {weightingType::none, "dB"},
+    {weightingType::dBA, "dBA"},
+    {weightingType::dBB, "dBB"},
+    {weightingType::dBC, "dBC"},
+    {weightingType::dBD, "dBD"},
+});
+
+
+void Foam::noiseModel::setOctaveBands
+(
+    const scalarField& f,
+    const scalar fLower,
+    const scalar fUpper,
+    const scalar octave,
+    labelList& fBandIDs,
+    scalarField& fCentre
+)
+{
+    // Set the indices of to the lower frequency bands for the input frequency
+    // range. Ensure that the centre frequency passes though 1000 Hz
+
+    // Low frequency bound given by:
+    //     fLow = f0*(2^(0.5*bandI/octave))
+
+    // Initial (lowest centre frequency)
+    scalar fTest = 15.625;
+
+    const scalar fRatio = pow(2, 1.0/octave);
+    const scalar fRatioL2C = pow(2, 0.5/octave);
+
+    // IDs of band IDs
+    labelHashSet bandIDs(f.size());
+
+    // Centre frequencies
+    DynamicList<scalar> fc;
+
+    // Convert to lower band limit
+    fTest /= fRatioL2C;
+
+    forAll(f, i)
+    {
+        if (f[i] >= fTest)
+        {
+            // Advance band if appropriate
+            while (f[i] > fTest)
+            {
+                fTest *= fRatio;
+            }
+            fTest /= fRatio;
+
+            if (bandIDs.insert(i))
+            {
+                // Also store (next) centre frequency
+                fc.append(fTest*fRatioL2C);
+            }
+            fTest *= fRatio;
+
+            if (fTest > fUpper)
+            {
+                break;
+            }
+        }
+    }
+
+    fBandIDs = bandIDs.sortedToc();
+
+    if (fc.size())
+    {
+        // Remove the last centre frequency (beyond upper frequency limit)
+        fc.remove();
+
+        fCentre.transfer(fc);
+    }
+}
+
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -71,14 +153,12 @@ Foam::scalar Foam::noiseModel::checkUniformTimeStep
 
     if (times.size() > 1)
     {
-        for (label i = 1; i < times.size(); i++)
+        // Uniform time step
+        deltaT = (times.last() - times.first())/scalar(times.size() - 1);
+
+        for (label i = 1; i < times.size(); ++i)
         {
             scalar dT = times[i] - times[i-1];
-
-            if (deltaT < 0)
-            {
-                deltaT = dT;
-            }
 
             if (mag(dT/deltaT - 1) > 1e-8)
             {
@@ -155,6 +235,267 @@ Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::noiseModel::uniformFrequencies
+(
+    const scalar deltaT
+) const
+{
+    const auto& window = windowModelPtr_();
+    const label N = window.nSamples();
+
+    auto tf = tmp<scalarField>::New(N/2 + 1, Zero);
+    auto& f = tf.ref();
+
+    const scalar deltaf = 1.0/(N*deltaT);
+    forAll(f, i)
+    {
+        f[i] = i*deltaf;
+    }
+
+    return tf;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::octaves
+(
+    const scalarField& data,
+    const scalarField& f,
+    const labelUList& freqBandIDs
+) const
+{
+    auto toctData = tmp<scalarField>::New(freqBandIDs.size() - 1, Zero);
+
+    if (freqBandIDs.size() < 2)
+    {
+        WarningInFunction
+            << "Octave frequency bands are not defined "
+            << "- skipping octaves calculation"
+            << endl;
+
+        return toctData;
+    }
+
+    auto& octData = toctData.ref();
+
+    for (label bandI = 0; bandI < freqBandIDs.size() - 1; ++bandI)
+    {
+        label fb0 = freqBandIDs[bandI];
+        label fb1 = freqBandIDs[bandI+1];
+
+        if (fb0 == fb1) continue;
+
+        for (label freqI = fb0; freqI < fb1; ++freqI)
+        {
+            label f0 = f[freqI];
+            label f1 = f[freqI + 1];
+            scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
+            octData[bandI] += dataAve*(f1 - f0);
+        }
+    }
+
+    return toctData;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::Pf(const scalarField& p) const
+{
+    if (planInfo_.active)
+    {
+        if (p.size() != planInfo_.windowSize)
+        {
+            FatalErrorInFunction
+                << "Expected pressure data to have " << planInfo_.windowSize
+                << " values, but received " << p.size() << " values"
+                << abort(FatalError);
+        }
+
+        List<double>& in = planInfo_.in;
+        const List<double>& out = planInfo_.out;
+        forAll(in, i)
+        {
+            in[i] = p[i];
+        }
+
+        ::fftw_execute(planInfo_.plan);
+
+        const label n = planInfo_.windowSize;
+        const label nBy2 = n/2;
+        auto tresult = tmp<scalarField>::New(nBy2 + 1);
+        auto& result = tresult.ref();
+
+        // 0 th value = DC component
+        // nBy2 th value = real only if n is even
+        result[0] = out[0];
+        for (label i = 1; i <= nBy2; ++i)
+        {
+            const auto re = out[i];
+            const auto im = out[n - i];
+            result[i] = sqrt(re*re + im*im);
+        }
+
+        return tresult;
+    }
+
+    return mag(fft::realTransform1D(p));
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::meanPf(const scalarField& p) const
+{
+    const auto& window = windowModelPtr_();
+    const label N = window.nSamples();
+    const label nWindow = window.nWindow();
+
+    auto tmeanPf = tmp<scalarField>::New(N/2 + 1, Zero);
+    auto& meanPf = tmeanPf.ref();
+
+    for (label windowI = 0; windowI < nWindow; ++windowI)
+    {
+        meanPf += Pf(window.apply<scalar>(p, windowI));
+    }
+
+    meanPf /= scalar(nWindow);
+
+    return tmeanPf;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::RMSmeanPf
+(
+    const scalarField& p
+) const
+{
+    const auto& window = windowModelPtr_();
+    const label N = window.nSamples();
+    const label nWindow = window.nWindow();
+
+    scalarField RMSMeanPf(N/2 + 1, Zero);
+    for (label windowI = 0; windowI < nWindow; ++windowI)
+    {
+        RMSMeanPf += sqr(Pf(window.apply<scalar>(p, windowI)));
+    }
+
+    return sqrt(RMSMeanPf/scalar(nWindow))/scalar(N);
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::PSDf
+(
+    const scalarField& p,
+    const scalar deltaT
+) const
+{
+    const auto& window = windowModelPtr_();
+    const label N = window.nSamples();
+    const label nWindow = window.nWindow();
+
+    auto tpsd = tmp<scalarField>::New(N/2 + 1, Zero);
+    auto& psd = tpsd.ref();
+
+    for (label windowI = 0; windowI < nWindow; ++windowI)
+    {
+        psd += sqr(Pf(window.apply<scalar>(p, windowI)));
+    }
+
+    scalar fs =  1.0/deltaT;
+    psd /= scalar(nWindow)*fs*N;
+
+    // Scaling due to use of 1-sided FFT
+    // Note: do not scale DC component
+    psd *= 2;
+    psd.first() /= 2;
+    psd.last() /= 2;
+
+    if (debug)
+    {
+        Pout<< "Average PSD: " << average(psd) << endl;
+    }
+
+    return tpsd;
+}
+
+
+Foam::scalar Foam::noiseModel::RAf(const scalar f) const
+{
+    const scalar c1 = sqr(12194.0);
+    const scalar c2 = sqr(20.6);
+    const scalar c3 = sqr(107.7);
+    const scalar c4 = sqr(739.9);
+
+    const scalar f2 = f*f;
+
+    return
+        c1*sqr(f2)
+       /(
+            (f2 + c2)*sqrt((f2 + c3)*(f2 + c4))*(f2 + c1)
+        );
+}
+
+
+Foam::scalar Foam::noiseModel::gainA(const scalar f) const
+{
+    return 20*log10(RAf(f)) - 20*log10(RAf(1000));
+}
+
+
+Foam::scalar Foam::noiseModel::RBf(const scalar f) const
+{
+    const scalar c1 = sqr(12194.0);
+    const scalar c2 = sqr(20.6);
+    const scalar c3 = sqr(158.5);
+
+    const scalar f2 = f*f;
+
+    return
+        c1*f2*f
+       /(
+            (f2 + c2)*sqrt(f2 + c3)*(f2 + c1)
+        );
+}
+
+
+Foam::scalar Foam::noiseModel::gainB(const scalar f) const
+{
+    return 20*log10(RBf(f)) - 20*log10(RBf(1000));
+}
+
+
+Foam::scalar Foam::noiseModel::RCf(const scalar f) const
+{
+    const scalar c1 = sqr(12194.0);
+    const scalar c2 = sqr(20.6);
+
+    const scalar f2 = f*f;
+
+    return c1*f2/((f2 + c2)*(f2 + c1));
+}
+
+
+Foam::scalar Foam::noiseModel::gainC(const scalar f) const
+{
+    return 20*log10(RCf(f)) - 20*log10(RCf(1000));
+}
+
+
+Foam::scalar Foam::noiseModel::RDf(const scalar f) const
+{
+    const scalar f2 = f*f;
+
+    const scalar hf =
+        (sqr(1037918.48 - f2) + 1080768.16*f2)
+       /(sqr(9837328 - f2) + 11723776*f2);
+
+    return
+        f/6.8966888496476e-5*Foam::sqrt(hf/((f2 + 79919.29)*(f2 + 1345600)));
+}
+
+
+Foam::scalar Foam::noiseModel::gainD(const scalar f) const
+{
+    return 20*log10(RDf(f));
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
@@ -164,10 +505,10 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     nSamples_(65536),
     fLower_(25),
     fUpper_(10000),
-    customBounds_(false),
     startTime_(0),
     windowModelPtr_(),
     graphFormat_("raw"),
+    SPLweighting_(weightingType::none),
     minPressure_(-0.5*VGREAT),
     maxPressure_(0.5*VGREAT),
     outputPrefix_(),
@@ -175,11 +516,19 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     writeSPL_(true),
     writePSD_(true),
     writePSDf_(true),
-    writeOctaves_(true)
+    writeOctaves_(true),
+    planInfo_()
 {
+    planInfo_.active = false;
+
     if (readFields)
     {
         read(dict);
+    }
+
+    if (debug)
+    {
+        writeWeightings();
     }
 }
 
@@ -190,15 +539,8 @@ bool Foam::noiseModel::read(const dictionary& dict)
 {
     dict.readIfPresent("rhoRef", rhoRef_);
     dict.readIfPresent("N", nSamples_);
-    customBounds_ = false;
-    if (dict.readIfPresent("fl", fLower_))
-    {
-        customBounds_ = true;
-    }
-    if (dict.readIfPresent("fu", fUpper_))
-    {
-        customBounds_ = true;
-    }
+    dict.readIfPresent("fl", fLower_);
+    dict.readIfPresent("fu", fUpper_);
     dict.readIfPresent("startTime", startTime_);
     dict.readIfPresent("graphFormat", graphFormat_);
     dict.readIfPresent("minPressure", minPressure_);
@@ -210,7 +552,6 @@ bool Foam::noiseModel::read(const dictionary& dict)
         FatalIOErrorInFunction(dict)
             << "fl: lower frequency bound must be greater than zero"
             << exit(FatalIOError);
-
     }
 
     if (fUpper_ < 0)
@@ -218,7 +559,6 @@ bool Foam::noiseModel::read(const dictionary& dict)
         FatalIOErrorInFunction(dict)
             << "fu: upper frequency bound must be greater than zero"
             << exit(FatalIOError);
-
     }
 
     if (fUpper_ < fLower_)
@@ -229,6 +569,14 @@ bool Foam::noiseModel::read(const dictionary& dict)
             << exit(FatalIOError);
 
     }
+
+    Info<< "    Frequency bounds:" << nl
+        << "        lower: " << fLower_ << nl
+        << "        upper: " << fUpper_ << endl;
+
+    weightingTypeNames_.readIfPresent("SPLweighting", dict, SPLweighting_);
+
+    Info<< "    Weighting: " << weightingTypeNames_[SPLweighting_] << endl;
 
     Info<< "    Write options:" << endl;
     dictionary optDict(dict.subOrEmptyDict("writeOptions"));
@@ -241,9 +589,178 @@ bool Foam::noiseModel::read(const dictionary& dict)
 
     windowModelPtr_ = windowModel::New(dict, nSamples_);
 
+    cleanFFTW();
+
+    const label windowSize = windowModelPtr_->nSamples();
+
+    if (windowSize > 1)
+    {
+        planInfo_.active = true;
+        planInfo_.windowSize = windowSize;
+        planInfo_.in.setSize(windowSize);
+        planInfo_.out.setSize(windowSize);
+
+        // Using real to half-complex fftw 'kind'
+        planInfo_.plan =
+            fftw_plan_r2r_1d
+            (
+                windowSize,
+                planInfo_.in.data(),
+                planInfo_.out.data(),
+                FFTW_R2HC,
+                windowSize <= 8192 ? FFTW_MEASURE : FFTW_ESTIMATE
+            );
+    }
+
     Info<< nl << endl;
 
     return true;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::PSD
+(
+    const scalarField& PSDf
+) const
+{
+    return 10*log10(PSDf/sqr(2e-5));
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
+(
+    const scalarField& Prms2,
+    const scalar f
+) const
+{
+    tmp<scalarField> tspl(10*log10(Prms2/sqr(2e-5)));
+    scalarField& spl = tspl.ref();
+
+    switch (SPLweighting_)
+    {
+        case weightingType::none:
+        {
+            break;
+        }
+        case weightingType::dBA:
+        {
+            spl += gainA(f);
+            break;
+        }
+        case weightingType::dBB:
+        {
+            spl += gainB(f);
+            break;
+        }
+        case weightingType::dBC:
+        {
+            spl += gainC(f);
+            break;
+        }
+        case weightingType::dBD:
+        {
+            spl += gainD(f);
+            break;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unknown weighting " << weightingTypeNames_[SPLweighting_]
+                << abort(FatalError);
+        }
+    }
+
+    return tspl;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
+(
+    const scalarField& Prms2,
+    const scalarField& f
+) const
+{
+    tmp<scalarField> tspl(10*log10(Prms2/sqr(2e-5)));
+    scalarField& spl = tspl.ref();
+
+    switch (SPLweighting_)
+    {
+        case weightingType::none:
+        {
+            break;
+        }
+        case weightingType::dBA:
+        {
+            forAll(spl, i)
+            {
+                spl[i] += gainA(f[i]);
+            }
+            break;
+        }
+        case weightingType::dBB:
+        {
+            forAll(spl, i)
+            {
+                spl[i] += gainB(f[i]);
+            }
+            break;
+        }
+        case weightingType::dBC:
+        {
+            forAll(spl, i)
+            {
+                spl[i] += gainC(f[i]);
+            }
+            break;
+        }
+        case weightingType::dBD:
+        {
+            forAll(spl, i)
+            {
+                spl[i] += gainD(f[i]);
+            }
+            break;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unknown weighting " << weightingTypeNames_[SPLweighting_]
+                << abort(FatalError);
+        }
+    }
+
+    return tspl;
+}
+
+
+void Foam::noiseModel::cleanFFTW()
+{
+    if (planInfo_.active)
+    {
+        planInfo_.active = false;
+        fftw_destroy_plan(planInfo_.plan);
+        fftw_cleanup();
+    }
+}
+
+
+void Foam::noiseModel::writeWeightings() const
+{
+    scalar f0 = 10;
+    scalar f1 = 20000;
+
+    OFstream osA("noiseModel-weight-A");
+    OFstream osB("noiseModel-weight-B");
+    OFstream osC("noiseModel-weight-C");
+    OFstream osD("noiseModel-weight-D");
+
+    for (label f = f0; f <= f1; ++f)
+    {
+        osA << f << " " << gainA(f) << nl;
+        osB << f << " " << gainB(f) << nl;
+        osC << f << " " << gainC(f) << nl;
+        osD << f << " " << gainD(f) << nl;
+    }
 }
 
 

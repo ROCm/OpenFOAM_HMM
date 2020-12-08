@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "pointNoise.H"
-#include "noiseFFT.H"
 #include "argList.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -77,12 +76,15 @@ void pointNoise::processData
 {
     Info<< "Reading data file " << data.fName() << endl;
 
-    const word fNameBase = data.fName().nameLessExt();
+    const word fNameBase(data.fName().nameLessExt());
 
     // Time and pressure history data
     scalarField t, p;
     filterTimeData(data.x(), data.y(), t, p);
+
+    // Apply conversions
     p *= rhoRef_;
+    p -= average(p);
 
     Info<< "    read " << t.size() << " values" << nl << endl;
 
@@ -101,79 +103,95 @@ void pointNoise::processData
     windowModelPtr_->validate(t.size());
     const windowModel& win = windowModelPtr_();
     const scalar deltaf = 1.0/(deltaT*win.nSamples());
-    fileName outDir(baseFileDir(dataseti)/fNameBase);
-
-    // Create the fft
-    noiseFFT nfft(deltaT, win.nSamples());
-    nfft.setData(p);
+    const fileName outDir(baseFileDir(dataseti)/fNameBase);
 
 
     // Narrow band data
     // ----------------
 
+    scalarField f(uniformFrequencies(deltaT));
+
     // RMS pressure [Pa]
-    graph Prmsf(nfft.RMSmeanPf(win));
-    if (customBounds_)
-    {
-        Prmsf.setXRange(fLower_, fUpper_);
-    }
     if (writePrmsf_)
     {
-        Info<< "    Creating graph for " << Prmsf.title() << endl;
-        Prmsf.write(outDir, graph::wordify(Prmsf.title()), graphFormat_);
+        graph g
+        (
+            "Prms(f)",
+            "f [Hz]",
+            "Prms(f) [Pa]",
+            f,
+            RMSmeanPf(p)
+        );
+
+        g.setXRange(fLower_, fUpper_);
+
+        Info<< "    Creating graph for " << g.title() << endl;
+        g.write(outDir, graph::wordify(g.title()), graphFormat_);
     }
 
     // PSD [Pa^2/Hz]
-    graph PSDf(nfft.PSDf(win));
-    if (customBounds_)
-    {
-        PSDf.setXRange(fLower_, fUpper_);
-    }
+    const scalarField PSDf(this->PSDf(p, deltaT));
+
     if (writePSDf_)
     {
-        Info<< "    Creating graph for " << PSDf.title() << endl;
-        PSDf.write(outDir, graph::wordify(PSDf.title()), graphFormat_);
+        graph g
+        (
+            "PSD(f)",
+            "f [Hz]",
+            "PSD(f) [PaPa_Hz]",
+            f,
+            PSDf
+        );
+
+        g.setXRange(fLower_, fUpper_);
+
+        Info<< "    Creating graph for " << g.title() << endl;
+        g.write(outDir, graph::wordify(g.title()), graphFormat_);
     }
 
     // PSD [dB/Hz]
-    graph PSDg
-    (
-        "PSD_dB_Hz(f)",
-        "f [Hz]",
-        "PSD(f) [dB_Hz]",
-        Prmsf.x(),
-        noiseFFT::PSD(PSDf.y())
-    );
-
     if (writePSD_)
     {
-        Info<< "    Creating graph for " << PSDg.title() << endl;
-        PSDg.write(outDir, graph::wordify(PSDg.title()), graphFormat_);
+        graph g
+        (
+            "PSD_dB_Hz(f)",
+            "f [Hz]",
+            "PSD(f) [dB_Hz]",
+            f,
+            PSD(PSDf)
+        );
+
+        g.setXRange(fLower_, fUpper_);
+
+        Info<< "    Creating graph for " << g.title() << endl;
+        g.write(outDir, graph::wordify(g.title()), graphFormat_);
     }
 
     // SPL [dB]
-    graph SPLg
-    (
-        "SPL_dB(f)",
-        "f [Hz]",
-        "SPL(f) [dB]",
-        Prmsf.x(),
-        noiseFFT::SPL(PSDf.y()*deltaf)
-    );
-
     if (writeSPL_)
     {
-        Info<< "    Creating graph for " << SPLg.title() << endl;
-        SPLg.write(outDir, graph::wordify(SPLg.title()), graphFormat_);
+        graph g
+        (
+            "SPL_dB(f)",
+            "f [Hz]",
+            "SPL(f) [" + weightingTypeNames_[SPLweighting_] + "]",
+            f,
+            SPL(PSDf*deltaf, f)
+        );
+
+        g.setXRange(fLower_, fUpper_);
+
+        Info<< "    Creating graph for " << g.title() << endl;
+        g.write(outDir, graph::wordify(g.title()), graphFormat_);
     }
 
     if (writeOctaves_)
     {
         labelList octave13BandIDs;
         scalarField octave13FreqCentre;
-        noiseFFT::octaveBandInfo
+        setOctaveBands
         (
-            Prmsf.x(),
+            f,
             fLower_,
             fUpper_,
             3,
@@ -186,18 +204,19 @@ void pointNoise::processData
         // ---------------
 
         // Integrated PSD = P(rms)^2 [Pa^2]
-        graph Prms13f(nfft.octaves(PSDf, octave13BandIDs));
+        scalarField Prms13f(octaves(PSDf, f, octave13BandIDs));
 
-        graph SPL13g
+        graph g
         (
             "SPL13_dB(fm)",
             "fm [Hz]",
-            "SPL(fm) [dB]",
+            "SPL(fm) [" + weightingTypeNames_[SPLweighting_] + "]",
             octave13FreqCentre,
-            noiseFFT::SPL(Prms13f.y())
+            SPL(Prms13f, octave13FreqCentre)
         );
-        Info<< "    Creating graph for " << SPL13g.title() << endl;
-        SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);
+
+        Info<< "    Creating graph for " << g.title() << endl;
+        g.write(outDir, graph::wordify(g.title()), graphFormat_);
     }
 }
 
