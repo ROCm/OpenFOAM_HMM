@@ -45,6 +45,25 @@ sampled
             ${_sampleMesh}
             surface     plane-0.55.stl;
         }
+
+        outerplane-0.45
+        {
+            type        distanceSurface;
+            // defaults:
+            distance    0;
+            signed      true;
+            isoMethod   topo;
+
+            surfaceType disk;
+
+            origin      (0.45 0 0);
+            normal      (1 0 0);
+            radius      0.09;
+            innerRadius 0.05;
+
+            topology    largestRegion;
+            store       true;
+        }
     }
 }
 

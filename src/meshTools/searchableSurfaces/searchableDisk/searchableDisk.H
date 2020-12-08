@@ -29,7 +29,7 @@ Class
 
 Description
     Searching on circular disk given as origin, normal (gets normalised)
-    and radius
+    and radius. Optionally it can be an annular ring.
 
     \heading Dictionary parameters
     \table
@@ -38,6 +38,7 @@ Description
         origin      | centre of disk                    | yes   |
         normal      | normal vector                     | yes   |
         radius      | disk radius                       | yes   |
+        innerRadius | inner disk radius                 | no    | 0
     \endtable
 
 Note
@@ -52,6 +53,7 @@ SourceFiles
 #define searchableDisk_H
 
 #include "plane.H"
+#include "MinMax.H"
 #include "searchableSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,10 +72,10 @@ class searchableDisk
 {
 private:
 
-    // Private Member Data
+    // Private Data
 
-        //- Radius
-        const scalar radius_;
+        //- Inner/outer radial limits
+        const scalarMinMax radialLimits_;
 
         //- Names of regions
         mutable wordList regions_;
@@ -119,7 +121,8 @@ public:
             const IOobject& io,
             const point& originPoint,
             const vector& normalVector,
-            const scalar radius
+            const scalar outerRadius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary (used by searchableSurface)
@@ -247,7 +250,6 @@ public:
                 NotImplemented;
                 return false;
             }
-
 };
 
 

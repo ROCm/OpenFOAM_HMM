@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,8 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
 
     v.normalise();
 
-
-    // Clip to radius.
-    info.setPoint(origin() + min(magV, radius_)*v);
+    // Clip to inner/outer radius
+    info.setPoint(origin() + radialLimits_.clip(magV)*v);
 
     if (magSqr(sample - info.rawPoint()) < nearestDistSqr)
     {
@@ -112,11 +111,10 @@ void Foam::searchableDisk::findLine
 
     v.normalise();
 
-
     // Set (hit or miss) to intersection of ray and plane of disk
     info.setPoint(origin() + magV*v);
 
-    if (magV <= radius_)
+    if (radialLimits_.contains(magV))
     {
         info.setHit();
         info.setIndex(0);
@@ -131,15 +129,15 @@ Foam::searchableDisk::searchableDisk
     const IOobject& io,
     const point& originPoint,
     const vector& normalVector,
-    const scalar radius
+    const scalar outerRadius,
+    const scalar innerRadius
 )
 :
     searchableSurface(io),
     plane(originPoint, normalVector),
-    radius_(radius)
+    radialLimits_(innerRadius, outerRadius)
 {
     // Rough approximation of bounding box
-    // vector span(radius_, radius_, radius_);
 
     // See searchableCylinder
     vector span
@@ -148,7 +146,7 @@ Foam::searchableDisk::searchableDisk
         sqrt(sqr(normal().x()) + sqr(normal().z())),
         sqrt(sqr(normal().x()) + sqr(normal().y()))
     );
-    span *= radius_;
+    span *= outerRadius;
 
     bounds().min() = origin() - span;
     bounds().max() = origin() + span;
@@ -166,7 +164,8 @@ Foam::searchableDisk::searchableDisk
         io,
         dict.get<point>("origin"),
         dict.get<vector>("normal"),
-        dict.get<scalar>("radius")
+        dict.get<scalar>("radius"),
+        dict.getOrDefault<scalar>("innerRadius", 0)
     )
 {}
 
@@ -177,8 +176,8 @@ const Foam::wordList& Foam::searchableDisk::regions() const
 {
     if (regions_.empty())
     {
-        regions_.setSize(1);
-        regions_[0] = "region0";
+        regions_.resize(1);
+        regions_.first() = "region0";
     }
     return regions_;
 }
@@ -190,11 +189,11 @@ void Foam::searchableDisk::boundingSpheres
     scalarField& radiusSqr
 ) const
 {
-    centres.setSize(1);
-    centres[0] = origin();
+    centres.resize(1);
+    radiusSqr.resize(1);
 
-    radiusSqr.setSize(1);
-    radiusSqr[0] = sqr(radius_);
+    centres[0] = origin();
+    radiusSqr[0] = sqr(radialLimits_.max());
 
     // Add a bit to make sure all points are tested inside
     radiusSqr += Foam::sqr(SMALL);
@@ -208,7 +207,7 @@ void Foam::searchableDisk::findNearest
     List<pointIndexHit>& info
 ) const
 {
-    info.setSize(samples.size());
+    info.resize(samples.size());
 
     forAll(samples, i)
     {
@@ -224,7 +223,7 @@ void Foam::searchableDisk::findLine
     List<pointIndexHit>& info
 ) const
 {
-    info.setSize(start.size());
+    info.resize(start.size());
 
     forAll(start, i)
     {
