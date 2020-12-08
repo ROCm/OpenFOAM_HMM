@@ -35,6 +35,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "solidThermo.H"
 #include "radiationModel.H"
 #include "fvOptions.H"
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
+    #include "createDynamicFvMesh.H"
     #include "createFields.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -92,13 +93,20 @@ int main(int argc, char *argv[])
 
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
-            while (pimple.correctNonOrthogonal())
+            while (pimple.loop())
             {
-                #include "hEqn.H"
+                if (pimple.firstIter())
+                {
+                    mesh.update();
+                }
+
+                while (pimple.correct())
+                {
+                    #include "hEqn.H"
+                }
             }
 
             runTime.write();
-
             runTime.printExecutionTime(Info);
         }
     }
