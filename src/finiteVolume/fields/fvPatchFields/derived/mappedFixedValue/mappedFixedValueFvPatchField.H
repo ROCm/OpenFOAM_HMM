@@ -103,18 +103,6 @@ class mappedFixedValueFvPatchField
     public fixedValueFvPatchField<Type>,
     public mappedPatchFieldBase<Type>
 {
-
-protected:
-
-    // Protected Member Functions
-
-        const mappedPatchBase& mapper
-        (
-            const fvPatch& p,
-            const DimensionedField<Type, volMesh>& iF
-        );
-
-
 public:
 
     //- Runtime type information
@@ -189,6 +177,7 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;

@@ -74,6 +74,11 @@ inline Foam::scalar Foam::species::thermo<Thermo, Type>::T
         {
             FatalErrorInFunction
                 << "Maximum number of iterations exceeded: " << maxIter_
+                << " when starting from T0:" << T0
+                << " old T:" << Test << " new T:" << Tnew
+                << " f:" << f
+                << " p:" << p
+                << " tol:" << Ttol
                 << abort(FatalError);
         }
 

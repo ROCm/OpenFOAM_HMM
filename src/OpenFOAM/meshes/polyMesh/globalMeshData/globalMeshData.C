@@ -2745,13 +2745,16 @@ void Foam::globalMeshData::updateMesh()
 
     // *** Temporary hack to avoid problems with overlapping communication
     // *** between these reductions and the calculation of deltaCoeffs
-    //label comm = UPstream::worldComm + 1;
-    label comm = UPstream::allocateCommunicator
+    //const label comm = UPstream::worldComm + 1;
+    const label comm = UPstream::allocateCommunicator
     (
         UPstream::worldComm,
         identity(UPstream::nProcs(UPstream::worldComm)),
         true
     );
+    const label oldWarnComm = UPstream::warnComm;
+    UPstream::warnComm = comm;
+
 
     // Total number of faces.
     nTotalFaces_ = returnReduce
@@ -2789,6 +2792,7 @@ void Foam::globalMeshData::updateMesh()
     );
 
     UPstream::freeCommunicator(comm);
+    UPstream::warnComm = oldWarnComm;
 
     if (debug)
     {

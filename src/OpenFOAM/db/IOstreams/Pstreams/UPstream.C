@@ -90,8 +90,8 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
                 << Foam::exit(FatalError);
         }
 
-        Pout.prefix() = '[' +  name(myProcNo(Pstream::worldComm)) + "] ";
-        Perr.prefix() = '[' +  name(myProcNo(Pstream::worldComm)) + "] ";
+        Pout.prefix() = '[' +  name(myProcNo(comm)) + "] ";
+        Perr.prefix() = '[' +  name(myProcNo(comm)) + "] ";
     }
 }
 
@@ -373,6 +373,8 @@ Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
 
 Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
 
+Foam::wordList Foam::UPstream::allWorlds_(1, "");
+Foam::labelList Foam::UPstream::worldIDs_(1, 0);
 
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
 Foam::UPstream::linearCommunication_(10);

@@ -28,11 +28,16 @@ License
 template<class Type>
 void Foam::mappedPatchBase::distribute(List<Type>& lst) const
 {
+    const label oldComm(Pstream::warnComm);
+    Pstream::warnComm = map().comm();
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
+            const label oldWorldComm = Pstream::worldComm;
+            Pstream::worldComm = comm_;
             lst = AMI().interpolateToSource(Field<Type>(std::move(lst)));
+            Pstream::worldComm = oldWorldComm;
             break;
         }
         default:
@@ -40,6 +45,7 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
             map().distribute(lst);
         }
     }
+    Pstream::warnComm = oldComm;
 }
 
 
@@ -50,11 +56,16 @@ void Foam::mappedPatchBase::distribute
     const CombineOp& cop
 ) const
 {
+    const label oldComm(Pstream::warnComm);
+    Pstream::warnComm = comm_;
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
+            const label oldWorldComm = Pstream::worldComm;
+            Pstream::worldComm = comm_;
             lst = AMI().interpolateToSource(Field<Type>(std::move(lst)), cop);
+            Pstream::worldComm = oldWorldComm;
             break;
         }
         default:
@@ -69,23 +80,31 @@ void Foam::mappedPatchBase::distribute
                 map().constructMap(),
                 false,
                 lst,
+                Type(Zero),
                 cop,
                 flipOp(),
-                Type(Zero)
+                UPstream::msgType(),
+                comm_
             );
         }
     }
+    Pstream::warnComm = oldComm;
 }
 
 
 template<class Type>
 void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
 {
+    const label oldComm(Pstream::warnComm);
+    Pstream::warnComm = map().comm();
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
+            const label oldWorldComm = Pstream::worldComm;
+            Pstream::worldComm = comm_;
             lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)));
+            Pstream::worldComm = oldWorldComm;
             break;
         }
         default:
@@ -94,6 +113,7 @@ void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
             break;
         }
     }
+    Pstream::warnComm = oldComm;
 }
 
 
@@ -104,11 +124,16 @@ void Foam::mappedPatchBase::reverseDistribute
     const CombineOp& cop
 ) const
 {
+    const label oldComm(Pstream::warnComm);
+    Pstream::warnComm = map().comm();
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
+            const label oldWorldComm = Pstream::worldComm;
+            Pstream::worldComm = comm_;
             lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)), cop);
+            Pstream::worldComm = oldWorldComm;
             break;
         }
         default:
@@ -124,12 +149,136 @@ void Foam::mappedPatchBase::reverseDistribute
                 map().subMap(),
                 false,
                 lst,
+                Type(Zero),
                 cop,
                 flipOp(),
-                Type(Zero)
+                UPstream::msgType(),
+                comm_
             );
             break;
         }
+    }
+    Pstream::warnComm = oldComm;
+}
+
+
+template<class Type>
+bool Foam::mappedPatchBase::writeIOField
+(
+    const regIOobject& obj,
+    dictionary& dict
+)
+{
+    const auto* fldPtr = isA<IOField<Type>>(obj);
+    if (fldPtr)
+    {
+        const auto& fld = *fldPtr;
+
+        token tok;
+        tok = new token::Compound<List<Type>>(fld);
+
+        primitiveEntry* pePtr = new primitiveEntry
+        (
+            fld.name(),
+            tokenList
+            (
+                one(),
+                std::move(tok)
+            )
+        );
+
+        dict.set(pePtr);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+template<class Type>
+bool Foam::mappedPatchBase::constructIOField
+(
+    const word& name,
+    token& tok,
+    Istream& is,
+    objectRegistry& obr
+)
+{
+    const word tag = "List<" + word(pTraits<Type>::typeName) + '>';
+
+    if (tok.isCompound() && tok.compoundToken().type() == tag)
+    {
+        IOField<Type>* fldPtr = obr.findObject<IOField<Type>>(name);
+        if (fldPtr)
+        {
+            fldPtr->transfer
+            (
+                dynamicCast<token::Compound<List<Type>>>
+                (
+                    tok.transferCompoundToken(is)
+                )
+            );
+        }
+        else
+        {
+            IOField<Type>* fldPtr = new IOField<Type>
+            (
+                IOobject
+                (
+                    name,
+                    obr,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                0
+            );
+            fldPtr->transfer
+            (
+                dynamicCast<token::Compound<List<Type>>>
+                (
+                    tok.transferCompoundToken(is)
+                )
+            );
+            objectRegistry::store(fldPtr);
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+template<class Type>
+void Foam::mappedPatchBase::storeField
+(
+    objectRegistry& obr,
+    const word& fieldName,
+    const Field<Type>& values
+)
+{
+    IOField<Type>* fldPtr = obr.findObject<IOField<Type>>(fieldName);
+    if (fldPtr)
+    {
+        *fldPtr = values;
+    }
+    else
+    {
+        fldPtr = new IOField<Type>
+        (
+            IOobject
+            (
+                fieldName,
+                obr,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            values
+        );
+        objectRegistry::store(fldPtr);
     }
 }
 

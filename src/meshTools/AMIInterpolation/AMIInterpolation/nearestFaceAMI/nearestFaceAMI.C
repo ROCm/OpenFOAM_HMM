@@ -200,9 +200,9 @@ Foam::autoPtr<Foam::mapDistribute> Foam::nearestFaceAMI::calcDistributed
         map.subMap(),
         map.subHasFlip(),
         remoteInfo,
+        nearestZero,
         nearestEqOp(),
-        noOp(),             // no flipping
-        nearestZero
+        noOp()              // no flipping
     );
 
 

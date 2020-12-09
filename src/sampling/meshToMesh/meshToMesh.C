@@ -556,9 +556,11 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
             map.subMap(),
             false,
             tgtToSrcCellAddr_,
+            labelList(),
             ListOps::appendEqOp<label>(),
             flipOp(),
-            labelList()
+            UPstream::msgType(),
+            map.comm()
         );
 
         // Set up as a reverse distribute
@@ -572,9 +574,11 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
             map.subMap(),
             false,
             tgtToSrcCellWght_,
+            scalarList(),
             ListOps::appendEqOp<scalar>(),
             flipOp(),
-            scalarList()
+            UPstream::msgType(),
+            map.comm()
         );
 
         // weights normalisation
