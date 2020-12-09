@@ -361,21 +361,62 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
             return iter.val();
         }
 
+        DynamicList<dirIndex> procDirs;
+        fileNameList dirEntries;
+
         // Read all directories to see any beginning with processor
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        DynamicList<dirIndex> procDirs;
-
         // Note: use parallel synchronised reading so cache will be same
         //       order on all processors
-        fileNameList dirNames(readDir(path, fileName::Type::DIRECTORY));
+
+        const bool readDirMasterOnly
+        (
+            regIOobject::fileModificationChecking == IOobject::timeStampMaster
+         || regIOobject::fileModificationChecking == IOobject::inotifyMaster
+        );
+
+        // As byproduct of the above selection, we exclude masterUncollated
+        // from using read/send, but that doesn't matter since that is what
+        // its own internals for readDir() do anyhow.
+
+        if (readDirMasterOnly && Pstream::parRun() && !distributed())
+        {
+            // Non-distributed.
+            // Read on master only and send to subProcs
+
+            if (Pstream::master())
+            {
+                dirEntries = Foam::readDir(path, fileName::Type::DIRECTORY);
+
+                DebugInfo
+                    << "readDir on master: send " << dirEntries.size()
+                    << " names to sub-processes" << endl;
+            }
+
+            Pstream::scatter(dirEntries, Pstream::msgType(), comm_);
+        }
+        else
+        {
+            // Serial or distributed roots.
+            // Handle readDir() with virtual method
+
+            if (debug)
+            {
+                Pout<< "readDir without special master/send treatment"
+                    << endl;
+            }
+
+            dirEntries = readDir(path, fileName::Type::DIRECTORY);
+        }
+
 
         // Extract info from processorsDDD or processorDDD:
         // - highest processor number
         // - directory+offset containing data for proci
         label maxProc = -1;
 
-        for (const fileName& dirN : dirNames)
+        for (const fileName& dirN : dirEntries)
         {
             // Analyse directory name
             fileName rp, rd, rl;
@@ -775,16 +816,11 @@ Foam::instantList Foam::fileOperation::findTimes
             << directory << endl;
     }
 
-    // Read directory entries into a list
-    fileNameList dirEntries
-    (
-        Foam::readDir
-        (
-            directory,
-            fileName::DIRECTORY
-        )
-    );
+    // Note: do NOT use master-only reading here (as per lookupProcessorsPath)
+    // since this routine is called on an individual processorN directory
 
+    // Read directory entries into a list
+    fileNameList dirEntries(Foam::readDir(directory, fileName::DIRECTORY));
     instantList times = sortTimes(dirEntries, constantName);
 
 
@@ -1269,7 +1305,6 @@ Foam::label Foam::fileOperation::splitProcessorPath
             // We are done!
             break;
         }
-
     }
 
     if (pos != string::npos)

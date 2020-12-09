@@ -1414,6 +1414,14 @@ void Foam::argList::parse
         case_ = globalCase_;   // Redundant, but extra safety?
     }
 
+    // If needed, adjust fileHandler for distributed roots
+    if (parRunControl_.distributed())
+    {
+        if (fileOperation::fileHandlerPtr_)
+        {
+            fileOperation::fileHandlerPtr_->distributed(true);
+        }
+    }
 
     // Keep or discard slave and root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
