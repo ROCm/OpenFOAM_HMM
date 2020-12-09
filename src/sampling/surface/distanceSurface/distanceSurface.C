@@ -41,6 +41,205 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::distanceSurface::topologyFilterType
+>
+Foam::distanceSurface::topoFilterNames_
+({
+    { topologyFilterType::NONE, "none" },
+    { topologyFilterType::LARGEST_REGION, "largestRegion" },
+    { topologyFilterType::NEAREST_POINTS, "nearestPoints" },
+    { topologyFilterType::PROXIMITY, "proximity" },
+});
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Check that all point hits are valid
+static inline void checkAllHits(const UList<pointIndexHit>& nearest)
+{
+    label notHit = 0;
+    for (const pointIndexHit& pHit : nearest)
+    {
+        if (!pHit.hit())
+        {
+            ++notHit;
+        }
+    }
+
+    if (notHit)
+    {
+        FatalErrorInFunction
+            << "Had " << notHit << " from " << nearest.size()
+            << " without a point hit" << endl
+            << abort(FatalError);
+    }
+}
+
+
+// Normal distance from surface hit point to a point in the mesh
+static inline scalar normalDistance_zero
+(
+    const point& pt,
+    const pointIndexHit& pHit,
+    const vector& norm
+)
+{
+    const vector diff(pt - pHit.point());
+
+    return (diff & norm);
+}
+
+
+// Signed distance from surface hit point to a point in the mesh,
+// the sign is dictated by the normal
+static inline scalar normalDistance_nonzero
+(
+    const point& pt,
+    const pointIndexHit& pHit,
+    const vector& norm
+)
+{
+    const vector diff(pt - pHit.point());
+    const scalar normDist = (diff & norm);
+
+    return Foam::sign(normDist) * Foam::mag(diff);
+}
+
+
+// Normal distance from surface hit point to a point in the mesh
+static inline void calcNormalDistance_zero
+(
+    scalarField& distance,
+    const pointField& points,
+    const List<pointIndexHit>& nearest,
+    const vectorField& normals
+)
+{
+    forAll(nearest, i)
+    {
+        distance[i] =
+            normalDistance_zero(points[i], nearest[i], normals[i]);
+    }
+}
+
+
+// Signed distance from surface hit point -> point in the mesh,
+// the sign is dictated by the normal
+static inline void calcNormalDistance_nonzero
+(
+    scalarField& distance,
+    const pointField& points,
+    const List<pointIndexHit>& nearest,
+    const vectorField& normals
+)
+{
+    forAll(nearest, i)
+    {
+        distance[i] =
+            normalDistance_nonzero(points[i], nearest[i], normals[i]);
+    }
+}
+
+
+// Close to the surface: normal distance from surface hit point
+// Far from surface: distance from surface hit point
+//
+// Note
+// This switch may be helpful when working directly with
+// distance/gradient fields. Has low overhead otherwise.
+// May be replaced in the future (2020-11)
+static inline void calcNormalDistance_filtered
+(
+    scalarField& distance,
+    const bitSet& ignoreLocation,
+    const pointField& points,
+    const List<pointIndexHit>& nearest,
+    const vectorField& normals
+)
+{
+    forAll(nearest, i)
+    {
+        if (ignoreLocation.test(i))
+        {
+            distance[i] =
+                normalDistance_nonzero(points[i], nearest[i], normals[i]);
+        }
+        else
+        {
+            distance[i] =
+                normalDistance_zero(points[i], nearest[i], normals[i]);
+        }
+    }
+}
+
+
+// Flat surfaces (eg, a plane) have an extreme change in
+// the normal at the edge, which creates a zero-crossing
+// extending to infinity.
+//
+// Ad hoc treatment: require that the surface hit
+// point is within a somewhat generous bounding box
+// for the cell
+template<bool WantPointFilter = false>
+static bitSet simpleGeometricFilter
+(
+    bitSet& ignoreCells,
+    const List<pointIndexHit>& nearest,
+    const polyMesh& mesh
+)
+{
+    // A deny filter. Initially false (accept everything)
+    ignoreCells.resize(mesh.nCells());
+
+    bitSet pointFilter;
+    if (WantPointFilter)
+    {
+        // Create as accept filter. Initially false (deny everything)
+        pointFilter.resize(mesh.nPoints());
+    }
+
+    boundBox cellBb;
+
+    forAll(nearest, celli)
+    {
+        const point& pt = nearest[celli].point();
+
+        const labelList& cPoints = mesh.cellPoints(celli);
+
+        cellBb.clear();
+        cellBb.add(mesh.points(), cPoints);
+
+        // Expand slightly to catch corners
+        cellBb.inflate(0.1);
+
+        if (!cellBb.contains(pt))
+        {
+            ignoreCells.set(celli);
+        }
+        else if (WantPointFilter)
+        {
+            // Good cell candidate, accept its points
+            pointFilter.set(cPoints);
+        }
+    }
+
+    // Flip from accept to deny filter
+    pointFilter.flip();
+
+    return pointFilter;
+}
+
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::distanceSurface::distanceSurface
@@ -51,7 +250,7 @@ Foam::distanceSurface::distanceSurface
 )
 :
     mesh_(mesh),
-    surfPtr_
+    geometryPtr_
     (
         searchableSurface::New
         (
@@ -68,10 +267,13 @@ Foam::distanceSurface::distanceSurface
             dict
         )
     ),
-    distance_(dict.get<scalar>("distance")),
-    signed_
+    distance_(dict.getOrDefault<scalar>("distance", 0)),
+    withZeroDistance_(equal(distance_, 0)),
+    withSignDistance_
     (
-        distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
+        withZeroDistance_
+     || (distance_ < 0)
+     || dict.getOrDefault<bool>("signed", true)
     ),
     isoParams_
     (
@@ -79,9 +281,55 @@ Foam::distanceSurface::distanceSurface
         isoSurfaceParams::ALGO_TOPO,
         isoSurfaceParams::filterType::DIAGCELL
     ),
+    topoFilter_
+    (
+        topoFilterNames_.getOrDefault
+        (
+            "topology",
+            dict,
+            topologyFilterType::NONE
+        )
+    ),
+    nearestPoints_(),
+    maxDistanceSqr_(Foam::sqr(GREAT)),
+    absProximity_(dict.getOrDefault<scalar>("absProximity", 1e-5)),
+    cellDistancePtr_(nullptr),
+    pointDistance_(),
     surface_(),
     meshCells_(),
     isoSurfacePtr_(nullptr)
+{
+    if (topologyFilterType::NEAREST_POINTS == topoFilter_)
+    {
+        dict.readEntry("nearestPoints", nearestPoints_);
+    }
+
+    if (dict.readIfPresent("maxDistance", maxDistanceSqr_))
+    {
+        maxDistanceSqr_ = Foam::sqr(maxDistanceSqr_);
+    }
+}
+
+
+Foam::distanceSurface::distanceSurface
+(
+    const polyMesh& mesh,
+    const word& surfaceType,
+    const word& surfaceName,
+    const isoSurfaceParams& params,
+    const bool interpolate
+)
+:
+    distanceSurface
+    (
+        mesh,
+        interpolate,
+        surfaceType,
+        surfaceName,
+        scalar(0),
+        true, // redundant - must be signed
+        params
+    )
 {}
 
 
@@ -97,7 +345,7 @@ Foam::distanceSurface::distanceSurface
 )
 :
     mesh_(mesh),
-    surfPtr_
+    geometryPtr_
     (
         searchableSurface::New
         (
@@ -115,11 +363,20 @@ Foam::distanceSurface::distanceSurface
         )
     ),
     distance_(distance),
-    signed_
+    withZeroDistance_(equal(distance_, 0)),
+    withSignDistance_
     (
-        useSignedDistance || distance_ < 0 || equal(distance_, Zero)
+        withZeroDistance_
+     || (distance_ < 0)
+     || useSignedDistance
     ),
     isoParams_(params),
+    topoFilter_(topologyFilterType::NONE),
+    nearestPoints_(),
+    maxDistanceSqr_(Foam::sqr(GREAT)),
+    absProximity_(1e-5),
+    cellDistancePtr_(nullptr),
+    pointDistance_(),
     surface_(),
     meshCells_(),
     isoSurfacePtr_(nullptr)
@@ -140,7 +397,10 @@ void Foam::distanceSurface::createGeometry()
     surface_.clear();
     meshCells_.clear();
 
-    const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
+    // Doing searches on this surface
+    const searchableSurface& geom = geometryPtr_();
+
+    const fvMesh& fvmesh = static_cast<const fvMesh&>(mesh_);
 
     // Distance to cell centres
     // ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -152,132 +412,126 @@ void Foam::distanceSurface::createGeometry()
             IOobject
             (
                 "distanceSurface.cellDistance",
-                fvm.time().timeName(),
-                fvm.time(),
+                fvmesh.time().timeName(),
+                fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            fvm,
-            dimensionedScalar(dimLength, Zero)
+            fvmesh,
+            dimensionedScalar(dimLength, GREAT)
         )
     );
-    volScalarField& cellDistance = *cellDistancePtr_;
+    auto& cellDistance = *cellDistancePtr_;
 
-    // For distance = 0 (and isoSurfaceCell) we apply additional filtering
+
+    // For distance = 0 we apply additional geometric filtering
     // to limit the extent of open edges.
+    //
+    // Does not work with ALGO_POINT
 
-    const bool isZeroDist  = equal(distance_, Zero);
+    bitSet ignoreCells, ignoreCellPoints;
+
     const bool filterCells =
     (
-        isZeroDist
+        withZeroDistance_
      && isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT
     );
 
-    bitSet ignoreCells;
-    if (filterCells)
-    {
-        ignoreCells.resize(fvm.nCells());
-    }
 
     // Internal field
     {
-        const pointField& cc = fvm.C();
+        const pointField& cc = fvmesh.C();
         scalarField& fld = cellDistance.primitiveFieldRef();
 
         List<pointIndexHit> nearest;
-        surfPtr_().findNearest
+        geom.findNearest
         (
             cc,
-            scalarField(cc.size(), GREAT),
+            // Use initialized field (GREAT) to limit search too
+            fld,
             nearest
         );
+        checkAllHits(nearest);
 
-        if (signed_ || isZeroDist)
+        // Geometric pre-filtering when distance == 0
+        if (filterCells)
+        {
+            ignoreCellPoints =
+                simpleGeometricFilter<false>(ignoreCells, nearest, fvmesh);
+        }
+
+        if (withSignDistance_)
         {
             vectorField norms;
-            surfPtr_().getNormal(nearest, norms);
+            geom.getNormal(nearest, norms);
 
-            boundBox cellBb;
-
-            forAll(norms, i)
+            if (filterCells)
             {
-                const point diff(cc[i] - nearest[i].hitPoint());
-
-                fld[i] =
+                // With inside/outside switching (see note above)
+                calcNormalDistance_filtered
                 (
-                    isZeroDist // Use normal distance
-                  ? (diff & norms[i])
-                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                    fld,
+                    ignoreCells,
+                    cc,
+                    nearest,
+                    norms
                 );
-
-                if (filterCells)
-                {
-                    cellBb.clear();
-                    cellBb.add(fvm.points(), fvm.cellPoints(i));
-
-                    // Expand slightly to catch corners
-                    cellBb.inflate(0.1);
-
-                    if (!cellBb.contains(nearest[i].hitPoint()))
-                    {
-                        ignoreCells.set(i);
-                    }
-                }
+            }
+            else if (withZeroDistance_)
+            {
+                calcNormalDistance_zero(fld, cc, nearest, norms);
+            }
+            else
+            {
+                calcNormalDistance_nonzero(fld, cc, nearest, norms);
             }
         }
         else
         {
-            forAll(nearest, i)
-            {
-                fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
-
-                // No filtering for unsigned or distance != 0.
-            }
+            calcAbsoluteDistance(fld, cc, nearest);
         }
     }
 
+
     // Patch fields
     {
-        volScalarField::Boundary& cellDistanceBf =
-            cellDistance.boundaryFieldRef();
-
-        forAll(fvm.C().boundaryField(), patchi)
+        forAll(fvmesh.C().boundaryField(), patchi)
         {
-            const pointField& cc = fvm.C().boundaryField()[patchi];
-            fvPatchScalarField& fld = cellDistanceBf[patchi];
+            const pointField& cc = fvmesh.C().boundaryField()[patchi];
+            scalarField& fld = cellDistance.boundaryFieldRef()[patchi];
 
             List<pointIndexHit> nearest;
-            surfPtr_().findNearest
+            geom.findNearest
             (
                 cc,
                 scalarField(cc.size(), GREAT),
                 nearest
             );
+            checkAllHits(nearest);
 
-            if (signed_)
+            if (withSignDistance_)
             {
                 vectorField norms;
-                surfPtr_().getNormal(nearest, norms);
+                geom.getNormal(nearest, norms);
 
-                forAll(norms, i)
+                if (withZeroDistance_)
                 {
-                    const point diff(cc[i] - nearest[i].hitPoint());
+                    // Slight inconsistency in boundary vs interior when
+                    // cells are filtered, but the patch fields are only
+                    // used by isoSurfacePoint, and filtering is disabled
+                    // for that anyhow.
 
-                    fld[i] =
-                    (
-                        isZeroDist // Use normal distance
-                      ? (diff & norms[i])
-                      : Foam::sign(diff & norms[i]) * Foam::mag(diff)
-                    );
+                    calcNormalDistance_zero(fld, cc, nearest, norms);
+                }
+                else
+                {
+                    calcNormalDistance_nonzero(fld, cc, nearest, norms);
                 }
             }
             else
             {
-                forAll(nearest, i)
-                {
-                    fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
-                }
+                calcAbsoluteDistance(fld, cc, nearest);
             }
         }
     }
@@ -288,43 +542,85 @@ void Foam::distanceSurface::createGeometry()
 
 
     // Distance to points
-    pointDistance_.resize(fvm.nPoints());
+    pointDistance_.resize(fvmesh.nPoints());
+    pointDistance_ = GREAT;
     {
-        const pointField& pts = fvm.points();
+        const pointField& pts = fvmesh.points();
+        scalarField& fld = pointDistance_;
 
         List<pointIndexHit> nearest;
-        surfPtr_().findNearest
+        geom.findNearest
         (
             pts,
-            scalarField(pts.size(), GREAT),
+            // Use initialized field (GREAT) to limit search too
+            pointDistance_,
             nearest
         );
+        checkAllHits(nearest);
 
-        if (signed_)
+        if (withSignDistance_)
         {
             vectorField norms;
-            surfPtr_().getNormal(nearest, norms);
+            geom.getNormal(nearest, norms);
 
-            forAll(norms, i)
+            if (filterCells)
             {
-                const point diff(pts[i] - nearest[i].hitPoint());
-
-                pointDistance_[i] =
+                // With inside/outside switching (see note above)
+                calcNormalDistance_filtered
                 (
-                    isZeroDist // Use normal distance
-                  ? (diff & norms[i])
-                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                    fld,
+                    ignoreCellPoints,
+                    pts,
+                    nearest,
+                    norms
                 );
+            }
+            else if (withZeroDistance_)
+            {
+                calcNormalDistance_zero(fld, pts, nearest, norms);
+            }
+            else
+            {
+                calcNormalDistance_nonzero(fld, pts, nearest, norms);
             }
         }
         else
         {
-            forAll(nearest, i)
-            {
-                pointDistance_[i] = Foam::mag(pts[i] - nearest[i].hitPoint());
-            }
+            calcAbsoluteDistance(fld, pts, nearest);
         }
     }
+
+
+    // Don't need ignoreCells if there is nothing to ignore.
+    if (ignoreCells.none())
+    {
+        ignoreCells.clearStorage();
+    }
+    else if (filterCells && topologyFilterType::NONE != topoFilter_)
+    {
+        // For refine blocked cells (eg, checking actual cells cut)
+        isoSurfaceBase isoCutter
+        (
+            mesh_,
+            cellDistance,
+            pointDistance_,
+            distance_
+        );
+
+        if (topologyFilterType::LARGEST_REGION == topoFilter_)
+        {
+            refineBlockedCells(ignoreCells, isoCutter);
+            filterKeepLargestRegion(ignoreCells);
+        }
+        else if (topologyFilterType::NEAREST_POINTS == topoFilter_)
+        {
+            refineBlockedCells(ignoreCells, isoCutter);
+            filterKeepNearestRegions(ignoreCells);
+        }
+    }
+
+    // Don't need point filter beyond this point
+    ignoreCellPoints.clearStorage();
 
 
     if (debug)
@@ -336,13 +632,13 @@ void Foam::distanceSurface::createGeometry()
             IOobject
             (
                 "distanceSurface.pointDistance",
-                fvm.time().timeName(),
-                fvm.time(),
+                fvmesh.time().timeName(),
+                fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            pointMesh::New(fvm),
+            pointMesh::New(fvmesh),
             dimensionedScalar(dimLength, Zero)
         );
         pDist.primitiveFieldRef() = pointDistance_;
@@ -350,13 +646,6 @@ void Foam::distanceSurface::createGeometry()
         Pout<< "Writing point distance:" << pDist.objectPath() << endl;
         pDist.write();
     }
-
-    // Don't need ignoreCells if there is nothing to ignore.
-    if (!ignoreCells.any())
-    {
-        ignoreCells.clear();
-    }
-
 
     isoSurfacePtr_.reset
     (
@@ -370,9 +659,16 @@ void Foam::distanceSurface::createGeometry()
         )
     );
 
+
     // ALGO_POINT still needs cell, point fields (for interpolate)
     // The others can do straight transfer
-    if (isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT)
+
+    // But also flatten into a straight transfer for proximity filtering
+    if
+    (
+        isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT
+     || topologyFilterType::PROXIMITY == topoFilter_
+    )
     {
         surface_.transfer(static_cast<meshedSurface&>(*isoSurfacePtr_));
         meshCells_.transfer(isoSurfacePtr_->meshCells());
@@ -380,6 +676,11 @@ void Foam::distanceSurface::createGeometry()
         isoSurfacePtr_.reset(nullptr);
         cellDistancePtr_.reset(nullptr);
         pointDistance_.clear();
+    }
+
+    if (topologyFilterType::PROXIMITY == topoFilter_)
+    {
+        filterByProximity();
     }
 
     if (debug)

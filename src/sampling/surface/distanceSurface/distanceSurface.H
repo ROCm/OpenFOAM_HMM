@@ -32,27 +32,82 @@ Description
     Uses an iso-surface algorithm (cell, topo, point) for constructing the
     distance surface.
 
+    For a zero-distance surface, it performs additional checks and supports
+    filtering to handle the surface boundaries.
+
 Usage
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    {
+        surface1
+        {
+            type        distanceSurface;
+            surfaceType triSurfaceMesh;
+            surfaceName something.obj;
+            topology    proximity;
+        }
+
+        surface2
+        {
+            type        distanceSurface;
+            surfaceType triSurfaceMesh;
+            surfaceName other.obj;
+
+            topology    nearestPoints;
+            nearestPoints
+            (
+                (0 0 0)
+                (10 10 0)
+            );
+
+            // Max search distance for nearestPoints
+            maxDistance 0.005;
+        }
+    }
+    \endverbatim
+
     Dictionary controls:
     \table
         Property | Description                              | Required | Default
-        distance | distance from surface                    | yes |
-        signed   | Use sign when distance is positive       | partly |
-        isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
+        distance | distance from surface                    | no  | 0
+        signed   | Use sign when distance is positive       | no  | true
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | default
         regularise | Face simplification (enum or bool)     | no  | true
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
+        topology    | Topology filter (none/largestRegion/nearestPoints/proximity) | no  | none
+        nearestPoints | Points for point-based segmentation | no  |
+        maxDistance | Max search distance for nearestPoints | no  | GREAT
+        absProximity | Max proximity of face centres        | no  | 1e-5
     \endtable
+
+    Filtering (for zero-distance only)
+
+    - \c largestRegion (pre-filter):
+        The cut cells are checked for topological connectivity and the
+        region with the most number of cut cells is retained.
+        This handles the "ragged" edge problem.
+
+    - \c nearestPoints (pre-filter):
+        The cut cells split into regions, the regions closest to the
+        user-defined points are retained.
+        Uses \c maxDistance for additional control.
+
+    - \c proximity (post-filter):
+        Checks the resulting faces against the original search surface
+        and rejects faces with a distance greater than \c absProximity.
+    .
 
 Note
     For distance = 0, some special adjustments.
     - Always signed (ignoring the input value).
     - Use normal distance from surface (for better treatment of open edges).
-    - When the isoSurfaceCell algorithm is used, additional checks for open
-      surfaces edges are used to limit the extend of resulting distance
-      surface. The resulting surface elements will not, however, contain
-      partial cell coverage.
+    - Additional checks for open surfaces edges are used to limit the extend
+      of resulting distance surface.
+      The resulting surface elements will, however, contain partial cell
+      coverage. NB: Not applicable if the \c point isoMethod is used.
 
 The keyword \c cell (bool value) which was use in 1906 and earlier to switch
 between point/cell algorithms is now ignored (2020-12).
@@ -70,6 +125,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "searchableSurface.H"
 #include "isoSurfaceBase.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,22 +138,52 @@ namespace Foam
 
 class distanceSurface
 {
+    // Data Types
+
+        //- The type of pre/post face-filtering
+        enum class topologyFilterType : uint8_t
+        {
+            NONE,               //!< No additional filtering
+            LARGEST_REGION,     //!< Retain largest region
+            NEAREST_POINTS,     //!< Retain regions nearest to the points
+            PROXIMITY           //!< Post-filter for surface proximity
+        };
+
+        //- Names for the topology filter
+        static const Enum<topologyFilterType> topoFilterNames_;
+
+
     // Private Data
 
         //- Reference to mesh
         const polyMesh& mesh_;
 
-        //- Surface
-        const autoPtr<searchableSurface> surfPtr_;
+        //- Searchable surface
+        const autoPtr<searchableSurface> geometryPtr_;
 
         //- Distance value
         const scalar distance_;
 
-        //- Signed distance
-        const bool signed_;
+        //- Distance is zero. Implies signed and additional optimizations
+        const bool withZeroDistance_;
+
+        //- Use signed distance
+        const bool withSignDistance_;
 
         //- Parameters for iso-surface (algorithm, filter, mergeTol, etc)
         isoSurfaceParams isoParams_;
+
+        //- Optional topology face-filtering
+        topologyFilterType topoFilter_;
+
+        //- Points for nearest-points segmentation
+        pointField nearestPoints_;
+
+        //- Max search distance squared (for nearestPoints)
+        scalar maxDistanceSqr_;
+
+        //- Max distance for proximity check (post-filtering)
+        scalar absProximity_;
 
         //- Distance to cell centres
         autoPtr<volScalarField> cellDistancePtr_;
@@ -116,6 +202,24 @@ class distanceSurface
 
         //- Extracted iso-surface, for interpolators
         mutable autoPtr<isoSurfaceBase> isoSurfacePtr_;
+
+
+    // Private Member Functions
+
+        //- Absolute distances from hit points
+        //  Hit/miss checks have been done elsewhere.
+        static inline void calcAbsoluteDistance
+        (
+            scalarField& distance,
+            const pointField& points,
+            const List<pointIndexHit>& nearest
+        )
+        {
+            forAll(nearest, i)
+            {
+                distance[i] = Foam::mag(points[i] - nearest[i].point());
+            }
+        }
 
 
 protected:
@@ -145,6 +249,29 @@ protected:
         }
 
 
+    // Private Member Functions
+
+        //- Re-filter the blocked cells based on the anticipated cuts
+        //  Uses a lightweight variant of cutting.
+        bool refineBlockedCells
+        (
+            bitSet& ignoreCells,
+            const isoSurfaceBase& isoContext
+        ) const;
+
+        //- Prepare blockedFaces for region split
+        bitSet filterPrepareRegionSplit(const bitSet& ignoreCells) const;
+
+        //- Adjust extracted iso-surface to remove far faces
+        void filterByProximity();
+
+        //- Keep region with the most cuts (after region split)
+        void filterKeepLargestRegion(bitSet& ignoreCells) const;
+
+        //- Keep region(s) closest to the nearest points
+        void filterKeepNearestRegions(bitSet& ignoreCells) const;
+
+
 public:
 
     //- Runtime type information
@@ -159,6 +286,16 @@ public:
             const word& defaultSurfaceName,
             const polyMesh& mesh,
             const dictionary& dict
+        );
+
+        //- Construct from components with zero-distanced
+        distanceSurface
+        (
+            const polyMesh& mesh,
+            const word& surfaceType,
+            const word& surfaceName,
+            const isoSurfaceParams& params = isoSurfaceParams(),
+            const bool interpolate = false
         );
 
         //- Construct from components
@@ -186,11 +323,11 @@ public:
         //- The name of the underlying searchableSurface
         const word& surfaceName() const
         {
-            return surfPtr_->name();
+            return geometryPtr_->name();
         }
 
         //- The distance to the underlying searchableSurface
-        scalar distance() const
+        scalar distance() const noexcept
         {
             return distance_;
         }
