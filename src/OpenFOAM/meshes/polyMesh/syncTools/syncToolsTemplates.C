@@ -31,9 +31,7 @@ License
 #include "processorPolyPatch.H"
 #include "cyclicPolyPatch.H"
 #include "globalMeshData.H"
-#include "contiguous.H"
 #include "transformList.H"
-#include "SubField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
