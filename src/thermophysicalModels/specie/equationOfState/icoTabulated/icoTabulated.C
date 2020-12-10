@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,51 +26,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "hRefConstThermo.H"
+#include "icoTabulated.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class EquationOfState>
-Foam::hRefConstThermo<EquationOfState>::hRefConstThermo(const dictionary& dict)
+template<class Specie>
+Foam::icoTabulated<Specie>::icoTabulated(const dictionary& dict)
 :
-    EquationOfState(dict),
-    Cp_(dict.subDict("thermodynamics").get<scalar>("Cp")),
-    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
-    Tref_(dict.subDict("thermodynamics").get<scalar>("Tref")),
-    Href_(dict.subDict("thermodynamics").get<scalar>("Href"))
+    Specie(dict),
+    rho_("rho", dict.subDict("equationOfState"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class EquationOfState>
-void Foam::hRefConstThermo<EquationOfState>::write(Ostream& os) const
+template<class Specie>
+void Foam::icoTabulated<Specie>::write(Ostream& os) const
 {
-    EquationOfState::write(os);
+    Specie::write(os);
 
     // Entries in dictionary format
-    {
-        os.beginBlock("thermodynamics");
-        os.writeEntry("Cp", Cp_);
-        os.writeEntry("Hf", Hf_);
-        os.writeEntry("Tref", Tref_);
-        os.writeEntry("Href", Href_);
-        os.endBlock();
-    }
+    os.beginBlock("equationOfState");
+    os.writeEntry("rho", rho_);
+    os.endBlock();
 }
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class EquationOfState>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const hRefConstThermo<EquationOfState>& ct
-)
+template<class Specie>
+Foam::Ostream& Foam::operator<<(Ostream& os, const icoTabulated<Specie>& ip)
 {
-    ct.write(os);
+    ip.write(os);
     return os;
 }
 

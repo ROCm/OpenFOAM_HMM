@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,90 +24,93 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hRefConstThermo
-
-Group
-    grpSpecieThermo
+    Foam::hTabulatedThermo
 
 Description
-    Constant properties thermodynamics package
-    templated into the EquationOfState.
+    Enthalpy based thermodynamics package using non-uniform tabulated data for
+    heat capacity vs temperature.
+
+Usage
+
+    \table
+        Property     | Description
+        Hf           | Heat of formation
+        Sf           | Standard entropy
+        Cp           | Specific heat at constant pressure vs temperature table
+    \endtable
+
+    Example of the specification of the thermodynamic properties:
+    \verbatim
+    thermodynamics
+    {
+        Hf              0;
+        Sf              0;
+        Cp
+        (
+            (200     1005)
+            (350     1010)
+            (400     1020)
+        );
+    }
+    \endverbatim
 
 SourceFiles
-    hRefConstThermoI.H
-    hRefConstThermo.C
+    hTabulatedThermoI.H
+    hTabulatedThermo.C
+
+See also
+    Foam::thermophysicalFunctions::nonUniformTable
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hRefConstThermo_H
-#define hRefConstThermo_H
+#ifndef hTabulatedThermo_H
+#define hTabulatedThermo_H
+
+#include "integratedNonUniformTableThermophysicalFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-template<class EquationOfState> class hRefConstThermo;
+// Forward Declarations
 
 template<class EquationOfState>
-inline hRefConstThermo<EquationOfState> operator+
-(
-    const hRefConstThermo<EquationOfState>&,
-    const hRefConstThermo<EquationOfState>&
-);
-
-template<class EquationOfState>
-inline hRefConstThermo<EquationOfState> operator*
-(
-    const scalar,
-    const hRefConstThermo<EquationOfState>&
-);
-
-template<class EquationOfState>
-inline hRefConstThermo<EquationOfState> operator==
-(
-    const hRefConstThermo<EquationOfState>&,
-    const hRefConstThermo<EquationOfState>&
-);
+class hTabulatedThermo;
 
 template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const hRefConstThermo<EquationOfState>&
+    const hTabulatedThermo<EquationOfState>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                           Class hRefConstThermo Declaration
+                      Class hTabulatedThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class EquationOfState>
-class hRefConstThermo
+class hTabulatedThermo
 :
     public EquationOfState
 {
-    // Private data
+    // Private Typedefs
 
-        scalar Cp_;
+    typedef thermophysicalFunctions::integratedNonUniformTable
+        integratedNonUniformTable;
+
+
+    // Private Data
+
+        //- Heat of formation
         scalar Hf_;
-        scalar Tref_;
-        scalar Href_;
 
+        //- Standard entropy
+        scalar Sf_;
 
-    // Private Member Functions
-
-        //- Construct from components
-        inline hRefConstThermo
-        (
-            const EquationOfState& st,
-            const scalar cp,
-            const scalar hf,
-            const scalar tref,
-            const scalar href
-        );
+        //- Specific heat at constant pressure table [J/kg/K]
+        integratedNonUniformTable Cp_;
 
 
 public:
@@ -115,36 +118,31 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        hRefConstThermo(const dictionary& dict);
+        explicit hTabulatedThermo(const dictionary& dict);
 
-        //- Construct as named copy
-        inline hRefConstThermo(const word&, const hRefConstThermo&);
-
-        //- Construct and return a clone
-        inline autoPtr<hRefConstThermo> clone() const;
-
-        //- Selector from dictionary
-        inline static autoPtr<hRefConstThermo> New(const dictionary& dict);
+        //- Construct as a named copy
+        inline hTabulatedThermo(const word&, const hTabulatedThermo&);
 
 
     // Member Functions
 
-        //- Return the instantiated type name
+        //- The instantiated type name
         static word typeName()
         {
-            return "hRefConst<" + EquationOfState::typeName() + '>';
+            return "hTabulated<" + EquationOfState::typeName() + '>';
         }
 
-        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        //- Limit the temperature to be in the temperature range
+        //  Currently no limit applied
         inline scalar limit(const scalar T) const;
 
 
-        // Fundamental properties
+        // Fundamental Properties
 
-            //- Heat capacity at constant pressure [J/(kg K)]
+            //- Heat capacity at constant pressure [J/kg/K]
             inline scalar Cp(const scalar p, const scalar T) const;
 
-            //- Absolute Enthalpy [J/kg]
+            //- Absolute enthalpy [J/kg]
             inline scalar Ha(const scalar p, const scalar T) const;
 
             //- Sensible enthalpy [J/kg]
@@ -153,16 +151,17 @@ public:
             //- Chemical enthalpy [J/kg]
             inline scalar Hc() const;
 
-            //- Entropy [J/(kg K)]
+            //- Entropy [J/kg/K]
             inline scalar S(const scalar p, const scalar T) const;
+
+            //- Gibbs free energy of the mixture in the standard state [J/kg]
+            inline scalar Gstd(const scalar T) const;
+
 
             #include "HtoEthermo.H"
 
 
         // Derivative term used for Jacobian
-
-            //- Derivative of Gibbs free energy w.r.t. temperature
-            inline scalar dGdT(const scalar p, const scalar T) const;
 
             //- Temperature derivative of heat capacity at constant pressure
             inline scalar dCpdT(const scalar p, const scalar T) const;
@@ -174,38 +173,12 @@ public:
             void write(Ostream& os) const;
 
 
-    // Member operators
-
-        inline void operator+=(const hRefConstThermo&);
-
-
-    // Friend operators
-
-        friend hRefConstThermo operator+ <EquationOfState>
-        (
-            const hRefConstThermo&,
-            const hRefConstThermo&
-        );
-
-        friend hRefConstThermo operator* <EquationOfState>
-        (
-            const scalar,
-            const hRefConstThermo&
-        );
-
-        friend hRefConstThermo operator== <EquationOfState>
-        (
-            const hRefConstThermo&,
-            const hRefConstThermo&
-        );
-
-
-    // IOstream Operators
+    // Ostream Operator
 
         friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
-            const hRefConstThermo&
+            const hTabulatedThermo&
         );
 };
 
@@ -216,10 +189,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "hRefConstThermoI.H"
+#include "hTabulatedThermoI.H"
 
 #ifdef NoRepository
-    #include "hRefConstThermo.C"
+    #include "hTabulatedThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

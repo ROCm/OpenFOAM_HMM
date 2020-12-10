@@ -11,8 +11,6 @@ multiphaseSystem/multiphaseSystem.C
 multiphaseSystem/multiphaseSystemNew.C
 multiphaseSystem/multiphaseSystems.C
 
-reactionThermo/hRefConstThermos.C
-
 diameter = diameterModels
 $(diameter)/diameterModel/diameterModel.C
 $(diameter)/constantDiameter/constantDiameter.C

@@ -66,14 +66,8 @@ private:
 
     // Private data
 
-        // Temperature limits of applicability for functions
-
-            scalar Tcommon_;
-
-            scalar Tlow_;
-
-            scalar Thigh_;
-
+        // Temperature limits of applicability of functions
+        scalar Tlow_, Thigh_, Tcommon_;
 
         // Polynomial using inverse temperatures
         bool invTemp_;
@@ -92,13 +86,12 @@ public:
 
     // Constructors
 
-        // Null constructor
-        absorptionCoeffs()
-        {}
+        //- Default construct
+        absorptionCoeffs() = default;
 
 
     //- Destructor
-    ~absorptionCoeffs();
+    ~absorptionCoeffs() = default;
 
 
     // Member functions

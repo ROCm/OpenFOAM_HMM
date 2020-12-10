@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,14 +162,15 @@ inline Foam::scalar Foam::hPowerThermo<EquationOfState>::S
 
 
 template<class EquationOfState>
-inline Foam::scalar Foam::hPowerThermo<EquationOfState>::dGdT
+inline Foam::scalar Foam::hPowerThermo<EquationOfState>::Gstd
 (
-    const scalar p, const scalar T
+    const scalar T
 ) const
 {
-    // To be implemented
-    NotImplemented;
-    return 0;
+    return
+        c0_*(pow(T, n0_ + 1) - pow(Tstd, n0_ + 1))/(pow(Tref_, n0_)*(n0_ + 1))
+      + Hc()
+      - c0_*(pow(T, n0_) - pow(Tstd, n0_))*T/(pow(Tref_, n0_)*n0_);
 }
 
 

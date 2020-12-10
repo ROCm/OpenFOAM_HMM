@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenFOAM Foundation
     Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,35 +26,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "eRefConstThermo.H"
+#include "hTabulatedThermo.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EquationOfState>
-Foam::eRefConstThermo<EquationOfState>::eRefConstThermo(const dictionary& dict)
+Foam::hTabulatedThermo<EquationOfState>::hTabulatedThermo
+(
+    const dictionary& dict
+)
 :
     EquationOfState(dict),
-    Cv_(readCoeff("Cv", dict)),
-    Hf_(readCoeff("Hf", dict)),
-    Tref_(readCoeff("Tref", dict)),
-    Eref_(readCoeff("Eref", dict))
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
+    Sf_(dict.subDict("thermodynamics").get<scalar>("Sf")),
+    Cp_("Cp", dict.subDict("thermodynamics"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EquationOfState>
-void Foam::eRefConstThermo<EquationOfState>::write(Ostream& os) const
+void Foam::hTabulatedThermo<EquationOfState>::write
+(
+    Ostream& os
+) const
 {
     EquationOfState::write(os);
 
+    // Entries in dictionary format
     {
         os.beginBlock("thermodynamics");
-        os.writeEntry("Cv", Cv_);
         os.writeEntry("Hf", Hf_);
-        os.writeEntry("Tref", Tref_);
-        os.writeEntry("Eref", Eref_);
+        os.writeEntry("Sf", Sf_);
+        os.writeEntry("Cp", Cp_);
         os.endBlock();
     }
 }
@@ -66,10 +71,10 @@ template<class EquationOfState>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const eRefConstThermo<EquationOfState>& ct
+    const hTabulatedThermo<EquationOfState>& pt
 )
 {
-    ct.write(os);
+    pt.write(os);
     return os;
 }
 

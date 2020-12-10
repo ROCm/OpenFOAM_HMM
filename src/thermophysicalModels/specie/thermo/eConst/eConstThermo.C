@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,9 @@ Foam::eConstThermo<EquationOfState>::eConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
     Cv_(dict.subDict("thermodynamics").get<scalar>("Cv")),
-    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf"))
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
+    Tref_(dict.subDict("thermodynamics").getOrDefault<scalar>("Tref", Tstd)),
+    Esref_(dict.subDict("thermodynamics").getOrDefault<scalar>("Eref", 0))
 {}
 
 
@@ -51,6 +54,8 @@ void Foam::eConstThermo<EquationOfState>::write(Ostream& os) const
         os.beginBlock("thermodynamics");
         os.writeEntry("Cv", Cv_);
         os.writeEntry("Hf", Hf_);
+        os.writeEntryIfDifferent<scalar>("Tref", Tstd, Tref_);
+        os.writeEntryIfDifferent<scalar>("Eref", 0, Esref_);
         os.endBlock();
     }
 }

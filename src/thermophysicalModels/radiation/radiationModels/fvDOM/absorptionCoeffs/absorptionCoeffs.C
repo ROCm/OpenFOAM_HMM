@@ -28,12 +28,6 @@ License
 #include "absorptionCoeffs.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::radiation::absorptionCoeffs::~absorptionCoeffs()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::radiation::absorptionCoeffs::checkT(const scalar T) const

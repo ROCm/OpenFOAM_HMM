@@ -20,7 +20,7 @@ thermoType
     type            heRhoThermo;
     mixture         pureMixture;
     transport       const;
-    thermo          hRefConst;
+    thermo          hConst;
     equationOfState perfectGas;
     specie          specie;
     energy          sensibleEnthalpy;

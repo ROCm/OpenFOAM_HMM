@@ -11,8 +11,11 @@ $(NSRDSfunctions)/NSRDSfunc6/NSRDSfunc6.C
 $(NSRDSfunctions)/NSRDSfunc7/NSRDSfunc7.C
 $(NSRDSfunctions)/NSRDSfunc14/NSRDSfunc14.C
 
-APIfunctions           = thermophysicalFunctions/APIfunctions
+APIfunctions = thermophysicalFunctions/APIfunctions
 $(APIfunctions)/APIdiffCoefFunc/APIdiffCoefFunc.C
+
+thermophysicalFunctions/nonUniformTable/nonUniformTableThermophysicalFunction.C
+thermophysicalFunctions/integratedNonUniformTable/integratedNonUniformTableThermophysicalFunction.C
 
 thermophysicalProperties/thermophysicalProperties.C
 

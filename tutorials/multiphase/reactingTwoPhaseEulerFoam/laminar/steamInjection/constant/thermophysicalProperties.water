@@ -20,7 +20,7 @@ thermoType
     type            heRhoThermo;
     mixture         pureMixture;
     transport       const;
-    thermo          eRefConst;
+    thermo          eConst;
     equationOfState perfectFluid;
     specie          specie;
     energy          sensibleInternalEnergy;

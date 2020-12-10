@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,6 +102,12 @@ class eConstThermo
         //  Note: input in [J/kg], but internally uses [J/kmol]
         scalar Hf_;
 
+        //- Reference temperature around which to linearise [K]
+        scalar Tref_;
+
+        //- Reference sensible enthalpy around which to linearise [J/kg]
+        scalar Esref_;
+
 
     // Private Member Functions
 
@@ -109,7 +116,9 @@ class eConstThermo
         (
             const EquationOfState& st,
             const scalar cv,
-            const scalar hf
+            const scalar hf,
+            const scalar Tref,
+            const scalar Esref
         );
 
 
@@ -138,7 +147,7 @@ public:
             return "eConst<" + EquationOfState::typeName() + '>';
         }
 
-        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        //- Limit temperature to be within the range
         inline scalar limit(const scalar T) const;
 
 
@@ -159,13 +168,14 @@ public:
             //- Entropy [J/(kg K)]
             inline scalar S(const scalar p, const scalar T) const;
 
+            //- Gibbs free energy of the mixture in the standard state [J/kg]
+            inline scalar Gstd(const scalar T) const;
+
             #include "EtoHthermo.H"
 
 
         // Derivative term used for Jacobian
 
-            //- Derivative of Gibbs free energy w.r.t. temperature
-            inline scalar dGdT(const scalar p, const scalar T) const;
 
             //- Temperature derivative of heat capacity at constant pressure
             inline scalar dCpdT(const scalar p, const scalar T) const;

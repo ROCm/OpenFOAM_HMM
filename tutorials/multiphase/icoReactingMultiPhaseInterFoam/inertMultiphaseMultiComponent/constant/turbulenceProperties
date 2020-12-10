@@ -17,12 +17,15 @@ FoamFile
 
 simulationType  laminar;
 
-RAS
+laminar
 {
-    RASModel        kEpsilon;
+    model       generalizedNewtonian;
 
-    turbulence      on;
-    printCoeffs     on;
+    viscosityModel  powerLaw;
+    nuMin           1e-06;
+    nuMax           1;
+    k               0.02;
+    n               0.4;
 }
 
 // ************************************************************************* //
