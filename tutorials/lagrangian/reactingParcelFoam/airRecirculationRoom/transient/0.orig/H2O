@@ -1,0 +1,84 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2011                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      H2O;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    "(roof|floor|sideWall|humanBody)"
+    {
+        type            zeroGradient;
+    }
+
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 0.5; // relative humidity 50%
+    }
+
+    mouth
+    {
+        type            fixedValue;
+        value           uniform 1; // relative humidity 100%
+    }
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    "(intake1|intake2|intake3|intake4)"
+    {
+        type            zeroGradient;
+    }
+
+    exhaust_maxX
+    {
+        type            outletMappedUniformInlet;
+        outletPatch     intake3;
+        fraction        0.95;    // 5% filtering
+        value           $internalField;
+    }
+
+    exhaust_minX
+    {
+        type            outletMappedUniformInlet;
+        outletPatch     intake1;
+        fraction        0.95;
+        value           $internalField;
+    }
+
+    exhaust_maxY
+    {
+        type            outletMappedUniformInlet;
+        outletPatch     intake4;
+        fraction        0.95;
+        value           $internalField;
+    }
+
+    exhaust_minY
+    {
+        type            outletMappedUniformInlet;
+        outletPatch     intake2;
+        fraction        0.95;
+        value           $internalField;
+    }
+}
+
+
+// ************************************************************************* //
