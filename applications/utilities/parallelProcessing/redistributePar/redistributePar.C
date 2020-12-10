@@ -2314,6 +2314,19 @@ int main(int argc, char *argv[])
     // (replacement for setRootCase that does not abort)
 
     argList args(argc, argv);
+
+
+    // As much as possible avoid synchronised operation. To be looked at more
+    // closely for the three scenarios:
+    // - decompose - reads on master (and from parent directory) and sends
+    //               dictionary to slaves
+    // - distribute - reads on potentially a different number of processors
+    //                than it writes to
+    // - reconstruct - reads parallel, write on master only and to parent
+    //                 directory
+    const_cast<fileOperation&>(fileHandler()).distributed(true);
+
+
     #include "foamDlOpenLibs.H"
 
     const bool reconstruct = args.found("reconstruct");
@@ -2569,12 +2582,14 @@ int main(int argc, char *argv[])
 
 
                 // See where the mesh is
+                //const bool oldParRun = Pstream::parRun(false);
                 fileName facesInstance = runTime.findInstance
                 (
                     meshSubDir,
                     "faces",
                     IOobject::READ_IF_PRESENT
                 );
+                //Pstream::parRun(oldParRun);
                 //Pout<< "facesInstance:" << facesInstance << endl;
 
                 Pstream::scatter(facesInstance);
@@ -2941,12 +2956,14 @@ int main(int argc, char *argv[])
                     runTime.caseName() = baseRunTime.caseName();
                 }
 
+                const bool oldParRun = Pstream::parRun(false);
                 masterInstDir = runTime.findInstance
                 (
                     meshSubDir,
                     "faces",
                     IOobject::READ_IF_PRESENT
                 );
+                Pstream::parRun(oldParRun);
 
                 if (decompose)
                 {
