@@ -199,6 +199,12 @@ cloudFunctions
             cycLeft
         );
     }
+
+    patchInteractionFields1
+    {
+        type            patchInteractionFields;
+        resetMode       writeTime;
+    }
 }
 
 
