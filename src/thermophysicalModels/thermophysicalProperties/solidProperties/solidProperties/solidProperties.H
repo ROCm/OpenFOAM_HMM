@@ -74,6 +74,12 @@ class solidProperties
         //- Molar weight [Kg/Kmol]
         scalar W_;
 
+        //- Poisson ration
+        scalar nu_;
+
+        //- Young Modulus [N/m2]
+        scalar E_;
+
 
 public:
 
@@ -112,7 +118,9 @@ public:
             scalar kappa,
             scalar Hf,
             scalar emissivity,
-            scalar W
+            scalar W,
+            scalar nu,
+            scalar E
         );
 
         //- Construct from dictionary
@@ -162,6 +170,12 @@ public:
 
             //- Molar weight [Kg/Kmol]
             inline scalar W() const;
+
+            //- Poissons
+            inline scalar nu() const;
+
+            //- Young modulus [N/m2]
+            inline scalar E() const;
 
 
     // I-O

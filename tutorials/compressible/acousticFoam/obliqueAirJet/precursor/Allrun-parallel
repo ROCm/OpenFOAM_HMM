@@ -1,0 +1,20 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+[[ -d constant/polyMesh ]] || runApplication ./Allrun.pre
+
+restore0Dir
+
+runApplication decomposePar
+
+runParallel $(getApplication)
+
+vibroAcousticCase="../main"
+dataDir="postProcessing/surfaces/window"
+
+mkdir -p "$vibroAcousticCase/constant/boundaryData"
+cp -rf "$dataDir" "$vibroAcousticCase/constant/boundaryData/window"
+
+# -----------------------------------------------------------------------------

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,9 @@ Author
 
 SourceFiles
     faPatch.C
-    newFaPatch.C
+    faPatchNew.C
+    faPatchTemplates.C
+    faPatchFaMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -68,9 +71,7 @@ class faPatch
     public labelList,
     public patchIdentifier
 {
-private:
-
-    // Private data
+    // Private Data
 
         //- Neighbour polyPatch index
         const label ngbPolyPatchIndex_;
@@ -105,6 +106,8 @@ private:
 
 
 protected:
+
+    // Protected Member Functions
 
         //- The faPatch geometry initialisation is called by faBoundaryMesh
         friend class faBoundaryMesh;
@@ -142,7 +145,6 @@ protected:
 public:
 
     typedef faBoundaryMesh BoundaryMesh;
-
 
     //- Runtime type information
     TypeName("patch");
@@ -189,7 +191,7 @@ public:
         faPatch(const faPatch&, const faBoundaryMesh&);
 
         //- Construct and return a clone, resetting the edge list
-        //  and boundary mesh
+        //- and boundary mesh
         virtual autoPtr<faPatch> clone
         (
             const faBoundaryMesh& bm,
@@ -207,7 +209,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new patch created
-        // on freestore from dictionary
+        //- on freestore from dictionary
         static autoPtr<faPatch> New
         (
             const word& name,
@@ -320,6 +322,8 @@ public:
             //- Make patch edge - neighbour face distances
             virtual void makeDeltaCoeffs(scalarField&) const;
 
+            void makeCorrectionVectors(vectorField&) const;
+
             //- Return patch edge - neighbour face distances
             const scalarField& deltaCoeffs() const;
 
@@ -330,7 +334,7 @@ public:
             void resetEdges(const labelList&);
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Return given internal field next to patch as patch field
             template<class Type>
@@ -344,7 +348,7 @@ public:
             ) const;
 
             //- Lookup and return the patchField of the named field from the
-            //  local objectRegistry.
+            //- local objectRegistry.
             //  N.B.  The dummy pointer arguments are used if this function is
             //  instantiated within a templated function to avoid a bug in gcc.
             //  See inletOutletFvPatchField.C and outletInletFvPatchField.C

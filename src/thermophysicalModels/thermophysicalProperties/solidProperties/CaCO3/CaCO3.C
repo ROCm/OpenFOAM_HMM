@@ -42,7 +42,7 @@ namespace Foam
 
 Foam::CaCO3::CaCO3()
 :
-    solidProperties(2710, 850, 1.3, 0.0, 1.0, 100.086)
+    solidProperties(2710, 850, 1.3, 0.0, 1.0, 100.086, 0.0, 0.0)
 {
     if (debug)
     {

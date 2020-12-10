@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,21 +25,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedValueFaPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "areaFields.H"
+#include "vibrationShellModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace regionModels
+{
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-makeFaPatchFields(uniformFixedValue);
+autoPtr<vibrationShellModel> vibrationShellModel::New
+(
+    const fvPatch& p,
+    const dictionary& dict
+)
+{
+    const word modelType = dict.get<word>("vibrationShellModel");
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown vibrationShellModel type "
+            << modelType << nl << nl
+            << "Valid vibrationShellModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<vibrationShellModel>(cstrIter()(modelType, p, dict));
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace regionModels
 } // End namespace Foam
 
 // ************************************************************************* //

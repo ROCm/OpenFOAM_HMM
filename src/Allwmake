@@ -49,6 +49,7 @@ wmake $targetType fileFormats
 wmake $targetType surfMesh
 wmake $targetType meshTools
 
+wmake $targetType finiteArea
 wmake $targetType finiteVolume
 
 wmake $targetType mesh/blockMesh
@@ -85,7 +86,9 @@ regionModels/Allwmake $targetType $*
 lagrangian/Allwmake $targetType $*
 
 wmake $targetType fvOptions
+wmake $targetType faOptions
 wmake $targetType fvMotionSolver
+wmake $targetType regionFaModels
 
 wmake $targetType overset
 
@@ -97,7 +100,6 @@ wmake $targetType waveModels
 
 wmake $targetType engine
 
-wmake $targetType finiteArea
 wmake $targetType genericPatchFields
 
 conversion/Allwmake $targetType $*

@@ -343,8 +343,8 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
 
     const labelListList& pntEdges = pointEdges();
 
-    tmp<vectorField> tpN(new vectorField(pntEdges.size(), Zero));
-    vectorField& pN = tpN.ref();
+    auto tpN = tmp<vectorField>::New(pntEdges.size(), Zero);
+    auto& pN = tpN.ref();
 
     const vectorField faceNormals(ngbPolyPatchFaceNormals());
 
@@ -406,8 +406,8 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 {
-    tmp<vectorField> tfc(new vectorField(size()));
-    vectorField& fc = tfc.ref();
+    auto tfc = tmp<vectorField>::New(size());
+    auto& fc = tfc.ref();
 
     // get reference to global face centres
     const vectorField& gfc =
@@ -427,13 +427,22 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
 {
     return edgeNormals()*(edgeNormals() & (edgeCentres() - edgeFaceCentres()));
-    //return edgeCentres() - edgeFaceCentres();
 }
 
 
 void Foam::faPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-    dc = 1.0/(edgeNormals() & delta());
+    dc = scalar(1)/(edgeNormals() & delta());
+}
+
+
+void Foam::faPatch::makeCorrectionVectors(vectorField& k) const
+{
+    vectorField unitDelta(delta()/mag(delta()));
+    vectorField edgeNormMag(edgeNormals()/mag(edgeNormals()));
+    scalarField dn(edgeNormals() & delta());
+
+    k = edgeNormMag - (scalar(1)/(unitDelta & edgeNormMag))*unitDelta;
 }
 
 
@@ -445,7 +454,7 @@ const Foam::scalarField& Foam::faPatch::deltaCoeffs() const
 
 void Foam::faPatch::makeWeights(scalarField& w) const
 {
-    w = 1.0;
+    w = scalar(1);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,12 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     const DimensionedField<Type, areaMesh>& iF
 )
 {
-    DebugInFunction << "Constructing faPatchField<Type>" << endl;
+    DebugInFunction
+        << "Constructing faPatchField<Type> "
+        << "patchFieldType:" << patchFieldType
+        << "actualPatchType:" << actualPatchType
+        << "p.Type():" << p.type()
+        << endl;
 
     auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 

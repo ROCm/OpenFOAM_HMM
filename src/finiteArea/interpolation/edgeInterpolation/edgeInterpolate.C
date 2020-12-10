@@ -281,6 +281,7 @@ Foam::fac::interpolate
     tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf =
         interpolate(tvf());
     tvf.clear();
+
     return tsf;
 }
 

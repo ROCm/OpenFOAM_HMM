@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
--------------------------------------------------------------------------------
+    Copyright (C) 2019-2020 OpenCFD Ltd.
+------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -25,27 +25,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValueFaPatchFields_H
-#define uniformFixedValueFaPatchFields_H
+#include "faOption.H"
 
-#include "uniformFixedValueFaPatchField.H"
-#include "fieldTypes.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+void Foam::fa::option::writeHeader(Ostream& os) const
 {
+    os.beginBlock(name_);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(uniformFixedValue)
+void Foam::fa::option::writeFooter(Ostream& os) const
+{
+    os.endBlock();
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+void Foam::fa::option::writeData(Ostream& os) const
+{
+    os.writeEntry("type", type());
+    os.writeEntry("active", active_);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    os << nl;
+    coeffs_.writeEntry(word(type() + "Coeffs"), os);
+}
 
-#endif
+
+bool Foam::fa::option::read(const dictionary& dict)
+{
+    dict.readIfPresent("active", active_);
+
+    coeffs_ = dict.optionalSubDict(modelType_ + "Coeffs");
+
+    return true;
+}
+
 
 // ************************************************************************* //
