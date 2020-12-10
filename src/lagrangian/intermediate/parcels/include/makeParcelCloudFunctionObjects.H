@@ -37,6 +37,7 @@ License
 #include "ParticleTracks.H"
 #include "ParticleTrap.H"
 #include "PatchCollisionDensity.H"
+#include "PatchInteractionFields.H"
 #include "PatchPostProcessing.H"
 #include "PatchParticleHistogram.H"
 #include "RemoveParcels.H"
@@ -54,6 +55,7 @@ License
     makeCloudFunctionObjectType(ParticleTracks, CloudType);                    \
     makeCloudFunctionObjectType(ParticleTrap, CloudType);                      \
     makeCloudFunctionObjectType(PatchCollisionDensity, CloudType);             \
+    makeCloudFunctionObjectType(PatchInteractionFields, CloudType);            \
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
     makeCloudFunctionObjectType(PatchParticleHistogram, CloudType);            \
     makeCloudFunctionObjectType(RemoveParcels, CloudType);                     \
