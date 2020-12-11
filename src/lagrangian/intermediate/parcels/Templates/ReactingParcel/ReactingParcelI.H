@@ -61,20 +61,27 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     ParcelType::constantProperties(parentDict),
     pMin_(this->dict_, "pMin", 1000.0),
     constantVolume_(this->dict_, "constantVolume", false),
-    volUpdateType_
-    (
-        this->dict_,
-        "volumeUpdateMethod",
-        volumeUpdateType::mConstRho
-    )
+    volUpdateType_(this->dict_, "volumeUpdateMethod")
 {
     // If constantVolume found use it
     if (this->dict_.found("constantVolume"))
     {
         volUpdateType_.setValue(mUndefined);
     }
-    else if (this->dict_.found("volumeUpdateMethod"))
+    else
     {
+        if (!this->dict_.found("volumeUpdateMethod"))
+        {
+            FatalErrorInFunction
+                << "Either 'constantVolume' or 'volumeUpdateMethod' " << nl
+                << " must be provided. " << nl
+                << " The new keyword is 'volumeUpdateMethod'. " << nl
+                << " Available methods are  : " << nl
+                << " constantRho, constantVolume or updateRhoAndVol. " << nl
+                << " 'constantVolume' is either true/false " << nl
+                << nl << exit(FatalError);
+        }
+
         const word volumeUpdateMethod
         (
             this->dict_.getWord("volumeUpdateMethod")
