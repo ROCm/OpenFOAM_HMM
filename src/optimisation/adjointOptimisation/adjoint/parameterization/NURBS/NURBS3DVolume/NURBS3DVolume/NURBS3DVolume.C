@@ -1828,31 +1828,28 @@ void Foam::NURBS3DVolume::writeCps
 
 void Foam::NURBS3DVolume::writeCpsInDict() const
 {
-    if (Pstream::master())
-    {
-        IOdictionary cpsDict
+    IOdictionary cpsDict
+    (
+        IOobject
         (
-            IOobject
-            (
-                name_ + "cpsBsplines" + mesh_.time().timeName(),
-                mesh_.time().caseConstant(),
-                cpsFolder_,
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
+            name_ + "cpsBsplines" + mesh_.time().timeName(),
+            mesh_.time().caseConstant(),
+            cpsFolder_,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
 
-        cpsDict.add("controlPoints", cps_);
+    cpsDict.add("controlPoints", cps_);
 
-        // Always write in ASCII, but allow compression
-        cpsDict.regIOobject::writeObject
-        (
-            IOstreamOption(IOstream::ASCII, mesh_.time().writeCompression()),
-            true
-        );
-    }
+    // Always write in ASCII, but allow compression
+    cpsDict.regIOobject::writeObject
+    (
+        IOstreamOption(IOstream::ASCII, mesh_.time().writeCompression()),
+        true
+    );
 }
 
 
