@@ -73,6 +73,8 @@ SourceFiles
 #include "pointField.H"
 #include "faceList.H"
 #include "Enum.H"
+#include "vector2D.H"
+#include "labelVector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,7 +83,9 @@ namespace Foam
 
 // Forward Declarations
 class IOobject;
+class blockMesh;
 class polyMesh;
+class gradingDescriptors;
 
 /*---------------------------------------------------------------------------*\
                            Class PDRblock Declaration
@@ -96,7 +100,7 @@ public:
     // Data Types
 
         //- The expansion type
-        enum expansionType
+        enum expansionType : uint8_t
         {
             EXPAND_UNIFORM,     //!< Uniform expansion (ie, no expansion)
             EXPAND_RATIO,       //!< End/start ratio
@@ -115,7 +119,7 @@ public:
         {
         public:
 
-            //- The locations are valid if they contain 2 or more points
+            //- The location list is valid if it contains 2 or more points
             inline bool valid() const;
 
             //- The number of cells in this direction.
@@ -136,6 +140,9 @@ public:
             //- Mid-point location, zero for an empty list.
             inline scalar centre() const;
 
+            //- The difference between min/max values, zero for an empty list.
+            inline scalar length() const;
+
             //- Check that element index is within valid range.
             inline void checkIndex(const label i) const;
 
@@ -145,6 +152,13 @@ public:
             //- Cell centre at element position.
             //  Treats -1 and nCells positions like a halo cell.
             inline scalar C(const label i) const;
+
+            //- Return min/max edge lengths
+            scalarMinMax edgeLimits() const;
+
+            //- Return edge grading descriptors for the locations
+            //  \see Foam::gradingDescriptor
+            gradingDescriptors grading() const;
 
             //- Find the cell index enclosing this location
             //  \return -1 for out-of-bounds
@@ -172,6 +186,33 @@ private:
 
     // Private Classes
 
+        //- The begin/end nodes for each segment,
+        //- with divisions and expansion for each segment
+        struct gridControl
+        :
+            public scalarList
+        {
+            //- The number of division per segment
+            labelList divisions_;
+
+            //- The expansion ratio per segment
+            scalarList expansion_;
+
+            //- Total number of cells in this direction
+            label nCells() const;
+
+            //- Return edge grading descriptors for the locations
+            //  \see Foam::gradingDescriptor
+            gradingDescriptors grading() const;
+
+            //- Add point/divisions/expand to end of list (push_back)
+            void append(const scalar p, label nDiv, scalar expRatio=1);
+
+            //- Add point/divisions/expand to front of list (push_front)
+            void prepend(const scalar p, label nDiv, scalar expRatio=1);
+        };
+
+
         //- Extracted patch settings
         struct boundaryEntry
         {
@@ -188,14 +229,88 @@ private:
             labelList faces_;
         };
 
+        //- The begin/end nodes for each segment,
+        //- with divisions and expansion for each segment
+        struct outerControl
+        {
+            //- The control type
+            enum controlType : uint8_t
+            {
+                OUTER_NONE = 0,     //!< No outer region
+                OUTER_EXTEND,       //!< Extend inner region (orthogonal)
+                OUTER_BOX,          //!< Cuboid
+                OUTER_SPHERE        //!< Spherical
+            };
+
+            //- Named enumerations for the control type
+            const static Enum<controlType> controlNames_;
+
+            //- The control type
+            controlType type_;
+
+            //- The expansion type
+            expansionType expandType_;
+
+            //- True if on the ground
+            bool onGround_;
+
+            //- Relative size(s) for the outer region
+            vector2D relSize_;
+
+            //- Number of cells in outer region
+            //  Generally only single component is used
+            labelVector2D nCells_;
+
+            //- Expansion ratio(s) for the outer region
+            vector2D expansion_;
+
+
+        // Constructors
+
+            //- Default construct. NONE
+            outerControl();
+
+
+        // Member Functions
+
+            //- Reset to default (NONE) values
+            void clear();
+
+            //- Is enabled (not NONE)
+            bool active() const;
+
+            //- Project on to sphere (is SPHERE)
+            bool isSphere() const;
+
+            //- Is the outer region on the ground?
+            bool onGround() const;
+
+            //- Define that the outer region is on the ground or not
+            //  \return the old value
+            bool onGround(const bool on);
+
+            //- Read content from dictionary
+            void read(const dictionary& dict);
+
+            //- Report information about outer region
+            void report(Ostream& os) const;
+        };
+
 
     // Private Data
 
-        //- Verbosity
-        bool verbose_;
+        //- Reference to mesh dictionary
+        const dictionary& meshDict_;
 
-        //- The grid points in all (i,j,k / x,y,z) directions.
+        //- The grid controls in (i,j,k / x,y,z) directions.
+        Vector<gridControl> control_;
+
+        //- The grid points in all (i,j,k / x,y,z) directions,
+        //- after applying the internal subdivisions.
         Vector<location> grid_;
+
+        //- Control for the outer-region (if any)
+        outerControl outer_;
 
         //- The mesh bounding box
         boundBox bounds_;
@@ -203,8 +318,11 @@ private:
         //- The boundary patch information
         PtrList<boundaryEntry> patches_;
 
-        //- The min edge length
-        scalar minEdgeLen_;
+        //- The min/max edge lengths
+        scalarMinMax edgeLimits_;
+
+        //- Verbosity
+        bool verbose_;
 
 
     // Private Member Functions
@@ -267,6 +385,35 @@ private:
             const scalar tol
         ) const;
 
+        //- The bounding box of the grid points
+        static boundBox bounds
+        (
+            const scalarList& x, //!< X-points, monotonically increasing
+            const scalarList& y, //!< Y-points, monotonically increasing
+            const scalarList& z  //!< T-points, monotonically increasing
+        );
+
+        //- Equivalent edge grading descriptors in (x,y,z) directions.
+        static Vector<gradingDescriptors> grading
+        (
+            const Vector<gridControl>& ctrl
+        );
+
+        //- Mesh sizes based on the controls
+        static labelVector sizes
+        (
+            const Vector<gridControl>& ctrl
+        );
+
+
+    // Mesh Generation
+
+        //- Create a blockMesh
+        autoPtr<blockMesh> createBlockMesh(const IOobject& io) const;
+
+        //- Create polyMesh via blockMesh
+        autoPtr<polyMesh> meshBlockMesh(const IOobject& io) const;
+
 
 public:
 
@@ -278,8 +425,8 @@ public:
 
     // Constructors
 
-        //- Construct zero-size
-        inline PDRblock();
+        //- Default construct, zero-size, inverted bounds etc
+        PDRblock();
 
         //- Construct from components
         PDRblock
@@ -290,7 +437,7 @@ public:
         );
 
         //- Construct from dictionary
-        explicit PDRblock(const dictionary& dict, bool verbose=false);
+        explicit PDRblock(const dictionary& dict, bool verboseOutput=false);
 
 
     // Member Functions
@@ -312,14 +459,23 @@ public:
         //- The grid point locations in the i,j,k (x,y,z) directions.
         inline const Vector<location>& grid() const;
 
+        //- Equivalent edge grading descriptors in (x,y,z) directions.
+        Vector<gradingDescriptors> grading() const;
 
-    // Mesh information
+        //- Equivalent edge grading descriptors in specified (x,y,z) direction.
+        gradingDescriptors grading(const direction cmpt) const;
+
+
+    // Mesh Information
+
+        //- Mesh sizing as per ijkMesh
+        using ijkMesh::sizes;
 
         //- The mesh bounding box
         inline const boundBox& bounds() const;
 
-        //- The min edge length
-        inline const scalar& minEdgeLen() const;
+        //- The min/max edge length
+        inline const scalarMinMax& edgeLimits() const;
 
         //- Cell size in x-direction at i position.
         inline scalar dx(const label i) const;
@@ -379,17 +535,30 @@ public:
         labelVector findCell(const point& pt) const;
 
         //- Obtain i,j,k grid index for point location within specified
-        //  relative tolerance of the minEdgeLen.
+        //  relative tolerance of the min edge length
         //  The value (-1,-1,-1) is returned for out-of-bounds (not found).
         //  and off-grid
         labelVector gridIndex(const point& pt, const scalar relTol=0.01) const;
 
 
-    // Mesh generation
+    // Mesh Generation
+
+        //- Output content for an equivalent blockMeshDict
+        //  Optionally generate header/footer content
+        Ostream& blockMeshDict(Ostream& os, const bool withHeader=false) const;
+
+        //- Content for an equivalent blockMeshDict
+        dictionary blockMeshDict() const;
+
+        //- Write an equivalent blockMeshDict
+        void writeBlockMeshDict(const IOobject& io) const;
 
         //- Create polyMesh for grid definition and patch information
         autoPtr<polyMesh> mesh(const IOobject& io) const;
 
+        //- Create polyMesh for inner-mesh only,
+        //- ignore any outer block definitions
+        autoPtr<polyMesh> innerMesh(const IOobject& io) const;
 };
 
 

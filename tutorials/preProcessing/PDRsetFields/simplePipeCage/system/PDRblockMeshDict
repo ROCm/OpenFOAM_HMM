@@ -74,4 +74,23 @@ boundary
     }
 );
 
+
+// Treatment of the outer region
+
+outer
+{
+    type        sphere;     // (none | extend | box | sphere)  [default: none]
+    onGround    true;       // Module on the ground?  [default: false]
+    expansion   relative;   // (uniform | ratio | relative)  [default: ratio]
+
+    ratios      1.1;
+
+    size        3;          // Overall outer/inner size
+    nCells      10;         // Number of cells for outer region
+
+    // size       (3 4);
+    // nCells     (10 12);
+}
+
+
 //***************************************************************************//

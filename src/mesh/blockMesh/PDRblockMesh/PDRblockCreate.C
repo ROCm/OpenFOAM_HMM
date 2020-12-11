@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -300,7 +300,8 @@ Foam::label Foam::PDRblock::addBoundaryFaces
 }
 
 
-Foam::autoPtr<Foam::polyMesh> Foam::PDRblock::mesh(const IOobject& io) const
+Foam::autoPtr<Foam::polyMesh>
+Foam::PDRblock::innerMesh(const IOobject& io) const
 {
     pointField pts(nPoints());
 
@@ -373,6 +374,22 @@ Foam::autoPtr<Foam::polyMesh> Foam::PDRblock::mesh(const IOobject& io) const
     pmesh.addPatches(patches);
 
     return meshPtr;
+}
+
+
+Foam::autoPtr<Foam::polyMesh>
+Foam::PDRblock::mesh(const IOobject& io) const
+{
+    if (outer_.active())
+    {
+        Info<< "Outer region is active, using blockMesh generation" << nl;
+        return meshBlockMesh(io);
+    }
+    else
+    {
+        Info<< "Outer region is inactive, using ijk generation" << nl;
+        return innerMesh(io);
+    }
 }
 
 
