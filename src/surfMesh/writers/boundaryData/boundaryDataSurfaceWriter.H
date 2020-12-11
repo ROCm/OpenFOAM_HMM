@@ -159,9 +159,6 @@ class boundaryDataWriter
 
     // Private Member Functions
 
-        //- Write option (default: IOstream::ASCII)
-        IOstream::streamFormat writeFormat_;
-
         //- Templated write field operation
         template<class Type>
         fileName writeTemplate

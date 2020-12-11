@@ -232,7 +232,7 @@ bool Foam::mappedPatchBase::constructIOField
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                0
+                label(0)
             );
             fldPtr->transfer
             (

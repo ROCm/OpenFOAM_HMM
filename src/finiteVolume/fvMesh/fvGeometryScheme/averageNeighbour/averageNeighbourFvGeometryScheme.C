@@ -70,11 +70,20 @@ Foam::label Foam::averageNeighbourFvGeometryScheme::clipFaceTet
     label nClipped = 0;
     for (label facei = 0; facei < mesh_.nFaces(); facei++)
     {
+        #ifdef WM_SPDP
+        const solveVector fcCorr(faceCorrection[facei]);
+        #else
         const vector& fcCorr = faceCorrection[facei];
-        if (fcCorr != vector::zero)
+        #endif
+        if (fcCorr != solveVector::zero)
         {
+            #ifdef WM_SPDP
+            const solveVector fn(faceNormals[facei]);
+            const solveVector fc(faceCentres[facei]);
+            #else
             const vector& fn = faceNormals[facei];
             const point& fc = faceCentres[facei];
+            #endif
             const face& f = mesh_.faces()[facei];
 
             forAll(f, fp)
@@ -142,15 +151,20 @@ void Foam::averageNeighbourFvGeometryScheme::makePyrHeights
     {
         const solveVector n = faceNormals[facei];
         const solveVector fc = faceCentres[facei];
-        ownHeight[facei] = ((fc-cellCentres[own[facei]])&n);
-        neiHeight[facei] = ((cellCentres[nei[facei]]-fc)&n);
+        const solveVector ownCc = cellCentres[own[facei]];
+        const solveVector neiCc = cellCentres[nei[facei]];
+
+        ownHeight[facei] = ((fc-ownCc)&n);
+        neiHeight[facei] = ((neiCc-fc)&n);
     }
 
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); facei++)
     {
         const solveVector n = faceNormals[facei];
         const solveVector fc = faceCentres[facei];
-        ownHeight[facei] = ((fc-cellCentres[own[facei]])&n);
+        const solveVector ownCc = cellCentres[own[facei]];
+
+        ownHeight[facei] = ((fc-ownCc)&n);
     }
 }
 
@@ -178,8 +192,13 @@ Foam::label Foam::averageNeighbourFvGeometryScheme::clipPyramids
     label nClipped = 0;
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
+        #ifdef WM_SPDP
+        const solveVector n(faceNormals[facei]);
+        const solveVector fc(faceCentres[facei]);
+        #else
         const vector& n = faceNormals[facei];
         const point& fc = faceCentres[facei];
+        #endif
 
         const label ownCelli = own[facei];
         if (correction[ownCelli] != vector::zero)
@@ -218,8 +237,13 @@ Foam::label Foam::averageNeighbourFvGeometryScheme::clipPyramids
 
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); facei++)
     {
+        #ifdef WM_SPDP
+        const solveVector n(faceNormals[facei]);
+        const solveVector fc(faceCentres[facei]);
+        #else
         const vector& n = faceNormals[facei];
         const point& fc = faceCentres[facei];
+        #endif
 
         const label ownCelli = own[facei];
         if (correction[ownCelli] != vector::zero)
@@ -264,7 +288,11 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
     // Internal faces
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
+        #ifdef WM_SPDP
+        const solveVector n(faceNormals[facei]);
+        #else
         const vector& n = faceNormals[facei];
+        #endif
         const point& ownCc = cellCentres[own[facei]];
         const point& neiCc = cellCentres[nei[facei]];
 
@@ -281,10 +309,10 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
         // Apply half to both sides (as a correction)
         // Note: should this be linear weights instead of 0.5?
         const scalar w = 0.5*faceWeights[facei];
-        cc[own[facei]] += w*d;
+        cc[own[facei]] += point(w*d);
         cellWeights[own[facei]] += w;
 
-        cc[nei[facei]] -= w*d;
+        cc[nei[facei]] -= point(w*d);
         cellWeights[nei[facei]] += w;
     }
 
@@ -294,9 +322,8 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
     syncTools::swapBoundaryCellPositions(mesh_, cellCentres, neiCellCentres);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        const polyPatch& pp = pbm[patchi];
         if (pp.coupled())
         {
             const labelUList& fc = pp.faceCells();
@@ -306,7 +333,11 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
                 const label meshFacei = pp.start()+i;
                 const label bFacei = meshFacei-mesh_.nInternalFaces();
 
+                #ifdef WM_SPDP
+                const solveVector n(faceNormals[meshFacei]);
+                #else
                 const vector& n = faceNormals[meshFacei];
+                #endif
 
                 const point& ownCc = cellCentres[fc[i]];
                 const point& neiCc = neiCellCentres[bFacei];
@@ -323,7 +354,7 @@ Foam::averageNeighbourFvGeometryScheme::averageNeighbourCentres
 
                 // Apply half to both sides (as a correction)
                 const scalar w = 0.5*faceWeights[meshFacei];
-                cc[fc[i]] += w*d;
+                cc[fc[i]] += point(w*d);
                 cellWeights[fc[i]] += w;
             }
         }
@@ -367,8 +398,13 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
     // Internal faces
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
+        #ifdef WM_SPDP
+        const solveVector n(faceNormals[facei]);
+        const solveVector oldFc(faceCentres[facei]);
+        #else
         const vector& n = faceNormals[facei];
         const point& oldFc = faceCentres[facei];
+        #endif
 
         const solveVector ownCc(cellCentres[own[facei]]);
         const solveVector neiCc(cellCentres[nei[facei]]);
@@ -395,7 +431,7 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
         //    (= non-ortho correction vector?)
         d -= (d&n)*n;
 
-//        // Clip to limit change in 
+//        // Clip to limit change in
 //        d *= ratio;
 
 
@@ -408,9 +444,8 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
     syncTools::swapBoundaryCellPositions(mesh_, cellCentres, neiCellCentres);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        const polyPatch& pp = pbm[patchi];
         const labelUList& fc = pp.faceCells();
 
         if (pp.coupled())
@@ -421,8 +456,13 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
                 const label facei = pp.start()+i;
                 const label bFacei = facei-mesh_.nInternalFaces();
 
+                #ifdef WM_SPDP
+                const solveVector n(faceNormals[facei]);
+                const solveVector oldFc(faceCentres[facei]);
+                #else
                 const vector& n = faceNormals[facei];
                 const point& oldFc = faceCentres[facei];
+                #endif
 
                 const solveVector ownCc(cellCentres[fc[i]]);
                 const solveVector neiCc(neiCellCentres[bFacei]);
@@ -449,8 +489,14 @@ Foam::averageNeighbourFvGeometryScheme::averageCentres
             {
                 const label facei = pp.start()+i;
 
+                #ifdef WM_SPDP
+                const solveVector n(faceNormals[facei]);
+                const solveVector oldFc(faceCentres[facei]);
+                #else
                 const vector& n = faceNormals[facei];
                 const point& oldFc = faceCentres[facei];
+                #endif
+
                 const solveVector ownCc(cellCentres[fc[i]]);
 
                 solveVector d(ownCc-oldFc);

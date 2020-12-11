@@ -434,7 +434,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         autoPtr<labelIOList> newTetBasePtIsPtr = readTetBasePtIs();
 
         // Update all geometry
-        updateGeom(newPoints, newTetBasePtIsPtr);
+        updateGeomPoints(std::move(newPoints), newTetBasePtIsPtr);
 
         return polyMesh::POINTS_MOVED;
     }

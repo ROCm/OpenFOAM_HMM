@@ -1600,7 +1600,7 @@ Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
                     mesh,
                     boundaryPointLevel,
                     maxEqOp<label>(),
-                    0
+                    label(0)
                 );
             }
 

@@ -194,12 +194,12 @@ void Foam::highAspectRatioFvGeometryScheme::calcAspectRatioWeights
     cellWeight =
     max
     (
+        scalar(0),
         min
         (
-            (aratio-minAspect_)/delta,
-            1.0
-        ),
-        0.0
+            scalar(1),
+            (aratio-minAspect_)/delta
+        )
     );
 
     faceWeight.setSize(mesh_.nFaces());
@@ -292,7 +292,7 @@ void Foam::highAspectRatioFvGeometryScheme::makeAverageCentres
                 sumAc = Zero;
                 for (label pi = 0; pi < nPoints; pi++)
                 {
-                    sumAc += p[f[pi]];
+                    sumAc += static_cast<solveVector>(p[f[pi]]);
                 }
                 faceCentres[facei] = sumAc/nPoints;
             }
@@ -310,7 +310,7 @@ void Foam::highAspectRatioFvGeometryScheme::makeAverageCentres
         for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
         {
             const solveScalar magfA(magFaceAreas[facei]);
-            const solveVector weightedFc(magfA*faceCentres[facei]);
+            const vector weightedFc(magfA*faceCentres[facei]);
 
             // Accumulate area-weighted face-centre
             cellCentres[own[facei]] += weightedFc;
@@ -334,7 +334,7 @@ void Foam::highAspectRatioFvGeometryScheme::makeAverageCentres
                 )
                 {
                     const solveScalar magfA(magFaceAreas[facei]);
-                    const solveVector weightedFc(magfA*faceCentres[facei]);
+                    const vector weightedFc(magfA*faceCentres[facei]);
 
                     cellCentres[own[facei]] += weightedFc;
                     cellWeights[own[facei]] += magfA;

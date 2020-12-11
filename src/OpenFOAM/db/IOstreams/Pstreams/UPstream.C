@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         haveThreads_ = haveThreads;
 
         freeCommunicator(UPstream::worldComm);
-        label comm = allocateCommunicator(-1, labelList(1, Zero), false);
+        label comm = allocateCommunicator(-1, labelList(Foam::one{}, 0), false);
         if (comm != UPstream::worldComm)
         {
             FatalErrorInFunction
@@ -258,8 +258,8 @@ Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID)
         // Not yet allocated
 
         label above(-1);
-        labelList below(0);
-        labelList allBelow(0);
+        labelList below;
+        labelList allBelow;
 
         if (size() < UPstream::nProcsSimpleSum)
         {
@@ -373,8 +373,8 @@ Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
 
 Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
 
-Foam::wordList Foam::UPstream::allWorlds_(1, "");
-Foam::labelList Foam::UPstream::worldIDs_(1, 0);
+Foam::wordList Foam::UPstream::allWorlds_(Foam::one{}, "");
+Foam::labelList Foam::UPstream::worldIDs_(Foam::one{}, 0);
 
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
 Foam::UPstream::linearCommunication_(10);
@@ -388,7 +388,7 @@ Foam::UPstream::treeCommunication_(10);
 Foam::UPstream::communicator serialComm
 (
     -1,
-    Foam::labelList(1, Foam::Zero),
+    Foam::labelList(Foam::one{}, 0),
     false
 );
 

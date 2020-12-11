@@ -625,15 +625,16 @@ public:
             );
 
 
-        //  Storage management
+        // Storage management
 
             //- Clear geometry
             void clearGeom();
 
-            //- Update geometry; keep topology. Optional new face decomposition
-            void updateGeom
+            //- Update geometry points; keep topology.
+            //- Optionally with new face decomposition
+            void updateGeomPoints
             (
-                pointIOField& newPoints,
+                pointIOField&& newPoints,
                 autoPtr<labelIOList>& newTetBasePtIsPtr
             );
 

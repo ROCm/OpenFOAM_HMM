@@ -462,18 +462,21 @@ public:
             //- Update mesh corresponding to the given map
             virtual void updateMesh(const mapPolyMesh& mpm);
 
+            //- Avoid masking surfaceInterpolation method
+            using surfaceInterpolation::movePoints;
+
             //- Move points, returns volumes swept by faces in motion
             virtual tmp<scalarField> movePoints(const pointField&);
 
             //- Update all geometric data. This gets redirected up from
-            //  primitiveMesh level
+            //- primitiveMesh level
             virtual void updateGeom();
 
             //- Map all fields in time using given map.
             virtual void mapFields(const mapPolyMesh& mpm);
 
             //- Remove boundary patches. Warning: fvPatchFields hold ref to
-            //  these fvPatches.
+            //- these fvPatches.
             void removeFvBoundary();
 
             //- Return cell face motion fluxes

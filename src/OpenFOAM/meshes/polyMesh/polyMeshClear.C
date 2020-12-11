@@ -71,9 +71,9 @@ void Foam::polyMesh::clearGeom()
 }
 
 
-void Foam::polyMesh::updateGeom
+void Foam::polyMesh::updateGeomPoints
 (
-    pointIOField& newPoints,
+    pointIOField&& newPoints,
     autoPtr<labelIOList>& newTetBasePtIsPtr
 )
 {
