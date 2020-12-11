@@ -1,0 +1,50 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+models="
+Maxwell
+Stokes
+"
+
+#------------------------------------------------------------------------------
+
+# Plot streamwise flow speed at y=1.0 [m] as a function of time
+#
+# $* = models
+# ----
+plot() {
+    # Require gnuplot
+    command -v gnuplot >/dev/null || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    models=$*
+    endTime=$(foamDictionary -entry endTime -value system/controlDict)
+
+    gnuplot<<PLT
+    set terminal pngcairo font "helvetica,16" size 800,600
+    set output "planarPoiseuille.png"
+    set grid
+    set key right top
+    set xrange [0:"$endTime"]
+    set yrange [0:8]
+    set xlabel "t [s]"
+    set ylabel "U_x [m/s]" rotate by 0 offset 3,0,0
+
+    results=system("ls *.txt")
+    names="${models[*]}"
+    plot \
+        "WatersKing.dat" w lines t "Analytical" lt -1, \
+        for [i=1:words(results)] word(results, i) t word(names, i) \
+            w linespoints pointinterval 100 lt i pt 6 ps 1.5
+PLT
+}
+
+#------------------------------------------------------------------------------
+
+plot $models
+
+#------------------------------------------------------------------------------

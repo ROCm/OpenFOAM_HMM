@@ -65,8 +65,6 @@ functions
             }
         );
     }
-
-    #includeFunc "samples"
 }
 
 

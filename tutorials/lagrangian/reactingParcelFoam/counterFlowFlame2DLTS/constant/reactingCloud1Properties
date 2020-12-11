@@ -21,4 +21,10 @@ solution
 }
 
 
+constantProperties
+{
+    volumeUpdateMethod  constantRho;
+}
+
+
 // ************************************************************************* //
