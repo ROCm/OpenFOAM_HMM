@@ -28,13 +28,11 @@ License
 
 #include "sampledCuttingPlane.H"
 #include "dictionary.H"
+#include "fvMesh.H"
 #include "volFields.H"
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvMesh.H"
-#include "isoSurfaceCell.H"
-#include "isoSurfacePoint.H"
-#include "isoSurfaceTopo.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -189,6 +187,111 @@ void Foam::sampledCuttingPlane::setDistanceFields(const plane& pln)
 }
 
 
+void Foam::sampledCuttingPlane::combineSurfaces
+(
+    PtrList<isoSurfaceBase>& isoSurfPtrs
+)
+{
+    isoSurfacePtr_.reset(nullptr);
+
+    // Already checked previously for ALGO_POINT, but do it again
+    // - ALGO_POINT still needs fields (for interpolate)
+    // The others can do straight transfer
+    if
+    (
+        isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT
+     && isoSurfPtrs.size() == 1
+    )
+    {
+        // Shift ownership from list to autoPtr
+        isoSurfacePtr_.reset(isoSurfPtrs.release(0));
+    }
+    else if (isoSurfPtrs.size() == 1)
+    {
+        autoPtr<isoSurfaceBase> ptr(isoSurfPtrs.release(0));
+        auto& surf = *ptr;
+
+        surface_.transfer(static_cast<meshedSurface&>(surf));
+        meshCells_.transfer(surf.meshCells());
+    }
+    else
+    {
+        // Combine faces with point offsets
+        //
+        // Note: use points().size() from surface, not nPoints()
+        // since there may be uncompacted dangling nodes
+
+        label nFaces = 0, nPoints = 0;
+
+        for (const auto& surf : isoSurfPtrs)
+        {
+            nFaces += surf.size();
+            nPoints += surf.points().size();
+        }
+
+        faceList newFaces(nFaces);
+        pointField newPoints(nPoints);
+        meshCells_.resize(nFaces);
+
+        surfZoneList newZones(isoSurfPtrs.size());
+
+        nFaces = 0;
+        nPoints = 0;
+        forAll(isoSurfPtrs, surfi)
+        {
+            autoPtr<isoSurfaceBase> ptr(isoSurfPtrs.release(surfi));
+            auto& surf = *ptr;
+
+            SubList<face> subFaces(newFaces, surf.size(), nFaces);
+            SubList<point> subPoints(newPoints, surf.points().size(), nPoints);
+            SubList<label> subCells(meshCells_, surf.size(), nFaces);
+
+            newZones[surfi] = surfZone
+            (
+                surfZoneIdentifier::defaultName(surfi),
+                subFaces.size(),    // size
+                nFaces,             // start
+                surfi               // index
+            );
+
+            subFaces = surf.surfFaces();
+            subPoints = surf.points();
+            subCells = surf.meshCells();
+
+            if (nPoints)
+            {
+                for (face& f : subFaces)
+                {
+                    for (label& pointi : f)
+                    {
+                        pointi += nPoints;
+                    }
+                }
+            }
+
+            nFaces += subFaces.size();
+            nPoints += subPoints.size();
+        }
+
+        meshedSurface combined
+        (
+            std::move(newPoints),
+            std::move(newFaces),
+            newZones
+        );
+
+        surface_.transfer(combined);
+    }
+
+    // Addressing into the full mesh
+    if (subMeshPtr_ && meshCells_.size())
+    {
+        meshCells_ =
+            UIndirectList<label>(subMeshPtr_->cellMap(), meshCells_);
+    }
+}
+
+
 void Foam::sampledCuttingPlane::createGeometry()
 {
     if (debug)
@@ -198,62 +301,105 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
     // Clear any previously stored topologies
-    isoSurfacePtr_.reset(nullptr);
     surface_.clear();
     meshCells_.clear();
+    isoSurfacePtr_.reset(nullptr);
+
+    // Clear derived data
+    sampledSurface::clearGeom();
 
     // Clear any stored fields
     pointDistance_.clear();
     cellDistancePtr_.clear();
 
+    const bool hasCellZones =
+        (-1 != mesh().cellZones().findIndex(zoneNames_));
+
     const fvMesh& fvm = static_cast<const fvMesh&>(this->mesh());
 
-    // Get sub-mesh if any
+    // Geometry
     if
     (
-        !subMeshPtr_
-     && (-1 != mesh().cellZones().findIndex(zoneNames_))
+        simpleSubMesh_
+     && isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT
     )
     {
-        const label exposedPatchi =
-            mesh().boundaryMesh().findPatchID(exposedPatchName_);
+        subMeshPtr_.reset(nullptr);
 
-        bitSet cellsToSelect(mesh().cellZones().selection(zoneNames_));
-
-        DebugInfo
-            << "Allocating subset of size "
-            << cellsToSelect.count()
-            << " with exposed faces into patch "
-            << exposedPatchi << endl;
-
-
-        // If we will use a fvMeshSubset so can apply bounds as well to make
-        // the initial selection smaller.
-
-        const boundBox& clipBb = isoParams_.getClipBounds();
-        if (clipBb.valid() && cellsToSelect.any())
+        // Handle cell zones as inverse (blocked) selection
+        if (!ignoreCellsPtr_)
         {
-            const auto& cellCentres = fvm.C();
+            ignoreCellsPtr_.reset(new bitSet);
 
-            for (const label celli : cellsToSelect)
+            if (hasCellZones)
             {
-                const point& cc = cellCentres[celli];
+                bitSet select(mesh().cellZones().selection(zoneNames_));
 
-                if (!clipBb.contains(cc))
+                if (select.any() && !select.all())
                 {
-                    cellsToSelect.unset(celli);
+                    // From selection to blocking
+                    select.flip();
+
+                    *ignoreCellsPtr_ = std::move(select);
                 }
             }
+        }
+    }
+    else
+    {
+        // A standard subMesh treatment
 
-            DebugInfo
-                << "Bounded subset of size "
-                << cellsToSelect.count() << endl;
+        if (ignoreCellsPtr_)
+        {
+            ignoreCellsPtr_->clearStorage();
+        }
+        else
+        {
+            ignoreCellsPtr_.reset(new bitSet);
         }
 
-        subMeshPtr_.reset
-        (
-            new fvMeshSubset(fvm, cellsToSelect, exposedPatchi)
-        );
+        // Get sub-mesh if any
+        if (!subMeshPtr_ && hasCellZones)
+        {
+            const label exposedPatchi =
+                mesh().boundaryMesh().findPatchID(exposedPatchName_);
+
+            bitSet cellsToSelect(mesh().cellZones().selection(zoneNames_));
+
+            DebugInfo
+                << "Allocating subset of size "
+                << cellsToSelect.count() << " with exposed faces into patch "
+                << exposedPatchi << endl;
+
+
+            // If we will use a fvMeshSubset so can apply bounds as well to make
+            // the initial selection smaller.
+
+            const boundBox& clipBb = isoParams_.getClipBounds();
+            if (clipBb.valid() && cellsToSelect.any())
+            {
+                const auto& cellCentres = fvm.C();
+
+                for (const label celli : cellsToSelect)
+                {
+                    const point& cc = cellCentres[celli];
+
+                    if (!clipBb.contains(cc))
+                    {
+                        cellsToSelect.unset(celli);
+                    }
+                }
+
+                DebugInfo
+                    << "Bounded subset of size "
+                    << cellsToSelect.count() << endl;
+            }
+
+            subMeshPtr_.reset
+            (
+                new fvMeshSubset(fvm, cellsToSelect, exposedPatchi)
+            );
+        }
     }
 
 
@@ -288,7 +434,6 @@ void Foam::sampledCuttingPlane::createGeometry()
             dimensionedScalar(dimLength, Zero)
         )
     );
-
     const volScalarField& cellDistance = cellDistancePtr_();
 
     setDistanceFields(plane_);
@@ -318,64 +463,35 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
 
-    // This will soon improve (reduced clutter)
+    // Create surfaces for each offset
 
-    // Direct from cell field and point field.
-    if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
+    PtrList<isoSurfaceBase> isoSurfPtrs(offsets_.size());
+
+    forAll(offsets_, surfi)
     {
-        isoSurfacePtr_.reset
+        isoSurfPtrs.set
         (
-            new isoSurfacePoint
+            surfi,
+            isoSurfaceBase::New
             (
+                isoParams_,
                 cellDistance,
                 pointDistance_,
-                scalar(0),  // distance
-                isoParams_
+                offsets_[surfi],
+                *ignoreCellsPtr_
             )
         );
     }
-    else if (isoParams_.algorithm() == isoSurfaceParams::ALGO_CELL)
-    {
-        isoSurfaceCell surf
-        (
-            fvm,
-            cellDistance,
-            pointDistance_,
-            scalar(0),  // distance
-            isoParams_
-        );
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
-    else
-    {
-        // ALGO_TOPO
-        isoSurfaceTopo surf
-        (
-            fvm,
-            cellDistance,
-            pointDistance_,
-            scalar(0),  // distance
-            isoParams_
-        );
+    // And flatten
+    combineSurfaces(isoSurfPtrs);
 
-        surface_.transfer(static_cast<meshedSurface&>(surf));
-        meshCells_.transfer(surf.meshCells());
-    }
 
-    // Only retain for iso-surface
+    // Discard fields if not required by an iso-surface
     if (!isoSurfacePtr_)
     {
         cellDistancePtr_.reset(nullptr);
         pointDistance_.clear();
-    }
-
-    if (subMeshPtr_ && meshCells_.size())
-    {
-        // With the correct addressing into the full mesh
-        meshCells_ =
-            UIndirectList<label>(subMeshPtr_->cellMap(), meshCells_);
     }
 
     if (debug)
@@ -397,6 +513,7 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
 :
     sampledSurface(name, mesh, dict),
     plane_(dict),
+    offsets_(),
     isoParams_
     (
         dict,
@@ -404,15 +521,59 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
         isoSurfaceParams::filterType::DIAGCELL
     ),
     average_(dict.getOrDefault("average", false)),
+    simpleSubMesh_(dict.getOrDefault("simpleSubMesh", false)),
     zoneNames_(),
     exposedPatchName_(),
     needsUpdate_(true),
-    subMeshPtr_(nullptr),
-    cellDistancePtr_(nullptr),
+
     surface_(),
     meshCells_(),
-    isoSurfacePtr_(nullptr)
+    isoSurfacePtr_(nullptr),
+
+    subMeshPtr_(nullptr),
+    ignoreCellsPtr_(nullptr),
+    cellDistancePtr_(nullptr),
+    pointDistance_()
 {
+    dict.readIfPresent("offsets", offsets_);
+
+    if (offsets_.empty())
+    {
+        offsets_.resize(1);
+        offsets_.first() = Zero;
+    }
+
+    if (offsets_.size() > 1)
+    {
+        const label nOrig = offsets_.size();
+
+        inplaceUniqueSort(offsets_);
+
+        if (nOrig != offsets_.size())
+        {
+            IOWarningInFunction(dict)
+                << "Removed non-unique offsets" << nl;
+        }
+    }
+
+    if (isoParams_.algorithm() == isoSurfaceParams::ALGO_POINT)
+    {
+        // Not possible for ALGO_POINT
+        simpleSubMesh_ = false;
+
+        // Not possible for ALGO_POINT
+        if (offsets_.size() > 1)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Multiple offsets with iso-surface (point) not supported"
+                << " since needs original interpolators." << nl
+                << exit(FatalIOError);
+        }
+    }
+
+
+    // Zones
+
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
     {
         zoneNames_.resize(1);
@@ -589,6 +750,7 @@ void Foam::sampledCuttingPlane::print(Ostream& os) const
 {
     os  << "sampledCuttingPlane: " << name() << " :"
         << "  plane:" << plane_
+        << "  offsets:" << flatOutput(offsets_)
         << "  faces:" << faces().size()
         << "  points:" << points().size();
 }

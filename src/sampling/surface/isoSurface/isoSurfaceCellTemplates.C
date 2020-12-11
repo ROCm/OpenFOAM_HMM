@@ -175,7 +175,7 @@ void Foam::isoSurfaceCell::generateTriPoints
             if (triIndex == 0x0C)
             {
                 // Flip normals
-                label sz = pts.size();
+                const label sz = pts.size();
                 Swap(pts[sz-5], pts[sz-4]);
                 Swap(pts[sz-2], pts[sz-1]);
             }
@@ -285,7 +285,7 @@ void Foam::isoSurfaceCell::generateTriPoints
 
     forAll(mesh_.cells(), celli)
     {
-        if (cellCutType_[celli] != NOTCUT)
+        if ((cellCutType_[celli] & cutType::ANYCUT) != 0)
         {
             label oldNPoints = triPoints.size();
 
@@ -469,7 +469,7 @@ void Foam::isoSurfaceCell::generateTriPoints
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::isoSurfaceCell::interpolate
+Foam::isoSurfaceCell::interpolateTemplate
 (
     const Field<Type>& cCoords,
     const Field<Type>& pCoords

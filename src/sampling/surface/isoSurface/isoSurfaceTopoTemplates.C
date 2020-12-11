@@ -30,7 +30,7 @@ License
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::isoSurfaceTopo::interpolate
+Foam::isoSurfaceTopo::interpolateTemplate
 (
     const Field<Type>& cellCoords,
     const Field<Type>& pointCoords

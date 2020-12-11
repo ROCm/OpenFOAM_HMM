@@ -38,34 +38,17 @@ License
 #include "Time.H"
 #include "triPoints.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "isoSurfaceBaseMethods.H"
+defineIsoSurfaceInterpolateMethods(Foam::isoSurfaceCell);
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(isoSurfaceCell, 0);
-}
-
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Does any edge of triangle cross iso value?
-    inline static bool isTriCut
-    (
-        const label a,
-        const label b,
-        const label c,
-        const scalarField& pointValues,
-        const scalar isoValue
-    )
-    {
-        const bool aLower = (pointValues[a] < isoValue);
-        const bool bLower = (pointValues[b] < isoValue);
-        const bool cLower = (pointValues[c] < isoValue);
-
-        return !(aLower == bLower && aLower == cLower);
-    }
 }
 
 
@@ -85,154 +68,6 @@ Foam::scalar Foam::isoSurfaceCell::isoFraction
     }
 
     return -1.0;
-}
-
-
-Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
-(
-    const bitSet& isTet,
-    const scalarField& cellValues,
-    const scalarField& pointValues,
-    const label celli
-) const
-{
-    if (ignoreCells_.test(celli))
-    {
-        return NOTCUT;
-    }
-
-    const cell& cFaces = mesh_.cells()[celli];
-
-    if (isTet.test(celli))
-    {
-        for (const label facei : cFaces)
-        {
-            const face& f = mesh_.faces()[facei];
-
-            for (label fp = 1; fp < f.size() - 1; ++fp)
-            {
-                if (isTriCut(f[0], f[fp], f[f.fcIndex(fp)], pointValues, iso_))
-                {
-                    return CUT;
-                }
-            }
-        }
-        return NOTCUT;
-    }
-
-
-    const bool cellLower = (cellValues[celli] < iso_);
-
-    // First check if there is any cut in cell
-    bool edgeCut = false;
-
-    for (const label facei : cFaces)
-    {
-        const face& f = mesh_.faces()[facei];
-
-        // Check pyramid edges (corner point to cell centre)
-        for (const label pointi : f)
-        {
-            if (cellLower != (pointValues[pointi] < iso_))
-            {
-                edgeCut = true;
-                break;
-            }
-        }
-
-        if (edgeCut)
-        {
-            break;
-        }
-
-        // Check (triangulated) face edges
-        // With fallback for problem decompositions
-        const label fp0 =
-            (mesh_.tetBasePtIs()[facei] < 0 ? 0 : mesh_.tetBasePtIs()[facei]);
-
-        label fp = f.fcIndex(fp0);
-        for (label i = 2; i < f.size(); ++i)
-        {
-            const label nextFp = f.fcIndex(fp);
-
-            if (isTriCut(f[fp0], f[fp], f[nextFp], pointValues, iso_))
-            {
-                edgeCut = true;
-                break;
-            }
-
-            fp = nextFp;
-        }
-
-        if (edgeCut)
-        {
-            break;
-        }
-    }
-
-
-    if (edgeCut)
-    {
-        // Count actual cuts (expensive since addressing needed)
-        // Note: not needed if you don't want to preserve maxima/minima
-        // centred around cellcentre. In that case just always return CUT
-
-        const labelList& cPoints = mesh_.cellPoints(celli);
-
-        label nPyrCuts = 0;
-
-        for (const label pointi : cPoints)
-        {
-            if ((pointValues[pointi] < iso_) != cellLower)
-            {
-                ++nPyrCuts;
-            }
-        }
-
-        if (nPyrCuts == cPoints.size())
-        {
-            return SPHERE;
-        }
-        else if (nPyrCuts)
-        {
-            // There is a pyramid edge cut. E.g. lopping off a tet from a corner
-            return CUT;
-        }
-    }
-
-    return NOTCUT;
-}
-
-
-void Foam::isoSurfaceCell::calcCutTypes
-(
-    const bitSet& isTet,
-    const scalarField& cVals,
-    const scalarField& pVals
-)
-{
-    cellCutType_.setSize(mesh_.nCells());
-    nCutCells_ = 0;
-
-    // Some processor domains may require tetBasePtIs and others do not.
-    // Do now to ensure things stay synchronized.
-    (void)mesh_.tetBasePtIs();
-
-    forAll(cellCutType_, celli)
-    {
-        cellCutType_[celli] = calcCutType(isTet, cVals, pVals, celli);
-
-        if (cellCutType_[celli] == CUT)
-        {
-            ++nCutCells_;
-        }
-    }
-
-    if (debug)
-    {
-        Pout<< "isoSurfaceCell : candidate cut cells "
-            << nCutCells_ << " / " << mesh_.nCells() << endl;
-    }
 }
 
 
@@ -402,7 +237,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
 
     forAll(mesh_.cells(), celli)
     {
-        if (cellCutType_[celli] == CUT && !isTet.test(celli))
+        if (cellCutType_[celli] == cutType::CUT) // No tet cuts
         {
             const scalar cVal = cVals[celli];
 
@@ -709,18 +544,21 @@ void Foam::isoSurfaceCell::calcSnappedPoint
     labelList& snappedPoint
 ) const
 {
+    const labelList& faceOwn = mesh_.faceOwner();
+    const labelList& faceNei = mesh_.faceNeighbour();
+
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
     bitSet isBoundaryPoint(mesh_.nPoints());
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
     for (const polyPatch& pp : patches)
     {
         if (!pp.coupled())
         {
-            label facei = pp.start();
-            forAll(pp, i)
+            for (const label facei : pp.range())
             {
-                const face& f = mesh_.faces()[facei++];
+                const face& f = mesh_.faces()[facei];
 
                 isBoundaryPoint.set(f);
             }
@@ -739,6 +577,8 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
     forAll(mesh_.pointFaces(), pointi)
     {
+        constexpr uint8_t realCut(cutType::CUT | cutType::TETCUT);
+
         if (isBoundaryPoint.test(pointi))
         {
             continue;
@@ -752,10 +592,10 @@ void Foam::isoSurfaceCell::calcSnappedPoint
         {
             if
             (
-                cellCutType_[mesh_.faceOwner()[facei]] == CUT
+                (cellCutType_[faceOwn[facei]] & realCut) != 0
              || (
                     mesh_.isInternalFace(facei)
-                 && cellCutType_[mesh_.faceNeighbour()[facei]] == CUT
+                 && (cellCutType_[faceNei[facei]] & realCut) != 0
                 )
             )
             {
@@ -777,7 +617,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
         for (const label facei : pFaces)
         {
-            const label own = mesh_.faceOwner()[facei];
+            const label own = faceOwn[facei];
 
             if (isTet.test(own))
             {
@@ -803,7 +643,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
             if (mesh_.isInternalFace(facei))
             {
-                const label nei = mesh_.faceNeighbour()[facei];
+                const label nei = faceNei[facei];
 
                 if (isTet.test(nei))
                 {
@@ -1298,12 +1138,9 @@ Foam::isoSurfaceCell::isoSurfaceCell
     const bitSet& ignoreCells
 )
 :
-    isoSurfaceBase(iso, params),
-    mesh_(mesh),
-    cVals_(cellValues),
-    pVals_(pointValues),
-    ignoreCells_(ignoreCells),
-    mergeDistance_(params.mergeTol()*mesh.bounds().mag())
+    isoSurfaceBase(mesh, cellValues, pointValues, iso, params),
+    mergeDistance_(params.mergeTol()*mesh.bounds().mag()),
+    cellCutType_(mesh.nCells(), cutType::UNVISITED)
 {
     const bool regularise = (params.filter() != filterType::NONE);
 
@@ -1317,15 +1154,27 @@ Foam::isoSurfaceCell::isoSurfaceCell
             << "    mergeTol      : " << params.mergeTol() << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    mergeDistance : " << mergeDistance_ << nl
-            << "    ignoreCells   : " << ignoreCells_.count()
+            << "    ignoreCells   : " << ignoreCells.count()
             << " / " << cVals_.size() << nl
             << endl;
     }
 
-    // Determine if cell is tet
+
+    label nBlockedCells = 0;
+
+    // Mark ignoreCells as blocked
+    nBlockedCells += blockCells(cellCutType_, ignoreCells);
+
+
+    // Some processor domains may require tetBasePtIs and others do not.
+    // Do now to ensure things stay synchronized.
+    (void)mesh_.tetBasePtIs();
+
+
+    // Calculate a tet/non-tet filter
     bitSet isTet(mesh_.nCells());
     {
-        forAll(isTet, celli)
+        for (label celli = 0; celli < mesh_.nCells(); ++celli)
         {
             if (tetMatcher::test(mesh_, celli))
             {
@@ -1334,26 +1183,33 @@ Foam::isoSurfaceCell::isoSurfaceCell
         }
     }
 
+    // Determine cell cuts
+    nCutCells_ = calcCellCuts(cellCutType_);
 
-    // Determine if any cut through cell
-    calcCutTypes(isTet, cellValues, pointValues);
+    if (debug)
+    {
+        Pout<< "isoSurfaceCell : candidate cells cut "
+            << nCutCells_
+            << " blocked " << nBlockedCells
+            << " total " << mesh_.nCells() << endl;
+    }
 
     if (debug && isA<fvMesh>(mesh))
     {
-        const fvMesh& fvm = dynamicCast<const fvMesh&>(mesh);
+        const fvMesh& fvmesh = dynamicCast<const fvMesh&>(mesh);
 
         volScalarField debugField
         (
             IOobject
             (
                 "isoSurfaceCell.cutType",
-                fvm.time().timeName(),
-                fvm.time(),
+                fvmesh.time().timeName(),
+                fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            fvm,
+            fvmesh,
             dimensionedScalar(dimless, Zero)
         );
 
@@ -1613,5 +1469,6 @@ Foam::isoSurfaceCell::isoSurfaceCell
         this->Mesh::transfer(updated);
     }
 }
+
 
 // ************************************************************************* //

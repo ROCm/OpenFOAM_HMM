@@ -40,6 +40,9 @@ Usage
         surface1
         {
             type        distanceSurface;
+            surfaceType triSurfaceMesh;
+            surfaceName something.obj;
+            topology    proximity;
         }
     }
     \endverbatim
@@ -48,18 +51,23 @@ Usage
     \table
         Property | Description                              | Required | Default
         type     | distanceSurface                          | yes |
-        distance | Distance from surface                    | yes |
-        signed   | Use sign when distance is positive       | partly |
-        isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
-        regularise | Point snapping for iso-surface         | no  | true
+        distance | distance from surface                    | no  | 0
+        signed   | Use sign when distance is positive       | no  | true
+        isoMethod | Iso-algorithm (cell/topo/point)         | no  | default
+        regularise | Face simplification (enum or bool)     | no  | true
         average  | Cell values from averaged point values   | no  | false
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
+        topology    | Topology filter (none/largestRegion/nearestPoints/proximity) | no  | none
+        nearestPoints | Points for point-based segmentation | no  |
+        maxDistance | Max search distance for nearestPoints | no  | GREAT
+        relProximity | Max limit of absolute vs normal distance | no  | 1e3
     \endtable
 
 SourceFiles
     sampledDistanceSurface.C
+    sampledDistanceSurfaceTemplates.C
 
 \*---------------------------------------------------------------------------*/
 

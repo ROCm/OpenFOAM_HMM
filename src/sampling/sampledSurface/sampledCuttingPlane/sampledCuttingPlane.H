@@ -55,6 +55,7 @@ Usage
         Property | Description                              | Required | Default
         type     | cuttingPlane                             | yes |
         planeType | plane description (pointAndNormal etc)  | yes |
+        offsets   | Offsets of the origin in the normal direction | no | (0)
         isoMethod | Iso-algorithm (cell/topo/point)         | no  | topo
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
@@ -81,7 +82,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "plane.H"
 #include "fvMeshSubset.H"
-#include "isoSurfacePoint.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -101,11 +102,17 @@ class sampledCuttingPlane
         //- Plane
         const plane plane_;
 
+        //- The offsets to the plane - defaults to (0).
+        List<scalar> offsets_;
+
         //- Parameters (filtering etc) for iso-surface
         isoSurfaceParams isoParams_;
 
         //- Whether to recalculate cell values as average of point values
         bool average_;
+
+        //- Use simple sub-meshing in algorithm itself
+        bool simpleSubMesh_;
 
         //- The zone or zones in which cutting is to occur
         wordRes zoneNames_;
@@ -117,16 +124,6 @@ class sampledCuttingPlane
         mutable bool needsUpdate_;
 
 
-        //- Mesh subset (optional: only used with zones)
-        autoPtr<fvMeshSubset> subMeshPtr_;
-
-        //- Distance to cell centres
-        autoPtr<volScalarField> cellDistancePtr_;
-
-        //- Distance to points
-        scalarField pointDistance_;
-
-
     // Sampling geometry. Directly stored or via an iso-surface (ALGO_POINT)
 
         //- The extracted surface (direct storage)
@@ -136,7 +133,25 @@ class sampledCuttingPlane
         mutable labelList meshCells_;
 
         //- Constructed iso-surface (ALGO_POINT), for interpolators
-        autoPtr<isoSurfacePoint> isoSurfacePtr_;
+        autoPtr<isoSurfaceBase> isoSurfacePtr_;
+
+
+    // Mesh Subsetting
+
+        //- Cached subMesh for (pre-)subset of cell zones
+        mutable autoPtr<fvMeshSubset> subMeshPtr_;
+
+        //- Cached ignore cells for (post-)subset of cell zones
+        mutable autoPtr<bitSet> ignoreCellsPtr_;
+
+
+    // Fields
+
+        //- Distance to cell centres
+        autoPtr<volScalarField> cellDistancePtr_;
+
+        //- Distance to points
+        scalarField pointDistance_;
 
 
     // Private Member Functions
@@ -150,6 +165,9 @@ class sampledCuttingPlane
 
         //- Fill cellDistance, pointDistance fields for the specified plane
         void setDistanceFields(const plane& pln);
+
+        //- Collect iso-surfaces into a single surface (No point merging)
+        void combineSurfaces(PtrList<isoSurfaceBase>& isoSurfPtrs);
 
         //- Create iso surface
         void createGeometry();
