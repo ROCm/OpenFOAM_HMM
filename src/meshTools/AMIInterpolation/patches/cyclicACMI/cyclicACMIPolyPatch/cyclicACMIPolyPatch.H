@@ -28,7 +28,29 @@ Class
     Foam::cyclicACMIPolyPatch
 
 Description
-    Cyclic patch for Arbitrarily Coupled Mesh Interface (ACMI)
+    Cyclic patch for Arbitrarily Coupled Mesh Interface (ACMI).
+
+    Mixes cyclicAMI behaviour with non-coupled patch behaviour using
+    the overlap area fraction. The non-coupled patch is specified through
+    the nonOverlapPatch keyword.
+
+Usage
+    Example of the patch specification:
+
+        type            cyclicACMI;
+        neighbourPatch  ACMI2_couple;       // cyclicAMI neighbour patch
+        nonOverlapPatch ACMI1_blockage;     // patch for uncoupled faces
+
+        // Optional time-dependent scaling (PatchFunction1)
+        scale           table
+        (
+            (0.00   1.0)
+            (0.02   1.0)
+            (0.0201 0.0)
+        );
+
+See also
+    cyclicAMIPolyPatch.C
 
 SourceFiles
     cyclicACMIPolyPatch.C
@@ -42,6 +64,9 @@ SourceFiles
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
 #include "partialFaceAreaWeightAMI.H"
+#include "PatchFunction1.H"
+#include "uniformDimensionedFields.H"
+#include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,6 +99,34 @@ private:
         mutable scalarField tgtMask_;
 
 
+        // Scaling of overlap (optional)
+
+            //- Weighting for source mask
+            mutable autoPtr<PatchFunction1<scalar>> srcScalePtr_;
+
+            //- Weighting for target mask
+            mutable autoPtr<PatchFunction1<scalar>> tgtScalePtr_;
+
+            //- Stored face areas
+            mutable vectorField thisSf_;
+            mutable vectorField thisNoSf_;
+            mutable vectorField nbrSf_;
+            mutable vectorField nbrNoSf_;
+
+            //- Scaled version of source mask
+            mutable scalarField srcScaledMask_;
+
+            //- Scaled version of target mask
+            mutable scalarField tgtScaledMask_;
+
+            //- Flag to detect whether AMI is up to date with mesh points
+            mutable uniformDimensionedScalarField AMITime_;
+
+            //- Flag to detect whether scaled masks are up to date with
+            //  current time
+            mutable label prevTimeIndex_;
+
+
 protected:
 
     // Protected Member Functions
@@ -96,7 +149,13 @@ protected:
         virtual void scalePatchFaceAreas();
 
         //- Scale patch face areas to maintain physical area
-        virtual void scalePatchFaceAreas(const cyclicACMIPolyPatch& acmipp);
+        virtual void scalePatchFaceAreas
+        (
+            const cyclicACMIPolyPatch& acmipp,
+            const scalarField& mask,
+            const vectorList& faceArea,
+            const vectorList& noFaceArea
+        );
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
@@ -297,6 +356,20 @@ public:
 
         //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;
+
+        // Handling optional scaling (time dependency)
+
+            //- Update the AMI and patch areas. Return true if anything
+            //  updated
+            virtual bool updateAreas() const;
+
+            //- Return true if given object is up to date with *this
+            //  (note : like regIOobject::upToDate but operates on object)
+            bool upToDate(const regIOobject&) const;
+
+            //- Set object up to date with *this
+            //  (note : like regIOobject::setUpToDate but operates on object)
+            void setUpToDate(regIOobject&) const;
 };
 
 

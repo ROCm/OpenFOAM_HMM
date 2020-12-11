@@ -43,6 +43,117 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+bool Foam::cyclicACMIPolyPatch::updateAreas() const
+{
+    const polyMesh& mesh = boundaryMesh().mesh();
+
+    bool updated = false;
+
+    if (!owner())
+    {
+        return updated;
+    }
+
+    // Check if underlying AMI up to date
+    if (!mesh.upToDatePoints(AMITime_))
+    {
+        // This should not happen normally since resetAMI is triggered
+        // by any point motion.
+        FatalErrorInFunction << "Problem : AMI is up to event:"
+            << AMITime_.eventNo()
+            << " mesh points are up to time " << mesh.pointsInstance()
+            << " patch:" << this->name()
+            << exit(FatalError);
+    }
+
+    // Check if scaling enabled (and necessary)
+    if
+    (
+        srcScalePtr_.valid()
+     && (updated || prevTimeIndex_ != mesh.time().timeIndex())
+    )
+    {
+        if (debug)
+        {
+            Pout<< "cyclicACMIPolyPatch::updateAreas() :"
+                << " patch:" << this->name()
+                << " neighbPatch:" << this->neighbPatch().name()
+                << " AMITime_:" << AMITime_.eventNo()
+                << " uptodate:" << mesh.upToDatePoints(AMITime_)
+                << " mesh.time().timeIndex():" << mesh.time().timeIndex()
+                << " prevTimeIndex_:" << prevTimeIndex_
+                << endl;
+        }
+
+        if (createAMIFaces_)
+        {
+            WarningInFunction
+                << "Topology changes and scaling currently not supported."
+                << " Patch " << this->name() << endl;
+        }
+
+        const scalar t = mesh.time().timeOutputValue();
+
+        // Note: ideally preserve src/tgtMask before clipping to tolerance ...
+        srcScaledMask_ =
+            min
+            (
+                scalar(1) - tolerance_,
+                max(tolerance_, srcScalePtr_->value(t)*srcMask_)
+            );
+
+
+        if (!tgtScalePtr_.valid())
+        {
+            tgtScalePtr_= srcScalePtr_.clone(neighbPatch());
+        }
+
+        tgtScaledMask_ =
+            min
+            (
+                scalar(1) - tolerance_,
+                max(tolerance_, tgtScalePtr_->value(t)*tgtMask_)
+            );
+
+        if (debug)
+        {
+            Pout<< "cyclicACMIPolyPatch::updateAreas : scaling masks"
+                << " for " << name() << " mask " << gAverage(srcScaledMask_)
+                << " and " << nonOverlapPatch().name()
+                << " mask " << gAverage(srcScaledMask_) << endl;
+        }
+
+        // Calculate areas from the masks
+        cyclicACMIPolyPatch& cpp = const_cast<cyclicACMIPolyPatch&>(*this);
+        const cyclicACMIPolyPatch& nbrCpp = neighbPatch();
+
+        cpp.scalePatchFaceAreas(*this, srcScaledMask_, thisSf_, thisNoSf_);
+        cpp.scalePatchFaceAreas(nbrCpp, tgtScaledMask_, nbrSf_, nbrNoSf_);
+
+        prevTimeIndex_ = mesh.time().timeIndex();
+        AMITime_.setUpToDate();
+        updated = true;
+    }
+
+    return updated;
+}
+
+
+bool Foam::cyclicACMIPolyPatch::upToDate(const regIOobject& io) const
+{
+    // Is io up to date with
+    // - underlying AMI
+    // - scaling
+    return io.upToDate(AMITime_);
+}
+
+
+void Foam::cyclicACMIPolyPatch::setUpToDate(regIOobject& io) const
+{
+    io.setUpToDate();
+}
+
+
 void Foam::cyclicACMIPolyPatch::reportCoverage
 (
     const word& name,
@@ -69,6 +180,85 @@ void Foam::cyclicACMIPolyPatch::reportCoverage
     Info<< "ACMI: Patch " << name << " uncovered/blended/covered = "
         << nUncovered << ", " << nTotal-nUncovered-nCovered
         << ", " << nCovered << endl;
+}
+
+
+void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas
+(
+    const cyclicACMIPolyPatch& acmipp,
+    const scalarField& mask,                // srcMask_
+    const vectorList& faceArea,             // this->faceAreas();
+    const vectorList& noFaceArea            // nonOverlapPatch.faceAreas()
+)
+{
+    // Primitive patch face areas have been cleared/reset based on the raw
+    // points - need to reset to avoid double-accounting of face areas
+
+    const scalar maxTol = scalar(1) - tolerance_;
+
+    const polyPatch& nonOverlapPatch = acmipp.nonOverlapPatch();
+    vectorField::subField noSf = nonOverlapPatch.faceAreas();
+
+    DebugPout
+        << "rescaling non-overlap patch areas for: "
+        << nonOverlapPatch.name() << endl;
+
+    if (mask.size() != noSf.size())
+    {
+        WarningInFunction
+            << "Inconsistent sizes for patch: " << acmipp.name()
+            << " - not manipulating patches" << nl
+            << " - size: " << size() << nl
+            << " - non-overlap patch size: " << noSf.size() << nl
+            << " - mask size: " << mask.size() << nl
+            << "This is OK for decomposition but"
+            << " should be considered fatal at run-time" << endl;
+
+        return;
+    }
+
+    forAll(noSf, facei)
+    {
+        const scalar w = min(maxTol, max(tolerance_, mask[facei]));
+        noSf[facei] = noFaceArea[facei]*(scalar(1) - w);
+    }
+
+    if (!createAMIFaces_)
+    {
+        // Note: for topological update (createAMIFaces_ = true)
+        // AMI coupled patch face areas are updated as part of the topological
+        // updates, e.g. by the calls to cyclicAMIPolyPatch's setTopology and
+        // initMovePoints
+        DebugPout
+            << "scaling coupled patch areas for: " << acmipp.name() << endl;
+
+        // Scale the coupled patch face areas
+        vectorField::subField Sf = acmipp.faceAreas();
+
+        forAll(Sf, facei)
+        {
+            Sf[facei] = faceArea[facei]*max(tolerance_, mask[facei]);
+        }
+
+        // Re-normalise the weights since the effect of overlap is already
+        // accounted for in the area
+        auto& weights = const_cast<scalarListList&>(acmipp.weights());
+        auto& weightsSum = const_cast<scalarField&>(acmipp.weightsSum());
+        forAll(weights, i)
+        {
+            scalarList& wghts = weights[i];
+            if (wghts.size())
+            {
+                scalar& sum = weightsSum[i];
+
+                forAll(wghts, j)
+                {
+                    wghts[j] /= sum;
+                }
+                sum = 1.0;
+            }
+        }
+    }
 }
 
 
@@ -164,86 +354,37 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas()
         return;
     }
 
-    scalePatchFaceAreas(*this);
-    scalePatchFaceAreas(this->neighbPatch());
-}
+    const polyPatch& nonOverlapPatch = this->nonOverlapPatch();
+    const cyclicACMIPolyPatch& nbrPatch = this->neighbPatch();
+    const polyPatch& nbrNonOverlapPatch = nbrPatch.nonOverlapPatch();
 
-
-void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas
-(
-    const cyclicACMIPolyPatch& acmipp
-)
-{
-    // Primitive patch face areas have been cleared/reset based on the raw
-    // points - need to reset to avoid double-accounting of face areas
-
-    const scalar maxTol = scalar(1) - tolerance_;
-    const scalarField& mask = acmipp.mask();
-
-    const polyPatch& nonOverlapPatch = acmipp.nonOverlapPatch();
-    vectorField::subField noSf = nonOverlapPatch.faceAreas();
-
-    DebugPout
-        << "rescaling non-overlap patch areas for: " << nonOverlapPatch.name()
-        << endl;
-
-
-    if (mask.size() != noSf.size())
+    if (srcScalePtr_.valid())
     {
-        WarningInFunction
-            << "Inconsistent sizes for patch: " << acmipp.name()
-            << " - not manipulating patches" << nl
-            << " - size: " << size() << nl
-            << " - non-overlap patch size: " << noSf.size() << nl
-            << " - mask size: " << mask.size() << nl
-            << "This is OK for decomposition but should be considered fatal "
-            << "at run-time" << endl;
-
-        return;
+        // Save overlap geometry for later scaling
+        thisSf_ = this->faceAreas();
+        thisNoSf_ = nonOverlapPatch.faceAreas();
+        nbrSf_ = nbrPatch.faceAreas();
+        nbrNoSf_ = nbrNonOverlapPatch.faceAreas();
     }
 
-    forAll(noSf, facei)
-    {
-        const scalar w = min(maxTol, max(tolerance_, mask[facei]));
-        noSf[facei] *= scalar(1) - w;
-    }
+    // In-place scale the patch areas
+    scalePatchFaceAreas
+    (
+        *this,
+        srcMask_,       // unscaled mask
+        this->faceAreas(),
+        nonOverlapPatch.faceAreas()
+    );
+    scalePatchFaceAreas
+    (
+        nbrPatch,
+        tgtMask_,       // unscaled mask
+        nbrPatch.faceAreas(),
+        nbrNonOverlapPatch.faceAreas()
+    );
 
-    if (!createAMIFaces_)
-    {
-        // Note: for topological update (createAMIFaces_ = true)
-        // AMI coupled patch face areas are updated as part of the topological
-        // updates, e.g. by the calls to cyclicAMIPolyPatch's setTopology and
-        // initMovePoints
-        DebugPout
-            << "scaling coupled patch areas for: " << acmipp.name() << endl;
-
-        // Scale the coupled patch face areas
-        vectorField::subField Sf = acmipp.faceAreas();
-
-        forAll(Sf, facei)
-        {
-            Sf[facei] *= max(tolerance_, mask[facei]);
-        }
-
-        // Re-normalise the weights since the effect of overlap is already
-        // accounted for in the area
-        auto& weights = const_cast<scalarListList&>(acmipp.weights());
-        auto& weightsSum = const_cast<scalarField&>(acmipp.weightsSum());
-        forAll(weights, i)
-        {
-            scalarList& wghts = weights[i];
-            if (wghts.size())
-            {
-                scalar& sum = weightsSum[i];
-
-                forAll(wghts, j)
-                {
-                    wghts[j] /= sum;
-                }
-                sum = 1.0;
-            }
-        }
-    }
+    // Mark current AMI as up to date with points
+    boundaryMesh().mesh().setUpToDatePoints(AMITime_);
 }
 
 
@@ -328,13 +469,33 @@ void Foam::cyclicACMIPolyPatch::clearGeom()
 
 const Foam::scalarField& Foam::cyclicACMIPolyPatch::srcMask() const
 {
-    return srcMask_;
+    if (srcScalePtr_.valid())
+    {
+        // Make sure areas are up-to-date
+        updateAreas();
+
+        return srcScaledMask_;
+    }
+    else
+    {
+        return srcMask_;
+    }
 }
 
 
 const Foam::scalarField& Foam::cyclicACMIPolyPatch::tgtMask() const
 {
-    return tgtMask_;
+    if (tgtScalePtr_.valid())
+    {
+        // Make sure areas are up-to-date
+        updateAreas();
+
+        return tgtScaledMask_;
+    }
+    else
+    {
+        return tgtMask_;
+    }
 }
 
 
@@ -366,7 +527,21 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchName_(word::null),
     nonOverlapPatchID_(-1),
     srcMask_(),
-    tgtMask_()
+    tgtMask_(),
+    AMITime_
+    (
+        IOobject
+        (
+            "AMITime",
+            boundaryMesh().mesh().pointsInstance(),
+            boundaryMesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dimensionedScalar("time", dimTime, -GREAT)
+    ),
+    prevTimeIndex_(-1)
 {
     AMIPtr_->setRequireMatch(false);
 
@@ -389,7 +564,27 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchName_(dict.get<word>("nonOverlapPatch")),
     nonOverlapPatchID_(-1),
     srcMask_(),
-    tgtMask_()
+    tgtMask_(),
+    srcScalePtr_
+    (
+        dict.found("scale")
+      ? PatchFunction1<scalar>::New(*this, "scale", dict)
+      : nullptr
+    ),
+    AMITime_
+    (
+        IOobject
+        (
+            "AMITime",
+            boundaryMesh().mesh().pointsInstance(),
+            boundaryMesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dimensionedScalar("time", dimTime, -GREAT)
+    ),
+    prevTimeIndex_(-1)
 {
     AMIPtr_->setRequireMatch(false);
 
@@ -416,7 +611,27 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchName_(pp.nonOverlapPatchName_),
     nonOverlapPatchID_(-1),
     srcMask_(),
-    tgtMask_()
+    tgtMask_(),
+    srcScalePtr_
+    (
+        pp.srcScalePtr_.valid()
+      ? pp.srcScalePtr_.clone(*this)
+      : nullptr
+    ),
+    AMITime_
+    (
+        IOobject
+        (
+            "AMITime",
+            boundaryMesh().mesh().pointsInstance(),
+            boundaryMesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dimensionedScalar("time", dimTime, -GREAT)
+    ),
+    prevTimeIndex_(-1)
 {
     AMIPtr_->setRequireMatch(false);
 
@@ -440,7 +655,27 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchName_(nonOverlapPatchName),
     nonOverlapPatchID_(-1),
     srcMask_(),
-    tgtMask_()
+    tgtMask_(),
+    srcScalePtr_
+    (
+        pp.srcScalePtr_.valid()
+      ? pp.srcScalePtr_.clone(*this)
+      : nullptr
+    ),
+    AMITime_
+    (
+        IOobject
+        (
+            "AMITime",
+            boundaryMesh().mesh().pointsInstance(),
+            boundaryMesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dimensionedScalar("time", dimTime, -GREAT)
+    ),
+    prevTimeIndex_(-1)
 {
     AMIPtr_->setRequireMatch(false);
 
@@ -470,7 +705,27 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchName_(pp.nonOverlapPatchName_),
     nonOverlapPatchID_(-1),
     srcMask_(),
-    tgtMask_()
+    tgtMask_(),
+    srcScalePtr_
+    (
+        pp.srcScalePtr_.valid()
+      ? pp.srcScalePtr_.clone(*this)
+      : nullptr
+    ),
+    AMITime_
+    (
+        IOobject
+        (
+            "AMITime",
+            boundaryMesh().mesh().pointsInstance(),
+            boundaryMesh().mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        dimensionedScalar("time", dimTime, -GREAT)
+    ),
+    prevTimeIndex_(-1)
 {
     AMIPtr_->setRequireMatch(false);
 }
@@ -481,6 +736,17 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 const Foam::cyclicACMIPolyPatch& Foam::cyclicACMIPolyPatch::neighbPatch() const
 {
     const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
+
+    // Bit of checking now we know neighbour patch
+    if (!owner() && srcScalePtr_.valid())
+    {
+        WarningInFunction
+            << "Ignoring \"scale\" setting in slave patch " << name()
+            << endl;
+        srcScalePtr_.clear();
+        tgtScalePtr_.clear();
+    }
+
     return refCast<const cyclicACMIPolyPatch>(pp);
 }
 
@@ -578,6 +844,11 @@ void Foam::cyclicACMIPolyPatch::write(Ostream& os) const
     cyclicAMIPolyPatch::write(os);
 
     os.writeEntry("nonOverlapPatch", nonOverlapPatchName_);
+
+    if (owner() && srcScalePtr_.valid())
+    {
+        srcScalePtr_->writeData(os);
+    }
 }
 
 
