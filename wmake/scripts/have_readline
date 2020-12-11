@@ -16,8 +16,11 @@
 # Description
 #     Detection/setup of READLINE
 #
-# Requires
-#     None
+# Optional
+#     config.sh/readline
+#
+# Environment
+#     READLINE_ARCH_PATH
 #
 # Functions provided
 #     have_readline, no_readline, echo_readline, search_readline
@@ -26,6 +29,8 @@
 #     HAVE_LIBREADLINE - as per GNU autoconf
 #     READLINE_INC_DIR
 #     READLINE_LIB_DIR
+#
+# Without a config file, defaults to system
 #
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
@@ -108,7 +113,16 @@ search_readline()
 # Output as per search_* function
 have_readline()
 {
-    search_readline system
+    local config="config.sh/readline"
+    local file
+
+    # Allow missing file
+    if file="$("$WM_PROJECT_DIR"/bin/foamEtcFile "$config")"
+    then
+        . "$file"
+    fi
+
+    search_readline "$READLINE_ARCH_PATH"
 }
 
 
