@@ -28,7 +28,6 @@ License
 #include "surfaceNoise.H"
 #include "surfaceReader.H"
 #include "surfaceWriter.H"
-#include "noiseFFT.H"
 #include "argList.H"
 #include "graph.H"
 #include "addToRunTimeSelectionTable.H"
@@ -192,6 +191,11 @@ void surfaceNoise::readSurfaceData
                 pData[faceI][i] = pSlice[faceI];
             }
         }
+
+        forAll(pData, faceI)
+        {
+            pData[faceI] -= average(pData[faceI]);
+        }
     }
     else
     {
@@ -208,11 +212,20 @@ void surfaceNoise::readSurfaceData
             label timeI = i + startTimeIndex_;
 
             Info<< "    time: " << times_[i] << endl;
-            const scalarField p(readerPtr_->field(timeI, pIndex_, scalar(0)));
+            scalarField p(readerPtr_->field(timeI, pIndex_, scalar(0)));
+
+            // Apply conversions
+            p *= rhoRef_;
+
             forAll(p, faceI)
             {
-                pData[faceI][i] = p[faceI]*rhoRef_;
+                pData[faceI][i] = p[faceI];
             }
+        }
+
+        forAll(pData, faceI)
+        {
+            pData[faceI] -= average(pData[faceI]);
         }
     }
 
@@ -224,7 +237,7 @@ void surfaceNoise::readSurfaceData
 }
 
 
-Foam::scalar surfaceNoise::writeSurfaceData
+scalar surfaceNoise::writeSurfaceData
 (
     const fileName& outDirBase,
     const word& fName,
@@ -336,7 +349,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
 }
 
 
-Foam::scalar surfaceNoise::surfaceAverage
+scalar surfaceNoise::surfaceAverage
 (
     const scalarField& data,
     const labelList& procFaceOffset
@@ -424,12 +437,6 @@ surfaceNoise::surfaceNoise(const dictionary& dict, const bool readFields)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-surfaceNoise::~surfaceNoise()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool surfaceNoise::read(const dictionary& dict)
@@ -508,7 +515,7 @@ void surfaceNoise::calculate()
 
         Info<< "Creating noise FFTs" << endl;
 
-        const scalarField freq1(noiseFFT::frequencies(nSamples_, deltaT_));
+        const scalarField freq1(uniformFrequencies(deltaT_));
 
         // Reset desired frequency range if outside actual frequency range
         fLower_ = min(fLower_, max(freq1));
@@ -529,7 +536,7 @@ void surfaceNoise::calculate()
         // Storage for 1/3 octave data
         labelList octave13BandIDs;
         scalarField octave13FreqCentre;
-        noiseFFT::octaveBandInfo
+        setOctaveBands
         (
             freq1,
             fLower_,
@@ -561,32 +568,37 @@ void surfaceNoise::calculate()
         const windowModel& win = windowModelPtr_();
 
         {
-            noiseFFT nfft(deltaT_, win.nSamples());
-
             forAll(pData, faceI)
             {
-                // Note: passes storage from pData to noiseFFT
-                nfft.setData(pData[faceI]);
+                const scalarField& p = pData[faceI];
 
                 // Generate the FFT-based data
-                graph Prmsf(nfft.RMSmeanPf(win));
-                graph PSDf(nfft.PSDf(win));
+                const scalarField Prmsf(RMSmeanPf(p));
+                const scalarField PSDf(this->PSDf(p, deltaT_));
 
                 // Store the frequency results in slot for face of surface
                 forAll(surfPrmsf, i)
                 {
                     label freqI = i*fftWriteInterval_;
-                    surfPrmsf[i][faceI] = Prmsf.y()[freqI];
-                    surfPSDf[i][faceI] = PSDf.y()[freqI];
+                    surfPrmsf[i][faceI] = Prmsf[freqI];
+                    surfPSDf[i][faceI] = PSDf[freqI];
                 }
 
                 // Integrated PSD = P(rms)^2 [Pa^2]
-                graph Prms13f(nfft.octaves(PSDf, octave13BandIDs));
+                const scalarField Prms13f
+                (
+                    octaves
+                    (
+                        PSDf,
+                        freq1,
+                        octave13BandIDs
+                    )
+                );
 
                 // Store the 1/3 octave results in slot for face of surface
                 forAll(surfPrms13f, freqI)
                 {
-                    surfPrms13f[freqI][faceI] = Prms13f.y()[freqI];
+                    surfPrms13f[freqI][faceI] = Prms13f[freqI];
                 }
             }
         }
@@ -663,7 +675,7 @@ void surfaceNoise::calculate()
                         fNameBase,
                         "PSD",
                         freq1[freqI],
-                        noiseFFT::PSD(surfPSDf[i + f0]),
+                        PSD(surfPSDf[i + f0]),
                         procFaceOffset,
                         writePSD_
                     );
@@ -673,7 +685,7 @@ void surfaceNoise::calculate()
                         fNameBase,
                         "SPL",
                         freq1[freqI],
-                        noiseFFT::SPL(surfPSDf[i + f0]*deltaf),
+                        SPL(surfPSDf[i + f0]*deltaf, freq1[freqI]),
                         procFaceOffset,
                         writeSPL_
                     );
@@ -718,7 +730,7 @@ void surfaceNoise::calculate()
                     "f [Hz]",
                     "PSD(f) [dB_Hz]",
                     fOut,
-                    noiseFFT::PSD(PSDfAve)
+                    PSD(PSDfAve)
                 );
                 PSDg.write
                 (
@@ -733,7 +745,7 @@ void surfaceNoise::calculate()
                     "f [Hz]",
                     "SPL(f) [dB]",
                     fOut,
-                    noiseFFT::SPL(PSDfAve*deltaf)
+                    SPL(PSDfAve*deltaf, fOut)
                 );
                 SPLg.write
                 (
@@ -760,7 +772,7 @@ void surfaceNoise::calculate()
                     fNameBase,
                     "SPL13",
                     octave13FreqCentre[i],
-                    noiseFFT::SPL(surfPrms13f[i]),
+                    SPL(surfPrms13f[i], octave13FreqCentre[i]),
                     procFaceOffset,
                     writeOctaves_
                 );
@@ -777,7 +789,7 @@ void surfaceNoise::calculate()
                     "fm [Hz]",
                     "SPL(fm) [dB]",
                     octave13FreqCentre,
-                    noiseFFT::SPL(Prms13fAve)
+                    SPL(Prms13fAve, octave13FreqCentre)
                 );
                 SPL13g.write
                 (

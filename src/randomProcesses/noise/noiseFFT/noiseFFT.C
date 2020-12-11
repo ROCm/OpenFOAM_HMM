@@ -127,7 +127,7 @@ void Foam::noiseFFT::octaveBandInfo
         }
     }
 
-    fBandIDs = bandIDs.toc();
+    fBandIDs = bandIDs.sortedToc();
 
     if (fc.size())
     {

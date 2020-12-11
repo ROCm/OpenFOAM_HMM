@@ -30,7 +30,7 @@ Description
     Base class for windowing models
 
 SourceFiles
-    noiseFFT.C
+    windowModel.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -87,7 +87,6 @@ Usage
 
 
 See also
-    noiseFFT.H
     noiseModel.H
     windowModel.H
 

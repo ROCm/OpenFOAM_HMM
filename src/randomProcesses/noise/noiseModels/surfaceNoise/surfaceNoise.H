@@ -211,7 +211,7 @@ public:
     surfaceNoise(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
-    virtual ~surfaceNoise();
+    virtual ~surfaceNoise() = default;
 
 
     // Public Member Functions

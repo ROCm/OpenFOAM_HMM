@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +32,15 @@ Description
     Data is read from a dictionary, e.g.
 
     \verbatim
-    rhoRef          0;
+    rhoRef          1;
     N               4096;
     fl              25;
-    fu              25;
+    fu              10000;
     startTime       0;
 
     outputPrefix    "test1";
+
+    SPLweighting    dBA;
 
     // Optional write options dictionary
     writeOptions
@@ -60,6 +62,7 @@ Description
         fu           | Upper frequency bounds        | no        | 10000
         startTime    | Start time                    | no        | 0
         outputPrefix | Prefix applied to output files| no        | ''
+        SPLweighting | Weighting: dBA, dBB, dBC, DBD | no        | none
         graphFormat  | Graph format                  | no        | raw
         writePrmsf   | Write Prmsf data              | no        | yes
         writeSPL     | Write SPL data                | no        | yes
@@ -80,7 +83,10 @@ SourceFiles
 #include "scalarList.H"
 #include "instantList.H"
 #include "windowModel.H"
+#include "Enum.H"
 #include "runTimeSelectionTables.H"
+#include "graph.H"
+#include <fftw3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -93,6 +99,54 @@ namespace Foam
 
 class noiseModel
 {
+public:
+
+    enum class weightingType
+    {
+        none,
+        dBA,
+        dBB,
+        dBC,
+        dBD
+    };
+
+    static const Enum<weightingType> weightingTypeNames_;
+
+    //- FFTW planner information
+    //  Note: storage uses double for use directly with FFTW
+    struct planInfo
+    {
+        bool active;
+        label windowSize;
+        List<double> in;
+        List<double> out;
+        fftw_plan plan;
+    };
+
+    //- Octave band information
+    struct octaveBandInfo
+    {
+        label octave;
+
+        // IDs of bin boundaries in pressure data
+        labelList binIDs;
+
+        // Centre frequencies for each bin
+        scalarField centreFreq;
+    };
+
+
+private:
+
+    // Private Member Functions
+
+        //- No copy construct
+        noiseModel(const noiseModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const noiseModel&) = delete;
+
+
 protected:
 
     // Protected Data
@@ -112,9 +166,6 @@ protected:
         //- Upper frequency limit, default = 10kHz
         scalar fUpper_;
 
-        //- Flag to indicate that custom frequency bounds are being used
-        bool customBounds_;
-
         //- Start time, default = 0s
         scalar startTime_;
 
@@ -123,6 +174,9 @@ protected:
 
         //- Graph format
         word graphFormat_;
+
+        //- Weighting
+        weightingType SPLweighting_;
 
 
         // Data validation
@@ -155,6 +209,12 @@ protected:
             bool writeOctaves_;
 
 
+        // FFT
+
+            //- Plan information for FFTW
+            mutable planInfo planInfo_;
+
+
     // Protected Member Functions
 
         //- Helper function to read write options and provide info feedback
@@ -184,12 +244,70 @@ protected:
         //- Return the base output directory
         fileName baseFileDir(const label dataseti) const;
 
+        //- Create a field of equally spaced frequencies for the current set of
+        //- data - assumes a constant time step
+        tmp<scalarField> uniformFrequencies(const scalar deltaT) const;
 
-        //- No copy construct
-        noiseModel(const noiseModel&) = delete;
+        //- Return a list of the frequency indices wrt f field that correspond
+        //- to the bands limits for a given octave
+        static void setOctaveBands
+        (
+            const scalarField& f,
+            const scalar fLower,
+            const scalar fUpper,
+            const scalar octave,
+            labelList& fBandIDs,
+            scalarField& fCentre
+        );
 
-        //- No copy assignment
-        void operator=(const noiseModel&) = delete;
+        //- Generate octave data
+        tmp<scalarField> octaves
+        (
+            const scalarField& data,
+            const scalarField& f,
+            const labelUList& freqBandIDs
+        ) const;
+
+        //- Return the fft of the given pressure data
+        tmp<scalarField> Pf(const scalarField& p) const;
+
+        //- Return the multi-window mean fft of the complete pressure data [Pa]
+        tmp<scalarField> meanPf(const scalarField& p) const;
+
+        //- Return the multi-window RMS mean fft of the complete pressure
+        //- data [Pa]
+        tmp<scalarField> RMSmeanPf(const scalarField& p) const;
+
+        //- Return the multi-window Power Spectral Density (PSD) of the complete
+        //- pressure data [Pa^2/Hz]
+        tmp<scalarField> PSDf(const scalarField& p, const scalar deltaT) const;
+
+
+        // Weightings
+
+            //- A weighting function
+            scalar RAf(const scalar f) const;
+
+            //- A weighting as gain in dB
+            scalar gainA(const scalar f) const;
+
+            //- B weighting function
+            scalar RBf(const scalar f) const;
+
+            //- B weighting as gain in dB
+            scalar gainB(const scalar f) const;
+
+            //- C weighting function
+            scalar RCf(const scalar f) const;
+
+            //- C weighting as gain in dB
+            scalar gainC(const scalar f) const;
+
+            //- D weighting function
+            scalar RDf(const scalar f) const;
+
+            //- D weighting as gain in dB
+            scalar gainD(const scalar f) const;
 
 
 public:
@@ -226,6 +344,29 @@ public:
 
         //- Abstract call to calculate
         virtual void calculate() = 0;
+
+        //- PSD [dB/Hz]
+        tmp<Foam::scalarField> PSD(const scalarField& PSDf) const;
+
+        //- SPL [dB]
+        tmp<scalarField> SPL
+        (
+            const scalarField& Prms2,
+            const scalar f
+        ) const;
+
+        //- SPL [dB]
+        tmp<scalarField> SPL
+        (
+            const scalarField& Prms2,
+            const scalarField& f
+        ) const;
+
+        //- Clean up the FFTW
+        void cleanFFTW();
+
+        //- Helper function to check weightings
+        void writeWeightings() const;
 };
 
 
