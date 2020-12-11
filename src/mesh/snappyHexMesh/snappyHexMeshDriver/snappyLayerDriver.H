@@ -235,6 +235,7 @@ private:
                 (
                     const indirectPrimitivePatch& pp,
                     const scalar faceRatio,
+                    const boolList& relativeSizes,
                     const scalar edge0Len,
                     const labelList& cellLevel,
                     pointField& patchDisp,
@@ -328,6 +329,8 @@ private:
                     const indirectPrimitivePatch& pp,
                     const scalarField& thickness,
                     const scalarField& minThickness,
+                    const scalarField& expansionRatio,
+
                     pointField& patchDisp,
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus

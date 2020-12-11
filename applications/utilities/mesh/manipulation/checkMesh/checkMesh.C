@@ -154,6 +154,7 @@ int main(int argc, char *argv[])
         "cellShapes",
         "cellVolume",
         "cellVolumeRatio",
+        "cellAspectRatio",
         "minTetVolume",
         "minPyrVolume",
         "cellRegion",

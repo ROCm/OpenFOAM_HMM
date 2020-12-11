@@ -281,6 +281,44 @@ void Foam::primitiveMesh::reset
 }
 
 
+void Foam::primitiveMesh::resetGeometry
+(
+    pointField&& faceCentres,
+    pointField&& faceAreas,
+    pointField&& cellCentres,
+    scalarField&& cellVolumes
+)
+{
+    if
+    (
+        faceCentres.size() != nFaces_
+     || faceAreas.size() != nFaces_
+     || cellCentres.size() != nCells_
+     || cellVolumes.size() != nCells_
+    )
+    {
+        FatalErrorInFunction
+            << "Wrong sizes of passed in face/cell data"
+            << abort(FatalError);
+    }
+
+    // Remove old geometry
+    clearGeom();
+
+    faceCentresPtr_ = new pointField(std::move(faceCentres));
+    faceAreasPtr_ = new pointField(std::move(faceAreas));
+    cellCentresPtr_ = new pointField(std::move(cellCentres));
+    cellVolumesPtr_ = new scalarField(std::move(cellVolumes));
+
+    if (debug)
+    {
+        Pout<< "primitiveMesh::resetGeometry : geometry reset for"
+            << " nFaces:" << faceCentresPtr_->size()
+            << " nCells:" << cellCentresPtr_->size() << endl;
+    }
+}
+
+
 Foam::tmp<Foam::scalarField> Foam::primitiveMesh::movePoints
 (
     const pointField& newPoints,
@@ -321,6 +359,28 @@ const Foam::cellShapeList& Foam::primitiveMesh::cellShapes() const
     }
 
     return *cellShapesPtr_;
+}
+
+
+
+void Foam::primitiveMesh::updateGeom()
+{
+    if (!faceCentresPtr_)
+    {
+        calcFaceCentresAndAreas();
+    }
+    if (!faceAreasPtr_)
+    {
+        calcFaceCentresAndAreas();
+    }
+    if (!cellCentresPtr_)
+    {
+        calcCellCentresAndVols();
+    }
+    if (!cellVolumesPtr_)
+    {
+        calcCellCentresAndVols();
+    }
 }
 
 

@@ -63,9 +63,11 @@ else
                 runTime.timeName(),
                 runTime,
                 Foam::IOobject::MUST_READ
-            )
+            ),
+            false
         )
     );
+    meshPtr().init(true);   // initialise all (lower levels and current)
 }
 
 Foam::fvMesh& mesh = meshPtr();

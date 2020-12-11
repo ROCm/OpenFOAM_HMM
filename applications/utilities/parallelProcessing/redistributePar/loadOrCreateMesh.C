@@ -36,6 +36,7 @@ License
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
+#include "basicFvGeometryScheme.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -254,6 +255,19 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     auto meshPtr = autoPtr<fvMesh>::New(io);
     fvMesh& mesh = *meshPtr;
 
+    // Make sure to use a non-parallel geometry calculation method
+    {
+        tmp<fvGeometryScheme> basicGeometry
+        (
+            fvGeometryScheme::New
+            (
+                mesh,
+                dictionary(),
+                basicFvGeometryScheme::typeName
+            )
+        );
+        mesh.geometry(basicGeometry);
+    }
 
 
     // Sync patches

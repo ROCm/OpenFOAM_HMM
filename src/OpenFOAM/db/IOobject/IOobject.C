@@ -438,6 +438,20 @@ Foam::IOobject::IOobject
 {}
 
 
+Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    readOption ro,
+    writeOption wo
+)
+:
+    IOobject(io)
+{
+    rOpt_ = ro;
+    wOpt_ = wo;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::objectRegistry& Foam::IOobject::db() const

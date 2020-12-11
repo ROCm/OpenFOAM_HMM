@@ -155,6 +155,50 @@ Foam::solution::solution
 }
 
 
+Foam::solution::solution
+(
+    const objectRegistry& obr,
+    const fileName& dictName,
+    const dictionary& dict
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            dictName,
+            obr.time().system(),
+            obr,
+            (
+                obr.readOpt() == IOobject::MUST_READ
+             || obr.readOpt() == IOobject::READ_IF_PRESENT
+              ? IOobject::MUST_READ_IF_MODIFIED
+              : obr.readOpt()
+            ),
+            IOobject::NO_WRITE
+        ),
+        dict
+    ),
+    cache_(dictionary::null),
+    caching_(false),
+    fieldRelaxDict_(dictionary::null),
+    eqnRelaxDict_(dictionary::null),
+    fieldRelaxDefault_(0),
+    eqnRelaxDefault_(0),
+    solvers_(dictionary::null)
+{
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        read(solutionDict());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::solution::upgradeSolverDict

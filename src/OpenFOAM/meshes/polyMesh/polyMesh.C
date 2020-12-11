@@ -70,20 +70,29 @@ void Foam::polyMesh::calcDirections() const
 
     forAll(boundaryMesh(), patchi)
     {
-        if (boundaryMesh()[patchi].size())
+        const polyPatch& pp = boundaryMesh()[patchi];
+        if (isA<emptyPolyPatch>(pp))
         {
-            if (isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+            // Force calculation of geometric properties, independent of
+            // size. This avoids parallel synchronisation problems.
+            const vectorField::subField fa(pp.faceAreas());
+
+            if (pp.size())
             {
                 nEmptyPatches++;
-                emptyDirVec += sum(cmptMag(boundaryMesh()[patchi].faceAreas()));
+                emptyDirVec += sum(cmptMag(fa));
             }
-            else if (isA<wedgePolyPatch>(boundaryMesh()[patchi]))
-            {
-                const wedgePolyPatch& wpp = refCast<const wedgePolyPatch>
-                (
-                    boundaryMesh()[patchi]
-                );
+        }
+        else if (isA<wedgePolyPatch>(pp))
+        {
+            const wedgePolyPatch& wpp = refCast<const wedgePolyPatch>(pp);
 
+            // Force calculation of geometric properties, independent of
+            // size. This avoids parallel synchronisation problems.
+            (void)wpp.faceNormals();
+
+            if (pp.size())
+            {
                 nWedgePatches++;
                 wedgeDirVec += cmptMag(wpp.centreNormal());
             }
@@ -161,7 +170,7 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polyMesh::polyMesh(const IOobject& io)
+Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
 :
     objectRegistry(io),
     primitiveMesh(),
@@ -328,12 +337,6 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         neighbour_.write();
     }
 
-    // Calculate topology for the patches (processor-processor comms etc.)
-    boundary_.updateMesh();
-
-    // Calculate the geometry for the patches (transformation tensors etc.)
-    boundary_.calcGeometry();
-
     // Warn if global empty mesh
     if (returnReduce(boundary_.empty(), orOp<bool>()))
     {
@@ -352,8 +355,30 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         }
     }
 
+    if (doInit)
+    {
+        polyMesh::init(false);  // do not init lower levels
+    }
+}
+
+
+bool Foam::polyMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        primitiveMesh::init(doInit);
+    }
+
+    // Calculate topology for the patches (processor-processor comms etc.)
+    boundary_.updateMesh();
+
+    // Calculate the geometry for the patches (transformation tensors etc.)
+    boundary_.calcGeometry();
+
     // Initialise demand-driven data
     calcDirections();
+
+    return false;
 }
 
 
@@ -377,7 +402,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(points)
@@ -390,7 +415,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(faces)
@@ -403,7 +428,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(owner)
@@ -416,7 +441,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(neighbour)
@@ -430,7 +455,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         *this,
@@ -440,7 +465,7 @@ Foam::polyMesh::polyMesh
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(readTetBasePtIs()),
+    tetBasePtIsPtr_(nullptr),
     cellTreePtr_(nullptr),
     pointZones_
     (
@@ -450,7 +475,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
@@ -464,7 +489,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
@@ -478,7 +503,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
@@ -591,7 +616,7 @@ Foam::polyMesh::polyMesh
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(readTetBasePtIs()),
+    tetBasePtIsPtr_(nullptr),
     cellTreePtr_(nullptr),
     pointZones_
     (

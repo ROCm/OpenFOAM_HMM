@@ -255,22 +255,9 @@ protected:
 
             //- Calculate face centres and areas
             void calcFaceCentresAndAreas() const;
-            void makeFaceCentresAndAreas
-            (
-                const pointField& p,
-                vectorField& fCtrs,
-                vectorField& fAreas
-            ) const;
 
             //- Calculate cell centres and volumes
             void calcCellCentresAndVols() const;
-            void makeCellCentresAndVols
-            (
-                const vectorField& fCtrs,
-                const vectorField& fAreas,
-                vectorField& cellCtrs,
-                scalarField& cellVols
-            ) const;
 
             //- Calculate edge vectors
             void calcEdgeVectors() const;
@@ -475,6 +462,21 @@ public:
             const label nCells,
             cellList& cells
         );
+
+        //- Reset the local geometry
+        void resetGeometry
+        (
+            pointField&& faceCentres,
+            pointField&& faceAreas,
+            pointField&& cellCentres,
+            scalarField&& cellVolumes
+        );
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit)
+        {
+            return false;
+        }
 
 
         // Access
@@ -891,6 +893,8 @@ public:
 
             const labelList& cellEdges(const label celli) const;
 
+            //- Update all geometric data
+            virtual void updateGeom();
 
             //- Clear geometry
             void clearGeom();

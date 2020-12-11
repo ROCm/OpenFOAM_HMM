@@ -92,6 +92,7 @@ Usage
 #include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
+#include "basicFvGeometryScheme.H"
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
@@ -149,6 +150,30 @@ scalar getMergeDistance
         << endl;
 
     return mergeDist;
+}
+
+
+void setBasicGeometry(fvMesh& mesh)
+{
+    // Set the fvGeometryScheme to basic since it does not require
+    // any parallel communication to construct the geometry. During
+    // redistributePar one might temporarily end up with processors
+    // with zero procBoundaries. Normally procBoundaries trigger geometry
+    // calculation (e.g. send over cellCentres) so on the processors without
+    // procBoundaries this will not happen. The call to the geometry calculation
+    // is not synchronised and this might lead to a hang for geometry schemes
+    // that do require synchronisation
+
+    tmp<fvGeometryScheme> basicGeometry
+    (
+        fvGeometryScheme::New
+        (
+            mesh,
+            dictionary(),
+            basicFvGeometryScheme::typeName
+        )
+    );
+    mesh.geometry(basicGeometry);
 }
 
 
@@ -2675,6 +2700,10 @@ int main(int argc, char *argv[])
                     );
                     fvMesh& mesh = meshPtr();
 
+                    // Use basic geometry calculation to avoid synchronisation
+                    // problems. See comment in routine
+                    setBasicGeometry(mesh);
+
                     // Global matching tolerance
                     const scalar tolDim = getMergeDistance
                     (
@@ -2736,6 +2765,8 @@ int main(int argc, char *argv[])
                 ),
                 true            // read on master only
             );
+            setBasicGeometry(baseMeshPtr());
+
 
             Info<< "Reading local, decomposed mesh" << endl;
             autoPtr<fvMesh> meshPtr = loadOrCreateMesh

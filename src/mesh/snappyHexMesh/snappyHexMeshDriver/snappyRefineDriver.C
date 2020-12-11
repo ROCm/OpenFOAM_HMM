@@ -1476,6 +1476,261 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
     return iter;
 }
 
+bool Foam::snappyRefineDriver::usesHigherLevel
+(
+    const labelUList& boundaryPointLevel,
+    const labelUList& f,
+    const label cLevel
+) const
+{
+    for (const label pointi : f)
+    {
+        if (boundaryPointLevel[pointi] > cLevel)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
+{
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
+    if (dryRun_)
+    {
+        return 0;
+    }
+
+    addProfiling(interface, "snappyHexMesh::refine::transition");
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    label iter = 0;
+
+    if (refineParams.interfaceRefine())
+    {
+        for (;iter < maxIter; iter++)
+        {
+            Info<< nl
+                << "Boundary refinement iteration " << iter << nl
+                << "-------------------------------" << nl
+                << endl;
+
+            const labelList& surfaceIndex = meshRefiner_.surfaceIndex();
+            const hexRef8& cutter = meshRefiner_.meshCutter();
+            const labelList& cellLevel = cutter.cellLevel();
+            const faceList& faces = mesh.faces();
+            const cellList& cells = mesh.cells();
+
+
+            // Determine cells to refine
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            // Point/face on boundary
+            bitSet isBoundaryPoint(mesh.nPoints());
+            bitSet isBoundaryFace(mesh.nFaces());
+            {
+                forAll(surfaceIndex, facei)
+                {
+                    if (surfaceIndex[facei] != -1)
+                    {
+                        isBoundaryFace.set(facei);
+                        isBoundaryPoint.set(faces[facei]);
+                    }
+                }
+                const labelList meshPatchIDs(meshRefiner_.meshedPatches());
+                for (const label patchi : meshPatchIDs)
+                {
+                    const polyPatch& pp = mesh.boundaryMesh()[patchi];
+                    forAll(pp, i)
+                    {
+                        isBoundaryFace.set(pp.start()+i);
+                        isBoundaryPoint.set(pp[i]);
+                    }
+                }
+
+                syncTools::syncPointList
+                (
+                    mesh,
+                    isBoundaryPoint,
+                    orEqOp<unsigned int>(),
+                    0
+                );
+            }
+
+            // Mark max boundary face level onto boundary points. All points
+            // not on a boundary face stay 0.
+            labelList boundaryPointLevel(mesh.nPoints(), 0);
+            {
+                forAll(cells, celli)
+                {
+                    const cell& cFaces = cells[celli];
+                    const label cLevel = cellLevel[celli];
+
+                    for (const label facei : cFaces)
+                    {
+                        if (isBoundaryFace(facei))
+                        {
+                            const face& f = faces[facei];
+                            for (const label pointi : f)
+                            {
+                                boundaryPointLevel[pointi] =
+                                max
+                                (
+                                    boundaryPointLevel[pointi],
+                                    cLevel
+                                );
+                            }
+                        }
+                    }
+                }
+
+                syncTools::syncPointList
+                (
+                    mesh,
+                    boundaryPointLevel,
+                    maxEqOp<label>(),
+                    0
+                );
+            }
+
+
+            // Detect cells with a point but not face on the boundary
+            labelList candidateCells;
+            {
+                const cellList& cells = mesh.cells();
+
+                cellSet candidateCellSet
+                (
+                    mesh,
+                    "candidateCells",
+                    cells.size()/100
+                );
+
+                forAll(cells, celli)
+                {
+                    const cell& cFaces = cells[celli];
+                    const label cLevel = cellLevel[celli];
+
+                    bool isBoundaryCell = false;
+                    for (const label facei : cFaces)
+                    {
+                        if (isBoundaryFace(facei))
+                        {
+                            isBoundaryCell = true;
+                            break;
+                        }
+                    }
+
+                    if (!isBoundaryCell)
+                    {
+                        for (const label facei : cFaces)
+                        {
+                            const face& f = mesh.faces()[facei];
+                            if (usesHigherLevel(boundaryPointLevel, f, cLevel))
+                            {
+                                candidateCellSet.insert(celli);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (debug&meshRefinement::MESH)
+                {
+                    Pout<< "Dumping " << candidateCellSet.size()
+                        << " cells to cellSet candidateCellSet." << endl;
+                    candidateCellSet.instance() = meshRefiner_.timeName();
+                    candidateCellSet.write();
+                }
+                candidateCells = candidateCellSet.toc();
+            }
+
+            labelList cellsToRefine
+            (
+                meshRefiner_.meshCutter().consistentRefinement
+                (
+                    candidateCells,
+                    true
+                )
+            );
+            Info<< "Determined cells to refine in = "
+                << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+
+            label nCellsToRefine = cellsToRefine.size();
+            reduce(nCellsToRefine, sumOp<label>());
+
+            Info<< "Selected for refinement : " << nCellsToRefine
+                << " cells (out of " << mesh.globalData().nTotalCells()
+                << ')' << endl;
+
+            // Stop when no cells to refine. After a few iterations check if too
+            // few cells
+            if
+            (
+                nCellsToRefine == 0
+                // || (
+                //        iter >= 1
+                //     && nCellsToRefine <= refineParams.minRefineCells()
+                //    )
+            )
+            {
+                Info<< "Stopping refining since too few cells selected."
+                    << nl << endl;
+                break;
+            }
+
+
+            if (debug)
+            {
+                const_cast<Time&>(mesh.time())++;
+            }
+
+
+            if
+            (
+                returnReduce
+                (
+                    (mesh.nCells() >= refineParams.maxLocalCells()),
+                    orOp<bool>()
+                )
+            )
+            {
+                meshRefiner_.balanceAndRefine
+                (
+                    "boundary cell refinement iteration " + name(iter),
+                    decomposer_,
+                    distributor_,
+                    cellsToRefine,
+                    refineParams.maxLoadUnbalance()
+                );
+            }
+            else
+            {
+                meshRefiner_.refineAndBalance
+                (
+                    "boundary cell refinement iteration " + name(iter),
+                    decomposer_,
+                    distributor_,
+                    cellsToRefine,
+                    refineParams.maxLoadUnbalance()
+                );
+            }
+        }
+    }
+    return iter;
+}
+
 
 void Foam::snappyRefineDriver::removeInsideCells
 (
@@ -3194,6 +3449,18 @@ void Foam::snappyRefineDriver::doRefine
         prepareForSnapping,
         motionDict
     );
+
+
+    //- Commented out for now since causes zoning errors (sigsegv) on
+    //  case with faceZones. TBD.
+    //// Refine any cells are point/edge connected to the boundary and have a
+    //// lower refinement level than the neighbouring cells
+    //boundaryRefinementInterfaceRefine
+    //(
+    //    refineParams,
+    //    10      // maxIter
+    //);
+
 
     // Mesh is at its finest. Do optional zoning (cellZones and faceZones)
     wordPairHashTable zonesToFaceZone;

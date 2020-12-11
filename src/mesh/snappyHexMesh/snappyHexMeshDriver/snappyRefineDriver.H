@@ -165,6 +165,21 @@ class snappyRefineDriver
             const label maxIter
         );
 
+        //- Helper: see if any element in f has higher level than cLevel
+        bool usesHigherLevel
+        (
+            const labelUList& boundaryPointLevel,
+            const labelUList& f,
+            const label cLevel
+        ) const;
+
+        //- Refine cells with a point/edge but not face on the boundary
+        label boundaryRefinementInterfaceRefine
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
         //- Remove all cells within intersected region
         void removeInsideCells
         (

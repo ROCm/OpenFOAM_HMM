@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
-#include "PrecisionAdaptor.H"
+#include "primitiveMeshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -61,7 +61,14 @@ void Foam::primitiveMesh::calcCellCentresAndVols() const
     scalarField& cellVols = *cellVolumesPtr_;
 
     // Make centres and volumes
-    makeCellCentresAndVols(faceCentres(), faceAreas(), cellCtrs, cellVols);
+    primitiveMeshTools::makeCellCentresAndVols
+    (
+        *this,
+        faceCentres(),
+        faceAreas(),
+        cellCtrs,
+        cellVols
+    );
 
     if (debug)
     {
@@ -72,111 +79,14 @@ void Foam::primitiveMesh::calcCellCentresAndVols() const
 }
 
 
-void Foam::primitiveMesh::makeCellCentresAndVols
-(
-    const vectorField& fCtrs,
-    const vectorField& fAreas,
-    vectorField& cellCtrs_s,
-    scalarField& cellVols_s
-) const
-{
-    typedef Vector<solveScalar> solveVector;
-
-    PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s, false);
-    Field<solveVector>& cellCtrs = tcellCtrs.ref();
-    PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s, false);
-    Field<solveScalar>& cellVols = tcellVols.ref();
-
-    cellCtrs = Zero;
-    cellVols = 0.0;
-
-    const labelList& own = faceOwner();
-    const labelList& nei = faceNeighbour();
-
-    // first estimate the approximate cell centre as the average of
-    // face centres
-
-    Field<solveVector> cEst(nCells(), Zero);
-    labelField nCellFaces(nCells(), Zero);
-
-    forAll(own, facei)
-    {
-        cEst[own[facei]] += solveVector(fCtrs[facei]);
-        ++nCellFaces[own[facei]];
-    }
-
-    forAll(nei, facei)
-    {
-        cEst[nei[facei]] += solveVector(fCtrs[facei]);
-        ++nCellFaces[nei[facei]];
-    }
-
-    forAll(cEst, celli)
-    {
-        cEst[celli] /= nCellFaces[celli];
-    }
-
-    forAll(own, facei)
-    {
-        const solveVector fc(fCtrs[facei]);
-        const solveVector fA(fAreas[facei]);
-
-        // Calculate 3*face-pyramid volume
-        solveScalar pyr3Vol =
-            fA & (fc - cEst[own[facei]]);
-
-        // Calculate face-pyramid centre
-        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[own[facei]];
-
-        // Accumulate volume-weighted face-pyramid centre
-        cellCtrs[own[facei]] += pyr3Vol*pc;
-
-        // Accumulate face-pyramid volume
-        cellVols[own[facei]] += pyr3Vol;
-    }
-
-    forAll(nei, facei)
-    {
-        const solveVector fc(fCtrs[facei]);
-        const solveVector fA(fAreas[facei]);
-
-        // Calculate 3*face-pyramid volume
-        solveScalar pyr3Vol =
-            fA & (cEst[nei[facei]] - fc);
-
-        // Calculate face-pyramid centre
-        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[nei[facei]];
-
-        // Accumulate volume-weighted face-pyramid centre
-        cellCtrs[nei[facei]] += pyr3Vol*pc;
-
-        // Accumulate face-pyramid volume
-        cellVols[nei[facei]] += pyr3Vol;
-    }
-
-    forAll(cellCtrs, celli)
-    {
-        if (mag(cellVols[celli]) > VSMALL)
-        {
-            cellCtrs[celli] /= cellVols[celli];
-        }
-        else
-        {
-            cellCtrs[celli] = cEst[celli];
-        }
-    }
-
-    cellVols *= (1.0/3.0);
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::vectorField& Foam::primitiveMesh::cellCentres() const
 {
     if (!cellCentresPtr_)
     {
-        calcCellCentresAndVols();
+        //calcCellCentresAndVols();
+        const_cast<primitiveMesh&>(*this).updateGeom();
     }
 
     return *cellCentresPtr_;
@@ -187,7 +97,8 @@ const Foam::scalarField& Foam::primitiveMesh::cellVolumes() const
 {
     if (!cellVolumesPtr_)
     {
-        calcCellCentresAndVols();
+        //calcCellCentresAndVols();
+        const_cast<primitiveMesh&>(*this).updateGeom();
     }
 
     return *cellVolumesPtr_;

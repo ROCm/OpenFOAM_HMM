@@ -820,6 +820,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 (
     const indirectPrimitivePatch& pp,
     const scalar faceRatio,
+    const boolList& relativeSizes,
     const scalar edge0Len,
     const labelList& cellLevel,
     pointField& patchDisp,
@@ -828,6 +829,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     Info<< nl << "Handling cells with warped patch faces ..." << nl;
 
@@ -838,16 +840,19 @@ void Foam::snappyLayerDriver::handleWarpedFaces
     forAll(pp, i)
     {
         const face& f = pp[i];
+        label faceI = pp.addressing()[i];
+        label patchI = patches.patchID()[faceI-mesh.nInternalFaces()];
 
-        if (f.size() > 3)
+        // It is hard to calculate some length scale if not in relative
+        // mode so disable this check.
+
+        if (relativeSizes[patchI] && f.size() > 3)
         {
-            label facei = pp.addressing()[i];
-
-            label ownLevel = cellLevel[mesh.faceOwner()[facei]];
+            label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
             scalar edgeLen = edge0Len/(1<<ownLevel);
 
             // Normal distance to face centre plane
-            const point& fc = mesh.faceCentres()[facei];
+            const point& fc = mesh.faceCentres()[faceI];
             const vector& fn = pp.faceNormals()[i];
 
             scalarField vProj(f.size());
@@ -1412,10 +1417,14 @@ void Foam::snappyLayerDriver::calculateLayerThickness
     minThickness.setSize(pp.nPoints());
     minThickness = GREAT;
 
-    forAll(patchIDs, i)
-    {
-        label patchi = patchIDs[i];
+    thickness.setSize(pp.nPoints());
+    thickness = GREAT;
 
+    expansionRatio.setSize(pp.nPoints());
+    expansionRatio = GREAT;
+
+    for (const label patchi : patchIDs)
+    {
         const labelList& meshPoints = patches[patchi].meshPoints();
 
         forAll(meshPoints, patchPointi)
@@ -1495,32 +1504,11 @@ void Foam::snappyLayerDriver::calculateLayerThickness
     // Now the thicknesses are set according to the minimum of connected
     // patches.
 
+    // Determine per point the max cell level of connected cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Rework relative thickness into absolute
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // by multiplying with the internal cell size.
-
-    if (layerParams.relativeSizes())
+    labelList maxPointLevel(pp.nPoints(), labelMin);
     {
-        if
-        (
-            min(layerParams.minThickness()) < 0
-         || max(layerParams.minThickness()) > 2
-        )
-        {
-            FatalErrorInFunction
-                << "Thickness should be factor of local undistorted cell size."
-                << " Valid values are [0..2]." << nl
-                << " minThickness:" << layerParams.minThickness()
-                << exit(FatalError);
-        }
-
-
-        // Determine per point the max cell level of connected cells
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        labelList maxPointLevel(pp.nPoints(), labelMin);
-
         forAll(pp, i)
         {
             label ownLevel = cellLevel[mesh.faceOwner()[pp.addressing()[i]]];
@@ -1541,44 +1529,149 @@ void Foam::snappyLayerDriver::calculateLayerThickness
             maxEqOp<label>(),
             labelMin            // null value
         );
+    }
 
 
-        forAll(maxPointLevel, pointi)
+    // Rework relative thickness into absolute
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // by multiplying with the internal cell size.
+    // Note that we cannot loop over the patches since then points on
+    // multiple patches would get multiplied with edgeLen twice ..
+    {
+        // Multiplication factor for relative sizes
+        scalarField edgeLen(pp.nPoints(), GREAT);
+
+        labelList spec(pp.nPoints(), layerParameters::FIRST_AND_TOTAL);
+
+        bitSet isRelativePoint(mesh.nPoints());
+
+        for (const label patchi : patchIDs)
         {
-            // Find undistorted edge size for this level.
-            scalar edgeLen = edge0Len/(1<<maxPointLevel[pointi]);
-            firstLayerThickness[pointi] *= edgeLen;
-            finalLayerThickness[pointi] *= edgeLen;
-            totalThickness[pointi] *= edgeLen;
-            minThickness[pointi] *= edgeLen;
+            const labelList& meshPoints = patches[patchi].meshPoints();
+            const layerParameters::thicknessModelType patchSpec =
+                layerParams.layerModels()[patchi];
+            const bool relSize = layerParams.relativeSizes()[patchi];
+
+            for (const label meshPointi : meshPoints)
+            {
+                const label ppPointi = pp.meshPointMap()[meshPointi];
+
+                // Note: who wins if different specs?
+
+                // Calculate undistorted edge size for this level.
+                edgeLen[ppPointi] = min
+                (
+                    edgeLen[ppPointi],
+                    edge0Len/(1<<maxPointLevel[ppPointi])
+                );
+                spec[ppPointi] = max(spec[ppPointi], patchSpec);
+                isRelativePoint[meshPointi] =
+                    isRelativePoint[meshPointi]
+                 || relSize;
+            }
+        }
+
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            edgeLen,
+            minEqOp<scalar>(),
+            GREAT                               // null value
+        );
+        syncTools::syncPointList
+        (
+            mesh,
+            pp.meshPoints(),
+            spec,
+            maxEqOp<label>(),
+            label(layerParameters::FIRST_AND_TOTAL) // null value
+        );
+        syncTools::syncPointList
+        (
+            mesh,
+            isRelativePoint,
+            orEqOp<unsigned int>(),
+            0
+        );
+
+
+
+
+        forAll(pp.meshPoints(), pointi)
+        {
+            const label meshPointi = pp.meshPoints()[pointi];
+            const layerParameters::thicknessModelType pointSpec =
+                static_cast<layerParameters::thicknessModelType>(spec[pointi]);
+
+            if (pointSpec == layerParameters::FIRST_AND_RELATIVE_FINAL)
+            {
+                // This overrules the relative sizes flag for
+                // first (always absolute) and final (always relative)
+                finalLayerThickness[pointi] *= edgeLen[pointi];
+                if (isRelativePoint[meshPointi])
+                {
+                    totalThickness[pointi] *= edgeLen[pointi];
+                    minThickness[pointi] *= edgeLen[pointi];
+                }
+            }
+            else if (isRelativePoint[meshPointi])
+            {
+                firstLayerThickness[pointi] *= edgeLen[pointi];
+                finalLayerThickness[pointi] *= edgeLen[pointi];
+                totalThickness[pointi] *= edgeLen[pointi];
+                minThickness[pointi] *= edgeLen[pointi];
+            }
+
+            thickness[pointi] = min
+            (
+                thickness[pointi],
+                layerParameters::layerThickness
+                (
+                    pointSpec,
+                    patchNLayers[pointi],
+                    firstLayerThickness[pointi],
+                    finalLayerThickness[pointi],
+                    totalThickness[pointi],
+                    expRatio[pointi]
+                )
+            );
+            expansionRatio[pointi] = min
+            (
+                expansionRatio[pointi],
+                layerParameters::layerExpansionRatio
+                (
+                    pointSpec,
+                    patchNLayers[pointi],
+                    firstLayerThickness[pointi],
+                    finalLayerThickness[pointi],
+                    totalThickness[pointi],
+                    expRatio[pointi]
+                )
+            );
         }
     }
 
+    // Synchronise the determined thicknes. Note that this should not be
+    // necessary since the inputs to the calls to layerThickness,
+    // layerExpansionRatio above are already parallel consistent
 
-
-    // Rework thickness parameters into overall thickness
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    forAll(firstLayerThickness, pointi)
-    {
-        thickness[pointi] = layerParams.layerThickness
-        (
-            patchNLayers[pointi],
-            firstLayerThickness[pointi],
-            finalLayerThickness[pointi],
-            totalThickness[pointi],
-            expRatio[pointi]
-        );
-
-        expansionRatio[pointi] = layerParams.layerExpansionRatio
-        (
-            patchNLayers[pointi],
-            firstLayerThickness[pointi],
-            finalLayerThickness[pointi],
-            totalThickness[pointi],
-            expRatio[pointi]
-        );
-    }
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        thickness,
+        minEqOp<scalar>(),
+        GREAT               // null value
+    );
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        expansionRatio,
+        minEqOp<scalar>(),
+        GREAT               // null value
+    );
 
     //Info<< "calculateLayerThickness : min:" << gMin(thickness)
     //    << " max:" << gMax(thickness) << endl;
@@ -1614,6 +1707,8 @@ void Foam::snappyLayerDriver::calculateLayerThickness
             label patchi = patchIDs[i];
 
             const labelList& meshPoints = patches[patchi].meshPoints();
+            const layerParameters::thicknessModelType spec =
+                layerParams.layerModels()[patchi];
 
             scalar sumThickness = 0;
             scalar sumNearWallThickness = 0;
@@ -1629,6 +1724,7 @@ void Foam::snappyLayerDriver::calculateLayerThickness
                     sumThickness += thickness[ppPointi];
                     sumNearWallThickness += layerParams.firstLayerThickness
                     (
+                        spec,
                         patchNLayers[ppPointi],
                         firstLayerThickness[ppPointi],
                         finalLayerThickness[ppPointi],
@@ -1806,6 +1902,8 @@ void Foam::snappyLayerDriver::getPatchDisplacement
     const indirectPrimitivePatch& pp,
     const scalarField& thickness,
     const scalarField& minThickness,
+    const scalarField& expansionRatio,
+
     pointField& patchDisp,
     labelList& patchNLayers,
     List<extrudeMode>& extrudeStatus
@@ -1834,6 +1932,98 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 
     label nNoVisNormal = 0;
     label nExtrudeRemove = 0;
+
+
+////XXXXXXXX
+//    {
+//        OBJstream twoStr
+//        (
+//            mesh.time().path()
+//          / "twoFacePoints_"
+//          + meshRefiner_.timeName()
+//          + ".obj"
+//        );
+//        OBJstream multiStr
+//        (
+//            mesh.time().path()
+//          / "multiFacePoints_"
+//          + meshRefiner_.timeName()
+//          + ".obj"
+//        );
+//        Pout<< "Writing points inbetween two faces on same cell to "
+//            << twoStr.name() << endl;
+//        Pout<< "Writing points inbetween three or more faces on same cell to "
+//            << multiStr.name() << endl;
+//        // Check whether inbetween patch faces on same cell
+//        Map<labelList> cellToFaces;
+//        forAll(pointNormals, patchPointi)
+//        {
+//            const labelList& pFaces = pointFaces[patchPointi];
+//
+//            cellToFaces.clear();
+//            forAll(pFaces, pFacei)
+//            {
+//                const label patchFacei = pFaces[pFacei];
+//                const label meshFacei = pp.addressing()[patchFacei];
+//                const label celli = mesh.faceOwner()[meshFacei];
+//                Map<labelList>::iterator faceFnd = cellToFaces.find(celli);
+//                if (faceFnd.found())
+//                {
+//                    labelList& faces = faceFnd();
+//                    if (!faces.found(patchFacei))
+//                    {
+//                        faces.append(patchFacei);
+//                    }
+//                }
+//                else
+//                {
+//                    cellToFaces.insert(celli, labelList(1, patchFacei));
+//                }
+//            }
+//
+//            forAllConstIter(Map<labelList>, cellToFaces, iter)
+//            {
+//                if (iter().size() == 2)
+//                {
+//                    twoStr.write(pp.localPoints()[patchPointi]);
+//                }
+//                else if (iter().size() > 2)
+//                {
+//                    multiStr.write(pp.localPoints()[patchPointi]);
+//
+//                    const scalar ratio =
+//                        layerParameters::finalLayerThicknessRatio
+//                        (
+//                            patchNLayers[patchPointi],
+//                            expansionRatio[patchPointi]
+//                        );
+//                    // Get thickness of cell next to bulk
+//                    const vector finalDisp
+//                    (
+//                        ratio*patchDisp[patchPointi]
+//                    );
+//
+//                    //Pout<< "** point:" << pp.localPoints()[patchPointi]
+//                    //    << " on cell:" << iter.key()
+//                    //    << " faces:" << iter()
+//                    //    << " displacement was:" << patchDisp[patchPointi]
+//                    //    << " ratio:" << ratio
+//                    //    << " finalDispl:" << finalDisp;
+//
+//                    // Half this thickness
+//                    patchDisp[patchPointi] -= 0.8*finalDisp;
+//
+//                    //Pout<< " new displacement:"
+//                    //    << patchDisp[patchPointi] << endl;
+//                }
+//            }
+//        }
+//
+//        Pout<< "Written " << multiStr.nVertices()
+//            << " points inbetween three or more faces on same cell to "
+//            << multiStr.name() << endl;
+//    }
+////XXXXXXXX
 
 
     // Check if no extrude possible.
@@ -3724,7 +3914,7 @@ void Foam::snappyLayerDriver::addLayers
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // It is hard to calculate some length scale if not in relative
         // mode so disable this check.
-        if (layerParams.relativeSizes())
+        if (!layerParams.relativeSizes().found(false))
         {
             // Undistorted edge length
             const scalar edge0Len =
@@ -3735,6 +3925,7 @@ void Foam::snappyLayerDriver::addLayers
             (
                 *pp,
                 layerParams.maxFaceThicknessRatio(),
+                layerParams.relativeSizes(),
                 edge0Len,
                 cellLevel,
 
@@ -3948,6 +4139,8 @@ void Foam::snappyLayerDriver::addLayers
                 *pp,
                 thickness,
                 minThickness,
+                expansionRatio,
+
                 patchDisp,
                 patchNLayers,
                 extrudeStatus
@@ -4077,7 +4270,7 @@ void Foam::snappyLayerDriver::addLayers
 
             forAll(nPatchPointLayers, i)
             {
-                scalar ratio = layerParams.finalLayerThicknessRatio
+                scalar ratio = layerParameters::finalLayerThicknessRatio
                 (
                     nPatchPointLayers[i],
                     expansionRatio[i]
@@ -4133,7 +4326,7 @@ void Foam::snappyLayerDriver::addLayers
                     mesh.name(),
                     static_cast<polyMesh&>(mesh).instance(),
                     mesh.time(),  // register with runTime
-                    IOobject::NO_READ,
+                    IOobject::READ_IF_PRESENT,  // read fv* if present
                     static_cast<polyMesh&>(mesh).writeOpt()
                 ),              // io params from original mesh but new name
                 mesh,           // original mesh

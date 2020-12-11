@@ -38,21 +38,44 @@ SourceFiles
 #ifndef primitiveMeshTools_H
 #define primitiveMeshTools_H
 
-#include "primitiveMesh.H"
 #include "bitSet.H"
+#include "primitiveFields.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declarations
+class primitiveMesh;
+
 /*---------------------------------------------------------------------------*\
-                        Namespace primitiveMeshTools Declaration
+                   Namespace primitiveMeshTools Declaration
 \*---------------------------------------------------------------------------*/
 
 class primitiveMeshTools
 {
 public:
+
+    //- Calculate face centres and areas
+    static void makeFaceCentresAndAreas
+    (
+        const primitiveMesh& mesh,
+        const pointField& p,
+        vectorField& fCtrs,
+        vectorField& fAreas
+    );
+
+    //- Calculate cell centres and volumes from face properties
+    static void makeCellCentresAndVols
+    (
+        const primitiveMesh& mesh,
+        const vectorField& fCtrs,
+        const vectorField& fAreas,
+        vectorField& cellCtrs,
+        scalarField& cellVols
+    );
 
     //- Generate non-orthogonality field (internal faces only)
     static tmp<scalarField> faceOrthogonality

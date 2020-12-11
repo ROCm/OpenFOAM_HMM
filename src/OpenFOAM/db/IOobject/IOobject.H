@@ -340,6 +340,14 @@ public:
             const word& name
         );
 
+        //- Copy construct, resetting io options
+        IOobject
+        (
+            const IOobject& io,
+            readOption,
+            writeOption
+        );
+
         //- Clone
         autoPtr<IOobject> clone() const
         {

@@ -182,14 +182,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     // Create the mesh
     // ~~~~~~~~~~~~~~~
 
-    IOobject noReadIO(io);
-    noReadIO.readOpt() = IOobject::NO_READ;
-    noReadIO.writeOpt() = IOobject::AUTO_WRITE;
+    //IOobject noReadIO(io);
+    //noReadIO.readOpt() = IOobject::NO_READ;
+    //noReadIO.writeOpt() = IOobject::AUTO_WRITE;
     newMeshPtr.reset
     (
         new Type
         (
-            noReadIO,
+            io,         //noReadIO
             std::move(newPoints),
             std::move(faces_),
             std::move(faceOwner_),

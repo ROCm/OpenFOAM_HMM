@@ -104,7 +104,7 @@ public:
     // Constructors
 
         //- Construct from an IOobject
-        explicit dynamicFvMesh(const IOobject& io);
+        explicit dynamicFvMesh(const IOobject& io); //, const bool doInit=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
@@ -139,7 +139,11 @@ public:
         //- Select, construct and return the dynamicFvMesh
         //  If the constant/dynamicMeshDict does not exist
         //  a staticFvMesh is returned
-        static autoPtr<dynamicFvMesh> New(const IOobject& io);
+        static autoPtr<dynamicFvMesh> New
+        (
+            const IOobject& io  //,
+            //const bool doInit=true
+        );
 
 
         //- Select, construct and return the dynamicFvMesh
@@ -148,7 +152,8 @@ public:
         static autoPtr<dynamicFvMesh> New
         (
             const argList& args,
-            const Time& runTime
+            const Time& runTime //,
+            //const bool doInit=true
         );
 
 
@@ -157,6 +162,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        //virtual bool init(const bool doInit);
 
         //- Is mesh dynamic
         virtual bool dynamic() const

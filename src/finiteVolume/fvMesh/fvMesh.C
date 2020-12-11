@@ -240,11 +240,11 @@ void Foam::fvMesh::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvMesh::fvMesh(const IOobject& io)
+Foam::fvMesh::fvMesh(const IOobject& io, const bool doInit)
 :
-    polyMesh(io),
-    surfaceInterpolation(*this),
+    polyMesh(io, doInit),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
+    surfaceInterpolation(*this),
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this, boundaryMesh()),
@@ -260,6 +260,25 @@ Foam::fvMesh::fvMesh(const IOobject& io)
     phiPtr_(nullptr)
 {
     DebugInFunction << "Constructing fvMesh from IOobject" << endl;
+
+    if (doInit)
+    {
+        fvMesh::init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::fvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        // Construct basic geometry calculation engine. Note: do before
+        // doing anything with primitiveMesh::cellCentres etc.
+        (void)geometry();
+
+        // Intialise my data
+        polyMesh::init(doInit);
+    }
 
     // Check the existence of the cell volumes and read if present
     // and set the storage of V00
@@ -322,6 +341,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 
         moving(true);
     }
+    return false;
 }
 
 
@@ -344,11 +364,11 @@ Foam::fvMesh::fvMesh
         std::move(allNeighbour),
         syncPar
     ),
-    surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
+    surfaceInterpolation(*this),
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
-    boundary_(*this, boundaryMesh()),
+    boundary_(*this),
     lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
     VPtr_(nullptr),
@@ -381,8 +401,8 @@ Foam::fvMesh::fvMesh
         std::move(cells),
         syncPar
     ),
-    surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
+    surfaceInterpolation(*this),
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
     boundary_(*this),
@@ -405,6 +425,108 @@ Foam::fvMesh::fvMesh(const IOobject& io, const zero, const bool syncPar)
 :
     fvMesh(io, pointField(), faceList(), labelList(), labelList(), syncPar)
 {}
+
+
+Foam::fvMesh::fvMesh
+(
+    const IOobject& io,
+    const fvMesh& baseMesh,
+    pointField&& points,
+    faceList&& faces,
+    labelList&& allOwner,
+    labelList&& allNeighbour,
+    const bool syncPar
+)
+:
+    polyMesh
+    (
+        io,
+        std::move(points),
+        std::move(faces),
+        std::move(allOwner),
+        std::move(allNeighbour),
+        syncPar
+    ),
+    fvSchemes
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const fvSchemes&>(baseMesh)
+    ),
+    surfaceInterpolation(*this),
+    fvSolution
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const fvSolution&>(baseMesh)
+    ),
+    data
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const data&>(baseMesh)
+    ),
+    boundary_(*this),
+    lduPtr_(nullptr),
+    curTimeIndex_(time().timeIndex()),
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
+{
+    DebugInFunction << "Constructing fvMesh as copy and primitives" << endl;
+}
+
+
+Foam::fvMesh::fvMesh
+(
+    const IOobject& io,
+    const fvMesh& baseMesh,
+    pointField&& points,
+    faceList&& faces,
+    cellList&& cells,
+    const bool syncPar
+)
+:
+    polyMesh
+    (
+        io,
+        std::move(points),
+        std::move(faces),
+        std::move(cells),
+        syncPar
+    ),
+    fvSchemes
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const fvSchemes&>(baseMesh)
+    ),
+    surfaceInterpolation(*this),
+    fvSolution
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const fvSolution&>(baseMesh)
+    ),
+    data
+    (
+        static_cast<const objectRegistry&>(*this),
+        static_cast<const data&>(baseMesh)
+    ),
+    boundary_(*this),
+    lduPtr_(nullptr),
+    curTimeIndex_(time().timeIndex()),
+    VPtr_(nullptr),
+    V0Ptr_(nullptr),
+    V00Ptr_(nullptr),
+    SfPtr_(nullptr),
+    magSfPtr_(nullptr),
+    CPtr_(nullptr),
+    CfPtr_(nullptr),
+    phiPtr_(nullptr)
+{
+    DebugInFunction << "Constructing fvMesh as copy and primitives" << endl;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -801,6 +923,13 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     meshObject::movePoints<lduMesh>(*this);
 
     return tsweptVols;
+}
+
+
+void Foam::fvMesh::updateGeom()
+{
+    // Let surfaceInterpolation handle geometry calculation
+    surfaceInterpolation::updateGeom();
 }
 
 

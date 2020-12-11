@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,11 +102,20 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary
+        //- Construct for given objectRegistry and dictionary name
         solution
         (
             const objectRegistry& obr,
             const fileName& dictName
+        );
+
+        //- Construct for given objectRegistry, dictionary name and (optional)
+        //  content (gets used in case of NO_READ or dictionary cannot be read)
+        solution
+        (
+            const objectRegistry& obr,
+            const fileName& dictName,
+            const dictionary& dict
         );
 
 

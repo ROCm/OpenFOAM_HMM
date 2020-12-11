@@ -79,7 +79,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::polyMeshFilter::copyMesh(const fvMesh& mesh)
             mesh.name(),
             mesh.polyMesh::instance(),
             mesh.time(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,  // read fv* if present
             IOobject::NO_WRITE,
             false
         ),

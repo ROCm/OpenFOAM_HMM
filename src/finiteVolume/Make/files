@@ -1,6 +1,17 @@
 fvMesh/fvMeshGeometry.C
 fvMesh/fvMesh.C
 
+fvGeometryScheme = fvMesh/fvGeometryScheme
+$(fvGeometryScheme)/fvGeometryScheme/fvGeometryScheme.C
+$(fvGeometryScheme)/basic/basicFvGeometryScheme.C
+$(fvGeometryScheme)/highAspectRatio/highAspectRatioFvGeometryScheme.C
+$(fvGeometryScheme)/highAspectRatio/cellAspectRatio.C
+$(fvGeometryScheme)/averageNeighbour/averageNeighbourFvGeometryScheme.C
+$(fvGeometryScheme)/stabilised/stabilisedFvGeometryScheme.C
+
+surfaceInterpolation = interpolation/surfaceInterpolation
+$(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
+
 fvMesh/singleCellFvMesh/singleCellFvMesh.C
 
 fvMesh/simplifiedFvMesh/simplifiedFvMesh/simplifiedFvMesh.C
@@ -52,7 +63,6 @@ $(wallDist)/patchDistMethods/directionalMeshWave/directionalMeshWavePatchDistMet
 fvMeshMapper = fvMesh/fvMeshMapper
 $(fvMeshMapper)/fvPatchMapper.C
 $(fvMeshMapper)/fvSurfaceMapper.C
-
 
 extendedStencil = fvMesh/extendedStencil
 
@@ -316,8 +326,6 @@ volPointInterpolation = interpolation/volPointInterpolation
 $(volPointInterpolation)/volPointInterpolation.C
 $(volPointInterpolation)/pointConstraints.C
 
-surfaceInterpolation = interpolation/surfaceInterpolation
-$(surfaceInterpolation)/surfaceInterpolation/surfaceInterpolation.C
 $(surfaceInterpolation)/surfaceInterpolationScheme/surfaceInterpolationSchemes.C
 
 $(surfaceInterpolation)/blendedSchemeBase/blendedSchemeBaseName.C
