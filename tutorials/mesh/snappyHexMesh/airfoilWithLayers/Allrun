@@ -1,0 +1,22 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication blockMesh
+runApplication surfaceFeatureExtract
+
+mkdir -p 0
+
+# Run with basic
+foamDictionary -entry geometry.type -set basic system/fvSchemes
+runApplication -s basic snappyHexMesh
+runApplication -s basic checkMesh -writeAllFields
+foamListTimes -rm
+
+# Run with highAspectRatio
+foamDictionary -entry geometry.type -set highAspectRatio system/fvSchemes
+runApplication -s highAspectRatio snappyHexMesh
+runApplication -s highAspectRatio checkMesh -writeAllFields
+
+#------------------------------------------------------------------------------

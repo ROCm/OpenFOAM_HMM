@@ -268,7 +268,7 @@ void Foam::fvMeshSubset::removeCellsImpl
             baseMesh().name(),
             baseMesh().time().timeName(),
             baseMesh().time(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,  // read fv* if present
             IOobject::NO_WRITE
         ),
         baseMesh(),
@@ -980,9 +980,10 @@ void Foam::fvMeshSubset::setCellSubset
             baseMesh().name(),
             baseMesh().time().timeName(),
             baseMesh().time(),
-            IOobject::NO_READ,
+            IOobject::NO_READ,      // do not read any dictionaries
             IOobject::NO_WRITE
         ),
+        baseMesh(),                 // get dictionaries from base mesh
         std::move(newPoints),
         std::move(newFaces),
         std::move(newCells),

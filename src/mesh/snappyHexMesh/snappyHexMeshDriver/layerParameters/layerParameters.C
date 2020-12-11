@@ -35,6 +35,20 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+const Foam::Enum
+<
+    Foam::layerParameters::thicknessModelType
+>
+Foam::layerParameters::thicknessModelTypeNames_
+({
+    { thicknessModelType::FIRST_AND_TOTAL, "firstAndOverall" },
+    { thicknessModelType::FIRST_AND_EXPANSION, "firstAndExpansion" },
+    { thicknessModelType::FINAL_AND_TOTAL, "finalAndOverall" },
+    { thicknessModelType::FINAL_AND_EXPANSION, "finalAndExpansion" },
+    { thicknessModelType::TOTAL_AND_EXPANSION, "overallAndExpansion" },
+    { thicknessModelType::FIRST_AND_RELATIVE_FINAL, "firstAndRelativeFinal" },
+});
+
 const Foam::scalar Foam::layerParameters::defaultConcaveAngle = 90;
 
 
@@ -44,7 +58,7 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 (
     const label n,
     const scalar totalOverFirst
-) const
+)
 {
     if (n <= 1)
     {
@@ -66,11 +80,11 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
     if (totalOverFirst < n)
     {
         minR = 0.0;
-        maxR = pow(totalOverFirst/n, 1/(n-1));
+        maxR = pow(totalOverFirst/n, scalar(1)/(n-1));
     }
     else
     {
-        minR = pow(totalOverFirst/n, 1/(n-1));
+        minR = pow(totalOverFirst/n, scalar(1)/(n-1));
         maxR = totalOverFirst/(n - 1);
     }
 
@@ -94,6 +108,253 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 }
 
 
+void Foam::layerParameters::readLayerParameters
+(
+    const bool verbose,
+    const dictionary& dict,
+    const thicknessModelType& spec,
+    scalar& firstLayerThickness,
+    scalar& finalLayerThickness,
+    scalar& thickness,
+    scalar& expansionRatio
+)
+{
+    // Now we have determined the layer-specification read the actual fields
+    switch (spec)
+    {
+        case FIRST_AND_TOTAL:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- first layer thickness ('firstLayerThickness')" << nl
+                    << "- overall thickness ('thickness')" << endl;
+            }
+            firstLayerThickness = readScalar
+            (
+                dict.lookup("firstLayerThickness")
+            );
+            thickness = readScalar(dict.lookup("thickness"));
+        break;
+
+        case FIRST_AND_EXPANSION:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- first layer thickness ('firstLayerThickness')" << nl
+                    << "- expansion ratio ('expansionRatio')" << endl;
+            }
+            firstLayerThickness = readScalar
+            (
+                dict.lookup("firstLayerThickness")
+            );
+            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+        break;
+
+        case FINAL_AND_TOTAL:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- final layer thickness ('finalLayerThickness')" << nl
+                    << "- overall thickness ('thickness')" << endl;
+            }
+            finalLayerThickness = readScalar
+            (
+                dict.lookup("finalLayerThickness")
+            );
+            thickness = readScalar(dict.lookup("thickness"));
+        break;
+
+        case FINAL_AND_EXPANSION:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- final layer thickness ('finalLayerThickness')" << nl
+                    << "- expansion ratio ('expansionRatio')" << endl;
+            }
+            finalLayerThickness = readScalar
+            (
+                dict.lookup("finalLayerThickness")
+            );
+            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+        break;
+
+        case TOTAL_AND_EXPANSION:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- overall thickness ('thickness')" << nl
+                    << "- expansion ratio ('expansionRatio')" << endl;
+            }
+            thickness = readScalar(dict.lookup("thickness"));
+            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+        break;
+
+        case FIRST_AND_RELATIVE_FINAL:
+            if (verbose)
+            {
+                Info<< "Layer specification as" << nl
+                    << "- absolute first layer thickness"
+                    << " ('firstLayerThickness')"
+                    << nl
+                    << "- and final layer thickness"
+                    << " ('finalLayerThickness')" << nl
+                    << endl;
+            }
+            firstLayerThickness = readScalar
+            (
+                dict.lookup("firstLayerThickness")
+            );
+            finalLayerThickness = readScalar
+            (
+                dict.lookup("finalLayerThickness")
+            );
+        break;
+
+        default:
+            FatalIOErrorIn
+            (
+                "layerParameters::layerParameters(..)",
+                dict
+            )   << "problem." << exit(FatalIOError);
+        break;
+    }
+}
+
+
+void Foam::layerParameters::calculateLayerParameters
+(
+    const thicknessModelType& spec,
+    const label nLayers,
+    scalar& firstThickness,
+    scalar& finalThickness,
+    scalar& thickness,
+    scalar& expansionRatio
+)
+{
+    // Calculate the non-read parameters
+    switch (spec)
+    {
+        case FIRST_AND_TOTAL:
+            expansionRatio = layerExpansionRatio
+            (
+                spec,
+                nLayers,
+                firstThickness,
+                VGREAT,
+                thickness,              //totalThickness
+                VGREAT                  //expansionRatio
+            );
+            finalThickness =
+                thickness
+               *finalLayerThicknessRatio(nLayers, expansionRatio);
+
+        break;
+
+        case FIRST_AND_EXPANSION:
+            thickness = layerThickness
+            (
+                spec,
+                nLayers,
+                firstThickness,         //firstThickness
+                VGREAT,                 //finalThickness
+                VGREAT,                 //totalThickness
+                expansionRatio          //expansionRatio
+            );
+            finalThickness =
+                thickness
+               *finalLayerThicknessRatio(nLayers, expansionRatio);
+
+        break;
+
+        case FINAL_AND_TOTAL:
+            firstThickness = firstLayerThickness
+            (
+                spec,
+                nLayers,
+                VGREAT,                 //firstThickness
+                VGREAT,                 //finalThickness
+                thickness,              //totalThickness
+                VGREAT                  //expansionRatio
+            );
+            expansionRatio = layerExpansionRatio
+            (
+                spec,
+                nLayers,
+                VGREAT,                 //firstThickness
+                finalThickness,         //finalThickness
+                thickness,              //totalThickness
+                VGREAT                  //expansionRatio
+            );
+
+        break;
+
+        case FINAL_AND_EXPANSION:
+            firstThickness = firstLayerThickness
+            (
+                spec,
+                nLayers,
+                VGREAT,                 //firstThickness
+                finalThickness,         //finalThickness
+                VGREAT,                 //thickness
+                expansionRatio          //expansionRatio
+            );
+            thickness = layerThickness
+            (
+                spec,
+                nLayers,
+                VGREAT,                 //firstThickness
+                finalThickness,         //finalThickness
+                VGREAT,                 //totalThickness
+                expansionRatio          //expansionRatio
+            );
+        break;
+
+        case TOTAL_AND_EXPANSION:
+            firstThickness = firstLayerThickness
+            (
+                spec,
+                nLayers,
+                VGREAT,                 //firstThickness
+                finalThickness,         //finalThickness
+                VGREAT,                 //thickness
+                expansionRatio          //expansionRatio
+            );
+            finalThickness =
+                thickness
+               *finalLayerThicknessRatio(nLayers, expansionRatio);
+
+        break;
+
+        case FIRST_AND_RELATIVE_FINAL:
+            thickness = layerThickness
+            (
+                spec,
+                nLayers,
+                firstThickness,         //firstThickness
+                finalThickness,         //finalThickness
+                VGREAT,                 //totalThickness
+                VGREAT                  //expansionRatio
+            );
+            expansionRatio = layerExpansionRatio
+            (
+                spec,
+                nLayers,
+                firstThickness,         //firstThickness
+                finalThickness,         //finalThickness
+                VGREAT,                 //totalThickness
+                VGREAT                  //expansionRatio
+            );
+
+        break;
+
+        default:
+            FatalErrorInFunction << "Illegal thicknessModel " << spec
+                << exit(FatalError);
+        break;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::layerParameters::layerParameters
@@ -105,10 +366,13 @@ Foam::layerParameters::layerParameters
 :
     dict_(dict),
     dryRun_(dryRun),
-    relativeSizes_(meshRefinement::get<bool>(dict, "relativeSizes", dryRun)),
-    additionalReporting_(dict.getOrDefault("additionalReporting", false)),
-    layerSpec_(ILLEGAL),
     numLayers_(boundaryMesh.size(), -1),
+    relativeSizes_
+    (
+        boundaryMesh.size(),
+        meshRefinement::get<bool>(dict, "relativeSizes", dryRun)
+    ),
+    layerModels_(boundaryMesh.size(), FIRST_AND_TOTAL),
     firstLayerThickness_(boundaryMesh.size(), -123),
     finalLayerThickness_(boundaryMesh.size(), -123),
     thickness_(boundaryMesh.size(), -123),
@@ -142,6 +406,7 @@ Foam::layerParameters::layerParameters
     ),
     nLayerIter_(meshRefinement::get<label>(dict, "nLayerIter", dryRun)),
     nRelaxedIter_(labelMax),
+    additionalReporting_(dict.getOrDefault("additionalReporting", false)),
     meshShrinker_
     (
         dict.getOrDefault
@@ -153,100 +418,112 @@ Foam::layerParameters::layerParameters
 {
     // Detect layer specification mode
 
-    label nSpec = 0;
+    word spec;
+    if (dict.readIfPresent("thicknessModel", spec))
+    {
+        layerModels_ = thicknessModelTypeNames_[spec];
+    }
+    else
+    {
+        // Count number of specifications
+        label nSpec = 0;
 
-    bool haveFirst = dict.found("firstLayerThickness");
-    if (haveFirst)
-    {
-        firstLayerThickness_ = scalarField
-        (
-            boundaryMesh.size(),
-            dict.get<scalar>("firstLayerThickness")
-        );
-        nSpec++;
-    }
-    bool haveFinal = dict.found("finalLayerThickness");
-    if (haveFinal)
-    {
-        finalLayerThickness_ = scalarField
-        (
-            boundaryMesh.size(),
-            dict.get<scalar>("finalLayerThickness")
-        );
-        nSpec++;
-    }
-    bool haveTotal = dict.found("thickness");
-    if (haveTotal)
-    {
-        thickness_ = scalarField
-        (
-            boundaryMesh.size(),
-            dict.get<scalar>("thickness")
-        );
-        nSpec++;
-    }
-    bool haveExp = dict.found("expansionRatio");
-    if (haveExp)
-    {
-        expansionRatio_ = scalarField
-        (
-            boundaryMesh.size(),
-            dict.get<scalar>("expansionRatio")
-        );
-        nSpec++;
-    }
+        bool haveFirst = dict.found("firstLayerThickness");
+        if (haveFirst)
+        {
+            nSpec++;
+        }
+        bool haveFinal = dict.found("finalLayerThickness");
+        if (haveFinal)
+        {
+            nSpec++;
+        }
+        bool haveTotal = dict.found("thickness");
+        if (haveTotal)
+        {
+            nSpec++;
+        }
+        bool haveExp = dict.found("expansionRatio");
+        if (haveExp)
+        {
+            nSpec++;
+        }
 
-
-    if (haveFirst && haveTotal)
-    {
-        layerSpec_ = FIRST_AND_TOTAL;
-        Info<< "Layer thickness specified as first layer and overall thickness."
-            << endl;
-    }
-    else if (haveFirst && haveExp)
-    {
-        layerSpec_ = FIRST_AND_EXPANSION;
-        Info<< "Layer thickness specified as first layer and expansion ratio."
-            << endl;
-    }
-    else if (haveFinal && haveTotal)
-    {
-        layerSpec_ = FINAL_AND_TOTAL;
-        Info<< "Layer thickness specified as final layer and overall thickness."
-            << endl;
-    }
-    else if (haveFinal && haveExp)
-    {
-        layerSpec_ = FINAL_AND_EXPANSION;
-        Info<< "Layer thickness specified as final layer and expansion ratio."
-            << endl;
-    }
-    else if (haveTotal && haveExp)
-    {
-        layerSpec_ = TOTAL_AND_EXPANSION;
-        Info<< "Layer thickness specified as overall thickness"
-            << " and expansion ratio." << endl;
-    }
-
-
-    if (layerSpec_ == ILLEGAL || nSpec != 2)
-    {
-        FatalIOErrorInFunction(dict)
-            << "Over- or underspecified layer thickness."
-            << " Please specify" << nl
-            << "    first layer thickness ('firstLayerThickness')"
-            << " and overall thickness ('thickness') or" << nl
-            << "    first layer thickness ('firstLayerThickness')"
-            << " and expansion ratio ('expansionRatio') or" << nl
-            << "    final layer thickness ('finalLayerThickness')"
-            << " and expansion ratio ('expansionRatio') or" << nl
-            << "    final layer thickness ('finalLayerThickness')"
-            << " and overall thickness ('thickness') or" << nl
-            << "    overall thickness ('thickness')"
-            << " and expansion ratio ('expansionRatio'"
-            << exit(FatalIOError);
+        if (nSpec == 2 && haveFirst && haveTotal)
+        {
+            layerModels_ = FIRST_AND_TOTAL;
+            //Info<< "Layer thickness specified as first layer"
+            //    << " and overall thickness." << endl;
+        }
+        else if (nSpec == 2 && haveFirst && haveExp)
+        {
+            layerModels_ = FIRST_AND_EXPANSION;
+            //Info<< "Layer thickness specified as first layer"
+            //    << " and expansion ratio." << endl;
+        }
+        else if (nSpec == 2 && haveFinal && haveTotal)
+        {
+            layerModels_ = FINAL_AND_TOTAL;
+            //Info<< "Layer thickness specified as final layer"
+            //    << " and overall thickness." << endl;
+        }
+        else if (nSpec == 2 && haveFinal && haveExp)
+        {
+            layerModels_ = FINAL_AND_EXPANSION;
+            //Info<< "Layer thickness specified as final layer"
+            //    << " and expansion ratio." << endl;
+        }
+        else if (nSpec == 2 && haveTotal && haveExp)
+        {
+            layerModels_ = TOTAL_AND_EXPANSION;
+            //Info<< "Layer thickness specified as overall thickness"
+            //    << " and expansion ratio." << endl;
+        }
+        else if (nSpec == 2 && haveFirst && haveFinal)
+        {
+            layerModels_ = FIRST_AND_RELATIVE_FINAL;
+            //Info<< "Layer thickness specified as absolute first and"
+            //    << " relative final layer ratio." << endl;
+        }
+        else
+        {
+            FatalIOErrorInFunction(dict)
+                << "Over- or underspecified layer thickness."
+                << " Please specify" << nl
+                << "    first layer thickness ('firstLayerThickness')"
+                << " and overall thickness ('thickness') or" << nl
+                << "    first layer thickness ('firstLayerThickness')"
+                << " and expansion ratio ('expansionRatio') or" << nl
+                << "    final layer thickness ('finalLayerThickness')"
+                << " and expansion ratio ('expansionRatio') or" << nl
+                << "    final layer thickness ('finalLayerThickness')"
+                << " and overall thickness ('thickness') or" << nl
+                << "    overall thickness ('thickness')"
+                << " and expansion ratio ('expansionRatio'"
+                << exit(FatalIOError);
+        }
     }
 
+
+    // Now we have determined the layer-specification read the actual fields
+    scalar firstThickness;
+    scalar finalThickness;
+    scalar thickness;
+    scalar expansionRatio;
+    readLayerParameters
+    (
+        true,               // verbose
+        dict,
+        layerModels_[0],    // spec
+        firstThickness,
+        finalThickness,
+        thickness,
+        expansionRatio
+    );
+    firstLayerThickness_ = firstThickness;
+    finalLayerThickness_ = finalThickness;
+    thickness_ = thickness;
+    expansionRatio_ = expansionRatio;
 
     dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
 
@@ -293,87 +570,146 @@ Foam::layerParameters::layerParameters
                     numLayers_[patchi] =
                         layerDict.get<label>("nSurfaceLayers");
 
-                    switch (layerSpec_)
+                    word spec;
+                    if (layerDict.readIfPresent("thicknessModel", spec))
                     {
-                        case FIRST_AND_TOTAL:
-                            layerDict.readIfPresent
-                            (
-                                "firstLayerThickness",
-                                firstLayerThickness_[patchi]
-                            );
-                            layerDict.readIfPresent
-                            (
-                                "thickness",
-                                thickness_[patchi]
-                            );
-                        break;
+                        // If the thickness model is explicitly specified
+                        // we want full specification of all parameters
+                        layerModels_[patchi] = thicknessModelTypeNames_[spec];
+                        readLayerParameters
+                        (
+                            false,                  // verbose
+                            layerDict,
+                            layerModels_[patchi],   // spec
+                            firstLayerThickness_[patchi],
+                            finalLayerThickness_[patchi],
+                            thickness_[patchi],
+                            expansionRatio_[patchi]
+                        );
+                        minThickness_[patchi] = readScalar
+                        (
+                            layerDict.lookup("minThickness")
+                        );
+                    }
+                    else
+                    {
+                        // Optional override of thickness parameters
+                        switch (layerModels_[patchi])
+                        {
+                            case FIRST_AND_TOTAL:
+                                layerDict.readIfPresent
+                                (
+                                    "firstLayerThickness",
+                                    firstLayerThickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "thickness",
+                                    thickness_[patchi]
+                                );
+                            break;
 
-                        case FIRST_AND_EXPANSION:
-                            layerDict.readIfPresent
-                            (
-                                "firstLayerThickness",
-                                firstLayerThickness_[patchi]
-                            );
-                            layerDict.readIfPresent
-                            (
-                                "expansionRatio",
-                                expansionRatio_[patchi]
-                            );
-                        break;
+                            case FIRST_AND_EXPANSION:
+                                layerDict.readIfPresent
+                                (
+                                    "firstLayerThickness",
+                                 firstLayerThickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "expansionRatio",
+                                    expansionRatio_[patchi]
+                                );
+                            break;
 
-                        case FINAL_AND_TOTAL:
-                            layerDict.readIfPresent
-                            (
-                                "finalLayerThickness",
-                                finalLayerThickness_[patchi]
-                            );
-                            layerDict.readIfPresent
-                            (
-                                "thickness",
-                                thickness_[patchi]
-                            );
-                        break;
+                            case FINAL_AND_TOTAL:
+                                layerDict.readIfPresent
+                                (
+                                    "finalLayerThickness",
+                                    finalLayerThickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "thickness",
+                                    thickness_[patchi]
+                                );
+                            break;
 
-                        case FINAL_AND_EXPANSION:
-                            layerDict.readIfPresent
-                            (
-                                "finalLayerThickness",
-                                finalLayerThickness_[patchi]
-                            );
-                            layerDict.readIfPresent
-                            (
-                                "expansionRatio",
-                                expansionRatio_[patchi]
-                            );
-                        break;
+                            case FINAL_AND_EXPANSION:
+                                layerDict.readIfPresent
+                                (
+                                    "finalLayerThickness",
+                                    finalLayerThickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "expansionRatio",
+                                    expansionRatio_[patchi]
+                                );
+                            break;
 
-                        case TOTAL_AND_EXPANSION:
-                            layerDict.readIfPresent
-                            (
-                                "thickness",
-                                thickness_[patchi]
-                            );
-                            layerDict.readIfPresent
-                            (
-                                "expansionRatio",
-                                expansionRatio_[patchi]
-                            );
-                        break;
+                            case TOTAL_AND_EXPANSION:
+                                layerDict.readIfPresent
+                                (
+                                    "thickness",
+                                    thickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "expansionRatio",
+                                    expansionRatio_[patchi]
+                                );
+                            break;
 
-                        default:
-                            FatalIOErrorInFunction(dict)
-                                << "problem." << exit(FatalIOError);
-                        break;
+                            case FIRST_AND_RELATIVE_FINAL:
+                                layerDict.readIfPresent
+                                (
+                                    "firstLayerThickness",
+                                    firstLayerThickness_[patchi]
+                                );
+                                layerDict.readIfPresent
+                                (
+                                    "finalLayerThickness",
+                                    finalLayerThickness_[patchi]
+                                );
+                            break;
+
+                            default:
+                                FatalIOErrorInFunction(dict)
+                                    << "problem." << exit(FatalIOError);
+                            break;
+                        }
+
+                        layerDict.readIfPresent
+                        (
+                            "minThickness",
+                            minThickness_[patchi]
+                        );
                     }
 
                     layerDict.readIfPresent
                     (
-                        "minThickness",
-                        minThickness_[patchi]
+                        "relativeSizes",
+                        relativeSizes_[patchi]
                     );
                 }
             }
         }
+    }
+
+
+    forAll(numLayers_, patchi)
+    {
+        // Calculate the remaining parameters
+        calculateLayerParameters
+        (
+            layerModels_[patchi],
+            numLayers_[patchi],
+            firstLayerThickness_[patchi],
+            finalLayerThickness_[patchi],
+            thickness_[patchi],
+            expansionRatio_[patchi]
+        );
     }
 }
 
@@ -382,14 +718,15 @@ Foam::layerParameters::layerParameters
 
 Foam::scalar Foam::layerParameters::layerThickness
 (
+    const thicknessModelType layerSpec,
     const label nLayers,
-    const scalar firstLayerThickess,
-    const scalar finalLayerThickess,
+    const scalar firstLayerThickness,
+    const scalar finalLayerThickness,
     const scalar totalThickness,
     const scalar expansionRatio
-) const
+)
 {
-    switch (layerSpec_)
+    switch (layerSpec)
     {
         case FIRST_AND_TOTAL:
         case FINAL_AND_TOTAL:
@@ -403,11 +740,11 @@ Foam::scalar Foam::layerParameters::layerThickness
         {
             if (mag(expansionRatio-1) < SMALL)
             {
-                return firstLayerThickess * nLayers;
+                return firstLayerThickness * nLayers;
             }
             else
             {
-                return firstLayerThickess
+                return firstLayerThickness
                    *(1.0 - pow(expansionRatio, nLayers))
                    /(1.0 - expansionRatio);
             }
@@ -418,14 +755,46 @@ Foam::scalar Foam::layerParameters::layerThickness
         {
             if (mag(expansionRatio-1) < SMALL)
             {
-                return finalLayerThickess * nLayers;
+                return finalLayerThickness * nLayers;
             }
             else
             {
                 scalar invExpansion = 1.0 / expansionRatio;
-                return finalLayerThickess
+                return finalLayerThickness
                    *(1.0 - pow(invExpansion, nLayers))
                    /(1.0 - invExpansion);
+            }
+        }
+        break;
+
+        case FIRST_AND_RELATIVE_FINAL:
+        {
+            if (mag(expansionRatio-1) < SMALL)
+            {
+                return firstLayerThickness * nLayers;
+            }
+            else
+            {
+                scalar ratio = layerExpansionRatio
+                (
+                    layerSpec,
+                    nLayers,
+                    firstLayerThickness,
+                    finalLayerThickness,
+                    totalThickness,
+                    expansionRatio
+                );
+
+                if (mag(ratio-1) < SMALL)
+                {
+                    return firstLayerThickness * nLayers;
+                }
+                else
+                {
+                    return firstLayerThickness *
+                        (1.0 - pow(ratio, nLayers))
+                      / (1.0 - ratio);
+                }
             }
         }
         break;
@@ -433,7 +802,7 @@ Foam::scalar Foam::layerParameters::layerThickness
         default:
         {
             FatalErrorInFunction
-                << exit(FatalError);
+                << layerSpec << exit(FatalError);
             return -VGREAT;
         }
     }
@@ -442,14 +811,15 @@ Foam::scalar Foam::layerParameters::layerThickness
 
 Foam::scalar Foam::layerParameters::layerExpansionRatio
 (
+    const thicknessModelType layerSpec,
     const label nLayers,
-    const scalar firstLayerThickess,
-    const scalar finalLayerThickess,
+    const scalar firstLayerThickness,
+    const scalar finalLayerThickness,
     const scalar totalThickness,
     const scalar expansionRatio
-) const
+)
 {
-    switch (layerSpec_)
+    switch (layerSpec)
     {
         case FIRST_AND_EXPANSION:
         case FINAL_AND_EXPANSION:
@@ -461,23 +831,58 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
         case FIRST_AND_TOTAL:
         {
-            return layerExpansionRatio
-            (
-                nLayers,
-                totalThickness/firstLayerThickess
-            );
+            if (firstLayerThickness < SMALL)
+            {
+                // Do what?
+                return 1;
+            }
+            else
+            {
+                return layerExpansionRatio
+                (
+                    nLayers,
+                    totalThickness/firstLayerThickness
+                );
+            }
         }
         break;
 
         case FINAL_AND_TOTAL:
         {
-            return
-                1.0
-               /layerExpansionRatio
+            if (finalLayerThickness < SMALL)
+            {
+                // Do what?
+                return 1;
+            }
+            else
+            {
+                return
+                    1.0
+                  / layerExpansionRatio
+                    (
+                        nLayers,
+                        totalThickness/finalLayerThickness
+                    );
+            }
+        }
+        break;
+
+        case FIRST_AND_RELATIVE_FINAL:
+        {
+            if (firstLayerThickness < SMALL || nLayers <= 1)
+            {
+                return 1.0;
+            }
+            else
+            {
+                // Note: at this point the finalLayerThickness is already
+                // absolute
+                return pow
                 (
-                    nLayers,
-                    totalThickness/finalLayerThickess
+                    finalLayerThickness/firstLayerThickness,
+                    1.0/(nLayers-1)
                 );
+            }
         }
         break;
 
@@ -493,24 +898,34 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 
 Foam::scalar Foam::layerParameters::firstLayerThickness
 (
+    const thicknessModelType layerSpec,
     const label nLayers,
-    const scalar firstLayerThickess,
-    const scalar finalLayerThickess,
+    const scalar firstLayerThickness,
+    const scalar finalLayerThickness,
     const scalar totalThickness,
     const scalar expansionRatio
-) const
+)
 {
-    switch (layerSpec_)
+    switch (layerSpec)
     {
         case FIRST_AND_EXPANSION:
         case FIRST_AND_TOTAL:
+        case FIRST_AND_RELATIVE_FINAL:
         {
-            return firstLayerThickess;
+            return firstLayerThickness;
         }
 
         case FINAL_AND_EXPANSION:
         {
-            return finalLayerThickess*pow(1.0/expansionRatio, nLayers-1);
+            if (expansionRatio < SMALL)
+            {
+                // Do what?
+                return 0.0;
+            }
+            else
+            {
+                return finalLayerThickness*pow(1.0/expansionRatio, nLayers-1);
+            }
         }
         break;
 
@@ -518,13 +933,14 @@ Foam::scalar Foam::layerParameters::firstLayerThickness
         {
             scalar r = layerExpansionRatio
             (
+                layerSpec,
                 nLayers,
-                firstLayerThickess,
-                finalLayerThickess,
+                firstLayerThickness,
+                finalLayerThickness,
                 totalThickness,
                 expansionRatio
             );
-            return finalLayerThickess/pow(r, nLayers-1);
+            return finalLayerThickness/pow(r, nLayers-1);
         }
         break;
 
@@ -554,7 +970,7 @@ Foam::scalar Foam::layerParameters::finalLayerThicknessRatio
 (
     const label nLayers,
     const scalar expansionRatio
-) const
+)
 {
     if (nLayers > 0)
     {

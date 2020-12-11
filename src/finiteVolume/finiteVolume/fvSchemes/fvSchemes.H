@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,6 +111,11 @@ public:
 
         //- Construct for objectRegistry
         fvSchemes(const objectRegistry& obr);
+
+        //- Construct from objectRegistry and supplied (optional) content
+        //  (gets used in case of NO_READ or fvSchemes dictionary cannot be
+        //   read)
+        fvSchemes(const objectRegistry& obr, const dictionary& dict);
 
 
     // Member Functions

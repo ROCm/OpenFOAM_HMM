@@ -74,7 +74,16 @@ class fvPatch
         const fvBoundaryMesh& boundaryMesh_;
 
 
-protected:
+    // Private Member Functions
+
+        //- No copy construct
+        fvPatch(const fvPatch&) = delete;
+
+        //- No copy assignment
+        void operator=(const fvPatch&) = delete;
+
+
+public:
 
     // Protected Member Functions
 
@@ -96,11 +105,6 @@ protected:
         //- Correct patches after moving points
         virtual void movePoints();
 
-        //- No copy construct
-        fvPatch(const fvPatch&) = delete;
-
-        //- No copy assignment
-        void operator=(const fvPatch&) = delete;
 
 public:
 

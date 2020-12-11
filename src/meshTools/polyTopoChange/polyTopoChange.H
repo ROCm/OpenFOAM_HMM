@@ -617,7 +617,8 @@ public:
                 const bool orderPoints = false
             );
 
-            //- Create new mesh with old mesh patches
+            //- Create new mesh with old mesh patches. Additional dictionaries
+            //  (fv* etc) read according to IO flags
             template<class Type>
             autoPtr<mapPolyMesh> makeMesh
             (

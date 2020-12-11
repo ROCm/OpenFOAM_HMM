@@ -41,6 +41,7 @@ SourceFiles
 #include "scalarField.H"
 #include "labelList.H"
 #include "Switch.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,14 +68,14 @@ public:
         //  - final and total thickness specified
         //  - final and expansion ratio specified
         //  - total thickness and expansion ratio specified
-        enum layerSpecification
+        enum thicknessModelType
         {
-            ILLEGAL,
             FIRST_AND_TOTAL,
             FIRST_AND_EXPANSION,
             FINAL_AND_TOTAL,
             FINAL_AND_EXPANSION,
-            TOTAL_AND_EXPANSION
+            TOTAL_AND_EXPANSION,
+            FIRST_AND_RELATIVE_FINAL
         };
 
 
@@ -85,6 +86,9 @@ private:
         //- Default angle for faces to be concave
         static const scalar defaultConcaveAngle;
 
+        //- thicknessModelType names
+        static const Enum<thicknessModelType> thicknessModelTypeNames_;
+
 
     // Private Data
 
@@ -93,28 +97,25 @@ private:
         //- In dry-run mode?
         const bool dryRun_;
 
-        //- Are sizes relative to local cell size
-        bool relativeSizes_;
-
-        //- Any additional reporting
-        bool additionalReporting_;
-
 
         // Per patch (not region!) information
-
-            //- How thickness is specified.
-            layerSpecification layerSpec_;
 
             //- How many layers to add.
             labelList numLayers_;
 
-                scalarField firstLayerThickness_;
+            //- Are sizes relative to local cell size
+            boolList relativeSizes_;
 
-                scalarField finalLayerThickness_;
+            //- How thickness is specified.
+            List<thicknessModelType> layerModels_;
 
-                scalarField thickness_;
+            scalarField firstLayerThickness_;
 
-                scalarField expansionRatio_;
+            scalarField finalLayerThickness_;
+
+            scalarField thickness_;
+
+            scalarField expansionRatio_;
 
             //- Minimum total thickness
             scalarField minThickness_;
@@ -136,6 +137,9 @@ private:
 
         label nRelaxedIter_;
 
+        //- Any additional reporting
+        bool additionalReporting_;
+
         word meshShrinker_;
 
 
@@ -143,11 +147,33 @@ private:
 
         //- Calculate expansion ratio from overall size v.s. thickness of
         //  first layer.
-        scalar layerExpansionRatio
+        static scalar layerExpansionRatio
         (
             const label n,
             const scalar totalOverFirst
-        ) const;
+        );
+
+        //- Read parameters according to thickness model
+        static void readLayerParameters
+        (
+            const bool verbose,
+            const dictionary&,
+            const thicknessModelType& spec,
+            scalar& firstLayerThickness,
+            scalar& finalLayerThickness,
+            scalar& thickness,
+            scalar& expansionRatio
+        );
+
+        void calculateLayerParameters
+        (
+            const thicknessModelType& spec,
+            const label nLayers,
+            scalar& firstLayerThickness,
+            scalar& finalLayerThickness,
+            scalar& thickness,
+            scalar& expansionRatio
+        );
 
         //- No copy construct
         layerParameters(const layerParameters&) = delete;
@@ -191,15 +217,15 @@ public:
 
             //- Are size parameters relative to inner cell size or
             //  absolute distances.
-            bool relativeSizes() const
+            const boolList& relativeSizes() const
             {
                 return relativeSizes_;
             }
 
-            //- Any additional reporting requested?
-            bool additionalReporting() const
+            //- Specification of layer thickness
+            const List<thicknessModelType>& layerModels() const
             {
-                return additionalReporting_;
+                return layerModels_;
             }
 
             // Expansion factor for layer mesh
@@ -296,6 +322,12 @@ public:
                 return nBufferCellsNoExtrude_;
             }
 
+            //- Any additional reporting requested?
+            bool additionalReporting() const
+            {
+                return additionalReporting_;
+            }
+
             //- Type of mesh shrinker
             const word& meshShrinker() const
             {
@@ -306,45 +338,48 @@ public:
         // Helper
 
             //- Determine overall thickness. Uses two of the four parameters
-            //  according to the layerSpecification
-            scalar layerThickness
+            //  according to the thicknessModel
+            static scalar layerThickness
             (
+                const thicknessModelType,
                 const label nLayers,
-                const scalar firstLayerThickess,
-                const scalar finalLayerThickess,
+                const scalar firstLayerThickness,
+                const scalar finalLayerThickness,
                 const scalar totalThickness,
                 const scalar expansionRatio
-            ) const;
+            );
 
             //- Determine expansion ratio. Uses two of the four parameters
-            //  according to the layerSpecification
-            scalar layerExpansionRatio
+            //  according to the thicknessModel
+            static scalar layerExpansionRatio
             (
+                const thicknessModelType,
                 const label nLayers,
-                const scalar firstLayerThickess,
-                const scalar finalLayerThickess,
+                const scalar firstLayerThickness,
+                const scalar finalLayerThickness,
                 const scalar totalThickness,
                 const scalar expansionRatio
-            ) const;
+            );
 
             //- Determine first layer (near-wall) thickness. Uses two of the
-            //  four parameters according to the layerSpecification
-            scalar firstLayerThickness
+            //  four parameters according to the thicknessModel
+            static scalar firstLayerThickness
             (
+                const thicknessModelType,
                 const label nLayers,
-                const scalar firstLayerThickess,
-                const scalar finalLayerThickess,
+                const scalar firstLayerThickness,
+                const scalar finalLayerThickness,
                 const scalar totalThickness,
                 const scalar expansionRatio
-            ) const;
+            );
 
             //- Determine ratio of final layer thickness to
             //  overall layer thickness
-            scalar finalLayerThicknessRatio
+            static scalar finalLayerThicknessRatio
             (
                 const label nLayers,
                 const scalar expansionRatio
-            ) const;
+            );
 };
 
 

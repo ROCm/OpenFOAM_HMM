@@ -319,11 +319,11 @@ public:
     // Constructors
 
         //- Read construct from IOobject
-        explicit polyMesh(const IOobject& io);
+        polyMesh(const IOobject& io, const bool doInit = true);
 
         //- Construct from IOobject or as zero-sized mesh
         //  Boundary is added using addPatches() member function
-        polyMesh(const IOobject& io, const zero, bool syncPar=true);
+        polyMesh(const IOobject& io, const zero, const bool syncPar=true);
 
         //- Construct from IOobject or from components.
         //  Boundary is added using addPatches() member function
@@ -592,6 +592,9 @@ public:
                 const List<faceZone*>& fz,
                 const List<cellZone*>& cz
             );
+
+            //- Initialise all non-demand-driven data
+            virtual bool init(const bool doInit);
 
             //- Update the mesh based on the mesh files saved in
             //  time directories

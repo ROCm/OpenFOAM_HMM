@@ -77,7 +77,6 @@ class volMesh;
 template<class Type>
 class fvMatrix;
 
-
 /*---------------------------------------------------------------------------*\
                            Class fvMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -86,8 +85,8 @@ class fvMesh
 :
     public polyMesh,
     public lduMesh,
-    public surfaceInterpolation,
     public fvSchemes,
+    public surfaceInterpolation,    // needs input from fvSchemes
     public fvSolution,
     public data
 {
@@ -97,7 +96,6 @@ protected:
 
         //- Boundary mesh
         fvBoundaryMesh boundary_;
-
 
     // Demand-driven data
 
@@ -186,7 +184,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        explicit fvMesh(const IOobject& io);
+        explicit fvMesh(const IOobject& io, const bool doInit=true);
 
         //- Construct from IOobject or as zero-sized mesh
         //  Boundary is added using addFvPatches() member function
@@ -215,6 +213,32 @@ public:
             const bool syncPar = true
         );
 
+        //- Construct as copy (for dictionaries) and components without
+        //  boundary. Boundary is added using addFvPatches() member function
+        fvMesh
+        (
+            const IOobject& io,
+            const fvMesh& baseMesh,
+            pointField&& points,
+            faceList&& faces,
+            labelList&& allOwner,
+            labelList&& allNeighbour,
+            const bool syncPar = true
+        );
+
+        //- Construct as copy (for dictionaries) without boundary from cells
+        //  rather than owner/neighbour. Boundary is added using addFvPatches()
+        //  member function
+        fvMesh
+        (
+            const IOobject& io,
+            const fvMesh& baseMesh,
+            pointField&& points,
+            faceList&& faces,
+            cellList&& cells,
+            const bool syncPar = true
+        );
+
 
     //- Destructor
     virtual ~fvMesh();
@@ -223,6 +247,9 @@ public:
     // Member Functions
 
         // Helpers
+
+            //- Initialise all non-demand-driven data
+            virtual bool init(const bool doInit);
 
             //- Add boundary patches. Constructor helper
             void addFvPatches
@@ -437,6 +464,10 @@ public:
 
             //- Move points, returns volumes swept by faces in motion
             virtual tmp<scalarField> movePoints(const pointField&);
+
+            //- Update all geometric data. This gets redirected up from
+            //  primitiveMesh level
+            virtual void updateGeom();
 
             //- Map all fields in time using given map.
             virtual void mapFields(const mapPolyMesh& mpm);

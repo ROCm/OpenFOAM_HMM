@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +82,9 @@ public:
 
         //- Construct for objectRegistry
         data(const objectRegistry& obr);
+
+        //- Construct for objectRegistry and initial contents
+        data(const objectRegistry& obr, const dictionary& dict);
 
 
     // Member Functions

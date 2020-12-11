@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +53,24 @@ Foam::data::data(const objectRegistry& obr)
 {
     set("solverPerformance", dictionary());
 }
+
+
+Foam::data::data(const objectRegistry& obr, const dictionary& dict)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "data",
+            obr.time().system(),
+            obr,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        dict
+    ),
+    prevTimeIndex_(0)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

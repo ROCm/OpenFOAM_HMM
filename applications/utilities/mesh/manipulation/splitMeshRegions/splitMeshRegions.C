@@ -680,7 +680,7 @@ autoPtr<mapPolyMesh> createRegionMesh
             regionName,
             mesh.time().timeName(),
             mesh.time(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,  // read fv* if present
             IOobject::AUTO_WRITE
         ),
         mesh

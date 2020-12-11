@@ -753,13 +753,26 @@ bool Foam::polyMesh::checkMeshMotion
     vectorField fCtrs(nFaces());
     vectorField fAreas(nFaces());
 
-    makeFaceCentresAndAreas(newPoints, fCtrs, fAreas);
+    primitiveMeshTools::makeFaceCentresAndAreas
+    (
+        *this,
+        newPoints,
+        fCtrs,
+        fAreas
+    );
 
     // Check cell volumes and calculate new cell centres
     vectorField cellCtrs(nCells());
     scalarField cellVols(nCells());
 
-    makeCellCentresAndVols(fCtrs, fAreas, cellCtrs, cellVols);
+    primitiveMeshTools::makeCellCentresAndVols
+    (
+        *this,
+        fCtrs,
+        fAreas,
+        cellCtrs,
+        cellVols
+    );
 
     // Check cell volumes
     bool error = checkCellVolumes

@@ -7,6 +7,7 @@
 #include "tetPointRef.H"
 #include "regionSplit.H"
 #include "wallDist.H"
+#include "cellAspectRatio.H"
 
 using namespace Foam;
 
@@ -315,6 +316,32 @@ void Foam::writeFields
 
         aspectRatio.correctBoundaryConditions();
         Info<< "    Writing aspect ratio to " << aspectRatio.name() << endl;
+        aspectRatio.write();
+    }
+
+    if (selectedFields.found("cellAspectRatio"))
+    {
+        volScalarField aspectRatio
+        (
+            IOobject
+            (
+                "cellAspectRatio",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar(dimless, Zero),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        aspectRatio.ref().field() = cellAspectRatio(mesh);
+
+        aspectRatio.correctBoundaryConditions();
+        Info<< "    Writing approximate aspect ratio to "
+            << aspectRatio.name() << endl;
         aspectRatio.write();
     }
 

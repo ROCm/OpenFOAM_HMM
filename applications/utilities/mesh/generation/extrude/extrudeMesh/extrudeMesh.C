@@ -704,7 +704,7 @@ int main(int argc, char *argv[])
                 regionName,
                 runTimeExtruded.constant(),
                 runTimeExtruded,
-                IOobject::NO_READ,
+                IOobject::READ_IF_PRESENT,  // Read fv* if present
                 IOobject::AUTO_WRITE,
                 false
             ),
