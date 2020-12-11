@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -114,14 +114,14 @@ adjointEikonalSolver::adjointEikonalSolver
     const fvMesh& mesh,
     const dictionary& dict,
     const autoPtr<incompressible::RASModelVariables>& RASModelVars,
-    autoPtr<Foam::incompressibleAdjoint::adjointRASModel>& adjointTurbulence,
+    incompressibleAdjointVars& adjointVars,
     const labelHashSet& sensitivityPatchIDs
 )
 :
     mesh_(mesh),
     dict_(dict.subOrEmptyDict("adjointEikonalSolver")),
     RASModelVars_(RASModelVars),
-    adjointTurbulence_(adjointTurbulence),
+    adjointTurbulence_(adjointVars.adjointTurbulence()),
     sensitivityPatchIDs_(sensitivityPatchIDs),
     nEikonalIters_(-1),
     tolerance_(-1),
@@ -131,7 +131,12 @@ adjointEikonalSolver::adjointEikonalSolver
     (
         IOobject
         (
-            "da",
+            word
+            (
+                adjointVars.useSolverNameForFields() ?
+                "da" + adjointTurbulence_().adjointSolverName() :
+                "da"
+            ),
             mesh_.time().timeName(),
             mesh_,
             IOobject::READ_IF_PRESENT,
@@ -217,7 +222,10 @@ void adjointEikonalSolver::solve()
             break;
         }
     }
-    da_.write();
+    if (debug)
+    {
+        da_.write();
+    }
 }
 
 

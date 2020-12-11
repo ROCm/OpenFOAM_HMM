@@ -29,6 +29,7 @@ License
 
 #include "objective.H"
 #include "createZeroField.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -135,8 +136,12 @@ objective::objective
     JMean_(this->getOrDefault<scalar>("JMean", Zero)),
     weight_(Zero),
     normFactor_(nullptr),
-    target_(dict.getOrDefault<scalar>("target", Zero)),
-
+    target_
+    (
+        dict.found("target") ?
+        autoPtr<scalar>::New(dict.get<scalar>("target")) :
+        nullptr
+    ),
     integrationStartTimePtr_(nullptr),
     integrationEndTimePtr_(nullptr),
 
@@ -158,7 +163,8 @@ objective::objective
     objFunctionFolder_("word"),
     objFunctionFilePtr_(nullptr),
     instantValueFilePtr_(nullptr),
-    meanValueFilePtr_(nullptr)
+    meanValueFilePtr_(nullptr),
+    width_(IOstream::defaultPrecision() + 5)
 {
     makeFolder();
     // Read integration start and end times, if present.
@@ -253,7 +259,10 @@ scalar objective::JCycle() const
     }
 
     // Subtract target, in case the objective is used as a constraint
-    J -= target_;
+    if (target_.valid())
+    {
+        J -= target_();
+    }
 
     // Normalize here, in order to get the correct value for line search
     if (normalize_ && normFactor_)
@@ -687,9 +696,34 @@ bool objective::write(const bool valid) const
         if (!objFunctionFilePtr_)
         {
             setObjectiveFilePtr();
+            OFstream& file = objFunctionFilePtr_();
+            ios_base::fmtflags flags = file.flags();
+            flags |= std::cout.left;
+            file.flags(flags);
+            if (target_.valid())
+            {
+                file<< setw(width_) << "#target" << " "
+                    << setw(width_) << target_() << endl;
+            }
+            if (normalize_)
+            {
+                file<< setw(width_) << "#normFactor " << " "
+                    << setw(width_) << normFactor_() << endl;
+            }
+            addHeaderInfo();
+            file<< setw(4) << "#" << " ";
+            file<< setw(width_) << "J" << " ";
+            file<< setw(width_) << "JCycle" << " ";
+            addHeaderColumns();
+            file<< endl;
         }
 
-        objFunctionFilePtr_() << mesh_.time().value() << tab << J_ << endl;
+        OFstream& file = objFunctionFilePtr_();
+        file<< setw(4) << mesh_.time().value() << " ";
+        file<< setw(width_) << J_ << " ";
+        file<< setw(width_) << JCycle() << " ";
+        addColumnValues();
+        file<< endl;
     }
 
     return true;
@@ -760,6 +794,24 @@ bool objective::writeData(Ostream& os) const
         os.writeEntry("normFactor", normFactor_());
     }
     return os.good();
+}
+
+
+void objective::addHeaderInfo() const
+{
+    // Does nothing in base
+}
+
+
+void objective::addHeaderColumns() const
+{
+    // Does nothing in base
+}
+
+
+void objective::addColumnValues() const
+{
+    // Does nothing in base
 }
 
 

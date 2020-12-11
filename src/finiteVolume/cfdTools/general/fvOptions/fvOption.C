@@ -7,6 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -321,6 +323,33 @@ void Foam::fv::option::correct(volSymmTensorField& field)
 
 
 void Foam::fv::option::correct(volTensorField& field)
+{}
+
+
+void Foam::fv::option::postProcessSens
+(
+    scalarField& sensField,
+    const word& fieldName,
+    const word& designVariablesName
+)
+{}
+
+
+void Foam::fv::option::postProcessSens
+(
+    vectorField& sensField,
+    const word& fieldName,
+    const word& designVariablesName
+)
+{}
+
+
+void Foam::fv::option::postProcessSens
+(
+    tensorField& sensField,
+    const word& fieldName,
+    const word& designVariablesName
+)
 {}
 
 

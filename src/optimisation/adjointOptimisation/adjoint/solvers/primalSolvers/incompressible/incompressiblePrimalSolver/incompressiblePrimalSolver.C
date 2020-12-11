@@ -30,6 +30,7 @@ License
 #include "incompressiblePrimalSolver.H"
 #include "adjustPhi.H"
 #include "adjointSolver.H"
+#include "fvOptions.H"
 #include "addToRunTimeSelectionTable.H"
 
 
@@ -67,8 +68,7 @@ Foam::incompressiblePrimalSolver::incompressiblePrimalSolver
     (
         dict.subOrEmptyDict("fieldReconstruction").
             getOrDefault<label>("iters", 10)
-    ),
-    fvOptions_(nullptr)
+    )
 {}
 
 
@@ -110,8 +110,6 @@ bool Foam::incompressiblePrimalSolver::readDict(const dictionary& dict)
 {
     if (primalSolver::readDict(dict))
     {
-        fvOptions_().read(dict.subOrEmptyDict("fvOptions"));
-
         return true;
     }
 
@@ -187,6 +185,7 @@ void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
     volVectorField& U = vars.U();
     surfaceScalarField& phi = vars.phi();
     autoPtr<incompressible::turbulenceModel>& turbulence = vars.turbulence();
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     scalar contError(GREAT), diff(GREAT);
     for (label iter = 0; iter < phiReconstructionIters_; ++iter)
@@ -200,11 +199,11 @@ void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
             fvm::div(phi, U)
           + turbulence->divDevReff(U)
           ==
-            fvOptions_()(U)
+            fvOptions(U)
         );
         fvVectorMatrix& UEqn = tUEqn.ref();
         UEqn.relax();
-        fvOptions_().constrain(UEqn);
+        fvOptions.constrain(UEqn);
 
         // Pressure equation will give the Rhie-Chow correction
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -216,7 +215,7 @@ void Foam::incompressiblePrimalSolver::correctBoundaryConditions()
         surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
         adjustPhi(phiHbyA, U, p);
 
-        //fvOptions_().makeRelative(phiHbyA);
+        //fvOptions.makeRelative(phiHbyA);
 
         fvScalarMatrix pEqn
         (

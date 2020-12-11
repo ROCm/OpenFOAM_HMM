@@ -41,7 +41,8 @@ divSchemes
     div(-phip2,Uaas2)       bounded Gauss linearUpwind gradUaConv;
     div(-phip2,nuaTildaas2) bounded Gauss linearUpwind gradNuaTildaConv;
 
-    div(-yPhi,da)              Gauss linearUpwind gradDaConv;
+    div(-yPhi,daas1)                Gauss linearUpwind gradDaConv;
+    div(-yPhi,daas2)                Gauss linearUpwind gradDaConv;
 }
 
 laplacianSchemes

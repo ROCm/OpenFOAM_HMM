@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "objectiveManager.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +66,8 @@ objectiveManager::objectiveManager
     dict_(dict),
     adjointSolverName_(adjointSolverName),
     primalSolverName_(primalSolverName),
-    objectives_(0)
+    objectives_(0),
+    weigthedObjectiveFile_(nullptr)
 {
     // Construct objectives
     //~~~~~~~~~~~~~~~~~~~~~
@@ -98,6 +100,34 @@ objectiveManager::objectiveManager
         FatalIOErrorInFunction(objectiveNamesDict)
             << "No objectives have been set - cannot perform an optimisation"
             << exit(FatalIOError);
+    }
+
+    if (Pstream::master())
+    {
+        if (objectives_.size() > 1)
+        {
+            const Time& time = mesh_.time();
+            weigthedObjectiveFile_.reset
+            (
+                new OFstream
+                (
+                    time.globalPath()/"optimisation"/"objective"
+                        /time.timeName()/"weightedObjective"+adjointSolverName_
+                )
+            );
+
+            unsigned int width = IOstream::defaultPrecision() + 5;
+            weigthedObjectiveFile_()
+                << setw(4) << "#" << " "
+                << setw(width) << "weightedObjective" << " ";
+            for (objective& objI : objectives_)
+            {
+                weigthedObjectiveFile_()
+                    << setw(width) << objI.objectiveName() << " ";
+            }
+            weigthedObjectiveFile_()
+                << endl;
+        }
     }
 }
 
@@ -206,29 +236,48 @@ void objectiveManager::incrementIntegrationTimes(const scalar timeSpan)
 scalar objectiveManager::print()
 {
     scalar objValue(Zero);
+    Info<< "Adjoint solver " << adjointSolverName_ << endl;
     for (objective& obj : objectives_)
     {
         scalar cost = obj.JCycle();
         scalar weight = obj.weight();
         objValue += weight*cost;
 
-        Info<< obj.type() << " : " << cost << endl;
+        Info<< obj.objectiveName() << " : " << cost << endl;
     }
 
-    Info<< "Objective function manager" << nl
-        << "    Weighted Lagrangian " << " : " << objValue << nl << endl;
+    Info<< "Weighted objective : " << objValue << nl << endl;
 
     return objValue;
 }
 
 
-bool objectiveManager::write(const bool valid) const
+bool objectiveManager::write
+(
+    const scalar weightedObjective,
+    const bool valid
+)
 {
     for (const objective& obj : objectives_)
     {
         // Write objective function to file
         obj.write();
         obj.writeMeanValue();
+    }
+
+    if (weigthedObjectiveFile_.valid())
+    {
+        unsigned int width = IOstream::defaultPrecision() + 5;
+        weigthedObjectiveFile_()
+            << setw(4) << mesh_.time().timeName() << " "
+            << setw(width) << weightedObjective << " ";
+
+        for (objective& objI : objectives_)
+        {
+            weigthedObjectiveFile_()
+                << setw(width) << objI.JCycle() << " ";
+        }
+        weigthedObjectiveFile_() << endl;
     }
 
     return true;
@@ -239,8 +288,8 @@ void objectiveManager::updateAndWrite()
 {
     updateNormalizationFactor();
     update();
-    print();
-    write();
+    scalar weightedObjective = print();
+    write(weightedObjective);
 }
 
 

@@ -7,6 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,12 +36,13 @@ License
 
 Foam::IOobject Foam::IOMRFZoneList::createIOobject
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& solverName
 ) const
 {
     IOobject io
     (
-        "MRFProperties",
+        "MRFProperties" + solverName,
         mesh.time().constant(),
         mesh,
         IOobject::MUST_READ,
@@ -67,10 +70,11 @@ Foam::IOobject Foam::IOMRFZoneList::createIOobject
 
 Foam::IOMRFZoneList::IOMRFZoneList
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& solverName
 )
 :
-    IOdictionary(createIOobject(mesh)),
+    IOdictionary(createIOobject(mesh, solverName)),
     MRFZoneList(mesh, *this)
 {}
 

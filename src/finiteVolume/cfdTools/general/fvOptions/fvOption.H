@@ -7,6 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,6 +72,7 @@ SourceFiles
 #define fvOption_H
 
 #include "fvMatricesFwd.H"
+#include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "dictionary.H"
 #include "Switch.H"
@@ -405,6 +408,28 @@ public:
                 virtual void correct(volSphericalTensorField& field);
                 virtual void correct(volSymmTensorField& field);
                 virtual void correct(volTensorField& field);
+
+
+            // Post process sensitivity field related to the fvOption
+
+                virtual void postProcessSens
+                (
+                    scalarField& sensField,
+                    const word& fieldName = word::null,
+                    const word& designVariablesName = word::null
+                );
+                virtual void postProcessSens
+                (
+                    vectorField& sensField,
+                    const word& fieldName = word::null,
+                    const word& designVariablesName = word::null
+                );
+                virtual void postProcessSens
+                (
+                    tensorField& sensField,
+                    const word& fieldName = word::null,
+                    const word& designVariablesName = word::null
+                );
 
 
         // IO

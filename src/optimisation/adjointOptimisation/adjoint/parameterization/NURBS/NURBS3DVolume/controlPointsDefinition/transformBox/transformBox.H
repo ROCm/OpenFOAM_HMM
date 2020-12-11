@@ -5,9 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,76 +26,76 @@ License
 
 
 Class
-    Foam::fv::IOoptionListAdjoint
+    Foam::transformBox
 
 Description
-    IOoptionListAdjoint
+    Defines control points based on given lower and upper boundaries for the
+    box and additional translation, rotation and scaling vectors.
+    The latter can be copied over from the Paraview clip or transform filters,
+    to facilitate the definition of a more general box.
 
 SourceFiles
-    IOoptionListAdjoint.C
+    transformBox.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOoptionListAdjoint_H
-#define IOoptionListAdjoint_H
+#ifndef transformBox_H
+#define transformBox_H
 
-#include "fvOptionList.H"
-#include "IOdictionary.H"
-#include "autoPtr.H"
+#include "controlPointsDefinition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace fv
-{
-
 /*---------------------------------------------------------------------------*\
-                     Class IOoptionListAdjoint Declaration
+                         Class transformBox Declaration
 \*---------------------------------------------------------------------------*/
 
-class IOoptionListAdjoint
+class transformBox
 :
-    public IOdictionary,
-    public optionList
+    public controlPointsDefinition
 {
+
+protected:
+
+    // Protected Member Functions
+
+        //- Compute control points
+        virtual void computeControlPoints();
+
+
 private:
 
     // Private Member Functions
 
-        //- Create IO object if dictionary is present
-        IOobject createIOobject(const fvMesh& mesh) const;
-
         //- No copy construct
-        IOoptionListAdjoint(const IOoptionListAdjoint&) = delete;
+        transformBox(const transformBox&) = delete;
 
         //- No copy assignment
-        void operator=(const IOoptionListAdjoint&) = delete;
+        void operator=(const transformBox&) = delete;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("transformBox");
+
+
     // Constructors
 
-        //- Construct from components with list of field names
-        IOoptionListAdjoint(const fvMesh& mesh);
+        //- Construct from components
+        transformBox(NURBS3DVolume& box);
 
 
-        //- Destructor
-        virtual ~IOoptionListAdjoint() = default;
-
-
-    // Member Functions
-
-        //- Read dictionary
-        virtual bool read();
+    //- Destructor
+    virtual ~transformBox() = default;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

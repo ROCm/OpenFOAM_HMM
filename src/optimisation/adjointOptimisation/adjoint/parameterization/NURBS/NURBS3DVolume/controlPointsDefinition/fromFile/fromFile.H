@@ -5,9 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,107 +26,74 @@ License
 
 
 Class
-    Foam::fv::optionAdjoint
+    Foam::fromFile
 
 Description
-    Similar to fv::option but with additional functionality to contribute to
-    the sensitivity deriavtives
+    Reads control points from constant/controlPoints
 
 SourceFiles
-    fvOptionAdjoint.C
+    fromFile.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvOptionAdjoint_H
-#define fvOptionAdjoint_H
+#ifndef fromFile_H
+#define fromFile_H
 
-#include "fvOption.H"
-#include "incompressibleAdjointVars.H"
+#include "controlPointsDefinition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace fv
-{
-
 /*---------------------------------------------------------------------------*\
-                        Class optionAdjoint Declaration
+                         Class fromFile Declaration
 \*---------------------------------------------------------------------------*/
 
-class optionAdjoint
+class fromFile
 :
-    public option
+    public controlPointsDefinition
 {
+
+protected:
+
+    // Protected Member Functions
+
+        //- Compute control points
+        virtual void computeControlPoints();
+
+
+private:
+
+    // Private Member Functions
+
+        //- No copy construct
+        fromFile(const fromFile&) = delete;
+
+        //- No copy assignment
+        void operator=(const fromFile&) = delete;
+
+
 public:
 
     //- Runtime type information
-    TypeName("optionAdjoint");
+    TypeName("fromFile");
 
 
     // Constructors
 
         //- Construct from components
-        optionAdjoint
-        (
-            const word& name,
-            const word& modelType,
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
-
-        //- Return clone
-        autoPtr<optionAdjoint> clone() const
-        {
-            NotImplemented;
-            return nullptr;
-        }
-
-
-     // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            optionAdjoint,
-            dictionary,
-            (
-                const word& name,
-                const word& modelType,
-                const dictionary& dict,
-                const fvMesh& mesh
-            ),
-            (name, modelType, dict, mesh)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected fvOption model
-        static autoPtr<optionAdjoint> New
-        (
-            const word& name,
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+        fromFile(NURBS3DVolume& box);
 
 
     //- Destructor
-    virtual ~optionAdjoint() = default;
-
-
-    // Member Functions
-    virtual tmp<volVectorField> dxdbMult(const incompressibleAdjointVars&);
+    virtual ~fromFile() = default;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fv
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

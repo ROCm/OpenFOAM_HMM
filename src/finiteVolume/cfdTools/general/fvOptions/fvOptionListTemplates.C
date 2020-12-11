@@ -7,6 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -345,6 +347,45 @@ void Foam::fv::optionList::correct
                 }
 
                 source.correct(field);
+            }
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::fv::optionList::postProcessSens
+(
+    Field<Type>& sensField,
+    const word& fieldName,
+    const word& designVariablesName
+)
+{
+    forAll(*this, i)
+    {
+        option& source = this->operator[](i);
+
+        label fieldi = source.applyToField(fieldName);
+
+        if (fieldi != -1)
+        {
+            addProfiling(fvopt, "fvOption::postProcessSens." + source.name());
+
+            if (source.isActive())
+            {
+                if (debug)
+                {
+                    Info<< "Post processing sensitivity from source "
+                        << source.name()
+                        << " for field " << fieldName << endl;
+                }
+
+                source.postProcessSens
+                (
+                    sensField,
+                    fieldName,
+                    designVariablesName
+                );
             }
         }
     }

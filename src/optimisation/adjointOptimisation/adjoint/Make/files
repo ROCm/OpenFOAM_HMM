@@ -42,18 +42,12 @@ ATCModel/ATCstandard/ATCstandard.C
 ATCModel/ATCUaGradU/ATCUaGradU.C
 ATCModel/cancelATC/cancelATC.C
 
-/* ADJOINT FVOPTIONS */
-fvOptionsAdjoint/fvOptions/fvOptionAdjoint.C
-fvOptionsAdjoint/fvOptions/fvOptionAdjointList.C
-fvOptionsAdjoint/fvOptions/fvIOoptionListAdjoint.C
-
 /* OBJECTIVES */
 objectives/objective/objective.C
 objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C
 objectives/incompressible/objectiveForce/objectiveForce.C
 objectives/incompressible/objectiveMoment/objectiveMoment.C
 objectives/incompressible/objectivePtLosses/objectivePtLosses.C
-objectives/incompressible/objectiveForceTarget/objectiveForceTarget.C
 objectives/incompressible/objectivePartialVolume/objectivePartialVolume.C
 objectives/incompressible/objectiveNutSqr/objectiveNutSqr.C
 
@@ -97,10 +91,15 @@ NURBS=parameterization/NURBS
 $(NURBS)/NURBSbasis/NURBSbasis.C
 $(NURBS)/NURBS3DCurve/NURBS3DCurve.C
 $(NURBS)/NURBS3DSurface/NURBS3DSurface.C
-$(NURBS)/NURBS3DVolume/NURBS3DVolume/NURBS3DVolume.C
-$(NURBS)/NURBS3DVolume/cartesian/NURBS3DVolumeCartesian.C
-$(NURBS)/NURBS3DVolume/cylindrical/NURBS3DVolumeCylindrical.C
-$(NURBS)/NURBS3DVolume/volBSplinesBase/volBSplinesBase.C
+NURBS3D=$(NURBS)/NURBS3DVolume
+$(NURBS3D)/controlPointsDefinition/controlPointsDefinition/controlPointsDefinition.C 
+$(NURBS3D)/controlPointsDefinition/axisAligned/axisAligned.C 
+$(NURBS3D)/controlPointsDefinition/fromFile/fromFile.C 
+$(NURBS3D)/controlPointsDefinition/transformBox/transformBox.C 
+$(NURBS3D)/NURBS3DVolume/NURBS3DVolume.C
+$(NURBS3D)/cartesian/NURBS3DVolumeCartesian.C
+$(NURBS3D)/cylindrical/NURBS3DVolumeCylindrical.C
+$(NURBS3D)/volBSplinesBase/volBSplinesBase.C
 
 /* BEZIER */
 parameterization/Bezier/Bezier.C

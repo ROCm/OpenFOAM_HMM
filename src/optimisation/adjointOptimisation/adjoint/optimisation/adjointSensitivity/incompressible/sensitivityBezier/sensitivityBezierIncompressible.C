@@ -57,8 +57,7 @@ sensitivityBezier::sensitivityBezier
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     SIBase
@@ -67,8 +66,7 @@ sensitivityBezier::sensitivityBezier
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     //Bezier_(mesh, dict), // AJH Read locally?
     Bezier_(mesh, mesh.lookupObject<IOdictionary>("optimisationDict")),

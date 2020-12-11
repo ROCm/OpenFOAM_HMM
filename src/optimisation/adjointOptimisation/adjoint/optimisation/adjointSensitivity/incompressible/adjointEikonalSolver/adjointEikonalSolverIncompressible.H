@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -127,7 +127,7 @@ SourceFiles
 #define adjointEikonalSolverIncompressible_H
 
 #include "IOdictionary.H"
-#include "adjointRASModel.H"
+#include "incompressibleAdjointVars.H"
 #include "createZeroField.H"
 #include "boundaryFieldsFwd.H"
 #include "RASModelVariables.H"
@@ -215,8 +215,7 @@ public:
             const fvMesh& mesh,
             const dictionary& dict,
             const autoPtr<incompressible::RASModelVariables>& RASModelVars,
-            autoPtr<Foam::incompressibleAdjoint::adjointRASModel>&
-                  adjointTurbulence,
+            incompressibleAdjointVars& adjointVars,
             const labelHashSet& sensitivityPatchIDs
         );
 

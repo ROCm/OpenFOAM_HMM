@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -78,9 +78,10 @@ protected:
 
         typedef List<boolVector> boolVectorList;
 
-        //- NURBS basis functions
         const fvMesh& mesh_;
+        dictionary dict_;
         word name_;
+        //- NURBS basis functions
         NURBSbasis basisU_;
         NURBSbasis basisV_;
         NURBSbasis basisW_;
@@ -148,9 +149,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Get control point ID from its I-J-K coordinates
-        label getCPID(const label i, const label j, const label k) const;
 
         //- Find points within control points box
         void findPointsInBox(const vectorField& meshPoints);
@@ -379,6 +377,9 @@ public:
 
         // Control points management
 
+            //- Get control point ID from its I-J-K coordinates
+            label getCPID(const label i, const label j, const label k) const;
+
             //- Set new control points
             //  New values should be on the coordinates system original CPs
             //  were defined
@@ -449,6 +450,8 @@ public:
                 //- Get control points
                 inline const vectorField& getControlPoints() const;
 
+                inline vectorField& getControlPoints();
+
                 //- Get confine movements
                 inline bool confineUMovement() const;
 
@@ -463,12 +466,22 @@ public:
 
                 inline const NURBSbasis& basisW() const;
 
+                //- Get mesh
+                inline const fvMesh& mesh() const;
+
+                //- Get dictionary
+                inline const dictionary& dict() const;
+
 
         // Write Functions
 
             //- Write control points on a cartesian coordinates system for
             //- visualization
-            void writeCps(const fileName& baseName="cpsFile") const;
+            void writeCps
+            (
+                const fileName& = "cpsFile",
+                const bool transform = true
+            ) const;
 
             //- Write control points on the local coordinate system.
             //  For continuation

@@ -84,7 +84,7 @@ objectiveNutSqr::objectiveNutSqr
             ("divDxdbMult"+type()) ,
             //variable dimensions!!
             //Dummy zeroes. Only the internalField will be used
-            dimensionSet(0,0,0,0,0,0,0)
+            dimless
         )
     );
     // set file pointer

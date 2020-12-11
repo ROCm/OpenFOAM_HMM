@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -134,6 +134,15 @@ public:
             //- Execute one iteration of the solution algorithm
             virtual void solveIter();
 
+            //- Steps to be executed before each main SIMPLE iteration
+            virtual void preIter();
+
+            //- The main SIMPLE iter
+            virtual void mainIter();
+
+            //- Steps to be executed before each main SIMPLE iteration
+            virtual void postIter();
+
             //- Main control loop
             virtual void solve();
 
@@ -142,6 +151,12 @@ public:
 
             //- Restore initial field values if necessary
             virtual void restoreInitValues();
+
+            //- Functions to be called before loop
+            virtual void preLoop();
+
+            //- Functions to be called after loop
+            virtual void postLoop();
 
             //- Write average iteration
             virtual bool writeData(Ostream& os) const;

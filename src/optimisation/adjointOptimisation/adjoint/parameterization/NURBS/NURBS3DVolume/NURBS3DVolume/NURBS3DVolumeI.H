@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -55,6 +55,12 @@ inline const Foam::vectorField& Foam::NURBS3DVolume::getControlPoints() const
 }
 
 
+inline Foam::vectorField& Foam::NURBS3DVolume::getControlPoints()
+{
+    return cps_;
+}
+
+
 inline bool Foam::NURBS3DVolume::confineUMovement() const
 {
     return confineUMovement_;
@@ -88,6 +94,18 @@ const Foam::NURBSbasis& Foam::NURBS3DVolume::basisV() const
 const Foam::NURBSbasis& Foam::NURBS3DVolume::basisW() const
 {
     return basisW_;
+}
+
+
+const Foam::fvMesh& Foam::NURBS3DVolume::mesh() const
+{
+    return mesh_;
+}
+
+
+const Foam::dictionary& Foam::NURBS3DVolume::dict() const
+{
+    return dict_;
 }
 
 

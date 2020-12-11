@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -62,12 +62,7 @@ Foam::incompressibleAdjointSolver::incompressibleAdjointSolver
         mesh.lookupObjectRef<incompressiblePrimalSolver>(primalSolverName).
             getIncoVars()
     ),
-    ATCModel_(nullptr),
-    fvOptionsAdjoint_
-    (
-        mesh_,
-        dict.subOrEmptyDict("fvOptions")
-    )
+    ATCModel_(nullptr)
 {}
 
 
@@ -110,8 +105,6 @@ bool Foam::incompressibleAdjointSolver::readDict(const dictionary& dict)
 {
     if (adjointSolver::readDict(dict))
     {
-        fvOptionsAdjoint_.read(dict.subOrEmptyDict("fvOptions"));
-
         return true;
     }
 
@@ -161,13 +154,6 @@ Foam::incompressibleAdjointSolver::getATCModel() const
 Foam::autoPtr<Foam::ATCModel>& Foam::incompressibleAdjointSolver::getATCModel()
 {
     return ATCModel_;
-}
-
-
-Foam::fv::optionAdjointList&
-Foam::incompressibleAdjointSolver::getFvOptionsAdjoint()
-{
-    return fvOptionsAdjoint_;
 }
 
 

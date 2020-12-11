@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ License
 #include "boundaryAdjointContribution.H"
 #include "incompressibleAdjointSolver.H"
 #include "wallFvPatch.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,16 +55,14 @@ adjointSensitivity::adjointSensitivity
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     sensitivity(mesh, dict),
     derivatives_(0),
     primalVars_(primalVars),
     adjointVars_(adjointVars),
-    objectiveManager_(objectiveManager),
-    fvOptionsAdjoint_(fvOptionsAdjoint)
+    objectiveManager_(objectiveManager)
 {}
 
 
@@ -75,8 +74,7 @@ autoPtr<adjointSensitivity> adjointSensitivity::New
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 {
     const word modelType(dict.get<word>("type"));
@@ -104,8 +102,7 @@ autoPtr<adjointSensitivity> adjointSensitivity::New
             dict,
             primalVars,
             adjointVars,
-            objectiveManager,
-            fvOptionsAdjoint
+            objectiveManager
         )
     );
 }
@@ -334,10 +331,10 @@ tmp<volVectorField> adjointSensitivity::adjointMeshMovementSource()
     source -= fvc::div(gradDxDbMult.T());
 
     // Terms from fvOptions
-    forAll(fvOptionsAdjoint_, oI)
-    {
-        source += fvOptionsAdjoint_[oI].dxdbMult(adjointVars_);
-    }
+    fv::options::New(this->mesh_).postProcessSens
+    (
+        source.primitiveFieldRef(), adjointVars_.solverName()
+    );
 
     return (tadjointMeshMovementSource);
 }

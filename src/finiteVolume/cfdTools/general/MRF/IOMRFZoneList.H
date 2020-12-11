@@ -7,6 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
     Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +79,11 @@ private:
     // Private Member Functions
 
         //- Create IO object if dictionary is present
-        IOobject createIOobject(const fvMesh& mesh) const;
+        IOobject createIOobject
+        (
+            const fvMesh& mesh,
+            const word& solverName
+        ) const;
 
         //- No copy construct
         IOMRFZoneList(const IOMRFZoneList&) = delete;
@@ -91,7 +97,11 @@ public:
     // Constructors
 
         //- Construct from mesh
-        IOMRFZoneList(const fvMesh& mesh);
+        IOMRFZoneList
+        (
+            const fvMesh& mesh,
+            const word& solverName = word::null
+        );
 
 
         //- Destructor

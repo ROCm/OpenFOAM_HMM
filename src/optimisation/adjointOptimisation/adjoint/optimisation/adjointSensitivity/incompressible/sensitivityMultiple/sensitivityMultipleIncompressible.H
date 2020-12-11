@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -92,8 +92,7 @@ public:
             const dictionary& dict,
             incompressibleVars& primalVars,
             incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager,
-            fv::optionAdjointList& fvOptionsAdjoint
+            objectiveManager& objectiveManager
         );
 
 

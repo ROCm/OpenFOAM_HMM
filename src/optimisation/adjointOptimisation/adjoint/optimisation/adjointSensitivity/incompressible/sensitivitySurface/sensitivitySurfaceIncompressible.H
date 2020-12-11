@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -79,6 +79,9 @@ protected:
         //- Include the transpose part of the adjoint stresses
         bool includeTransposeStresses_;
 
+        //- Use snGrad in the transpose part of the adjoint stresses
+        bool useSnGradInTranposeStresses_;
+
         //- Include the term from the deviatoric part of the stresses
         bool includeDivTerm_;
 
@@ -140,8 +143,7 @@ public:
             const dictionary& dict,
             incompressibleVars& primalVars,
             incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager,
-            fv::optionAdjointList& fvOptionsAdjoint
+            objectiveManager& objectiveManager
         );
 
 

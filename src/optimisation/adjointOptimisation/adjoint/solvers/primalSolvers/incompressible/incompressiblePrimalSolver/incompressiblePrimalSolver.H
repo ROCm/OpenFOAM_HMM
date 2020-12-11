@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,6 @@ Description
 
 #include "primalSolver.H"
 #include "incompressibleVars.H"
-#include "fvOptionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,9 +75,6 @@ protected:
 
         //- Max iterations  for reconstructing phi from U and p
         label phiReconstructionIters_;
-
-        //- optionList for source terms addition
-        autoPtr<fv::optionList> fvOptions_;
 
 
 public:

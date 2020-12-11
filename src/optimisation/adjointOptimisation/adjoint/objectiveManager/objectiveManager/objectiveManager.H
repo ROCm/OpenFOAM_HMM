@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2020 PCOpt/NTUA
+    Copyright (C) 2013-2020 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,7 @@ protected:
         const word adjointSolverName_;
         const word primalSolverName_;
         PtrList<objective> objectives_;
+        autoPtr<OFstream> weigthedObjectiveFile_;
 
 
 private:
@@ -145,7 +146,11 @@ public:
         scalar print();
 
         //- Write objective function history
-        virtual bool write(const bool valid = true) const;
+        virtual bool write
+        (
+            const scalar weightedObjective,
+            const bool valid = true
+        );
 
         //- Call all functions required prior to the solution of the adjoint
         //- equations

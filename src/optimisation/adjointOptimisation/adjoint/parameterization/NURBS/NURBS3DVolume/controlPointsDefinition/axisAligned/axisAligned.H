@@ -5,9 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2020 PCOpt/NTUA
+    Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,78 +26,73 @@ License
 
 
 Class
-    Foam::objectives::objectiveForceTarget
+    Foam::axisAligned
 
 Description
+    Defines control points aligned with coordinate system
 
 SourceFiles
-    objectiveForceTarget.C
+    axisAligned.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objectiveForceTarget_H
-#define objectiveForceTarget_H
+#ifndef axisAligned_H
+#define axisAligned_H
 
-#include "objectiveForce.H"
+#include "controlPointsDefinition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace objectives
-{
-
 /*---------------------------------------------------------------------------*\
-                    Class objectiveForceTarget Declaration
+                         Class axisAligned Declaration
 \*---------------------------------------------------------------------------*/
 
-class objectiveForceTarget
+class axisAligned
 :
-    public objectiveForce
+    public controlPointsDefinition
 {
-    // Private data
 
-        scalar force_;
+protected:
 
-        scalar target_;
+    // Protected Member Functions
+
+        //- Compute control points
+        virtual void computeControlPoints();
+
+
+private:
+
+    // Private Member Functions
+
+        //- No copy construct
+        axisAligned(const axisAligned&) = delete;
+
+        //- No copy assignment
+        void operator=(const axisAligned&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("forceTarget");
+    TypeName("axisAligned");
 
 
     // Constructors
 
         //- Construct from components
-        objectiveForceTarget
-        (
-            const fvMesh& mesh,
-            const dictionary& dict,
-            const word& adjointSolverName,
-            const word& primalSolverName
-        );
+        axisAligned(NURBS3DVolume& box);
 
 
     //- Destructor
-    virtual ~objectiveForceTarget() = default;
-
-
-    // Member Functions
-
-        //- Return the objective function value
-        scalar J();
-
-        //- Write objective value
-        virtual bool write(const bool valid = true) const;
+    virtual ~axisAligned() = default;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace objectives
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

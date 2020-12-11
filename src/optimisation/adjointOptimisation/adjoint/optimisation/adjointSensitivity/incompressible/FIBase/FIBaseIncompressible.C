@@ -29,6 +29,7 @@ License
 
 #include "FIBaseIncompressible.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,7 @@ void FIBase::read()
                 mesh_,
                 dict_,
                 primalVars_.RASModelVariables(),
-                adjointVars_.adjointTurbulence(),
+                adjointVars_,
                 sensitivityPatchIDs_
             )
         );
@@ -80,8 +81,7 @@ FIBase::FIBase
     const dictionary& dict,
     incompressibleVars& primalVars,
     incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager,
-    fv::optionAdjointList& fvOptionsAdjoint
+    objectiveManager& objectiveManager
 )
 :
     shapeSensitivities
@@ -90,8 +90,7 @@ FIBase::FIBase
         dict,
         primalVars,
         adjointVars,
-        objectiveManager,
-        fvOptionsAdjoint
+        objectiveManager
     ),
     gradDxDbMult_
     (
@@ -148,11 +147,10 @@ void FIBase::accumulateIntegrand(const scalar dt)
     }
 
     // Terms from fvOptions
-    for (fv::optionAdjoint& optionAdj : fvOptionsAdjoint_)
-    {
-        optionsDxDbMult_ +=
-            optionAdj.dxdbMult(adjointVars_)().primitiveField()*dt;
-    }
+    fv::options::New(this->mesh_).postProcessSens
+    (
+        optionsDxDbMult_, adjointVars_.solverName()
+    );
 
     // Accumulate source for the adjoint to the eikonal equation
     if (includeDistance_)
