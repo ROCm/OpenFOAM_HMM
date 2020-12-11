@@ -175,9 +175,6 @@ void optimisationType::update()
 
 void optimisationType::update(scalarField& direction)
 {
-    // Compute eta if needed
-    computeEta(direction);
-
     // Multiply with line search step, if necessary
     scalarField correction(direction);
     if (lineSearch_.valid())
@@ -217,6 +214,9 @@ tmp<scalarField> optimisationType::computeDirection()
     );
     scalarField& correction = tcorrection.ref();
     correction = updateMethod_->returnCorrection();
+
+    // Compute eta if needed
+    computeEta(correction);
 
     return tcorrection;
 }
