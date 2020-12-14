@@ -7,5 +7,6 @@ chemistryModel/TDACChemistryModel/tabulation/makeChemistryTabulationMethods.C
 chemistrySolver/chemistrySolver/makeChemistrySolvers.C
 
 functionObjects/specieReactionRates/specieReactionRates.C
+functionObjects/BilgerMixtureFraction/BilgerMixtureFraction.C
 
 LIB = $(FOAM_LIBBIN)/libchemistryModel
