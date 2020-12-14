@@ -131,9 +131,6 @@ protected:
         //- Get or create fileMonitor singleton
         fileMonitor& monitor() const;
 
-        //- Sort directory entries according to time value
-        static instantList sortTimes(const fileNameList&, const word&);
-
         //- Merge two times
         static void mergeTimes
         (
@@ -223,6 +220,17 @@ public:
 
     //- Destructor
     virtual ~fileOperation() = default;
+
+
+   // Static Functions
+
+        //- Sort directory entries according to time value,
+        //  with "constant" appearing first (if it exists)
+        static instantList sortTimes
+        (
+            const fileNameList& dirEntries,
+            const word& constantName = "constant"
+        );
 
 
     // Member Functions

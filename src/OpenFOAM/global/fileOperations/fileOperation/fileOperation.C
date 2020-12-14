@@ -179,6 +179,68 @@ static bool parseProcsNumRange
 } // End anonymous namespace
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::instantList
+Foam::fileOperation::sortTimes
+(
+    const fileNameList& dirEntries,
+    const word& constantName
+)
+{
+    // Check for "constant"
+    bool haveConstant = false;
+
+    if (!constantName.empty())
+    {
+        for (const fileName& dirName : dirEntries)
+        {
+            if (dirName == constantName)
+            {
+                haveConstant = true;
+                break;
+            }
+        }
+    }
+
+    instantList times(dirEntries.size() + 1);
+    label nTimes = 0;
+
+    if (haveConstant)
+    {
+        times[nTimes].value() = 0;
+        times[nTimes].name() = constantName;
+        ++nTimes;
+    }
+
+    // Parse directory entries for scalar values
+    for (const fileName& dirName : dirEntries)
+    {
+        if (readScalar(dirName, times[nTimes].value()))
+        {
+            times[nTimes].name() = dirName;
+            ++nTimes;
+        }
+    }
+
+    times.resize(nTimes);
+
+    if (haveConstant)
+    {
+        if (nTimes > 2)
+        {
+            std::sort(&times[1], times.end(), instant::less());
+        }
+    }
+    else if (nTimes > 1)
+    {
+        std::sort(times.begin(), times.end(), instant::less());
+    }
+
+    return times;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::fileMonitor& Foam::fileOperation::monitor() const
@@ -195,61 +257,6 @@ Foam::fileMonitor& Foam::fileOperation::monitor() const
         );
     }
     return *monitorPtr_;
-}
-
-
-Foam::instantList Foam::fileOperation::sortTimes
-(
-    const fileNameList& dirNames,
-    const word& constantName
-)
-{
-    // Initialise instant list
-    instantList times(dirNames.size() + 1);
-    label nTimes = 0;
-
-    // Check for "constant"
-    bool haveConstant = false;
-    for (const fileName& dirName : dirNames)
-    {
-        if (dirName == constantName)
-        {
-            haveConstant = true;
-            times[nTimes].value() = 0;
-            times[nTimes].name() = constantName;
-            ++nTimes;
-            break;
-        }
-    }
-
-    // Read and parse all the entries in the directory
-    for (const fileName& dirName : dirNames)
-    {
-        scalar timeValue;
-        if (readScalar(dirName, timeValue))
-        {
-            times[nTimes].value() = timeValue;
-            times[nTimes].name() = dirName;
-            ++nTimes;
-        }
-    }
-
-    // Reset the length of the times list
-    times.setSize(nTimes);
-
-    if (haveConstant)
-    {
-        if (nTimes > 2)
-        {
-            std::sort(&times[1], times.end(), instant::less());
-        }
-    }
-    else if (nTimes > 1)
-    {
-        std::sort(&times[0], times.end(), instant::less());
-    }
-
-    return times;
 }
 
 
