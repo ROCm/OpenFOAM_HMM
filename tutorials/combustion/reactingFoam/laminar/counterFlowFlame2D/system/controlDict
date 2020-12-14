@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,6 +47,11 @@ runTimeModifiable true;
 adjustTimeStep  yes;
 
 maxCo           0.4;
+
+functions
+{
+    #include "FOBilgerMixtureFraction"
+}
 
 
 // ************************************************************************* //

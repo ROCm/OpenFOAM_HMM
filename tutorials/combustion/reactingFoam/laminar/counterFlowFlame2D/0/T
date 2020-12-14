@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,22 +20,19 @@ internalField   uniform 2000;
 
 boundaryField
 {
-    fuel
+    "(fuel|air)"
     {
         type            fixedValue;
         value           uniform 293;
     }
-    air
-    {
-        type            fixedValue;
-        value           uniform 293;
-    }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 293;
         value           uniform 293;
     }
+
     frontAndBack
     {
         type            empty;

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,11 +25,11 @@ thermoType
     specie          specie;
 }
 
-inertSpecie N2;
+inertSpecie         N2;
 
-chemistryReader foamChemistryReader;
+chemistryReader     foamChemistryReader;
 
-foamChemistryFile "<constant>/reactions";
+foamChemistryFile   "<constant>/reactions";
 
 foamChemistryThermoFile "<constant>/thermo.compressibleGas";
 
