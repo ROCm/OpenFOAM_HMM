@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,14 @@ SourceFiles
 #include "basicSpecieMixture.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "specieElement.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+typedef HashTable<List<specieElement>> speciesCompositionTable;
 
 /*---------------------------------------------------------------------------*\
                      Class psiReactionThermo Declaration
@@ -137,6 +140,16 @@ public:
 
         //- Return the composition of the multi-component mixture
         virtual const basicSpecieMixture& composition() const = 0;
+
+        //- Table of species composition
+        autoPtr<speciesCompositionTable> specieComposition() const
+        {
+            return
+                autoPtr<speciesCompositionTable>
+                (
+                    composition().specieComposition()
+                );
+        }
 };
 
 
