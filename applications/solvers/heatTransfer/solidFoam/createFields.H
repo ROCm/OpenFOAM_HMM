@@ -4,13 +4,6 @@ autoPtr<solidThermo> pThermo(solidThermo::New(mesh));
 solidThermo& thermo = pThermo();
 
 tmp<volScalarField> trho = thermo.rho();
-const volScalarField& rho = trho();
-//
-//tmp<volScalarField> tcp = thermo.Cp();
-//const volScalarField& cp = tcp();
-//
-//volScalarField& p = thermo.p();
-volScalarField& h = thermo.he();
 
 autoPtr<coordinateSystem> coordinatesPtr;
 autoPtr<volSymmTensorField> taniAlpha;
@@ -96,7 +89,6 @@ else
         )
     );
 }
-const volScalarField& betav = *betavPtr;
 
 #include "createRadiationModel.H"
 #include "createFvOptions.H"
