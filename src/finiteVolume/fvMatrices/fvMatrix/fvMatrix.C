@@ -49,7 +49,8 @@ void Foam::fvMatrix<Type>::addToInternalField
     if (addr.size() != pf.size())
     {
         FatalErrorInFunction
-            << "sizes of addressing and field are different"
+            << "addressing (" << addr.size()
+            << ") and field (" << pf.size() << ") are different sizes" << endl
             << abort(FatalError);
     }
 
@@ -86,7 +87,8 @@ void Foam::fvMatrix<Type>::subtractFromInternalField
     if (addr.size() != pf.size())
     {
         FatalErrorInFunction
-            << "sizes of addressing and field are different"
+            << "addressing (" << addr.size()
+            << ") and field (" << pf.size() << ") are different sizes" << endl
             << abort(FatalError);
     }
 
