@@ -70,42 +70,38 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     }
     else
     {
-        if (!this->dict_.found("volumeUpdateMethod"))
+        if (this->dict_.found("volumeUpdateMethod"))
         {
-            FatalErrorInFunction
-                << "Either 'constantVolume' or 'volumeUpdateMethod' " << nl
-                << " must be provided. " << nl
-                << " The new keyword is 'volumeUpdateMethod'. " << nl
-                << " Available methods are  : " << nl
-                << " constantRho, constantVolume or updateRhoAndVol. " << nl
-                << " 'constantVolume' is either true/false " << nl
-                << nl << exit(FatalError);
-        }
+            const word volumeUpdateMethod
+            (
+                this->dict_.getWord("volumeUpdateMethod")
+            );
 
-        const word volumeUpdateMethod
-        (
-            this->dict_.getWord("volumeUpdateMethod")
-        );
-
-        if (volumeUpdateMethod == "constantRho")
-        {
-            volUpdateType_.setValue(mConstRho);
-        }
-        else if (volumeUpdateMethod == "constantVolume")
-        {
-            volUpdateType_.setValue(mConstVol);
-        }
-        else if (volumeUpdateMethod == "updateRhoAndVol")
-        {
-            volUpdateType_.setValue(mUpdateRhoAndVol);
+            if (volumeUpdateMethod == "constantRho")
+            {
+                volUpdateType_.setValue(mConstRho);
+            }
+            else if (volumeUpdateMethod == "constantVolume")
+            {
+                volUpdateType_.setValue(mConstVol);
+            }
+            else if (volumeUpdateMethod == "updateRhoAndVol")
+            {
+                volUpdateType_.setValue(mUpdateRhoAndVol);
+            }
+            else
+            {
+                
+                FatalErrorInFunction
+                    << "The method provided is not correct " << nl
+                    << " Available methods are  : " << nl
+                    << " constantRho, constantVolume or updateRhoAndVol. " << nl
+                    << nl << exit(FatalError);
+            }
         }
         else
         {
-            FatalErrorInFunction
-                << "The method provided is not correct " << nl
-                << " Available methods are  : " << nl
-                << " constantRho, constantVolume or updateRhoAndVol. " << nl
-                << nl << exit(FatalError);
+            constantVolume_.setValue(false);
         }
     }
 }
