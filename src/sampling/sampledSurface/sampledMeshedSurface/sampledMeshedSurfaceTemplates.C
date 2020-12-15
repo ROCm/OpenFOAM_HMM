@@ -141,6 +141,8 @@ Foam::sampledMeshedSurface::sampleOnPoints
                 );
             }
         }
+
+        return tvalues;
     }
 
 
