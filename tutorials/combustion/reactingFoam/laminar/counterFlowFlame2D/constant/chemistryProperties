@@ -10,14 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      chemistryProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 chemistryType
 {
-    solver            EulerImplicit;
+    solver          EulerImplicit;
 }
 
 chemistry           on;
@@ -36,5 +35,6 @@ odeCoeffs
     absTol          1e-12;
     relTol          0.01;
 }
+
 
 // ************************************************************************* //

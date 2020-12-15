@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2016-2020 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,34 +31,67 @@ Group
     grpThermophysicalFunctionObjects
 
 Description
-    This function object calculates mole-fraction fields from the mass-fraction
-    fields of the psi/rhoReactionThermo and caches them for output and further
-    post-processing.
+    Calculates mole-fraction fields from the mass-fraction
+    fields of the psi/rhoReactionThermo and caches them
+    for output and further post-processing.
 
-    The names of the mole-fraction fields are obtained from the corresponding
-    mass-fraction fields prepended by "X_"
+    The names of the mole-fraction fields are obtained from
+    the corresponding mass-fraction fields prepended by "X_".
 
-    Example of function object specification:
+    Operands:
+    \table
+      Operand        | Type           | Location
+      input          | -              | -
+      output file    | -              | -
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
+    \endtable
+
+Usage
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    moleFractions
+    moleFractions1
     {
-        type psiReactionThermoMoleFractions;
+        // Conditional mandatory entries (unmodifiable)
+        // Either of the below depending on
+        // the thermodynamics package used in the solver.
+
+            // Option-1
+            type                 psiReactionThermoMoleFractions;
+
+            // Option-2
+            type                 rhoReactionThermoMoleFractions;
+
+        // Mandatory entries (unmodifiable)
+        libs                 (fieldFunctionObjects);
+
+        // Optional entries (runtime modifiable)
+        phase                <phaseName>;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
-    or
-    \verbatim
-    moleFractions
-    {
-        type rhoReactionThermoMoleFractions;
-    }
-    \endverbatim
-    depending on the thermodynamics package used in the solver.
+
+    where the entries mean:
+    \table
+      Property | Description                         | Type | Reqd | Dflt
+      type     | Type name: psiReactionThermoMoleFractions or <!--
+                --> rhoReactionThermoMoleFractions   | word | yes  | -
+      libs     | Library name: fieldFunctionObjects  | word | yes  | -
+      phase    | Name of phase (e.g. "gas")          | word | no   | ""
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+
+    Usage by the \c postProcess utility is not available.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject
 
 SourceFiles
     moleFractions.C
+    moleFractionsFunctionObjects.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -81,22 +115,19 @@ class moleFractions
 :
     public functionObjects::fvMeshFunctionObject
 {
-    // Private data
+    // Private Data
 
         //- Species mole fractions
         PtrList<volScalarField> X_;
+
+        //- Name of phase
+        word phaseName_;
 
 
     // Private Member Functions
 
         //- Calculate the mole fraction fields
-        virtual void calculateMoleFractions();
-
-        //- No copy construct
-        moleFractions(const moleFractions&) = delete;
-
-        //- No copy assignment
-        void operator=(const moleFractions&) = delete;
+        virtual void calcMoleFractions();
 
 
 public:
@@ -115,21 +146,30 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        moleFractions(const moleFractions&) = delete;
+
+        //- No copy assignment
+        void operator=(const moleFractions&) = delete;
+
 
     //- Destructor
-    virtual ~moleFractions();
+    virtual ~moleFractions() = default;
 
 
     // Member Functions
 
         //- Read the moleFractions data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Calculate the mole-fraction fields
         virtual bool execute();
 
-        //- The mole-fraction fields auto-write
-        virtual bool write();
+        //- The mole-fraction fields auto-write - no-op
+        virtual bool write()
+        {
+            return true;
+        }
 };
 
 

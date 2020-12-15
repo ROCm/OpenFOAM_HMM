@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,9 +116,13 @@ public:
         using PtrList<Reaction<ThermoType>>::operator[];
 
         //- Table of species composition
-        const speciesCompositionTable& specieComposition() const
+        virtual autoPtr<speciesCompositionTable> specieComposition() const
         {
-            return speciesComposition_;
+            return
+                autoPtr<speciesCompositionTable>
+                (
+                    new speciesCompositionTable(speciesComposition_)
+                );
         }
 };
 

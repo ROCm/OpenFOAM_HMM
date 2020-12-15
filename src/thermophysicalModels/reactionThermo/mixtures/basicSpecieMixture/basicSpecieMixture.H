@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,11 +43,14 @@ SourceFiles
 #define basicSpecieMixture_H
 
 #include "basicMultiComponentMixture.H"
+#include "specieElement.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+typedef HashTable<List<specieElement>> speciesCompositionTable;
 
 /*---------------------------------------------------------------------------*\
                  Class basicSpecieMixture Declaration
@@ -202,6 +206,16 @@ public:
                 const scalar p,
                 const scalar T
             ) const = 0;
+
+            //- Species composition
+            virtual autoPtr<speciesCompositionTable> specieComposition() const
+            {
+                return
+                    autoPtr<speciesCompositionTable>
+                    (
+                        new speciesCompositionTable()
+                    );
+            }
 };
 
 
