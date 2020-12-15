@@ -99,6 +99,14 @@ class dlLibraryTable
 
 public:
 
+    // Static Data Members
+
+        //- Use dlclose() when clearing the dlLibraryTable.
+        //  This is presumably \em cleaner, but can also remove functions
+        //  that are still needed (eg, to terminate the library itself)
+        static int dlcloseOnTerminate;
+
+
     // Public Data Types
 
         //- Global loader/unloader function type (C-linkage)
@@ -229,8 +237,8 @@ public:
             return libPtrs_;
         }
 
-        //- Clearing closes all libraries loaded by the table.
-        void clear(bool verbose = true);
+        //- Clears the table, without attempting to close the libraries
+        void clear();
 
         //- Add to the list of names, but do not yet open.
         //  Ignores duplicate names.
@@ -260,6 +268,10 @@ public:
             std::initializer_list<fileName> libNames,
             bool verbose = true
         );
+
+        //- Close all libraries loaded by the table and remove the closed
+        //- functions from the table.
+        void close(bool verbose = true);
 
         //- Close the named library, optionally warn if problems occur
         //  Using an empty name is a no-op and always returns false.

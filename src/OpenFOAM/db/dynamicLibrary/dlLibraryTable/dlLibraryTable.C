@@ -46,6 +46,12 @@ namespace Foam
     defineTypeNameAndDebug(dlLibraryTable, 0);
 }
 
+int Foam::dlLibraryTable::dlcloseOnTerminate
+(
+    Foam::debug::optimisationSwitch("dlcloseOnTerminate", 0)
+);
+
+
 std::unique_ptr<Foam::dlLibraryTable> Foam::dlLibraryTable::global_(nullptr);
 
 
@@ -238,7 +244,10 @@ Foam::dlLibraryTable::dlLibraryTable
 
 Foam::dlLibraryTable::~dlLibraryTable()
 {
-    clear();
+    if (dlLibraryTable::dlcloseOnTerminate)
+    {
+        close();
+    }
 }
 
 
@@ -274,6 +283,13 @@ Foam::label Foam::dlLibraryTable::size() const
 }
 
 
+void Foam::dlLibraryTable::clear()
+{
+    libPtrs_.clear();
+    libNames_.clear();
+}
+
+
 Foam::List<Foam::fileName> Foam::dlLibraryTable::loaded() const
 {
     List<fileName> list(libNames_.size());
@@ -298,7 +314,7 @@ Foam::List<Foam::fileName> Foam::dlLibraryTable::loaded() const
 }
 
 
-void Foam::dlLibraryTable::clear(bool verbose)
+void Foam::dlLibraryTable::close(bool verbose)
 {
     label nLoaded = 0;
 

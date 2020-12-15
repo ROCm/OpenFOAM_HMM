@@ -140,6 +140,11 @@ OptimisationSwitches
     // Force dumping (at next timestep) upon signal (-1 to disable) and exit
     stopAtWriteNowSignal    -1;
 
+    //- Use dlclose() when clearing the dlLibraryTable.
+    //  This is presumably cleaner, but can also remove functions
+    //  that are still needed (eg, to terminate the library itself)
+    dlcloseOnTerminate 0;
+
     //- Choose STL ASCII parser:  0=Flex, 1=Ragel, 2=Manual
     fileFormats::stl 0;
 
