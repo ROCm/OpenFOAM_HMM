@@ -278,6 +278,10 @@ bool Foam::fvMesh::init(const bool doInit)
 
         // Intialise my data
         polyMesh::init(doInit);
+
+        // All addressing needs to be updated
+        // deleteDemandDrivenData(lduPtr_);
+        clearAddressing(true);
     }
 
     // Check the existence of the cell volumes and read if present
