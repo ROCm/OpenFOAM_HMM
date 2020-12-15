@@ -68,6 +68,13 @@ Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& rhs)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+void Foam::Function1Types::Sine<Type>::convertTimeBase(const Time& t)
+{
+    t0_ = t.timeToUserTime(t0_);
+}
+
+
+template<class Type>
 void Foam::Function1Types::Sine<Type>::writeEntries(Ostream& os) const
 {
     os.writeEntryIfDifferent<scalar>("t0", 0, t0_);

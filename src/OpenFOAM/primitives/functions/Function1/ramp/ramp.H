@@ -133,6 +133,9 @@ public:
 
     // Member Functions
 
+        //- Convert time
+        virtual void convertTimeBase(const Time& t);
+
         //- Return value for time t
         virtual scalar value(const scalar t) const = 0;
 

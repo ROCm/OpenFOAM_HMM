@@ -58,6 +58,13 @@ void Foam::Function1Types::ramp::writeEntries(Ostream& os) const
 }
 
 
+void Foam::Function1Types::ramp::convertTimeBase(const Time& t)
+{
+    start_ = t.timeToUserTime(start_);
+    duration_ = t.timeToUserTime(duration_);
+}
+
+
 void Foam::Function1Types::ramp::writeData(Ostream& os) const
 {
     Function1<scalar>::writeData(os);

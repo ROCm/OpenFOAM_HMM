@@ -194,6 +194,9 @@ public:
 
     // Member Functions
 
+        //- Convert time
+        virtual void convertTimeBase(const Time& t);
+
         //- Return value for time t
         virtual inline Type value(const scalar t) const
         {
