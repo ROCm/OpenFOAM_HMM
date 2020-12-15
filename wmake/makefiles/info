@@ -5,11 +5,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     wmake/makefiles/info
@@ -46,6 +45,7 @@ EXT_SO  = .so
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
+include $(GENERAL_RULES)/mpi-rules
 
 # Commands
 COMPILE_C    := $(strip $(cc) $(cFLAGS))
@@ -95,4 +95,14 @@ cflags-arch:
 cxxflags-arch:
 	@echo "$(strip $(c++ARCH))"
 
-#----------------------------- vim: set ft=make: ------------------------------
+# Like openmpi mpicc --showme:compile
+.PHONY: mpi-compile
+mpi-compile:
+	@echo "$(strip $(PINC))"
+
+# Like openmpi mpicc --showme:link
+.PHONY: mpi-link
+mpi-link:
+	@echo "$(strip $(PLIBS))"
+
+#------------------------------------------------------------------------------

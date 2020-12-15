@@ -86,6 +86,7 @@ cat<<HELP_FULL
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
   -no-scheduler     Disable scheduled parallel compilation
+
   -show-api         Print api value (from Make rules)
   -show-ext-so      Print shared library extension (with '.' separator)
   -show-c           Print C compiler value
@@ -98,6 +99,9 @@ cat<<HELP_FULL
   -show-compile-cxx Same as '-show-cxx -show-cxxflags'
   -show-path-c      Print path to C compiler
   -show-path-cxx    Print path to C++ compiler
+  -show-mpi-compile Print mpi-related flags used when compiling
+  -show-mpi-link    Print mpi-related flags used when linking
+
 HELP_FULL
 fi
 
@@ -263,7 +267,8 @@ do
 
         -show-api | -show-ext-so | \
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
-        -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
+        -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch | \
+        -show-mpi-compile | -show-mpi-link )
             printInfo "${1#-show-}"
             optShow=true
             ;;
