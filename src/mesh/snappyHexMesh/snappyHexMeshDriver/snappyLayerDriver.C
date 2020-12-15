@@ -835,6 +835,10 @@ void Foam::snappyLayerDriver::handleWarpedFaces
 
     const pointField& points = mesh.points();
 
+    // Local reference to face centres also used to trigger consistent
+    // [re-]building of demand-driven face centres and areas
+    const vectorField& faceCentres = mesh.faceCentres();
+
     label nWarpedFaces = 0;
 
     forAll(pp, i)
@@ -852,7 +856,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
             scalar edgeLen = edge0Len/(1<<ownLevel);
 
             // Normal distance to face centre plane
-            const point& fc = mesh.faceCentres()[faceI];
+            const point& fc = faceCentres[faceI];
             const vector& fn = pp.faceNormals()[i];
 
             scalarField vProj(f.size());
