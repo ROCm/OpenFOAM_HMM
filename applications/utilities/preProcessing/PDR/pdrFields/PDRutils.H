@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,6 @@ Namespace
 Description
     Utilities for PDR (eg, for setFields)
 
-SourceFiles
-    PDRUtils.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef PDRutils_H
@@ -48,11 +45,17 @@ namespace Foam
 // Forward Declarations
 class PDRobstacle;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace PDRutils
 {
 
 
 } // End namespace PDRutils
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

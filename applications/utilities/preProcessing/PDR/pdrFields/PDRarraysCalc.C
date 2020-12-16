@@ -1149,9 +1149,9 @@ static void tail_field
     const UList<PDRpatchDef>& patches
 )
 {
-    // seaGround
+    // ground
     {
-        os.beginBlock("seaGround");
+        os.beginBlock(pars.groundPatchName);
         os.writeKeyword("type") << wall_bc << token::END_STATEMENT << nl;
         putUniform(os, "value", deflt);
         os.endBlock();
@@ -1222,13 +1222,14 @@ static void tail_field
         os.endBlock();
     }
 
-    if ( pars.two_d )
+    if (pars.two_d)
     {
         os.beginBlock("z_boundaries");
         os.writeEntry("type", "empty");
         os.endBlock();
     }
-    if ( pars.outer_orthog )
+
+    if (pars.outer_orthog)
     {
         os.beginBlock("outer_inner");
         os.writeEntry("type", "cyclicAMI");
@@ -1285,9 +1286,10 @@ void write_scalarField
     os << nl;
     os.beginBlock("boundaryField");
 
+
     // outer
     {
-        os.beginBlock("outer");
+        os.beginBlock(pars.outerPatchName);
 
         os.writeEntry("type", "inletOutlet");
         putUniform(os, "inletValue", deflt);
@@ -1329,7 +1331,8 @@ void write_uniformField
 
     // outer
     {
-        os.beginBlock("outer");
+        os.beginBlock(pars.outerPatchName);
+
         if (fieldName == "alphat" || fieldName == "nut")
         {
             // Different b.c. for alphat & nut
@@ -1377,17 +1380,17 @@ void write_pU_fields
         os << nl;
         os.beginBlock("boundaryField");
 
-        // "outer"
+        // outer
         {
-            os.beginBlock("outer");
+            os.beginBlock(pars.outerPatchName);
             os.writeEntry("type", "inletOutlet");
             putUniform(os, "inletValue", vector::zero);
             os.endBlock();
         }
 
-        // seaGround
+        // ground
         {
-            os.beginBlock("seaGround");
+            os.beginBlock(pars.groundPatchName);
             os.writeEntry("type", "zeroGradient");
             os.endBlock();
         }
@@ -1497,9 +1500,10 @@ void write_pU_fields
         os << nl;
         os.beginBlock("boundaryField");
 
-        // "outer"
+        // outer
         {
-            os.beginBlock("outer");
+            os.beginBlock(pars.outerPatchName);
+
             os.writeEntry("type", "waveTransmissive");
             os.writeEntry("gamma", 1.3);
             os.writeEntry("fieldInf", deflt);
@@ -1560,7 +1564,7 @@ void write_symmTensorField
 
     // outer
     {
-        os.beginBlock("outer");
+        os.beginBlock(pars.outerPatchName);
 
         os.writeEntry("type", "inletOutlet");
         putUniform(os, "inletValue", deflt);
@@ -1628,7 +1632,7 @@ void write_symmTensorFieldV
 
     // outer
     {
-        os.beginBlock("outer");
+        os.beginBlock(pars.outerPatchName);
 
         os.writeEntry("type", "inletOutlet");
         putUniform(os, "inletValue", deflt);

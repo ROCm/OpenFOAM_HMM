@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,13 @@ public:
         fileName obsfile_dir;
         wordList obsfile_names;
         word    timeName;
+
+        //- The name for the "ground" patch
+        word    groundPatchName;
+
+        //- The name for the "outer" patch
+        word    outerPatchName;
+
         string  UPatchBc;   //!< "fixedValue;value uniform (0 0 0)"
 
         bool legacyMeshSpec{false};
@@ -136,7 +143,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         PDRparams() = default;
 
 

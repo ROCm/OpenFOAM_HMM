@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2006                                 |
+|  \\    /   O peration     | Version:  v2012                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -21,18 +21,19 @@ obsFileDir      "<case>/geometry";
 
 obsFileNames    (obstaclesDict);
 
-// legacyObsSpec   true;
-//
-// obsFileNames    (position.obs base.obs);
 
-// Some parameters for PDRfitMesh are read from this file, including
+// ------------------
+// PDRfitMesh
+// ------------------
 
+// Some parameters for PDRfitMesh are read from this file,
+// including the following
+
+// Mandatory (here or in PDRfitMeshDict)
 cellWidth       0.22;
 
-outer           (20 0);
+// Optional
+cellWidthFactor 1.0;
 
-outerCombFac    0;
-
-sea_ground      0.0;
 
 // ************************************************************************* //

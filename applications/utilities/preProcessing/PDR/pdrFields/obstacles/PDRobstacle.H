@@ -264,6 +264,8 @@ public:
         );
 
         //- Trim obstacle to ensure it is within the specified bounding box
+        //- and return the intersection type.
+        //  Returns UNKNOWN for unknown types and invalid bounding boxes
         volumeType trim(const boundBox& bb);
 
         //- Surface (points, faces) representation

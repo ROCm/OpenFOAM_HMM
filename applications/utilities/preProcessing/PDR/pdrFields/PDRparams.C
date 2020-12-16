@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,6 +83,20 @@ void Foam::PDRparams::readDefaults(const dictionary& dict)
 
     dict.readIfPresent("blockageNoCT", blockageNoCT);
     dict.readIfPresent("scale", scale);
+
+
+    const dictionary* dictptr;
+
+    groundPatchName = "ground";
+    outerPatchName = "outer";
+
+    if ((dictptr = dict.findDict("patchNames")) != nullptr)
+    {
+        const dictionary& d = *dictptr;
+
+        d.readIfPresent("ground", groundPatchName);
+        d.readIfPresent("outer", outerPatchName);
+    }
 
     UPatchBc = "fixedValue;value uniform (0 0 0)";
     if (dict.readIfPresent("UPatchBc", UPatchBc))

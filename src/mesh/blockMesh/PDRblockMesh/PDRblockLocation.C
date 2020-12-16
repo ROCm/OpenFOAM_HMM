@@ -129,6 +129,20 @@ Foam::gradingDescriptors Foam::PDRblock::gridControl::grading() const
 }
 
 
+void Foam::PDRblock::gridControl::resize(label len)
+{
+    // Begin/end nodes for each segment
+    scalarList& knots = *this;
+
+    knots.resize(len, Zero);
+
+    len = Foam::max(0, len-1);
+
+    divisions_.resize(len, Zero);
+    expansion_.resize(len, Zero);
+}
+
+
 void Foam::PDRblock::gridControl::append
 (
     const scalar p,
@@ -212,6 +226,37 @@ void Foam::PDRblock::gridControl::prepend
     prependList(knots, p);
     prependList(divisions_, nDiv);
     prependList(expansion_, expRatio);
+}
+
+
+void Foam::PDRblock::gridControl::writeDict
+(
+    Ostream& os,
+    const direction cmpt
+) const
+{
+    if (cmpt < vector::nComponents)
+    {
+        os.beginBlock(vector::componentNames[cmpt]);
+    }
+
+
+    const scalarList& knots = *this;
+
+    os  << indent << "points  "
+        << flatOutput(knots) << token::END_STATEMENT << nl;
+
+    os  << indent << "nCells  "
+        << flatOutput(divisions_) << token::END_STATEMENT << nl;
+
+    os  << indent << "ratios  "
+        << flatOutput(expansion_) << token::END_STATEMENT << nl;
+
+    if (cmpt < vector::nComponents)
+    {
+        os.endBlock();
+    }
+    os << nl;
 }
 
 

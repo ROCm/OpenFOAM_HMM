@@ -107,6 +107,9 @@ public:
             EXPAND_RELATIVE     //!< Relative expansion ratio
         };
 
+        //- Named enumerations for the expansion type
+        const static Enum<expansionType> expansionNames_;
+
 
     // Public Classes
 
@@ -176,18 +179,9 @@ public:
         };
 
 
-private:
-
-    // Data Types
-
-        //- Named enumerations for the expansion type
-        const static Enum<expansionType> expansionNames_;
-
-
-    // Private Classes
-
         //- The begin/end nodes for each segment,
         //- with divisions and expansion for each segment
+        //  Not normally used outside of PDRblock
         struct gridControl
         :
             public scalarList
@@ -205,13 +199,23 @@ private:
             //  \see Foam::gradingDescriptor
             gradingDescriptors grading() const;
 
+            //- Resize lists
+            void resize(label len);
+
             //- Add point/divisions/expand to end of list (push_back)
             void append(const scalar p, label nDiv, scalar expRatio=1);
 
             //- Add point/divisions/expand to front of list (push_front)
             void prepend(const scalar p, label nDiv, scalar expRatio=1);
+
+            //- Write as dictionary contents for specified vector direction
+            void writeDict(Ostream& os, const direction cmpt) const;
         };
 
+
+private:
+
+    // Private Classes
 
         //- Extracted patch settings
         struct boundaryEntry

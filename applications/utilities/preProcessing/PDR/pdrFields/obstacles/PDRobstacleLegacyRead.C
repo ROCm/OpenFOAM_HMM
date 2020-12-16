@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -385,8 +385,8 @@ Foam::scalar Foam::PDRlegacy::readObstacleFiles
                         obs.dia() -= floatSMALL;
 
 
-                        // Trim against the mesh bounds
-                        // - ignore if it doesn't overlap
+                        // Trim against the mesh bounds.
+                        // Ignore if it doesn't overlap, or bounds are invalid
                         const volumeType vt = obs.trim(meshBb);
 
                         switch (vt)
@@ -474,8 +474,8 @@ Foam::scalar Foam::PDRlegacy::readObstacleFiles
                         obs.span += point::uniform(shift2);
 
 
-                        // Trim against the mesh bounds
-                        // - ignore if it doesn't overlap
+                        // Trim against the mesh bounds.
+                        // Ignore if it doesn't overlap, or bounds are invalid
                         const volumeType vt = obs.trim(meshBb);
 
                         switch (vt)
