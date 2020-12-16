@@ -57,6 +57,13 @@ Foam::functionObjects::regionFunctionObject::obr() const
             obrPtr_ =
                 storedObjects().cfindObject<objectRegistry>(subRegistryName_);
         }
+
+        if (!obrPtr_)
+        {
+            WarningInFunction
+                << "Could not locate subRegion \""
+                << subRegistryName_ << '"' << nl;
+        }
     }
 
     return (obrPtr_ ? *obrPtr_ : obr_);
