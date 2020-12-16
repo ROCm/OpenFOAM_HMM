@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,32 +24,65 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::PolynomialEntry
+    Foam::Function1Types::LimitRange
 
 Description
-    PolynomialEntry container data entry for scalars. Items are stored in a
-    list of Tuple2's. Data is input in the form,
-    e.g. for an entry \<entryName\> that describes y = x^2 + 2x^3
+    Function1 wrapper that limits the input range of another Function1
 
+    Example usage for limiting a polynomial:
     \verbatim
-        <entryName>  polynomial
-        (
-            (1    2)
-            (2    3)
-        );
+        limitedPolyTest        limitRange;
+        limitedPolyTestCoeffs
+        {
+            min         0.4;
+            max         1.4;
+
+            value       polynomial
+            (
+                (5 1)
+                (-2 2)
+                (-2 3)
+                (1 4)
+            );
+        }
     \endverbatim
 
+    Here the return value will be:
+    - poly(0.4) for x <= 0.4;
+    - poly(1.4) for x >= 1.4; and
+    - poly(x) for 0.4 < x < 1.4.
+
+
+    Example usage for limiting a table
+    \verbatim
+        limitedTableFileTest   limitRange;
+        limitedTableFileTestCoeffs
+        {
+            min             0.4;
+            max             1.4;
+
+            value           tableFile;
+            file            "<system>/fanCurve.txt";
+        }
+    \endverbatim
+
+    Where:
+    \table
+        Property | Description                                  | Required
+        min      | Minimum input value                          | yes
+        max      | Maximum input value                          | yes
+        value    | Function of type Function1<Type>             | yes
+    \endtable
+
 SourceFiles
-    PolynomialEntry.C
+    LimitRange.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PolynomialEntry_H
-#define PolynomialEntry_H
+#ifndef LimitRange_H
+#define LimitRange_H
 
 #include "Function1.H"
-#include "Tuple2.H"
-#include "Function1Fwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,75 +92,70 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class Polynomial Declaration
+                          Class LimitRange Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class Polynomial
+class LimitRange
 :
     public Function1<Type>
 {
     // Private Data
 
-        //- Polynomial coefficients - list of prefactor, exponent
-        List<Tuple2<Type, Type>> coeffs_;
+        //- Minimum input value
+        scalar min_;
 
-        //- Flag to indicate whether poly can be integrated
-        bool canIntegrate_;
+        //- Maximum input value
+        scalar max_;
+
+        //- Value function
+        autoPtr<Function1<Type>> value_;
 
 
     // Private Member Functions
 
-        //- No copy assignment
-        void operator=(const Polynomial<Type>&) = delete;
+        //- Read the coefficients from the given dictionary
+        void read(const dictionary& coeffs);
 
 
 public:
 
     //- Runtime type information
-    TypeName("polynomial");
+    TypeName("limitRange");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const LimitRange<Type>&) = delete;
 
 
     // Constructors
 
         //- Construct from entry name and dictionary
-        Polynomial(const word& entryName, const dictionary& dict);
+        LimitRange(const word& entryName, const dictionary& dict);
 
-        //- Construct from components
-        Polynomial
-        (
-            const word& entryName,
-            const List<Tuple2<Type, Type>>& coeffs
-        );
-
-        //- Copy constructor
-        explicit Polynomial(const Polynomial& poly);
-
-        //- Construct and return a clone
-        virtual tmp<Function1<Type>> clone() const
-        {
-            return tmp<Function1<Type>>(new Polynomial<Type>(*this));
-        }
+        //- Copy construct
+        explicit LimitRange(const LimitRange<Type>& rhs);
 
 
     //- Destructor
-    virtual ~Polynomial() = default;
+    virtual ~LimitRange() = default;
 
 
     // Member Functions
 
-        //- Convert time
-        virtual void convertTimeBase(const Time& t);
-
-        //- Return Polynomial value
-        virtual Type value(const scalar x) const;
+        //- Return value for time t
+        virtual inline Type value(const scalar t) const;
 
         //- Integrate between two (scalar) values
-        virtual Type integrate(const scalar x1, const scalar x2) const;
-
+        virtual inline Type integrate(const scalar x1, const scalar x2) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
+
+        //- Write coefficient entries in dictionary format
+        void writeEntries(Ostream& os) const;
 };
 
 
@@ -138,8 +166,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "LimitRangeI.H"
+
 #ifdef NoRepository
-    #include "PolynomialEntry.C"
+    #include "LimitRange.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
