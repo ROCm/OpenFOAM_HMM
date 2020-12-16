@@ -103,6 +103,12 @@ public:
         //- Copy constructor
         explicit Polynomial(const Polynomial& poly);
 
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new Polynomial<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~Polynomial() = default;
