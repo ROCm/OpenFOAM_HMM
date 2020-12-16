@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,7 +160,7 @@ bool Foam::linearInterpolationWeights::integrationWeights
     scalarField& weights
 ) const
 {
-    if (t2 < t1-VSMALL)
+    if (t2 < t1 - ROOTVSMALL)
     {
         FatalErrorInFunction
             << "Integration should be in positive direction."
@@ -172,6 +172,20 @@ bool Foam::linearInterpolationWeights::integrationWeights
 
     //- Find lower or equal index
     const label i1 = findLower(samples_, t1, 0, lessEqOp<scalar>());
+
+    if (t2 <= t1 + ROOTVSMALL)
+    {
+        // Early exit if 1 and t2 are approximately equal
+
+        bool anyChanged = (indices.size() != 1 || indices[0] != i1);
+
+        indices.setSize(1);
+        weights.setSize(1);
+        indices[0] = i1;
+        weights[0] = scalar(0);
+
+        return anyChanged;
+    }
 
     //- Find lower index
     const label i2 = findLower(samples_, t2);
