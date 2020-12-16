@@ -1,0 +1,19 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+[[ -d constant/polyMesh ]] || rm -rf constant/polyMesh
+
+cp -rf ../steady/constant/polyMesh constant
+
+restore0Dir
+
+cp -f ../steady/500/U 0/
+cp -f ../steady/500/p 0/
+
+runApplication decomposePar
+
+runParallel $(getApplication)
+
+#------------------------------------------------------------------------------
