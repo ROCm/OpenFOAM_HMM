@@ -25,63 +25,108 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DPMIncompressibleTurbulenceModel.H"
-#include "singlePhaseTransportModel.H"
-#include "addToRunTimeSelectionTable.H"
-#include "makeTurbulenceModel.H"
-
-#include "laminarModel.H"
-#include "RASModel.H"
-#include "LESModel.H"
+#include "VoFphaseTurbulentTransportModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTurbulenceModelTypes
-(
-    volScalarField,
-    geometricOneField,
-    incompressibleTurbulenceModel,
-    DPMIncompressibleTurbulenceModel,
-    singlePhaseTransportModel
-);
-
 makeBaseTurbulenceModel
 (
-    volScalarField,
     geometricOneField,
-    incompressibleTurbulenceModel,
-    DPMIncompressibleTurbulenceModel,
-    singlePhaseTransportModel
+    volScalarField,
+    incompressibleRhoTurbulenceModel,
+    PhaseIncompressibleTurbulenceModel,
+    transportModel
 );
 
-#define makeLaminarModel(Type)                                                 \
-    makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, laminar, Type)
 
-#define makeRASModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, RAS, Type)
-
-#define makeLESModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, LES, Type)
+// -------------------------------------------------------------------------- //
+// Laminar models
+// -------------------------------------------------------------------------- //
 
 #include "Stokes.H"
 makeLaminarModel(Stokes);
 
+#include "Maxwell.H"
+makeLaminarModel(Maxwell);
+
+
+// -------------------------------------------------------------------------- //
+// RAS models
+// -------------------------------------------------------------------------- //
+
+#include "SpalartAllmaras.H"
+makeRASModel(SpalartAllmaras);
+
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
+
+#include "RNGkEpsilon.H"
+makeRASModel(RNGkEpsilon);
 
 #include "realizableKE.H"
 makeRASModel(realizableKE);
 
+#include "LaunderSharmaKE.H"
+makeRASModel(LaunderSharmaKE);
+
+#include "kOmega.H"
+makeRASModel(kOmega);
+
 #include "kOmegaSST.H"
 makeRASModel(kOmegaSST);
+
+#include "kOmegaSSTSAS.H"
+makeRASModel(kOmegaSSTSAS);
+
+#include "kOmegaSSTLM.H"
+makeRASModel(kOmegaSSTLM);
+
+#include "LRR.H"
+makeRASModel(LRR);
+
+#include "SSG.H"
+makeRASModel(SSG);
+
+
+// -------------------------------------------------------------------------- //
+// LES models
+// -------------------------------------------------------------------------- //
 
 #include "Smagorinsky.H"
 makeLESModel(Smagorinsky);
 
+#include "WALE.H"
+makeLESModel(WALE);
+
 #include "kEqn.H"
 makeLESModel(kEqn);
+
+#include "dynamicKEqn.H"
+makeLESModel(dynamicKEqn);
+
+#include "dynamicLagrangian.H"
+makeLESModel(dynamicLagrangian);
+
+#include "SpalartAllmarasDES.H"
+makeLESModel(SpalartAllmarasDES);
+
+#include "SpalartAllmarasDDES.H"
+makeLESModel(SpalartAllmarasDDES);
+
+#include "SpalartAllmarasIDDES.H"
+makeLESModel(SpalartAllmarasIDDES);
+
+#include "DeardorffDiffStress.H"
+makeLESModel(DeardorffDiffStress);
+
+#include "kOmegaSSTDES.H"
+makeLESModel(kOmegaSSTDES);
+
+#include "kOmegaSSTDDES.H"
+makeLESModel(kOmegaSSTDDES);
+
+#include "kOmegaSSTIDDES.H"
+makeLESModel(kOmegaSSTIDDES);
+
 
 // ************************************************************************* //

@@ -71,11 +71,8 @@ surfaceScalarField rhoPhi
 );
 
 
-// Construct incompressible turbulence model
-autoPtr<incompressible::turbulenceModel> turbulence
-(
-    incompressible::turbulenceModel::New(U, phi, mixture)
-);
+incompressibleInterPhaseTransportModel<immiscibleIncompressibleTwoPhaseMixture>
+    turbulence(rho, U, phi, rhoPhi, mixture);
 
 
 #include "readGravitationalAcceleration.H"

@@ -17,6 +17,8 @@ FoamFile
 
 simulationType  RAS;
 
+density         variable;
+
 RAS
 {
     RASModel        kEpsilon;
