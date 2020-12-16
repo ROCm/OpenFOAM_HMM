@@ -42,7 +42,9 @@ outletMappedUniformInletFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     outletPatchName_(),
-    phiName_("phi")
+    phiName_("phi"),
+    fraction_(1),
+    offset_(Zero)
 {}
 
 
@@ -56,8 +58,10 @@ outletMappedUniformInletFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
-    outletPatchName_(dict.lookup("outletPatch")),
-    phiName_(dict.getOrDefault<word>("phi", "phi"))
+    outletPatchName_(dict.get<word>("outletPatch")),
+    phiName_(dict.getOrDefault<word>("phi", "phi")),
+    fraction_(dict.getOrDefault<scalar>("fraction", 1)),
+    offset_(dict.getOrDefault<Type>("offset", Zero))
 {}
 
 
@@ -73,7 +77,9 @@ outletMappedUniformInletFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
     outletPatchName_(ptf.outletPatchName_),
-    phiName_(ptf.phiName_)
+    phiName_(ptf.phiName_),
+    fraction_(ptf.fraction_),
+    offset_(ptf.offset_)
 {}
 
 
@@ -86,9 +92,10 @@ outletMappedUniformInletFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf),
     outletPatchName_(ptf.outletPatchName_),
-    phiName_(ptf.phiName_)
+    phiName_(ptf.phiName_),
+    fraction_(ptf.fraction_),
+    offset_(ptf.offset_)
 {}
-
 
 
 template<class Type>
@@ -101,7 +108,9 @@ outletMappedUniformInletFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf, iF),
     outletPatchName_(ptf.outletPatchName_),
-    phiName_(ptf.phiName_)
+    phiName_(ptf.phiName_),
+    fraction_(ptf.fraction_),
+    offset_(ptf.offset_)
 {}
 
 
@@ -124,7 +133,7 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
     );
 
     const fvPatch& p = this->patch();
-    label outletPatchID =
+    const label outletPatchID =
         p.patch().boundaryMesh().findPatchID(outletPatchName_);
 
     if (outletPatchID < 0)
@@ -139,12 +148,12 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
     const fvPatchField<Type>& outletPatchField =
         f.boundaryField()[outletPatchID];
 
-    const surfaceScalarField& phi =
+    const auto& phi =
         this->db().objectRegistry::template lookupObject<surfaceScalarField>
         (phiName_);
 
     const scalarField& outletPatchPhi = phi.boundaryField()[outletPatchID];
-    scalar sumOutletPatchPhi = gSum(outletPatchPhi);
+    const scalar sumOutletPatchPhi = gSum(outletPatchPhi);
 
     if (sumOutletPatchPhi > SMALL)
     {
@@ -152,7 +161,7 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::updateCoeffs()
             gSum(outletPatchPhi*outletPatchField)
            /sumOutletPatchPhi;
 
-        this->operator==(averageOutletField);
+        this->operator==(averageOutletField*fraction_ + offset_);
     }
     else
     {
@@ -173,6 +182,8 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeEntry("outletPatch", outletPatchName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntry("fraction", fraction_);
+    os.writeEntry("offset", offset_);
     this->writeEntry("value", os);
 }
 

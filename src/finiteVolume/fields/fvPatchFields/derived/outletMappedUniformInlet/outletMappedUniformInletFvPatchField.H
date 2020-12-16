@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,33 +31,66 @@ Group
     grpInletBoundaryConditions
 
 Description
-    This boundary condition averages the field over the "outlet" patch specified
-    by name "outletPatch" and applies this as the uniform value of the field
-    over this patch.
+    The \c outletMappedUniformInlet is an inlet boundary condition that
+    - averages the patch field of \<Type\> over a specified "outlet" patch
+    and uniformly applies the averaged value over a specified inlet patch.
+    - optionally, the averaged value can be scaled
+    and/or offset by a pair of specified values.
+
+    The governing equation of the boundary condition is:
+
+    \f[
+        \phi_{inlet} = f \phi_{outlet} + \phi_{offset}
+    \f]
+
+    where
+    \vartable
+      \phi_{inlet}   | Spatially-uniform patch-field value at an inlet patch
+      \phi_{outlet}  | Averaged patch-field value at an outlet patch
+      f              | User-defined fraction value
+      \phi_{offset}  | User-defined offset value
+    \endvartable
 
 Usage
-    \table
-        Property        | Description             | Required    | Default value
-        outletPatch     | Name of outlet patch    | yes         |
-        phi             | Flux field name         | no          | phi
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type            outletMappedUniformInlet;
-        outletPatch     aPatch;
+        // Mandatory entries (unmodifiable)
+        type            outletMappedFilterInlet;
+        outletPatch     <outletPatchName>;
+
+        // Optional entries (unmodifiable)
+        fraction        0.1;
+        offset          10;    // (1 0 0);
         phi             phi;
-        value           uniform 0;
+
+        // Optional (inherited) entries
+        ...
     }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property    | Description                          | Type   | Reqd | Dflt
+      type        | Type name: outletMappedUniformInlet  | word   | yes  | -
+      outletPatch | Name of patch to be mapped           | word   | yes  | -
+      fraction    | Fraction value                       | scalar | no   | 1
+      offset      | Offset value                         | Type   | no   | Zero
+      phi         | Name of operand flux field           | word   | no   | phi
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
+
 See also
-    Foam::fixedValueFvPatchField
+  - Foam::fixedValueFvPatchField
+  - Foam::outletMappedUniformInletHeatAdditionFvPatchField
+  - Foam::outletMappedUniformInletTemperatureFvPatchField
 
 SourceFiles
     outletMappedUniformInletFvPatchField.C
+    outletMappedUniformInletFvPatchFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,13 +113,19 @@ class outletMappedUniformInletFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Name of the outlet patch to be mapped
         word outletPatchName_;
 
-       //- Name of the flux transporting the field
+       //- Name of operand flux field
         word phiName_;
+
+        //- Fraction value
+        scalar fraction_;
+
+        //- Offset value
+        Type offset_;
 
 
 public:
@@ -112,7 +152,7 @@ public:
         );
 
         //- Construct by mapping given outletMappedUniformInletFvPatchField
-        //  onto a new patch
+        //- onto a new patch
         outletMappedUniformInletFvPatchField
         (
             const outletMappedUniformInletFvPatchField<Type>&,
@@ -156,7 +196,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -167,7 +207,7 @@ public:
             }
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
