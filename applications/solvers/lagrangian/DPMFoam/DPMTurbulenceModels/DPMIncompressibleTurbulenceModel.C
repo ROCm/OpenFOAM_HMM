@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,17 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PhaseIncompressibleTurbulenceModel.H"
+#include "DPMIncompressibleTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class TransportModel>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::
-PhaseIncompressibleTurbulenceModel
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::
+DPMIncompressibleTurbulenceModel
 (
     const word& type,
-    const geometricOneField& alpha,
-    const volScalarField& rho,
+    const volScalarField& alpha,
+    const geometricOneField& rho,
     const volVectorField& U,
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
@@ -46,9 +45,9 @@ PhaseIncompressibleTurbulenceModel
 :
     TurbulenceModel
     <
-        geometricOneField,
         volScalarField,
-        incompressibleRhoTurbulenceModel,
+        geometricOneField,
+        incompressibleTurbulenceModel,
         TransportModel
     >
     (
@@ -66,10 +65,10 @@ PhaseIncompressibleTurbulenceModel
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class TransportModel>
-Foam::autoPtr<Foam::PhaseIncompressibleTurbulenceModel<TransportModel>>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::New
+Foam::autoPtr<Foam::DPMIncompressibleTurbulenceModel<TransportModel>>
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::New
 (
-    const volScalarField& rho,
+    const volScalarField& alpha,
     const volVectorField& U,
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
@@ -77,19 +76,19 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::New
     const word& propertiesName
 )
 {
-    return autoPtr<PhaseIncompressibleTurbulenceModel>
+    return autoPtr<DPMIncompressibleTurbulenceModel>
     (
-        static_cast<PhaseIncompressibleTurbulenceModel*>(
+        static_cast<DPMIncompressibleTurbulenceModel*>(
         TurbulenceModel
         <
-            geometricOneField,
             volScalarField,
-            incompressibleRhoTurbulenceModel,
+            geometricOneField,
+            incompressibleTurbulenceModel,
             TransportModel
         >::New
         (
+            alpha,
             geometricOneField(),
-            rho,
             U,
             alphaRhoPhi,
             phi,
@@ -104,7 +103,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::New
 
 template<class TransportModel>
 Foam::tmp<Foam::volScalarField>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrime() const
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::pPrime() const
 {
     return tmp<volScalarField>::New
     (
@@ -124,7 +123,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrime() const
 
 template<class TransportModel>
 Foam::tmp<Foam::surfaceScalarField>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrimef() const
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::pPrimef() const
 {
     return tmp<surfaceScalarField>::New
     (
@@ -144,7 +143,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrimef() const
 
 template<class TransportModel>
 Foam::tmp<Foam::volSymmTensorField>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::devReff() const
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::devReff() const
 {
     return devRhoReff();
 }
@@ -152,7 +151,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::devReff() const
 
 template<class TransportModel>
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::divDevReff
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::divDevReff
 (
     volVectorField& U
 ) const
@@ -163,7 +162,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::divDevReff
 
 template<class TransportModel>
 Foam::tmp<Foam::volSymmTensorField>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::devRhoReff() const
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::devRhoReff() const
 {
     NotImplemented;
 
@@ -173,7 +172,7 @@ Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::devRhoReff() const
 
 template<class TransportModel>
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::divDevRhoReff
+Foam::DPMIncompressibleTurbulenceModel<TransportModel>::divDevRhoReff
 (
     volVectorField& U
 ) const

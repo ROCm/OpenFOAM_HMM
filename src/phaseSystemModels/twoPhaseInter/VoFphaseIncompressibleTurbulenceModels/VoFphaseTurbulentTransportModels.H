@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DPMIncompressibleTurbulenceModel.H"
-#include "singlePhaseTransportModel.H"
+#include "PhaseIncompressibleTurbulenceModel.H"
+#include "incompressible/transportModel/transportModel.H"
 #include "addToRunTimeSelectionTable.H"
 #include "makeTurbulenceModel.H"
 
@@ -36,52 +36,26 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTurbulenceModelTypes
+makeTurbulenceModelTypes
 (
-    volScalarField,
     geometricOneField,
-    incompressibleTurbulenceModel,
-    DPMIncompressibleTurbulenceModel,
-    singlePhaseTransportModel
-);
-
-makeBaseTurbulenceModel
-(
     volScalarField,
-    geometricOneField,
-    incompressibleTurbulenceModel,
-    DPMIncompressibleTurbulenceModel,
-    singlePhaseTransportModel
+    incompressibleRhoTurbulenceModel,
+    PhaseIncompressibleTurbulenceModel,
+    transportModel
 );
 
 #define makeLaminarModel(Type)                                                 \
     makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, laminar, Type)
+    (transportModelPhaseIncompressibleTurbulenceModel, laminar, Type)
 
 #define makeRASModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, RAS, Type)
+    (transportModelPhaseIncompressibleTurbulenceModel, RAS, Type)
 
 #define makeLESModel(Type)                                                     \
     makeTemplatedTurbulenceModel                                               \
-    (singlePhaseTransportModelDPMIncompressibleTurbulenceModel, LES, Type)
+    (transportModelPhaseIncompressibleTurbulenceModel, LES, Type)
 
-#include "Stokes.H"
-makeLaminarModel(Stokes);
-
-#include "kEpsilon.H"
-makeRASModel(kEpsilon);
-
-#include "realizableKE.H"
-makeRASModel(realizableKE);
-
-#include "kOmegaSST.H"
-makeRASModel(kOmegaSST);
-
-#include "Smagorinsky.H"
-makeLESModel(Smagorinsky);
-
-#include "kEqn.H"
-makeLESModel(kEqn);
 
 // ************************************************************************* //

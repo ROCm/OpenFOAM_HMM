@@ -10,6 +10,7 @@
     Copyright (C) 2017 OpenCFD Ltd.
     Copyright (C) 2018 Johan Roenby
     Copyright (C) 2019-2020 DLR
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +60,7 @@ Description
 #include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
 #include "immiscibleIncompressibleTwoPhaseMixture.H"
-#include "turbulentTransportModel.H"
+#include "incompressibleInterPhaseTransportModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
 #include "CorrectPhi.H"
@@ -90,8 +91,6 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initCorrectPhi.H"
     #include "createUfIfPresent.H"
-
-    turbulence->validate();
 
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -181,7 +180,7 @@ int main(int argc, char *argv[])
 
             if (pimple.turbCorr())
             {
-                turbulence->correct();
+                turbulence.correct();
             }
         }
 

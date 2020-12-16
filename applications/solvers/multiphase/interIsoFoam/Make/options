@@ -1,5 +1,7 @@
 EXE_INC = \
     -I../VoF \
+    -I$(LIB_SRC)/phaseSystemModels/twoPhaseInter/incompressibleInterPhaseTransportModel/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/twoPhaseInter/VoFphaseIncompressibleTurbulenceModels/lnInclude \
     -I../interFoam \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
@@ -14,6 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/phaseIncompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/immiscibleIncompressibleTwoPhaseMixture/lnInclude
 
 EXE_LIBS = \
@@ -29,4 +32,6 @@ EXE_LIBS = \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
     -lwaveModels \
-    -lgeometricVoF
+    -lgeometricVoF \
+    -lVoFphaseTurbulentTransportModels \
+    -lincompressibleInterPhaseTransportModels

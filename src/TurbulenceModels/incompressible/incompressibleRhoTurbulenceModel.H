@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +24,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressibleTurbulenceModel
+    Foam::incompressibleRhoTurbulenceModel
 
 Description
     Abstract base class for turbulence models (RAS, LES and laminar).
 
 SourceFiles
-    incompressibleTurbulenceModel.C
+    incompressibleRhoTurbulenceModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef incompressibleTurbulenceModel_H
-#define incompressibleTurbulenceModel_H
+#ifndef incompressibleRhoTurbulenceModel_H
+#define incompressibleRhoTurbulenceModel_H
 
 #include "turbulenceModel.H"
 #include "geometricOneField.H"
@@ -50,10 +49,10 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                Class incompressibleTurbulenceModel Declaration
+                Class incompressibleRhoTurbulenceModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class incompressibleTurbulenceModel
+class incompressibleRhoTurbulenceModel
 :
     public turbulenceModel
 {
@@ -62,7 +61,8 @@ protected:
 
     // Protected data
 
-        geometricOneField rho_;
+        //- Pointer to actual rho
+        const volScalarField& rho_;
 
 
     // Protected member functions
@@ -78,27 +78,28 @@ private:
     // Private Member Functions
 
         //- No copy construct
-        incompressibleTurbulenceModel
+        incompressibleRhoTurbulenceModel
         (
-            const incompressibleTurbulenceModel&
+            const incompressibleRhoTurbulenceModel&
         ) = delete;
 
         //- No copy assignment
-        void operator=(const incompressibleTurbulenceModel&) = delete;
+        void operator=(const incompressibleRhoTurbulenceModel&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("incompressibleTurbulenceModel");
+    TypeName("incompressibleRhoTurbulenceModel");
 
 
     // Constructors
 
-        //- Construct from components
-        incompressibleTurbulenceModel
+
+         //- Construct from components
+        incompressibleRhoTurbulenceModel
         (
-            const geometricOneField& rho,
+            const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
@@ -107,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~incompressibleTurbulenceModel() = default;
+    virtual ~incompressibleRhoTurbulenceModel() = default;
 
 
     // Member Functions
