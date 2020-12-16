@@ -450,6 +450,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     PtrList<entry> patchEntries;
     if (Pstream::master())
     {
+        const bool oldParRun = Pstream::parRun(false);
         facesInstance = io.time().findInstance
         (
             meshSubDir,
@@ -470,6 +471,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
                 false
             )
         );
+        Pstream::parRun(oldParRun);
 
         // Send patches
         for (const int slave : Pstream::subProcs())
@@ -520,11 +522,14 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
 
     // Read mesh
     // ~~~~~~~~~
-    // Now all processors read a mesh and use supplied points,faces etc
+    // Now all processors read a mesh or use supplied points,faces etc
     // if there is none.
-    // Note: fvSolution, fvSchemes are also using the supplied Ioobject so
+    // Note: fvSolution, fvSchemes are also using the supplied IOobject so
     //       on slave will be NO_READ, on master READ_IF_PRESENT. This will
     //       conflict with e.g. timeStampMaster reading so switch off.
+    // Note: v2006 used the READ_IF_PRESENT flag in the meshIO.readOpt(). v2012
+    //       (correctly) does no longer so below code explicitly addFvPatches
+    //       using the separately read boundary file.
 
     const regIOobject::fileCheckTypes oldCheckType =
         regIOobject::fileModificationChecking;
@@ -551,8 +556,12 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
 
         DynamicList<polyPatch*> newPatches;
 
-        if (haveMesh)   //Pstream::master())
+        if (mesh.boundary().size() == patchEntries.size())
         {
+            // Assumably we have correctly read the boundary and can clone.
+            // Note: for
+            // v2012 onwards this is probably never the case and this whole
+            // section can be removed.
             forAll(mesh.boundary(), patchI)
             {
                 newPatches.append
@@ -563,6 +572,10 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
         }
         else
         {
+            // Use patchEntries (read on master & scattered to slaves). This
+            // is probably always happening since boundary file is not read with
+            // READ_IF_PRESENT on recent versions.
+
             forAll(patchEntries, patchI)
             {
                 const entry& e = patchEntries[patchI];
@@ -577,8 +590,12 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
                 else
                 {
                     dictionary patchDict(e.dict());
-                    patchDict.set("nFaces", 0);
-                    patchDict.set("startFace", 0);
+
+                    if (mesh.nInternalFaces() == 0)
+                    {
+                        patchDict.set("nFaces", 0);
+                        patchDict.set("startFace", 0);
+                    }
 
                     newPatches.append
                     (
@@ -655,7 +672,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             );
         }
 
-        if (pz.size() && fz.size() && cz.size())
+        if (pz.size() || fz.size() || cz.size())
         {
             mesh.addZones(pz, fz, cz);
         }

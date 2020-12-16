@@ -2754,6 +2754,10 @@ int main(int argc, char *argv[])
             Info<< "Time = " << runTime.timeName() << endl << endl;
 
 
+            // Read undecomposed mesh on master and 'empty' mesh
+            // (zero faces, point, cells but valid patches and zones) on slaves.
+            // This is a bit of tricky code and hidden inside fvMeshTools for
+            // now.
             Info<< "Reading undecomposed mesh (on master)" << endl;
             autoPtr<fvMesh> baseMeshPtr = fvMeshTools::newMesh
             (
