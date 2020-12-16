@@ -2362,15 +2362,16 @@ int main(int argc, char *argv[])
     bool decompose = args.found("decompose");
     bool overwrite = args.found("overwrite");
 
-    if (Foam::sigFpe::requested())
-    {
-        WarningInFunction
-            << "Detected floating point exception trapping (FOAM_SIGFPE)."
-            << " This might give" << nl
-            << "    problems when mapping fields. Switch it off in case"
-            << " of problems." << endl;
-    }
-
+    // Disable NaN setting and floating point error trapping. This is to avoid
+    // any issues inside the field redistribution inside fvMeshDistribute
+    // which temporarily moves processor faces into existing patches. These
+    // will now not have correct values. After all bits have been assembled
+    // the processor fields will be restored but until then there might
+    // be uninitialised values which might upset some patch field constructors.
+    // Workaround by disabling floating point error trapping. TBD: have
+    // actual field redistribution instead of subsetting inside
+    // fvMeshDistribute.
+    Foam::sigFpe::unset(true);
 
     const wordRes selectedFields;
     const wordRes selectedLagrangianFields;
