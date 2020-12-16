@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
             if (pimple.turbCorr())
             {
-                turbulence.correct();
+                turbulence->correct();
             }
         }
 

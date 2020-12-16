@@ -71,8 +71,18 @@ surfaceScalarField rhoPhi
 );
 
 
-incompressibleInterPhaseTransportModel<immiscibleIncompressibleTwoPhaseMixture>
-    turbulence(rho, U, phi, rhoPhi, mixture);
+typedef incompressibleInterPhaseTransportModel
+    <
+        immiscibleIncompressibleTwoPhaseMixture
+    > transportModelType;
+
+autoPtr<transportModelType> turbulence
+(
+    new transportModelType
+    (
+        rho, U, phi, rhoPhi, mixture
+    )
+);
 
 
 #include "readGravitationalAcceleration.H"

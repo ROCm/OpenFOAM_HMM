@@ -70,8 +70,18 @@ surfaceScalarField rhoPhi
     fvc::interpolate(rho)*phi
 );
 
-incompressibleInterPhaseTransportModel<immiscibleIncompressibleTwoPhaseMixture>
-    turbulence(rho, U, phi, rhoPhi, mixture);
+typedef incompressibleInterPhaseTransportModel
+    <
+        immiscibleIncompressibleTwoPhaseMixture
+    > transportModelType;
+
+autoPtr<transportModelType> turbulence
+(
+    new transportModelType
+    (
+        rho, U, phi, rhoPhi, mixture
+    )
+);
 
 #include "readGravitationalAcceleration.H"
 #include "readhRef.H"
