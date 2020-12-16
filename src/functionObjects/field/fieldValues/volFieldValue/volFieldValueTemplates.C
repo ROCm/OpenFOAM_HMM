@@ -209,30 +209,26 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
 
         if (writeFields_)
         {
-            Field<Type> allValues(values);
-            combineFields(allValues);
-
-            if (Pstream::master())
+            word outName = fieldName + '_' + regionTypeNames_[regionType_];
+            if (this->volRegion::regionName_ != polyMesh::defaultRegion)
             {
-                word outName = fieldName + '_' + regionTypeNames_[regionType_];
-                if (this->volRegion::regionName_ != polyMesh::defaultRegion)
-                {
-                    outName = outName + '-' + this->volRegion::regionName_;
-                }
-
-                IOField<Type>
-                (
-                    IOobject
-                    (
-                        outName,
-                        obr_.time().timeName(),
-                        obr_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    scaleFactor_*weightField*allValues
-                ).write();
+                outName = outName + '-' + this->volRegion::regionName_;
             }
+
+            IOField<Type>
+            (
+                IOobject
+                (
+                    outName,
+                    obr_.time().timeName(),
+                    obr_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                weightField.empty()
+              ? scaleFactor_*values
+              : scaleFactor_*weightField*values
+            ).write();
         }
 
         if (operation_ != opNone)
