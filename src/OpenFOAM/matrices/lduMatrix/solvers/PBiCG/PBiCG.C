@@ -105,7 +105,7 @@ Foam::solverPerformance Foam::PBiCG::solve
     (
         ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
         fieldName_,
-        false
+        true
     );
 
     // --- Calculate normalisation factor
