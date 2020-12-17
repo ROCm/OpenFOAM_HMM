@@ -36,7 +36,7 @@ namespace Foam
 namespace expressions
 {
 
-    defineTypeNameAndDebug(exprResultStoredStack,0);
+    defineTypeName(exprResultStoredStack);
 
     addToRunTimeSelectionTable
     (

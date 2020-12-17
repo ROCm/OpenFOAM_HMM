@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,12 @@ Class
     Foam::expressions::exprResultGlobals
 
 Description
-    A globally available registry of expression results
+    A globally available registry of expression results.
+    These are currently registered on Time (may change in the future).
+
+Note
+    The storage mechanism is similar to a MeshObject, but always stores
+    on Time and flushes stale values according to the time index.
 
 SourceFiles
     exprResultGlobals.C
@@ -69,10 +74,17 @@ public:
         {
         public:
 
-            Table();
+            //- Default construct
+            Table() = default;
+
+            //- Copy (clone) construct
             Table(const Table& tbl);
+
+            //- Move construct
             Table(Table&& tbl);
-            Table(Istream& is);
+
+            //- Read construct from stream
+            explicit Table(Istream& is);
         };
 
 
@@ -86,13 +98,10 @@ private:
         //- The currently (or previously) used time-index
         label timeIndex_;
 
-        //- Only one instance of this repository
-        static autoPtr<exprResultGlobals> singleton_;
-
 
     // Private Member Functions
 
-        //- Construct
+        //- Construct on Time for registry
         explicit exprResultGlobals(const objectRegistry& obr);
 
         //- Reset all variables
@@ -108,13 +117,16 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("exprResultGlobals");
+    TypeNameNoDebug("exprResultGlobals");
 
 
-    // Constructors
+    // Selectors
 
-        //- Get the singleton
+        //- Static constructor for singleton
         static exprResultGlobals& New(const objectRegistry& obr);
+
+        //- Static destructor for singleton
+        static bool Delete(const objectRegistry& obr);
 
 
     //- Destructor
@@ -140,15 +152,6 @@ public:
             const word& name,
             const word& scope,
             const exprResult& value,
-            const bool overwrite = true
-        );
-
-        //- Add named result to specified scope
-        exprResult& addValue
-        (
-            const word& name,
-            const word& scope,
-            autoPtr<exprResult>& value,
             const bool overwrite = true
         );
 

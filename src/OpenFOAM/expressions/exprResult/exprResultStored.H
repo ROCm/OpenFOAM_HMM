@@ -84,7 +84,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("exprResultStored");
+    TypeNameNoDebug("exprResultStored");
 
 
     // Constructors

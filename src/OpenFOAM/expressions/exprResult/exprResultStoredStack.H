@@ -66,7 +66,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("exprResultStoredStack");
+    TypeNameNoDebug("exprResultStoredStack");
 
 
     // Constructors

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ namespace Foam
 {
 namespace expressions
 {
-    defineTypeNameAndDebug(exprResultDelayed, 0);
+    defineTypeName(exprResultDelayed);
 
     addToRunTimeSelectionTable
     (

@@ -36,14 +36,10 @@ namespace Foam
 namespace expressions
 {
 
-    defineTypeNameAndDebug(exprResultGlobals, 0);
+    defineTypeName(exprResultGlobals);
 
 } // End namespace expressions
 } // End namespace Foam
-
-
-Foam::autoPtr<Foam::expressions::exprResultGlobals>
-    Foam::expressions::exprResultGlobals::singleton_;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -57,30 +53,26 @@ Foam::expressions::exprResultGlobals::exprResultGlobals
     (
         IOobject
         (
-            "exprResultGlobals",
-            obr.time().timeName(),
-            "expressions",
+            exprResultGlobals::typeName,
+            obr.time().timeName(),  // instance
+            "expressions",          // local
             obr.time(),
             IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
+            IOobject::AUTO_WRITE,
+            true  // register
         )
     ),
+    variables_(),
     timeIndex_(obr.time().timeIndex())
 {
     if (headerOk())
     {
         readData
         (
-            readStream("exprResultGlobals", true)
+            readStream(exprResultGlobals::typeName, true)
         );
     }
 }
-
-
-Foam::expressions::exprResultGlobals::Table::Table()
-:
-    HashPtrTable<exprResult>()
-{}
 
 
 Foam::expressions::exprResultGlobals::Table::Table(const Table& tbl)
@@ -120,6 +112,52 @@ void Foam::expressions::exprResultGlobals::reset()
 }
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::expressions::exprResultGlobals&
+Foam::expressions::exprResultGlobals::New
+(
+    const objectRegistry& obr
+)
+{
+    typedef expressions::exprResultGlobals Type;
+
+    auto* ptr = obr.time().getObjectPtr<Type>(Type::typeName);
+
+    if (!ptr)
+    {
+        ptr = new Type(obr);
+        ptr->store();
+    }
+    else if (ptr->timeIndex_ != obr.time().timeIndex())
+    {
+        // If time changes, reset variables
+
+        ptr->timeIndex_ = obr.time().timeIndex();
+        ptr->reset();
+    }
+
+    return *ptr;
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+bool Foam::expressions::exprResultGlobals::Delete(const objectRegistry& obr)
+{
+    typedef expressions::exprResultGlobals Type;
+
+    auto* ptr = obr.time().getObjectPtr<Type>(Type::typeName);
+
+    if (ptr)
+    {
+        return obr.time().checkOut(ptr);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::expressions::exprResultGlobals::writeData(Ostream& os) const
@@ -148,29 +186,6 @@ bool Foam::expressions::exprResultGlobals::readData(Istream& is)
 }
 
 
-Foam::expressions::exprResultGlobals&
-Foam::expressions::exprResultGlobals::New
-(
-    const objectRegistry& obr
-)
-{
-    if (!singleton_)
-    {
-        singleton_.reset(new exprResultGlobals(obr));
-    }
-
-    if (singleton_->timeIndex_ != obr.time().timeIndex())
-    {
-        // Time changes, reset variables
-
-        singleton_->timeIndex_ = obr.time().timeIndex();
-        singleton_->reset();
-    }
-
-    return *singleton_;
-}
-
-
 Foam::expressions::exprResultGlobals::Table&
 Foam::expressions::exprResultGlobals::getNamespace(const word& name)
 {
@@ -187,11 +202,11 @@ Foam::expressions::exprResultGlobals::get
 {
     for (const word& scopeName : scopes)
     {
-        const auto tableIter = variables_.find(scopeName);
+        const auto tableIter = variables_.cfind(scopeName);
 
         if (tableIter.found())
         {
-            const auto resultIter = (*tableIter).find(name);
+            const auto resultIter = (*tableIter).cfind(name);
 
             if (resultIter.found())
             {
@@ -244,26 +259,6 @@ Foam::expressions::exprResultGlobals::addValue
 (
     const word& name,
     const word& scope,
-    autoPtr<exprResult>& value,
-    const bool overwrite
-)
-{
-    Table& tbl = getOrCreateScope(scope);
-
-    if (overwrite || !tbl.found(name))
-    {
-        tbl.set(name, value);
-    }
-
-    return *tbl[name];
-}
-
-
-Foam::expressions::exprResult&
-Foam::expressions::exprResultGlobals::addValue
-(
-    const word& name,
-    const word& scope,
     autoPtr<exprResult>&& value,
     const bool overwrite
 )
@@ -272,7 +267,7 @@ Foam::expressions::exprResultGlobals::addValue
 
     if (overwrite || !tbl.found(name))
     {
-        tbl.set(name, value);
+        tbl.set(name, std::move(value));
     }
 
     return *tbl[name];
