@@ -137,7 +137,8 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     functionObjects::writeFile(owner, this->localPath(), typeName, false),
     UName_("unknown_U"),
     escapedParcels_(0),
-    escapedMass_(0.0)
+    escapedMass_(0.0),
+    Urmax_(1e-4)
 {}
 
 
@@ -160,7 +161,8 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     ),
     UName_(this->coeffDict().template getOrDefault<word>("U", "U")),
     escapedParcels_(0),
-    escapedMass_(0.0)
+    escapedMass_(0.0),
+    Urmax_(this->coeffDict().template getOrDefault<scalar>("UrMax", 0))
 {}
 
 
@@ -174,7 +176,8 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
     functionObjects::writeFile(pim),
     UName_(pim.UName_),
     escapedParcels_(pim.escapedParcels_),
-    escapedMass_(pim.escapedMass_)
+    escapedMass_(pim.escapedMass_),
+    Urmax_(pim.Urmax_)
 {}
 
 
@@ -184,6 +187,13 @@ template<class CloudType>
 const Foam::word& Foam::PatchInteractionModel<CloudType>::UName() const
 {
     return UName_;
+}
+
+
+template<class CloudType>
+const Foam::scalar& Foam::PatchInteractionModel<CloudType>::Urmax() const
+{
+    return Urmax_;
 }
 
 

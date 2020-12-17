@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,6 +177,9 @@ Foam::Cloud<ParticleType>::Cloud
     geometryType_(cloud::geometryType::COORDINATES)
 {
     checkPatches();
+
+    polyMesh_.tetBasePtIs();
+    polyMesh_.oldCellCentres();
 
     initCloud(checkClass);
 }

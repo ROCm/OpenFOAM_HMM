@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,6 +93,28 @@ void Foam::KinematicParcel<ParcelType>::calcDispersion
 
 template<class ParcelType>
 template<class TrackCloudType>
+void Foam::KinematicParcel<ParcelType>::calcUCorrection
+(
+    TrackCloudType& cloud,
+    trackingData& td,
+    const scalar dt
+)
+{
+    typename TrackCloudType::parcelType& p =
+        static_cast<typename TrackCloudType::parcelType&>(*this);
+
+    this->UCorrect_ = Zero;
+
+    this->UCorrect_ =
+        cloud.dampingModel().velocityCorrection(p, dt);
+
+    this->UCorrect_ +=
+        cloud.packingModel().velocityCorrection(p, dt);
+}
+
+
+template<class ParcelType>
+template<class TrackCloudType>
 void Foam::KinematicParcel<ParcelType>::cellValueSourceCorrection
 (
     TrackCloudType& cloud,
@@ -141,6 +164,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     this->U_ =
         calcVelocity(cloud, td, dt, Re, td.muc(), mass0, Su, dUTrans, Spu);
 
+    this->U_ += this->UCorrect_;
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -249,7 +273,8 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     rho_(p.rho_),
     age_(p.age_),
     tTurb_(p.tTurb_),
-    UTurb_(p.UTurb_)
+    UTurb_(p.UTurb_),
+    UCorrect_(p.UCorrect_)
 {}
 
 
@@ -270,7 +295,8 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     rho_(p.rho_),
     age_(p.age_),
     tTurb_(p.tTurb_),
-    UTurb_(p.UTurb_)
+    UTurb_(p.UTurb_),
+    UCorrect_(p.UCorrect_)
 {}
 
 
@@ -348,6 +374,8 @@ bool Foam::KinematicParcel<ParcelType>::move
                 p.cellValueSourceCorrection(cloud, ttd, dt);
             }
 
+            p.calcUCorrection(cloud, ttd, dt);
+
             p.calc(cloud, ttd, dt);
         }
 
@@ -357,7 +385,6 @@ bool Foam::KinematicParcel<ParcelType>::move
         {
             cloud.functions().postFace(p, ttd.keepParticle);
         }
-
         cloud.functions().postMove(p, dt, start, ttd.keepParticle);
 
         if (p.active() && p.onFace() && ttd.keepParticle)

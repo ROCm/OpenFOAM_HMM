@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,10 +81,9 @@ class polyMesh
     public objectRegistry,
     public primitiveMesh
 {
-
 public:
 
-    // Public data types
+    // Public Data
 
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
@@ -114,7 +114,7 @@ public:
 
 private:
 
-    // Permanent data
+    // Private Data
 
         // Primitive mesh data
 
@@ -188,6 +188,12 @@ private:
 
             //- Old points (for the last mesh motion)
             mutable autoPtr<pointField> oldPointsPtr_;
+
+            //- Old cell centres (for the last mesh motion)
+            mutable autoPtr<pointField> oldCellCentresPtr_;
+
+            //- Whether or not to store the old cell centres
+            mutable bool storeOldCellCentres_;
 
 
     // Private Member Functions
@@ -431,6 +437,9 @@ public:
 
             //- Return old points for mesh motion
             virtual const pointField& oldPoints() const;
+
+            //- Return old points for mesh motion
+            virtual const pointField& oldCellCentres() const;
 
             //- Return boundary mesh
             const polyBoundaryMesh& boundaryMesh() const

@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -293,7 +294,7 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 template<class TrackCloudType>
 void Foam::particle::hitFace
 (
-    const vector& direction,
+    const vector& displacement,
     TrackCloudType& cloud,
     trackingData& td
 )
@@ -337,11 +338,11 @@ void Foam::particle::hitFace
             }
             else if (isA<cyclicACMIPolyPatch>(patch))
             {
-                p.hitCyclicACMIPatch(cloud, ttd, direction);
+                p.hitCyclicACMIPatch(cloud, ttd, displacement);
             }
             else if (isA<cyclicAMIPolyPatch>(patch))
             {
-                p.hitCyclicAMIPatch(cloud, ttd, direction);
+                p.hitCyclicAMIPatch(cloud, ttd, displacement);
             }
             else if (isA<processorPolyPatch>(patch))
             {
@@ -459,7 +460,7 @@ void Foam::particle::hitCyclicAMIPatch
 (
     TrackCloudType&,
     trackingData& td,
-    const vector& direction
+    const vector& displacement
 )
 {
     vector pos = position();
@@ -468,7 +469,7 @@ void Foam::particle::hitCyclicAMIPatch
         static_cast<const cyclicAMIPolyPatch&>(mesh_.boundaryMesh()[patch()]);
     const cyclicAMIPolyPatch& receiveCpp = cpp.neighbPatch();
     const label sendFacei = cpp.whichFace(facei_);
-    const label receiveFacei = cpp.pointFace(sendFacei, direction, pos);
+    const label receiveFacei = cpp.pointFace(sendFacei, displacement, pos);
 
     if (receiveFacei < 0)
     {
@@ -485,12 +486,19 @@ void Foam::particle::hitCyclicAMIPatch
     facei_ = tetFacei_ = receiveFacei + receiveCpp.start();
 
     // Locate the particle on the receiving side
-    vector directionT = direction;
-    cpp.reverseTransformDirection(directionT, sendFacei);
+    vector displacementT = displacement;
+    cpp.reverseTransformDirection(displacementT, sendFacei);
+
+    // NOTE: The ray used to find the hit location accross the AMI might not
+    // be consistent in the displacement direction. Therefore a particle can
+    // be looping accross AMI patches indefinitely. Advancing the particle
+    // trajectory inside the cell is a possible solution.
+    const vector dispDir = cpp.fraction()*displacementT;
+    stepFraction_ += cpp.fraction();
     locate
     (
-        pos,
-        &directionT,
+        pos + dispDir,
+        &displacementT,
         mesh_.faceOwner()[facei_],
         false,
         "Particle crossed between " + cyclicAMIPolyPatch::typeName +
@@ -523,6 +531,26 @@ void Foam::particle::hitCyclicAMIPatch
         );
         transformProperties(-s);
     }
+
+    //if (onBoundaryFace())
+    {
+//         vector receiveNormal, receiveDisplacement;
+//         patchData(receiveNormal, receiveDisplacement);
+//
+//         if (((displacementT - fraction*receiveDisplacement)&receiveNormal) > 0)
+//         {
+//             td.keepParticle = false;
+//             WarningInFunction
+//                 << "Particle transfer from " << cyclicAMIPolyPatch::typeName
+//                 << " patches " << cpp.name() << " to " << receiveCpp.name()
+//                 << " failed at position " << pos << " and with displacement "
+//                 << (displacementT - fraction*receiveDisplacement) << nl
+//                 << "    The displacement points into both the source and "
+//                 << "receiving faces, so the tracking cannot proceed" << nl
+//                 << "    The particle has been removed" << nl << endl;
+//             return;
+//         }
+    }
 }
 
 
@@ -531,7 +559,7 @@ void Foam::particle::hitCyclicACMIPatch
 (
     TrackCloudType& cloud,
     trackingData& td,
-    const vector& direction
+    const vector& displacement
 )
 {
     const cyclicACMIPolyPatch& cpp =
@@ -551,20 +579,20 @@ void Foam::particle::hitCyclicACMIPatch
     if (!couple && !nonOverlap)
     {
         vector pos = position();
-        couple = cpp.pointFace(localFacei, direction, pos) >= 0;
+        couple = cpp.pointFace(localFacei, displacement, pos) >= 0;
         nonOverlap = !couple;
     }
 
     if (couple)
     {
-        hitCyclicAMIPatch(cloud, td, direction);
+        hitCyclicAMIPatch(cloud, td, displacement);
     }
     else
     {
         // Move to the face associated with the non-overlap patch and redo the
         // face interaction.
         tetFacei_ = facei_ = cpp.nonOverlapPatch().start() + localFacei;
-        hitFace(direction, cloud, td);
+        hitFace(displacement, cloud, td);
     }
 }
 

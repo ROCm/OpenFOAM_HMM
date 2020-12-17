@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,6 +143,39 @@ public:
 
 #define makeDampingModel(CloudType)                                            \
                                                                                \
+    typedef Foam::CloudType::kinematicCloudType kinematicCloudType;            \
+    defineNamedTemplateTypeNameAndDebug                                        \
+    (                                                                          \
+        Foam::DampingModel<kinematicCloudType>,                                \
+        0                                                                      \
+    );                                                                         \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        defineTemplateRunTimeSelectionTable                                    \
+        (                                                                      \
+            DampingModel<kinematicCloudType>,                                  \
+            dictionary                                                         \
+        );                                                                     \
+    }
+
+
+#define makeDampingModelType(SS, CloudType)                                    \
+                                                                               \
+    typedef Foam::CloudType::kinematicCloudType kinematicCloudType;            \
+    defineNamedTemplateTypeNameAndDebug                                        \
+        (Foam::DampingModels::SS<kinematicCloudType>, 0);                      \
+                                                                               \
+    Foam::DampingModel<kinematicCloudType>::                                   \
+        adddictionaryConstructorToTable                                        \
+        <Foam::DampingModels::SS<kinematicCloudType>>                          \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
+
+
+// These are used to defined models in MPPIC cloud specifically
+
+#define makeDampingModelMPPIC(CloudType)                                       \
+                                                                               \
     typedef Foam::CloudType::MPPICCloudType MPPICCloudType;                    \
     defineNamedTemplateTypeNameAndDebug                                        \
     (                                                                          \
@@ -159,7 +193,7 @@ public:
     }
 
 
-#define makeDampingModelType(SS, CloudType)                                    \
+#define makeDampingModelTypeMPPIC(SS, CloudType)                               \
                                                                                \
     typedef Foam::CloudType::MPPICCloudType MPPICCloudType;                    \
     defineNamedTemplateTypeNameAndDebug                                        \

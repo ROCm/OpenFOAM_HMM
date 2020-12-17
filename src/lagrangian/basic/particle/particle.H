@@ -6,7 +6,8 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +79,7 @@ class particle
 :
     public IDLList<particle>::link
 {
-    // Private member data
+    // Private Data
 
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition;
@@ -86,15 +87,9 @@ class particle
         //- Size in bytes of the fields
         static const std::size_t sizeofFields;
 
-        //- The factor by which the displacement is increased when passing
-        //  through negative space. This should be slightly bigger than one.
-        //  This is needed as a straight trajectory can form a closed loop
-        //  through regions of overlapping positive and negative space, leading
-        //  to a track which never ends. By increasing the rate of displacement
-        //  through negative regions, the change in track fraction over this
-        //  part of the loop no longer exactly cancels the change over the
-        //  positive part, and the track therefore terminates.
-        static const scalar negativeSpaceDisplacementFactor;
+        //- The value of nBehind_ at which tracking is abandoned. See the
+        //  description of nBehind_.
+        static const label maxNBehind_;
 
 
 public:
@@ -103,7 +98,7 @@ public:
     {
     public:
 
-        // Public data
+        // Public Data
 
             //- Flag to switch processor
             bool switchProcessor;
@@ -135,7 +130,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to the polyMesh database
         const polyMesh& mesh_;
@@ -147,12 +142,12 @@ private:
         label celli_;
 
         //- Index of the face that owns the decomposed tet that the
-        //  particle is in
+        //- particle is in
         label tetFacei_;
 
         //- Index of the point on the face that defines the decomposed
-        //  tet that the particle is in.  Relative to the face base
-        //  point.
+        //- tet that the particle is in.  Relative to the face base
+        //- point.
         label tetPti_;
 
         //- Face index if the particle is on a face otherwise -1
@@ -160,6 +155,18 @@ private:
 
         //- Fraction of time-step completed
         scalar stepFraction_;
+
+        //- The distance behind the maximum distance reached so far
+        scalar behind_;
+
+        //- The number of tracks carried out that ended in a distance behind the
+        //- maximum distance reached so far. Once this reaches maxNBehind_,
+        //  tracking is abandoned for the current step. This is needed because
+        //  when tetrahedra are inverted a straight trajectory can form a closed
+        //  loop through regions of overlapping positive and negative space.
+        //  Without this break clause, such loops can result in a valid track
+        //  which never ends.
+        label nBehind_;
 
         //- Originating processor id
         label origProc_;
@@ -331,7 +338,7 @@ protected:
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Runtime type information
         TypeName("particle");
@@ -526,6 +533,9 @@ public:
             //- Return current particle position
             inline vector position() const;
 
+            //- Reset particle data
+            inline void reset();
+
 
     // Track
 
@@ -662,6 +672,7 @@ public:
 
         //- Set the addressing based on the provided position
         void relocate(const point& position, const label celli = -1);
+
 
 
     // I-O

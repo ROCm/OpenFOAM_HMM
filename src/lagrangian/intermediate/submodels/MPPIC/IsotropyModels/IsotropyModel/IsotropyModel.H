@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,12 +137,42 @@ public:
 
 #define makeIsotropyModel(CloudType)                                           \
                                                                                \
-    typedef Foam::CloudType::MPPICCloudType MPPICCloudType;                    \
+    typedef Foam::CloudType::kinematicCloudType kinematicCloudType;            \
     defineNamedTemplateTypeNameAndDebug                                        \
     (                                                                          \
-        Foam::IsotropyModel<MPPICCloudType>,                                   \
+        Foam::IsotropyModel<kinematicCloudType>,                               \
         0                                                                      \
     );                                                                         \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        defineTemplateRunTimeSelectionTable                                    \
+        (                                                                      \
+            IsotropyModel<kinematicCloudType>,                                 \
+            dictionary                                                         \
+        );                                                                     \
+    }
+
+
+#define makeIsotropyModelType(SS, CloudType)                                   \
+                                                                               \
+    typedef Foam::CloudType::kinematicCloudType kinematicCloudType;            \
+    defineNamedTemplateTypeNameAndDebug                                        \
+        (Foam::IsotropyModels::SS<kinematicCloudType>, 0);                     \
+                                                                               \
+    Foam::IsotropyModel<kinematicCloudType>::                                  \
+        adddictionaryConstructorToTable                                        \
+        <Foam::IsotropyModels::SS<kinematicCloudType>>                         \
+            add##SS##CloudType##kinematicCloudType##ConstructorToTable_;
+
+
+// These are used to defined models in MPPIC cloud specifically
+
+#define makeIsotropyModelMPPIC(CloudType)                                  \
+                                                                               \
+    typedef Foam::CloudType::MPPICCloudType MPPICCloudType;                    \
+    defineNamedTemplateTypeNameAndDebug                                        \
+        (Foam::IsotropyModel<MPPICCloudType>, 0);                              \
                                                                                \
     namespace Foam                                                             \
     {                                                                          \
@@ -153,7 +184,7 @@ public:
     }
 
 
-#define makeIsotropyModelType(SS, CloudType)                                   \
+#define makeIsotropyModelTypeMPPIC(SS, CloudType)                              \
                                                                                \
     typedef Foam::CloudType::MPPICCloudType MPPICCloudType;                    \
     defineNamedTemplateTypeNameAndDebug                                        \
@@ -163,7 +194,6 @@ public:
         adddictionaryConstructorToTable                                        \
         <Foam::IsotropyModels::SS<MPPICCloudType>>                             \
             add##SS##CloudType##MPPICCloudType##ConstructorToTable_;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

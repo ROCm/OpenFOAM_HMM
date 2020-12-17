@@ -49,6 +49,11 @@ License
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
 #include "makeReactingMultiphaseParcelSurfaceReactionModels.H"
 
+// MPPIC sub-models
+#include "makeMPPICParcelDampingModels.H"
+#include "makeMPPICParcelIsotropyModels.H"
+#include "makeMPPICParcelPackingModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeParcelCloudFunctionObjects(basicReactingMultiphaseCloud);
@@ -84,5 +89,9 @@ makeReactingMultiphaseParcelSurfaceReactionModels
     basicReactingMultiphaseCloud
 );
 
+// MPPIC sub-models
+makeMPPICParcelDampingModels(basicReactingMultiphaseCloud);
+makeMPPICParcelIsotropyModels(basicReactingMultiphaseCloud);
+makeMPPICParcelPackingModels(basicReactingMultiphaseCloud);
 
 // ************************************************************************* //

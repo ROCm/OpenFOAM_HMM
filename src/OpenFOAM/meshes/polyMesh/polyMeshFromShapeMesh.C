@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -576,7 +577,9 @@ Foam::polyMesh::polyMesh
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(nullptr)
+    oldPointsPtr_(nullptr),
+    oldCellCentresPtr_(nullptr),
+    storeOldCellCentres_(false)
 {
     DebugInfo
         << "Constructing polyMesh from cell and boundary shapes." << endl;
@@ -856,7 +859,9 @@ Foam::polyMesh::polyMesh
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(nullptr)
+    oldPointsPtr_(nullptr),
+    oldCellCentresPtr_(nullptr),
+    storeOldCellCentres_(false)
 {
     DebugInfo
         << "Constructing polyMesh from cell and boundary shapes." << endl;

@@ -58,6 +58,13 @@ inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
     return nbrPatchName_;
 }
 
+
+inline Foam::scalar Foam::cyclicAMIPolyPatch::fraction() const
+{
+    return fraction_;
+}
+
+
 inline const Foam::scalarListList& Foam::cyclicAMIPolyPatch::weights() const
 {
     if (owner())

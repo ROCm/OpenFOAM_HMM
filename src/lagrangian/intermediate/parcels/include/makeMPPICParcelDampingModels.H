@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +44,13 @@ License
     makeDampingModelType(NoDamping, CloudType);                                \
     makeDampingModelType(Relaxation, CloudType);
 
+
+#define makeMPPICCloudParcelDampingModels(CloudType)                           \
+                                                                               \
+    makeDampingModelMPPIC(CloudType);                                          \
+                                                                               \
+    makeDampingModelTypeMPPIC(NoDamping, CloudType);                           \
+    makeDampingModelTypeMPPIC(Relaxation, CloudType);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -42,8 +42,8 @@ Description
 #include "CorrectPhi.H"
 
 #ifdef MPPIC
-    #include "basicKinematicMPPICCloud.H"
-    #define basicKinematicTypeCloud basicKinematicMPPICCloud
+    #include "basicKinematicCloud.H"
+    #define basicKinematicTypeCloud basicKinematicCloud
 #else
     #include "basicKinematicCollidingCloud.H"
     #define basicKinematicTypeCloud basicKinematicCollidingCloud
@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
         continuousPhaseTransport.correct();
         muc = rhoc*continuousPhaseTransport.nu();
 
-        Info<< "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
 
         // Update continuous phase volume fraction field

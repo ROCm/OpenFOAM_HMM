@@ -1069,15 +1069,17 @@ const
     {
         const face& f = srcPatch[srcFacei];
 
-        pointHit ray = f.ray(tgtPoint, n, srcPoints);
+        pointHit ray =
+            f.ray(tgtPoint, n, srcPoints, intersection::algorithm::VISIBLE);
 
         if (ray.hit())
         {
-            // tgtPoint = ray.rawPoint();
+            tgtPoint = ray.rawPoint();
             return srcFacei;
         }
         else if (ray.distance() < nearest.distance())
         {
+
             nearest = ray;
             nearestFacei = srcFacei;
         }
@@ -1085,7 +1087,7 @@ const
 
     if (nearest.hit() || nearest.eligibleMiss())
     {
-        // tgtPoint = nearest.rawPoint();
+        tgtPoint = nearest.rawPoint();
         return nearestFacei;
     }
 
@@ -1116,23 +1118,26 @@ const
     {
         const face& f = tgtPatch[tgtFacei];
 
-        pointHit ray = f.ray(srcPoint, n, tgtPoints);
+        pointHit ray =
+            f.ray(srcPoint, n, tgtPoints, intersection::algorithm::VISIBLE);
 
-        if (ray.hit() || ray.eligibleMiss())
+        if (ray.hit())
         {
-            // srcPoint = ray.rawPoint();
+            srcPoint = ray.rawPoint();
             return tgtFacei;
         }
-        else if (ray.distance() < nearest.distance())
+        const pointHit near = f.nearestPoint(srcPoint, tgtPoints);
+
+        if (near.distance() < nearest.distance())
         {
-            nearest = ray;
+            nearest = near;
             nearestFacei = tgtFacei;
         }
     }
-
     if (nearest.hit() || nearest.eligibleMiss())
     {
-        // srcPoint = nearest.rawPoint();
+
+        srcPoint = nearest.rawPoint();
         return nearestFacei;
     }
 

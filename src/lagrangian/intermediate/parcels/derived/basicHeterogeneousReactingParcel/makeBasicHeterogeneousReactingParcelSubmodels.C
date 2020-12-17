@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,11 @@ License
 #include "makeReactingMultiphaseParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
 
+// MPPIC sub-models
+#include "makeMPPICParcelDampingModels.H"
+#include "makeMPPICParcelIsotropyModels.H"
+#include "makeMPPICParcelPackingModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeParcelCloudFunctionObjects(basicHeterogeneousReactingCloud);
@@ -67,5 +72,10 @@ makeHeterogeneousReactingParcelHeterogeneousReactingModels
 (
     basicHeterogeneousReactingCloud
 );
+
+// MPPIC sub-models
+makeMPPICParcelDampingModels(basicHeterogeneousReactingCloud);
+makeMPPICParcelIsotropyModels(basicHeterogeneousReactingCloud);
+makeMPPICParcelPackingModels(basicHeterogeneousReactingCloud);
 
 // ************************************************************************* //

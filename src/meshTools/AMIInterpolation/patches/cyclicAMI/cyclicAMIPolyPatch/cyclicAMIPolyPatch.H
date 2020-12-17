@@ -97,6 +97,9 @@ protected:
         //- Index of other half
         mutable label nbrPatchID_;
 
+        //- Particle displacement fraction accross AMI
+        const scalar fraction_;
+
 
         // Transformations
 
@@ -356,6 +359,9 @@ public:
 
             //- Neighbour patch ID
             virtual label neighbPatchID() const;
+
+            //- Particle fraction increase between AMI pathces
+            inline scalar fraction() const;
 
             //- Does this side own the patch?
             virtual bool owner() const;

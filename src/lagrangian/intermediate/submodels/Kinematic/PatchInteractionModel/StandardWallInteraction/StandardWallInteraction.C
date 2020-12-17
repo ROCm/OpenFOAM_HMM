@@ -211,6 +211,18 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 // Calculate motion relative to patch velocity
                 U -= Up;
 
+                if (mag(Up) > 0 && mag(U) < this->Urmax())
+                {
+                    WarningInFunction
+                        << "Particle U the same as patch "
+                        << "    The particle has been removed" << nl << endl;
+
+                    keepParticle = false;
+                    p.active(false);
+                    U = Zero;
+                    break;
+                }
+
                 scalar Un = U & nw;
                 vector Ut = U - Un*nw;
 
@@ -223,6 +235,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 
                 // Return velocity to global space
                 U += Up;
+
 
                 break;
             }

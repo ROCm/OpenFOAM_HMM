@@ -256,6 +256,54 @@ Foam::KinematicCloud<CloudType>::surfaceFilm()
 
 
 template<class CloudType>
+inline const Foam::PackingModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::packingModel() const
+{
+    return *packingModel_;
+}
+
+
+template<class CloudType>
+inline Foam::PackingModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::packingModel()
+{
+    return *packingModel_;
+}
+
+
+template<class CloudType>
+inline const Foam::DampingModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::dampingModel() const
+{
+    return *dampingModel_;
+}
+
+
+template<class CloudType>
+inline Foam::DampingModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::dampingModel()
+{
+    return *dampingModel_;
+}
+
+
+template<class CloudType>
+inline const Foam::IsotropyModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::isotropyModel() const
+{
+    return *isotropyModel_;
+}
+
+
+template<class CloudType>
+inline Foam::IsotropyModel<Foam::KinematicCloud<CloudType>>&
+Foam::KinematicCloud<CloudType>::isotropyModel()
+{
+    return *isotropyModel_;
+}
+
+
+template<class CloudType>
 inline const Foam::integrationScheme&
 Foam::KinematicCloud<CloudType>::UIntegrator() const
 {

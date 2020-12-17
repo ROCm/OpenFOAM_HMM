@@ -95,6 +95,15 @@ class SurfaceFilmModel;
 template<class CloudType>
 class StochasticCollisionModel;
 
+template<class CloudType>
+class PackingModel;
+
+template<class CloudType>
+class DampingModel;
+
+template<class CloudType>
+class IsotropyModel;
+
 
 /*---------------------------------------------------------------------------*\
                        Class KinematicCloud Declaration
@@ -129,7 +138,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Cloud copy pointer
         autoPtr<KinematicCloud<CloudType>> cloudCopyPtr_;
@@ -146,7 +155,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
@@ -224,6 +233,18 @@ protected:
             //- Surface film model
             autoPtr<SurfaceFilmModel<KinematicCloud<CloudType>>>
                 surfaceFilmModel_;
+
+            //- Packing model
+            autoPtr<PackingModel<KinematicCloud<CloudType>>>
+                packingModel_;
+
+            //- Damping model
+            autoPtr<DampingModel<KinematicCloud<CloudType>>>
+                dampingModel_;
+
+            //- Exchange model
+            autoPtr<IsotropyModel<KinematicCloud<CloudType>>>
+                isotropyModel_;
 
 
         // Reference to the particle integration schemes
@@ -464,6 +485,31 @@ public:
                     surfaceFilm();
 
 
+                //- Return const access to the packing model
+                inline const PackingModel<KinematicCloud<CloudType>>&
+                    packingModel() const;
+
+                //- Return a reference to the packing model
+                inline PackingModel<KinematicCloud<CloudType>>&
+                    packingModel();
+
+                //- Return const access to the damping model
+                inline const DampingModel<KinematicCloud<CloudType>>&
+                    dampingModel() const;
+
+                //- Return a reference to the damping model
+                inline DampingModel<KinematicCloud<CloudType>>&
+                    dampingModel();
+
+                //- Return const access to the isotropy model
+                inline const IsotropyModel<KinematicCloud<CloudType>>&
+                    isotropyModel() const;
+
+                //- Return a reference to the isotropy model
+                inline IsotropyModel<KinematicCloud<CloudType>>&
+                    isotropyModel();
+
+
             // Integration schemes
 
                 //-Return reference to velocity integration
@@ -590,7 +636,10 @@ public:
             void scaleSources();
 
             //- Pre-evolve
-            void preEvolve(const typename parcelType::trackingData& td);
+            void preEvolve
+            (
+                const typename parcelType::trackingData& td
+            );
 
             //- Evolve the cloud
             void evolve();

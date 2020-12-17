@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -309,7 +310,9 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(nullptr)
+    oldPointsPtr_(nullptr),
+    oldCellCentresPtr_(nullptr),
+    storeOldCellCentres_(false)
 {
     if (!owner_.headerClassName().empty())
     {
@@ -513,7 +516,9 @@ Foam::polyMesh::polyMesh
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(nullptr)
+    oldPointsPtr_(nullptr),
+    oldCellCentresPtr_(nullptr),
+    storeOldCellCentres_(false)
 {
     // Note: changed that the constructors where values can be supplied
     //       (points, faces, owner/neighbour) use the readOpt. All others
@@ -669,7 +674,9 @@ Foam::polyMesh::polyMesh
     moving_(false),
     topoChanging_(false),
     curMotionTimeIndex_(time().timeIndex()),
-    oldPointsPtr_(nullptr)
+    oldPointsPtr_(nullptr),
+    oldCellCentresPtr_(nullptr),
+    storeOldCellCentres_(false)
 {
     // Note: probably needs io.readOpt() for points/faces/cells etc so
     //       we can run with READ_IF_PRESENT. See constructor above.
@@ -1120,6 +1127,11 @@ const Foam::labelList& Foam::polyMesh::faceNeighbour() const
 
 const Foam::pointField& Foam::polyMesh::oldPoints() const
 {
+    if (!moving_)
+    {
+        return points_;
+    }
+
     if (!oldPointsPtr_)
     {
         if (debug)
@@ -1132,6 +1144,24 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
     }
 
     return *oldPointsPtr_;
+}
+
+
+const Foam::pointField& Foam::polyMesh::oldCellCentres() const
+{
+    storeOldCellCentres_ = true;
+
+    if (!moving_)
+    {
+        return cellCentres();
+    }
+
+    if (!oldCellCentresPtr_)
+    {
+        oldCellCentresPtr_.reset(new pointField(cellCentres()));
+    }
+
+    return *oldCellCentresPtr_;
 }
 
 
@@ -1164,6 +1194,12 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
             Info<< "tmp<scalarField> polyMesh::movePoints(const pointField&) : "
                 << " Storing current points for time " << time().value()
                 << " index " << time().timeIndex() << endl;
+        }
+
+        if (storeOldCellCentres_)
+        {
+            oldCellCentresPtr_.clear();
+            oldCellCentresPtr_.reset(new pointField(cellCentres()));
         }
 
         // Mesh motion in the new time step
@@ -1261,6 +1297,7 @@ void Foam::polyMesh::resetMotion() const
 {
     curMotionTimeIndex_ = 0;
     oldPointsPtr_.clear();
+    oldCellCentresPtr_.clear();
 }
 
 
