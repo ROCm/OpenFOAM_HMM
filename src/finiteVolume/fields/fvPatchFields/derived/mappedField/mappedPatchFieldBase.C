@@ -84,7 +84,7 @@ void Foam::mappedPatchFieldBase<Type>::storeField
                 Pout<< "*** STORING :"
                     << " field:" << fieldName
                     << " values:" << flatOutput(subFld)
-                    << " as:" << subObr.objectPath() << endl; 
+                    << " as:" << subObr.objectPath() << endl;
             }
 
             mappedPatchBase::storeField
@@ -202,7 +202,7 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
                     << flatOutput(receiveFld)
                     << " from:" << flatOutput(fld)
                     << " constructMap:" << flatOutput(constructMap)
-                    << " as:" << subObr.objectPath() << endl; 
+                    << " as:" << subObr.objectPath() << endl;
             }
 
             mappedPatchBase::storeField

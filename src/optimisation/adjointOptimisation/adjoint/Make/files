@@ -92,10 +92,10 @@ $(NURBS)/NURBSbasis/NURBSbasis.C
 $(NURBS)/NURBS3DCurve/NURBS3DCurve.C
 $(NURBS)/NURBS3DSurface/NURBS3DSurface.C
 NURBS3D=$(NURBS)/NURBS3DVolume
-$(NURBS3D)/controlPointsDefinition/controlPointsDefinition/controlPointsDefinition.C 
-$(NURBS3D)/controlPointsDefinition/axisAligned/axisAligned.C 
-$(NURBS3D)/controlPointsDefinition/fromFile/fromFile.C 
-$(NURBS3D)/controlPointsDefinition/transformBox/transformBox.C 
+$(NURBS3D)/controlPointsDefinition/controlPointsDefinition/controlPointsDefinition.C
+$(NURBS3D)/controlPointsDefinition/axisAligned/axisAligned.C
+$(NURBS3D)/controlPointsDefinition/fromFile/fromFile.C
+$(NURBS3D)/controlPointsDefinition/transformBox/transformBox.C
 $(NURBS3D)/NURBS3DVolume/NURBS3DVolume.C
 $(NURBS3D)/cartesian/NURBS3DVolumeCartesian.C
 $(NURBS3D)/cylindrical/NURBS3DVolumeCylindrical.C

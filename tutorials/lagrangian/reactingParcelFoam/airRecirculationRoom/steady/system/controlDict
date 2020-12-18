@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2011                                 |
+|  \\    /   O peration     | Version:  v2012                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -53,7 +53,7 @@ functions
     fieldMinMax
     {
         type                fieldMinMax;
-        functionObjectLibs  (fieldFunctionObjects);
+        libs                (fieldFunctionObjects);
         fields              ( U p T);
         mode                magnitude;
         writeControl        timeStep;

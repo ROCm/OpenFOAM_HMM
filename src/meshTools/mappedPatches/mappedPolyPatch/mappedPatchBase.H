@@ -312,7 +312,7 @@ protected:
         //  and project them onto the face-diagonal-decomposition triangles.
         tmp<pointField> facePoints(const polyPatch&) const;
 
-        //- Collect single list of samples and originating processor+face + 
+        //- Collect single list of samples and originating processor+face +
         //  wanted world
         void collectSamples
         (

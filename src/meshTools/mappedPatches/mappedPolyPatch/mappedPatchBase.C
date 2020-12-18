@@ -203,7 +203,7 @@ void Foam::mappedPatchBase::collectSamples
     const pointField& facePoints,
     pointField& samples,            // All samples
     labelList& patchFaceWorlds,     // Per sample: wanted world
-    labelList& patchFaceProcs,      // Per sample: originating processor 
+    labelList& patchFaceProcs,      // Per sample: originating processor
     labelList& patchFaces,          // Per sample: originating patchFace index
     pointField& patchFc             // Per sample: originating centre
 ) const

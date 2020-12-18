@@ -32,13 +32,14 @@ Description
     area-weighted average.
 
     Example usage:
-
+    \verbatim
     {
         field               T;          // default is same as fvPatchField
         setAverage          false;
         average             1.0;        // only if setAverage=true
         interpolationScheme cellPoint;  // default is cell
     }
+    \endverbatim
 
     \table
         Property     | Description                      | Required | Default
@@ -64,7 +65,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mappedPatchBase;
 template<class> class interpolation;
 class mapDistribute;
@@ -203,7 +204,7 @@ public:
 
         //- Map optional weightField (given by name) onto *this patch
         virtual void mappedWeightField
-        (    
+        (
             const word& weightFieldName,
             tmp<scalarField>& thisWeights,
             tmp<scalarField>& nbrWeights
