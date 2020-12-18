@@ -64,12 +64,11 @@ unsetenv WM_PROJECT_DIR
 unsetenv WM_PROJECT_SITE
 unsetenv WM_PROJECT_USER_DIR
 unsetenv WM_PROJECT_VERSION
+unsetenv WM_QUIET
 unsetenv WM_SCHEDULER
 unsetenv WM_THIRD_PARTY_DIR
 
 # Older, unused variables
-unsetenv WM_HOSTS
-unsetenv WM_PROJECT_API
 unsetenv WM_PROJECT_INST_DIR
 
 # Before 1906
@@ -93,6 +92,7 @@ unsetenv FOAM_MODULE_APPBIN
 unsetenv FOAM_MODULE_LIBBIN
 unsetenv FOAM_MODULE_PREFIX
 unsetenv FOAM_MPI
+unsetenv FOAM_MPI_LIBBIN
 unsetenv FOAM_RUN
 unsetenv FOAM_SETTINGS
 unsetenv FOAM_SIGFPE
