@@ -70,12 +70,12 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     if (oldPointsPtr_)
     {
         // Make a copy of the original points
-        pointField oldMotionPoints = *oldPointsPtr_;
+        pointField oldMotionPoints(*oldPointsPtr_);
 
         pointField& newMotionPoints = *oldPointsPtr_;
 
         // Resize the list to new size
-        newMotionPoints.setSize(points_.size());
+        newMotionPoints.resize(points_.size());
 
         // Map the list
         if (mpm.hasMotionPoints())
@@ -119,15 +119,16 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
         }
     }
 
+    // Map the old motion cell-centres if present
     if (oldCellCentresPtr_)
     {
         // Make a copy of the original cell-centres
-        pointField oldMotionCellCentres = oldCellCentresPtr_();
+        pointField oldMotionCellCentres(*oldCellCentresPtr_);
 
-        pointField& newMotionCellCentres = oldCellCentresPtr_();
+        pointField& newMotionCellCentres = *oldCellCentresPtr_;
 
         // Resize the list to new size
-        newMotionCellCentres.setSize(cellCentres().size());
+        newMotionCellCentres.resize(cellCentres().size());
 
         // Map the list
         newMotionCellCentres.map(oldMotionCellCentres, mpm.cellMap());

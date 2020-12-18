@@ -575,10 +575,10 @@ Foam::polyMesh::polyMesh
     globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
+    storeOldCellCentres_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr),
-    oldCellCentresPtr_(nullptr),
-    storeOldCellCentres_(false)
+    oldCellCentresPtr_(nullptr)
 {
     DebugInfo
         << "Constructing polyMesh from cell and boundary shapes." << endl;
@@ -857,10 +857,10 @@ Foam::polyMesh::polyMesh
     globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
+    storeOldCellCentres_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr),
-    oldCellCentresPtr_(nullptr),
-    storeOldCellCentres_(false)
+    oldCellCentresPtr_(nullptr)
 {
     DebugInfo
         << "Constructing polyMesh from cell and boundary shapes." << endl;

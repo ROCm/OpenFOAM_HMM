@@ -308,10 +308,10 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
     globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
+    storeOldCellCentres_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr),
-    oldCellCentresPtr_(nullptr),
-    storeOldCellCentres_(false)
+    oldCellCentresPtr_(nullptr)
 {
     if (!owner_.headerClassName().empty())
     {
@@ -514,10 +514,10 @@ Foam::polyMesh::polyMesh
     globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
+    storeOldCellCentres_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr),
-    oldCellCentresPtr_(nullptr),
-    storeOldCellCentres_(false)
+    oldCellCentresPtr_(nullptr)
 {
     // Note: changed that the constructors where values can be supplied
     //       (points, faces, owner/neighbour) use the readOpt. All others
@@ -672,10 +672,10 @@ Foam::polyMesh::polyMesh
     globalMeshDataPtr_(nullptr),
     moving_(false),
     topoChanging_(false),
+    storeOldCellCentres_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr),
-    oldCellCentresPtr_(nullptr),
-    storeOldCellCentres_(false)
+    oldCellCentresPtr_(nullptr)
 {
     // Note: probably needs io.readOpt() for points/faces/cells etc so
     //       we can run with READ_IF_PRESENT. See constructor above.

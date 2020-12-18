@@ -182,6 +182,9 @@ private:
             //- Is the mesh topology changing
             bool topoChanging_;
 
+            //- Store old cell centres?
+            mutable bool storeOldCellCentres_;
+
             //- Current time index for mesh motion
             mutable label curMotionTimeIndex_;
 
@@ -191,8 +194,6 @@ private:
             //- Old cell centres (for the last mesh motion)
             mutable autoPtr<pointField> oldCellCentresPtr_;
 
-            //- Whether or not to store the old cell centres
-            mutable bool storeOldCellCentres_;
 
 
     // Private Member Functions
@@ -434,10 +435,10 @@ public:
             //- Return face neighbour
             virtual const labelList& faceNeighbour() const;
 
-            //- Return old points for mesh motion
+            //- Return old points (mesh motion)
             virtual const pointField& oldPoints() const;
 
-            //- Return old points for mesh motion
+            //- Return old cellCentres (mesh motion)
             virtual const pointField& oldCellCentres() const;
 
             //- Return boundary mesh
