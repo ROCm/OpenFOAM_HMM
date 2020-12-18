@@ -63,46 +63,42 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     constantVolume_(this->dict_, "constantVolume", false),
     volUpdateType_(this->dict_, "volumeUpdateMethod")
 {
+    word updateName;
+
     // If constantVolume found use it
     if (this->dict_.found("constantVolume"))
     {
         volUpdateType_.setValue(mUndefined);
     }
-    else
+    else if (this->dict_.readIfPresent("volumeUpdateMethod", updateName))
     {
-        if (this->dict_.found("volumeUpdateMethod"))
+        // Manual version of Enum<volumeUpdateType>
+        if (updateName == "constantRho")
         {
-            const word volumeUpdateMethod
-            (
-                this->dict_.getWord("volumeUpdateMethod")
-            );
-
-            if (volumeUpdateMethod == "constantRho")
-            {
-                volUpdateType_.setValue(mConstRho);
-            }
-            else if (volumeUpdateMethod == "constantVolume")
-            {
-                volUpdateType_.setValue(mConstVol);
-            }
-            else if (volumeUpdateMethod == "updateRhoAndVol")
-            {
-                volUpdateType_.setValue(mUpdateRhoAndVol);
-            }
-            else
-            {
-                
-                FatalErrorInFunction
-                    << "The method provided is not correct " << nl
-                    << " Available methods are  : " << nl
-                    << " constantRho, constantVolume or updateRhoAndVol. " << nl
-                    << nl << exit(FatalError);
-            }
+            volUpdateType_.setValue(mConstRho);
+        }
+        else if (updateName == "constantVolume")
+        {
+            volUpdateType_.setValue(mConstVol);
+        }
+        else if (updateName == "updateRhoAndVol")
+        {
+            volUpdateType_.setValue(mUpdateRhoAndVol);
         }
         else
         {
-            constantVolume_.setValue(false);
+            // FatalIOErrorInLookup
+
+            FatalIOErrorInFunction(this->dict_)
+                << "Unknown volumeUpdateMethod type " << updateName
+                << "\n\nValid volumeUpdateMethod types :\n"
+                << "(constantRho constantVolume updateRhoAndVol)" << nl
+                << exit(FatalIOError);
         }
+    }
+    else
+    {
+        constantVolume_.setValue(false);
     }
 }
 

@@ -75,7 +75,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "case",
         "dir",
-        "Specify case directory to use (instead of the cwd)"
+        "Specify case directory to use (instead of cwd)"
     );
     argList::addOption
     (
@@ -169,14 +169,14 @@ Foam::argList::initValidTables::initValidTables()
     argList::addOption
     (
         "world",
-        "Name",
-        "Name of local world",
-        true
+        "name",
+        "Name of the local world for parallel communication",
+        true  // advanced option
     );
     validParOptions.set
     (
         "world",
-        "Name of local world"
+        "name"
     );
 
 
