@@ -142,7 +142,11 @@ void Foam::polyTopoChange::countMap
 
         if (oldCelli >= 0)
         {
-            if (reverseMap[oldCelli] == newCelli)
+            if
+            (
+                oldCelli < reverseMap.size()
+             && reverseMap[oldCelli] == newCelli
+            )
             {
                 // unchanged
             }
