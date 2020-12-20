@@ -37,6 +37,7 @@ Description
 #include "OSspecific.H"
 #include "fvCFD.H"
 #include "cpuTime.H"
+#include "volFields.H"
 #include "IOobjectList.H"
 #include "regionProperties.H"
 #include "decompositionInformation.H"
@@ -89,7 +90,16 @@ int main(int argc, char *argv[])
 
     // These are implicit so just ignore them
     argList::ignoreOptionCompat({"dry-run", 0}, false);
-    argList::ignoreOptionCompat({"cellDist", 0}, false);
+    argList::addBoolOption
+    (
+        "cellDist",
+        "Write cell distribution as volScalarField for visualization"
+    );
+    argList::addBoolOption
+    (
+        "cellDist-internal",
+        "Write cell distribution (internal field) for visualization"
+    );
 
     // Include explicit constant options, have zero from time range
     timeSelector::addOptions(true, false);
@@ -236,6 +246,68 @@ int main(int argc, char *argv[])
             Info<< nl;
         }
         info.printSummary(Info);
+
+
+        if (args.found("cellDist-internal"))
+        {
+            volScalarField::Internal cellDist
+            (
+                IOobject
+                (
+                    "cellDist",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("cellDist", dimless, -1)
+            );
+
+            forAll(cellToProc, celli)
+            {
+                cellDist[celli] = cellToProc[celli];
+            }
+
+            cellDist.write();
+
+            Info<< nl << "Wrote decomposition as volScalarField::Internal to "
+                << cellDist.name() << " for visualization."
+                << endl;
+
+            fileHandler().flush();
+        }
+        else if (args.found("cellDist"))
+        {
+            volScalarField cellDist
+            (
+                IOobject
+                (
+                    "cellDist",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("cellDist", dimless, -1),
+                zeroGradientFvPatchScalarField::typeName
+            );
+
+            forAll(cellToProc, celli)
+            {
+                cellDist[celli] = cellToProc[celli];
+            }
+
+            cellDist.correctBoundaryConditions();
+            cellDist.write();
+
+            Info<< nl << "Wrote decomposition as volScalarField to "
+                << cellDist.name() << " for visualization."
+                << endl;
+
+            fileHandler().flush();
+        }
     }
 
     Info<< "\nEnd\n" << endl;
