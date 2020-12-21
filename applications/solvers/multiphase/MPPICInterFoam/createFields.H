@@ -147,7 +147,7 @@ volScalarField alphacRho(alphac*rho);
 alphacRho.oldTime();
 
 Info<< "Constructing kinematicCloud " << endl;
-basicKinematicMPPICCloud kinematicCloud
+basicKinematicCloud kinematicCloud
 (
     "kinematicCloud",
     rho,

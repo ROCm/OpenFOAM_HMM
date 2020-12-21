@@ -43,7 +43,7 @@ solution
     {
         schemes
         {
-            U           semiImplicit 0.8;
+            U           semiImplicit 1;
         }
     }
 }
@@ -133,7 +133,7 @@ subModels
 
     surfaceFilmModel none;
 
-    packingModel implicit;
+    packingModel explicit;
 
     explicitCoeffs
     {
@@ -168,7 +168,7 @@ subModels
         }
     }
 
-    dampingModel relaxation;
+    dampingModel none;
 
     relaxationCoeffs
     {
