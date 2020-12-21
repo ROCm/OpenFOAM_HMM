@@ -7,7 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
     Copyright (C) 2017-2020 OpenCFD Ltd.
-    Copyright (c) 2017-2020, German Aerospace Center (DLR)
+    Copyright (C) 2017-2020 German Aerospace Center (DLR)
+    Copyright (C) 2020 Johan Roenby
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +46,7 @@ Description
 #include "implicitFunction.H"
 
 #include "cutCellIso.H"
+#include "cutFaceIso.H"
 #include "OBJstream.H"
 
 
@@ -86,6 +88,50 @@ void isoFacesToFile
         for (const List<point>& facePts : faces)
         {
             os.write(face(identity(facePts.size())), facePts);
+        }
+    }
+}
+
+void setAlpha
+(
+    volScalarField& alpha1,
+    DynamicList<List<point>>& facePts,
+    scalarField& f,
+    const bool writeOBJ
+)
+{
+    const fvMesh& mesh = alpha1.mesh();
+    cutCellIso cutCell(mesh, f);
+    cutFaceIso cutFace(mesh, f);
+
+    forAll(alpha1, cellI)
+    {
+        cutCell.calcSubCell(cellI, 0.0);
+
+        alpha1[cellI] = max(min(cutCell.VolumeOfFluid(), 1), 0);
+
+        if (writeOBJ && (mag(cutCell.faceArea()) >= 1e-14))
+        {
+            facePts.append(cutCell.facePoints());
+        }
+    }
+
+    // Setting boundary alpha1 values
+    forAll(mesh.boundary(), patchi)
+    {
+        if (mesh.boundary()[patchi].size() > 0)
+        {
+            const label start = mesh.boundary()[patchi].patch().start();
+            scalarField& alphap = alpha1.boundaryFieldRef()[patchi];
+            const scalarField& magSfp = mesh.magSf().boundaryField()[patchi];
+
+            forAll(alphap, patchFacei)
+            {
+                const label facei = patchFacei + start;
+                cutFace.calcSubFace(facei, 0.0);
+                alphap[patchFacei] =
+                    mag(cutFace.subFaceArea())/magSfp[patchFacei];
+            }
         }
     }
 }
@@ -143,38 +189,9 @@ int main(int argc, char *argv[])
         f[pi] = func->value(mesh.points()[pi]);
     };
 
-    cutCellIso cutCell(mesh, f);
-
     DynamicList<List<point>> facePts;
 
-    DynamicList<triSurface> surface;
-
-    surfaceScalarField cellToCellDist(mag(mesh.delta()));
-
-    forAll(alpha1, cellI)
-    {
-        label cellStatus = cutCell.calcSubCell(cellI, 0.0);
-
-        if (cellStatus == -1)
-        {
-            alpha1[cellI] = 1;
-        }
-        else if (cellStatus == 1)
-        {
-            alpha1[cellI] = 0;
-        }
-        else if (cellStatus == 0)
-        {
-            if (mag(cutCell.faceArea()) != 0)
-            {
-                alpha1[cellI] = max(min(cutCell.VolumeOfFluid(), 1), 0);
-                if (writeOBJ && (mag(cutCell.faceArea()) >= 1e-14))
-                {
-                    facePts.append(cutCell.facePoints());
-                }
-            }
-        }
-    }
+    setAlpha(alpha1, facePts, f, writeOBJ);
 
     if (writeOBJ)
     {
@@ -187,8 +204,6 @@ int main(int argc, char *argv[])
     {
         alpha1 = scalar(1) - alpha1;
     }
-
-    alpha1.correctBoundaryConditions();
 
     Info<< "Writing new alpha field " << alpha1.name() << endl;
     alpha1.write();
