@@ -63,6 +63,36 @@ functions
         internalField   yes;
         patches         ();
     }
+
+    filmFlux
+    {
+        type            filmFlux;
+        writeControl    writeTime;
+        result          myPhi; // optional
+    }
+
+    filmPatchFluxIn
+    {
+        type            surfaceFieldValue;
+        libs            (fieldFunctionObjects);
+        region          wallFilmRegion;
+        fields          (myPhi);
+        operation       sum;
+        regionType      patch;
+        name            inlet;
+        writeFields     no;
+    }
+    filmPatchFluxOut
+    {
+        type            surfaceFieldValue;
+        libs            (fieldFunctionObjects);
+        region          wallFilmRegion;
+        fields          (myPhi);
+        operation       sum;
+        regionType      patch;
+        name            outlet;
+        writeFields     no;
+    }
 }
 
 // ************************************************************************* //
