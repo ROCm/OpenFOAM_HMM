@@ -50,13 +50,16 @@ runTimeModifiable yes;
 functions
 {
     #include "sampleDict"
+    #include "sampleIso"
+    #include "samplePlanes"
 
     minMax
     {
-      type          fieldMinMax;
-      libs          (fieldFunctionObjects);
-      writeControl  writeTime;
-      fields        (U);
+        type    fieldMinMax;
+        libs    (fieldFunctionObjects);
+
+        writeControl    writeTime;
+        fields          (U);
     }
 }
 
