@@ -120,6 +120,9 @@ do
         # Prefix: openfoam (other)
         (o | openfoam)  FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}" ;;
 
+        # Prefix: false (ie, 'disabled')
+        (false) FOAM_MODULE_PREFIX=false ;;
+
         # Prefix: directory (absolute or relative)
         (*)
             : "${FOAM_MODULE_PREFIX:=/usr/local}"  # Fallback (autoconf-like)
