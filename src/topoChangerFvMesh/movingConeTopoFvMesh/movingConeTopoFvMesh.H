@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,7 +114,11 @@ public:
     // Constructors
 
         //- Construct from database
-        explicit movingConeTopoFvMesh(const IOobject& io);
+        explicit movingConeTopoFvMesh
+        (
+            const IOobject& io,
+            const bool doInit = true
+        );
 
 
     //- Destructor
@@ -121,6 +126,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit);
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();

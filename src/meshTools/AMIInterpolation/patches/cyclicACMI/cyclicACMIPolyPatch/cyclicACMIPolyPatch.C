@@ -288,24 +288,27 @@ void Foam::cyclicACMIPolyPatch::resetAMI(const UList<point>& points) const
     {
         DebugPout
             << "cyclicACMIPolyPatch::resetAMI : clearing cellCentres"
-            << " for " << name() << " and " << nonOverlapPatch.name()
-            << endl;
+            << " for " << name() << " and " << nonOverlapPatch.name() << nl
+            << "The mesh already has cellCentres calculated when"
+            << " resetting ACMI " << name() << "." << nl
+            << "This is a problem since ACMI adapts the face areas"
+            << " (to close cells) so this has" << nl
+            << "to be done before cell centre calculation." << nl
+            << "This can happen if e.g. the cyclicACMI is after"
+            << " any processor patches in the boundary." << endl;
 
-        WarningInFunction
-           << "The mesh already has cellCentres calculated when"
-           << " resetting ACMI " << name() << "." << nl
-           << "This is a problem since ACMI adapts the face areas"
-           << " (to close cells) so this has" << nl
-           << "to be done before cell centre calculation." << nl
-           << "This can happen if e.g. the cyclicACMI is after"
-           << " any processor patches in the boundary." << endl;
-        const_cast<polyMesh&>(mesh).primitiveMesh::clearGeom();
+        const_cast<polyMesh&>(mesh).primitiveMesh::clearCellGeom();
     }
 
-
-    // Trigger re-building of faceAreas
-    (void)mesh.faceAreas();
-
+    // At this point we want face geometry but not cell geometry since we want
+    // correct the face area on duplicate baffles before calculating the cell
+    // centres and volumes.
+    if (!mesh.hasFaceAreas())
+    {
+        FatalErrorInFunction
+            << "primitiveMesh must already have face geometry"
+            << abort(FatalError);
+    }
 
     // Calculate the AMI using partial face-area-weighted. This leaves
     // the weights as fractions of local areas (sum(weights) = 1 means
@@ -423,8 +426,12 @@ void Foam::cyclicACMIPolyPatch::initMovePoints
     DebugPout<< "cyclicACMIPolyPatch::initMovePoints : " << name() << endl;
 
     // Note: calculates transformation and triggers face centre calculation
-    // - Note: resetAMI called by cyclicAMIPolyPatch::initMovePoints
     cyclicAMIPolyPatch::initMovePoints(pBufs, p);
+
+    if (!createAMIFaces_ && canResetAMI())
+    {
+        resetAMI();
+    }
 
     scalePatchFaceAreas();
 }

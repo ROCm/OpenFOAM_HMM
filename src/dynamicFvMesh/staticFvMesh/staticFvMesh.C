@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,14 +35,15 @@ namespace Foam
 {
     defineTypeNameAndDebug(staticFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, staticFvMesh, IOobject);
+    addToRunTimeSelectionTable(dynamicFvMesh, staticFvMesh, doInit);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::staticFvMesh::staticFvMesh(const IOobject& io)
+Foam::staticFvMesh::staticFvMesh(const IOobject& io, const bool doInit)
 :
-    dynamicFvMesh(io)
+    dynamicFvMesh(io, doInit)
 {}
 
 

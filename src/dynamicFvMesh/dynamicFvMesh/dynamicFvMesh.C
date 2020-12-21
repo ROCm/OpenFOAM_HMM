@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicFvMesh, 0);
     defineRunTimeSelectionTable(dynamicFvMesh, IOobject);
+    defineRunTimeSelectionTable(dynamicFvMesh, doInit);
 }
 
 
@@ -74,12 +75,29 @@ void Foam::dynamicFvMesh::readDict()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
+Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io, const bool doInit)
 :
-    fvMesh(io),
-    timeControl_(io.time(), "update")
+    fvMesh(io, doInit),
+    timeControl_(io.time(), "update")   // assume has no side effects
 {
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        fvMesh::init(doInit);
+    }
+
     readDict();
+
+    // Assume something changed
+    return true;
 }
 
 

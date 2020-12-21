@@ -38,6 +38,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicOversetFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, dynamicOversetFvMesh, IOobject);
+    addToRunTimeSelectionTable(dynamicFvMesh, dynamicOversetFvMesh, doInit);
 }
 
 
@@ -526,13 +527,35 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
+Foam::dynamicOversetFvMesh::dynamicOversetFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicMotionSolverListFvMesh(io),
-    active_(false)
+    dynamicMotionSolverListFvMesh(io, doInit)
 {
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicOversetFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicMotionSolverListFvMesh::init(doInit);
+    }
+
+    active_ = false;
+
     // Load stencil (but do not update)
     (void)Stencil::New(*this, false);
+
+    // Assume something changed
+    return true;
 }
 
 

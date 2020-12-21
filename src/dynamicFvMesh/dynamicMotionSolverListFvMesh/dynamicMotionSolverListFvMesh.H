@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +83,11 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        dynamicMotionSolverListFvMesh(const IOobject& io);
+        dynamicMotionSolverListFvMesh
+        (
+            const IOobject& io,
+            const bool doInit=true
+        );
 
 
     //- Destructor
@@ -90,6 +95,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit);
 
         //- Dummy update function which does not change the mesh
         virtual bool update();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,11 +100,23 @@ public:
             (io)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            dynamicFvMesh,
+            doInit,
+            (
+                const IOobject& io,
+                const bool doInit
+            ),
+            (io, doInit)
+        );
+
 
     // Constructors
 
         //- Construct from an IOobject
-        explicit dynamicFvMesh(const IOobject& io); //, const bool doInit=true);
+        explicit dynamicFvMesh(const IOobject& io, const bool doInit=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
@@ -139,11 +151,7 @@ public:
         //- Select, construct and return the dynamicFvMesh
         //  If the constant/dynamicMeshDict does not exist
         //  a staticFvMesh is returned
-        static autoPtr<dynamicFvMesh> New
-        (
-            const IOobject& io  //,
-            //const bool doInit=true
-        );
+        static autoPtr<dynamicFvMesh> New(const IOobject& io);
 
 
         //- Select, construct and return the dynamicFvMesh
@@ -152,8 +160,7 @@ public:
         static autoPtr<dynamicFvMesh> New
         (
             const argList& args,
-            const Time& runTime //,
-            //const bool doInit=true
+            const Time& runTime
         );
 
 
@@ -164,7 +171,7 @@ public:
     // Member Functions
 
         //- Initialise all non-demand-driven data
-        //virtual bool init(const bool doInit);
+        virtual bool init(const bool doInit);
 
         //- Is mesh dynamic
         virtual bool dynamic() const

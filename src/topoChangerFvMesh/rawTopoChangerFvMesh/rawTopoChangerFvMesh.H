@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +88,11 @@ public:
     // Constructors
 
         //- Construct from database
-        explicit rawTopoChangerFvMesh(const IOobject& io);
+        explicit rawTopoChangerFvMesh
+        (
+            const IOobject& io,
+            const bool doInit=true
+        );
 
     //- Destructor
     virtual ~rawTopoChangerFvMesh();

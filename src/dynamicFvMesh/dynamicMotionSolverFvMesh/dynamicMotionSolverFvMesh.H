@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +78,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        dynamicMotionSolverFvMesh(const IOobject& io);
+        dynamicMotionSolverFvMesh(const IOobject& io, bool syncPar=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
@@ -97,6 +98,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit);
 
         //- Return the motionSolver
         const motionSolver& motion() const;

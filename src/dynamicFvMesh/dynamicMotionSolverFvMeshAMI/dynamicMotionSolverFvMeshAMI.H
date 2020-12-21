@@ -81,7 +81,11 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        dynamicMotionSolverFvMeshAMI(const IOobject& io);
+        dynamicMotionSolverFvMeshAMI
+        (
+            const IOobject& io,
+            const bool doInit=true
+        );
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
@@ -101,6 +105,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit);
 
         //- Return the motionSolver
         const motionSolver& motion() const;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -250,7 +251,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        interfaceTrackingFvMesh(const IOobject& io);
+        interfaceTrackingFvMesh(const IOobject& io, const bool doInit=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function

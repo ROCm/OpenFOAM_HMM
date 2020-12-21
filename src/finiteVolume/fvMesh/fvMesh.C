@@ -278,10 +278,6 @@ bool Foam::fvMesh::init(const bool doInit)
 
         // Intialise my data
         polyMesh::init(doInit);
-
-        // All addressing needs to be updated
-        // deleteDemandDrivenData(lduPtr_);
-        clearAddressing(true);
     }
 
     // Check the existence of the cell volumes and read if present
@@ -345,7 +341,9 @@ bool Foam::fvMesh::init(const bool doInit)
 
         moving(true);
     }
-    return false;
+
+    // Assume something changed
+    return true;
 }
 
 
@@ -932,7 +930,8 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 
 void Foam::fvMesh::updateGeom()
 {
-    // Let surfaceInterpolation handle geometry calculation
+    // Let surfaceInterpolation handle geometry calculation. Note: this does
+    // lower levels updateGeom
     surfaceInterpolation::updateGeom();
 }
 

@@ -45,6 +45,12 @@ namespace Foam
         dynamicMotionSolverTopoFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        dynamicMotionSolverTopoFvMesh,
+        doInit
+    );
 }
 
 
@@ -52,12 +58,31 @@ namespace Foam
 
 Foam::dynamicMotionSolverTopoFvMesh::dynamicMotionSolverTopoFvMesh
 (
-    const IOobject& io
+    const IOobject& io,
+    const bool doInit
 )
 :
-    topoChangerFvMesh(io),
-    motionPtr_(motionSolver::New(*this))
-{}
+    topoChangerFvMesh(io, doInit)
+{
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicMotionSolverTopoFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        topoChangerFvMesh::init(doInit);
+    }
+
+    motionPtr_ = motionSolver::New(*this);
+
+    // Assume something changed
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

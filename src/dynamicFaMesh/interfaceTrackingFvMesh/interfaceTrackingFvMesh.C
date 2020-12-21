@@ -60,6 +60,12 @@ namespace Foam
         interfaceTrackingFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        interfaceTrackingFvMesh,
+        doInit
+    );
 }
 
 
@@ -1553,9 +1559,13 @@ void Foam::interfaceTrackingFvMesh::correctContactLinePointNormals()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh(const IOobject& io)
+Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicMotionSolverFvMesh(io),
+    dynamicMotionSolverFvMesh(io, doInit),
     aMeshPtr_(new faMesh(*this)),
     fsPatchIndex_(-1),
     fixedFreeSurfacePatches_

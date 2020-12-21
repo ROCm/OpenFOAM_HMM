@@ -899,6 +899,10 @@ public:
             //- Clear geometry
             void clearGeom();
 
+            //- Clear cell-based geometry only
+            //  Use with care! currently used by cyclicACMI
+            void clearCellGeom();
+
             //- Clear topological data
             void clearAddressing();
 
