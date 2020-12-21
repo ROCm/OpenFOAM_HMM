@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,16 +42,43 @@ namespace Foam
         dynamicMotionSolverFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        dynamicMotionSolverFvMesh,
+        doInit
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh(const IOobject& io)
+Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicFvMesh(io),
-    motionPtr_(motionSolver::New(*this))
-{}
+    dynamicFvMesh(io, doInit),
+    motionPtr_(nullptr)
+{
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicMotionSolverFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicFvMesh::init(doInit);
+    }
+
+    motionPtr_ = motionSolver::New(*this);
+    return true;
+}
 
 
 Foam::dynamicMotionSolverFvMesh::dynamicMotionSolverFvMesh

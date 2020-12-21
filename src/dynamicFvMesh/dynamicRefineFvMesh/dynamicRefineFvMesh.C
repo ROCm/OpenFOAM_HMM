@@ -44,6 +44,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicRefineFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, IOobject);
+    addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, doInit);
 }
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -1014,14 +1015,33 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
+Foam::dynamicRefineFvMesh::dynamicRefineFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicFvMesh(io),
-    meshCutter_(*this),
-    protectedCell_(nCells()),
-    nRefinementIterations_(0),
-    dumpLevel_(false)
+    dynamicFvMesh(io, doInit),
+    meshCutter_(*this)
 {
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicRefineFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicFvMesh::init(doInit);
+    }
+
+    protectedCell_.setSize(nCells());
+    nRefinementIterations_ = 0;
+    dumpLevel_ = false;
+
     // Read static part of dictionary
     readDict();
 
@@ -1175,6 +1195,8 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 
         protectedCells.write();
     }
+
+    return true;
 }
 
 

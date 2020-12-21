@@ -140,6 +140,20 @@ void Foam::primitiveMesh::clearGeom()
 }
 
 
+void Foam::primitiveMesh::clearCellGeom()
+{
+    if (debug)
+    {
+        Pout<< "primitiveMesh::clearCellGeom() : "
+            << "clearing cell centres and volumes"
+            << endl;
+    }
+
+    deleteDemandDrivenData(cellCentresPtr_);
+    deleteDemandDrivenData(cellVolumesPtr_);
+}
+
+
 void Foam::primitiveMesh::clearAddressing()
 {
     if (debug)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,12 @@ namespace Foam
         dynamicMotionSolverListFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        dynamicMotionSolverListFvMesh,
+        doInit
+    );
 }
 
 
@@ -50,12 +56,27 @@ namespace Foam
 
 Foam::dynamicMotionSolverListFvMesh::dynamicMotionSolverListFvMesh
 (
-    const IOobject& io
+    const IOobject& io,
+    const bool doInit
 )
 :
-    dynamicFvMesh(io),
+    dynamicFvMesh(io, doInit),
     motionSolvers_()
 {
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicFvMesh::init(doInit);
+    }
+
     IOobject ioDict
     (
         "dynamicMeshDict",
@@ -104,6 +125,9 @@ Foam::dynamicMotionSolverListFvMesh::dynamicMotionSolverListFvMesh
         motionSolvers_.setSize(1);
         motionSolvers_.set(i++, motionSolver::New(*this));
     }
+
+    // Assume something changed
+    return true;
 }
 
 

@@ -228,7 +228,11 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        explicit dynamicRefineFvMesh(const IOobject& io);
+        explicit dynamicRefineFvMesh
+        (
+            const IOobject& io,
+            const bool doInit=true
+        );
 
 
     //- Destructor
@@ -236,6 +240,9 @@ public:
 
 
     // Member Functions
+
+        //- Initialise all non-demand-driven data
+        virtual bool init(const bool doInit);
 
         //- Direct access to the refinement engine
         const hexRef8& meshCutter() const

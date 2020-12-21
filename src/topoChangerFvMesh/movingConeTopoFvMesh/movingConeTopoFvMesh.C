@@ -49,6 +49,12 @@ namespace Foam
         movingConeTopoFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        topoChangerFvMesh,
+        movingConeTopoFvMesh,
+        doInit
+    );
 }
 
 
@@ -238,9 +244,13 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
+Foam::movingConeTopoFvMesh::movingConeTopoFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    topoChangerFvMesh(io),
+    topoChangerFvMesh(io, doInit),
     motionDict_
     (
         IOdictionary
@@ -255,17 +265,30 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
                 false
             )
         ).optionalSubDict(typeName + "Coeffs")
-    ),
-    motionVelAmplitude_(motionDict_.get<vector>("motionVelAmplitude")),
-    motionVelPeriod_(motionDict_.get<scalar>("motionVelPeriod")),
-    curMotionVel_
-    (
-        motionVelAmplitude_*sin(time().value()*pi/motionVelPeriod_)
-    ),
-    leftEdge_(motionDict_.get<scalar>("leftEdge")),
-    curLeft_(motionDict_.get<scalar>("leftObstacleEdge")),
-    curRight_(motionDict_.get<scalar>("rightObstacleEdge"))
+    )
 {
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::movingConeTopoFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        topoChangerFvMesh::init(doInit);
+    }
+
+    motionVelAmplitude_ = motionDict_.get<vector>("motionVelAmplitude");
+    motionVelPeriod_ = motionDict_.get<scalar>("motionVelPeriod");
+    curMotionVel_ =
+        motionVelAmplitude_*sin(time().value()*pi/motionVelPeriod_);
+    leftEdge_ = motionDict_.get<scalar>("leftEdge");
+    curLeft_ = motionDict_.get<scalar>("leftObstacleEdge");
+    curRight_ = motionDict_.get<scalar>("rightObstacleEdge");
+
     Pout<< "Initial time:" << time().value()
         << " Initial curMotionVel_:" << curMotionVel_
         << endl;
@@ -294,6 +317,9 @@ Foam::movingConeTopoFvMesh::movingConeTopoFvMesh(const IOobject& io)
         curLeft_,
         curRight_
     );
+
+    // Assume something changed
+    return true;
 }
 
 

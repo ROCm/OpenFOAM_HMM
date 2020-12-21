@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,14 +37,19 @@ namespace Foam
 {
     defineTypeNameAndDebug(dynamicInkJetFvMesh, 0);
     addToRunTimeSelectionTable(dynamicFvMesh, dynamicInkJetFvMesh, IOobject);
+    addToRunTimeSelectionTable(dynamicFvMesh, dynamicInkJetFvMesh, doInit);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicInkJetFvMesh::dynamicInkJetFvMesh(const IOobject& io)
+Foam::dynamicInkJetFvMesh::dynamicInkJetFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicFvMesh(io),
+    dynamicFvMesh(io, doInit),
     dynamicMeshCoeffs_
     (
         IOdictionary

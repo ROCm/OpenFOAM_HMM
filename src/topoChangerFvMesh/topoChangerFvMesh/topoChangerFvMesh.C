@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +39,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::topoChangerFvMesh::topoChangerFvMesh(const IOobject& io)
+Foam::topoChangerFvMesh::topoChangerFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    dynamicFvMesh(io),
+    dynamicFvMesh(io, doInit),
     topoChanger_(*this)
 {}
 

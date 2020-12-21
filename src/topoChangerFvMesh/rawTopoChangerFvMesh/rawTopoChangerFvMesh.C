@@ -43,15 +43,25 @@ namespace Foam
         rawTopoChangerFvMesh,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        topoChangerFvMesh,
+        rawTopoChangerFvMesh,
+        doInit
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::rawTopoChangerFvMesh::rawTopoChangerFvMesh(const IOobject& io)
+Foam::rawTopoChangerFvMesh::rawTopoChangerFvMesh
+(
+    const IOobject& io,
+    const bool doInit
+)
 :
-    topoChangerFvMesh(io)
+    topoChangerFvMesh(io, doInit)
 {}
 
 

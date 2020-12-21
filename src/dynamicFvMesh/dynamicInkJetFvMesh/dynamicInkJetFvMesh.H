@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +89,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        dynamicInkJetFvMesh(const IOobject& io);
+        dynamicInkJetFvMesh(const IOobject& io, const bool doInit=true);
 
 
     //- Destructor

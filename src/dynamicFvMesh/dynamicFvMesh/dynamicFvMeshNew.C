@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +72,24 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
                 << exit(FatalError);
         }
 
+        auto doInitCstrIter = doInitConstructorTablePtr_->cfind(modelType);
+
+        if (doInitCstrIter.found())
+        {
+            DebugInfo
+                << "Constructing dynamicFvMesh with explicit initialisation"
+                << endl;
+
+            // Two-step constructor
+            // 1. Construct mesh, do not initialise
+            autoPtr<dynamicFvMesh> meshPtr(doInitCstrIter()(io, false));
+
+            // 2. Initialise parents and itself
+            meshPtr().init(true);
+
+            return meshPtr;
+        }
+
         auto cstrIter = IOobjectConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
@@ -88,7 +106,16 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         return autoPtr<dynamicFvMesh>(cstrIter()(io));
     }
 
-    return autoPtr<dynamicFvMesh>(new staticFvMesh(io));
+    DebugInfo
+        << "Constructing staticFvMesh with explicit initialisation" << endl;
+
+    // 1. Construct mesh, do not initialise
+    autoPtr<dynamicFvMesh> meshPtr(new staticFvMesh(io, false));
+
+    // 2. Initialise parents and itself
+    meshPtr().init(true);
+
+    return meshPtr;
 }
 
 

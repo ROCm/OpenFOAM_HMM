@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +71,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        staticFvMesh(const IOobject& io);
+        staticFvMesh(const IOobject& io, const bool doInit=true);
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function

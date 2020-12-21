@@ -49,6 +49,12 @@ namespace Foam
         dynamicMotionSolverFvMeshAMI,
         IOobject
     );
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        dynamicMotionSolverFvMeshAMI,
+        doInit
+    );
 }
 
 
@@ -56,12 +62,29 @@ namespace Foam
 
 Foam::dynamicMotionSolverFvMeshAMI::dynamicMotionSolverFvMeshAMI
 (
-    const IOobject& io
+    const IOobject& io,
+    const bool doInit
 )
 :
-    dynamicFvMesh(io),
-    motionPtr_(motionSolver::New(*this))
-{}
+    dynamicFvMesh(io, doInit)
+{
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
+}
+
+
+bool Foam::dynamicMotionSolverFvMeshAMI::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicFvMesh::init(doInit);
+    }
+
+    motionPtr_ = motionSolver::New(*this);
+    return true;
+}
 
 
 Foam::dynamicMotionSolverFvMeshAMI::dynamicMotionSolverFvMeshAMI
