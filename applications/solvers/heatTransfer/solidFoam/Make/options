@@ -19,5 +19,6 @@ EXE_LIBS = \
     -ltopoChangerFvMesh \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
+    -lsolidThermo \
     -lradiationModels \
     -lspecie
