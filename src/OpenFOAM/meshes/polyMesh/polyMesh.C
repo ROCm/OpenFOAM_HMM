@@ -404,7 +404,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(points)
@@ -417,7 +417,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(faces)
@@ -430,7 +430,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(owner)
@@ -443,7 +443,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,  //io.readOpt(),
             io.writeOpt()
         ),
         std::move(neighbour)
@@ -519,11 +519,6 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(nullptr),
     oldCellCentresPtr_(nullptr)
 {
-    // Note: changed that the constructors where values can be supplied
-    //       (points, faces, owner/neighbour) use the readOpt. All others
-    //       (boundary, *zones) ignore readOpt. To be reviewed as with
-    //       constructor below
-
     // Check if the faces and cells are valid
     forAll(faces_, facei)
     {
@@ -677,9 +672,6 @@ Foam::polyMesh::polyMesh
     oldPointsPtr_(nullptr),
     oldCellCentresPtr_(nullptr)
 {
-    // Note: probably needs io.readOpt() for points/faces/cells etc so
-    //       we can run with READ_IF_PRESENT. See constructor above.
-
     // Check if faces are valid
     forAll(faces_, facei)
     {

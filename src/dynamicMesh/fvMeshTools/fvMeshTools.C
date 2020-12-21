@@ -442,6 +442,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
 
 
     fileName facesInstance;
+    fileName pointsInstance;
 
     // Patch types
     // ~~~~~~~~~~~
@@ -457,7 +458,12 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             "faces",
             IOobject::MUST_READ
         );
-
+        pointsInstance = io.time().findInstance
+        (
+            meshSubDir,
+            "points",
+            IOobject::MUST_READ
+        );
         patchEntries = polyBoundaryMeshEntries
         (
             IOobject
@@ -491,8 +497,9 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
         fromMaster >> patchEntries;
     }
 
-
     Pstream::scatter(facesInstance);
+    Pstream::scatter(pointsInstance);
+
 
     // Dummy meshes
     // ~~~~~~~~~~~~
@@ -522,8 +529,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
 
     // Read mesh
     // ~~~~~~~~~
-    // Now all processors read a mesh or use supplied points,faces etc
-    // if there is none.
+    // Now all processors use supplied points,faces etc
     // Note: fvSolution, fvSchemes are also using the supplied IOobject so
     //       on slave will be NO_READ, on master READ_IF_PRESENT. This will
     //       conflict with e.g. timeStampMaster reading so switch off.
@@ -535,7 +541,75 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
         regIOobject::fileModificationChecking;
     regIOobject::fileModificationChecking = regIOobject::timeStamp;
 
-    auto meshPtr = autoPtr<fvMesh>::New(meshIO, Zero);
+
+    //- Points
+    pointIOField points
+    (
+        IOobject
+        (
+            "points",
+            pointsInstance, //meshIO.instance(),
+            meshSubDir,
+            meshIO.db(),
+            (haveMesh ? IOobject::MUST_READ : IOobject::NO_READ),
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    //- Faces
+    faceCompactIOList faces
+    (
+        IOobject
+        (
+            "faces",
+            meshIO.instance(),
+            meshSubDir,
+            meshIO.db(),
+            (haveMesh ? IOobject::MUST_READ : IOobject::NO_READ),
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    //- Face owner
+    labelIOList owner
+    (
+        IOobject
+        (
+            "owner",
+            meshIO.instance(),
+            meshSubDir,
+            meshIO.db(),
+            (haveMesh ? IOobject::MUST_READ : IOobject::NO_READ),
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    //- Face neighbour
+    labelIOList neighbour
+    (
+        IOobject
+        (
+            "neighbour",
+            meshIO.instance(),
+            meshSubDir,
+            meshIO.db(),
+            (haveMesh ? IOobject::MUST_READ : IOobject::NO_READ),
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    auto meshPtr = autoPtr<fvMesh>::New
+    (
+        meshIO,
+        std::move(points),
+        std::move(faces),
+        std::move(owner),
+        std::move(neighbour)
+    );
     fvMesh& mesh = *meshPtr;
 
     regIOobject::fileModificationChecking = oldCheckType;

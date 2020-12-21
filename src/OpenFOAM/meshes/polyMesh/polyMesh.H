@@ -331,7 +331,7 @@ public:
         //  Boundary is added using addPatches() member function
         polyMesh(const IOobject& io, const zero, const bool syncPar=true);
 
-        //- Construct from IOobject or from components.
+        //- Construct from IOobject and components.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
