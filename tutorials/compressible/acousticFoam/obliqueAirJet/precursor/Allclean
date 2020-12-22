@@ -7,6 +7,6 @@ vibroAcousticCase="../main"
 
 cleanCase0
 
-rm -rf $vibroAcousticCase/constant/boundaryData
+rm -rf "$vibroAcousticCase"/constant/boundaryData
 
 # -----------------------------------------------------------------------------

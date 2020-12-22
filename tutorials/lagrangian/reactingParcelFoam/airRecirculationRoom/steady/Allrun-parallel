@@ -3,7 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-[[ -d constant/polyMesh ]] || runApplication ./Allrun.pre
+# Generate mesh if required
+[ -d constant/polyMesh ] || ./Allrun.pre
 
 runApplication decomposePar
 
