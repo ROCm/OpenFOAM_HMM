@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2006                                 |
+|  \\    /   O peration     | Version:  v2012                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,9 +22,9 @@ boundaryField
 {
     outlet
     {
-       type             inletOutlet;
-       inletValue       uniform (0 0 0);
-       inlet            uniform (0 0 0);
+        type             inletOutlet;
+        inletValue       uniform (0 0 0);
+        value            uniform (0 0 0);
     }
     inlet
     {
