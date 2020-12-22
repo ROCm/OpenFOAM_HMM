@@ -1568,27 +1568,15 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
     dynamicMotionSolverFvMesh(io, doInit),
     aMeshPtr_(new faMesh(*this)),
     fsPatchIndex_(-1),
-    fixedFreeSurfacePatches_
-    (
-        motion().get<wordList>("fixedFreeSurfacePatches")
-    ),
+    fixedFreeSurfacePatches_(),
     nonReflectingFreeSurfacePatches_(),
-    pointNormalsCorrectionPatches_
-    (
-        motion().get<wordList>("pointNormalsCorrectionPatches")
-    ),
-    normalMotionDir_
-    (
-        motion().get<bool>("normalMotionDir")
-    ),
+    pointNormalsCorrectionPatches_(),
+    normalMotionDir_(false),
     motionDir_(Zero),
-    smoothing_(motion().getOrDefault("smoothing", false)),
-    pureFreeSurface_(motion().getOrDefault("pureFreeSurface", true)),
-    rigidFreeSurface_(motion().getOrDefault("rigidFreeSurface", false)),
-    correctContactLineNormals_
-    (
-        motion().getOrDefault("correctContactLineNormals", false)
-    ),
+    smoothing_(false),
+    pureFreeSurface_(true),
+    rigidFreeSurface_(false),
+    correctContactLineNormals_(false),
     sigma0_("zero", dimForce/dimLength/dimDensity, Zero),
     rho_("one", dimDensity, 1.0),
     timeIndex_(-1),
@@ -1605,10 +1593,13 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
     surfactantPtr_(nullptr),
     contactAnglePtr_(nullptr)
 {
-    initializeData();
+    if (doInit)
+    {
+        init(false);    // do not initialise lower levels
+    }
 }
 
-
+/*
 Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
 (
     const IOobject& io,
@@ -1630,22 +1621,13 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
     ),
     aMeshPtr_(new faMesh(*this)),
     fsPatchIndex_(-1),
-    fixedFreeSurfacePatches_
-    (
-        motion().get<wordList>("fixedFreeSurfacePatches")
-    ),
+    fixedFreeSurfacePatches_(),
     nonReflectingFreeSurfacePatches_(),
-    pointNormalsCorrectionPatches_
-    (
-        motion().get<wordList>("pointNormalsCorrectionPatches")
-    ),
-    normalMotionDir_
-    (
-        motion().get<bool>("normalMotionDir")
-    ),
+    pointNormalsCorrectionPatches_(),
+    normalMotionDir_(false),
     motionDir_(Zero),
-    smoothing_(motion().getOrDefault("smoothing", false)),
-    pureFreeSurface_(motion().getOrDefault("pureFreeSurface", true)),
+    smoothing_(false),
+    pureFreeSurface_(true),
     sigma0_("zero", dimForce/dimLength/dimDensity, Zero),
     rho_("one", dimDensity, 1.0),
     timeIndex_(-1),
@@ -1661,10 +1643,8 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
     surfaceTensionPtr_(nullptr),
     surfactantPtr_(nullptr),
     contactAnglePtr_(nullptr)
-{
-    initializeData();
-}
-
+{}
+*/
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -1686,6 +1666,32 @@ Foam::interfaceTrackingFvMesh::~interfaceTrackingFvMesh()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::interfaceTrackingFvMesh::init(const bool doInit)
+{
+    if (doInit)
+    {
+        dynamicMotionSolverFvMesh::init(doInit);
+    }
+
+    aMeshPtr_.reset(new faMesh(*this));
+
+    // Set motion-based data
+    fixedFreeSurfacePatches_ =
+        motion().get<wordList>("fixedFreeSurfacePatches");
+
+    pointNormalsCorrectionPatches_ =
+        motion().get<wordList>("pointNormalsCorrectionPatches");
+
+    normalMotionDir_ = motion().get<bool>("normalMotionDir");
+    smoothing_ = motion().getOrDefault("smoothing", false);
+    pureFreeSurface_ = motion().getOrDefault("pureFreeSurface", true);
+
+    initializeData();
+
+    return true;
+}
+
 
 Foam::areaVectorField& Foam::interfaceTrackingFvMesh::Us()
 {
