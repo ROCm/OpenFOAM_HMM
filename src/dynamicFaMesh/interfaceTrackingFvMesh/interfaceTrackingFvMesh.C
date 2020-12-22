@@ -1566,7 +1566,7 @@ Foam::interfaceTrackingFvMesh::interfaceTrackingFvMesh
 )
 :
     dynamicMotionSolverFvMesh(io, doInit),
-    aMeshPtr_(new faMesh(*this)),
+    aMeshPtr_(nullptr),
     fsPatchIndex_(-1),
     fixedFreeSurfacePatches_(),
     nonReflectingFreeSurfacePatches_(),
