@@ -10,6 +10,7 @@ cd "${0%/*}" || exit    # Run from this directory
 ( cd faceZoneRegions && ./Allrun )
 ( cd motorBike_leakDetection && ./Allrun )
 ( cd opposite_walls && ./Allrun )
+( cd airfoilWithLayers && ./Allrun )
 
 exit 0
 
