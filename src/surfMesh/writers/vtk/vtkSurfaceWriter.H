@@ -56,12 +56,12 @@ Description
     }
     \endverbatim
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry and Fields
+    \subsection Geometry and Fields
     \verbatim
     rootdir
     `-- timeName

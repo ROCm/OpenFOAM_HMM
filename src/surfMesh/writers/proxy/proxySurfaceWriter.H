@@ -31,12 +31,12 @@ Description
     A surfaceWriter that writes the geometry via the MeshedSurfaceProxy,
     but which does not support any fields.
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- timeName

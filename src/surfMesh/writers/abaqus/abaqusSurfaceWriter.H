@@ -52,27 +52,27 @@ Description
     }
     \endverbatim
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- surfaceName0
         `-- geometry
-            `-- surfaceName0_<time>.abq
+            `-- surfaceName0_\<time\>.abq
     \endverbatim
 
-    \subheading Fields
+    \subsection Fields
     \verbatim
     rootdir
     `-- surfaceName0
         `-- field0
-        |   `-- surfaceName0_<time>.{inp}
+        |   `-- surfaceName0_\<time\>.{inp}
         `-- field1
-            `-- surfaceName0_<time>.{inp}
+            `-- surfaceName0_\<time\>.{inp}
     \endverbatim
 
 Note

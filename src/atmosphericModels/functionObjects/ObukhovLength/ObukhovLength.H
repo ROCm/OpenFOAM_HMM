@@ -39,7 +39,7 @@ Description
     shear in the production and dissipation of turbulent kinetic energy.
 
     \f[
-        u^* = \sqrt{\max (\nu_t \sqrt{2 |\symm{\grad{\u}}|^2}, VSMALL)}
+        u^* = \sqrt{\max (\nu_t \sqrt{2 |\symm{\grad{u}}|^2}, VSMALL)}
     \f]
 
     \f[
@@ -55,7 +55,7 @@ Description
     \vartable
       u^*        | Friction velocity                        [m/s]
       \nu_t      | Turbulent viscosity                      [m2/s]
-      \u         | Velocity                                 [m/s]
+      u          | Velocity                                 [m/s]
       L_o        | Obukhov length                           [m]
       B          | Buoyancy production term                 [m2/s3]
       \alpha_t   | Kinematic turbulent thermal conductivity [m2/s]/[kg/m/s]

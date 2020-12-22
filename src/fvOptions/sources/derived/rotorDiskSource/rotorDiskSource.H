@@ -53,7 +53,7 @@ Usage
         type            rotorDiskSource;
 
         // Mandatory entries (runtime modifiable)
-        fields          (<field1> <field2> ... <fieldN>);
+        fields          (\<field1\> \<field2\> ... \<fieldN\>);
         rhoRef          1.0;
         rpm             5.5;
         nBlades         3;

@@ -37,18 +37,19 @@ Description
 
 Usage
     Minimal example by using \c constant/fvOptions:
-    <Type>FixedValueConstraint1
+    \verbatim
+    \<Type\>FixedValueConstraint1
     {
         // Mandatory entries (unmodifiable)
-        type            <Type>FixedValueConstraint;
+        type            \<Type\>FixedValueConstraint;
 
         // Mandatory entries (runtime modifiable)
         fieldValues
         {
-            <fieldName1>           <value1>;
-            <fieldName2>           <value2>;
+            \<fieldName1\>           \<value1\>;
+            \<fieldName2\>           \<value2\>;
             ...
-            <fieldNameN>           <valueN>;
+            \<fieldNameN\>           \<valueN\>;
         }
 
         // Mandatory/Optional (inherited) entries

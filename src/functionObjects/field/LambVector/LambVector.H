@@ -80,7 +80,7 @@ Usage
     \endverbatim
 
 Note
-    To execute \c LambVector function object on an input <field>, a numerical
+    To execute \c LambVector function object on an input \<field\>, a numerical
     scheme should be defined for \c div(LambVector) in
     \c system/fvSchemes.divSchemes.
 

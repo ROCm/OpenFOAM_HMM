@@ -78,9 +78,9 @@ Description
     Operands:
     \table
       Operand        | Type           | Location
-      input          | volScalarField | $FOAM_CASE/<time>/<inpField>
+      input          | volScalarField | $FOAM_CASE/\<time\>/\<inpField\>
       output file    | -              | -
-      output field   | volScalarField | $FOAM_CASE/<time>/<outField>
+      output field   | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
     \endtable
 
 Usage
@@ -93,11 +93,11 @@ Usage
         libs            (fieldFunctionObjects);
 
         // Mandatory entries (runtime modifiable)
-        mode            <option>;
+        mode            \<option\>;
 
         // Optional entries (runtime modifiable)
-        p               <pName>;
-        U               <UName>;
+        p               \<pName\>;
+        U               \<UName\>;
         rho             <rhoName>;
         rhoInf          1.0; // enabled if rho=rhoInf
         pRef            0.0;

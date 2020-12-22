@@ -131,7 +131,7 @@ Description
         onEnd             | Trigger on end of simulation run
     \endtable
 
-    The sub-dictionary name \c <userDefinedSubDictName> is chosen by the user,
+    The sub-dictionary name \c \<userDefinedSubDictName\> is chosen by the user,
     and is typically used as the name of the output directory for any data
     written by the function object.
 

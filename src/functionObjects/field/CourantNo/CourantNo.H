@@ -38,7 +38,7 @@ Description
       Operand           | Type           | Location
       input             | -              | -
       output file       | -              | -
-      output field      | volScalarField | $FOAM_CASE/<time>/<outField>
+      output field      | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
     \endtable
 
 Usage

@@ -37,19 +37,19 @@ Description
         colourMap   | The colour map for rendering          | no  | coolToWarm
     \endtable
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- timeName
         `-- surfaceName.x3d
     \endverbatim
 
-    \subheading Fields
+    \subsection Fields
     \verbatim
     rootdir
     `-- timeName

@@ -36,9 +36,9 @@ Description
     Operands:
     \table
       Operand          | Type           | Location
-      input            | volVectorField | $FOAM_CASE/<time>/<inpField>
+      input            | volVectorField | $FOAM_CASE/\<time\>/\<inpField\>
       output file      | -              | -
-      output field     | volScalarField | $FOAM_CASE/<time>/<outField>
+      output field     | volScalarField | $FOAM_CASE/\<time\>/\<outField\>
     \endtable
 
 Usage

@@ -40,12 +40,12 @@ Description
     The governing equation of the boundary condition:
 
         \f[
-            \u = \frac{\u^*}{\kappa} ln \left(\frac{z + z_0}{z_0}\right)
+            u = \frac{u^*}{\kappa} ln \left(\frac{z + z_0}{z_0}\right)
         \f]
 
     where
     \vartable
-      \u^*     | Friction velocity
+      u^*      | Friction velocity
       \kappa   | von Kármán constant
       z_0      | Surface roughness length       [m]
       z        | Ground-normal coordinate

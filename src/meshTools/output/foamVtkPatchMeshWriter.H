@@ -125,7 +125,6 @@ public:
     // Constructors
 
         //- Construct from components (default format INLINE_BASE64)
-        //  \param useNearCellValue to use cell instead of patch values
         patchMeshWriter
         (
             const polyMesh& mesh,

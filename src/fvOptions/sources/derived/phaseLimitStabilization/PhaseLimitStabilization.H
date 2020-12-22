@@ -42,12 +42,13 @@ Description
 
 Usage
     Minimal example by using \c constant/fvOptions:
-    <Type>PhaseLimitStabilization1
+    \verbatim
+    \<Type\>PhaseLimitStabilization1
     {
         // Mandatory entries (unmodifiable)
-        type            <Type>PhaseLimitStabilization;
-        field           <fieldName>;
-        rate            <rateName>;
+        type            \<Type\>PhaseLimitStabilization;
+        field           \<fieldName\>;
+        rate            \<rateName\>;
 
         // Mandatory entries (runtime modifiable)
         residualAlpha   1.0;

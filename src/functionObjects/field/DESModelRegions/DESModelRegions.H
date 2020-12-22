@@ -69,7 +69,7 @@ Usage
       Property     | Description                        | Type | Req'd | Dflt
       type         | Type name: DESModelRegions         | word |  yes  | -
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
-      result       | Name of DES indicator field        | word |  no   | <FO>
+      result       | Name of DES indicator field        | word |  no   | \<FO\>
     \endtable
 
     The inherited entries are elaborated in:

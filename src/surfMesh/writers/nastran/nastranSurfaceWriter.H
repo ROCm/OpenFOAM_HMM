@@ -64,12 +64,12 @@ Description
     }
     \endverbatim
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- <time>
@@ -77,7 +77,7 @@ Description
         `-- surfaceName1.{nas}
     \endverbatim
 
-    \subheading Fields
+    \subsection Fields
     \verbatim
     rootdir
     `-- <time>

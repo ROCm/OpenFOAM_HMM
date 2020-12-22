@@ -36,10 +36,10 @@ Description
     the table.
 
 Usage
-    \nonUniformTable
+    \table
         Property    | Description
         values      | List of (temperature property) value pairs
-    \endnonUniformTable
+    \endTable
 
     Example for the density of water between 280 and 350K
     \verbatim

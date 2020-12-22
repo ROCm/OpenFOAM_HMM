@@ -41,7 +41,7 @@ Description
     are written in a trivial ASCII format with ID and VALUE as
     so-called user data. These \c .usr files can be read into proSTAR
     with these types of commands. For element data:
-     \verbatim
+    \verbatim
         getuser FILENAME.usr cell scalar free
         getuser FILENAME.usr cell vector free
     \endverbatim
@@ -51,19 +51,19 @@ Description
         getuser FILENAME.usr vertex vector free
     \endverbatim
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- timeName
         `-- surfaceName.{cel,vrt,inp}
     \endverbatim
 
-    \subheading Fields
+    \subsection Fields
     \verbatim
     rootdir
     `-- timeName

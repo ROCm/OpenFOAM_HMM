@@ -34,10 +34,10 @@ Description
 
     Operands:
     \table
-      Operand          | Type           | Location
-      input            | vol<Type>Field | $FOAM_CASE/<time>/<inpField>
-      output file      | -              | -
-      output field     | vol<Type>Field | $FOAM_CASE/<time>/<outField>
+      Operand          | Type             | Location
+      input            | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<inpField\>
+      output file      | -                | -
+      output field     | vol\<Type\>Field | $FOAM_CASE/\<time\>/\<outField\>
     \endtable
 
     where \c \<Type\>=Scalar/Vector/SphericalTensor/SymmTensor/Tensor.

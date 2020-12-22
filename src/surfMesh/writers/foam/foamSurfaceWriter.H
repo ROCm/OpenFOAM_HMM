@@ -54,12 +54,12 @@ Description
         fieldScale | output field scaling (dictionary)      | no  | empty
     \endtable
 
-    \heading Output file locations
+    \section Output file locations
 
     The \c rootdir normally corresponds to something like
     \c postProcessing/\<name\>
 
-    \subheading Geometry
+    \subsection Geometry
     \verbatim
     rootdir
     `-- timeName
@@ -69,7 +69,7 @@ Description
             `-- "faces"
     \endverbatim
 
-    \subheading Fields
+    \subsection Fields
     \verbatim
     rootdir
     `-- timeName

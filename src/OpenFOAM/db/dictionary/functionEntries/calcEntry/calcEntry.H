@@ -36,7 +36,7 @@ Description
     \verbatim
     a 1.0;
     b 3;
-    c #calc "$a/$b";
+    c \#calc "$a/$b";
     \endverbatim
 
     Note the explicit trailing 0 ('1.0') to force a to be read (and written)
@@ -44,7 +44,7 @@ Description
 
 Note
     Internally this is just a wrapper around codeStream functionality - the
-    #calc string gets used to construct a dictionary for codeStream.
+    \#calc string gets used to construct a dictionary for codeStream.
 
 SourceFiles
     calcEntry.C

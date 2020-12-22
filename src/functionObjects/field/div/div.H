@@ -51,7 +51,7 @@ Usage
         libs            (fieldFunctionObjects);
 
         // Mandatory (inherited) entry (runtime modifiable)
-        field           <field>;
+        field           \<field\>;
 
         // Optional (inherited) entries
         ...
@@ -72,12 +72,12 @@ Usage
 
     Minimal example by using the \c postProcess utility:
     \verbatim
-        postProcess -func "div(<field>)"
+        postProcess -func "div(\<field\>)"
     \endverbatim
 
 Note
-    To execute \c div function object on an input <field>, a numerical scheme
-    should be defined for \c div(<field>) in \c system/fvSchemes.divSchemes.
+    To execute \c div function object on an input \<field\>, a numerical scheme
+    should be defined for \c div(\<field\>) in \c system/fvSchemes.divSchemes.
 
 See also
     - Foam::functionObject

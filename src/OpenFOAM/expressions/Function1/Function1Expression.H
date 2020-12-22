@@ -32,7 +32,7 @@ Description
 Usage
     Example:
     \verbatim
-    <patchName>
+    \<patchName\>
     {
         type            uniformFixedValue;
         uniformValue
@@ -55,7 +55,7 @@ Usage
     }
     \endverbatim
 
-Very much like '#eval' but runtime
+Very much like '\#eval' but runtime
 
 See also
     Foam::exprFixedValueFvPatchField
