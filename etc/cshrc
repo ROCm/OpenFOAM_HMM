@@ -55,7 +55,7 @@
 
 # [WM_PROJECT_VERSION] - A human-readable version name
 # A development version is often named 'com' - as in www.openfoam.com
-setenv WM_PROJECT_VERSION v2012
+setenv WM_PROJECT_VERSION com
 
 #------------------------------------------------------------------------------
 # Configuration environment variables.
