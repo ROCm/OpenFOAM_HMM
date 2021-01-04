@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -813,7 +813,9 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             for (auto& pfld : bfld)
             {
-                if (pfld.patch().coupled())
+                const auto& fvp = pfld.patch();
+
+                if (fvp.coupled() && !isA<cyclicACMIFvPatch>(fvp))
                 {
                     pfld.evaluate(Pstream::defaultCommsType);
                 }
