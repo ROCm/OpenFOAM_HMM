@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,11 +129,8 @@ void Foam::layerParameters::readLayerParameters
                     << "- first layer thickness ('firstLayerThickness')" << nl
                     << "- overall thickness ('thickness')" << endl;
             }
-            firstLayerThickness = readScalar
-            (
-                dict.lookup("firstLayerThickness")
-            );
-            thickness = readScalar(dict.lookup("thickness"));
+            firstLayerThickness = dict.get<scalar>("firstLayerThickness");
+            thickness = dict.get<scalar>("thickness");
         break;
 
         case FIRST_AND_EXPANSION:
@@ -143,11 +140,8 @@ void Foam::layerParameters::readLayerParameters
                     << "- first layer thickness ('firstLayerThickness')" << nl
                     << "- expansion ratio ('expansionRatio')" << endl;
             }
-            firstLayerThickness = readScalar
-            (
-                dict.lookup("firstLayerThickness")
-            );
-            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+            firstLayerThickness = dict.get<scalar>("firstLayerThickness");
+            expansionRatio = dict.get<scalar>("expansionRatio");
         break;
 
         case FINAL_AND_TOTAL:
@@ -157,11 +151,8 @@ void Foam::layerParameters::readLayerParameters
                     << "- final layer thickness ('finalLayerThickness')" << nl
                     << "- overall thickness ('thickness')" << endl;
             }
-            finalLayerThickness = readScalar
-            (
-                dict.lookup("finalLayerThickness")
-            );
-            thickness = readScalar(dict.lookup("thickness"));
+            finalLayerThickness = dict.get<scalar>("finalLayerThickness");
+            thickness = dict.get<scalar>("thickness");
         break;
 
         case FINAL_AND_EXPANSION:
@@ -171,11 +162,8 @@ void Foam::layerParameters::readLayerParameters
                     << "- final layer thickness ('finalLayerThickness')" << nl
                     << "- expansion ratio ('expansionRatio')" << endl;
             }
-            finalLayerThickness = readScalar
-            (
-                dict.lookup("finalLayerThickness")
-            );
-            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+            finalLayerThickness = dict.get<scalar>("finalLayerThickness");
+            expansionRatio = dict.get<scalar>("expansionRatio");
         break;
 
         case TOTAL_AND_EXPANSION:
@@ -185,8 +173,8 @@ void Foam::layerParameters::readLayerParameters
                     << "- overall thickness ('thickness')" << nl
                     << "- expansion ratio ('expansionRatio')" << endl;
             }
-            thickness = readScalar(dict.lookup("thickness"));
-            expansionRatio = readScalar(dict.lookup("expansionRatio"));
+            thickness = dict.get<scalar>("thickness");
+            expansionRatio = dict.get<scalar>("expansionRatio");
         break;
 
         case FIRST_AND_RELATIVE_FINAL:
@@ -200,22 +188,13 @@ void Foam::layerParameters::readLayerParameters
                     << " ('finalLayerThickness')" << nl
                     << endl;
             }
-            firstLayerThickness = readScalar
-            (
-                dict.lookup("firstLayerThickness")
-            );
-            finalLayerThickness = readScalar
-            (
-                dict.lookup("finalLayerThickness")
-            );
+            firstLayerThickness = dict.get<scalar>("firstLayerThickness");
+            finalLayerThickness = dict.get<scalar>("finalLayerThickness");
         break;
 
         default:
-            FatalIOErrorIn
-            (
-                "layerParameters::layerParameters(..)",
-                dict
-            )   << "problem." << exit(FatalIOError);
+            FatalIOErrorInFunction(dict)
+                << "problem." << exit(FatalIOError);
         break;
     }
 }
@@ -586,10 +565,8 @@ Foam::layerParameters::layerParameters
                             thickness_[patchi],
                             expansionRatio_[patchi]
                         );
-                        minThickness_[patchi] = readScalar
-                        (
-                            layerDict.lookup("minThickness")
-                        );
+                        minThickness_[patchi] =
+                            layerDict.get<scalar>("minThickness");
                     }
                     else
                     {
@@ -613,7 +590,7 @@ Foam::layerParameters::layerParameters
                                 layerDict.readIfPresent
                                 (
                                     "firstLayerThickness",
-                                 firstLayerThickness_[patchi]
+                                    firstLayerThickness_[patchi]
                                 );
                                 layerDict.readIfPresent
                                 (
