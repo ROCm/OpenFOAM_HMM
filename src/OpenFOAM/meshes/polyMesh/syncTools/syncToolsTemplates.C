@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -798,14 +798,15 @@ void Foam::syncTools::syncPointList
 }
 
 
-template<class T, class CombineOp, class TransformOp>
+template<class T, class CombineOp, class TransformOp, class FlipOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
     List<T>& edgeValues,
     const CombineOp& cop,
     const T& nullValue,
-    const TransformOp& top
+    const TransformOp& top,
+    const FlipOp& fop
 )
 {
     if (edgeValues.size() != mesh.nEdges())
@@ -816,12 +817,47 @@ void Foam::syncTools::syncEdgeList
             << mesh.nEdges() << abort(FatalError);
     }
 
+    const edgeList& edges = mesh.edges();
     const globalMeshData& gd = mesh.globalData();
     const labelList& meshEdges = gd.coupledPatchMeshEdges();
+    const indirectPrimitivePatch& cpp = gd.coupledPatch();
+    const edgeList& cppEdges = cpp.edges();
+    const labelList& mp = cpp.meshPoints();
     const globalIndexAndTransform& git = gd.globalTransforms();
     const mapDistribute& edgeMap = gd.globalEdgeSlavesMap();
+    const bitSet& orientation = gd.globalEdgeOrientation();
 
-    List<T> cppFld(UIndirectList<T>(edgeValues, meshEdges));
+    List<T> cppFld(meshEdges.size());
+    forAll(meshEdges, i)
+    {
+        const edge& cppE = cppEdges[i];
+        const label meshEdgei = meshEdges[i];
+        const edge& meshE = edges[meshEdgei];
+
+        // 1. is cpp edge oriented as mesh edge
+        // 2. is cpp edge oriented same as master edge
+
+        const int dir = edge::compare(meshE, edge(mp, cppE));
+        if (dir == 0)
+        {
+            FatalErrorInFunction<< "Problem:"
+                << " mesh edge:" << meshE.line(mesh.points())
+                << " coupled edge:" << cppE.line(cpp.localPoints())
+                << exit(FatalError);
+        }
+
+        const bool sameOrientation = ((dir == 1) == orientation[i]);
+
+        if (sameOrientation)
+        {
+            cppFld[i] = edgeValues[meshEdgei];
+        }
+        else
+        {
+            cppFld[i] = fop(edgeValues[meshEdgei]);
+        }
+    }
+
 
     globalMeshData::syncData
     (
@@ -837,12 +873,29 @@ void Foam::syncTools::syncEdgeList
     // Extract back onto mesh
     forAll(meshEdges, i)
     {
-        edgeValues[meshEdges[i]] = cppFld[i];
+        const edge& cppE = cppEdges[i];
+        const label meshEdgei = meshEdges[i];
+        const edge& meshE = edges[meshEdgei];
+
+        // 1. is cpp edge oriented as mesh edge
+        // 2. is cpp edge oriented same as master edge
+
+        const int dir = edge::compare(meshE, edge(mp, cppE));
+        const bool sameOrientation = ((dir == 1) == orientation[i]);
+
+        if (sameOrientation)
+        {
+            edgeValues[meshEdges[i]] = cppFld[i];
+        }
+        else
+        {
+            edgeValues[meshEdges[i]] =  fop(cppFld[i]);
+        }
     }
 }
 
 
-template<class T, class CombineOp, class TransformOp>
+template<class T, class CombineOp, class TransformOp, class FlipOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
@@ -850,7 +903,8 @@ void Foam::syncTools::syncEdgeList
     List<T>& edgeValues,
     const CombineOp& cop,
     const T& nullValue,
-    const TransformOp& top
+    const TransformOp& top,
+    const FlipOp& fop
 )
 {
     if (edgeValues.size() != meshEdges.size())
@@ -860,19 +914,48 @@ void Foam::syncTools::syncEdgeList
             << " is not equal to the number of meshEdges "
             << meshEdges.size() << abort(FatalError);
     }
+    const edgeList& edges = mesh.edges();
     const globalMeshData& gd = mesh.globalData();
     const indirectPrimitivePatch& cpp = gd.coupledPatch();
+    const edgeList& cppEdges = cpp.edges();
+    const labelList& mp = cpp.meshPoints();
     const Map<label>& mpm = gd.coupledPatchMeshEdgeMap();
+    const bitSet& orientation = gd.globalEdgeOrientation();
 
     List<T> cppFld(cpp.nEdges(), nullValue);
 
     forAll(meshEdges, i)
     {
-        const auto iter = mpm.cfind(meshEdges[i]);
-
+        const label meshEdgei = meshEdges[i];
+        const auto iter = mpm.cfind(meshEdgei);
         if (iter.found())
         {
-            cppFld[*iter] = edgeValues[i];
+            const label cppEdgei = iter();
+            const edge& cppE = cppEdges[cppEdgei];
+            const edge& meshE = edges[meshEdgei];
+
+            // 1. is cpp edge oriented as mesh edge
+            // 2. is cpp edge oriented same as master edge
+
+            const int dir = edge::compare(meshE, edge(mp, cppE));
+            if (dir == 0)
+            {
+                FatalErrorInFunction<< "Problem:"
+                    << " mesh edge:" << meshE.line(mesh.points())
+                    << " coupled edge:" << cppE.line(cpp.localPoints())
+                    << exit(FatalError);
+            }
+
+            const bool sameOrientation = ((dir == 1) == orientation[i]);
+
+            if (sameOrientation)
+            {
+                cppFld[cppEdgei] = edgeValues[i];
+            }
+            else
+            {
+                cppFld[cppEdgei] = fop(edgeValues[i]);
+            }
         }
     }
 
@@ -889,11 +972,25 @@ void Foam::syncTools::syncEdgeList
 
     forAll(meshEdges, i)
     {
-        const auto iter = mpm.cfind(meshEdges[i]);
-
-        if (iter.found())
+        label meshEdgei = meshEdges[i];
+        Map<label>::const_iterator iter = mpm.find(meshEdgei);
+        if (iter != mpm.end())
         {
-            edgeValues[i] = cppFld[*iter];
+            label cppEdgei = iter();
+            const edge& cppE = cppEdges[cppEdgei];
+            const edge& meshE = edges[meshEdgei];
+
+            const int dir = edge::compare(meshE, edge(mp, cppE));
+            const bool sameOrientation = ((dir == 1) == orientation[i]);
+
+            if (sameOrientation)
+            {
+                edgeValues[i] = cppFld[cppEdgei];
+            }
+            else
+            {
+                edgeValues[i] = fop(cppFld[cppEdgei]);
+            }
         }
     }
 }

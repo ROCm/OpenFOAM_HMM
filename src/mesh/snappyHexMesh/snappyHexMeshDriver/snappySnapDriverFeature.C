@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2873,6 +2873,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
         (
             pp.meshEdges(mesh.edges(), mesh.pointEdges())
         );
+        // Collect all coupled edges. Does not filter duplicates/order
         syncTools::syncEdgeList
         (
             mesh,
@@ -2880,7 +2881,8 @@ void Foam::snappySnapDriver::determineBaffleFeatures
             edgeFaceNormals,
             listPlusEqOp<point>(),
             List<point>(),
-            mapDistribute::transform()
+            mapDistribute::transform(),
+            noOp()
         );
     }
 

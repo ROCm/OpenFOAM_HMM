@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,18 +138,19 @@ public:
             );
 
             //- Synchronize values on all mesh edges.
-            template<class T, class CombineOp, class TransformOp>
+            template<class T, class CombineOp, class TransformOp, class FlipOp>
             static void syncEdgeList
             (
                 const polyMesh& mesh,
                 List<T>& edgeValues,
                 const CombineOp& cop,
                 const T& nullValue,
-                const TransformOp& top
+                const TransformOp& top,
+                const FlipOp& fop
             );
 
             //- Synchronize values on selected mesh edges.
-            template<class T, class CombineOp, class TransformOp>
+            template<class T, class CombineOp, class TransformOp, class FlipOp>
             static void syncEdgeList
             (
                 const polyMesh& mesh,
@@ -157,7 +158,8 @@ public:
                 List<T>& edgeValues,
                 const CombineOp& cop,
                 const T& nullValue,
-                const TransformOp& top
+                const TransformOp& top,
+                const FlipOp& fop
             );
 
             //- Synchronize values on boundary faces only.
@@ -277,7 +279,8 @@ public:
                     edgeValues,
                     cop,
                     nullValue,
-                    mapDistribute::transform()
+                    mapDistribute::transform(),
+                    noOp()
                 );
             }
 
@@ -297,7 +300,8 @@ public:
                     positions,
                     cop,
                     nullValue,
-                    mapDistribute::transformPosition()
+                    mapDistribute::transformPosition(),
+                    noOp()
                 );
             }
 
@@ -319,7 +323,8 @@ public:
                     edgeValues,
                     cop,
                     nullValue,
-                    mapDistribute::transform()
+                    mapDistribute::transform(),
+                    noOp()
                 );
             }
 
@@ -341,7 +346,8 @@ public:
                     positions,
                     cop,
                     nullValue,
-                    mapDistribute::transformPosition()
+                    mapDistribute::transformPosition(),
+                    noOp()
                 );
             }
 
