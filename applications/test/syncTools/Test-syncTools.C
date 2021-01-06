@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | www.openfoam.com
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
@@ -37,6 +37,7 @@ Description
 #include "Time.H"
 #include "Random.H"
 #include "PackedList.H"
+#include "flipOp.H"
 
 using namespace Foam;
 
@@ -408,7 +409,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(mesh.nPoints(), Zero);
 
-        bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
+        const bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
 
         forAll(isMasterPoint, pointi)
         {
@@ -484,7 +485,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(edges.size(), Zero);
 
-        bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
+        const bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
 
         forAll(isMasterEdge, edgeI)
         {
@@ -513,6 +514,252 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
                     << " has " << nMasters[edgeI]
                     << " masters."
                     << endl;
+            }
+        }
+    }
+}
+
+
+typedef Pair<point> PointPair;
+class edgePointCombineOp
+{
+public:
+    void operator()(PointPair& x, const PointPair& y) const
+    {
+        if
+        (
+            (y[0] < x[0])
+         || (y[0] == x[0] && y[1] < x[1])
+        )
+        {
+            x = y;
+        }
+    }
+};
+class edgePointTransformOp
+{
+public:
+    void operator()
+    (
+        const vectorTensorTransform& vt,
+        const bool forward,
+        List<PointPair>& fld
+    ) const
+    {
+        pointField points0(fld.size());
+        pointField points1(fld.size());
+        forAll(fld, i)
+        {
+            points0[i] = fld[i].first();
+            points1[i] = fld[i].second();
+        }
+
+        pointField points0New;
+        pointField points1New;
+        if (forward)
+        {
+            points0New = vt.transformPosition(points0);
+            points1New = vt.transformPosition(points1);
+        }
+        else
+        {
+            points0New = vt.invTransformPosition(points0);
+            points1New = vt.invTransformPosition(points1);
+        }
+
+        forAll(fld, i)
+        {
+            fld[i] = PointPair(points0New[i], points1New[i]);
+        }
+    }
+};
+class edgePointFlipOp
+{
+public:
+    PointPair operator()(const PointPair& val) const
+    {
+        PointPair newVal(val);
+        newVal.flip();
+        return newVal;
+    }
+};
+void testEdgeFlip2(const polyMesh& mesh, Random& rndGen)
+{
+    Pout<< nl << "Testing edge-wise (oriented) data synchronisation." << endl;
+
+    const edgeList& edges = mesh.edges();
+    const pointField& points = mesh.points();
+
+    // Test position.
+
+    List<PointPair> synEdgeEnds(edges.size());
+    {
+        forAll(synEdgeEnds, edgeI)
+        {
+            const edge& e = edges[edgeI];
+            synEdgeEnds[edgeI] = PointPair
+            (
+                points[e[0]],
+                points[e[1]]
+            );
+        }
+    }
+
+    // 1. Ignore flipping
+    {
+        List<PointPair> fld(synEdgeEnds);
+
+        syncTools::syncEdgeList
+        (
+            mesh,
+            fld,
+            edgePointCombineOp(),
+            PointPair(point::max, point::max),
+            edgePointTransformOp(),
+            noOp()
+        );
+
+        forAll(fld, edgeI)
+        {
+            const edge& e = edges[edgeI];
+            const PointPair edgeEnd
+            (
+                points[e[0]],
+                points[e[1]]
+            );
+
+            const PointPair& sync = fld[edgeI];
+
+            if
+            (
+                (mag(edgeEnd[0] - sync[0]) > SMALL)
+             || (mag(edgeEnd[1] - sync[1]) > SMALL)
+            )
+            {
+                WarningInFunction
+                    << "Edge " << edgeI
+                    << " original endpoints " << edgeEnd
+                    << " synced endpoints " << sync
+                    << endl;
+            }
+        }
+    }
+
+    // 2. Use flipping operator. Should produce no warnings
+    {
+        syncTools::syncEdgeList
+        (
+            mesh,
+            synEdgeEnds,
+            edgePointCombineOp(),
+            PointPair(point::max, point::max),
+            edgePointTransformOp(),
+            edgePointFlipOp()
+        );
+
+        forAll(synEdgeEnds, edgeI)
+        {
+            const edge& e = edges[edgeI];
+            const PointPair edgeEnd
+            (
+                points[e[0]],
+                points[e[1]]
+            );
+
+            const PointPair& sync = synEdgeEnds[edgeI];
+
+            if
+            (
+                (mag(edgeEnd[0] - sync[0]) > SMALL)
+             || (mag(edgeEnd[1] - sync[1]) > SMALL)
+            )
+            {
+                FatalErrorInFunction
+                    << "Edge " << edgeI
+                    << " original endpoints " << edgeEnd
+                    << " synced endpoints " << sync
+                    << exit(FatalError);
+            }
+        }
+    }
+}
+
+
+void testEdgeFlip(const polyMesh& mesh, Random& rndGen)
+{
+    Info<< nl << "Testing edge-wise (oriented) data synchronisation."
+        << endl;
+
+    const edgeList& edges = mesh.edges();
+    const pointField& points = mesh.points();
+
+    // Test vector.
+
+    vectorField synEdgeVecs(edges.size());
+    {
+        forAll(synEdgeVecs, edgeI)
+        {
+            synEdgeVecs[edgeI] = edges[edgeI].unitVec(points);
+        }
+    }
+
+    // Without flipping (should produce warnings)
+    {
+        vectorField fld(synEdgeVecs);
+        // Ignore flipping
+        syncTools::syncEdgeList
+        (
+            mesh,
+            fld,
+            minEqOp<vector>(),
+            point::max
+        );
+
+        forAll(fld, edgeI)
+        {
+            const edge& e = edges[edgeI];
+            const vector eVec(e.unitVec(points));
+
+            if ((eVec & fld[edgeI]) < (1-SMALL))
+            {
+                WarningInFunction
+                    << "Edge " << edgeI
+                    << " at " << e.line(points)
+                    << " original vector " << eVec
+                    << " synced vector " << fld[edgeI]
+                    << " diff:" << (eVec & fld[edgeI])
+                    << endl;
+            }
+        }
+    }
+
+
+    // With consistent flipping. Should never produce difference
+    {
+        syncTools::syncEdgeList
+        (
+            mesh,
+            synEdgeVecs,
+            minMagSqrEqOp<vector>(),
+            point::max,
+            mapDistribute::transform(),
+            flipOp()
+        );
+
+        forAll(synEdgeVecs, edgeI)
+        {
+            const edge& e = edges[edgeI];
+            const vector eVec(e.unitVec(points));
+
+            if ((eVec & synEdgeVecs[edgeI]) < (1-SMALL))
+            {
+                FatalErrorInFunction
+                    << "Edge " << edgeI
+                    << " at " << e.line(points)
+                    << " original vector " << eVec
+                    << " synced vector " << synEdgeVecs[edgeI]
+                    << " diff:" << (eVec & synEdgeVecs[edgeI])
+                    << exit(FatalError);
             }
         }
     }
@@ -553,7 +800,7 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(mesh.nFaces(), Zero);
 
-        bitSet isMasterFace(syncTools::getMasterFaces(mesh));
+        const bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
         forAll(isMasterFace, facei)
         {
@@ -603,6 +850,12 @@ int main(int argc, char *argv[])
 
     // Edge sync
     testEdgeSync(mesh, rndGen);
+
+    // Edge sync and flip
+    testEdgeFlip(mesh, rndGen);
+
+    // Edge sync and flip of more complex structure
+    testEdgeFlip2(mesh, rndGen);
 
     // Point sync
     testPointSync(mesh, rndGen);
