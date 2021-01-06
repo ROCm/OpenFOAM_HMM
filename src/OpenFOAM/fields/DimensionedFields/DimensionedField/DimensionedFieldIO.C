@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,9 +121,12 @@ bool Foam::DimensionedField<Type, GeoMesh>::writeData
 ) const
 {
     os.writeEntry("dimensions", dimensions());
-    oriented_.writeEntry(os);
+    os << nl;
 
-    os<< nl << nl;
+    if (oriented_.writeEntry(os))
+    {
+        os << nl;
+    }
 
     Field<Type>::writeEntry(fieldDictEntry, os);
 

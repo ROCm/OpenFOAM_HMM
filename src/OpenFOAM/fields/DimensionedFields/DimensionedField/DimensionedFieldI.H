@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,14 +61,15 @@ inline Foam::dimensionSet& Foam::DimensionedField<Type, GeoMesh>::dimensions()
 
 template<class Type, class GeoMesh>
 inline const Foam::orientedType&
-Foam::DimensionedField<Type, GeoMesh>::oriented() const
+Foam::DimensionedField<Type, GeoMesh>::oriented() const noexcept
 {
     return oriented_;
 }
 
 
 template<class Type, class GeoMesh>
-inline Foam::orientedType& Foam::DimensionedField<Type, GeoMesh>::oriented()
+inline Foam::orientedType&
+Foam::DimensionedField<Type, GeoMesh>::oriented() noexcept
 {
     return oriented_;
 }
@@ -78,7 +79,7 @@ template<class Type, class GeoMesh>
 inline void Foam::DimensionedField<Type, GeoMesh>::setOriented
 (
     const bool oriented
-)
+) noexcept
 {
     oriented_.setOriented(oriented);
 }

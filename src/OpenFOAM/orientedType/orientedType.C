@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "orientedType.H"
+#include "dictionary.H"
+#include "Istream.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -35,11 +38,13 @@ const Foam::Enum
 >
 Foam::orientedType::orientedOptionNames
 ({
+    { orientedOption::UNKNOWN, "unknown" },
     { orientedOption::ORIENTED, "oriented" },
     { orientedOption::UNORIENTED, "unoriented" },
-    { orientedOption::UNKNOWN, "unknown" },
 });
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 bool Foam::orientedType::checkType
 (
@@ -86,19 +91,19 @@ Foam::orientedType::orientedType(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::orientedType::orientedOption& Foam::orientedType::oriented()
+Foam::orientedType::orientedOption& Foam::orientedType::oriented() noexcept
 {
     return oriented_;
 }
 
 
-Foam::orientedType::orientedOption Foam::orientedType::oriented() const
+Foam::orientedType::orientedOption Foam::orientedType::oriented() const noexcept
 {
     return oriented_;
 }
 
 
-void Foam::orientedType::setOriented(const bool oriented)
+void Foam::orientedType::setOriented(const bool oriented) noexcept
 {
     oriented_ = oriented ? ORIENTED : UNORIENTED;
 }
@@ -116,12 +121,16 @@ void Foam::orientedType::read(const dictionary& dict)
 }
 
 
-void Foam::orientedType::writeEntry(Ostream& os) const
+bool Foam::orientedType::writeEntry(Ostream& os) const
 {
-    if (oriented_ == ORIENTED)
+    const bool output = (oriented_ == ORIENTED);
+
+    if (output)
     {
         os.writeEntry("oriented", orientedOptionNames[oriented_]);
     }
+
+    return output;
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +37,6 @@ SourceFiles
 #ifndef orientedType_H
 #define orientedType_H
 
-#include "Istream.H"
-#include "Ostream.H"
-#include "dictionary.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,12 +44,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class orientedType;
 
 Istream& operator>>(Istream& is, orientedType& ot);
-
 Ostream& operator<<(Ostream& os, const orientedType& ot);
 
 /*---------------------------------------------------------------------------*\
@@ -63,24 +58,25 @@ class orientedType
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
-        //- Enumeration defining the valid oriented flags
+        //- Enumeration defining oriented flags
         enum orientedOption
         {
-            ORIENTED,
-            UNORIENTED,
-            UNKNOWN
+            UNKNOWN = 0,
+            ORIENTED = 1,
+            UNORIENTED = 2
         };
 
+        //- Named enumerations for oriented flags
         static const Enum<orientedOption> orientedOptionNames;
 
 
 private:
 
-    // Private data
+    // Private Data
 
-        //- Oriented flag
+        //- Oriented type
         orientedOption oriented_;
 
 
@@ -88,20 +84,20 @@ public:
 
     // Constructors
 
-        //- Null constructor - flag initialised to false
+        //- Default construct as "UNKNOWN"
         orientedType();
 
-        //- Copy constructor
+        //- Copy construct
         orientedType(const orientedType& ot);
 
         //- Construct from bool
-        orientedType(const bool oriented);
+        explicit orientedType(const bool oriented);
 
         //- Construct from Istream
-        orientedType(Istream& is);
+        explicit orientedType(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return true if can operate on this pair of oriented types
         static bool checkType
@@ -111,22 +107,23 @@ public:
         );
 
         //- Return non-const reference to the oriented flag
-        orientedOption& oriented();
+        orientedOption& oriented() noexcept;
 
-        //- Return const reference to the oriented flag
-        orientedOption oriented() const;
+        //- Return the oriented flag
+        orientedOption oriented() const noexcept;
 
         //- Set the oriented flag
-        void setOriented(const bool oriented = true);
+        void setOriented(const bool oriented = true) noexcept;
 
-        //- Read the oriented state from dictionary
+        //- Read the "oriented" state from dictionary
         void read(const dictionary& dict);
 
-        //- Write the oriented flag entry
-        void writeEntry(Ostream& os) const;
+        //- Write the "oriented" flag entry (if ORIENTED)
+        //  \return True if entry was written
+        bool writeEntry(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const orientedType& ot);
 
@@ -139,10 +136,9 @@ public:
         bool operator()() const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, orientedType& ot);
-
         friend Ostream& operator<<(Ostream& os, const orientedType& ot);
 };
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -304,13 +304,13 @@ public:
         inline dimensionSet& dimensions();
 
         //- Return oriented type
-        inline const orientedType& oriented() const;
+        inline const orientedType& oriented() const noexcept;
 
         //- Return non-const access to the oriented type
-        inline orientedType& oriented();
+        inline orientedType& oriented() noexcept;
 
         //- Set the oriented flag
-        inline void setOriented(const bool oriented = true);
+        inline void setOriented(const bool oriented = true) noexcept;
 
         //- Return field
         inline const Field<Type>& field() const;
