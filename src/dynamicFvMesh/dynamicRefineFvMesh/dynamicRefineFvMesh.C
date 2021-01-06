@@ -243,6 +243,12 @@ void Foam::dynamicRefineFvMesh::mapFields(const mapPolyMesh& mpm)
         (
             lookupClass<surfaceScalarField>()
         );
+
+        // Remove surfaceInterpolation to allow re-calculation on demand
+        // This could be done in fvMesh::updateMesh but some dynamicFvMesh
+        // might need the old interpolation fields (weights, etc).
+        surfaceInterpolation::clearOut();
+
         forAllIters(fluxes, iter)
         {
             if (!correctFluxes_.found(iter.key()))
