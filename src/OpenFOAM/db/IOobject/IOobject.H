@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -511,8 +511,8 @@ public:
     // Writing
 
         //- Write the standard OpenFOAM file/dictionary banner
-        //  Optionally without -*- C++ -*- editor hint (eg, for logs)
-        static Ostream& writeBanner(Ostream& os, bool noHint=false);
+        //  Optionally without editor syntax hint (eg, for logs)
+        static Ostream& writeBanner(Ostream& os, const bool noSyntaxHint=false);
 
         //- Write the standard file section divider
         static Ostream& writeDivider(Ostream& os);
@@ -520,11 +520,18 @@ public:
         //- Write the standard end file divider
         static Ostream& writeEndDivider(Ostream& os);
 
-        //- Write header
-        bool writeHeader(Ostream& os) const;
+        //- Write header with current type().
+        //  Optionally without arch information when ASCII
+        bool writeHeader(Ostream& os, const bool noArchAscii=false) const;
 
-        //- Write header. Allow override of type
-        bool writeHeader(Ostream& os, const word& objectType) const;
+        //- Write header with override of type.
+        //  Optionally without arch information when ASCII
+        bool writeHeader
+        (
+            Ostream& os,
+            const word& objectType,
+            const bool noArchAscii = false
+        ) const;
 
 
     // Error Handling

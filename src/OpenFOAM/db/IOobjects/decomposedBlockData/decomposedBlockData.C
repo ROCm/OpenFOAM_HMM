@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,41 +188,47 @@ void Foam::decomposedBlockData::writeHeader
     Ostream& os,
     const IOstream::versionNumber version,
     const IOstream::streamFormat format,
-    const word& type,
+    const word& objectType,
     const string& note,
     const fileName& location,
-    const word& name
+    const word& objectName
 )
 {
     IOobject::writeBanner(os)
-        << "FoamFile\n{\n"
-        << "    version     " << version << ";\n"
-        << "    format      " << format << ";\n"
-        << "    class       " << type << ";\n";
-
-    // This may be useful to have as well
-    if (os.format() == IOstream::BINARY)
-    {
-        os  << "    arch        " << foamVersion::buildArch << ";\n";
-    }
+        << "FoamFile" << nl
+        << '{' << nl
+        << "    version     " << version << ';' << nl
+        << "    format      " << format << ';' << nl
+        << "    arch        " << foamVersion::buildArch << ';' << nl;
 
     if (Pstream::parRun())
     {
-        os  << "    blocks      " << Pstream::nProcs() << ";\n";
+        os  << "    blocks      " << Pstream::nProcs() << ';' << nl;
     }
-
-    if (note.size())
+    if (!note.empty())
     {
-        os  << "    note        " << note << ";\n";
+        os  << "    note        " << note << ';' << nl;
     }
 
-    if (location.size())
+    os << "    class       ";
+    if (objectType.empty())
     {
-        os  << "    location    " << location << ";\n";
+        // Empty type not allowed - use 'dictionary' fallback
+        os  << "dictionary";
+    }
+    else
+    {
+        os  << objectType;
+    }
+    os  << ';' << nl;
+
+    if (!location.empty())
+    {
+        os  << "    location    " << location << ';' << nl;
     }
 
-    os  << "    object      " << name << ";\n"
-        << "}" << nl;
+    os  << "    object      " << objectName << ';' << nl
+        << '}' << nl;
 
     IOobject::writeDivider(os) << nl;
 }
@@ -976,9 +982,8 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
     // Scatter header information
 
     string versionString(os.version().str());
-    Pstream::scatter(versionString, Pstream::msgType(), comm_);
-
     label formatValue(os.format());
+    Pstream::scatter(versionString, Pstream::msgType(), comm_);
     Pstream::scatter(formatValue, Pstream::msgType(), comm_);
 
     //word masterName(name());
@@ -997,8 +1002,8 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
         writeHeader
         (
             os,
-            IOstream::versionNumber(versionString),
-            IOstream::streamFormat(formatValue),
+            IOstreamOption::versionNumber(versionString),
+            IOstreamOption::streamFormat(formatValue),
             io.headerClassName(),
             io.note(),
             masterLocation,

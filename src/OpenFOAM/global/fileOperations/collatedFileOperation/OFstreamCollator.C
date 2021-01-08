@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,16 +94,15 @@ bool Foam::OFstreamCollator::writeFile
         // We don't have IOobject so cannot use IOobject::writeHeader
         if (!append)
         {
-            OSstream& os = osPtr();
             decomposedBlockData::writeHeader
             (
-                os,
+                *osPtr,
                 ver,
                 fmt,
                 typeName,
-                "",
-                fName,
-                fName.name()
+                "",          // note
+                fName,       // location
+                fName.name() // object name
             );
         }
     }

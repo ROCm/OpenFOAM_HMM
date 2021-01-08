@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,8 @@ License
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
+Foam::Ostream&
+Foam::IOobject::writeBanner(Ostream& os, const bool noSyntaxHint)
 {
     // The version padded with spaces to fit after "Version:  "
     // - initialized with zero-length string to detect if it has been populated
@@ -66,7 +67,7 @@ Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
     os  <<
         "/*--------------------------------";
 
-    if (noHint)
+    if (noSyntaxHint)
     {
         // Without syntax hint
         os  << "---------";
@@ -116,7 +117,12 @@ Foam::Ostream& Foam::IOobject::writeEndDivider(Ostream& os)
 }
 
 
-bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
+bool Foam::IOobject::writeHeader
+(
+    Ostream& os,
+    const word& objectType,
+    const bool noArchAscii
+) const
 {
     if (!os.good())
     {
@@ -127,25 +133,37 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
         return false;
     }
 
-    writeBanner(os)
-        << "FoamFile\n{\n"
-        << "    version     " << os.version() << ";\n"
-        << "    format      " << os.format() << ";\n"
-        << "    class       " << type << ";\n";
+    IOobject::writeBanner(os)
+        << "FoamFile" << nl
+        << '{' << nl
+        << "    version     " << os.version() << ';' << nl
+        << "    format      " << os.format() << ';' << nl;
 
-    if (os.format() == IOstream::BINARY)
+    if (os.format() == IOstream::BINARY || !noArchAscii)
     {
-        os  << "    arch        " << foamVersion::buildArch << ";\n";
+        // Arch information (BINARY: always, ASCII: can disable)
+        os  << "    arch        " << foamVersion::buildArch << ';' << nl;
     }
-
     if (!note().empty())
     {
-        os  << "    note        " << note() << ";\n";
+        os  << "    note        " << note() << ';' << nl;
     }
 
-    os  << "    location    " << instance()/db().dbDir()/local() << ";\n"
-        << "    object      " << name() << ";\n"
-        << "}" << nl;
+    os  << "    class       ";
+    if (objectType.empty())
+    {
+        // Empty type not allowed - use 'dictionary' fallback
+        os  << "dictionary";
+    }
+    else
+    {
+        os  << objectType;
+    }
+    os  << ';' << nl;
+
+    os  << "    location    " << instance()/db().dbDir()/local() << ';' << nl
+        << "    object      " << name() << ';' << nl
+        << '}' << nl;
 
     writeDivider(os) << nl;
 
@@ -153,9 +171,9 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 }
 
 
-bool Foam::IOobject::writeHeader(Ostream& os) const
+bool Foam::IOobject::writeHeader(Ostream& os, const bool noArchAscii) const
 {
-    return writeHeader(os, type());
+    return writeHeader(os, type(), noArchAscii);
 }
 
 

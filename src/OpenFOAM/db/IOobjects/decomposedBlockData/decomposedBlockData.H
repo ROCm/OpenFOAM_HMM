@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,10 +156,10 @@ public:
             Ostream& os,
             const IOstream::versionNumber version,
             const IOstream::streamFormat format,
-            const word& type,
+            const word& objectType,
             const string& note,
             const fileName& location,
-            const word& name
+            const word& objectName
         );
 
         //- Read selected block (non-seeking) + header information
