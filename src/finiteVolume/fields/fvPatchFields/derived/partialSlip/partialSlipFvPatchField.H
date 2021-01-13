@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +36,11 @@ Description
 
 Usage
     \table
-        Property      | Description             | Required    | Default value
-        refValue      | Reference value at zero slip | no     | 0
-        valueFraction | Fraction of refValue used for boundary [0-1] | yes |
+      Property      | Description                     | Reqd | Default
+      type          | Type name: partialSlip          | yes  | -
+      refValue      | Reference value at zero slip    | no   | 0
+      valueFraction | Fraction of refValue used for boundary [0-1] | yes |
+      writeValue    | Output patch value (eg, ParaView) | no | false
     \endtable
 
     Example of the boundary condition specification:
@@ -78,13 +81,20 @@ class partialSlipFvPatchField
 :
     public transformFvPatchField<Type>
 {
-    // Private data
+    //- The parent boundary condition type
+    typedef transformFvPatchField<Type> parent_bctype;
+
+
+    // Private Data
 
         //- Reference value
         Field<Type> refValue_;
 
         //- Fraction (0-1) of value used for boundary condition
         scalarField valueFraction_;
+
+        //- Flag to output patch values (e.g. for ParaView)
+        bool writeValue_;
 
 
 public:
@@ -154,34 +164,15 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Attributes
+        // Access/attributes
 
-            //- Return false: this patch field is not altered by assignment
+            //- This patch field is not altered by assignment
             virtual bool assignable() const
             {
                 return false;
             }
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>&,
-                const labelList&
-            );
-
-
-        // Return defining fields
 
             virtual Field<Type>& refValue()
             {
@@ -204,7 +195,23 @@ public:
             }
 
 
-        // Evaluation functions
+        // Mapping
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<Type>&,
+                const labelList&
+            );
+
+
+        // Evaluation
 
             //- Return gradient at boundary
             virtual tmp<Field<Type>> snGrad() const;
@@ -224,7 +231,7 @@ public:
         virtual void write(Ostream&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

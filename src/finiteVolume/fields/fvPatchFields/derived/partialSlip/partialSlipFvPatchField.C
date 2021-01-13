@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    transformFvPatchField<Type>(p, iF),
-    refValue_(p.size()),
-    valueFraction_(p.size(), 1.0)
+    parent_bctype(p, iF),
+    refValue_(p.size(), Zero),
+    valueFraction_(p.size(), 1.0),
+    writeValue_(false)
 {}
 
 
@@ -53,9 +54,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    transformFvPatchField<Type>(ptf, p, iF, mapper),
+    parent_bctype(ptf, p, iF, mapper),
     refValue_(ptf.refValue_, mapper),
-    valueFraction_(ptf.valueFraction_, mapper)
+    valueFraction_(ptf.valueFraction_, mapper),
+    writeValue_(ptf.writeValue_)
 {}
 
 
@@ -67,9 +69,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     const dictionary& dict
 )
 :
-    transformFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     refValue_(p.size(), Zero),
-    valueFraction_("valueFraction", dict, p.size())
+    valueFraction_("valueFraction", dict, p.size()),
+    writeValue_(dict.getOrDefault("writeValue", false))
 {
     this->patchType() = dict.getOrDefault<word>("patchType", word::null);
 
@@ -89,9 +92,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     const partialSlipFvPatchField<Type>& ptf
 )
 :
-    transformFvPatchField<Type>(ptf),
+    parent_bctype(ptf),
     refValue_(ptf.refValue_),
-    valueFraction_(ptf.valueFraction_)
+    valueFraction_(ptf.valueFraction_),
+    writeValue_(ptf.writeValue_)
 {}
 
 
@@ -102,9 +106,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    transformFvPatchField<Type>(ptf, iF),
+    parent_bctype(ptf, iF),
     refValue_(ptf.refValue_),
-    valueFraction_(ptf.valueFraction_)
+    valueFraction_(ptf.valueFraction_),
+    writeValue_(ptf.writeValue_)
 {}
 
 
@@ -116,7 +121,7 @@ void Foam::partialSlipFvPatchField<Type>::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    transformFvPatchField<Type>::autoMap(m);
+    parent_bctype::autoMap(m);
     refValue_.autoMap(m);
     valueFraction_.autoMap(m);
 }
@@ -129,9 +134,9 @@ void Foam::partialSlipFvPatchField<Type>::rmap
     const labelList& addr
 )
 {
-    transformFvPatchField<Type>::rmap(ptf, addr);
+    parent_bctype::rmap(ptf, addr);
 
-    const partialSlipFvPatchField<Type>& dmptf =
+    const auto& dmptf =
         refCast<const partialSlipFvPatchField<Type>>(ptf);
 
     refValue_.rmap(dmptf.refValue_, addr);
@@ -175,7 +180,7 @@ void Foam::partialSlipFvPatchField<Type>::evaluate
        *transform(I - sqr(nHat), this->patchInternalField())
     );
 
-    transformFvPatchField<Type>::evaluate();
+    parent_bctype::evaluate();
 }
 
 
@@ -200,9 +205,15 @@ Foam::partialSlipFvPatchField<Type>::snGradTransformDiag() const
 template<class Type>
 void Foam::partialSlipFvPatchField<Type>::write(Ostream& os) const
 {
-    transformFvPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     refValue_.writeEntry("refValue", os);
     valueFraction_.writeEntry("valueFraction", os);
+
+    if (writeValue_)
+    {
+        os.writeEntry("writeValue", "true");
+        this->writeEntry("value", os);
+    }
 }
 
 

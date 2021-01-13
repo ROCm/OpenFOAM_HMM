@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ VoFPatchTransfer::VoFPatchTransfer
         pbm.size() - film.regionMesh().globalData().processorPatches().size()
     );
 
-    wordReList patchNames;
+    wordRes patchNames;
     if (coeffDict_.readIfPresent("patches", patchNames))
     {
         patchIDs_ = pbm.patchSet(patchNames).sortedToc();
