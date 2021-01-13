@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -416,11 +416,11 @@ bool Foam::surfaceWriter::empty() const
 
 Foam::label Foam::surfaceWriter::size() const
 {
-    const bool value =
+    const label value =
     (
         useComponents_
-      ? surfComp_.faces().empty()
-      : surf_.get().faces().empty()
+      ? surfComp_.faces().size()
+      : surf_.get().faces().size()
     );
 
     return (parallel_ ? returnReduce(value, sumOp<label>()) : value);
