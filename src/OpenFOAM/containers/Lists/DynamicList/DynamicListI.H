@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,29 +28,29 @@ License
 
 #include "FixedList.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T, int SizeMin>
 template<class ListType>
 inline void Foam::DynamicList<T, SizeMin>::assignDynList
 (
-    const ListType& lst
+    const ListType& list
 )
 {
-    const label newSize = lst.size();
+    const label newLen = list.size();
 
-    if (capacity_ >= newSize)
+    if (newLen <= capacity_)
     {
         // Can copy w/o reallocating - adjust addressable size accordingly.
-        List<T>::size(newSize);
-        List<T>::operator=(lst);
+        List<T>::setAddressableSize(newLen);
+        List<T>::operator=(list);
     }
     else
     {
         // Ensure list size consistency prior to copying.
-        List<T>::size(capacity_);
+        List<T>::setAddressableSize(capacity_);
 
-        List<T>::operator=(lst);
+        List<T>::operator=(list);
         capacity_ = List<T>::size();
     }
 }
@@ -61,27 +61,29 @@ inline void Foam::DynamicList<T, SizeMin>::assignDynList
 template<class T, int SizeMin>
 inline constexpr Foam::DynamicList<T, SizeMin>::DynamicList() noexcept
 :
+    List<T>(),
     capacity_(0)
 {}
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>::DynamicList(const label nElem)
+inline Foam::DynamicList<T, SizeMin>::DynamicList(const label len)
 :
+    List<T>(),
     capacity_(0)
 {
-    reserve(nElem);
+    reserve(len);
 }
 
 
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const label nElem,
+    const label len,
     const T& val
 )
 :
-    List<T>(nElem, val),
+    List<T>(len, val),
     capacity_(List<T>::size())
 {}
 
@@ -89,11 +91,11 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const label nElem,
+    const label len,
     const Foam::zero
 )
 :
-    List<T>(nElem, Zero),
+    List<T>(len, Zero),
     capacity_(List<T>::size())
 {}
 
@@ -101,10 +103,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const DynamicList<T, SizeMin>& lst
+    const DynamicList<T, SizeMin>& list
 )
 :
-    List<T>(lst),
+    List<T>(list),
     capacity_(List<T>::size())
 {}
 
@@ -113,10 +115,10 @@ template<class T, int SizeMin>
 template<int AnySizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const DynamicList<T, AnySizeMin>& lst
+    const DynamicList<T, AnySizeMin>& list
 )
 :
-    List<T>(lst),
+    List<T>(list),
     capacity_(List<T>::size())
 {}
 
@@ -124,10 +126,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const UList<T>& lst
+    const UList<T>& list
 )
 :
-    List<T>(lst),
+    List<T>(list),
     capacity_(List<T>::size())
 {}
 
@@ -136,12 +138,12 @@ template<class T, int SizeMin>
 template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const FixedList<T, N>& lst
+    const FixedList<T, N>& list
 )
 :
     capacity_(0)
 {
-    this->operator=(lst);
+    this->operator=(list);
 }
 
 
@@ -218,6 +220,14 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 }
 
 
+template<class T, int SizeMin>
+inline Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
+:
+    List<T>(is),
+    capacity_(List<T>::size())
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
@@ -230,124 +240,83 @@ inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const noexcept
 template<class T, int SizeMin>
 inline void Foam::DynamicList<T, SizeMin>::setCapacity
 (
-    const label nElem
+    const label newCapacity
 )
 {
-    label nextFree = List<T>::size();
-    capacity_ = nElem;
+    label currLen = List<T>::size();
+    capacity_ = newCapacity;
 
-    if (nextFree > capacity_)
+    if (currLen > capacity_)
     {
         // Truncate addressed sizes too
-        nextFree = capacity_;
+        currLen = capacity_;
     }
 
-    // We could also enforce sizing granularity
-
-    List<T>::setSize(capacity_);
-    List<T>::size(nextFree);
+    List<T>::resize(capacity_);
+    List<T>::setAddressableSize(currLen);
 }
 
 
 template<class T, int SizeMin>
 inline void Foam::DynamicList<T, SizeMin>::reserve
 (
-    const label nElem
+    const label len
 )
 {
-    // Allocate more capacity if necessary
-    if (nElem > capacity_)
+    if (capacity_ < len)
     {
-        capacity_ = max
-        (
-            SizeMin,
-            max
-            (
-                nElem,
-                // label(SizeInc + capacity_ * SizeMult / SizeDiv)
-                label(2 * capacity_)
-            )
-        );
+        // Increase capacity (doubling)
+        capacity_ = max(SizeMin, max(len, label(2 * capacity_)));
 
         // Adjust allocated size, leave addressed size untouched
-        const label nextFree = List<T>::size();
-        List<T>::setSize(capacity_);
-        List<T>::size(nextFree);
+        const label currLen = List<T>::size();
+        List<T>::resize(capacity_);
+        List<T>::setAddressableSize(currLen);
     }
 }
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::setSize
+inline void Foam::DynamicList<T, SizeMin>::resize
 (
-    const label nElem
+    const label newLen
 )
 {
-    // Allocate more capacity if necessary
-    if (nElem > capacity_)
+    if (capacity_ < newLen)
     {
-        capacity_ = max
-        (
-            SizeMin,
-            max
-            (
-                nElem,
-                // label(SizeInc + capacity_ * SizeMult / SizeDiv)
-                label(2 * capacity_)
-            )
-        );
+        // Increase capacity (doubling)
+        capacity_ = max(SizeMin, max(newLen, label(2 * capacity_)));
 
-        List<T>::setSize(capacity_);
+        List<T>::resize(capacity_);
     }
 
     // Adjust addressed size
-    List<T>::size(nElem);
+    List<T>::setAddressableSize(newLen);
 }
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::setSize
+inline void Foam::DynamicList<T, SizeMin>::resize
 (
-    const label nElem,
+    const label newLen,
     const T& val
 )
 {
-    label nextFree = List<T>::size();
-    setSize(nElem);
+    label currLen = List<T>::size();
+    resize(newLen);
 
-    // Set new elements to constant value
-    while (nextFree < nElem)
+    // Fill newly exposed with constant value
+    while (currLen < newLen)
     {
-        this->operator[](nextFree++) = val;
+        this->operator[](currLen++) = val;
     }
 }
 
 
 template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::resize
-(
-    const label nElem
-)
+inline void Foam::DynamicList<T, SizeMin>::clear() noexcept
 {
-    this->setSize(nElem);
-}
-
-
-template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::resize
-(
-    const label nElem,
-    const T& val
-)
-{
-    this->setSize(nElem, val);
-}
-
-
-template<class T, int SizeMin>
-inline void Foam::DynamicList<T, SizeMin>::clear()
-{
-    List<T>::size(0);
+    List<T>::setAddressableSize(0);
 }
 
 
@@ -360,14 +329,14 @@ inline void Foam::DynamicList<T, SizeMin>::clearStorage()
 
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::expandStorage()
+inline Foam::label Foam::DynamicList<T, SizeMin>::expandStorage() noexcept
 {
-    const label nextFree = List<T>::size();
+    const label currLen = List<T>::size();
 
     // Allow addressing into the entire list
-    List<T>::size(capacity_);
+    List<T>::setAddressableSize(capacity_);
 
-    return nextFree;
+    return currLen;
 }
 
 
@@ -375,16 +344,16 @@ template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::shrink()
 {
-    const label nextFree = List<T>::size();
-    if (capacity_ > nextFree)
+    const label currLen = List<T>::size();
+    if (currLen < capacity_)
     {
         // Use the full list when resizing
-        List<T>::size(capacity_);
+        List<T>::setAddressableSize(capacity_);
 
-        // The new size
-        capacity_ = nextFree;
-        List<T>::setSize(capacity_);
-        List<T>::size(nextFree);
+        // Capacity and size are identical
+        capacity_ = currLen;
+        List<T>::resize(currLen);
+        // Redundant: List<T>::setAddressableSize(currLen);
     }
     return *this;
 }
@@ -394,41 +363,30 @@ template<class T, int SizeMin>
 template<int AnySizeMin>
 inline void Foam::DynamicList<T, SizeMin>::swap
 (
-    DynamicList<T, AnySizeMin>& lst
+    DynamicList<T, AnySizeMin>& other
 )
 {
     // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == lst.cdata())
+    if (this->cdata() == other.cdata())
     {
         return;  // Self-swap is a no-op
     }
 
-    DynamicList<T, SizeMin>& cur = *this;
+    // Swap storage and addressable size
+    UList<T>::swap(other);
 
-    // Make addressable size identical to the allocated capacity
-    const label oldSize1 = cur.expandStorage();
-    const label oldSize2 = lst.expandStorage();
-
-    // Swap storage
-    UList<T>::swap(lst);
-
-    // Match capacity to the underlying allocated list size
-    cur.setCapacity(cur.size());
-    lst.setCapacity(lst.size());
-
-    // Set addressable size
-    cur.setSize(oldSize2);
-    lst.setSize(oldSize1);
+    // Swap capacity
+    std::swap(this->capacity_, other.capacity_);
 }
 
 
 template<class T, int SizeMin>
 inline void
-Foam::DynamicList<T, SizeMin>::transfer(List<T>& lst)
+Foam::DynamicList<T, SizeMin>::transfer(List<T>& list)
 {
-    // Take over storage, clear addressing for lst.
-    capacity_ = lst.size();
-    List<T>::transfer(lst);
+    // Take over storage, clear addressing for list
+    capacity_ = list.size();
+    List<T>::transfer(list);
 }
 
 
@@ -437,21 +395,21 @@ template<int AnySizeMin>
 inline void
 Foam::DynamicList<T, SizeMin>::transfer
 (
-    DynamicList<T, AnySizeMin>& lst
+    DynamicList<T, AnySizeMin>& list
 )
 {
     // Cannot compare 'this' for different types, so use cdata()
-    if (this->cdata() == lst.cdata())
+    if (this->cdata() == list.cdata())
     {
         return;  // Self-assignment is a no-op
     }
 
     // Take over storage as-is (without shrink, without using SizeMin)
     // clear addressing and storage for old lst.
-    capacity_ = lst.capacity();
+    capacity_ = list.capacity();
 
-    List<T>::transfer(static_cast<List<T>&>(lst));
-    lst.clearStorage();  // Ensure capacity=0
+    List<T>::transfer(static_cast<List<T>&>(list));
+    list.clearStorage();  // Ensure capacity=0
 }
 
 
@@ -459,12 +417,12 @@ template<class T, int SizeMin>
 inline void
 Foam::DynamicList<T, SizeMin>::transfer
 (
-    SortableList<T>& lst
+    SortableList<T>& list
 )
 {
-    lst.shrink();  // Shrink away sort indices
-    capacity_ = lst.size(); // Capacity after transfer == list size
-    List<T>::transfer(lst);
+    list.shrink();  // Shrink away sort indices
+    capacity_ = list.size(); // Capacity after transfer == list size
+    List<T>::transfer(list);
 }
 
 
@@ -476,7 +434,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     const label idx = List<T>::size();
-    setSize(idx + 1);
+    resize(idx + 1);
 
     this->operator[](idx) = val;  // copy element
     return *this;
@@ -491,7 +449,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     const label idx = List<T>::size();
-    setSize(idx + 1);
+    resize(idx + 1);
 
     this->operator[](idx) = std::move(val);  // move assign element
     return *this;
@@ -508,12 +466,12 @@ Foam::DynamicList<T, SizeMin>::append
     if (this == &lst)
     {
         FatalErrorInFunction
-            << "Attempted appending to self" << abort(FatalError);
+            << "Attempted appending to self"
+            << abort(FatalError);
     }
 
     label idx = List<T>::size();
-
-    setSize(idx + lst.size());
+    resize(idx + lst.size());
 
     for (const T& val : lst)
     {
@@ -532,7 +490,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     label idx = List<T>::size();
-    setSize(idx + lst.size());
+    resize(idx + lst.size());
 
     for (const T& val : lst)
     {
@@ -550,8 +508,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     label idx = List<T>::size();
-
-    setSize(idx + lst.size());
+    resize(idx + lst.size());
 
     for (const T& val : lst)
     {
@@ -572,7 +529,7 @@ Foam::DynamicList<T, SizeMin>::append
     label idx = List<T>::size();
     const label n = lst.size();
 
-    setSize(idx + n);
+    resize(idx + n);
 
     for (label i=0; i<n; ++i)
     {
@@ -586,25 +543,25 @@ template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::append
 (
-    List<T>&& lst
+    List<T>&& list
 )
 {
-    if (this == &lst)
+    if (this == &list)
     {
         FatalErrorInFunction
-            << "Attempted appending to self" << abort(FatalError);
+            << "Attempted appending to self"
+            << abort(FatalError);
     }
 
     label idx = List<T>::size();
+    resize(idx + list.size());
 
-    setSize(idx + lst.size());
-
-    for (T& val : lst)
+    for (T& val : list)
     {
         Foam::Swap(this->operator[](idx++), val);  // moved content
     }
 
-    lst.clear();
+    list.clear();
     return *this;
 }
 
@@ -663,7 +620,7 @@ inline T Foam::DynamicList<T, SizeMin>::remove()
 
     const T& val = List<T>::operator[](idx);
 
-    List<T>::size(idx);
+    List<T>::setAddressableSize(idx);
 
     return val;
 }
@@ -742,7 +699,7 @@ inline T& Foam::DynamicList<T, SizeMin>::operator()
 {
     if (i >= List<T>::size())
     {
-        setSize(i + 1);
+        resize(i + 1);
     }
 
     return this->operator[](i);
@@ -788,7 +745,7 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 {
     const label n = lst.size();
 
-    setSize(n);
+    resize(n);
 
     for (label i=0; i<n; ++i)
     {
@@ -906,16 +863,34 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 }
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T, int SizeMin1, int SizeMin2>
-inline void Foam::Swap
+template<class T, int SizeMin>
+inline Foam::Istream& Foam::operator>>
 (
-    DynamicList<T, SizeMin1>& a,
-    DynamicList<T, SizeMin2>& b
+    Istream& is,
+    DynamicList<T, SizeMin>& rhs
 )
 {
-    a.swap(b);
+    // Use entire storage - ie, resize(capacity())
+    (void) rhs.expandStorage();
+
+    is >> static_cast<List<T>&>(rhs);
+    rhs.capacity_ = rhs.List<T>::size();
+
+    return is;
+}
+
+
+template<class T, int SizeMin>
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const DynamicList<T, SizeMin>& rhs
+)
+{
+    os << static_cast<const List<T>&>(rhs);
+    return os;
 }
 
 

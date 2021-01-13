@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,16 @@ protected:
         Detail::PtrListDetail<T> ptrs_;
 
 
+    // Protected Member Functions
+
+        //- Adjust addressable size
+        inline void setAddressableSize(const label n) noexcept;
+
+
     // Constructors
 
         //- Low-level move construct
-        inline UPtrList(Detail::PtrListDetail<T>&& ptrs);
+        inline explicit UPtrList(Detail::PtrListDetail<T>&& ptrs);
 
 
 public:
@@ -158,15 +164,15 @@ public:
         inline const T& last() const;
 
         //- Return pointer to element (can be nullptr),
-        //  without bounds checking.
+        //- without bounds checking.
         inline T* get(const label i);
 
         //- Return const pointer to element (can be nullptr),
-        //  without bounds checking.
+        //- without bounds checking.
         inline const T* get(const label i) const;
 
         //- Return const pointer to element (can be nullptr),
-        //  without bounds checking - same as get().
+        //- without bounds checking - same as get().
         //  The return value can also be tested as a bool.
         const T* set(const label i) const { return this->get(i); }
 
@@ -176,12 +182,12 @@ public:
         //- Set list size to zero.
         inline void clear();
 
-        //- Reset size of list.
+        //- Change the size of the list.
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
 
-        //- Same as resize()
-        inline void setSize(const label newLen);
+        //- Alias for resize()
+        void setSize(const label n) { this->resize(n); }
 
         //- Squeeze out intermediate nullptr entries in the list of pointers
         //  \return the number of non-null entries

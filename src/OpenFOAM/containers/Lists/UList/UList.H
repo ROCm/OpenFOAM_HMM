@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,9 +101,13 @@ protected:
 
     // Protected Member Functions
 
-        //- Override size to be inconsistent with allocated storage.
+        //- Set addressed size to be inconsistent with allocated storage.
         //  Use with care
-        inline void size(const label n) noexcept;
+        inline void setAddressableSize(const label n) noexcept;
+
+        //- Older name for setAddressableSize
+        FOAM_DEPRECATED_FOR(2021-01, "setAddressableSize(label) method")
+        void size(const label n) { this->setAddressableSize(n); }
 
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
@@ -579,9 +583,12 @@ inline void reverse(UList<T>& list, const label n);
 template<class T>
 inline void reverse(UList<T>& list);
 
-// Exchange contents of lists - see UList::swap().
+//- Exchange contents of lists - see UList::swap().
 template<class T>
-inline void Swap(UList<T>& a, UList<T>& b);
+inline void Swap(UList<T>& a, UList<T>& b)
+{
+    a.swap(b);
+}
 
 
 //- Hashing for UList data, which uses Hasher for contiguous data and

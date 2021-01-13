@@ -525,10 +525,7 @@ public:
         void assign(const PackedList<Width>& rhs) { (*this) = rhs; }
 
         //- Alias for resize()
-        void setSize(const label len, unsigned int val = 0u)
-        {
-            resize(len, val);
-        }
+        void setSize(const label n, unsigned int val = 0u) { resize(n, val); }
 };
 
 

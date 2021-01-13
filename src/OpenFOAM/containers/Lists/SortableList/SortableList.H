@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ public:
 
     // Constructors
 
-        //- Null constructor, sort later (eg, after assignment or transfer)
+        //- Default construct
         inline constexpr SortableList() noexcept;
 
         //- Construct given size, sort later.
@@ -143,7 +143,7 @@ public:
         void partialReverseSort(label n, label start=0);
 
         //- Swap content with another SortableList in constant time
-        inline void swap(SortableList<T>& lst);
+        inline void swap(SortableList<T>& other);
 
 
     // Member Operators
@@ -160,20 +160,22 @@ public:
         //- Move assignment, removing indices. Takes linear time
         inline void operator=(List<T>&& lst);
 
-        //- Move operator. Takes linear time
+        //- Move operator (constant time)
         inline void operator=(SortableList<T>&& lst);
 
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> lst);
-
 };
 
 
-// Global Functions
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 // Exchange contents of lists - see SortableList::swap().
 template<class T>
-inline void Swap(SortableList<T>& a, SortableList<T>& b);
+inline void Swap(SortableList<T>& a, SortableList<T>& b)
+{
+    a.swap(b);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

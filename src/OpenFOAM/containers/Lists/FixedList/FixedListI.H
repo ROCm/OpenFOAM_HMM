@@ -328,15 +328,6 @@ inline void Foam::FixedList<T, N>::resize(const label n)
 }
 
 template<class T, unsigned N>
-inline void Foam::FixedList<T, N>::setSize(const label n)
-{
-    #ifdef FULLDEBUG
-    checkSize(n);
-    #endif
-}
-
-
-template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::fill(const T& val)
 {
     for (unsigned i=0; i<N; ++i)
@@ -357,16 +348,16 @@ inline void Foam::FixedList<T, N>::fill(const Foam::zero)
 
 
 template<class T, unsigned N>
-inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& list)
+inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& other)
 {
-    if (this == &list)
+    if (this == &other)
     {
         return;  // Self-swap is a no-op
     }
 
     for (unsigned i=0; i<N; ++i)
     {
-        Foam::Swap(v_[i], list.v_[i]);
+        Foam::Swap(v_[i], other.v_[i]);
     }
 }
 
@@ -490,8 +481,6 @@ inline void Foam::FixedList<T, N>::operator=(FixedList<T, N>&& list)
         return;  // Self-assignment is a no-op
     }
 
-    // No significant speedup observed for copy assignment on simple types,
-    // use move assignment for generality with more complex types
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = std::move(list.v_[i]);
@@ -594,15 +583,6 @@ inline typename Foam::FixedList<T, N>::const_reverse_iterator
 Foam::FixedList<T, N>::crend() const
 {
     return const_reverse_iterator(begin());
-}
-
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-template<class T, unsigned N>
-inline void Foam::Swap(FixedList<T, N>& lhs, FixedList<T, N>& rhs)
-{
-    lhs.swap(rhs);
 }
 
 

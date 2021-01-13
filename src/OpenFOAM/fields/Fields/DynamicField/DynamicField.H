@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ Description
 
 SourceFiles
     DynamicFieldI.H
-    DynamicField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,24 +46,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 template<class T, int SizeMin> class DynamicField;
 
 template<class T, int SizeMin>
-Ostream& operator<<
-(
-    Ostream& os,
-    const DynamicField<T, SizeMin>& fld
-);
+inline Istream& operator>>(Istream&, DynamicField<T, SizeMin>&);
 
 template<class T, int SizeMin>
-Istream& operator>>
-(
-    Istream& is,
-    DynamicField<T, SizeMin>& fld
-);
-
+inline Ostream& operator<<(Ostream&, const DynamicField<T, SizeMin>&);
 
 /*---------------------------------------------------------------------------*\
                         Class DynamicField Declaration
@@ -77,7 +66,7 @@ class DynamicField
 {
     static_assert(SizeMin > 0, "Invalid min size parameter");
 
-    // Private data
+    // Private Data
 
         //- The capacity (allocated size) of the underlying field.
         label capacity_;
@@ -87,7 +76,7 @@ class DynamicField
 
         //- Copy assignment from another list
         template<class ListType>
-        inline void assignDynField(const ListType& list);
+        inline void assignDynList(const ListType& list);
 
 public:
 
@@ -102,7 +91,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, an empty field without allocation.
         inline constexpr DynamicField() noexcept;
 
         //- Construct empty field with given reserve size.
@@ -162,69 +151,69 @@ public:
         );
 
         //- Construct from Istream. Size set to size of list read.
-        explicit DynamicField(Istream& is);
+        inline explicit DynamicField(Istream& is);
 
         //- Clone
-        tmp<DynamicField<T, SizeMin>> clone() const;
+        inline tmp<DynamicField<T, SizeMin>> clone() const;
 
 
     // Member Functions
 
     // Access
 
+        //- Normal lower capacity limit - the SizeMin template parameter
+        static constexpr label min_size() noexcept { return SizeMin; }
+
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
 
 
-    // Edit
+    // Sizing
 
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
         //  Use this or reserve() in combination with append().
-        inline void setCapacity(const label nElem);
-
-        //- Alter the addressed list size.
-        //  New space will be allocated if required.
-        //  Use this to resize the list prior to using the operator[] for
-        //  setting values (as per List usage).
-        inline void setSize(const label nElem);
-
-        //- Alter the addressed list size and fill new space with a constant.
-        inline void setSize(const label nElem, const T& val);
-
-        //- Alter the addressed list size.
-        //  New space will be allocated if required.
-        //  Use this to resize the list prior to using the operator[] for
-        //  setting values (as per List usage).
-        inline void resize(const label nElem);
-
-        //- Alter the addressed list size and fill new space with a
-        //  constant.
-        inline void resize(const label nElem, const T& val);
+        inline void setCapacity(const label newCapacity);
 
         //- Reserve allocation space for at least this size.
         //  Never shrinks the allocated size, use setCapacity() for that.
-        inline void reserve(const label nElem);
+        inline void reserve(const label len);
+
+        //- Alter addressable size.
+        //  New space will be allocated if required.
+        inline void resize(const label newLen);
+
+        //- Alter addressable size and fill new space with constant value
+        inline void resize(const label newLen, const T& val);
+
+        //- Alias for resize()
+        void setSize(const label n) { this->resize(n); }
+
+        //- Alias for resize()
+        void setSize(const label n, const T& val) { this->resize(n, val); }
 
         //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
-        inline void clear();
+        inline void clear() noexcept;
 
         //- Clear the list and delete storage.
         inline void clearStorage();
 
         //- Expand the addressable size to fit the allocated capacity.
         //  Returns the previous addressable size.
-        inline label expandStorage();
+        inline label expandStorage() noexcept;
 
         //- Shrink the allocated space to the number of elements used.
         //  Returns a reference to the DynamicField.
         inline DynamicField<T, SizeMin>& shrink();
 
-        //- Swap content with any sized DynamicField
+
+    // Edit
+
+        //- Swap content, independent of sizing parameter
         template<int AnySizeMin>
-        inline void swap(DynamicField<T, AnySizeMin>& list);
+        inline void swap(DynamicField<T, AnySizeMin>& other);
 
         //- Transfer the parameter contents into this
         inline void transfer(List<T>& list);
@@ -237,10 +226,11 @@ public:
         template<int AnySizeMin>
         inline void transfer(DynamicField<T, AnySizeMin>& list);
 
-
         //- Append an element at the end of the list
-        inline DynamicField<T, SizeMin>&
-        append(const T& val);
+        inline DynamicField<T, SizeMin>& append(const T& val);
+
+        //- Move append an element
+        inline DynamicField<T, SizeMin>& append(T&& val);
 
         //- Append a List at the end of this list
         inline DynamicField<T, SizeMin>&
@@ -252,11 +242,14 @@ public:
 
     // Member Operators
 
-        //- Return non-const access to an element, resizing list if necessary
+        //- Return non-const access to an element, resizing list if needed
         inline T& operator()(const label i);
 
         //- Assign addressed entries to the given value
         inline void operator=(const T& val);
+
+        //- Assign addressed entries to zero
+        inline void operator=(const Foam::zero);
 
         //- Copy assignment
         inline void operator=(const UList<T>& list);
@@ -274,6 +267,22 @@ public:
         template<int AnySizeMin>
         inline void operator=(DynamicField<T, AnySizeMin>&& list);
 
+
+    // IOstream Operators
+
+        //- Read from Istream, discarding existing contents
+        inline friend Istream& operator>> <T, SizeMin>
+        (
+            Istream& is,
+            DynamicField<T, SizeMin>& rhs
+        );
+
+        //- Write to Ostream
+        inline friend Ostream& operator<< <T, SizeMin>
+        (
+            Ostream& os,
+            const DynamicField<T, SizeMin>& rhs
+        );
 };
 
 
@@ -284,12 +293,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "DynamicFieldI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "DynamicField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

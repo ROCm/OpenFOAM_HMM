@@ -93,7 +93,7 @@ class List
         template<class List2>
         inline void copyList(const List2& list);
 
-        //- Change allocation size of List. Backend for resize/setSize.
+        //- Change allocation size - backend for resize.
         void doResize(const label newSize);
 
         //- Construct given begin/end iterators and number of elements
@@ -123,7 +123,7 @@ public:
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct
         inline constexpr List() noexcept;
 
         //- Construct with given size
@@ -208,23 +208,26 @@ public:
 
     // Member Functions
 
+    // Sizing
+
+        //- Clear the list, i.e. set size to zero
+        inline void clear();
+
+        //- Adjust allocated size of list.
+        //  The boolList version fills new memory with false.
+        inline void resize(const label newLen);
+
+        //- Adjust allocated size of list and set val for new elements
+        void resize(const label newLen, const T& val);
+
+        //- Alias for resize()
+        void setSize(const label n) { this->resize(n); }
+
+        //- Alias for resize()
+        void setSize(const label n, const T& val) { this->resize(n, val); }
+
+
         // Edit
-
-            //- Adjust allocated size of list.
-            //  The boolList version fills new memory with false.
-            inline void resize(const label newSize);
-
-            //- Adjust allocated size of list and set val for new elements
-            void resize(const label newSize, const T& val);
-
-            //- Alias for resize(const label)
-            inline void setSize(const label newSize);
-
-            //- Alias for resize(const label, const T&)
-            inline void setSize(const label newSize, const T& val);
-
-            //- Clear the list, i.e. set size to zero
-            inline void clear();
 
             //- Append an element at the end of the list
             inline void append(const T& val);

@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -39,7 +38,7 @@ Foam::label Foam::DynamicList<T, SizeMin>::removeElements
 {
     if (!slice.size())
     {
-        // Noop
+        // No-op
         return 0;
     }
     else if (slice.after() >= this->size())
@@ -86,42 +85,6 @@ Foam::label Foam::DynamicList<T, SizeMin>::subsetElements
     // Don't need min size, since slice size was already checked before
     resize(slice.size());
     return this->size();
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class T, int SizeMin>
-Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
-:
-    List<T>(is),
-    capacity_(List<T>::size())
-{}
-
-
-template<class T, int SizeMin>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const DynamicList<T, SizeMin>& lst
-)
-{
-    os << static_cast<const List<T>&>(lst);
-    return os;
-}
-
-
-template<class T, int SizeMin>
-Foam::Istream& Foam::operator>>
-(
-    Istream& is,
-    DynamicList<T, SizeMin>& lst
-)
-{
-    is >> static_cast<List<T>&>(lst);
-    lst.capacity_ = lst.List<T>::size();
-
-    return is;
 }
 
 

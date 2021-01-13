@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T>
+inline void Foam::UPtrList<T>::setAddressableSize(const label n) noexcept
+{
+    ptrs_.setAddressableSize(n);
+}
+
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
@@ -172,13 +181,6 @@ inline const T& Foam::UPtrList<T>::last() const
 
 template<class T>
 inline void Foam::UPtrList<T>::resize(const label newLen)
-{
-    ptrs_.resize(newLen);
-}
-
-
-template<class T>
-inline void Foam::UPtrList<T>::setSize(const label newLen)
 {
     ptrs_.resize(newLen);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,15 +29,6 @@ License
 #include "refPtr.H"
 #include "tmp.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::setAddressableSize(const label len)
-{
-    (this->ptrs_).setAddressableSize(len);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
@@ -54,7 +45,7 @@ inline Foam::PtrDynList<T, SizeMin>::PtrDynList(const label len)
     PtrList<T>(len),
     capacity_(len)
 {
-    setAddressableSize(0);
+    PtrList<T>::setAddressableSize(0);
 }
 
 
@@ -107,35 +98,34 @@ inline const T* Foam::PtrDynList<T, SizeMin>::get(const label i) const
 
 
 template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::setCapacity(const label nElem)
+inline void Foam::PtrDynList<T, SizeMin>::setCapacity(const label newCapacity)
 {
-    label nextFree = PtrList<T>::size();
-    capacity_ = nElem;
+    label currLen = PtrList<T>::size();
+    capacity_ = newCapacity;
 
-    if (nextFree > capacity_)
+    if (currLen > capacity_)
     {
         // Truncate addressed sizes too
-        nextFree = capacity_;
+        currLen = capacity_;
     }
 
     PtrList<T>::resize(capacity_);
-    setAddressableSize(nextFree);
+    PtrList<T>::setAddressableSize(currLen);
 }
 
 
 template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::reserve(const label nElem)
+inline void Foam::PtrDynList<T, SizeMin>::reserve(const label len)
 {
-    if (nElem > capacity_)
+    if (capacity_ < len)
     {
-        // Allocate more capacity if necessary
-
-        capacity_ = max(SizeMin, max(nElem, label(2*capacity_)));
+        // Increase capacity (doubling)
+        capacity_ = max(SizeMin, max(len, label(2 * capacity_)));
 
         // Adjust allocated size, leave addressed size untouched
-        const label nextFree = PtrList<T>::size();
+        const label currLen = PtrList<T>::size();
         PtrList<T>::resize(capacity_);
-        setAddressableSize(nextFree);
+        PtrList<T>::setAddressableSize(currLen);
     }
 }
 
@@ -147,31 +137,25 @@ inline void Foam::PtrDynList<T, SizeMin>::resize(const label newLen)
 
     const label oldLen = ptrs.size();
 
-    if (newLen > capacity_)
+    if (capacity_ < newLen)
     {
-        // Allocate more capacity if necessary
-        capacity_ = max(SizeMin, max(newLen, label(2*capacity_)));
+        // Increase capacity (doubling)
+        capacity_ = max(SizeMin, max(newLen, label(2 * capacity_)));
 
         PtrList<T>::resize(capacity_);
     }
     else if (newLen != oldLen)
     {
         // Truncation frees old pointers
-        for (label i=newLen; i<oldLen; ++i)
+        for (label i = newLen; i < oldLen; ++i)
         {
             delete ptrs[i];
             ptrs[i] = nullptr;
         }
     }
 
-    setAddressableSize(newLen);
-}
-
-
-template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::setSize(const label newLen)
-{
-    this->resize(newLen);
+    // Adjust addressed size
+    PtrList<T>::setAddressableSize(newLen);
 }
 
 
@@ -179,7 +163,7 @@ template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::clear()
 {
     (this->ptrs_).free(); // free old pointers
-    setAddressableSize(0);
+    PtrList<T>::setAddressableSize(0);
 }
 
 
@@ -192,30 +176,30 @@ inline void Foam::PtrDynList<T, SizeMin>::clearStorage()
 
 
 template<class T, int SizeMin>
-inline Foam::label Foam::PtrDynList<T, SizeMin>::expandStorage()
+inline Foam::label Foam::PtrDynList<T, SizeMin>::expandStorage() noexcept
 {
-    const label nextFree = PtrList<T>::size();
+    const label currLen = PtrList<T>::size();
 
     // Allow addressing into the entire list
-    setAddressableSize(capacity_);
+    PtrList<T>::setAddressableSize(capacity_);
 
-    return nextFree;
+    return currLen;
 }
 
 
 template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::shrink()
 {
-    label nextFree = PtrList<T>::size();
-    if (capacity_ > nextFree)
+    const label currLen = PtrList<T>::size();
+    if (currLen < capacity_)
     {
         // Use the full list when resizing
-        setAddressableSize(capacity_);
+        PtrList<T>::setAddressableSize(capacity_);
 
-        // The new size
-        capacity_ = nextFree;
-        PtrList<T>::resize(capacity_);
-        setAddressableSize(nextFree);
+        // Capacity and size are identical
+        capacity_ = currLen;
+        PtrList<T>::resize(currLen);
+        // Redundant: PtrList<T>::setAddressableSize(currLen);
     }
 }
 
@@ -226,6 +210,27 @@ inline Foam::label Foam::PtrDynList<T, SizeMin>::squeezeNull()
     const label newLen = UPtrList<T>::squeezeNull();
     resize(newLen);
     return newLen;
+}
+
+
+template<class T, int SizeMin>
+template<int AnySizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::swap
+(
+    PtrDynList<T, AnySizeMin>& other
+)
+{
+    // Cannot compare 'this' for different types, so use cdata()
+    if (this->cdata() == other.cdata())
+    {
+        return;  // Self-swap is a no-op
+    }
+
+    // Swap storage and addressable size
+    UPtrList<T>::swap(other);
+
+    // Swap capacity
+    std::swap(this->capacity_, other.capacity_);
 }
 
 
@@ -332,7 +337,7 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::remove()
 
     autoPtr<T> old(this->ptrs_[idx]);
     this->ptrs_[idx] = nullptr;
-    setAddressableSize(idx);
+    PtrList<T>::setAddressableSize(idx);
 
     return old;
 }

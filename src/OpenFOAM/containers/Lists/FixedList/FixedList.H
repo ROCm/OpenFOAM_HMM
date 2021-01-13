@@ -281,7 +281,7 @@ public:
         inline void resize(const label n);
 
         //- Dummy function, to make FixedList consistent with List
-        inline void setSize(const label n);
+        void setSize(const label n) { this->resize(n); }
 
         //- Assign all entries to the given value
         inline void fill(const T& val);
@@ -399,7 +399,7 @@ public:
         static constexpr unsigned max_size() noexcept { return N; }
 
         //- Swap lists by swapping the content of the individual list elements
-        inline void swap(FixedList<T, N>& list);
+        inline void swap(FixedList<T, N>& other);
 
 
     // STL Member Operators
@@ -491,9 +491,12 @@ struct is_contiguous_scalar<FixedList<T, N>> : is_contiguous_scalar<T> {};
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Swap FixedList contents - see FixedList::swap().
-//  Internally this actually swaps the individual list elements
+//  Internally actually swaps the individual list elements
 template<class T, unsigned N>
-inline void Swap(FixedList<T, N>& lhs, FixedList<T, N>& rhs);
+inline void Swap(FixedList<T, N>& a, FixedList<T, N>& b)
+{
+    a.swap(b);
+}
 
 
 //- Hashing for FixedList data, which uses Hasher for contiguous data and

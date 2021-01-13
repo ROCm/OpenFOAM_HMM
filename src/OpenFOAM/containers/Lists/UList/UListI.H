@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "error.H"
 #include "pTraits.H"
-#include "Swap.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -357,7 +356,7 @@ Foam::UList<T>::crend() const
 
 
 template<class T>
-inline void Foam::UList<T>::size(const label n) noexcept
+inline void Foam::UList<T>::setAddressableSize(const label n) noexcept
 {
     size_ = n;
 }
@@ -385,8 +384,8 @@ inline void Foam::UList<T>::swap(UList<T>& list)
         return;  // Self-swap is a no-op
     }
 
-    Foam::Swap(size_, list.size_);
-    Foam::Swap(v_, list.v_);
+    std::swap(size_, list.size_);
+    std::swap(v_, list.v_);
 }
 
 
@@ -406,13 +405,6 @@ template<class T>
 inline void Foam::reverse(UList<T>& list)
 {
     reverse(list, list.size());
-}
-
-
-template<class T>
-inline void Foam::Swap(UList<T>& a, UList<T>& b)
-{
-    a.swap(b);
 }
 
 

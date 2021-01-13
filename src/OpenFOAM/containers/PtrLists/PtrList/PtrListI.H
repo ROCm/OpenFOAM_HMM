@@ -102,13 +102,6 @@ inline void Foam::PtrList<T>::clear()
 
 
 template<class T>
-inline void Foam::PtrList<T>::setSize(const label newLen)
-{
-    this->resize(newLen);
-}
-
-
-template<class T>
 template<class... Args>
 inline void Foam::PtrList<T>::emplace_append(Args&&... args)
 {

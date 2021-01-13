@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,17 +201,17 @@ void Foam::CompactListList<T, Container>::clear()
 template<class T, class Container>
 void Foam::CompactListList<T, Container>::swap
 (
-    CompactListList<T, Container>& lst
+    CompactListList<T, Container>& other
 )
 {
-    if (this == &lst)
+    if (this == &other)
     {
         return;  // Self-swap is a no-op
     }
 
-    Foam::Swap(size_, lst.size_);
-    offsets_.swap(lst.offsets_);
-    m_.swap(lst.m_);
+    std::swap(size_, other.size_);
+    offsets_.swap(other.offsets_);
+    m_.swap(other.m_);
 }
 
 

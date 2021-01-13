@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,9 +106,9 @@ public:
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
 
-        //- Override size to be inconsistent with allocated storage.
+        //- Set addressed size to be inconsistent with allocated storage.
         //  Use with care
-        inline void setAddressableSize(const label n);
+        inline void setAddressableSize(const label n) noexcept;
 
         //- Write output, optionally silently trimming nullptrs
         Ostream& write(Ostream& os, const bool trimNull=false) const;

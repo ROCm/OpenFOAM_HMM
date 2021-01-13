@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,18 +56,10 @@ namespace Foam
 template<class T, int SizeMin> class DynamicList;
 
 template<class T, int SizeMin>
-Ostream& operator<<
-(
-    Ostream& os,
-    const DynamicList<T, SizeMin>& lst
-);
+inline Istream& operator>>(Istream&, DynamicList<T, SizeMin>&);
 
 template<class T, int SizeMin>
-Istream& operator>>
-(
-    Istream& is,
-    DynamicList<T, SizeMin>& lst
-);
+inline Ostream& operator<<(Ostream&, const DynamicList<T, SizeMin>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -95,22 +87,11 @@ class DynamicList
         //- Subset elements in range
         label subsetElements(const labelRange& slice);
 
-
-protected:
-
-    // Protected Member Functions
-
         //- Copy assignment from another list
         template<class ListType>
-        inline void assignDynList(const ListType& lst);
+        inline void assignDynList(const ListType& list);
 
 public:
-
-    // Related Types
-
-        //- Declare friendship with the List class
-        friend class List<T>;
-
 
     // Constructors
 
@@ -118,13 +99,13 @@ public:
         inline constexpr DynamicList() noexcept;
 
         //- Construct an empty list with given reserve size.
-        inline explicit DynamicList(const label nElem);
+        inline explicit DynamicList(const label len);
 
         //- Construct with given size and value for all elements.
-        inline DynamicList(const label nElem, const T& val);
+        inline DynamicList(const label len, const T& val);
 
         //- Construct with given size initializing all elements to zero
-        inline DynamicList(const label nElem, const Foam::zero);
+        inline DynamicList(const label len, const Foam::zero);
 
         //- Copy construct.
         inline DynamicList(const DynamicList<T, SizeMin>& lst);
@@ -181,64 +162,62 @@ public:
         inline label capacity() const noexcept;
 
 
-        // Edit
+    // Sizing
 
-            //- Alter the size of the underlying storage.
-            //  The addressed size will be truncated if needed to fit, but will
-            //  remain otherwise untouched.
-            //  Use this or reserve() in combination with append().
-            inline void setCapacity(const label nElem);
+        //- Alter the size of the underlying storage.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  remain otherwise untouched.
+        //  Use this or reserve() in combination with append().
+        inline void setCapacity(const label newCapacity);
 
-            //- Alter addressable list size.
-            //  New space will be allocated if required.
-            //  Use this to resize the list prior to using the operator[] for
-            //  setting values (as per List usage).
-            inline void setSize(const label nElem);
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        inline void reserve(const label len);
 
-            //- Alter addressable list size and fill new space with constant.
-            inline void setSize(const label nElem, const T& val);
+        //- Alter addressable size.
+        //  New space will be allocated if required.
+        inline void resize(const label newLen);
 
-            //- Alter addressable list size.
-            //  New space will be allocated if required.
-            //  Use this to resize the list prior to using the operator[] for
-            //  setting values (as per List usage).
-            inline void resize(const label nElem);
+        //- Alter addressable size and fill new space with constant value
+        inline void resize(const label newLen, const T& val);
 
-            //- Alter addressable list size and fill new space with constant.
-            inline void resize(const label nElem, const T& val);
+        //- Alias for resize()
+        void setSize(const label n) { this->resize(n); }
 
-            //- Reserve allocation space for at least this size.
-            //  Never shrinks the allocated size, use setCapacity() for that.
-            inline void reserve(const label nElem);
+        //- Alias for resize()
+        void setSize(const label n, const T& val) { this->resize(n, val); }
 
-            //- Clear the addressed list, i.e. set the size to zero.
-            //  Allocated size does not change
-            inline void clear();
+        //- Clear the addressed list, i.e. set the size to zero.
+        //  Allocated size does not change
+        inline void clear() noexcept;
 
-            //- Clear the list and delete storage.
-            inline void clearStorage();
+        //- Clear the list and delete storage.
+        inline void clearStorage();
 
-            //- Expand the addressable size to fit the allocated capacity.
-            //  Returns the previous addressable size.
-            inline label expandStorage();
+        //- Expand the addressable size to fit the allocated capacity.
+        //  Returns the previous addressable size.
+        inline label expandStorage() noexcept;
 
-            //- Shrink the allocated space to the number of elements used.
-            //  Returns a reference to the DynamicList.
-            inline DynamicList<T, SizeMin>& shrink();
+        //- Shrink the allocated space to the number of elements used.
+        //  Returns a reference to the DynamicList.
+        inline DynamicList<T, SizeMin>& shrink();
 
-            //- Swap content with any sized DynamicList
+
+    // Edit
+
+            //- Swap content, independent of sizing parameter
             template<int AnySizeMin>
-            inline void swap(DynamicList<T, AnySizeMin>& lst);
+            inline void swap(DynamicList<T, AnySizeMin>& other);
 
             //- Transfer contents of the argument List into this.
-            inline void transfer(List<T>& lst);
+            inline void transfer(List<T>& list);
 
             //- Transfer contents of any sized DynamicList into this.
             template<int AnySizeMin>
-            inline void transfer(DynamicList<T, AnySizeMin>& lst);
+            inline void transfer(DynamicList<T, AnySizeMin>& list);
 
             //- Transfer contents  of the argument SortableList into this.
-            inline void transfer(SortableList<T>& lst);
+            inline void transfer(SortableList<T>& list);
 
             //- Append an element to the end of this list.
             inline DynamicList<T, SizeMin>& append(const T& val);
@@ -311,8 +290,7 @@ public:
 
         // Member Operators
 
-            //- Return non-const access to an element,
-            //- resizing list if necessary
+            //- Return non-const access to an element, resizing list if needed
             inline T& operator()(const label i);
 
             //- Assignment of all addressed entries to the given value
@@ -356,29 +334,32 @@ public:
             inline void operator=(SortableList<T>&& lst);
 
 
-        // IOstream operators
+    // IOstream Operators
 
-            // Write DynamicList to Ostream.
-            friend Ostream& operator<< <T, SizeMin>
-            (
-                Ostream& os,
-                const DynamicList<T, SizeMin>& lst
-            );
+        //- Read from Istream, discarding existing contents
+        inline friend Istream& operator>> <T, SizeMin>
+        (
+            Istream& is,
+            DynamicList<T, SizeMin>& rhs
+        );
 
-            //- Read from Istream, discarding contents of existing DynamicList.
-            friend Istream& operator>> <T, SizeMin>
-            (
-                Istream& is,
-                DynamicList<T, SizeMin>& lst
-            );
+        //- Write to Ostream
+        inline friend Ostream& operator<< <T, SizeMin>
+        (
+            Ostream& os,
+            const DynamicList<T, SizeMin>& rhs
+        );
 };
 
 
-// Global Functions
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 // Exchange contents of lists - see DynamicList::swap().
-template<class T, int SizeMin1, int SizeMin2>
-inline void Swap(DynamicList<T, SizeMin1>& a, DynamicList<T, SizeMin2>& b);
+template<class T, int SizeMinA, int SizeMinB>
+inline void Swap(DynamicList<T, SizeMinA>& a, DynamicList<T, SizeMinB>& b)
+{
+    a.swap(b);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

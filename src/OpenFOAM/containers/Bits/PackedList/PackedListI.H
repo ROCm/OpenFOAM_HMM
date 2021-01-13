@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -577,7 +577,7 @@ inline void Foam::PackedList<Width>::swap(PackedList<Width>& rhs)
     }
 
     blocks_.swap(rhs.blocks_);
-    Foam::Swap(size_, rhs.size_);
+    std::swap(size_, rhs.size_);
 }
 
 

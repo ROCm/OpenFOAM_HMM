@@ -34,7 +34,7 @@ Foam::PtrListDictionary<T>::PtrListDictionary(const label size)
 :
     DictionaryBase<PtrList<T>, T>(2*size)
 {
-    PtrList<T>::setSize(size);
+    PtrList<T>::resize(size);
 }
 
 

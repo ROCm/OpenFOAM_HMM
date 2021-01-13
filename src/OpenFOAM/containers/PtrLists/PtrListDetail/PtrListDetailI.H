@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,9 +85,12 @@ inline Foam::Detail::PtrListDetail<T>::PtrListDetail
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::Detail::PtrListDetail<T>::setAddressableSize(const label n)
+inline void Foam::Detail::PtrListDetail<T>::setAddressableSize
+(
+    const label n
+) noexcept
 {
-    List<T*>::size(n);
+    List<T*>::setAddressableSize(n);
 }
 
 

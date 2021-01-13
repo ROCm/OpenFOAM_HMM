@@ -149,7 +149,7 @@ public:
         void resize(const label newLen);
 
         //- Same as resize()
-        inline void setSize(const label newLen);
+        void setSize(const label newLen) { this->resize(newLen); }
 
         //- Construct and append an element to the end of the list
         template<class... Args>

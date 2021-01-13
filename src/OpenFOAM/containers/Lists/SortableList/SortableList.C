@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,15 +195,15 @@ void Foam::SortableList<T>::partialReverseSort(label n, label start)
 
 
 template<class T>
-void Foam::SortableList<T>::swap(SortableList<T>& lst)
+void Foam::SortableList<T>::swap(SortableList<T>& other)
 {
-    if (this == &lst)
+    if (this == &other)
     {
         return;  // Self-swap is a no-op
     }
 
-    List<T>::swap(lst);
-    indices_.swap(lst.indices_);
+    List<T>::swap(other);
+    indices_.swap(other.indices_);
 }
 
 
@@ -264,15 +264,6 @@ inline void Foam::SortableList<T>::operator=(std::initializer_list<T> lst)
 {
     List<T>::operator=(lst);
     sort();
-}
-
-
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-template<class T>
-inline void Foam::Swap(SortableList<T>& a, SortableList<T>& b)
-{
-    a.swap(b);
 }
 
 

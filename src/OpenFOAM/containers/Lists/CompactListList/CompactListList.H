@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Default construct
         inline CompactListList();
 
         //- Construct by converting given List<List<T>>
@@ -197,7 +197,7 @@ public:
             labelList sizes() const;
 
             //- Swap contents
-            void swap(CompactListList<T, Container>& lst);
+            void swap(CompactListList<T, Container>& other);
 
             //- Transfer contents into this and annul the argument
             void transfer(CompactListList<T, Container>& list);
@@ -261,13 +261,15 @@ public:
 };
 
 
+// Note: uses default Foam::Swap (move construct/assignment)
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "CompactListListI.H"
+#include "CompactListListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

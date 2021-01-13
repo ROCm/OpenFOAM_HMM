@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,17 +71,11 @@ class PtrDynList
         label capacity_;
 
 
-    // Private Member Functions
-
-        //- Adjust addressable size
-        void setAddressableSize(const label len);
-
-
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline constexpr PtrDynList() noexcept;
 
         //- Construct with given capacity.
@@ -118,23 +112,20 @@ public:
         const T* set(const label i) const { return this->get(i); }
 
 
-    // Edit
-
-        //- Delete the allocated entries, but retain the list size.
-        using PtrList<T>::free;
+    // Sizing
 
         //- Alter the size of the underlying storage.
-        inline void setCapacity(const label nElem);
+        inline void setCapacity(const label newCapacity);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        inline void reserve(const label len);
 
         //- Alter the addressed list size.
         inline void resize(const label newLen);
 
         //- Same as resize()
-        inline void setSize(const label newLen);
-
-        //- Reserve allocation space for at least this size.
-        //  Never shrinks the allocated size, use setCapacity() for that.
-        inline void reserve(const label nElem);
+        void setSize(const label n) { this->resize(n); }
 
         //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
@@ -145,15 +136,25 @@ public:
 
         //- Expand the addressable size to fit the allocated capacity.
         //  Returns the previous addressable size.
-        inline label expandStorage();
+        inline label expandStorage() noexcept;
 
         //- Shrink the allocated space to the number of elements used.
         inline void shrink();
+
+
+    // Edit
+
+        //- Delete the allocated entries, but retain the list size.
+        using PtrList<T>::free;
 
         //- Squeeze out intermediate nullptr entries in the list of pointers
         //- and adjust the addressable size accordingly.
         //  \return the number of non-null entries
         inline label squeezeNull();
+
+        //- Swap content, independent of sizing parameter
+        template<int AnySizeMin>
+        inline void swap(PtrDynList<T, AnySizeMin>& other);
 
         //- Construct and append an element to the end of the list
         template<class... Args>
@@ -234,7 +235,6 @@ public:
         //- Move assignment with different sizing parameters
         template<int AnySizeMin>
         inline void operator=(PtrDynList<T, AnySizeMin>&& list);
-
 };
 
 

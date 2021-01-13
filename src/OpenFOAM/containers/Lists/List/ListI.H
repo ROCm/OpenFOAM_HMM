@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,31 +128,17 @@ namespace Foam
 {
     // Template specialization for bool. Fills with false
     template<>
-    inline void List<bool>::resize(const label newSize)
+    inline void List<bool>::resize(const label newLen)
     {
-        this->resize(newSize, false);
+        this->resize(newLen, false);
     }
 }
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label len)
+inline void Foam::List<T>::resize(const label newLen)
 {
-    this->doResize(len);
-}
-
-
-template<class T>
-inline void Foam::List<T>::setSize(const label len)
-{
-    this->resize(len);
-}
-
-
-template<class T>
-inline void Foam::List<T>::setSize(const label len, const T& val)
-{
-    this->resize(len, val);
+    this->doResize(newLen);
 }
 
 
