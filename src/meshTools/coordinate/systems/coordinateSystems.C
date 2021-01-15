@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coordinateSystems.H"
+#include "predicates.H"
+#include "PtrListOps.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,98 +44,7 @@ namespace Foam
 static const char* headerTypeCompat = "IOPtrList<coordinateSystem>";
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Templated implementation for names() - file-scope
-    template<class UnaryMatchPredicate>
-    static wordList namesImpl
-    (
-        const PtrList<coordinateSystem>& list,
-        const UnaryMatchPredicate& matcher,
-        const bool doSort
-    )
-    {
-        const label len = list.size();
-
-        wordList output(len);
-
-        label count = 0;
-        for (label i = 0; i < len; ++i)
-        {
-            const word& itemName = list[i].name();
-
-            if (matcher(itemName))
-            {
-                output[count++] = itemName;
-            }
-        }
-
-        output.resize(count);
-
-        if (doSort)
-        {
-            Foam::sort(output);
-        }
-
-        return output;
-    }
-
-
-    // Templated implementation for indices() - file-scope
-    template<class UnaryMatchPredicate>
-    static labelList indicesImpl
-    (
-        const PtrList<coordinateSystem>& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        labelList output(len);
-
-        label count = 0;
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                output[count++] = i;
-            }
-        }
-
-        output.resize(count);
-
-        return output;
-    }
-
-
-    // Templated implementation for findIndex() - file-scope
-    template<class UnaryMatchPredicate>
-    label findIndexImpl
-    (
-        const PtrList<coordinateSystem>& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 void Foam::coordinateSystems::readFromStream(const bool valid)
 {
@@ -277,14 +188,14 @@ Foam::labelList Foam::coordinateSystems::indices(const keyType& key) const
     else if (key.isPattern())
     {
         // Match as regex
-        regExp matcher(key);
-        return indicesImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::findMatching(*this, matcher);
     }
     else
     {
         // Compare as literal string
         const word& matcher = key;
-        return indicesImpl(*this, matcher);
+        return PtrListOps::findMatching(*this, matcher);
     }
 }
 
@@ -295,7 +206,7 @@ Foam::labelList Foam::coordinateSystems::indices(const wordRes& matcher) const
     {
         return labelList();
     }
-    return indicesImpl(*this, matcher);
+    return PtrListOps::findMatching(*this, matcher);
 }
 
 
@@ -305,18 +216,17 @@ Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
     {
         return -1;
     }
-
-    if (key.isPattern())
+    else if (key.isPattern())
     {
         // Find as regex
-        regExp matcher(key);
-        return findIndexImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::firstMatching(*this, matcher);
     }
     else
     {
         // Find as literal string
         const word& matcher = key;
-        return findIndexImpl(*this, matcher);
+        return PtrListOps::firstMatching(*this, matcher);
     }
 }
 
@@ -327,7 +237,7 @@ Foam::label Foam::coordinateSystems::findIndex(const wordRes& matcher) const
     {
         return -1;
     }
-    return findIndexImpl(*this, matcher);
+    return PtrListOps::firstMatching(*this, matcher);
 }
 
 
@@ -384,17 +294,7 @@ Foam::coordinateSystems::lookup(const word& name) const
 
 Foam::wordList Foam::coordinateSystems::names() const
 {
-    const PtrList<coordinateSystem>& list = *this;
-
-    wordList result(list.size());
-
-    forAll(list, i)
-    {
-        result[i] = list[i].name();
-    }
-
-    return result;
-    // return ListOps::create<word>(list, nameOp<coordinateSystem>());
+    return PtrListOps::names(*this, predicates::always{});
 }
 
 
@@ -407,27 +307,27 @@ Foam::wordList Foam::coordinateSystems::names(const keyType& key) const
     else if (key.isPattern())
     {
         // Find as regex
-        regExp matcher(key);
-        return namesImpl(*this, matcher, false);
+        const regExp matcher(key);
+        return PtrListOps::names(*this, matcher);
     }
     else
     {
         // Find as literal string
         const word& matcher = key;
-        return namesImpl(*this, matcher, false);
+        return PtrListOps::names(*this, matcher);
     }
 }
 
 
 Foam::wordList Foam::coordinateSystems::names(const wordRe& matcher) const
 {
-    return namesImpl(*this, matcher, false);
+    return PtrListOps::names(*this, matcher);
 }
 
 
 Foam::wordList Foam::coordinateSystems::names(const wordRes& matcher) const
 {
-    return namesImpl(*this, matcher, false);
+    return PtrListOps::names(*this, matcher);
 }
 
 

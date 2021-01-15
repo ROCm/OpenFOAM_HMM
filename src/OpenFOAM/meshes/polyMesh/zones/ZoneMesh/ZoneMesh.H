@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,32 +84,6 @@ class ZoneMesh
 
         //- Create zone map
         void calcZoneMap() const;
-
-        //- Templated implementation for names()
-        template<class UnaryMatchPredicate>
-        static wordList namesImpl
-        (
-            const PtrList<ZoneType>& list,
-            const UnaryMatchPredicate& matcher,
-            const bool doSort
-        );
-
-        //- Templated implementation for indices()
-        template<class UnaryMatchPredicate>
-        static labelList indicesImpl
-        (
-            const PtrList<ZoneType>& list,
-            const UnaryMatchPredicate& matcher
-        );
-
-        //- Templated implementation for findIndex()
-        template<class UnaryMatchPredicate>
-        static label findIndexImpl
-        (
-            const PtrList<ZoneType>& list,
-            const UnaryMatchPredicate& matcher
-        );
-
 
         //- No copy construct
         ZoneMesh(const ZoneMesh&) = delete;

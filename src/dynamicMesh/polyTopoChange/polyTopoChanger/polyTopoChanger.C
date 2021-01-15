@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "polyMesh.H"
 #include "polyTopoChange.H"
 #include "Time.H"
+#include "PtrListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -135,31 +136,13 @@ Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
 
 Foam::wordList Foam::polyTopoChanger::types() const
 {
-    const PtrList<polyMeshModifier>& modifiers = *this;
-
-    wordList lst(modifiers.size());
-
-    forAll(modifiers, i)
-    {
-        lst[i] = modifiers[i].type();
-    }
-
-    return lst;
+    return PtrListOps::get<word>(*this, typeOp<polyMeshModifier>());
 }
 
 
 Foam::wordList Foam::polyTopoChanger::names() const
 {
-    const PtrList<polyMeshModifier>& modifiers = *this;
-
-    wordList lst(modifiers.size());
-
-    forAll(modifiers, i)
-    {
-        lst[i] = modifiers[i].name();
-    }
-
-    return lst;
+    return PtrListOps::get<word>(*this, typeOp<polyMeshModifier>());
 }
 
 

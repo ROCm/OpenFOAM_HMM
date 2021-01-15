@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "entry.H"
 #include "demandDrivenData.H"
 #include "Pstream.H"
+#include "PtrListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -138,91 +139,6 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::read()
 }
 
 
-// Templated implementation for names()
-template<class ZoneType, class MeshType>
-template<class UnaryMatchPredicate>
-Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::namesImpl
-(
-    const PtrList<ZoneType>& list,
-    const UnaryMatchPredicate& matcher,
-    const bool doSort
-)
-{
-    const label len = list.size();
-
-    wordList output(len);
-
-    label count = 0;
-    for (label i = 0; i < len; ++i)
-    {
-        const word& itemName = list[i].name();
-
-        if (matcher(itemName))
-        {
-            output[count++] = itemName;
-        }
-    }
-
-    output.resize(count);
-
-    if (doSort)
-    {
-        Foam::sort(output);
-    }
-
-    return output;
-}
-
-
-template<class ZoneType, class MeshType>
-template<class UnaryMatchPredicate>
-Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indicesImpl
-(
-    const PtrList<ZoneType>& list,
-    const UnaryMatchPredicate& matcher
-)
-{
-    const label len = list.size();
-
-    labelList output(len);
-
-    label count = 0;
-    for (label i = 0; i < len; ++i)
-    {
-        if (matcher(list[i].name()))
-        {
-            output[count++] = i;
-        }
-    }
-
-    output.resize(count);
-
-    return output;
-}
-
-
-template<class ZoneType, class MeshType>
-template<class UnaryMatchPredicate>
-Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndexImpl
-(
-    const PtrList<ZoneType>& list,
-    const UnaryMatchPredicate& matcher
-)
-{
-    const label len = list.size();
-
-    for (label i = 0; i < len; ++i)
-    {
-        if (matcher(list[i].name()))
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>
@@ -323,32 +239,14 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::whichZone
 template<class ZoneType, class MeshType>
 Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::types() const
 {
-    const PtrList<ZoneType>& zones = *this;
-
-    wordList list(zones.size());
-
-    forAll(zones, zonei)
-    {
-        list[zonei] = zones[zonei].type();
-    }
-
-    return list;
+    return PtrListOps::get<word>(*this, typeOp<ZoneType>());
 }
 
 
 template<class ZoneType, class MeshType>
 Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names() const
 {
-    const PtrList<ZoneType>& zones = *this;
-
-    wordList list(zones.size());
-
-    forAll(zones, zonei)
-    {
-        list[zonei] = zones[zonei].name();
-    }
-
-    return list;
+    return PtrListOps::get<word>(*this, nameOp<ZoneType>());
 }
 
 
@@ -358,7 +256,7 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names
     const wordRe& matcher
 ) const
 {
-    return namesImpl(*this, matcher, false);
+    return PtrListOps::names(*this, matcher);
 }
 
 
@@ -369,7 +267,7 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::names
 )
 const
 {
-    return namesImpl(*this, matcher, false);
+    return PtrListOps::names(*this, matcher);
 }
 
 
@@ -389,7 +287,10 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::sortedNames
     const wordRe& matcher
 ) const
 {
-    return namesImpl(*this, matcher, true);
+    wordList sorted(this->names(matcher));
+    Foam::sort(sorted);
+
+    return sorted;
 }
 
 
@@ -400,7 +301,10 @@ Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::sortedNames
 )
 const
 {
-    return namesImpl(*this, matcher, true);
+    wordList sorted(this->names(matcher));
+    Foam::sort(sorted);
+
+    return sorted;
 }
 
 
@@ -417,14 +321,14 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
     else if (key.isPattern())
     {
         // Match as regex
-        regExp matcher(key);
-        return indicesImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::findMatching(*this, matcher);
     }
     else
     {
         // Compare as literal string
         const word& matcher = key;
-        return indicesImpl(*this, matcher);
+        return PtrListOps::findMatching(*this, matcher);
     }
 }
 
@@ -439,8 +343,7 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
     {
         return labelList();
     }
-
-    return indicesImpl(*this, matcher);
+    return PtrListOps::findMatching(*this, matcher);
 }
 
 
@@ -457,14 +360,14 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
     else if (key.isPattern())
     {
         // Find as regex
-        regExp matcher(key);
-        return findIndexImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::firstMatching(*this, matcher);
     }
     else
     {
         // Find as literal string
         const word& matcher = key;
-        return findIndexImpl(*this, matcher);
+        return PtrListOps::firstMatching(*this, matcher);
     }
 }
 
@@ -475,7 +378,7 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
     const wordRes& matcher
 ) const
 {
-    return (matcher.empty() ? -1 : findIndexImpl(*this, matcher));
+    return (matcher.empty() ? -1 : PtrListOps::firstMatching(*this, matcher));
 }
 
 
@@ -490,7 +393,7 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
         return -1;
     }
 
-    label zoneId = findIndexImpl(*this, zoneName);
+    label zoneId = PtrListOps::firstMatching(*this, zoneName);
 
     if (zoneId < 0)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "faBoundaryMesh.H"
 #include "faMesh.H"
 #include "primitiveMesh.H"
+#include "PtrListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,82 +37,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(faBoundaryMesh, 0);
 }
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Templated implementation for types(), names(), etc - file-scope
-    template<class ListType, class GetOp>
-    static ListType getMethodImpl
-    (
-        const faPatchList& list,
-        const GetOp& getop
-    )
-    {
-        const label len = list.size();
-
-        ListType output(len);
-
-        for (label i = 0; i < len; ++i)
-        {
-            output[i] = getop(list[i]);
-        }
-
-        return output;
-    }
-
-
-    // Templated implementation for indices() - file-scope
-    template<class UnaryMatchPredicate>
-    static labelList indicesImpl
-    (
-        const faPatchList& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        labelList output(len);
-
-        label count = 0;
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                output[count++] = i;
-            }
-        }
-
-        output.resize(count);
-
-        return output;
-    }
-
-
-    // Templated implementation for findIndex() - file-scope
-    template<class UnaryMatchPredicate>
-    label findIndexImpl
-    (
-        const faPatchList& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-} // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -220,13 +145,13 @@ Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 
 Foam::wordList Foam::faBoundaryMesh::names() const
 {
-    return getMethodImpl<wordList>(*this, getNameOp<faPatch>());
+    return PtrListOps::get<word>(*this, nameOp<faPatch>());
 }
 
 
 Foam::wordList Foam::faBoundaryMesh::types() const
 {
-    return getMethodImpl<wordList>(*this, getTypeOp<faPatch>());
+    return PtrListOps::get<word>(*this, typeOp<faPatch>());
 }
 
 
@@ -244,8 +169,7 @@ Foam::labelList Foam::faBoundaryMesh::indices
     if (key.isPattern())
     {
         const regExp matcher(key);
-
-        return indicesImpl(*this, matcher);
+        return PtrListOps::findMatching(*this, matcher);
     }
     else
     {
@@ -253,8 +177,7 @@ Foam::labelList Foam::faBoundaryMesh::indices
         // Special version of above for reduced memory footprint
 
         const word& matcher = key;
-
-        const label patchId = findIndexImpl(*this, matcher);
+        const label patchId = PtrListOps::firstMatching(*this, matcher);
 
         if (patchId >= 0)
         {
@@ -275,14 +198,14 @@ Foam::label Foam::faBoundaryMesh::findIndex(const keyType& key) const
     else if (key.isPattern())
     {
         // Find as regex
-        regExp matcher(key);
-        return findIndexImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::firstMatching(*this, matcher);
     }
     else
     {
         // Find as literal string
         const word& matcher = key;
-        return findIndexImpl(*this, matcher);
+        return PtrListOps::firstMatching(*this, matcher);
     }
 }
 
@@ -294,7 +217,7 @@ Foam::label Foam::faBoundaryMesh::findPatchID(const word& patchName) const
         return -1;
     }
 
-    return findIndexImpl(*this, patchName);
+    return PtrListOps::firstMatching(*this, patchName);
 }
 
 
