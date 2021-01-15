@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,6 +100,120 @@ void Foam::shuffle(UPtrList<T>& list)
     labelList order(identity(list.size()));
     Foam::shuffle(order);
     list.sortOrder(order, false);  // false = allow nullptr
+}
+
+
+
+// Templated implementation for types(), names(), etc - file-scope
+template<class ReturnType, class T, class AccessOp>
+Foam::List<ReturnType> Foam::PtrListOps::get
+(
+    const UPtrList<T>& list,
+    const AccessOp& aop
+)
+{
+    const label len = list.size();
+
+    List<ReturnType> output(len);
+
+    label count = 0;
+    for (label i = 0; i < len; ++i)
+    {
+        const T* ptr = list.get(i);
+
+        if (bool(ptr))
+        {
+            output[count++] = aop(*ptr);
+        }
+    }
+
+    output.resize(count);
+
+    return output;
+}
+
+
+template<class T, class UnaryMatchPredicate>
+Foam::List<Foam::word> Foam::PtrListOps::names
+(
+    const UPtrList<T>& list,
+    const UnaryMatchPredicate& matcher
+)
+{
+    // Possible: const auto aop = nameOp<T>();
+
+    const label len = list.size();
+
+    List<word> output(len);
+
+    label count = 0;
+    for (label i = 0; i < len; ++i)
+    {
+        const T* ptr = list.get(i);
+
+        if (bool(ptr))
+        {
+            if (matcher(ptr->name()))
+            {
+                output[count++] = (ptr->name());
+            }
+        }
+    }
+
+    output.resize(count);
+
+    return output;
+}
+
+
+template<class T, class UnaryMatchPredicate>
+Foam::label Foam::PtrListOps::firstMatching
+(
+    const UPtrList<T>& list,
+    const UnaryMatchPredicate& matcher
+)
+{
+    const label len = list.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        const T* ptr = list.get(i);
+
+        if (bool(ptr) && matcher(ptr->name()))
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+template<class T, class UnaryMatchPredicate>
+Foam::labelList Foam::PtrListOps::findMatching
+(
+    const UPtrList<T>& list,
+    const UnaryMatchPredicate& matcher
+)
+{
+    const label len = list.size();
+
+    labelList output(len);
+
+    label count = 0;
+    for (label i = 0; i < len; ++i)
+    {
+        const T* ptr = list.get(i);
+
+        if (bool(ptr) && matcher(ptr->name()))
+        {
+            output[count++] = i;
+        }
+    }
+
+    output.resize(count);
+
+    return output;
 }
 
 
