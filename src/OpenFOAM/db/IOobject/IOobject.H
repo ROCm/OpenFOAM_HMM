@@ -520,12 +520,11 @@ public:
         //- Write the standard end file divider
         static Ostream& writeEndDivider(Ostream& os);
 
-        //- Write header with current type().
-        //  Optionally without arch information when ASCII
-        bool writeHeader(Ostream& os, const bool noArchAscii=false) const;
+        //- Write header with current type() and arch information
+        bool writeHeader(Ostream& os) const;
 
-        //- Write header with override of type.
-        //  Optionally without arch information when ASCII
+        //- Write header with override of type and optionally without
+        //- arch information in ASCII
         bool writeHeader
         (
             Ostream& os,

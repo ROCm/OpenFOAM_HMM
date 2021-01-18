@@ -171,9 +171,9 @@ bool Foam::IOobject::writeHeader
 }
 
 
-bool Foam::IOobject::writeHeader(Ostream& os, const bool noArchAscii) const
+bool Foam::IOobject::writeHeader(Ostream& os) const
 {
-    return writeHeader(os, type(), noArchAscii);
+    return writeHeader(os, type());
 }
 
 
