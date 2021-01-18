@@ -29,7 +29,7 @@ template<class Type>
 void Foam::mappedPatchBase::distribute(List<Type>& lst) const
 {
     const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = map().comm();
+    Pstream::warnComm = comm_;
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
@@ -96,7 +96,7 @@ template<class Type>
 void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
 {
     const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = map().comm();
+    Pstream::warnComm = comm_;
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
@@ -125,7 +125,7 @@ void Foam::mappedPatchBase::reverseDistribute
 ) const
 {
     const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = map().comm();
+    Pstream::warnComm = comm_;
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
