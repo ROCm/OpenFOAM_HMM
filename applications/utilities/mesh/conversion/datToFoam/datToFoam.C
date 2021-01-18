@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "Fstream.H"
-#include "pointField.H"
+#include "polyMesh.H"
 #include "unitConversion.H"
 
 using namespace Foam;
@@ -76,8 +76,7 @@ int main(int argc, char *argv[])
     word block;
     string zoneName;
     token punctuation;
-    label iPoints;
-    label jPoints;
+    label iPoints, jPoints;
 
     Istring >> block;
     Istring >> block;
@@ -117,11 +116,11 @@ int main(int argc, char *argv[])
     }
 
     // correct error in biconic meshes
-    forAll(points, i)
+    for (point& p : points)
     {
-        if (points[i][1] < 1e-07)
+        if (p.y() < 1e-07)
         {
-            points[i][1] = 0.0;
+            p.y() = 0;
         }
     }
 
@@ -146,18 +145,30 @@ int main(int argc, char *argv[])
             );
     }
 
-    const fileName polyMeshPath(runTime.constantPath()/"polyMesh");
-    const fileName pointsFile(polyMeshPath/"points");
-    OFstream pFile(pointsFile);
-    if (!exists(polyMeshPath)) mkDir(polyMeshPath);
+    // Write (overwrite) points
+    {
+        IOobject iopoints
+        (
+            "points",
+            runTime.constant(),     // instance
+            polyMesh::meshSubDir,   // local
+            runTime
+        );
 
-    Info<< "Writing points to: " << nl
-        << "    " << pointsFile << endl;
+        if (!exists(iopoints.path()))
+        {
+            mkDir(iopoints.path());
+        }
 
-    runTime.writeHeader(pFile, "vectorField");
-    pFile << pointsWedge;
-    runTime.writeEndDivider(pFile);
+        OFstream os(iopoints.objectPath(), runTime.writeStreamOption());
 
+        Info<< "Writing points to: " << nl
+            << "    " << os.name() << endl;
+
+        iopoints.writeHeader(os, vectorIOField::typeName);
+        os << pointsWedge;
+        IOobject::writeEndDivider(os);
+    }
 
     Info<< "End\n" << endl;
 
