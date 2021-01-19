@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -32,8 +32,9 @@
 #
 # Debian-style without OpenFOAM sub-directory
 #
-#     foamPackRelease -name=openfoam2002_200129.orig -no-prefix origin/develop
+#     foamPackRelease -debian origin/develop
 #     foamPackRelease -debian=openfoam2002_200129 origin/develop
+#     foamPackRelease -name=openfoam2002_200129.orig -no-prefix origin/develop
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"
@@ -55,7 +56,8 @@ options:
   -sep=SEP          Change version/patch separator from '_' to SEP
   -gitbase=DIR      Alternative repository location
   -with-api=NUM     Specify alternative api value for packaging
-  -tgz, -xz         Alias for -compress=tgz, -compress=xz
+  -tgz, -xz, -zstd  Alias for -compress=tgz, -compress=xz, -compress=zstd
+  -debian           Auto (debian) naming with -no-prefix, -xz
   -debian=NAME      Short-cut for -name=NAME.orig, -no-prefix, -xz
   -help             Print help
 
@@ -116,6 +118,11 @@ do
     -h | -help*)
         printHelp
         ;;
+    -debian)
+        tarName="debian"     # Special placeholder
+        prefixDir=false      # No prefix directory
+        : "${compress:=xz}"  # Default 'xz' compression
+        ;;
     -debian=*)
         tarName="${1#*=}"
         cleanTarName
@@ -166,7 +173,7 @@ do
     -with-api=*)
         packageApi="${1#*=}"
         ;;
-    -tgz | -xz)
+    -tgz | -xz | -zst | -zstd)
         compress="${1#*-}"
         ;;
     --)
@@ -259,10 +266,11 @@ sha1=$(git --git-dir="$gitbase/.git" ls-tree "$head" META-INFO/api-info | \
 [ -n "$sha1" ] || die "Could locate git content for META-INFO/api-info"
 
 # The api and patch
-api="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/api=//p)"
-patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/patch=//p)"
+api="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/^api=//p)"
+patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/^patch=//p)"
 
 [ -n "$api" ] || die "Could resolve api value"
+: "${patch:=0}"  # Treat missing patch number as '0'
 
 # Determine the BUILD information from git, as per `wmake -build-info`
 build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
@@ -290,8 +298,25 @@ then
     unset prefixDir
 fi
 
-if [ -z "$tarName" ]
-then
+case "$tarName" in
+(debian)
+    tarName="openfoam${packageApi}"
+
+    if [ "$withPatchNum" = false ]
+    then
+        echo "Ignoring patch number for output name" 1>&2
+    else
+        # Start debian with patch=1, not patch=0
+        if [ "$patch" = 0 ]
+        then
+            patch=1
+        fi
+        tarName="${tarName}${versionSeparator}${patch}"
+    fi
+    tarName="${tarName}.orig"  # Append .orig
+    ;;
+
+('')
     tarName="OpenFOAM-v${packageApi}"
     if [ "$withSource" = false ]
     then
@@ -301,11 +326,12 @@ then
     if [ "$withPatchNum" = false ]
     then
         echo "Ignoring patch number for output name" 1>&2
-    elif [ "${patch:-0}" -gt 0 ]
+    elif [ "${patch:-0}" != 0 ]
     then
         tarName="${tarName}${versionSeparator}${patch}"
     fi
-fi
+    ;;
+esac
 
 echo 1>&2
 echo "Tar-file name:   $tarName.tar" 1>&2
@@ -444,7 +470,7 @@ case "$compress" in
 
     (gz | gzip)
     echo "Using gzip compression" 1>&2
-    echo 'gzip -f9 "$outputDir/$tarName.tar"'
+    echo 'gzip -f -9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
@@ -459,14 +485,21 @@ case "$compress" in
 
     (bz | bzip | bzip2)
     echo "Using bzip2 compression" 1>&2
-    echo 'bzip2 -f9 "$outputDir/$tarName.tar"'
+    echo 'bzip2 -f -9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
 
     (xz)
     echo "Using xz compression" 1>&2
-    echo 'xz -f9 "$outputDir/$tarName.tar"'
+    echo 'xz -f -9 "$outputDir/$tarName.tar"'
+    echo
+    echo '# End of compression'
+    ;;
+
+    (zst | zstd)
+    echo "Using zstd compression" 1>&2
+    echo 'zstd --rm -f -9 "$outputDir/$tarName.tar"'
     echo
     echo '# End of compression'
     ;;
