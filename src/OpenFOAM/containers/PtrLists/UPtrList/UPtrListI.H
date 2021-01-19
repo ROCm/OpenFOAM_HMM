@@ -252,7 +252,8 @@ inline const T* Foam::UPtrList<T>::operator()(const label i) const
 // * * * * * * * * * * * * * * * * iterator  * * * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::UPtrList<T>::iterator::iterator(T** ptr)
+inline Foam::UPtrList<T>::iterator::
+iterator(T** ptr) noexcept
 :
     ptr_(ptr)
 {}
@@ -262,20 +263,6 @@ template<class T>
 inline T* Foam::UPtrList<T>::iterator::get() const
 {
     return *ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator==(const iterator& iter) const
-{
-    return ptr_ == iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator!=(const iterator& iter) const
-{
-    return ptr_ != iter.ptr_;
 }
 
 
@@ -294,15 +281,14 @@ inline T& Foam::UPtrList<T>::iterator::operator*() const
 
 
 template<class T>
-inline T& Foam::UPtrList<T>::iterator::operator()() const
+inline T& Foam::UPtrList<T>::iterator::operator[](label n) const
 {
-    return **ptr_;
+    return **(ptr_ + n);
 }
-
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator++()
+Foam::UPtrList<T>::iterator::operator++() noexcept
 {
     ++ptr_;
     return *this;
@@ -311,7 +297,7 @@ Foam::UPtrList<T>::iterator::operator++()
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator++(int)
+Foam::UPtrList<T>::iterator::operator++(int) noexcept
 {
     iterator iter(*this);
     ++ptr_;
@@ -321,7 +307,7 @@ Foam::UPtrList<T>::iterator::operator++(int)
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator--()
+Foam::UPtrList<T>::iterator::operator--() noexcept
 {
     --ptr_;
     return *this;
@@ -330,7 +316,7 @@ Foam::UPtrList<T>::iterator::operator--()
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator--(int)
+Foam::UPtrList<T>::iterator::operator--(int) noexcept
 {
     iterator iter(*this);
     --ptr_;
@@ -340,7 +326,7 @@ Foam::UPtrList<T>::iterator::operator--(int)
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator+=(label n)
+Foam::UPtrList<T>::iterator::operator+=(label n) noexcept
 {
     ptr_ += n;
     return *this;
@@ -349,7 +335,7 @@ Foam::UPtrList<T>::iterator::operator+=(label n)
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator-=(label n)
+Foam::UPtrList<T>::iterator::operator-=(label n) noexcept
 {
     ptr_ -= n;
     return *this;
@@ -358,7 +344,7 @@ Foam::UPtrList<T>::iterator::operator-=(label n)
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator+(label n) const
+Foam::UPtrList<T>::iterator::operator+(label n) const noexcept
 {
     return iterator(ptr_ + n);
 }
@@ -366,7 +352,7 @@ Foam::UPtrList<T>::iterator::operator+(label n) const
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator-(label n) const
+Foam::UPtrList<T>::iterator::operator-(label n) const noexcept
 {
     return iterator(ptr_ - n);
 }
@@ -374,42 +360,56 @@ Foam::UPtrList<T>::iterator::operator-(label n) const
 
 template<class T>
 inline Foam::label
-Foam::UPtrList<T>::iterator::operator-(const iterator& iter) const
+Foam::UPtrList<T>::iterator::
+operator-(const iterator& iter) const noexcept
 {
     return (ptr_ - iter.ptr_);
 }
 
 
 template<class T>
-inline T& Foam::UPtrList<T>::iterator::operator[](label n) const
+inline bool Foam::UPtrList<T>::iterator::
+operator==(const iterator& iter) const noexcept
 {
-    return *(*this + n);
+    return ptr_ == iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator<(const iterator& iter) const
+inline bool Foam::UPtrList<T>::iterator::
+operator!=(const iterator& iter) const noexcept
+{
+    return ptr_ != iter.ptr_;
+}
+
+
+template<class T>
+inline bool Foam::UPtrList<T>::iterator::
+operator<(const iterator& iter) const noexcept
 {
     return ptr_ < iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator>(const iterator& iter) const
+inline bool Foam::UPtrList<T>::iterator::
+operator>(const iterator& iter) const noexcept
 {
     return ptr_ > iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator<=(const iterator& iter) const
+inline bool Foam::UPtrList<T>::iterator::
+operator<=(const iterator& iter) const noexcept
 {
     return ptr_ <= iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::iterator::operator>=(const iterator& iter) const
+inline bool Foam::UPtrList<T>::iterator::
+operator>=(const iterator& iter) const noexcept
 {
     return ptr_ >= iter.ptr_;
 }
@@ -418,14 +418,16 @@ inline bool Foam::UPtrList<T>::iterator::operator>=(const iterator& iter) const
 // * * * * * * * * * * * * * * * const_iterator  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::UPtrList<T>::const_iterator::const_iterator(const T* const* ptr)
+inline Foam::UPtrList<T>::const_iterator::
+const_iterator(const T* const* ptr) noexcept
 :
     ptr_(ptr)
 {}
 
 
 template<class T>
-inline Foam::UPtrList<T>::const_iterator::const_iterator(const iterator& iter)
+inline Foam::UPtrList<T>::const_iterator::
+const_iterator(const iterator& iter) noexcept
 :
     ptr_(iter.ptr_)
 {}
@@ -435,26 +437,6 @@ template<class T>
 inline const T* Foam::UPtrList<T>::const_iterator::get() const
 {
     return *ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator==
-(
-    const const_iterator& iter
-) const
-{
-    return ptr_ == iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator!=
-(
-    const const_iterator& iter
-) const
-{
-    return ptr_ != iter.ptr_;
 }
 
 
@@ -473,15 +455,16 @@ inline const T& Foam::UPtrList<T>::const_iterator::operator*() const
 
 
 template<class T>
-inline const T& Foam::UPtrList<T>::const_iterator::operator()() const
+inline const T&
+Foam::UPtrList<T>::const_iterator::operator[](label n) const
 {
-    return **ptr_;
+    return **(ptr_ + n);
 }
 
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator++()
+Foam::UPtrList<T>::const_iterator::operator++() noexcept
 {
     ++ptr_;
     return *this;
@@ -490,7 +473,7 @@ Foam::UPtrList<T>::const_iterator::operator++()
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator++(int)
+Foam::UPtrList<T>::const_iterator::operator++(int) noexcept
 {
     const_iterator iter(*this);
     ++ptr_;
@@ -500,7 +483,7 @@ Foam::UPtrList<T>::const_iterator::operator++(int)
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator--()
+Foam::UPtrList<T>::const_iterator::operator--() noexcept
 {
     --ptr_;
     return *this;
@@ -509,7 +492,7 @@ Foam::UPtrList<T>::const_iterator::operator--()
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator--(int)
+Foam::UPtrList<T>::const_iterator::operator--(int) noexcept
 {
     const_iterator iter(*this);
     --ptr_;
@@ -519,7 +502,7 @@ Foam::UPtrList<T>::const_iterator::operator--(int)
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator+=(label n)
+Foam::UPtrList<T>::const_iterator::operator+=(label n) noexcept
 {
     ptr_ += n;
     return *this;
@@ -528,7 +511,7 @@ Foam::UPtrList<T>::const_iterator::operator+=(label n)
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator-=(label n)
+Foam::UPtrList<T>::const_iterator::operator-=(label n) noexcept
 {
     ptr_ -= n;
     return *this;
@@ -537,7 +520,7 @@ Foam::UPtrList<T>::const_iterator::operator-=(label n)
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator+(label n) const
+Foam::UPtrList<T>::const_iterator::operator+(label n) const noexcept
 {
     return const_iterator(ptr_ + n);
 }
@@ -545,7 +528,7 @@ Foam::UPtrList<T>::const_iterator::operator+(label n) const
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator-(label n) const
+Foam::UPtrList<T>::const_iterator::operator-(label n) const noexcept
 {
     return const_iterator(ptr_ - n);
 }
@@ -553,55 +536,56 @@ Foam::UPtrList<T>::const_iterator::operator-(label n) const
 
 template<class T>
 inline Foam::label
-Foam::UPtrList<T>::const_iterator::operator-(const const_iterator& iter) const
+Foam::UPtrList<T>::const_iterator::
+operator-(const const_iterator& iter) const noexcept
 {
     return (ptr_ - iter.ptr_);
 }
 
 
 template<class T>
-inline const T&
-Foam::UPtrList<T>::const_iterator::operator[](label n) const
+inline bool Foam::UPtrList<T>::const_iterator::
+operator==(const const_iterator& iter) const noexcept
 {
-    return *(*this + n);
+    return ptr_ == iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator<
-(
-    const const_iterator& iter
-) const
+inline bool Foam::UPtrList<T>::const_iterator::
+operator!=(const const_iterator& iter) const noexcept
+{
+    return ptr_ != iter.ptr_;
+}
+
+
+template<class T>
+inline bool Foam::UPtrList<T>::const_iterator::
+operator<(const const_iterator& iter) const noexcept
 {
     return ptr_ < iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator>
-(
-    const const_iterator& iter
-) const
+inline bool Foam::UPtrList<T>::const_iterator::
+operator>(const const_iterator& iter) const noexcept
 {
     return ptr_ > iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator<=
-(
-    const const_iterator& iter
-) const
+inline bool Foam::UPtrList<T>::const_iterator::
+operator<=(const const_iterator& iter) const noexcept
 {
     return ptr_ <= iter.ptr_;
 }
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::operator>=
-(
-    const const_iterator& iter
-) const
+inline bool Foam::UPtrList<T>::const_iterator::
+operator>=(const const_iterator& iter) const noexcept
 {
     return ptr_ >= iter.ptr_;
 }
@@ -611,7 +595,7 @@ inline bool Foam::UPtrList<T>::const_iterator::operator>=
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::begin()
+Foam::UPtrList<T>::begin() noexcept
 {
     return ptrs_.begin();
 }
@@ -619,7 +603,7 @@ Foam::UPtrList<T>::begin()
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::end()
+Foam::UPtrList<T>::end() noexcept
 {
     return ptrs_.end();
 }
@@ -627,7 +611,7 @@ Foam::UPtrList<T>::end()
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::cbegin() const
+Foam::UPtrList<T>::cbegin() const noexcept
 {
     return ptrs_.cbegin();
 }
@@ -635,7 +619,7 @@ Foam::UPtrList<T>::cbegin() const
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::cend() const
+Foam::UPtrList<T>::cend() const noexcept
 {
     return ptrs_.cend();
 }
@@ -643,7 +627,7 @@ Foam::UPtrList<T>::cend() const
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::begin() const
+Foam::UPtrList<T>::begin() const noexcept
 {
     return ptrs_.begin();
 }
@@ -651,7 +635,7 @@ Foam::UPtrList<T>::begin() const
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::end() const
+Foam::UPtrList<T>::end() const noexcept
 {
     return ptrs_.end();
 }

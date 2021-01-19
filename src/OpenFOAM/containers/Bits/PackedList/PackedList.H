@@ -161,7 +161,7 @@ public:
         //   + (numElem % elem_per_block) ? 1 : 0
         // \endcode
         // But avoiding the modulus operation
-        static constexpr label num_blocks(label numElem)
+        static constexpr label num_blocks(label numElem) noexcept
         {
             return ((numElem - 1 + elem_per_block) / elem_per_block);
         }
@@ -385,10 +385,6 @@ public:
 
     // Low-level access
 
-        //- The number of bytes used in the underlying storage
-        //- including any unused padding.
-        inline std::streamsize byteSize() const;
-
         //- The number of internal storage blocks
         inline label nBlocks() const;
 
@@ -398,6 +394,16 @@ public:
         //- Return the underlying storage blocks
         //  Manipulate with utmost caution
         inline List<unsigned int>& storage();
+
+        //- A const pointer to the raw storage
+        inline const unsigned int* cdata() const noexcept;
+
+        //- A pointer to the raw storage
+        inline unsigned int* data() noexcept;
+
+        //- The number of bytes used in the raw storage
+        //- including any unused padding.
+        inline std::streamsize byteSize() const noexcept;
 
 
     // IO

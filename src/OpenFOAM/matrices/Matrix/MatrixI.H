@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ inline void Foam::Matrix<Form, Type>::doAlloc()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Form, class Type>
-inline Foam::Matrix<Form, Type>::Matrix()
+inline Foam::Matrix<Form, Type>::Matrix() noexcept
 :
     mRows_(0),
     nCols_(0),
@@ -510,7 +510,7 @@ inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::Tmul
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::iterator
-Foam::Matrix<Form, Type>::begin()
+Foam::Matrix<Form, Type>::begin() noexcept
 {
     return v_;
 }
@@ -518,7 +518,7 @@ Foam::Matrix<Form, Type>::begin()
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::iterator
-Foam::Matrix<Form, Type>::end()
+Foam::Matrix<Form, Type>::end() noexcept
 {
     return v_ + (mRows_ * nCols_);
 }
@@ -526,7 +526,7 @@ Foam::Matrix<Form, Type>::end()
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::const_iterator
-Foam::Matrix<Form, Type>::cbegin() const
+Foam::Matrix<Form, Type>::cbegin() const noexcept
 {
     return v_;
 }
@@ -534,7 +534,7 @@ Foam::Matrix<Form, Type>::cbegin() const
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::const_iterator
-Foam::Matrix<Form, Type>::cend() const
+Foam::Matrix<Form, Type>::cend() const noexcept
 {
     return v_ + (mRows_ * nCols_);
 }
@@ -542,7 +542,7 @@ Foam::Matrix<Form, Type>::cend() const
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::const_iterator
-Foam::Matrix<Form, Type>::begin() const
+Foam::Matrix<Form, Type>::begin() const noexcept
 {
     return v_;
 }
@@ -550,7 +550,7 @@ Foam::Matrix<Form, Type>::begin() const
 
 template<class Form, class Type>
 inline typename Foam::Matrix<Form, Type>::const_iterator
-Foam::Matrix<Form, Type>::end() const
+Foam::Matrix<Form, Type>::end() const noexcept
 {
     return v_ + (mRows_ * nCols_);
 }

@@ -99,7 +99,7 @@ operator++() noexcept
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::const_iterator::
-operator++(int)
+operator++(int) noexcept
 {
     const_iterator old(*this);
     ++value_;
@@ -120,7 +120,7 @@ operator--() noexcept
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
 Foam::IntRange<IntType>::const_iterator::
-operator--(int)
+operator--(int) noexcept
 {
     const_iterator old(*this);
     --value_;
@@ -234,7 +234,7 @@ operator++() noexcept
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::const_reverse_iterator::
-operator++(int)
+operator++(int) noexcept
 {
     const_reverse_iterator old(*this);
     --value_;
@@ -255,7 +255,7 @@ operator--() noexcept
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
 Foam::IntRange<IntType>::const_reverse_iterator::
-operator--(int)
+operator--(int) noexcept
 {
     const_reverse_iterator old(*this);
     ++value_;
@@ -340,7 +340,7 @@ Foam::IntRange<IntType>::at(const IntType i) const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
-Foam::IntRange<IntType>::begin() const
+Foam::IntRange<IntType>::begin() const noexcept
 {
     return const_iterator(start_);
 }
@@ -348,7 +348,7 @@ Foam::IntRange<IntType>::begin() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
-Foam::IntRange<IntType>::cbegin() const
+Foam::IntRange<IntType>::cbegin() const noexcept
 {
     return const_iterator(start_);
 }
@@ -356,7 +356,7 @@ Foam::IntRange<IntType>::cbegin() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
-Foam::IntRange<IntType>::end() const
+Foam::IntRange<IntType>::end() const noexcept
 {
     return const_iterator(start_ + size_);
 }
@@ -364,7 +364,7 @@ Foam::IntRange<IntType>::end() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_iterator
-Foam::IntRange<IntType>::cend() const
+Foam::IntRange<IntType>::cend() const noexcept
 {
     return const_iterator(start_ + size_);
 }
@@ -372,7 +372,7 @@ Foam::IntRange<IntType>::cend() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
-Foam::IntRange<IntType>::rbegin() const
+Foam::IntRange<IntType>::rbegin() const noexcept
 {
     return const_reverse_iterator(start_ + (size_-1));
 }
@@ -380,7 +380,7 @@ Foam::IntRange<IntType>::rbegin() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
-Foam::IntRange<IntType>::crbegin() const
+Foam::IntRange<IntType>::crbegin() const noexcept
 {
     return const_reverse_iterator(start_ + (size_-1));
 }
@@ -388,7 +388,7 @@ Foam::IntRange<IntType>::crbegin() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
-Foam::IntRange<IntType>::rend() const
+Foam::IntRange<IntType>::rend() const noexcept
 {
     return const_reverse_iterator(start_ - 1);
 }
@@ -396,7 +396,7 @@ Foam::IntRange<IntType>::rend() const
 
 template<class IntType>
 inline typename Foam::IntRange<IntType>::const_reverse_iterator
-Foam::IntRange<IntType>::crend() const
+Foam::IntRange<IntType>::crend() const noexcept
 {
     return const_reverse_iterator(start_ - 1);
 }
@@ -508,7 +508,7 @@ inline void Foam::IntRange<IntType>::resize(const IntType n) noexcept
 
 
 template<class IntType>
-inline void Foam::IntRange<IntType>::clampSize()
+inline void Foam::IntRange<IntType>::clampSize() noexcept
 {
     if (size_ < 0) size_ = 0;
 }

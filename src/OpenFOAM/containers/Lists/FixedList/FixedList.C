@@ -32,6 +32,20 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
+std::streamsize Foam::FixedList<T, N>::byteSize() const
+{
+    if (!is_contiguous<T>::value)
+    {
+        FatalErrorInFunction
+            << "Invalid for non-contiguous data types"
+            << abort(FatalError);
+    }
+
+    return N*sizeof(T);
+}
+
+
+template<class T, unsigned N>
 Foam::label Foam::FixedList<T, N>::find(const T& val, label pos) const
 {
     if (pos >= 0)

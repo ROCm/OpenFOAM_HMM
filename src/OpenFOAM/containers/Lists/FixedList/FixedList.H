@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -216,6 +216,8 @@ public:
         //- The last element of the list, position [N-1]
         inline const T& last() const noexcept;
 
+        //- The number of bytes stored by the list data for contiguous types
+        std::streamsize byteSize() const;
 
         //- Return the forward circular index, i.e. next index
         //- which returns to the first at the end of the list
@@ -340,25 +342,25 @@ public:
     // Random access iterator (non-const)
 
         //- Return an iterator to begin traversing the FixedList
-        inline iterator begin();
+        inline iterator begin() noexcept;
 
         //- Return an iterator to end traversing the FixedList
-        inline iterator end();
+        inline iterator end() noexcept;
 
 
     // Random access iterator (const)
 
         //- Return const_iterator to begin traversing the constant FixedList
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- Return const_iterator to end traversing the constant FixedList
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- Return const_iterator to begin traversing the constant FixedList
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- Return const_iterator to end traversing the constant FixedList
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // Reverse iterator (non-const)

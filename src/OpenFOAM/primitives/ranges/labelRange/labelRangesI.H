@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,28 +110,28 @@ operator!=
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::labelRanges::const_iterator
-Foam::labelRanges::cbegin() const
+Foam::labelRanges::cbegin() const noexcept
 {
     return const_iterator(this);
 }
 
 
 inline const Foam::labelRanges::const_iterator
-Foam::labelRanges::cend() const
+Foam::labelRanges::cend() const noexcept
 {
     return const_iterator(this, this->size());
 }
 
 
 inline Foam::labelRanges::const_iterator
-Foam::labelRanges::begin() const
+Foam::labelRanges::begin() const noexcept
 {
     return const_iterator(this);
 }
 
 
 inline const Foam::labelRanges::const_iterator
-Foam::labelRanges::end() const
+Foam::labelRanges::end() const noexcept
 {
     return const_iterator(this, this->size());
 }

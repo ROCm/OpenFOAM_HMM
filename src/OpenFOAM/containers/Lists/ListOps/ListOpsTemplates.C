@@ -213,8 +213,8 @@ Foam::PackedList<Width> Foam::reorder
     }
 
     // Verify addresses (for movable refs)
-    // Info<< "reordered in " << name(input.storage().cdata()) << nl
-    //     << "reordered out " << name(output.storage().cdata()) << nl;
+    // Info<< "reordered in " << name(input.cdata()) << nl
+    //     << "reordered out " << name(output.cdata()) << nl;
 
     return output;
 }
@@ -231,7 +231,7 @@ void Foam::inplaceReorder
     input = reorder(oldToNew, input, prune);
 
     // Verify address (for movable refs)
-    // Info<< "now have " << name(input.storage().cdata()) << nl;
+    // Info<< "now have " << name(input.cdata()) << nl;
 }
 
 

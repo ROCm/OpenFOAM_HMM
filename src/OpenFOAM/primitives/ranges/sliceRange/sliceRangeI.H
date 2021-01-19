@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -314,56 +314,56 @@ Foam::sliceRange::at(const label i) const
 
 
 inline Foam::sliceRange::const_iterator
-Foam::sliceRange::begin() const
+Foam::sliceRange::begin() const noexcept
 {
     return const_iterator(start_, stride_);
 }
 
 
 inline Foam::sliceRange::const_iterator
-Foam::sliceRange::cbegin() const
+Foam::sliceRange::cbegin() const noexcept
 {
     return const_iterator(start_, stride_);
 }
 
 
 inline Foam::sliceRange::const_iterator
-Foam::sliceRange::end() const
+Foam::sliceRange::end() const noexcept
 {
     return const_iterator(start_ + size_*stride_, stride_);
 }
 
 
 inline Foam::sliceRange::const_iterator
-Foam::sliceRange::cend() const
+Foam::sliceRange::cend() const noexcept
 {
     return const_iterator(start_ + size_*stride_, stride_);
 }
 
 
 inline Foam::sliceRange::const_reverse_iterator
-Foam::sliceRange::rbegin() const
+Foam::sliceRange::rbegin() const noexcept
 {
     return const_reverse_iterator(start_ + (size_-1)*stride_, stride_);
 }
 
 
 inline Foam::sliceRange::const_reverse_iterator
-Foam::sliceRange::crbegin() const
+Foam::sliceRange::crbegin() const noexcept
 {
     return const_reverse_iterator(start_ + (size_-1)*stride_, stride_);
 }
 
 
 inline Foam::sliceRange::const_reverse_iterator
-Foam::sliceRange::rend() const
+Foam::sliceRange::rend() const noexcept
 {
     return const_reverse_iterator(start_ - stride_, stride_);
 }
 
 
 inline Foam::sliceRange::const_reverse_iterator
-Foam::sliceRange::crend() const
+Foam::sliceRange::crend() const noexcept
 {
     return const_reverse_iterator(start_ - stride_, stride_);
 }

@@ -1265,7 +1265,7 @@ void Foam::syncTools::syncFaceList
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<char*>(recvInfo.storage().data()),
+                    reinterpret_cast<char*>(recvInfo.data()),
                     recvInfo.byteSize()
                 );
             }
@@ -1300,7 +1300,7 @@ void Foam::syncTools::syncFaceList
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<const char*>(sendInfo.storage().cdata()),
+                    reinterpret_cast<const char*>(sendInfo.cdata()),
                     sendInfo.byteSize()
                 );
             }

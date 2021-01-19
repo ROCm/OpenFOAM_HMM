@@ -248,22 +248,15 @@ public:
             //- Return reverse circular value (ie, previous value in the list)
             inline T& rcValue(const label i);
 
-            //- Return the binary size in number of characters of the UList
-            //- if the element is a primitive type
-            //  i.e. is_contiguous<T>::value == true.
-            //  Note that is of type streamsize since used in stream ops
-            std::streamsize byteSize() const;
-
-
             //- Return a const pointer to the first data element.
             //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
-            inline const T* cdata() const;
+            inline const T* cdata() const noexcept;
 
             //- Return a pointer to the first data element.
             //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
-            inline T* data();
+            inline T* data() noexcept;
 
             //- Return the first element of the list
             inline T& first();
@@ -276,6 +269,10 @@ public:
 
             //- Return the last element of the list
             inline const T& last() const;
+
+            //- The number of bytes stored by the list data for contiguous types
+            //  \note is a std::streamsize since it is used in stream ops
+            std::streamsize byteSize() const;
 
 
     // Check
@@ -371,25 +368,25 @@ public:
     // Random access iterator (non-const)
 
         //- Return an iterator to begin traversing the UList
-        inline iterator begin();
+        inline iterator begin() noexcept;
 
         //- Return an iterator to end traversing the UList
-        inline iterator end();
+        inline iterator end() noexcept;
 
 
     // Random access iterator (const)
 
         //- Return const_iterator to begin traversing the constant UList
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- Return const_iterator to end traversing the constant UList
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- Return const_iterator to begin traversing the constant UList
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- Return const_iterator to end traversing the constant UList
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // Reverse iterators (non-const)

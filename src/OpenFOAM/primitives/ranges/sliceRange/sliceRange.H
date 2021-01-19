@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,28 +179,28 @@ public:
         inline const_iterator at(const label i) const;
 
         //- A const_iterator set to the beginning of the range
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- A const_iterator set to the beginning of the range
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator rbegin() const;
+        inline const_reverse_iterator rbegin() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator crbegin() const;
+        inline const_reverse_iterator crbegin() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator rend() const;
+        inline const_reverse_iterator rend() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator crend() const;
+        inline const_reverse_iterator crend() const noexcept;
 
 
     // Iterators

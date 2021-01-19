@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ Foam::Ostream& Foam::bitSet::writeList
             // write(...) includes surrounding start/end delimiters
             os.write
             (
-                reinterpret_cast<const char*>(list.storage().cdata()),
+                reinterpret_cast<const char*>(list.cdata()),
                 list.byteSize()
             );
         }

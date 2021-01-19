@@ -193,7 +193,7 @@ std::streamsize Foam::UList<T>::byteSize() const
     if (!is_contiguous<T>::value)
     {
         FatalErrorInFunction
-            << "Cannot return binary size of a list with non-primitive elements"
+            << "Invalid for non-contiguous data types"
             << abort(FatalError);
     }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -224,25 +224,25 @@ public:
     // Random access iterator (non-const)
 
         //- Return an iterator to begin of VectorSpace
-        inline iterator begin();
+        inline iterator begin() noexcept;
 
         //- Return an iterator to end of VectorSpace
-        inline iterator end();
+        inline iterator end() noexcept;
 
 
     // Random access iterator (const)
 
         //- Return const_iterator to begin of VectorSpace
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- Return const_iterator to end of VectorSpace
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- Return const_iterator to begin of VectorSpace
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- Return const_iterator to end of VectorSpace
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // IOstream Operators

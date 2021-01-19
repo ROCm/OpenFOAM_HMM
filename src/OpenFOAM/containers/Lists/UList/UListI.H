@@ -195,14 +195,14 @@ inline const T& Foam::UList<T>::last() const
 
 
 template<class T>
-inline const T* Foam::UList<T>::cdata() const
+inline const T* Foam::UList<T>::cdata() const noexcept
 {
     return v_;
 }
 
 
 template<class T>
-inline T* Foam::UList<T>::data()
+inline T* Foam::UList<T>::data() noexcept
 {
     return v_;
 }
@@ -273,42 +273,42 @@ inline Foam::UList<T>::operator const Foam::List<T>&() const
 
 template<class T>
 inline typename Foam::UList<T>::iterator
-Foam::UList<T>::begin()
+Foam::UList<T>::begin() noexcept
 {
     return v_;
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
-Foam::UList<T>::begin() const
+Foam::UList<T>::begin() const noexcept
 {
     return v_;
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
-Foam::UList<T>::cbegin() const
+Foam::UList<T>::cbegin() const noexcept
 {
     return v_;
 }
 
 template<class T>
 inline typename Foam::UList<T>::iterator
-Foam::UList<T>::end()
+Foam::UList<T>::end() noexcept
 {
     return (v_ + size_);
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
-Foam::UList<T>::end() const
+Foam::UList<T>::end() const noexcept
 {
     return (v_ + size_);
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
-Foam::UList<T>::cend() const
+Foam::UList<T>::cend() const noexcept
 {
     return (v_ + size_);
 }

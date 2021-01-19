@@ -235,6 +235,7 @@ public:
         //- Random-access iterator with non-const access
         class iterator
         {
+            // Pointer to parent
             T** ptr_;
 
         public:
@@ -247,51 +248,52 @@ public:
             friend class const_iterator;
 
             //- Construct for a given entry
-            inline iterator(T** ptr);
+            inline iterator(T** ptr) noexcept;
 
-            // Member functions
+            // Member Functions
 
             //- Return pointer, can be nullptr.
             inline pointer get() const;
 
-            // Member operators
-
-            inline bool operator==(const iterator& iter) const;
-            inline bool operator!=(const iterator& iter) const;
+            // Member Operators
 
             inline pointer operator->() const;
             inline reference operator*() const;
 
-            inline reference operator()() const;
-
-            // Forward iteration
-            inline iterator& operator++();
-            inline iterator operator++(int);
-
-            inline iterator& operator--();
-            inline iterator operator--(int);
-
-            // Random-access
-            inline iterator& operator+=(difference_type n);
-            inline iterator& operator-=(difference_type n);
-            inline iterator operator+(difference_type n) const;
-            inline iterator operator-(difference_type n) const;
-
-            inline difference_type operator-(const iterator& iter) const;
-
+            reference operator()() const { return this->operator*(); }
             inline reference operator[](difference_type n) const;
 
-            inline bool operator<(const iterator& iter) const;
-            inline bool operator>(const iterator& iter) const;
+            // Forward iteration
+            inline iterator& operator++() noexcept;
+            inline iterator operator++(int) noexcept;
 
-            inline bool operator<=(const iterator& iter) const;
-            inline bool operator>=(const iterator& iter) const;
+            inline iterator& operator--() noexcept;
+            inline iterator operator--(int) noexcept;
+
+            // Random-access
+            inline iterator& operator+=(difference_type n) noexcept;
+            inline iterator& operator-=(difference_type n) noexcept;
+            inline iterator operator+(difference_type n) const noexcept;
+            inline iterator operator-(difference_type n) const noexcept;
+
+            inline difference_type operator-(const iterator& iter)
+            const noexcept;
+
+            inline bool operator==(const iterator& iter) const noexcept;
+            inline bool operator!=(const iterator& iter) const noexcept;
+
+            inline bool operator<(const iterator& iter) const noexcept;
+            inline bool operator>(const iterator& iter) const noexcept;
+
+            inline bool operator<=(const iterator& iter) const noexcept;
+            inline bool operator>=(const iterator& iter) const noexcept;
         };
 
 
         //- Random-access iterator with const access
         class const_iterator
         {
+            // Pointer to parent
             const T* const* ptr_;
 
         public:
@@ -303,68 +305,68 @@ public:
             using reference = const T&;
 
             //- Construct for a given entry
-            inline const_iterator(const T* const* ptr);
+            inline const_iterator(const T* const* ptr) noexcept;
 
             //- Copy construct from non-const iterator
-            inline const_iterator(const iterator& iter);
+            inline const_iterator(const iterator& iter) noexcept;
 
-            // Member functions
+            // Member Functions
 
             //- Return pointer, can be nullptr.
             inline pointer get() const;
 
-            // Member operators
-
-            inline bool operator==(const const_iterator& iter) const;
-            inline bool operator!=(const const_iterator& iter) const;
+            // Member Operators
 
             inline pointer operator->() const;
             inline reference operator*() const;
 
-            inline reference operator()() const;
-
-            // Forward iteration
-            inline const_iterator& operator++();
-            inline const_iterator operator++(int);
-
-            inline const_iterator& operator--();
-            inline const_iterator operator--(int);
-
-            // Random-access
-            inline const_iterator& operator+=(difference_type n);
-            inline const_iterator& operator-=(difference_type n);
-            inline const_iterator operator+(difference_type n) const;
-            inline const_iterator operator-(difference_type n) const;
-
-            inline difference_type operator-(const const_iterator& iter) const;
-
+            reference operator()() const { return this->operator*(); }
             inline reference operator[](difference_type n) const;
 
-            inline bool operator<(const const_iterator& iter) const;
-            inline bool operator>(const const_iterator& iter) const;
+            // Forward iteration
+            inline const_iterator& operator++() noexcept;
+            inline const_iterator operator++(int) noexcept;
 
-            inline bool operator<=(const const_iterator& iter) const;
-            inline bool operator>=(const const_iterator& iter) const;
+            inline const_iterator& operator--() noexcept;
+            inline const_iterator operator--(int) noexcept;
+
+            // Random-access
+            inline const_iterator& operator+=(difference_type n) noexcept;
+            inline const_iterator& operator-=(difference_type n) noexcept;
+            inline const_iterator operator+(difference_type n) const noexcept;
+            inline const_iterator operator-(difference_type n) const noexcept;
+
+            inline difference_type operator-(const const_iterator& iter)
+            const noexcept;
+
+            inline bool operator==(const const_iterator& iter) const noexcept;
+            inline bool operator!=(const const_iterator& iter) const noexcept;
+
+            inline bool operator<(const const_iterator& iter) const noexcept;
+            inline bool operator>(const const_iterator& iter) const noexcept;
+
+            inline bool operator<=(const const_iterator& iter) const noexcept;
+            inline bool operator>=(const const_iterator& iter) const noexcept;
         };
 
 
         //- Return an iterator to begin traversing the UPtrList
-        inline iterator begin();
+        inline iterator begin() noexcept;
 
         //- Return an iterator to end traversing the UPtrList
-        inline iterator end();
+        inline iterator end() noexcept;
 
         //- Return an const_iterator to begin traversing the UPtrList
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- Return an const_iterator to end traversing the UPtrList
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- Return an const_iterator to begin traversing the UPtrList
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- Return an const_iterator to end traversing the UPtrList
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // IOstream operator
@@ -375,7 +377,6 @@ public:
             Ostream& os,
             const UPtrList<T>& list
         );
-
 };
 
 

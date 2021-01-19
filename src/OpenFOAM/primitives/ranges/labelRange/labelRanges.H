@@ -155,16 +155,16 @@ public:
 
 
         //- A const_iterator set to the beginning of the list
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- A const_iterator set to beyond the end of the list
-        inline const const_iterator cend() const;
+        inline const const_iterator cend() const noexcept;
 
         //- A const_iterator set to the beginning of the list
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- A const_iterator set to beyond the end of the list
-        inline const const_iterator end() const;
+        inline const const_iterator end() const noexcept;
 
 
     // IOstream Operators

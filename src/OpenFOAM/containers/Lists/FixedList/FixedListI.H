@@ -503,7 +503,7 @@ inline void Foam::FixedList<T, N>::operator=(FixedList<T, N>&& list)
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::iterator
-Foam::FixedList<T, N>::begin()
+Foam::FixedList<T, N>::begin() noexcept
 {
     return v_;
 }
@@ -511,7 +511,7 @@ Foam::FixedList<T, N>::begin()
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::const_iterator
-Foam::FixedList<T, N>::begin() const
+Foam::FixedList<T, N>::begin() const noexcept
 {
     return v_;
 }
@@ -519,7 +519,7 @@ Foam::FixedList<T, N>::begin() const
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::const_iterator
-Foam::FixedList<T, N>::cbegin() const
+Foam::FixedList<T, N>::cbegin() const noexcept
 {
     return v_;
 }
@@ -527,7 +527,7 @@ Foam::FixedList<T, N>::cbegin() const
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::iterator
-Foam::FixedList<T, N>::end()
+Foam::FixedList<T, N>::end() noexcept
 {
     return (v_ + N);
 }
@@ -535,7 +535,7 @@ Foam::FixedList<T, N>::end()
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::const_iterator
-Foam::FixedList<T, N>::end() const
+Foam::FixedList<T, N>::end() const noexcept
 {
     return (v_ + N);
 }
@@ -543,7 +543,7 @@ Foam::FixedList<T, N>::end() const
 
 template<class T, unsigned N>
 inline typename Foam::FixedList<T, N>::const_iterator
-Foam::FixedList<T, N>::cend() const
+Foam::FixedList<T, N>::cend() const noexcept
 {
     return (v_ + N);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,8 +123,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        inline Matrix();
+        //- Default construct (empty matrix)
+        inline Matrix() noexcept;
 
         //- Construct given number of rows/columns
         Matrix(const label m, const label n);
@@ -203,6 +203,9 @@ public:
         //- Return pointer to the first data element, which can also
         //- be used to address into Matrix contents
         inline Type* data() noexcept;
+
+        //- The number of bytes stored by the Matrix data for contiguous types
+        std::streamsize byteSize() const;
 
         //- Return const pointer to data in the specified row
         //  Subscript checking only with FULLDEBUG
@@ -444,25 +447,25 @@ public:
     // Random Access Iterator (non-const)
 
         //- Return an iterator to begin traversing a Matrix
-        inline iterator begin();
+        inline iterator begin() noexcept;
 
         //- Return an iterator to end traversing a Matrix
-        inline iterator end();
+        inline iterator end() noexcept;
 
 
     // Random Access Iterator (const)
 
         //- Return const_iterator to begin traversing a constant Matrix
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- Return const_iterator to end traversing a constant Matrix
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- Return const_iterator to begin traversing a constant Matrix
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- Return const_iterator to end traversing a constant Matrix
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // IO

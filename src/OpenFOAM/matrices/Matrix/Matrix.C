@@ -460,6 +460,20 @@ Foam::scalar Foam::Matrix<Form, Type>::norm(const bool noSqrt) const
 }
 
 
+template<class Form, class Type>
+std::streamsize Foam::Matrix<Form, Type>::byteSize() const
+{
+    if (!is_contiguous<Type>::value)
+    {
+        FatalErrorInFunction
+            << "Invalid for non-contiguous data types"
+            << abort(FatalError);
+    }
+
+    return mRows_*nCols_*sizeof(Type);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Form, class Type>

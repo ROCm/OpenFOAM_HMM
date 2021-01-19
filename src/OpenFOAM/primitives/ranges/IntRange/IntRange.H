@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,7 +167,7 @@ public:
         inline void resize(const IntType n) noexcept;
 
         //- Enforce non-negative size
-        inline void clampSize();
+        inline void clampSize() noexcept;
 
 
     // Search
@@ -212,31 +212,31 @@ public:
         inline const_iterator at(const IntType i) const;
 
         //- A const_iterator set to the beginning of the range
-        inline const_iterator begin() const;
+        inline const_iterator begin() const noexcept;
 
         //- A const_iterator set to the beginning of the range
-        inline const_iterator cbegin() const;
+        inline const_iterator cbegin() const noexcept;
 
         //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator cend() const;
+        inline const_iterator cend() const noexcept;
 
         //- A const_iterator set to 1 beyond the end of the range.
-        inline const_iterator end() const;
+        inline const_iterator end() const noexcept;
 
 
     // Bidirectional reverse input iterators (const)
 
         //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator rbegin() const;
+        inline const_reverse_iterator rbegin() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the end of range
-        inline const_reverse_iterator crbegin() const;
+        inline const_reverse_iterator crbegin() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator rend() const;
+        inline const_reverse_iterator rend() const noexcept;
 
         //- A const_reverse_iterator set to 1 before the begin of range
-        inline const_reverse_iterator crend() const;
+        inline const_reverse_iterator crend() const noexcept;
 
 
     // Iterators
@@ -280,13 +280,13 @@ public:
             inline const_iterator& operator++() noexcept;
 
             //- Postfix increment
-            inline const_iterator operator++(int);
+            inline const_iterator operator++(int) noexcept;
 
             //- Prefix decrement
             inline const_iterator& operator--() noexcept;
 
             //- Postfix decrement
-            inline const_iterator operator--(int);
+            inline const_iterator operator--(int) noexcept;
 
             //- Arbitrary increment
             inline const_iterator& operator+=(const IntType n) noexcept;
@@ -391,13 +391,13 @@ public:
             inline const_reverse_iterator& operator++() noexcept;
 
             //- Postfix increment
-            inline const_reverse_iterator operator++(int);
+            inline const_reverse_iterator operator++(int) noexcept;
 
             //- Prefix decrement
             inline const_reverse_iterator& operator--() noexcept;
 
             //- Postfix decrement
-            inline const_reverse_iterator operator--(int);
+            inline const_reverse_iterator operator--(int) noexcept;
 
             //- Arbitrary increment
             inline const_reverse_iterator& operator+=(const IntType n) noexcept;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -230,7 +230,7 @@ inline bool Foam::Enum<EnumType>::const_iterator::operator!=
 
 template<class EnumType>
 inline typename Foam::Enum<EnumType>::const_iterator
-Foam::Enum<EnumType>::cbegin() const
+Foam::Enum<EnumType>::cbegin() const noexcept
 {
     return typename Enum<EnumType>::const_iterator(this);
 }
@@ -238,7 +238,7 @@ Foam::Enum<EnumType>::cbegin() const
 
 template<class EnumType>
 inline typename Foam::Enum<EnumType>::const_iterator
-Foam::Enum<EnumType>::cend() const
+Foam::Enum<EnumType>::cend() const noexcept
 {
     return typename Enum<EnumType>::const_iterator(this, this->size());
 }

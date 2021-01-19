@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -295,11 +295,11 @@ public:
             inline bool operator!=(const const_iterator& iter) const noexcept;
         };
 
-        inline const_iterator cbegin() const;
-        inline const_iterator cend() const;
+        inline const_iterator cbegin() const noexcept;
+        inline const_iterator cend() const noexcept;
 
-        const_iterator begin() const { return cbegin(); }
-        const_iterator end() const { return cend(); }
+        const_iterator begin() const noexcept { return cbegin(); }
+        const_iterator end() const noexcept { return cend(); }
 
 
     // Housekeeping

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,7 +127,7 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
             {
                 is.read
                 (
-                    reinterpret_cast<char*>(list.storage().data()),
+                    reinterpret_cast<char*>(list.data()),
                     list.byteSize()
                 );
 
@@ -249,7 +249,7 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
             // write(...) includes surrounding start/end delimiters
             os.write
             (
-                reinterpret_cast<const char*>(list.storage().cdata()),
+                reinterpret_cast<const char*>(list.cdata()),
                 list.byteSize()
             );
         }

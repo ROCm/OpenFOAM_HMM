@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,42 +196,46 @@ inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cdata() const noexcept
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin()
+inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin() noexcept
 {
     return v_;
 }
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end()
+inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end() noexcept
 {
     return (v_ + Ncmpts);
 }
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cbegin() const
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cbegin()
+const noexcept
 {
     return v_;
 }
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cend() const
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cend()
+const noexcept
 {
     return (v_ + Ncmpts);
 }
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin() const
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin()
+const noexcept
 {
     return v_;
 }
 
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
-inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end() const
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end()
+const noexcept
 {
     return (v_ + Ncmpts);
 }
