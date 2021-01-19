@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,9 +114,9 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
 {
     typedef Vector<solveScalar> solveVector;
 
-    PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s);
+    PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s, false);
     Field<solveVector>& cellCtrs = tcellCtrs.ref();
-    PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s);
+    PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s, false);
     Field<solveScalar>& cellVols = tcellVols.ref();
 
     // Clear the fields for accumulation
