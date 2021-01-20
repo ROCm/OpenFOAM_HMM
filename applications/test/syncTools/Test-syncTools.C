@@ -3,9 +3,10 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | www.openfoam.com
-     \\/     M anipulation  | Copyright (C) 2021 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +39,7 @@ Description
 #include "Random.H"
 #include "PackedList.H"
 #include "flipOp.H"
+#include "pointList.H"
 
 using namespace Foam;
 
@@ -224,8 +226,6 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             fullData[meshPointi] = pt;
         }
 
-        //Pout<< "sparseData:" << sparseData << endl;
-
         syncTools::syncPointMap
         (
             mesh,
@@ -309,8 +309,6 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
             sparseData.insert(mesh.edges()[meshEdgeI], pt);
             fullData[meshEdgeI] = pt;
         }
-
-        //Pout<< "sparseData:" << sparseData << endl;
 
         syncTools::syncEdgeMap
         (
@@ -585,7 +583,7 @@ public:
 };
 void testEdgeFlip2(const polyMesh& mesh, Random& rndGen)
 {
-    Pout<< nl << "Testing edge-wise (oriented) data synchronisation." << endl;
+    Info<< nl << "Testing edge-wise (oriented) data synchronisation." << endl;
 
     const edgeList& edges = mesh.edges();
     const pointField& points = mesh.points();
@@ -766,6 +764,64 @@ void testEdgeFlip(const polyMesh& mesh, Random& rndGen)
 }
 
 
+class pointListOps
+{
+public:
+
+    void operator()(pointList& lhs, const pointList& rhs) const
+    {
+        forAll(lhs, i)
+        {
+            point& l = lhs[i];
+            const point& r = rhs[i];
+            maxMagSqrEqOp<vector>()(l, r);
+        }
+    }
+
+    void operator()
+    (
+        const vectorTensorTransform& vt,
+        const bool forward,
+        List<pointList>& fld
+    ) const
+    {
+        if (forward)
+        {
+            for (auto& elems : fld)
+            {
+                for (auto& elem : elems)
+                {
+                    elem = vt.transformPosition(elem);
+                }
+            }
+        }
+        else
+        {
+            for (auto& elems : fld)
+            {
+                for (auto& elem : elems)
+                {
+                    elem = vt.invTransformPosition(elem);
+                }
+            }
+        }
+    }
+
+    //- Transform patch-based field
+    void operator()(const coupledPolyPatch& cpp, List<pointList>& fld) const
+    {
+        forAll(fld, facei)
+        {
+            pointList& pts = fld[facei];
+            for (auto& pt : pts)
+            {
+                cpp.transformPosition(pt, facei);
+            }
+        }
+    }
+};
+
+
 void testFaceSync(const polyMesh& mesh, Random& rndGen)
 {
     Info<< nl << "Testing face-wise data synchronisation." << endl;
@@ -794,6 +850,52 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
             }
         }
     }
+
+
+    // Test non-contiguous data (uses streaming)
+
+    {
+        List<pointList> syncedFc(mesh.nFaces());
+
+        const pointField& fcs = mesh.faceCentres();
+        forAll(fcs, facei)
+        {
+            const point& fc = fcs[facei];
+            syncedFc[facei].setSize(2, fc);
+        }
+
+        SubList<pointList> bndValues
+        (
+            syncedFc,
+            mesh.nBoundaryFaces(),
+            mesh.nInternalFaces()
+        );
+        syncTools::syncBoundaryFaceList
+        (
+            mesh,
+            bndValues,
+            pointListOps(), //does maxMagSqrEqOp<pointList>()
+            pointListOps()  //transforms all
+        );
+
+        forAll(syncedFc, facei)
+        {
+            const point& fc = fcs[facei];
+            const pointList& fld = syncedFc[facei];
+            forAll(fld, i)
+            {
+                if (mag(fld[i] - fc) > SMALL)
+                {
+                    FatalErrorInFunction
+                        << "Face " << facei
+                        << " original centre " << fc
+                        << " synced centre " << fld[i]
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+
 
     // Test masterFaces
 

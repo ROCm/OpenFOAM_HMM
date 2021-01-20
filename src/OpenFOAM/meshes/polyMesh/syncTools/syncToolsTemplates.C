@@ -1022,50 +1022,147 @@ void Foam::syncTools::syncBoundaryFaceList
 
     if (parRun)
     {
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-
-        // Send
-
-        for (const polyPatch& pp : patches)
+        if
+        (
+            is_contiguous<T>::value
+         && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+        )
         {
-            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+            const label startRequest = UPstream::nRequests();
+
+            // Receive buffer
+            List<T> receivedValues(mesh.nBoundaryFaces());
+
+            // Set up reads
+            for (const polyPatch& pp : patches)
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                {
+                    const processorPolyPatch& procPatch =
+                        refCast<const processorPolyPatch>(pp);
 
-                const label patchStart = procPatch.start()-boundaryOffset;
+                    SubList<T> fld
+                    (
+                        receivedValues,
+                        procPatch.size(),
+                        procPatch.offset()
+                    );
 
-                // Send slice of values on the patch
-                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                toNbr<< SubList<T>(faceValues, procPatch.size(), patchStart);
+                    IPstream::read
+                    (
+                        Pstream::commsTypes::nonBlocking,
+                        procPatch.neighbProcNo(),
+                        reinterpret_cast<char*>(fld.data()),
+                        fld.byteSize()
+                    );
+                }
+            }
+
+            // Set up writes
+            for (const polyPatch& pp : patches)
+            {
+                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                {
+                    const processorPolyPatch& procPatch =
+                        refCast<const processorPolyPatch>(pp);
+
+                    const SubList<T> fld
+                    (
+                        faceValues,
+                        procPatch.size(),
+                        procPatch.offset()
+                    );
+
+                    OPstream::write
+                    (
+                        Pstream::commsTypes::nonBlocking,
+                        procPatch.neighbProcNo(),
+                        reinterpret_cast<const char*>(fld.cdata()),
+                        fld.byteSize()
+                    );
+                }
+            }
+
+            // Wait for all comms to finish
+            Pstream::waitRequests(startRequest);
+
+            // Combine with existing data
+            for (const polyPatch& pp : patches)
+            {
+                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                {
+                    const processorPolyPatch& procPatch =
+                        refCast<const processorPolyPatch>(pp);
+                    SubList<T> recvFld
+                    (
+                        receivedValues,
+                        procPatch.size(),
+                        procPatch.offset()
+                    );
+                    const List<T>& fakeList = recvFld;
+                    top(procPatch, const_cast<List<T>&>(fakeList));
+
+                    SubList<T> patchValues
+                    (
+                        faceValues,
+                        procPatch.size(),
+                        procPatch.offset()
+                    );
+                    forAll(patchValues, i)
+                    {
+                        cop(patchValues[i], recvFld[i]);
+                    }
+                }
             }
         }
-
-
-        pBufs.finishedSends();
-
-
-        // Receive and combine.
-
-        for (const polyPatch& pp : patches)
+        else
         {
-            if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+            PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+            // Send
+
+            for (const polyPatch& pp : patches)
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
-
-                Field<T> nbrVals(procPatch.size());
-
-                UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                fromNbr >> nbrVals;
-
-                top(procPatch, nbrVals);
-
-                label bFacei = procPatch.start()-boundaryOffset;
-
-                for (T& nbrVal : nbrVals)
+                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
                 {
-                    cop(faceValues[bFacei++], nbrVal);
+                    const processorPolyPatch& procPatch =
+                        refCast<const processorPolyPatch>(pp);
+
+                    const label patchStart = procPatch.start()-boundaryOffset;
+
+                    // Send slice of values on the patch
+                    UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
+                    toNbr <<
+                        SubList<T>(faceValues, procPatch.size(), patchStart);
+                }
+            }
+
+
+            pBufs.finishedSends();
+
+
+            // Receive and combine.
+
+            for (const polyPatch& pp : patches)
+            {
+                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                {
+                    const processorPolyPatch& procPatch =
+                        refCast<const processorPolyPatch>(pp);
+
+                    List<T> nbrVals(procPatch.size());
+
+                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
+                    fromNbr >> nbrVals;
+
+                    top(procPatch, nbrVals);
+
+                    label bFacei = procPatch.start()-boundaryOffset;
+
+                    for (const T& nbrVal : nbrVals)
+                    {
+                        cop(faceValues[bFacei++], nbrVal);
+                    }
                 }
             }
         }
@@ -1089,10 +1186,10 @@ void Foam::syncTools::syncBoundaryFaceList
                 const label nbrStart = nbrPatch.start()-boundaryOffset;
 
                 // Transform (copy of) data on both sides
-                Field<T> ownVals(SubList<T>(faceValues, patchSize, ownStart));
+                List<T> ownVals(SubList<T>(faceValues, patchSize, ownStart));
                 top(nbrPatch, ownVals);
 
-                Field<T> nbrVals(SubList<T>(faceValues, patchSize, nbrStart));
+                List<T> nbrVals(SubList<T>(faceValues, patchSize, nbrStart));
                 top(cycPatch, nbrVals);
 
                 label bFacei = ownStart;
@@ -1145,10 +1242,39 @@ void Foam::syncTools::syncFaceList
 
     if (parRun)
     {
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        const label startRequest = UPstream::nRequests();
 
-        // Send
+        // Receive buffers
+        PtrList<PackedList<Width>> recvInfos(patches.size());
 
+        // Set up reads
+        for (const polyPatch& pp : patches)
+        {
+            if (isA<processorPolyPatch>(pp) && pp.size())
+            {
+                const processorPolyPatch& procPatch =
+                    refCast<const processorPolyPatch>(pp);
+
+                const label patchSize = procPatch.size();
+                const label patchi = procPatch.index();
+
+                recvInfos.set(patchi, new PackedList<Width>(patchSize));
+                PackedList<Width>& recvInfo = recvInfos[patchi];
+
+                IPstream::read
+                (
+                    Pstream::commsTypes::nonBlocking,
+                    procPatch.neighbProcNo(),
+                    reinterpret_cast<char*>(recvInfo.storage().data()),
+                    recvInfo.byteSize()
+                );
+            }
+        }
+
+        // Send buffers
+        PtrList<PackedList<Width>> sendInfos(patches.size());
+
+        // Set up writes
         for (const polyPatch& pp : patches)
         {
             if (isA<processorPolyPatch>(pp) && pp.size())
@@ -1161,18 +1287,29 @@ void Foam::syncTools::syncFaceList
                     procPatch.start()-boundaryOffset,
                     procPatch.size()
                 );
+                const label patchi = procPatch.index();
 
-                // Send slice of values on the patch
-                UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                toNbr<< PackedList<Width>(faceValues, range);
+                sendInfos.set
+                (
+                    patchi,
+                    new PackedList<Width>(faceValues, range)
+                );
+                PackedList<Width>& sendInfo = sendInfos[patchi];
+
+                OPstream::write
+                (
+                    Pstream::commsTypes::nonBlocking,
+                    procPatch.neighbProcNo(),
+                    reinterpret_cast<const char*>(sendInfo.storage().cdata()),
+                    sendInfo.byteSize()
+                );
             }
         }
 
-        pBufs.finishedSends();
+        // Wait for all comms to finish
+        Pstream::waitRequests(startRequest);
 
-
-        // Receive and combine.
-
+        // Combine with existing data
         for (const polyPatch& pp : patches)
         {
             if (isA<processorPolyPatch>(pp) && pp.size())
@@ -1181,13 +1318,8 @@ void Foam::syncTools::syncFaceList
                     refCast<const processorPolyPatch>(pp);
 
                 const label patchSize = procPatch.size();
-
-                // Recv slice of values on the patch
-                PackedList<Width> recvInfo(patchSize);
-                {
-                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                    fromNbr >> recvInfo;
-                }
+                const label patchi = procPatch.index();
+                const PackedList<Width>& recvInfo = recvInfos[patchi];
 
                 // Combine (bitwise)
                 label bFacei = procPatch.start()-boundaryOffset;
@@ -1203,6 +1335,66 @@ void Foam::syncTools::syncFaceList
                 }
             }
         }
+
+
+        //PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        //
+        //// Send
+        //
+        //for (const polyPatch& pp : patches)
+        //{
+        //    if (isA<processorPolyPatch>(pp) && pp.size())
+        //    {
+        //        const processorPolyPatch& procPatch =
+        //            refCast<const processorPolyPatch>(pp);
+        //
+        //        const labelRange range
+        //        (
+        //            procPatch.start()-boundaryOffset,
+        //            procPatch.size()
+        //        );
+        //
+        //        // Send slice of values on the patch
+        //        UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
+        //        toNbr<< PackedList<Width>(faceValues, range);
+        //    }
+        //}
+        //
+        //pBufs.finishedSends();
+        //
+        //
+        //// Receive and combine.
+        //
+        //for (const polyPatch& pp : patches)
+        //{
+        //    if (isA<processorPolyPatch>(pp) && pp.size())
+        //    {
+        //        const processorPolyPatch& procPatch =
+        //            refCast<const processorPolyPatch>(pp);
+        //
+        //        const label patchSize = procPatch.size();
+        //
+        //        // Recv slice of values on the patch
+        //        PackedList<Width> recvInfo(patchSize);
+        //        {
+        //            UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
+        //            fromNbr >> recvInfo;
+        //        }
+        //
+        //        // Combine (bitwise)
+        //        label bFacei = procPatch.start()-boundaryOffset;
+        //        for (label i = 0; i < patchSize; ++i)
+        //        {
+        //            unsigned int recvVal = recvInfo[i];
+        //            unsigned int faceVal = faceValues[bFacei];
+        //
+        //            cop(faceVal, recvVal);
+        //            faceValues.set(bFacei, faceVal);
+        //
+        //            ++bFacei;
+        //        }
+        //    }
+        //}
     }
 
 
