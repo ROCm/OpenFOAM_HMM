@@ -52,7 +52,7 @@ Foam::functionObjects::FUNCTIONOBJECT::FUNCTIONOBJECT
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    boolData_(dict.getOrDefault<bool>("boolData"), true),
+    boolData_(dict.getOrDefault<bool>("boolData", true)),
     labelData_(dict.get<label>("labelData")),
     wordData_(dict.getOrDefault<word>("wordData", "defaultWord")),
     scalarData_(dict.getOrDefault<scalar>("scalarData", 1.0))
