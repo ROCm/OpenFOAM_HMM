@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,12 +136,13 @@ void Foam::fvMeshSubset::doCoupledPatches
         // Send face usage across processor patches
         for (const polyPatch& pp : oldPatches)
         {
-            if (isA<processorPolyPatch>(pp))
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+            const auto* procPatch = isA<processorPolyPatch>(pp);
 
-                UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
+            if (procPatch)
+            {
+                const label nbrProci = procPatch->neighbProcNo();
+
+                UOPstream toNeighbour(nbrProci, pBufs);
 
                 if (!nCellsUsingFace.empty())
                 {
@@ -160,12 +161,13 @@ void Foam::fvMeshSubset::doCoupledPatches
         // Receive face usage count and check for faces that become uncoupled.
         for (const polyPatch& pp : oldPatches)
         {
-            if (isA<processorPolyPatch>(pp))
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+            const auto* procPatch = isA<processorPolyPatch>(pp);
 
-                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+            if (procPatch)
+            {
+                const label nbrProci = procPatch->neighbProcNo();
+
+                UIPstream fromNeighbour(nbrProci, pBufs);
 
                 const labelList nbrList(fromNeighbour);
 
@@ -199,27 +201,25 @@ void Foam::fvMeshSubset::doCoupledPatches
     // Do same for cyclics.
     for (const polyPatch& pp : oldPatches)
     {
-        if (isA<cyclicPolyPatch>(pp))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && !nCellsUsingFace.empty())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            const auto& cycPatch = *cpp;
 
-            if (!nCellsUsingFace.empty())
+            forAll(cycPatch, i)
             {
-                forAll(cycPatch, i)
-                {
-                    label thisFacei = cycPatch.start() + i;
-                    label otherFacei = cycPatch.transformGlobalFace(thisFacei);
+                label thisFacei = cycPatch.start() + i;
+                label otherFacei = cycPatch.transformGlobalFace(thisFacei);
 
-                    if
-                    (
-                        nCellsUsingFace[thisFacei] == 1
-                     && nCellsUsingFace[otherFacei] == 0
-                    )
-                    {
-                        nCellsUsingFace[thisFacei] = 3;
-                        ++nUncoupled;
-                    }
+                if
+                (
+                    nCellsUsingFace[thisFacei] == 1
+                 && nCellsUsingFace[otherFacei] == 0
+                )
+                {
+                    nCellsUsingFace[thisFacei] = 3;
+                    ++nUncoupled;
                 }
             }
         }

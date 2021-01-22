@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -435,10 +436,12 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleCyclicPatches()
     {
         const polyPatch& patch = mesh_.boundaryMesh()[patchi];
 
-        if (isA<cyclicPolyPatch>(patch))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(patch);
+
+        if (cpp)
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patch);
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             nbrInfo.clear();
             nbrInfo.reserve(cycPatch.nPoints());
@@ -449,7 +452,6 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleCyclicPatches()
 
             // Collect nbrPatch points that have changed
             {
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
                 const edgeList& pairs = cycPatch.coupledPoints();
                 const labelList& meshPoints = nbrPatch.meshPoints();
 

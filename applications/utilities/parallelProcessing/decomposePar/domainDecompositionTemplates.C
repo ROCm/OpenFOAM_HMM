@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,22 +45,18 @@ void Foam::domainDecomposition::processInterCyclics
     // Processor boundaries from split cyclics
     forAll(patches, patchi)
     {
-        if (isA<cyclicPolyPatch>(patches[patchi]))
-        {
-            const cyclicPolyPatch& pp = refCast<const cyclicPolyPatch>
-            (
-                patches[patchi]
-            );
+        const auto& pp = patches[patchi];
+        const auto* cpp = isA<cyclicPolyPatch>(pp);
 
-            if (pp.owner() != owner)
-            {
-                continue;
-            }
+        if (cpp && cpp->owner() == owner)
+        {
+            // cyclic: check opposite side on this processor
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             // cyclic: check opposite side on this processor
             const labelUList& patchFaceCells = pp.faceCells();
-            const labelUList& nbrPatchFaceCells =
-                pp.neighbPatch().faceCells();
+            const labelUList& nbrPatchFaceCells = nbrPatch.faceCells();
 
             // Store old sizes. Used to detect which inter-proc patches
             // have been added to.

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,25 +83,15 @@ void Foam::conformalVoronoiMesh::selectSeparatedCoupledFaces
     boolList& selected
 ) const
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(patches, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
         // Check all coupled. Avoid using .coupled() so we also pick up AMI.
-        if (isA<coupledPolyPatch>(patches[patchi]))
-        {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchi]
-            );
 
-            if (cpp.separated() || !cpp.parallel())
-            {
-                forAll(cpp, i)
-                {
-                    selected[cpp.start()+i] = true;
-                }
-            }
+        const auto* cpp = isA<coupledPolyPatch>(patches[patchi]);
+
+        if (cpp && (cpp->separated() || !cpp->parallel())
+        {
+            SubList<bool>(selected, pp.size(), pp.start()) = true;
         }
     }
 }

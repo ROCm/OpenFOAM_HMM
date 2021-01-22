@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -649,12 +649,12 @@ void Foam::FaceCellWave<Type, TrackingData>::handleCyclicPatches()
 
     for (const polyPatch& patch : mesh_.boundaryMesh())
     {
-        if (isA<cyclicPolyPatch>(patch))
-        {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patch);
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(patch);
 
-            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+        if (cpp)
+        {
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             // Allocate buffers
             label nReceiveFaces;
@@ -733,12 +733,12 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
 
     for (const polyPatch& patch : mesh_.boundaryMesh())
     {
-        if (isA<cyclicAMIPolyPatch>(patch))
-        {
-            const cyclicAMIPolyPatch& cycPatch =
-                refCast<const cyclicAMIPolyPatch>(patch);
+        const cyclicAMIPolyPatch* cpp = isA<cyclicAMIPolyPatch>(patch);
 
-            const cyclicAMIPolyPatch& nbrPatch = cycPatch.neighbPatch();
+        if (cpp)
+        {
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             List<Type> receiveInfo;
 

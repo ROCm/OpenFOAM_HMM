@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,18 +205,14 @@ void filterPatches(polyMesh& mesh, const wordHashSet& addedPatchNames)
 // Dump for all patches the current match
 void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
 {
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(patches, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if
-        (
-            isA<cyclicPolyPatch>(patches[patchi])
-         && refCast<const cyclicPolyPatch>(patches[patchi]).owner()
-        )
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(patches[patchi]);
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             // Dump patches
             {
@@ -231,7 +227,6 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
                 );
             }
 
-            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
             {
                 OFstream str(prefix+nbrPatch.name()+".obj");
                 Pout<< "Dumping " << nbrPatch.name()
@@ -325,22 +320,16 @@ void syncPoints
 
     if (Pstream::parRun())
     {
-        // Send
+        const labelList& procPatches = mesh.globalData().processorPatches();
 
-        forAll(patches, patchi)
+        // Send
+        for (const label patchi : procPatches)
         {
             const polyPatch& pp = patches[patchi];
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
 
-            if
-            (
-                isA<processorPolyPatch>(pp)
-             && pp.nPoints() > 0
-             && refCast<const processorPolyPatch>(pp).owner()
-            )
+            if (pp.nPoints() && procPatch.owner())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
-
                 // Get data per patchPoint in neighbouring point numbers.
                 pointField patchInfo(procPatch.nPoints(), nullValue);
 
@@ -368,20 +357,13 @@ void syncPoints
 
         // Receive and set.
 
-        forAll(patches, patchi)
+        for (const label patchi : procPatches)
         {
             const polyPatch& pp = patches[patchi];
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
 
-            if
-            (
-                isA<processorPolyPatch>(pp)
-             && pp.nPoints() > 0
-             && !refCast<const processorPolyPatch>(pp).owner()
-            )
+            if (pp.nPoints() && !procPatch.owner())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
-
                 pointField nbrPatchInfo(procPatch.nPoints());
                 {
                     // We do not know the number of points on the other side
@@ -419,22 +401,19 @@ void syncPoints
     }
 
     // Do the cyclics.
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
 
-        if
-        (
-            isA<cyclicPolyPatch>(pp)
-         && refCast<const cyclicPolyPatch>(pp).owner()
-        )
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            // Owner does all.
+
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
             const edgeList& coupledPoints = cycPatch.coupledPoints();
             const labelList& meshPts = cycPatch.meshPoints();
-            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
             const labelList& nbrMeshPts = nbrPatch.meshPoints();
 
             pointField half0Values(coupledPoints.size());

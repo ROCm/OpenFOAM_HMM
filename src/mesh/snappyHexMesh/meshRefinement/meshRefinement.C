@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,17 +240,11 @@ void Foam::meshRefinement::calcCellCellRays
     // coupled unset.
     bitSet isMaster(mesh_.nBoundaryFaces(), true);
     {
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-        for (const polyPatch& pp : patches)
+        for (const polyPatch& pp : mesh_.boundaryMesh())
         {
             if (pp.coupled() && !refCast<const coupledPolyPatch>(pp).owner())
             {
-                const labelRange bSlice
-                (
-                    pp.start()-mesh_.nInternalFaces(),
-                    pp.size()
-                );
-                isMaster.unset(bSlice);
+                isMaster.unset(labelRange(pp.offset(), pp.size()));
             }
         }
     }
@@ -2447,25 +2441,14 @@ bool Foam::meshRefinement::getFaceZoneInfo
 
 void Foam::meshRefinement::selectSeparatedCoupledFaces(boolList& selected) const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    forAll(patches, patchi)
+    for (const polyPatch& pp : mesh_.boundaryMesh())
     {
         // Check all coupled. Avoid using .coupled() so we also pick up AMI.
-        if (isA<coupledPolyPatch>(patches[patchi]))
-        {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchi]
-            );
+        const auto* cpp = isA<coupledPolyPatch>(pp);
 
-            if (cpp.separated() || !cpp.parallel())
-            {
-                forAll(cpp, i)
-                {
-                    selected[cpp.start()+i] = true;
-                }
-            }
+        if (cpp && (cpp->separated() || !cpp->parallel()))
+        {
+            SubList<bool>(selected, pp.size(), pp.start()) = true;
         }
     }
 }

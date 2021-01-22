@@ -211,16 +211,11 @@ void Foam::functionObjects::extractEulerianParticles::setBlockedFaces
 
             const polyPatch& pp = mesh_.boundaryMesh()[patchi];
             const scalarField& alphafp = alphaf.boundaryField()[patchi];
+            const auto* cpp = isA<coupledPolyPatch>(pp);
 
-            if (isA<coupledPolyPatch>(pp))
+            if (cpp)
             {
-                const coupledPolyPatch& cpp =
-                    refCast<const coupledPolyPatch>(pp);
-
-                if (cpp.owner())
-                {
-                    patchFacei = cpp.whichFace(facei);
-                }
+                patchFacei = (cpp->owner() ? pp.whichFace(facei) : -1);
             }
             else if (!isA<emptyPolyPatch>(pp))
             {

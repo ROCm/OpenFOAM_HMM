@@ -196,7 +196,7 @@ bool Foam::sampledFaceZone::update()
                 }
                 else
                 {
-                    faceId = meshFacei - pp.start();
+                    faceId = pp.whichFace(meshFacei);
                 }
             }
 

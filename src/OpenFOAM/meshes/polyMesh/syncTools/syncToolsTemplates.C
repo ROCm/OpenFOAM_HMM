@@ -130,13 +130,13 @@ void Foam::syncTools::syncPointMap
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
-
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.nPoints() > 0)
+            const auto* ppp = isA<processorPolyPatch>(pp);
+
+            if (ppp && pp.nPoints())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+                const auto& procPatch = *ppp;
 
                 // Get data per patchPoint in neighbouring point numbers.
 
@@ -165,13 +165,13 @@ void Foam::syncTools::syncPointMap
         pBufs.finishedSends();
 
         // Receive and combine.
-
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.nPoints() > 0)
+            const auto* ppp = isA<processorPolyPatch>(pp);
+
+            if (ppp && pp.nPoints())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+                const auto& procPatch = *ppp;
 
                 UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
                 Map<T> nbrPatchInfo(fromNbr);
@@ -199,76 +199,74 @@ void Foam::syncTools::syncPointMap
     // Do the cyclics.
     for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(pp))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            // Owner does all.
 
-            if (cycPatch.owner())
+            const cyclicPolyPatch& cycPatch = *cpp;
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+
+            const edgeList& coupledPoints = cycPatch.coupledPoints();
+            const labelList& meshPtsA = cycPatch.meshPoints();
+            const labelList& meshPtsB = nbrPatch.meshPoints();
+
+            // Extract local values. Create map from coupled-edge to value.
+            Map<T> half0Values(meshPtsA.size() / 20);
+            Map<T> half1Values(half0Values.size());
+
+            forAll(coupledPoints, i)
             {
-                // Owner does all.
+                const edge& e = coupledPoints[i];
 
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
-                const edgeList& coupledPoints = cycPatch.coupledPoints();
-                const labelList& meshPtsA = cycPatch.meshPoints();
-                const labelList& meshPtsB = nbrPatch.meshPoints();
+                const auto point0Fnd = pointValues.cfind(meshPtsA[e[0]]);
 
-                // Extract local values. Create map from coupled-edge to value.
-                Map<T> half0Values(meshPtsA.size() / 20);
-                Map<T> half1Values(half0Values.size());
-
-                forAll(coupledPoints, i)
+                if (point0Fnd.found())
                 {
-                    const edge& e = coupledPoints[i];
-
-                    const auto point0Fnd = pointValues.cfind(meshPtsA[e[0]]);
-
-                    if (point0Fnd.found())
-                    {
-                        half0Values.insert(i, *point0Fnd);
-                    }
-
-                    const auto point1Fnd = pointValues.cfind(meshPtsB[e[1]]);
-
-                    if (point1Fnd.found())
-                    {
-                        half1Values.insert(i, *point1Fnd);
-                    }
+                    half0Values.insert(i, *point0Fnd);
                 }
 
-                // Transform to receiving side
-                top(cycPatch, half1Values);
-                top(nbrPatch, half0Values);
+                const auto point1Fnd = pointValues.cfind(meshPtsB[e[1]]);
 
-                forAll(coupledPoints, i)
+                if (point1Fnd.found())
                 {
-                    const edge& e = coupledPoints[i];
+                    half1Values.insert(i, *point1Fnd);
+                }
+            }
 
-                    const auto half0Fnd = half0Values.cfind(i);
+            // Transform to receiving side
+            top(cycPatch, half1Values);
+            top(nbrPatch, half0Values);
 
-                    if (half0Fnd.found())
-                    {
-                        combine
-                        (
-                            pointValues,
-                            cop,
-                            meshPtsB[e[1]],
-                            *half0Fnd
-                        );
-                    }
+            forAll(coupledPoints, i)
+            {
+                const edge& e = coupledPoints[i];
 
-                    const auto half1Fnd = half1Values.cfind(i);
+                const auto half0Fnd = half0Values.cfind(i);
 
-                    if (half1Fnd.found())
-                    {
-                        combine
-                        (
-                            pointValues,
-                            cop,
-                            meshPtsA[e[0]],
-                            *half1Fnd
-                        );
-                    }
+                if (half0Fnd.found())
+                {
+                    combine
+                    (
+                        pointValues,
+                        cop,
+                        meshPtsB[e[1]],
+                        *half0Fnd
+                    );
+                }
+
+                const auto half1Fnd = half1Values.cfind(i);
+
+                if (half1Fnd.found())
+                {
+                    combine
+                    (
+                        pointValues,
+                        cop,
+                        meshPtsA[e[0]],
+                        *half1Fnd
+                    );
                 }
             }
         }
@@ -386,14 +384,13 @@ void Foam::syncTools::syncEdgeMap
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
-
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.nEdges() > 0)
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+            const auto* ppp = isA<processorPolyPatch>(pp);
 
+            if (ppp && pp.nEdges())
+            {
+                const auto& procPatch = *ppp;
 
                 // Get data per patch edge in neighbouring edge.
 
@@ -424,13 +421,13 @@ void Foam::syncTools::syncEdgeMap
         pBufs.finishedSends();
 
         // Receive and combine.
-
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.nEdges() > 0)
+            const auto* ppp = isA<processorPolyPatch>(pp);
+
+            if (ppp && pp.nEdges())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+                const auto& procPatch = *ppp;
 
                 EdgeMap<T> nbrPatchInfo;
                 {
@@ -468,96 +465,96 @@ void Foam::syncTools::syncEdgeMap
 
     for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(pp))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            // Owner does all.
 
-            if (cycPatch.owner())
+            const cyclicPolyPatch& cycPatch = *cpp;
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+
+            const edgeList& coupledEdges = cycPatch.coupledEdges();
+
+            const labelList& meshPtsA = cycPatch.meshPoints();
+            const edgeList& edgesA = cycPatch.edges();
+
+            const labelList& meshPtsB = nbrPatch.meshPoints();
+            const edgeList& edgesB = nbrPatch.edges();
+
+            // Extract local values. Create map from edge to value.
+            Map<T> half0Values(edgesA.size() / 20);
+            Map<T> half1Values(half0Values.size());
+
+            forAll(coupledEdges, edgei)
             {
-                // Owner does all.
+                const edge& twoEdges = coupledEdges[edgei];
 
-                const edgeList& coupledEdges = cycPatch.coupledEdges();
-                const labelList& meshPtsA = cycPatch.meshPoints();
-                const edgeList& edgesA = cycPatch.edges();
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
-                const labelList& meshPtsB = nbrPatch.meshPoints();
-                const edgeList& edgesB = nbrPatch.edges();
-
-                // Extract local values. Create map from edge to value.
-                Map<T> half0Values(edgesA.size() / 20);
-                Map<T> half1Values(half0Values.size());
-
-                forAll(coupledEdges, i)
                 {
-                    const edge& twoEdges = coupledEdges[i];
+                    const edge& e0 = edgesA[twoEdges[0]];
+                    const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
 
+                    const auto iter = edgeValues.cfind(meshEdge0);
+
+                    if (iter.found())
                     {
-                        const edge& e0 = edgesA[twoEdges[0]];
-                        const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
-
-                        const auto iter = edgeValues.cfind(meshEdge0);
-
-                        if (iter.found())
-                        {
-                            half0Values.insert(i, *iter);
-                        }
-                    }
-                    {
-                        const edge& e1 = edgesB[twoEdges[1]];
-                        const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
-
-                        const auto iter = edgeValues.cfind(meshEdge1);
-
-                        if (iter.found())
-                        {
-                            half1Values.insert(i, *iter);
-                        }
+                        half0Values.insert(edgei, *iter);
                     }
                 }
-
-                // Transform to this side
-                top(cycPatch, half1Values);
-                top(nbrPatch, half0Values);
-
-
-                // Extract and combine information
-
-                forAll(coupledEdges, i)
                 {
-                    const edge& twoEdges = coupledEdges[i];
+                    const edge& e1 = edgesB[twoEdges[1]];
+                    const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
 
-                    const auto half1Fnd = half1Values.cfind(i);
+                    const auto iter = edgeValues.cfind(meshEdge1);
 
-                    if (half1Fnd.found())
+                    if (iter.found())
                     {
-                        const edge& e0 = edgesA[twoEdges[0]];
-                        const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
-
-                        combine
-                        (
-                            edgeValues,
-                            cop,
-                            meshEdge0,  // edge
-                            *half1Fnd   // value
-                        );
+                        half1Values.insert(edgei, *iter);
                     }
+                }
+            }
 
-                    const auto half0Fnd = half0Values.cfind(i);
+            // Transform to this side
+            top(cycPatch, half1Values);
+            top(nbrPatch, half0Values);
 
-                    if (half0Fnd.found())
-                    {
-                        const edge& e1 = edgesB[twoEdges[1]];
-                        const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
 
-                        combine
-                        (
-                            edgeValues,
-                            cop,
-                            meshEdge1,  // edge
-                            *half0Fnd   // value
-                        );
-                    }
+            // Extract and combine information
+
+            forAll(coupledEdges, edgei)
+            {
+                const edge& twoEdges = coupledEdges[edgei];
+
+                const auto half1Fnd = half1Values.cfind(edgei);
+
+                if (half1Fnd.found())
+                {
+                    const edge& e0 = edgesA[twoEdges[0]];
+                    const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
+
+                    combine
+                    (
+                        edgeValues,
+                        cop,
+                        meshEdge0,      // edge
+                        *half1Fnd       // value
+                    );
+                }
+
+                const auto half0Fnd = half0Values.cfind(edgei);
+
+                if (half0Fnd.found())
+                {
+                    const edge& e1 = edgesB[twoEdges[1]];
+                    const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
+
+                    combine
+                    (
+                        edgeValues,
+                        cop,
+                        meshEdge1,      // edge
+                        *half0Fnd       // value
+                    );
                 }
             }
         }
@@ -1022,6 +1019,8 @@ void Foam::syncTools::syncBoundaryFaceList
 
     if (parRun)
     {
+        // Avoid mesh.globalData() - possible race condition
+
         if
         (
             is_contiguous<T>::value
@@ -1036,16 +1035,17 @@ void Foam::syncTools::syncBoundaryFaceList
             // Set up reads
             for (const polyPatch& pp : patches)
             {
-                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                const auto* ppp = isA<processorPolyPatch>(pp);
+
+                if (ppp && pp.size())
                 {
-                    const processorPolyPatch& procPatch =
-                        refCast<const processorPolyPatch>(pp);
+                    const auto& procPatch = *ppp;
 
                     SubList<T> fld
                     (
                         receivedValues,
-                        procPatch.size(),
-                        procPatch.offset()
+                        pp.size(),
+                        pp.start()-boundaryOffset
                     );
 
                     IPstream::read
@@ -1061,16 +1061,17 @@ void Foam::syncTools::syncBoundaryFaceList
             // Set up writes
             for (const polyPatch& pp : patches)
             {
-                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                const auto* ppp = isA<processorPolyPatch>(pp);
+
+                if (ppp && pp.size())
                 {
-                    const processorPolyPatch& procPatch =
-                        refCast<const processorPolyPatch>(pp);
+                    const auto& procPatch = *ppp;
 
                     const SubList<T> fld
                     (
                         faceValues,
-                        procPatch.size(),
-                        procPatch.offset()
+                        pp.size(),
+                        pp.start()-boundaryOffset
                     );
 
                     OPstream::write
@@ -1089,15 +1090,17 @@ void Foam::syncTools::syncBoundaryFaceList
             // Combine with existing data
             for (const polyPatch& pp : patches)
             {
-                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                const auto* ppp = isA<processorPolyPatch>(pp);
+
+                if (ppp && pp.size())
                 {
-                    const processorPolyPatch& procPatch =
-                        refCast<const processorPolyPatch>(pp);
+                    const auto& procPatch = *ppp;
+
                     SubList<T> recvFld
                     (
                         receivedValues,
-                        procPatch.size(),
-                        procPatch.offset()
+                        pp.size(),
+                        pp.start()-boundaryOffset
                     );
                     const List<T>& fakeList = recvFld;
                     top(procPatch, const_cast<List<T>&>(fakeList));
@@ -1105,9 +1108,10 @@ void Foam::syncTools::syncBoundaryFaceList
                     SubList<T> patchValues
                     (
                         faceValues,
-                        procPatch.size(),
-                        procPatch.offset()
+                        pp.size(),
+                        pp.start()-boundaryOffset
                     );
+
                     forAll(patchValues, i)
                     {
                         cop(patchValues[i], recvFld[i]);
@@ -1120,48 +1124,54 @@ void Foam::syncTools::syncBoundaryFaceList
             PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
             // Send
-
             for (const polyPatch& pp : patches)
             {
-                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
+                const auto* ppp = isA<processorPolyPatch>(pp);
+
+                if (ppp && pp.size())
                 {
-                    const processorPolyPatch& procPatch =
-                        refCast<const processorPolyPatch>(pp);
+                    const auto& procPatch = *ppp;
 
-                    const label patchStart = procPatch.start()-boundaryOffset;
+                    const SubList<T> fld
+                    (
+                        faceValues,
+                        pp.size(),
+                        pp.start()-boundaryOffset
+                    );
 
-                    // Send slice of values on the patch
                     UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-                    toNbr <<
-                        SubList<T>(faceValues, procPatch.size(), patchStart);
+                    toNbr << fld;;
                 }
             }
 
-
             pBufs.finishedSends();
 
-
             // Receive and combine.
-
             for (const polyPatch& pp : patches)
             {
-                if (isA<processorPolyPatch>(pp) && pp.size() > 0)
-                {
-                    const processorPolyPatch& procPatch =
-                        refCast<const processorPolyPatch>(pp);
+                const auto* ppp = isA<processorPolyPatch>(pp);
 
-                    List<T> nbrVals(procPatch.size());
+                if (ppp && pp.size())
+                {
+                    const auto& procPatch = *ppp;
+
+                    List<T> recvFld(pp.size());
 
                     UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                    fromNbr >> nbrVals;
+                    fromNbr >> recvFld;
 
-                    top(procPatch, nbrVals);
+                    top(procPatch, recvFld);
 
-                    label bFacei = procPatch.start()-boundaryOffset;
+                    SubList<T> patchValues
+                    (
+                        faceValues,
+                        pp.size(),
+                        pp.start()-boundaryOffset
+                    );
 
-                    for (const T& nbrVal : nbrVals)
+                    forAll(patchValues, i)
                     {
-                        cop(faceValues[bFacei++], nbrVal);
+                        cop(patchValues[i], recvFld[i]);
                     }
                 }
             }
@@ -1171,38 +1181,45 @@ void Foam::syncTools::syncBoundaryFaceList
     // Do the cyclics.
     for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(pp))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            // Owner does all.
 
-            if (cycPatch.owner())
+            const cyclicPolyPatch& cycPatch = *cpp;
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+            const label patchSize = cycPatch.size();
+
+            SubList<T> ownPatchValues
+            (
+                faceValues,
+                patchSize,
+                cycPatch.start()-boundaryOffset
+            );
+
+            SubList<T> nbrPatchValues
+            (
+                faceValues,
+                patchSize,
+                nbrPatch.start()-boundaryOffset
+            );
+
+            // Transform (copy of) data on both sides
+            List<T> ownVals(ownPatchValues);
+            top(nbrPatch, ownVals);
+
+            List<T> nbrVals(nbrPatchValues);
+            top(cycPatch, nbrVals);
+
+            forAll(ownPatchValues, i)
             {
-                // Owner does all.
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+                cop(ownPatchValues[i], nbrVals[i]);
+            }
 
-                const label patchSize = cycPatch.size();
-                const label ownStart = cycPatch.start()-boundaryOffset;
-                const label nbrStart = nbrPatch.start()-boundaryOffset;
-
-                // Transform (copy of) data on both sides
-                List<T> ownVals(SubList<T>(faceValues, patchSize, ownStart));
-                top(nbrPatch, ownVals);
-
-                List<T> nbrVals(SubList<T>(faceValues, patchSize, nbrStart));
-                top(cycPatch, nbrVals);
-
-                label bFacei = ownStart;
-                for (T& nbrVal : nbrVals)
-                {
-                    cop(faceValues[bFacei++], nbrVal);
-                }
-
-                bFacei = nbrStart;
-                for (T& ownVal : ownVals)
-                {
-                    cop(faceValues[bFacei++], ownVal);
-                }
+            forAll(nbrPatchValues, i)
+            {
+                cop(nbrPatchValues[i], ownVals[i]);
             }
         }
     }
@@ -1224,17 +1241,14 @@ void Foam::syncTools::syncFaceList
     // Offset (global to local) for start of boundaries
     const label boundaryOffset = (isBoundaryOnly ? mesh.nInternalFaces() : 0);
 
-    if
-    (
-        faceValues.size()
-     != (isBoundaryOnly ? mesh.nBoundaryFaces() : mesh.nFaces())
-    )
+    // Check size
+    if (faceValues.size() != (mesh.nFaces() - boundaryOffset))
     {
         FatalErrorInFunction
             << "Number of values " << faceValues.size()
             << " is not equal to the number of "
             << (isBoundaryOnly ? "boundary" : "mesh") << " faces "
-            << (isBoundaryOnly ? mesh.nBoundaryFaces() : mesh.nFaces()) << nl
+            << ((mesh.nFaces() - boundaryOffset)) << nl
             << abort(FatalError);
     }
 
@@ -1250,13 +1264,13 @@ void Foam::syncTools::syncFaceList
         // Set up reads
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.size())
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+            const auto* ppp = isA<processorPolyPatch>(pp);
 
-                const label patchSize = procPatch.size();
-                const label patchi = procPatch.index();
+            if (ppp && pp.size())
+            {
+                const auto& procPatch = *ppp;
+                const label patchi = pp.index();
+                const label patchSize = pp.size();
 
                 recvInfos.set(patchi, new PackedList<Width>(patchSize));
                 PackedList<Width>& recvInfo = recvInfos[patchi];
@@ -1277,18 +1291,18 @@ void Foam::syncTools::syncFaceList
         // Set up writes
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.size())
+            const auto* ppp = isA<processorPolyPatch>(pp);
+
+            if (ppp && pp.size())
             {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+                const auto& procPatch = *ppp;
+                const label patchi = pp.index();
 
                 const labelRange range
                 (
-                    procPatch.start()-boundaryOffset,
-                    procPatch.size()
+                    pp.start()-boundaryOffset,
+                    pp.size()
                 );
-                const label patchi = procPatch.index();
-
                 sendInfos.set
                 (
                     patchi,
@@ -1312,17 +1326,17 @@ void Foam::syncTools::syncFaceList
         // Combine with existing data
         for (const polyPatch& pp : patches)
         {
-            if (isA<processorPolyPatch>(pp) && pp.size())
-            {
-                const processorPolyPatch& procPatch =
-                    refCast<const processorPolyPatch>(pp);
+            const auto* ppp = isA<processorPolyPatch>(pp);
 
-                const label patchSize = procPatch.size();
-                const label patchi = procPatch.index();
+            if (ppp && pp.size())
+            {
+                const label patchi = pp.index();
+                const label patchSize = pp.size();
+
                 const PackedList<Width>& recvInfo = recvInfos[patchi];
 
                 // Combine (bitwise)
-                label bFacei = procPatch.start()-boundaryOffset;
+                label bFacei = pp.start()-boundaryOffset;
                 for (label i = 0; i < patchSize; ++i)
                 {
                     unsigned int recvVal = recvInfo[i];
@@ -1335,101 +1349,38 @@ void Foam::syncTools::syncFaceList
                 }
             }
         }
-
-
-        //PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-        //
-        //// Send
-        //
-        //for (const polyPatch& pp : patches)
-        //{
-        //    if (isA<processorPolyPatch>(pp) && pp.size())
-        //    {
-        //        const processorPolyPatch& procPatch =
-        //            refCast<const processorPolyPatch>(pp);
-        //
-        //        const labelRange range
-        //        (
-        //            procPatch.start()-boundaryOffset,
-        //            procPatch.size()
-        //        );
-        //
-        //        // Send slice of values on the patch
-        //        UOPstream toNbr(procPatch.neighbProcNo(), pBufs);
-        //        toNbr<< PackedList<Width>(faceValues, range);
-        //    }
-        //}
-        //
-        //pBufs.finishedSends();
-        //
-        //
-        //// Receive and combine.
-        //
-        //for (const polyPatch& pp : patches)
-        //{
-        //    if (isA<processorPolyPatch>(pp) && pp.size())
-        //    {
-        //        const processorPolyPatch& procPatch =
-        //            refCast<const processorPolyPatch>(pp);
-        //
-        //        const label patchSize = procPatch.size();
-        //
-        //        // Recv slice of values on the patch
-        //        PackedList<Width> recvInfo(patchSize);
-        //        {
-        //            UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-        //            fromNbr >> recvInfo;
-        //        }
-        //
-        //        // Combine (bitwise)
-        //        label bFacei = procPatch.start()-boundaryOffset;
-        //        for (label i = 0; i < patchSize; ++i)
-        //        {
-        //            unsigned int recvVal = recvInfo[i];
-        //            unsigned int faceVal = faceValues[bFacei];
-        //
-        //            cop(faceVal, recvVal);
-        //            faceValues.set(bFacei, faceVal);
-        //
-        //            ++bFacei;
-        //        }
-        //    }
-        //}
     }
 
 
     // Do the cyclics.
     for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(pp))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(pp);
+            // Owner does all.
 
-            if (cycPatch.owner())
+            const cyclicPolyPatch& cycPatch = *cpp;
+            const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+            const label patchSize = cycPatch.size();
+
+            label face0 = cycPatch.start()-boundaryOffset;
+            label face1 = nbrPatch.start()-boundaryOffset;
+            for (label i = 0; i < patchSize; ++i)
             {
-                // Owner does all.
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
+                unsigned int val0 = faceValues[face0];
+                unsigned int val1 = faceValues[face1];
 
-                const label patchSize = cycPatch.size();
+                unsigned int t = val0;
+                cop(t, val1);
+                faceValues[face0] = t;
 
-                label face0 = cycPatch.start()-boundaryOffset;
-                label face1 = nbrPatch.start()-boundaryOffset;
-                for (label i = 0; i < patchSize; ++i)
-                {
-                    unsigned int val0 = faceValues[face0];
-                    unsigned int val1 = faceValues[face1];
+                cop(val1, val0);
+                faceValues[face1] = val1;
 
-                    unsigned int t = val0;
-                    cop(t, val1);
-                    faceValues[face0] = t;
-
-                    cop(val1, val0);
-                    faceValues[face1] = val1;
-
-                    ++face0;
-                    ++face1;
-                }
+                ++face0;
+                ++face1;
             }
         }
     }
@@ -1458,11 +1409,9 @@ void Foam::syncTools::swapBoundaryCellList
 
     for (const polyPatch& pp : patches)
     {
-        label bFacei = pp.start()-mesh.nInternalFaces();
+        label bFacei = pp.offset();
 
-        const labelUList& faceCells = pp.faceCells();
-
-        for (const label celli : faceCells)
+        for (const label celli : pp.faceCells())
         {
             neighbourCellData[bFacei] = cellData[celli];
             ++bFacei;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,17 +405,11 @@ void Foam::meshToMesh::distributeCells
             forAll(tgtMesh.boundaryMesh(), patchi)
             {
                 const polyPatch& pp = tgtMesh.boundaryMesh()[patchi];
+                const auto* procPatch = isA<processorPolyPatch>(pp);
 
-                label nbrProci = -1;
-
-                // store info for faces on processor patches
-                if (isA<processorPolyPatch>(pp))
-                {
-                    const processorPolyPatch& ppp =
-                        dynamic_cast<const processorPolyPatch&>(pp);
-
-                    nbrProci = ppp.neighbProcNo();
-                }
+                // Store info for faces on processor patches
+                const label nbrProci =
+                    (procPatch ? procPatch->neighbProcNo() : -1);
 
                 forAll(pp, i)
                 {

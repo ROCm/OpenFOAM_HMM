@@ -117,39 +117,37 @@ void writeWeights(const polyMesh& mesh)
 
     for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if (isA<cyclicAMIPolyPatch>(pp))
+        const auto* cpp = isA<cyclicAMIPolyPatch>(pp);
+
+        if (cpp && cpp->owner())
         {
-            const cyclicAMIPolyPatch& cpp =
-                refCast<const cyclicAMIPolyPatch>(pp);
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
 
-            if (cpp.owner())
-            {
-                Info<< "Calculating AMI weights between owner patch: "
-                    << cpp.name() << " and neighbour patch: "
-                    << cpp.neighbPatch().name() << endl;
+            const AMIPatchToPatchInterpolation& ami = cycPatch.AMI();
 
-                const AMIPatchToPatchInterpolation& ami =
-                    cpp.AMI();
+            Info<< "Calculating AMI weights between owner patch: "
+                << cycPatch.name() << " and neighbour patch: "
+                << nbrPatch.name() << endl;
 
-                writeWeights
-                (
-                    mesh,
-                    ami.tgtWeightsSum(),
-                    cpp.neighbPatch(),
-                    outputDir,
-                    "patch" + Foam::name(pp.index()) + "-tgt",
-                    mesh.time()
-                );
-                writeWeights
-                (
-                    mesh,
-                    ami.srcWeightsSum(),
-                    cpp,
-                    outputDir,
-                    "patch" + Foam::name(pp.index()) + "-src",
-                    mesh.time()
-                );
-            }
+            writeWeights
+            (
+                mesh,
+                ami.tgtWeightsSum(),
+                nbrPatch,
+                outputDir,
+                "patch" + Foam::name(pp.index()) + "-tgt",
+                mesh.time()
+            );
+            writeWeights
+            (
+                mesh,
+                ami.srcWeightsSum(),
+                cycPatch,
+                outputDir,
+                "patch" + Foam::name(pp.index()) + "-src",
+                mesh.time()
+            );
         }
     }
 }
