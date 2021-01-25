@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2020 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,6 +118,7 @@ Foam::labelList Foam::polyMesh::facePatchFaceCells
         {
             FatalErrorInFunction
                 << "face " << fI << " in patch " << patchID
+                << " vertices " << UIndirectList<point>(points(), curFace)
                 << " does not have neighbour cell"
                 << " face: " << patchFaces[fI]
                 << abort(FatalError);

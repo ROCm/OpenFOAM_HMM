@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2019,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +145,7 @@ public:
                 char* buf,
                 const std::streamsize bufSize,
                 const int tag = UPstream::msgType(),
-                const label communicator = 0
+                const label communicator = UPstream::worldComm
             );
 
             //- Return next token from stream
