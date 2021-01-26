@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2019,2021 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,8 +136,8 @@ public:
 
         // Read Functions
 
-            //- Read into given buffer from given processor and return the
-            //  message size
+            //- Read into given buffer from given processor
+            //  \return the message size
             static label read
             (
                 const commsTypes commsType,

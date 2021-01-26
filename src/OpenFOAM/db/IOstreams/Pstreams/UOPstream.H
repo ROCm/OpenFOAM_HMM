@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2018,2021 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ public:
     // Constructors
 
         //- Construct given process index to send to and optional buffer size,
-        //  write format and IO version
+        //- write format and IO version
         UOPstream
         (
             const commsTypes commsType,

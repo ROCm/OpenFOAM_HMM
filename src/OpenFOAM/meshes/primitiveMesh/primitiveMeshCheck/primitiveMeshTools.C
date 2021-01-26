@@ -115,8 +115,8 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
     typedef Vector<solveScalar> solveVector;
 
     PrecisionAdaptor<solveVector, vector> tcellCtrs(cellCtrs_s, false);
-    Field<solveVector>& cellCtrs = tcellCtrs.ref();
     PrecisionAdaptor<solveScalar, scalar> tcellVols(cellVols_s, false);
+    Field<solveVector>& cellCtrs = tcellCtrs.ref();
     Field<solveScalar>& cellVols = tcellVols.ref();
 
     // Clear the fields for accumulation

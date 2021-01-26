@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1034,6 +1034,16 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
             mesh_,
             dict.subDict("sampledSurfaceDict")
         );
+
+        if (sampledPtr_->interpolate())
+        {
+            // Should probably ignore interpolate entirely,
+            // but the oldest isoSurface algorithm requires it!
+            WarningInFunction
+                << type() << ' ' << name() << ": "
+                << "sampledSurface with interpolate = true "
+                << "is likely incorrect" << nl << nl;
+        }
     }
 
     Info<< type() << ' ' << name() << ':' << nl

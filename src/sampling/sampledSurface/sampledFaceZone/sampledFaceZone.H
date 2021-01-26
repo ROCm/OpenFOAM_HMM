@@ -27,8 +27,7 @@ Class
     Foam::sampledFaceZone
 
 Description
-    A sampledSurface defined by the cell faces corresponding to a threshold
-    value.
+    A sampledSurface defined by a faceZone or faceZones.
 
     This is often embedded as part of a sampled surfaces function object.
 
@@ -285,7 +284,6 @@ public:
         (
             const surfaceTensorField&
         ) const;
-
 
 
     // Interpolate

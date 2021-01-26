@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -387,6 +387,15 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                     ),
                     false  // serial - already merged
                 );
+
+                // Point data? Should probably disallow
+                if (sampledPtr_)
+                {
+                    surfaceWriterPtr_->isPointData() =
+                        sampledPtr_->interpolate();
+                }
+
+                surfaceWriterPtr_->nFields() = 1;  // Needed for VTK legacy
 
                 surfaceWriterPtr_->write(fieldName, allValues);
 
