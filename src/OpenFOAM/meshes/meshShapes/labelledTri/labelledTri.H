@@ -48,8 +48,8 @@ namespace Foam
 
 // Forward Declarations
 class labelledTri;
-Istream& operator>>(Istream&, labelledTri&);
-Ostream& operator<<(Ostream&, const labelledTri&);
+inline Istream& operator>>(Istream&, labelledTri&);
+inline Ostream& operator<<(Ostream&, const labelledTri&);
 
 /*---------------------------------------------------------------------------*\
                            Class labelledTri Declaration
@@ -119,8 +119,8 @@ public:
 
     // IOstream Operators
 
-        inline friend Istream& operator>>(Istream&, labelledTri&);
-        inline friend Ostream& operator<<(Ostream&, const labelledTri&);
+        friend Istream& operator>>(Istream&, labelledTri&);
+        friend Ostream& operator<<(Ostream&, const labelledTri&);
 };
 
 

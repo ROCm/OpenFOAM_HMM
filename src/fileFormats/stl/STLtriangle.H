@@ -47,9 +47,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class STLtriangle;
-Ostream& operator<<(Ostream& os, const STLtriangle& tri);
+inline Ostream& operator<<(Ostream& os, const STLtriangle& tri);
 
 /*---------------------------------------------------------------------------*\
                          Class STLtriangle Declaration
@@ -141,10 +141,10 @@ public:
             );
 
 
-    // Ostream operator
+    // Ostream Operator
 
         //- Print triangle contents
-        inline friend Ostream& operator<<(Ostream& os, const STLtriangle& tri);
+        friend Ostream& operator<<(Ostream& os, const STLtriangle& tri);
 };
 
 

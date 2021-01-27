@@ -44,11 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class magnet;
 Istream& operator>>(Istream&, magnet&);
 Ostream& operator<<(Ostream&, const magnet&);

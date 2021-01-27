@@ -54,8 +54,8 @@ template<class Container, class Delimiters> class OutputAdaptor;
 template<class Container, class Delimiters>
 inline Ostream& operator<<
 (
-    Ostream&,
-    const FlatOutput::OutputAdaptor<Container, Delimiters>&
+    Ostream& os,
+    const FlatOutput::OutputAdaptor<Container, Delimiters>& adaptor
 );
 
 
@@ -187,8 +187,7 @@ public:
     // Operators
 
         //- Ostream Operator
-        inline friend Ostream&
-        operator<<
+        friend Ostream& operator<<
         (
             Ostream& os,
             const OutputAdaptor<Container, Delimiters>& adaptor

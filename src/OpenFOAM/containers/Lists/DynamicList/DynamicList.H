@@ -337,14 +337,14 @@ public:
     // IOstream Operators
 
         //- Read from Istream, discarding existing contents
-        inline friend Istream& operator>> <T, SizeMin>
+        friend Istream& operator>> <T, SizeMin>
         (
             Istream& is,
             DynamicList<T, SizeMin>& rhs
         );
 
         //- Write to Ostream
-        inline friend Ostream& operator<< <T, SizeMin>
+        friend Ostream& operator<< <T, SizeMin>
         (
             Ostream& os,
             const DynamicList<T, SizeMin>& rhs

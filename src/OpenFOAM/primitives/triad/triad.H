@@ -52,13 +52,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class triad;
 class quaternion;
-class Istream;
-class Ostream;
-Istream& operator>>(Istream&, triad&);
-Ostream& operator<<(Ostream&, const triad&);
+inline Istream& operator>>(Istream&, triad&);
+inline Ostream& operator<<(Ostream&, const triad&);
 
 /*---------------------------------------------------------------------------*\
                            Class triad Declaration
@@ -68,7 +66,6 @@ class triad
 :
     public Vector<vector>
 {
-
 public:
 
     // Constructors
@@ -160,8 +157,8 @@ public:
 
     // IOstream Operators
 
-        inline friend Istream& operator>>(Istream&, triad&);
-        inline friend Ostream& operator<<(Ostream&, const triad&);
+        friend Istream& operator>>(Istream&, triad&);
+        friend Ostream& operator<<(Ostream&, const triad&);
 };
 
 

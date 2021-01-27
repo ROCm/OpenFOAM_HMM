@@ -280,13 +280,13 @@ public:
         {
             if (is.format() == IOstream::ASCII)
             {
-                return is >> pHit.hit_ >> pHit.point_ >> pHit.index_;
+                is >> pHit.hit_ >> pHit.point_ >> pHit.index_;
             }
             else
             {
                 // TODO (2019-08-06):
                 // cannot properly handle mixed-precision reading
-                // owning to bool and Point type.
+                // owing to bool and Point type.
 
                 is.read
                 (

@@ -54,8 +54,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 class plane;
 class triPoints;
 
@@ -355,7 +353,7 @@ public:
             ) const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>> <Point, PointRef>
         (

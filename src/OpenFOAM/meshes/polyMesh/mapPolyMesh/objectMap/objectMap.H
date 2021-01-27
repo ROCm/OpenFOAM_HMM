@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class objectMap;
 inline bool operator==(const objectMap& a, const objectMap& b);

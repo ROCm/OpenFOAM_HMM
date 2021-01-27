@@ -57,11 +57,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Istream;
-class Ostream;
-class tetPoints;
+// Forward Declarations
 class plane;
+class tetPoints;
 
 template<class Point, class PointRef> class tetrahedron;
 
@@ -310,7 +308,7 @@ public:
             boundBox bounds() const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>> <Point, PointRef>
         (
