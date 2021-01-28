@@ -96,8 +96,7 @@ Usage
 
     Options for the \c patchMapMethod entry:
     \verbatim
-      directAMI
-      mapNearestAMI
+      nearestFaceAMI
       faceAreaWeightAMI
       partialFaceAreaWeightAMI
     \endverbatim
