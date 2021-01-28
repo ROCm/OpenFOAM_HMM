@@ -397,7 +397,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
                 surfaceWriterPtr_->nFields() = 1;  // Needed for VTK legacy
 
-                surfaceWriterPtr_->write(fieldName, allValues);
+                fileName outputName =
+                    surfaceWriterPtr_->write(fieldName, allValues);
+
+                // Case-local file name with "<case>" to make relocatable
+                dictionary propsDict;
+                propsDict.add("file", time_.relativePath(outputName, true));
+                this->setProperty(fieldName, propsDict);
 
                 surfaceWriterPtr_->clear();
             }
