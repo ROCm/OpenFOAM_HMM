@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ void Foam::polyMesh::initMesh()
         {
             FatalErrorInFunction
                 << "Illegal cell label " << owner_[facei]
-                << " in neighbour addressing for face " << facei
+                << " in owner addressing for face " << facei
                 << exit(FatalError);
         }
         nCells = max(nCells, owner_[facei]);

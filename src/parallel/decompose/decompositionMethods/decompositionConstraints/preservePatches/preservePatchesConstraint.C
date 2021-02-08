@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +60,9 @@ Foam::decompositionConstraints::preservePatches::preservePatches
 {
     if (decompositionConstraint::debug)
     {
-        Info<< type() << " : adding constraints to keep owner of faces"
-            << " in patches " << patches_
+        Info<< type()
+            << " : adding constraints to keep owner and (coupled) neighbour"
+            << " of faces in patches " << patches_
             << " on same processor. This only makes sense for cyclics." << endl;
     }
 }
@@ -77,8 +78,9 @@ Foam::decompositionConstraints::preservePatches::preservePatches
 {
     if (decompositionConstraint::debug)
     {
-        Info<< type() << " : adding constraints to keep owner of faces"
-            << " in patches " << patches_
+        Info<< type()
+            << " : adding constraints to keep owner and (coupled) neighbour"
+            << " of faces in patches " << patches_
             << " on same processor. This only makes sense for cyclics." << endl;
     }
 }
