@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -415,21 +415,21 @@ void Foam::particle::locate
 {
     if (debug)
     {
-        Info << "Particle " << origId() << nl << FUNCTION_NAME << nl << endl;
+        Pout<< "Particle " << origId() << nl << FUNCTION_NAME << nl << endl;
     }
 
     celli_ = celli;
 
     // Find the cell, if it has not been given
-    if (celli < 0)
+    if (celli_ < 0)
     {
         celli_ = mesh_.cellTree().findInside(position);
-    }
-    if (celli < 0)
-    {
-        FatalErrorInFunction
-            << "Cell not found for particle position " << position << "."
-            << exit(FatalError);
+        if (celli_ < 0)
+        {
+            FatalErrorInFunction
+                << "Cell not found for particle position " << position << "."
+                << exit(FatalError);
+        }
     }
 
     const vector displacement = position - mesh_.cellCentres()[celli_];
@@ -811,10 +811,10 @@ Foam::scalar Foam::particle::trackToStationaryTri
 
     if (debug)
     {
-        Info << "Step Fraction : " << stepFraction_ << endl;
-        Info << "fraction*muH*detA : " << fraction*muH*detA << endl;
-        Info << "static muH : " << muH << endl;
-        Info << "origId() : " << origId() << endl;
+        Pout << "Step Fraction : " << stepFraction_ << endl;
+        Pout << "fraction*muH*detA : " << fraction*muH*detA << endl;
+        Pout << "static muH : " << muH << endl;
+        Pout << "origId() : " << origId() << endl;
     }
 
     // Accumulate displacement behind
@@ -864,7 +864,7 @@ Foam::scalar Foam::particle::trackToMovingTri
     {
         Pair<vector> o, b, v1, v2;
         movingTetGeometry(fraction, o, b, v1, v2);
-        Info<< "Tet points o=" << o[0] << ", b=" << b[0]
+        Pout<< "Tet points o=" << o[0] << ", b=" << b[0]
             << ", v1=" << v1[0] << ", v2=" << v2[0] << endl
             << "Tet determinant = " << detA[0] << endl
             << "Start local coordinates = " << y0[0] << endl;
@@ -895,10 +895,10 @@ Foam::scalar Foam::particle::trackToMovingTri
     {
         for (label i = 0; i < 4; ++ i)
         {
-            Info<< (i ? "             " : "Hit equation ") << i << " = "
+            Pout<< (i ? "             " : "Hit equation ") << i << " = "
                 << hitEqn[i] << endl;
         }
-        Info<< " DetA equation = " << detA << endl;
+        Pout<< " DetA equation = " << detA << endl;
     }
 
     // Calculate the hit fraction
@@ -927,12 +927,12 @@ Foam::scalar Foam::particle::trackToMovingTri
                     );
                     const scalar detAH = detAEqn.value(mu[j]);
 
-                    Info<< "Hit on tet face " << i << " at local coordinate "
+                    Pout<< "Hit on tet face " << i << " at local coordinate "
                         << (std::isnormal(detAH) ? name(yH/detAH) : "???")
                         << ", " << mu[j]*detA[0]*100 << "% of the "
                         << "way along the track" << endl;
 
-                    Info<< "derivative : " << hitEqn[i].derivative(mu[j]) << nl
+                    Pout<< "derivative : " << hitEqn[i].derivative(mu[j]) << nl
                         << " coord " << j << " mu[j]: " << mu[j] << nl
                         << " hitEq " << i << endl;
                 }
