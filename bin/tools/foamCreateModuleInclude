@@ -152,7 +152,7 @@ then
 
     # Check that it appears to be an OpenFOAM installation
     # could also check [ -d "$projectDir/META-INFO" ]
-    if [ -d "$projectDir" ] && [ -f "etc/bashrc" ]
+    if [ -d "$projectDir" ] && [ -f "$projectDir/etc/bashrc" ]
     then
         echo "Appears to be an OpenFOAM installation" 1>&2
     else
@@ -276,17 +276,52 @@ fi
 echo "Using openfoam: $WM_PROJECT_DIR" 1>&2
 echo "==> $moduleOutput" 1>&2
 
-# Remove user directories as being unreliable
+# Check if directory is the OpenFOAM or ThirdParty tree
+dirInTree()
+{
+    local dir="$1"
+    [ "${dir#$WM_PROJECT_DIR}" != "$dir" ] || \
+    [ "${dir#$WM_THIRD_PARTY_DIR}" != "$dir" ]
+}
 
-foamOldDirs="$ADIOS2_ARCH_PATH $BOOST_ARCH_PATH $CGAL_ARCH_PATH $FFTW_ARCH_PATH \
-$MESA_ARCH_PATH $LLVM_ARCH_PATH \
-$MPI_ARCH_PATH $SCOTCH_ARCH_PATH \
-$FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN $WM_PROJECT_SITE \
-$FOAM_USER_APPBIN $FOAM_USER_LIBBIN"
+# User directories are entirely unreliable
+foamOldDirs="$FOAM_USER_APPBIN $FOAM_USER_LIBBIN"
+
+# Site locations must be within the OpenFOAM/ThirdParty tree
+for dir in "$WM_PROJECT_SITE" "$FOAM_SITE_APPBIN" "$FOAM_SITE_LIBBIN"
+do
+    if [ -d "$dir" ] && dirInTree "$dir"
+    then
+        continue
+    fi
+    # Discard non-directories or non-OpenFOAM/ThirdParty locations
+    foamOldDirs="$foamOldDirs $dir"
+done
+
+# Changes associated with the '[A-Z].*_ARCH_PATH' variables must be
+# within the OpenFOAM/ThirdParty tree
+# - avoids adding items that may have come from another module
+for envname in $(env | sed -n -e 's/^\(.*ARCH_PATH\)=.*$/\1/p')
+do
+    eval "dir=\$$envname" || continue
+    if [ -d "$dir" ] && dirInTree "$dir"
+    then
+        continue
+    fi
+    # Discard non-directories or non-OpenFOAM/ThirdParty locations
+    foamOldDirs="$foamOldDirs $dir"
+done
 
 if [ "${optParaview:-false}" != true ]
 then
-    foamOldDirs="$foamOldDirs $ParaView_DIR"
+    for dir in "$ParaView_DIR"
+    do
+        if [ -d "$dir" ] && dirInTree "$dir"
+        then
+            continue
+        fi
+        foamOldDirs="$foamOldDirs $ParaView_DIR"
+    done
 fi
 
 foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
@@ -335,6 +370,14 @@ unset FOAM_SITE_APPBIN FOAM_SITE_LIBBIN WM_PROJECT_SITE
 
 # Should work without (use default)
 unset WM_DIR
+
+# Remove any sourcing cruft
+# Remove: 'BASH_.*'
+
+for envname in $(env | sed -n -e 's/^\(BASH_.*\)=.*$/\1/p')
+do
+    eval "unset $envname"
+done
 
 # Third-party cruft - only used for orig compilation
 # - as per spack installation
