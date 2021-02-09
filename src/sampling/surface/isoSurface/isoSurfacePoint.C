@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,7 +79,7 @@ struct storeOp
 static inline bool collocatedPatch(const polyPatch& pp)
 {
     const auto* cpp = isA<coupledPolyPatch>(pp);
-    return bool(cpp) && cpp->parallel() && !cpp->separated();
+    return cpp && cpp->parallel() && !cpp->separated();
 }
 
 
@@ -158,21 +158,18 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
 
     if (Pstream::parRun())
     {
-        // Send
-        for (const polyPatch& p : patches)
-        {
-            if
-            (
-                isA<processorPolyPatch>(p)
-             && p.nPoints() > 0
-             && collocatedPatch(p)
-            )
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(p);
+        const labelList& procPatches = mesh_.globalData().processorPatches();
 
-                const labelList& meshPts = pp.meshPoints();
-                const labelList& nbrPts = pp.neighbPoints();
+        // Send
+        for (const label patchi : procPatches)
+        {
+            const polyPatch& pp = patches[patchi];
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
+
+            if (pp.nPoints() && collocatedPatch(pp))
+            {
+                const labelList& meshPts = procPatch.meshPoints();
+                const labelList& nbrPts = procPatch.neighbPoints();
 
                 pointField patchInfo(meshPts.size());
 
@@ -185,38 +182,33 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
                 OPstream toNbr
                 (
                     Pstream::commsTypes::blocking,
-                    pp.neighbProcNo()
+                    procPatch.neighbProcNo()
                 );
                 toNbr << patchInfo;
             }
         }
 
         // Receive and combine.
-        for (const polyPatch& p : patches)
+        for (const label patchi : procPatches)
         {
-            if
-            (
-                isA<processorPolyPatch>(p)
-             && p.nPoints() > 0
-             && collocatedPatch(p)
-            )
-            {
-                const processorPolyPatch& pp =
-                    refCast<const processorPolyPatch>(p);
+            const polyPatch& pp = patches[patchi];
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
 
-                pointField nbrPatchInfo(pp.nPoints());
+            if (pp.nPoints() && collocatedPatch(pp))
+            {
+                pointField nbrPatchInfo(procPatch.nPoints());
                 {
                     // We do not know the number of points on the other side
                     // so cannot use Pstream::read.
                     IPstream fromNbr
                     (
                         Pstream::commsTypes::blocking,
-                        pp.neighbProcNo()
+                        procPatch.neighbProcNo()
                     );
                     fromNbr >> nbrPatchInfo;
                 }
 
-                const labelList& meshPts = pp.meshPoints();
+                const labelList& meshPts = procPatch.meshPoints();
 
                 forAll(meshPts, pointi)
                 {
@@ -232,41 +224,39 @@ void Foam::isoSurfacePoint::syncUnseparatedPoints
     }
 
     // Do the cyclics.
-    for (const polyPatch& p : patches)
+    for (const polyPatch& pp : patches)
     {
-        if (isA<cyclicPolyPatch>(p))
+        const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
+
+        if (cpp && cpp->owner() && collocatedPatch(*cpp))
         {
-            const cyclicPolyPatch& cycPatch =
-                refCast<const cyclicPolyPatch>(p);
+            // Owner does all.
 
-            if (cycPatch.owner() && collocatedPatch(cycPatch))
+            const auto& cycPatch = *cpp;
+            const auto& nbrPatch = cycPatch.neighbPatch();
+
+            const edgeList& coupledPoints = cycPatch.coupledPoints();
+            const labelList& meshPts = cycPatch.meshPoints();
+            const labelList& nbrMeshPoints = nbrPatch.meshPoints();
+
+            pointField half0Values(coupledPoints.size());
+            pointField half1Values(coupledPoints.size());
+
+            forAll(coupledPoints, i)
             {
-                // Owner does all.
+                const edge& e = coupledPoints[i];
+                half0Values[i] = pointValues[meshPts[e[0]]];
+                half1Values[i] = pointValues[nbrMeshPoints[e[1]]];
+            }
 
-                const edgeList& coupledPoints = cycPatch.coupledPoints();
-                const labelList& meshPts = cycPatch.meshPoints();
-                const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
-                const labelList& nbrMeshPoints = nbrPatch.meshPoints();
+            forAll(coupledPoints, i)
+            {
+                const edge& e = coupledPoints[i];
+                const label p0 = meshPts[e[0]];
+                const label p1 = nbrMeshPoints[e[1]];
 
-                pointField half0Values(coupledPoints.size());
-                pointField half1Values(coupledPoints.size());
-
-                forAll(coupledPoints, i)
-                {
-                    const edge& e = coupledPoints[i];
-                    half0Values[i] = pointValues[meshPts[e[0]]];
-                    half1Values[i] = pointValues[nbrMeshPoints[e[1]]];
-                }
-
-                forAll(coupledPoints, i)
-                {
-                    const edge& e = coupledPoints[i];
-                    const label p0 = meshPts[e[0]];
-                    const label p1 = nbrMeshPoints[e[1]];
-
-                    minEqOp<point>()(pointValues[p0], half1Values[i]);
-                    minEqOp<point>()(pointValues[p1], half0Values[i]);
-                }
+                minEqOp<point>()(pointValues[p0], half1Values[i]);
+                minEqOp<point>()(pointValues[p1], half0Values[i]);
             }
         }
     }

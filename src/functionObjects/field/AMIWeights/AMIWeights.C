@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -315,21 +315,16 @@ bool Foam::functionObjects::AMIWeights::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-
         patchIDs_.clear();
         labelHashSet ids;
-        forAll(pbm, patchi)
-        {
-            if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
-            {
-                const auto& ami =
-                    static_cast<const cyclicAMIPolyPatch&>(pbm[patchi]);
 
-                if (ami.owner())
-                {
-                    ids.insert(patchi);
-                }
+        for (const polyPatch& pp : mesh_.boundaryMesh())
+        {
+            const auto* amicpp = isA<cyclicAMIPolyPatch>(pp);
+
+            if (amicpp && amicpp->owner())
+            {
+                ids.insert(pp.index());
             }
         }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,30 +271,13 @@ struct compareOp
 };
 
 
-//- General get operation to extract the 'name' from an object as a word.
-//  The default implementation uses the 'name()' method commonly used within
-//  OpenFOAM.
-template<class T>
-struct getNameOp
-{
-    word operator()(const T& x) const WARNRETURN
-    {
-        return x.name();
-    }
-};
+//- Deprecated(2020-11) use nameOp (word.H)
+//  \deprecated(2020-11) use nameOp
+template<class T> struct getNameOp : nameOp<T> {};
 
-
-//- General get operation to extract the 'type' from an object as a word.
-//  The default implementation uses the 'type()' method commonly used within
-//  OpenFOAM.
-template<class T>
-struct getTypeOp
-{
-    word operator()(const T& x) const WARNRETURN
-    {
-        return x.type();
-    }
-};
+//- Deprecated(2020-11) use typeOp (word.H)
+//  \deprecated(2020-11) use typeOp
+template<class T> struct getTypeOp : typeOp<T> {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

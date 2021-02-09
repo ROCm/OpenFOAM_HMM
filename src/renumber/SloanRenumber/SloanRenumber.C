@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,22 +111,15 @@ Foam::labelList Foam::SloanRenumber::renumber
     const pointField& points
 ) const
 {
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
     // Construct graph : faceOwner + connections across cyclics.
 
     // Determine neighbour cell
     labelList nbr(mesh.nBoundaryFaces(), -1);
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if (pbm[patchi].coupled() && !isA<processorPolyPatch>(pbm[patchi]))
+        if (pp.coupled() && !isA<processorPolyPatch>(pp))
         {
-            SubList<label>
-            (
-                nbr,
-                pbm[patchi].size(),
-                pbm[patchi].start()-mesh.nInternalFaces()
-            ) = pbm[patchi].faceCells();
+            SubList<label>(nbr, pp.size(), pp.offset()) = pp.faceCells();
         }
     }
     syncTools::swapBoundaryFaceList(mesh, nbr);
@@ -140,28 +133,29 @@ Foam::labelList Foam::SloanRenumber::renumber
         add_edge(mesh.faceOwner()[facei], mesh.faceNeighbour()[facei], G);
     }
     // Add cyclics
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
         if
         (
-            pbm[patchi].coupled()
-        && !isA<processorPolyPatch>(pbm[patchi])
-        &&  refCast<const coupledPolyPatch>(pbm[patchi]).owner()
+            pp.coupled()
+         && !isA<processorPolyPatch>(pp)
+         && refCast<const coupledPolyPatch>(pp).owner()
         )
         {
-            const labelUList& faceCells = pbm[patchi].faceCells();
-            forAll(faceCells, i)
-            {
-                label bFacei = pbm[patchi].start()+i-mesh.nInternalFaces();
-                label nbrCelli = nbr[bFacei];
+            label bFacei = pp.offset();
 
-                if (faceCells[i] < nbrCelli)
+            for (const label ownCelli : pp.faceCells())
+            {
+                const label nbrCelli = nbr[bFacei];
+                ++bFacei;
+
+                if (ownCelli < nbrCelli)
                 {
-                    add_edge(faceCells[i], nbrCelli, G);
+                    add_edge(ownCelli, nbrCelli, G);
                 }
                 else
                 {
-                    add_edge(nbrCelli, faceCells[i], G);
+                    add_edge(nbrCelli, ownCelli, G);
                 }
             }
         }

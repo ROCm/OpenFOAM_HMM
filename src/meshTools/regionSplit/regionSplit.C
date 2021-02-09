@@ -232,7 +232,7 @@ void Foam::regionSplit::fillSeedMask
         {
             const cyclicPolyPatch* cpp = isA<cyclicPolyPatch>(pp);
 
-            if (bool(cpp) && cpp->owner())
+            if (cpp && cpp->owner())
             {
                 // Transfer from neighbourPatch to here or vice versa.
                 const auto& cycPatch = *cpp;

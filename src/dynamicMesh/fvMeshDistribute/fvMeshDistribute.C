@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -312,13 +312,12 @@ Foam::label Foam::fvMeshDistribute::findNonEmptyPatch() const
     forAll(patches, patchi)
     {
         const polyPatch& pp = patches[patchi];
+        const auto* cpp = isA<cyclicACMIPolyPatch>(pp);
 
-        if (isA<cyclicACMIPolyPatch>(pp))
+        if (cpp)
         {
             isCoupledPatch.set(patchi);
-            const cyclicACMIPolyPatch& cpp =
-                refCast<const cyclicACMIPolyPatch>(pp);
-            const label dupPatchID = cpp.nonOverlapPatchID();
+            const label dupPatchID = cpp->nonOverlapPatchID();
             if (dupPatchID != -1)
             {
                 isCoupledPatch.set(dupPatchID);
@@ -510,12 +509,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
     // or new patchID
     labelList newPatchID(mesh_.nBoundaryFaces(), -1);
 
-    label nProcPatches = 0;
-
-    forAll(mesh_.boundaryMesh(), patchi)
+    for (const polyPatch& pp : mesh_.boundaryMesh())
     {
-        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
-
         if (isA<processorPolyPatch>(pp))
         {
             if (debug)
@@ -525,14 +520,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
                     << endl;
             }
 
-            label offset = pp.start() - mesh_.nInternalFaces();
-
-            forAll(pp, i)
-            {
-                newPatchID[offset+i] = destinationPatch;
-            }
-
-            nProcPatches++;
+            SubList<label>
+            (
+                newPatchID,
+                pp.size(),
+                pp.offset()
+            ) = destinationPatch;
         }
     }
 

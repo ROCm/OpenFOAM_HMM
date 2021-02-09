@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::initialise()
     label count = 0;
     forAll(fZone, i)
     {
-        label faceI = fZone[i];
+        const label faceI = fZone[i];
 
         label faceId = -1;
         label facePatchId = -1;
@@ -95,20 +95,15 @@ void Foam::fv::directionalPressureGradientExplicitSource::initialise()
         {
             facePatchId = mesh_.boundaryMesh().whichPatch(faceI);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
-            if (isA<coupledPolyPatch>(pp))
+            const auto* cpp = isA<coupledPolyPatch>(pp);
+
+            if (cpp)
             {
-                if (refCast<const coupledPolyPatch>(pp).owner())
-                {
-                    faceId = pp.whichFace(faceI);
-                }
-                else
-                {
-                    faceId = -1;
-                }
+                faceId = (cpp->owner() ? pp.whichFace(faceI) : -1);
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceId = faceI - pp.start();
+                faceId = pp.whichFace(faceI);
             }
             else
             {

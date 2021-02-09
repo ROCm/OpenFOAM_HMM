@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ License
 #include "lduSchedule.H"
 #include "globalMeshData.H"
 #include "stringListOps.H"
+#include "PtrListOps.H"
 #include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,81 +43,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(polyBoundaryMesh, 0);
 }
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Templated implementation for types(), names(), etc - file-scope
-    template<class ListType, class GetOp>
-    static ListType getMethodImpl
-    (
-        const polyPatchList& list,
-        const GetOp& getop
-    )
-    {
-        const label len = list.size();
-
-        ListType output(len);
-
-        for (label i = 0; i < len; ++i)
-        {
-            output[i] = getop(list[i]);
-        }
-
-        return output;
-    }
-
-
-    // Templated implementation for indices() - file-scope
-    template<class UnaryMatchPredicate>
-    static labelList indicesImpl
-    (
-        const polyPatchList& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        labelList output(len);
-
-        label count = 0;
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                output[count++] = i;
-            }
-        }
-
-        output.resize(count);
-
-        return output;
-    }
-
-
-    // Templated implementation for findIndex() - file-scope
-    template<class UnaryMatchPredicate>
-    label findIndexImpl
-    (
-        const polyPatchList& list,
-        const UnaryMatchPredicate& matcher
-    )
-    {
-        const label len = list.size();
-
-        for (label i = 0; i < len; ++i)
-        {
-            if (matcher(list[i].name()))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -592,20 +518,20 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
 
 Foam::wordList Foam::polyBoundaryMesh::names() const
 {
-    return getMethodImpl<wordList>(*this, getNameOp<polyPatch>());
+    return PtrListOps::get<word>(*this, nameOp<polyPatch>());
 }
 
 
 Foam::wordList Foam::polyBoundaryMesh::types() const
 {
-    return getMethodImpl<wordList>(*this, getTypeOp<polyPatch>());
+    return PtrListOps::get<word>(*this, typeOp<polyPatch>());
 }
 
 
 Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 {
     return
-        getMethodImpl<wordList>
+        PtrListOps::get<word>
         (
             *this,
             [](const polyPatch& p) { return p.physicalType(); }
@@ -616,7 +542,7 @@ Foam::wordList Foam::polyBoundaryMesh::physicalTypes() const
 Foam::labelList Foam::polyBoundaryMesh::patchStarts() const
 {
     return
-        getMethodImpl<labelList>
+        PtrListOps::get<label>
         (
             *this,
             [](const polyPatch& p) { return p.start(); }
@@ -627,7 +553,7 @@ Foam::labelList Foam::polyBoundaryMesh::patchStarts() const
 Foam::labelList Foam::polyBoundaryMesh::patchSizes() const
 {
     return
-        getMethodImpl<labelList>
+        PtrListOps::get<label>
         (
             *this,
             [](const polyPatch& p) { return p.size(); }
@@ -681,8 +607,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
     if (key.isPattern())
     {
         const regExp matcher(key);
-
-        patchIndices = indicesImpl(*this, matcher);
+        patchIndices = PtrListOps::findMatching(*this, matcher);
 
         // Only examine patch groups if requested and when they exist.
         if (useGroups && !groupPatchIDs().empty())
@@ -713,8 +638,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
         // Special version of above for reduced memory footprint
 
         const word& matcher = key;
-
-        const label patchId = findIndexImpl(*this, matcher);
+        const label patchId = PtrListOps::firstMatching(*this, matcher);
 
         if (patchId >= 0)
         {
@@ -750,14 +674,14 @@ Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
     else if (key.isPattern())
     {
         // Find as regex
-        regExp matcher(key);
-        return findIndexImpl(*this, matcher);
+        const regExp matcher(key);
+        return PtrListOps::firstMatching(*this, matcher);
     }
     else
     {
         // Find as literal string
         const word& matcher = key;
-        return findIndexImpl(*this, matcher);
+        return PtrListOps::firstMatching(*this, matcher);
     }
 }
 
@@ -773,7 +697,7 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
         return -1;
     }
 
-    const label patchId = findIndexImpl(*this, patchName);
+    const label patchId = PtrListOps::firstMatching(*this, patchName);
 
     if (patchId >= 0)
     {
@@ -782,15 +706,18 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
 
     if (!allowNotFound)
     {
-        string regionStr;
-        if (mesh_.name() != polyMesh::defaultRegion)
-        {
-            regionStr = "in region '" + mesh_.name() + "' ";
-        }
-
         FatalErrorInFunction
             << "Patch '" << patchName << "' not found. "
-            << "Available patch names " << regionStr << "include: " << names()
+            << "Available patch names";
+
+        if (polyMesh::defaultRegion != mesh_.name())
+        {
+            FatalError
+                << " in region '" << mesh_.name() << "'";
+        }
+
+        FatalError
+            << " include: " << names() << endl
             << exit(FatalError);
     }
 
@@ -799,7 +726,7 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
     {
         Pout<< "label polyBoundaryMesh::findPatchID(const word&) const"
             << "Patch named " << patchName << " not found.  "
-            << "List of available patch names: " << names() << endl;
+            << "Available patch names: " << names() << endl;
     }
 
     // Not found, return -1

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,18 +41,17 @@ License
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::checkPatches() const
 {
-    const polyBoundaryMesh& pbm = polyMesh_.boundaryMesh();
     bool ok = true;
-    for (const polyPatch& pp : pbm)
+    for (const polyPatch& pp : polyMesh_.boundaryMesh())
     {
-        if (isA<cyclicAMIPolyPatch>(pp))
-        {
-            const cyclicAMIPolyPatch& cami =
-                refCast<const cyclicAMIPolyPatch>(pp);
+        const auto* camipp = isA<cyclicAMIPolyPatch>(pp);
 
-            if (cami.owner())
+        if (camipp && camipp->owner())
+        {
+            ok = (camipp->AMI().singlePatchProc() != -1);
+            if (!ok)
             {
-                ok = ok && (cami.AMI().singlePatchProc() != -1);
+                break;
             }
         }
     }

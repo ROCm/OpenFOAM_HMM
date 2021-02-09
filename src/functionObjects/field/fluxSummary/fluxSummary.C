@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,6 +208,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
     forAll(fZone, i)
     {
         label facei = fZone[i];
+        const bool isFlip = fZone.flipMap()[i];
 
         label faceID = -1;
         label facePatchID = -1;
@@ -220,20 +221,15 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
         {
             facePatchID = mesh_.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
-            if (isA<coupledPolyPatch>(pp))
+            const auto* cpp = isA<coupledPolyPatch>(pp);
+
+            if (cpp)
             {
-                if (refCast<const coupledPolyPatch>(pp).owner())
-                {
-                    faceID = pp.whichFace(facei);
-                }
-                else
-                {
-                    faceID = -1;
-                }
+                faceID = (cpp->owner() ? pp.whichFace(facei) : -1);
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceID = facei - pp.start();
+                faceID = pp.whichFace(facei);
             }
             else
             {
@@ -245,15 +241,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
         if (faceID >= 0)
         {
             // Orientation set by faceZone flip map
-            if (fZone.flipMap()[i])
-            {
-                flips.append(true);
-            }
-            else
-            {
-                flips.append(false);
-            }
-
+            flips.append(isFlip);
             faceIDs.append(faceID);
             facePatchIDs.append(facePatchID);
         }
@@ -317,20 +305,15 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
         {
             facePatchID = mesh_.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchID];
-            if (isA<coupledPolyPatch>(pp))
+            const auto* cpp = isA<coupledPolyPatch>(pp);
+
+            if (cpp)
             {
-                if (refCast<const coupledPolyPatch>(pp).owner())
-                {
-                    faceID = pp.whichFace(facei);
-                }
-                else
-                {
-                    faceID = -1;
-                }
+                faceID = (cpp->owner() ? pp.whichFace(facei) : -1);
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceID = facei - pp.start();
+                faceID = pp.whichFace(facei);
             }
             else
             {

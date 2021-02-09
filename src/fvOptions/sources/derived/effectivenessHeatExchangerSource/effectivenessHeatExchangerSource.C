@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,20 +87,15 @@ void Foam::fv::effectivenessHeatExchangerSource::initialise()
         {
             facePatchId = mesh_.boundaryMesh().whichPatch(facei);
             const polyPatch& pp = mesh_.boundaryMesh()[facePatchId];
-            if (isA<coupledPolyPatch>(pp))
+            const auto* cpp = isA<coupledPolyPatch>(pp);
+
+            if (cpp)
             {
-                if (refCast<const coupledPolyPatch>(pp).owner())
-                {
-                    faceId = pp.whichFace(facei);
-                }
-                else
-                {
-                    faceId = -1;
-                }
+                faceId = (cpp->owner() ? pp.whichFace(facei) : -1);
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
-                faceId = facei - pp.start();
+                faceId = pp.whichFace(facei);
             }
             else
             {
