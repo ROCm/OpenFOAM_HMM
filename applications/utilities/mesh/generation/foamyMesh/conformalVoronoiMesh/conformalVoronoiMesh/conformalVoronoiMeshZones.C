@@ -87,9 +87,9 @@ void Foam::conformalVoronoiMesh::selectSeparatedCoupledFaces
     {
         // Check all coupled. Avoid using .coupled() so we also pick up AMI.
 
-        const auto* cpp = isA<coupledPolyPatch>(patches[patchi]);
+        const auto* cpp = isA<coupledPolyPatch>(pp);
 
-        if (cpp && (cpp->separated() || !cpp->parallel())
+        if (cpp && (cpp->separated() || !cpp->parallel()))
         {
             SubList<bool>(selected, pp.size(), pp.start()) = true;
         }
