@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -652,13 +652,9 @@ Foam::sampledIsoSurface::sampledIsoSurface
         // Not possible for ALGO_POINT
         simpleSubMesh_ = false;
 
-        if (!sampledSurface::interpolate())
-        {
-            FatalIOErrorInFunction(dict)
-                << "Non-interpolated iso-surface (point) not supported"
-                << " since triangles span across cells." << nl
-                << exit(FatalIOError);
-        }
+        // Previously emitted an error about using ALGO_POINT with
+        // non-interpolated, but that was before we had "sampleScheme"
+        // at the top level
 
         if (isoValues_.size() > 1)
         {

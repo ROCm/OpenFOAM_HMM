@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -713,7 +713,7 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
             );
 
             // Use outputDir/TIME/surface-name
-            writerPtr->useTimeDir() = true;
+            writerPtr->useTimeDir(true);
 
             writerPtr->beginTime(mesh_.time());
 
@@ -765,7 +765,7 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
                     faceWeights
                 );
 
-                if (writerPtr.valid())
+                if (writerPtr)
                 {
                     writerPtr->beginTime(instant(scalar(iter)));
                     writerPtr->write("cosAngles", cosAngles);

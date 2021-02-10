@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,10 @@ Usage
         regularise | point snapping                         | yes |
         mergeTol | tolerance for merging points             | no  | 1e-6
     \endtable
+
+Note
+    For the isoMethod \b point should use a "cellPoint" sampleScheme
+    since the triangles generated with this algorithm span across cells.
 
 SourceFiles
     sampledIsoSurfacePoint.C

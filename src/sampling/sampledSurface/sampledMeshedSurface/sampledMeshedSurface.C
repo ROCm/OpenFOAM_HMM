@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -287,7 +287,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
     // Collect the samplePoints and sampleElements
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (sampledSurface::interpolate())
+    if (sampledSurface::isPointData())
     {
         // With point interpolation
 
@@ -422,7 +422,7 @@ bool Foam::sampledMeshedSurface::update(const meshSearch& meshSearcher)
           : mesh().cellCentres()
         );
 
-        if (sampledSurface::interpolate())
+        if (sampledSurface::isPointData())
         {
             label vertI = 0;
             forAll(samplePoints_, pointi)

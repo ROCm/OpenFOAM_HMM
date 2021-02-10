@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,8 +121,8 @@ private:
         //- Geometry is invariant (never changes)
         bool invariant_;
 
-        //- Interpolate information to the nodes?
-        bool interpolate_;
+        //- Is point vs cell data
+        bool isPointData_;
 
         //- Total surface area (demand-driven)
         mutable scalar area_;
@@ -249,7 +249,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            const bool interpolate = false
+            const bool interpolateToPoints = false
         );
 
         //- Construct from dictionary
@@ -311,11 +311,15 @@ public:
             return invariant_;
         }
 
-        //- Interpolation to nodes requested for surface
-        bool interpolate() const
+        //- Using interpolation to surface points
+        bool isPointData() const
         {
-            return interpolate_;
+            return isPointData_;
         }
+
+        //- Change point/cell representation, may trigger an expire().
+        //  \return old value
+        virtual bool isPointData(const bool on);
 
         //- Does the surface need an update?
         virtual bool needsUpdate() const = 0;
@@ -561,6 +565,12 @@ public:
 
         //- Print information
         virtual void print(Ostream& os) const;
+
+
+    // Housekeeping
+
+        //- Same as isPointData()
+        bool interpolate() const { return isPointData_; }
 };
 
 

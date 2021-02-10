@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,9 +33,11 @@ inline Foam::label Foam::surfaceWriter::nFields() const
 }
 
 
-inline Foam::label& Foam::surfaceWriter::nFields()
+inline Foam::label Foam::surfaceWriter::nFields(const label n)
 {
-    return nFields_;
+    label old(nFields_);
+    nFields_ = n;
+    return old;
 }
 
 
@@ -45,9 +47,11 @@ inline bool Foam::surfaceWriter::isPointData() const
 }
 
 
-inline bool& Foam::surfaceWriter::isPointData()
+inline bool Foam::surfaceWriter::isPointData(const bool on)
 {
-    return isPointData_;
+    bool old(isPointData_);
+    isPointData_ = on;
+    return old;
 }
 
 
@@ -65,12 +69,6 @@ inline bool Foam::surfaceWriter::useTimeDir(const bool on)
 }
 
 
-inline bool& Foam::surfaceWriter::useTimeDir()
-{
-    return useTimeDir_;
-}
-
-
 inline bool Foam::surfaceWriter::verbose() const
 {
     return verbose_;
@@ -85,21 +83,17 @@ inline bool Foam::surfaceWriter::verbose(const bool on)
 }
 
 
-inline bool& Foam::surfaceWriter::verbose()
-{
-    return verbose_;
-}
-
-
 inline Foam::scalar Foam::surfaceWriter::mergeDim() const
 {
     return mergeDim_;
 }
 
 
-inline Foam::scalar& Foam::surfaceWriter::mergeDim()
+inline Foam::scalar Foam::surfaceWriter::mergeDim(const scalar dist)
 {
-    return mergeDim_;
+    scalar old(mergeDim_);
+    mergeDim_ = dist;
+    return old;
 }
 
 

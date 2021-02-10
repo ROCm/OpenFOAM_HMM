@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,7 +108,7 @@ void Foam::sampledSurfaces::performAction
 
         Field<Type> values;
 
-        if (s.interpolate())
+        if (s.isPointData())
         {
             if (!interpPtr)
             {
@@ -151,7 +151,7 @@ void Foam::sampledSurfaces::performAction
 
         if ((request & actions_[surfi]) & ACTION_STORE)
         {
-            if (s.interpolate())
+            if (s.isPointData())
             {
                 storeRegistryField<Type, polySurfacePointGeoMesh>
                 (

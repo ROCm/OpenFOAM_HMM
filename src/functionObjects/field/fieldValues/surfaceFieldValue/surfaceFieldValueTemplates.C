@@ -96,18 +96,13 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 
         if (sampledPtr_)
         {
-            if (sampledPtr_->interpolate())
-            {
-                const interpolationCellPoint<Type> interp(fld);
+            // Could be runtime selectable
+            // auto sampler = interpolation<Type>::New(sampleFaceScheme_, fld);
 
-                return sampledPtr_->interpolate(interp);
-            }
-            else
-            {
-                const interpolationCell<Type> interp(fld);
+            // const interpolationCellPoint<Type> interp(fld);
+            const interpolationCell<Type> interp(fld);
 
-                return sampledPtr_->sample(interp);
-            }
+            return sampledPtr_->sample(interp);
         }
         else
         {
@@ -324,6 +319,30 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
 {
     label nProcessed = 0;
 
+    // If using the surface writer, the points/faces parameters have already
+    // been merged on the master and the writeValues routine will also gather
+    // all data onto the master before calling the writer.
+    // Thus only call the writer on master!
+
+    // Begin writer time step
+    if (Pstream::master() && surfaceWriterPtr_ && surfaceWriterPtr_->enabled())
+    {
+        auto& writer = *surfaceWriterPtr_;
+
+        writer.open
+        (
+            points,
+            faces,
+            (
+                outputDir()
+              / regionTypeNames_[regionType_] + ("_" + regionName_)
+            ),
+            false  // serial - already merged
+        );
+
+        writer.beginTime(time_);
+    }
+
     for (const word& fieldName : fields_)
     {
         if
@@ -347,6 +366,23 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
                 << " not found in database and not processed"
                 << endl;
         }
+    }
+
+    // Finish writer time step
+    if (Pstream::master() && surfaceWriterPtr_ && surfaceWriterPtr_->enabled())
+    {
+        auto& writer = *surfaceWriterPtr_;
+
+        // Write geometry if no fields were written so that we still
+        // can have something to look at.
+
+        if (!writer.wroteData())
+        {
+            writer.write();
+        }
+
+        writer.endTime();
+        writer.clear();
     }
 
     return nProcessed;
@@ -377,26 +413,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
 
             if (Pstream::master())
             {
-                surfaceWriterPtr_->open
-                (
-                    points,
-                    faces,
-                    (
-                        outputDir()
-                      / regionTypeNames_[regionType_] + ("_" + regionName_)
-                    ),
-                    false  // serial - already merged
-                );
-
-                // Point data? Should probably disallow
-                if (sampledPtr_)
-                {
-                    surfaceWriterPtr_->isPointData() =
-                        sampledPtr_->interpolate();
-                }
-
-                surfaceWriterPtr_->nFields() = 1;  // Needed for VTK legacy
-
                 fileName outputName =
                     surfaceWriterPtr_->write(fieldName, allValues);
 
@@ -404,8 +420,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                 dictionary propsDict;
                 propsDict.add("file", time_.relativePath(outputName, true));
                 this->setProperty(fieldName, propsDict);
-
-                surfaceWriterPtr_->clear();
             }
         }
 

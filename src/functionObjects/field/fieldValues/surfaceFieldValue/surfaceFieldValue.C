@@ -971,6 +971,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
     needsUpdate_ = true;
     writeArea_ = dict.getOrDefault("writeArea", false);
     weightFieldNames_.clear();
+    // future?
+    // sampleFaceScheme_ = dict.getOrDefault<word>("sampleScheme", "cell");
 
     totalArea_ = 0;
     nFaces_ = 0;
@@ -1029,15 +1031,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
             dict.subDict("sampledSurfaceDict")
         );
 
-        if (sampledPtr_->interpolate())
-        {
-            // Should probably ignore interpolate entirely,
-            // but the oldest isoSurface algorithm requires it!
-            WarningInFunction
-                << type() << ' ' << name() << ": "
-                << "sampledSurface with interpolate = true "
-                << "is likely incorrect" << nl << nl;
-        }
+        // Internal consistency. Want face values, never point values!
+        sampledPtr_->isPointData(false);
     }
 
     Info<< type() << ' ' << name() << ':' << nl
@@ -1055,15 +1050,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     if (usesWeight())
     {
-        if (stSampled == regionType_)
-        {
-            FatalIOErrorInFunction(dict)
-                << "Cannot use weighted operation '"
-                << operationTypeNames_[operation_]
-                << "' for sampledSurface"
-                << exit(FatalIOError);
-        }
-
         // Can have "weightFields" or "weightField"
 
         bool missing = true;
@@ -1109,18 +1095,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
         }
     }
 
-    // Backwards compatibility for v1612 and older
-    List<word> orientedFields;
-    if (dict.readIfPresent("orientedFields", orientedFields))
-    {
-        fields_.append(orientedFields);
-
-        WarningInFunction
-            << "The 'orientedFields' option is deprecated.  These fields can "
-            << "and have been added to the standard 'fields' list."
-            << endl;
-    }
-
     if (writeFields_)
     {
         const word formatName(dict.get<word>("surfaceFormat"));
@@ -1133,6 +1107,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
                 dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
             )
         );
+
+        // Propagate field counts (per surface)
+        surfaceWriterPtr_->nFields(fields_.size());
 
         if (debug)
         {

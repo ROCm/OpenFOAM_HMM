@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -485,8 +485,8 @@ void Foam::ParticleCollector<CloudType>::write()
             false  // serial - already merged
         );
 
+        writer->nFields(2); // Legacy VTK
         writer->write("massFlowRate", faceMassFlowRate);
-
         writer->write("massTotal", faceMassTotal);
     }
 

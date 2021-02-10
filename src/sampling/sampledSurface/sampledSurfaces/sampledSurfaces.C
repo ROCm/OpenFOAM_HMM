@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,14 +171,14 @@ void Foam::sampledSurfaces::countFields()
         const sampledSurface& s = (*this)[surfi];
         surfaceWriter& outWriter = writers_[surfi];
 
-        outWriter.nFields() =
+        outWriter.nFields
         (
             nVolumeFields
           + (s.withSurfaceFields() ? nSurfaceFields : 0)
           +
             (
                 // Face-id field, but not if the writer manages that itself
-                !s.interpolate() && s.hasFaceIds() && !outWriter.usesFaceIds()
+                !s.isPointData() && s.hasFaceIds() && !outWriter.usesFaceIds()
               ? 1 : 0
             )
         );
@@ -360,7 +360,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
                 newWriter(writerType, formatOptions, surfDict)
             );
 
-            writers_[surfi].isPointData() = surfs[surfi].interpolate();
+            writers_[surfi].isPointData(surfs[surfi].isPointData());
 
             // Use outputDir/TIME/surface-name
             writers_[surfi].useTimeDir(true);
@@ -426,7 +426,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
                 newWriter(writerType, formatOptions, surfDict)
             );
 
-            writers_[surfi].isPointData() = surfs[surfi].interpolate();
+            writers_[surfi].isPointData(surfs[surfi].isPointData());
 
             // Use outputDir/TIME/surface-name
             writers_[surfi].useTimeDir(true);
@@ -565,7 +565,7 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             outWriter.beginTime(obr_.time());
 
             // Face-id field, but not if the writer manages that itself
-            if (!s.interpolate() && s.hasFaceIds() && !outWriter.usesFaceIds())
+            if (!s.isPointData() && s.hasFaceIds() && !outWriter.usesFaceIds())
             {
                 // This is still quite horrible.
 
@@ -723,7 +723,7 @@ bool Foam::sampledSurfaces::expire(const bool force)
         }
 
         writers_[surfi].expire();
-        writers_[surfi].mergeDim() = mergeDim;
+        writers_[surfi].mergeDim(mergeDim);
         nFaces_[surfi] = 0;
     }
 

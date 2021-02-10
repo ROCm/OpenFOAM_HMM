@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,10 @@ Usage
     Some options are limited to particular algorithms.
     - triangulate is topo-only
     - simpleSubMesh and multiple isoValues are not available for point.
+
+Note
+    For the isoMethod \b point should use a "cellPoint" sampleScheme
+    since the triangles generated with this algorithm span across cells.
 
 SourceFiles
     sampledIsoSurface.C
@@ -215,7 +219,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("samplediIsoSurfacePoint");
+    TypeName("sampledIsoSurface");
 
 
     // Constructors

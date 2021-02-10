@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,9 @@ SourceFiles
 #include "meshedSurfRef.H"
 #include "InfoProxy.H"
 #include "runTimeSelectionTables.H"
+
+// Deprecated methods
+// #define Foam_surfaceWriter_directAccess
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -254,10 +257,10 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         surfaceWriter();
 
-        //- Construct null with specified options
+        //- Default construct with specified options
         explicit surfaceWriter(const dictionary& options);
 
         //- Construct from components
@@ -378,15 +381,17 @@ public:
         //  Currently only used by the legacy VTK format.
         inline label nFields() const;
 
-        //- The number of expected output fields.
+        //- Set the number of expected output fields
         //  Currently only used by the legacy VTK format.
-        inline label& nFields();
+        //  \return old value
+        inline label nFields(const label n);
 
         //- Are the field data to be treated as point data?
         inline bool isPointData() const;
 
-        //- Set handling of field data to face/point data.
-        inline bool& isPointData();
+        //- Set handling of field data to face/point data
+        //  \return old value
+        inline bool isPointData(const bool on);
 
         //- Should a time directory be spliced into the output path?
         inline bool useTimeDir() const;
@@ -395,9 +400,6 @@ public:
         //  \return old value
         inline bool useTimeDir(const bool on);
 
-        //- Change handling of spliced output path.
-        inline bool& useTimeDir();
-
         //- Get output verbosity
         inline bool verbose() const;
 
@@ -405,14 +407,12 @@ public:
         //  \return old value
         inline bool verbose(const bool on);
 
-        //- Access output verbosity
-        inline bool& verbose();
-
         //- The current value of the point merge dimension (metre)
         inline scalar mergeDim() const;
 
-        //- The current value of the point merge dimension (metre)
-        inline scalar& mergeDim();
+        //- Change the point merge dimension (metre)
+        //  \return old value
+        inline scalar mergeDim(const scalar dist);
 
 
     // Time
@@ -539,6 +539,28 @@ public:
             Ostream& os,
             const InfoProxy<surfaceWriter>& ip
         );
+
+
+    // Housekeeping
+
+        #ifdef Foam_surfaceWriter_directAccess
+
+        //- Access number of expected output fields.
+        label& nFields() { return nFields_; }
+
+        //- Access handling of face/point data
+        bool& isPointData() { return isPointData_; }
+
+        //- Access handling of spliced output path
+        bool& useTimeDir() { return useTimeDir_; }
+
+        //- Access output verbosity
+        bool& verbose() { return verbose_; }
+
+        //- Access value of the point merge dimension
+        scalar& mergeDim() { return mergeDim_; }
+
+        #endif
 };
 
 

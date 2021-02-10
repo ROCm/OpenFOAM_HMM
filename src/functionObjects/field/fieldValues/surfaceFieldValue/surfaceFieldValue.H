@@ -177,12 +177,11 @@ Note
         Instead specify the regionType 'functionObjectSurface' and provide
         the name.
     - Using \c sampledSurface:
-        - not available for surface fields
-        - if interpolate=true they use \c interpolationCellPoint
-          otherwise they use cell values
-        - each triangle in \c sampledSurface is logically only in one cell
-          so interpolation will be wrong when triangles are larger than
-          cells.  This can only happen for sampling on a \c triSurfaceMesh
+        - surface fields only supported by some surfaces
+        - default uses sampleScheme \c cell
+        - each face in \c sampledSurface is logically only in one cell
+          so sampling will be wrong when they are larger than cells.
+          This can only happen for sampling on a \c triSurfaceMesh
         - take care when using isoSurfaces - these might have duplicate
           triangles and so integration might be wrong
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ Foam::sampledSurface::sampledSurface(const word& name, std::nullptr_t)
     mesh_(NullObjectRef<polyMesh>()),
     enabled_(true),
     invariant_(false),
-    interpolate_(false),
+    isPointData_(false),
     area_(-1)
 {}
 
@@ -106,14 +106,14 @@ Foam::sampledSurface::sampledSurface
 (
     const word& name,
     const polyMesh& mesh,
-    const bool interpolate
+    const bool interpolateToPoints
 )
 :
     name_(name),
     mesh_(mesh),
     enabled_(true),
     invariant_(false),
-    interpolate_(interpolate),
+    isPointData_(interpolateToPoints),
     area_(-1)
 {}
 
@@ -129,7 +129,7 @@ Foam::sampledSurface::sampledSurface
     mesh_(mesh),
     enabled_(dict.getOrDefault("enabled", true)),
     invariant_(dict.getOrDefault("invariant", false)),
-    interpolate_(dict.getOrDefault("interpolate", false)),
+    isPointData_(dict.getOrDefault("interpolate", false)),
     area_(-1)
 {}
 
@@ -152,6 +152,14 @@ Foam::scalar Foam::sampledSurface::area() const
     }
 
     return area_;
+}
+
+
+bool Foam::sampledSurface::isPointData(const bool on)
+{
+    bool old(isPointData_);
+    isPointData_ = on;
+    return old;
 }
 
 
