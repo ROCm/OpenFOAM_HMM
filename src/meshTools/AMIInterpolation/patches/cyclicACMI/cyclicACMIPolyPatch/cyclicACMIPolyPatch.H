@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,6 @@ SourceFiles
 #include "cyclicAMIPolyPatch.H"
 #include "AMIPatchToPatchInterpolation.H"
 #include "polyBoundaryMesh.H"
-#include "partialFaceAreaWeightAMI.H"
 #include "PatchFunction1.H"
 #include "uniformDimensionedFields.H"
 #include "vectorList.H"
@@ -197,7 +196,7 @@ public:
             const polyBoundaryMesh& bm,
             const word& patchType,
             const transformType transform = UNKNOWN,
-            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct from dictionary
@@ -208,7 +207,7 @@ public:
             const label index,
             const polyBoundaryMesh& bm,
             const word& patchType,
-            const word& defaultAMIMethod = partialFaceAreaWeightAMI::typeName
+            const word& defaultAMIMethod = faceAreaWeightAMI::typeName
         );
 
         //- Construct as copy, resetting the boundary mesh

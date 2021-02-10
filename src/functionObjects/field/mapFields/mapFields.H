@@ -98,7 +98,6 @@ Usage
     \verbatim
       nearestFaceAMI
       faceAreaWeightAMI
-      partialFaceAreaWeightAMI
     \endverbatim
 
     The inherited entries are elaborated in:

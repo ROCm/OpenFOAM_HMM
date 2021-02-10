@@ -55,7 +55,7 @@ void Foam::advancingFrontAMI::checkPatches() const
     }
 
 
-    if (conformal())
+    if (requireMatch_)
     {
         const scalar maxBoundsError = 0.05;
 
@@ -345,6 +345,27 @@ void Foam::advancingFrontAMI::triangulatePatch
 }
 
 
+void Foam::advancingFrontAMI::nonConformalCorrection()
+{
+    if (!requireMatch_ && distributed())
+    {
+        scalarList newTgtMagSf(std::move(tgtMagSf_));
+
+        // Assign default sizes. Override selected values with calculated
+        // values. This is to support ACMI where some of the target faces
+        // are never used (so never get sent over and hence never assigned
+        // to)
+        tgtMagSf_ = tgtPatch0().magFaceAreas();
+
+        for (const labelList& smap : this->extendedTgtMapPtr_->subMap())
+        {
+            UIndirectList<scalar>(tgtMagSf_, smap) =
+                UIndirectList<scalar>(newTgtMagSf, smap);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::advancingFrontAMI::advancingFrontAMI
@@ -421,7 +442,8 @@ bool Foam::advancingFrontAMI::calculate
 {
     if (AMIInterpolation::calculate(srcPatch, tgtPatch, surfPtr))
     {
-        // Create a representation of the target patch that covers the source patch
+        // Create a representation of the target patch that covers the source
+        // patch
         if (distributed())
         {
             createExtendedTgtPatch();
@@ -451,12 +473,6 @@ bool Foam::advancingFrontAMI::calculate
     }
 
     return false;
-}
-
-
-bool Foam::advancingFrontAMI::conformal() const
-{
-    return true;
 }
 
 

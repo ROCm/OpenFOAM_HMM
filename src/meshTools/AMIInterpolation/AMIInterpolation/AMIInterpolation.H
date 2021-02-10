@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -363,6 +363,9 @@ public:
 
             //- Access to the requireMatch flag
             inline bool setRequireMatch(const bool flag);
+
+            //- Return true if requireMatch and lowWeightCorrectionin active
+            inline bool mustMatchFaces() const;
 
             //- Access to the reverseTarget flag
             inline bool reverseTarget() const;

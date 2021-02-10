@@ -115,6 +115,9 @@ void Foam::faceAreaWeightAMI::calcAddressing
     // Reset starting seed
     label startSeedi = 0;
 
+    // Should all faces be matched?
+    const bool mustMatch = mustMatchFaces();
+
     bool continueWalk = true;
     DynamicList<label> nonOverlapFaces;
     do
@@ -154,7 +157,7 @@ void Foam::faceAreaWeightAMI::calcAddressing
             mapFlag,
             seedFaces,
             visitedFaces,
-            requireMatch_ && (lowWeightCorrection_ < 0)
+            mustMatch
             // pass in nonOverlapFaces for failed tree search?
         );
     } while (continueWalk);
@@ -675,7 +678,7 @@ bool Foam::faceAreaWeightAMI::calculate
         }
 
         // Check for badly covered faces
-        if (restartUncoveredSourceFace_) // && requireMatch_???
+        if (restartUncoveredSourceFace_) //  && mustMatchFaces())
         {
             restartUncoveredSourceFace
             (
@@ -775,7 +778,9 @@ bool Foam::faceAreaWeightAMI::calculate
     }
 
     // Convert the weights from areas to normalised values
-    normaliseWeights(conformal(), true);
+    normaliseWeights(requireMatch_, true);
+
+    nonConformalCorrection();
 
     upToDate_ = true;
 

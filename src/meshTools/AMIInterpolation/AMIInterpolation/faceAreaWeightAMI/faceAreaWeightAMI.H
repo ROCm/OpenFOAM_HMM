@@ -30,6 +30,8 @@ Class
 Description
     Face area weighted Arbitrary Mesh Interface (AMI) method
 
+    Searching is performed using an advancing front.
+
 SourceFiles
     faceAreaWeightAMI.C
 
@@ -61,22 +63,12 @@ private:
         const bool restartUncoveredSourceFace_;
 
 
-
 protected:
 
     // Protected Member Functions
 
         //- No copy assignment
         void operator=(const faceAreaWeightAMI&) = delete;
-
-        //- Initialise the geometry
-        void initGeom
-        (
-            const primitivePatch& srcPatch,
-            const primitivePatch& tgtPatch,
-            const globalIndex& globalTgtFaces,
-            labelList& extendedTgtFaceIDs
-        );
 
 
         // Marching front

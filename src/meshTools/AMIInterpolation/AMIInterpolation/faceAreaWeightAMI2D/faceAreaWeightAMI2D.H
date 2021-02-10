@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::partialFaceAreaWeightAMI
+    Foam::faceAreaWeightAMI2D
 
 Description
-    Partial face area weighted Arbitrary Mesh Interface (AMI) method
+    Face area weighted Arbitrary Mesh Interface (AMI) method that performs
+    the intersection of src and tgt face area in 2D.
 
 SourceFiles
-    partialFaceAreaWeightAMI.C
+    faceAreaWeightAMI2D.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef partialFaceAreaWeightAMI_H
-#define partialFaceAreaWeightAMI_H
+#ifndef faceAreaWeightAMI2D_H
+#define faceAreaWeightAMI2D_H
 
-#include "faceAreaWeightAMI.H"
+#include "advancingFrontAMI.H"
+#include "AABBTree.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,58 +47,80 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class partialFaceAreaWeightAMI Declaration
+                     Class faceAreaWeightAMI2D Declaration
 \*---------------------------------------------------------------------------*/
 
-class partialFaceAreaWeightAMI
+class faceAreaWeightAMI2D
 :
-    public faceAreaWeightAMI
+    public advancingFrontAMI
 {
-
-private:
-
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const partialFaceAreaWeightAMI&) = delete;
-
-
 protected:
+
+    // Protected Data
+
+        //- Face bounding box factor
+        scalar Cbb_;
+
 
     // Protected Member Functions
 
-        //- Set the source and target seed faces
-        virtual bool setNextFaces
+        //- No copy assignment
+        void operator=(const faceAreaWeightAMI2D&) = delete;
+
+        //- Helper function to write non-matched source faces to the set
+        //- of candidate faces
+        void writeNoMatch
         (
-            label& startSeedi,
-            label& srcFacei,
-            label& tgtFacei,
-            const bitSet& mapFlag,
-            labelList& seedFaces,
-            const DynamicList<label>& visitedFaces,
-            const bool errorOnNotFound = true
+            const label srcFacei,
+            const labelList& tgtFaceCandidates,
+            const boundBox& srcFaceBb
         ) const;
+
+
+        // Evaluation
+
+            //- Calculate and store the area of intersection between source and
+            //- target faces
+            void storeInterArea
+            (
+                const label srcFacei,
+                const label tgtFacei,
+                DynamicList<label>& srcAddr,
+                DynamicList<scalar>& srcWght,
+                DynamicList<vector>& srcCtr,
+                DynamicList<label>& tgtAddr,
+                DynamicList<scalar>& tgtWght
+            ) const;
+
+
+            //- Return the set of tgt face IDs that overlap the src face bb
+            labelList overlappingTgtFaces
+            (
+                const AABBTree<face>& tree,
+                const List<boundBox>& tgtFaceBbs,
+                const boundBox& srcFaceBb
+            ) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("partialFaceAreaWeightAMI");
+    TypeName("faceAreaWeightAMI2D");
 
 
     // Constructors
 
         //- Construct from dictionary
-        partialFaceAreaWeightAMI
+        faceAreaWeightAMI2D
         (
             const dictionary& dict,
             const bool reverseTarget = false
         );
 
         //- Construct from components
-        partialFaceAreaWeightAMI
+        faceAreaWeightAMI2D
         (
-            const bool requireMatch = false,
+            const bool requireMatch,
             const bool reverseTarget = false,
             const scalar lowWeightCorrection = -1,
             const faceAreaIntersect::triangulationMode triMode =
@@ -106,24 +129,20 @@ public:
         );
 
         //- Construct as copy
-        partialFaceAreaWeightAMI(const partialFaceAreaWeightAMI& ami);
+        faceAreaWeightAMI2D(const faceAreaWeightAMI2D& ami);
 
         //- Construct and return a clone
         virtual autoPtr<AMIInterpolation> clone() const
         {
-            return
-                autoPtr<AMIInterpolation>(new partialFaceAreaWeightAMI(*this));
+            return autoPtr<AMIInterpolation>(new faceAreaWeightAMI2D(*this));
         }
 
 
     //- Destructor
-    virtual ~partialFaceAreaWeightAMI() = default;
+    virtual ~faceAreaWeightAMI2D() = default;
 
 
     // Member Functions
-
-        //- Flag to indicate that interpolation patches are conformal
-        virtual bool conformal() const;
 
         //- Update addressing, weights and (optional) centroids
         virtual bool calculate
@@ -132,6 +151,9 @@ public:
             const primitivePatch& tgtPatch,
             const autoPtr<searchableSurface>& surfPtr = nullptr
         );
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 
