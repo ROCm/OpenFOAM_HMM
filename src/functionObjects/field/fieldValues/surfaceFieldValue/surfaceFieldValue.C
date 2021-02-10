@@ -1034,16 +1034,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
             mesh_,
             dict.subDict("sampledSurfaceDict")
         );
-
-        if (sampledPtr_->interpolate())
-        {
-            // Should probably ignore interpolate entirely,
-            // but the oldest isoSurface algorithm requires it!
-            WarningInFunction
-                << type() << ' ' << name() << ": "
-                << "sampledSurface with interpolate = true "
-                << "is likely incorrect" << nl << nl;
-        }
     }
 
     Info<< type() << ' ' << name() << ':' << nl
@@ -1061,15 +1051,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
     if (usesWeight())
     {
-        if (stSampled == regionType_)
-        {
-            FatalIOErrorInFunction(dict)
-                << "Cannot use weighted operation '"
-                << operationTypeNames_[operation_]
-                << "' for sampledSurface"
-                << exit(FatalIOError);
-        }
-
         // Can have "weightFields" or "weightField"
 
         bool missing = true;
@@ -1139,6 +1120,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
                 dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
             )
         );
+
+        // Propagate field counts (per surface)
+        surfaceWriterPtr_->nFields() = fields_.size();
 
         if (debug)
         {
