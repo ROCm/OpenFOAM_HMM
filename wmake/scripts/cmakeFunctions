@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -76,13 +76,12 @@ cmakeVersioned()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@") || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
-    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
-         make ) \
-    && storeDependency "$sentinel" "$depend" $@
+    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && make ) \
+    && storeDependency "$sentinel" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@"
 }
 
 
@@ -103,13 +102,12 @@ cmakeVersionedInstall()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@") || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
-    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && \
-         make install ) \
-    && storeDependency "$sentinel" "$depend" $@
+    && ( cd "$objectsDir" && call_cmake "$@" "$sourceDir" && make install ) \
+    && storeDependency "$sentinel" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@"
 }
 
 
@@ -131,12 +129,12 @@ wmakeVersioned()
     objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
 
     # Version changed
-    sentinel=$(sameDependency "$sourceDir" "$depend" $@) || \
+    sentinel=$(sameDependency "$sourceDir" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@") || \
         rm -rf "$objectsDir" 2>/dev/null
 
     mkdir -p "$objectsDir" \
     && wmake "$@" \
-    && storeDependency "$sentinel" "$depend" $@
+    && storeDependency "$sentinel" "$depend" "MPLIB=$WM_MPLIB" "MPI=$FOAM_MPI" "$@"
 }
 
 
