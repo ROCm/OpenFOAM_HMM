@@ -733,11 +733,12 @@ template<class Cmpt>
 inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt dett)
 {
     #ifdef FULLDEBUG
-    if (mag(dett) < SMALL)
+    if (mag(dett) < VSMALL)
     {
         FatalErrorInFunction
-            << "Tensor is not invertible due to the zero determinant:"
-            << "det(Tensor) = " << mag(dett)
+            << "Tensor is not invertible due to the (almost) zero determinant:"
+            << "    Tensor = " << t << nl
+            << "    det(Tensor) = " << dett
             << abort(FatalError);
     }
     #endif
