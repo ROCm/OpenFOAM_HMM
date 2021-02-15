@@ -4,6 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 #------------------------------------------------------------------------------
 
+wmakeLnInclude -u thermophysicalProperties
 wmake $targetType specie
 wmake $targetType solidSpecie
 wmake $targetType thermophysicalProperties

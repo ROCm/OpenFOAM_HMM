@@ -56,6 +56,10 @@ Description
 #include "hPolynomialThermo.H"
 #include "polynomialTransport.H"
 
+#include "tabulatedTransport.H"
+#include "hTabulatedThermo.H"
+#include "icoTabulated.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -198,6 +202,20 @@ namespace Foam
     >
     constHThermoPhysics;
 
+    typedef
+    tabulatedTransport
+    <
+        species::thermo
+        <
+            hTabulatedThermo
+            <
+                icoTabulated<specie>
+            >,
+            sensibleEnthalpy
+        >
+    >
+    tabulatedThermoPhysics;
+
 
     // thermo physics types based on sensibleInternalEnergy
     typedef
@@ -336,6 +354,20 @@ namespace Foam
         >
     >
     constEThermoPhysics;
+
+    typedef
+    tabulatedTransport
+    <
+        species::thermo
+        <
+            hTabulatedThermo
+            <
+                icoTabulated<specie>
+            >,
+            sensibleInternalEnergy
+        >
+    >
+    tabulatedEThermoPhysics;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
