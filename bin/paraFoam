@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -140,8 +140,8 @@ do
             esac
         else
             echo "Ignore bad/invalid plugin-path: $pluginPath" 1>&2
-            unset pluginPath
         fi
+        unset pluginPath
         ;;
 
     -block*)  # Silently accepts -blockMesh
@@ -238,8 +238,11 @@ then
             ;;
         esac
 
-        if [ -n "$pluginError" ]
+        if [ -z "$pluginError" ]
         then
+            # Ensure plugin is also in the lib-path
+            LD_LIBRARY_PATH="${PV_PLUGIN_PATH}:$LD_LIBRARY_PATH"
+        else
             cat<< NO_PLUGIN 1>&2
 $pluginError
     See '${0##*/} -help-build' for more information
