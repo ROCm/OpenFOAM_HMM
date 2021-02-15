@@ -30,11 +30,12 @@
 #
 #     foamPackRelease -with-api=1912 -pkg-modules origin/develop
 #
-# Debian-style without OpenFOAM sub-directory
+# Debian-style, without OpenFOAM sub-directory
 #
 #     foamPackRelease -debian origin/develop
-#     foamPackRelease -debian=openfoam2002_200129 origin/develop
-#     foamPackRelease -name=openfoam2002_200129.orig -no-prefix origin/develop
+#
+#     == -debian=openfoam_{version}
+#     == -name=openfoam_{api}.{patch} -no-prefix
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"
@@ -300,18 +301,14 @@ fi
 
 case "$tarName" in
 (debian)
-    tarName="openfoam${packageApi}"
+    tarName="openfoam_${packageApi}"
 
     if [ "$withPatchNum" = false ]
     then
         echo "Ignoring patch number for output name" 1>&2
-    else
-        # Start debian with patch=1, not patch=0
-        if [ "$patch" = 0 ]
-        then
-            patch=1
-        fi
-        tarName="${tarName}${versionSeparator}${patch}"
+    elif [ "${patch:-0}" != 0 ]
+    then
+        tarName="${tarName}.${patch}"
     fi
     tarName="${tarName}.orig"  # Append .orig
     ;;
