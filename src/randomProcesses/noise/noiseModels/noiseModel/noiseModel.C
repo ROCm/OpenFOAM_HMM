@@ -434,6 +434,11 @@ Foam::scalar Foam::noiseModel::RAf(const scalar f) const
 
 Foam::scalar Foam::noiseModel::gainA(const scalar f) const
 {
+    if (f < SMALL)
+    {
+        return 0;
+    }
+
     return 20*log10(RAf(f)) - 20*log10(RAf(1000));
 }
 
@@ -456,6 +461,11 @@ Foam::scalar Foam::noiseModel::RBf(const scalar f) const
 
 Foam::scalar Foam::noiseModel::gainB(const scalar f) const
 {
+    if (f < SMALL)
+    {
+        return 0;
+    }
+
     return 20*log10(RBf(f)) - 20*log10(RBf(1000));
 }
 
@@ -473,6 +483,11 @@ Foam::scalar Foam::noiseModel::RCf(const scalar f) const
 
 Foam::scalar Foam::noiseModel::gainC(const scalar f) const
 {
+    if (f < SMALL)
+    {
+        return 0;
+    }
+
     return 20*log10(RCf(f)) - 20*log10(RCf(1000));
 }
 
@@ -492,6 +507,11 @@ Foam::scalar Foam::noiseModel::RDf(const scalar f) const
 
 Foam::scalar Foam::noiseModel::gainD(const scalar f) const
 {
+    if (f < SMALL)
+    {
+        return 0;
+    }
+
     return 20*log10(RDf(f));
 }
 
