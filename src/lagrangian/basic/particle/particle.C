@@ -432,7 +432,12 @@ void Foam::particle::locate
         }
     }
 
-    const vector displacement = position - mesh_.cellCentres()[celli_];
+    // Perturbing displacement to avoid zero in case position is the
+    // cellCentre
+    const vector displacement =
+        position
+      - mesh_.cellCentres()[celli_]
+      + vector(VSMALL, VSMALL, VSMALL);
 
     // Loop all cell tets to find the one containing the position. Track
     // through each tet from the cell centre. If a tet contains the position
@@ -748,7 +753,7 @@ Foam::scalar Foam::particle::trackToStationaryTri
 
     // Calculate the hit fraction
     label iH = -1;
-    scalar muH = std::isnormal(detA) && detA <= 0 ? VGREAT : 1/detA;
+    scalar muH = detA <= 0 ? VGREAT : 1/detA;
     for (label i = 0; i < 4; ++ i)
     {
         if (Tx1[i] < - detA*SMALL)
@@ -903,7 +908,7 @@ Foam::scalar Foam::particle::trackToMovingTri
 
     // Calculate the hit fraction
     label iH = -1;
-    scalar muH = std::isnormal(detA[0]) && detA[0] <= 0 ? VGREAT : 1/detA[0];
+    scalar muH = detA[0] <= 0 ? VGREAT : 1/detA[0];
     for (label i = 0; i < 4; ++i)
     {
         const Roots<3> mu = hitEqn[i].roots();
