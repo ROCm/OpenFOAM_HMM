@@ -36,6 +36,13 @@ InfoSwitches
     // The default ASCII write precision
     writePrecision  6;
 
+    // The output level (verbosity) of messages
+    //  - 0 : suppress all output
+    //  - 1 : normal output
+    //  - >= 2 : report source file and line number (default)
+    outputLevel     2;
+
+    // Report information as baseIOdictionary are read in
     writeDictionaries 0;
 
     // Report optional dictionary entries. For value > 1, treat as fatal.
@@ -671,7 +678,6 @@ DebugSwitches
     lduMesh             0;
     leastSquares        0;
     leastSquaresVectors 0;
-    level               2;
     limitWith           0;
     limited             0;
     limitedCubic        0;
