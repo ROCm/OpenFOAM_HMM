@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -264,7 +264,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -288,7 +288,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -319,8 +319,8 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-5], pts[sz-4]);
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-5], pts[sz-4]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -345,7 +345,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -376,8 +376,8 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-5], pts[sz-4]);
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-5], pts[sz-4]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -408,8 +408,8 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-5], pts[sz-4]);
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-5], pts[sz-4]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;
@@ -434,7 +434,7 @@ void Foam::isoSurfacePoint::generateTriPoints
             {
                 // Flip normals
                 const label sz = pts.size();
-                Swap(pts[sz-2], pts[sz-1]);
+                std::swap(pts[sz-2], pts[sz-1]);
             }
         }
         break;

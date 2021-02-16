@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -328,7 +328,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -371,7 +371,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -429,8 +429,8 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-5], verts[sz-4]);
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-5], verts[sz-4]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -473,7 +473,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -531,8 +531,8 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-5], verts[sz-4]);
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-5], verts[sz-4]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -590,8 +590,8 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-5], verts[sz-4]);
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-5], verts[sz-4]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -633,7 +633,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
             {
                 // Flip normals
                 const label sz = verts.size();
-                Swap(verts[sz-2], verts[sz-1]);
+                std::swap(verts[sz-2], verts[sz-1]);
             }
         }
         break;
@@ -688,7 +688,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
 
         if (faceOwner[facei] == celli)
         {
-            Swap(p1, p2);
+            std::swap(p1, p2);
         }
 
         generateTriPoints
@@ -754,7 +754,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
                 label p2 = f[nextFp];
                 if (faceOwner[facei] == celli)
                 {
-                    Swap(p1, p2);
+                    std::swap(p1, p2);
                     if (i != 2) edgeIsDiag[1] = true;
                     if (i != f.size()-1) edgeIsDiag[0] = true;
                 }

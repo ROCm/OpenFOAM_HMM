@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -795,7 +795,7 @@ void Foam::lumpedPointMovement::setInterpolator
                 {
                     // Order by distance, which is not really needed,
                     // but helps with diagnostics
-                    Swap(nei1, nei2);
+                    std::swap(nei1, nei2);
                 }
 
 

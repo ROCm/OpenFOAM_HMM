@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -889,8 +890,8 @@ int main(int argc, char *argv[])
             if (own[facei] == -1 && nei[facei] != -1)
             {
                 // Boundary face with incorrect orientation
-                boundaryFaces[facei] = boundaryFaces[facei].reverseFace();
-                Swap(own[facei], nei[facei]);
+                boundaryFaces[facei].flip();
+                std::swap(own[facei], nei[facei]);
                 nReverse++;
             }
         }

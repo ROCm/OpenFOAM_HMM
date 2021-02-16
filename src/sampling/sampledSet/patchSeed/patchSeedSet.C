@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,7 +225,7 @@ void Foam::patchSeedSet::calcSamples
             forAll(subset, i)
             {
                 label j = rndGen.position<label>(0, subset.size()-1);
-                Swap(subset[i], subset[j]);
+                std::swap(subset[i], subset[j]);
             }
         }
         // Truncate

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2291,7 +2291,7 @@ void Foam::ccm::reader::reorderMesh()
         {
             faceOwner_[faceI] = faceNeighbour_[faceI];
             faceNeighbour_[faceI] = own;
-            faces_[faceI] = faces_[faceI].reverseFace();
+            faces_[faceI].flip();
         }
 
         // And check the face

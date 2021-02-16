@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -407,7 +407,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
                         }
                         if (maxIndex != 0)
                         {
-                            Swap(faceIDs[0], faceIDs[maxIndex]);
+                            std::swap(faceIDs[0], faceIDs[maxIndex]);
                         }
                     }
 

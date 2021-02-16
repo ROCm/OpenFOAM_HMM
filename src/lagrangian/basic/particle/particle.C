@@ -146,7 +146,7 @@ void Foam::particle::movingTetReverseTransform
 
 void Foam::particle::reflect()
 {
-    Swap(coordinates_.c(), coordinates_.d());
+    std::swap(coordinates_.c(), coordinates_.d());
 }
 
 

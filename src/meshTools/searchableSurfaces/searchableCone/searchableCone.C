@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -383,7 +383,7 @@ void Foam::searchableCone::findLineAll
 
             if (tPoint2 < tPoint1)
             {
-                Swap(tPoint1, tPoint2);
+                std::swap(tPoint1, tPoint2);
             }
             if (tPoint1 > magV || tPoint2 < 0)
             {
@@ -546,7 +546,7 @@ void Foam::searchableCone::findLineAll
             t2 = (-b + sqrtDisc)/(2.0*a);
             if (t2 < t1)
             {
-                Swap(t1, t2);
+                std::swap(t1, t2);
             }
 
             if (t1 >= 0.0 && t1 <= magV && t1 >= tPoint1 && t1 <= tPoint2)

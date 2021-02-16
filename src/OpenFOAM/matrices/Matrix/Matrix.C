@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -294,9 +294,9 @@ void Foam::Matrix<Form, Type>::swap(Matrix<Form, Type>& mat)
         return;  // Self-swap is a no-op
     }
 
-    Foam::Swap(mRows_, mat.mRows_);
-    Foam::Swap(nCols_, mat.nCols_);
-    Foam::Swap(v_, mat.v_);
+    std::swap(mRows_, mat.mRows_);
+    std::swap(nCols_, mat.nCols_);
+    std::swap(v_, mat.v_);
 }
 
 

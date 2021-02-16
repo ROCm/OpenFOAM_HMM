@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,7 +101,7 @@ inline Foam::triFace Foam::tetIndices::faceTriIs
 
     if (mesh.faceOwner()[face()] != cell())
     {
-        Swap(facePtI, faceOtherPtI);
+        std::swap(facePtI, faceOtherPtI);
     }
 
     return triFace(f[faceBasePtI], f[facePtI], f[faceOtherPtI]);
@@ -144,7 +145,7 @@ inline Foam::triFace Foam::tetIndices::triIs
 
     if (mesh.faceOwner()[face()] != cell())
     {
-        Swap(facePtI, faceOtherPtI);
+        std::swap(facePtI, faceOtherPtI);
     }
 
     return triFace(faceBasePtI, facePtI, faceOtherPtI);

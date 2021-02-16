@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -661,9 +661,9 @@ void Foam::HashTable<T, Key, Hash>::swap(HashTable<T, Key, Hash>& rhs)
         return;  // Self-swap is a no-op
     }
 
-    Foam::Swap(size_, rhs.size_);
-    Foam::Swap(capacity_, rhs.capacity_);
-    Foam::Swap(table_, rhs.table_);
+    std::swap(size_, rhs.size_);
+    std::swap(capacity_, rhs.capacity_);
+    std::swap(table_, rhs.table_);
 }
 
 

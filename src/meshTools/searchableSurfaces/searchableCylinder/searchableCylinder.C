@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -253,7 +253,7 @@ void Foam::searchableCylinder::findLineAll
             tPoint2 = -(point2Start&unitDir_)/s;
             if (tPoint2 < tPoint1)
             {
-                Swap(tPoint1, tPoint2);
+                std::swap(tPoint1, tPoint2);
             }
             if (tPoint1 > magV || tPoint2 < 0)
             {
@@ -365,7 +365,7 @@ void Foam::searchableCylinder::findLineAll
             t2 = (-b + sqrtDisc)/(2*a);
             if (t2 < t1)
             {
-                Swap(t1, t2);
+                std::swap(t1, t2);
             }
 
             if (t1 >= 0 && t1 <= magV && t1 >= tPoint1 && t1 <= tPoint2)

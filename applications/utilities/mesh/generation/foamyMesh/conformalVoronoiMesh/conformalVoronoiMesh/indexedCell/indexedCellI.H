@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -325,7 +326,7 @@ inline Foam::tetCell CGAL::indexedCell<Gt, Cb>::vertexGlobalIndices
         {
             if (tVGI[j - 1] > tVGI[j])
             {
-                Foam::Swap(tVGI[j - 1], tVGI[j]);
+                std::swap(tVGI[j - 1], tVGI[j]);
             }
         }
     }
@@ -354,8 +355,8 @@ CGAL::indexedCell<Gt, Cb>::globallyOrderedCellVertices
         {
             if (tVGI[j - 1] > tVGI[j])
             {
-                Foam::Swap(tVGI[j - 1], tVGI[j]);
-                Foam::Swap(vertexMap[j - 1], vertexMap[j]);
+                std::swap(tVGI[j - 1], tVGI[j]);
+                std::swap(vertexMap[j - 1], vertexMap[j]);
             }
         }
     }

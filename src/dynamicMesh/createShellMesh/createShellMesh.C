@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -756,8 +756,8 @@ void Foam::createShellMesh::setRefinement
                 if (minCelli > maxCelli)
                 {
                     // Swap
-                    Swap(minCelli, maxCelli);
-                    newF = newF.reverseFace();
+                    std::swap(minCelli, maxCelli);
+                    newF.flip();
                 }
                 patchi = -1;
             }

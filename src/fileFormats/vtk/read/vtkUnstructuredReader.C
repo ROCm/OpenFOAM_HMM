@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -907,9 +907,9 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 if (((topCc - bottomCc) & bottomNormal) < 0)
                 {
                     // Flip top and bottom
-                    Swap(shape[0], shape[3]);
-                    Swap(shape[1], shape[4]);
-                    Swap(shape[2], shape[5]);
+                    std::swap(shape[0], shape[3]);
+                    std::swap(shape[1], shape[4]);
+                    std::swap(shape[2], shape[5]);
                     nSwapped++;
                 }
             }

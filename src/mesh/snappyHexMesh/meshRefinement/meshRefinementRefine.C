@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1166,7 +1166,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
 
             if (!isMasterFace[faceI])
             {
-                Swap(start[i], end[i]);
+                std::swap(start[i], end[i]);
             }
 
             minLevel[i] = min(cellLevel[own], neiLevel[bFaceI]);

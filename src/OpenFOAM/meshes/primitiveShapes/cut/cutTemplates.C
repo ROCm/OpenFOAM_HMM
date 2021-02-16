@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
     {
         if (level[(i + 1)%3]*level[(i + 2)%3] >= 0)
         {
-            Swap(indices[0], indices[i]);
+            std::swap(indices[0], indices[i]);
             break;
         }
     }
@@ -71,7 +72,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::triCut
     // Correct the sign
     if (indices[0] != 0)
     {
-        Swap(indices[1], indices[2]);
+        std::swap(indices[1], indices[2]);
     }
 
     // Permute the data
@@ -165,7 +166,7 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
         {
             break;
         }
-        Swap(indices[i], indices[j]);
+        std::swap(indices[i], indices[j]);
         signChange = !signChange;
     }
 
@@ -179,14 +180,14 @@ typename Foam::cut::opAddResult<AboveOp, BelowOp>::type Foam::tetCut
         n = 4 - n;
         for (label i = 0; i < 2; ++i)
         {
-            Swap(indices[i], indices[3-i]);
+            std::swap(indices[i], indices[3-i]);
         }
     }
 
     // Correct the sign
     if (signChange)
     {
-        Swap(indices[2], indices[3]);
+        std::swap(indices[2], indices[3]);
     }
 
     // Permute the data

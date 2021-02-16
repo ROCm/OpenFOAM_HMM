@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -474,7 +475,7 @@ void Foam::face::flip()
     {
         for (label i=1; i < (n+1)/2; ++i)
         {
-            Swap(operator[](i), operator[](n-i));
+            std::swap(operator[](i), operator[](n-i));
         }
     }
 }

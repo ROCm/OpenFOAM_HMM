@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1197,7 +1197,7 @@ void Foam::polyTopoChange::compact
                         )
                         {
                             faces_[facei].flip();
-                            Swap(faceOwner_[facei], faceNeighbour_[facei]);
+                            std::swap(faceOwner_[facei], faceNeighbour_[facei]);
                             flipFaceFlux_.flip(facei);
                             faceZoneFlip_.flip(facei);
                         }

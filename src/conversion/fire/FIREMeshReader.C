@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,7 +214,7 @@ void Foam::fileFormats::FIREMeshReader::reorganize()
 
             if (owner_[faceI] > neigh_[faceI])
             {
-                Swap(owner_[faceI], neigh_[faceI]);
+                std::swap(owner_[faceI], neigh_[faceI]);
             }
         }
     }

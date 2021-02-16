@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,12 +29,14 @@ InNamespace
 Description
     Swap arguments as per std::swap, but in Foam namespace.
 
+    For complex structures, it is usual to provide a member swap() method
+    and a function specialization for Swap().
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Swap_H
 #define Swap_H
 
-#include <type_traits>
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,26 +44,12 @@ Description
 namespace Foam
 {
 
-//- Swap non-array types as per std::swap example, but in Foam namespace.
+//- Swap non-array types as per std::swap, but in Foam namespace.
 //  \sa http://www.cplusplus.com/reference/utility/swap/
 template<class T>
 void Swap(T& a, T& b)
 {
-    // compile-time resolution with std::enable_if not yet working
-    if (std::is_fundamental<T>::value || std::is_pointer<T>::value)
-    {
-        // Use copy/assign for simple types
-        const T tmp = a;
-        a = b;
-        b = tmp;
-    }
-    else
-    {
-        // Use move/assignment
-        T tmp(std::move(a));
-        a = std::move(b);
-        b = std::move(tmp);
-    }
+    std::swap(a, b);
 }
 
 
