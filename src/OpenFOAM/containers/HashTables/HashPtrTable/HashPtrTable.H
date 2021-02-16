@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ public:
     // Constructors
 
         //- Default construct with default table capacity
-        inline HashPtrTable();
+        HashPtrTable() = default;
 
         //- Construct given initial table capacity
         inline explicit HashPtrTable(const label size);
@@ -130,15 +130,26 @@ public:
 
     // Edit
 
+        //- Release ownership of the pointer and replace with a nullptr
+        //  Includes a safeguard against the end-iterator.
+        //
+        //  \return the entry's old value as an encapsulated pointer.
+        autoPtr<T> release(iterator& iter);
+
+        //- Release ownership of the pointer and replace with a nullptr
+        //
+        //  \return the entry's old value as an encapsulated pointer.
+        autoPtr<T> release(const Key& key);
+
         //- Remove entry specified by given iterator.
         //  Includes a safeguard against the end-iterator.
         //
-        //  \return entry as an encapsulated pointer.
+        //  \return the entry's old value as an encapsulated pointer.
         autoPtr<T> remove(iterator& iter);
 
         //- Remove entry specified by given key.
         //
-        //  \return entry as an encapsulated pointer.
+        //  \return the entry's old value as an encapsulated pointer.
         autoPtr<T> remove(const Key& key);
 
         //- Erase entry specified by given iterator and delete the

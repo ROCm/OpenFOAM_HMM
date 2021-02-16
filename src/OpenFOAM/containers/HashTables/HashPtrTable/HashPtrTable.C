@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "HashPtrTable.H"
+#include "autoPtr.H"
+#include "error.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -76,6 +77,28 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::release(iterator& iter)
+{
+    if (iter.good())
+    {
+        autoPtr<T> old(iter.val());
+        iter.val() = nullptr;
+        return old;
+    }
+
+    return nullptr;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::release(const Key& key)
+{
+    iterator iter(this->find(key));
+    return this->release(iter);
+}
+
 
 template<class T, class Key, class Hash>
 Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)

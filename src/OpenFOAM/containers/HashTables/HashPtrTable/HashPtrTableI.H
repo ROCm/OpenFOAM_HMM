@@ -30,13 +30,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable()
-:
-    parent_type()
-{}
-
-
-template<class T, class Key, class Hash>
 inline Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 :
     parent_type(size)

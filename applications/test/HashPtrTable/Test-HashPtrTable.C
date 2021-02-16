@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,6 +125,7 @@ int main()
     myTable.set("pi", new double(3.14159));
     myTable.set("natlog", new double(2.718282));
     myTable.insert("sqrt2", autoPtr<double>::New(1.414214));
+    myTable.insert("euler", autoPtr<double>::New(0.577216));
 
     HashTable<std::unique_ptr<double>, word, string::hash> myTable1;
 
@@ -139,14 +140,24 @@ int main()
     myTable2.set("natlog", autoPtr<double>(new double(2.718282)));
     myTable2.insert("sqrt2", autoPtr<double>::New(1.414214));
 
-    // Info<< myTable << endl;
+    Info<< "Initial table" << nl;
     printTable(myTable);
+
+    Info<< "print" << nl;
     Info<< myTable2 << nl;
 
-    auto iter2 = myTable2.find("pi");
-
-    Info<<"PI: " << **iter2 << nl;
-
+    {
+        auto iter2 = myTable2.find("pi");
+        Info<< nl "Got pi=";
+        if (iter2.good())
+        {
+            Info<< **iter2 << nl;
+        }
+        else
+        {
+            Info<< "not-found" << nl;
+        }
+    }
 
     HashPtrTable<double> copy(myTable);
 
@@ -165,6 +176,9 @@ int main()
     myTable.erase("abc");
     myTable.erase("unknownKey");
 
+    myTable.release("euler");
+
+    Info<< "After erasure" << nl;
     printTable(myTable);
 
     HashPtrTable<double> moved(std::move(copy));
