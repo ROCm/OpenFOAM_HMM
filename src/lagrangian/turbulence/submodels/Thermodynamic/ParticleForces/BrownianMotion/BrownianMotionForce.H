@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,9 +84,6 @@ class BrownianMotionForce
 
 
     // Private Member Functions
-
-        //- Inverse erf for Gaussian distribution
-        scalar erfInv(const scalar y) const;
 
         //- Return the k field from the turbulence model
         tmp<volScalarField> kModel() const;

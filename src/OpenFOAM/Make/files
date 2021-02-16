@@ -60,8 +60,6 @@ $(ints)/lists/labelListIOList.C
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C
-primitives/Scalar/scalar/incGamma.C
-primitives/Scalar/scalar/invIncGamma.C
 primitives/Scalar/lists/scalarList.C
 primitives/Scalar/lists/scalarIOList.C
 primitives/Scalar/lists/scalarListIOList.C
@@ -116,6 +114,12 @@ primitives/functions/Function1/quarterSineRamp/quarterSineRamp.C
 primitives/functions/Function1/quarterCosineRamp/quarterCosineRamp.C
 primitives/functions/Function1/halfCosineRamp/halfCosineRamp.C
 primitives/functions/Polynomial/polynomialFunction.C
+
+/* Math functions */
+math = primitives/functions/Math
+$(math)/erfInv.C
+$(math)/incGamma.C
+$(math)/invIncGamma.C
 
 primitives/subModelBase/subModelBase.C
 

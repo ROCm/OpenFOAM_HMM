@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +61,7 @@ class normal
 :
     public distributionModel
 {
-    // Private data
-
+    // Private Data
 
         //- Distribution minimum
         scalar minValue_;
@@ -116,8 +116,6 @@ public:
 
         //- Return the mean value
         virtual scalar meanValue() const;
-
-        virtual scalar erfInv(const scalar y) const;
 };
 
 

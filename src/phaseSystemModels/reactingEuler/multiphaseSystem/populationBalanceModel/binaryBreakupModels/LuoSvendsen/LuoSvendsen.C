@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "phaseCompressibleTurbulenceModel.H"
 #include "tableBounds.H"
+#include "MathFunctions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -99,19 +100,19 @@ Foam::diameterModels::binaryBreakupModels::LuoSvendsen::LuoSvendsen
         Tuple2<scalar, scalar> gamma2by11
             (
                 z,
-                incGammaRatio_Q(2.0/11.0, z)
+                Math::incGammaRatio_Q(2.0/11.0, z)
             );
 
         Tuple2<scalar, scalar> gamma5by11
             (
                 z,
-                incGammaRatio_Q(5.0/11.0, z)
+                Math::incGammaRatio_Q(5.0/11.0, z)
             );
 
         Tuple2<scalar, scalar> gamma8by11
             (
                 z,
-                incGammaRatio_Q(8.0/11.0, z)
+                Math::incGammaRatio_Q(8.0/11.0, z)
             );
 
         gammaUpperReg2by11Table.append(gamma2by11);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ License
 
 #include "normal.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "MathFunctions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -99,7 +100,7 @@ Foam::scalar Foam::distributionModels::normal::sample() const
     scalar b = erf((maxValue_ - expectation_)/variance_);
 
     scalar y = rndGen_.sample01<scalar>();
-    scalar x = erfInv(y*(b - a) + a)*variance_ + expectation_;
+    scalar x = Math::erfInv(y*(b - a) + a)*variance_ + expectation_;
 
     // Note: numerical approximation of the inverse function yields slight
     //       inaccuracies
@@ -125,19 +126,6 @@ Foam::scalar Foam::distributionModels::normal::maxValue() const
 Foam::scalar Foam::distributionModels::normal::meanValue() const
 {
     return expectation_;
-}
-
-
-Foam::scalar Foam::distributionModels::normal::erfInv(const scalar y) const
-{
-    scalar k = 2.0/(constant::mathematical::pi*a_) +  0.5*log(1.0 - y*y);
-    scalar h = log(1.0 - y*y)/a_;
-    scalar x = sqrt(-k + sqrt(k*k - h));
-    if (y < 0.0)
-    {
-        x *= -1.0;
-    }
-    return x;
 }
 
 

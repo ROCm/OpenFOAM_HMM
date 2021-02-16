@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,38 +25,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    Foam::incGamma
+    Foam::Math::incGamma
 
 Description
-    Calculates the upper and lower incomplete gamma functions as well as their
-    normalized versions.
-
-    The algorithm is described in detail in DiDonato et al. (1986).
-
-    \verbatim
-        DiDonato, A. R., & Morris Jr, A. H. (1986).
-        Computation of the incomplete gamma function ratios and their inverse.
-        ACM Transactions on Mathematical Software (TOMS), 12(4), 377-393.
-    \endverbatim
-
-    All equation numbers in the following code refer to the above paper.
-    The algorithm in function 'incGammaRatio_Q' is described in section 3.
-    The accuracy parameter IND is set to a value of 1.
+    Implementation of the incomplete gamma functions.
 
 \*---------------------------------------------------------------------------*/
 
+#include "MathFunctions.H"
 #include "mathematicalConstants.H"
+#include <cmath>
 
-using namespace Foam::constant::mathematical;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Eqn. (13)
+// (DM:Eq. 13)
 static scalar calcQE11(const scalar a, const scalar x, const int e = 30)
 {
     scalar a_2n = 0;
@@ -88,7 +74,7 @@ static scalar calcQE11(const scalar a, const scalar x, const int e = 30)
 }
 
 
-// Eqn. (15)
+// (DM:Eq. 15)
 static scalar calcPE15(const scalar a, const scalar x, const int nmax = 20)
 {
     scalar prod = 1;
@@ -106,7 +92,7 @@ static scalar calcPE15(const scalar a, const scalar x, const int nmax = 20)
 }
 
 
-// Eq. (16)
+// (DM:Eq. 16)
 static scalar calcQE16(const scalar a, const scalar x, const int N = 20)
 {
     scalar an = 1;
@@ -124,7 +110,7 @@ static scalar calcQE16(const scalar a, const scalar x, const int N = 20)
 }
 
 
-// Eq. (18)
+// (DM:Eq. 18)
 static scalar calcTE18
 (
     const scalar a,
@@ -135,55 +121,46 @@ static scalar calcTE18
     const scalar phi
 )
 {
-    static const scalar D0[] =
-    {
-       -0.333333333333333E-00,
-        0.833333333333333E-01,
-       -0.148148148148148E-01,
-        0.115740740740741E-02,
-        0.352733686067019E-03,
-       -0.178755144032922E-03,
-        0.391926317852244E-04,
-       -0.218544851067999E-05,
-       -0.185406221071516E-05,
-        0.829671134095309E-06,
-       -0.176659527368261E-06,
-        0.670785354340150E-08,
-        0.102618097842403E-07,
-       -0.438203601845335E-08
-    };
+    constexpr scalar D0_0  = -0.333333333333333E-00;
+    constexpr scalar D0_1  =  0.833333333333333E-01;
+    constexpr scalar D0_2  = -0.148148148148148E-01;
+    constexpr scalar D0_3  =  0.115740740740741E-02;
+    constexpr scalar D0_4  =  0.352733686067019E-03;
+    constexpr scalar D0_5  = -0.178755144032922E-03;
+    constexpr scalar D0_6  =  0.391926317852244E-04;
+    // unused: constexpr scalar D0_7  = -0.218544851067999E-05;
+    // unused: constexpr scalar D0_8  = -0.185406221071516E-05;
+    // unused: constexpr scalar D0_9  =  0.829671134095309E-06;
+    // unused: constexpr scalar D0_10 = -0.176659527368261E-06;
+    // unused: constexpr scalar D0_11 =  0.670785354340150E-08;
+    // unused: constexpr scalar D0_12 =  0.102618097842403E-07;
+    // unused: constexpr scalar D0_13 = -0.438203601845335E-08;
 
-    static const scalar D1[] =
-    {
-       -0.185185185185185E-02,
-       -0.347222222222222E-02,
-        0.264550264550265E-02,
-       -0.990226337448560E-03,
-        0.205761316872428E-03,
-       -0.401877572016461E-06,
-       -0.180985503344900E-04,
-        0.764916091608111E-05,
-       -0.161209008945634E-05,
-        0.464712780280743E-08,
-        0.137863344691572E-06,
-       -0.575254560351770E-07,
-        0.119516285997781E-07
-    };
+    constexpr scalar D1_0  = -0.185185185185185E-02;
+    constexpr scalar D1_1  = -0.347222222222222E-02;
+    constexpr scalar D1_2  =  0.264550264550265E-02;
+    constexpr scalar D1_3  = -0.990226337448560E-03;
+    constexpr scalar D1_4  =  0.205761316872428E-03;
+    // unused: constexpr scalar D1_5  = -0.401877572016461E-06;
+    // unused: constexpr scalar D1_6  = -0.180985503344900E-04;
+    // unused: constexpr scalar D1_7  =  0.764916091608111E-05;
+    // unused: constexpr scalar D1_8  = -0.161209008945634E-05;
+    // unused: constexpr scalar D1_9  =  0.464712780280743E-08;
+    // unused: constexpr scalar D1_10 =  0.137863344691572E-06;
+    // unused: constexpr scalar D1_11 = -0.575254560351770E-07;
+    // unused: constexpr scalar D1_12 =  0.119516285997781E-07;
 
-    static const scalar D2[] =
-    {
-        0.413359788359788E-02,
-       -0.268132716049383E-02,
-        0.771604938271605E-03,
-        0.200938786008230E-05,
-       -0.107366532263652E-03,
-        0.529234488291201E-04,
-       -0.127606351886187E-04,
-        0.342357873409614E-07,
-        0.137219573090629E-05,
-       -0.629899213838006E-06,
-        0.142806142060642E-06
-    };
+    constexpr scalar D2_0  =  0.413359788359788E-02;
+    constexpr scalar D2_1  = -0.268132716049383E-02;
+    // unused: constexpr scalar D2_2  =  0.771604938271605E-03;
+    // unused: constexpr scalar D2_3  =  0.200938786008230E-05;
+    // unused: constexpr scalar D2_4  = -0.107366532263652E-03;
+    // unused: constexpr scalar D2_5  =  0.529234488291201E-04;
+    // unused: constexpr scalar D2_6  = -0.127606351886187E-04;
+    // unused: constexpr scalar D2_7  =  0.342357873409614E-07;
+    // unused: constexpr scalar D2_8  =  0.137219573090629E-05;
+    // unused: constexpr scalar D2_9  = -0.629899213838006E-06;
+    // unused: constexpr scalar D2_10 =  0.142806142060642E-06;
 
     const scalar u = 1/a;
     scalar z = sqrt(2*phi);
@@ -196,44 +173,66 @@ static scalar calcTE18
     if (sigma > (e0/sqrt(a)))
     {
         const scalar C0 =
-            D0[6]*pow6(z) + D0[5]*pow5(z) + D0[4]*pow4(z)
-          + D0[3]*pow3(z) + D0[2]*sqr(z) + D0[1]*z + D0[0];
+            D0_6*pow6(z) + D0_5*pow5(z) + D0_4*pow4(z)
+          + D0_3*pow3(z) + D0_2*sqr(z) + D0_1*z + D0_0;
 
         const scalar C1 =
-            D1[4]*pow4(z) + D1[3]*pow3(z) + D1[2]*sqr(z) + D1[1]*z + D1[0];
+            D1_4*pow4(z) + D1_3*pow3(z) + D1_2*sqr(z) + D1_1*z + D1_0;
 
-        const scalar C2 = D2[1]*z + D2[0];
+        const scalar C2 = D2_1*z + D2_0;
 
         return C2*sqr(u) + C1*u + C0;
     }
     else
     {
-        const scalar C0 = D0[2]*sqr(z) + D0[1]*z + D0[0];
-        const scalar C1 = D1[1]*z + D1[0];
-        const scalar C2 = D2[1]*z + D2[0];
+        const scalar C0 = D0_2*sqr(z) + D0_1*z + D0_0;
+        const scalar C1 = D1_1*z + D1_0;
+        const scalar C2 = D2_1*z + D2_0;
 
         return C2*sqr(u) + C1*u + C0;
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 }  // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
+Foam::scalar Foam::Math::incGammaRatio_Q(const scalar a, const scalar x)
 {
-    const scalar BIG = 14;
-    const scalar x0 = 17;
-    const scalar e0 = 0.025;
+    using namespace Foam::constant::mathematical;
+
+    #ifdef FULLDEBUG
+    if (a <= 0)
+    {
+        WarningInFunction
+            << "The parameter (i.e. a) cannot be negative or zero"
+            << "    a = " << a
+            << endl;
+
+        return std::numeric_limits<scalar>::infinity();
+    }
+
+    if (x < 0)
+    {
+        WarningInFunction
+            << "The parameter (i.e. x) cannot be negative"
+            << "    x = " << x
+            << endl;
+
+        return std::numeric_limits<scalar>::infinity();
+    }
+    #endif
+
+    constexpr scalar BIG = 14;
+    constexpr scalar x0 = 17;
+    constexpr scalar e0 = 0.025;
 
     if (a < 1)
     {
         if (a == 0.5)
         {
-            // Eqn. (8)
+            // (DM:Eq. 8)
             if (x < 0.25)
             {
                 return 1 - erf(sqrt(x));
@@ -245,7 +244,7 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
         }
         else if ( x < 1.1)
         {
-            // Eqn. (12)
+            // (DM:Eq. 12)
             scalar alpha = x/2.59;
 
             if (x < 0.5)
@@ -264,12 +263,12 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
 
             if (a > alpha || a == alpha)
             {
-                // Eqn. (9)
+                // (DM:Eq. 9)
                 return 1 - (pow(x, a)*(1 - J))/tgamma(a + 1);
             }
             else
             {
-                // Eqn. (10)
+                // (DM:Eq. 10)
                 const scalar L = exp(a*log(x)) - 1;
                 const scalar H = 1/(tgamma(a + 1)) - 1;
 
@@ -278,7 +277,7 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
         }
         else
         {
-            // Eqn. (11)
+            // (DM:Eq. 11)
             const scalar R = (exp(-x)*pow(x, a))/tgamma(a);
 
             return R*calcQE11(a, x);
@@ -290,7 +289,7 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
 
         if (sigma <= e0/sqrt(a))
         {
-            // Eqn. (19)
+            // (DM:Eq. 19)
             const scalar lambda = x/a;
             const scalar phi = lambda - 1 - log(lambda);
             const scalar y = a*phi;
@@ -319,7 +318,7 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
         {
             if (sigma <= 0.4)
             {
-                // Eqn. (17)
+                // (DM:Eq. 17)
                 const scalar lambda = x/a;
                 const scalar phi = lambda - 1 - log(lambda);
                 const scalar y = a*phi;
@@ -344,19 +343,19 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
             {
                 if (x <= max(a, log(10.0)))
                 {
-                    // Eqn. (15)
+                    // (DM:Eq. 15)
                     return 1 - calcPE15(a, x);
                 }
                 else if (x < x0)
                 {
-                    // Eqn. (11)
+                    // (DM:Eq. 11)
                     const scalar R = (exp(-x)*pow(x, a))/tgamma(a);
 
                     return R*calcQE11(a, x);
                 }
                 else
                 {
-                    // Eqn. (16)
+                    // (DM:Eq. 16)
                     return calcQE16(a, x);
                 }
             }
@@ -368,19 +367,19 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
         {
             if (x <= max(a, log(10.0)))
             {
-                // Eqn. (15)
+                // (DM:Eq. 15)
                 return 1 - calcPE15(a, x);
             }
             else if ( x < x0)
             {
-                // Eqn. (11)
+                // (DM:Eq. 11)
                 const scalar R = (exp(-x)*pow(x, a))/tgamma(a);
 
                 return R*calcQE11(a, x);
             }
             else
             {
-                // Eqn. (16)
+                // (DM:Eq. 16)
                 return calcQE16(a, x);
             }
         }
@@ -388,7 +387,7 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
         {
             if (floor(2*a) == 2*a)
             {
-                // Eqn. (14)
+                // (DM:Eq. 14)
                 if (floor(a) == a)
                 {
                     scalar sum = 0;
@@ -417,19 +416,19 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
             }
             else if (x <= max(a, log(10.0)))
             {
-                // Eqn. (15)
+                // (DM:Eq. 15)
                 return 1 - calcPE15(a, x);
             }
-            else if ( x < x0)
+            else if (x < x0)
             {
-                // Eqn. (11)
+                // (DM:Eq. 11)
                 const scalar R = (exp(-x)*pow(x, a))/tgamma(a);
 
                 return R*calcQE11(a, x);
             }
             else
             {
-                // Eqn. (16)
+                // (DM:Eq. 16)
                 return calcQE16(a, x);
             }
         }
@@ -437,19 +436,19 @@ Foam::scalar Foam::incGammaRatio_Q(const scalar a, const scalar x)
 }
 
 
-Foam::scalar Foam::incGammaRatio_P(const scalar a, const scalar x)
+Foam::scalar Foam::Math::incGammaRatio_P(const scalar a, const scalar x)
 {
     return 1 - incGammaRatio_Q(a, x);
 }
 
 
-Foam::scalar Foam::incGamma_Q(const scalar a, const scalar x)
+Foam::scalar Foam::Math::incGamma_Q(const scalar a, const scalar x)
 {
     return incGammaRatio_Q(a, x)*tgamma(a);
 }
 
 
-Foam::scalar Foam::incGamma_P(const scalar a, const scalar x)
+Foam::scalar Foam::Math::incGamma_P(const scalar a, const scalar x)
 {
     return incGammaRatio_P(a, x)*tgamma(a);
 }

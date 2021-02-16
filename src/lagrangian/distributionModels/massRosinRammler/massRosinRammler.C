@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "massRosinRammler.H"
+#include "MathFunctions.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -87,7 +89,7 @@ Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
     {
         const scalar a = 3/n_ + 1;
         const scalar P = rndGen_.sample01<scalar>();
-        const scalar x = invIncGamma(a, P);
+        const scalar x = Math::invIncGamma(a, P);
         d = d_*pow(x, 1/n_);
     } while (d < minValue_ || d > maxValue_);
 

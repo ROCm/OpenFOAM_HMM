@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -213,25 +213,9 @@ inline float narrowFloat(const double val)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Additional transcendental functions and specialisations
 
 namespace Foam
 {
-    //- Inverse normalized incomplete gamma function
-    scalar invIncGamma(const scalar a, const scalar P);
-
-    //- Normalized upper incomplete gamma function
-    scalar incGammaRatio_Q(const scalar a, const scalar x);
-
-    //- Normalized lower incomplete gamma function
-    scalar incGammaRatio_P(const scalar a, const scalar x);
-
-    //- Upper incomplete gamma function
-    scalar incGamma_Q(const scalar a, const scalar x);
-
-    //- Lower incomplete gamma function
-    scalar incGamma_P(const scalar a, const scalar x);
-
     //- Type to use for extended precision
     template<>
     class typeOfSolve<scalar>

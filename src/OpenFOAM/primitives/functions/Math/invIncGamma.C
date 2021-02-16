@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,60 +25,43 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    Foam::invIncGamma
+    Foam::Math::invIncGamma
 
 Description
-    Function to calculate the inverse of the
-    normalized incomplete gamma function.
-
-    The algorithm is described in detain in reference:
-    \verbatim
-        DiDonato, A. R., & Morris Jr, A. H. (1986).
-        Computation of the incomplete gamma function ratios and their inverse.
-        ACM Transactions on Mathematical Software (TOMS), 12(4), 377-393.
-    \endverbatim
-
-    All equation numbers in the following code refer to the above text and
-    the algorithm in the function 'invIncGamma' is described in section 4.
+    Implementation of the inverse incomplete gamma function.
 
 \*---------------------------------------------------------------------------*/
 
+#include "MathFunctions.H"
 #include "mathematicalConstants.H"
+
 using namespace Foam::constant::mathematical;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 static scalar minimaxs(const scalar P)
 {
-    // Eqn. 32
+    // (DM:Eq. 32)
 
-    static const scalar a[] =
-    {
-        3.31125922108741,
-        11.6616720288968,
-        4.28342155967104,
-        0.213623493715853
-    };
+    constexpr scalar a_0 = 3.31125922108741;
+    constexpr scalar a_1 = 11.6616720288968;
+    constexpr scalar a_2 = 4.28342155967104;
+    constexpr scalar a_3 = 0.213623493715853;
 
-    static const scalar b[] =
-    {
-        6.61053765625462,
-        6.40691597760039,
-        1.27364489782223,
-        0.03611708101884203
-    };
+    constexpr scalar b_0 = 6.61053765625462;
+    constexpr scalar b_1 = 6.40691597760039;
+    constexpr scalar b_2 = 1.27364489782223;
+    constexpr scalar b_3 = 0.03611708101884203;
 
     const scalar t = P < 0.5 ? sqrt(-2*log(P)) : sqrt(-2*log(1 - P));
 
     const scalar s =
         t
-      - (a[0] + t*(a[1] + t*(a[2] + t*a[3])))
-       /(1 + t*(b[0] + t*(b[1] + t*(b[2] + t*b[3]))));
+      - (a_0 + t*(a_1 + t*(a_2 + t*a_3)))
+       /(1 + t*(b_0 + t*(b_1 + t*(b_2 + t*b_3))));
 
     return P < 0.5 ? -s : s;
 }
@@ -85,12 +69,12 @@ static scalar minimaxs(const scalar P)
 
 static scalar Sn(const scalar a, const scalar x)
 {
-    //- Eqn. 34
+    // (DM:Eq. 34)
 
     scalar Sn = 1;
     scalar Si = 1;
 
-    for (int i=1; i<100; i++)
+    for (int i=1; i<100; ++i)
     {
         Si *= x/(a + i);
         Sn += Si;
@@ -101,15 +85,35 @@ static scalar Sn(const scalar a, const scalar x)
     return Sn;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Inverse normalized incomplete gamma function
-Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
+Foam::scalar Foam::Math::invIncGamma(const scalar a, const scalar P)
 {
+    #ifdef FULLDEBUG
+    if (a <= 0)
+    {
+        WarningInFunction
+            << "The parameter (i.e. a) cannot be negative or zero"
+            << "    a = " << a
+            << endl;
+
+        return std::numeric_limits<scalar>::infinity();
+    }
+
+    if (P < 0 || P > 1)
+    {
+        WarningInFunction
+            << "The domain of the parameter (i.e. P) should be limited to [0,1]"
+            << "    P = " << P
+            << endl;
+
+        return std::numeric_limits<scalar>::infinity();
+    }
+    #endif
+
     const scalar Q = 1 - P;
 
     if (a == 1)
@@ -123,7 +127,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
 
         if (B > 0.6 || (B >= 0.45 && a >= 0.3))
         {
-            // Eqn. 21
+            // (DM:Eq. 21)
             const scalar u =
                 (B*Q > 1e-8) ? pow(P*Ga*a, 1/a) : exp((-Q/a) - Eu);
 
@@ -131,7 +135,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
         }
         else if (a < 0.3 && B >= 0.35)
         {
-            // Eqn. 22
+            // (DM:Eq. 22)
             const scalar t = exp(-Eu - B);
             const scalar u = t*exp(t);
 
@@ -139,7 +143,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
         }
         else if (B > 0.15 || a >= 0.3)
         {
-            // Eqn. 23
+            // (DM:Eq. 23)
             const scalar y = -log(B);
             const scalar u = y - (1 - a)*log(y);
 
@@ -147,7 +151,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
         }
         else if (B > 0.1)
         {
-            // Eqn. 24
+            // (DM:Eq. 24)
             const scalar y = -log(B);
             const scalar u = y - (1 - a)*log(y);
 
@@ -161,7 +165,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
         }
         else
         {
-            // Eqn. 25:
+            // (DM:Eq. 25)
             const scalar y = -log(B);
             const scalar c1 = (a - 1)*log(y);
             const scalar c12 = c1*c1;
@@ -194,7 +198,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
     }
     else
     {
-        // Eqn. 31:
+        // (DM:Eq. 31)
         scalar s = minimaxs(P);
 
         const scalar s2 = sqr(s);
@@ -227,7 +231,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
 
                 if (lnB < -2.3*D)
                 {
-                    // Eqn. 25:
+                    // (DM:Eq. 25)
                     const scalar y = -lnB;
                     const scalar c1 = (a - 1)*log(y);
                     const scalar c12 = c1*c1;
@@ -270,7 +274,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
                 }
                 else
                 {
-                    // Eqn. 33
+                    // (DM:Eq. 33)
                     const scalar u =
                         -lnB + (a - 1)*log(w) - log(1 + (1 - a)/(1 + w));
 
@@ -285,7 +289,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
 
             if (w < 0.15*ap1)
             {
-                // Eqn. 35
+                // (DM:Eq. 35)
                 const scalar ap2 = a + 2;
                 const scalar v = log(P) + lgamma(ap1);
                 z = exp((v + w)/a);
@@ -303,7 +307,7 @@ Foam::scalar Foam::invIncGamma(const scalar a, const scalar P)
             }
             else
             {
-                // Eqn. 36
+                // (DM:Eq. 36)
                 const scalar lnSn = log(Sn(a, z));
                 const scalar v = log(P) + lgamma(ap1);
                 z = exp((v + z - lnSn)/a);

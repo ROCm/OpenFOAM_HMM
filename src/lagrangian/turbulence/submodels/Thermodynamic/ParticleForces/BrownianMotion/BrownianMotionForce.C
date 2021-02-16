@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,25 +35,6 @@ License
 using namespace Foam::constant;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::scalar Foam::BrownianMotionForce<CloudType>::erfInv(const scalar y) const
-{
-    const scalar a = 0.147;
-    scalar k = 2.0/(mathematical::pi*a) +  0.5*log(1.0 - y*y);
-    scalar h = log(1.0 - y*y)/a;
-    scalar x = sqrt(-k + sqrt(k*k - h));
-
-    if (y < 0.0)
-    {
-        return -x;
-    }
-    else
-    {
-        return x;
-    }
-}
-
 
 template<class CloudType>
 Foam::tmp<Foam::volScalarField>
@@ -200,7 +182,7 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
     // for (direction dir = 0; dir < vector::nComponents; dir++)
     // {
     //     const scalar x = rndGen_.sample01<scalar>();
-    //     const scalar eta = sqrt2*erfInv(2*x - 1.0);
+    //     const scalar eta = sqrt2*Math::erfInv(2*x - 1.0);
     //     value.Su()[dir] = f*eta;
     // }
 
