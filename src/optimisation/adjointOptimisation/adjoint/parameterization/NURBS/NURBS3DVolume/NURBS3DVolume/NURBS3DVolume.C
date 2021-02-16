@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -631,6 +631,19 @@ Foam::NURBS3DVolume::NURBS3DVolume
     bool computeParamCoors
 )
 :
+    localIOdictionary
+    (
+        IOobject
+        (
+            dict.dictName() + "cpsBsplines",
+            mesh.time().timeName(),
+            fileName("uniform")/fileName("volumetricBSplines"),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        word::null
+    ),
     mesh_(mesh),
     dict_(dict),
     name_(dict.dictName()),
@@ -640,7 +653,17 @@ Foam::NURBS3DVolume::NURBS3DVolume
     maxIter_(dict.getOrDefault<label>("maxIterations", 10)),
     tolerance_(dict.getOrDefault<scalar>("tolerance", 1.e-10)),
     nMaxBound_(dict.getOrDefault<scalar>("nMaxBoundIterations", 4)),
-    cps_(0),
+    cps_
+    (
+        found("controlPoints") ?
+        vectorField
+        (
+            "controlPoints",
+            *this,
+            basisU_.nCPs()*basisV_.nCPs()*basisW_.nCPs()
+        ) :
+        vectorField(0)
+    ),
     mapPtr_(nullptr),
     reverseMapPtr_(nullptr),
     parametricCoordinatesPtr_(nullptr),
@@ -737,10 +760,12 @@ Foam::NURBS3DVolume::NURBS3DVolume
            << exit(FatalError);
     }
 
-    // Define control points
-    controlPointsDefinition::New(*this);
+    // Construct control points, if not already read from file
+    if (cps_.empty())
+    {
+        controlPointsDefinition::New(*this);
+    }
     determineActiveDesignVariablesAndPoints();
-    writeCpsInDict();
 }
 
 
@@ -1382,7 +1407,6 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewPoints
     // Update control points position
     cps_ += controlPointsMovement;
     writeCps("cpsBsplines"+mesh_.time().timeName());
-    writeCpsInDict();
 
     // Compute new mesh points based on updated control points
     tmp<vectorField> tparameterizedPoints = coordinates(paramCoors);
@@ -1411,7 +1435,8 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewPoints
 Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewBoundaryPoints
 (
     const vectorField& controlPointsMovement,
-    const labelList& patchesToBeMoved
+    const labelList& patchesToBeMoved,
+    const bool updateCPs
 )
 {
     // Get parametric coordinates
@@ -1420,8 +1445,10 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewBoundaryPoints
     // Update control points position
     cps_ += controlPointsMovement;
 
-    writeCps("cpsBsplines"+mesh_.time().timeName());
-    writeCpsInDict();
+    if (updateCPs)
+    {
+        writeCps("cpsBsplines"+mesh_.time().timeName());
+    }
 
     // Return field. Initialized with current mesh points
     tmp<vectorField> tnewPoints(new vectorField(mesh_.points()));
@@ -1452,8 +1479,17 @@ Foam::tmp<Foam::vectorField> Foam::NURBS3DVolume::computeNewBoundaryPoints
         }
     }
 
-    // Update coordinates in the local system based on the cartesian points
-    updateLocalCoordinateSystem(newPoints);
+    if (updateCPs)
+    {
+        // Update coordinates in the local system based on the cartesian points
+        updateLocalCoordinateSystem(newPoints);
+    }
+    else
+    {
+        // Move control points to their initial position
+        cps_ -= controlPointsMovement;
+    }
+
     DebugInfo
         << "Max mesh movement equal to "
         << gMax(mag(newPoints - mesh_.points())) << endl;
@@ -1492,7 +1528,7 @@ void Foam::NURBS3DVolume::setControlPoints(const vectorField& newCps)
 void Foam::NURBS3DVolume::boundControlPointMovement
 (
     vectorField& controlPointsMovement
-)
+) const
 {
     forAll(controlPointsMovement, cpI)
     {
@@ -1732,45 +1768,27 @@ Foam::tmp<Foam::volTensorField> Foam::NURBS3DVolume::getDxCellsDb
 Foam::label Foam::NURBS3DVolume::nUSymmetry() const
 {
     label nU(basisU_.nCPs());
-    if (nU % 2 == 0)
-    {
-        nU /=2;
-    }
-    else
-    {
-        nU = (nU - 1)/2 + 1;
-    }
-    return nU;
+    return label(nU % 2 == 0 ? 0.5*nU : (nU - 1)/2 + 1);
 }
 
 
 Foam::label Foam::NURBS3DVolume::nVSymmetry() const
 {
     label nV(basisV_.nCPs());
-    if (nV % 2 == 0)
-    {
-        nV /=2;
-    }
-    else
-    {
-        nV = (nV - 1)/2 + 1;
-    }
-    return nV;
+    return label(nV % 2 == 0 ? 0.5*nV : 0.5*(nV - 1) + 1);
 }
 
 
 Foam::label Foam::NURBS3DVolume::nWSymmetry() const
 {
     label nW(basisW_.nCPs());
-    if (nW % 2 == 0)
-    {
-        nW /=2;
-    }
-    else
-    {
-        nW = (nW - 1)/2 + 1;
-    }
-    return nW;
+    return label(nW % 2 == 0 ? 0.5*nW : 0.5*(nW - 1) + 1);
+}
+
+
+Foam::Vector<Foam::label> Foam::NURBS3DVolume::nSymmetry() const
+{
+    return Vector<label>(nUSymmetry(), nVSymmetry(), nWSymmetry());
 }
 
 
@@ -1824,36 +1842,16 @@ void Foam::NURBS3DVolume::writeCps
 }
 
 
-void Foam::NURBS3DVolume::writeCpsInDict() const
-{
-    IOdictionary cpsDict
-    (
-        IOobject
-        (
-            name_ + "cpsBsplines" + mesh_.time().timeName(),
-            mesh_.time().caseConstant(),
-            cpsFolder_,
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-    cpsDict.add("controlPoints", cps_);
-
-    // Always write in ASCII, but allow compression
-    cpsDict.regIOobject::writeObject
-    (
-        IOstreamOption(IOstream::ASCII, mesh_.time().writeCompression()),
-        true
-    );
-}
-
-
 void Foam::NURBS3DVolume::write() const
 {
     parametricCoordinatesPtr_().write();
+}
+
+
+bool Foam::NURBS3DVolume::writeData(Ostream& os) const
+{
+    cps_.writeEntry("controlPoints", os);
+    return true;
 }
 
 

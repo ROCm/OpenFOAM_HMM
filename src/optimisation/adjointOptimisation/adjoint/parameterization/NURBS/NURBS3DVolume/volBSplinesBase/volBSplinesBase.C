@@ -315,8 +315,7 @@ void Foam::volBSplinesBase::writeControlPoints() const
 {
     for (const NURBS3DVolume& box : volume_)
     {
-        box.writeCps("cpsBsplines"+mesh_.time().timeName());
-        box.writeCpsInDict();
+        box.writeCps("cpsBsplines" + mesh_.time().timeName());
     }
 }
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -56,6 +56,7 @@ SourceFiles
 
 #include "NURBSbasis.H"
 #include "boolVector.H"
+#include "localIOdictionary.H"
 #include "pointMesh.H"
 #include "pointPatchField.H"
 #include "pointPatchFieldsFwd.H"
@@ -71,6 +72,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class NURBS3DVolume
+:
+    public localIOdictionary
 {
 protected:
 
@@ -371,7 +374,8 @@ public:
             tmp<vectorField> computeNewBoundaryPoints
             (
                 const vectorField& controlPointsMovement,
-                const labelList& patchesToBeMoved
+                const labelList& patchesToBeMoved,
+                const bool moveCPs = true
             );
 
 
@@ -391,7 +395,7 @@ public:
             void boundControlPointMovement
             (
                 vectorField& controlPointsMovement
-            );
+            ) const;
 
             //- Compute max. displacement at the boundary
             scalar computeMaxBoundaryDisplacement
@@ -433,6 +437,10 @@ public:
                 //- Get number of variables if CPs are moved symmetrically in W
                 label nWSymmetry() const;
 
+                //- Get number of variables per direction,
+                //- if CPs are moved symmetrically
+                Vector<label> nSymmetry() const;
+
 
             // Inline access functions
 
@@ -466,6 +474,9 @@ public:
 
                 inline const NURBSbasis& basisW() const;
 
+                //- Get number of control points per direction
+                inline Vector<label> nCPsPerDirection() const;
+
                 //- Get mesh
                 inline const fvMesh& mesh() const;
 
@@ -483,12 +494,11 @@ public:
                 const bool transform = true
             ) const;
 
-            //- Write control points on the local coordinate system.
-            //  For continuation
-            void writeCpsInDict() const;
-
             //- Write parametric coordinates
             void write() const;
+
+            //- Write the control points to support restart
+            virtual bool writeData(Ostream& os) const;
 };
 
 
