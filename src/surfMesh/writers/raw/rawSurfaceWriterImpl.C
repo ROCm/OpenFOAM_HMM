@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,12 @@ License
 
 namespace Foam
 {
+    // Emit x,y,z
+    static inline void writePoint(Ostream& os, const point& p)
+    {
+        os << p.x() << ' ' << p.y() << ' ' << p.z();
+    }
+
     // Emit each component
     template<class Type>
     static inline void writeData(Ostream& os, const Type& val)
@@ -42,65 +48,58 @@ namespace Foam
         {
             os  << ' ' << component(val, i);
         }
-        os  << nl;
+    }
+
+    // Write x/y/z header. Must be called first
+    static inline void writeHeaderXYZ(Ostream& os)
+    {
+        os  << "# x y z";
+    }
+
+    // Write area header
+    static inline void writeHeaderArea(Ostream& os)
+    {
+        os  << "  area_x area_y area_z";
     }
 
     template<class Type>
-    static inline void writeHeader(Ostream& os, const word& fieldName) {}
-
-    template<>
-    void writeHeader<label>(Ostream& os, const word& fieldName)
+    static inline void writeHeader(Ostream& os, const word& fieldName)
     {
-        os  << "# x  y  z"
-            << "  " << fieldName << nl;
+        os  << "  " << fieldName;
     }
 
-    template<>
-    void writeHeader<scalar>(Ostream& os, const word& fieldName)
+    template<class Type>
+    void writeHeaderComponents(Ostream& os, const word& fieldName)
     {
-        os  << "# x  y  z"
-            << "  " << fieldName << nl;
+        os  << ' ';
+        for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+        {
+            os  << ' ' << fieldName << '_' << Type::componentNames[i];
+        }
     }
 
     template<>
     void writeHeader<vector>(Ostream& os, const word& fieldName)
     {
-        os  << "# x  y  z"
-            << "  " << fieldName << "_x"
-            << "  " << fieldName << "_y"
-            << "  " << fieldName << "_z"
-            << nl;
+        writeHeaderComponents<vector>(os, fieldName);
     }
 
     template<>
     void writeHeader<sphericalTensor>(Ostream& os, const word& fieldName)
     {
-        os  << "# x  y  z"
-            << "  " << fieldName << "_ii" << nl;
+        writeHeaderComponents<sphericalTensor>(os, fieldName);
     }
 
     template<>
     void writeHeader<symmTensor>(Ostream& os, const word& fieldName)
     {
-        // This may not be quite right (not sure what people might need)
-        os  << "#  xx  xy  xz  yy  yz  zz";
-        for (direction i=0; i < pTraits<symmTensor>::nComponents; ++i)
-        {
-            os  << "  " << fieldName << '_' << int(i);
-        }
-        os  << nl;
+        writeHeaderComponents<symmTensor>(os, fieldName);
     }
 
     template<>
     void writeHeader<tensor>(Ostream& os, const word& fieldName)
     {
-        // This may not be quite right (not sure what people might need)
-        os  << "#  xx  xy  xz  yx  yy  yz  zx  zy  zz";
-        for (direction i=0; i < pTraits<tensor>::nComponents; ++i)
-        {
-            os  << "  " << fieldName << '_' << int(i);
-        }
-        os  << nl;
+        writeHeaderComponents<tensor>(os, fieldName);
     }
 
 } // End namespace Foam
@@ -162,6 +161,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
         const auto& values = tfield();
         const pointField& points = surf.points();
         const faceList& faces = surf.faces();
+        const bool withFaceNormal = (writeNormal_ && !this->isPointData());
 
         if (!isDir(outputFile.path()))
         {
@@ -169,6 +169,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
         }
 
         OFstream os(outputFile, streamOpt_);
+        os.precision(precision_);
 
         // Header
         {
@@ -183,8 +184,13 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             }
             os << values.size() << nl;
 
-            // #  x  y  z  field
+            writeHeaderXYZ(os);
             writeHeader<Type>(os, fieldName);
+            if (withFaceNormal)
+            {
+                writeHeaderArea(os);
+            }
+            os << nl;
         }
 
 
@@ -195,6 +201,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             {
                 writePoint(os, points[elemi]*geometryScale_);
                 writeData(os, values[elemi]);
+                os << nl;
             }
         }
         else
@@ -202,8 +209,16 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             // Face values
             forAll(values, elemi)
             {
-                writePoint(os, faces[elemi].centre(points)*geometryScale_);
+                const face& f = faces[elemi];
+
+                writePoint(os, f.centre(points)*geometryScale_);
                 writeData(os,  values[elemi]);
+                if (withFaceNormal)
+                {
+                    os << ' ';
+                    writePoint(os, f.areaNormal(points)*geometryScale_);
+                }
+                os << nl;
             }
         }
     }

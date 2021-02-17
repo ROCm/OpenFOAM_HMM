@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,19 +45,6 @@ namespace surfaceWriters
 }
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace
-{
-    // Emit x,y,z
-    static inline void writePoint(Foam::Ostream& os, const Foam::point& p)
-    {
-        os << p.x() << ' ' << p.y() << ' ' << p.z();
-    }
-
-} // End anonymous namespace
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing implementation
@@ -73,6 +60,8 @@ Foam::surfaceWriters::rawWriter::rawWriter()
 :
     surfaceWriter(),
     streamOpt_(),
+    precision_(IOstream::defaultPrecision()),
+    writeNormal_(false),
     geometryScale_(1),
     fieldScale_()
 {}
@@ -89,6 +78,11 @@ Foam::surfaceWriters::rawWriter::rawWriter
         IOstream::ASCII,
         IOstream::compressionEnum("compression", options)
     ),
+    precision_
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    ),
+    writeNormal_(options.getOrDefault("normal", false)),
     geometryScale_(options.getOrDefault<scalar>("scale", 1)),
     fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
@@ -151,6 +145,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
     {
         const pointField& points = surf.points();
         const faceList& faces = surf.faces();
+        const bool withFaceNormal = writeNormal_; // Even for point data?
 
         if (!isDir(outputFile.path()))
         {
@@ -158,17 +153,28 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
         }
 
         OFstream os(outputFile, streamOpt_);
+        os.precision(precision_);
 
         // Header
         {
-            os  << "# geometry NO_DATA " << faces.size() << nl
-                << "#  x  y  z" << nl;
+            os  << "# geometry NO_DATA " << faces.size() << nl;
+            writeHeaderXYZ(os);
+            if (withFaceNormal)
+            {
+                writeHeaderArea(os);
+            }
+            os  << nl;
         }
 
-        // Write faces centres
+        // Write faces centres (optionally faceArea normals)
         for (const face& f : faces)
         {
             writePoint(os, f.centre(points)*geometryScale_);
+            if (withFaceNormal)
+            {
+                os << ' ';
+                writePoint(os, f.areaNormal(points)*geometryScale_);
+            }
             os << nl;
         }
 

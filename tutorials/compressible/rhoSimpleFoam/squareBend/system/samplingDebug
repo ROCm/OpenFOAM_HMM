@@ -16,6 +16,7 @@ debug
     interpolationScheme cellPoint;
     surfaceFormat ensight;
     // surfaceFormat vtk;
+    // surfaceFormat raw;
 
     formatOptions
     {
@@ -23,6 +24,11 @@ debug
         {
             collateTimes  true;
             // collateTimes  false;
+        }
+        raw
+        {
+            normal  true;
+            precision 8;
         }
     }
 

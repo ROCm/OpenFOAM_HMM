@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,10 @@ Description
     \table
         Property    | Description                           | Required | Default
         compression | Use file compression                  | no  | false
+        precision   | Write precision in ascii              | no  | same as IOstream
         scale       | output geometry scaling               | no  | 1
         fieldScale  | output field scaling (dictionary)     | no  | empty
+        normal      | Write face area normal in output      | no  | false
     \endtable
 
     For example,
@@ -47,6 +49,8 @@ Description
             compression on;
 
             scale   1000;     // [m] -> [mm]
+            normal  yes;
+            precision 10;
             fieldScale
             {
                "p.*"   0.01;  // [Pa] -> [mbar]
@@ -104,6 +108,12 @@ class rawWriter
 
         //- Output stream option
         IOstreamOption streamOpt_;
+
+        //- ASCII write precision
+        unsigned precision_;
+
+        //- Output face area normal
+        const bool writeNormal_;
 
         //- Output geometry scaling
         const scalar geometryScale_;
