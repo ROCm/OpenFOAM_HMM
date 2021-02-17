@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,6 +199,9 @@ void Foam::ensightMesh::correct()
 
         if (returnReduce(!zn.empty(), orOp<bool>()))
         {
+            // Ensure full mesh coverage
+            cellSelection.resize(mesh_.nCells());
+
             cellSelection.set(zn);
 
             ensightCells& part = cellZoneParts_(zoneId);
@@ -267,6 +270,7 @@ void Foam::ensightMesh::correct()
 
     if (returnReduce(!cellSelection.empty(), orOp<bool>()))
     {
+        // Ensure full mesh coverage
         excludeFace.resize(mesh_.nFaces());
 
         const labelList& owner = mesh_.faceOwner();
@@ -288,6 +292,7 @@ void Foam::ensightMesh::correct()
 
     if (fzoneIds.size())
     {
+        // Ensure full mesh coverage
         excludeFace.resize(mesh_.nFaces());
 
         for (const polyPatch& p : mesh_.boundaryMesh())

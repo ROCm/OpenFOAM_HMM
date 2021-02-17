@@ -44,7 +44,7 @@ coldAndHot
 fire
 {
     // ParaView: Black-Body Radiation
-    interpolate rbg;
+    interpolate rgb;
 
     table
     (
@@ -70,7 +70,7 @@ rainbow
 greyscale
 {
     // ParaView: grayscale
-    interpolate rbg;
+    interpolate rgb;
 
     table
     (
@@ -82,7 +82,7 @@ greyscale
 xray
 {
     // ParaView: "X ray"
-    interpolate rbg;
+    interpolate rgb;
 
     table
     (
