@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,16 @@ void Foam::vtk::patchWriter::write
         {
             const auto& pfld = field.boundaryField()[patchId];
 
-            vtk::writeList(format(), pfld.patchInternalField()());
+            // Only valuePointPatchField is actually derived from Field
+            const auto* vpp = isA<Field<Type>>(pfld);
+            if (vpp)
+            {
+                vtk::writeList(format(), *vpp);
+            }
+            else
+            {
+                vtk::writeList(format(), pfld.patchInternalField()());
+            }
         }
     }
 
@@ -122,7 +131,16 @@ void Foam::vtk::patchWriter::write
             {
                 const auto& pfld = field.boundaryField()[patchId];
 
-                toMaster << pfld.patchInternalField()();
+                // Only valuePointPatchField is actually derived from Field
+                const auto* vpp = isA<Field<Type>>(pfld);
+                if (vpp)
+                {
+                    toMaster << *vpp;
+                }
+                else
+                {
+                    toMaster << pfld.patchInternalField();
+                }
             }
         }
     }

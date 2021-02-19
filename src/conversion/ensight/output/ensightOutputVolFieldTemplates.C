@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,13 +219,13 @@ bool Foam::ensightOutput::writePointField
     {
         const ensightCells& part = cellZoneParts[zoneId];
 
-        labelList uniqueMeshPointLabels;
-        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
-
         if (Pstream::master())
         {
             os.beginPart(part.index());
         }
+
+        labelList uniqueMeshPointLabels;
+        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
 
         ensightOutput::Detail::writeFieldComponents
         (
@@ -244,21 +244,38 @@ bool Foam::ensightOutput::writePointField
     {
         const ensightFaces& part = boundaryParts[patchId];
 
-        labelList uniqueMeshPointLabels;
-        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
-
         if (Pstream::master())
         {
             os.beginPart(part.index());
         }
 
-        ensightOutput::Detail::writeFieldComponents
-        (
-            os,
-            ensightFile::coordinates,
-            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
-            parallel
-        );
+        const auto& bfld = pf.boundaryField()[patchId];
+
+        // Only valuePointPatchField is actually derived from Field
+        const auto* vpp = isA<Field<Type>>(bfld);
+        if (vpp)
+        {
+            ensightOutput::Detail::writeFieldComponents
+            (
+                os,
+                ensightFile::coordinates,
+                *vpp,
+                parallel
+            );
+        }
+        else
+        {
+            labelList uniqueMeshPointLabels;
+            part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+
+            ensightOutput::Detail::writeFieldComponents
+            (
+                os,
+                ensightFile::coordinates,
+                UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+                parallel
+            );
+        }
     }
 
     //
@@ -268,21 +285,26 @@ bool Foam::ensightOutput::writePointField
     {
         const ensightFaces& part = faceZoneParts[zoneId];
 
-        labelList uniqueMeshPointLabels;
-        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
-
         if (Pstream::master())
         {
             os.beginPart(part.index());
         }
 
-        ensightOutput::Detail::writeFieldComponents
-        (
-            os,
-            ensightFile::coordinates,
-            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
-            parallel
-        );
+        // CAVEAT - does not properly handle valuePointPatchField,
+        // uses internalField only
+
+        {
+            labelList uniqueMeshPointLabels;
+            part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+
+            ensightOutput::Detail::writeFieldComponents
+            (
+                os,
+                ensightFile::coordinates,
+                UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+                parallel
+            );
+        }
     }
 
     return true;
