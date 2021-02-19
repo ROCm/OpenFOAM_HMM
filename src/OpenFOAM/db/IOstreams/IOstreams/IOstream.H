@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,10 @@ using std::cin;
 using std::cout;
 using std::cerr;
 
+// Additional constructors and methods (as per v2012 and earlier)
+#define Foam_IOstream_extras
+// COMPAT_OPENFOAM_ORG
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -84,8 +88,8 @@ public:
         //- Enumeration for stream open/closed state
         enum streamAccess : char
         {
-            CLOSED = 0,         //!< stream not open
-            OPENED              //!< stream is open
+            CLOSED = 0,         //!< The stream is not open
+            OPENED              //!< The stream is open
         };
 
 
@@ -102,15 +106,17 @@ protected:
         //- Name for any generic stream - normally treat as readonly
         static fileName staticName_;
 
+        //- Mirror of internal stream io state
+        std::ios_base::iostate ioState_;
+
+        //- The stream open/closed state
         streamAccess openClosed_;
 
-        ios_base::iostate ioState_;
+        //- The sizeof (label), possibly read from the header
+        unsigned char sizeofLabel_;
 
-        //- The label byte-size (could also be stored as byte)
-        unsigned short labelByteSize_;
-
-        //- The scalar byte-size (could also be stored as byte)
-        unsigned short scalarByteSize_;
+        //- The sizeof (scalar), possibly read from the header
+        unsigned char sizeofScalar_;
 
         //- The file line
         label lineNumber_;
@@ -121,27 +127,27 @@ protected:
     // Access
 
         //- Set stream opened
-        void setOpened()
+        void setOpened() noexcept
         {
             openClosed_ = OPENED;
         }
 
         //- Set stream closed
-        void setClosed()
+        void setClosed() noexcept
         {
             openClosed_ = CLOSED;
         }
 
         //- Set stream state
-        void setState(ios_base::iostate state)
+        void setState(std::ios_base::iostate state) noexcept
         {
             ioState_ = state;
         }
 
-        //- Set stream to be good
-        void setGood()
+        //- Set stream state to be good
+        void setGood() noexcept
         {
-            ioState_ = ios_base::iostate(0);
+            ioState_ = std::ios_base::iostate(0);
         }
 
 
@@ -163,10 +169,10 @@ public:
         explicit IOstream(IOstreamOption streamOpt = IOstreamOption())
         :
             IOstreamOption(streamOpt),
+            ioState_(std::ios_base::iostate(0)),
             openClosed_(CLOSED),
-            ioState_(ios_base::iostate(0)),
-            labelByteSize_(sizeof(label)),
-            scalarByteSize_(sizeof(scalar)),
+            sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+            sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
             lineNumber_(0)
         {
             setBad();
@@ -175,12 +181,12 @@ public:
         //- Construct with format, version (compression)
         IOstream
         (
-            streamFormat fmt,
-            versionNumber ver,
-            compressionType comp = compressionType::UNCOMPRESSED
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :
-            IOstream(IOstreamOption(fmt, comp, ver))
+            IOstream(IOstreamOption(fmt, ver, cmp))
         {}
 
 
@@ -209,50 +215,50 @@ public:
         //  Generate a FatalIOError when an error has occurred.
         bool fatalCheck(const char* operation) const;
 
-        //- Return true if stream has been opened
-        bool opened() const
+        //- True if stream has been opened
+        bool opened() const noexcept
         {
             return openClosed_ == OPENED;
         }
 
-        //- Return true if stream is closed
-        bool closed() const
+        //- True if stream is closed
+        bool closed() const noexcept
         {
             return openClosed_ == CLOSED;
         }
 
-        //- Return true if next operation might succeed
-        bool good() const
+        //- True if next operation might succeed
+        bool good() const noexcept
         {
             return ioState_ == 0;
         }
 
-        //- Return true if end of input seen
-        bool eof() const
+        //- True if end of input seen
+        bool eof() const noexcept
         {
-            return ioState_ & ios_base::eofbit;
+            return ioState_ & std::ios_base::eofbit;
         }
 
-        //- Return true if next operation will fail
-        bool fail() const
+        //- True if next operation will fail
+        bool fail() const noexcept
         {
-            return ioState_ & (ios_base::badbit | ios_base::failbit);
+            return ioState_ & (std::ios_base::badbit | std::ios_base::failbit);
         }
 
-        //- Return true if stream is corrupted
-        bool bad() const
+        //- True if stream is corrupted
+        bool bad() const noexcept
         {
-            return ioState_ & ios_base::badbit;
+            return ioState_ & std::ios_base::badbit;
         }
 
         //- Return true if the stream has not failed
-        explicit operator bool() const
+        explicit operator bool() const noexcept
         {
             return !fail();
         }
 
         //- Return true if the stream has failed
-        bool operator!() const
+        bool operator!() const noexcept
         {
             return fail();
         }
@@ -260,28 +266,28 @@ public:
 
     // Element sizes (precision)
 
-        //- The label byte-size associated with the stream
-        unsigned labelByteSize() const
+        //- The sizeof (label) in bytes associated with the stream
+        unsigned labelByteSize() const noexcept
         {
-            return labelByteSize_;
+            return static_cast<unsigned>(sizeofLabel_);
         }
 
-        //- The scalar byte-size associated with the stream
-        unsigned scalarByteSize() const
+        //- The sizeof (scalar) in bytes associated with the stream
+        unsigned scalarByteSize() const noexcept
         {
-            return scalarByteSize_;
+            return static_cast<unsigned>(sizeofScalar_);
         }
 
-        //- Set the label byte-size associated with the stream
-        void setLabelByteSize(unsigned nbytes)
+        //- Set the sizeof (label) in bytes associated with the stream
+        void setLabelByteSize(unsigned nbytes) noexcept
         {
-            labelByteSize_ = nbytes;
+            sizeofLabel_ = static_cast<unsigned char>(nbytes);
         }
 
-        //- Set the scalar byte-size associated with the stream
-        void setScalarByteSize(unsigned nbytes)
+        //- Set the sizeof (scalar) in bytes associated with the stream
+        void setScalarByteSize(unsigned nbytes) noexcept
         {
-            scalarByteSize_ = nbytes;
+            sizeofScalar_ = static_cast<unsigned char>(nbytes);
         }
 
 
@@ -289,38 +295,38 @@ public:
         //- is the same as the given type
         template<class T = label>
         typename std::enable_if<std::is_integral<T>::value, bool>::type
-        checkLabelSize() const
+        checkLabelSize() const noexcept
         {
-            return labelByteSize_ == sizeof(T);
+            return sizeofLabel_ == sizeof(T);
         }
 
         //- Check if the scalar byte-size associated with the stream
         //- is the same as the given type
         template<class T = scalar>
         typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-        checkScalarSize() const
+        checkScalarSize() const noexcept
         {
-            return scalarByteSize_ == sizeof(T);
+            return sizeofScalar_ == sizeof(T);
         }
 
 
     // Stream State Functions
 
         //- Const access to the current stream line number
-        label lineNumber() const
+        label lineNumber() const noexcept
         {
             return lineNumber_;
         }
 
         //- Non-const access to the current stream line number
-        label& lineNumber()
+        label& lineNumber() noexcept
         {
             return lineNumber_;
         }
 
         //- Set the stream line number
         //  \return the previous value
-        label lineNumber(const label num)
+        label lineNumber(const label num) noexcept
         {
             const label old(lineNumber_);
             lineNumber_ = num;
@@ -331,36 +337,36 @@ public:
         virtual ios_base::fmtflags flags() const = 0;
 
         //- Return the default precision
-        static unsigned int defaultPrecision()
+        static unsigned int defaultPrecision() noexcept
         {
             return precision_;
         }
 
         //- Reset the default precision
         //  \return the previous value
-        static unsigned int defaultPrecision(unsigned int prec)
+        static unsigned int defaultPrecision(unsigned int prec) noexcept
         {
             unsigned int old(precision_);
             precision_ = prec;
             return old;
         }
 
-        //- Set stream to have reached eof
-        void setEof()
+        //- Set stream state as reached 'eof'
+        void setEof() noexcept
         {
-            ioState_ |= ios_base::eofbit;
+            ioState_ |= std::ios_base::eofbit;
         }
 
-        //- Set stream to have failed
-        void setFail()
+        //- Set stream state as 'failed'
+        void setFail() noexcept
         {
-            ioState_ |= ios_base::failbit;
+            ioState_ |= std::ios_base::failbit;
         }
 
-        //- Set stream to be bad
+        //- Set stream state to be 'bad'
         void setBad()
         {
-            ioState_ |= ios_base::badbit;
+            ioState_ |= std::ios_base::badbit;
         }
 
         //- Set flags of stream

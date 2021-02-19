@@ -249,7 +249,7 @@ void Foam::Time::readDict()
 
             for (simpleRegIOobject* obj : objects)
             {
-                OStringStream os(IOstream::ASCII);
+                OStringStream os;
                 os  << dict;
                 IStringStream is(os.str());
                 obj->readData(is);

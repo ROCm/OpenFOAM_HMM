@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +45,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class OFstreamCollator;
 
 /*---------------------------------------------------------------------------*\
@@ -54,13 +56,14 @@ class threadedCollatedOFstream
 :
     public OStringStream
 {
-    // Private data
+    // Private Data
 
+        //- The backend writer
         OFstreamCollator& writer_;
 
         const fileName pathName_;
 
-        const IOstream::compressionType compression_;
+        const IOstreamOption::compressionType compression_;
 
         const bool useThread_;
 
@@ -78,14 +81,22 @@ public:
             const bool useThread = true
         );
 
+
+    //- Destructor
+    ~threadedCollatedOFstream();
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
         //- Construct and set stream status
         threadedCollatedOFstream
         (
             OFstreamCollator& writer,
             const fileName& pathname,
-            streamFormat fmt,
-            versionNumber ver = currentVersion,
-            compressionType comp = compressionType::UNCOMPRESSED,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
             const bool useThread = true
         )
         :
@@ -93,14 +104,12 @@ public:
             (
                 writer,
                 pathname,
-                IOstreamOption(fmt, ver, comp),
+                IOstreamOption(fmt, ver, cmp),
                 useThread
             )
         {}
 
-
-    //- Destructor
-    ~threadedCollatedOFstream();
+    #endif /* Foam_IOstream_extras */
 };
 
 

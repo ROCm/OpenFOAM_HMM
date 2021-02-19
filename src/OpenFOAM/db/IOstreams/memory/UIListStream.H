@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -216,54 +216,44 @@ public:
         (
             const char* buffer,
             size_t nbytes,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(const_cast<char*>(buffer), nbytes),
-            ISstream(stream_, name, format, version)
-        {}
-
-
-        //- Construct using data area from a FixedList
-        template<unsigned N>
-        explicit UIListStream
-        (
-            const FixedList<char, N>& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
-        )
-        :
-            UIListStream(buffer.cdata(), N, format, version, name)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
         //- Construct using data area from a List and number of bytes
         UIListStream
         (
             const UList<char>& buffer,
-            label size,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            size_t nbytes,
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
-            UIListStream(buffer.cdata(), size, format, version, name)
+            UIListStream(buffer.cdata(), nbytes, streamOpt)
         {}
-
 
         //- Construct using data area from a List and its inherent storage size
         //  Uses addressed size, thus no special treatment for a DynamicList
         explicit UIListStream
         (
             const UList<char>& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
-            UIListStream(buffer.cdata(), buffer.size(), format, version, name)
+            UIListStream(buffer.cdata(), buffer.size(), streamOpt)
+        {}
+
+        //- Construct using data area from a FixedList
+        template<unsigned N>
+        explicit UIListStream
+        (
+            const FixedList<char, N>& buffer,
+            IOstreamOption streamOpt = IOstreamOption()
+        )
+        :
+            UIListStream(buffer.cdata(), N, streamOpt)
         {}
 
 
@@ -294,6 +284,60 @@ public:
         {
             return const_cast<Istream&>(static_cast<const Istream&>(*this));
         }
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Construct using specified buffer and number of bytes
+        UIListStream
+        (
+            const char* buffer,
+            size_t nbytes,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            UIListStream(buffer, nbytes, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct using data area from a List and number of bytes
+        UIListStream
+        (
+            const UList<char>& buffer,
+            size_t nbytes,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            UIListStream(buffer.cdata(), nbytes, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct using data area from a List and its inherent storage size
+        //  Uses addressed size, thus no special treatment for a DynamicList
+        UIListStream
+        (
+            const UList<char>& buf,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            UIListStream(buf.cdata(), buf.size(), IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct using data area from a FixedList
+        template<unsigned N>
+        UIListStream
+        (
+            const FixedList<char, N>& buffer,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            UIListStream(buffer.cdata(), N, IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

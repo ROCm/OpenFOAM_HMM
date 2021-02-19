@@ -55,10 +55,10 @@ Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
 Foam::tokenList Foam::ITstream::parse
 (
     const UList<char>& input,
-    streamFormat format
+    IOstreamOption streamOpt
 )
 {
-    UIListStream is(input, format, IOstream::currentVersion);
+    UIListStream is(input, streamOpt);
 
     tokenList tokens;
     parseStream(is, tokens);
@@ -69,16 +69,10 @@ Foam::tokenList Foam::ITstream::parse
 Foam::tokenList Foam::ITstream::parse
 (
     const std::string& input,
-    streamFormat format
+    IOstreamOption streamOpt
 )
 {
-    UIListStream is
-    (
-        input.data(),
-        input.size(),
-        format,
-        IOstream::currentVersion
-    );
+    UIListStream is(input.data(), input.size(), streamOpt);
 
     tokenList tokens;
     parseStream(is, tokens);
@@ -89,10 +83,10 @@ Foam::tokenList Foam::ITstream::parse
 Foam::tokenList Foam::ITstream::parse
 (
     const char* input,
-    streamFormat format
+    IOstreamOption streamOpt
 )
 {
-    UIListStream is(input, strlen(input), format, IOstream::currentVersion);
+    UIListStream is(input, strlen(input), streamOpt);
 
     tokenList tokens;
     parseStream(is, tokens);
@@ -141,16 +135,15 @@ Foam::ITstream::ITstream
 (
     const string& name,
     const UList<char>& input,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption streamOpt
 )
 :
-    Istream(format, version),
+    Istream(streamOpt.format(), streamOpt.version()),
     tokenList(),
     name_(name),
     tokenIndex_(0)
 {
-    UIListStream is(input, format, version);
+    UIListStream is(input, streamOpt);
 
     parseStream(is, static_cast<tokenList&>(*this));
     ITstream::rewind();
@@ -161,16 +154,15 @@ Foam::ITstream::ITstream
 (
     const string& name,
     const std::string& input,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption streamOpt
 )
 :
-    Istream(format, version),
+    Istream(streamOpt.format(), streamOpt.version()),
     tokenList(),
     name_(name),
     tokenIndex_(0)
 {
-    UIListStream is(input.data(), input.size(), format, version);
+    UIListStream is(input.data(), input.size(), streamOpt);
 
     parseStream(is, static_cast<tokenList&>(*this));
     ITstream::rewind();
@@ -181,16 +173,15 @@ Foam::ITstream::ITstream
 (
     const string& name,
     const char* input,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption streamOpt
 )
 :
-    Istream(format, version),
+    Istream(streamOpt.format(), streamOpt.version()),
     tokenList(),
     name_(name),
     tokenIndex_(0)
 {
-    UIListStream is(input, strlen(input), format, version);
+    UIListStream is(input, strlen(input), streamOpt);
 
     parseStream(is, static_cast<tokenList&>(*this));
     ITstream::rewind();

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,10 +71,7 @@ protected:
     // Constructors
 
         //- Default construct
-        StringStreamAllocator()
-        :
-            stream_()
-        {}
+        StringStreamAllocator() = default;
 
         //- Copy construct from string
         StringStreamAllocator(const std::string& s)
@@ -107,7 +104,7 @@ public:
                         Class IStringStream Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Input from string buffer, using a ISstream
+//- Input from string buffer, using a ISstream. Always UNCOMPRESSED.
 class IStringStream
 :
     public Detail::StringStreamAllocator<std::istringstream>,
@@ -119,41 +116,36 @@ public:
 
     // Constructors
 
-        //- Default construct
+        //- Default construct or with specified stream option
         explicit IStringStream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            ISstream(stream_, "input", format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
         //- Construct from std::string
         explicit IStringStream
         (
             const std::string& s,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(s),
-            ISstream(stream_, name, format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
         //- Construct from char*
         explicit IStringStream
         (
             const char* s,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(s),
-            ISstream(stream_, name, format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
         //- Copy construct, copies content and format
@@ -185,6 +177,44 @@ public:
         {
             return const_cast<IStringStream&>(*this);
         }
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Default construct
+        explicit IStringStream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IStringStream(IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct from std::string
+        IStringStream
+        (
+            const std::string& s,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IStringStream(s, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct from char*
+        IStringStream
+        (
+            const char* s,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IStringStream(s, IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 
@@ -192,7 +222,7 @@ public:
                         Class OStringStream Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Output to string buffer, using a OSstream
+//- Output to string buffer, using a OSstream. Always UNCOMPRESSED.
 class OStringStream
 :
     public Detail::StringStreamAllocator<std::ostringstream>,
@@ -204,15 +234,14 @@ public:
 
     // Constructors
 
-        //- Default construct
+        //- Default construct or with specified stream option
         explicit OStringStream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "output", streamOpt.format(), streamOpt.version())
         {}
 
         //- Copy construct, copies content and format
@@ -241,6 +270,22 @@ public:
 
         //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
+
+
+    // Older style, without stream option (including 2012 release)
+    #ifdef Foam_IOstream_extras
+
+        //- Default construct
+        explicit OStringStream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OStringStream(IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
         is.setScalarByteSize(sizeof(otherType));
 
         Info<< "Stream scalar-size ("
-            << is.scalarByteSize() << ") is native: "
+            << label(is.scalarByteSize()) << ") is native: "
             << Switch(is.checkScalarSize<otherType>()) << nl;
 
 

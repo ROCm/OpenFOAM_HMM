@@ -579,17 +579,13 @@ bool Foam::ccm::reader::hasSolution()
 void Foam::ccm::reader::writeMesh
 (
     const polyMesh& mesh,
-    IOstream::streamFormat fmt
+    IOstreamOption streamOpt
 ) const
 {
     mesh.removeFiles();
 
     Info<< "Writing polyMesh" << endl;
-    mesh.writeObject
-    (
-        IOstreamOption(fmt),
-        true
-    );
+    mesh.writeObject(streamOpt, true);
     writeAux(mesh);
 }
 

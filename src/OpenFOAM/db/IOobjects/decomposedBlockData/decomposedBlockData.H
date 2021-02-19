@@ -67,7 +67,7 @@ protected:
         const label comm_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Helper: determine number of processors whose recvSizes fits
         //  ito maxBufferSize
@@ -154,8 +154,7 @@ public:
         static void writeHeader
         (
             Ostream& os,
-            const IOstream::versionNumber version,
-            const IOstream::streamFormat format,
+            IOstreamOption streamOpt,
             const word& objectType,
             const string& note,
             const fileName& location,

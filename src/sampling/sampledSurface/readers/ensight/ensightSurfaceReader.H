@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ protected:
         };
 
         //- Format flag
-        IOstream::streamFormat streamFormat_;
+        IOstreamOption::streamFormat streamFormat_;
 
         //- Base directory
         fileName baseDir_;

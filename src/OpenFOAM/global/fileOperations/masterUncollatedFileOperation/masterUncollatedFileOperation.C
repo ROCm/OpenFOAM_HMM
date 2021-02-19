@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -500,7 +500,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
     PstreamBuffers& pBufs
 )
 {
-    IFstream ifs(filePath, IOstream::streamFormat::BINARY);
+    IFstream ifs(filePath, IOstreamOption::BINARY);
 
     if (!ifs.good())
     {
@@ -516,7 +516,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
             << filePath << endl;
     }
 
-    if (ifs.compression() == IOstream::compressionType::COMPRESSED)
+    if (ifs.compression() == IOstreamOption::COMPRESSED)
     {
         // Could use Foam::fileSize, estimate uncompressed size (eg, 2x)
         // and then string reserve followed by string assign...
@@ -2087,7 +2087,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
 (
     regIOobject& io,
     const bool masterOnly,
-    const IOstream::streamFormat format,
+    const IOstreamOption::streamFormat format,
     const word& typeName
 ) const
 {
@@ -2203,7 +2203,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     setTime(io.time());
 
     autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, valid));
-    OSstream& os = osPtr();
+    OSstream& os = *osPtr;
 
     // If any of these fail, return (leave error handling to Ostream class)
     if (!os.good())

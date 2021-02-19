@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,16 +72,6 @@ public:
             setOpened();
             setGood();
         }
-
-        //- Construct with format, version
-        explicit OTstream
-        (
-            streamFormat fmt,
-            versionNumber ver = currentVersion
-        )
-        :
-            OTstream(IOstreamOption(fmt, ver))
-        {}
 
         //- Copy construct
         OTstream(const OTstream& os)
@@ -268,6 +258,22 @@ public:
 
         //- Print stream description to Ostream
         void print(Ostream& os) const;
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Construct empty with format, version
+        explicit OTstream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OTstream(IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

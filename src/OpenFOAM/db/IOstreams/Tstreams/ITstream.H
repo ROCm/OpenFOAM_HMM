@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,16 +115,15 @@ public:
             setGood();
         }
 
-        //- Construct from components
+        //- Construct from components, copying the tokens
         ITstream
         (
             const string& name,
             const UList<token>& tokens,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
-            Istream(format, version),
+            Istream(streamOpt.format(), streamOpt.version()),
             tokenList(tokens),
             name_(name),
             tokenIndex_(0)
@@ -138,11 +137,10 @@ public:
         (
             const string& name,
             List<token>&& tokens,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
-            Istream(format, version),
+            Istream(streamOpt.format(), streamOpt.version()),
             tokenList(std::move(tokens)),
             name_(name),
             tokenIndex_(0)
@@ -157,8 +155,7 @@ public:
         (
             const string& name,
             const UList<char>& input,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
         //- Construct token list by parsing the input string
@@ -167,8 +164,7 @@ public:
         (
             const string& name,
             const std::string& input,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
         //- Construct token list by parsing the input character sequence
@@ -177,8 +173,7 @@ public:
         (
             const string& name,
             const char* input,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
 
@@ -193,7 +188,7 @@ public:
         static tokenList parse
         (
             const UList<char>& input,
-            streamFormat format=ASCII
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
         //- Create token list by parsing the input string until
@@ -201,7 +196,7 @@ public:
         static tokenList parse
         (
             const std::string& input,
-            streamFormat format=ASCII
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
         //- Create token list by parsing the input character sequence until
@@ -209,7 +204,7 @@ public:
         static tokenList parse
         (
             const char* input,
-            streamFormat format=ASCII
+            IOstreamOption streamOpt = IOstreamOption()
         );
 
 
@@ -359,6 +354,109 @@ public:
 
         //- Move assignment of tokens, with rewind()
         void operator=(List<token>&& toks);
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Construct from components, copying the tokens
+        ITstream
+        (
+            const string& name,
+            const UList<token>& tokens,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            ITstream(name, tokens, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct from components, transferring the tokens
+        ITstream
+        (
+            const string& name,
+            List<token>&& tokens,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            ITstream(name, std::move(tokens), IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const UList<char>& input,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            ITstream(name, input, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct token list by parsing the input string
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const std::string& input,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            ITstream(name, input, IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const char* input,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            ITstream(name, input, IOstreamOption(fmt, ver))
+        {}
+
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const UList<char>& input,
+            IOstreamOption::streamFormat fmt
+        )
+        {
+            return parse(input, IOstreamOption(fmt));
+        }
+
+        //- Create token list by parsing the input string until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const std::string& input,
+            IOstreamOption::streamFormat fmt
+        )
+        {
+            return parse(input, IOstreamOption(fmt));
+        }
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const char* input,
+            IOstreamOption::streamFormat fmt
+        )
+        {
+            return parse(input, IOstreamOption(fmt));
+        }
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

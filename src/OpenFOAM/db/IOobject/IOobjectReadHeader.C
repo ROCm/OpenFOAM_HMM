@@ -84,22 +84,22 @@ bool Foam::IOobject::readHeader(Istream& is)
         // The note entry is optional
         headerDict.readIfPresent("note", note_);
 
-        labelByteSize_ = sizeof(label);
-        scalarByteSize_ = sizeof(scalar);
+        sizeofLabel_ = sizeof(label);
+        sizeofScalar_ = sizeof(scalar);
 
         // The arch information is optional
         string arch;
         if (headerDict.readIfPresent("arch", arch))
         {
             unsigned val = foamVersion::labelByteSize(arch);
-            if (val) labelByteSize_ = val;
+            if (val) sizeofLabel_ = static_cast<unsigned char>(val);
 
             val = foamVersion::scalarByteSize(arch);
-            if (val) scalarByteSize_ = val;
+            if (val) sizeofScalar_ = static_cast<unsigned char>(val);
         }
 
-        is.setLabelByteSize(labelByteSize_);
-        is.setScalarByteSize(scalarByteSize_);
+        is.setLabelByteSize(sizeofLabel_);
+        is.setScalarByteSize(sizeofScalar_);
     }
     else
     {

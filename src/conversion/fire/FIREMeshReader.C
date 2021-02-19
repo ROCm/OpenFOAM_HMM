@@ -376,7 +376,7 @@ void Foam::fileFormats::FIREMeshReader::addPatches(polyMesh& mesh) const
 
 bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
 {
-    IOstream::streamFormat fmt = IOstream::ASCII;
+    IOstreamOption::streamFormat fmt = IOstream::ASCII;
 
     const word ext(geometryFile_.ext());
 

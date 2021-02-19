@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,8 +252,7 @@ Foam::primitiveEntry::primitiveEntry
     (
         is.name() + '.' + key,
         tokenList(10),
-        is.format(),
-        is.version()
+        static_cast<IOstreamOption>(is)
     )
 {
     readEntry(dict, is);

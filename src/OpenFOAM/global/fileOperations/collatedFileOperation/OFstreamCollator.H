@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +43,6 @@ Description
     collecting is done locally; the thread only does the writing
     (since the data has already been collected)
 
-
-Operation determine
-
 SourceFiles
     OFstreamCollator.C
 
@@ -71,45 +69,39 @@ namespace Foam
 
 class OFstreamCollator
 {
-    // Private class
+    // Private Class
 
         class writeData
         {
         public:
 
             const label comm_;
-            const word typeName_;
+            const word objectType_;
             const fileName pathName_;
             const string data_;
             const labelList sizes_;
             PtrList<List<char>> slaveData_;
-            const IOstream::streamFormat format_;
-            const IOstream::versionNumber version_;
-            const IOstream::compressionType compression_;
+            const IOstreamOption streamOpt_;
             const bool append_;
 
             writeData
             (
                 const label comm,
-                const word& typeName,
+                const word& objectType,
                 const fileName& pathName,
                 const string& data,
                 const labelList& sizes,
-                IOstream::streamFormat format,
-                IOstream::versionNumber version,
-                IOstream::compressionType compression,
+                IOstreamOption streamOpt,
                 const bool append
             )
             :
                 comm_(comm),
-                typeName_(typeName),
+                objectType_(objectType),
                 pathName_(pathName),
                 data_(data),
                 sizes_(sizes),
-                slaveData_(0),
-                format_(format),
-                version_(version),
-                compression_(compression),
+                slaveData_(),
+                streamOpt_(streamOpt),
                 append_(append)
             {}
 
@@ -157,14 +149,12 @@ class OFstreamCollator
         static bool writeFile
         (
             const label comm,
-            const word& typeName,
+            const word& objectType,
             const fileName& fName,
             const string& masterData,
             const labelUList& recvSizes,
             const PtrList<SubList<char>>& slaveData,
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType cmp,
+            IOstreamOption streamOpt,
             const bool append
         );
 
@@ -185,10 +175,10 @@ public:
     // Constructors
 
         //- Construct from buffer size. 0 = do not use thread
-        OFstreamCollator(const off_t maxBufferSize);
+        explicit OFstreamCollator(const off_t maxBufferSize);
 
-        //- Construct from buffer size (0 = do not use thread) and local
-        //  thread
+        //- Construct from buffer size (0 = do not use thread)
+        //- and specified communicator
         OFstreamCollator(const off_t maxBufferSize, const label comm);
 
 
@@ -196,18 +186,17 @@ public:
     virtual ~OFstreamCollator();
 
 
-    // Member functions
+    // Member Functions
 
-        //- Write file with contents. Blocks until writethread has space
-        //  available (total file sizes < maxBufferSize)
+        //- Write file with contents.
+        //  Blocks until writethread has space available
+        //  (total file sizes < maxBufferSize)
         bool write
         (
-            const word& typeName,
+            const word& objectType,
             const fileName&,
             const string& data,
-            IOstream::streamFormat,
-            IOstream::versionNumber,
-            IOstream::compressionType,
+            IOstreamOption streamOpt,
             const bool append,
             const bool useThread = true
         );

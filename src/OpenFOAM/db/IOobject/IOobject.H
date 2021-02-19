@@ -163,9 +163,6 @@ private:
         //- Local path component
         fileName local_;
 
-        //- Reference to the objectRegistry
-        const objectRegistry& db_;
-
         //- Read option
         readOption rOpt_;
 
@@ -181,11 +178,14 @@ private:
         //- IOobject state
         objectState objState_;
 
-        //- The label byte-size (could also be stored as byte)
-        unsigned short labelByteSize_;
+        //- The sizeof (label) in bytes, possibly read from the header
+        unsigned char sizeofLabel_;
 
-        //- The scalar byte-size (could also be stored as byte)
-        unsigned short scalarByteSize_;
+        //- The sizeof (scalar) in bytes, possibly read from the header
+        unsigned char sizeofScalar_;
+
+        //- Reference to the objectRegistry
+        const objectRegistry& db_;
 
 
 protected:
@@ -294,7 +294,8 @@ public:
             const objectRegistry& registry,
             readOption r=NO_READ,
             writeOption w=NO_WRITE,
-            bool registerObject=true
+            bool registerObject = true,
+            bool globalObject = false
         );
 
         //- Construct from name, instance, local, registry, io options
@@ -306,7 +307,7 @@ public:
             const objectRegistry& registry,
             readOption r=NO_READ,
             writeOption w=NO_WRITE,
-            bool registerObject=true,
+            bool registerObject = true,
             bool globalObject = false
         );
 
@@ -368,7 +369,7 @@ public:
         //- Return the local objectRegistry
         const objectRegistry& db() const;
 
-        //- Return time
+        //- Return Time associated with the objectRegistry
         const Time& time() const;
 
         //- Return name
@@ -404,11 +405,11 @@ public:
         //- Is object same for all processors?
         inline bool& globalObject();
 
-        //- The label byte-size, possibly read from the header
-        inline unsigned labelByteSize() const;
+        //- The sizeof (label) in bytes, possibly read from the header
+        inline unsigned labelByteSize() const noexcept;
 
-        //- The scalar byte-size, possibly read from the header
-        inline unsigned scalarByteSize() const;
+        //- The sizeof (scalar) in bytes, possibly read from the header
+        inline unsigned scalarByteSize() const noexcept;
 
 
     // Checks

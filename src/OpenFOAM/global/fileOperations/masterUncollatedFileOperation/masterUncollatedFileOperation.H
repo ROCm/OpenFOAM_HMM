@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ class masterUncollatedFileOperation
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Any communicator allocated by me
         const label myComm_;
@@ -98,7 +98,7 @@ protected:
         mutable HashPtrTable<instantList> times_;
 
 
-    // Protected classes
+    // Protected Classes
 
         class mkDirOp
         {
@@ -488,8 +488,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        masterUncollatedFileOperation(bool verbose);
+        //- Default construct
+        explicit masterUncollatedFileOperation(bool verbose);
 
         //- Construct from communicator
         masterUncollatedFileOperation(const label comm, bool verbose);
@@ -679,7 +679,7 @@ public:
             (
                 regIOobject&,
                 const bool masterOnly,
-                const IOstream::streamFormat format,
+                const IOstreamOption::streamFormat format,
                 const word& typeName
             ) const;
 

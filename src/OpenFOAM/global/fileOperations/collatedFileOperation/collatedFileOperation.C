@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     // Create string from all data to write
     string buf;
     {
-        OStringStream os(streamOpt.format(), streamOpt.version());
+        OStringStream os(streamOpt);
         if (isMaster)
         {
             if (!io.writeHeader(os))
@@ -204,23 +204,15 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
     if (isMaster)
     {
-        IOobject::writeBanner(os)
-            << "FoamFile\n{\n"
-            << "    version     " << os.version() << ";\n"
-            << "    format      " << os.format() << ";\n"
-            << "    class       " << decomposedBlockData::typeName
-            << ";\n";
-
-        // This may be useful to have as well
-        if (os.format() == IOstream::BINARY)
-        {
-            os  << "    arch        " << foamVersion::buildArch << ";\n";
-        }
-
-        os  << "    location    " << pathName << ";\n"
-            << "    object      " << pathName.name() << ";\n"
-            << "}" << nl;
-        IOobject::writeDivider(os) << nl;
+        decomposedBlockData::writeHeader
+        (
+            os,
+            static_cast<IOstreamOption>(os),
+            decomposedBlockData::typeName,  // class
+            "",                             // note
+            pathName,                       // location
+            pathName.name()                 // object
+        );
     }
 
     // Write data

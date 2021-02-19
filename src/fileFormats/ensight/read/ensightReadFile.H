@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +65,10 @@ public:
     // Constructors
 
         //- Construct from pathname. Default format is binary.
-        ensightReadFile
+        explicit ensightReadFile
         (
             const fileName& pathname,
-            IOstream::streamFormat format=IOstream::BINARY
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
 

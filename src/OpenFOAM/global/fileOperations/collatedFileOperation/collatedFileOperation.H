@@ -105,7 +105,7 @@ public:
         TypeName("collated");
 
 
-    // Static data
+    // Static Data
 
         //- Max size of thread buffer size. This is the overall size of
         //  all files to be written. Starts blocking if not enough size.
@@ -115,8 +115,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        collatedFileOperation(bool verbose);
+        //- Default construct
+        explicit collatedFileOperation(bool verbose);
 
         //- Construct from user communicator
         collatedFileOperation
@@ -163,8 +163,8 @@ public:
             //- Actual name of processors dir
             virtual word processorsDir(const fileName&) const;
 
-            //- Set number of processor directories/results. Only used in
-            //  decomposePar
+            //- Set number of processor directories/results.
+            //- Only used in decomposePar
             virtual void setNProcs(const label nProcs);
 };
 
@@ -197,9 +197,7 @@ public:
         //- Needs threading
         virtual bool needsThreading() const
         {
-            return
-                collatedFileOperation::maxThreadFileBufferSize
-              > 0;
+            return (collatedFileOperation::maxThreadFileBufferSize > 0);
         }
 };
 

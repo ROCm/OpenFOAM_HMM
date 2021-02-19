@@ -47,12 +47,12 @@ Foam::UIPstream::UIPstream
     const int tag,
     const label comm,
     const bool clearAtEnd,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption::streamFormat fmt,
+    IOstreamOption::versionNumber ver
 )
 :
     UPstream(commsType),
-    Istream(format, version),
+    Istream(fmt, ver),
     fromProcNo_(fromProcNo),
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),

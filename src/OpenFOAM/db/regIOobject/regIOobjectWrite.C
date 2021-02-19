@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "regIOobject.H"
 #include "Time.H"
-#include "OSspecific.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,8 +41,7 @@ bool Foam::regIOobject::writeObject
     if (!good())
     {
         SeriousErrorInFunction
-            << "bad object " << name()
-            << endl;
+            << "bad object " << name() << endl;
 
         return false;
     }
@@ -51,8 +49,7 @@ bool Foam::regIOobject::writeObject
     if (instance().empty())
     {
         SeriousErrorInFunction
-            << "instance undefined for object " << name()
-            << endl;
+            << "instance undefined for object " << name() << endl;
 
         return false;
     }
@@ -97,9 +94,6 @@ bool Foam::regIOobject::writeObject
     }
 
 
-    bool osGood = false;
-
-
     // Everyone check or just master
     bool masterOnly =
         isGlobal
@@ -108,36 +102,9 @@ bool Foam::regIOobject::writeObject
          || regIOobject::fileModificationChecking == inotifyMaster
         );
 
-
+    bool osGood = false;
     if (Pstream::master() || !masterOnly)
     {
-        //if (mkDir(path()))
-        //{
-        //    // Try opening an OFstream for object
-        //    OFstream os(objectPath(), streamOpt);
-        //
-        //    // If any of these fail, return (leave error handling to Ostream
-        //    // class)
-        //    if (!os.good())
-        //    {
-        //        return false;
-        //    }
-        //
-        //    if (!writeHeader(os))
-        //    {
-        //        return false;
-        //    }
-        //
-        //    // Write the data to the Ostream
-        //    if (!writeData(os))
-        //    {
-        //        return false;
-        //    }
-        //
-        //    writeEndDivider(os);
-        //
-        //    osGood = os.good();
-        //}
         osGood = fileHandler().writeObject(*this, streamOpt, valid);
     }
     else
@@ -174,9 +141,9 @@ bool Foam::regIOobject::write(const bool valid) const
 
 bool Foam::regIOobject::writeObject
 (
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption::streamFormat fmt,
+    IOstreamOption::versionNumber ver,
+    IOstreamOption::compressionType cmp,
     const bool valid
 ) const
 {

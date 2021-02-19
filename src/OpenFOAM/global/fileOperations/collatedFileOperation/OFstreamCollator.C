@@ -44,14 +44,12 @@ namespace Foam
 bool Foam::OFstreamCollator::writeFile
 (
     const label comm,
-    const word& typeName,
+    const word& objectType,
     const fileName& fName,
     const string& masterData,
     const labelUList& recvSizes,
     const PtrList<SubList<char>>& slaveData,    // optional slave data
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool append
 )
 {
@@ -79,17 +77,7 @@ bool Foam::OFstreamCollator::writeFile
     if (UPstream::master(comm))
     {
         Foam::mkDir(fName.path());
-        osPtr.reset
-        (
-            new OFstream
-            (
-                fName,
-                fmt,
-                ver,
-                cmp,
-                append
-            )
-        );
+        osPtr.reset(new OFstream(fName, streamOpt, append));
 
         // We don't have IOobject so cannot use IOobject::writeHeader
         if (!append)
@@ -97,9 +85,8 @@ bool Foam::OFstreamCollator::writeFile
             decomposedBlockData::writeHeader
             (
                 *osPtr,
-                ver,
-                fmt,
-                typeName,
+                streamOpt,
+                objectType,
                 "",          // note
                 fName,       // location
                 fName.name() // object name
@@ -195,7 +182,7 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
             PtrList<SubList<char>> slaveData;
             if (ptr->slaveData_.size())
             {
-                slaveData.setSize(ptr->slaveData_.size());
+                slaveData.resize(ptr->slaveData_.size());
                 forAll(slaveData, proci)
                 {
                     if (ptr->slaveData_.set(proci))
@@ -216,14 +203,12 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
             bool ok = writeFile
             (
                 ptr->comm_,
-                ptr->typeName_,
+                ptr->objectType_,
                 ptr->pathName_,
                 ptr->data_,
                 ptr->sizes_,
                 slaveData,
-                ptr->format_,
-                ptr->version_,
-                ptr->compression_,
+                ptr->streamOpt_,
                 ptr->append_
             );
             if (!ok)
@@ -354,12 +339,10 @@ Foam::OFstreamCollator::~OFstreamCollator()
 
 bool Foam::OFstreamCollator::write
 (
-    const word& typeName,
+    const word& objectType,
     const fileName& fName,
     const string& data,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool append,
     const bool useThread
 )
@@ -393,14 +376,12 @@ bool Foam::OFstreamCollator::write
         return writeFile
         (
             localComm_,
-            typeName,
+            objectType,
             fName,
             data,
             recvSizes,
             dummySlaveData,
-            fmt,
-            ver,
-            cmp,
+            streamOpt,
             append
         );
     }
@@ -429,7 +410,7 @@ bool Foam::OFstreamCollator::write
             new writeData
             (
                 threadComm_,        // Note: comm not actually used anymore
-                typeName,
+                objectType,
                 fName,
                 (
                     Pstream::master(localComm_)
@@ -437,9 +418,7 @@ bool Foam::OFstreamCollator::write
                   : string::null
                 ),
                 recvSizes,
-                fmt,
-                ver,
-                cmp,
+                streamOpt,
                 append
             )
         );
@@ -559,13 +538,11 @@ bool Foam::OFstreamCollator::write
                 new writeData
                 (
                     threadComm_,
-                    typeName,
+                    objectType,
                     fName,
                     data,
                     recvSizes,
-                    fmt,
-                    ver,
-                    cmp,
+                    streamOpt,
                     append
                 )
             );

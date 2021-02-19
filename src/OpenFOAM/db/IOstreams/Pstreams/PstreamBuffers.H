@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,9 +100,9 @@ class PstreamBuffers
 
         const label comm_;
 
-        const IOstream::streamFormat format_;
+        const IOstreamOption::streamFormat format_;
 
-        const IOstream::versionNumber version_;
+        const IOstreamOption::versionNumber version_;
 
         //- Send buffer
         List<DynamicList<char>> sendBuf_;
@@ -130,8 +131,8 @@ public:
             const UPstream::commsTypes commsType,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
-            IOstream::streamFormat format=IOstream::BINARY,
-            IOstream::versionNumber version=IOstream::currentVersion
+            IOstreamOption::streamFormat vmt = IOstreamOption::BINARY,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
         );
 
     //- Destructor

@@ -1181,7 +1181,7 @@ bool Foam::polyBoundaryMesh::writeObject
     const bool valid
 ) const
 {
-    streamOpt.compression(IOstream::UNCOMPRESSED);
+    streamOpt.compression(IOstreamOption::UNCOMPRESSED);
     return regIOobject::writeObject(streamOpt, valid);
 }
 

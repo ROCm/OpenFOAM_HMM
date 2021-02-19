@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -409,36 +409,33 @@ public:
         //- Default construct (empty output)
         explicit OListStream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "output", streamOpt.format(), streamOpt.version())
         {}
 
         //- Construct with initial reserved number of bytes
         explicit OListStream
         (
             size_t nbytes,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(nbytes),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "output", streamOpt.format(), streamOpt.version())
         {}
 
         //- Move construct from an existing List
         explicit OListStream
         (
             List<char>&& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(std::move(buffer)),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "output", streamOpt.format(), streamOpt.version())
         {}
 
         //- Move construct from an existing DynamicList
@@ -446,12 +443,11 @@ public:
         explicit OListStream
         (
             DynamicList<char,SizeMin>&& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(std::move(buffer)),
-            OSstream(stream_, "output", format, version)
+            OSstream(stream_, "output", streamOpt.format(), streamOpt.version())
         {}
 
 
@@ -466,6 +462,56 @@ public:
 
         //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Default construct (empty output)
+        explicit OListStream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OListStream(IOstreamOption(fmt, ver))
+        {}
+
+        //- Construct with initial reserved number of bytes
+        explicit OListStream
+        (
+            size_t nbytes,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OListStream(nbytes, IOstreamOption(fmt, ver))
+        {}
+
+        //- Move construct from an existing List
+        OListStream
+        (
+            List<char>&& buffer,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OListStream(std::move(buffer), IOstreamOption(fmt, ver))
+        {}
+
+        //- Move construct from an existing DynamicList
+        template<int SizeMin>
+        OListStream
+        (
+            DynamicList<char,SizeMin>&& buffer,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OListStream(std::move(buffer), IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

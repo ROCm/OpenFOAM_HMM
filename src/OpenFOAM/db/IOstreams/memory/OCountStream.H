@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,12 +260,11 @@ public:
         //- Default construct
         explicit OCountStream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            OSstream(stream_, "count", format, version)
+            OSstream(stream_, "count", streamOpt.format(), streamOpt.version())
         {}
 
         //- Copy construct
@@ -287,6 +286,23 @@ public:
 
         //- Print stream description to Ostream
         virtual void print(Ostream& os) const;
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Default construct
+        explicit OCountStream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OCountStream(IOstreamOption(fmt, ver))
+        {}
+
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

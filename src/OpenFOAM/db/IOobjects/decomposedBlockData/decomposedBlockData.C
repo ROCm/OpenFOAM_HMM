@@ -186,8 +186,7 @@ bool Foam::decomposedBlockData::readMasterHeader(IOobject& io, Istream& is)
 void Foam::decomposedBlockData::writeHeader
 (
     Ostream& os,
-    const IOstream::versionNumber version,
-    const IOstream::streamFormat format,
+    IOstreamOption streamOpt,
     const word& objectType,
     const string& note,
     const fileName& location,
@@ -197,8 +196,8 @@ void Foam::decomposedBlockData::writeHeader
     IOobject::writeBanner(os)
         << "FoamFile" << nl
         << '{' << nl
-        << "    version     " << version << ';' << nl
-        << "    format      " << format << ';' << nl
+        << "    version     " << streamOpt.version() << ';' << nl
+        << "    format      " << streamOpt.format() << ';' << nl
         << "    arch        " << foamVersion::buildArch << ';' << nl;
 
     if (Pstream::parRun())
@@ -274,8 +273,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         List<char> data(is);
         is.fatalCheck("read(Istream&) : reading entry");
 
-        IOstream::versionNumber ver(IOstream::currentVersion);
-        IOstream::streamFormat fmt;
+        IOstreamOption::versionNumber ver(IOstreamOption::currentVersion);
+        IOstreamOption::streamFormat fmt;
         unsigned labelByteSize;
         unsigned scalarByteSize;
         {
@@ -566,24 +565,24 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
     //- Set stream properties from realIsPtr on master
 
     // Scatter master header info
-    string versionString;
-    label formatValue;
+    int verValue;
+    int fmtValue;
     unsigned labelByteSize;
     unsigned scalarByteSize;
     if (UPstream::master(comm))
     {
-        versionString = realIsPtr().version().str();
-        formatValue = static_cast<label>(realIsPtr().format());
+        verValue = realIsPtr().version().canonical();
+        fmtValue = static_cast<int>(realIsPtr().format());
         labelByteSize = realIsPtr().labelByteSize();
         scalarByteSize = realIsPtr().scalarByteSize();
     }
-    Pstream::scatter(versionString); //,  Pstream::msgType(), comm);
-    Pstream::scatter(formatValue); //,  Pstream::msgType(), comm);
+    Pstream::scatter(verValue); //,  Pstream::msgType(), comm);
+    Pstream::scatter(fmtValue); //,  Pstream::msgType(), comm);
     Pstream::scatter(labelByteSize); //,  Pstream::msgType(), comm);
     Pstream::scatter(scalarByteSize); //,  Pstream::msgType(), comm);
 
-    realIsPtr().version(IOstream::versionNumber(versionString));
-    realIsPtr().format(IOstream::streamFormat(formatValue));
+    realIsPtr().version(IOstreamOption::versionNumber::canonical(verValue));
+    realIsPtr().format(IOstreamOption::streamFormat(fmtValue));
     realIsPtr().setLabelByteSize(labelByteSize);
     realIsPtr().setScalarByteSize(scalarByteSize);
 
@@ -971,20 +970,27 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
     const List<char>& data = *this;
 
     IOobject io(*this);
+    IOstreamOption streamOpt(os);
+
+    int verValue;
+    int fmtValue;
 
     // Re-read my own data to find out the header information
     if (Pstream::master(comm_))
     {
         UIListStream headerStream(data);
         io.readHeader(headerStream);
+
+        verValue = headerStream.version().canonical();
+        fmtValue = static_cast<int>(headerStream.format());
     }
 
     // Scatter header information
+    Pstream::scatter(verValue, Pstream::msgType(), comm_);
+    Pstream::scatter(fmtValue, Pstream::msgType(), comm_);
 
-    string versionString(os.version().str());
-    label formatValue(os.format());
-    Pstream::scatter(versionString, Pstream::msgType(), comm_);
-    Pstream::scatter(formatValue, Pstream::msgType(), comm_);
+    streamOpt.version(IOstreamOption::versionNumber::canonical(verValue));
+    streamOpt.format(IOstreamOption::streamFormat(fmtValue));
 
     //word masterName(name());
     //Pstream::scatter(masterName, Pstream::msgType(), comm_);
@@ -999,11 +1005,10 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
 
     if (!Pstream::master(comm_))
     {
-        writeHeader
+        decomposedBlockData::writeHeader
         (
             os,
-            IOstreamOption::versionNumber(versionString),
-            IOstreamOption::streamFormat(formatValue),
+            streamOpt,
             io.headerClassName(),
             io.note(),
             masterLocation,
@@ -1074,7 +1079,7 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
     label nBlocks = 0;
 
     IFstream is(fName);
-    is.fatalCheck("decomposedBlockData::numBlocks(const fileName&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     if (!is.good())
     {

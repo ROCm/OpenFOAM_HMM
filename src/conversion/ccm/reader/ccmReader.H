@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,7 +160,6 @@ SourceFiles
 #include "cellTable.H"
 #include "ccmInterfaceDefinitions.H"
 #include "ccmSolutionTable.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -395,7 +394,7 @@ private:
             const objectRegistry& registry,
             const word& propertyName,
             const labelList& list,
-            IOstream::streamFormat fmt = IOstream::ASCII
+            IOstreamOption streamOpt
         ) const;
 
         // polyMesh Friend Functions
@@ -493,7 +492,7 @@ public:
         void writeMesh
         (
             const polyMesh& mesh,
-            IOstream::streamFormat fmt = IOstream::BINARY
+            IOstreamOption streamOpt = IOstreamOption(IOstreamOption::BINARY)
         ) const;
 
         //- Write cellTable, boundaryRegion and interface information

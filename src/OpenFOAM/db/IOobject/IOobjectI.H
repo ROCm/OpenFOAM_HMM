@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,15 +133,15 @@ inline bool& Foam::IOobject::globalObject()
 }
 
 
-inline unsigned Foam::IOobject::labelByteSize() const
+inline unsigned Foam::IOobject::labelByteSize() const noexcept
 {
-    return labelByteSize_;
+    return static_cast<unsigned>(sizeofLabel_);
 }
 
 
-inline unsigned Foam::IOobject::scalarByteSize() const
+inline unsigned Foam::IOobject::scalarByteSize() const noexcept
 {
-    return scalarByteSize_;
+    return static_cast<unsigned>(sizeofScalar_);
 }
 
 

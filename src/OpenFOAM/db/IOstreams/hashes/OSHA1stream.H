@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,10 +72,8 @@ class osha1stream
 
     public:
 
-        //- Construct null
-        sha1buf()
-        {}
-
+        //- Default construct
+        sha1buf() = default;
 
         //- Full access to the sha1
         inline SHA1& sha1()
@@ -94,7 +92,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         osha1stream()
         :
             std::ostream(&buf_)
@@ -114,7 +112,6 @@ public:
         {
             return buf_.sha1();
         }
-
 };
 
 
@@ -140,11 +137,8 @@ protected:
 
     // Constructors
 
-        //- Construct null
-        OSHA1streamAllocator()
-        :
-            stream_()
-        {}
+        //- Default construct
+        OSHA1streamAllocator() = default;
 
 
 public:
@@ -170,7 +164,6 @@ public:
         {
             return stream_.sha1().clear();
         }
-
 };
 
 } // End namespace Detail
@@ -201,14 +194,13 @@ public:
     // Constructors
 
         //- Construct with an empty digest
-        OSHA1stream
+        explicit OSHA1stream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            OSstream(stream_, "sha1", format, version)
+            OSstream(stream_, "sha1", streamOpt.format(), streamOpt.version())
         {}
 
 
@@ -230,6 +222,22 @@ public:
         {
             sha1().clear();
         }
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Construct empty
+        explicit OSHA1stream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            OSHA1stream(IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,7 +143,7 @@ Foam::Ostream& Foam::OTstream::write(const doubleScalar val)
 
 Foam::Ostream& Foam::OTstream::write(const char* data, std::streamsize count)
 {
-    if (format() != BINARY)
+    if (format() != IOstreamOption::BINARY)
     {
         FatalErrorInFunction
             << "stream format not binary"
@@ -173,7 +173,7 @@ Foam::Ostream& Foam::OTstream::writeRaw
 
 bool Foam::OTstream::beginRawWrite(std::streamsize count)
 {
-    if (format() != BINARY)
+    if (format() != IOstreamOption::BINARY)
     {
         FatalErrorInFunction
             << "stream format not binary"

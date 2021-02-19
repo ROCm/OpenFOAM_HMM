@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,7 @@ public:
     // Constructors
 
         //- Default construct
-        uncollatedFileOperation(bool verbose);
+        explicit uncollatedFileOperation(bool verbose);
 
 
     //- Destructor
@@ -272,7 +272,7 @@ public:
             (
                 regIOobject&,
                 const bool masterOnly,
-                const IOstream::streamFormat format,
+                const IOstreamOption::streamFormat format,
                 const word& typeName
             ) const;
 

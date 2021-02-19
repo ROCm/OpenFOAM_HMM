@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::threadedCollatedOFstream::threadedCollatedOFstream
     const bool useThread
 )
 :
-    OStringStream(streamOpt.format(), streamOpt.version()),
+    OStringStream(streamOpt),
     writer_(writer),
     pathName_(pathName),
     compression_(streamOpt.compression()),
@@ -57,9 +57,7 @@ Foam::threadedCollatedOFstream::~threadedCollatedOFstream()
         decomposedBlockData::typeName,
         pathName_,
         str(),
-        IOstream::BINARY,
-        version(),
-        compression_,
+        IOstreamOption(IOstream::BINARY, version(), compression_),
         false,  // append=false
         useThread_
     );

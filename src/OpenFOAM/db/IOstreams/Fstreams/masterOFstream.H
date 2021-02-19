@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ class masterOFstream
 
         const fileName pathName_;
 
-        const IOstream::compressionType compression_;
+        const IOstreamOption::compressionType compression_;
 
         const bool append_;
 
@@ -99,9 +99,9 @@ public:
         masterOFstream
         (
             const fileName& pathname,
-            streamFormat fmt,
-            versionNumber ver = currentVersion,
-            compressionType comp = compressionType::UNCOMPRESSED,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
             const bool append = false,
             const bool valid = true
         )
@@ -109,7 +109,7 @@ public:
             masterOFstream
             (
                 pathname,
-                IOstreamOption(fmt, comp, ver),
+                IOstreamOption(fmt, ver, cmp),
                 append,
                 valid
             )

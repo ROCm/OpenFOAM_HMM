@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,8 +91,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        hostCollatedFileOperation(const bool verbose);
+        //- Default construct
+        explicit hostCollatedFileOperation(const bool verbose);
 
 
     //- Destructor

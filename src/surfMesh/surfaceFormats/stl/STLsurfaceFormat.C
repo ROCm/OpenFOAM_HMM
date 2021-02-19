@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,7 +204,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
 (
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
-    IOstream::compressionType comp
+    IOstreamOption::compressionType comp
 )
 {
     OFstream os(filename, IOstreamOption(IOstream::ASCII, comp));
@@ -303,7 +303,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeAscii
 (
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
-    IOstream::compressionType comp
+    IOstreamOption::compressionType comp
 )
 {
     const pointField& pointLst = surf.points();
@@ -416,7 +416,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const fileName& filename,
     const MeshedSurfaceProxy<Face>& surf,
     const STLFormat format,
-    IOstream::compressionType comp
+    IOstreamOption::compressionType comp
 )
 {
     if (STLCore::isBinaryName(filename, format))
@@ -461,7 +461,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf,
     const STLFormat format,
-    IOstream::compressionType comp
+    IOstreamOption::compressionType comp
 )
 {
     if (STLCore::isBinaryName(filename, format))
