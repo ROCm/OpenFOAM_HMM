@@ -241,30 +241,34 @@ inline bool Foam::wallPoints::updateFace
     TrackingData& td
 )
 {
-    const point& fc = mesh.faceCentres()[thisFacei];
-
     // From cell to its faces.
     bool hasChanged = false;
-    forAll(neighbourInfo.surface_, i)
-    {
-        const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
 
-        // Find in my surfaces
-        label index = surface_.find(nbrSurface);
-        if (index == -1)
+    if (!td.isBlockedFace_[thisFacei])
+    {
+        const point& fc = mesh.faceCentres()[thisFacei];
+
+        forAll(neighbourInfo.surface_, i)
         {
-            // Append
-            origin_.append(neighbourInfo.origin_[i]);
-            distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
-            surface_.append(nbrSurface);
-            //normal_.append(neighbourInfo.normal_[i]);
-            hasChanged = true;
-        }
-        else
-        {
-            hasChanged =
-                update(fc, index, neighbourInfo, i, tol, td)
-             || hasChanged;
+            const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
+
+            // Find in my surfaces
+            label index = surface_.find(nbrSurface);
+            if (index == -1)
+            {
+                // Append
+                origin_.append(neighbourInfo.origin_[i]);
+                distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
+                surface_.append(nbrSurface);
+                //normal_.append(neighbourInfo.normal_[i]);
+                hasChanged = true;
+            }
+            else
+            {
+                hasChanged =
+                    update(fc, index, neighbourInfo, i, tol, td)
+                 || hasChanged;
+            }
         }
     }
 
@@ -283,30 +287,34 @@ inline bool Foam::wallPoints::updateFace
     TrackingData& td
 )
 {
-    const point& fc = mesh.faceCentres()[thisFacei];
-
     // From face to face (e.g. coupled faces)
     bool hasChanged = false;
-    forAll(neighbourInfo.surface_, i)
-    {
-        const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
 
-        // Find in my surfaces
-        label index = surface_.find(nbrSurface);
-        if (index == -1)
+    if (!td.isBlockedFace_[thisFacei])
+    {
+        const point& fc = mesh.faceCentres()[thisFacei];
+
+        forAll(neighbourInfo.surface_, i)
         {
-            // Append
-            origin_.append(neighbourInfo.origin_[i]);
-            distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
-            surface_.append(nbrSurface);
-            //normal_.append(neighbourInfo.normal_[i]);
-            hasChanged = true;
-        }
-        else
-        {
-            hasChanged =
-                update(fc, index, neighbourInfo, i, tol, td)
-             || hasChanged;
+            const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
+
+            // Find in my surfaces
+            const label index = surface_.find(nbrSurface);
+            if (index == -1)
+            {
+                // Append
+                origin_.append(neighbourInfo.origin_[i]);
+                distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
+                surface_.append(nbrSurface);
+                //normal_.append(neighbourInfo.normal_[i]);
+                hasChanged = true;
+            }
+            else
+            {
+                hasChanged =
+                    update(fc, index, neighbourInfo, i, tol, td)
+                 || hasChanged;
+            }
         }
     }
 

@@ -42,6 +42,7 @@ SourceFiles
 #include "tensor.H"
 #include "DynamicList.H"
 #include "labelList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +62,23 @@ Ostream& operator<<(Ostream&, const wallPoints&);
 
 class wallPoints
 {
+public:
+
+    //- Class used to pass additional data in
+    class trackData
+    {
+    public:
+
+        //- Per face whether the face should not be walked through
+        const bitSet& isBlockedFace_;
+
+        trackData(const bitSet& isBlockedFace)
+        :
+            isBlockedFace_(isBlockedFace)
+        {}
+    };
+
+
 protected:
 
     // Protected Data
