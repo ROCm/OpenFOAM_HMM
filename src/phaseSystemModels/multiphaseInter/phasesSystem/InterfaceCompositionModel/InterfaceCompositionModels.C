@@ -214,7 +214,7 @@ namespace Foam
         );
 
 
-        // From pure phase (solidThermo) to phase (Boussinesq)
+        // From pure solid phase (const) to phase (Boussinesq)
         makeInterfacePureType
         (
             Lee,
@@ -228,7 +228,7 @@ namespace Foam
             BoussinesqFluidEThermoPhysics
         );
 
-        // From pure phase (solidThermo) to phase (rho const)
+        // From pure solid phase (const) to phase (rho const)
         makeInterfacePureType
         (
             Lee,
@@ -242,7 +242,35 @@ namespace Foam
             constRhoHThermoPhysics
         );
 
-        // From pure phase (all-poly solidThermo) to phase (ico-rho)
+        // From pure solid phase (const) to phase (tabulated)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics
+        );
+
+        // From pure solid phase (const) to phase (poly)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics
+        );
+
+        // From pure solid phase (poly) to flow phase (poly)
         makeInterfacePureType
         (
             Lee,
@@ -254,6 +282,20 @@ namespace Foam
             rhoThermo,
             pureMixture,
             icoPoly8HThermoPhysics
+        );
+
+        // From pure solid phase (poly) to flow phase (tabulated)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPolyTranspPolyIcoSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics
         );
 
         // From pure phase (exp-Transp, hPower solidThermo) to phase (ico-rho)
@@ -314,7 +356,7 @@ namespace Foam
             hConstSolidThermoPhysics
         );
 
-        //From pure liquid phase (ico-rho) to pure phase (exp-Transp, hPower solidThermo)
+        //From pure phase (poly) to solid phase (exp)
         makeInterfacePureType
         (
             Lee,
@@ -326,6 +368,62 @@ namespace Foam
             solidThermo,
             pureMixture,
             hPowerSolidThermoPhysics
+        );
+
+        //From pure phase (poly) to solid phase (poly)
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPolyTranspPolyIcoSolidThermoPhysics
+        );
+
+        //From pure phase (poly) to solid phase (const)
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics
+        );
+
+        //From pure phase (tabulated) to solid phase (poly)
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPolyTranspPolyIcoSolidThermoPhysics
+        );
+
+        //From pure phase (tabulated) to solid phase (const)
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hConstSolidThermoPhysics
         );
 
 
