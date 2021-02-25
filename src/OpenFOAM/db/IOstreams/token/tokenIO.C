@@ -92,9 +92,9 @@ static OS& printTokenInfo(OS& os, const token& tok)
 
         case token::tokenType::COMPOUND:
         {
-            if (tok.compoundToken().empty())
+            if (tok.compoundToken().moved())
             {
-                os  << "empty ";
+                os  << "moved ";
             }
             os  << "compound of type "
                 << tok.compoundToken().type();

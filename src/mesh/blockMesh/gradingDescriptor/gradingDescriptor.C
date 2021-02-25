@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,7 @@ Foam::Istream& Foam::operator>>(Istream& is, gradingDescriptor& gd)
         gd.nDivFraction_ = 1.0;
         gd.expansionRatio_ = t.number();
     }
-    else if (t.isPunctuation() && t.pToken() == token::BEGIN_LIST)
+    else if (t.isPunctuation(token::BEGIN_LIST))
     {
         is >> gd.blockFraction_ >> gd.nDivFraction_ >> gd.expansionRatio_;
         is.readEnd("gradingDescriptor");

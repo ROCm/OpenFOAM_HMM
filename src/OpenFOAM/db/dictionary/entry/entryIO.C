@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,11 +133,7 @@ bool Foam::entry::New
     const bool valid = getKeyword(keyword, keyToken, is);
 
     // Can accept a list of entries too
-    if
-    (
-        keyToken.isLabel()
-     || (keyToken.isPunctuation() && keyToken.pToken() == token::BEGIN_LIST)
-    )
+    if (keyToken.isLabel() || keyToken.isPunctuation(token::BEGIN_LIST))
     {
         is.putBack(keyToken);
         return parentDict.add

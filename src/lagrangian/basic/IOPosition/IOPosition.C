@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,18 +98,18 @@ void Foam::IOPosition<CloudType>::readData(Istream& is, CloudType& c)
 {
     const polyMesh& mesh = c.pMesh();
 
-    token firstToken(is);
+    token tok(is);
 
     const bool newFormat = (geometryType_ == cloud::geometryType::COORDINATES);
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Read beginning of contents
         is.readBeginList(FUNCTION_NAME);
 
-        for (label i=0; i<s; i++)
+        for (label i=0; i<len; ++i)
         {
             // Read position only
             c.append
@@ -127,39 +127,27 @@ void Foam::IOPosition<CloudType>::readData(Istream& is, CloudType& c)
         // Read end of contents
         is.readEndList(FUNCTION_NAME);
     }
-    else if (firstToken.isPunctuation())
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
+        is >> tok;
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, '(', found "
-                << firstToken.info() << exit(FatalIOError);
-        }
-
-        token lastToken(is);
-        while
-        (
-           !(
-                lastToken.isPunctuation()
-             && lastToken.pToken() == token::END_LIST
-            )
-        )
-        {
-            is.putBack(lastToken);
+            is.putBack(tok);
 
             // Read position only
             c.append
             (
                 new typename CloudType::particleType(mesh, is, false, newFormat)
             );
-            is  >> lastToken;
+            is >> tok;
         }
     }
     else
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info() << exit(FatalIOError);
+            << tok.info() << nl
+            << exit(FatalIOError);
     }
 
     is.check(FUNCTION_NAME);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +65,7 @@ Foam::rawIOField<Type>::rawIOField(const IOobject& io, const bool readAverage)
 
                 const token firstToken(is);
 
-                headerOk =
-                    is.good()
-                 && firstToken.isWord()
-                 && firstToken.wordToken() == "FoamFile";
+                headerOk = is.good() && firstToken.isWord("FoamFile");
             }
 
             isPtr.clear();

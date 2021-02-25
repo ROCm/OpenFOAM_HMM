@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,23 +203,10 @@ Foam::Istream& Foam::operator>>
         // Read end of contents
         is.readEndList("HashTable");
     }
-    else if (firstToken.isPunctuation())
+    else if (firstToken.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, '(', found " << firstToken.info()
-                << exit(FatalIOError);
-        }
-
         token lastToken(is);
-        while
-        (
-           !(
-                lastToken.isPunctuation()
-             && lastToken.pToken() == token::END_LIST
-            )
-        )
+        while (!lastToken.isPunctuation(token::END_LIST))
         {
             is.putBack(lastToken);
 

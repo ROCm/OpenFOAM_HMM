@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 
     {
         OListStream os2;
-        os2.indentSize() = 0;
+        os2.indentSize(0);
 
         outputDict(os2);
 

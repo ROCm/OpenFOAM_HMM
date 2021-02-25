@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,7 +202,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 
 
     // Set the line number of this token to the current stream line number
-    t.lineNumber() = lineNumber();
+    t.lineNumber(this->lineNumber());
 
     // Analyse input starting with this character.
     switch (c)

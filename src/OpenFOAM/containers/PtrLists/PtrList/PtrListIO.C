@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +49,10 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
         "reading first token"
     );
 
-
-    // Label: could be int(..), int{...} or just a plain '0'
     if (firstToken.isLabel())
     {
+        // Label: could be int(..), int{...} or just a plain '0'
+
         // Read size of list
         const label len = firstToken.labelToken();
 
@@ -98,33 +98,17 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
 
         // Read end of contents
         is.readEndList("PtrList");
-
-        return;
     }
-
-
-    // "(...)" : read as SLList and transfer contents
-    // This would be more efficient (fewer allocations, lower overhead)
-    // using a DynamicList, but then we have circular dependencies
-    if (firstToken.isPunctuation())
+    else if (firstToken.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, '(', found " << firstToken.info()
-                << exit(FatalIOError);
-        }
+        // "(...)" : read as SLList and transfer contents
+        // This would be more efficient (fewer allocations, lower overhead)
+        // using a DynamicList, but then we have circular dependencies
 
         SLList<T*> slList;
 
         token lastToken(is);
-        while
-        (
-           !(
-                lastToken.isPunctuation()
-             && lastToken.pToken() == token::END_LIST
-            )
-        )
+        while (!lastToken.isPunctuation(token::END_LIST))
         {
             is.putBack(lastToken);
 
@@ -147,14 +131,14 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
         {
             set(i++, ptr);
         }
-
-        return;
     }
-
-    FatalIOErrorInFunction(is)
-        << "incorrect first token, expected <int> or '(', found "
-        << firstToken.info()
-        << exit(FatalIOError);
+    else
+    {
+        FatalIOErrorInFunction(is)
+            << "incorrect first token, expected <int> or '(', found "
+            << firstToken.info() << nl
+            << exit(FatalIOError);
+    }
 }
 
 

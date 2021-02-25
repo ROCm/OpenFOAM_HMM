@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +134,7 @@ Foam::cv2DControls::cv2DControls
 
 void Foam::cv2DControls::write(Ostream& os) const
 {
-    os.indentLevel() = 1;
+    const auto oldLevel = os.indentLevel(1);
     os.precision(2);
     os.flags(ios_base::scientific);
 
@@ -148,6 +148,8 @@ void Foam::cv2DControls::write(Ostream& os) const
        << indent << "ppDist_               : " << ppDist_ << nl
        << indent << "minEdgeLen2_          : " << minEdgeLen2_ << nl
        << token::END_BLOCK << endl;
+
+    os.indentLevel(oldLevel);
 }
 
 

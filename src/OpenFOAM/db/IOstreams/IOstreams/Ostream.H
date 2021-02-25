@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,32 +171,36 @@ public:
             //- Add indentation characters
             virtual void indent() = 0;
 
-            //- Return indent level
-            unsigned short indentSize() const
+            //- Return indent size (spaces per level)
+            unsigned short indentSize() const noexcept
             {
                 return indentSize_;
             }
 
-            //- Access to indent size
-            unsigned short& indentSize()
+            //- Change indent size (spaces per level), return old value
+            unsigned short indentSize(unsigned short val) noexcept
             {
-                return indentSize_;
+                auto old(indentSize_);
+                indentSize_ = val;
+                return old;
             }
 
-            //- Return indent level
-            unsigned short indentLevel() const
+            //- Return the indent level
+            unsigned short indentLevel() const noexcept
             {
                 return indentLevel_;
             }
 
-            //- Access to indent level
-            unsigned short& indentLevel()
+            //- Change the indent level, return old value
+            unsigned short indentLevel(unsigned short val) noexcept
             {
-                return indentLevel_;
+                auto old(indentLevel_);
+                indentLevel_ = val;
+                return old;
             }
 
             //- Increment the indent level
-            void incrIndent()
+            void incrIndent() noexcept
             {
                 ++indentLevel_;
             }
@@ -292,6 +296,21 @@ public:
         Ostream& operator()() const
         {
             return const_cast<Ostream&>(*this);
+        }
+
+
+    // Housekeeping
+
+        //- Access to indent level
+        unsigned short& indentLevel() noexcept
+        {
+            return indentLevel_;
+        }
+
+        //- Access to indent size
+        unsigned short& indentSize() noexcept
+        {
+            return indentSize_;
         }
 };
 

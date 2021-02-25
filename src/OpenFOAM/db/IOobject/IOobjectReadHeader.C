@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,12 +62,7 @@ bool Foam::IOobject::readHeader(Istream& is)
 
     token firstToken(is);
 
-    if
-    (
-        is.good()
-     && firstToken.isWord()
-     && firstToken.wordToken() == "FoamFile"
-    )
+    if (is.good() && firstToken.isWord("FoamFile"))
     {
         const dictionary headerDict(is);
 

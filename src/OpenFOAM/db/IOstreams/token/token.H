@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,22 +115,17 @@ public:
     enum punctuationToken : char
     {
         NULL_TOKEN     = '\0',  //!< Nul character
-        SPACE          = ' ',   //!< Space [isspace]
         TAB            = '\t',  //!< Tab [isspace]
         NL             = '\n',  //!< Newline [isspace]
+        SPACE          = ' ',   //!< Space [isspace]
 
-        END_STATEMENT  = ';',   //!< End entry [#isseparator]
-        BEGIN_LIST     = '(',   //!< Begin list [#isseparator]
-        END_LIST       = ')',   //!< End list [#isseparator]
-        BEGIN_SQR      = '[',   //!< Begin dimensions [#isseparator]
-        END_SQR        = ']',   //!< End dimensions [#isseparator]
-        BEGIN_BLOCK    = '{',   //!< Begin block [#isseparator]
-        END_BLOCK      = '}',   //!< End block [#isseparator]
         COLON          = ':',   //!< Colon [#isseparator]
+        SEMICOLON      = ';',   //!< Semicolon [#isseparator]
         COMMA          = ',',   //!< Comma [#isseparator]
         HASH           = '#',   //!< Hash - directive or verbatim string
         DOLLAR         = '$',   //!< Dollar - start variable
-        ATSYM          = '@',   //!< At
+        QUESTION       = '?',   //!< Question mark (eg, ternary)
+        ATSYM          = '@',   //!< The 'at' symbol
         SQUOTE         = '\'',  //!< Single quote
         DQUOTE         = '"',   //!< Double quote
 
@@ -140,8 +135,25 @@ public:
         MULTIPLY       = '*',   //!< Multiply [#isseparator]
         DIVIDE         = '/',   //!< Divide [#isseparator]
 
-        BEGIN_STRING   = DQUOTE, //!< Begin string with double quote
-        END_STRING     = DQUOTE  //!< End string with double quote
+        LPAREN         = '(',   //!< Left parenthesis [#isseparator]
+        RPAREN         = ')',   //!< Right parenthesis [#isseparator]
+        LSQUARE        = '[',   //!< Left square bracket [#isseparator]
+        RSQUARE        = ']',   //!< Right square bracket [#isseparator]
+        LBRACE         = '{',   //!< Left brace [#isseparator]
+        RBRACE         = '}',   //!< Right brace [#isseparator]
+
+        // With semantically meaning
+
+        END_STATEMENT  = SEMICOLON, //!< End entry [#isseparator]
+        BEGIN_LIST     = LPAREN,    //!< Begin list [#isseparator]
+        END_LIST       = RPAREN,    //!< End list [#isseparator]
+        BEGIN_SQR      = LSQUARE,   //!< Begin dimensions [#isseparator]
+        END_SQR        = RSQUARE,   //!< End dimensions [#isseparator]
+        BEGIN_BLOCK    = LBRACE,    //!< Begin block [#isseparator]
+        END_BLOCK      = RBRACE,    //!< End block [#isseparator]
+
+        BEGIN_STRING   = DQUOTE,    //!< Begin string with double quote
+        END_STRING     = DQUOTE     //!< End string with double quote
     };
 
 
@@ -150,7 +162,8 @@ public:
     :
         public refCount
     {
-        bool empty_;
+        //- Has compound token already been transferred
+        bool moved_;
 
         //- No copy construct
         compound(const compound&) = delete;
@@ -179,7 +192,7 @@ public:
             //- Default construct
             constexpr compound() noexcept
             :
-                empty_(false)
+                moved_(false)
             {}
 
             //- Construct compound from Istream
@@ -195,16 +208,16 @@ public:
             //- Test if name is a known (registered) compound type
             static bool isCompound(const word& name);
 
-            //- Has compound been transferred?
-            bool empty() const noexcept
+            //- Get compound transferred status
+            bool moved() const noexcept
             {
-                return empty_;
+                return moved_;
             }
 
-            //- Access to empty
-            bool& empty() noexcept
+            //- Set compound transferred status
+            void moved(bool b) noexcept
             {
-                return empty_;
+                moved_ = b;
             }
 
             //- The size of the underlying content
@@ -255,9 +268,6 @@ public:
 
 
         // Member Functions
-
-            //- Using empty from compound refCount
-            using token::compound::empty;
 
             //- The size of the underlying content
             virtual label size() const
@@ -416,8 +426,8 @@ public:
         //- The line number for the token
         inline label lineNumber() const noexcept;
 
-        //- The line number for the token
-        inline label& lineNumber() noexcept;
+        //- Change token line number, return old value
+        inline label lineNumber(const label lineNum) noexcept;
 
         //- True if token is not UNDEFINED or ERROR
         inline bool good() const noexcept;
@@ -436,6 +446,9 @@ public:
 
         //- Token is PUNCTUATION
         inline bool isPunctuation() const noexcept;
+
+        //- True if token is PUNCTUATION and equal to parameter
+        inline bool isPunctuation(const punctuationToken p) const noexcept;
 
         //- Token is PUNCTUATION and isseparator
         inline bool isSeparator() const noexcept;
@@ -457,6 +470,9 @@ public:
 
         //- Token is WORD or DIRECTIVE word
         inline bool isWord() const noexcept;
+
+        //- Token is WORD or DIRECTIVE word and equal to parameter
+        inline bool isWord(const std::string& s) const;
 
         //- Token is DIRECTIVE (word variant)
         inline bool isDirective() const noexcept;
@@ -599,20 +615,20 @@ public:
     // Equality
 
         inline bool operator==(const token& tok) const;
-        inline bool operator==(const punctuationToken p) const;
-        inline bool operator==(const label val) const;
-        inline bool operator==(const floatScalar val) const;
-        inline bool operator==(const doubleScalar val) const;
+        inline bool operator==(const punctuationToken p) const noexcept;
+        inline bool operator==(const label val) const noexcept;
+        inline bool operator==(const floatScalar val) const noexcept;
+        inline bool operator==(const doubleScalar val) const noexcept;
         inline bool operator==(const std::string& s) const;
 
 
     // Inequality
 
         inline bool operator!=(const token& tok) const;
-        inline bool operator!=(const punctuationToken p) const;
-        inline bool operator!=(const label val) const;
-        inline bool operator!=(const floatScalar val) const;
-        inline bool operator!=(const doubleScalar val) const;
+        inline bool operator!=(const punctuationToken p) const noexcept;
+        inline bool operator!=(const label val) const noexcept;
+        inline bool operator!=(const floatScalar val) const noexcept;
+        inline bool operator!=(const doubleScalar val) const noexcept;
         inline bool operator!=(const std::string& s) const;
 
 
@@ -627,6 +643,10 @@ public:
 
 
     // Housekeeping
+
+        //- Write access for the token line number
+        //  \deprecated(2021-03) - use lineNumber(label)
+        label& lineNumber() noexcept { return line_; }
 
         //- Token is FLOAT
         //  \deprecated(2020-01) - isFloat()
@@ -670,12 +690,23 @@ Ostream& operator<<(Ostream& os, const InfoProxy<token>& ip);
 
 // Handling of compound types
 
-#define defineCompoundTypeName(Type, Name)                                     \
+//- Define compound using \a Type for its name
+#define defineCompoundTypeName(Type, UnusedTag)                                \
     defineTemplateTypeNameAndDebugWithName(token::Compound<Type>, #Type, 0);
 
-#define addCompoundToRunTimeSelectionTable(Type, Name)                         \
+//- Define compound using \a Name for its name
+#define defineNamedCompoundTypeName(Type, Name)                                \
+    defineTemplateTypeNameAndDebugWithName(token::Compound<Type>, #Name, 0);
+
+//- Add compound to selection table, lookup using typeName
+#define addCompoundToRunTimeSelectionTable(Type, Tag)                          \
     token::compound::addIstreamConstructorToTable<token::Compound<Type>>       \
-        add##Name##IstreamConstructorToTable_;
+        add##Tag##IstreamConstructorToTable_;
+
+//- Add compound to selection table, lookup as \a Name
+#define addNamedCompoundToRunTimeSelectionTable(Type, Tag, Name)               \
+    token::compound::addIstreamConstructorToTable<token::Compound<Type>>       \
+        add##Tag##IstreamConstructorToTable_(#Name);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

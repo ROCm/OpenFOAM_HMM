@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ Foam::token::compound& Foam::token::transferCompoundToken()
         parseError("compound");
     }
 
-    if (data_.compoundPtr->empty())
+    if (data_.compoundPtr->moved())
     {
         FatalErrorInFunction
             << "compound has already been transferred from token\n    "
@@ -102,7 +102,7 @@ Foam::token::compound& Foam::token::transferCompoundToken()
     }
     else
     {
-        data_.compoundPtr->empty() = true;
+        data_.compoundPtr->moved(true);
     }
 
     return *data_.compoundPtr;
@@ -116,7 +116,7 @@ Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
         parseError("compound");
     }
 
-    if (data_.compoundPtr->empty())
+    if (data_.compoundPtr->moved())
     {
         FatalIOErrorInFunction(is)
             << "compound has already been transferred from token\n    "
@@ -124,7 +124,7 @@ Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
     }
     else
     {
-        data_.compoundPtr->empty() = true;
+        data_.compoundPtr->moved(true);
     }
 
     return *data_.compoundPtr;

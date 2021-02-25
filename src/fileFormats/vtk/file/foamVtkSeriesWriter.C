@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +51,7 @@ namespace Foam
         return
         (
             // Token 1 = ':' separator
-            (
-                getToken(is, tok)
-             && tok.isPunctuation() && tok.pToken() == token::COLON
-            )
+            (getToken(is, tok) && tok.isPunctuation(token::COLON))
 
             // Token 2 is the value
          && getToken(is, tok)
@@ -441,8 +438,7 @@ Foam::label Foam::vtk::seriesWriter::load
                     if
                     (
                         getValueToken(is, tok)
-                     && tok.isPunctuation()
-                     && tok.pToken() == token::BEGIN_SQR
+                     && tok.isPunctuation(token::BEGIN_SQR)
                     )
                     {
                         state = parse::FILES_ARRAY;

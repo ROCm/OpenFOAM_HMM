@@ -1084,12 +1084,7 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
     // FoamFile header
     token firstToken(is);
 
-    if
-    (
-        is.good()
-     && firstToken.isWord()
-     && firstToken.wordToken() == "FoamFile"
-    )
+    if (is.good() && firstToken.isWord("FoamFile"))
     {
         dictionary headerDict(is);
         is.version(headerDict.get<token>("version"));

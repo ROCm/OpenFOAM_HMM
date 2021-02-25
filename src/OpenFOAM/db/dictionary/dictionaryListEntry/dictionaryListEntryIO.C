@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,43 +70,35 @@ Foam::dictionaryListEntry::dictionaryListEntry
         dictionary::null
     )
 {
-    token firstToken(is);
-    if (firstToken.isLabel())
+    token tok(is);
+    if (tok.isLabel())
     {
-        const label sz = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         is.readBeginList("List");
 
-        for (label i=0; i<sz; ++i)
+        for (label i=0; i<len; ++i)
         {
             entry::New(*this, is);
         }
         is.readEndList("List");
     }
-    else if
-    (
-        firstToken.isPunctuation()
-     && firstToken.pToken() == token::BEGIN_LIST
-    )
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
         while (true)
         {
-            token nextToken(is);
-            if (nextToken.error())
+            is >> tok;
+            if (tok.error())
             {
                 FatalIOErrorInFunction(is)
-                    << "parsing error " << nextToken.info()
+                    << "parsing error " << tok.info() << nl
                     << exit(FatalIOError);
             }
-            else if
-            (
-                nextToken.isPunctuation()
-             && nextToken.pToken() == token::END_LIST
-            )
+            else if (tok.isPunctuation(token::END_LIST))
             {
                 break;
             }
-            is.putBack(nextToken);
+            is.putBack(tok);
             entry::New(*this, is);
         }
     }
@@ -113,7 +106,7 @@ Foam::dictionaryListEntry::dictionaryListEntry
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 }

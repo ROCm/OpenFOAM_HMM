@@ -139,59 +139,39 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
             }
         }
     }
-    else if (firstTok.isPunctuation())
+    else if (firstTok.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstTok.pToken() == token::BEGIN_LIST)
+        token nextTok(is);
+        is.fatalCheck(FUNCTION_NAME);
+
+        while (!nextTok.isPunctuation(token::END_LIST))
         {
-            token nextTok(is);
+            is.putBack(nextTok);
+            list.append(list.readValue(is));
+
+            is  >> nextTok;
             is.fatalCheck(FUNCTION_NAME);
-
-            while
-            (
-                !(   nextTok.isPunctuation()
-                  && nextTok.pToken() == token::END_LIST
-                 )
-            )
-            {
-                is.putBack(nextTok);
-                list.append(list.readValue(is));
-
-                is  >> nextTok;
-                is.fatalCheck(FUNCTION_NAME);
-            }
         }
-        else if (firstTok.pToken() == token::BEGIN_BLOCK)
+    }
+    else if (firstTok.isPunctuation(token::BEGIN_BLOCK))
+    {
+        token nextTok(is);
+        is.fatalCheck(FUNCTION_NAME);
+
+        while (!nextTok.isPunctuation(token::END_BLOCK))
         {
-            token nextTok(is);
+            is.putBack(nextTok);
+            list.setPair(is);
+
+            is  >> nextTok;
             is.fatalCheck(FUNCTION_NAME);
-
-            while
-            (
-                !(   nextTok.isPunctuation()
-                  && nextTok.pToken() == token::END_BLOCK
-                 )
-            )
-            {
-                is.putBack(nextTok);
-                list.setPair(is);
-
-                is  >> nextTok;
-                is.fatalCheck(FUNCTION_NAME);
-            }
-        }
-        else
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, expected '(', found "
-                << firstTok.info()
-                << exit(FatalIOError);
         }
     }
     else
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int>, '(' or '{', found "
-            << firstTok.info()
+            << firstTok.info() << nl
             << exit(FatalIOError);
     }
 

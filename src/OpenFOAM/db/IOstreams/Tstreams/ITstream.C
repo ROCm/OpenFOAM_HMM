@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -285,11 +285,11 @@ Foam::Istream& Foam::ITstream::read(token& tok)
 
         if (size())
         {
-            tok.lineNumber() = tokenList::last().lineNumber();
+            tok.lineNumber(tokenList::last().lineNumber());
         }
         else
         {
-            tok.lineNumber() = lineNumber();
+            tok.lineNumber(this->lineNumber());
         }
     }
 

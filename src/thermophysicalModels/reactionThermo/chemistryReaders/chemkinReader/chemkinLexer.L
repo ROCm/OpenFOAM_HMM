@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1216,7 +1216,7 @@ bool finishReaction = false;
         reactionCoeffsString.replaceAll("d", "e");
         reactionCoeffsString.replaceAll("D", "e");
         IStringStream reactionCoeffsStream(reactionCoeffsString);
-        reactionCoeffsStream.lineNumber() = lineNo_;
+        reactionCoeffsStream.lineNumber(lineNo_);
 
         reactionCoeffsStream
             >> ArrheniusCoeffs[0]

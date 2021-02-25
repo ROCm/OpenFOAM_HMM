@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,11 +77,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         // Read first token
         token firstToken(is);
 
-        if
-        (
-            firstToken.isWord()
-         && firstToken.wordToken() == "nonuniform"
-        )
+        if (firstToken.isWord("nonuniform"))
         {
             token fieldToken(is);
 
@@ -490,8 +486,7 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
         (
             dEntry.isStream()
          && dEntry.stream().size()
-         && dEntry.stream()[0].isWord()
-         && dEntry.stream()[0].wordToken() == "nonuniform"
+         && dEntry.stream()[0].isWord("nonuniform")
         )
         {
             if (scalarFields_.found(key))

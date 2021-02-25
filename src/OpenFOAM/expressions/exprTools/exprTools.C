@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,29 +157,21 @@ Foam::exprTools::getList
 
 
     ITstream& is = eptr->stream();
-    token firstToken(is);
+    token tok(is);
 
     List<string> list;
 
-    if
-    (
-        firstToken.isLabel()
-     ||
-        (
-            firstToken.type() == token::PUNCTUATION
-         && firstToken.pToken() == token::BEGIN_LIST
-        )
-    )
+    if (tok.isLabel() || tok.isPunctuation(token::BEGIN_LIST))
     {
         // A list of strings
         is.rewind();
         is >> list;
     }
-    else if (firstToken.isString())
+    else if (tok.isString())
     {
         // A single string
         list.resize(1);
-        list[0] = firstToken.stringToken();
+        list[0] = tok.stringToken();
     }
     else
     {

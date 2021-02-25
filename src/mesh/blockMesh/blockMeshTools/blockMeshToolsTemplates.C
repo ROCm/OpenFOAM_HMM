@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,29 +32,29 @@ template<class T>
 void Foam::blockMeshTools::read
 (
     Istream& is,
-    List<T>& L,
+    List<T>& list,
     const dictionary& dict
 )
 {
-    token firstToken(is);
+    token tok(is);
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Set list length to that read
-        L.setSize(s);
+        list.resize(len);
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("List");
 
-        if (s)
+        if (len)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
-                    read(is, L[i], dict);
+                    read(is, list[i], dict);
                 }
             }
         }
@@ -61,39 +62,33 @@ void Foam::blockMeshTools::read
         // Read end of contents
         is.readEndList("List");
     }
-    else if (firstToken.isPunctuation())
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, expected '(', found "
-                << firstToken.info()
-                << exit(FatalIOError);
-        }
-
         SLList<T> sll;
 
-        while (true)
+        is >> tok;
+        is.fatalCheck(FUNCTION_NAME);
+
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            token t(is);
-            if (t.isPunctuation() && t.pToken() == token::END_LIST)
-            {
-                break;
-            }
-            is.putBack(t);
+            is.putBack(tok);
+
             T elem;
             read(is, elem, dict);
             sll.append(elem);
+
+            is >> tok;
+            is.fatalCheck(FUNCTION_NAME);
         }
 
         // Convert the singly-linked list to this list
-        L = sll;
+        list = std::move(sll);
     }
     else
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 }
@@ -106,9 +101,9 @@ Foam::List<T> Foam::blockMeshTools::read
     const dictionary& dict
 )
 {
-    List<T> L;
-    read(is, L, dict);
-    return L;
+    List<T> list;
+    read(is, list, dict);
+    return list;
 }
 
 

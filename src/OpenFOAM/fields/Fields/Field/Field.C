@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,47 +191,35 @@ Foam::Field<Type>::Field
         // Read first token
         token firstToken(is);
 
-        if (firstToken.isWord())
+        if (firstToken.isWord("uniform"))
         {
-            if (firstToken.wordToken() == "uniform")
+            this->resize(len);
+            operator=(pTraits<Type>(is));
+        }
+        else if (firstToken.isWord("nonuniform"))
+        {
+            is >> static_cast<List<Type>&>(*this);
+            const label lenRead = this->size();
+            if (len != lenRead)
             {
-                this->setSize(len);
-                operator=(pTraits<Type>(is));
-            }
-            else if (firstToken.wordToken() == "nonuniform")
-            {
-                is >> static_cast<List<Type>&>(*this);
-                label currentSize = this->size();
-                if (currentSize != len)
+                if (len < lenRead && allowConstructFromLargerSize)
                 {
-                    if (len < currentSize && allowConstructFromLargerSize)
-                    {
-                        #ifdef FULLDEBUG
-                        IOWarningInFunction(dict)
-                            << "Sizes do not match. "
-                            << "Re-sizing " << currentSize
-                            << " entries to " << len
-                            << endl;
-                        #endif
+                    #ifdef FULLDEBUG
+                    IOWarningInFunction(dict)
+                        << "Sizes do not match. Truncating " << lenRead
+                        << " entries to " << len << endl;
+                    #endif
 
-                        // Resize the data
-                        this->setSize(len);
-                    }
-                    else
-                    {
-                        FatalIOErrorInFunction(dict)
-                            << "size " << this->size()
-                            << " is not equal to the given value of " << len
-                            << exit(FatalIOError);
-                    }
+                    // Truncate the data
+                    this->resize(len);
                 }
-            }
-            else
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Expected keyword 'uniform' or 'nonuniform', found "
-                    << firstToken.wordToken()
-                    << exit(FatalIOError);
+                else
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "size " << lenRead
+                        << " is not equal to the expected length " << len
+                        << exit(FatalIOError);
+                }
             }
         }
         else

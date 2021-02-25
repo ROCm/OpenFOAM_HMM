@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -390,9 +390,11 @@ inline Foam::label Foam::token::lineNumber() const noexcept
 }
 
 
-inline Foam::label& Foam::token::lineNumber() noexcept
+inline Foam::label Foam::token::lineNumber(const label lineNum) noexcept
 {
-    return line_;
+    label old(line_);
+    line_ = lineNum;
+    return old;
 }
 
 
@@ -456,15 +458,13 @@ inline bool Foam::token::isPunctuation() const noexcept
 }
 
 
-inline Foam::token::punctuationToken Foam::token::pToken() const
+inline bool Foam::token::isPunctuation(const punctuationToken p) const noexcept
 {
-    if (type_ == tokenType::PUNCTUATION)
-    {
-        return data_.punctuationVal;
-    }
-
-    parseError("punctuation character");
-    return punctuationToken::NULL_TOKEN;
+    return
+    (
+        type_ == tokenType::PUNCTUATION
+     && data_.punctuationVal == p
+    );
 }
 
 
@@ -475,6 +475,18 @@ inline bool Foam::token::isSeparator() const noexcept
         type_ == tokenType::PUNCTUATION
      && isseparator(data_.punctuationVal)
     );
+}
+
+
+inline Foam::token::punctuationToken Foam::token::pToken() const
+{
+    if (type_ == tokenType::PUNCTUATION)
+    {
+        return data_.punctuationVal;
+    }
+
+    parseError("punctuation character");
+    return punctuationToken::NULL_TOKEN;
 }
 
 
@@ -587,6 +599,12 @@ inline bool Foam::token::isWord() const noexcept
         type_ == tokenType::WORD
      || type_ == tokenType::DIRECTIVE
     );
+}
+
+
+inline bool Foam::token::isWord(const std::string& s) const
+{
+    return (isWord() && s == *data_.wordPtr);
 }
 
 
@@ -884,9 +902,9 @@ inline bool Foam::token::operator==(const token& tok) const
 }
 
 
-inline bool Foam::token::operator==(const punctuationToken p) const
+inline bool Foam::token::operator==(const punctuationToken p) const noexcept
 {
-    return (type_ == tokenType::PUNCTUATION && data_.punctuationVal == p);
+    return isPunctuation(p);
 }
 
 
@@ -901,7 +919,7 @@ inline bool Foam::token::operator==(const std::string& s) const
 }
 
 
-inline bool Foam::token::operator==(const label val) const
+inline bool Foam::token::operator==(const label val) const noexcept
 {
     return
     (
@@ -911,7 +929,7 @@ inline bool Foam::token::operator==(const label val) const
 }
 
 
-inline bool Foam::token::operator==(const floatScalar val) const
+inline bool Foam::token::operator==(const floatScalar val) const noexcept
 {
     return
     (
@@ -921,7 +939,7 @@ inline bool Foam::token::operator==(const floatScalar val) const
 }
 
 
-inline bool Foam::token::operator==(const doubleScalar val) const
+inline bool Foam::token::operator==(const doubleScalar val) const noexcept
 {
     return
     (
@@ -937,25 +955,25 @@ inline bool Foam::token::operator!=(const token& tok) const
 }
 
 
-inline bool Foam::token::operator!=(const punctuationToken p) const
+inline bool Foam::token::operator!=(const punctuationToken p) const noexcept
 {
-    return !operator==(p);
+    return !isPunctuation(p);
 }
 
 
-inline bool Foam::token::operator!=(const label val) const
-{
-    return !operator==(val);
-}
-
-
-inline bool Foam::token::operator!=(const floatScalar val) const
+inline bool Foam::token::operator!=(const label val) const noexcept
 {
     return !operator==(val);
 }
 
 
-inline bool Foam::token::operator!=(const doubleScalar val) const
+inline bool Foam::token::operator!=(const floatScalar val) const noexcept
+{
+    return !operator==(val);
+}
+
+
+inline bool Foam::token::operator!=(const doubleScalar val) const noexcept
 {
     return !operator==(val);
 }

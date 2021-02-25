@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,25 +91,12 @@ void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
         // Read end of contents
         is.readEndList("LPtrList");
     }
-    else if (firstToken.isPunctuation())
+    else if (firstToken.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, '(', found " << firstToken.info()
-                << exit(FatalIOError);
-        }
-
         token lastToken(is);
         is.fatalCheck(FUNCTION_NAME);
 
-        while
-        (
-           !(
-                lastToken.isPunctuation()
-             && lastToken.pToken() == token::END_LIST
-            )
-        )
+        while (!lastToken.isPunctuation(token::END_LIST))
         {
             is.putBack(lastToken);
             this->append(inew(is).ptr());

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,9 +170,10 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
 
     is.fatalCheck("operator>>(Istream&, UList<T>&) : reading first token");
 
-    // Compound: simply transfer contents
     if (firstToken.isCompound())
     {
+        // Compound: simply transfer contents
+
         List<T> elems;
         elems.transfer
         (
@@ -197,14 +198,11 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
         {
             list[i] = std::move(elems[i]);
         }
-
-        return is;
     }
-
-
-    // Label: could be int(..), int{...} or just a plain '0'
-    if (firstToken.isLabel())
+    else if (firstToken.isLabel())
     {
+        // Label: could be int(..), int{...} or just a plain '0'
+
         const label inputLen = firstToken.labelToken();
 
         // List lengths must match
@@ -276,24 +274,12 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
                 "operator>>(Istream&, UList<T>&) : reading the binary block"
             );
         }
-
-        return is;
     }
-
-
-    // "(...)" : read as SLList and transfer contents
-    if (firstToken.isPunctuation())
+    else if (firstToken.isPunctuation(token::BEGIN_LIST))
     {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, expected '(', found "
-                << firstToken.info()
-                << exit(FatalIOError);
-        }
+        // "(...)" : read as SLList and transfer contents
 
         is.putBack(firstToken); // Putback the opening bracket
-
         SLList<T> sll(is);      // Read as singly-linked list
 
         // List lengths must match
@@ -310,15 +296,14 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
         {
             list[i] = std::move(sll.removeHead());
         }
-
-        return is;
     }
-
-
-    FatalIOErrorInFunction(is)
-        << "incorrect first token, expected <int> or '(', found "
-        << firstToken.info()
-        << exit(FatalIOError);
+    else
+    {
+        FatalIOErrorInFunction(is)
+            << "incorrect first token, expected <int> or '(', found "
+            << firstToken.info() << nl
+            << exit(FatalIOError);
+    }
 
     return is;
 }
