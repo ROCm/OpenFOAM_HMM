@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -3196,11 +3196,16 @@ void Foam::snappyRefineDriver::deleteSmallRegions
         nCellsPerZone[zonei]++;
     }
     Pstream::listCombineGather(nCellsPerRegion, plusEqOp<label>());
+    Pstream::listCombineScatter(nCellsPerRegion);
     Pstream::listCombineGather(regionToZone, maxEqOp<label>());
+    Pstream::listCombineScatter(regionToZone);
     Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineScatter(nCellsPerZone);
 
 
-    // Mark small regions
+    // Mark small regions. Note that all processors have the same information
+    // so should take the same decision. Alternative is to do master only
+    // and scatter the decision.
     forAll(nCellsPerRegion, regioni)
     {
         const label zonei = regionToZone[regioni];
