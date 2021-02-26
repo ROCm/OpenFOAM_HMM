@@ -42,7 +42,6 @@ License
 
 #include "ccmInternal.H" // include last to avoid any strange interactions
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::labelList Foam::ccm::reader::patchStartList(label initial) const
@@ -311,7 +310,7 @@ Foam::labelList Foam::ccm::reader::readVertices
         nullptr,
         nullptr,
         nullptr,
-        vrts.begin(),
+        vrts.data(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -388,7 +387,7 @@ void Foam::ccm::reader::readCells
         &(globalState_->error),
         cellsNode,
         &mapId,
-        cellTableId_.begin(),
+        cellTableId_.data(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -597,7 +596,7 @@ void Foam::ccm::reader::readCells
         kCCMIOInternalFaces,
         nullptr,
         nullptr,
-        ccmFaces.begin(),
+        ccmFaces.data(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -607,7 +606,7 @@ void Foam::ccm::reader::readCells
         &(globalState_->error),
         nodeId,
         kCCMIOInternalFaces,
-        faceCells.begin(),
+        faceCells.data(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -686,7 +685,7 @@ void Foam::ccm::reader::readCells
                 kCCMIOBoundaryFaces,
                 nullptr,
                 nullptr,
-                ccmFaces.begin(),
+                ccmFaces.data(),
                 kCCMIOStart,
                 kCCMIOEnd
             );
@@ -695,7 +694,7 @@ void Foam::ccm::reader::readCells
                 &(globalState_->error),
                 nodeId,
                 kCCMIOBoundaryFaces,
-                faceCells.begin(),
+                faceCells.data(),
                 kCCMIOStart,
                 kCCMIOEnd
             );
@@ -837,7 +836,7 @@ void Foam::ccm::reader::readInterfaces
             &(globalState_->error),
             interfaceNode,
             "ProstarBaffles",
-            mapData.begin(),
+            mapData.data(),
             kCCMIOStart,
             kCCMIOEnd
         );
@@ -880,7 +879,7 @@ void Foam::ccm::reader::readInterfaces
         &(globalState_->error),
         interfaceNode,
         "FaceIds",
-        mapData.begin(),
+        mapData.data(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -1058,7 +1057,7 @@ void Foam::ccm::reader::readMonitoring
             // CCMIOGetNode(nullptr, childNode, "Cells", &subNode);
             // CCMIORead1i
             // (
-            //     nullptr, subNode, faceCells.begin(),
+            //     nullptr, subNode, faceCells.data(),
             //     kCCMIOStart, kCCMIOEnd
             // );
             //

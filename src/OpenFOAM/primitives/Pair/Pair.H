@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ struct Hash<Pair<T>>
     {
         if (is_contiguous<T>::value)
         {
-            return Hasher(obj.cdata(), sizeof(obj), seed);
+            return Hasher(obj.cdata(), obj.size_bytes(), seed);
         }
 
         seed = Hash<T>()(obj.first(), seed);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,7 @@ void Foam::ccm::reader::readMap
     (
         &(globalState_->error),
         mapId,
-        data.begin(),
+        data.data(),
         kCCMIOStart,
         kCCMIOEnd
     );

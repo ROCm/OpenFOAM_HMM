@@ -208,6 +208,13 @@ inline T* Foam::UList<T>::data() noexcept
 
 
 template<class T>
+inline std::streamsize Foam::UList<T>::size_bytes() const noexcept
+{
+    return std::streamsize(size_)*sizeof(T);
+}
+
+
+template<class T>
 inline bool Foam::UList<T>::found(const T& val, label pos) const
 {
     return (this->find(val, pos) >= 0);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +199,7 @@ Foam::List<T>::List(const UList<T>& a)
         {
             std::memcpy
             (
-                static_cast<void*>(this->v_), a.v_, this->byteSize()
+                static_cast<void*>(this->v_), a.v_, this->size_bytes()
             );
         }
         else
@@ -232,7 +232,7 @@ Foam::List<T>::List(const List<T>& a)
         {
             std::memcpy
             (
-                static_cast<void*>(this->v_), a.v_, this->byteSize()
+                static_cast<void*>(this->v_), a.v_, this->size_bytes()
             );
         }
         else
@@ -274,7 +274,7 @@ Foam::List<T>::List(List<T>& a, bool reuse)
         {
             std::memcpy
             (
-                static_cast<void*>(this->v_), a.v_, this->byteSize()
+                static_cast<void*>(this->v_), a.v_, this->size_bytes()
             );
         }
         else
@@ -516,7 +516,7 @@ void Foam::List<T>::operator=(const UList<T>& a)
         {
             std::memcpy
             (
-                static_cast<void*>(this->v_), a.v_, this->byteSize()
+                static_cast<void*>(this->v_), a.v_, this->size_bytes()
             );
         }
         else

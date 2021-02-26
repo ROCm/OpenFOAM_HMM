@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "labelRange.H"
 
 #include <algorithm>
+#include <random>
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -120,7 +121,7 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
         {
             std::memcpy
             (
-                static_cast<void*>(this->v_), list.v_, this->byteSize()
+                static_cast<void*>(this->v_), list.v_, this->size_bytes()
             );
         }
         else
@@ -196,8 +197,7 @@ std::streamsize Foam::UList<T>::byteSize() const
             << "Invalid for non-contiguous data types"
             << abort(FatalError);
     }
-
-    return this->size_*sizeof(T);
+    return this->size_bytes();
 }
 
 
@@ -281,7 +281,7 @@ void Foam::stableSort(UList<T>& a, const Compare& comp)
 template<class T>
 void Foam::shuffle(UList<T>& a)
 {
-    std::random_shuffle(a.begin(), a.end());
+    std::shuffle(a.begin(), a.end(), std::default_random_engine());
 }
 
 

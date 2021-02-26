@@ -609,7 +609,7 @@ void Foam::decomposedBlockData::gather
     const label nProcs = UPstream::nProcs(comm);
     datas.setSize(nProcs);
 
-    char* data0Ptr = reinterpret_cast<char*>(datas.begin());
+    char* data0Ptr = reinterpret_cast<char*>(datas.data());
 
     List<int> recvOffsets;
     List<int> recvSizes;
@@ -682,15 +682,15 @@ void Foam::decomposedBlockData::gatherSlaveData
     )
     {
         // Note: UPstream::gather limited to int
-        nSend = int(data.byteSize());
+        nSend = int(data.size_bytes());
     }
 
     UPstream::gather
     (
-        data.begin(),
+        data.cdata(),
         nSend,
 
-        recvData.begin(),
+        recvData.data(),
         sliceSizes,
         sliceOffsets,
         comm
@@ -822,8 +822,8 @@ bool Foam::decomposedBlockData::writeBlocks
                 (
                     UPstream::commsTypes::scheduled,
                     proci,
-                    elems.begin(),
-                    elems.size(),
+                    elems.data(),
+                    elems.size_bytes(),
                     Pstream::msgType(),
                     comm
                 );
@@ -841,8 +841,8 @@ bool Foam::decomposedBlockData::writeBlocks
             (
                 UPstream::commsTypes::scheduled,
                 UPstream::masterNo(),
-                data.begin(),
-                data.byteSize(),
+                data.cdata(),
+                data.size_bytes(),
                 Pstream::msgType(),
                 comm
             );
@@ -1015,12 +1015,12 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
     if (isA<OFstream>(os))
     {
         // Serial file output - can use writeRaw()
-        os.writeRaw(data.cdata(), data.byteSize());
+        os.writeRaw(data.cdata(), data.size_bytes());
     }
     else
     {
         // Other cases are less fortunate, and no std::string_view
-        std::string str(data.cdata(), data.byteSize());
+        std::string str(data.cdata(), data.size_bytes());
         os.writeQuoted(str, false);
     }
 
@@ -1052,7 +1052,7 @@ bool Foam::decomposedBlockData::writeObject
     }
 
     labelList recvSizes;
-    gather(comm_, label(this->byteSize()), recvSizes);
+    gather(comm_, label(this->size_bytes()), recvSizes);
 
     List<std::streamoff> start;
     PtrList<SubList<char>> slaveData;  // dummy slave data

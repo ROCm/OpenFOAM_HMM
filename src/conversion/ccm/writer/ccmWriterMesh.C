@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,7 @@ void Foam::ccm::writer::writeFaces
         nodeType,
         mapId,
         streamSize,
-        ccmStream.begin(),
+        ccmStream.cdata(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -235,7 +235,7 @@ void Foam::ccm::writer::writeFaces
         nodeId,
         nodeType,
         mapId,
-        ccmStream.begin(),
+        ccmStream.cdata(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -262,7 +262,7 @@ void Foam::ccm::writer::writeFaces
             nodeId,
             "ProstarFaceId",
             size,
-            ccmStream.begin(),
+            ccmStream.cdata(),
             kCCMIOStart,
             kCCMIOEnd
         );
@@ -290,7 +290,7 @@ void Foam::ccm::writer::writeFaces
             "ProstarFaceId",
             size,
             2,
-            ccmStream.begin(),
+            ccmStream.cdata(),
             kCCMIOStart,
             kCCMIOEnd
         );
@@ -337,7 +337,7 @@ void Foam::ccm::writer::writeVertices
         verticesNode,
         3, scaling,
         vertexMap,
-        vrts.begin(),
+        vrts.cdata(),
         kCCMIOStart,
         kCCMIOEnd
     );
@@ -612,7 +612,7 @@ void Foam::ccm::writer::writeCells
         &(globalState_->error),
         cellsNode,
         maps_->cells,
-        mapData.begin(),
+        mapData.data(),
         kCCMIOStart, kCCMIOEnd
     );
     assertNoError("writing 'Cells' node");
@@ -640,7 +640,7 @@ void Foam::ccm::writer::writeCells
         cellsNode,
         "CellTopologyType",
         mesh_.nCells(),
-        mapData.begin(),
+        mapData.cdata(),
         kCCMIOStart, kCCMIOEnd
     );
 
@@ -701,7 +701,7 @@ void Foam::ccm::writer::writeInterfaces
                 "FaceIds",
                 interfaces.size(),
                 2,
-                mapData.begin(), kCCMIOStart, kCCMIOEnd
+                mapData.cdata(), kCCMIOStart, kCCMIOEnd
             )
          != kCCMIONoErr
         )

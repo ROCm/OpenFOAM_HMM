@@ -185,6 +185,13 @@ Foam::FixedList<T, N>::data() noexcept
 
 
 template<class T, unsigned N>
+inline std::streamsize Foam::FixedList<T, N>::size_bytes() noexcept
+{
+    return N*sizeof(T);
+}
+
+
+template<class T, unsigned N>
 inline T& Foam::FixedList<T, N>::first() noexcept
 {
     return v_[0];

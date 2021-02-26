@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,7 +170,7 @@ Foam::UOPstream::~UOPstream()
             (
                 commsType_,
                 toProcNo_,
-                sendBuf_.begin(),
+                sendBuf_.cdata(),
                 sendBuf_.size(),
                 tag_,
                 comm_

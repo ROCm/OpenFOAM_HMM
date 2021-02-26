@@ -128,7 +128,7 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
                 is.read
                 (
                     reinterpret_cast<char*>(list.data()),
-                    list.byteSize()
+                    list.size_bytes()
                 );
 
                 is.fatalCheck
@@ -230,7 +230,7 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
             os.write
             (
                 reinterpret_cast<const char*>(list.cdata()),
-                list.byteSize()
+                list.size_bytes()
             );
         }
     }

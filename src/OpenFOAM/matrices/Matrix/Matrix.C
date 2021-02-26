@@ -469,8 +469,7 @@ std::streamsize Foam::Matrix<Form, Type>::byteSize() const
             << "Invalid for non-contiguous data types"
             << abort(FatalError);
     }
-
-    return mRows_*nCols_*sizeof(Type);
+    return this->size_bytes();
 }
 
 

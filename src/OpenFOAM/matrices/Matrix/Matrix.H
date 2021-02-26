@@ -204,7 +204,12 @@ public:
         //- be used to address into Matrix contents
         inline Type* data() noexcept;
 
-        //- The number of bytes stored by the Matrix data for contiguous types
+        //- Number of contiguous bytes for the Matrix data,
+        //- no runtime check that the type is actually contiguous
+        inline std::streamsize size_bytes() const noexcept;
+
+        //- Number of contiguous bytes for the Matrix data,
+        //- with runtime check that the type is actually contiguous
         std::streamsize byteSize() const;
 
         //- Return const pointer to data in the specified row

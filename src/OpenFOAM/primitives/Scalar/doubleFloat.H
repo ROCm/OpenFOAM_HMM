@@ -73,6 +73,8 @@ MAXMINPOW(float, int, float)
 MAXMINPOW(float, float, long)
 MAXMINPOW(float, long, float)
 #if defined(__APPLE__) && WM_LABEL_SIZE == 64
+MAXMINPOW(double, double, int64_t)
+MAXMINPOW(double, int64_t, double)
 MAXMINPOW(float, float, int64_t)
 MAXMINPOW(float, int64_t, float)
 #endif

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::UIPstream::UIPstream
         (
             commsType,
             fromProcNo_,
-            externalBuf_.begin(),
+            externalBuf_.data(),
             wantedSize,
             tag_,
             comm_
@@ -221,7 +221,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         (
             commsType(),
             fromProcNo_,
-            externalBuf_.begin(),
+            externalBuf_.data(),
             wantedSize,
             tag_,
             comm_

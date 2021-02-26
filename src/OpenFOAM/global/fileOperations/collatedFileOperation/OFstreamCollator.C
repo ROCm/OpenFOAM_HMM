@@ -465,7 +465,7 @@ bool Foam::OFstreamCollator::write
                     UPstream::commsTypes::nonBlocking,
                     proci,
                     reinterpret_cast<char*>(slaveData[proci].data()),
-                    slaveData[proci].byteSize(),
+                    slaveData[proci].size_bytes(),
                     Pstream::msgType(),
                     localComm_
                 );
@@ -480,7 +480,7 @@ bool Foam::OFstreamCollator::write
                     UPstream::commsTypes::nonBlocking,
                     0,
                     reinterpret_cast<const char*>(slice.cdata()),
-                    slice.byteSize(),
+                    slice.size_bytes(),
                     Pstream::msgType(),
                     localComm_
                 )
@@ -489,7 +489,7 @@ bool Foam::OFstreamCollator::write
                 FatalErrorInFunction
                     << "Cannot send outgoing message. "
                     << "to:" << 0 << " nBytes:"
-                    << label(slice.byteSize())
+                    << label(slice.size_bytes())
                     << Foam::abort(FatalError);
             }
         }

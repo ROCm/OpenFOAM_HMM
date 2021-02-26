@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +34,8 @@ License
 #include "scalarIOField.H"
 #include "labelIOField.H"
 #include "pointConversion.H"
+#include <algorithm>
+#include <random>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -304,7 +307,7 @@ Foam::Map<Foam::label> Foam::DelaunayMesh<Triangulation>::rangeInsertWithInfo
         );
     }
 
-    std::random_shuffle(points.begin(), points.end());
+    std::shuffle(points.begin(), points.end(), std::default_random_engine());
 
     spatial_sort
     (

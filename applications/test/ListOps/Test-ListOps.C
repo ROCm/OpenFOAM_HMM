@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     std::for_each(test6.begin(), test6.end(), [](label& x){ x *= 3; });
 
     // Randomize the list
-    std::random_shuffle(test6.begin(), test6.end());
+    Foam::shuffle(test6);
 
     Info<< "randomized input list: " << flatOutput(test6) << nl;
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
     // List reorder
     labelList oldToNew(identity(40));
-    std::random_shuffle(oldToNew.begin(), oldToNew.end());
+    Foam::shuffle(oldToNew);
 
     // Force a few -1:
     oldToNew[4] = oldToNew[8] = -1;
@@ -192,9 +192,9 @@ int main(int argc, char *argv[])
         )
     );
 
-    Info<<"packed input: " << flatOutput(packed) << nl;
+    Info<< "packed input: " << packed << nl;
     inplaceReorder(oldToNew, packed);
-    Info<<"     reorder: " << flatOutput(packed) << nl << nl;
+    Info<<"     reorder: " << packed << nl << nl;
 
     Info<< "\nEnd\n" << endl;
 

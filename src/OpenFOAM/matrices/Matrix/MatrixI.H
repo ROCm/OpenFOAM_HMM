@@ -212,6 +212,13 @@ inline Type* Foam::Matrix<Form, Type>::data() noexcept
 
 
 template<class Form, class Type>
+inline std::streamsize Foam::Matrix<Form, Type>::size_bytes() const noexcept
+{
+    return mRows_*nCols_*sizeof(Type);
+}
+
+
+template<class Form, class Type>
 inline const Type* Foam::Matrix<Form, Type>::rowData(const label irow) const
 {
     #ifdef FULLDEBUG

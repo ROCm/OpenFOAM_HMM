@@ -216,7 +216,12 @@ public:
         //- The last element of the list, position [N-1]
         inline const T& last() const noexcept;
 
-        //- The number of bytes stored by the list data for contiguous types
+        //- Number of contiguous bytes for the list data,
+        //- no runtime check that the type is actually contiguous
+        inline static std::streamsize size_bytes() noexcept;
+
+        //- Number of contiguous bytes for the list data,
+        //- with runtime check that the type is actually contiguous
         std::streamsize byteSize() const;
 
         //- Return the forward circular index, i.e. next index

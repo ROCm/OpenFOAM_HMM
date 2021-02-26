@@ -562,9 +562,16 @@ inline unsigned int* Foam::PackedList<Width>::data() noexcept
 
 
 template<unsigned Width>
-inline std::streamsize Foam::PackedList<Width>::byteSize() const noexcept
+inline std::streamsize Foam::PackedList<Width>::size_bytes() const noexcept
 {
     return num_blocks(size()) * sizeof(block_type);
+}
+
+
+template<unsigned Width>
+inline std::streamsize Foam::PackedList<Width>::byteSize() const noexcept
+{
+    return this->size_bytes();
 }
 
 

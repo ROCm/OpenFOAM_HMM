@@ -274,8 +274,12 @@ public:
             //- Return the last element of the list
             inline const T& last() const;
 
-            //- The number of bytes stored by the list data for contiguous types
-            //  \note is a std::streamsize since it is used in stream ops
+            //- Number of contiguous bytes for the List data,
+            //- no runtime check that the type is actually contiguous
+            inline std::streamsize size_bytes() const noexcept;
+
+            //- Number of contiguous bytes for the List data,
+            //- with runtime check that the type is actually contiguous
             std::streamsize byteSize() const;
 
 
@@ -530,7 +534,7 @@ public:
             {
                 if (is_contiguous<T>::value)
                 {
-                    return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+                    return Hasher(obj.cdata(), obj.size_bytes(), seed);
                 }
 
                 for (const T& val : obj)
@@ -600,7 +604,7 @@ struct Hash<UList<T>>
     {
         if (is_contiguous<T>::value)
         {
-            return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+            return Hasher(obj.cdata(), obj.size_bytes(), seed);
         }
         for (const T& val : obj)
         {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,7 @@ void Foam::globalIndex::gather
                         commsType,
                         procIDs[i],
                         reinterpret_cast<char*>(procSlot.data()),
-                        procSlot.byteSize(),
+                        procSlot.size_bytes(),
                         tag,
                         comm
                     );
@@ -133,7 +133,7 @@ void Foam::globalIndex::gather
                     commsType,
                     procIDs[0],
                     reinterpret_cast<const char*>(fld.cdata()),
-                    fld.byteSize(),
+                    fld.size_bytes(),
                     tag,
                     comm
                 );
@@ -170,7 +170,7 @@ void Foam::globalIndex::gather
                 commsType,
                 procIDs[0],
                 reinterpret_cast<const char*>(fld.cdata()),
-                fld.byteSize(),
+                fld.size_bytes(),
                 tag,
                 comm
             );
@@ -319,7 +319,7 @@ void Foam::globalIndex::scatter
                         commsType,
                         procIDs[i],
                         reinterpret_cast<const char*>(procSlot.cdata()),
-                        procSlot.byteSize(),
+                        procSlot.size_bytes(),
                         tag,
                         comm
                     );
@@ -366,7 +366,7 @@ void Foam::globalIndex::scatter
                     commsType,
                     procIDs[i],
                     reinterpret_cast<const char*>(procSlot.cdata()),
-                    procSlot.byteSize(),
+                    procSlot.size_bytes(),
                     tag,
                     comm
                 );
@@ -391,7 +391,7 @@ void Foam::globalIndex::scatter
                     commsType,
                     procIDs[0],
                     reinterpret_cast<char*>(fld.data()),
-                    fld.byteSize(),
+                    fld.size_bytes(),
                     tag,
                     comm
                 );
@@ -428,7 +428,7 @@ void Foam::globalIndex::scatter
                 commsType,
                 procIDs[0],
                 reinterpret_cast<char*>(fld.data()),
-                fld.byteSize(),
+                fld.size_bytes(),
                 tag,
                 comm
             );

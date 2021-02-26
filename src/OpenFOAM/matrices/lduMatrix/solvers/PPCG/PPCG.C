@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 Mattijs Janssens
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ void Foam::PPCG::gSumMagProd
     {
         Foam::reduce
         (
-            globalSum.begin(),
+            globalSum.data(),
             globalSum.size(),
             sumOp<solveScalar>(),
             Pstream::msgType(),

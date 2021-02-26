@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1920,7 +1920,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
             (
                 Pstream::commsTypes::blocking,
                 slave,
-                sharedPoints.size()*sizeof(Foam::vector)  // byteSize()
+                sharedPoints.size_bytes()
             );
             toSlave << sharedPoints;
         }

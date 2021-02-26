@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -536,7 +536,7 @@ void Foam::mapDistributeBase::distribute
                         Pstream::commsTypes::nonBlocking,
                         domain,
                         reinterpret_cast<const char*>(subField.cdata()),
-                        subField.byteSize(),
+                        subField.size_bytes(),
                         tag,
                         comm
                     );
@@ -559,7 +559,7 @@ void Foam::mapDistributeBase::distribute
                         Pstream::commsTypes::nonBlocking,
                         domain,
                         reinterpret_cast<char*>(recvFields[domain].data()),
-                        recvFields[domain].byteSize(),
+                        recvFields[domain].size_bytes(),
                         tag,
                         comm
                     );
@@ -1061,7 +1061,7 @@ void Foam::mapDistributeBase::distribute
                         Pstream::commsTypes::nonBlocking,
                         domain,
                         reinterpret_cast<const char*>(subField.cdata()),
-                        subField.size()*sizeof(T),
+                        subField.size_bytes(),
                         tag,
                         comm
                     );
@@ -1084,7 +1084,7 @@ void Foam::mapDistributeBase::distribute
                         Pstream::commsTypes::nonBlocking,
                         domain,
                         reinterpret_cast<char*>(recvFields[domain].data()),
-                        recvFields[domain].size()*sizeof(T),
+                        recvFields[domain].size_bytes(),
                         tag,
                         comm
                     );

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -542,7 +542,6 @@ Foam::ccm::reader::readField
                          && dataLocation == requestedLocation
                         )
                         {
-
 #ifdef SOLID_STRESS_HACK
                             bool okayCombination = true;
 
@@ -611,7 +610,7 @@ Foam::ccm::reader::readField
                                 dataNode,
                                 nullptr,
                                 nullptr,
-                                rawData.begin(),
+                                rawData.data(),
                                 kCCMIOStart,
                                 kCCMIOEnd
                             );
@@ -627,7 +626,6 @@ Foam::ccm::reader::readField
                                 const label cellId = mapData[i];
                                 scalarData[cellId] = rawData[i];
                             }
-
                         }
                     }
                 }

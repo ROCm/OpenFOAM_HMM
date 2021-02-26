@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 #include "vector.H"
 #include "IOstreams.H"
 #include <algorithm>
+#include <random>
 
 using namespace Foam;
 
@@ -115,9 +116,8 @@ void testData(const VecSpace& vs)
 int main(int argc, char *argv[])
 {
     Info<<"normalised: " << vector(1,2,3).normalise() << nl;
-    Info<<"normalised: " << vector(VSMALL,VSMALL,VSMALL).normalise() << nl;
-    Info<<"normalised: " <<
-        vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL).normalise() << nl;
+    Info<<"normalised: " << vector::uniform(VSMALL).normalise() << nl;
+    Info<<"normalised: " << vector::uniform(ROOTVSMALL).normalise() << nl;
 
     {
         vector vec1(0.5, 0.5, 0.5);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         std::sort(vec2.begin(), vec2.end());
         Info<< "sorted: " << vec2 << nl;
 
-        std::random_shuffle(vec2.begin(), vec2.end());
+        std::shuffle(vec2.begin(), vec2.end(), std::default_random_engine());
         Info<< "shuffled: " << vec2 << nl;
     }
 

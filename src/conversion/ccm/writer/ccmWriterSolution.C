@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -737,7 +737,7 @@ void Foam::ccm::writer::writeSolution
                 kCCMIOFace,
                 const_cast<scalar*>
                 (
-                    field.primitiveField().begin()
+                    field.primitiveField().cdata()
                 ),
                 kCCMIOStart,
                 kCCMIOEnd
@@ -762,7 +762,10 @@ void Foam::ccm::writer::writeSolution
                     nodeId,
                     maps_->boundary[patchI],
                     kCCMIOFace,
-                    field.boundaryField()[patchI].begin(),
+                    const_cast<scalar*>
+                    (
+                        field.boundaryField()[patchI].cdata()
+                    ),
                     kCCMIOStart,
                     kCCMIOEnd
                 );

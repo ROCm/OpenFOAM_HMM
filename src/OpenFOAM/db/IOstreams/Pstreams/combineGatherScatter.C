@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -314,7 +314,7 @@ void Foam::Pstream::listCombineGather
                     UPstream::commsTypes::scheduled,
                     belowID,
                     reinterpret_cast<char*>(receivedValues.data()),
-                    receivedValues.byteSize(),
+                    receivedValues.size_bytes(),
                     tag,
                     comm
                 );
@@ -371,7 +371,7 @@ void Foam::Pstream::listCombineGather
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
                     reinterpret_cast<const char*>(Values.cdata()),
-                    Values.byteSize(),
+                    Values.size_bytes(),
                     tag,
                     comm
                 );
@@ -451,7 +451,7 @@ void Foam::Pstream::listCombineScatter
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
                     reinterpret_cast<char*>(Values.data()),
-                    Values.byteSize(),
+                    Values.size_bytes(),
                     tag,
                     comm
                 );
@@ -493,7 +493,7 @@ void Foam::Pstream::listCombineScatter
                     UPstream::commsTypes::scheduled,
                     belowID,
                     reinterpret_cast<const char*>(Values.cdata()),
-                    Values.byteSize(),
+                    Values.size_bytes(),
                     tag,
                     comm
                 );

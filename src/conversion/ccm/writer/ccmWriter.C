@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ void Foam::ccm::writer::addLinearMap
         mapId,
         size,
         (start + size),
-        data.begin(),
+        data.cdata(),
         kCCMIOStart,
         kCCMIOEnd
     );

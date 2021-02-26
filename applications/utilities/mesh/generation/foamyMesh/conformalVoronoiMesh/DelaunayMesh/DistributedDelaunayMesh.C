@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ License
 #include "pointConversion.H"
 #include "indexedVertexEnum.H"
 #include "IOmanip.H"
+#include <algorithm>
+#include <random>
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -880,7 +882,12 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
         );
     }
 
-    std::random_shuffle(pointsBbDistSqr.begin(), pointsBbDistSqr.end());
+    std::shuffle
+    (
+        pointsBbDistSqr.begin(),
+        pointsBbDistSqr.end(),
+        std::default_random_engine()
+    );
 
     // Sort in ascending order by the distance of the point from the centre
     // of the processor bounding box

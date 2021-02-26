@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -770,10 +770,10 @@ void Foam::UPstream::allToAll
             (
                 // NOTE: const_cast is a temporary hack for
                 // backward-compatibility with versions of OpenMPI < 1.7.4
-                const_cast<label*>(sendData.begin()),
+                const_cast<label*>(sendData.cdata()),
                 sizeof(label),
                 MPI_BYTE,
-                recvData.begin(),
+                recvData.data(),
                 sizeof(label),
                 MPI_BYTE,
                 PstreamGlobals::MPICommunicators_[communicator]
@@ -1090,7 +1090,7 @@ void Foam::UPstream::allocatePstreamCommunicator
         (
             PstreamGlobals::MPIGroups_[parentIndex],
             procIDs_[index].size(),
-            procIDs_[index].begin(),
+            procIDs_[index].cdata(),
            &PstreamGlobals::MPIGroups_[index]
         );
 
@@ -1188,7 +1188,7 @@ void Foam::UPstream::waitRequests(const label start)
             MPI_Waitall
             (
                 waitRequests.size(),
-                waitRequests.begin(),
+                waitRequests.data(),
                 MPI_STATUSES_IGNORE
             )
         )

@@ -146,7 +146,7 @@ Foam::Ostream& Foam::UList<T>::writeList
             os.write
             (
                 reinterpret_cast<const char*>(list.cdata()),
-                list.byteSize()
+                list.size_bytes()
             );
         }
     }
