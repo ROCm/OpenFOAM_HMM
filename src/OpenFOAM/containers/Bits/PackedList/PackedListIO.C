@@ -61,70 +61,33 @@ Foam::Ostream& Foam::PackedList<Width>::printBits
 
 
 template<unsigned Width>
-Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
+Foam::Istream& Foam::PackedList<Width>::readList(Istream& is)
 {
     PackedList<Width>& list = *this;
 
+    // Anull list
     list.clear();
+
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstTok(is);
-    is.fatalCheck
-    (
-        "PackedList::read(Istream&) : "
-        "reading first token"
-    );
+    token tok(is);
 
-    if (firstTok.isLabel())
+    is.fatalCheck("PackedList::readList(Istream&) : reading first token");
+
+    if (tok.isLabel())
     {
-        const label len = firstTok.labelToken();
+        const label len = tok.labelToken();
 
         // Set list length to that read
         list.resize(len);
 
-        // Read list contents depending on data format
-        if (is.format() == IOstream::ASCII)
+        if (is.format() == IOstream::BINARY)
         {
-            // Read beginning of contents
-            const char delimiter = is.readBeginList("PackedList");
+            // Binary (always contiguous)
 
             if (len)
             {
-                if (delimiter == token::BEGIN_LIST)
-                {
-                    for (label i=0; i<len; ++i)
-                    {
-                        list[i] = list.readValue(is);
-
-                        is.fatalCheck
-                        (
-                            "PackedList::read(Istream&) : "
-                            "reading entry"
-                        );
-                    }
-                }
-                else
-                {
-                    // Assign for all entries
-                    list = list.readValue(is);
-
-                    is.fatalCheck
-                    (
-                        "PackedList::read(Istream&) : "
-                        "reading the single entry"
-                    );
-                }
-            }
-
-            // Read end of contents
-            is.readEndList("PackedList");
-        }
-        else
-        {
-            // NOTE: binary content should be independent of WM_LABEL_SIZE
-
-            if (len)
-            {
+                // NOTE: independent of WM_LABEL_SIZE
                 is.read
                 (
                     reinterpret_cast<char*>(list.data()),
@@ -133,37 +96,73 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
 
                 is.fatalCheck
                 (
-                    "PackedList::read(Istream&) : "
+                    "PackedList::readList(Istream&) : "
                     "reading the binary block"
                 );
             }
         }
+        else
+        {
+            // Begin of contents marker
+            const char delimiter = is.readBeginList("PackedList");
+
+            if (len)
+            {
+                if (delimiter == token::BEGIN_LIST)
+                {
+                    for (label i=0; i<len; ++i)
+                    {
+                        list.set(i, list.readValue(is));
+
+                        is.fatalCheck
+                        (
+                            "PackedList::readList(Istream&) : "
+                            "reading entry"
+                        );
+                    }
+                }
+                else  // token::BEGIN_BLOCK
+                {
+                    // Assign for all entries
+                    list = list.readValue(is);
+
+                    is.fatalCheck
+                    (
+                        "PackedList::readList(Istream&) : "
+                        "reading the single entry"
+                    );
+                }
+            }
+
+            // End of contents marker
+            is.readEndList("PackedList");
+        }
     }
-    else if (firstTok.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        token nextTok(is);
+        is >> tok;
         is.fatalCheck(FUNCTION_NAME);
 
-        while (!nextTok.isPunctuation(token::END_LIST))
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            is.putBack(nextTok);
+            is.putBack(tok);
             list.append(list.readValue(is));
 
-            is  >> nextTok;
+            is >> tok;
             is.fatalCheck(FUNCTION_NAME);
         }
     }
-    else if (firstTok.isPunctuation(token::BEGIN_BLOCK))
+    else if (tok.isPunctuation(token::BEGIN_BLOCK))
     {
-        token nextTok(is);
+        is >> tok;
         is.fatalCheck(FUNCTION_NAME);
 
-        while (!nextTok.isPunctuation(token::END_BLOCK))
+        while (!tok.isPunctuation(token::END_BLOCK))
         {
-            is.putBack(nextTok);
+            is.putBack(tok);
             list.setPair(is);
 
-            is  >> nextTok;
+            is >> tok;
             is.fatalCheck(FUNCTION_NAME);
         }
     }
@@ -171,7 +170,7 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int>, '(' or '{', found "
-            << firstTok.info() << nl
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 
@@ -189,40 +188,11 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
     const PackedList<Width>& list = *this;
     const label len = list.size();
 
-    // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII)
+    if (os.format() == IOstream::BINARY)
     {
-        if (len > 1 && list.uniform())
-        {
-            // Two or more entries, and all have identical values.
-            os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
-        }
-        else if (!shortLen || len <= shortLen)
-        {
-            // Shorter list, or line-breaks suppressed
-            os  << len << token::BEGIN_LIST;
-            for (label i=0; i < len; ++i)
-            {
-                if (i) os << token::SPACE;
-                os  << list[i];
-            }
-            os  << token::END_LIST;
-        }
-        else
-        {
-            // Longer list
-            os << nl << len << nl << token::BEGIN_LIST << nl;
-            for (label i=0; i < len; ++i)
-            {
-                os << list[i] << nl;
-            }
-            os << token::END_LIST << nl;
-        }
-    }
-    else
-    {
-        // Contents are binary and contiguous
-        os  << nl << len << nl;
+        // Binary (always contiguous)
+
+        os << nl << len << nl;
 
         if (len)
         {
@@ -233,6 +203,44 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
                 list.size_bytes()
             );
         }
+    }
+    else if (len > 1 && list.uniform())
+    {
+        // Two or more entries, and all entries have identical values.
+        os << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
+    }
+    else if (!shortLen || len <= shortLen)
+    {
+        // Single-line output
+
+        // Size and start delimiter
+        os << len << token::BEGIN_LIST;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            if (i) os << token::SPACE;
+            os << label(list.get(i));
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+    else
+    {
+        // Multi-line output
+
+        // Size and start delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            os << label(list.get(i)) << nl;
+        }
+
+        // End delimiter
+        os << token::END_LIST << nl;
     }
 
     return os;
@@ -260,7 +268,7 @@ void Foam::PackedList<Width>::writeEntry
 template<unsigned Width>
 Foam::Istream& Foam::operator>>(Istream& is, PackedList<Width>& list)
 {
-    return list.read(is);
+    return list.readList(is);
 }
 
 

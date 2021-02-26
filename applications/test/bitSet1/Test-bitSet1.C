@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ Description
 #include "HashSet.H"
 #include "ListOps.H"
 #include "cpuTime.H"
+#include "StringStream.H"
+#include "FlatOutput.H"
 #include <vector>
 #include <unordered_set>
 
@@ -62,6 +64,28 @@ inline Ostream& report
     }
 
     return Info;
+}
+
+
+// Create equivalent to flat output
+inline void undecorated
+(
+    Ostream& os,
+    const bitSet& list
+)
+{
+    const label len = list.size();
+
+    os << token::BEGIN_LIST;
+
+    // Contents
+    for (label i=0; i < len; ++i)
+    {
+        if (i) os << token::SPACE;
+        os << label(list.get(i));
+    }
+
+    os << token::END_LIST;
 }
 
 
@@ -97,6 +121,28 @@ int main(int argc, char *argv[])
 
         Info<<"bits used: " << flatOutput(set3b.toc()) << nl;
         Info<<"inverted:  " << flatOutput(invert(set3b)) << nl;
+
+        Info<< "Test read/write (ASCII)" << nl;
+
+        OStringStream ostr;
+
+        undecorated(ostr, set3a);  // like flatOutput
+        ostr << bitSet();
+        set3a.flip();
+        undecorated(ostr, set3a);  // like flatOutput
+
+        {
+            IStringStream istr(ostr.str());
+            Info<< "parse: " << istr.str() << nl;
+
+            bitSet bset1(istr);
+            bitSet bset2(istr);
+            bitSet bset3(istr);
+
+            Info<< "got: " << bset1 << nl
+                << "and: " << bset2 << nl
+                << "and: " << bset3 << nl;
+        }
     }
 
     Info<< "End\n" << endl;

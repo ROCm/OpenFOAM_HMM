@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,59 +44,9 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
 
     const label len = list.size();
 
-    // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !is_contiguous<T>::value)
+    if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
     {
-        if (len > 1 && is_contiguous<T>::value && list.uniform())
-        {
-            // Two or more entries, and all entries have identical values.
-            os << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
-        }
-        else if
-        (
-            (len <= 1 || !shortLen)
-         ||
-            (
-                (len <= shortLen)
-             &&
-                (
-                    Detail::ListPolicy::no_linebreak<T>::value
-                 || is_contiguous<T>::value
-                )
-            )
-        )
-        {
-            // Size and start delimiter
-            os << len << token::BEGIN_LIST;
-
-            // Contents
-            for (label i=0; i < len; ++i)
-            {
-                if (i) os << token::SPACE;
-                os << list[i];
-            }
-
-            // End delimiter
-            os << token::END_LIST;
-        }
-        else
-        {
-            // Size and start delimiter
-            os << nl << len << nl << token::BEGIN_LIST << nl;
-
-            // Contents
-            for (label i=0; i < len; ++i)
-            {
-                os << list[i] << nl;
-            }
-
-            // End delimiter
-            os << token::END_LIST << nl;
-        }
-    }
-    else
-    {
-        // Contents are binary and contiguous
+        // Binary and contiguous
         os << nl << len << nl;
 
         if (len)
@@ -118,6 +68,56 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
             // End delimiter and/or cleanup.
             os.endRawWrite();
         }
+    }
+    else if (len > 1 && is_contiguous<T>::value && list.uniform())
+    {
+        // Two or more entries, and all entries have identical values.
+        os << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
+    }
+    else if
+    (
+        (len <= 1 || !shortLen)
+     ||
+        (
+            (len <= shortLen)
+         &&
+            (
+                is_contiguous<T>::value
+             || Detail::ListPolicy::no_linebreak<T>::value
+            )
+        )
+    )
+    {
+        // Single-line output
+
+        // Size and start delimiter
+        os << len << token::BEGIN_LIST;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            if (i) os << token::SPACE;
+            os << list[i];
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+    else
+    {
+        // Multi-line output
+
+        // Size and start delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            os << list[i] << nl;
+        }
+
+        // End delimiter
+        os << token::END_LIST << nl;
     }
 
     os.check(FUNCTION_NAME);

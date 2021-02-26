@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,11 +73,6 @@ class bitSet
 
 
 protected:
-
-    // Protected Member Functions
-
-        //- Write as a dictionary entry
-        void writeEntry(Ostream& os) const;
 
     // Logic/Set Operations
 
@@ -582,16 +577,6 @@ public:
         inline bitSet& operator-=(const bitSet& other);
 
 
-    // IO
-
-        //- Write bitSet, with line-breaks (ASCII) when length exceeds shortLen.
-        //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortLen=0) const;
-
-        //- Write as a dictionary entry with keyword
-        void writeEntry(const word& keyword, Ostream& os) const;
-
-
     // IOstream Operators
 
         //- Return info proxy
@@ -611,8 +596,7 @@ public:
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-//- Write bitset to Ostream, as per bitSet::writeList() with default length
-//- of 40 items.
+//- Write bitset to Ostream with 40 items per line.
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
 
 //- Output bitset information

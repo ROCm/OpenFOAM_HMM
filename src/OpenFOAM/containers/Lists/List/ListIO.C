@@ -39,23 +39,25 @@ Foam::List<T>::List(Istream& is)
 :
     UList<T>(nullptr, 0)
 {
-    operator>>(is, *this);
+    this->readList(is);
 }
 
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
+Foam::Istream& Foam::List<T>::readList(Istream& is)
 {
+    List<T>& list = *this;
+
     // Anull list
-    list.resize(0);
+    list.clear();
 
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
-    is.fatalCheck(FUNCTION_NAME);
+    is.fatalCheck("List<T>::readList(Istream&) : reading first token");
 
-    if (firstToken.isCompound())
+    if (tok.isCompound())
     {
         // Compound: simply transfer contents
 
@@ -63,24 +65,42 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
         (
             dynamicCast<token::Compound<List<T>>>
             (
-                firstToken.transferCompoundToken(is)
+                tok.transferCompoundToken(is)
             )
         );
     }
-    else if (firstToken.isLabel())
+    else if (tok.isLabel())
     {
         // Label: could be int(..), int{...} or just a plain '0'
 
-        const label len = firstToken.labelToken();
+        const label len = tok.labelToken();
 
-        // Resize to length read
+        // Resize to actual length read
         list.resize(len);
 
-        // Read list contents depending on data format
-
-        if (is.format() == IOstream::ASCII || !is_contiguous<T>::value)
+        if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
         {
-            // Read beginning of contents
+            // Binary and contiguous
+
+            if (len)
+            {
+                Detail::readContiguous<T>
+                (
+                    is,
+                    reinterpret_cast<char*>(list.data()),
+                    list.size_bytes()
+                );
+
+                is.fatalCheck
+                (
+                    "List<T>::readList(Istream&) : "
+                    "reading the binary block"
+                );
+            }
+        }
+        else
+        {
+            // Begin of contents marker
             const char delimiter = is.readBeginList("List");
 
             if (len)
@@ -93,7 +113,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
 
                         is.fatalCheck
                         (
-                            "operator>>(Istream&, List<T>&) : "
+                            "List<T>::readList(Istream&) : "
                             "reading entry"
                         );
                     }
@@ -102,49 +122,32 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
                 {
                     // Uniform content (delimiter == token::BEGIN_BLOCK)
 
-                    T element;
-                    is >> element;
+                    T elem;
+                    is >> elem;
 
                     is.fatalCheck
                     (
-                        "operator>>(Istream&, List<T>&) : "
+                        "List<T>::readList(Istream&) : "
                         "reading the single entry"
                     );
 
                     for (label i=0; i<len; ++i)
                     {
-                        list[i] = element;  // Copy the value
+                        list[i] = elem;  // Copy the value
                     }
                 }
             }
 
-            // Read end of contents
+            // End of contents marker
             is.readEndList("List");
         }
-        else if (len)
-        {
-            // Non-empty, binary, contiguous
-
-            Detail::readContiguous<T>
-            (
-                is,
-                reinterpret_cast<char*>(list.data()),
-                len*sizeof(T)
-            );
-
-            is.fatalCheck
-            (
-                "operator>>(Istream&, List<T>&) : "
-                "reading the binary block"
-            );
-        }
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
         // "(...)" : read as SLList and transfer contents
 
-        is.putBack(firstToken); // Putback the opening bracket
-        SLList<T> sll(is);      // Read as singly-linked list
+        is.putBack(tok);    // Putback the opening bracket
+        SLList<T> sll(is);  // Read as singly-linked list
 
         // Reallocate and move assign list elements
         list = std::move(sll);
@@ -153,11 +156,18 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info() << nl
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 
     return is;
+}
+
+
+template<class T>
+Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
+{
+    return list.readList(is);
 }
 
 

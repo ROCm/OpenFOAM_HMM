@@ -141,21 +141,20 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
 template<class T, class Key, class Hash>
-Foam::Istream& Foam::operator>>
+Foam::Istream& Foam::HashTable<T, Key, Hash>::readTable
 (
-    Istream& is,
-    HashTable<T, Key, Hash>& tbl
+    Istream& is
 )
 {
+    HashTable<T, Key, Hash>& tbl = *this;
+
     // Anull existing table
     tbl.clear();
 
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
     is.fatalCheck
     (
@@ -163,9 +162,9 @@ Foam::Istream& Foam::operator>>
         "reading first token"
     );
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
-        const label len = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("HashTable");
@@ -175,7 +174,8 @@ Foam::Istream& Foam::operator>>
             if (delimiter != token::BEGIN_LIST)
             {
                 FatalIOErrorInFunction(is)
-                    << "incorrect first token, '(', found " << firstToken.info()
+                    << "incorrect first token, '(', found "
+                    << tok.info() << nl
                     << exit(FatalIOError);
             }
 
@@ -203,12 +203,12 @@ Foam::Istream& Foam::operator>>
         // Read end of contents
         is.readEndList("HashTable");
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        token lastToken(is);
-        while (!lastToken.isPunctuation(token::END_LIST))
+        is >> tok;
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            is.putBack(lastToken);
+            is.putBack(tok);
 
             Key key;
 
@@ -222,14 +222,14 @@ Foam::Istream& Foam::operator>>
                 "reading entry"
             );
 
-            is >> lastToken;
+            is >> tok;
         }
     }
     else
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 
@@ -239,12 +239,13 @@ Foam::Istream& Foam::operator>>
 
 
 template<class T, class Key, class Hash>
-Foam::Ostream& Foam::operator<<
+Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeTable
 (
-    Ostream& os,
-    const HashTable<T, Key, Hash>& tbl
-)
+    Ostream& os
+) const
 {
+    const HashTable<T, Key, Hash>& tbl = *this;
+
     const label len = tbl.size();
 
     if (len)
@@ -268,6 +269,30 @@ Foam::Ostream& Foam::operator<<
 
     os.check(FUNCTION_NAME);
     return os;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    HashTable<T, Key, Hash>& tbl
+)
+{
+    return tbl.readTable(is);
+}
+
+
+template<class T, class Key, class Hash>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const HashTable<T, Key, Hash>& tbl
+)
+{
+    return tbl.writeTable(os);
 }
 
 

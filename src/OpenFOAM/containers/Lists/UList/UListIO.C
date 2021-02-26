@@ -85,59 +85,10 @@ Foam::Ostream& Foam::UList<T>::writeList
 
     const label len = list.size();
 
-    // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !is_contiguous<T>::value)
+    if (os.format() == IOstream::BINARY && is_contiguous<T>::value)
     {
-        if (len > 1 && is_contiguous<T>::value && list.uniform())
-        {
-            // Two or more entries, and all entries have identical values.
-            os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
-        }
-        else if
-        (
-            (len <= 1 || !shortLen)
-         ||
-            (
-                (len <= shortLen)
-             &&
-                (
-                    Detail::ListPolicy::no_linebreak<T>::value
-                 || is_contiguous<T>::value
-                )
-            )
-        )
-        {
-            // Size and start delimiter
-            os << len << token::BEGIN_LIST;
+        // Binary and contiguous
 
-            // Contents
-            for (label i=0; i < len; ++i)
-            {
-                if (i) os << token::SPACE;
-                os << list[i];
-            }
-
-            // End delimiter
-            os << token::END_LIST;
-        }
-        else
-        {
-            // Size and start delimiter
-            os << nl << len << nl << token::BEGIN_LIST << nl;
-
-            // Contents
-            for (label i=0; i < len; ++i)
-            {
-                os << list[i] << nl;
-            }
-
-            // End delimiter
-            os << token::END_LIST << nl;
-        }
-    }
-    else
-    {
-        // Contents are binary and contiguous
         os << nl << len << nl;
 
         if (len)
@@ -150,27 +101,77 @@ Foam::Ostream& Foam::UList<T>::writeList
             );
         }
     }
+    else if (len > 1 && is_contiguous<T>::value && list.uniform())
+    {
+        // Two or more entries, and all entries have identical values.
+        os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
+    }
+    else if
+    (
+        (len <= 1 || !shortLen)
+     ||
+        (
+            (len <= shortLen)
+         &&
+            (
+                is_contiguous<T>::value
+             || Detail::ListPolicy::no_linebreak<T>::value
+            )
+        )
+    )
+    {
+        // Single-line output
+
+        // Size and start delimiter
+        os << len << token::BEGIN_LIST;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            if (i) os << token::SPACE;
+            os << list[i];
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+    else
+    {
+        // Multi-line output
+
+        // Size and start delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (label i=0; i < len; ++i)
+        {
+            os << list[i] << nl;
+        }
+
+        // End delimiter
+        os << token::END_LIST << nl;
+    }
 
     os.check(FUNCTION_NAME);
     return os;
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
+Foam::Istream& Foam::UList<T>::readList(Istream& is)
 {
+    UList<T>& list = *this;
+
     // The target list length - must match with sizes read
     const label len = list.size();
 
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
-    is.fatalCheck("operator>>(Istream&, UList<T>&) : reading first token");
+    is.fatalCheck("UList<T>::readList(Istream&) : reading first token");
 
-    if (firstToken.isCompound())
+    if (tok.isCompound())
     {
         // Compound: simply transfer contents
 
@@ -179,7 +180,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
         (
             dynamicCast<token::Compound<List<T>>>
             (
-                firstToken.transferCompoundToken(is)
+                tok.transferCompoundToken(is)
             )
         );
 
@@ -199,11 +200,11 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
             list[i] = std::move(elems[i]);
         }
     }
-    else if (firstToken.isLabel())
+    else if (tok.isLabel())
     {
         // Label: could be int(..), int{...} or just a plain '0'
 
-        const label inputLen = firstToken.labelToken();
+        const label inputLen = tok.labelToken();
 
         // List lengths must match
         if (inputLen != len)
@@ -214,11 +215,29 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
                 << exit(FatalIOError);
         }
 
-        // Read list contents depending on data format
-
-        if (is.format() == IOstream::ASCII || !is_contiguous<T>::value)
+        if (is.format() == IOstream::BINARY && is_contiguous<T>::value)
         {
-            // Read beginning of contents
+            // Binary and contiguous
+
+            if (len)
+            {
+                Detail::readContiguous<T>
+                (
+                    is,
+                    reinterpret_cast<char*>(list.data()),
+                    list.size_bytes()
+                );
+
+                is.fatalCheck
+                (
+                    "UList<T>::readList(Istream&) : "
+                    "reading binary block"
+                );
+            }
+        }
+        else
+        {
+            // Begin of contents marker
             const char delimiter = is.readBeginList("List");
 
             if (len)
@@ -231,7 +250,8 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
 
                         is.fatalCheck
                         (
-                            "operator>>(Istream&, UList<T>&) : reading entry"
+                            "UList<T>::readList(Istream&) : "
+                            "reading entry"
                         );
                     }
                 }
@@ -239,48 +259,32 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
                 {
                     // Uniform content (delimiter == token::BEGIN_BLOCK)
 
-                    T element;
-                    is >> element;
+                    T elem;
+                    is >> elem;
 
                     is.fatalCheck
                     (
-                        "operator>>(Istream&, UList<T>&) : "
+                        "UList<T>::readList(Istream&) : "
                         "reading the single entry"
                     );
 
                     for (label i=0; i<len; ++i)
                     {
-                        list[i] = element;  // Copy the value
+                        list[i] = elem;  // Copy the value
                     }
                 }
             }
 
-            // Read end of contents
+            // End of contents marker
             is.readEndList("List");
         }
-        else if (len)
-        {
-            // Non-empty, binary, contiguous
-
-            Detail::readContiguous<T>
-            (
-                is,
-                reinterpret_cast<char*>(list.data()),
-                len*sizeof(T)
-            );
-
-            is.fatalCheck
-            (
-                "operator>>(Istream&, UList<T>&) : reading the binary block"
-            );
-        }
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
         // "(...)" : read as SLList and transfer contents
 
-        is.putBack(firstToken); // Putback the opening bracket
-        SLList<T> sll(is);      // Read as singly-linked list
+        is.putBack(tok);    // Putback the opening bracket
+        SLList<T> sll(is);  // Read as singly-linked list
 
         // List lengths must match
         if (sll.size() != len)
@@ -301,11 +305,18 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info() << nl
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 
     return is;
+}
+
+
+template<class T>
+Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
+{
+    return list.readList(is);
 }
 
 

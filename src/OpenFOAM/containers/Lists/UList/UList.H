@@ -459,7 +459,11 @@ public:
         bool operator>=(const UList<T>& a) const;
 
 
-    // Writing
+    // Reading/writing
+
+        //- Read List contents from Istream.
+        //  The List must have the proper size before calling
+        Istream& readList(Istream& is);
 
         //- Write the List as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
@@ -472,7 +476,7 @@ public:
     // IOstream Operators
 
         //- Read List contents from Istream.
-        //  Requires size to have been set before
+        //  The List must have the proper size before calling
         friend Istream& operator>> <T>
         (
             Istream& os,

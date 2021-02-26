@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,10 +68,26 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
         // The total size
         const label len = size();
 
-        // Read list contents depending on data format
-        if (is.format() == IOstream::ASCII || !is_contiguous<Type>::value)
+        if (is.format() == IOstream::BINARY && is_contiguous<Type>::value)
         {
-            // Read beginning of contents
+            // Binary and contiguous
+
+            if (len)
+            {
+                Detail::readContiguous<Type>
+                (
+                    is,
+                    reinterpret_cast<char*>(v_),
+                    this->size_bytes()
+                );
+
+                is.fatalCheck("readMatrix : reading the binary block");
+            }
+
+        }
+        else
+        {
+            // Begin of contents marker
             char listDelimiter = is.readBeginList("Matrix");
 
             if (len)
@@ -88,14 +104,13 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
                         for (label j = 0; j < nCols_; ++j)
                         {
                             is >> v_[idx++];
-
-                            is.fatalCheck("readMatrix : reading reading entry");
+                            is.fatalCheck("readMatrix : reading entry");
                         }
 
                         is.readEndList("MatrixRow");
                     }
                 }
-                else
+                else  // BEGIN_BLOCK
                 {
                     Type element;
                     is >> element;
@@ -106,31 +121,16 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
                 }
             }
 
-            // Read end of contents
+            // End of contents marker
             is.readEndList("Matrix");
-        }
-        else
-        {
-            if (len)
-            {
-                Detail::readContiguous<Type>
-                (
-                    is,
-                    reinterpret_cast<char*>(v_),
-                    len*sizeof(Type)
-                );
-
-                is.fatalCheck("readMatrix : reading the binary block");
-            }
         }
 
         return len;
     }
 
-
     FatalIOErrorInFunction(is)
         << "incorrect first token, expected <int>, found "
-        << firstToken.info()
+        << firstToken.info() << nl
         << exit(FatalIOError);
 
     return 0;
@@ -150,10 +150,23 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
     const label len = mat.size();
 
     // Rows, columns size
-    os  << mat.m() << token::SPACE << mat.n();
+    os  << mat.nRows() << token::SPACE << mat.nCols();
 
-    // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !is_contiguous<Type>::value)
+    if (os.format() == IOstream::BINARY && is_contiguous<Type>::value)
+    {
+        // Binary and contiguous
+
+        if (len)
+        {
+            // write(...) includes surrounding start/end delimiters
+            os.write
+            (
+                reinterpret_cast<const char*>(mat.cdata()),
+                mat.size_bytes()
+            );
+        }
+    }
+    else
     {
         if (len)
         {
@@ -173,12 +186,12 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
                 label idx = 0;
 
                 // Loop over rows
-                for (label i = 0; i < mat.m(); ++i)
+                for (label i = 0; i < mat.nRows(); ++i)
                 {
                     os  << token::BEGIN_LIST;
 
                     // Write row
-                    for (label j = 0; j < mat.n(); ++j)
+                    for (label j = 0; j < mat.nCols(); ++j)
                     {
                         if (j) os << token::SPACE;
                         os << v[idx++];
@@ -198,12 +211,12 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
                 label idx = 0;
 
                 // Loop over rows
-                for (label i=0; i < mat.m(); ++i)
+                for (label i=0; i < mat.nRows(); ++i)
                 {
                     os  << nl << token::BEGIN_LIST;
 
                     // Write row
-                    for (label j=0; j < mat.n(); ++j)
+                    for (label j = 0; j < mat.nCols(); ++j)
                     {
                         os << nl << v[idx++];
                     }
@@ -217,21 +230,8 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
         }
         else
         {
+            // Empty matrix
             os  << token::BEGIN_LIST << token::END_LIST << nl;
-        }
-    }
-    else
-    {
-        // Contents are binary and contiguous
-
-        if (len)
-        {
-            // write(...) includes surrounding start/end delimiters
-            os.write
-            (
-                reinterpret_cast<const char*>(mat.cdata()),
-                len*sizeof(Type)
-            );
         }
     }
 

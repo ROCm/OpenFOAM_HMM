@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -302,7 +302,13 @@ public:
         void operator=(SLList<T>&& list);
 
 
-    // Istream Operator
+    // Reading/writing
+
+        //- Read List from Istream, discarding contents of existing List
+        Istream& readList(Istream& is);
+
+
+    // IOstream Operators
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T>

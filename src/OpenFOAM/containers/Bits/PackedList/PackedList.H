@@ -416,7 +416,7 @@ public:
         Ostream& printBits(Ostream& os, bool debugOutput=false) const;
 
         //- Clear list and read from stream
-        Istream& read(Istream& is);
+        Istream& readList(Istream& is);
 
         //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
