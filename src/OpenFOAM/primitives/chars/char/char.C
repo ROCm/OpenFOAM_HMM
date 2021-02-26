@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,54 +24,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Primitive
-    wchar_t
-
-Description
-    A wide-character and a pointer to a wide-character string.
-
-SourceFiles
-    wchar.C
-
-See also
-    http://en.wikipedia.org/wiki/UTF-8
-    http://en.wikibooks.org/wiki/Unicode/Character_reference
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef wchar_H
-#define wchar_H
-
-#include <cwchar>
-#include <string>
+#include "char.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+const char* const Foam::pTraits<char>::typeName = "char";
+
+Foam::pTraits<char>::pTraits(const char p) noexcept
+:
+    p_(p)
+{}
+
+
+Foam::pTraits<char>::pTraits(Istream& is)
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-//- Output wide character (Unicode) as UTF-8
-Ostream& operator<<(Ostream& os, const wchar_t wc);
-
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream& os, const wchar_t* wstr);
-
-//- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream& os, const std::wstring& wstr);
+    is >> p_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+char Foam::readChar(Istream& is)
+{
+    char c;
+    is.read(c);
+    return c;
+}
 
-} // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::Istream& Foam::operator>>(Istream& is, char& c)
+{
+    is.read(c);
+    is.check(FUNCTION_NAME);
+    return is;
+}
 
-#endif
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
+{
+    os.write(c);
+    os.check(FUNCTION_NAME);
+    return os;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const char* str)
+{
+    os.write(str);
+    os.check(FUNCTION_NAME);
+    return os;
+}
+
 
 // ************************************************************************* //

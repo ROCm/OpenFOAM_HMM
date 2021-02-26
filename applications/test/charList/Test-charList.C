@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,43 +23,65 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    Test-charList
+
+Description
+    Some test of UList, List for characters
+
 \*---------------------------------------------------------------------------*/
 
-#include "char.H"
+#include "OSspecific.H"
+#include "argList.H"
 #include "IOstreams.H"
+#include "messageStream.H"
+
+#include "charList.H"
+#include "labelList.H"
+#include "StringStream.H"
+#include "ListOps.H"
+#include "SubList.H"
+#include "FlatOutput.H"
+
+#include <numeric>
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//  Main program:
 
-char Foam::readChar(Istream& is)
+int main(int argc, char *argv[])
 {
-    char c;
-    is.read(c);
-    return c;
+    argList::noBanner();
+    argList::noParallel();
+    argList::noFunctionObjects();
+
+    #include "setRootCase.H"
+
+    Info<< "Known compound tokens: "
+        << token::compound::IstreamConstructorTablePtr_->sortedToc() << nl;
+
+    OStringStream ostr;
+
+    {
+        List<char> alphabet(64);
+        std::iota(alphabet.begin(), alphabet.end(), '@');
+
+        alphabet.writeEntry("alphabet", Info);
+
+        ostr << alphabet;
+
+        Info<< "wrote: " << ostr.str() << nl;
+    }
+
+    {
+        IStringStream istr(ostr.str());
+        List<char> alphabet(istr);
+
+        Info<< "re-read: " << alphabet << nl;
+    }
+
+    return 0;
 }
-
-
-Foam::Istream& Foam::operator>>(Istream& is, char& c)
-{
-    is.read(c);
-    is.check(FUNCTION_NAME);
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
-{
-    os.write(c);
-    os.check(FUNCTION_NAME);
-    return os;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const char* str)
-{
-    os.write(str);
-    os.check(FUNCTION_NAME);
-    return os;
-}
-
 
 // ************************************************************************* //

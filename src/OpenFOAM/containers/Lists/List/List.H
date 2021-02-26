@@ -353,6 +353,14 @@ public:
 };
 
 
+// * * * * * * * * * * * * Template Specializations  * * * * * * * * * * * * //
+
+//- Specialized list reading for character lists which always uses
+//- binary format.
+template<>
+Istream& List<char>::readList(Istream& is);
+
+
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Create identity map of the given length with (map[i] == i)

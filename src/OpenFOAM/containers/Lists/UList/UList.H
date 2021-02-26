@@ -551,6 +551,24 @@ public:
 };
 
 
+// * * * * * * * * * * * * Template Specializations  * * * * * * * * * * * * //
+
+//- Specialized list reading for character lists which always uses
+//- binary format.
+template<>
+Istream& UList<char>::readList(Istream& is);
+
+//- Specialized writeEntry for character lists which always uses
+//- binary format.
+template<>
+void UList<char>::writeEntry(Ostream& os) const;
+
+//- Specialized writeList for character lists which always uses
+//- binary format.
+template<>
+Ostream& UList<char>::writeList(Ostream& os, const label /*unused*/) const;
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Write List to Ostream, as per UList::writeList() with default length.

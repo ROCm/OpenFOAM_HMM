@@ -31,8 +31,10 @@ $(bools)/Switch/Switch.C
 $(bools)/lists/boolList.C
 
 chars = primitives/chars
-$(chars)/char/charIO.C
-$(chars)/wchar/wcharIO.C
+$(chars)/char/char.C
+$(chars)/wchar/wchar.C
+$(chars)/lists/charList.C
+$(chars)/lists/charUList.C
 
 primitives/direction/directionIO.C
 
