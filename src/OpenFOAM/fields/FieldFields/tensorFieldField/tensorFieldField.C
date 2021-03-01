@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,7 +219,7 @@ UNARY_FUNCTION(tensor, tensor, cof)
 UNARY_FUNCTION(tensor, tensor, inv)
 
 UNARY_FUNCTION(vector, symmTensor, eigenValues)
-UNARY_FUNCTION(symmTensor, symmTensor, eigenVectors)
+UNARY_FUNCTION(tensor, symmTensor, eigenVectors)
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
