@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +72,10 @@ MAXMINPOW(float, float, int)
 MAXMINPOW(float, int, float)
 MAXMINPOW(float, float, long)
 MAXMINPOW(float, long, float)
+#if defined(__APPLE__) && WM_LABEL_SIZE == 64
+MAXMINPOW(float, float, int64_t)
+MAXMINPOW(float, int64_t, float)
+#endif
 
 #undef MAXMINPOW
 

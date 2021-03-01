@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -237,7 +237,7 @@ getMakeInfo()
     # (api) from WM_DIR/rules/General/general
     # - extract WM_VERSION = OPENFOAM=<digits>
 
-    api="$(sed -ne '/^ *#/!{ /WM_VERSION.*OPENFOAM=/{ s@^.*OPENFOAM= *\([0-9][0-9]*\).*@\1@p; q }}' "$rulesFile" 2>/dev/null)"
+    api="$(sed -ne 's@^ *WM_VERSION *= *OPENFOAM=\([0-9][0-9]*\).*@\1@p' "$rulesFile" 2>/dev/null)"
 
     if [ -d "$META_INFO" ]
     then
