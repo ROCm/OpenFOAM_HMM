@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,10 @@ Usage
         referenceOrientation | Orientation          | no       | I
         axis         | Rotation axis (in reference) | yes      |
         omega        | Angular velocity (rad/s)     | yes      |
+        relax        | Relax moment with prevoius iter | yes
+        p            | Propoptional corrector for PDI | yes
+        d            | Differencial corrector for PDI | yes
+        i            | Integral corrector for PDI     | yes
     \endtable
 
 SourceFiles
@@ -85,6 +89,26 @@ class prescribedRotation
         //- Rotational velocity [rad/sec]
         TimeFunction1<vector> omegaSet_;
 
+        //- Cache omega
+        mutable vector omega_;
+
+        //- Cache previous momentum
+        mutable vector prevMom_;
+
+        //- Relax momentum
+        scalar relax_;
+
+        //- PID constants
+
+            mutable vector error0_;
+
+            mutable vector integral0_;
+
+            mutable scalar p_;
+
+            mutable scalar i_;
+
+            mutable scalar d_;
 
 public:
 
@@ -137,7 +161,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RBD
+} // End namespace restraints
 } // End namespace RBD
 } // End namespace Foam
 

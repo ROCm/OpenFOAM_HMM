@@ -48,7 +48,6 @@ Foam::IOobject Foam::points0MotionSolver::points0IO(const polyMesh& mesh)
             "points0",
             IOobject::READ_IF_PRESENT
         );
-
     IOobject io
     (
         "points0",
@@ -71,6 +70,19 @@ Foam::IOobject Foam::points0MotionSolver::points0IO(const polyMesh& mesh)
         io.rename("points");
     }
 
+    // Choose the latest points if points0 is not present
+//     if (!io.typeHeaderOk<pointIOField>())
+//     {
+//         const word instance =
+//             mesh.time().findInstance
+//             (
+//                 mesh.meshDir(),
+//                 "points",
+//                 IOobject::MUST_READ
+//             );
+//         io.instance() = instance;
+//         io.rename("points");
+//     }
     return io;
 }
 

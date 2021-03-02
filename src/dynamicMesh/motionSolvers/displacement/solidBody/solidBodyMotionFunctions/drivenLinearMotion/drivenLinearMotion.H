@@ -66,14 +66,8 @@ class drivenLinearMotion
         //- Name of the meshObject to dum CofG velocity
         word CofGvelocity_;
 
-        //- Normal plane direction to restrict movement on a plane
-        vector normal_;
-
         //- Uniform vector to follow
         uniformDimensionedVectorField CofGvel_;
-
-        //- Last displacement
-        mutable vector displacement_;
 
 
     // Private Member Functions

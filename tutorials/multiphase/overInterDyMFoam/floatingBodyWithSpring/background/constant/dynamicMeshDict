@@ -27,7 +27,6 @@ solvers
 
         cellSet                 c0;
         CofGvelocity            CofG;
-        normal                  (0 0 1);
     }
 
     cube
@@ -101,7 +100,7 @@ solvers
                 sixDoFRigidBodyMotionRestraint linearSpring;
                 anchor            (0 0.5 0.4);
                 refAttachmentPt   (0.5 0.5 0.4);
-                stiffness         100;
+                stiffness         300;
                 damping           0;
                 restLength        0;
             }

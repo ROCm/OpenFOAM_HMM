@@ -32,15 +32,12 @@ Description
     const cellCellStencilObject& overlap = Stencil::New(mesh);
     const labelList& cellTypes = overlap.cellTypes();
 
-    //label nHoles = 0;
-
     cellMask.primitiveFieldRef() = 1.0;
     forAll(cellMask, cellI)
     {
         if (cellTypes[cellI] == cellCellStencil::HOLE)
         {
             cellMask[cellI] = 0.0;
-            //nHoles++;
         }
     }
     cellMask.correctBoundaryConditions();

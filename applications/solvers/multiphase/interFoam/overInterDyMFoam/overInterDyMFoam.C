@@ -97,8 +97,14 @@ int main(int argc, char *argv[])
         dimensionedScalar("rAUf", dimTime/rho.dimensions(), 1.0)
     );
 
-    #include "correctPhi.H"
+    if (correctPhi)
+    {
+        #include "correctPhi.H"
+    }
     #include "createUf.H"
+
+    #include "setCellMask.H"
+    #include "setInterpolatedCells.H"
 
     turbulence->validate();
 
@@ -107,9 +113,6 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
         #include "setInitialDeltaT.H"
     }
-
-    #include "setCellMask.H"
-    #include "setInterpolatedCells.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;

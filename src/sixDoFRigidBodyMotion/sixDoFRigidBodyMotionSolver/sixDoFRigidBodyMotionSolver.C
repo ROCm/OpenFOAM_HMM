@@ -243,6 +243,8 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         forcesDict.add("rho", rhoName_);
         forcesDict.add("CofR", motion_.centreOfRotation());
 
+        vector oldPos = motion_.centreOfRotation();
+
         functionObjects::forces f("forces", db(), forcesDict);
 
         f.calcForcesMoment();
@@ -270,12 +272,13 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
                 )
             )
             {
-                uniformDimensionedVectorField& vel =
+                uniformDimensionedVectorField& disp =
                     db().time().lookupObjectRef<uniformDimensionedVectorField>
                     (
                         CofGvelocity_
                     );
-                vel = motion_.v();
+
+                disp += (motion_.centreOfRotation() - oldPos);
             }
         }
     }

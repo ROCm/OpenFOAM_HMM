@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +127,13 @@ class rigidBodyMeshMotion
 
         //- Current time index (used for updating)
         label curTimeIndex_;
+
+        //- Name of the uniformVectorField for CofG velocity
+        word CofGvelocity_;
+
+        //- Body Id for the body to write CofG velocity
+        label bodyIdCofG_;
+
 
 
     // Private Member Functions
