@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,26 @@ Group
     grpLagrangianIntermediateHeatTransferSubModels
 
 Description
-    Dummy heat transfer model for 'none'
+    Nusselt-number model providing an interface to the
+    properties of \c HeatTransferModel without any active model.
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        heatTransferModel    none;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property           | Description              | Type | Reqd | Deflt
+      heatTransferModel  | Type name: none          | word | yes  | -
+    \endtable
+
+SourceFiles
+    NoHeatTransfer.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,12 +79,18 @@ public:
     TypeName("none");
 
 
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const NoHeatTransfer&) = delete;
+
+
     // Constructors
 
         //- Construct from dictionary
         NoHeatTransfer(const dictionary&, CloudType& owner);
 
-        //- Construct copy
+        //- Copy construct
         NoHeatTransfer(const NoHeatTransfer<CloudType>& im);
 
         //- Construct and return a clone
@@ -78,19 +104,31 @@ public:
 
 
     //- Destructor
-    virtual ~NoHeatTransfer();
+    virtual ~NoHeatTransfer() = default;
 
 
     // Member Functions
 
         //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const;
+        virtual bool active() const
+        {
+            return false;
+        }
 
-        //- Nusselt number
-        virtual scalar Nu(const scalar, const scalar) const;
 
-        //- Prandtl number
-        virtual scalar Pr() const;
+        // Evaluation
+
+            //- Return Nusselt number
+            virtual scalar Nu(const scalar Re, const scalar Pr) const
+            {
+                return 0.0;
+            }
+
+            //- Return Prandtl number
+            virtual scalar Pr() const
+            {
+                return 1.0;
+            }
 };
 
 

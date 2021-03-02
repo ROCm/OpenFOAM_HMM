@@ -56,13 +56,6 @@ Foam::RanzMarshall<CloudType>::RanzMarshall(const RanzMarshall<CloudType>& htm)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::RanzMarshall<CloudType>::~RanzMarshall()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -72,6 +65,7 @@ Foam::scalar Foam::RanzMarshall<CloudType>::Nu
     const scalar Pr
 ) const
 {
+    // (AOB:p. 18 below Eq. 42)
     return a_ + b_*pow(Re, m_)*pow(Pr, n_);
 }
 

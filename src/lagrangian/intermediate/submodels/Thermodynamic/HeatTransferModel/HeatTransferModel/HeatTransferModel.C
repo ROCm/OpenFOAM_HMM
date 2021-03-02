@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +47,7 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
 )
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    BirdCorrection_(this->coeffDict().lookup("BirdCorrection"))
+    BirdCorrection_(this->coeffDict().template get<Switch>("BirdCorrection"))
 {}
 
 
@@ -58,13 +59,6 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
 :
     CloudSubModelBase<CloudType>(htm),
     BirdCorrection_(htm.BirdCorrection_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::~HeatTransferModel()
 {}
 
 
