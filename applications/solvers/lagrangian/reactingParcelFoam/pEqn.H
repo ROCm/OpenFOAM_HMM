@@ -23,6 +23,7 @@ surfaceScalarField phiHbyA
   + phig
 );
 
+fvc::makeRelative(phiHbyA, rho, U);
 MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
 
 // Update the pressure BCs to ensure flux consistency
