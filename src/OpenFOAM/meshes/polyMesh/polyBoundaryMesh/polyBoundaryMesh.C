@@ -561,6 +561,17 @@ Foam::labelList Foam::polyBoundaryMesh::patchSizes() const
 }
 
 
+Foam::List<Foam::labelRange> Foam::polyBoundaryMesh::patchRanges() const
+{
+    return
+        PtrListOps::get<labelRange>
+        (
+            *this,
+            [](const polyPatch& p) { return p.range(); }
+        );
+}
+
+
 Foam::label Foam::polyBoundaryMesh::start() const
 {
     return mesh_.nInternalFaces();
