@@ -645,6 +645,14 @@ void Foam::ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& pts)
 
 
 template<class ZoneType, class MeshType>
+void Foam::ZoneMesh<ZoneType, MeshType>::updateMetaData()
+{
+    dictionary& meta = this->getMetaData();
+    meta.set("names", this->names());
+}
+
+
+template<class ZoneType, class MeshType>
 bool Foam::ZoneMesh<ZoneType, MeshType>::writeData(Ostream& os) const
 {
     os  << *this;

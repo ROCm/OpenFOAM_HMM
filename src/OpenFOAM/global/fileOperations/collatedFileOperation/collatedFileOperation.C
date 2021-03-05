@@ -237,6 +237,12 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
     const bool isMaster = isMasterRank(proci);
 
+    // Update meta-data for current state
+    if (isMaster)
+    {
+        const_cast<regIOobject&>(io).updateMetaData();
+    }
+
     // Note: cannot do append + compression. This is a limitation
     // of ogzstream (or rather most compressed formats)
 
@@ -378,6 +384,9 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
 {
     const Time& tm = io.time();
     const fileName& inst = io.instance();
+
+    // Update meta-data for current state
+    const_cast<regIOobject&>(io).updateMetaData();
 
     if (inst.isAbsolute() || !tm.processorCase())
     {

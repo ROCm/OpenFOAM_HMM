@@ -2182,6 +2182,9 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     // Make sure to pick up any new times
     setTime(io.time());
 
+    // Update meta-data for current state
+    const_cast<regIOobject&>(io).updateMetaData();
+
     autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, valid));
     OSstream& os = *osPtr;
 

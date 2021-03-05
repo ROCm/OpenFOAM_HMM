@@ -56,6 +56,8 @@ namespace Foam
 
 // Forward Declarations
 
+class dictionary;
+
 namespace functionEntries
 {
     class codeStream;
@@ -105,6 +107,9 @@ private:
 
         //- eventNo of last update
         label eventNo_;
+
+        //- Dictionary for any meta-data
+        autoPtr<dictionary> metaDataPtr_;
 
         //- Istream for reading
         autoPtr<ISstream> isPtr_;
@@ -275,6 +280,21 @@ public:
 
             //- Rename
             virtual void rename(const word& newName);
+
+
+        // Meta-data
+
+            //- Return pointer to meta-data or nullptr
+            const dictionary* findMetaData() const noexcept;
+
+            //- Get or create meta-data
+            dictionary& getMetaData() noexcept;
+
+            //- Remove meta-data
+            void removeMetaData();
+
+            //- Update internal meta-data (eg, prior to writing)
+            virtual void updateMetaData();
 
 
         // Reading

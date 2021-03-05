@@ -232,9 +232,6 @@ public:
         //- Correct zone mesh after moving points
         void movePoints(const pointField& pts);
 
-        //- writeData member function required by regIOobject
-        bool writeData(Ostream& os) const;
-
 
     // Member Operators
 
@@ -267,6 +264,15 @@ public:
         //      a new zone was created.
         //  \return non-const reference to the existing or new zone
         ZoneType& operator()(const word& zoneName, const bool verbose=false);
+
+
+    // IO
+
+        //- Update internal meta-data (eg, prior to writing)
+        void updateMetaData();
+
+        //- The writeData member function required by regIOobject
+        bool writeData(Ostream& os) const;
 
 
     // Ostream Operator

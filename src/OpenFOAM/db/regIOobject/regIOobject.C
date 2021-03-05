@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,8 +29,9 @@ License
 #include "regIOobject.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "registerSwitch.H"
+#include "dictionary.H"
 #include "fileOperation.H"
+#include "registerSwitch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -73,7 +74,9 @@ Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
     registered_(false),
     ownedByRegistry_(false),
     watchIndices_(),
-    eventNo_(isTime ? 0 : db().getEvent()) // No event for top-level Time
+    eventNo_(isTime ? 0 : db().getEvent()), // No event for top-level Time
+    metaDataPtr_(nullptr),
+    isPtr_(nullptr)
 {
     if (registerObject())
     {
@@ -90,6 +93,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio)
     ownedByRegistry_(false),
     watchIndices_(rio.watchIndices_),
     eventNo_(db().getEvent()),
+    metaDataPtr_(rio.metaDataPtr_.clone()),
     isPtr_(nullptr)
 {
     // Do not register copy with objectRegistry
@@ -103,6 +107,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     ownedByRegistry_(false),
     watchIndices_(),
     eventNo_(db().getEvent()),
+    metaDataPtr_(rio.metaDataPtr_.clone()),
     isPtr_(nullptr)
 {
     if (registerCopy)
@@ -129,6 +134,7 @@ Foam::regIOobject::regIOobject
     ownedByRegistry_(false),
     watchIndices_(),
     eventNo_(db().getEvent()),
+    metaDataPtr_(rio.metaDataPtr_.clone()),
     isPtr_(nullptr)
 {
     if (registerCopy)
@@ -152,6 +158,7 @@ Foam::regIOobject::regIOobject
     ownedByRegistry_(false),
     watchIndices_(),
     eventNo_(db().getEvent()),
+    metaDataPtr_(rio.metaDataPtr_.clone()),
     isPtr_(nullptr)
 {
     if (registerObject())
@@ -474,7 +481,7 @@ bool Foam::regIOobject::headerOk()
 void Foam::regIOobject::operator=(const IOobject& io)
 {
     // Close any file
-    isPtr_.clear();
+    isPtr_.reset(nullptr);
 
     // Check out of objectRegistry
     checkOut();

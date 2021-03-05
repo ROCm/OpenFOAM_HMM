@@ -327,6 +327,7 @@ $(IOobject)/IOobjectWriteHeader.C
 
 regIOobject = db/regIOobject
 /* $(regIOobject)/regIOobject.C in global.Cver */
+$(regIOobject)/regIOobjectMetaData.C
 $(regIOobject)/regIOobjectRead.C
 $(regIOobject)/regIOobjectWrite.C
 

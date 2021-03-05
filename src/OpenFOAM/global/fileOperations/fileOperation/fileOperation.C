@@ -635,6 +635,9 @@ bool Foam::fileOperation::writeObject
 
         OSstream& os = *osPtr;
 
+        // Update meta-data for current state
+        const_cast<regIOobject&>(io).updateMetaData();
+
         // If any of these fail, return (leave error handling to Ostream class)
 
         const bool ok =

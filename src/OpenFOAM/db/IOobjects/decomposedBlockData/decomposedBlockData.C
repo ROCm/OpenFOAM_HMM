@@ -1024,6 +1024,12 @@ bool Foam::decomposedBlockData::writeObject
 
         osPtr.reset(new OFstream(objectPath(), IOstreamOption::BINARY));
 
+        // Update meta-data for current state
+        const_cast<regIOobject&>
+        (
+            static_cast<const regIOobject&>(*this)
+        ).updateMetaData();
+
         decomposedBlockData::writeHeader
         (
             *osPtr,
