@@ -74,13 +74,13 @@ namespace fileOperations
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::labelList Foam::fileOperations::collatedFileOperation::ioRanks()
 {
     labelList ioRanks;
 
-    string ioRanksString(getEnv("FOAM_IORANKS"));
+    string ioRanksString(Foam::getEnv("FOAM_IORANKS"));
     if (!ioRanksString.empty())
     {
         IStringStream is(ioRanksString);
@@ -88,6 +88,102 @@ Foam::labelList Foam::fileOperations::collatedFileOperation::ioRanks()
     }
 
     return ioRanks;
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::fileOperations::collatedFileOperation::printBanner
+(
+    const bool printRanks
+) const
+{
+    DetailInfo
+        << "I/O    : " << this->type();
+
+    if (maxThreadFileBufferSize == 0)
+    {
+        DetailInfo
+            << " [unthreaded] (maxThreadFileBufferSize = 0)." << nl
+            << "         Writing may be slow for large file sizes."
+            << endl;
+    }
+    else
+    {
+        DetailInfo
+            << " [threaded] (maxThreadFileBufferSize = "
+            << maxThreadFileBufferSize << ")." << nl
+            << "         Requires buffer large enough to collect all data"
+               " or thread support" << nl
+            << "         enabled in MPI. If MPI thread support cannot be"
+               " enabled, deactivate" << nl
+            << "         threading by setting maxThreadFileBufferSize"
+               " to 0 in" << nl
+            << "         OpenFOAM etc/controlDict" << endl;
+    }
+
+    if (printRanks)
+    {
+        // Information about the ranks
+        stringList ioRanks(Pstream::nProcs());
+        if (Pstream::master(comm_))
+        {
+            // Don't usually need the pid
+            // ioRanks[Pstream::myProcNo()] = hostName()+"."+name(pid());
+            ioRanks[Pstream::myProcNo()] = hostName();
+        }
+        Pstream::gatherList(ioRanks);
+
+        DynamicList<label> offsetMaster(Pstream::nProcs());
+
+        forAll(ioRanks, ranki)
+        {
+            if (!ioRanks[ranki].empty())
+            {
+                offsetMaster.append(ranki);
+            }
+        }
+
+        if (offsetMaster.size() > 1)
+        {
+            DetailInfo
+                << "IO nodes:" << nl << '(' << nl;
+
+            offsetMaster.append(Pstream::nProcs());
+
+            for (label group = 1; group < offsetMaster.size(); ++group)
+            {
+                const label beg = offsetMaster[group-1];
+                const label end = offsetMaster[group];
+
+                DetailInfo
+                    << "    (" << ioRanks[beg].c_str() << ' '
+                    << (end-beg) << ')' << nl;
+            }
+            DetailInfo
+                << ')' << nl;
+        }
+    }
+
+    if
+    (
+        regIOobject::fileModificationChecking
+     == regIOobject::inotifyMaster
+    )
+    {
+        WarningInFunction
+            << "Resetting fileModificationChecking to inotify" << endl;
+    }
+
+    if
+    (
+        regIOobject::fileModificationChecking
+     == regIOobject::timeStampMaster
+    )
+    {
+        WarningInFunction
+            << "Resetting fileModificationChecking to timeStamp" << endl;
+    }
 }
 
 
@@ -121,9 +217,9 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
     IOstreamOption streamOpt
 ) const
 {
-    // Append to processors/ file
+    // Append to processorsNN/ file
 
-    label proci = detectProcessorPath(io.objectPath());
+    const label proci = detectProcessorPath(io.objectPath());
 
     if (debug)
     {
@@ -132,58 +228,14 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
             << " appending processor " << proci
             << " data to " << pathName << endl;
     }
-
     if (proci == -1)
     {
         FatalErrorInFunction
-            << "Not a valid processor path " << pathName
+            << "Invalid processor path: " << pathName
             << exit(FatalError);
     }
 
     const bool isMaster = isMasterRank(proci);
-
-    // Determine local rank (offset) if the pathName is a per-rank one
-    label localProci = proci;
-    {
-        fileName path, procDir, local;
-        procRangeType group;
-        label nProcs;
-        splitProcessorPath(pathName, path, procDir, local, group, nProcs);
-
-        // The local rank (offset)
-        if (!group.empty())
-        {
-            localProci = proci - group.start();
-        }
-    }
-
-
-    // Create string from all data to write
-    string buf;
-    {
-        OStringStream os(streamOpt);
-        if (isMaster)
-        {
-            if (!io.writeHeader(os))
-            {
-                return false;
-            }
-        }
-
-        // Write the data to the Ostream
-        if (!io.writeData(os))
-        {
-            return false;
-        }
-
-        if (isMaster)
-        {
-            IOobject::writeEndDivider(os);
-        }
-
-        buf = os.str();
-    }
-
 
     // Note: cannot do append + compression. This is a limitation
     // of ogzstream (or rather most compressed formats)
@@ -204,26 +256,20 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
     if (isMaster)
     {
-        decomposedBlockData::writeHeader
-        (
-            os,
-            static_cast<IOstreamOption>(os),
-            decomposedBlockData::typeName,  // class
-            "",                             // note
-            pathName,                       // location
-            pathName.name()                 // object
-        );
+        decomposedBlockData::writeHeader(os, streamOpt, io);
     }
 
-    // Write data
-    UList<char> slice
+    std::streamoff blockOffset = decomposedBlockData::writeBlockEntry
     (
-        const_cast<char*>(buf.data()),
-        label(buf.size())
+        os,
+        streamOpt,
+        io,
+        proci,
+        // With FoamFile header on master?
+        isMaster
     );
-    os << nl << "// Processor" << localProci << nl << slice << nl;
 
-    return os.good();
+    return (blockOffset >= 0) && os.good();
 }
 
 
@@ -252,81 +298,9 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
 {
-    verbose = (verbose && Foam::infoDetailLevel > 0);
-
-    if (verbose)
+    if (verbose && Foam::infoDetailLevel > 0)
     {
-        DetailInfo
-            << "I/O    : " << typeName
-            << " (maxThreadFileBufferSize " << maxThreadFileBufferSize
-            << ')' << endl;
-
-        if (maxThreadFileBufferSize == 0)
-        {
-            DetailInfo
-                << "         Threading not activated "
-                   "since maxThreadFileBufferSize = 0." << nl
-                << "         Writing may run slowly for large file sizes."
-                << endl;
-        }
-        else
-        {
-            DetailInfo
-                << "         Threading activated "
-                   "since maxThreadFileBufferSize > 0." << nl
-                << "         Requires large enough buffer to collect all data"
-                    " or thread support " << nl
-                << "         enabled in MPI. If thread support cannot be "
-                   "enabled, deactivate" << nl
-                << "         threading by setting maxThreadFileBufferSize "
-                    "to 0 in" << nl
-                << "         OpenFOAM etc/controlDict"
-                << endl;
-        }
-
-        if (ioRanks_.size())
-        {
-            // Print a bit of information
-            stringList ioRanks(Pstream::nProcs());
-            if (Pstream::master(comm_))
-            {
-                ioRanks[Pstream::myProcNo()] = hostName()+"."+name(pid());
-            }
-            Pstream::gatherList(ioRanks);
-
-            DetailInfo
-                << "         IO nodes:" << nl;
-
-            for (const string& ranks : ioRanks)
-            {
-                if (!ranks.empty())
-                {
-                    DetailInfo
-                        << "             " << ranks << nl;
-                }
-            }
-        }
-
-
-        if
-        (
-            regIOobject::fileModificationChecking
-         == regIOobject::inotifyMaster
-        )
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to inotify" << endl;
-        }
-
-        if
-        (
-            regIOobject::fileModificationChecking
-         == regIOobject::timeStampMaster
-        )
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to timeStamp" << endl;
-        }
+        this->printBanner(ioRanks_.size());
     }
 }
 
@@ -345,56 +319,9 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
 {
-    verbose = (verbose && Foam::infoDetailLevel > 0);
-
-    if (verbose)
+    if (verbose && Foam::infoDetailLevel > 0)
     {
-        DetailInfo
-            << "I/O    : " << typeName
-            << " (maxThreadFileBufferSize " << maxThreadFileBufferSize
-            << ')' << endl;
-
-        if (maxThreadFileBufferSize == 0)
-        {
-            DetailInfo
-                << "         Threading not activated "
-                   "since maxThreadFileBufferSize = 0." << nl
-                << "         Writing may run slowly for large file sizes."
-                << endl;
-        }
-        else
-        {
-            DetailInfo
-                << "         Threading activated "
-                   "since maxThreadFileBufferSize > 0." << nl
-                << "         Requires large enough buffer to collect all data"
-                    " or thread support " << nl
-                << "         enabled in MPI. If thread support cannot be "
-                   "enabled, deactivate" << nl
-                << "         threading by setting maxThreadFileBufferSize "
-                    "to 0 in the OpenFOAM etc/controlDict" << nl
-                << endl;
-        }
-
-        if
-        (
-            regIOobject::fileModificationChecking
-         == regIOobject::inotifyMaster
-        )
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to inotify" << endl;
-        }
-
-        if
-        (
-            regIOobject::fileModificationChecking
-         == regIOobject::timeStampMaster
-        )
-        {
-            WarningInFunction
-                << "Resetting fileModificationChecking to timeStamp" << endl;
-        }
+        this->printBanner(ioRanks_.size());
     }
 }
 
@@ -473,23 +400,22 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             valid
         );
 
-        // If any of these fail, return (leave error handling to Ostream class)
-        if (!os.good())
-        {
-            return false;
-        }
-        if (!io.writeHeader(os))
-        {
-            return false;
-        }
-        // Write the data to the Ostream
-        if (!io.writeData(os))
-        {
-            return false;
-        }
-        IOobject::writeEndDivider(os);
+        // If any of these fail, return
+        // (leave error handling to Ostream class)
 
-        return true;
+        const bool ok =
+        (
+            os.good()
+         && io.writeHeader(os)
+         && io.writeData(os)
+        );
+
+        if (ok)
+        {
+            IOobject::writeEndDivider(os);
+        }
+
+        return ok;
     }
     else
     {
@@ -517,24 +443,22 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 valid
             );
 
-            // If any of these fail, return (leave error handling to Ostream
-            // class)
-            if (!os.good())
-            {
-                return false;
-            }
-            if (!io.writeHeader(os))
-            {
-                return false;
-            }
-            // Write the data to the Ostream
-            if (!io.writeData(os))
-            {
-                return false;
-            }
-            IOobject::writeEndDivider(os);
+            // If any of these fail, return
+            // (leave error handling to Ostream class)
 
-            return true;
+            const bool ok =
+            (
+                os.good()
+             && io.writeHeader(os)
+             && io.writeData(os)
+            );
+
+            if (ok)
+            {
+                IOobject::writeEndDivider(os);
+            }
+
+            return ok;
         }
         else if (!Pstream::parRun())
         {
@@ -553,7 +477,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         {
             // Re-check static maxThreadFileBufferSize variable to see
             // if needs to use threading
-            bool useThread = (maxThreadFileBufferSize > 0);
+            const bool useThread = (maxThreadFileBufferSize > 0);
 
             if (debug)
             {
@@ -576,27 +500,25 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 useThread
             );
 
-            // If any of these fail, return (leave error handling to Ostream
-            // class)
-            if (!os.good())
-            {
-                return false;
-            }
-            if (Pstream::master(comm_) && !io.writeHeader(os))
-            {
-                return false;
-            }
-            // Write the data to the Ostream
-            if (!io.writeData(os))
-            {
-                return false;
-            }
+            // If any of these fail, return
+            // (leave error handling to Ostream class)
+
+            bool ok = os.good();
+
             if (Pstream::master(comm_))
             {
-                IOobject::writeEndDivider(os);
+                // Suppress comment banner
+                const bool old = IOobject::bannerEnabled(false);
+
+                ok = ok && io.writeHeader(os);
+
+                IOobject::bannerEnabled(old);
             }
 
-            return true;
+            ok = ok && io.writeData(os);
+            // No end divider for collated output
+
+            return ok;
         }
     }
 }
@@ -629,7 +551,7 @@ Foam::word Foam::fileOperations::collatedFileOperation::processorsDir
         {
             procDir +=
               + "_"
-              + Foam::name(procs[0])
+              + Foam::name(procs.first())
               + "-"
               + Foam::name(procs.last());
         }
@@ -649,19 +571,19 @@ Foam::word Foam::fileOperations::collatedFileOperation::processorsDir
                 // Find lowest io rank
                 label minProc = 0;
                 label maxProc = nProcs_-1;
-                forAll(ioRanks_, i)
+                for (const label ranki : ioRanks_)
                 {
-                    if (ioRanks_[i] >= nProcs_)
+                    if (ranki >= nProcs_)
                     {
                         break;
                     }
-                    else if (ioRanks_[i] <= proci)
+                    else if (ranki <= proci)
                     {
-                        minProc = ioRanks_[i];
+                        minProc = ranki;
                     }
                     else
                     {
-                        maxProc = ioRanks_[i]-1;
+                        maxProc = ranki-1;
                         break;
                     }
                 }

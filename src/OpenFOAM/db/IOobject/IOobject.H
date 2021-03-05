@@ -64,6 +64,21 @@ Description
       - \par NO_WRITE
         No automatic write on destruction but can be written explicitly
 
+    When serializing, the IOobject characteristics are typically written
+    as a \c FoamFile header, which is a sub-dictionary with the following
+    type of content:
+
+    \table
+        Property | Description                            | Type | Reqd | Deflt
+        version  | The base format version                | float | no  | 2.0
+        format   | The stream format (ascii/binary)       | word  | yes |
+        arch     | The architecture string                | string | no |
+        note     | Descriptive note about the object      | string | no |
+        location | The relative location of the object    | string | no |
+        class    | The type of the object                 | word | yes |
+        object   | The name of the object                 | word | yes |
+    \endtable
+
 Note
     Specifying registered does not result in the IOobject itself being
     registered. It is only serves as guidance for a regIOobject using it.
@@ -86,6 +101,7 @@ SourceFiles
 #include "fileName.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
+#include "IOstreamOption.H"
 #include "InfoProxy.H"
 #include "Enum.H"
 
@@ -96,6 +112,7 @@ namespace Foam
 
 // Forward Declarations
 class Time;
+class dictionary;
 class objectRegistry;
 
 /*---------------------------------------------------------------------------*\
@@ -146,6 +163,12 @@ public:
 
 private:
 
+    // Static Data Members
+
+        //- Use an output file banner, enabled by default
+        static bool bannerEnabled_;
+
+
     // Private Data
 
         //- Name
@@ -192,6 +215,27 @@ protected:
 
     // Protected Member Functions
 
+        //- Helper: write content for FoamFile IOobject header
+        //- with optional meta information.
+        static void writeHeaderContent
+        (
+            Ostream& os,
+            const IOobject& io,
+            const word& objectType,
+            const dictionary* metaDataDict = nullptr
+        );
+
+        //- Helper: write dictionary content for FoamFile header
+        //- with optional meta information.
+        static void writeHeaderContent
+        (
+            dictionary& os,
+            const IOobject& io,
+            const word& objectType,
+            IOstreamOption streamOpt,
+            const dictionary* metaDataDict = nullptr
+        );
+
         //- Set the object state to bad
         void setBad(const string& s);
 
@@ -213,6 +257,21 @@ public:
 
 
     // Static Functions
+
+        //- Status of output file banner
+        static bool bannerEnabled() noexcept
+        {
+            return bannerEnabled_;
+        }
+
+        //- Enable/disable an output file banner
+        //  \return the previous value
+        static bool bannerEnabled(bool on) noexcept
+        {
+            bool old(bannerEnabled_);
+            bannerEnabled_ = on;
+            return old;
+        }
 
         //- Split path into instance, local, name components
         //
@@ -364,28 +423,28 @@ public:
 
     // Member Functions
 
-    // General access
+    // General Access
 
         //- Return the local objectRegistry
-        const objectRegistry& db() const;
+        const objectRegistry& db() const noexcept;
 
         //- Return Time associated with the objectRegistry
         const Time& time() const;
 
         //- Return name
-        inline const word& name() const;
+        inline const word& name() const noexcept;
 
         //- Return name of the class name read from header
-        inline const word& headerClassName() const;
+        inline const word& headerClassName() const noexcept;
 
         //- Return non-constant access to the class name read from header
-        inline word& headerClassName();
+        inline word& headerClassName() noexcept;
 
         //- Return the optional note
-        inline const string& note() const;
+        inline const string& note() const noexcept;
 
         //- Return non-constant access to the optional note
-        inline string& note();
+        inline string& note() noexcept;
 
         //- Rename
         virtual void rename(const word& newName)
@@ -394,16 +453,16 @@ public:
         }
 
         //- Should object created with this IOobject be registered?
-        inline bool registerObject() const;
+        inline bool registerObject() const noexcept;
 
         //- Should object created with this IOobject be registered?
-        inline bool& registerObject();
+        inline bool& registerObject() noexcept;
 
         //- Is object same for all processors?
-        inline bool globalObject() const;
+        inline bool globalObject() const noexcept;
 
         //- Is object same for all processors?
-        inline bool& globalObject();
+        inline bool& globalObject() noexcept;
 
         //- The sizeof (label) in bytes, possibly read from the header
         inline unsigned labelByteSize() const noexcept;
@@ -422,19 +481,25 @@ public:
         inline bool isHeaderClassName() const;
 
 
+    // Meta-data
+
+        //- Return pointer to meta-data (if any) or nullptr
+        virtual const dictionary* findMetaData() const noexcept;
+
+
     // Read/write options
 
         //- The read option
-        inline readOption readOpt() const;
+        inline readOption readOpt() const noexcept;
 
         //- Non-constant access to the read option
-        inline readOption& readOpt();
+        inline readOption& readOpt() noexcept;
 
         //- The write option
-        inline writeOption writeOpt() const;
+        inline writeOption writeOpt() const noexcept;
 
         //- Non-constant access to the write option
-        inline writeOption& writeOpt();
+        inline writeOption& writeOpt() noexcept;
 
 
     // Path components
@@ -449,11 +514,11 @@ public:
 
         const fileName& caseName() const;
 
-        inline const fileName& instance() const;
+        inline const fileName& instance() const noexcept;
 
-        inline fileName& instance();
+        inline fileName& instance() noexcept;
 
-        inline const fileName& local() const;
+        inline const fileName& local() const noexcept;
 
         //- The complete path
         fileName path() const;
@@ -489,8 +554,18 @@ public:
 
     // Reading
 
-        //- Read header
+        //- Parse 'FoamFile' header contents and set the IOobject
+        //- characteristics and return the stream characteristics.
+        IOstreamOption parseHeader(const dictionary& headerDict);
+
+        //- Read header ('FoamFile' dictionary) and set the
+        //- IOobject and stream characteristics.
         bool readHeader(Istream& is);
+
+        //- Read header (the 'FoamFile' dictionary) and set the
+        //- IOobject and stream characteristics.
+        //  Saves the header content in the given dictionary.
+        bool readHeader(dictionary& headerDict, Istream& is);
 
         //- Read header (uses typeFilePath to find file) and check its info.
         //  Optionally checks headerClassName against the type-name.
@@ -521,24 +596,31 @@ public:
         //- Write the standard end file divider
         static Ostream& writeEndDivider(Ostream& os);
 
-        //- Write header with current type() and arch information
+        //- Write header with current type()
         bool writeHeader(Ostream& os) const;
 
-        //- Write header with override of type and optionally without
-        //- arch information in ASCII
-        bool writeHeader
+        //- Write header with override of type
+        bool writeHeader(Ostream& os, const word& objectType) const;
+
+        //- Write header into a dictionary with current type()
+        //- and given output format
+        void writeHeader(dictionary& dict, IOstreamOption streamOpt) const;
+
+        //- Write header into a dictionary with override of type
+        //- and given output format
+        void writeHeader
         (
-            Ostream& os,
+            dictionary& dict,
             const word& objectType,
-            const bool noArchAscii = false
+            IOstreamOption streamOpt
         ) const;
 
 
     // Error Handling
 
-        inline bool good() const;
+        inline bool good() const noexcept;
 
-        inline bool bad() const;
+        inline bool bad() const noexcept;
 
 
     // Info

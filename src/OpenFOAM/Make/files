@@ -311,6 +311,7 @@ $(IOdictionary)/unwatchedIOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
 db/IOobjects/decomposedBlockData/decomposedBlockData.C
+db/IOobjects/decomposedBlockData/decomposedBlockDataHeader.C
 db/IOobjects/GlobalIOField/GlobalIOFields.C
 
 
@@ -320,6 +321,7 @@ db/IOobjects/GlobalIOList/globalIOLists.C
 IOobject = db/IOobject
 $(IOobject)/IOobject.C
 $(IOobject)/IOobjectIO.C
+$(IOobject)/IOobjectMetaData.C
 $(IOobject)/IOobjectReadHeader.C
 $(IOobject)/IOobjectWriteHeader.C
 

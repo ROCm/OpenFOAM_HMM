@@ -58,6 +58,7 @@ bool Foam::OFstreamCollator::writeFile
         Pout<< "OFstreamCollator : Writing master " << masterData.size()
             << " bytes to " << fName
             << " using comm " << comm << endl;
+
         if (slaveData.size())
         {
             Pout<< "OFstreamCollator :  Slave data" << endl;
@@ -85,10 +86,10 @@ bool Foam::OFstreamCollator::writeFile
             decomposedBlockData::writeHeader
             (
                 *osPtr,
-                streamOpt,
+                streamOpt,   // streamOpt for container
                 objectType,
                 "",          // note
-                fName,       // location
+                "",          // location (leave empty instead inaccurate)
                 fName.name() // object name
             );
         }
@@ -106,12 +107,12 @@ bool Foam::OFstreamCollator::writeFile
     // the master processor in order. However can be unstable
     // for some mpi so default is non-blocking.
 
-    List<std::streamoff> start;
+    List<std::streamoff> blockOffset;
     decomposedBlockData::writeBlocks
     (
         comm,
         osPtr,
-        start,
+        blockOffset,
         slice,
         recvSizes,
         slaveData,
@@ -141,11 +142,8 @@ bool Foam::OFstreamCollator::writeFile
             {
                 sum += recv;
             }
-            // Use ostringstream to display long int (until writing these is
-            // supported)
-            std::ostringstream os;
-            os << sum;
-            Pout<< " (overall " << os.str() << ")";
+            // Use std::to_string to display long int
+            Pout<< " (overall " << std::to_string(sum) << ')';
         }
         Pout<< " to " << fName
             << " using comm " << comm << endl;
@@ -355,10 +353,10 @@ bool Foam::OFstreamCollator::write
     off_t totalSize = 0;
     label maxLocalSize = 0;
     {
-        for (label proci = 0; proci < recvSizes.size(); proci++)
+        for (const label recvSize : recvSizes)
         {
-            totalSize += recvSizes[proci];
-            maxLocalSize = max(maxLocalSize, recvSizes[proci]);
+            totalSize += recvSize;
+            maxLocalSize = max(maxLocalSize, recvSize);
         }
         Pstream::scatter(totalSize, Pstream::msgType(), localComm_);
         Pstream::scatter(maxLocalSize, Pstream::msgType(), localComm_);
@@ -443,7 +441,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
-                    reinterpret_cast<char*>(slaveData[proci].data()),
+                    slaveData[proci].data(),
                     slaveData[proci].size_bytes(),
                     Pstream::msgType(),
                     localComm_
@@ -458,7 +456,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     0,
-                    reinterpret_cast<const char*>(slice.cdata()),
+                    slice.cdata(),
                     slice.size_bytes(),
                     Pstream::msgType(),
                     localComm_

@@ -65,7 +65,7 @@ class collatedFileOperation
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Any communicator allocated by me
         const label myComm_;
@@ -82,15 +82,19 @@ protected:
             const labelList ioRanks_;
 
 
-   // Private Member Functions
+    // Protected Member Functions
 
+        //- Retrieve list of IO ranks from FOAM_IORANKS env variable
         static labelList ioRanks();
 
+        //- Print banner information, optionally with io ranks
+        void printBanner(const bool printRanks = false) const;
+
         //- Is proci master of communicator (in parallel) or master of
-        //  the io ranks (non-parallel)
+        //- the io ranks (non-parallel)
         bool isMasterRank(const label proci) const;
 
-        //- Append to processors/ file
+        //- Append to processorsNN/ file
         bool appendObject
         (
             const regIOobject& io,

@@ -28,10 +28,56 @@ Class
     Foam::decomposedBlockData
 
 Description
-    decomposedBlockData is a List<char> with IO on the master processor only.
+    The decomposedBlockData comprise a \c List\<char\> for each output
+    processor, typically with IO on the master processor only.
+
+    For decomposedBlockData, we make a distinction between the container
+    description and the individual block contents.
+
+    The \b FoamFile header specifies the container characteristics and thus
+    has \c class = \c %decomposedBlockData and normally \c format = \c binary.
+    This description refers to the \em entire file container, not the
+    individual blocks.
+
+    Each processor block is simply a binary chunk of characters and the
+    first block also contains the header description for all of the blocks.
+    For example,
+\verbatim
+FoamFile
+{
+    version     2.0;
+    format      binary;
+    arch        "LSB;label=32;scalar=64";
+    class       decomposedBlockData;
+    location    "constant/polyMesh";
+    object      points;
+}
+
+// processor0
+NCHARS
+(FoamFile
+{
+    version     2.0;
+    format      ascii;
+    arch        "LSB;label=32;scalar=64";
+    class       vectorField;
+    location    "constant/polyMesh";
+    object      points;
+}
+...content...
+)
+
+// processor1
+NCHARS
+(...content...)
+
+...
+\endverbatim
+
 
 SourceFiles
     decomposedBlockData.C
+    decomposedBlockDataHeader.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,9 +99,22 @@ namespace Foam
 
 class decomposedBlockData
 :
-    public regIOobject,
-    public List<char>
+    public regIOobject
 {
+    // Private Functions
+
+        //- Helper: write content for FoamFile IOobject header
+        static void writeHeaderContent
+        (
+            Ostream& os,
+            IOstreamOption streamOptContainer,
+            const word& objectType,
+            const string& note,
+            const fileName& location,
+            const word& objectName
+        );
+
+
 protected:
 
     // Protected Data
@@ -66,11 +125,14 @@ protected:
         //- Communicator for all parallel comms
         const label comm_;
 
+        //- The block content
+        List<char> contentData_;
+
 
     // Protected Member Functions
 
         //- Helper: determine number of processors whose recvSizes fits
-        //  ito maxBufferSize
+        //- into maxBufferSize
         static label calcNumProcs
         (
             const label comm,
@@ -84,7 +146,7 @@ protected:
         (
             const label comm,
             autoPtr<ISstream>& isPtr,
-            List<char>& data,
+            List<char>& contentChars,
             const UPstream::commsTypes commsType
         );
 
@@ -105,30 +167,12 @@ public:
             const UPstream::commsTypes = UPstream::commsTypes::scheduled
         );
 
-        //- Construct given an IOobject and for READ_IF_MODIFIED a List<char>
-        decomposedBlockData
-        (
-            const label comm,
-            const IOobject& io,
-            const UList<char>& list,
-            const UPstream::commsTypes = UPstream::commsTypes::scheduled
-        );
-
-        //- Construct by transferring the List contents
-        decomposedBlockData
-        (
-            const label comm,
-            const IOobject& io,
-            List<char>&& list,
-            const UPstream::commsTypes = UPstream::commsTypes::scheduled
-        );
-
 
     //- Destructor
     virtual ~decomposedBlockData() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Read object
         virtual bool read();
@@ -147,30 +191,71 @@ public:
 
     // Helpers
 
-        //- Read header. Call only on master.
-        static bool readMasterHeader(IOobject&, Istream&);
+        //- True if object type is a known collated type
+        static bool isCollatedType(const word& objectType);
+
+        //- True if object header class is a known collated type
+        static bool isCollatedType(const IOobject& io);
+
+        //- Read header as per IOobject with additional handling of
+        //- decomposedBlockData
+        static bool readHeader(IOobject& io, Istream& is);
 
         //- Helper: write FoamFile IOobject header
         static void writeHeader
         (
             Ostream& os,
-            IOstreamOption streamOpt,
+            IOstreamOption streamOptContainer,
             const word& objectType,
             const string& note,
             const fileName& location,
             const word& objectName
         );
 
+        //- Helper: write FoamFile IOobject header
+        static void writeHeader
+        (
+            Ostream& os,
+            IOstreamOption streamOptData,
+            const IOobject& io
+        );
+
+        //- Helper: read block of (binary) character data
+        static bool readBlockEntry
+        (
+            Istream& is,
+            List<char>& charData
+        );
+
+        //- Helper: write block of (binary) character data
+        static std::streamoff writeBlockEntry
+        (
+            OSstream& os,
+            const label blocki,
+            const UList<char>& charData
+        );
+
+        //- Helper: write block of (binary) character data
+        //  \return -1 on error
+        static std::streamoff writeBlockEntry
+        (
+            OSstream& os,
+            IOstreamOption streamOptData,
+            const regIOobject& io,
+            const label blocki,
+            const bool withLocalHeader
+        );
+
         //- Read selected block (non-seeking) + header information
         static autoPtr<ISstream> readBlock
         (
             const label blocki,
-            Istream& is,
+            ISstream& is,
             IOobject& headerIO
         );
 
         //- Read master header information (into headerIO) and return
-        //  data in stream. Note: isPtr is only valid on master.
+        //- data in stream. Note: isPtr is only valid on master.
         static autoPtr<ISstream> readBlocks
         (
             const label comm,
@@ -190,9 +275,11 @@ public:
             labelList& datas
         );
 
-        //- Helper: gather data from (subset of) slaves. Returns
-        //  recvData : received data
-        //  recvOffsets : offset in data. recvOffsets is nProcs+1
+        //- Helper: gather data from (subset of) slaves.
+        //
+        //  Returns:
+        //  - recvData : received data
+        //  - recvOffsets : offset in data. recvOffsets is nProcs+1
         static void gatherSlaveData
         (
             const label comm,
@@ -206,13 +293,14 @@ public:
             List<char>& recvData
         );
 
-        //- Write *this. Ostream only valid on master. Returns starts of
-        //  processor blocks
+        //- Write *this. Ostream only valid on master.
+        //  Returns offsets of processor blocks in blockOffset
         static bool writeBlocks
         (
             const label comm,
             autoPtr<OSstream>& osPtr,
-            List<std::streamoff>& start,
+            List<std::streamoff>& blockOffset,
+
             const UList<char>& masterData,
 
             const labelUList& recvSizes,
@@ -223,9 +311,6 @@ public:
             const UPstream::commsTypes,
             const bool syncReturnState = true
         );
-
-        //- Detect number of blocks in a file
-        static label numBlocks(const fileName& fName);
 };
 
 

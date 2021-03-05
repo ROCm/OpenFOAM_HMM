@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "IOobject.H"
 #include "Time.H"
-#include "IFstream.H"
+#include "Istream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +36,8 @@ namespace Foam
 {
     defineTypeNameAndDebug(IOobject, 0);
 }
+
+bool Foam::IOobject::bannerEnabled_(true);
 
 char Foam::IOobject::scopeSeparator
 (
@@ -46,7 +48,6 @@ char Foam::IOobject::scopeSeparator
     Foam::debug::infoSwitch("scopeSeparator", ':')
     #endif
 );
-
 
 const Foam::Enum
 <
@@ -59,7 +60,6 @@ Foam::IOobject::fileCheckTypesNames
     { fileCheckTypes::inotify, "inotify" },
     { fileCheckTypes::inotifyMaster, "inotifyMaster" },
 });
-
 
 // Default fileCheck type
 Foam::IOobject::fileCheckTypes Foam::IOobject::fileModificationChecking
@@ -460,7 +460,7 @@ Foam::IOobject::IOobject
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::objectRegistry& Foam::IOobject::db() const
+const Foam::objectRegistry& Foam::IOobject::db() const noexcept
 {
     return db_;
 }

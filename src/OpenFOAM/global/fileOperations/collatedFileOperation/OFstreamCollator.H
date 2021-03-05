@@ -71,10 +71,8 @@ class OFstreamCollator
 {
     // Private Class
 
-        class writeData
+        struct writeData
         {
-        public:
-
             const label comm_;
             const word objectType_;
             const fileName pathName_;
@@ -105,18 +103,18 @@ class OFstreamCollator
                 append_(append)
             {}
 
-            //- (approximate) size of master + any optional slave data
+            //- The (approximate) size of master + any optional slave data
             off_t size() const
             {
-                off_t sz = data_.size();
+                off_t totalSize = data_.size();
                 forAll(slaveData_, i)
                 {
                     if (slaveData_.set(i))
                     {
-                        sz += slaveData_[i].size();
+                        totalSize += slaveData_[i].size();
                     }
                 }
-                return sz;
+                return totalSize;
             }
         };
 
