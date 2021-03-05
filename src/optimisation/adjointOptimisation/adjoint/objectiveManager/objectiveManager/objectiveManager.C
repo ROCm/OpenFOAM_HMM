@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -252,7 +252,7 @@ scalar objectiveManager::print()
 }
 
 
-bool objectiveManager::write
+bool objectiveManager::writeObjectives
 (
     const scalar weightedObjective,
     const bool valid
@@ -289,7 +289,7 @@ void objectiveManager::updateAndWrite()
     updateNormalizationFactor();
     update();
     scalar weightedObjective = print();
-    write(weightedObjective);
+    writeObjectives(weightedObjective);
 }
 
 
