@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,10 +24,12 @@ boundaryField
     {
         type            fixedFluxPressure;
     }
+
     region0_to_wallFilmRegion_wallFilmFaces
     {
         type            fixedFluxPressure;
     }
 }
+
 
 // ************************************************************************* //

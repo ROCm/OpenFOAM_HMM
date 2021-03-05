@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,6 +25,7 @@ boundaryField
         type            epsilonWallFunction;
         value           uniform 1e-7;
     }
+
     wallFilm
     {
         type            epsilonWallFunction;

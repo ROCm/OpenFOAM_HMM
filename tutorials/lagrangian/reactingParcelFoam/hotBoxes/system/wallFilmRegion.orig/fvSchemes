@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system/wallFilmRegion";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -18,15 +17,6 @@ FoamFile
 ddtSchemes
 {
     default         Euler;
-}
-
-divSchemes
-{
-    default         none;
-    div(phi,Uf)     Gauss upwind;
-    div(phid,deltaf) Gauss upwind;
-    div(phi,hf)     Gauss upwind;
-    div(nHat)       Gauss linear;
 }
 
 gradSchemes
@@ -41,13 +31,21 @@ gradSchemes
     grad(alpha)     Gauss linear;
 }
 
+divSchemes
+{
+    default         none;
+    div(phi,Uf)     Gauss upwind;
+    div(phid,deltaf) Gauss upwind;
+    div(phi,hf)     Gauss upwind;
+    div(nHat)       Gauss linear;
+}
+
 laplacianSchemes
 {
     default         none;
     laplacian(sigmaf,deltaf) Gauss linear uncorrected;
     laplacian(deltaCoeff,deltaf) Gauss linear uncorrected;
 }
-
 
 snGradSchemes
 {

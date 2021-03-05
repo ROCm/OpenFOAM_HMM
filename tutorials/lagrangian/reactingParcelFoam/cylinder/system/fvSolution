@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,6 +74,7 @@ solvers
         tolerance       1e-6;
         relTol          0;
     }
+
     hFinal
     {
         solver          PBiCGStab;
@@ -84,7 +84,6 @@ solvers
     }
 }
 
-
 PIMPLE
 {
     nCorrectors     2;
@@ -93,7 +92,6 @@ PIMPLE
     pRefCell        0;
     pRefValue       1e5;
 }
-
 
 relaxationFactors
 {

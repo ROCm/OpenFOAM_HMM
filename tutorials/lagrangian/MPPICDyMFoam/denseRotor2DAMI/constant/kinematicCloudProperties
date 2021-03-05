@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      particleProperties;
+    object      kinematicCloudProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,14 +76,14 @@ subModels
             parcelsPerSecond  20000;
 
             sizeDistribution
-	    {
-	        type uniform;
+            {
+                type uniform;
                 uniformDistribution
                 {
                     minValue        5e-03;
                     maxValue        5e-03;
                 }
-	    }
+            }
 
             flowRateProfile constant 1;
             massTotal       2000000;
@@ -94,13 +94,7 @@ subModels
 
     dispersionModel none;
 
-    patchInteractionModel none;
-
-    heatTransferModel none;
-
     surfaceFilmModel none;
-
-    collisionModel none;
 
     patchInteractionModel standardWallInteraction;
 
@@ -158,10 +152,7 @@ subModels
             e 0.8;
         }
     }
-
-    radiation off;
 }
-
 
 cloudFunctions
 {}

@@ -90,19 +90,7 @@ subModels
     {
         patches
         (
-            sides
-            {
-                type rebound;
-                e    1;
-                mu   0.09;
-            }
-            top
-            {
-                type rebound;
-                e    1;
-                mu   0.09;
-            }
-            bottom
+            "(sides|top|bottom)"
             {
                 type rebound;
                 e    1;
@@ -110,8 +98,6 @@ subModels
             }
         );
     }
-
-    heatTransferModel none;
 
     surfaceFilmModel none;
 
@@ -175,10 +161,7 @@ subModels
     }
 
     stochasticCollisionModel none;
-
-    radiation off;
 }
-
 
 cloudFunctions
 {}

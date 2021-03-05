@@ -9,21 +9,35 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      mapFieldsDict;
+    class       volScalarField;
+    object      nut.air;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// List of pairs of source/target patches for mapping
-patchMap
-(
-);
+dimensions          [0 2 -1 0 0 0 0];
 
-// List of target patches cutting the source domain (these need to be
-// handled specially e.g. interpolated from internal values)
-cuttingPatches
-(
-);
+internalField       uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type               calculated;
+        value              $internalField;
+    }
+
+    outlet
+    {
+        type               calculated;
+        value              $internalField;
+    }
+
+    walls
+    {
+        type               nutkWallFunction;
+        value              $internalField;
+    }
+}
+
 
 // ************************************************************************* //

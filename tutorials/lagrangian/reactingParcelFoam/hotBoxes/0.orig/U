@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,12 +25,13 @@ boundaryField
         type            uniformFixedValue;
         uniformValue    (0 0 0);
     }
+
     wallFilm
     {
         type            uniformFixedValue;
         uniformValue    (0 0 0);
 //        type            mapped;
-//        field       Usf;
+//        field           Usf;
 //        average         (0 0 0);
 //        setAverage      no;
 //        value           uniform (0 0 0);

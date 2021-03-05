@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      reactingCloud1Properties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -116,7 +115,7 @@ subModels
                 type        rebound;
             }
 
-            "inlet|outlet"
+            "(inlet|outlet)"
             {
                 type escape;
             }

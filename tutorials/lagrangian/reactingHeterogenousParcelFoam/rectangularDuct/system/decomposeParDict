@@ -18,13 +18,5 @@ numberOfSubdomains 4;
 
 method          scotch;
 
-coeffs
-{
-    n           (2 2 1);
-}
-
-distributed     no;
-
-roots           ( );
 
 // ************************************************************************* //

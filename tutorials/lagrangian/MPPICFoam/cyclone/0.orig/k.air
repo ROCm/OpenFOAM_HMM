@@ -9,28 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      decomposeParDict;
+    class       volScalarField;
+    object      k.air;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 4;
+dimensions          [0 2 -2 0 0 0 0];
 
-method          metis;
+internalField       uniform 1;
 
-coeffs
+boundaryField
 {
-    n           (2 2 1);
+    inlet
+    {
+        type               fixedValue;
+        value              $internalField;
+    }
+
+    outlet
+    {
+        type               inletOutlet;
+        phi                phi.air;
+        inletValue         $internalField;
+        value              $internalField;
+    }
+
+    walls
+    {
+        type               kqRWallFunction;
+        value              $internalField;
+    }
 }
 
-metisCoeffs
-{
-    processorWeights ( 1 1 1 1 );
-}
-
-
-distributed     no;
-
-roots           ( );
 
 // ************************************************************************* //

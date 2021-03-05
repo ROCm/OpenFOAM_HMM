@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      H2O;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,16 +20,18 @@ internalField   uniform 0.01;
 
 boundaryField
 {
-     walls
+    walls
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 0.01;
         value           uniform 0.01;
     }
+
     inlet
     {
         type            fixedValue;

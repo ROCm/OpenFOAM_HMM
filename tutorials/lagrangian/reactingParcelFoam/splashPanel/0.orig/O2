@@ -10,10 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      O2;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 0 0 0 0 0 0];
@@ -28,6 +26,7 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
+
     region0_to_wallFilmRegion_wallFilmFaces
     {
         type            zeroGradient;

@@ -9,7 +9,6 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    location    "0";
     class       volScalarField;
     object      T;
 }
@@ -26,11 +25,13 @@ boundaryField
         type            fixedValue;
         value           uniform 300;
     }
+
     region0_to_wallFilmRegion_wallFilmFaces
     {
         type            fixedValue;
         value           uniform 300;
     }
 }
+
 
 // ************************************************************************* //

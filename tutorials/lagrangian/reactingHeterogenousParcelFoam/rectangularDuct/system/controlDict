@@ -10,10 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 DebugSwitches
 {
     MUCSheterogeneousRate   0;
@@ -54,9 +54,6 @@ adjustTimeStep  yes;
 maxCo           1;
 
 maxDeltaT       0.03;
-
-functions
-{}
 
 
 // ************************************************************************* //

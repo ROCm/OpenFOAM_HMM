@@ -25,14 +25,17 @@ boundaryField
         type            zeroGradient;
         value           uniform (0 0 0);
     }
+
     walls
     {
         type            noSlip;
     }
+
     frontAndBack
     {
         type            noSlip;
     }
 }
+
 
 // ************************************************************************* //

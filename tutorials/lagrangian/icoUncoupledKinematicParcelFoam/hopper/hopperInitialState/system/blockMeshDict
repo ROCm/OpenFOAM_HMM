@@ -32,7 +32,6 @@ vertices
     (0 500 0)
 );
 
-
 blocks
 (
     hex (6 9 10 11 0 3 4 5 ) (20 40 1) simpleGrading (1 1 1)

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,7 +60,6 @@ solvers
     {
         solver          PBiCGStab;
         preconditioner  DILU;
-
         tolerance       1e-6;
         relTol          0;
     }
@@ -80,7 +78,6 @@ solvers
 
 potentialFlow
 {
-    // Used for potentialFoam initialisation
     nNonOrthogonalCorrectors 5;
 }
 
