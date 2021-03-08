@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,6 @@ Description
       expects procPatches on all)
     - initial mesh has to have procPatches last and all normal patches common
       to all processors and in the same order. This is checked.
-    - faces are matched topologically but points on the faces are not. So
-      expect problems -on separated patches (cyclics?) -on zero sized processor
-      edges.
 
 SourceFiles
     fvMeshDistribute.C
@@ -77,10 +74,6 @@ class fvMeshDistribute
 
         //- Underlying fvMesh
         fvMesh& mesh_;
-
-        //- Absolute merging tolerance (constructing meshes gets done using
-        //  geometric matching)
-        const scalar mergeTol_;
 
 
     // Private Member Functions
@@ -230,6 +223,20 @@ class fvMeshDistribute
                 labelList& slaveCoupledFaces
             );
 
+            //- Find cells on mesh whose faceID/procID match the neighbour
+            //  cell/proc of domainMesh. Store the matching face pairs
+            static void findCouples
+            (
+                const UPtrList<polyMesh>& meshes,
+                const PtrList<labelList>& domainSourceFaces,
+                const PtrList<labelList>& domainSourceProcs,
+                const PtrList<labelList>& domainSourcePatchs,
+
+                labelListList& localBoundaryFace,
+                labelListList& remoteFaceProc,
+                labelListList& remoteBoundaryFace
+            );
+
             //- Map data on boundary faces to new mesh (resulting from adding
             //  two meshes)
             static labelList mapBoundaryData
@@ -352,8 +359,8 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and absolute merge tolerance
-        fvMeshDistribute(fvMesh& mesh, const scalar mergeTol);
+        //- Construct from mesh
+        fvMeshDistribute(fvMesh& mesh);
 
 
     // Member Functions

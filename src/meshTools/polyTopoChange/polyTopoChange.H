@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,6 @@ SourceFiles
 #include "pointField.H"
 #include "Map.H"
 #include "HashSet.H"
-#include "mapPolyMesh.H"
 #include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,6 +90,7 @@ class dictionary;
 class topoAction;
 class objectMap;
 class IOobject;
+class mapPolyMesh;
 template<class T, class Container> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
@@ -349,6 +349,7 @@ class polyTopoChange
         void calcPatchPointMap
         (
             const UList<Map<label>>& oldPatchMeshPointMaps,
+            const labelUList& patchMap,
             const polyBoundaryMesh& boundary,
             labelListList& patchPointMap
         ) const;
@@ -394,6 +395,7 @@ class polyTopoChange
             (
                 const bool syncParallel,
                 const polyBoundaryMesh& boundary,
+                const labelUList& patchMap,     // new back to old patch labels
                 const labelUList& patchStarts,
                 const labelUList& patchSizes,
                 const pointField& points
@@ -402,6 +404,7 @@ class polyTopoChange
         void compactAndReorder
         (
             const polyMesh& mesh,
+            const labelUList& patchMap,      // from new to old patch
             const bool syncParallel,
             const bool orderCells,
             const bool orderPoints,
@@ -611,7 +614,32 @@ public:
             autoPtr<mapPolyMesh> changeMesh
             (
                 polyMesh& mesh,
+                const labelUList& patchMap,
                 const bool inflate,
+                const bool syncParallel = true,
+                const bool orderCells = false,
+                const bool orderPoints = false
+            );
+
+            //- Without patch mapping
+            autoPtr<mapPolyMesh> changeMesh
+            (
+                polyMesh& mesh,
+                const bool inflate,
+                const bool syncParallel = true,
+                const bool orderCells = false,
+                const bool orderPoints = false
+            );
+
+            //- Create new mesh with old mesh patches. Additional dictionaries
+            //  (fv* etc) read according to IO flags
+            template<class Type>
+            autoPtr<mapPolyMesh> makeMesh
+            (
+                autoPtr<Type>& newMesh,
+                const IOobject& io,
+                const polyMesh& mesh,
+                const labelUList& patchMap,
                 const bool syncParallel = true,
                 const bool orderCells = false,
                 const bool orderPoints = false

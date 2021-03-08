@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polyTopoChange.H"
 #include "polyMesh.H"
 #include "HashOps.H"
+#include "emptyPolyPatch.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -105,6 +106,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     autoPtr<Type>& newMeshPtr,
     const IOobject& io,
     const polyMesh& mesh,
+    const labelUList& patchMap,
     const bool syncParallel,
     const bool orderCells,
     const bool orderPoints
@@ -151,6 +153,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     compactAndReorder
     (
         mesh,
+        patchMap,      // from new to old patch
         syncParallel,
         orderCells,
         orderPoints,
@@ -239,17 +242,35 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     {
         const polyBoundaryMesh& oldPatches = mesh.boundaryMesh();
 
-        List<polyPatch*> newBoundary(oldPatches.size());
+        List<polyPatch*> newBoundary(patchMap.size());
 
-        forAll(oldPatches, patchi)
+        forAll(patchMap, patchi)
         {
-            newBoundary[patchi] = oldPatches[patchi].clone
-            (
-                newMesh.boundaryMesh(),
-                patchi,
-                patchSizes[patchi],
-                patchStarts[patchi]
-            ).ptr();
+            const label oldPatchi = patchMap[patchi];
+
+            if (oldPatchi != -1)
+            {
+                newBoundary[patchi] = oldPatches[oldPatchi].clone
+                (
+                    newMesh.boundaryMesh(),
+                    patchi,
+                    patchSizes[patchi],
+                    patchStarts[patchi]
+                ).ptr();
+            }
+            else
+            {
+                // Added patch
+                newBoundary[patchi] = new emptyPolyPatch
+                (
+                    "patch" + Foam::name(patchi),
+                    patchSizes[patchi],
+                    patchStarts[patchi],
+                    patchi,
+                    newMesh.boundaryMesh(),
+                    word::null
+                );
+            }
         }
         newMesh.addFvPatches(newBoundary);
     }
@@ -327,6 +348,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     calcPatchPointMap
     (
         oldPatchMeshPointMaps,
+        patchMap,
         newMesh.boundaryMesh(),
         patchPointMap
     );
@@ -338,7 +360,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     if (debug)
     {
         Pout<< "New mesh:" << nl;
-        writeMeshStats(mesh, Pout);
+        writeMeshStats(newMesh, Pout);
     }
 
     labelHashSet flipFaceFluxSet(HashSetOps::used(flipFaceFlux_));
@@ -387,6 +409,30 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will
     // be invalid.
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
+(
+    autoPtr<Type>& newMeshPtr,
+    const IOobject& io,
+    const polyMesh& mesh,
+    const bool syncParallel,
+    const bool orderCells,
+    const bool orderPoints
+)
+{
+    return makeMesh
+    (
+        newMeshPtr,
+        io,
+        mesh,
+        identity(mesh.boundaryMesh().size()),
+        syncParallel,
+        orderCells,
+        orderPoints
+    );
 }
 
 

@@ -42,6 +42,7 @@ License
 #include "processorPolyPatch.H"
 #include "CompactListList.H"
 #include "ListOps.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1298,36 +1299,43 @@ Foam::labelList Foam::polyTopoChange::selectFaces
 void Foam::polyTopoChange::calcPatchPointMap
 (
     const UList<Map<label>>& oldPatchMeshPointMaps,
+    const labelUList& patchMap,
     const polyBoundaryMesh& boundary,
     labelListList& patchPointMap
 ) const
 {
-    patchPointMap.setSize(boundary.size());
+    patchPointMap.setSize(patchMap.size());
 
-    forAll(boundary, patchi)
+    forAll(patchMap, patchi)
     {
-        const labelList& meshPoints = boundary[patchi].meshPoints();
+        const label oldPatchi = patchMap[patchi];
 
-        const Map<label>& oldMeshPointMap = oldPatchMeshPointMaps[patchi];
-
-        labelList& curPatchPointRnb = patchPointMap[patchi];
-
-        curPatchPointRnb.setSize(meshPoints.size());
-
-        forAll(meshPoints, i)
+        if (oldPatchi != -1)
         {
-            if (meshPoints[i] < pointMap_.size())
+            const labelList& meshPoints = boundary[patchi].meshPoints();
+
+            const Map<label>& oldMeshPointMap =
+                oldPatchMeshPointMaps[oldPatchi];
+
+            labelList& curPatchPointRnb = patchPointMap[patchi];
+
+            curPatchPointRnb.setSize(meshPoints.size());
+
+            forAll(meshPoints, i)
             {
-                // Check if old point was part of same patch
-                curPatchPointRnb[i] = oldMeshPointMap.lookup
-                (
-                    pointMap_[meshPoints[i]],
-                    -1
-                );
-            }
-            else
-            {
-                curPatchPointRnb[i] = -1;
+                if (meshPoints[i] < pointMap_.size())
+                {
+                    // Check if old point was part of same patch
+                    curPatchPointRnb[i] = oldMeshPointMap.lookup
+                    (
+                        pointMap_[meshPoints[i]],
+                        -1
+                    );
+                }
+                else
+                {
+                    curPatchPointRnb[i] = -1;
+                }
             }
         }
     }
@@ -1865,7 +1873,8 @@ void Foam::polyTopoChange::calcFaceZonePointMap
 void Foam::polyTopoChange::reorderCoupledFaces
 (
     const bool syncParallel,
-    const polyBoundaryMesh& boundary,
+    const polyBoundaryMesh& oldBoundary,
+    const labelUList& patchMap,     // new to old patches
     const labelUList& patchStarts,
     const labelUList& patchSizes,
     const pointField& points
@@ -1881,11 +1890,17 @@ void Foam::polyTopoChange::reorderCoupledFaces
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     // Send ordering
-    forAll(boundary, patchi)
+    forAll(patchMap, patchi)
     {
-        if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
+        const label oldPatchi = patchMap[patchi];
+
+        if
+        (
+            oldPatchi != -1
+         && (syncParallel || !isA<processorPolyPatch>(oldBoundary[oldPatchi]))
+        )
         {
-            boundary[patchi].initOrder
+            oldBoundary[oldPatchi].initOrder
             (
                 pBufs,
                 primitivePatch
@@ -1911,14 +1926,20 @@ void Foam::polyTopoChange::reorderCoupledFaces
 
     bool anyChanged = false;
 
-    forAll(boundary, patchi)
+    forAll(patchMap, patchi)
     {
-        if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
+        const label oldPatchi = patchMap[patchi];
+
+        if
+        (
+            oldPatchi != -1
+         && (syncParallel || !isA<processorPolyPatch>(oldBoundary[oldPatchi]))
+        )
         {
             labelList patchFaceMap(patchSizes[patchi], -1);
             labelList patchFaceRotation(patchSizes[patchi], Zero);
 
-            const bool changed = boundary[patchi].order
+            const bool changed = oldBoundary[oldPatchi].order
             (
                 pBufs,
                 primitivePatch
@@ -1982,6 +2003,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
 void Foam::polyTopoChange::compactAndReorder
 (
     const polyMesh& mesh,
+    const labelUList& patchMap,     // from new to old patch
     const bool syncParallel,
     const bool orderCells,
     const bool orderPoints,
@@ -2004,13 +2026,13 @@ void Foam::polyTopoChange::compactAndReorder
     List<Map<label>>& oldFaceZoneMeshPointMaps
 )
 {
-    if (mesh.boundaryMesh().size() != nPatches_)
+    if (patchMap.size() != nPatches_)
     {
         FatalErrorInFunction
             << "polyTopoChange was constructed with a mesh with "
             << nPatches_ << " patches." << endl
             << "The mesh now provided has a different number of patches "
-            << mesh.boundaryMesh().size()
+            << patchMap.size()
             << " which is illegal" << endl
             << abort(FatalError);
     }
@@ -2028,6 +2050,7 @@ void Foam::polyTopoChange::compactAndReorder
     (
         syncParallel,
         mesh.boundaryMesh(),
+        patchMap,
         patchStarts,
         patchSizes,
         newPoints
@@ -2245,7 +2268,7 @@ void Foam::polyTopoChange::addMesh
         points_.setCapacity(points_.size() + points.size());
         pointMap_.setCapacity(pointMap_.size() + points.size());
         reversePointMap_.setCapacity(reversePointMap_.size() + points.size());
-        pointZone_.resize(pointZone_.size() + points.size()/100);
+        pointZone_.resize(pointZone_.size() + points.size()/128);
 
         // Precalc offset zones
         labelList newZoneID(points.size(), -1);
@@ -2285,9 +2308,9 @@ void Foam::polyTopoChange::addMesh
 
         cellMap_.setCapacity(cellMap_.size() + nAllCells);
         reverseCellMap_.setCapacity(reverseCellMap_.size() + nAllCells);
-        cellFromPoint_.resize(cellFromPoint_.size() + nAllCells/100);
-        cellFromEdge_.resize(cellFromEdge_.size() + nAllCells/100);
-        cellFromFace_.resize(cellFromFace_.size() + nAllCells/100);
+        cellFromPoint_.resize(cellFromPoint_.size() + nAllCells/128);
+        cellFromEdge_.resize(cellFromEdge_.size() + nAllCells/128);
+        cellFromFace_.resize(cellFromFace_.size() + nAllCells/128);
         cellZone_.setCapacity(cellZone_.size() + nAllCells);
 
 
@@ -2343,10 +2366,10 @@ void Foam::polyTopoChange::addMesh
         faceNeighbour_.setCapacity(faceNeighbour_.size() + nAllFaces);
         faceMap_.setCapacity(faceMap_.size() + nAllFaces);
         reverseFaceMap_.setCapacity(reverseFaceMap_.size() + nAllFaces);
-        faceFromPoint_.resize(faceFromPoint_.size() + nAllFaces/100);
-        faceFromEdge_.resize(faceFromEdge_.size() + nAllFaces/100);
+        faceFromPoint_.resize(faceFromPoint_.size() + nAllFaces/128);
+        faceFromEdge_.resize(faceFromEdge_.size() + nAllFaces/128);
         flipFaceFlux_.setCapacity(faces_.size() + nAllFaces);
-        faceZone_.resize(faceZone_.size() + nAllFaces/100);
+        faceZone_.resize(faceZone_.size() + nAllFaces/128);
         faceZoneFlip_.setCapacity(faces_.size() + nAllFaces);
 
 
@@ -2434,7 +2457,7 @@ void Foam::polyTopoChange::setCapacity
     points_.setCapacity(nPoints);
     pointMap_.setCapacity(nPoints);
     reversePointMap_.setCapacity(nPoints);
-    pointZone_.resize(pointZone_.size() + nPoints/100);
+    pointZone_.resize(pointZone_.size() + nPoints/128);
 
     faces_.setCapacity(nFaces);
     region_.setCapacity(nFaces);
@@ -2442,17 +2465,17 @@ void Foam::polyTopoChange::setCapacity
     faceNeighbour_.setCapacity(nFaces);
     faceMap_.setCapacity(nFaces);
     reverseFaceMap_.setCapacity(nFaces);
-    faceFromPoint_.resize(faceFromPoint_.size() + nFaces/100);
-    faceFromEdge_.resize(faceFromEdge_.size() + nFaces/100);
+    faceFromPoint_.resize(faceFromPoint_.size() + nFaces/128);
+    faceFromEdge_.resize(faceFromEdge_.size() + nFaces/128);
     flipFaceFlux_.setCapacity(nFaces);
-    faceZone_.resize(faceZone_.size() + nFaces/100);
+    faceZone_.resize(faceZone_.size() + nFaces/128);
     faceZoneFlip_.setCapacity(nFaces);
 
     cellMap_.setCapacity(nCells);
     reverseCellMap_.setCapacity(nCells);
-    cellFromPoint_.resize(cellFromPoint_.size() + nCells/100);
-    cellFromEdge_.resize(cellFromEdge_.size() + nCells/100);
-    cellFromFace_.resize(cellFromFace_.size() + nCells/100);
+    cellFromPoint_.resize(cellFromPoint_.size() + nCells/128);
+    cellFromEdge_.resize(cellFromEdge_.size() + nCells/128);
+    cellFromFace_.resize(cellFromFace_.size() + nCells/128);
     cellZone_.setCapacity(nCells);
 }
 
@@ -2958,6 +2981,7 @@ void Foam::polyTopoChange::removeCell
 Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 (
     polyMesh& mesh,
+    const labelUList& patchMap,
     const bool inflate,
     const bool syncParallel,
     const bool orderCells,
@@ -3003,6 +3027,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     compactAndReorder
     (
         mesh,
+        patchMap,
         syncParallel,
         orderCells,
         orderPoints,
@@ -3159,6 +3184,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     calcPatchPointMap
     (
         oldPatchMeshPointMaps,
+        patchMap,
         mesh.boundaryMesh(),
         patchPointMap
     );
@@ -3215,6 +3241,27 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will
     // be invalid.
+}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
+(
+    polyMesh& mesh,
+    const bool inflate,
+    const bool syncParallel,
+    const bool orderCells,
+    const bool orderPoints
+)
+{
+    return changeMesh
+    (
+        mesh,
+        identity(mesh.boundaryMesh().size()),
+        inflate,
+        syncParallel,
+        orderCells,
+        orderPoints
+    );
 }
 
 

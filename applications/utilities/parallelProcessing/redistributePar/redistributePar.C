@@ -107,52 +107,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Tolerance (as fraction of the bounding box). Needs to be fairly lax since
-// usually meshes get written with limited precision (6 digits)
-static const scalar defaultMergeTol = 1e-6;
-
-
-// Get merging distance when matching face centres
-scalar getMergeDistance
-(
-    const argList& args,
-    const Time& runTime,
-    const boundBox& bb
-)
-{
-    const scalar mergeTol =
-        args.getOrDefault<scalar>("mergeTol", defaultMergeTol);
-
-    const scalar writeTol =
-        Foam::pow(scalar(10), -scalar(IOstream::defaultPrecision()));
-
-    Info<< "Merge tolerance : " << mergeTol << nl
-        << "Write tolerance : " << writeTol << endl;
-
-    if (runTime.writeFormat() == IOstream::ASCII && mergeTol < writeTol)
-    {
-        FatalErrorInFunction
-            << "Your current settings specify ASCII writing with "
-            << IOstream::defaultPrecision() << " digits precision." << nl
-            << "Your merging tolerance (" << mergeTol << ") is finer than this."
-            << nl
-            << "Please change your writeFormat to binary"
-            << " or increase the writePrecision" << endl
-            << "or adjust the merge tolerance (-mergeTol)."
-            << exit(FatalError);
-    }
-
-    const scalar mergeDist = mergeTol * bb.mag();
-
-    Info<< "Overall meshes bounding box : " << bb << nl
-        << "Relative tolerance          : " << mergeTol << nl
-        << "Absolute matching distance  : " << mergeDist << nl
-        << endl;
-
-    return mergeDist;
-}
-
-
 void setBasicGeometry(fvMesh& mesh)
 {
     // Set the fvGeometryScheme to basic since it does not require
@@ -860,7 +814,6 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 autoPtr<mapDistributePolyMesh> redistributeAndWrite
 (
     const Time& baseRunTime,
-    const scalar tolDim,
     const boolList& haveMesh,
     const fileName& meshSubDir,
     const bool doReadFields,
@@ -1150,7 +1103,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
 
     // Mesh distribution engine
-    fvMeshDistribute distributor(mesh, tolDim);
+    fvMeshDistribute distributor(mesh);
 
     // Do all the distribution of mesh and fields
     autoPtr<mapDistributePolyMesh> rawMap = distributor.distribute(decomp);
@@ -2317,12 +2270,6 @@ int main(int argc, char *argv[])
         "Test without writing the decomposition. "
         "Changes -cellDist to only write volScalarField."
     );
-    argList::addOption
-    (
-        "mergeTol",
-        "scalar",
-        "The merge distance relative to the bounding box size (default 1e-6)"
-    );
     argList::addBoolOption
     (
         "cellDist",
@@ -2707,14 +2654,6 @@ int main(int argc, char *argv[])
                     // problems. See comment in routine
                     setBasicGeometry(mesh);
 
-                    // Global matching tolerance
-                    const scalar tolDim = getMergeDistance
-                    (
-                        args,
-                        runTime,
-                        mesh.bounds()
-                    );
-
 
                     // Determine decomposition
                     // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2728,7 +2667,6 @@ int main(int argc, char *argv[])
                     redistributeAndWrite
                     (
                         baseRunTime,
-                        tolDim,
                         haveMesh,
                         meshSubDir,
                         false,      // do not read fields
@@ -3060,14 +2998,6 @@ int main(int argc, char *argv[])
             //    << " nPatches:" << mesh.boundaryMesh().size() << endl;
 
 
-            // Global matching tolerance
-            const scalar tolDim = getMergeDistance
-            (
-                args,
-                runTime,
-                mesh.bounds()
-            );
-
             // Determine decomposition
             // ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3139,7 +3069,6 @@ int main(int argc, char *argv[])
             autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
             (
                 baseRunTime,
-                tolDim,
                 haveMesh,
                 meshSubDir,
                 true,           // read fields

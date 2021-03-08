@@ -704,8 +704,15 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         }
     }
 
+    if (debug)
+    {
+        Pout<< "mergeSharedPoints : found " << nShared
+            << " points on processor boundaries" << nl << endl;
+    }
+
     Map<label> globalMasterToLocalMaster(2*nShared);
     Map<label> pointToMaster(2*nShared);
+    label nMatch = 0;
 
     forAll(pointToGlobalMaster, pointi)
     {
@@ -716,7 +723,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
 
             if (iter.found())
             {
+                // Matched to existing master
                 pointToMaster.insert(pointi, *iter);
+                nMatch++;
             }
             else
             {
@@ -727,7 +736,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         }
     }
 
-    if (returnReduce(pointToMaster.size(), sumOp<label>()) == 0)
+    reduce(nMatch, sumOp<label>());
+
+    if (debug)
+    {
+        Pout<< "mergeSharedPoints : found "
+            << nMatch << " mergeable points" << nl << endl;
+    }
+
+
+    if (nMatch == 0)
     {
         return nullptr;
     }
@@ -1116,6 +1134,141 @@ void Foam::fvMeshDistribute::findCouples
     {
         Pout<< "findCouples : found " << coupledI
             << " faces that will be stitched" << nl << endl;
+    }
+}
+
+
+void Foam::fvMeshDistribute::findCouples
+(
+    const UPtrList<polyMesh>& meshes,
+    const PtrList<labelList>& domainSourceFaces,
+    const PtrList<labelList>& domainSourceProcs,
+    const PtrList<labelList>& domainSourcePatchs,
+
+    labelListList& localBoundaryFace,
+    labelListList& remoteFaceProc,
+    labelListList& remoteBoundaryFace
+)
+{
+    // Collect all matching processor face pairs. These are all the
+    // faces for which we have both sides
+
+    // Pass 0: count number of inter-processor faces
+    labelList nProcFaces(meshes.size(), 0);
+    forAll(meshes, meshi)
+    {
+        if (meshes.set(meshi))
+        {
+            const labelList& domainProc = domainSourceProcs[meshi];
+            const labelList& domainPatch = domainSourcePatchs[meshi];
+
+            forAll(domainProc, bFacei)
+            {
+                if (domainProc[bFacei] != -1 && domainPatch[bFacei] == -1)
+                {
+                    nProcFaces[meshi]++;
+                }
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "fvMeshDistribute::findCouples : nProcFaces:"
+            << flatOutput(nProcFaces) << endl;
+    }
+
+
+    // Size
+    List<DynamicList<label>> dynLocalFace(Pstream::nProcs());
+    List<DynamicList<label>> dynRemoteProc(Pstream::nProcs());
+    List<DynamicList<label>> dynRemoteFace(Pstream::nProcs());
+
+    forAll(meshes, meshi)
+    {
+        if (meshes.set(meshi))
+        {
+            dynLocalFace[meshi].setCapacity(nProcFaces[meshi]);
+            dynRemoteProc[meshi].setCapacity(nProcFaces[meshi]);
+            dynRemoteFace[meshi].setCapacity(nProcFaces[meshi]);
+        }
+    }
+
+
+    // Insert all into big map. Find matches
+    HashTable<labelPair, labelPair, labelPair::Hash<>> map(2*sum(nProcFaces));
+
+    nProcFaces = 0;
+
+    forAll(meshes, meshi)
+    {
+        if (meshes.set(meshi))
+        {
+            const labelList& domainFace = domainSourceFaces[meshi];
+            const labelList& domainProc = domainSourceProcs[meshi];
+            const labelList& domainPatch = domainSourcePatchs[meshi];
+
+            forAll(domainProc, bFacei)
+            {
+                if (domainProc[bFacei] != -1 && domainPatch[bFacei] == -1)
+                {
+                    const labelPair key
+                    (
+                        domainProc[bFacei],
+                        domainFace[bFacei]
+                    );
+                    auto fnd = map.find(key);
+
+                    if (!fnd.found())
+                    {
+                        // Insert
+                        map.emplace(key, meshi, bFacei);
+                    }
+                    else
+                    {
+                        // Second occurence. Found match.
+                        const label matchProci = fnd().first();
+                        const label matchFacei = fnd().second();
+
+                        dynLocalFace[meshi].append(bFacei);
+                        dynRemoteProc[meshi].append(matchProci);
+                        dynRemoteFace[meshi].append(matchFacei);
+                        nProcFaces[meshi]++;
+
+                        dynLocalFace[matchProci].append(matchFacei);
+                        dynRemoteProc[matchProci].append(meshi);
+                        dynRemoteFace[matchProci].append(bFacei);
+                        nProcFaces[matchProci]++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "fvMeshDistribute::findCouples : stored procFaces:"
+            << map.size() << endl;
+    }
+
+    localBoundaryFace.setSize(Pstream::nProcs());
+    remoteFaceProc.setSize(Pstream::nProcs());
+    remoteBoundaryFace.setSize(Pstream::nProcs());
+    forAll(meshes, meshi)
+    {
+        if (meshes.set(meshi))
+        {
+            localBoundaryFace[meshi] = std::move(dynLocalFace[meshi]);
+            remoteFaceProc[meshi] = std::move(dynRemoteProc[meshi]);
+            remoteBoundaryFace[meshi] = std::move(dynRemoteFace[meshi]);
+        }
+    }
+
+
+    if (debug)
+    {
+        Pout<< "fvMeshDistribute::findCouples : found matches:"
+            << flatOutput(nProcFaces) << endl;
     }
 }
 
@@ -1676,10 +1829,10 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvMeshDistribute::fvMeshDistribute(fvMesh& mesh, const scalar mergeTol)
+Foam::fvMeshDistribute::fvMeshDistribute(fvMesh& mesh)//, const scalar mergeTol)
 :
-    mesh_(mesh),
-    mergeTol_(mergeTol)
+    mesh_(mesh)
+    //mergeTol_(mergeTol)
 {}
 
 
@@ -2165,7 +2318,21 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
 
     // Start sending&receiving from buffers
-    pBufs.finishedSends();
+    {
+        if (debug)
+        {
+            Pout<< "Starting sending" << endl;
+        }
+
+        labelList recvSizes;
+        pBufs.finishedSends(recvSizes);
+
+        if (debug)
+        {
+            Pout<< "Finished sending and receiving : " << flatOutput(recvSizes)
+                << endl;
+        }
+    }
 
 
     // Subset the part that stays
@@ -2208,14 +2375,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         subPointMap[Pstream::myProcNo()] = subMap().pointMap();
         subPatchMap[Pstream::myProcNo()] = identity(patches.size());
 
-        // Initialize all addressing into current mesh
-        constructCellMap[Pstream::myProcNo()] = identity(mesh_.nCells());
-        constructFaceMap[Pstream::myProcNo()] = identity(mesh_.nFaces(), 1);
-        constructPointMap[Pstream::myProcNo()] = identity(mesh_.nPoints());
-        constructPatchMap[Pstream::myProcNo()] = identity(patches.size());
-
-        // Subset the mesh data: neighbourCell/neighbourProc
-        // fields
+        // Subset the mesh data: neighbourCell/neighbourProc fields
         labelList domainSourceFace;
         labelList domainSourceProc;
         labelList domainSourcePatch;
@@ -2281,6 +2441,41 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Disable parallel. Original state already known.
     UPstream::parRun(false);
 
+    PtrList<labelList> domainSourceFaces(Pstream::nProcs());
+    PtrList<labelList> domainSourceProcs(Pstream::nProcs());
+    PtrList<labelList> domainSourcePatchs(Pstream::nProcs());
+    PtrList<labelList> domainSourceNewNbrProcs(Pstream::nProcs());
+    PtrList<labelList> domainSourcePointMasters(Pstream::nProcs());
+
+    PtrList<fvMesh> domainMeshPtrs(Pstream::nProcs());
+
+    PtrList<PtrList<volScalarField>> vsfs(Pstream::nProcs());
+    PtrList<PtrList<volVectorField>> vvfs(Pstream::nProcs());
+    PtrList<PtrList<volSphericalTensorField>> vsptfs(Pstream::nProcs());
+    PtrList<PtrList<volSymmTensorField>> vsytfs(Pstream::nProcs());
+    PtrList<PtrList<volTensorField>> vtfs(Pstream::nProcs());
+
+    PtrList<PtrList<surfaceScalarField>> ssfs(Pstream::nProcs());
+    PtrList<PtrList<surfaceVectorField>> svfs(Pstream::nProcs());
+    PtrList<PtrList<surfaceSphericalTensorField>> ssptfs
+    (
+        Pstream::nProcs()
+    );
+    PtrList<PtrList<surfaceSymmTensorField>> ssytfs(Pstream::nProcs());
+    PtrList<PtrList<surfaceTensorField>> stfs(Pstream::nProcs());
+
+    PtrList<PtrList<volScalarField::Internal>> dsfs(Pstream::nProcs());
+    PtrList<PtrList<volVectorField::Internal>> dvfs(Pstream::nProcs());
+    PtrList<PtrList<volSphericalTensorField::Internal>> dstfs
+    (
+        Pstream::nProcs()
+    );
+    PtrList<PtrList<volSymmTensorField::Internal>> dsytfs
+    (
+        Pstream::nProcs()
+    );
+    PtrList<PtrList<volTensorField::Internal>> dtfs(Pstream::nProcs());
+
     forAll(nRevcCells, sendProc)
     {
         // Did processor sendProc send anything to me?
@@ -2301,36 +2496,26 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
 
             // Receive from sendProc
-            labelList domainSourceFace;
-            labelList domainSourceProc;
-            labelList domainSourcePatch;
-            labelList domainSourceNewNbrProc;
-            labelList domainSourcePointMaster;
+            domainSourceFaces.set(sendProc, new labelList(0));
+            labelList& domainSourceFace = domainSourceFaces[sendProc];
 
-            autoPtr<fvMesh> domainMeshPtr;
+            domainSourceProcs.set(sendProc, new labelList(0));
+            labelList& domainSourceProc = domainSourceProcs[sendProc];
 
-            PtrList<volScalarField> vsf;
-            PtrList<volVectorField> vvf;
-            PtrList<volSphericalTensorField> vsptf;
-            PtrList<volSymmTensorField> vsytf;
-            PtrList<volTensorField> vtf;
+            domainSourcePatchs.set(sendProc, new labelList(0));
+            labelList& domainSourcePatch = domainSourcePatchs[sendProc];
 
-            PtrList<surfaceScalarField> ssf;
-            PtrList<surfaceVectorField> svf;
-            PtrList<surfaceSphericalTensorField> ssptf;
-            PtrList<surfaceSymmTensorField> ssytf;
-            PtrList<surfaceTensorField> stf;
+            domainSourceNewNbrProcs.set(sendProc, new labelList(0));
+            labelList& domainSourceNewNbrProc =
+                domainSourceNewNbrProcs[sendProc];
 
-            PtrList<volScalarField::Internal> dsf;
-            PtrList<volVectorField::Internal> dvf;
-            PtrList<volSphericalTensorField::Internal> dstf;
-            PtrList<volSymmTensorField::Internal> dsytf;
-            PtrList<volTensorField::Internal> dtf;
-
+            domainSourcePointMasters.set(sendProc, new labelList(0));
+            labelList& domainSourcePointMaster =
+                domainSourcePointMasters[sendProc];
 
             // Opposite of sendMesh
             {
-                domainMeshPtr = receiveMesh
+                autoPtr<fvMesh> domainMeshPtr = receiveMesh
                 (
                     sendProc,
                     pointZoneNames,
@@ -2345,7 +2530,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                     domainSourcePointMaster,
                     str
                 );
-                fvMesh& domainMesh = domainMeshPtr();
+                domainMeshPtrs.set(sendProc, domainMeshPtr.ptr());
+                fvMesh& domainMesh = domainMeshPtrs[sendProc];
                 // Force construction of various on mesh.
                 //(void)domainMesh.globalData();
 
@@ -2355,346 +2541,361 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 dictionary fieldDicts(str);
 
                 // Vol fields
+                vsfs.set(sendProc, new PtrList<volScalarField>(0));
                 receiveFields<volScalarField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    vsf,
+                    vsfs[sendProc],
                     fieldDicts
                 );
+                vvfs.set(sendProc, new PtrList<volVectorField>(0));
                 receiveFields<volVectorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    vvf,
+                    vvfs[sendProc],
                     fieldDicts
+                );
+                vsptfs.set
+                (
+                    sendProc,
+                    new PtrList<volSphericalTensorField>(0)
                 );
                 receiveFields<volSphericalTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    vsptf,
+                    vsptfs[sendProc],
                     fieldDicts
                 );
+                vsytfs.set(sendProc, new PtrList<volSymmTensorField>(0));
                 receiveFields<volSymmTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    vsytf,
+                    vsytfs[sendProc],
                     fieldDicts
                 );
+                vtfs.set(sendProc, new PtrList<volTensorField>(0));
                 receiveFields<volTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    vtf,
+                    vtfs[sendProc],
                     fieldDicts
                 );
 
                 // Surface fields
+                ssfs.set(sendProc, new PtrList<surfaceScalarField>(0));
                 receiveFields<surfaceScalarField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    ssf,
+                    ssfs[sendProc],
                     fieldDicts
                 );
+                svfs.set(sendProc, new PtrList<surfaceVectorField>(0));
                 receiveFields<surfaceVectorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    svf,
+                    svfs[sendProc],
                     fieldDicts
+                );
+                ssptfs.set
+                (
+                    sendProc,
+                    new PtrList<surfaceSphericalTensorField>(0)
                 );
                 receiveFields<surfaceSphericalTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    ssptf,
+                    ssptfs[sendProc],
                     fieldDicts
                 );
+                ssytfs.set(sendProc, new PtrList<surfaceSymmTensorField>(0));
                 receiveFields<surfaceSymmTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    ssytf,
+                    ssytfs[sendProc],
                     fieldDicts
                 );
+                stfs.set(sendProc, new PtrList<surfaceTensorField>(0));
                 receiveFields<surfaceTensorField>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    stf,
+                    stfs[sendProc],
                     fieldDicts
                 );
 
                 // Dimensioned fields
+                dsfs.set
+                (
+                    sendProc,
+                    new PtrList<volScalarField::Internal>(0)
+                );
                 receiveFields<volScalarField::Internal>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    dsf,
+                    dsfs[sendProc],
                     fieldDicts
+                );
+                dvfs.set
+                (
+                    sendProc,
+                    new PtrList<volVectorField::Internal>(0)
                 );
                 receiveFields<volVectorField::Internal>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    dvf,
+                    dvfs[sendProc],
                     fieldDicts
+                );
+                dstfs.set
+                (
+                    sendProc,
+                    new PtrList<volSphericalTensorField::Internal>(0)
                 );
                 receiveFields<volSphericalTensorField::Internal>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    dstf,
+                    dstfs[sendProc],
                     fieldDicts
+                );
+                dsytfs.set
+                (
+                    sendProc,
+                    new PtrList<volSymmTensorField::Internal>(0)
                 );
                 receiveFields<volSymmTensorField::Internal>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    dsytf,
+                    dsytfs[sendProc],
                     fieldDicts
+                );
+                dtfs.set
+                (
+                    sendProc,
+                    new PtrList<volTensorField::Internal>(0)
                 );
                 receiveFields<volTensorField::Internal>
                 (
                     sendProc,
                     allFieldNames,
                     domainMesh,
-                    dtf,
+                    dtfs[sendProc],
                     fieldDicts
                 );
             }
-            const fvMesh& domainMesh = domainMeshPtr();
+        }
+    }
+
+    // Clear out storage
+    pBufs.clear();
 
 
-            constructCellMap[sendProc] = identity(domainMesh.nCells());
-            constructFaceMap[sendProc] = identity(domainMesh.nFaces(), 1);
-            constructPointMap[sendProc] = identity(domainMesh.nPoints());
-            constructPatchMap[sendProc] =
-                identity(domainMesh.boundaryMesh().size());
+    // Set up pointers to meshes so we can include our mesh_
+    UPtrList<polyMesh> meshes(domainMeshPtrs.size());
+    UPtrList<fvMesh> fvMeshes(domainMeshPtrs.size());
+    forAll(domainMeshPtrs, proci)
+    {
+        if (domainMeshPtrs.set(proci))
+        {
+            meshes.set(proci, &domainMeshPtrs[proci]);
+            fvMeshes.set(proci, &domainMeshPtrs[proci]);
+        }
+    }
+
+    // 'Receive' from myself
+    {
+        meshes.set(Pstream::myProcNo(), &mesh_);
+        fvMeshes.set(Pstream::myProcNo(), &mesh_);
+
+        //domainSourceFaces.set(Pstream::myProcNo(), std::move(sourceFace));
+        domainSourceFaces.set(Pstream::myProcNo(), new labelList(0));
+        domainSourceFaces[Pstream::myProcNo()] = sourceFace;
+
+        domainSourceProcs.set(Pstream::myProcNo(), new labelList(0));
+        //std::move(sourceProc));
+        domainSourceProcs[Pstream::myProcNo()] = sourceProc;
+
+        domainSourcePatchs.set(Pstream::myProcNo(), new labelList(0));
+        //, std::move(sourcePatch));
+        domainSourcePatchs[Pstream::myProcNo()] = sourcePatch;
+
+        domainSourceNewNbrProcs.set(Pstream::myProcNo(), new labelList(0));
+        domainSourceNewNbrProcs[Pstream::myProcNo()] = sourceNewNbrProc;
+
+        domainSourcePointMasters.set(Pstream::myProcNo(), new labelList(0));
+        domainSourcePointMasters[Pstream::myProcNo()] = sourcePointMaster;
+    }
 
 
-            // Print a bit.
-            if (debug)
+    // Find matching faces that need to be stitched
+    labelListList localBoundaryFace(Pstream::nProcs());
+    labelListList remoteFaceProc(Pstream::nProcs());
+    labelListList remoteBoundaryFace(Pstream::nProcs());
+    findCouples
+    (
+        meshes,
+        domainSourceFaces,
+        domainSourceProcs,
+        domainSourcePatchs,
+
+        localBoundaryFace,
+        remoteFaceProc,
+        remoteBoundaryFace
+    );
+
+
+    const label nOldInternalFaces = mesh_.nInternalFaces();
+    const labelList oldFaceOwner(mesh_.faceOwner());
+
+    fvMeshAdder::add
+    (
+        Pstream::myProcNo(),    // index of mesh to modify (== mesh_)
+        fvMeshes,
+        oldFaceOwner,
+
+        // Coupling info
+        localBoundaryFace,
+        remoteFaceProc,
+        remoteBoundaryFace,
+
+        constructPatchMap,
+        constructCellMap,
+        constructFaceMap,
+        constructPointMap
+    );
+
+    if (debug)
+    {
+        Pout<< nl << "ADDED REMOTE MESHES:" << endl;
+        printMeshInfo(mesh_);
+        printFieldInfo<volScalarField>(mesh_);
+        printFieldInfo<volVectorField>(mesh_);
+        printFieldInfo<volSphericalTensorField>(mesh_);
+        printFieldInfo<volSymmTensorField>(mesh_);
+        printFieldInfo<volTensorField>(mesh_);
+        printFieldInfo<surfaceScalarField>(mesh_);
+        printFieldInfo<surfaceVectorField>(mesh_);
+        printFieldInfo<surfaceSphericalTensorField>(mesh_);
+        printFieldInfo<surfaceSymmTensorField>(mesh_);
+        printFieldInfo<surfaceTensorField>(mesh_);
+        Pout<< nl << endl;
+    }
+
+    {
+        //- Combine sourceProc, sourcePatch, sourceFace
+        sourceProc.setSize(mesh_.nBoundaryFaces());
+        sourceProc = -1;
+        sourcePatch.setSize(mesh_.nBoundaryFaces());
+        sourcePatch = -1;
+        sourceFace.setSize(mesh_.nBoundaryFaces());
+        sourceFace = -1;
+        sourceNewNbrProc.setSize(mesh_.nBoundaryFaces());
+        sourceNewNbrProc = -1;
+        sourcePointMaster.setSize(mesh_.nPoints());
+        sourcePointMaster = -1;
+
+        if (mesh_.nPoints() > 0)
+        {
+            forAll(meshes, meshi)
             {
-                Pout<< nl << "RECEIVED MESH FROM:" << sendProc << endl;
-                printMeshInfo(domainMesh);
-                printFieldInfo<volScalarField>(domainMesh);
-                printFieldInfo<volVectorField>(domainMesh);
-                printFieldInfo<volSphericalTensorField>(domainMesh);
-                printFieldInfo<volSymmTensorField>(domainMesh);
-                printFieldInfo<volTensorField>(domainMesh);
-                printFieldInfo<surfaceScalarField>(domainMesh);
-                printFieldInfo<surfaceVectorField>(domainMesh);
-                printFieldInfo<surfaceSphericalTensorField>(domainMesh);
-                printFieldInfo<surfaceSymmTensorField>(domainMesh);
-                printFieldInfo<surfaceTensorField>(domainMesh);
-            }
-
-
-            // Now this mesh we received (from sendProc) needs to be merged
-            // with the current mesh. On the current mesh we have for all
-            // boundaryfaces the original face and processor. See if we can
-            // match these up to the received domainSourceFace and
-            // domainSourceProc.
-            labelList masterCoupledFaces;
-            labelList slaveCoupledFaces;
-            findCouples
-            (
-                mesh_,
-
-                sourceFace,
-                sourceProc,
-                sourcePatch,
-
-                sendProc,
-                domainMesh,
-                domainSourceFace,
-                domainSourceProc,
-                domainSourcePatch,
-
-                masterCoupledFaces,
-                slaveCoupledFaces
-            );
-
-            // Generate additional coupling info (points, edges) from
-            // faces-that-match
-            faceCoupleInfo couples
-            (
-                mesh_,
-                masterCoupledFaces,
-                domainMesh,
-                slaveCoupledFaces,
-                mergeTol_,              // merge tolerance
-                true,                   // faces align
-                true,                   // couples are ordered already
-                false
-            );
-
-
-            // Add domainMesh to mesh
-            // ~~~~~~~~~~~~~~~~~~~~~~
-
-            autoPtr<mapAddedPolyMesh> map = fvMeshAdder::add
-            (
-                mesh_,
-                domainMesh,
-                couples,
-                false,          // no parallel comms
-                true            // fake complete mapping
-            );
-
-            // Update mesh data: sourceFace,sourceProc for added
-            // mesh.
-
-            sourceFace = mapBoundaryData
-            (
-                mesh_,
-                map(),
-                sourceFace,
-                domainMesh.nInternalFaces(),
-                domainSourceFace
-            );
-            sourceProc = mapBoundaryData
-            (
-                mesh_,
-                map(),
-                sourceProc,
-                domainMesh.nInternalFaces(),
-                domainSourceProc
-            );
-            sourcePatch = mapBoundaryData
-            (
-                mesh_,
-                map(),
-                sourcePatch,
-                domainMesh.nInternalFaces(),
-                domainSourcePatch
-            );
-            sourceNewNbrProc = mapBoundaryData
-            (
-                mesh_,
-                map(),
-                sourceNewNbrProc,
-                domainMesh.nInternalFaces(),
-                domainSourceNewNbrProc
-            );
-            // Update pointMaster data
-            sourcePointMaster = mapPointData
-            (
-                mesh_,
-                map(),
-                sourcePointMaster,
-                domainSourcePointMaster
-            );
-
-
-            // Update all addressing so xxProcAddressing points to correct
-            // item in masterMesh.
-            const labelList& oldCellMap = map().oldCellMap();
-            const labelList& oldFaceMap = map().oldFaceMap();
-            const labelList& oldPointMap = map().oldPointMap();
-            const labelList& oldPatchMap = map().oldPatchMap();
-
-            //Note: old mesh faces never flipped!
-            forAll(constructPatchMap, proci)
-            {
-                if (proci != sendProc && constructPatchMap[proci].size())
+                if (domainSourceFaces.set(meshi))
                 {
-                    // Processor already in mesh (either myProcNo or received)
-                    inplaceRenumber(oldCellMap, constructCellMap[proci]);
-                    inplaceRenumberWithFlip
+                    const label nIntFaces =
                     (
-                        oldFaceMap,
-                        false,
-                        true,
-                        constructFaceMap[proci]
+                        meshi == Pstream::myProcNo()
+                      ? nOldInternalFaces
+                      : meshes[meshi].nInternalFaces()
                     );
-                    inplaceRenumber(oldPointMap, constructPointMap[proci]);
-                    inplaceRenumber(oldPatchMap, constructPatchMap[proci]);
-                }
-            }
+                    const labelList& faceOwner
+                    (
+                        meshi == Pstream::myProcNo()
+                      ? oldFaceOwner
+                      : meshes[meshi].faceOwner()
+                    );
+
+                    labelList& faceMap = constructFaceMap[meshi];
+                    const labelList& cellMap = constructCellMap[meshi];
+
+                    const labelList& domainSourceFace =
+                        domainSourceFaces[meshi];
+                    const labelList& domainSourceProc =
+                        domainSourceProcs[meshi];
+                    const labelList& domainSourcePatch =
+                        domainSourcePatchs[meshi];
+                    const labelList& domainSourceNewNbr =
+                        domainSourceNewNbrProcs[meshi];
+                    UIndirectList<label>
+                    (
+                        sourcePointMaster,
+                        constructPointMap[meshi]
+                    ) = domainSourcePointMasters[meshi];
 
 
-            labelHashSet flippedAddedFaces;
-            {
-                // Find out if any faces of domain mesh were flipped (boundary
-                // faces becoming internal)
-                const label nBnd = domainMesh.nBoundaryFaces();
-                flippedAddedFaces.resize(nBnd/4);
-
-                for
-                (
-                    label domainFaceI = domainMesh.nInternalFaces();
-                    domainFaceI < domainMesh.nFaces();
-                    domainFaceI++
-                )
-                {
-                    label newFaceI = map().addedFaceMap()[domainFaceI];
-                    label newCellI = mesh_.faceOwner()[newFaceI];
-
-                    label domainCellI = domainMesh.faceOwner()[domainFaceI];
-
-                    if (newCellI != map().addedCellMap()[domainCellI])
+                    forAll(domainSourceFace, bFacei)
                     {
-                        flippedAddedFaces.insert(domainFaceI);
+                        const label oldFacei = bFacei+nIntFaces;
+                        const label allFacei = faceMap[oldFacei];
+                        const label allbFacei = allFacei-mesh_.nInternalFaces();
+
+                        if (allbFacei >= 0)
+                        {
+                            sourceProc[allbFacei] = domainSourceProc[bFacei];
+                            sourcePatch[allbFacei] = domainSourcePatch[bFacei];
+                            sourceFace[allbFacei] = domainSourceFace[bFacei];
+                            sourceNewNbrProc[allbFacei] =
+                                domainSourceNewNbr[bFacei];
+                        }
+                    }
+
+
+                    // Add flip to constructFaceMap
+                    forAll(faceMap, oldFacei)
+                    {
+                        const label allFacei = faceMap[oldFacei];
+                        const label allOwn = mesh_.faceOwner()[allFacei];
+
+                        if (cellMap[faceOwner[oldFacei]] == allOwn)
+                        {
+                            // Master face
+                            faceMap[oldFacei] += 1;
+                        }
+                        else
+                        {
+                            // Slave face. Flip.
+                            faceMap[oldFacei] = -faceMap[oldFacei] - 1;
+                        }
                     }
                 }
             }
-
-
-            // Added processor
-            inplaceRenumber(map().addedCellMap(), constructCellMap[sendProc]);
-            // Add flip
-            for (const label domainFaceI : flippedAddedFaces)
-            {
-                label& val = constructFaceMap[sendProc][domainFaceI];
-                val = -val;
-            }
-            inplaceRenumberWithFlip
-            (
-                map().addedFaceMap(),
-                false,
-                true,           // constructFaceMap has flip sign
-                constructFaceMap[sendProc]
-            );
-            inplaceRenumber(map().addedPointMap(), constructPointMap[sendProc]);
-            inplaceRenumber(map().addedPatchMap(), constructPatchMap[sendProc]);
-
-            if (debug)
-            {
-                Pout<< nl << "MERGED MESH FROM:" << sendProc << endl;
-                printMeshInfo(mesh_);
-                printFieldInfo<volScalarField>(mesh_);
-                printFieldInfo<volVectorField>(mesh_);
-                printFieldInfo<volSphericalTensorField>(mesh_);
-                printFieldInfo<volSymmTensorField>(mesh_);
-                printFieldInfo<volTensorField>(mesh_);
-                printFieldInfo<surfaceScalarField>(mesh_);
-                printFieldInfo<surfaceVectorField>(mesh_);
-                printFieldInfo<surfaceSphericalTensorField>(mesh_);
-                printFieldInfo<surfaceSymmTensorField>(mesh_);
-                printFieldInfo<surfaceTensorField>(mesh_);
-                Pout<< nl << endl;
-            }
         }
     }
+
 
     UPstream::parRun(oldParRun);  // Restore parallel state
 
