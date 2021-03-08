@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
+#     Copyright (C) 2020-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -80,7 +80,7 @@ done
 # Detect version. Seems to be stderr for some versions!?
 if version="$(bear --version 2>&1)"
 then
-    version="$(echo "$version" | sed -ne '1{ s/^[^0-9]*\([1-9]\)/\1/p }')"
+    version="$(echo "$version" | sed -ne '1s/^[^0-9]*\([1-9]\)/\1/p;')"
 else
     unset version
 fi

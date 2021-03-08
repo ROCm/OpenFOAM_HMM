@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ https://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
 
 #include "searchableSphere.H"
 #include "addToRunTimeSelectionTable.H"
+#include <array>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
