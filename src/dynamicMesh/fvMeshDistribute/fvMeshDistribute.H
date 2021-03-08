@@ -70,7 +70,7 @@ class mapDistributePolyMesh;
 
 class fvMeshDistribute
 {
-    // Private data
+    // Private Data
 
         //- Underlying fvMesh
         fvMesh& mesh_;
@@ -360,7 +360,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        fvMeshDistribute(fvMesh& mesh);
+        explicit fvMeshDistribute(fvMesh& mesh);
 
 
     // Member Functions

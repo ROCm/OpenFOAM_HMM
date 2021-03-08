@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -532,15 +532,15 @@ int main(int argc, char *argv[])
         ).decomposer().decompose(mesh, mesh.cellCentres());
 
         // Global matching tolerance
-        const scalar tolDim = getMergeDistance
-        (
-            args,
-            runTime,
-            mesh.bounds()
-        );
+        //const scalar tolDim = getMergeDistance
+        //(
+        //    args,
+        //    runTime,
+        //    mesh.bounds()
+        //);
 
         // Mesh distribution engine
-        fvMeshDistribute distributor(mesh, tolDim);
+        fvMeshDistribute distributor(mesh);
 
         Info<< "Wanted distribution:"
             << distributor.countCells(decomp) << nl << endl;

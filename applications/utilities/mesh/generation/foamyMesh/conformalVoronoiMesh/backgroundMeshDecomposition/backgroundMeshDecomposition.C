@@ -407,7 +407,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 icellWeights
             );
 
-            fvMeshDistribute distributor(mesh_, mergeDist_);
+            fvMeshDistribute distributor(mesh_);
 
             autoPtr<mapDistributePolyMesh> mapDist = distributor.distribute
             (
@@ -987,7 +987,7 @@ Foam::backgroundMeshDecomposition::distribute
 
     Info<< "    Redistributing background mesh cells" << endl;
 
-    fvMeshDistribute distributor(mesh_, mergeDist_);
+    fvMeshDistribute distributor(mesh_);
 
     autoPtr<mapDistributePolyMesh> mapDist = distributor.distribute(newDecomp);
 
