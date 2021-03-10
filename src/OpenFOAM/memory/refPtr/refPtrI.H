@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -327,16 +327,47 @@ inline void Foam::refPtr<T>::swap(refPtr<T>& other) noexcept
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
+inline const T& Foam::refPtr<T>::operator*() const
+{
+    if (!ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
+    }
+    return *ptr_;
+}
+
+
+template<class T>
+inline T& Foam::refPtr<T>::operator*()
+{
+    if (type_ == CREF)
+    {
+        FatalErrorInFunction
+            << "Attempt to cast const object to non-const for a "
+            << this->typeName()
+            << abort(FatalError);
+    }
+    else if (!ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
+    return *ptr_;
+}
+
+
+template<class T>
 inline const T* Foam::refPtr<T>::operator->() const
 {
-    if (type_ == PTR)
+    if (!ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
     return ptr_;
@@ -346,20 +377,17 @@ inline const T* Foam::refPtr<T>::operator->() const
 template<class T>
 inline T* Foam::refPtr<T>::operator->()
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (type_ == CREF)
     {
         FatalErrorInFunction
             << "Attempt to cast const object to non-const for a "
             << this->typeName()
+            << abort(FatalError);
+    }
+    else if (!ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
             << abort(FatalError);
     }
 

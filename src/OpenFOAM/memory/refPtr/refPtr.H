@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,7 +132,7 @@ public:
         //- Move construct, transferring ownership.
         inline refPtr(refPtr<T>&& rhs) noexcept;
 
-        //- Copy construct
+        //- Copy construct (shallow copy)
         inline refPtr(const refPtr<T>& rhs);
 
         //- Copy/move construct. Optionally reusing pointer.
@@ -227,12 +227,20 @@ public:
 
     // Member Operators
 
+        //- Return const reference to the object.
+        //  Fatal if nothing is managed
+        inline const T& operator*() const;
+
+        //- Return reference to the managed object.
+        //  Fatal if nothing is managed or if the object is const.
+        inline T& operator*();
+
         //- Dereferences (const) pointer to the managed object.
-        //  Fatal for a null managed pointer.
+        //  Fatal if nothing is managed.
         inline const T* operator->() const;
 
         //- Dereferences (non-const) pointer to the managed object.
-        //  Fatal for a null managed pointer or if the object is const.
+        //  Fatal if nothing is managed or if the object is const.
         inline T* operator->();
 
         //- Return const reference to the object - same as cref() method.

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -63,6 +63,7 @@ int main()
         auto tfld1 = refPtr<scalarField>::New(10, scalar(1));
         printInfo(tfld1, true);
 
+        Info<< nl << "Dereferenced: " << *tfld1 << nl;
 
         Info<< nl << "Construct from autoPtr" << nl;
         refPtr<scalarField> tfld2(autoPtr<scalarField>::New(10, scalar(2)));
