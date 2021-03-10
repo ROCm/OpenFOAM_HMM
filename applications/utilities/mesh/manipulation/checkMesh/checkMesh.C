@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,9 @@ Usage
 
     \param -writeAllFields \n
     Writes all mesh quality measures as fields.
+
+    \param -writeAllSurfaceFields \n
+    Adds writing of surface fields when used in combination with writeAllFields.
 
     \param -writeFields '(\<fieldName\>)' \n
     Writes selected mesh quality measures as fields.
@@ -111,6 +114,11 @@ int main(int argc, char *argv[])
         "writeAllFields",
         "Write volFields with mesh quality parameters"
     );
+    argList::addBoolOption
+    (
+        "writeAllSurfaceFields",
+        "Write surfaceFields with mesh quality parameters"
+    );
     argList::addOption
     (
         "writeFields",
@@ -163,6 +171,7 @@ int main(int argc, char *argv[])
         "faceZone"
     });
 
+    const bool writeFaceFields = args.found("writeAllSurfaceFields");
     wordHashSet selectedFields;
     if (args.found("writeFields"))
     {
@@ -181,6 +190,13 @@ int main(int argc, char *argv[])
     else if (args.found("writeAllFields"))
     {
         selectedFields = allFields;
+    }
+    else if (writeFaceFields)
+    {
+        FatalErrorInFunction
+            << "Option 'writeAllSurfaceFields' only valid in combination"
+            << " with 'writeFields' or 'writeAllFields'"
+            << nl << exit(FatalError);
     }
 
 
@@ -306,7 +322,7 @@ int main(int argc, char *argv[])
 
 
             // Write selected fields
-            Foam::writeFields(mesh, selectedFields);
+            Foam::writeFields(mesh, selectedFields, writeFaceFields);
         }
         else if (state == polyMesh::POINTS_MOVED)
         {
@@ -338,7 +354,7 @@ int main(int argc, char *argv[])
 
 
             // Write selected fields
-            Foam::writeFields(mesh, selectedFields);
+            Foam::writeFields(mesh, selectedFields, writeFaceFields);
         }
     }
 

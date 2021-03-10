@@ -5,6 +5,7 @@ namespace Foam
     void writeFields
     (
         const fvMesh& mesh,
-        const wordHashSet& selectedFields
+        const wordHashSet& selectedFields,
+        const bool writeFaceFields
     );
 }

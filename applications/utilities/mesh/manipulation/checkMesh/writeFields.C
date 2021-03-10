@@ -117,10 +117,42 @@ void minFaceToCell
 }
 
 
+void writeSurfaceField
+(
+    const fvMesh& mesh,
+    const fileName& fName,
+    const scalarField& faceData
+)
+{
+    // Write single surfaceScalarField
+
+    surfaceScalarField fld
+    (
+        IOobject
+        (
+            fName,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE,
+            false
+        ),
+        mesh,
+        dimensionedScalar(dimless, Zero),
+        calculatedFvsPatchScalarField::typeName
+    );
+    fld.primitiveFieldRef() = faceData;
+    //fld.correctBoundaryConditions();
+    Info<< "    Writing face data to " << fName << endl;
+    fld.write();
+}
+
+
 void Foam::writeFields
 (
     const fvMesh& mesh,
-    const wordHashSet& selectedFields
+    const wordHashSet& selectedFields,
+    const bool writeFaceFields
 )
 {
     if (selectedFields.empty())
@@ -173,6 +205,16 @@ void Foam::writeFields
         Info<< "    Writing non-orthogonality (angle) to "
             << cellNonOrthoAngle.name() << endl;
         cellNonOrthoAngle.write();
+
+        if (writeFaceFields)
+        {
+            writeSurfaceField
+            (
+                mesh,
+                "face_nonOrthoAngle",
+                SubField<scalar>(nonOrthoAngle, mesh.nInternalFaces())
+            );
+        }
     }
 
     if (selectedFields.found("faceWeight"))
@@ -202,6 +244,11 @@ void Foam::writeFields
         Info<< "    Writing face interpolation weights (0..0.5) to "
             << cellWeights.name() << endl;
         cellWeights.write();
+
+        if (writeFaceFields)
+        {
+            writeSurfaceField(mesh, "face_faceWeight", mesh.weights());
+        }
     }
 
 
@@ -243,6 +290,16 @@ void Foam::writeFields
         maxFaceToCell(faceSkewness, cellSkewness);
         Info<< "    Writing face skewness to " << cellSkewness.name() << endl;
         cellSkewness.write();
+
+        if (writeFaceFields)
+        {
+            writeSurfaceField
+            (
+                mesh,
+                "face_skewness",
+                SubField<scalar>(faceSkewness, mesh.nInternalFaces())
+            );
+        }
     }
 
 
@@ -431,6 +488,16 @@ void Foam::writeFields
         Info<< "    Writing cell volume ratio to "
             << cellVolumeRatio.name() << endl;
         cellVolumeRatio.write();
+
+        if (writeFaceFields)
+        {
+            writeSurfaceField
+            (
+                mesh,
+                "face_cellVolumeRatio",
+                SubField<scalar>(faceVolumeRatio, mesh.nInternalFaces())
+            );
+        }
     }
 
     // minTetVolume
@@ -560,6 +627,17 @@ void Foam::writeFields
         minPyrVolume.correctBoundaryConditions();
         Info<< "    Writing minPyrVolume to " << minPyrVolume.name() << endl;
         minPyrVolume.write();
+
+        if (writeFaceFields)
+        {
+            scalarField minFacePyrVol(neiPyrVol);
+            minFacePyrVol = min
+            (
+                minFacePyrVol,
+                SubField<scalar>(ownPyrVol, mesh.nInternalFaces())
+            );
+            writeSurfaceField(mesh, "face_minPyrVolume", minFacePyrVol);
+        }
     }
 
     if (selectedFields.found("cellRegion"))
