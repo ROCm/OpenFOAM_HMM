@@ -224,14 +224,14 @@ bool Foam::ensightOutput::writePointField
             os.beginPart(part.index());
         }
 
-        labelList uniqueMeshPointLabels;
-        part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+        labelList uniquePointLabels;
+        part.uniqueMeshPoints(mesh, uniquePointLabels, parallel);
 
         ensightOutput::Detail::writeFieldComponents
         (
             os,
             ensightFile::coordinates,
-            UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+            UIndirectList<Type>(pf.internalField(), uniquePointLabels),
             parallel
         );
     }
@@ -249,30 +249,42 @@ bool Foam::ensightOutput::writePointField
             os.beginPart(part.index());
         }
 
+        labelList uniquePointLabels;
+        part.uniqueMeshPoints(mesh, uniquePointLabels, parallel);
+
         const auto& bfld = pf.boundaryField()[patchId];
 
         // Only valuePointPatchField is actually derived from Field
         const auto* vpp = isA<Field<Type>>(bfld);
         if (vpp)
         {
-            ensightOutput::Detail::writeFieldComponents
-            (
-                os,
-                ensightFile::coordinates,
-                *vpp,
-                parallel
-            );
-        }
-        else
-        {
-            labelList uniqueMeshPointLabels;
-            part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+            // Require patch local indices, not mesh point labels.
+            // But need to use polyPatch meshPointMap() to recover the
+            // local indices since the ensight output will have jumbled
+            // the face output order
+
+            const polyPatch& pp = mesh.boundaryMesh()[patchId];
+
+            for (label& pointi : uniquePointLabels)
+            {
+                pointi = pp.meshPointMap()[pointi];
+            }
 
             ensightOutput::Detail::writeFieldComponents
             (
                 os,
                 ensightFile::coordinates,
-                UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+                UIndirectList<Type>(*vpp, uniquePointLabels),
+                parallel
+            );
+        }
+        else
+        {
+            ensightOutput::Detail::writeFieldComponents
+            (
+                os,
+                ensightFile::coordinates,
+                UIndirectList<Type>(pf.internalField(), uniquePointLabels),
                 parallel
             );
         }
@@ -294,14 +306,14 @@ bool Foam::ensightOutput::writePointField
         // uses internalField only
 
         {
-            labelList uniqueMeshPointLabels;
-            part.uniqueMeshPoints(mesh, uniqueMeshPointLabels, parallel);
+            labelList uniquePointLabels;
+            part.uniqueMeshPoints(mesh, uniquePointLabels, parallel);
 
             ensightOutput::Detail::writeFieldComponents
             (
                 os,
                 ensightFile::coordinates,
-                UIndirectList<Type>(pf.internalField(), uniqueMeshPointLabels),
+                UIndirectList<Type>(pf.internalField(), uniquePointLabels),
                 parallel
             );
         }
