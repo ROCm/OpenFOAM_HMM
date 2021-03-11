@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,14 @@ inline bool Foam::TimePaths::distributed() const
 inline bool Foam::TimePaths::processorCase() const
 {
     return processorCase_;
+}
+
+
+inline bool Foam::TimePaths::processorCase(const bool newProcCase)
+{
+    const bool oldProcCase = processorCase_;
+    processorCase_ = newProcCase;
+    return oldProcCase;
 }
 
 

@@ -366,9 +366,11 @@ void determineDecomposition
                 Time& tm = const_cast<Time&>(mesh.time());
 
                 tm.caseName() = baseRunTime.caseName();
+                const bool oldProcCase(tm.processorCase(false));
                 writeDecomposition("cellDist", mesh, decomp);
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
                 tm.caseName() = proc0CaseName;
+                tm.processorCase(oldProcCase);
             }
         }
         else
@@ -1178,6 +1180,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             Info<< "Setting caseName to " << baseRunTime.caseName()
                 << " to write reconstructed mesh and fields." << endl;
             runTime.caseName() = baseRunTime.caseName();
+            const bool oldProcCase(runTime.processorCase(false));
 
             mesh.write();
             topoSet::removeFiles(mesh);
@@ -1198,6 +1201,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
             runTime.caseName() = proc0CaseName;
+            runTime.processorCase(oldProcCase);
         }
     }
     else
@@ -1280,12 +1284,14 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to write reconstructed refinement data." << endl;
                 runTime.caseName() = baseRunTime.caseName();
+                const bool oldProcCase(runTime.processorCase(false));
 
                 refData.write();
 
                 // Now we've written all. Reset caseName on master
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
                 runTime.caseName() = proc0CaseName;
+                runTime.processorCase(oldProcCase);
             }
         }
         else
@@ -1323,6 +1329,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //            Info<< "Setting caseName to " << baseRunTime.caseName()
     //                << " to write reconstructed refinement data." << endl;
     //            runTime.caseName() = baseRunTime.caseName();
+    //            const bool oldProcCase(runTime.processorCase(false));
     //
     //            forAll(cellSets, i)
     //            {
@@ -1332,6 +1339,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //            // Now we've written all. Reset caseName on master
     //            Info<< "Restoring caseName to " << proc0CaseName << endl;
     //            runTime.caseName() = proc0CaseName;
+    //            runTime.processorCase(oldProcCase);
     //        }
     //    }
     //    else
@@ -2383,12 +2391,17 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    if (isDir(args.path()))
+    // Check if we have processor directories. Ideally would like to
+    // use fileHandler().dirPath here but we don't have runTime yet and
+    // want to delay constructing runTime until we've synced all time
+    // directories...
+    const fileName procDir(fileHandler().filePath(args.path()));
+    if (isDir(procDir))
     {
         if (decompose)
         {
             Info<< "Removing existing processor directories" << endl;
-            rmDir(args.path());
+            rmDir(procDir);
         }
     }
     else
@@ -2408,19 +2421,20 @@ int main(int argc, char *argv[])
     // e.g. latestTime will pick up a different time (which causes createTime.H
     // to abort). So for now make sure to have master times on all
     // processors
+    if (!procDir.empty())
     {
         Info<< "Creating time directories on all processors" << nl << endl;
         instantList timeDirs;
         if (Pstream::master())
         {
             const bool oldParRun = Pstream::parRun(false);
-            timeDirs = Time::findTimes(args.path(), "constant");
+            timeDirs = Time::findTimes(procDir, "constant");
             Pstream::parRun(oldParRun);  // Restore parallel state
         }
         Pstream::scatter(timeDirs);
         for (const instant& t : timeDirs)
         {
-            mkDir(args.path()/t.name());
+            mkDir(procDir/t.name());
         }
     }
 

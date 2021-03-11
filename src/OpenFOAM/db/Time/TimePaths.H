@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,6 +117,9 @@ public:
 
         //- Return true if this is a processor case
         inline bool processorCase() const;
+
+        //- Set processor case status. Return old one
+        inline bool processorCase(const bool isProcessorCase);
 
         //- Return root path
         inline const fileName& rootPath() const;
