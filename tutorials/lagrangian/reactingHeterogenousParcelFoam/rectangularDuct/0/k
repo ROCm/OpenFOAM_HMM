@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,11 +26,13 @@ boundaryField
         intensity       0.16;
         value           uniform 3.75e-9;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 3.75e-9;
     }
+
     walls
     {
         type            kqRWallFunction;

@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      createPatchDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // This application/dictionary controls:
@@ -50,5 +49,6 @@ patchInfo
 (
     // none
 );
+
 
 // ************************************************************************* //

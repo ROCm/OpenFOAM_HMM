@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
@@ -46,5 +46,6 @@ snGradSchemes
 {
     default         corrected;
 }
+
 
 // ************************************************************************* //

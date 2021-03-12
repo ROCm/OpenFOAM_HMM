@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/region0_to_"(region0_to.*)"Region_masterRegion";
     object      Tf;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -36,7 +35,6 @@ boundaryField
     // mapped boundaries
     "(region0_to.*)"
     {
-//        type            zeroGradient;
         type            fixedValue;
         value           uniform 350.0;
     }
@@ -47,5 +45,6 @@ boundaryField
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      kinematicCloudProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -94,25 +93,7 @@ subModels
     {
         patches
         (
-            top
-            {
-                type rebound;
-                e    0.97;
-                mu   0.09;
-            }
-            bottom
-            {
-                type rebound;
-                e    0.97;
-                mu   0.09;
-            }
-            walls
-            {
-                type rebound;
-                e    0.97;
-                mu   0.09;
-            }
-            frontAndBack
+            "(top|bottom|walls|frontAndBack)"
             {
                 type rebound;
                 e    0.97;
@@ -120,8 +101,6 @@ subModels
             }
         );
     }
-
-    heatTransferModel none;
 
     surfaceFilmModel none;
 
@@ -185,10 +164,7 @@ subModels
     }
 
     stochasticCollisionModel none;
-
-    radiation off;
 }
-
 
 cloudFunctions
 {}

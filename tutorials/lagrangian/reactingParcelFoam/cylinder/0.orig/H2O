@@ -10,11 +10,9 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      H2O;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 dimensions      [0 0 0 0 0 0 0];
 
@@ -26,6 +24,7 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     region0_to_wallFilmRegion_wallFilmFaces
     {
         type            zeroGradient;

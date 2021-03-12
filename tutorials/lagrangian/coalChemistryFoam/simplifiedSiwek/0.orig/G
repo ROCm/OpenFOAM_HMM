@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      G;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,20 +25,24 @@ boundaryField
         type            MarshakRadiation;
         value           uniform 0;
     }
+
     bottom
     {
         type            MarshakRadiation;
         value           uniform 0;
     }
+
     walls
     {
         type            MarshakRadiation;
         value           uniform 0;
     }
+
     symmetry
     {
         type            symmetryPlane;
     }
+
     frontAndBack
     {
         type            empty;

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,11 +25,12 @@ boundaryField
         type            fixedValue;
         value           uniform 300;
     }
+
     wallFilm
     {
         type            zeroGradient;
 //        type            mapped;
-//        field       Tsf;
+//        field           Tsf;
 //        average         300;
 //        setAverage      no;
 //        value           uniform 300;

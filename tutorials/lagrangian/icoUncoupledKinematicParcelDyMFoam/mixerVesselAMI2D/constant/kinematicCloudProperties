@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      kinematicCloudProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -100,8 +99,6 @@ subModels
         mu   0.09;
     }
 
-    heatTransferModel none;
-
     surfaceFilmModel none;
 
     collisionModel pairCollision;
@@ -142,8 +139,6 @@ subModels
     }
 
     stochasticCollisionModel none;
-
-    radiation off;
 }
 
 

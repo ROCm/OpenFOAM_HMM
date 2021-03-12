@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,23 +24,28 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     front
     {
         type            symmetryPlane;
     }
+
     inletCentral
     {
         type            zeroGradient;
     }
+
     inletSides
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            totalPressure;
         p0              $internalField;
     }
+
     walls
     {
         type            zeroGradient;

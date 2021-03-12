@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      surfaceFilmProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,13 +46,6 @@ thermoSingleLayerCoeffs
 
     upperSurfaceModels
     {
-        /*
-        heatTransferModel constant;
-        constantCoeffs
-        {
-           c0              1e-8;
-        }
-        */
         heatTransferModel mappedConvectiveHeatTransfer;
     }
 

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,13 +58,11 @@ solvers
     {
         $p;
     }
-
 }
 
 potentialFlow
 {
-    // Used for potentialFoam initialisation
-    nNonOrthogonalCorrectors 5;
+    nNonOrthogonalCorrectors 3;
 }
 
 PIMPLE
@@ -84,9 +81,5 @@ PIMPLE
     maxDeltaT       1;
 }
 
-potentialFlow
-{
-    nNonOrthogonalCorrectors 3;
-}
 
 // ************************************************************************* //

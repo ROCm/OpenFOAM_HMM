@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,10 +24,12 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     front
     {
         type            symmetryPlane;
     }
+
     inletCentral
     {
         type            flowRateInletVelocity;
@@ -36,17 +37,20 @@ boundaryField
         value           uniform (0 14.68 0);
         rhoInlet        1.22;    // fallback value for e.g. potentialFoam
     }
+
     inletSides
     {
         type            flowRateInletVelocity;
         massFlowRate    constant 0.00832;
         rhoInlet        1.22;    // fallback value for e.g. potentialFoam
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform (0 0 0);
     }
+
     walls
     {
         type            noSlip;

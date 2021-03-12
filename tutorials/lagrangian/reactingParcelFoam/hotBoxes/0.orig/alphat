@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      alphat;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,6 +26,7 @@ boundaryField
         Prt             0.85;
         value           uniform 0;
     }
+
     wallFilm
     {
         type            alphatFilmWallFunction;

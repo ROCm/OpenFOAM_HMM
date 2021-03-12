@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system/wallFilmRegion";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -24,6 +23,7 @@ solvers
         tolerance       1e-10;
         relTol          0;
     }
+
     deltaf
     {
         solver          smoothSolver;
@@ -33,7 +33,6 @@ solvers
     }
 }
 
-
 PISO
 {
     momentumPredictor  yes;
@@ -41,12 +40,12 @@ PISO
     nNonOrthCorr    0;
 }
 
-
 relaxationFactors
 {
     equations
     {
     }
 }
+
 
 // ************************************************************************* //

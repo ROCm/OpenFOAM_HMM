@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -32,5 +31,6 @@ actions
         faceSet wallFilmFaceSet;
     }
 );
+
 
 // ************************************************************************* //
