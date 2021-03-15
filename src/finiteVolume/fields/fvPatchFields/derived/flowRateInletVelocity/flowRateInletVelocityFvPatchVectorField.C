@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "one.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -177,7 +178,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateValues
         const scalar flowRate = flowRate_->value(t);
         const scalar estimatedFlowRate = -gSum(rho*(this->patch().magSf()*nUp));
 
-        if (estimatedFlowRate/flowRate > 0.5)
+        if (estimatedFlowRate > 0.5*flowRate)
         {
             nUp *= (mag(flowRate)/mag(estimatedFlowRate));
         }
@@ -249,7 +250,10 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntryIfDifferent<scalar>("rhoInlet", -VGREAT, rhoInlet_);
     }
-    os.writeEntry("extrapolateProfile", extrapolateProfile_);
+    if (extrapolateProfile_)
+    {
+        os.writeEntry("extrapolateProfile", extrapolateProfile_);
+    }
     writeEntry("value", os);
 }
 

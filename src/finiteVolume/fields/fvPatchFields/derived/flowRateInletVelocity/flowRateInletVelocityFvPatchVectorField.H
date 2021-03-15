@@ -117,7 +117,7 @@ class flowRateInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-    // Private data
+    // Private Data
 
         //- Inlet integral flow rate
         autoPtr<Function1<scalar>> flowRate_;
@@ -135,7 +135,7 @@ class flowRateInletVelocityFvPatchVectorField
         Switch extrapolateProfile_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Update the patch values given the appropriate density type and value
         template<class RhoType>
@@ -211,7 +211,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,7 +166,7 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::updateValues
     const scalar flowRate = flowRate_->value(t);
     const scalar estimatedFlowRate = gSum(rho*(this->patch().magSf()*nUp));
 
-    if (estimatedFlowRate/flowRate > 0.5)
+    if (estimatedFlowRate > 0.5*flowRate)
     {
         nUp *= (mag(flowRate)/mag(estimatedFlowRate));
     }

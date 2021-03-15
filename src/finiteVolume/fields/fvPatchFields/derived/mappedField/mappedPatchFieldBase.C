@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -630,7 +630,7 @@ Foam::mappedPatchFieldBase<Type>::mappedField
             gSum(patchField_.patch().magSf()*newValues)
            /gSum(patchField_.patch().magSf());
 
-        if (mag(averagePsi)/mag(average_) > 0.5)
+        if (mag(averagePsi) > 0.5*mag(average_))
         {
             newValues *= mag(average_)/mag(averagePsi);
         }

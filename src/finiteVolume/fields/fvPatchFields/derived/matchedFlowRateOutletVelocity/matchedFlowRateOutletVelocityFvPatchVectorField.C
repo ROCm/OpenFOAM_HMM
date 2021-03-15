@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ matchedFlowRateOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
-    inletPatchName_(dict.lookup("inletPatch")),
+    inletPatchName_(dict.get<word>("inletPatch")),
     volumetric_(dict.getOrDefault("volumetric", true))
 {
     if (volumetric_)
@@ -174,7 +174,7 @@ void Foam::matchedFlowRateOutletVelocityFvPatchVectorField::updateValues
     // Calculate the extrapolated outlet patch flow rate
     const scalar estimatedFlowRate = gSum(rhoOutlet*(patch().magSf()*nUp));
 
-    if (estimatedFlowRate/flowRate > 0.5)
+    if (estimatedFlowRate > 0.5*flowRate)
     {
         nUp *= (mag(flowRate)/mag(estimatedFlowRate));
     }

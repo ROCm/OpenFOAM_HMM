@@ -294,7 +294,7 @@ Foam::PatchFunction1Types::Sampled<Type>::value
             averagePsi = gAverage(newValues);
         }
 
-        if (mag(averagePsi)/mag(average_) > 0.5)
+        if (mag(averagePsi) > 0.5*mag(average_))
         {
             newValues *= mag(average_)/mag(averagePsi);
         }
