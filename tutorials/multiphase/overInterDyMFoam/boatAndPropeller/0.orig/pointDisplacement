@@ -28,7 +28,7 @@ boundaryField
 
     "(hullWall|propellerWall|rudderWall)"
     {
-         type            calculated;
+        type            calculated;
         value           uniform (0 0 0);
     }
 

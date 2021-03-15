@@ -22,14 +22,16 @@ boundaryField
 {
     inlet
     {
-        type               uniformFixedValue;
-        uniformValue       table
-                           (
-                                (0  (0 0 0.1))
-                                (1  (0 0 0.1))
-                                (4  (0 0 0.3))
-                                (14 (0 0 0.5))
-                           );
+        type    uniformFixedValue;
+        value   $internalField;
+
+        uniformValue table
+        (
+            (0  (0 0 0.1))
+            (1  (0 0 0.1))
+            (4  (0 0 0.3))
+            (14 (0 0 0.5))
+        );
     }
 
     outlet

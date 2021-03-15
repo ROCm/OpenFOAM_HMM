@@ -25,6 +25,7 @@ boundaryField
     inlet
     {
         type            uniformFixedValue;
+        value           $internalField;
         uniformValue    table
         (
             (0     (0 0 0))

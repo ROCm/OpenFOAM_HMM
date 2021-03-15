@@ -25,6 +25,7 @@ boundaryField
     inlet
     {
         type            uniformFixedValue;
+        value           $internalField;
         uniformValue
         {
             type        expression;
