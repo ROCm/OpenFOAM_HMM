@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ void Foam::error::warnAboutAge(const char* what, const int version)
         // Warning for things that predate the YYMM versioning
         // (eg, 240 for version 2.4)
         std::cerr
-            << "    This " << what << " is considered to be VERY old!\n"
+            << "    This " << what << " is very old.\n"
             << std::endl;
     }
     else if (version < foamVersion::api)
@@ -62,8 +62,7 @@ void Foam::error::warnAboutAge(const char* what, const int version)
         );
 
         std::cerr
-            << "    This " << what << " is deemed to be " << months
-            << " months old.\n"
+            << "    This " << what << " is " << months << " months old.\n"
             << std::endl;
     }
     // No warning for (foamVersion::api < version).
