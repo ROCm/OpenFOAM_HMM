@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,58 +27,188 @@ Class
     Foam::solarCalculator
 
 Description
-    The solar calculator model provides information about the Sun direction
-    and Sun load model. The available models are:
+    A solar calculator model providing models
+    for the solar direction and solar loads.
 
-    For the Sun direction:
-    1) SunDirConstant : the direction is given in 'sunDirection'
-    2) SunDirTracking : the direction is calculated from the following
-       parameters:
-            localStandardMeridian : GMT (Local Zone Meridian) in hours
-            startDay :  day from 1 to 365)
-            startTime:  in hours
-            longitude:  in degrees
-            latitude:   in degrees
-            gridUp:     grid orientation upwards
-            gridEast    grid orientation eastwards
+    Available models for the solar direction:
+    - \c constant: Constant sunbeam direction.
+    - \c tracking: Transient model calculating sunbeam direction
+    based on a given set of parameters.
 
-        This model should be use in transient calculations.
-        The keyword 'sunTrackingUpdateInterval' (in hours) specifies on which
-        interval is the Sun direction updated.
+    Available models for the solar load:
+    - \c constant: Constant solar load.
+    - \c timeDependent: Time-dependent solar load.
+    - \c fairWeather: Solar fluxes are calculated following
+       the "Fair Weather Conditions Method from the ASHRAE Handbook".
+    - \c theoreticalMaximum: Theoretically maximum solar load.
+
+Usage
+    Minimal examples by using \c constant/radiationProperties:
+
+    \c sunDirectionModel - Option-1:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunDirectionModel           constant;
+        sunDirection                (1 0 -1);
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                  | Type   | Reqd | Deflt
+      sunDirection | Sunbeam direction            | vector | no   | calculated
+    \endtable
 
 
-    Solar Load models available:
-    1) SunLoadConstant: direct and diffusive heat fluxes are provided by the
-       entries 'directSolarRad' and 'diffuseSolarRad'
+    \c sunDirectionModel - Option-2:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunDirectionModel           tracking;
+        sunTrackingUpdateInterval   800;
+        localStandardMeridian       9;
+        startDay                    204;
+        startTime                   15;
+        longitude                   139.74;
+        latitude                    35.658;
+        gridUp                      (0 0 1);
+        gridEast                    (1 0 0);
+    }
+    \endverbatim
 
-    2) SunLoadFairWeatherConditions: The solar fluxes are calculated following
-       the Fair Weather Conditions Method from the ASHRAE Handbook. The entries
-       are:
-            skyCloudCoverFraction: Fraction of sky covered by clouds (0-1)
-            A :     Apparent solar irradiation at air mass m = 0
-            B :     Atmospheric extinction coefficient
-            beta:   Solar altitude (in degrees) above the horizontal. This
-            can be read or calculated providing the respective parameters
-            for Sun position explained above.
-            groundReflectivity : ground reflectivity
+    where the entries mean:
+    \table
+      Property     | Description                       | Type   | Reqd | Deflt
+      sunTrackingUpdateInterval  | Interval to update the Sun direction  <!--
+                   --> [decimal hours]                 | scalar | yes  | -
+      localStandardMeridian | GMT (Local Zone Meridian) [decimal hours]<!--
+                   -->                                 | scalar | yes  | -
+      startDay     | Day from 1 to 365                 | scalar | yes  | -
+      startTime    | Start time for the Sun position [decimal hours]   <!--
+                   -->                                 | scalar | yes  | -
+      longitude    | Geographic coordinate specifying the east–west <!--
+                   --> position of a point on the surface of a planetary <!--
+                   --> body [degree]                   | scalar | yes  | -
+      latitude     | Geographic coordinate specifying the north–south  <!--
+                   --> position of a point on the surface of a planetary <!--
+                   --> body [degree]                   | scalar | yes  | -
+      gridUp       | Grid orientation upwards          | vector | yes  | -
+      gridEast     | Grid orientation eastwards        | vector | yes  | -
+    \endtable
 
-            In this model the flux is calculated as:
 
-                directSolarRad =
-                    (1 - 0.75*skyCloudCoverFraction^3)*A/exp(B/sin(beta));
+    \c sunLoadModel - Option-1:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunLoadModel                constant;
+        directSolarRad              100;
+        diffuseSolarRad             0;
+    }
+    \endverbatim
 
-    3) SunLoadTheoreticalMaximum: The entries are:
-            Setrn
-            SunPrime:
-            groundReflectivity : ground reflectivity
+    where the entries mean:
+    \table
+      Property     | Description                       | Type   | Reqd | Deflt
+      directSolarRad | Direct solar irradiation [W/m2] | scalar | yes  | -
+      diffuseSolarRad | Diffuse solar irradiation on vertical surfaces <!--
+                      --> [W/m2]                       | scalar | yes  | -
+    \endtable
 
-            In this model the flux is calculated as:
 
-                directSolarRad = Setrn*SunPrime;
+    \c sunLoadModel - Option-2:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunLoadModel                timeDependent;
+        directSolarRad              <TimeFunction1<scalar>>;
+        diffuseSolarRad             <TimeFunction1<scalar>>;
+    }
+    \endverbatim
 
-    The diffuse on vertical/horizontal walls and ground-reflected radiation are
+    where the entries mean:
+    \table
+      Property     | Description                       | Type    | Reqd | Deflt
+      directSolarRad  | Time-series of direct solar irradiation        <!--
+                   --> [W/m2]          | TimeFunction1\<scalar\> | yes  | -
+      diffuseSolarRad | Time-series of diffuse solar irradiation on    <!--
+                   --> vertical surfaces [W/m2]                        <!--
+                   -->                  | TimeFunction1\<scalar\> | yes | -
+    \endtable
+
+
+    \c sunLoadModel - Option-3:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunLoadModel                fairWeather;
+        skyCloudCoverFraction       0.25;
+        groundReflectivity          1.0;
+        A                           0.1;
+        B                           0.2;
+        C                           0.058;
+        beta                        0.15;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                       | Type   | Reqd | Deflt
+      A         | Apparent solar irradiation at air mass m = 0      <!--
+                -->                                 | scalar | yes  | -
+      B         | Atmospheric extinction coefficient                <!--
+                -->                                 | scalar | yes  | -
+      C         | Solar diffusivity constant        | scalar | yes  | -
+      groundReflectivity | Ground reflectivity      | scalar | yes  | -
+      skyCloudCoverFraction | Fraction of sky covered by clouds [0,1]  <!--
+                -->                                 | scalar | no   | 0
+      beta      | Solar altitude (in degrees) above the horizontal  <!--
+                -->                                 | scalar | no   | calculated
+    \endtable
+
+    In this model the flux is calculated as:
+    \verbatim
+    directSolarRad = (1 - 0.75*skyCloudCoverFraction^3)*A/exp(B/sin(beta));
+    \endverbatim
+
+
+    \c sunLoadModel - Option-4:
+    \verbatim
+    solarLoadCoeffs
+    {
+        sunLoadModel                theoreticalMaximum;
+        Setrn                       1.0;
+        SunPrime                    4.0;
+        groundReflectivity          1.0;
+        C                           0.058;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type   | Reqd | Deflt
+      Setrn        | Parameter in maximum theoretical direct solar    <!--
+                   --> model                           | scalar | yes  | -
+      SunPrime     | Parameter in maximum theoretical direct solar    <!--
+                   --> model                           | scalar | yes  | -
+      groundReflectivity | Ground reflectivity         | scalar | yes  | -
+      C            | Solar diffusivity constant        | scalar | yes  | -
+    \endtable
+
+    In this model the flux is calculated as:
+    \verbatim
+    directSolarRad = Setrn*SunPrime;
+    \endverbatim
+
+Note
+  - The \c sunDirectionModel:tracking can only be used
+  in transient calculations.
+  - The keyword \c sunTrackingUpdateInterval (in hours) specifies on which
+    interval is the Sun direction updated.
+  - The diffuse on vertical/horizontal walls and ground-reflected radiation are
     calculated following the ASHRAE Handbook.
-
+  - The range of \c skyCloudCoverFraction is [0,1].
 
 SourceFiles
     solarCalculator.C
@@ -93,6 +223,7 @@ SourceFiles
 #include "DynamicField.H"
 #include "HashSet.H"
 #include "coordinateSystem.H"
+#include "TimeFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,37 +238,34 @@ class solarCalculator
 {
 public:
 
-    //  Public enumeration
+    //  Public Enumeration
 
-        //- Sun direction models
+        //- Options for the Sun direction models
         enum sunDirModel
         {
             mSunDirConstant,
             mSunDirTracking
         };
 
-        //- Direct sun load models
+        //- Names for sunDirModel
+        static const Enum<sunDirModel> sunDirectionModelTypeNames_;
+
+        //- Options for the Sun load models
         enum sunLModel
         {
             mSunLoadConstant,
+            mSunLoadTimeDependent,
             mSunLoadFairWeatherConditions,
             mSunLoadTheoreticalMaximum
         };
 
-
-protected:
-
-         //- Sun direction models
-        static const Enum<sunDirModel> sunDirectionModelTypeNames_;
-
-        //- Sun load models
-        static const Enum<sunLModel> sunLoadModelTypeNames_;
+        //- Names for sunLModel
+        static const Enum<sunLModel> sunLModelTypeNames_;
 
 
 private:
 
-    // Private data
-
+    // Private Data
 
         //- Reference to mesh
         const fvMesh& mesh_;
@@ -145,56 +273,78 @@ private:
         //- Dictionary
         dictionary dict_;
 
-        //- Direction
-        vector direction_;
-
-        //- Direct solar irradiation
-        scalar directSolarRad_;
-
-        //- Diffuse solar irradiation on vertical surfaces
-        scalar diffuseSolarRad_;
-
-        //- Ground reflectivity
-        scalar groundReflectivity_;
-
-        //- Fair weather direct solar load model parameters
-        scalar A_;
-        scalar B_;
-        scalar beta_;
-        scalar theta_;
-
-        //- Sky cloud cover fraction [0-1]
-        scalar skyCloudCoverFraction_;
-
-
-        //- Maximum theoretical direct solar load model parameters
-        scalar Setrn_;
-        scalar SunPrime_;
-
-
-        //- Diffusive solar load model parameters
-        scalar C_;
-
         //- Sun direction model
         sunDirModel sunDirectionModel_;
 
         //- Sun load model
         sunLModel sunLoadModel_;
 
-        //- Grid coordinate system
-        autoPtr<coordinateSystem> coord_;
 
-        //- East grid orientation
-        vector eastDir_;
+        // sunDirectionModel = constant
 
-        //- Up grid orientation
-        vector gridUp_;
+            //- Sunbeam direction
+            vector direction_;
 
-        //- Interval in decimal hours to update Sun direction for SunDirTracking
-        scalar sunTrackingUpdateInterval_;
 
-        //- Start time for the Sun position (decimal hours)
-        scalar startTime_;
+        // sunDirectionModel = tracking
+
+            //- Interval to update the Sun direction [decimal hours]
+            scalar sunTrackingUpdateInterval_;
+
+            //- Start time for the Sun position [decimal hours]
+            scalar startTime_;
+
+            //- Up grid orientation
+            vector gridUp_;
+
+            //- East grid orientation
+            vector eastDir_;
+
+            //- Grid coordinate system
+            autoPtr<coordinateSystem> coord_;
+
+
+        // sunLoadModel = constant
+
+            //- Direct solar irradiation
+            scalar directSolarRad_;
+
+            //- Diffuse solar irradiation on vertical surfaces
+            scalar diffuseSolarRad_;
+
+
+        // sunLoadModel = timeDependent
+
+            //- Time-series of direct solar irradiation
+            autoPtr<TimeFunction1<scalar>> directSolarRads_;
+
+            //- Time-series of diffuse solar irradiation on vertical surfaces
+            autoPtr<TimeFunction1<scalar>> diffuseSolarRads_;
+
+
+        // sunLoadModel = fairWeather
+
+            //- Sky cloud cover fraction [0-1]
+            scalar skyCloudCoverFraction_;
+
+            //- Ground reflectivity
+            scalar groundReflectivity_;
+
+            //- Fair weather direct solar load model parameters
+            scalar A_;
+            scalar B_;
+            scalar beta_;
+            scalar theta_;
+
+            //- Diffusive solar load model parameter
+            scalar C_;
+
+
+        // sunLoadModel = theoreticalMaximum
+
+            //- Maximum theoretical direct solar load model parameters
+            scalar Setrn_;
+            scalar SunPrime_;
 
 
         //- No copy construct
@@ -204,15 +354,15 @@ private:
         void operator=(const solarCalculator&) = delete;
 
 
-    // Private members
+    // Private Member Functions
 
-        //- Init
-        void init();
+        //- Initialise model parameters
+        void initialise();
 
         //- Calculate beta and theta angles
         void calculateBetaTheta();
 
-        //- Calculate Sun direction
+        //- Calculate the Sun direction
         void calculateSunDirection();
 
 
@@ -234,101 +384,109 @@ public:
 
     // Member Functions
 
+        // Evaluation
+
+            //- Correct the Sun direction
+            void correctSunDirection();
+
+            //- Correct direct solar irradiation
+            void correctDirectSolarRad();
+
+            //- Correct diffuse solar irradiation
+            void correctDiffuseSolarRad();
+
+
         // Access
 
-            //- const access to direction
-            const vector& direction() const
+            //- Return const access to the Sun direction model
+            const sunDirModel& sunDirectionModel() const noexcept
             {
-                return direction_;
+                return sunDirectionModel_;
             }
 
-            //- Non-const access to direction
+            //- Return const access to the Sun load model
+            const sunLModel& sunLoadModel() const noexcept
+            {
+                return sunLoadModel_;
+            }
+
+            //- Return non-const access to the Sun direction
             vector& direction()
             {
                 return direction_;
             }
 
-            //- Return direct solar irradiation
+            //- Return const access to the Sun direction
+            const vector& direction() const noexcept
+            {
+                return direction_;
+            }
+
+            //- Return non-const access to the direct solar irradiation
             scalar& directSolarRad()
             {
                 return directSolarRad_;
             }
 
-            //- Return const access to direct solar irradiation
-            const scalar& directSolarRad() const
+            //- Return const access to the direct solar irradiation
+            const scalar& directSolarRad() const noexcept
             {
                 return directSolarRad_;
             }
 
-            //- Return diffuse solar irradiation
+            //- Return non-const access to the diffuse solar irradiation
             scalar& diffuseSolarRad()
             {
                 return diffuseSolarRad_;
             }
 
-            //- Return diffuse solar irradiation
-            const scalar& diffuseSolarRad() const
+            //- Return const access to the diffuse solar irradiation
+            const scalar& diffuseSolarRad() const noexcept
             {
                 return diffuseSolarRad_;
             }
 
-            //- Return C constant
-            scalar C()
+            //- Return const access to the C constant
+            scalar C() const noexcept
             {
                 return C_;
             }
 
-            //- Return beta
-            scalar beta()
+            //- Return const access to beta
+            scalar beta() const noexcept
             {
                 return beta_;
             }
 
-            //- Return theta
-            scalar theta()
+            //- Return const access to theta
+            scalar theta() const noexcept
             {
                 return theta_;
             }
 
-            //- Return Sun direction model
-            sunDirModel sunDirectionModel() const
-            {
-                return sunDirectionModel_;
-            }
-
-            //- Return Sun load model
-            sunLModel sunLoadModel() const
-            {
-                return sunLoadModel_;
-            }
-
-            //- Return groundReflectivity
-            scalar groundReflectivity()
+            //- Return const access to the ground reflectivity
+            scalar groundReflectivity() const noexcept
             {
                 return groundReflectivity_;
             }
 
-            //- Return coordinateSystem
-            const coordinateSystem& coord()
+            //- Return const access to the coordinate system
+            const coordinateSystem& coord() const noexcept
             {
                 return *coord_;
             }
 
-            //- Return sunTrackingUpdateInterval
-            scalar sunTrackingUpdateInterval()
+            //- Return const access to sunTrackingUpdateInterval
+            scalar sunTrackingUpdateInterval() const noexcept
             {
                 return sunTrackingUpdateInterval_;
             }
 
-            //- Return startTime
-            scalar startTime()
+            //- Return const access to startTime
+            scalar startTime() const noexcept
             {
                 return startTime_;
             }
-
-
-        //- Recalculate
-        void correctSunDirection();
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,7 +120,16 @@ void Foam::radiation::fvDOM::initialise()
 
     if (useExternalBeam_)
     {
-        coeffs_.readEntry("spectralDistribution", spectralDistribution_);
+        spectralDistributions_.reset
+        (
+            new TimeFunction1<scalarField>
+            (
+                mesh_.time(), "spectralDistribution", coeffs_
+            )
+        );
+
+        spectralDistribution_ =
+            spectralDistributions_->value(mesh_.time().value());
 
         spectralDistribution_ =
             spectralDistribution_/sum(spectralDistribution_);
@@ -428,6 +437,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     ),
     useExternalBeam_(false),
     spectralDistribution_(),
+    spectralDistributions_(),
     solarCalculator_(),
     updateTimeIndex_(0)
 {
@@ -533,17 +543,12 @@ Foam::radiation::fvDOM::fvDOM
     ),
     useExternalBeam_(false),
     spectralDistribution_(),
+    spectralDistributions_(),
     solarCalculator_(),
     updateTimeIndex_(0)
 {
     initialise();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::fvDOM::~fvDOM()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

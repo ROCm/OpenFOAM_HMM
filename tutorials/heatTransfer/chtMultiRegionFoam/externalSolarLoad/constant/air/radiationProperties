@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      radiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,71 +20,51 @@ radiationModel  viewFactor;
 
 solarLoadCoeffs
 {
+    sunDirectionModel   tracking;
 
-    // Sun direction ray model. Give the sunDirection or calculated using the
-    // (solar calculator)
-    sunDirectionModel   sunDirTracking; //sunDirConstant
-
-        // Time interval to update Sun position (sec)
-        sunTrackingUpdateInterval 800;
-
-        //sunDirection        (1 0 -1);
-
-        localStandardMeridian   9;      // GMT offset (hours)
-        startDay                204;    // day of the year
-        startTime               15;     // time of the day (hours decimal)
-        longitude               139.74; // longitude (degrees)
-        latitude                35.658; // latitude (degrees)
+        sunTrackingUpdateInterval 800; // Time interval to update Sun position
+        localStandardMeridian     9;       // GMT offset (hours)
+        startDay                  204;     // day of the year
+        startTime                 15;      // time of the day (hours decimal)
+        longitude                 139.74;  // longitude (degrees)
+        latitude                  35.658;  // latitude (degrees)
+        gridUp                    (0 0 1); // grid orientation
+        gridEast                  (1 0 0);
 
 
-        // Grid orientation
-        gridUp                  (0 0 1);
-        gridEast                (1 0 0);
+    sunLoadModel    fairWeather;
+
+        // Fair weather conditions model constants
+        // Calculate beta from the Solar calculator or input
+        groundReflectivity 0.2;
+        A       500;   // Apparent solar irradiation at air mass m = 0
+        B       0.142; // Atmospheric extinction coefficient
+        C       0.058; // Solar diffusivity constant
+        //beta    45;  // Solar altitude (in degrees) above the horizontal
+
+
+    // see solarCalculator.H for other model examples and details
+
 
     // Energy spectrum
     spectralDistribution (2 1);
 
-    // Solar model:
-
-        // sunLoadConstant-sunLoadFairWeatherConditions-SunLoadTheoreticalMaximum;
-        sunLoadModel sunLoadFairWeatherConditions;
-
-        // Sun load constant model
-        //directSolarRad  500;    // [w/m2]
-        //diffuseSolarRad 40;     // [w/m2]
-
-        // Fair Weather Conditions Model Constants.
-        // Calculate beta from the Solar calculator or input
-        A       500;        // Apparent solar irradiation at air mass m = 0
-        B       0.142;      // Atmospheric extinction coefficient
-        //beta    45;         // Solar altitude (in degrees) above the horizontal
-
-        // Theoretical maximum model constants
-        Setrn       10;
-        SunPrime    1;
-
-        // Ground reflectivity
-        groundReflectivity 0.2;
-
-        // Solar diffusivity constants
-        C   0.058;  // Model constant
 
     // Radiative flux coupling flags
     solidCoupled    true;  //Couple through qr the solid regions (default true)
     wallCoupled     false; //Couple through qr wall patches (default false)
 
     // Reflecting rays
-        useReflectedRays true;
-        reflecting
-        {
-            nPhi        10;
-            nTheta      10;
-        }
+    useReflectedRays true;
+    reflecting
+    {
+        nPhi        10;
+        nTheta      10;
+    }
 
     absorptionEmissionModel none;
     scatterModel            none;
     sootModel               none;
-
 }
 
 
@@ -108,5 +87,6 @@ absorptionEmissionModel none;
 scatterModel    none;
 
 sootModel       none;
+
 
 // ************************************************************************* //
