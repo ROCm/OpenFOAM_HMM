@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,15 +40,15 @@ Foam::PstreamBuffers::PstreamBuffers
     const UPstream::commsTypes commsType,
     const int tag,
     const label comm,
-    IOstream::streamFormat format,
-    IOstream::versionNumber version
+    IOstreamOption::streamFormat fmt,
+    IOstreamOption::versionNumber ver
 )
 :
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
-    format_(format),
-    version_(version),
+    format_(fmt),
+    version_(ver),
     sendBuf_(UPstream::nProcs(comm)),
     recvBuf_(UPstream::nProcs(comm)),
     recvBufPos_(UPstream::nProcs(comm), 0),

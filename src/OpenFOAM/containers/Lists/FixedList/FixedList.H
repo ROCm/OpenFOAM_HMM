@@ -430,7 +430,10 @@ public:
         bool operator>=(const FixedList<T, N>& list) const;
 
 
-    // Writing
+    // Reading/writing
+
+        //- Read from Istream, discarding contents of existing List
+        Istream& readList(Istream& is);
 
         //- Write the list as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;

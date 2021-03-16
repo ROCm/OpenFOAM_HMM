@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,7 +108,7 @@ public:
         (
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
-            IOstream::compressionType comp = IOstream::UNCOMPRESSED
+            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED
         );
 
         //- Write surface mesh components by proxy (as BINARY)
@@ -123,7 +123,7 @@ public:
         (
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
-            IOstream::compressionType comp = IOstream::UNCOMPRESSED
+            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED
         );
 
         //- Write UnsortedMeshedSurface (as BINARY) unsorted by zone
@@ -140,7 +140,7 @@ public:
             const fileName& filename,
             const MeshedSurfaceProxy<Face>& surf,
             const STLFormat format,
-            IOstream::compressionType comp = IOstream::UNCOMPRESSED
+            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED
         );
 
         //- Write UnsortedMeshedSurface
@@ -150,7 +150,7 @@ public:
             const fileName& filename,
             const UnsortedMeshedSurface<Face>& surf,
             const STLFormat format,
-            IOstream::compressionType comp = IOstream::UNCOMPRESSED
+            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED
         );
 
 

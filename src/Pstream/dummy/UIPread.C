@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,12 +42,12 @@ Foam::UIPstream::UIPstream
     const int tag,
     const label comm,
     const bool clearAtEnd,
-    streamFormat format,
-    versionNumber version
+    IOstreamOption::streamFormat fmt,
+    IOstreamOption::versionNumber ver
 )
 :
     UPstream(commsType),
-    Istream(format, version),
+    Istream(fmt, ver),
     fromProcNo_(fromProcNo),
     externalBuf_(externalBuf),
     externalBufPosition_(externalBufPosition),
@@ -88,8 +89,7 @@ Foam::label Foam::UIPstream::read
 )
 {
     NotImplemented;
-
-     return 0;
+    return 0;
 }
 
 

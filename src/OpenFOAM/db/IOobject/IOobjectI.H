@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ inline Foam::word Foam::IOobject::scopedName
 
 // General access
 
-inline const Foam::word& Foam::IOobject::name() const
+inline const Foam::word& Foam::IOobject::name() const noexcept
 {
     return name_;
 }
@@ -85,63 +85,63 @@ inline Foam::word Foam::IOobject::member() const
 }
 
 
-inline const Foam::word& Foam::IOobject::headerClassName() const
+inline const Foam::word& Foam::IOobject::headerClassName() const noexcept
 {
     return headerClassName_;
 }
 
 
-inline Foam::word& Foam::IOobject::headerClassName()
+inline Foam::word& Foam::IOobject::headerClassName() noexcept
 {
     return headerClassName_;
 }
 
 
-inline const Foam::string& Foam::IOobject::note() const
+inline const Foam::string& Foam::IOobject::note() const noexcept
 {
     return note_;
 }
 
 
-inline Foam::string& Foam::IOobject::note()
+inline Foam::string& Foam::IOobject::note() noexcept
 {
     return note_;
 }
 
 
-inline bool Foam::IOobject::registerObject() const
+inline bool Foam::IOobject::registerObject() const noexcept
 {
     return registerObject_;
 }
 
 
-inline bool& Foam::IOobject::registerObject()
+inline bool& Foam::IOobject::registerObject() noexcept
 {
     return registerObject_;
 }
 
 
-inline bool Foam::IOobject::globalObject() const
+inline bool Foam::IOobject::globalObject() const noexcept
 {
     return globalObject_;
 }
 
 
-inline bool& Foam::IOobject::globalObject()
+inline bool& Foam::IOobject::globalObject() noexcept
 {
     return globalObject_;
 }
 
 
-inline unsigned Foam::IOobject::labelByteSize() const
+inline unsigned Foam::IOobject::labelByteSize() const noexcept
 {
-    return labelByteSize_;
+    return static_cast<unsigned>(sizeofLabel_);
 }
 
 
-inline unsigned Foam::IOobject::scalarByteSize() const
+inline unsigned Foam::IOobject::scalarByteSize() const noexcept
 {
-    return scalarByteSize_;
+    return static_cast<unsigned>(sizeofScalar_);
 }
 
 
@@ -162,25 +162,25 @@ inline bool Foam::IOobject::isHeaderClassName() const
 
 // Read/write options
 
-inline Foam::IOobject::readOption Foam::IOobject::readOpt() const
+inline Foam::IOobject::readOption Foam::IOobject::readOpt() const noexcept
 {
     return rOpt_;
 }
 
 
-inline Foam::IOobject::readOption& Foam::IOobject::readOpt()
+inline Foam::IOobject::readOption& Foam::IOobject::readOpt() noexcept
 {
     return rOpt_;
 }
 
 
-inline Foam::IOobject::writeOption Foam::IOobject::writeOpt() const
+inline Foam::IOobject::writeOption Foam::IOobject::writeOpt() const noexcept
 {
     return wOpt_;
 }
 
 
-inline Foam::IOobject::writeOption& Foam::IOobject::writeOpt()
+inline Foam::IOobject::writeOption& Foam::IOobject::writeOpt() noexcept
 {
     return wOpt_;
 }
@@ -188,19 +188,19 @@ inline Foam::IOobject::writeOption& Foam::IOobject::writeOpt()
 
 // Path components
 
-inline const Foam::fileName& Foam::IOobject::instance() const
+inline const Foam::fileName& Foam::IOobject::instance() const noexcept
 {
     return instance_;
 }
 
 
-inline Foam::fileName& Foam::IOobject::instance()
+inline Foam::fileName& Foam::IOobject::instance() noexcept
 {
     return instance_;
 }
 
 
-inline const Foam::fileName& Foam::IOobject::local() const
+inline const Foam::fileName& Foam::IOobject::local() const noexcept
 {
     return local_;
 }
@@ -214,13 +214,13 @@ inline Foam::fileName Foam::IOobject::objectPath() const
 
 // Error Handling
 
-inline bool Foam::IOobject::good() const
+inline bool Foam::IOobject::good() const noexcept
 {
     return objState_ == GOOD;
 }
 
 
-inline bool Foam::IOobject::bad() const
+inline bool Foam::IOobject::bad() const noexcept
 {
     return objState_ == BAD;
 }

@@ -101,7 +101,7 @@ public:
     // Constructors
 
         //- Construct given process index to read from and optional buffer size,
-        //  read format and IO version
+        //- read format and IO version
         UIPstream
         (
             const commsTypes commsType,
@@ -111,8 +111,8 @@ public:
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
             const bool clearAtEnd = false,   // destroy externalBuf if at end
-            streamFormat format=BINARY,
-            versionNumber version=currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
         );
 
         //- Construct given buffers

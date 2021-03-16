@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,7 @@ Description
     A character and a pointer to a character string.
 
 SourceFiles
-    charIO.C
+    char.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,6 +43,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 class Ostream;
 
@@ -59,7 +61,7 @@ Ostream& operator<<(Ostream& os, const char c);
 //- Write a nul-terminated C-string
 Ostream& operator<<(Ostream& os, const char* str);
 
-//- Test for \em horizontal whitespace
+//- Test for whitespace
 inline bool isspace(char c)
 {
     return
@@ -70,6 +72,55 @@ inline bool isspace(char c)
      || c == '\t'
     );
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "pTraits.H"
+
+namespace Foam
+{
+
+// Template specialisation for pTraits<char>
+template<>
+class pTraits<char>
+{
+    char p_;
+
+public:
+
+    // Static Data Members
+
+        static const char* const typeName;
+
+
+    // Constructors
+
+        //- Copy construct from primitive
+        explicit pTraits(const char p) noexcept;
+
+        //- Read construct from Istream
+        explicit pTraits(Istream& is);
+
+
+    // Member Functions
+
+        //- Read access to primitive value
+        operator char() const noexcept
+        {
+            return p_;
+        }
+
+        //- Write access to primitive value
+        operator char&() noexcept
+        {
+            return p_;
+        }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

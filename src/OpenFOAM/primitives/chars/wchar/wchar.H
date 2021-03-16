@@ -30,7 +30,7 @@ Description
     A wide-character and a pointer to a wide-character string.
 
 SourceFiles
-    wcharIO.C
+    wchar.C
 
 See also
     http://en.wikipedia.org/wiki/UTF-8
@@ -49,6 +49,7 @@ See also
 namespace Foam
 {
 
+// Forward Declarations
 class Istream;
 class Ostream;
 

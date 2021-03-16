@@ -113,8 +113,8 @@ public:
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
-            streamFormat format=BINARY,
-            versionNumber version=currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
         );
 
         //- Construct given buffers

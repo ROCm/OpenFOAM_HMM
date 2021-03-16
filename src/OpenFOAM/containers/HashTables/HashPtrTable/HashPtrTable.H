@@ -168,7 +168,10 @@ public:
         //- Clear all entries from table and delete any allocated pointers
         void clear();
 
-        //- Write
+
+    // Reading/writing
+
+        //- Invoke write() on each non-null entry
         void write(Ostream& os) const;
 
 
@@ -183,6 +186,7 @@ public:
 
     // IOstream Operators
 
+        //- Clear table and read from Istream
         friend Istream& operator>> <T, Key, Hash>
         (
             Istream& is,

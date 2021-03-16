@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -500,7 +500,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
     PstreamBuffers& pBufs
 )
 {
-    IFstream ifs(filePath, IOstream::streamFormat::BINARY);
+    IFstream ifs(filePath, IOstreamOption::BINARY);
 
     if (!ifs.good())
     {
@@ -516,7 +516,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
             << filePath << endl;
     }
 
-    if (ifs.compression() == IOstream::compressionType::COMPRESSED)
+    if (ifs.compression() == IOstreamOption::COMPRESSED)
     {
         // Could use Foam::fileSize, estimate uncompressed size (eg, 2x)
         // and then string reserve followed by string assign...
@@ -832,7 +832,7 @@ masterUncollatedFileOperationInitialise(int& argc, char**& argv)
         if (argv[i] == s)
         {
             index = i;
-            setEnv("FOAM_IORANKS", argv[i+1], true);
+            Foam::setEnv("FOAM_IORANKS", argv[i+1], true);
             break;
         }
     }
@@ -1782,12 +1782,8 @@ bool Foam::fileOperations::masterUncollatedFileOperation::readHeader
 
                 if (is.good())
                 {
-                    ok = io.readHeader(is);
-                    if (io.headerClassName() == decomposedBlockData::typeName)
-                    {
-                        // Read the header inside the container (master data)
-                        ok = decomposedBlockData::readMasterHeader(io, is);
-                    }
+                    // Regular header or from decomposed data
+                    ok = decomposedBlockData::readHeader(io, is);
                 }
             }
         }
@@ -1831,22 +1827,8 @@ bool Foam::fileOperations::masterUncollatedFileOperation::readHeader
 
                         if (is.good())
                         {
-                            result[proci] = io.readHeader(is);
-                            if
-                            (
-                                io.headerClassName()
-                             == decomposedBlockData::typeName
-                            )
-                            {
-                                // Read the header inside the container
-                                // (master data)
-                                result[proci] = decomposedBlockData::
-                                readMasterHeader
-                                (
-                                    io,
-                                    is
-                                );
-                            }
+                            result[proci] =
+                                decomposedBlockData::readHeader(io, is);
                             headerClassName[proci] = io.headerClassName();
                             note[proci] = io.note();
                         }
@@ -1905,7 +1887,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             // have no file to read from. This will only happen when using
             // normal writing since then the fName for the valid processors is
             // processorDDD/<instance>/.. . In case of collocated writing
-            // the fName is already rewritten to processors/.
+            // the fName is already rewritten to processorsNN/.
 
             isPtr.reset(new IFstream(fName));
 
@@ -1914,11 +1896,9 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
                 // Read header data (on copy)
                 headerIO.readHeader(*isPtr);
 
-                if (headerIO.headerClassName() == decomposedBlockData::typeName)
-                {
-                    isCollated = true;
-                }
-                else if (!Pstream::parRun())
+                isCollated = decomposedBlockData::isCollatedType(headerIO);
+
+                if (!isCollated && !Pstream::parRun())
                 {
                     // Short circuit: non-collated format. No parallel bits.
                     // Copy header and return.
@@ -2087,7 +2067,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::read
 (
     regIOobject& io,
     const bool masterOnly,
-    const IOstream::streamFormat format,
+    const IOstreamOption::streamFormat format,
     const word& typeName
 ) const
 {
@@ -2202,29 +2182,27 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     // Make sure to pick up any new times
     setTime(io.time());
 
+    // Update meta-data for current state
+    const_cast<regIOobject&>(io).updateMetaData();
+
     autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, valid));
-    OSstream& os = osPtr();
+    OSstream& os = *osPtr;
 
     // If any of these fail, return (leave error handling to Ostream class)
-    if (!os.good())
+
+    const bool ok =
+    (
+        os.good()
+     && io.writeHeader(os)
+     && io.writeData(os)
+    );
+
+    if (ok)
     {
-        return false;
+        IOobject::writeEndDivider(os);
     }
 
-    if (!io.writeHeader(os))
-    {
-        return false;
-    }
-
-    // Write the data to the Ostream
-    if (!io.writeData(os))
-    {
-        return false;
-    }
-
-    IOobject::writeEndDivider(os);
-
-    return true;
+    return ok;
 }
 
 

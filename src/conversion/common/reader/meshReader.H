@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,7 +193,7 @@ private:
             const objectRegistry& registry,
             const word& propertyName,
             const labelList& list,
-            IOstream::streamFormat fmt = IOstream::ASCII
+            IOstreamOption streamOpt
         ) const;
 
         //- Return list of faces for every cell
@@ -291,7 +291,7 @@ public:
         void writeMesh
         (
             const polyMesh&,
-            IOstream::streamFormat fmt = IOstream::BINARY
+            IOstreamOption streamOpt = IOstreamOption(IOstreamOption::BINARY)
         ) const;
 };
 

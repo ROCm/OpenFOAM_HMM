@@ -38,7 +38,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
     is.fatalCheck
     (
@@ -46,9 +46,9 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
         "reading first token"
     );
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
-        const label len = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("ILList");
@@ -69,7 +69,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
                     );
                 }
             }
-            else
+            else   // BEGIN_BLOCK
             {
                 T* p = inew(is).ptr();
                 this->append(p);
@@ -90,19 +90,19 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
         // Read end of contents
         is.readEndList("ILList");
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        token lastToken(is);
+        is >> tok;
         is.fatalCheck(FUNCTION_NAME);
 
-        while (!lastToken.isPunctuation(token::END_LIST))
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            is.putBack(lastToken);
+            is.putBack(tok);
 
             T* p = inew(is).ptr();
             this->append(p);
 
-            is >> lastToken;
+            is >> tok;
             is.fatalCheck(FUNCTION_NAME);
         }
     }
@@ -110,7 +110,7 @@ void Foam::ILList<LListBase, T>::readIstream(Istream& is, const INew& inew)
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 

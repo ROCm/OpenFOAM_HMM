@@ -96,12 +96,12 @@ public:
         //- Construct with format, version (compression)
         explicit Ostream
         (
-            streamFormat fmt,
-            versionNumber ver = currentVersion,
-            compressionType comp = compressionType::UNCOMPRESSED
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :
-            Ostream(IOstreamOption(fmt, comp, ver))
+            Ostream(IOstreamOption(fmt, ver, cmp))
         {}
 
 

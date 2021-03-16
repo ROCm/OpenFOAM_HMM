@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +105,12 @@ template<class T> class UList;
 template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream&, HashTable<T, Key, Hash>&);
+
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream&, const HashTable<T, Key, Hash>&);
+
 /*---------------------------------------------------------------------------*\
                           Class HashTable Declaration
 \*---------------------------------------------------------------------------*/
@@ -147,6 +153,12 @@ class HashTable
         //  \return True if the new entry was set.
         template<class... Args>
         bool setEntry(const bool overwrite, const Key& key, Args&&... args);
+
+        //- Read hash table
+        Istream& readTable(Istream& is);
+
+        //- Write hash table
+        Ostream& writeTable(Ostream& os) const;
 
 
 public:
@@ -893,7 +905,7 @@ public:
         inline constexpr const_iterator cend() const noexcept;
 
 
-    // Writing
+    // Reading/writing
 
         //- Print information
         Ostream& printInfo(Ostream& os) const;
@@ -902,16 +914,22 @@ public:
         //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeKeys(Ostream& os, const label shortLen=0) const;
+
+
+    // IOstream Operators
+
+        friend Istream& operator>> <T, Key, Hash>
+        (
+            Istream&,
+            HashTable<T, Key, Hash>& tbl
+        );
+
+        friend Ostream& operator<< <T, Key, Hash>
+        (
+            Ostream&,
+            const HashTable<T, Key, Hash>& tbl
+        );
 };
-
-
-// IOstream Operators
-
-template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& tbl);
-
-template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

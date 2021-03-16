@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,41 +25,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "char.H"
-#include "IOstreams.H"
+#include "regIOobject.H"
+#include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-char Foam::readChar(Istream& is)
+const Foam::dictionary* Foam::regIOobject::findMetaData() const noexcept
 {
-    char c;
-    is.read(c);
-    return c;
+    return metaDataPtr_.get();
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, char& c)
+Foam::dictionary& Foam::regIOobject::getMetaData() noexcept
 {
-    is.read(c);
-    is.check(FUNCTION_NAME);
-    return is;
+    if (!metaDataPtr_)
+    {
+        metaDataPtr_.reset(new dictionary("meta"));
+    }
+    return *metaDataPtr_;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
+void Foam::regIOobject::removeMetaData()
 {
-    os.write(c);
-    os.check(FUNCTION_NAME);
-    return os;
+    metaDataPtr_.reset(nullptr);
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const char* str)
-{
-    os.write(str);
-    os.check(FUNCTION_NAME);
-    return os;
-}
+void Foam::regIOobject::updateMetaData()
+{}
 
 
 // ************************************************************************* //

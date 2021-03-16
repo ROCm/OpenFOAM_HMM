@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class Istream;
 class Ostream;
@@ -79,7 +79,7 @@ public:
 
     // Constructors
 
-        //- Null construct
+        //- Default construct
         ILList() = default;
 
         //- Construct and insert the initial T item pointer
@@ -126,7 +126,7 @@ public:
         void transfer(ILList<LListBase, T>& lst);
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy assignment using the 'clone()' method for each element
         void operator=(const ILList<LListBase, T>& lst);
@@ -135,7 +135,7 @@ public:
         void operator=(ILList<LListBase, T>&& lst);
 
 
-    // Istream operator
+    // Istream Operator
 
         //- Read from Istream, discarding existing contents.
         friend Istream& operator>> <LListBase, T>

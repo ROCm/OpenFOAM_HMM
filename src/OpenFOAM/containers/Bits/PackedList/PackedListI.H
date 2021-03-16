@@ -212,7 +212,7 @@ inline Foam::PackedList<Width>::PackedList(Istream& is)
     blocks_(),
     size_(0)
 {
-    read(is);
+    readList(is);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,39 +123,36 @@ public:
 
         // Member Functions
 
+            //- A string representation as major.minor
+            std::string str() const
+            {
+                return
+                (
+                    std::to_string(int(number_ / 10)) // major
+                  + '.'
+                  + std::to_string(int(number_ % 10)) // minor
+                );
+            }
+
+            //- From version to canonical integer value
+            int canonical() const noexcept
+            {
+                return number_;
+            }
+
+            //- From canonical integer value to version
+            static versionNumber canonical(int verNum) noexcept
+            {
+                // Split into major/minor
+                return versionNumber(int(verNum / 10), int(verNum % 10));
+            }
+
             //- Compare differences in the versions
             //  Negative when 'this' is less than other.
             //  Positive when 'this' is greater than other.
             int compare(const versionNumber& other) const noexcept
             {
                 return number_ - other.number_;
-            }
-
-            //- The canonical major/minor pair as an integer value.
-            int canonical() noexcept
-            {
-                return number_;
-            }
-
-            //- Return the major version number.
-            int getMajor() const noexcept
-            {
-                return int(number_ / 10);
-            }
-
-            //- Return the minor version number
-            int getMinor() const noexcept
-            {
-                return int(number_ % 10);
-            }
-
-            //- A string representation of major.minor
-            std::string str() const
-            {
-                return
-                    std::to_string(getMajor())
-                  + '.'
-                  + std::to_string(getMinor());
             }
         };
 
@@ -364,12 +361,16 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
 //- Output format type as text string (ascii | binary)
 Ostream& operator<<(Ostream& os, const IOstreamOption::streamFormat& fmt);
 
 //- Output version as major.minor text string
 Ostream& operator<<(Ostream& os, const IOstreamOption::versionNumber& ver);
 
+
+// * * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * //
 
 // Comparison Operators
 

@@ -31,8 +31,10 @@ $(bools)/Switch/Switch.C
 $(bools)/lists/boolList.C
 
 chars = primitives/chars
-$(chars)/char/charIO.C
-$(chars)/wchar/wcharIO.C
+$(chars)/char/char.C
+$(chars)/wchar/wchar.C
+$(chars)/lists/charList.C
+$(chars)/lists/charUList.C
 
 primitives/direction/directionIO.C
 
@@ -309,6 +311,7 @@ $(IOdictionary)/unwatchedIOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
 db/IOobjects/decomposedBlockData/decomposedBlockData.C
+db/IOobjects/decomposedBlockData/decomposedBlockDataHeader.C
 db/IOobjects/GlobalIOField/GlobalIOFields.C
 
 
@@ -318,11 +321,13 @@ db/IOobjects/GlobalIOList/globalIOLists.C
 IOobject = db/IOobject
 $(IOobject)/IOobject.C
 $(IOobject)/IOobjectIO.C
+$(IOobject)/IOobjectMetaData.C
 $(IOobject)/IOobjectReadHeader.C
 $(IOobject)/IOobjectWriteHeader.C
 
 regIOobject = db/regIOobject
 /* $(regIOobject)/regIOobject.C in global.Cver */
+$(regIOobject)/regIOobjectMetaData.C
 $(regIOobject)/regIOobjectRead.C
 $(regIOobject)/regIOobjectWrite.C
 

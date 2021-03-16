@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,9 +54,7 @@ void Foam::masterOFstream::checkWrite
     OFstream os
     (
         fName,
-        IOstream::BINARY,   //format(),
-        version(),
-        compression_,
+        IOstreamOption(IOstreamOption::BINARY, version(), compression_),
         append_
     );
     if (!os.good())
@@ -189,7 +187,7 @@ Foam::masterOFstream::masterOFstream
     const bool valid
 )
 :
-    OStringStream(streamOpt.format(), streamOpt.version()),
+    OStringStream(streamOpt),
     pathName_(pathName),
     compression_(streamOpt.compression()),
     append_(append),

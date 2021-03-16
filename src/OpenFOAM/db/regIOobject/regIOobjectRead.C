@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ License
 
 bool Foam::regIOobject::readHeaderOk
 (
-    const IOstream::streamFormat format,
+    const IOstreamOption::streamFormat fmt,
     const word& typeName
 )
 {
@@ -77,7 +77,7 @@ bool Foam::regIOobject::readHeaderOk
      || isHeaderOk
     )
     {
-        return fileHandler().read(*this, masterOnly, format, typeName);
+        return fileHandler().read(*this, masterOnly, fmt, typeName);
     }
 
     return false;

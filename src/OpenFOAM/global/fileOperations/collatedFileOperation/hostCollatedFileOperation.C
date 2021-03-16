@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,31 +138,14 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
             UPstream::worldComm,
             subRanks(Pstream::nProcs())
         ),
-        (Pstream::parRun() ? labelList(0) : ioRanks()), // processor dirs
+        (Pstream::parRun() ? labelList() : ioRanks()), // processor dirs
         typeName,
-        verbose
+        false // verbose
     )
 {
-    verbose = (verbose && Foam::infoDetailLevel > 0);
-
-    if (verbose)
+    if (verbose && Foam::infoDetailLevel > 0)
     {
-        // Print a bit of information
-        stringList ioRanks(Pstream::nProcs());
-        if (Pstream::master(comm_))
-        {
-            ioRanks[Pstream::myProcNo()] = hostName()+"."+name(pid());
-        }
-        Pstream::gatherList(ioRanks);
-
-        Info<< "         IO nodes:" << nl;
-        for (const string& ranks : ioRanks)
-        {
-            if (!ranks.empty())
-            {
-                Info<< "             " << ranks << nl;
-            }
-        }
+        this->printBanner(ioRanks_.size());
     }
 }
 

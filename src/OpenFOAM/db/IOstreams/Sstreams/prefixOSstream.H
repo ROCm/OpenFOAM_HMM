@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::prefixOSstream
 
 Description
-    Version of OSstream which prints a prefix on each line.
+    Version of OSstream that prints a prefix on each line.
 
     This is useful for running in parallel as it allows the processor number
     to be automatically prepended to each message line.
@@ -85,12 +85,12 @@ public:
         (
             std::ostream& os,
             const string& streamName,
-            streamFormat fmt,
-            versionNumber ver = currentVersion,
-            compressionType comp = compressionType::UNCOMPRESSED
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED
         )
         :
-            prefixOSstream(os, streamName, IOstreamOption(fmt, comp, ver))
+            prefixOSstream(os, streamName, IOstreamOption(fmt, ver, cmp))
         {}
 
 

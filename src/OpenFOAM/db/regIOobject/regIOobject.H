@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,8 @@ namespace Foam
 
 // Forward Declarations
 
+class dictionary;
+
 namespace functionEntries
 {
     class codeStream;
@@ -78,7 +80,7 @@ protected:
         //- Helper: check readOpt flags and read if necessary
         bool readHeaderOk
         (
-            const IOstream::streamFormat PstreamFormat,
+            const IOstreamOption::streamFormat fmt,
             const word& typeName
         );
 
@@ -105,6 +107,9 @@ private:
 
         //- eventNo of last update
         label eventNo_;
+
+        //- Dictionary for any meta-data
+        autoPtr<dictionary> metaDataPtr_;
 
         //- Istream for reading
         autoPtr<ISstream> isPtr_;
@@ -277,6 +282,21 @@ public:
             virtual void rename(const word& newName);
 
 
+        // Meta-data
+
+            //- Return pointer to meta-data or nullptr
+            const dictionary* findMetaData() const noexcept;
+
+            //- Get or create meta-data
+            dictionary& getMetaData() noexcept;
+
+            //- Remove meta-data
+            void removeMetaData();
+
+            //- Update internal meta-data (eg, prior to writing)
+            virtual void updateMetaData();
+
+
         // Reading
 
             //- Return complete path + object name if the file exists
@@ -358,9 +378,9 @@ public:
         FOAM_DEPRECATED_FOR(2020-02, "writeObject(IOstreamOption, bool)")
         virtual bool writeObject
         (
-            IOstream::streamFormat fmt,
-            IOstream::versionNumber ver,
-            IOstream::compressionType comp,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver,
+            IOstreamOption::compressionType comp,
             const bool valid
         ) const;
 };

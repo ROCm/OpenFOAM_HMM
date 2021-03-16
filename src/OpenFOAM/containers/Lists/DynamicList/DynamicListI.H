@@ -223,9 +223,11 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
 :
-    List<T>(is),
-    capacity_(List<T>::size())
-{}
+    List<T>(),
+    capacity_(0)
+{
+    this->readList(is);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -866,19 +868,31 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
+inline Foam::Istream& Foam::DynamicList<T, SizeMin>::readList
+(
+    Istream& is
+)
+{
+    DynamicList<T, SizeMin>& list = *this;
+
+    // Use entire storage - ie, resize(capacity())
+    (void) list.expandStorage();
+
+    static_cast<List<T>&>(list).readList(is);
+    list.capacity_ = list.size();
+
+    return is;
+}
+
+
+template<class T, int SizeMin>
 inline Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    DynamicList<T, SizeMin>& rhs
+    DynamicList<T, SizeMin>& list
 )
 {
-    // Use entire storage - ie, resize(capacity())
-    (void) rhs.expandStorage();
-
-    is >> static_cast<List<T>&>(rhs);
-    rhs.capacity_ = rhs.List<T>::size();
-
-    return is;
+    return list.readList(is);
 }
 
 
@@ -886,10 +900,10 @@ template<class T, int SizeMin>
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const DynamicList<T, SizeMin>& rhs
+    const DynamicList<T, SizeMin>& list
 )
 {
-    os << static_cast<const List<T>&>(rhs);
+    os << static_cast<const List<T>&>(list);
     return os;
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,12 +81,12 @@ public:
         (
             const fileName& pathname,
             IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = currentVersion,
-            IOstreamOption::compressionType comp = IOstreamOption::UNCOMPRESSED,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion,
+            IOstreamOption::compressionType cmp = IOstreamOption::UNCOMPRESSED,
             const bool append = false
         )
         :
-            OFstream(pathname, IOstreamOption(fmt, comp, ver), append)
+            OFstream(pathname, IOstreamOption(fmt, ver, cmp), append)
         {}
 
 

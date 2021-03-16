@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,10 +260,9 @@ void Foam::Function1Types::CSV<Type>::writeEntries(Ostream& os) const
     os.writeEntry("refColumn", refColumn_);
 
     // Force writing labelList in ASCII
-    const enum IOstream::streamFormat fmt = os.format();
-    os.format(IOstream::ASCII);
+    const auto oldFmt = os.format(IOstream::ASCII);
     os.writeEntry("componentColumns", componentColumns_);
-    os.format(fmt);
+    os.format(oldFmt);
 
     os.writeEntry("separator", string(separator_));
     os.writeEntry("mergeSeparators", mergeSeparators_);

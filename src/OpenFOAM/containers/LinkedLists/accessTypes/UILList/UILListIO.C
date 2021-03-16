@@ -39,6 +39,8 @@ Foam::Ostream& Foam::UILList<LListBase, T>::writeList
     const label shortLen
 ) const
 {
+    // NB: no binary, contiguous output
+
     const label len = this->size();
 
     if

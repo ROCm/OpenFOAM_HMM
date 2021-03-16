@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,7 @@ Description
 #include "PstreamBuffers.H"
 #include "argList.H"
 #include "Time.H"
+#include "IOobject.H"
 
 namespace Foam
 {
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
         cout<<"string:" << sizeof(Foam::string) << nl;
     }
 
+    cout<<"IOobject:" << sizeof(Foam::IOobject) << nl;
     cout<<"IOstream:" << sizeof(Foam::IOstream) << nl;
     cout<<"PstreamBuffers:" << sizeof(Foam::PstreamBuffers) << nl;
     cout<<"Time:" << sizeof(Foam::Time) << nl;

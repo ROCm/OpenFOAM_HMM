@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,6 @@ See Also
 
 namespace Foam
 {
-
 namespace Detail
 {
 
@@ -130,7 +129,7 @@ public:
                          Class IListStream Declaration
 \*---------------------------------------------------------------------------*/
 
-//- An ISstream with internal List storage
+//- An ISstream with internal List storage. Always UNCOMPRESSED.
 class IListStream
 :
     public Detail::IListStreamAllocator,
@@ -145,26 +144,22 @@ public:
         //- Default construct with an empty list
         explicit IListStream
         (
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(),
-            ISstream(stream_, "input", format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
-
 
         //- Move construct from List
         explicit IListStream
         (
             ::Foam::List<char>&& buffer,  // Fully qualify (issue #1521)
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(std::move(buffer)),
-            ISstream(stream_, name, format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
 
@@ -173,13 +168,11 @@ public:
         explicit IListStream
         (
             DynamicList<char,SizeMin>&& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
+            IOstreamOption streamOpt = IOstreamOption()
         )
         :
             allocator_type(std::move(buffer)),
-            ISstream(stream_, name, format, version)
+            ISstream(stream_, "input", streamOpt.format(), streamOpt.version())
         {}
 
 
@@ -215,6 +208,47 @@ public:
         {
             return const_cast<Istream&>(static_cast<const Istream&>(*this));
         }
+
+
+    // Additional constructors and methods (as per v2012 and earlier)
+    #ifdef Foam_IOstream_extras
+
+        //- Construct with an empty list
+        explicit IListStream
+        (
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IListStream(IOstreamOption(fmt, ver))
+        {}
+
+
+        //- Move construct from List
+        IListStream
+        (
+            ::Foam::List<char>&& buffer,  // Fully qualify (issue #1521)
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IListStream(std::move(buffer), IOstreamOption(fmt, ver))
+        {}
+
+
+        //- Move construct from DynamicList
+        template<int SizeMin>
+        explicit IListStream
+        (
+            DynamicList<char,SizeMin>&& buffer,
+            IOstreamOption::streamFormat fmt,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+        )
+        :
+            IListStream(std::move(buffer), IOstreamOption(fmt, ver))
+        {}
+
+    #endif /* Foam_IOstream_extras */
 };
 
 

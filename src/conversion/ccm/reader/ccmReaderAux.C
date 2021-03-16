@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ void Foam::ccm::reader::writeMeshLabelList
     const objectRegistry& registry,
     const word& propertyName,
     const labelList& list,
-    IOstream::streamFormat fmt
+    IOstreamOption streamOpt
 ) const
 {
     // Write constant/polyMesh/propertyName
@@ -171,12 +171,8 @@ void Foam::ccm::reader::writeMeshLabelList
     // NOTE:
     // The cellTableId is an integer and almost always < 1000, thus ASCII
     // will be compacter than binary and makes external scripting easier
-    //
-    ioObj.writeObject
-    (
-        IOstreamOption(fmt),
-        true
-    );
+
+    ioObj.writeObject(streamOpt, true);
 }
 
 
@@ -197,7 +193,7 @@ void Foam::ccm::reader::writeAux
         registry,
         "origCellId",
         origCellId_,
-        IOstream::BINARY
+        IOstreamOption(IOstreamOption::BINARY)
     );
 
     // Write cellTableId as List<label>
@@ -207,7 +203,7 @@ void Foam::ccm::reader::writeAux
         registry,
         "cellTableId",
         cellTableId_,
-        IOstream::ASCII
+        IOstreamOption(IOstreamOption::ASCII)
     );
 }
 

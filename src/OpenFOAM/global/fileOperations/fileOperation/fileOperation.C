@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -635,24 +635,24 @@ bool Foam::fileOperation::writeObject
 
         OSstream& os = *osPtr;
 
+        // Update meta-data for current state
+        const_cast<regIOobject&>(io).updateMetaData();
+
         // If any of these fail, return (leave error handling to Ostream class)
-        if (!os.good())
+
+        const bool ok =
+        (
+            os.good()
+         && io.writeHeader(os)
+         && io.writeData(os)
+        );
+
+        if (ok)
         {
-            return false;
+            IOobject::writeEndDivider(os);
         }
 
-        if (!io.writeHeader(os))
-        {
-            return false;
-        }
-
-        // Write the data to the Ostream
-        if (!io.writeData(os))
-        {
-            return false;
-        }
-
-        IOobject::writeEndDivider(os);
+        return ok;
     }
     return true;
 }
@@ -1087,29 +1087,15 @@ Foam::label Foam::fileOperation::nProcs
         }
         nProcs = maxProc+1;
 
-
         if (nProcs == 0 && Foam::isDir(dir/processorsBaseDir))
         {
-            fileName pointsFile
-            (
-                dir
-               /processorsBaseDir
-               /"constant"
-               /local
-               /polyMesh::meshSubDir
-               /"points"
-            );
+            WarningInFunction
+                << "Defunct collated naming: " << processorsBaseDir << nl
+                << "Manually rename with the decomposition number. Eg," << nl << nl
+                << "    mv processors processors16" << nl << nl
+                << "...returning 1" << endl;
 
-            if (Foam::isFile(pointsFile))
-            {
-                nProcs = decomposedBlockData::numBlocks(pointsFile);
-            }
-            else
-            {
-                WarningInFunction << "Cannot read file " << pointsFile
-                    << " to determine the number of decompositions."
-                    << " Returning 1" << endl;
-            }
+            nProcs = 1;
         }
     }
     Pstream::scatter(nProcs, Pstream::msgType(), comm_);

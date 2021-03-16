@@ -41,20 +41,16 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
 
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
-    is.fatalCheck
-    (
-        "PtrList::readIstream : "
-        "reading first token"
-    );
+    is.fatalCheck("PtrList::readIstream : reading first token");
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
         // Label: could be int(..), int{...} or just a plain '0'
 
         // Read size of list
-        const label len = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Set list length to that read
         resize(len);
@@ -78,7 +74,7 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
                     );
                 }
             }
-            else
+            else  // Assumed to be BEGIN_BLOCK
             {
                 T* p = inew(is).ptr();
                 set(0, p);
@@ -99,7 +95,7 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
         // Read end of contents
         is.readEndList("PtrList");
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
         // "(...)" : read as SLList and transfer contents
         // This would be more efficient (fewer allocations, lower overhead)
@@ -107,20 +103,20 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
 
         SLList<T*> slList;
 
-        token lastToken(is);
-        while (!lastToken.isPunctuation(token::END_LIST))
+        is >> tok;
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            is.putBack(lastToken);
+            is.putBack(tok);
 
             if (is.eof())
             {
                 FatalIOErrorInFunction(is)
-                    << "Premature EOF after reading " << lastToken.info()
+                    << "Premature EOF after reading " << tok.info() << nl
                     << exit(FatalIOError);
             }
 
             slList.append(inew(is).ptr());
-            is >> lastToken;
+            is >> tok;
         }
 
         resize(slList.size());
@@ -136,7 +132,7 @@ void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info() << nl
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 }

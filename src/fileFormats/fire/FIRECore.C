@@ -204,7 +204,7 @@ void Foam::fileFormats::FIRECore::putFireLabel
     const label value
 )
 {
-    if (os.format() == Foam::IOstream::BINARY)
+    if (os.format() == IOstream::BINARY)
     {
         fireInt_t ivalue(value);
 

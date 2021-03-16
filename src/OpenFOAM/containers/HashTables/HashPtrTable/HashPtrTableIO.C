@@ -44,7 +44,7 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    token firstToken(is);
+    token tok(is);
 
     is.fatalCheck
     (
@@ -52,9 +52,9 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
         "reading first token"
     );
 
-    if (firstToken.isLabel())
+    if (tok.isLabel())
     {
-        const label len = firstToken.labelToken();
+        const label len = tok.labelToken();
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("HashPtrTable");
@@ -84,7 +84,8 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
             else
             {
                 FatalIOErrorInFunction(is)
-                    << "incorrect first token, '(', found " << firstToken.info()
+                    << "incorrect first token, '(', found "
+                    << tok.info() << nl
                     << exit(FatalIOError);
             }
         }
@@ -92,12 +93,13 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
         // Read end of contents
         is.readEndList("HashPtrTable");
     }
-    else if (firstToken.isPunctuation(token::BEGIN_LIST))
+    else if (tok.isPunctuation(token::BEGIN_LIST))
     {
-        token lastToken(is);
-        while (!lastToken.isPunctuation(token::END_LIST))
+        is >> tok;
+
+        while (!tok.isPunctuation(token::END_LIST))
         {
-            is.putBack(lastToken);
+            is.putBack(tok);
             Key key;
             is >> key;
             this->set(key, inew(key, is).ptr());
@@ -108,14 +110,14 @@ void Foam::HashPtrTable<T, Key, Hash>::readIstream
                 "reading entry"
             );
 
-            is >> lastToken;
+            is >> tok;
         }
     }
     else
     {
         FatalIOErrorInFunction(is)
             << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
+            << tok.info() << nl
             << exit(FatalIOError);
     }
 

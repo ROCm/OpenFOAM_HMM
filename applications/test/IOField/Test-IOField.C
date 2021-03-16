@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,8 +96,8 @@ void writeAndRead
     Pout<< "** Writing:" << writeType
         << " Reading:" << readType << endl;
 
-    autoPtr<fileOperation> writeHandler(fileOperation::New(writeType, true));
-    fileHandler(writeHandler);
+    // The write handler
+    fileHandler(fileOperation::New(writeType, true));
 
     // Delete
     Pout<< "Deleting:" << fileHandler().filePath(io.objectPath()) << endl;
@@ -107,8 +107,8 @@ void writeAndRead
     Pout<< "Writing:" << fileHandler().objectPath(io, io.name()) << endl;
     doWrite<Type>(io, sz);
 
-    autoPtr<fileOperation> readHandler(fileOperation::New(readType, true));
-    fileHandler(readHandler);
+    // The read handler
+    fileHandler(fileOperation::New(readType, true));
 
     // Read
     IOobject readIO(io);
@@ -130,8 +130,7 @@ void readIfPresent
     const word& readType
 )
 {
-    autoPtr<fileOperation> readHandler(fileOperation::New(readType, true));
-    fileHandler(readHandler);
+    fileHandler(fileOperation::New(readType, true));
 
     // Read
     Pout<< "Reading:" << fileHandler().filePath(io.objectPath()) << endl;
@@ -178,6 +177,7 @@ void doTests(IOobject& io, const label sz)
 
 int main(int argc, char *argv[])
 {
+    argList::noBanner();
     argList::addBoolOption("bool", "Use bool for tests");
     argList::addBoolOption("scalar", "Use scalar for tests");
     argList::addBoolOption("label", "Use label for tests (default)");
@@ -209,6 +209,11 @@ int main(int argc, char *argv[])
         IOobject::NO_WRITE
     );
 
+    {
+        dictionary headerDict;
+        io.writeHeader(headerDict, "anything", IOstreamOption());
+        Info<< "IOobjectHeader" << headerDict << nl;
+    }
 
     label tested = 0;
 

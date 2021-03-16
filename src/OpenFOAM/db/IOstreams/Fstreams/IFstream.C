@@ -48,7 +48,7 @@ Foam::IFstream::IFstream
     Foam::ifstreamPointer(pathname),
     ISstream(*(ifstreamPointer::get()), pathname, streamOpt)
 {
-    IOstream::compression(ifstreamPointer::whichCompression());
+    IOstreamOption::compression(ifstreamPointer::whichCompression());
 
     setClosed();
 
@@ -73,7 +73,7 @@ Foam::IFstream::IFstream
                 << "Cannot open empty file name"
                 << Foam::endl;
         }
-        else if (IOstreamOption::COMPRESSED == IOstream::compression())
+        else if (IOstreamOption::COMPRESSED == IOstreamOption::compression())
         {
             InfoInFunction
                 << "Decompressing " << (this->name() + ".gz") << Foam::endl;

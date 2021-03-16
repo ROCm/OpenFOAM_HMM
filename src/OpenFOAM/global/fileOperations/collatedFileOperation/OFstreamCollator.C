@@ -44,14 +44,12 @@ namespace Foam
 bool Foam::OFstreamCollator::writeFile
 (
     const label comm,
-    const word& typeName,
+    const word& objectType,
     const fileName& fName,
     const string& masterData,
     const labelUList& recvSizes,
     const PtrList<SubList<char>>& slaveData,    // optional slave data
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool append
 )
 {
@@ -60,6 +58,7 @@ bool Foam::OFstreamCollator::writeFile
         Pout<< "OFstreamCollator : Writing master " << masterData.size()
             << " bytes to " << fName
             << " using comm " << comm << endl;
+
         if (slaveData.size())
         {
             Pout<< "OFstreamCollator :  Slave data" << endl;
@@ -79,17 +78,7 @@ bool Foam::OFstreamCollator::writeFile
     if (UPstream::master(comm))
     {
         Foam::mkDir(fName.path());
-        osPtr.reset
-        (
-            new OFstream
-            (
-                fName,
-                fmt,
-                ver,
-                cmp,
-                append
-            )
-        );
+        osPtr.reset(new OFstream(fName, streamOpt, append));
 
         // We don't have IOobject so cannot use IOobject::writeHeader
         if (!append)
@@ -97,11 +86,10 @@ bool Foam::OFstreamCollator::writeFile
             decomposedBlockData::writeHeader
             (
                 *osPtr,
-                ver,
-                fmt,
-                typeName,
+                streamOpt,   // streamOpt for container
+                objectType,
                 "",          // note
-                fName,       // location
+                "",          // location (leave empty instead inaccurate)
                 fName.name() // object name
             );
         }
@@ -119,12 +107,12 @@ bool Foam::OFstreamCollator::writeFile
     // the master processor in order. However can be unstable
     // for some mpi so default is non-blocking.
 
-    List<std::streamoff> start;
+    List<std::streamoff> blockOffset;
     decomposedBlockData::writeBlocks
     (
         comm,
         osPtr,
-        start,
+        blockOffset,
         slice,
         recvSizes,
         slaveData,
@@ -154,11 +142,8 @@ bool Foam::OFstreamCollator::writeFile
             {
                 sum += recv;
             }
-            // Use ostringstream to display long int (until writing these is
-            // supported)
-            std::ostringstream os;
-            os << sum;
-            Pout<< " (overall " << os.str() << ")";
+            // Use std::to_string to display long int
+            Pout<< " (overall " << std::to_string(sum) << ')';
         }
         Pout<< " to " << fName
             << " using comm " << comm << endl;
@@ -195,7 +180,7 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
             PtrList<SubList<char>> slaveData;
             if (ptr->slaveData_.size())
             {
-                slaveData.setSize(ptr->slaveData_.size());
+                slaveData.resize(ptr->slaveData_.size());
                 forAll(slaveData, proci)
                 {
                     if (ptr->slaveData_.set(proci))
@@ -216,14 +201,12 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
             bool ok = writeFile
             (
                 ptr->comm_,
-                ptr->typeName_,
+                ptr->objectType_,
                 ptr->pathName_,
                 ptr->data_,
                 ptr->sizes_,
                 slaveData,
-                ptr->format_,
-                ptr->version_,
-                ptr->compression_,
+                ptr->streamOpt_,
                 ptr->append_
             );
             if (!ok)
@@ -354,12 +337,10 @@ Foam::OFstreamCollator::~OFstreamCollator()
 
 bool Foam::OFstreamCollator::write
 (
-    const word& typeName,
+    const word& objectType,
     const fileName& fName,
     const string& data,
-    IOstream::streamFormat fmt,
-    IOstream::versionNumber ver,
-    IOstream::compressionType cmp,
+    IOstreamOption streamOpt,
     const bool append,
     const bool useThread
 )
@@ -372,10 +353,10 @@ bool Foam::OFstreamCollator::write
     off_t totalSize = 0;
     label maxLocalSize = 0;
     {
-        for (label proci = 0; proci < recvSizes.size(); proci++)
+        for (const label recvSize : recvSizes)
         {
-            totalSize += recvSizes[proci];
-            maxLocalSize = max(maxLocalSize, recvSizes[proci]);
+            totalSize += recvSize;
+            maxLocalSize = max(maxLocalSize, recvSize);
         }
         Pstream::scatter(totalSize, Pstream::msgType(), localComm_);
         Pstream::scatter(maxLocalSize, Pstream::msgType(), localComm_);
@@ -393,14 +374,12 @@ bool Foam::OFstreamCollator::write
         return writeFile
         (
             localComm_,
-            typeName,
+            objectType,
             fName,
             data,
             recvSizes,
             dummySlaveData,
-            fmt,
-            ver,
-            cmp,
+            streamOpt,
             append
         );
     }
@@ -429,7 +408,7 @@ bool Foam::OFstreamCollator::write
             new writeData
             (
                 threadComm_,        // Note: comm not actually used anymore
-                typeName,
+                objectType,
                 fName,
                 (
                     Pstream::master(localComm_)
@@ -437,9 +416,7 @@ bool Foam::OFstreamCollator::write
                   : string::null
                 ),
                 recvSizes,
-                fmt,
-                ver,
-                cmp,
+                streamOpt,
                 append
             )
         );
@@ -464,7 +441,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
-                    reinterpret_cast<char*>(slaveData[proci].data()),
+                    slaveData[proci].data(),
                     slaveData[proci].size_bytes(),
                     Pstream::msgType(),
                     localComm_
@@ -479,7 +456,7 @@ bool Foam::OFstreamCollator::write
                 (
                     UPstream::commsTypes::nonBlocking,
                     0,
-                    reinterpret_cast<const char*>(slice.cdata()),
+                    slice.cdata(),
                     slice.size_bytes(),
                     Pstream::msgType(),
                     localComm_
@@ -559,13 +536,11 @@ bool Foam::OFstreamCollator::write
                 new writeData
                 (
                     threadComm_,
-                    typeName,
+                    objectType,
                     fName,
                     data,
                     recvSizes,
-                    fmt,
-                    ver,
-                    cmp,
+                    streamOpt,
                     append
                 )
             );

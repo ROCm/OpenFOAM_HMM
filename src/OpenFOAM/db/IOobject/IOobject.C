@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "IOobject.H"
 #include "Time.H"
-#include "IFstream.H"
+#include "Istream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,6 +36,8 @@ namespace Foam
 {
     defineTypeNameAndDebug(IOobject, 0);
 }
+
+bool Foam::IOobject::bannerEnabled_(true);
 
 char Foam::IOobject::scopeSeparator
 (
@@ -46,7 +48,6 @@ char Foam::IOobject::scopeSeparator
     Foam::debug::infoSwitch("scopeSeparator", ':')
     #endif
 );
-
 
 const Foam::Enum
 <
@@ -59,7 +60,6 @@ Foam::IOobject::fileCheckTypesNames
     { fileCheckTypes::inotify, "inotify" },
     { fileCheckTypes::inotifyMaster, "inotifyMaster" },
 });
-
 
 // Default fileCheck type
 Foam::IOobject::fileCheckTypes Foam::IOobject::fileModificationChecking
@@ -290,7 +290,8 @@ Foam::IOobject::IOobject
     const objectRegistry& registry,
     readOption ro,
     writeOption wo,
-    bool registerObject
+    bool registerObject,
+    bool globalObject
 )
 :
     name_(name),
@@ -298,14 +299,15 @@ Foam::IOobject::IOobject
     note_(),
     instance_(instance),
     local_(),
-    db_(registry),
     rOpt_(ro),
     wOpt_(wo),
     registerObject_(registerObject),
-    globalObject_(false),
+    globalObject_(globalObject),
     objState_(GOOD),
-    labelByteSize_(sizeof(label)),
-    scalarByteSize_(sizeof(scalar))
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
+    db_(registry)
 {
     if (objectRegistry::debug)
     {
@@ -334,14 +336,15 @@ Foam::IOobject::IOobject
     note_(),
     instance_(instance),
     local_(local),
-    db_(registry),
     rOpt_(ro),
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
     objState_(GOOD),
-    labelByteSize_(sizeof(label)),
-    scalarByteSize_(sizeof(scalar))
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
+    db_(registry)
 {
     if (objectRegistry::debug)
     {
@@ -368,14 +371,15 @@ Foam::IOobject::IOobject
     note_(),
     instance_(),
     local_(),
-    db_(registry),
     rOpt_(ro),
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
     objState_(GOOD),
-    labelByteSize_(sizeof(label)),
-    scalarByteSize_(sizeof(scalar))
+    sizeofLabel_(static_cast<unsigned char>(sizeof(label))),
+    sizeofScalar_(static_cast<unsigned char>(sizeof(scalar))),
+
+    db_(registry)
 {
     if (!fileNameComponents(path, instance_, local_, name_))
     {
@@ -405,14 +409,15 @@ Foam::IOobject::IOobject
     note_(io.note_),
     instance_(io.instance_),
     local_(io.local_),
-    db_(registry),
     rOpt_(io.rOpt_),
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
     objState_(io.objState_),
-    labelByteSize_(io.labelByteSize_),
-    scalarByteSize_(io.scalarByteSize_)
+    sizeofLabel_(io.sizeofLabel_),
+    sizeofScalar_(io.sizeofScalar_),
+
+    db_(registry)
 {}
 
 
@@ -427,14 +432,15 @@ Foam::IOobject::IOobject
     note_(io.note_),
     instance_(io.instance_),
     local_(io.local_),
-    db_(io.db_),
     rOpt_(io.rOpt_),
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
     objState_(io.objState_),
-    labelByteSize_(io.labelByteSize_),
-    scalarByteSize_(io.scalarByteSize_)
+    sizeofLabel_(io.sizeofLabel_),
+    sizeofScalar_(io.sizeofScalar_),
+
+    db_(io.db_)
 {}
 
 
@@ -454,7 +460,7 @@ Foam::IOobject::IOobject
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::objectRegistry& Foam::IOobject::db() const
+const Foam::objectRegistry& Foam::IOobject::db() const noexcept
 {
     return db_;
 }
@@ -566,8 +572,8 @@ void Foam::IOobject::operator=(const IOobject& io)
     wOpt_ = io.wOpt_;
     globalObject_ = io.globalObject_;
     objState_ = io.objState_;
-    labelByteSize_ = io.labelByteSize_;
-    scalarByteSize_ = io.scalarByteSize_;
+    sizeofLabel_ = io.sizeofLabel_;
+    sizeofScalar_ = io.sizeofScalar_;
 }
 
 

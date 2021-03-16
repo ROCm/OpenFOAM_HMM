@@ -32,7 +32,45 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::IOobject::readHeader(Istream& is)
+Foam::IOstreamOption Foam::IOobject::parseHeader(const dictionary& headerDict)
+{
+    IOstreamOption streamOpt;  // == (ASCII, currentVersion)
+
+    // Treat "version" as optional
+    {
+        token tok;
+        if (headerDict.readIfPresent("version", tok))
+        {
+            streamOpt.version(tok);
+        }
+    }
+
+    // Treat "format" as mandatory, could also as optional
+    streamOpt.format(headerDict.get<word>("format"));
+
+    headerClassName_ = headerDict.get<word>("class");
+
+    const word headerObject(headerDict.get<word>("object"));
+
+    // The "note" entry is optional
+    headerDict.readIfPresent("note", note_);
+
+    // The "arch" information may be missing
+    string arch;
+    if (headerDict.readIfPresent("arch", arch))
+    {
+        unsigned val = foamVersion::labelByteSize(arch);
+        if (val) sizeofLabel_ = static_cast<unsigned char>(val);
+
+        val = foamVersion::scalarByteSize(arch);
+        if (val) sizeofScalar_ = static_cast<unsigned char>(val);
+    }
+
+    return streamOpt;
+}
+
+
+bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
 {
     if (IOobject::debug)
     {
@@ -64,48 +102,21 @@ bool Foam::IOobject::readHeader(Istream& is)
 
     if (is.good() && firstToken.isWord("FoamFile"))
     {
-        const dictionary headerDict(is);
+        headerDict.read(is, false);  // Read sub-dictionary content
 
-        is.version(headerDict.get<token>("version"));
-        is.format(headerDict.get<word>("format"));
+        IOstreamOption streamOpt = parseHeader(headerDict);
 
-        headerClassName_ = headerDict.get<word>("class");
-
-        const word headerObject(headerDict.get<word>("object"));
-
-        if (IOobject::debug && headerObject != name())
-        {
-            IOWarningInFunction(is)
-                << " object renamed from "
-                << name() << " to " << headerObject
-                << " for file " << is.name() << endl;
-        }
-
-        // The note entry is optional
-        headerDict.readIfPresent("note", note_);
-
-        labelByteSize_ = sizeof(label);
-        scalarByteSize_ = sizeof(scalar);
-
-        // The arch information is optional
-        string arch;
-        if (headerDict.readIfPresent("arch", arch))
-        {
-            unsigned val = foamVersion::labelByteSize(arch);
-            if (val) labelByteSize_ = val;
-
-            val = foamVersion::scalarByteSize(arch);
-            if (val) scalarByteSize_ = val;
-        }
-
-        is.setLabelByteSize(labelByteSize_);
-        is.setScalarByteSize(scalarByteSize_);
+        is.format(streamOpt.format());
+        is.version(streamOpt.version());
+        is.setLabelByteSize(sizeofLabel_);
+        is.setScalarByteSize(sizeofScalar_);
     }
     else
     {
         IOWarningInFunction(is)
-            << "First token could not be read or is not the keyword 'FoamFile'"
-            << nl << nl << "Check header is of the form:" << nl << endl;
+            << "First token could not be read or is not 'FoamFile'"
+            << nl << nl
+            << "Check header is of the form:" << nl << endl;
 
         writeHeader(Info);
 
@@ -148,6 +159,13 @@ bool Foam::IOobject::readHeader(Istream& is)
     }
 
     return true;
+}
+
+
+bool Foam::IOobject::readHeader(Istream& is)
+{
+    dictionary headerDict;
+    return IOobject::readHeader(headerDict, is);
 }
 
 

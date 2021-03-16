@@ -334,20 +334,26 @@ public:
             inline void operator=(SortableList<T>&& lst);
 
 
+    // Reading/writing
+
+        //- Read from Istream, discarding existing contents
+        inline Istream& readList(Istream& is);
+
+
     // IOstream Operators
 
         //- Read from Istream, discarding existing contents
         friend Istream& operator>> <T, SizeMin>
         (
             Istream& is,
-            DynamicList<T, SizeMin>& rhs
+            DynamicList<T, SizeMin>& list
         );
 
         //- Write to Ostream
         friend Ostream& operator<< <T, SizeMin>
         (
             Ostream& os,
-            const DynamicList<T, SizeMin>& rhs
+            const DynamicList<T, SizeMin>& list
         );
 };
 

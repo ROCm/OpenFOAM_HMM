@@ -47,8 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class Ostream;
 
 template<class LListBase, class T> class UILList;
@@ -107,7 +106,7 @@ public:
 
     // Constructors
 
-        //- Null construct
+        //- Default construct
         UILList() = default;
 
         //- Construct and insert the initial T item
@@ -179,7 +178,7 @@ public:
         bool operator!=(const UILList<LListBase, T>& lst) const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
         //- Write UILList with line-breaks when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.

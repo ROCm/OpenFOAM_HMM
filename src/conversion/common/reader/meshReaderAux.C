@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ void Foam::meshReader::writeMeshLabelList
     const objectRegistry& registry,
     const word& propertyName,
     const labelList& list,
-    IOstream::streamFormat fmt
+    IOstreamOption streamOpt
 ) const
 {
     // write constant/polyMesh/propertyName
@@ -129,14 +129,14 @@ void Foam::meshReader::writeMeshLabelList
     );
 
 
-    ioObj.note() = "persistent data for star-cd <-> foam translation";
+    ioObj.note() = "persistent data for STARCD <-> OPENFOAM translation";
     Info<< "Writing " << ioObj.name() << " to " << ioObj.objectPath() << endl;
 
     // NOTE:
     // the cellTableId is an integer and almost always < 1000, thus ASCII
     // will be compacter than binary and makes external scripting easier
 
-    ioObj.writeObject(IOstreamOption(fmt), true);
+    ioObj.writeObject(streamOpt, true);
 }
 
 
@@ -153,7 +153,7 @@ void Foam::meshReader::writeAux(const objectRegistry& registry) const
         registry,
         "origCellId",
         origCellId_,
-        IOstream::BINARY
+        IOstreamOption(IOstreamOption::BINARY)
     );
 
     // write cellTableId as List<label>
@@ -163,7 +163,7 @@ void Foam::meshReader::writeAux(const objectRegistry& registry) const
         registry,
         "cellTableId",
         cellTableId_,
-        IOstream::ASCII
+        IOstreamOption(IOstreamOption::ASCII)
     );
 }
 

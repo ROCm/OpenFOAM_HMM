@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,13 +56,12 @@ class OPstream
     public Pstream,
     public UOPstream
 {
-
 public:
 
     // Constructors
 
         //- Construct given process index to send to and optional buffer size,
-        //  write format and IO version
+        //- write format and IO version
         OPstream
         (
             const commsTypes commsType,
@@ -69,10 +69,9 @@ public:
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
-            streamFormat format=BINARY,
-            versionNumber version=currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
+            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
         );
-
 };
 
 
