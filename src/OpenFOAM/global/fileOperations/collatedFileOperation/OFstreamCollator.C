@@ -29,6 +29,7 @@ License
 #include "OFstreamCollator.H"
 #include "OFstream.H"
 #include "decomposedBlockData.H"
+#include "dictionary.H"
 #include "masterUncollatedFileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -50,7 +51,8 @@ bool Foam::OFstreamCollator::writeFile
     const labelUList& recvSizes,
     const PtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
-    const bool append
+    const bool append,
+    const dictionary* headerEntriesPtr
 )
 {
     if (debug)
@@ -93,7 +95,8 @@ bool Foam::OFstreamCollator::writeFile
                 objectType,
                 "",             // note
                 "",             // location (leave empty instead inaccurate)
-                fName.name()    // object name
+                fName.name(),   // object name
+                headerEntriesPtr
             );
         }
     }
@@ -210,7 +213,8 @@ void* Foam::OFstreamCollator::writeAll(void *threadarg)
                 ptr->sizes_,
                 slaveData,
                 ptr->streamOpt_,
-                ptr->append_
+                ptr->append_,
+                ptr->headerEntries_
             );
             if (!ok)
             {
@@ -345,7 +349,8 @@ bool Foam::OFstreamCollator::write
     const string& data,
     IOstreamOption streamOpt,
     const bool append,
-    const bool useThread
+    const bool useThread,
+    const dictionary* headerEntriesPtr
 )
 {
     // Determine (on master) sizes to receive. Note: do NOT use thread
@@ -383,7 +388,8 @@ bool Foam::OFstreamCollator::write
             recvSizes,
             dummySlaveData,
             streamOpt,
-            append
+            append,
+            headerEntriesPtr
         );
     }
     else if (totalSize <= maxBufferSize_)
@@ -420,7 +426,8 @@ bool Foam::OFstreamCollator::write
                 ),
                 recvSizes,
                 streamOpt,
-                append
+                append,
+                headerEntriesPtr
             )
         );
         writeData& fileAndData = fileAndDataPtr();
@@ -544,7 +551,8 @@ bool Foam::OFstreamCollator::write
                     data,
                     recvSizes,
                     streamOpt,
-                    append
+                    append,
+                    headerEntriesPtr
                 )
             );
 

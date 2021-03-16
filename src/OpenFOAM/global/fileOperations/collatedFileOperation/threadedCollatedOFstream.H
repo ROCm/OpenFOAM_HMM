@@ -38,6 +38,7 @@ SourceFiles
 #ifndef threadedCollatedOFstream_H
 #define threadedCollatedOFstream_H
 
+#include "dictionary.H"
 #include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,6 +68,9 @@ class threadedCollatedOFstream
 
         const bool useThread_;
 
+        //- Additional FoamFile entries for decomposed data
+        dictionary headerEntries_;
+
 
 public:
 
@@ -84,6 +88,12 @@ public:
 
     //- Destructor
     ~threadedCollatedOFstream();
+
+
+    // Member Functions
+
+        //- Define the header entries for the data block(s)
+        void setHeaderEntries(const dictionary& dict);
 
 
     // Additional constructors and methods (as per v2012 and earlier)

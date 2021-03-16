@@ -44,7 +44,8 @@ Foam::threadedCollatedOFstream::threadedCollatedOFstream
     writer_(writer),
     pathName_(pathName),
     compression_(streamOpt.compression()),
-    useThread_(useThread)
+    useThread_(useThread),
+    headerEntries_()
 {}
 
 
@@ -59,8 +60,17 @@ Foam::threadedCollatedOFstream::~threadedCollatedOFstream()
         str(),
         IOstreamOption(IOstream::BINARY, version(), compression_),
         false,  // append=false
-        useThread_
+        useThread_,
+        &headerEntries_
     );
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::threadedCollatedOFstream::setHeaderEntries(const dictionary& dict)
+{
+    headerEntries_ = dict;
 }
 
 

@@ -493,6 +493,16 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 ok = ok && io.writeHeader(os);
 
                 IOobject::bannerEnabled(old);
+
+                // Additional header content
+                dictionary dict;
+                decomposedBlockData::writeExtraHeaderContent
+                (
+                    dict,
+                    streamOpt,
+                    io
+                );
+                os.setHeaderEntries(dict);
             }
 
             ok = ok && io.writeData(os);

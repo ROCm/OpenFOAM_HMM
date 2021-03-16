@@ -63,6 +63,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class dictionary;
+
 /*---------------------------------------------------------------------------*\
                         Class OFstreamCollator Declaration
 \*---------------------------------------------------------------------------*/
@@ -81,6 +84,7 @@ class OFstreamCollator
             PtrList<List<char>> slaveData_;
             const IOstreamOption streamOpt_;
             const bool append_;
+            const dictionary* headerEntries_;
 
             writeData
             (
@@ -90,7 +94,8 @@ class OFstreamCollator
                 const string& data,
                 const labelList& sizes,
                 IOstreamOption streamOpt,
-                const bool append
+                const bool append,
+                const dictionary* headerEntriesPtr = nullptr
             )
             :
                 comm_(comm),
@@ -100,7 +105,8 @@ class OFstreamCollator
                 sizes_(sizes),
                 slaveData_(),
                 streamOpt_(streamOpt),
-                append_(append)
+                append_(append),
+                headerEntries_(headerEntriesPtr)
             {}
 
             //- The (approximate) size of master + any optional slave data
@@ -153,7 +159,8 @@ class OFstreamCollator
             const labelUList& recvSizes,
             const PtrList<SubList<char>>& slaveData,
             IOstreamOption streamOpt,
-            const bool append
+            const bool append,
+            const dictionary* headerEntriesPtr
         );
 
         //- Write all files in stack
@@ -196,7 +203,8 @@ public:
             const string& data,
             IOstreamOption streamOpt,
             const bool append,
-            const bool useThread = true
+            const bool useThread = true,
+            const dictionary* headerEntriesPtr = nullptr
         );
 
         //- Wait for all thread actions to have finished
