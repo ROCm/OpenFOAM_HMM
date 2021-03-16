@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -396,22 +396,43 @@ Foam::AABBTree<Type>::AABBTree
     // transfer flattened tree to persistent storage
     DynamicList<treeBoundBox> boundBoxes(2*bbs.size());
     DynamicList<labelList> addressing(2*addr.size());
+
     forAll(nodes, nodeI)
     {
         if (nodes[nodeI].first() < 0)
         {
             boundBoxes.append(bbs[nodeI].first());
-            addressing.append(addr[nodeI + 1]);
+            addressing.append(addr[-(nodes[nodeI].first() + 1)]);
         }
         if (nodes[nodeI].second() < 0)
         {
             boundBoxes.append(bbs[nodeI].second());
-            addressing.append(addr[nodeI + 1]);
+            addressing.append(addr[-(nodes[nodeI].second() + 1)]);
         }
     }
 
     boundBoxes_.transfer(boundBoxes);
     addressing_.transfer(addressing);
+
+
+    if (0)
+    {
+        bitSet checked(objects.size());
+        for (const auto& box : addressing_)
+        {
+            for (const auto& id : box)
+            {
+                checked.set(id);
+            }
+        }
+
+        const label unsetSize = checked.count(false);
+
+        if (unsetSize)
+        {
+            Info<< "*** Problem: IDs not set: " << unsetSize << endl;
+        }
+    }
 }
 
 

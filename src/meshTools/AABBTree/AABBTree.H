@@ -142,8 +142,7 @@ public:
         AABBTree();
 
         //- Construct from components
-        //  equalBinSize: divide into equal number of elements or
-        //                equal span
+        //  equalBinSize: divide into equal number of elements or equal span
         AABBTree
         (
             const UList<Type>& objects,
@@ -171,7 +170,7 @@ public:
             bool pointInside(const point& pt) const;
 
             //- Determine whether a bounding box overlaps the tree bounding
-            //  boxes
+            //- boxes
             bool overlaps(const boundBox& bbIn) const;
 
 
