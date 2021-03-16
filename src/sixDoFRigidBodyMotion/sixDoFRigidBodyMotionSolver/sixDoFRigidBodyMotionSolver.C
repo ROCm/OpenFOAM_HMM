@@ -107,7 +107,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         dimensionedScalar(dimless, Zero)
     ),
     curTimeIndex_(-1),
-    CofGvelocity_(coeffDict().getOrDefault<word>("CofGvelocity", "none"))
+    cOfGdisplacement_(coeffDict().getOrDefault<word>("cOfGdisplacement", "none"))
 {
     if (rhoName_ == "rhoInf")
     {
@@ -262,20 +262,20 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
             t.deltaT0Value()
         );
 
-        if (CofGvelocity_ != "none")
+        if (cOfGdisplacement_ != "none")
         {
             if
             (
                 db().time().foundObject<uniformDimensionedVectorField>
                 (
-                    CofGvelocity_
+                    cOfGdisplacement_
                 )
             )
             {
-                uniformDimensionedVectorField& disp =
+                auto& disp =
                     db().time().lookupObjectRef<uniformDimensionedVectorField>
                     (
-                        CofGvelocity_
+                        cOfGdisplacement_
                     );
 
                 disp += (motion_.centreOfRotation() - oldPos);

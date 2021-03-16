@@ -93,7 +93,7 @@ class prescribedRotation
         mutable vector omega_;
 
         //- Cache previous momentum
-        mutable vector prevMom_;
+        mutable vector oldMom_;
 
         //- Relax momentum
         scalar relax_;

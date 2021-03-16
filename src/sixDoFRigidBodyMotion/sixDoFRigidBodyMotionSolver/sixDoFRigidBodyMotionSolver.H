@@ -94,8 +94,8 @@ class sixDoFRigidBodyMotionSolver
         //- Current time index (used for updating)
         label curTimeIndex_;
 
-        //- Name of the uniformVectorField for CofG velocity
-        word CofGvelocity_;
+        //- Name of the uniformVectorField for CofG displacement
+        word cOfGdisplacement_;
 
 
     // Private Member Functions

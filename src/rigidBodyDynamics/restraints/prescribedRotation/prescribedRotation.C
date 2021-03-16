@@ -63,7 +63,7 @@ Foam::RBD::restraints::prescribedRotation::prescribedRotation
     restraint(name, dict, model),
     omegaSet_(model_.time(), "omega"),
     omega_(Zero),
-    prevMom_(Zero),
+    oldMom_(Zero),
     error0_(Zero),
     integral0_(Zero)
 {
@@ -86,7 +86,7 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     const rigidBodyModelState& state
 ) const
 {
-    vector refDir = rotationTensor(vector(1, 0, 0), axis_) & vector(0, 1, 0);
+    vector refDir = rotationTensor(vector(1, 0, 0), axis_)&vector(0, 1, 0);
 
     vector oldDir = refQ_ & refDir;
     vector newDir = model_.X0(bodyID_).E() & refDir;
@@ -137,21 +137,10 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     vector integral = integral0_ + error;
     vector derivative = (error - error0_);
 
-    vector moment = ((p_*error + i_*integral + d_*derivative) & a ) * a;
-    moment = moment*Inertia/model_.time().deltaTValue();
+    vector moment = ((p_*error + i_*integral + d_*derivative)&a)*a;
+    moment *= Inertia/model_.time().deltaTValue();
 
-//     vector moment
-//     (
-//         (
-//             Inertia
-//           * (omegaSet_.value(model_.time().value()) - omega)
-//           / model_.time().deltaTValue()/relax_
-//           & a
-//         )
-//       * a
-//     );
-
-    moment = relax_*moment + (1- relax_)*prevMom_;
+    moment = relax_*moment + (1- relax_)*oldMom_;
 
     if (model_.debug)
     {
@@ -172,7 +161,7 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     // Accumulate the force for the restrained body
     fx[bodyIndex_] += model_.X0(bodyID_).T() & spatialVector(moment, Zero);
 
-    prevMom_ = moment;
+    oldMom_ = moment;
     error0_ = error;
     integral0_ = integral;
 }

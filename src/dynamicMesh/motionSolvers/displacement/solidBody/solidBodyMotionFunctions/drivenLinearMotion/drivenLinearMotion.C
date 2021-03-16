@@ -55,12 +55,12 @@ Foam::solidBodyMotionFunctions::drivenLinearMotion::drivenLinearMotion
 )
 :
     solidBodyMotionFunction(SBMFCoeffs, runTime),
-    CofGvelocity_(SBMFCoeffs.get<word>("CofGvelocity")),
-    CofGvel_
+    cOfGdisplacement_(SBMFCoeffs.get<word>("cOfGdisplacement")),
+    CofGdisp_
     (
         IOobject
         (
-            CofGvelocity_,
+            cOfGdisplacement_,
             time_.timeName(),
             "uniform",
             time_,
@@ -80,9 +80,9 @@ Foam::septernion
 Foam::solidBodyMotionFunctions::drivenLinearMotion::transformation() const
 {
 
-    DebugInFunction << "displacement  :" << CofGvel_.value() << endl;
+    DebugInFunction << "displacement  :" << CofGdisp_.value() << endl;
     quaternion R(1);
-    septernion TR(septernion(-CofGvel_.value())*R);
+    septernion TR(septernion(-CofGdisp_.value())*R);
 
     DebugInFunction << "Time = " << time_.value()
                     << " transformation: " << TR << endl;

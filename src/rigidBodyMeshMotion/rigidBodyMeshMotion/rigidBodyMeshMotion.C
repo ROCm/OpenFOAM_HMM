@@ -121,9 +121,11 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
     ramp_(Function1<scalar>::NewIfPresent("ramp", coeffDict())),
     curTimeIndex_(-1),
-    CofGvelocity_(coeffDict().getOrDefault<word>("CofGvelocity", "none")),
+    cOfGdisplacement_
+    (
+        coeffDict().getOrDefault<word>("cOfGdisplacement", "none")
+    ),
     bodyIdCofG_(coeffDict().getOrDefault<label>("bodyIdCofG", -1))
-    //points0_(points0IO(mesh))
 {
     if (rhoName_ == "rhoInf")
     {
@@ -211,8 +213,6 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 Foam::tmp<Foam::pointField>
 Foam::rigidBodyMeshMotion::curPoints() const
 {
-    //return points0() + pointDisplacement_.primitiveField();
-
     tmp<pointField> newPoints(points0() + pointDisplacement_.primitiveField());
 
     if (moveAllCells())
@@ -311,7 +311,7 @@ void Foam::rigidBodyMeshMotion::solve()
             );
         }
 
-        if (CofGvelocity_ != "none")
+        if (cOfGdisplacement_ != "none")
         {
             if (bodyIdCofG_ != -1)
             {
@@ -319,14 +319,14 @@ void Foam::rigidBodyMeshMotion::solve()
                 (
                     db().time().foundObject<uniformDimensionedVectorField>
                     (
-                        CofGvelocity_
+                        cOfGdisplacement_
                     )
                 )
                 {
-                    uniformDimensionedVectorField& disp =
+                    auto& disp =
                         db().time().lookupObjectRef<uniformDimensionedVectorField>
                         (
-                            CofGvelocity_
+                            cOfGdisplacement_
                         );
 
                     disp.value() += model_.cCofR(bodyIdCofG_) - oldPos;
@@ -335,8 +335,8 @@ void Foam::rigidBodyMeshMotion::solve()
             else
             {
                 FatalErrorInFunction
-                    << "CofGvelocity is different of none." << endl
-                    << "The model need the entry body reference Id: bodyIdCofG."
+                    << "CofGdisplacement is different to none." << endl
+                    << "The model needs the entry body reference Id: bodyIdCofG."
                     << exit(FatalError);
             }
         }

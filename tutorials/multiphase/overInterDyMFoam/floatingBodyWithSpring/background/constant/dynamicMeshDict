@@ -26,7 +26,7 @@ solvers
         solidBodyMotionFunction drivenLinearMotion;
 
         cellSet                 c0;
-        CofGvelocity            CofG;
+        cOfGdisplacement        CofG;
     }
 
     cube
@@ -40,9 +40,9 @@ solvers
         innerDistance   1000.0;
         outerDistance   1001.0;
 
-        centreOfMass    (0.5 0.5 0.4);
-        CofGvelocity    CofG;
-
+        centreOfMass        (0.5 0.5 0.4);
+        cOfGdisplacement    CofG;
+        
         // Cuboid dimensions
         Lx              0.24;
         Ly              0.24;
