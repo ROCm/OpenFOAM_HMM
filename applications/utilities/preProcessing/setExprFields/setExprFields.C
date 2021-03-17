@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,12 +44,11 @@ Note
 #include "pointMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfaceFields.H"
 #include "pointFields.H"
 #include "exprOps.H"
 #include "volumeExprDriver.H"
 #include "timeSelector.H"
-#include "dlLibraryTable.H"
+#include "readFields.H"
 
 
 using namespace Foam;
@@ -175,7 +174,7 @@ void setField
 
     if (cond.empty())
     {
-        // No condition
+        // No condition - set all
         output = result;
 
         setCells = output.size();
@@ -288,11 +287,15 @@ void evaluate
         << "Expression:" << nl
         << ">>>>" << nl
         << expression.c_str() << nl
-        << "<<<<" << nl
-        << "Condition:" << nl
-        << ">>>>" << nl
-        << condition.c_str() << nl
         << "<<<<" << nl;
+
+    if (condition.size() && condition != "true")
+    {
+        Info<< "Condition:" << nl
+            << ">>>>" << nl
+            << condition.c_str() << nl
+            << "<<<<" << nl;
+    }
 
     if (ctrl.keepPatches)
     {
@@ -542,32 +545,38 @@ int main(int argc, char *argv[])
         "file",
         "Alternative dictionary for setExprFieldsDict"
     );
-
     argList::addBoolOption
     (
         "dry-run",
         "Evaluate but do not write"
     );
-
     argList::addBoolOption
     (
         "verbose",
         "Additional verbosity",
         true // Advanced option
     );
-
+    argList::addOption
+    (
+        "load-fields",
+        "wordList",
+        "Specify field or fields to preload. Eg, 'T' or '(p T U)'",
+        true // Advanced option
+    );
     argList::addOption
     (
         "field",
         "name",
-        "The field to overwrite command-line operation)",
+        "The field to overwrite"
+        " (command-line operation)",
         true // Advanced option
     );
     argList::addOption
     (
         "expression",
         "expr",
-        "The expression to evaluate (command-line operation)",
+        "The expression to evaluate"
+        " (command-line operation)",
         true // Advanced option
     );
     argList::addOption
@@ -582,7 +591,7 @@ int main(int argc, char *argv[])
     (
         "dimension",
         "dims",
-        "The dimensions to apply for created fields"
+        "The dimensions for created fields"
         " (command-line operation)",
         true // Advanced option
     );
@@ -601,7 +610,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "create",
-        "Create a new field (command-line operation)",
+        "Create a new field"
+        " (command-line operation)",
         true // Advanced option
     );
     argList::addBoolOption
@@ -714,7 +724,6 @@ int main(int argc, char *argv[])
         exprDictPtr.reset(new IOdictionary(dictIO));
     }
 
-
     forAll(times, timei)
     {
         runTime.setTime(times[timei], timei);
@@ -722,6 +731,14 @@ int main(int argc, char *argv[])
         Info<< "\nTime = " << runTime.timeName() << endl;
 
         mesh.readUpdate();
+
+        // preload fields specified on command-line
+        if (timei == 0)
+        {
+            wordList preloadFields;
+            args.readListIfPresent("load-fields", preloadFieldNames);
+            readFieldsHandler(mesh).execute(preloadFields);
+        }
 
         if (args.found("dummy-phi") && !dummyPhi)
         {
@@ -805,6 +822,13 @@ int main(int argc, char *argv[])
         else if (exprDictPtr)
         {
             const dictionary& exprDict = *exprDictPtr;
+
+            // preload fields specified in dictionary
+            {
+                wordList preloadFields;
+                exprDict.readIfPresent("readFields", preloadFields);
+                readFieldsHandler(mesh).execute(preloadFields);
+            }
 
             // Read set construct info from dictionary
             PtrList<entry> actions(exprDict.lookup("expressions"));

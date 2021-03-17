@@ -28,4 +28,8 @@ runApplication reconstructParMesh -constant
 
 runApplication reconstructPar
 
+runApplication setExprFields -latestTime  ## -load-fields U
+
+runApplication setExprBoundaryFields -latestTime  ## -load-fields '(U)'
+
 #------------------------------------------------------------------------------

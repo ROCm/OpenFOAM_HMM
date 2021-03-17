@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,10 +44,10 @@ Note
 #include "pointMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfaceFields.H"
 #include "pointFields.H"
 #include "patchExprDriver.H"
 #include "timeSelector.H"
+#include "readFields.H"
 
 using namespace Foam;
 
@@ -67,11 +67,17 @@ int main(int argc, char *argv[])
         "file",
         "Alternative dictionary for setExprBoundaryFieldsDict"
     );
-
     argList::addBoolOption
     (
         "cache-fields",
         "Cache fields between calls",
+        true // Advanced
+    );
+    argList::addOption
+    (
+        "load-fields",
+        "wordList",
+        "Specify field or fields to preload. Eg, 'T' or '(p T U)'",
         true // Advanced
     );
     argList::addBoolOption
@@ -80,7 +86,6 @@ int main(int argc, char *argv[])
         "Preserve sub-entry as .backup",
         true // Advanced
     );
-
     argList::addBoolOption
     (
         "dry-run",
@@ -128,12 +133,29 @@ int main(int argc, char *argv[])
 
         mesh.readUpdate();
 
+        // preload fields specified on command-line
+        if (timei == 0)
+        {
+            wordList preloadFields;
+            args.readListIfPresent("load-fields", preloadFields);
+            readFieldsHandler(mesh).execute(preloadFields);
+        }
+        // preload fields specified in dictionary
+        {
+            wordList preloadFields;
+            setExprDict.readIfPresent("readFields", preloadFields);
+            readFieldsHandler(mesh).execute(preloadFields);
+        }
+
         for (const entry& dEntry : setExprDict)
         {
             if (!dEntry.isDict())
             {
-                Info<< "Ignoring non-dictionary entry "
-                    << dEntry.keyword() << nl;
+                if (dEntry.keyword() != "readFields")
+                {
+                    Info<< "Ignoring non-dictionary entry "
+                        << dEntry.keyword() << nl;
+                }
                 continue;
             }
 
@@ -193,8 +215,8 @@ int main(int argc, char *argv[])
 
             for (const dictionary& currDict : exprDicts)
             {
-                const word targetName = currDict.get<word>("target");
-                const word patchName = currDict.get<word>("patch");
+                const word patchName(currDict.get<word>("patch"));
+                const word targetName(currDict.get<word>("target"));
 
                 dictionary& patchDict = boundaryFieldDict.subDict(patchName);
 

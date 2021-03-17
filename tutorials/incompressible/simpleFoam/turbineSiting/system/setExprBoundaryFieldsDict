@@ -17,17 +17,23 @@ FoamFile
 // Preload any required fields (optional)
 readFields      ( U );
 
-pattern
+updateBCs
 {
-    field   T;
+    field   windPowerDensity;
+
+    _value1
+    {
+        target      value;
+        variables   ( "rho=1.2" );
+        expression  #{ 0.5*rho*cbrt(mag(U)) #};
+    }
 
     expressions
     (
-        {
-            patch   outlet2;
-            target  something;
-            expression #{ (pos().x() < 1e-4 ? 60 : 120) #};
-        }
+        { $_value1; patch inlet; }
+        { $_value1; patch outlet; }
+        { $_value1; patch sides; }
+        { $_value1; patch top; }
     );
 }
 

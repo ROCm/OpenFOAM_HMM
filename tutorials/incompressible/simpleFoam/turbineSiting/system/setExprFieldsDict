@@ -10,26 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      setExprBoundaryFieldsDict;
+    object      setExprFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Preload any required fields (optional)
 readFields      ( U );
 
-pattern
+_value1
 {
-    field   T;
-
-    expressions
-    (
-        {
-            patch   outlet2;
-            target  something;
-            expression #{ (pos().x() < 1e-4 ? 60 : 120) #};
-        }
-    );
+    variables   ( "rho=1.2" );
+    expression  #{ 0.5*rho*cbrt(mag(U)) #};
 }
+
+expressions
+(
+    windPowerDensity
+    {
+        field   windPowerDensity;
+        create  yes;
+        $_value1;
+    }
+);
 
 
 // ************************************************************************* //
