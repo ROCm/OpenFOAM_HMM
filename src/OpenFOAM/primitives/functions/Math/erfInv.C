@@ -27,6 +27,7 @@ License
 
 #include "MathFunctions.H"
 #include "mathematicalConstants.H"
+#include "error.H"
 
 // * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 
