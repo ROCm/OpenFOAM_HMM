@@ -2407,9 +2407,12 @@ int main(int argc, char *argv[])
     else
     {
         // Directory does not exist. If this happens on master -> decompose mode
-        decompose = true;
-        Info<< "No processor directories; switching on decompose mode"
-            << nl << endl;
+        if (Pstream::master())
+        {
+            decompose = true;
+            Info<< "No processor directories; switching on decompose mode"
+                << nl << endl;
+        }
     }
     // If master changed to decompose mode make sure all nodes know about it
     Pstream::scatter(decompose);
@@ -2421,20 +2424,19 @@ int main(int argc, char *argv[])
     // e.g. latestTime will pick up a different time (which causes createTime.H
     // to abort). So for now make sure to have master times on all
     // processors
-    if (!procDir.empty())
     {
         Info<< "Creating time directories on all processors" << nl << endl;
         instantList timeDirs;
         if (Pstream::master())
         {
             const bool oldParRun = Pstream::parRun(false);
-            timeDirs = Time::findTimes(procDir, "constant");
+            timeDirs = Time::findTimes(args.path(), "constant");
             Pstream::parRun(oldParRun);  // Restore parallel state
         }
         Pstream::scatter(timeDirs);
         for (const instant& t : timeDirs)
         {
-            mkDir(procDir/t.name());
+            mkDir(args.path()/t.name());
         }
     }
 

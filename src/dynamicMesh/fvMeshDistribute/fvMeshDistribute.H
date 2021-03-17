@@ -137,9 +137,9 @@ class fvMeshDistribute
                 const typename GeoField::value_type& initVal
             );
 
-            //- Call correctBoundaryConditions on fields
-            template<class GeoField>
-            void correctBoundaryConditions();
+            ////- Call correctBoundaryConditions on fields
+            //template<class GeoField>
+            //void correctBoundaryConditions();
 
             //- Delete all processor patches. Move any processor faces into
             //  patchi.
@@ -306,6 +306,7 @@ class fvMeshDistribute
             (
                 const fvMesh& mesh,
                 HashTable<wordList>& allFieldNames,
+                const word& excludeType = word::null,
                 const bool syncPar = true
             );
 
@@ -383,6 +384,10 @@ public:
                 const labelList&,
                 const labelList&
             );
+
+            //- Print some field info
+            template<class GeoField>
+            static void printIntFieldInfo(const fvMesh&);
 
             //- Print some field info
             template<class GeoField>

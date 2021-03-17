@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,9 +31,37 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class GeoField>
+void Foam::fvMeshDistribute::printIntFieldInfo(const fvMesh& mesh)
+{
+    typedef GeometricField
+    <
+        typename GeoField::value_type,
+        fvPatchField,
+        volMesh
+    > excludeType;
+
+    const HashTable<const GeoField*> flds
+    (
+        mesh.objectRegistry::lookupClass<GeoField>()
+    );
+
+    forAllConstIters(flds, iter)
+    {
+        const GeoField& fld = *iter();
+        if (!isA<excludeType>(fld))
+        {
+            Pout<< "Field:" << iter.key() << " internalsize:" << fld.size()
+                //<< " value:" << fld
+                << endl;
+        }
+    }
+}
+
+
+template<class GeoField>
 void Foam::fvMeshDistribute::printFieldInfo(const fvMesh& mesh)
 {
-    HashTable<const GeoField*> flds
+    const HashTable<const GeoField*> flds
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
@@ -270,22 +298,22 @@ void Foam::fvMeshDistribute::initPatchFields
 }
 
 
-template<class GeoField>
-void Foam::fvMeshDistribute::correctBoundaryConditions()
-{
-    // CorrectBoundaryConditions patch fields of certain type
-
-    HashTable<GeoField*> flds
-    (
-        mesh_.objectRegistry::lookupClass<GeoField>()
-    );
-
-    forAllIters(flds, iter)
-    {
-        GeoField& fld = *iter();
-        fld.correctBoundaryConditions();
-    }
-}
+//template<class GeoField>
+//void Foam::fvMeshDistribute::correctBoundaryConditions()
+//{
+//    // CorrectBoundaryConditions patch fields of certain type
+//
+//    HashTable<GeoField*> flds
+//    (
+//        mesh_.objectRegistry::lookupClass<GeoField>()
+//    );
+//
+//    forAllIters(flds, iter)
+//    {
+//        GeoField& fld = *iter();
+//        fld.correctBoundaryConditions();
+//    }
+//}
 
 
 template<class GeoField>
@@ -293,11 +321,31 @@ void Foam::fvMeshDistribute::getFieldNames
 (
     const fvMesh& mesh,
     HashTable<wordList>& allFieldNames,
+    const word& excludeType,
     const bool syncPar
 )
 {
     wordList& list = allFieldNames(GeoField::typeName);
     list = mesh.sortedNames<GeoField>();
+
+    if (!excludeType.empty())
+    {
+        const wordList& excludeList = allFieldNames(excludeType);
+
+        DynamicList<word> newList(list.size());
+        for(const auto& name : list)
+        {
+            if (!excludeList.found(name))
+            {
+                newList.append(name);
+            }
+        }
+        if (newList.size() < list.size())
+        {
+            list = std::move(newList);
+        }
+    }
+
 
     // Check all procs have same names
     if (syncPar)
@@ -363,7 +411,8 @@ void Foam::fvMeshDistribute::sendFields
     {
         if (debug)
         {
-            Pout<< "Subsetting field " << fieldName
+            Pout<< "Subsetting " << GeoField::typeName
+                << " field " << fieldName
                 << " for domain:" << domain << endl;
         }
 
@@ -406,7 +455,8 @@ void Foam::fvMeshDistribute::receiveFields
 
     if (debug)
     {
-        Pout<< "Receiving fields " << fieldNames
+        Pout<< "Receiving:" << GeoField::typeName
+            << " fields:" << fieldNames
             << " from domain:" << domain << endl;
     }
 
@@ -417,7 +467,8 @@ void Foam::fvMeshDistribute::receiveFields
     {
         if (debug)
         {
-            Pout<< "Constructing field " << fieldName
+            Pout<< "Constructing type:"  << GeoField::typeName
+                << " field:" << fieldName
                 << " from domain:" << domain << endl;
         }
 

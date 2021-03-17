@@ -2017,11 +2017,36 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     getFieldNames<surfaceSymmTensorField>(mesh_, allFieldNames);
     getFieldNames<surfaceTensorField>(mesh_, allFieldNames);
 
-    getFieldNames<volScalarField::Internal>(mesh_, allFieldNames);
-    getFieldNames<volVectorField::Internal>(mesh_, allFieldNames);
-    getFieldNames<volSphericalTensorField::Internal>(mesh_, allFieldNames);
-    getFieldNames<volSymmTensorField::Internal>(mesh_, allFieldNames);
-    getFieldNames<volTensorField::Internal>(mesh_, allFieldNames);
+    getFieldNames<volScalarField::Internal>
+    (
+        mesh_,
+        allFieldNames,
+        volScalarField::typeName
+    );
+    getFieldNames<volVectorField::Internal>
+    (
+        mesh_,
+        allFieldNames,
+        volVectorField::typeName
+    );
+    getFieldNames<volSphericalTensorField::Internal>
+    (
+        mesh_,
+        allFieldNames,
+        volSphericalTensorField::typeName
+    );
+    getFieldNames<volSymmTensorField::Internal>
+    (
+        mesh_,
+        allFieldNames,
+        volSymmTensorField::typeName
+    );
+    getFieldNames<volTensorField::Internal>
+    (
+        mesh_,
+        allFieldNames,
+        volTensorField::typeName
+    );
 
 
     // Find patch to temporarily put exposed and processor faces into.
@@ -2072,6 +2097,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         printFieldInfo<surfaceSphericalTensorField>(mesh_);
         printFieldInfo<surfaceSymmTensorField>(mesh_);
         printFieldInfo<surfaceTensorField>(mesh_);
+        printIntFieldInfo<volScalarField::Internal>(mesh_);
+        printIntFieldInfo<volVectorField::Internal>(mesh_);
+        printIntFieldInfo<volSphericalTensorField::Internal>(mesh_);
+        printIntFieldInfo<volSymmTensorField::Internal>(mesh_);
+        printIntFieldInfo<volTensorField::Internal>(mesh_);
         Pout<< nl << endl;
     }
 
@@ -2430,6 +2460,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         printFieldInfo<surfaceSphericalTensorField>(mesh_);
         printFieldInfo<surfaceSymmTensorField>(mesh_);
         printFieldInfo<surfaceTensorField>(mesh_);
+        printIntFieldInfo<volScalarField::Internal>(mesh_);
+        printIntFieldInfo<volVectorField::Internal>(mesh_);
+        printIntFieldInfo<volSphericalTensorField::Internal>(mesh_);
+        printIntFieldInfo<volSymmTensorField::Internal>(mesh_);
+        printIntFieldInfo<volTensorField::Internal>(mesh_);
         Pout<< nl << endl;
     }
 
@@ -2804,6 +2839,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         printFieldInfo<surfaceSphericalTensorField>(mesh_);
         printFieldInfo<surfaceSymmTensorField>(mesh_);
         printFieldInfo<surfaceTensorField>(mesh_);
+        printIntFieldInfo<volScalarField::Internal>(mesh_);
+        printIntFieldInfo<volVectorField::Internal>(mesh_);
+        printIntFieldInfo<volSphericalTensorField::Internal>(mesh_);
+        printIntFieldInfo<volSymmTensorField::Internal>(mesh_);
+        printIntFieldInfo<volTensorField::Internal>(mesh_);
         Pout<< nl << endl;
     }
 
@@ -2915,6 +2955,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         printFieldInfo<surfaceSphericalTensorField>(mesh_);
         printFieldInfo<surfaceSymmTensorField>(mesh_);
         printFieldInfo<surfaceTensorField>(mesh_);
+        printIntFieldInfo<volScalarField::Internal>(mesh_);
+        printIntFieldInfo<volVectorField::Internal>(mesh_);
+        printIntFieldInfo<volSphericalTensorField::Internal>(mesh_);
+        printIntFieldInfo<volSymmTensorField::Internal>(mesh_);
+        printIntFieldInfo<volTensorField::Internal>(mesh_);
         Pout<< nl << endl;
     }
 
@@ -3000,6 +3045,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
         printFieldInfo<surfaceSphericalTensorField>(mesh_);
         printFieldInfo<surfaceSymmTensorField>(mesh_);
         printFieldInfo<surfaceTensorField>(mesh_);
+        printIntFieldInfo<volScalarField::Internal>(mesh_);
+        printIntFieldInfo<volVectorField::Internal>(mesh_);
+        printIntFieldInfo<volSphericalTensorField::Internal>(mesh_);
+        printIntFieldInfo<volSymmTensorField::Internal>(mesh_);
+        printIntFieldInfo<volTensorField::Internal>(mesh_);
         Pout<< nl << endl;
     }
 
