@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -466,7 +466,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
         );
     }
 
-    this->writeOpt() = IOobject::NO_WRITE;
+    this->writeOpt(IOobject::NO_WRITE);
 }
 
 
@@ -485,7 +485,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     DebugInFunction
         << "Constructing from tmp" << nl << this->info() << endl;
 
-    this->writeOpt() = IOobject::NO_WRITE;
+    this->writeOpt(IOobject::NO_WRITE);
 
     tgf.clear();
 }
@@ -827,7 +827,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::storeOldTime() const
 
         if (field0Ptr_->field0Ptr_)
         {
-            field0Ptr_->writeOpt() = this->writeOpt();
+            field0Ptr_->writeOpt(this->writeOpt());
         }
     }
 }

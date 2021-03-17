@@ -27,23 +27,23 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::TimePaths::distributed() const
+inline bool Foam::TimePaths::distributed() const noexcept
 {
     return distributed_;
 }
 
 
-inline bool Foam::TimePaths::processorCase() const
+inline bool Foam::TimePaths::processorCase() const noexcept
 {
     return processorCase_;
 }
 
 
-inline bool Foam::TimePaths::processorCase(const bool newProcCase)
+inline bool Foam::TimePaths::processorCase(bool isProcessorCase) noexcept
 {
-    const bool oldProcCase = processorCase_;
-    processorCase_ = newProcCase;
-    return oldProcCase;
+    bool old(processorCase_);
+    processorCase_ = isProcessorCase;
+    return old;
 }
 
 

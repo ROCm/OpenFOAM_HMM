@@ -229,7 +229,7 @@ protected:
         //- with optional meta information.
         static void writeHeaderContent
         (
-            dictionary& os,
+            dictionary& dict,
             const IOobject& io,
             const word& objectType,
             IOstreamOption streamOpt,
@@ -246,7 +246,7 @@ public:
     TypeName("IOobject");
 
 
-    // Static Data Members
+    // Static Data
 
         //- Character for scoping object names (':' or '_')
         //  Change with caution.
@@ -254,6 +254,12 @@ public:
 
         //- Type of file modification checking
         static fileCheckTypes fileModificationChecking;
+
+        //- Time skew (seconds) for file modification checks
+        static float fileModificationSkew;
+
+        //- Max number of times to poll for file modification changes
+        static int maxFileModificationPolls;
 
 
     // Static Functions
@@ -382,7 +388,7 @@ public:
             const objectRegistry& registry,
             readOption r=NO_READ,
             writeOption w=NO_WRITE,
-            bool registerObject=true,
+            bool registerObject = true,
             bool globalObject = false
         );
 
@@ -455,14 +461,14 @@ public:
         //- Should object created with this IOobject be registered?
         inline bool registerObject() const noexcept;
 
-        //- Should object created with this IOobject be registered?
-        inline bool& registerObject() noexcept;
+        //- Change registration preference, return previous value
+        inline bool registerObject(bool on) noexcept;
 
         //- Is object same for all processors?
         inline bool globalObject() const noexcept;
 
-        //- Is object same for all processors?
-        inline bool& globalObject() noexcept;
+        //- Change global-object status, return previous value
+        inline bool globalObject(bool on) noexcept;
 
         //- The sizeof (label) in bytes, possibly read from the header
         inline unsigned labelByteSize() const noexcept;
@@ -492,14 +498,14 @@ public:
         //- The read option
         inline readOption readOpt() const noexcept;
 
-        //- Non-constant access to the read option
-        inline readOption& readOpt() noexcept;
+        //- Change the read option, return previous value
+        inline readOption readOpt(readOption opt) noexcept;
 
         //- The write option
         inline writeOption writeOpt() const noexcept;
 
-        //- Non-constant access to the write option
-        inline writeOption& writeOpt() noexcept;
+        //- Change the write option, return previous value
+        inline writeOption writeOpt(writeOption opt) noexcept;
 
 
     // Path components
@@ -636,6 +642,25 @@ public:
     // Member Operators
 
         void operator=(const IOobject& io);
+
+
+    // Housekeeping
+
+        //- Access to the read option
+        //  \deprecated(2021-03) - use readOpt(readOption)
+        readOption& readOpt() noexcept { return rOpt_; }
+
+        //- Access to the write option
+        //  \deprecated(2021-03) - use writeOpt(writeOption)
+        writeOption& writeOpt() noexcept { return wOpt_; }
+
+        //- Access to the register object option
+        //  \deprecated(2021-03) - use registerObject(bool)
+        bool& registerObject() noexcept { return registerObject_; }
+
+        //- Access to the global object option
+        //  \deprecated(2021-03) - use globalObject(bool)
+        bool& globalObject() noexcept { return globalObject_; }
 };
 
 

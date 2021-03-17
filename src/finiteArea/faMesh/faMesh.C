@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1121,7 +1121,7 @@ Foam::faMesh::S00() const
             S0()
         );
 
-        S0Ptr_->writeOpt() = IOobject::AUTO_WRITE;
+        S0Ptr_->writeOpt(IOobject::AUTO_WRITE);
     }
 
     return *S00Ptr_;

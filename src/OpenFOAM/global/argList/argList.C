@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 #include "IOobject.H"
 #include "JobInfo.H"
 #include "labelList.H"
-#include "regIOobject.H"
+#include "IOobject.H"
 #include "dynamicCode.H"
 #include "simpleObjectRegistry.H"
 #include "sigFpe.H"
@@ -1540,41 +1540,35 @@ void Foam::argList::parse
         {
             Info<< "fileModificationChecking : "
                 << "Monitoring run-time modified files using "
-                << regIOobject::fileCheckTypesNames
+                << IOobject::fileCheckTypesNames
                     [
-                        regIOobject::fileModificationChecking
+                        IOobject::fileModificationChecking
                     ];
             if
             (
-                (
-                    regIOobject::fileModificationChecking
-                 == regIOobject::timeStamp
-                )
-             || (
-                    regIOobject::fileModificationChecking
-                 == regIOobject::timeStampMaster
-                )
+                IOobject::fileModificationChecking == IOobject::timeStamp
+             || IOobject::fileModificationChecking == IOobject::timeStampMaster
             )
             {
-                if (regIOobject::maxFileModificationPolls == 1)
+                if (IOobject::maxFileModificationPolls == 1)
                 {
                     Info<< " (fileModificationSkew "
-                        << regIOobject::fileModificationSkew
+                        << IOobject::fileModificationSkew
                         << ")";
                 }
-                else if (regIOobject::maxFileModificationPolls > 1)
+                else if (IOobject::maxFileModificationPolls > 1)
                 {
                     Info<< " (fileModificationSkew "
-                        << regIOobject::fileModificationSkew
+                        << IOobject::fileModificationSkew
                         << ", maxFileModificationPolls "
-                        << regIOobject::maxFileModificationPolls
+                        << IOobject::maxFileModificationPolls
                         << ")";
                 }
                 else
                 {
                     FatalErrorInFunction
                         << "Invalid setting for maxFileModificationPolls "
-                        << regIOobject::maxFileModificationPolls
+                        << IOobject::maxFileModificationPolls
                         << exit(FatalError);
                 }
             }

@@ -165,25 +165,16 @@ void Foam::fileOperations::collatedFileOperation::printBanner
         }
     }
 
-    if
-    (
-        regIOobject::fileModificationChecking
-     == regIOobject::inotifyMaster
-    )
-    {
-        WarningInFunction
-            << "Resetting fileModificationChecking to inotify" << endl;
-    }
-
-    if
-    (
-        regIOobject::fileModificationChecking
-     == regIOobject::timeStampMaster
-    )
-    {
-        WarningInFunction
-            << "Resetting fileModificationChecking to timeStamp" << endl;
-    }
+    // if (IOobject::fileModificationChecking == IOobject::timeStampMaster)
+    // {
+    //     WarningInFunction
+    //         << "Resetting fileModificationChecking to timeStamp" << endl;
+    // }
+    // else if (IOobject::fileModificationChecking == IOobject::inotifyMaster)
+    // {
+    //     WarningInFunction
+    //         << "Resetting fileModificationChecking to inotify" << endl;
+    // }
 }
 
 

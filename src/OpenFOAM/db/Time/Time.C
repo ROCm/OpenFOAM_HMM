@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -476,7 +476,7 @@ Foam::Time::Time
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
-    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+    readOpt(IOobject::MUST_READ_IF_MODIFIED);
 
     setControls();
     setMonitoring();
@@ -560,7 +560,7 @@ Foam::Time::Time
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
-    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+    readOpt(IOobject::MUST_READ_IF_MODIFIED);
 
     setControls();
 
@@ -637,10 +637,10 @@ Foam::Time::Time
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
-    readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+    readOpt(IOobject::MUST_READ_IF_MODIFIED);
 
     // Since could not construct regIOobject with setting:
-    controlDict_.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+    controlDict_.readOpt(IOobject::MUST_READ_IF_MODIFIED);
 
     setControls();
     setMonitoring();

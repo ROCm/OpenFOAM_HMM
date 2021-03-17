@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,7 +111,7 @@ Foam::TDACChemistryModel<ReactionThermo, ThermoType>::TDACChemistryModel
             if (!header.typeHeaderOk<volScalarField>(true))
             {
                 composition.setInactive(i);
-                this->Y()[i].writeOpt() = IOobject::NO_WRITE;
+                this->Y()[i].writeOpt(IOobject::NO_WRITE);
             }
         }
     }
@@ -883,7 +883,7 @@ Foam::scalar Foam::TDACChemistryModel<ReactionThermo, ThermoType>::solve
     {
         if (composition.active(i))
         {
-            this->Y()[i].writeOpt() = IOobject::AUTO_WRITE;
+            this->Y()[i].writeOpt(IOobject::AUTO_WRITE);
         }
     }
 

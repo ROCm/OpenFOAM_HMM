@@ -131,14 +131,10 @@ public:
         friend class fileOperations::uncollatedFileOperation;
 
 
-    // Static data
+    // Static Data
 
         //- Runtime type information
         TypeName("regIOobject");
-
-        static float fileModificationSkew;
-
-        static int maxFileModificationPolls;
 
 
     // Constructors

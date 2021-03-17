@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) 2020 PCOpt/NTUA
     Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
@@ -53,16 +53,16 @@ Foam::IOobject Foam::IOMRFZoneList::createIOobject
     {
         Info<< "Creating MRF zone list from " << io.name() << endl;
 
-        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-        return io;
+        io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
     }
     else
     {
         Info<< "No MRF models present" << nl << endl;
 
-        io.readOpt() = IOobject::NO_READ;
-        return io;
+        io.readOpt(IOobject::NO_READ);
     }
+
+    return io;
 }
 
 

@@ -115,9 +115,11 @@ inline bool Foam::IOobject::registerObject() const noexcept
 }
 
 
-inline bool& Foam::IOobject::registerObject() noexcept
+inline bool Foam::IOobject::registerObject(bool on) noexcept
 {
-    return registerObject_;
+    bool old(registerObject_);
+    registerObject_ = on;
+    return old;
 }
 
 
@@ -127,9 +129,11 @@ inline bool Foam::IOobject::globalObject() const noexcept
 }
 
 
-inline bool& Foam::IOobject::globalObject() noexcept
+inline bool Foam::IOobject::globalObject(bool on) noexcept
 {
-    return globalObject_;
+    bool old(globalObject_);
+    globalObject_ = on;
+    return old;
 }
 
 
@@ -168,9 +172,12 @@ inline Foam::IOobject::readOption Foam::IOobject::readOpt() const noexcept
 }
 
 
-inline Foam::IOobject::readOption& Foam::IOobject::readOpt() noexcept
+inline Foam::IOobject::readOption
+Foam::IOobject::readOpt(readOption opt) noexcept
 {
-    return rOpt_;
+    readOption old(rOpt_);
+    rOpt_ = opt;
+    return old;
 }
 
 
@@ -180,9 +187,12 @@ inline Foam::IOobject::writeOption Foam::IOobject::writeOpt() const noexcept
 }
 
 
-inline Foam::IOobject::writeOption& Foam::IOobject::writeOpt() noexcept
+inline Foam::IOobject::writeOption
+Foam::IOobject::writeOpt(writeOption opt) noexcept
 {
-    return wOpt_;
+    writeOption old(wOpt_);
+    wOpt_ = opt;
+    return old;
 }
 
 

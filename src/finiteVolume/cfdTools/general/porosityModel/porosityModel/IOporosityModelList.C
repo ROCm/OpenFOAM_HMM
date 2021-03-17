@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2014 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,13 +50,13 @@ Foam::IOobject Foam::IOporosityModelList::createIOobject
     {
         Info<< "Creating porosity model list from " << io.name() << nl << endl;
 
-        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
     }
     else
     {
         Info<< "No porosity models present" << nl << endl;
 
-        io.readOpt() = IOobject::NO_READ;
+        io.readOpt(IOobject::NO_READ);
     }
 
     return io;

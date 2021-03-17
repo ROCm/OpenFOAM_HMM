@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1025,54 +1025,54 @@ int main(int argc, char *argv[])
     forAll(scalarFlds, i)
     {
         scalarFlds[i].rename(scalarNames[i]);
-        scalarFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        scalarFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(vectorFlds, i)
     {
         vectorFlds[i].rename(vectorNames[i]);
-        vectorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        vectorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(sphTensorFlds, i)
     {
         sphTensorFlds[i].rename(sphTensorNames[i]);
-        sphTensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        sphTensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(symmTensorFlds, i)
     {
         symmTensorFlds[i].rename(symmTensorNames[i]);
-        symmTensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        symmTensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(tensorFlds, i)
     {
         tensorFlds[i].rename(tensorNames[i]);
-        tensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        tensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
 
     // Surface ones.
     forAll(surfScalarFlds, i)
     {
         surfScalarFlds[i].rename(surfScalarNames[i]);
-        surfScalarFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        surfScalarFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(surfVectorFlds, i)
     {
         surfVectorFlds[i].rename(surfVectorNames[i]);
-        surfVectorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        surfVectorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(surfSphericalTensorFlds, i)
     {
         surfSphericalTensorFlds[i].rename(surfSphTensorNames[i]);
-        surfSphericalTensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        surfSphericalTensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(surfSymmTensorFlds, i)
     {
         surfSymmTensorFlds[i].rename(surfSymmTensorNames[i]);
-        surfSymmTensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        surfSymmTensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
     forAll(surfTensorNames, i)
     {
         surfTensorFlds[i].rename(surfTensorNames[i]);
-        surfTensorFlds[i].writeOpt() = IOobject::AUTO_WRITE;
+        surfTensorFlds[i].writeOpt(IOobject::AUTO_WRITE);
     }
 
     subsetter.subMesh().write();

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +135,7 @@ int main(int argc, char *argv[])
 
         zn = pointLabels;
 
-        mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+        mesh.pointZones().writeOpt(IOobject::AUTO_WRITE);
         mesh.pointZones().instance() = mesh.facesInstance();
     }
 
@@ -261,7 +262,7 @@ int main(int argc, char *argv[])
             flipMap.shrink()
         );
 
-        mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+        mesh.faceZones().writeOpt(IOobject::AUTO_WRITE);
         mesh.faceZones().instance() = mesh.facesInstance();
     }
 
@@ -297,7 +298,7 @@ int main(int argc, char *argv[])
 
             zn = cellLabels;
 
-            mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.cellZones().writeOpt(IOobject::AUTO_WRITE);
             mesh.cellZones().instance() = mesh.facesInstance();
         }
     }

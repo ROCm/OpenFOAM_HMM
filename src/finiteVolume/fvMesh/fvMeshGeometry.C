@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,7 +252,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
 
 
         // If V00 is used then V0 should be stored for restart
-        V0Ptr_->writeOpt() = IOobject::AUTO_WRITE;
+        V0Ptr_->writeOpt(IOobject::AUTO_WRITE);
     }
 
     return *V00Ptr_;

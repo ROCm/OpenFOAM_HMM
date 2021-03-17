@@ -81,7 +81,7 @@ if (thermalStress)
     }
     else if (CType == "field")
     {
-        CIO.readOpt() = IOobject::MUST_READ;
+        CIO.readOpt(IOobject::MUST_READ);
 
         CPtr.reset
         (
@@ -136,7 +136,7 @@ if (thermalStress)
     }
     else if (kType == "field")
     {
-        rhoKIO.readOpt() = IOobject::MUST_READ;
+        rhoKIO.readOpt(IOobject::MUST_READ);
 
         rhoKPtr.reset
         (
@@ -191,7 +191,7 @@ if (thermalStress)
     }
     else if (alphaType == "field")
     {
-        alphaIO.readOpt() = IOobject::MUST_READ;
+        alphaIO.readOpt(IOobject::MUST_READ);
 
         alphaPtr.reset
         (

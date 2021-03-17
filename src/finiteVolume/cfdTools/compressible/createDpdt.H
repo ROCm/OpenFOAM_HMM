@@ -15,8 +15,8 @@ if (mesh.dynamic())
     // - set to READ_IF_PRESENT and AUTO_WRITE to simplify dpdt correction
     //   by meshPhi
 
-    dpdtHeader.readOpt() = IOobject::READ_IF_PRESENT;
-    dpdtHeader.writeOpt() = IOobject::AUTO_WRITE;
+    dpdtHeader.readOpt(IOobject::READ_IF_PRESENT);
+    dpdtHeader.writeOpt(IOobject::AUTO_WRITE);
 }
 else
 {
@@ -28,5 +28,5 @@ volScalarField dpdt(dpdtHeader, fvc::ddt(p));
 if (!thermo.dpdt())
 {
     dpdt == dimensionedScalar(dpdt.dimensions(), Zero);
-    dpdt.writeOpt() = IOobject::NO_WRITE;
+    dpdt.writeOpt(IOobject::NO_WRITE);
 }

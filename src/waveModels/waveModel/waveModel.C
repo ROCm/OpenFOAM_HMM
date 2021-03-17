@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 IH-Cantabria
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -294,7 +294,7 @@ Foam::waveModel::waveModel
 
 bool Foam::waveModel::readDict(const dictionary& overrideDict)
 {
-    readOpt() = IOobject::READ_IF_PRESENT;
+    readOpt(IOobject::READ_IF_PRESENT);
     if (headerOk())
     {
         IOdictionary::regIOobject::read();

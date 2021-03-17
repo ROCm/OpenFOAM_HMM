@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::fvMeshSubsetProxy::zeroGradientField
 )
 {
     IOobject io(df);
-    io.readOpt()  = IOobject::NO_READ;
-    io.writeOpt() = IOobject::NO_WRITE;
-    io.registerObject() = false;
+    io.readOpt(IOobject::NO_READ);
+    io.writeOpt(IOobject::NO_WRITE);
+    io.registerObject(false);
 
     auto tfield = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (

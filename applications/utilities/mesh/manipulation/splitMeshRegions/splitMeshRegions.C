@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -192,7 +192,7 @@ void subsetVolFields
         // Store on subMesh
         GeoField* subFld = tSubFld.ptr();
         subFld->rename(fld.name());
-        subFld->writeOpt() = IOobject::AUTO_WRITE;
+        subFld->writeOpt(IOobject::AUTO_WRITE);
         subFld->store();
     }
 }
@@ -246,7 +246,7 @@ void subsetSurfaceFields
         // Store on subMesh
         GeoField* subFld = tSubFld.ptr();
         subFld->rename(fld.name());
-        subFld->writeOpt() = IOobject::AUTO_WRITE;
+        subFld->writeOpt(IOobject::AUTO_WRITE);
         subFld->store();
     }
 }
@@ -1886,7 +1886,7 @@ int main(int argc, char *argv[])
                     << zoneI << ' ' << cellZones[zoneI].name() << endl;
             }
         }
-        mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+        mesh.cellZones().writeOpt(IOobject::AUTO_WRITE);
 
         if (!overwrite)
         {

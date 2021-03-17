@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,7 +175,7 @@ void Foam::codedBase::createLibrary
 {
     bool create =
         Pstream::master()
-     || (regIOobject::fileModificationSkew <= 0);   // not NFS
+     || (IOobject::fileModificationSkew <= 0);   // not NFS
 
     if (create)
     {
@@ -206,7 +206,7 @@ void Foam::codedBase::createLibrary
 
 
     // all processes must wait for compile to finish
-    if (regIOobject::fileModificationSkew > 0)
+    if (IOobject::fileModificationSkew > 0)
     {
         //- Since the library has only been compiled on the master the
         //  other nodes need to pick this library up through NFS
@@ -222,8 +222,8 @@ void Foam::codedBase::createLibrary
         for
         (
             label iter = 0;
-            iter < regIOobject::maxFileModificationPolls;
-            iter++
+            iter < IOobject::maxFileModificationPolls;
+            ++iter
         )
         {
             DebugPout
@@ -259,10 +259,10 @@ void Foam::codedBase::createLibrary
                     << " not of same size (" << mySize
                     << ") as master ("
                     << masterSize << "). Waiting for "
-                    << regIOobject::fileModificationSkew
+                    << IOobject::fileModificationSkew
                     << " seconds." << endl;
 
-                Foam::sleep(regIOobject::fileModificationSkew);
+                Foam::sleep(IOobject::fileModificationSkew);
 
                 // Recheck local size
                 mySize = Foam::fileSize(libPath);

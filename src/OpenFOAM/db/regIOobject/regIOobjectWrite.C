@@ -98,8 +98,8 @@ bool Foam::regIOobject::writeObject
     bool masterOnly =
         isGlobal
      && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
+            IOobject::fileModificationChecking == IOobject::timeStampMaster
+         || IOobject::fileModificationChecking == IOobject::inotifyMaster
         );
 
     bool osGood = false;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,8 +101,8 @@ bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
             if (dEntry.isDict())
             {
                 IOobject io(ioDict);
-                io.readOpt() = IOobject::NO_READ;
-                io.writeOpt() = IOobject::AUTO_WRITE;
+                io.readOpt(IOobject::NO_READ);
+                io.writeOpt(IOobject::AUTO_WRITE);
                 io.rename(dEntry.dict().dictName());
 
                 IOdictionary IOsolverDict

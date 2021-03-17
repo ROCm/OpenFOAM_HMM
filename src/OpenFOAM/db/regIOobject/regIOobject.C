@@ -31,7 +31,6 @@ License
 #include "polyMesh.H"
 #include "dictionary.H"
 #include "fileOperation.H"
-#include "registerSwitch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,29 +38,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(regIOobject, 0);
 }
-
-float Foam::regIOobject::fileModificationSkew
-(
-    Foam::debug::floatOptimisationSwitch("fileModificationSkew", 30)
-);
-registerOptSwitch
-(
-    "fileModificationSkew",
-    float,
-    Foam::regIOobject::fileModificationSkew
-);
-
-int Foam::regIOobject::maxFileModificationPolls
-(
-    Foam::debug::optimisationSwitch("maxFileModificationPolls", 1)
-);
-registerOptSwitch
-(
-    "maxFileModificationPolls",
-    int,
-    Foam::regIOobject::maxFileModificationPolls
-);
-
 
 bool Foam::regIOobject::masterOnlyReading = false;
 
@@ -319,8 +295,8 @@ void Foam::regIOobject::addWatch()
         bool masterOnly =
             global()
          && (
-                regIOobject::fileModificationChecking == timeStampMaster
-             || regIOobject::fileModificationChecking == inotifyMaster
+                IOobject::fileModificationChecking == IOobject::timeStampMaster
+             || IOobject::fileModificationChecking == IOobject::inotifyMaster
             );
 
         if (masterOnly && Pstream::parRun())

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ License
 #include "PackedList.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
-#include "regIOobject.H"     // for fileModificationSkew symbol
+#include "IOobject.H"     // for fileModificationSkew symbol
 
 #ifdef FOAM_USE_INOTIFY
     #include <unistd.h>
@@ -406,7 +406,7 @@ void Foam::fileMonitor::checkFiles() const
                 }
                 else
                 {
-                    if (newTime > (oldTime + regIOobject::fileModificationSkew))
+                    if (newTime > (oldTime + IOobject::fileModificationSkew))
                     {
                         localState_[watchFd] = MODIFIED;
                     }

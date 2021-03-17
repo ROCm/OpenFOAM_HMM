@@ -1106,12 +1106,12 @@ int main(int argc, char *argv[])
         {
             Info<< "Not writing inconsistent processor cell decomposition"
                 << " map " << cellProcAddressing.filePath() << endl;
-            cellProcAddressing.writeOpt() = IOobject::NO_WRITE;
+            cellProcAddressing.writeOpt(IOobject::NO_WRITE);
         }
     }
     else
     {
-        cellProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        cellProcAddressing.writeOpt(IOobject::NO_WRITE);
     }
 
     if (faceProcAddressing.headerOk())
@@ -1147,12 +1147,12 @@ int main(int argc, char *argv[])
         {
             Info<< "Not writing inconsistent processor face decomposition"
                 << " map " << faceProcAddressing.filePath() << endl;
-            faceProcAddressing.writeOpt() = IOobject::NO_WRITE;
+            faceProcAddressing.writeOpt(IOobject::NO_WRITE);
         }
     }
     else
     {
-        faceProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        faceProcAddressing.writeOpt(IOobject::NO_WRITE);
     }
 
     if (pointProcAddressing.headerOk())
@@ -1173,12 +1173,12 @@ int main(int argc, char *argv[])
         {
             Info<< "Not writing inconsistent processor point decomposition"
                 << " map " << pointProcAddressing.filePath() << endl;
-            pointProcAddressing.writeOpt() = IOobject::NO_WRITE;
+            pointProcAddressing.writeOpt(IOobject::NO_WRITE);
         }
     }
     else
     {
-        pointProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        pointProcAddressing.writeOpt(IOobject::NO_WRITE);
     }
 
     if (boundaryProcAddressing.headerOk())
@@ -1196,12 +1196,12 @@ int main(int argc, char *argv[])
         {
             Info<< "Not writing inconsistent processor patch decomposition"
                 << " map " << boundaryProcAddressing.filePath() << endl;
-            boundaryProcAddressing.writeOpt() = IOobject::NO_WRITE;
+            boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
         }
     }
     else
     {
-        boundaryProcAddressing.writeOpt() = IOobject::NO_WRITE;
+        boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
     }
 
 

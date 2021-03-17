@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,7 +205,7 @@ Foam::phaseSystem::phaseSystem
     }
 
     // Write phi
-    phi_.writeOpt() = IOobject::AUTO_WRITE;
+    phi_.writeOpt(IOobject::AUTO_WRITE);
 
     // Blending methods
     forAllConstIter(dictionary, subDict("blending"), iter)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,7 +161,7 @@ Foam::functionEntries::codeStream::getFunction
     {
         const bool create =
             Pstream::master()
-         || (regIOobject::fileModificationSkew <= 0);   // not NFS
+         || (IOobject::fileModificationSkew <= 0);   // not NFS
 
         if (create)
         {
@@ -205,7 +205,7 @@ Foam::functionEntries::codeStream::getFunction
         if
         (
            !doingMasterOnlyReading(topDict)
-         && regIOobject::fileModificationSkew > 0
+         && IOobject::fileModificationSkew > 0
         )
         {
             //- Since the library has only been compiled on the master the
@@ -220,8 +220,8 @@ Foam::functionEntries::codeStream::getFunction
             for
             (
                 label iter = 0;
-                iter < regIOobject::maxFileModificationPolls;
-                iter++
+                iter < IOobject::maxFileModificationPolls;
+                ++iter
             )
             {
                 DebugPout
@@ -257,10 +257,10 @@ Foam::functionEntries::codeStream::getFunction
                         << " not of same size (" << mySize
                         << ") as master ("
                         << masterSize << "). Waiting for "
-                        << regIOobject::fileModificationSkew
+                        << IOobject::fileModificationSkew
                         << " seconds." << endl;
 
-                    Foam::sleep(regIOobject::fileModificationSkew);
+                    Foam::sleep(IOobject::fileModificationSkew);
 
                     // Recheck local size
                     mySize = Foam::fileSize(libPath);

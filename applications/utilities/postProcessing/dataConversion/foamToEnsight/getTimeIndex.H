@@ -26,7 +26,7 @@ label timeIndex = 0;
 
         if (io.typeHeaderOk<IOdictionary>(true, false))
         {
-            io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+            io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
             IOdictionary timeObject(io);
 
             timeObject.readEntry("index", timeIndex);

@@ -73,7 +73,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
 
         nZone++;
     }
-    mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+    mesh.faceZones().writeOpt(IOobject::AUTO_WRITE);
     warnDuplicates("faceZones", mesh.faceZones().names());
 }
 

@@ -40,33 +40,33 @@ void Foam::polyMesh::setInstance
 {
     DebugInFunction << "Resetting file instance to " << inst << endl;
 
-    points_.writeOpt() = wOpt;
+    points_.writeOpt(wOpt);
     points_.instance() = inst;
 
-    faces_.writeOpt() = wOpt;
+    faces_.writeOpt(wOpt);
     faces_.instance() = inst;
 
-    owner_.writeOpt() = wOpt;
+    owner_.writeOpt(wOpt);
     owner_.instance() = inst;
 
-    neighbour_.writeOpt() = wOpt;
+    neighbour_.writeOpt(wOpt);
     neighbour_.instance() = inst;
 
-    boundary_.writeOpt() = wOpt;
+    boundary_.writeOpt(wOpt);
     boundary_.instance() = inst;
 
-    pointZones_.writeOpt() = wOpt;
+    pointZones_.writeOpt(wOpt);
     pointZones_.instance() = inst;
 
-    faceZones_.writeOpt() = wOpt;
+    faceZones_.writeOpt(wOpt);
     faceZones_.instance() = inst;
 
-    cellZones_.writeOpt() = wOpt;
+    cellZones_.writeOpt(wOpt);
     cellZones_.instance() = inst;
 
     if (tetBasePtIsPtr_)
     {
-        tetBasePtIsPtr_->writeOpt() = wOpt;
+        tetBasePtIsPtr_->writeOpt(wOpt);
         tetBasePtIsPtr_->instance() = inst;
     }
 }

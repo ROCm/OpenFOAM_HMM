@@ -47,7 +47,7 @@
     }
     else if (rhoType == "field")
     {
-        rhoIO.readOpt() = IOobject::MUST_READ;
+        rhoIO.readOpt(IOobject::MUST_READ);
 
         rhoPtr.reset
         (
@@ -102,7 +102,7 @@
     }
     else if (EType == "field")
     {
-        EHeader.readOpt() = IOobject::MUST_READ;
+        EHeader.readOpt(IOobject::MUST_READ);
 
         EPtr.reset
         (
@@ -156,7 +156,7 @@
     }
     else if (nuType == "field")
     {
-        nuIO.readOpt() = IOobject::MUST_READ;
+        nuIO.readOpt(IOobject::MUST_READ);
         nuPtr.reset
         (
             new volScalarField

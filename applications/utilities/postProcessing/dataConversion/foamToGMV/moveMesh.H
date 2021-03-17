@@ -14,7 +14,7 @@
     {
         Info<< "new points available" << endl;
         // Read new points
-        io.readOpt() = IOobject::MUST_READ;
+        io.readOpt(IOobject::MUST_READ);
         mesh.movePoints(pointIOField(io));
     }
 }

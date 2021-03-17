@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 
     // Make sure we do not use the master-only reading since we read
     // fields (different per processor) as dictionaries.
-    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+    IOobject::fileModificationChecking = IOobject::timeStamp;
 
 
     fileName meshDir = polyMesh::meshSubDir;

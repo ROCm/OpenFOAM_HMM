@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1020,7 +1020,7 @@ void Foam::polyMesh::addZones
             pointZones_.set(pI, pz[pI]);
         }
 
-        pointZones_.writeOpt() = IOobject::AUTO_WRITE;
+        pointZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 
     // Face zones
@@ -1034,7 +1034,7 @@ void Foam::polyMesh::addZones
             faceZones_.set(fI, fz[fI]);
         }
 
-        faceZones_.writeOpt() = IOobject::AUTO_WRITE;
+        faceZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 
     // Cell zones
@@ -1048,7 +1048,7 @@ void Foam::polyMesh::addZones
             cellZones_.set(cI, cz[cI]);
         }
 
-        cellZones_.writeOpt() = IOobject::AUTO_WRITE;
+        cellZones_.writeOpt(IOobject::AUTO_WRITE);
     }
 }
 
@@ -1216,13 +1216,13 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
         }
     }
 
-    points_.writeOpt() = IOobject::AUTO_WRITE;
+    points_.writeOpt(IOobject::AUTO_WRITE);
     points_.instance() = time().timeName();
     points_.eventNo() = getEvent();
 
     if (tetBasePtIsPtr_)
     {
-        tetBasePtIsPtr_->writeOpt() = IOobject::AUTO_WRITE;
+        tetBasePtIsPtr_->writeOpt(IOobject::AUTO_WRITE);
         tetBasePtIsPtr_->instance() = time().timeName();
         tetBasePtIsPtr_->eventNo() = getEvent();
     }

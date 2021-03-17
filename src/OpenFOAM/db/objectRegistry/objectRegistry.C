@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +134,7 @@ Foam::objectRegistry::objectRegistry(const IOobject& io, const label nObjects)
     dbDir_(parent_.dbDir()/local()/name()),
     event_(1)
 {
-    writeOpt() = IOobject::AUTO_WRITE;
+    writeOpt(IOobject::AUTO_WRITE);
 }
 
 

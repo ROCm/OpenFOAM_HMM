@@ -131,8 +131,8 @@ void Foam::unwatchedIOdictionary::addWatch()
         bool masterOnly =
             global()
          && (
-                regIOobject::fileModificationChecking == timeStampMaster
-             || regIOobject::fileModificationChecking == inotifyMaster
+                IOobject::fileModificationChecking == IOobject::timeStampMaster
+             || IOobject::fileModificationChecking == IOobject::inotifyMaster
             );
 
         if (masterOnly && Pstream::parRun())

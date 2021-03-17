@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +130,7 @@ bool Foam::ensightOutput::writeCloudField
         // Handle this by READ_IF_PRESENT instead.
 
         IOobject fieldObj(io);
-        fieldObj.readOpt() = IOobject::READ_IF_PRESENT;
+        fieldObj.readOpt(IOobject::READ_IF_PRESENT);
 
         IOField<Type> field(fieldObj);
 

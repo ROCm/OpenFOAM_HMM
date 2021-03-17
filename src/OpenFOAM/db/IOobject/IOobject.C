@@ -29,6 +29,7 @@ License
 #include "IOobject.H"
 #include "Time.H"
 #include "Istream.H"
+#include "registerSwitch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,6 +70,29 @@ Foam::IOobject::fileCheckTypes Foam::IOobject::fileModificationChecking
         "fileModificationChecking",
         debug::optimisationSwitches()
     )
+);
+
+
+float Foam::IOobject::fileModificationSkew
+(
+    Foam::debug::floatOptimisationSwitch("fileModificationSkew", 30)
+);
+registerOptSwitch
+(
+    "fileModificationSkew",
+    float,
+    Foam::IOobject::fileModificationSkew
+);
+
+int Foam::IOobject::maxFileModificationPolls
+(
+    Foam::debug::optimisationSwitch("maxFileModificationPolls", 1)
+);
+registerOptSwitch
+(
+    "maxFileModificationPolls",
+    int,
+    Foam::IOobject::maxFileModificationPolls
 );
 
 

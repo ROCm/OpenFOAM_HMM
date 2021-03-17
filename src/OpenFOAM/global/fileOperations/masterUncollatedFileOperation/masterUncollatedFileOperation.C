@@ -746,20 +746,16 @@ masterUncollatedFileOperation
             << endl;
     }
 
-    if (regIOobject::fileModificationChecking == regIOobject::timeStampMaster)
+    if (IOobject::fileModificationChecking == IOobject::timeStampMaster)
     {
         if (verbose)
         {
             WarningInFunction
                 << "Resetting fileModificationChecking to timeStamp" << endl;
         }
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
+        IOobject::fileModificationChecking = IOobject::timeStamp;
     }
-    else if
-    (
-        regIOobject::fileModificationChecking
-     == regIOobject::inotifyMaster
-    )
+    else if (IOobject::fileModificationChecking == IOobject::inotifyMaster)
     {
         if (verbose)
         {
@@ -767,7 +763,7 @@ masterUncollatedFileOperation
                 << "Resetting fileModificationChecking to inotify"
                 << endl;
         }
-        regIOobject::fileModificationChecking = regIOobject::inotify;
+        IOobject::fileModificationChecking = IOobject::inotify;
     }
 }
 
@@ -792,20 +788,16 @@ masterUncollatedFileOperation
             << endl;
     }
 
-    if (regIOobject::fileModificationChecking == regIOobject::timeStampMaster)
+    if (IOobject::fileModificationChecking == IOobject::timeStampMaster)
     {
         if (verbose)
         {
             WarningInFunction
                 << "Resetting fileModificationChecking to timeStamp" << endl;
         }
-        regIOobject::fileModificationChecking = regIOobject::timeStamp;
+        IOobject::fileModificationChecking = IOobject::timeStamp;
     }
-    else if
-    (
-        regIOobject::fileModificationChecking
-     == regIOobject::inotifyMaster
-    )
+    else if (IOobject::fileModificationChecking == IOobject::inotifyMaster)
     {
         if (verbose)
         {
@@ -813,7 +805,7 @@ masterUncollatedFileOperation
                 << "Resetting fileModificationChecking to inotify"
                 << endl;
         }
-        regIOobject::fileModificationChecking = regIOobject::inotify;
+        IOobject::fileModificationChecking = IOobject::inotify;
     }
 }
 

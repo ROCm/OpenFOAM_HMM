@@ -89,7 +89,7 @@ void writeAndRead
     const IOobject& io,
     const label sz,
     const word& writeType,
-    const IOobject::readOption readOpt,
+    const IOobject::readOption rOpt,
     const word& readType
 )
 {
@@ -112,7 +112,7 @@ void writeAndRead
 
     // Read
     IOobject readIO(io);
-    readIO.readOpt() = readOpt;
+    readIO.readOpt(rOpt);
     Pout<< "Reading:"
         << fileHandler().filePath(readIO.objectPath()) << endl;
     doRead<Type>(readIO, sz);
@@ -134,7 +134,7 @@ void readIfPresent
 
     // Read
     Pout<< "Reading:" << fileHandler().filePath(io.objectPath()) << endl;
-    io.readOpt() = IOobject::READ_IF_PRESENT;
+    io.readOpt(IOobject::READ_IF_PRESENT);
     doRead<Type>(io, sz);
 }
 

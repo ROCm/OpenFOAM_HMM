@@ -2558,7 +2558,7 @@ void Foam::ccm::reader::addFaceZones
         ++nZone;
     }
 
-    mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+    mesh.faceZones().writeOpt(IOobject::AUTO_WRITE);
     warnDuplicates("faceZones", mesh.faceZones().names());
 }
 

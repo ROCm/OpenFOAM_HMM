@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -519,11 +519,11 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     meshIO.instance() = facesInstance;
     if (masterOnlyReading && !Pstream::master())
     {
-        meshIO.readOpt() = IOobject::NO_READ;
+        meshIO.readOpt(IOobject::NO_READ);
     }
     else
     {
-        meshIO.readOpt() = IOobject::READ_IF_PRESENT;
+        meshIO.readOpt(IOobject::READ_IF_PRESENT);
     }
 
 
@@ -537,9 +537,9 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     //       (correctly) does no longer so below code explicitly addFvPatches
     //       using the separately read boundary file.
 
-    const regIOobject::fileCheckTypes oldCheckType =
-        regIOobject::fileModificationChecking;
-    regIOobject::fileModificationChecking = regIOobject::timeStamp;
+    const IOobject::fileCheckTypes oldCheckType =
+        IOobject::fileModificationChecking;
+    IOobject::fileModificationChecking = IOobject::timeStamp;
 
 
     //- Points
@@ -612,7 +612,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     );
     fvMesh& mesh = *meshPtr;
 
-    regIOobject::fileModificationChecking = oldCheckType;
+    IOobject::fileModificationChecking = oldCheckType;
 
 
 

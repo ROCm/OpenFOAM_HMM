@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +145,7 @@ Foam::codedPoints0MotionSolver::redirectMotionSolver() const
         constructDict.set("motionSolver", name_);
 
         IOobject io(*this);
-        io.readOpt() = IOobject::NO_READ;
+        io.readOpt(IOobject::NO_READ);
 
         redirectMotionSolverPtr_ = motionSolver::New
         (

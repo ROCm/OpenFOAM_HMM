@@ -298,7 +298,7 @@ void variablesSet::renameTurbulenceField
     if (!mesh.foundObject<VolFieldType>(baseName))
     {
         autoPtr<VolFieldType> baseCopy(new VolFieldType(baseField));
-        baseCopy().IOobject::writeOpt() = baseField.writeOpt();
+        baseCopy().IOobject::writeOpt(baseField.writeOpt());
         baseCopy().rename(baseName);
         regIOobject::store(baseCopy);
     }

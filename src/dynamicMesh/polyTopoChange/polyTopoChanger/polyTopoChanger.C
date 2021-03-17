@@ -239,7 +239,7 @@ void Foam::polyTopoChanger::update(const mapPolyMesh& m)
     // Force the mesh modifiers to auto-write.  This allows us to
     // preserve the current state of modifiers corresponding with
     // the mesh.
-    writeOpt() = IOobject::AUTO_WRITE;
+    writeOpt(IOobject::AUTO_WRITE);
     instance() = mesh_.time().timeName();
 }
 
@@ -294,7 +294,7 @@ void Foam::polyTopoChanger::addTopologyModifiers
         set(tmI, tm[tmI]);
     }
 
-    writeOpt() = IOobject::AUTO_WRITE;
+    writeOpt(IOobject::AUTO_WRITE);
 }
 
 

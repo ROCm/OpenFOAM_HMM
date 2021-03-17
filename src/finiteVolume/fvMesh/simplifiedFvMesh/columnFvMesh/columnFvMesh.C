@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -467,9 +467,9 @@ Foam::simplifiedMeshes::columnFvMesh::columnFvMesh
     // Workaround to read fvSchemes and fvSolution after setting NO_READ
     // when creating the mesh
     {
-        fvSchemes::readOpt() = IOobject::MUST_READ;
+        fvSchemes::readOpt(IOobject::MUST_READ);
         fvSchemes::read();
-        fvSolution::readOpt() = IOobject::MUST_READ;
+        fvSolution::readOpt(IOobject::MUST_READ);
         fvSolution::read();
     }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,7 @@ void MapVolFields
             Info<< "    creating new field "
                 << fieldName << endl;
 
-            targetIO.readOpt() = IOobject::NO_READ;
+            targetIO.readOpt(IOobject::NO_READ);
 
             tmp<fieldType> tfieldTarget
             (

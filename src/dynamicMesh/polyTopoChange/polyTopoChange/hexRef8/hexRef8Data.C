@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,7 +241,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
     if (hasCellLevel && !cellLevelPtr_)
     {
         IOobject rio(io, "cellLevel");
-        rio.readOpt() = IOobject::NO_READ;
+        rio.readOpt(IOobject::NO_READ);
         cellLevelPtr_.reset
         (
             new labelIOList(rio, labelList(mesh.nCells(), Zero))
@@ -252,7 +252,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
     if (hasPointLevel && !pointLevelPtr_)
     {
         IOobject rio(io, "pointLevel");
-        rio.readOpt() = IOobject::NO_READ;
+        rio.readOpt(IOobject::NO_READ);
         pointLevelPtr_.reset
         (
             new labelIOList(rio, labelList(mesh.nPoints(), Zero))
@@ -268,7 +268,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         if (!level0EdgePtr_)
         {
             IOobject rio(io, "level0Edge");
-            rio.readOpt() = IOobject::NO_READ;
+            rio.readOpt(IOobject::NO_READ);
             level0EdgePtr_.reset
             (
                 new uniformDimensionedScalarField
@@ -284,7 +284,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
     if (hasHistory && !refHistoryPtr_)
     {
         IOobject rio(io, "refinementHistory");
-        rio.readOpt() = IOobject::NO_READ;
+        rio.readOpt(IOobject::NO_READ);
         refHistoryPtr_.reset(new refinementHistory(rio, mesh.nCells(), true));
     }
 }

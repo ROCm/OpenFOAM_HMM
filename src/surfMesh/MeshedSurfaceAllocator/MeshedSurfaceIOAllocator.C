@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,8 +88,8 @@ void Foam::Detail::MeshedSurfaceIOAllocator::setWriteOption
     IOobject::writeOption wOpt
 )
 {
-    points_.writeOpt() = wOpt;
-    faces_.writeOpt()  = wOpt;
+    points_.writeOpt(wOpt);
+    faces_.writeOpt(wOpt);
 }
 
 

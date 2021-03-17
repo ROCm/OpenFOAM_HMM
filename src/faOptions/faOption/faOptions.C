@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +62,7 @@ Foam::IOobject Foam::fa::options::createIOobject
             << io.instance()/io.name() << nl
             << endl;
 
-        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-        return io;
+        io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
     }
     else
     {
@@ -76,15 +75,15 @@ Foam::IOobject Foam::fa::options::createIOobject
                 << io.instance()/io.name() << nl
                 << endl;
 
-            io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-            return io;
+            io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
         }
         else
         {
-            io.readOpt() = IOobject::NO_READ;
-            return io;
+            io.readOpt(IOobject::NO_READ);
         }
     }
+
+    return io;
 }
 
 

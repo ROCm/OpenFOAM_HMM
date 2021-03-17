@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1990,7 +1990,7 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 {
     if (readHistory)
     {
-        history_.readOpt() = IOobject::READ_IF_PRESENT;
+        history_.readOpt(IOobject::READ_IF_PRESENT);
         if (history_.typeHeaderOk<refinementHistory>(true))
         {
             history_.read();

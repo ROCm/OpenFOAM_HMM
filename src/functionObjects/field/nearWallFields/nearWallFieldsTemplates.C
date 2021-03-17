@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,8 +61,8 @@ void Foam::functionObjects::nearWallFields::createFields
                 sflds.setSize(sz+1);
 
                 IOobject io(fld);
-                io.readOpt() = IOobject::NO_READ;
-                io.writeOpt() = IOobject::NO_WRITE;
+                io.readOpt(IOobject::NO_READ);
+                io.writeOpt(IOobject::NO_WRITE);
 
                 io.rename(sampleFldName);
 

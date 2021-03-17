@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -614,7 +614,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
     if (log)
     {
-        indicator_.writeOpt() = IOobject::AUTO_WRITE;
+        indicator_.writeOpt(IOobject::AUTO_WRITE);
 
     }
 

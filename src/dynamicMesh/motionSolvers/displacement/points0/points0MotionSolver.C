@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -217,7 +217,7 @@ void Foam::points0MotionSolver::updateMesh(const mapPolyMesh& mpm)
 
     // points0 changed - set to write and check-in to database
     points0_.rename("points0");
-    points0_.writeOpt() = IOobject::AUTO_WRITE;
+    points0_.writeOpt(IOobject::AUTO_WRITE);
     points0_.instance() = time().timeName();
     points0_.checkIn();
 }

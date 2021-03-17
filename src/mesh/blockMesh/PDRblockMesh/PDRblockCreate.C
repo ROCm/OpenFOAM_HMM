@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -331,7 +331,7 @@ Foam::PDRblock::innerMesh(const IOobject& io) const
 
 
     IOobject iomesh(io);
-    iomesh.writeOpt() = IOobject::AUTO_WRITE;
+    iomesh.writeOpt(IOobject::AUTO_WRITE);
 
     auto meshPtr = autoPtr<polyMesh>::New
     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
         // Construct distributedTrisurfaceMesh from components
         IOobject notReadIO(io);
-        notReadIO.readOpt() = IOobject::NO_READ;
+        notReadIO.readOpt(IOobject::NO_READ);
         surfMeshPtr.reset(new distributedTriSurfaceMesh(notReadIO, s, dict));
     }
 

@@ -648,7 +648,7 @@ void readFields
         {
             const word& name = masterNames[i];
             IOobject& io = *objects[name];
-            io.writeOpt() = IOobject::AUTO_WRITE;
+            io.writeOpt(IOobject::AUTO_WRITE);
 
             // Load field (but not oldTime)
             readField(io, mesh, i, fields);
@@ -714,7 +714,7 @@ void readFields
         {
             const word& name = masterNames[i];
             IOobject& io = *objects[name];
-            io.writeOpt() = IOobject::AUTO_WRITE;
+            io.writeOpt(IOobject::AUTO_WRITE);
 
             // Load field (but not oldtime)
             readField(io, mesh, i, fields);

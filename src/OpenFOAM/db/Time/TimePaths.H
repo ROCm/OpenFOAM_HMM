@@ -113,13 +113,13 @@ public:
 
         //- True if case running with parallel distributed directories
         //- (ie. not NFS mounted)
-        inline bool distributed() const;
+        inline bool distributed() const noexcept;
 
         //- Return true if this is a processor case
-        inline bool processorCase() const;
+        inline bool processorCase() const noexcept;
 
         //- Set processor case status. Return old one
-        inline bool processorCase(const bool isProcessorCase);
+        inline bool processorCase(const bool isProcessorCase) noexcept;
 
         //- Return root path
         inline const fileName& rootPath() const;

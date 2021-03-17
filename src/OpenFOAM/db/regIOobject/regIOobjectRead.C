@@ -45,8 +45,8 @@ bool Foam::regIOobject::readHeaderOk
     bool masterOnly =
         global()
      && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
+            IOobject::fileModificationChecking == IOobject::timeStampMaster
+         || IOobject::fileModificationChecking == IOobject::inotifyMaster
         );
 
 
@@ -227,8 +227,8 @@ bool Foam::regIOobject::read()
     bool masterOnly =
         global()
      && (
-            regIOobject::fileModificationChecking == timeStampMaster
-         || regIOobject::fileModificationChecking == inotifyMaster
+            IOobject::fileModificationChecking == IOobject::timeStampMaster
+         || IOobject::fileModificationChecking == IOobject::inotifyMaster
         );
 
     // Note: IOstream::binary flag is for all the processor comms. (Only for

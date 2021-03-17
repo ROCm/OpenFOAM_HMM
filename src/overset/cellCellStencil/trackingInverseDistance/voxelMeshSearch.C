@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -555,7 +555,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
 
     //Info<< "Creating polyMesh" << endl;
     IOobject polyIO(io);
-    polyIO.readOpt() = IOobject::NO_READ;
+    polyIO.readOpt(IOobject::NO_READ);
     polyMesh mesh
     (
         //IOobject
@@ -587,7 +587,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
         io.name()
     );
     IOobject fvIO(io);
-    fvIO.readOpt() = IOobject::MUST_READ;
+    fvIO.readOpt(IOobject::MUST_READ);
 
     return autoPtr<fvMesh>::New(fvIO);
 }

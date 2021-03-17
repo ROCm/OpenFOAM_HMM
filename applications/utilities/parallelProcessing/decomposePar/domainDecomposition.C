@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -570,7 +570,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             if (pz.size())
             {
                 // Force writing on all processors
-                procMesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+                procMesh.pointZones().writeOpt(IOobject::AUTO_WRITE);
             }
         }
 
@@ -664,7 +664,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             if (fz.size())
             {
                 // Force writing on all processors
-                procMesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+                procMesh.faceZones().writeOpt(IOobject::AUTO_WRITE);
             }
         }
 
@@ -728,7 +728,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             if (cz.size())
             {
                 // Force writing on all processors
-                procMesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+                procMesh.cellZones().writeOpt(IOobject::AUTO_WRITE);
             }
         }
 

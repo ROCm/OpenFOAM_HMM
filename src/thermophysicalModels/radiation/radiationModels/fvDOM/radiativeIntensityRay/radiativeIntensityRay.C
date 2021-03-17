@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -246,7 +246,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
             // Reset the MUST_READ flag
             IOobject noReadHeader(IHeader);
-            noReadHeader.readOpt() = IOobject::NO_READ;
+            noReadHeader.readOpt(IOobject::NO_READ);
 
             ILambda_.set
             (

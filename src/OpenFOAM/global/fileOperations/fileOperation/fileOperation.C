@@ -251,8 +251,8 @@ Foam::fileMonitor& Foam::fileOperation::monitor() const
         (
             new fileMonitor
             (
-                regIOobject::fileModificationChecking == IOobject::inotify
-             || regIOobject::fileModificationChecking == IOobject::inotifyMaster
+                IOobject::fileModificationChecking == IOobject::inotify
+             || IOobject::fileModificationChecking == IOobject::inotifyMaster
             )
         );
     }
@@ -379,15 +379,18 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
 
         const bool readDirMasterOnly
         (
-            regIOobject::fileModificationChecking == IOobject::timeStampMaster
-         || regIOobject::fileModificationChecking == IOobject::inotifyMaster
+            Pstream::parRun() && !distributed()
+         &&
+            (
+                IOobject::fileModificationChecking == IOobject::timeStampMaster
+             || IOobject::fileModificationChecking == IOobject::inotifyMaster
+            )
         );
 
-        // As byproduct of the above selection, we exclude masterUncollated
-        // from using read/send, but that doesn't matter since that is what
-        // its own internals for readDir() do anyhow.
+        // The above selection excludes masterUncollated, which uses inotify or
+        // timeStamp but provides its own internals for readDir() anyhow.
 
-        if (readDirMasterOnly && Pstream::parRun() && !distributed())
+        if (readDirMasterOnly)
         {
             // Non-distributed.
             // Read on master only and send to subProcs

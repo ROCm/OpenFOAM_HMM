@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -341,7 +341,7 @@ Foam::IOobject Foam::topoSet::findIOobject
     if (!io.typeHeaderOk<topoSet>(false) && disallowGenericSets != 0)
     {
         DebugInfo<< "Setting no read for set " << name << endl;
-        io.readOpt() = IOobject::NO_READ;
+        io.readOpt(IOobject::NO_READ);
     }
 
     return io;
@@ -389,10 +389,7 @@ Foam::topoSet::topoSet(const IOobject& obj, const word& wantedType)
     (
         readOpt() == IOobject::MUST_READ
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (
-            readOpt() == IOobject::READ_IF_PRESENT
-         && headerOk()
-        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
         if (readStream(wantedType).good())
@@ -420,10 +417,7 @@ Foam::topoSet::topoSet
     (
         readOpt() == IOobject::MUST_READ
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (
-            readOpt() == IOobject::READ_IF_PRESENT
-         && headerOk()
-        )
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
         if (readStream(wantedType).good())
