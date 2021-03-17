@@ -36,6 +36,7 @@ License
 #include "polyMesh.H"
 #include "registerSwitch.H"
 #include "Time.H"
+#include "ITstream.H"
 #include <cerrno>
 #include <cinttypes>
 
@@ -181,6 +182,20 @@ static bool parseProcsNumRange
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+Foam::labelList Foam::fileOperation::ioRanks()
+{
+    labelList ranks;
+
+    ITstream is("ioranks", Foam::getEnv("FOAM_IORANKS"));
+    if (!is.empty())
+    {
+        is >> ranks;
+    }
+
+    return ranks;
+}
+
+
 Foam::instantList
 Foam::fileOperation::sortTimes
 (
@@ -241,7 +256,7 @@ Foam::fileOperation::sortTimes
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::fileMonitor& Foam::fileOperation::monitor() const
 {

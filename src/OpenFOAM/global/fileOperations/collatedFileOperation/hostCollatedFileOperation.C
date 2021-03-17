@@ -66,21 +66,19 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
 {
     DynamicList<label> subRanks(64);
 
-    string ioRanksString(getEnv("FOAM_IORANKS"));
-    if (!ioRanksString.empty())
+    labelList mainRanks(fileOperation::ioRanks());
+    if (!mainRanks.empty())
     {
-        IStringStream is(ioRanksString);
-        labelList ioRanks(is);
-
-        if (!ioRanks.found(0))
+        if (!mainRanks.found(0))
         {
             FatalErrorInFunction
                 << "Rank 0 (master) should be in the IO ranks. Currently "
-                << ioRanks << exit(FatalError);
+                << mainRanks << nl
+                << exit(FatalError);
         }
 
         // The lowest numbered rank is the IO rank
-        const bitSet isIOrank(n, ioRanks);
+        const bitSet isIOrank(n, mainRanks);
 
         for (label proci = Pstream::myProcNo(); proci >= 0; --proci)
         {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fileOperationInitialise.H"
+#include "OSspecific.H"
 #include "addToRunTimeSelectionTable.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -48,7 +49,30 @@ Foam::fileOperations::fileOperationInitialise::fileOperationInitialise
     int& argc,
     char**& argv
 )
-{}
+{
+    // Filter out commonly known arguments
+    const string s("-ioRanks");
+
+    int index = -1;
+    for (int i=1; i<argc-1; i++)
+    {
+        if (argv[i] == s)
+        {
+            index = i;
+            Foam::setEnv("FOAM_IORANKS", argv[i+1], true);
+            break;
+        }
+    }
+
+    if (index > 0)
+    {
+        for (int i=index+2; i<argc; i++)
+        {
+            argv[i-2] = argv[i];
+        }
+        argc -= 2;
+    }
+}
 
 
 Foam::autoPtr<Foam::fileOperations::fileOperationInitialise>

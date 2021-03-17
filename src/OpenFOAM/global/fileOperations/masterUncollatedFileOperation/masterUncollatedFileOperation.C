@@ -32,6 +32,7 @@ License
 #include "Time.H"
 #include "instant.H"
 #include "IFstream.H"
+#include "IListStream.H"
 #include "masterOFstream.H"
 #include "decomposedBlockData.H"
 #include "registerSwitch.H"
@@ -39,7 +40,6 @@ License
 #include "SubList.H"
 #include "unthreadedInitialise.H"
 #include "bitSet.H"
-#include "IListStream.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -85,8 +85,9 @@ Foam::labelList Foam::fileOperations::masterUncollatedFileOperation::subRanks
     const label n
 )
 {
-    string ioRanksString(getEnv("FOAM_IORANKS"));
-    if (ioRanksString.empty())
+    labelList mainRanks(fileOperation::ioRanks());
+
+    if (mainRanks.empty())
     {
         return identity(n);
     }
@@ -94,18 +95,16 @@ Foam::labelList Foam::fileOperations::masterUncollatedFileOperation::subRanks
     {
         DynamicList<label> subRanks(n);
 
-        IStringStream is(ioRanksString);
-        labelList ioRanks(is);
-
-        if (!ioRanks.found(0))
+        if (!mainRanks.found(0))
         {
             FatalErrorInFunction
                 << "Rank 0 (master) should be in the IO ranks. Currently "
-                << ioRanks << exit(FatalError);
+                << mainRanks << nl
+                << exit(FatalError);
         }
 
         // The lowest numbered rank is the IO rank
-        const bitSet isIOrank(n, ioRanks);
+        const bitSet isIOrank(n, mainRanks);
 
         for (label proci = Pstream::myProcNo(); proci >= 0; --proci)
         {
@@ -806,36 +805,6 @@ masterUncollatedFileOperation
                 << endl;
         }
         IOobject::fileModificationChecking = IOobject::inotify;
-    }
-}
-
-
-Foam::fileOperations::masterUncollatedFileOperationInitialise::
-masterUncollatedFileOperationInitialise(int& argc, char**& argv)
-:
-    unthreadedInitialise(argc, argv)
-{
-    // Filter out any of my arguments
-    const string s("-ioRanks");
-
-    int index = -1;
-    for (int i=1; i<argc-1; i++)
-    {
-        if (argv[i] == s)
-        {
-            index = i;
-            Foam::setEnv("FOAM_IORANKS", argv[i+1], true);
-            break;
-        }
-    }
-
-    if (index != -1)
-    {
-        for (int i=index+2; i<argc; i++)
-        {
-            argv[i-2] = argv[i];
-        }
-        argc -= 2;
     }
 }
 
@@ -1754,7 +1723,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::readHeader
     {
         Pout<< "masterUncollatedFileOperation::readHeader :" << endl
             << "    objectPath:" << io.objectPath() << endl
-            << "    fName     :" << fName << endl;
+            << "    filePath  :" << fName << endl;
     }
 
     // Get filePaths on world master

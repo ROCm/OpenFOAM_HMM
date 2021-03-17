@@ -26,6 +26,9 @@ License
 Class
     Foam::unthreadedInitialise
 
+Description
+    A fileOperation initialiser for unthreaded file handlers
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef unthreadedInitialise_H
@@ -65,7 +68,7 @@ public:
 
     // Member Functions
 
-        //- Needs threading
+        //- No threading required
         virtual bool needsThreading() const
         {
             return false;

@@ -46,7 +46,6 @@ SourceFiles
 
 #include "masterUncollatedFileOperation.H"
 #include "OFstreamCollator.H"
-#include "fileOperationInitialise.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,9 +82,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Retrieve list of IO ranks from FOAM_IORANKS env variable
-        static labelList ioRanks();
 
         //- Print banner information, optionally with io ranks
         void printBanner(const bool printRanks = false) const;
@@ -198,7 +194,7 @@ public:
 
     // Member Functions
 
-        //- Needs threading
+        //- Requires threading for non-zero maxThreadFileBufferSize
         virtual bool needsThreading() const
         {
             return (collatedFileOperation::maxThreadFileBufferSize > 0);

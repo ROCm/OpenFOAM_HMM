@@ -79,18 +79,21 @@ bool Foam::OFstreamCollator::writeFile
     {
         Foam::mkDir(fName.path());
         osPtr.reset(new OFstream(fName, streamOpt, append));
+        auto& os = *osPtr;
 
-        // We don't have IOobject so cannot use IOobject::writeHeader
         if (!append)
         {
+            // No IOobject so cannot use IOobject::writeHeader
+
+            // FoamFile
             decomposedBlockData::writeHeader
             (
-                *osPtr,
-                streamOpt,   // streamOpt for container
+                os,
+                streamOpt,      // streamOpt for container
                 objectType,
-                "",          // note
-                "",          // location (leave empty instead inaccurate)
-                fName.name() // object name
+                "",             // note
+                "",             // location (leave empty instead inaccurate)
+                fName.name()    // object name
             );
         }
     }

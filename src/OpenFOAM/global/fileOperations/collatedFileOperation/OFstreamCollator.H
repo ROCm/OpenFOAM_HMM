@@ -119,7 +119,7 @@ class OFstreamCollator
         };
 
 
-    // Private data
+    // Private Data
 
         //- Total amount of storage to use for object stack below
         const off_t maxBufferSize_;

@@ -47,8 +47,6 @@ Description
 #include "fileNameList.H"
 #include "instantList.H"
 #include "fileMonitor.H"
-#include "labelList.H"
-#include "Switch.H"
 #include "refPtr.H"
 #include "Enum.H"
 #include "Tuple2.H"
@@ -64,13 +62,6 @@ class regIOobject;
 class objectRegistry;
 class Time;
 
-// Description of processor directory naming:
-//  - processor directory naming
-//  - whether directory contains a range (so differs on different processors)
-//  - index in range
-//typedef Tuple2<fileName, Tuple2<bool, label>> dirIndex;
-//typedef List<dirIndex> dirIndexList;
-
 /*---------------------------------------------------------------------------*\
                          Class fileOperation Declaration
 \*---------------------------------------------------------------------------*/
@@ -80,28 +71,32 @@ class fileOperation
 public:
 
         //- Enumeration for the location of an IOobject
-        enum pathType
+        enum pathType : int
         {
-            NOTFOUND,               // not found
-            ABSOLUTE,               // instance is absolute directory
-            OBJECT,                 // io.objectPath() exists
-            WRITEOBJECT,            // write path exists
-            PROCUNCOLLATED,         // objectPath exists in processor0
-            PROCBASEOBJECT,         // objectPath exists in specified, constant
-                                    // processorsDir (usually 'processorsDDD')
-            PROCOBJECT,             // objectPath exists in locally differing
-                                    // processorsDir (e.g. 'processorsDDD_0-1')
-            PARENTOBJECT,           // parent of object path
-            FINDINSTANCE,           // file found in time directory
-            PROCUNCOLLATEDINSTANCE, // as PROCUNCOLLATED but with instance
-            PROCBASEINSTANCE,       // as PROCBASEOBJECT but with instance
-            PROCINSTANCE            // as PROCOBJECT but with instance
+            NOTFOUND = 0,           //!< Not found
+            ABSOLUTE,               //!< instance is absolute directory
+            OBJECT,                 //!< io.objectPath() exists
+            WRITEOBJECT,            //!< write path exists
+
+            // NOTE: increasing precedence (uncollated, collated, rank-collated)
+
+            PROCUNCOLLATED,
+                        //!< objectPath exists in 'processorN'
+            PROCBASEOBJECT = PROCUNCOLLATED + 1,
+                        //!< objectPath exists in 'processorsNN'
+            PROCOBJECT = PROCBASEOBJECT + 1,
+                        //!< objectPath exists in 'processorsNN_first-last'
+
+            PARENTOBJECT,           //!< parent of object path
+            FINDINSTANCE,           //!< file found in time directory
+            PROCUNCOLLATEDINSTANCE, //!< as PROCUNCOLLATED but with instance
+            PROCBASEINSTANCE,       //!< as PROCBASEOBJECT but with instance
+            PROCINSTANCE            //!< as PROCOBJECT but with instance
         };
         static const Enum<pathType> pathTypeNames_;
 
-
-        //- A dirIndex adds the path type and local offset to a fileName
-        typedef Tuple2<fileName, Tuple2<pathType, label>> dirIndex;
+        //- Augment fileName with pathType and local offset
+        typedef Tuple2<fileName, Tuple2<pathType, int>> dirIndex;
         typedef List<dirIndex> dirIndexList;
 
         //- For addressing a range of processors,
@@ -131,6 +126,9 @@ protected:
         //- Get or create fileMonitor singleton
         fileMonitor& monitor() const;
 
+        //- Retrieve list of IO ranks from FOAM_IORANKS env variable
+        static labelList ioRanks();
+
         //- Merge two times
         static void mergeTimes
         (
@@ -146,7 +144,7 @@ protected:
         //  \return empty fileName if not found.
         refPtr<dirIndexList> lookupAndCacheProcessorsPath
         (
-            const fileName&,
+            const fileName& objectPath,
             const bool syncPar
         ) const;
 
@@ -158,8 +156,8 @@ protected:
             const fileName& objectPath
         ) const;
 
-        //- Does ioobject exist. Is either a directory (empty name()) or
-        //  a file
+        //- Does IOObject exist.
+        //- Is either a directory (empty name()) or a file
         bool exists(IOobject& io) const;
 
 

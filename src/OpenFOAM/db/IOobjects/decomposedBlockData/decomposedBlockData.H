@@ -93,6 +93,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class dictionary;
+
 /*---------------------------------------------------------------------------*\
                      Class decomposedBlockData Declaration
 \*---------------------------------------------------------------------------*/
@@ -177,8 +180,8 @@ public:
         //- Read object
         virtual bool read();
 
-        //- Write separated content. Assumes content is the serialised data
-        //  and that the master data contains a header
+        //- Write separated content (assumes content is the serialised data)
+        //  The serialised master data should also contain a FoamFile header
         virtual bool writeData(Ostream& os) const;
 
         //- Write using stream options
@@ -209,13 +212,22 @@ public:
             const word& objectType,
             const string& note,
             const fileName& location,
-            const word& objectName
+            const word& objectName,
+            const dictionary* extraEntries = nullptr
         );
 
         //- Helper: write FoamFile IOobject header
         static void writeHeader
         (
             Ostream& os,
+            IOstreamOption streamOptData,
+            const IOobject& io
+        );
+
+        //- Helper: generate additional entries for FoamFile header
+        static void writeExtraHeaderContent
+        (
+            dictionary& dict,
             IOstreamOption streamOptData,
             const IOobject& io
         );

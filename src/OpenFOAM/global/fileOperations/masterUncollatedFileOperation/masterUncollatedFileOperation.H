@@ -65,9 +65,8 @@ Description
 #include "fileOperation.H"
 #include "OSspecific.H"
 #include "HashPtrTable.H"
-#include "Switch.H"
+#include "List.H"
 #include "unthreadedInitialise.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -784,7 +783,10 @@ public:
     // Constructors
 
         //- Construct from components
-        masterUncollatedFileOperationInitialise(int& argc, char**& argv);
+        masterUncollatedFileOperationInitialise(int& argc, char**& argv)
+        :
+            unthreadedInitialise(argc, argv)
+        {}
 
 
     //- Destructor

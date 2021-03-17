@@ -140,7 +140,8 @@ void Foam::decomposedBlockData::writeHeader
     const word& objectType,
     const string& note,
     const fileName& location,
-    const word& objectName
+    const word& objectName,
+    const dictionary* extraEntries
 )
 {
     if (IOobject::bannerEnabled())
@@ -160,11 +161,35 @@ void Foam::decomposedBlockData::writeHeader
         objectName
     );
 
+    if (extraEntries)
+    {
+        extraEntries->writeEntries(os);
+    }
+
     os.endBlock();
 
     if (IOobject::bannerEnabled())
     {
         IOobject::writeDivider(os) << nl;
+    }
+}
+
+
+void Foam::decomposedBlockData::writeExtraHeaderContent
+(
+    dictionary& dict,
+    IOstreamOption streamOptData,
+    const IOobject& io
+)
+{
+    dict.set("data.format", streamOptData.format());
+    dict.set("data.class", io.type());
+
+    // Deep-copy of meta-data (if any)
+    const dictionary* metaDataDict = io.findMetaData();
+    if (metaDataDict && !metaDataDict->empty())
+    {
+        dict.add("meta", *metaDataDict);
     }
 }
 

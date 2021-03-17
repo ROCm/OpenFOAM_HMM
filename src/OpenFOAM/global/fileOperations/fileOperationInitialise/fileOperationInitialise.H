@@ -26,6 +26,11 @@ License
 Class
     Foam::fileOperationInitialise
 
+Description
+    General fileOperation initialiser.
+    Handles \c -ioRanks option, using it to set the FOAM_IORANKS environment
+    variable.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef fileOperationInitialise_H
@@ -54,7 +59,7 @@ public:
 
     // Constructors
 
-        //- Construct components
+        //- Construct from components
         fileOperationInitialise(int& argc, char**& argv);
 
 
@@ -87,7 +92,7 @@ public:
 
     // Member Functions
 
-        //- Needs threading
+        //- Threading required?
         virtual bool needsThreading() const = 0;
 };
 

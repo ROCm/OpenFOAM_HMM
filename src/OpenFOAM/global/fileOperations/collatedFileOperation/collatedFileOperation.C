@@ -74,23 +74,6 @@ namespace fileOperations
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::labelList Foam::fileOperations::collatedFileOperation::ioRanks()
-{
-    labelList ioRanks;
-
-    string ioRanksString(Foam::getEnv("FOAM_IORANKS"));
-    if (!ioRanksString.empty())
-    {
-        IStringStream is(ioRanksString);
-        is >> ioRanks;
-    }
-
-    return ioRanks;
-}
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fileOperations::collatedFileOperation::printBanner
@@ -125,20 +108,20 @@ void Foam::fileOperations::collatedFileOperation::printBanner
     if (printRanks)
     {
         // Information about the ranks
-        stringList ioRanks(Pstream::nProcs());
+        stringList hosts(Pstream::nProcs());
         if (Pstream::master(comm_))
         {
             // Don't usually need the pid
-            // ioRanks[Pstream::myProcNo()] = hostName()+"."+name(pid());
-            ioRanks[Pstream::myProcNo()] = hostName();
+            // hosts[Pstream::myProcNo()] = hostName()+"."+name(pid());
+            hosts[Pstream::myProcNo()] = hostName();
         }
-        Pstream::gatherList(ioRanks);
+        Pstream::gatherList(hosts);
 
         DynamicList<label> offsetMaster(Pstream::nProcs());
 
-        forAll(ioRanks, ranki)
+        forAll(hosts, ranki)
         {
-            if (!ioRanks[ranki].empty())
+            if (!hosts[ranki].empty())
             {
                 offsetMaster.append(ranki);
             }
@@ -157,7 +140,7 @@ void Foam::fileOperations::collatedFileOperation::printBanner
                 const label end = offsetMaster[group];
 
                 DetailInfo
-                    << "    (" << ioRanks[beg].c_str() << ' '
+                    << "    (" << hosts[beg].c_str() << ' '
                     << (end-beg) << ')' << nl;
             }
             DetailInfo
@@ -499,9 +482,6 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 streamOpt,
                 useThread
             );
-
-            // If any of these fail, return
-            // (leave error handling to Ostream class)
 
             bool ok = os.good();
 
