@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,11 @@ Foam::RBD::restraints::prescribedRotation::prescribedRotation
 )
 :
     restraint(name, dict, model),
-    omegaSet_(model_.time(), "omega")
+    omegaSet_(model_.time(), "omega"),
+    omega_(Zero),
+    oldMom_(Zero),
+    error0_(Zero),
+    integral0_(Zero)
 {
     read(dict);
 }
@@ -82,7 +86,7 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     const rigidBodyModelState& state
 ) const
 {
-    vector refDir = rotationTensor(vector(1, 0, 0), axis_) & vector(0, 1, 0);
+    vector refDir = rotationTensor(vector(1, 0, 0), axis_)&vector(0, 1, 0);
 
     vector oldDir = refQ_ & refDir;
     vector newDir = model_.X0(bodyID_).E() & refDir;
@@ -123,23 +127,20 @@ void Foam::RBD::restraints::prescribedRotation::restrain
 
     // Adding rotation to a given body
     vector omega = model_.v(model_.master(bodyID_)).w();
+
     scalar Inertia = mag(model_.I(model_.master(bodyID_)).Ic());
 
     // from the definition of the angular momentum:
-    //  moment = Inertia*ddt(omega)
-    const scalar relax = 0.5;
+    // moment = Inertia*ddt(omega)
 
-    vector moment
-    (
-        (
-            relax
-          * Inertia
-          * (omegaSet_.value(model_.time().value()) - omega)
-          / model_.time().deltaTValue()
-          & a
-        )
-      * a
-    );
+    vector error = omegaSet_.value(model_.time().value()) - omega;
+    vector integral = integral0_ + error;
+    vector derivative = (error - error0_);
+
+    vector moment = ((p_*error + i_*integral + d_*derivative)&a)*a;
+    moment *= Inertia/model_.time().deltaTValue();
+
+    moment = relax_*moment + (1- relax_)*oldMom_;
 
     if (model_.debug)
     {
@@ -149,12 +150,20 @@ void Foam::RBD::restraints::prescribedRotation::restrain
             << " moment " << moment << endl
             << " oldDir " << oldDir << endl
             << " newDir " << newDir << endl
+            << " inertia " << Inertia << endl
+            << " error " << error << endl
+            << " integral " << integral << endl
+            << " derivative " << derivative << endl
             << " refDir " << refDir
             << endl;
     }
 
     // Accumulate the force for the restrained body
-    fx[bodyIndex_] += spatialVector(moment, Zero);
+    fx[bodyIndex_] += model_.X0(bodyID_).T() & spatialVector(moment, Zero);
+
+    oldMom_ = moment;
+    error0_ = error;
+    integral0_ = integral;
 }
 
 
@@ -179,6 +188,12 @@ bool Foam::RBD::restraints::prescribedRotation::read
     coeffs_.readEntry("axis", axis_);
 
     const scalar magAxis(mag(axis_));
+
+    coeffs_.readEntry("relax", relax_);
+
+    coeffs_.readEntry("p", p_);
+    coeffs_.readEntry("i", i_);
+    coeffs_.readEntry("d", d_);
 
     if (magAxis > VSMALL)
     {

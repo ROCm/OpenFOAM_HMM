@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,7 +120,12 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     rhoInf_(1.0),
     rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
     ramp_(Function1<scalar>::NewIfPresent("ramp", coeffDict())),
-    curTimeIndex_(-1)
+    curTimeIndex_(-1),
+    cOfGdisplacement_
+    (
+        coeffDict().getOrDefault<word>("cOfGdisplacement", "none")
+    ),
+    bodyIdCofG_(coeffDict().getOrDefault<label>("bodyIdCofG", -1))
 {
     if (rhoName_ == "rhoInf")
     {
@@ -208,7 +213,22 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 Foam::tmp<Foam::pointField>
 Foam::rigidBodyMeshMotion::curPoints() const
 {
-    return points0() + pointDisplacement_.primitiveField();
+    tmp<pointField> newPoints(points0() + pointDisplacement_.primitiveField());
+
+    if (moveAllCells())
+    {
+        return newPoints;
+    }
+    else
+    {
+        tmp<pointField> ttransformedPts(new pointField(mesh().points()));
+        pointField& transformedPts = ttransformedPts.ref();
+
+        UIndirectList<point>(transformedPts, pointIDs()) =
+            pointField(newPoints.ref(), pointIDs());
+
+        return ttransformedPts;
+    }
 }
 
 
@@ -239,6 +259,8 @@ void Foam::rigidBodyMeshMotion::solve()
         model_.g() =
             ramp*t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
+
+    vector oldPos = model_.cCofR(bodyIdCofG_);
 
     if (test_)
     {
@@ -288,6 +310,36 @@ void Foam::rigidBodyMeshMotion::solve()
                 fx
             );
         }
+
+        if (cOfGdisplacement_ != "none")
+        {
+            if (bodyIdCofG_ != -1)
+            {
+                if
+                (
+                    db().time().foundObject<uniformDimensionedVectorField>
+                    (
+                        cOfGdisplacement_
+                    )
+                )
+                {
+                    auto& disp =
+                        db().time().lookupObjectRef<uniformDimensionedVectorField>
+                        (
+                            cOfGdisplacement_
+                        );
+
+                    disp.value() += model_.cCofR(bodyIdCofG_) - oldPos;
+                }
+            }
+            else
+            {
+                FatalErrorInFunction
+                    << "CofGdisplacement is different to none." << endl
+                    << "The model needs the entry body reference Id: bodyIdCofG."
+                    << exit(FatalError);
+            }
+        }
     }
 
     if (Pstream::master() && model_.report())
@@ -318,10 +370,10 @@ void Foam::rigidBodyMeshMotion::solve()
             weights[bi] = &bodyMeshes_[bi].weight_;
         }
 
-        pointDisplacement_.primitiveFieldRef() =
-            model_.transformPoints(bodyIDs, weights, points0()) - points0();
-    }
+         pointDisplacement_.primitiveFieldRef() =
+             model_.transformPoints(bodyIDs, weights, points0()) - points0();
 
+    }
     // Displacement has changed. Update boundary conditions
     pointConstraints::New
     (

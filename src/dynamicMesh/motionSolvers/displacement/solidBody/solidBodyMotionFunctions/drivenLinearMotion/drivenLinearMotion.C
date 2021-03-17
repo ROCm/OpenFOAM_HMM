@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,27 +55,22 @@ Foam::solidBodyMotionFunctions::drivenLinearMotion::drivenLinearMotion
 )
 :
     solidBodyMotionFunction(SBMFCoeffs, runTime),
-    CofGvelocity_(SBMFCoeffs.get<word>("CofGvelocity")),
-    normal_(SBMFCoeffs.getOrDefault<vector>("normal", Zero)),
-    CofGvel_
+    cOfGdisplacement_(SBMFCoeffs.get<word>("cOfGdisplacement")),
+    CofGdisp_
     (
         IOobject
         (
-            CofGvelocity_,
+            cOfGdisplacement_,
             time_.timeName(),
+            "uniform",
             time_,
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         dimensionedVector(dimless, Zero)
-    ),
-    displacement_(Zero)
+    )
 {
     read(SBMFCoeffs);
-    if (mag(normal_) > SMALL)
-    {
-        normal_ /= (mag(normal_) + SMALL);
-    }
 }
 
 
@@ -84,24 +79,10 @@ Foam::solidBodyMotionFunctions::drivenLinearMotion::drivenLinearMotion
 Foam::septernion
 Foam::solidBodyMotionFunctions::drivenLinearMotion::transformation() const
 {
-    scalar deltaT = time_.deltaT().value();
 
-    vector velocity = CofGvel_.value();
-
-    // Take out normal component
-    if (mag(normal_) > SMALL)
-    {
-        velocity = CofGvel_.value() - ((CofGvel_.value() & normal_)*normal_);
-    }
-
-    DebugInFunction << "Vel on plane  :" << velocity << endl;
-
-    // Translation of centre of gravity with constant velocity
-    //const vector displacement = velocity*t;
-    displacement_ += velocity*deltaT;
-
+    DebugInFunction << "displacement  :" << CofGdisp_.value() << endl;
     quaternion R(1);
-    septernion TR(septernion(-displacement_)*R);
+    septernion TR(septernion(-CofGdisp_.value())*R);
 
     DebugInFunction << "Time = " << time_.value()
                     << " transformation: " << TR << endl;

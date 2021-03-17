@@ -48,7 +48,6 @@ Foam::IOobject Foam::points0MotionSolver::points0IO(const polyMesh& mesh)
             "points0",
             IOobject::READ_IF_PRESENT
         );
-
     IOobject io
     (
         "points0",
