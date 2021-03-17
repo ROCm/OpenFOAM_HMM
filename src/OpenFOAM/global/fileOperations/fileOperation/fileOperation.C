@@ -180,6 +180,43 @@ static bool parseProcsNumRange
 } // End anonymous namespace
 
 
+#if 0
+
+// Sorting of processor directories
+#include "stringOpsSort.H"
+namespace
+{
+
+// Sort processor directory names (natural order)
+// - not strictly necessary
+void sortProcessorDirs(Foam::UList<Foam::fileOperation::dirIndex>& dirs)
+{
+    if (dirs.size() > 1)
+    {
+        std::stable_sort
+        (
+            dirs.begin(),
+            dirs.end(),
+            []
+            (
+                const Foam::fileOperation::dirIndex& a,
+                const Foam::fileOperation::dirIndex& b
+            ) -> bool
+            {
+                return
+                    Foam::stringOps::natural_sort::compare
+                    (
+                        a.first(),
+                        b.first()
+                    ) < 0;
+            }
+        );
+    }
+}
+
+} // End anonymous namespace
+#endif
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::labelList Foam::fileOperation::ioRanks()
@@ -407,10 +444,10 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
 
         if (readDirMasterOnly)
         {
-            // Non-distributed.
+            // Parallel and non-distributed
             // Read on master only and send to subProcs
 
-            if (Pstream::master())
+            if (Pstream::master(comm_))
             {
                 dirEntries = Foam::readDir(path, fileName::Type::DIRECTORY);
 
@@ -435,12 +472,11 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
             dirEntries = readDir(path, fileName::Type::DIRECTORY);
         }
 
-
-        // Extract info from processorsDDD or processorDDD:
+        // Extract info from processorN or processorsNN
         // - highest processor number
         // - directory+offset containing data for proci
-        label maxProc = -1;
 
+        label nProcs = 0;
         for (const fileName& dirN : dirEntries)
         {
             // Analyse directory name
@@ -449,76 +485,150 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
             const label readProci =
                 splitProcessorPath(dirN, rp, rd, rl, group, rNum);
 
-            maxProc = max(maxProc, readProci);
+            nProcs = max(nProcs, readProci+1);
+
+            Tuple2<pathType, int> pathTypeIdx(pathType::NOTFOUND, 0);
 
             if (proci == readProci)
             {
-                // Found "processorDDD". No need for index.
-                procDirs.append
-                (
-                    dirIndex
-                    (
-                        dirN,
-                        Tuple2<pathType, label>(PROCUNCOLLATED, -1)
-                    )
-                );
+                // Found "processorN"
+                pathTypeIdx.first() = pathType::PROCUNCOLLATED;
             }
-            else if (group.found(proci))
+            else if (rNum != -1)
             {
-                // "processorsDDD_start-end"
-                // Found the file that contains the data for proci
-                const label localProci = proci - group.start();
-                procDirs.append
-                (
-                    dirIndex
-                    (
-                        dirN,
-                        Tuple2<pathType, label>(PROCOBJECT, localProci)
-                    )
-                );
-            }
-            if (rNum != -1)
-            {
-                // Direct detection of processorsDDD
-                maxProc = rNum-1;
+                // "processorsNN" or "processorsNN_start-end"
+                nProcs = max(nProcs, rNum);
 
                 if (group.empty())
                 {
-                    // "processorsDDD"
-                    procDirs.append
+                    // "processorsNN"
+
+                    if (proci < rNum)
+                    {
+                        // And it is also in range.
+                        // Eg for "processors4": 3 is ok, 10 is not
+
+                        pathTypeIdx.first() = pathType::PROCBASEOBJECT;
+                        pathTypeIdx.second() = proci;
+                    }
+                }
+                else if (group.found(proci))
+                {
+                    // "processorsNN_start-end"
+                    // - save the local proc offset
+
+                    pathTypeIdx.first() = pathType::PROCOBJECT;
+                    pathTypeIdx.second() = (proci - group.start());
+                }
+            }
+
+            if (pathTypeIdx.first() != pathType::NOTFOUND)
+            {
+                procDirs.append(dirIndex(dirN, pathTypeIdx));
+            }
+        }
+
+        // Global check of empty/exists.
+        // 1 : empty directory
+        // 2 : non-empty directory
+        // 3 : mixed empty/non-empty directory (after reduce)
+        // Combines andOp<bool>() and orOp<bool>() in single operation
+
+        unsigned procDirsStatus = (procDirs.empty() ? 1u : 2u);
+
+        if (debug)
+        {
+            Pout<< "fileOperation::lookupProcessorsPath " << procPath
+                << " detected:" << procDirs << endl;
+        }
+
+        if (Pstream::parRun())
+        {
+            reduce(procDirsStatus, bitOrOp<unsigned>());  // worldComm
+
+            if (procDirsStatus == 3u)
+            {
+                // Mixed empty/exists for procDirs.
+                // Synthesize missing directory name (consistency in cache
+                // existence).
+                // Cannot reliably synthesize RANK-COLLATED, only COLLATED or
+                // UNCOLLATED.
+                //
+                // RANK-COLLATED should have been read from its corresponding
+                // master anyhow
+
+                int flavour(pathType::PROCUNCOLLATED);
+                for (const dirIndex& pDir : procDirs)
+                {
+                    flavour = max(flavour, int(pDir.second().first()));
+                }
+
+                reduce(nProcs, maxOp<label>());  // worldComm
+                reduce(flavour, maxOp<int>());   // worldComm
+
+                if (procDirs.empty())
+                {
+                    Tuple2<pathType, int> pathTypeIdx(pathType(flavour), 0);
+
+                    if
                     (
-                        dirIndex
+                        pathTypeIdx.first() == pathType::PROCBASEOBJECT
+                     && proci < nProcs
+                    )
+                    {
+                        pathTypeIdx.second() = proci;
+
+                        procDirs.append
                         (
-                            dirN,
-                            Tuple2<pathType, label>(PROCBASEOBJECT, proci)
-                        )
-                    );
+                            dirIndex
+                            (
+                                processorsBaseDir + Foam::name(nProcs),
+                                pathTypeIdx
+                            )
+                        );
+                    }
+                    else
+                    {
+                        // - pathType::PROCUNCOLLATED
+                        // - poor fallback for pathType::PROCOBJECT
+                        // - out-of-range pathType::PROCBASEOBJECT
+
+                        procDirs.append
+                        (
+                            dirIndex
+                            (
+                                "processor" + Foam::name(proci),
+                                pathTypeIdx
+                            )
+                        );
+                    }
+
+                    if (debug)
+                    {
+                        Pout<< "fileOperation::lookupProcessorsPath "
+                            << procPath
+                            << " synthetic:" << procDirs << endl;
+                    }
                 }
             }
         }
-        if (!Pstream::parRun())
+        else
         {
+            // Serial
             // If (as a side effect) we found the number of decompositions
             // use it
-            if (maxProc != -1)
+            if (nProcs)
             {
-                const_cast<fileOperation&>(*this).setNProcs(maxProc+1);
+                const_cast<fileOperation&>(*this).setNProcs(nProcs);
             }
         }
 
-        if
-        (
-            (syncPar && returnReduce(procDirs.size(), sumOp<label>()))
-         || (!syncPar && procDirs.size())
-        )
+        // Sort processor directory names (natural order)
+        /// sortProcessorDirs(procDirs);
+
+        if (procDirsStatus & 2u)
         {
             procsDirs_.insert(procPath, procDirs);
-
-            if (debug)
-            {
-                Pout<< "fileOperation::lookupProcessorsPath : For:" << procPath
-                    << " detected:" << procDirs << endl;
-            }
 
             // Make sure to return a reference
             return procsDirs_[procPath];
