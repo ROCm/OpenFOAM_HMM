@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,6 @@ namespace Foam
 
 void Foam::crankConRod::timeAdjustment()
 {
-    deltaT_  = degToTime(deltaT_);
     endTime_ = degToTime(endTime_);
 
     if
@@ -93,6 +93,7 @@ Foam::crankConRod::crankConRod
     startTime_  = degToTime(startTime_);
     value()     = degToTime(value());
 
+    deltaT_     = degToTime(deltaT_);
     deltaTSave_ = deltaT_;
     deltaT0_    = deltaT_;
 }
