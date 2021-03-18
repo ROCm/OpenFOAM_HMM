@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -220,6 +220,9 @@ bool Foam::functionObjects::Curle::execute()
                 sum((pp*sqr(invMagR) + invMagR/c0_*dpdtp)*(Sfp & r));
         }
     }
+
+    pDash /= 4*mathematical::pi;
+
     Pstream::listCombineGather(pDash, plusEqOp<scalar>());
     Pstream::listCombineScatter(pDash);
 
