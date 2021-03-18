@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,27 +249,41 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
             vectorField newDelta(cells.size() + 1, Zero);
 
             label j = 0;
-            forAllReverse(cells, i)
+            forAll(cells, i)
             {
                 const label celli = cells[i];
                 newDelta[j+1] = (deltaV[celli]/mag(sf))*n + newDelta[j];
                 j++;
             }
 
-            forAll(faces, i)
+            // Move the back face first
+            const face of = regionMesh().faces()[oFace];
+            {
+                scalar omagV = mag(newDelta[newDelta.size()-1]);
+
+                if (!frozen[cells.size()-1] && (omagV > ROOTVSMALL))
+                {
+                    forAll(of, pti)
+                    {
+                        const label pointi = of[pti];
+                        newPoints[pointi] =
+                            oldPoints[pointi] - newDelta[newDelta.size()-1];
+                    }
+                }
+            }
+            // Do internal faces
+            for (label i=0; i < faces.size(); i++)
             {
                 const label facei = faces[i];
                 const face f = regionMesh().faces()[facei];
 
-                if (!frozen[i])
+                scalar magV = mag(newDelta[i]);
+                if (!frozen[i] && magV > 0)
                 {
                     forAll(f, pti)
                     {
                         const label pointi = f[pti];
-
-                        newPoints[pointi] =
-                            oldPoints[pointi]
-                          + newDelta[newDelta.size() - 1 - i];
+                        newPoints[pointi] = oldPoints[pointi] - newDelta[i];
                     }
                 }
             }
