@@ -25,7 +25,7 @@ updateBCs
     {
         target      value;
         variables   ( "rho=1.2" );
-        expression  #{ 0.5*rho*cbrt(mag(U)) #};
+        expression  #{ 0.5*rho*pow(mag(U),3) #};
     }
 
     expressions

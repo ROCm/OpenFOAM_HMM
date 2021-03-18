@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    setExprFields
+    setExprBoundaryFields
 
 Group
     grpPreProcessingUtilities
@@ -61,6 +61,11 @@ int main(int argc, char *argv[])
     // No -constant, no special treatment for 0/
     timeSelector::addOptions(false);
 
+    argList::addBoolOption
+    (
+        "ascii",
+        "Write in ASCII format instead of the controlDict setting"
+    );
     argList::addOption
     (
         "dict",
@@ -114,16 +119,23 @@ int main(int argc, char *argv[])
 
     instantList times = timeSelector::select0(runTime, args);
 
-    if (times.size() < 1)
+    if (times.empty())
     {
         FatalErrorInFunction
-            << "No times selected." << exit(FatalError);
+            << "No times selected." << nl
+            << exit(FatalError);
     }
 
     #include "createNamedMesh.H"
 
     #include "setSystemMeshDictionaryIO.H"
     IOdictionary setExprDict(dictIO);
+
+    IOstreamOption streamOpt(runTime.writeFormat());
+    if (args.found("ascii"))
+    {
+        streamOpt.format(IOstream::ASCII);
+    }
 
     forAll(times, timei)
     {
@@ -270,7 +282,7 @@ int main(int argc, char *argv[])
             if (!dryrun)
             {
                 Info<< "Write " << fieldDict.filePath() << nl;
-                fieldDict.regIOobject::write();
+                fieldDict.regIOobject::writeObject(streamOpt, true);
             }
         }
     }

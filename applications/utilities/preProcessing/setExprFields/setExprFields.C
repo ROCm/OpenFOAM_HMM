@@ -75,11 +75,12 @@ struct setExprFieldsControl
     bool dryRun;
     bool debugParsing;
     bool cacheVariables;
-    bool useDimension;
+    bool useDimensions;
     bool createNew;
     bool keepPatches;
     bool correctPatches;
     bool correctBCs;
+    IOstreamOption streamOpt;
 };
 
 
@@ -218,9 +219,9 @@ void setField
 
     doCorrectBoundaryConditions(ctrl.correctBCs, output);
 
-    if (ctrl.useDimension)
+    if (ctrl.useDimensions)
     {
-        Info<< "Setting dimension to " << dims << endl;
+        Info<< "Setting dimensions to " << dims << endl;
         output.dimensions().reset(dims);
     }
 
@@ -231,7 +232,7 @@ void setField
     else
     {
         Info<< "Writing to " << output.name() << nl;
-        output.write();
+        output.writeObject(ctrl.streamOpt, true);
     }
 }
 
@@ -539,6 +540,11 @@ int main(int argc, char *argv[])
     // No -constant, no special treatment for 0/
     timeSelector::addOptions(false);
 
+    argList::addBoolOption
+    (
+        "ascii",
+        "Write in ASCII format instead of the controlDict setting"
+    );
     argList::addOption
     (
         "dict",
@@ -567,7 +573,7 @@ int main(int argc, char *argv[])
     (
         "field",
         "name",
-        "The field to overwrite"
+        "The field to create/overwrite"
         " (command-line operation)",
         true // Advanced option
     );
@@ -589,12 +595,14 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "dimension",
+        "dimensions",
         "dims",
         "The dimensions for created fields"
         " (command-line operation)",
         true // Advanced option
     );
+    argList::addOptionCompat("dimensions", {"dimension", 2012});
+
     argList::addBoolOption
     (
         "debug-parser",
@@ -632,7 +640,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "dummy-phi",
-        "(command-line operation)",
+        "Provide a zero phi field"
+        " (command-line operation)",
         true // Advanced option
     );
 
@@ -663,13 +672,14 @@ int main(int argc, char *argv[])
 
     instantList times = timeSelector::select0(runTime, args);
 
-    if (times.size() < 1)
+    if (times.empty())
     {
         FatalErrorInFunction
-            << "No times selected." << exit(FatalError);
+            << "No times selected." << nl
+            << exit(FatalError);
     }
 
-    // Disable dimension checking during operation
+    // Disable dimension checking during operations
     dimensionSet::debug = false;
 
     #include "createNamedMesh.H"
@@ -684,38 +694,53 @@ int main(int argc, char *argv[])
 
     if (useCommandArgs)
     {
+        bool fatalCombination = false;
+
         if (args.found("dict"))
         {
+            fatalCombination = true;
             FatalErrorInFunction
                 << "Cannot specify both dictionary and command-line arguments"
-                << nl
-                << endl;
+                << nl << endl;
         }
 
         if (args.found("create") && args.found("keepPatches"))
         {
+            fatalCombination = true;
             FatalErrorInFunction
                 << "Cannot specify both 'create' and 'keepPatches'" << nl
                 << endl;
         }
+
+        if (!args.found("expression"))
+        {
+            fatalCombination = true;
+            FatalErrorInFunction
+                << "Missing mandatory 'expression' option'" << nl
+                << endl;
+        }
+        if (fatalCombination)
+        {
+            FatalError
+                << exit(FatalError);
+        }
     }
     else
     {
-        // Carp about inapplicable options
+        // Carp about inapplicable options (non-fatal)
 
         wordHashSet badOptions
         ({
-            "create", "keepPatches", "valuePatches",
-            "dimension", "condition", "expression"
+            "create", "keepPatches", "value-patches",
+            "condition", "expression", "dimensions"
         });
-
         badOptions.retain(args.options());
 
         if (!badOptions.empty())
         {
+            // Non-fatal (warning)
             FatalErrorInFunction
-                << "Using a dictionary. Cannot specify command options:" << nl
-                << nl
+                << "Using a dictionary. Cannot specify these options:" << nl
                 << flatOutput(badOptions.sortedToc()) << nl
                 << endl;
         }
@@ -736,7 +761,7 @@ int main(int argc, char *argv[])
         if (timei == 0)
         {
             wordList preloadFields;
-            args.readListIfPresent("load-fields", preloadFieldNames);
+            args.readListIfPresent("load-fields", preloadFields);
             readFieldsHandler(mesh).execute(preloadFields);
         }
 
@@ -766,7 +791,7 @@ int main(int argc, char *argv[])
             runTime.functionObjects().start();
         }
 
-        if (args.found("field"))
+        if (useCommandArgs)
         {
             const word fieldName(args.get<word>("field"));
 
@@ -783,26 +808,27 @@ int main(int argc, char *argv[])
             ctrl.keepPatches = args.found("keepPatches");
             ctrl.correctPatches = !args.found("noCorrectPatches");
             ctrl.correctBCs = args.found("correctResultBoundaryFields");
-            ctrl.useDimension = args.found("dimension");
+            ctrl.useDimensions = args.found("dimensions");
+            ctrl.streamOpt.format(runTime.writeFormat());
+            if (args.found("ascii"))
+            {
+                ctrl.streamOpt.format(IOstream::ASCII);
+            }
 
             expressions::exprString
                 expression
                 (
-                    args[expression],
+                    args["expression"],
                     dictionary::null
                 );
 
             expressions::exprString condition;
-            if (args.found("condition"))
-            {
-                args.readIfPresent("condition", condition);
-            }
+            args.readIfPresent("condition", condition);
 
             dimensionSet dims;
-
-            if (ctrl.useDimension)
+            if (ctrl.useDimensions)
             {
-                ITstream is(args.lookup("dimension"));
+                ITstream is(args.lookup("dimensions"));
                 is >> dims;
             }
 
@@ -814,7 +840,7 @@ int main(int argc, char *argv[])
                 condition,
                 dictionary::null,
                 dims,
-                args.getList<word>("valuePatches", false),
+                args.getList<word>("value-patches", false),
 
                 ctrl
             );
@@ -852,8 +878,14 @@ int main(int argc, char *argv[])
 
                 ctrl.createNew = dict.getOrDefault("create", false);
                 ctrl.keepPatches = dict.getOrDefault("keepPatches", false);
+
                 ctrl.correctPatches = !args.found("noCorrectPatches");
                 ctrl.correctBCs = args.found("correctResultBoundaryFields");
+                ctrl.streamOpt.format(runTime.writeFormat());
+                if (args.found("ascii"))
+                {
+                    ctrl.streamOpt.format(IOstream::ASCII);
+                }
 
                 if (ctrl.createNew && ctrl.keepPatches)
                 {
@@ -891,16 +923,19 @@ int main(int argc, char *argv[])
                         );
                 }
 
-                ctrl.useDimension = dict.found("dimension");
-
                 dimensionSet dims;
-                if (ctrl.useDimension)
                 {
-                    dict.lookup("dimension") >> dims;
+                    const entry* dimPtr = dict.findCompat
+                    (
+                        "dimensions", {{"dimension", 2012}},
+                        keyType::LITERAL
+                    );
+                    if (dimPtr)
+                    {
+                        dimPtr->stream() >> dims;
+                    }
+                    ctrl.useDimensions = bool(dimPtr);
                 }
-
-                wordList valuePatches;
-                dict.readIfPresent("valuePatches", valuePatches);
 
                 if (verbose && !timei)
                 {
@@ -916,7 +951,7 @@ int main(int argc, char *argv[])
                     condition,
                     dict,
                     dims,
-                    valuePatches,
+                    dict.getOrDefault<wordList>("valuePatches", wordList()),
 
                     ctrl
                 );
