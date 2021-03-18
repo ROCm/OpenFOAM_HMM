@@ -170,6 +170,9 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
             }
         }
 
+        Info<< "Chemistry time solved max/min : "
+            << gMax(tauStar) << " / " << gMin(tauStar) << endl;
+
         this->chemistryPtr_->solve(tauStar);
     }
 }
