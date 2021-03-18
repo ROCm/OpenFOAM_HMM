@@ -39,7 +39,7 @@ solvers
                         );
 
         nAlphaCorr      2;
-        nAlphaSubCycles 2;
+        nAlphaSubCycles 3;
 
         // Compressiion factor for species in each alpha phase
         // NOTE: It should be similar to cAlpha
@@ -74,19 +74,16 @@ solvers
 
     p_rgh
     {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-9;
-        relTol          0.01;
+        solver              GAMG;
+        smoother            DICGaussSeidel;
+        tolerance           1e-11;
+        relTol              0.01;
 
-        nPreSweeps      0;
-        nPostSweeps     2;
-
-        cacheAgglomeration true;
+        cacheAgglomeration  true;
 
         nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
+        agglomerator        faceAreaPair;
+        mergeLevels         1;
     };
 
     p_rghFinal
@@ -94,10 +91,19 @@ solvers
         $p_rgh;
         relTol          0;
     };
+
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-5;
+        relTol          0;
+    }
 }
 
 PIMPLE
 {
+    correctPhi          false;
     momentumPredictor   false;
     nOuterCorrectors    1;
     nCorrectors         4;

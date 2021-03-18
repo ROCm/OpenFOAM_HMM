@@ -39,6 +39,14 @@ solvers
         cYi             1;
     }
 
+    "pcorr.*"
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-5;
+        relTol          0;
+    }
+
     "(U.*|epsilon.*|k.*)"
     {
         solver          smoothSolver;

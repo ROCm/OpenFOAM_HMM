@@ -49,6 +49,11 @@ solvers
         relTol          0;
     }
 
+    "pcorr.*"
+    {
+        $p_rgh;
+    }
+
     "U.*"
     {
         solver          smoothSolver;
