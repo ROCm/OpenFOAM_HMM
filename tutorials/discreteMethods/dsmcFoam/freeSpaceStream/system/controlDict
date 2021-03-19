@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -114,6 +113,7 @@ functions
             }
         );
     }
+
     dsmcFields1
     {
         type            dsmcFields;
@@ -121,5 +121,6 @@ functions
         writeControl    writeTime;
     }
 }
+
 
 // ************************************************************************* //
