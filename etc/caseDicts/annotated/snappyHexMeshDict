@@ -553,16 +553,31 @@ addLayersControls
     // size of the refined cell outside layer (true) or absolute sizes (false).
     relativeSizes true;
 
-    // Layer thickness specification. This can be specified in one of following
-    // ways:
-    // - expansionRatio and finalLayerThickness (cell nearest internal mesh)
-    // - expansionRatio and firstLayerThickness (cell on surface)
-    // - overall thickness and firstLayerThickness
-    // - overall thickness and finalLayerThickness
-    // - overall thickness and expansionRatio
-    //
-    // Note: the mode thus selected is global, i.e. one cannot override the
-    //       mode on a per-patch basis (only the values can be overridden)
+    // Layer thickness specification. This can be specified either through the
+    // 'thicknessModel' parameter (new) or by specifying the individual
+    // settings. The parameters are the cell height of the cells next to the
+    // wall ('firstLayerThickness'), the cell height of the cells next to the
+    // bulk ('finalLayerThickness'), the expansionRatio ('expansionRatio') and
+    // the overall thickness of all layers ('thickness').
+
+    //- specification of firstLayerThickness and overallThicknes, calculates
+    //  needed expansionRatio.
+    // thicknessModel firstAndOverall;
+
+    //- specification of firstLayerThickness and expansionRatio.
+    // thicknessModel firstAndExpansion;
+
+    //- specification of finalLayerThickness and expansionRatio.
+    // thicknessModel finalAndExpansion;
+
+    //- specification of thickness and expansionRatio.
+    // thicknessModel overallAndExpansion;
+
+    //- specification of firstLayerThickness and finalLayerThickness. The
+    //  firstLayerThickness is always absolute, the finalLayerThickness is
+    //  always relative, independent of the relativeSizes setting
+    // thicknessModel firstAndRelativeFinal;
+
 
         // Expansion factor for layer mesh
         expansionRatio 1.0;
@@ -572,16 +587,6 @@ addLayersControls
         // outside layer.
         finalLayerThickness 0.3;
 
-        // Wanted thickness of the layer next to the wall.
-        // If relativeSizes this is relative to undistorted size of cell
-        // outside layer.
-        //firstLayerThickness 0.3;
-
-        // Wanted overall thickness of layers.
-        // If relativeSizes this is relative to undistorted size of cell
-        // outside layer.
-        //thickness 0.5
-
 
     // Minimum overall thickness of total layers. If for any reason layer
     // cannot be above minThickness do not add layer.
@@ -590,9 +595,13 @@ addLayersControls
     minThickness 0.1;
 
 
-    // Per final patch or faceZone (so not geometry!) the layer information
-    // Note: This behaviour changed after 21x. Any non-mentioned patches
-    //       now slide unless:
+    // Per final patch or faceZone (so not geometry!) the layer information:
+    // - whether to use relative or absolute sizes
+    // - thicknessModel (or individual settings)
+    // - minimum thickness
+    //
+    // Note: mesh shrinking behaviour changed after 21x. Any non-mentioned
+    //       patches now slide unless:
     //          - nSurfaceLayers is explicitly mentioned to be 0.
     //          - angle to nearest surface < slipFeatureAngle (see below)
     layers
