@@ -500,7 +500,7 @@ snapControls
         //minAreaRatio 0.3;
         //- Attract points only to the surface they originate from. Default
         //  false. This can improve snapping of intersecting surfaces.
-          strictRegionSnap true;
+        strictRegionSnap true;
 }
 
 // Settings for the layer addition.
@@ -558,7 +558,6 @@ addLayersControls
         aerofoil
         {
             nSurfaceLayers 20;
-
         }
     }
 
