@@ -105,6 +105,18 @@ int main(int argc, char *argv[])
         printInfo(os1);
         printInfo(os2);
         printInfo(os3);
+
+        // Rewind and test single output
+        os1.rewind(); generateOutput(os1);
+        os2.rewind(); generateOutput(os2);
+        os3.rewind(); generateOutput(os3);
+
+        Info<< nl
+            << "single output" << nl;
+
+        printInfo(os1);
+        printInfo(os2);
+        printInfo(os3);
     }
 
     Info<< "\nEnd\n" << endl;

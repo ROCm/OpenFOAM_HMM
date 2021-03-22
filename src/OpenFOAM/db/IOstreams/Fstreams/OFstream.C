@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,6 +126,37 @@ const std::ostream& Foam::OFstream::stdStream() const
     }
 
     return *ptr;
+}
+
+
+void Foam::OFstream::rewind()
+{
+    if (IOstreamOption::COMPRESSED == ofstreamPointer::whichCompression())
+    {
+        ofstreamPointer::reopen_gz(this->name() + ".gz");
+    }
+    else
+    {
+        // Reopen (truncate)
+        ofstreamPointer::reopen(this->name());
+    }
+
+    // As per OSstream::rewind()
+
+    lineNumber_ = 1;  // Reset line number
+    setState(ofstreamPointer::get()->rdstate());
+
+    if (good())
+    {
+        setOpened();
+    }
+    else
+    {
+        setClosed();
+        setBad();
+    }
+
+    stdStream().rdbuf()->pubseekpos(0, std::ios_base::out);
 }
 
 

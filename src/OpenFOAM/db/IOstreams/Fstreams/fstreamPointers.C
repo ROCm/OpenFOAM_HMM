@@ -207,6 +207,38 @@ void Foam::ifstreamPointer::reopen_gz(const std::string& pathname_gz)
 }
 
 
+void Foam::ofstreamPointer::reopen_gz(const std::string& pathname_gz)
+{
+    #ifdef HAVE_LIBZ
+    ogzstream* gz = dynamic_cast<ogzstream*>(ptr_.get());
+
+    if (gz)
+    {
+        // Special treatment for gzstream
+        gz->close();
+        gz->clear();
+        gz->open(pathname_gz);
+    }
+    #endif /* HAVE_LIBZ */
+}
+
+
+void Foam::ofstreamPointer::reopen(const std::string& pathname)
+{
+    std::ofstream* file = dynamic_cast<std::ofstream*>(ptr_.get());
+
+    if (file)
+    {
+        if (file->is_open())
+        {
+            file->close();
+        }
+        file->clear();
+        file->open(pathname);
+    }
+}
+
+
 Foam::IOstreamOption::compressionType
 Foam::ifstreamPointer::whichCompression() const
 {

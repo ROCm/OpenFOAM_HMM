@@ -104,7 +104,8 @@ public:
         //- Const access to underlying std::istream
         virtual const std::istream& stdStream() const;
 
-        //- Rewind the stream so that it may be read again
+        //- Rewind the stream so that it may be read again.
+        //  Includes special handling for compressed streams.
         virtual void rewind();
 
 

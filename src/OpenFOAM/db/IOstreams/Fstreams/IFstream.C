@@ -123,13 +123,10 @@ const std::istream& Foam::IFstream::stdStream() const
 
 void Foam::IFstream::rewind()
 {
-    lineNumber_ = 1;  // Reset line number
-
     if (IOstreamOption::COMPRESSED == ifstreamPointer::whichCompression())
     {
-        // Special treatment for compressed stream
+        lineNumber_ = 1;  // Reset line number
         ifstreamPointer::reopen_gz(this->name() + ".gz");
-
         setState(ifstreamPointer::get()->rdstate());
     }
     else

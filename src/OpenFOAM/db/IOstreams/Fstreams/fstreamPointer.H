@@ -167,6 +167,16 @@ class ofstreamPointer
         //- The stream pointer (ofstream | ogzstream | ocountstream)
         std::unique_ptr<std::ostream> ptr_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Special 'rewind' method for compressed stream
+        void reopen_gz(const std::string& pathname_gz);
+
+        //- General 'rewind' method (non-compressed)
+        void reopen(const std::string& pathname);
+
 public:
 
     // Generated Methods
