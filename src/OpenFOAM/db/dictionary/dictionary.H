@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -406,6 +406,7 @@ public:
 
         //- Construct top-level dictionary from Istream,
         //- reading entries until EOF. Discards the header.
+        //  \note this constructor should be explicit
         dictionary(Istream& is);
 
         //- Construct top-level dictionary from Istream,
@@ -420,7 +421,7 @@ public:
 
         //- Construct top-level dictionary as copy from pointer to dictionary.
         //  A null pointer is treated like an empty dictionary.
-        dictionary(const dictionary* dict);
+        explicit dictionary(const dictionary* dict);
 
         //- Move construct for given parent dictionary
         dictionary(const dictionary& parentDict, dictionary&& dict);
@@ -928,7 +929,7 @@ public:
         //  Emits FatalIOError
         void checkITstream(const ITstream& is, const word& keyword) const;
 
-        //- Read dictionary from Istream
+        //- Read dictionary from Istream. Discards the header.
         bool read(Istream& is);
 
         //- Read dictionary from Istream, optionally keeping the header
@@ -944,7 +945,7 @@ public:
         void writeEntry(const keyType& keyword, Ostream& os) const;
 
         //- Write dictionary entries.
-        //  \param extraNewLine adds additional newline\n between entries
+        //  \param extraNewLine adds additional newline between entries
         //         for "top-level" dictionaries
         void writeEntries(Ostream& os, const bool extraNewLine=false) const;
 

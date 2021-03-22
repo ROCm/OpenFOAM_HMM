@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Foam::dictionaryEntry::dictionaryEntry
 )
 :
     entry(keyType(is)),
-    dictionary(parentDict, is)
+    dictionary(parentDict, dictionary(is))
 {
     is.fatalCheck(FUNCTION_NAME);
 }

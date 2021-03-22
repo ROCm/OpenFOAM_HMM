@@ -234,7 +234,7 @@ directionalPressureGradientExplicitSource
     if (propsFile.good())
     {
         Info<< "    Reading pressure gradient from file" << endl;
-        dictionary propsDict(dictionary::null, propsFile);
+        dictionary propsDict(propsFile);
         propsDict.readEntry("gradient", gradP0_);
     }
 

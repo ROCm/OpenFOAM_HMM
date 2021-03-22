@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ Foam::fv::meanVelocityForce::meanVelocityForce
     if (propsFile.good())
     {
         Info<< "    Reading pressure gradient from file" << endl;
-        dictionary propsDict(dictionary::null, propsFile);
+        dictionary propsDict(propsFile);
         propsDict.readEntry("gradient", gradP0_);
     }
 

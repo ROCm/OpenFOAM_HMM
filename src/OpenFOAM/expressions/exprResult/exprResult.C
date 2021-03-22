@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Copyright (C) 2012-2018 Bernhard Gschaider
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -351,6 +351,17 @@ Foam::expressions::exprResult::New
         << "Creating result of type " << resultType << nl;
 
     return autoPtr<exprResult>(cstrIter()(dict));
+}
+
+
+Foam::autoPtr<Foam::expressions::exprResult>
+Foam::expressions::exprResult::New
+(
+    Istream& is
+)
+{
+    dictionary dict(is);
+    return New(dict);
 }
 
 

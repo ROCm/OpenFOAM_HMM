@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2012-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -323,6 +323,9 @@ public:
             const bool needsValue = false
         );
 
+        //- Construct from Istream as dictionary content
+        explicit exprResult(Istream& is);
+
         //- Construct by copying a field
         template<class Type>
         explicit exprResult(const Field<Type>& fld);
@@ -361,6 +364,9 @@ public:
 
         //- Return a reference to the selected value driver
         static autoPtr<exprResult> New(const dictionary& dict);
+
+        //- Construct from Istream as dictionary content
+        static autoPtr<exprResult> New(Istream& is);
 
         //- Clone
         virtual autoPtr<exprResult> clone() const
