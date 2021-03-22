@@ -122,7 +122,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "roots",
         "(dir1 .. dirN)",
-        "Slave root directories for distributed running",
+        "Subprocess root directories for distributed running",
         true  // advanced option
     );
     validParOptions.set
@@ -141,7 +141,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "hostRoots",
         "((host1 dir1) .. (hostN dirN))",
-        "Per-host slave root directories for distributed running."
+        "Per-subprocess root directories for distributed running."
         " The host specification can be a regex.",
         true  // advanced option
     );
@@ -218,14 +218,14 @@ namespace Foam
 //
 // Always include the master too.
 // This provides a better overview of the subscription
-static void printHostsSubscription(const UList<string>& slaveProcs)
+static void printHostsSubscription(const UList<string>& hostProcs)
 {
-    Info<< "Hosts  :" << nl << "(" << nl;
+    Info<< "Hosts  :\n(" << nl;
 
-    std::string prev = hostName();
+    std::string prev = Foam::hostName();
     int count = 1;
 
-    for (const auto& str : slaveProcs)
+    for (const auto& str : hostProcs)
     {
         std::string curr(str.substr(0, str.rfind('.')));
 
@@ -234,7 +234,7 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
             if (count)
             {
                 // Finish previous
-                Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+                Info<< "    (" << prev.c_str() << ' ' << count << ')' << nl;
                 count = 0;
             }
 
@@ -246,10 +246,10 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
     if (count)
     {
         // Finished last one
-        Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+        Info<< "    (" << prev.c_str() << ' ' << count << ')' << nl;
     }
 
-    Info<< ")" << nl;
+    Info<< ')' << nl;
 }
 
 } // End namespace Foam
@@ -877,7 +877,7 @@ Foam::argList::argList
                 {
                     // The '-debug-switch' option:
                     // change registered debug switch
-                    DetailInfo << "DebugSwitch ";
+                    DetailInfo << "debug-switch ";
                     debug::debugObjects()
                         .setNamedInt(args_[argi], 1, true);
                 }
@@ -885,7 +885,7 @@ Foam::argList::argList
                 {
                     // The '-info-switch' option:
                     // change registered info switch
-                    DetailInfo << "InfoSwitch ";
+                    DetailInfo << "info-switch ";
                     debug::infoObjects()
                         .setNamedInt(args_[argi], 1, true);
                 }
@@ -893,7 +893,7 @@ Foam::argList::argList
                 {
                     // The '-opt-switch' option:
                     // change registered optimisation switch
-                    DetailInfo << "OptimisationSwitch ";
+                    DetailInfo << "opt-switch ";
                     debug::optimisationObjects()
                         .setNamedInt(args_[argi], 1, true);
                 }
@@ -1057,7 +1057,7 @@ void Foam::argList::parse
                 << "Exec   : " << commandLine_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
-                << "Host   : " << hostName().c_str() << nl
+                << "Host   : " << Foam::hostName().c_str() << nl
                 << "PID    : " << pid() << endl;
         }
 
@@ -1109,36 +1109,36 @@ void Foam::argList::parse
     }
 
 
-    stringList slaveProcs;
-    stringList slaveMachine;
-    const int writeHostsSwitch = debug::infoSwitch("writeHosts", 1);
+    stringList hostMachine;
+    stringList hostProcs;
+    const int writeHostsSwitch = Foam::debug::infoSwitch("writeHosts", 1);
 
-    // Collect slave machine/pid, and check that the build is identical
+    // Collect machine/pid, and check that the build is identical
     if (parRunControl_.parRun())
     {
         if (Pstream::master())
         {
-            slaveProcs.resize(Pstream::nProcs()-1);
-            slaveMachine.resize(Pstream::nProcs()-1);
-            label proci = 0;
-            for (const int slave : Pstream::subProcs())
+            hostMachine.resize(Pstream::nProcs()-1);
+            hostProcs.resize(Pstream::nProcs()-1);
+            string procBuild;
+            label procPid;
+            int proci = 0;
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
+                IPstream fromSubproc(Pstream::commsTypes::scheduled, subproci);
 
-                string slaveBuild;
-                label slavePid;
-                fromSlave >> slaveBuild >> slaveMachine[proci] >> slavePid;
+                fromSubproc >> procBuild >> hostMachine[proci] >> procPid;
 
-                slaveProcs[proci] = slaveMachine[proci] + "." + name(slavePid);
+                hostProcs[proci] = hostMachine[proci] + "." + name(procPid);
                 ++proci;
 
                 // Verify that all processors are running the same build
-                if (slaveBuild != foamVersion::build)
+                if (procBuild != foamVersion::build)
                 {
                     FatalErrorIn(executable())
-                        << "Master is running version " << foamVersion::build
-                        << "; slave " << proci << " is running version "
-                        << slaveBuild
+                        << "Running build version " << foamVersion::build
+                        << " but proc " << subproci << " is running "
+                        << procBuild << nl
                         << exit(FatalError);
                 }
             }
@@ -1150,7 +1150,7 @@ void Foam::argList::parse
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            toMaster << foamVersion::build << hostName() << pid();
+            toMaster << foamVersion::build << Foam::hostName() << Foam::pid();
         }
     }
 
@@ -1170,14 +1170,13 @@ void Foam::argList::parse
             // Establish rootPath_/globalCase_/case_ for master
             setCasePaths();
 
-            // Establish location of decomposeParDict, allow override with
-            // the -decomposeParDict option.
-            fileName source = rootPath_/globalCase_/"system"/"decomposeParDict";
-            if (options_.found("decomposeParDict"))
+            // The system/decomposeParDict (or equivalent)
+            fileName source;
+
+            if (this->readIfPresent("decomposeParDict", source))
             {
                 bool adjustOpt = false;
 
-                source = options_["decomposeParDict"];
                 if (isDir(source))
                 {
                     source /= "decomposeParDict";
@@ -1203,8 +1202,8 @@ void Foam::argList::parse
             label dictNProcs = -1;
             if (this->readListIfPresent("roots", roots))
             {
-                parRunControl_.distributed(true);
                 source = "-roots";
+                parRunControl_.distributed(true);
                 if (roots.size() != 1)
                 {
                     dictNProcs = roots.size()+1;
@@ -1212,10 +1211,9 @@ void Foam::argList::parse
             }
             else if (options_.found("hostRoots"))
             {
-                roots.resize(Pstream::nProcs()-1, fileName::null);
-
                 source = "-hostRoots";
-                ITstream is(source, options_["hostRoots"]);
+                roots.resize(Pstream::nProcs()-1, fileName::null);
+                ITstream is(this->lookup("hostRoots"));
 
                 List<Tuple2<wordRe, fileName>> hostRoots(is);
                 checkITstream(is, "hostRoots");
@@ -1224,31 +1222,33 @@ void Foam::argList::parse
                 {
                     labelList matched
                     (
-                        findStrings(hostRoot.first(), slaveMachine)
+                        findStrings(hostRoot.first(), hostMachine)
                     );
-                    for (const label slavei : matched)
+                    for (const label matchi : matched)
                     {
-                        if (!roots[slavei].empty())
+                        if (!roots[matchi].empty())
                         {
                             FatalErrorInFunction
-                                << "Slave " << slaveMachine[slavei]
-                                << " has multiple matching roots in "
-                                << hostRoots << exit(FatalError);
+                                << "Multiple matching roots for "
+                                << hostMachine[matchi] << " in "
+                                << hostRoots << nl
+                                << exit(FatalError);
                         }
 
-                        roots[slavei] = hostRoot.second();
+                        roots[matchi] = hostRoot.second();
                     }
                 }
 
                 // Check
-                forAll(roots, slavei)
+                forAll(roots, hosti)
                 {
-                    if (roots[slavei].empty())
+                    if (roots[hosti].empty())
                     {
                         FatalErrorInFunction
-                            << "Slave " << slaveMachine[slavei]
-                            << " has no matching roots in "
-                            << hostRoots << exit(FatalError);
+                            << "No matching roots for "
+                            << hostMachine[hosti] << " in "
+                            << hostRoots << nl
+                            << exit(FatalError);
                     }
                 }
 
@@ -1259,43 +1259,62 @@ void Foam::argList::parse
             }
             else if (checkProcessorDirectories_ && Pstream::nProcs() > 1)
             {
-                // Use values from decomposeParDict, the location was already
-                // established above.
+                // Check values from decomposeParDict
+
+                const bool useDefault = source.empty();
+                if (useDefault)
+                {
+                    source = rootPath_/globalCase_/"system"/"decomposeParDict";
+                }
 
                 // Disable any parallel comms happening inside the fileHandler
                 // since we are on master. This can happen e.g. inside
                 // the masterUncollated/collated handler.
                 const bool oldParRun = Pstream::parRun(false);
 
-                autoPtr<ISstream> decompDictStream
+                autoPtr<ISstream> dictStream
                 (
                     fileHandler().NewIFstream(source)
                 );
 
-                if (!decompDictStream || !decompDictStream->good())
-                {
-                    FatalError
-                        << "Cannot read decomposeParDict from "
-                        << source << exit(FatalError);
-                }
-
-                dictionary decompDict(*decompDictStream);
-
                 Pstream::parRun(oldParRun);  // Restore parallel state
 
-                decompDict.readEntry("numberOfSubdomains", dictNProcs);
+                if (dictStream && dictStream->good())
+                {
+                    dictionary decompDict(*dictStream);
+                    decompDict.readEntry("numberOfSubdomains", dictNProcs);
+
+                    if (decompDict.getOrDefault("distributed", false))
+                    {
+                        parRunControl_.distributed(true);
+                        decompDict.readEntry("roots", roots);
+                    }
+                }
+                else
+                {
+                    if (useDefault)
+                    {
+                        // Optional if using default location
+                        DetailInfo
+                            << "Warning: running without decomposeParDict "
+                            << this->relativePath(source) << nl;
+                    }
+                    else
+                    {
+                        // Mandatory if specified as -decomposeParDict
+                        FatalError
+                            << "Cannot read decomposeParDict: "
+                            << this->relativePath(source) << nl
+                            << exit(FatalError);
+                    }
+                }
+
                 if (Pstream::nProcs() == 1)
                 {
-                    WarningInFunction
+                    Warning
                         << "Running parallel on single processor. This only"
                         << " makes sense for multi-world simulation" << endl;
                     dictNProcs = 1;
-                }
-
-                if (decompDict.getOrDefault("distributed", false))
-                {
-                    parRunControl_.distributed(true);
-                    decompDict.readEntry("roots", roots);
                 }
             }
 
@@ -1306,7 +1325,7 @@ void Foam::argList::parse
                 const fileName rootName(roots[0]);
                 roots.resize(Pstream::nProcs()-1, rootName);
 
-                // adjust dictNProcs for command-line '-roots' option
+                // Adjust dictNProcs for command-line '-roots' option
                 if (dictNProcs < 0)
                 {
                     dictNProcs = roots.size()+1;
@@ -1331,13 +1350,12 @@ void Foam::argList::parse
             )
             {
                 FatalError
-                    << source
+                    << this->relativePath(source)
                     << " specifies " << dictNProcs
                     << " processors but job was started with "
                     << Pstream::nProcs() << " processors."
                     << exit(FatalError);
             }
-
 
             // Distributed data
             if (roots.size())
@@ -1347,7 +1365,7 @@ void Foam::argList::parse
                     FatalError
                         << "number of entries in roots "
                         << roots.size()
-                        << " is not equal to the number of slaves "
+                        << " is not equal to the number of sub-processes "
                         << Pstream::nProcs()-1
                         << exit(FatalError);
                 }
@@ -1359,12 +1377,12 @@ void Foam::argList::parse
 
                 // Distribute the master's argument list (with new root)
                 const bool hadCaseOpt = options_.found("case");
-                for (const int slave : Pstream::subProcs())
+                for (const int subproci : Pstream::subProcs())
                 {
-                    options_.set("case", roots[slave-1]/globalCase_);
+                    options_.set("case", roots[subproci-1]/globalCase_);
 
-                    OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                    toSlave << args_ << options_ << roots.size();
+                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
+                    toSubproc << args_ << options_ << roots.size();
                 }
                 options_.erase("case");
 
@@ -1382,6 +1400,7 @@ void Foam::argList::parse
                 (
                     checkProcessorDirectories_
                  && Pstream::nProcs() > 1
+                 && dictNProcs >= 1
                  && dictNProcs < Pstream::nProcs()
                 )
                 {
@@ -1408,10 +1427,10 @@ void Foam::argList::parse
                 }
 
                 // Distribute the master's argument list (unaltered)
-                for (const int slave : Pstream::subProcs())
+                for (const int subproci : Pstream::subProcs())
                 {
-                    OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                    toSlave << args_ << options_ << roots.size();
+                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
+                    toSubproc << args_ << options_ << roots.size();
                 }
             }
         }
@@ -1429,7 +1448,7 @@ void Foam::argList::parse
 
             parRunControl_.distributed(nroots);
 
-            // Establish rootPath_/globalCase_/case_ for slave
+            // Establish rootPath_/globalCase_/case_ for sub-process
             setCasePaths();
         }
 
@@ -1459,13 +1478,13 @@ void Foam::argList::parse
         }
     }
 
-    // Keep or discard slave and root information for reporting:
+    // Keep/discard sub-process host/root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
     {
         if (!writeHostsSwitch)
         {
             // Clear here to ensures it doesn't show in the jobInfo
-            slaveProcs.clear();
+            hostProcs.clear();
         }
         if (!debug::infoSwitch("writeRoots", 1))
         {
@@ -1480,17 +1499,28 @@ void Foam::argList::parse
 
         if (parRunControl_.parRun())
         {
-            if (slaveProcs.size())
+            if (hostProcs.size())
             {
                 if (writeHostsSwitch == 1)
                 {
                     // Compact output (see etc/controlDict)
-                    printHostsSubscription(slaveProcs);
+                    printHostsSubscription(hostProcs);
                 }
-                else
+                else if (writeHostsSwitch)
                 {
-                    // Full output of "slave.pid"
-                    Info<< "Slaves : " << slaveProcs << nl;
+                    // Full output of "host.pid"
+                    Info<< "Hosts  :\n(" << nl;
+
+                    // Include master in the list
+                    Info<< "    " << Foam::hostName().c_str() << '.'
+                        << Foam::pid() << nl;
+
+                    // Sub-processes
+                    for (const auto& str : hostProcs)
+                    {
+                        Info<< "    " << str.c_str() << nl;
+                    }
+                    Info<< ')' << nl;
                 }
             }
             if (roots.size())
@@ -1519,9 +1549,9 @@ void Foam::argList::parse
         jobInfo.add("root", rootPath_);
         jobInfo.add("case", globalCase_);
         jobInfo.add("nProcs", nProcs);
-        if (slaveProcs.size())
+        if (hostProcs.size())
         {
-            jobInfo.add("slaves", slaveProcs);
+            jobInfo.add("hosts", hostProcs);
         }
         if (roots.size())
         {
@@ -1819,8 +1849,8 @@ bool Foam::argList::checkRootCase() const
 
     if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())
     {
-        // Allow slaves on non-existing processor directories, created later
-        // (e.g. redistributePar)
+        // Allow non-existent processor directories on sub-processes,
+        // to be created later (e.g. redistributePar)
         FatalError
             << executable_
             << ": cannot open case directory " << path()

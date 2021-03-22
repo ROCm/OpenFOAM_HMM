@@ -54,7 +54,7 @@ InfoSwitches
     // Report hosts used (parallel)
     // - 0 = none
     // - 1 = per-host-count, but unsorted
-    // - 2 = long output of "slave.pid" ...
+    // - 2 = long output with host.pid ...
     writeHosts      1;
 
     // Report list of roots used (parallel)
