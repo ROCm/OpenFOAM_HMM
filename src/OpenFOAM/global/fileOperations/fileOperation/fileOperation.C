@@ -542,7 +542,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                 << " detected:" << procDirs << endl;
         }
 
-        if (Pstream::parRun())
+        if (Pstream::parRun() && (!distributed() || syncPar))
         {
             reduce(procDirsStatus, bitOrOp<unsigned>());  // worldComm
 
@@ -612,11 +612,9 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                 }
             }
         }
-        else
+        else if (!Pstream::parRun())
         {
-            // Serial
-            // If (as a side effect) we found the number of decompositions
-            // use it
+            // Serial: use the number of decompositions (if found)
             if (nProcs)
             {
                 const_cast<fileOperation&>(*this).setNProcs(nProcs);
