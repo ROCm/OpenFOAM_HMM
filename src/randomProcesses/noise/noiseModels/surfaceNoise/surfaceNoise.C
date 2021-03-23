@@ -515,7 +515,7 @@ void surfaceNoise::calculate()
 
         Info<< "Creating noise FFTs" << endl;
 
-        const scalarField freq1(uniformFrequencies(deltaT_));
+        const scalarField freq1(uniformFrequencies(deltaT_, true));
 
         // Reset desired frequency range if outside actual frequency range
         fLower_ = min(fLower_, max(freq1));

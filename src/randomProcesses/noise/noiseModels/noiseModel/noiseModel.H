@@ -246,7 +246,11 @@ protected:
 
         //- Create a field of equally spaced frequencies for the current set of
         //- data - assumes a constant time step
-        tmp<scalarField> uniformFrequencies(const scalar deltaT) const;
+        tmp<scalarField> uniformFrequencies
+        (
+            const scalar deltaT,
+            const bool check
+        ) const;
 
         //- Return a list of the frequency indices wrt f field that correspond
         //- to the bands limits for a given octave

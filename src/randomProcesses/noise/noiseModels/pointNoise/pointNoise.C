@@ -109,7 +109,7 @@ void pointNoise::processData
     // Narrow band data
     // ----------------
 
-    scalarField f(uniformFrequencies(deltaT));
+    scalarField f(uniformFrequencies(deltaT, true));
 
     // RMS pressure [Pa]
     if (writePrmsf_)

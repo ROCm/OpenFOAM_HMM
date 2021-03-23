@@ -237,7 +237,8 @@ Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 
 Foam::tmp<Foam::scalarField> Foam::noiseModel::uniformFrequencies
 (
-    const scalar deltaT
+    const scalar deltaT,
+    const bool check
 ) const
 {
     const auto& window = windowModelPtr_();
@@ -247,9 +248,24 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::uniformFrequencies
     auto& f = tf.ref();
 
     const scalar deltaf = 1.0/(N*deltaT);
+
+    label nFreq = 0;
     forAll(f, i)
     {
         f[i] = i*deltaf;
+
+        if (f[i] > fLower_ && f[i] < fUpper_)
+        {
+            ++nFreq;
+        }
+    }
+
+    if (check && nFreq == 0)
+    {
+        WarningInFunction
+            << "No frequencies found in range "
+            << fLower_ << " to " << fUpper_
+            << endl;
     }
 
     return tf;
@@ -263,8 +279,6 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::octaves
     const labelUList& freqBandIDs
 ) const
 {
-    auto toctData = tmp<scalarField>::New(freqBandIDs.size() - 1, Zero);
-
     if (freqBandIDs.size() < 2)
     {
         WarningInFunction
@@ -272,11 +286,13 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::octaves
             << "- skipping octaves calculation"
             << endl;
 
-        return toctData;
+        return tmp<scalarField>::New();
     }
 
+    auto toctData = tmp<scalarField>::New(freqBandIDs.size() - 1, Zero);
     auto& octData = toctData.ref();
 
+    bitSet bandUsed(freqBandIDs.size() - 1);
     for (label bandI = 0; bandI < freqBandIDs.size() - 1; ++bandI)
     {
         label fb0 = freqBandIDs[bandI];
@@ -290,7 +306,18 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::octaves
             label f1 = f[freqI + 1];
             scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
             octData[bandI] += dataAve*(f1 - f0);
+
+            bandUsed.set(bandI);
         }
+    }
+
+    bandUsed.flip();
+    labelList bandUnused = bandUsed.sortedToc();
+    if (bandUnused.size())
+    {
+        WarningInFunction
+            << "Empty bands found: " << bandUnused.size() << " of "
+            << bandUsed.size() << endl;
     }
 
     return toctData;
