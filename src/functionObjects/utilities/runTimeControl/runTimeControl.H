@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,8 +76,9 @@ public:
 
         enum class satisfiedAction
         {
-            END,
-            SET_TRIGGER
+            ABORT,      //!< "abort" - write and emit a FatalError
+            END,        //!< "end" - write and exit cleanly
+            SET_TRIGGER //!< "setTrigger" - trigger another condition
         };
 
         static Enum<satisfiedAction> satisfiedActionNames;

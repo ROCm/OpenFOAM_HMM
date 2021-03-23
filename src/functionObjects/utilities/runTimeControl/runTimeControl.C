@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,7 @@ Foam::Enum
 >
 Foam::functionObjects::runTimeControls::runTimeControl::satisfiedActionNames
 {
+    { satisfiedAction::ABORT, "abort"},
     { satisfiedAction::END, "end"},
     { satisfiedAction::SET_TRIGGER, "setTrigger"},
 };
@@ -251,6 +252,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
         switch (satisfiedAction_)
         {
+            case satisfiedAction::ABORT:
             case satisfiedAction::END:
             {
                 // Set to write a data dump or finalise the calculation
@@ -284,6 +286,13 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
                     // Trigger any function objects
                     time.run();
+
+                    if (satisfiedAction_ == satisfiedAction::ABORT)
+                    {
+                        FatalErrorInFunction
+                            << "Abort triggered"
+                            << exit(FatalError);
+                    }
                 }
                 break;
             }
