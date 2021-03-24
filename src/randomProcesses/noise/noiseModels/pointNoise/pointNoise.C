@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,15 +82,7 @@ void pointNoise::processData
     scalarField t, p;
     filterTimeData(data.x(), data.y(), t, p);
 
-    // Apply conversions
-    p *= rhoRef_;
-    p -= average(p);
-
     Info<< "    read " << t.size() << " values" << nl << endl;
-
-    Info<< "Creating noise FFT" << endl;
-
-    const scalar deltaT = checkUniformTimeStep(t);
 
     if (!validateBounds(p))
     {
@@ -98,6 +90,13 @@ void pointNoise::processData
         return;
     }
 
+    Info<< "Creating noise FFT" << endl;
+
+    const scalar deltaT = checkUniformTimeStep(t);
+
+    // Apply conversions
+    p *= rhoRef_;
+    p -= average(p);
 
     // Determine the windowing
     windowModelPtr_->validate(t.size());
