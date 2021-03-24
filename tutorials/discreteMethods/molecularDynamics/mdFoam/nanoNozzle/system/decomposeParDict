@@ -12,16 +12,11 @@ FoamFile
     class       dictionary;
     object      decomposeParDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains 4;
 
-method              scotch;
+method             scotch;
 
-coeffs
-{
-    n           (2 2 1);
-}
 
 // ************************************************************************* //

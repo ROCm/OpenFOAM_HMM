@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      mdInitialiseDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Euler angles, expressed in degrees as phi, theta, psi, see
@@ -42,5 +41,6 @@ liquid
     orientationAngles       (0 0 0);
     latticeCellShape        (1 1 1);
 }
+
 
 // ************************************************************************* //

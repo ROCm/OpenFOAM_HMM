@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      moleculeProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,5 +40,6 @@ water
         -1.66626354648e-19
     );
 }
+
 
 // ************************************************************************* //
