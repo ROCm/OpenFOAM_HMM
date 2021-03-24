@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,11 +143,14 @@ protected:
             //  geometric demand-driven data that was set
             void updateGeomNotOldVol();
 
-            //- Clear geometry
+            //- Clear local geometry
             void clearGeom();
 
-            //- Clear addressing
+            //- Clear local addressing
             void clearAddressing(const bool isMeshUpdate = false);
+
+            //- Clear local-only storage (geometry, addressing etc)
+            void clearOutLocal();
 
             //- Preserve old volume(s)
             void storeOldVol(const scalarField&);
