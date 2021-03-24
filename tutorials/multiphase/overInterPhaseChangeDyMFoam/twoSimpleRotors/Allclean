@@ -1,12 +1,10 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-wmake $targetType phaseChangeTwoPhaseMixtures
+cleanCase0
 
-wmake $targetType
-wmake $targetType interPhaseChangeDyMFoam
-wmake $targetType overInterPhaseChangeDyMFoam
+rm -f constant/cellInterpolationWeight
 
 #------------------------------------------------------------------------------
