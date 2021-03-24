@@ -81,6 +81,10 @@ void Foam::noiseModel::setOctaveBands
 
     // Convert to lower band limit
     fTest /= fRatioL2C;
+    while (fTest < fLower)
+    {
+        fTest *= fRatio;
+    }
 
     forAll(f, i)
     {
