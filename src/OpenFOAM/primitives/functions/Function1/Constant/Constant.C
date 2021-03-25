@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,16 +89,6 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::Constant<Type>::value
     return tmp<Field<Type>>::New(x.size(), value_);
 }
 
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::Function1Types::Constant<Type>::integrate
-(
-    const scalarField& x1,
-    const scalarField& x2
-) const
-{
-    return (x2 - x1)*value_;
-}
 
 template<class Type>
 void Foam::Function1Types::Constant<Type>::writeData(Ostream& os) const

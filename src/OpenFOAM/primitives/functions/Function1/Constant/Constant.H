@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,6 @@ public:
     TypeName("constant");
 
 
-
     // Generated Methods
 
         //- No copy assignment
@@ -118,24 +117,9 @@ public:
         //- Return value as a function of (scalar) independent variable
         virtual tmp<Field<Type>> value(const scalarField& x) const;
 
-        //- Integrate between two (scalar) values
-        virtual tmp<Field<Type>> integrate
-        (
-            const scalarField& x1,
-            const scalarField& x2
-        ) const;
-
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
 };
-
-
-template<>
-tmp<Field<label>> Function1Types::Constant<label>::integrate
-(
-    const scalarField& x1,
-    const scalarField& x2
-) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

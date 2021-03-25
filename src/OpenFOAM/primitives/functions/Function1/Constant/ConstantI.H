@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +44,7 @@ inline Type Foam::Function1Types::Constant<Type>::integrate
     const scalar x2
 ) const
 {
-    return (x2 - x1)*value_;
+    return Type((x2 - x1)*value_);
 }
 
 
