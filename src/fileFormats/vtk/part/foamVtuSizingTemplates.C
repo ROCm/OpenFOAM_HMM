@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -497,7 +497,7 @@ void Foam::vtk::vtuSizing::populateArrays
             addPointsIds[nPointDecomp++] = celli;
 
             // Whether to insert cell in place of original or not.
-            bool first = true;
+            bool firstCell = true;
 
             const labelList& cFaces = mesh.cells()[celli];
 
@@ -523,9 +523,9 @@ void Foam::vtk::vtuSizing::populateArrays
                     constexpr label nShapePoints = 5;  // pyr (5 vertices)
 
                     label celLoc, vrtLoc;
-                    if (first)
+                    if (firstCell)
                     {
-                        first = false;
+                        firstCell = false;
                         celLoc = celli;
                         vrtLoc = nVertLabels;
                         nVertLabels += prefix + nShapePoints;
@@ -551,10 +551,10 @@ void Foam::vtk::vtuSizing::populateArrays
                     // See note above about the orientation.
                     if (isOwner)
                     {
+                        vertLabels[vrtLoc++] = quad[0];
                         vertLabels[vrtLoc++] = quad[3];
                         vertLabels[vrtLoc++] = quad[2];
                         vertLabels[vrtLoc++] = quad[1];
-                        vertLabels[vrtLoc++] = quad[0];
                     }
                     else
                     {
@@ -575,9 +575,9 @@ void Foam::vtk::vtuSizing::populateArrays
                     constexpr label nShapePoints = 4;  // tet (4 vertices)
 
                     label celLoc, vrtLoc;
-                    if (first)
+                    if (firstCell)
                     {
-                        first = false;
+                        firstCell = false;
                         celLoc = celli;
                         vrtLoc = nVertLabels;
                         nVertLabels += prefix + nShapePoints;
@@ -603,9 +603,9 @@ void Foam::vtk::vtuSizing::populateArrays
                     // See note above about the orientation.
                     if (isOwner)
                     {
+                        vertLabels[vrtLoc++] = tria[0];
                         vertLabels[vrtLoc++] = tria[2];
                         vertLabels[vrtLoc++] = tria[1];
-                        vertLabels[vrtLoc++] = tria[0];
                     }
                     else
                     {
@@ -633,7 +633,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
             if (output == contentType::LEGACY)
             {
-                faceOutput[startLabel] = 0; // placeholder for size
+                faceOutput[startLabel] = 0; // placeholder for total size
                 ++faceIndexer;
             }
 
@@ -643,24 +643,24 @@ void Foam::vtk::vtuSizing::populateArrays
             {
                 const face& f = mesh.faces()[facei];
                 const bool isOwner = (owner[facei] == celli);
+                const label nFacePoints = f.size();
 
                 hashUniqId.insert(f);
 
                 // The number of labels for this face
-                faceOutput[faceIndexer++] = f.size();
+                faceOutput[faceIndexer++] = nFacePoints;
 
+                faceOutput[faceIndexer++] = f[0];
                 if (isOwner)
                 {
-                    forAll(f, fp)
+                    for (label fp = 1; fp < nFacePoints; ++fp)
                     {
                         faceOutput[faceIndexer++] = f[fp];
                     }
                 }
                 else
                 {
-                    // fairly immaterial if we reverse the list
-                    // or use face::reverseFace()
-                    forAllReverse(f, fp)
+                    for (label fp = nFacePoints - 1; fp > 0; --fp)
                     {
                         faceOutput[faceIndexer++] = f[fp];
                     }
@@ -684,10 +684,9 @@ void Foam::vtk::vtuSizing::populateArrays
                     vertLabels[nVertLabels++] = hashUniqId.size();
                 }
 
-                const labelList uniq = hashUniqId.sortedToc();
-                for (const label fpi : uniq)
+                for (const label pointi : hashUniqId.sortedToc())
                 {
-                    vertLabels[nVertLabels++] = fpi;
+                    vertLabels[nVertLabels++] = pointi;
                 }
             }
         }
@@ -726,7 +725,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
                 for (LabelType& off : faceOffset)
                 {
-                    const auto sz = off;
+                    const LabelType sz(off);
                     if (sz > 0)
                     {
                         prev += sz;
@@ -745,7 +744,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
                 for (LabelType& off : vertOffset)
                 {
-                    const auto sz = off;
+                    const LabelType sz(off);
                     off = beg;
                     beg += 1 + sz;  // Additional 1 to skip embedded prefix
                 }
@@ -758,7 +757,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
                 for (LabelType& off : faceOffset)
                 {
-                    const auto sz = off;
+                    const LabelType sz(off);
                     if (sz > 0)
                     {
                         off = beg;
@@ -782,7 +781,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
                 for (LabelType& off : vertOffset)
                 {
-                    const auto sz = off;
+                    const LabelType sz(off);
                     off = total;
                     total += sz;
                 }
@@ -795,7 +794,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
                 for (LabelType& off : faceOffset)
                 {
-                    const auto sz = off;
+                    const LabelType sz(off);
                     if (sz > 0)
                     {
                         off = beg;
