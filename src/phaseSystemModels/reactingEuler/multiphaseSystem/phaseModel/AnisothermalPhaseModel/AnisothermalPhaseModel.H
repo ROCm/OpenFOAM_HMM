@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ class AnisothermalPhaseModel
 :
     public BasePhaseModel
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Optionally filter the pressure work term as the phase-fraction -> 0
         tmp<volScalarField> filterPressureWork
@@ -67,6 +68,7 @@ public:
 
     // Constructors
 
+        //- Construct from phase system and phase name
         AnisothermalPhaseModel
         (
             const phaseSystem& fluid,
@@ -76,7 +78,7 @@ public:
 
 
     //- Destructor
-    virtual ~AnisothermalPhaseModel();
+    virtual ~AnisothermalPhaseModel() = default;
 
 
     // Member Functions

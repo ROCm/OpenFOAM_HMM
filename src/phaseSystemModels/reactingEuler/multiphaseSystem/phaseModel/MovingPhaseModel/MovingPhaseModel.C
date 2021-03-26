@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2015-2021 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -212,13 +212,6 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::MovingPhaseModel<BasePhaseModel>::~MovingPhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>
@@ -255,8 +248,7 @@ void Foam::MovingPhaseModel<BasePhaseModel>::correctKinematics()
 
     if (K_.valid())
     {
-        K_.clear();
-        K();
+        K_.ref() = 0.5*magSqr(this->U());
     }
 }
 
