@@ -249,8 +249,13 @@ void Foam::isoAdvection::boundFlux
 
             // First try to pass surplus fluid on to neighbour cells that are
             // not filled and to which dVf < phi*dt
-            while (mag(alphaOvershoot) > aTol && nFacesToPassFluidThrough > 0)
+            for (label iter=0; iter<10; iter++)
             {
+                if(mag(alphaOvershoot) < aTol || nFacesToPassFluidThrough == 0)
+                {
+                    break;
+                }
+
                 DebugInfo
                     << "\n\nBounding cell " << celli
                     << " with alpha overshooting " << alphaOvershoot

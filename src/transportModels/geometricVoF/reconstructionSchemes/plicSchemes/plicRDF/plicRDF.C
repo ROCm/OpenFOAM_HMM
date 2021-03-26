@@ -233,8 +233,7 @@ void Foam::reconstruction::plicRDF::setInitNormals(bool interpolate)
 
 void Foam::reconstruction::plicRDF::calcResidual
 (
-    Map<scalar>& normalResidual,
-    Map<scalar>& avgAngle
+    List<normalRes>& normalResidual
 )
 {
     exchangeFields_.setUpCommforZone(interfaceCell_,false);
@@ -246,7 +245,6 @@ void Foam::reconstruction::plicRDF::calcResidual
 
     const labelListList& stencil = exchangeFields_.getStencil();
 
-    normalResidual.clear();
 
     forAll(interfaceLabels_, i)
     {
@@ -260,13 +258,13 @@ void Foam::reconstruction::plicRDF::calcResidual
         scalar maxDiffNormal = GREAT;
         scalar weight= 0;
         const vector cellNormal = normal_[celli]/mag(normal_[celli]);
-
-        for (const label gblIdx : stencil[celli])
+        forAll(stencil[celli],j)
         {
+            const label gblIdx = stencil[celli][j];
             vector normal =
                 exchangeFields_.getValue(normal_, mapNormal, gblIdx);
 
-            if (mag(normal) != 0 && i != 0)
+            if (mag(normal) != 0 && j != 0)
             {
                 vector n = normal/mag(normal);
                 scalar cosAngle = max(min((cellNormal & n), 1), -1);
@@ -291,8 +289,9 @@ void Foam::reconstruction::plicRDF::calcResidual
         vector newCellNormal = normalised(interfaceNormal_[i]);
 
         scalar normalRes = (1 - (cellNormal & newCellNormal));
-        avgAngle.insert(celli, avgDiffNormal);
-        normalResidual.insert(celli, normalRes);
+        normalResidual[i].celli = celli;
+        normalResidual[i].normalResidual = normalRes;
+        normalResidual[i].avgAngle = avgDiffNormal;
     }
 }
 
@@ -399,14 +398,14 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
     // nextToInterface is update on setInitNormals
     const boolList& nextToInterface_ = RDF_.nextToInterface();
 
-    labelHashSet tooCoarse;
+    bitSet tooCoarse(mesh_.nCells(),false);
 
     for (int iter=0; iter<iteration_; ++iter)
     {
         forAll(interfaceLabels_, i)
         {
             const label celli = interfaceLabels_[i];
-            if (mag(interfaceNormal_[i]) == 0 || tooCoarse.found(celli))
+            if (mag(interfaceNormal_[i]) == 0 || tooCoarse.test(celli))
             {
                 continue;
             }
@@ -439,8 +438,7 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
 
         normal_.correctBoundaryConditions();
         centre_.correctBoundaryConditions();
-        Map<scalar> residual;
-        Map<scalar> avgAngle;
+        List<normalRes> normalResidual(interfaceLabels_.size());
 
         surfaceVectorField::Boundary nHatb(mesh_.Sf().boundaryField());
         nHatb *= 1/(mesh_.magSf().boundaryField());
@@ -456,43 +454,42 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
             );
             RDF_.updateContactAngle(alpha1_, U_, nHatb);
             gradSurf(RDF_);
-            calcResidual(residual, avgAngle);
+            calcResidual(normalResidual);
         }
-
 
         label resCounter = 0;
         scalar avgRes = 0;
         scalar avgNormRes = 0;
 
-        Map<scalar>::iterator resIter = residual.begin();
-        Map<scalar>::iterator avgAngleIter = avgAngle.begin();
-
-        while (resIter.found())
+        forAll(normalResidual,i)
         {
-            if (avgAngleIter() > 0.26 && iter > 0) // 15 deg
+
+            const label celli = normalResidual[i].celli;
+            const scalar normalRes= normalResidual[i].normalResidual;
+            const scalar avgA = normalResidual[i].avgAngle;
+
+            if (avgA > 0.26 && iter > 0) // 15 deg
             {
-                tooCoarse.set(resIter.key());
+                tooCoarse.set(celli);
             }
             else
             {
-                avgRes += resIter();
+                avgRes += normalRes;
                 scalar normRes = 0;
-                scalar discreteError = 0.01*sqr(avgAngleIter());
+                scalar discreteError = 0.01*sqr(avgA);
                 if (discreteError != 0)
                 {
-                    normRes= resIter()/max(discreteError, tol_);
+                    normRes= normalRes/max(discreteError, tol_);
                 }
                 else
                 {
-                    normRes= resIter()/tol_;
+                    normRes= normalRes/tol_;
                 }
                 avgNormRes += normRes;
                 resCounter++;
 
             }
 
-            ++resIter;
-            ++avgAngleIter;
         }
 
         reduce(avgRes,sumOp<scalar>());

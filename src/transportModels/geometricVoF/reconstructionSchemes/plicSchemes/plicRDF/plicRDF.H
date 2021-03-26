@@ -78,6 +78,14 @@ class plicRDF
 {
     // Private Data
 
+        //-  residuals storage
+        struct normalRes
+        {
+            label celli;
+            scalar normalResidual;
+            scalar avgAngle;
+        };
+
         //- Reference to mesh
         const fvMesh& mesh_;
 
@@ -129,8 +137,7 @@ class plicRDF
         //- compute the normal residuals
         void calcResidual
         (
-            Map<scalar>& normalResidual,
-            Map<scalar>& avgAngle
+            List<normalRes>& normalResidual
         );
 
         //- interpolation of the normals from the previous time step
