@@ -31,6 +31,8 @@ Description
 #include "dictionary.H"
 #include "Ostream.H"
 #include "Pstream.H"
+#include "pointField.H"
+#include "tensor.H"
 #include "unitConversion.H"
 
 //{{{ begin codeInclude
@@ -51,7 +53,7 @@ ${localCode}
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C" void ${typeName}(Ostream& os, const dictionary& dict)
+extern "C" void ${typeName}(Foam::Ostream& os, const Foam::dictionary& dict)
 {
 //{{{ begin code
     ${code}
