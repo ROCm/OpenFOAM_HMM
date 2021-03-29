@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,13 @@ License
     makeFunction1Type(Scale, Type);                                            \
     makeFunction1Type(LimitRange, Type);
 
+#define makeFieldFunction1s(Type)                                              \
+    makeFunction1(Type);                                                       \
+    makeFunction1Type(Constant, Type);                                         \
+    makeFunction1Type(Uniform, Type);                                          \
+    makeFunction1Type(Table, Type);                                            \
+    makeFunction1Type(TableFile, Type);                                        \
+
 namespace Foam
 {
     makeFunction1(label);
@@ -69,19 +76,8 @@ namespace Foam
     makeFunction1s(sphericalTensor);
     makeFunction1s(symmTensor);
     makeFunction1s(tensor);
-}
 
-
-template<>
-Foam::tmp<Foam::Field<Foam::label>>
-Foam::Function1Types::Constant<Foam::label>::integrate
-(
-    const scalarField& x1,
-    const scalarField& x2
-) const
-{
-    NotImplemented;
-    return tmp<Field<label>>::New(x1.size());
+    makeFieldFunction1s(scalarField);
 }
 
 
