@@ -214,10 +214,11 @@ class exprResult
         template<class Type>
         bool writeSingleValueChecked(Ostream& os) const;
 
-        //- Type-checked writing of "value" field entry
+        //- Type-checked writing field as entry (if keyword is non-empty)
+        //- or as plain field (if keyword is empty)
         //  \return True if the type check was satisfied
         template<class Type>
-        bool writeValueFieldChecked(Ostream& os) const;
+        bool writeFieldChecked(const word& keyword, Ostream& os) const;
 
         //- Type-checked forwarding to Field::writeEntry
         //  \return True if the type check was satisfied
@@ -515,6 +516,9 @@ public:
 
         //- Write entry as dictionary contents
         void writeDict(Ostream& os, const bool subDict=true) const;
+
+        //- Write the field, optionally as an entry
+        void writeField(Ostream& os, const word& keyword = "") const;
 
         //- Write the single value, or the first value from field
         void writeValue(Ostream& os) const;

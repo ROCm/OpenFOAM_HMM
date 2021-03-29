@@ -624,21 +624,7 @@ void Foam::expressions::exprResult::writeDict
         os.writeEntryIfDifferent<Switch>("isPointValue", false, isPointData_);
         os.writeEntry<Switch>("isSingleValue", isUniform_);
 
-        const bool ok =
-        (
-            writeValueFieldChecked<scalar>(os)
-         || writeValueFieldChecked<vector>(os)
-         || writeValueFieldChecked<tensor>(os)
-         || writeValueFieldChecked<symmTensor>(os)
-         || writeValueFieldChecked<sphericalTensor>(os)
-         || writeValueFieldChecked<bool>(os)
-        );
-
-        if (!ok)
-        {
-            WarningInFunction
-                << "Unknown data type " << valType_ << endl;
-        }
+        this->writeField(os, "value");
     }
 
     if (subDict)
@@ -647,6 +633,38 @@ void Foam::expressions::exprResult::writeDict
     }
 
     // os.format(oldFmt);
+}
+
+
+void Foam::expressions::exprResult::writeField
+(
+    Ostream& os,
+    const word& keyword
+) const
+{
+    // const auto oldFmt = os.format(IOstream::ASCII);
+
+    DebugInFunction
+        << Foam::name(this) << nl
+        << "Format: "
+        << IOstreamOption::formatNames[os.format()] << nl;
+
+    const bool ok =
+    (
+        writeFieldChecked<scalar>(keyword, os)
+     || writeFieldChecked<vector>(keyword, os)
+     || writeFieldChecked<tensor>(keyword, os)
+     || writeFieldChecked<symmTensor>(keyword, os)
+     || writeFieldChecked<sphericalTensor>(keyword, os)
+     || writeFieldChecked<label>(keyword, os)
+     || writeFieldChecked<bool>(keyword, os)
+    );
+
+    if (!ok)
+    {
+        WarningInFunction
+            << "Unknown data type " << valType_ << endl;
+    }
 }
 
 

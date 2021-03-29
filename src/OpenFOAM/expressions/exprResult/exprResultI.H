@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2012-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -496,7 +496,11 @@ bool Foam::expressions::exprResult::writeSingleValueChecked(Ostream& os) const
 
 
 template<class Type>
-bool Foam::expressions::exprResult::writeValueFieldChecked(Ostream& os) const
+bool Foam::expressions::exprResult::writeFieldChecked
+(
+    const word& keyword,
+    Ostream& os
+) const
 {
     if (!isType<Type>())
     {
@@ -508,26 +512,46 @@ bool Foam::expressions::exprResult::writeValueFieldChecked(Ostream& os) const
         if (isUniform_)
         {
             const Type& val = single_.get<Type>();
-            os.writeEntry("value", val);
+            if (keyword.empty())
+            {
+                os << val;
+            }
+            else
+            {
+                os.writeEntry(keyword, val);
+            }
         }
         else
         {
-            // Zero-sized
-            const Field<Type> fld;
-            fld.writeEntry("value", os);
+            // Zero-sized - could write nothing, or a zero value
+            if (keyword.empty())
+            {
+                os << pTraits<Type>::zero;
+            }
+            else
+            {
+                Field<Type>().writeEntry(keyword, os);
+            }
         }
     }
     else
     {
         const Field<Type>& fld = *static_cast<const Field<Type>*>(fieldPtr_);
 
-        if (isUniform_)
+        if (keyword.empty())
         {
-            os.writeEntry("value", fld.first());
+            os << fld;
         }
         else
         {
-            fld.writeEntry("value", os);
+            if (isUniform_)
+            {
+                os.writeEntry(keyword, fld.first());
+            }
+            else
+            {
+                fld.writeEntry(keyword, os);
+            }
         }
     }
 
