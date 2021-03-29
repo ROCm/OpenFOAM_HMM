@@ -125,7 +125,7 @@ case "system":
     if ($?FOAM_VERBOSE && $?prompt) then
         if ( $?pv_plugin_dir ) then
             echo "Using paraview (system)"
-            echo "    plugins         : ${pv_plugin_dir}" 1>&2
+            echo "    plugins         : ${pv_plugin_dir}"
         else
             echo "system paraview (not found)"
         endif

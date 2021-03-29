@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -25,6 +25,7 @@
 #     define the underlying compiler to be used
 #
 # User adjustments are controlled by these types of files:
+#     - config.csh/prefs.fjmpi
 #     - config.csh/prefs.intelmpi
 #     - config.csh/prefs.mpich
 #     - config.csh/prefs.mpich-gm
@@ -223,7 +224,7 @@ case CRAY-MPICH:
     setenv MPI_ARCH_PATH "$MPICH_DIR"
 
     if ( ! -d "$MPI_ARCH_PATH" ) then
-        echo "%{_foamMpiWarning}invalid $WM_MPLIB directory" 1>&2
+        echo "%{_foamMpiWarning}invalid $WM_MPLIB directory"
         echo "    => $MPI_ARCH_PATH"
         echo "Please set MPICH_DIR correctly"
     endif
@@ -269,12 +270,24 @@ case MPI:
 
 case FJMPI:
     setenv FOAM_MPI fjmpi
-    setenv MPI_ARCH_PATH /opt/FJSVmpi2
+    _foamEtc -config prefs.fjmpi  ## Optional adjustments
 
-    _foamAddPath    "$MPI_ARCH_PATH"/bin
-    _foamAddLib     "$MPI_ARCH_PATH"/lib/sparcv9
-    _foamAddLib     /opt/FSUNf90/lib/sparcv9
-    _foamAddLib     /opt/FJSVpnidt/lib
+    # MPI_ARCH_PATH (prefs) or MPI_ROOT (inherited), in that order
+    if ( "$MPI_ARCH_PATH" != "" ) then
+        setenv MPI_ROOT "$MPI_ARCH_PATH"
+    else if ( $?MPI_ROOT ) then
+        setenv MPI_ARCH_PATH "$MPI_ROOT"
+    endif
+
+    if ( -d "$MPI_ARCH_PATH" ) then
+        setenv OPAL_PREFIX "$MPI_ARCH_PATH"  # An openmpi-derivative
+        _foamAddPath    "$MPI_ARCH_PATH"/bin
+        _foamAddLib     "$MPI_ARCH_PATH"/lib64
+    else
+        echo "%{_foamMpiWarning}invalid $WM_MPLIB directory"
+        echo "    => ${MPI_ARCH_PATH:-unset}"
+        echo "Please set MPI_ARCH_PATH or MPI_ROOT correctly"
+    endif
     breaksw
 
 
@@ -297,7 +310,7 @@ case SGIMPI:
     setenv MPI_ARCH_PATH "$MPI_ROOT"
 
     if ( ! -d "$MPI_ARCH_PATH" ) then
-        echo "%{_foamMpiWarning}invalid $WM_MPLIB directory" 1>&2
+        echo "%{_foamMpiWarning}invalid $WM_MPLIB directory"
         echo "    => $MPI_ARCH_PATH"
         echo "Please set MPI_ROOT correctly"
     endif
@@ -339,8 +352,8 @@ case INTELMPI*:
         endsw
 
     else
-        echo "${_foamMpiWarning}invalid $WM_MPLIB directory" 1>&2
-        echo "    => ${MPI_ARCH_PATH}" 1>&2
+        echo "${_foamMpiWarning}invalid $WM_MPLIB directory"
+        echo "    => ${MPI_ARCH_PATH}"
         echo "Please set I_MPI_ROOT or MPI_ROOT correctly."
     endif
 
