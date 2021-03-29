@@ -67,7 +67,7 @@
 #define TOK_SSPH_TENSOR_ID                  67
 #define TOK_SYM_TENSOR_ID                   68
 #define TOK_SSYM_TENSOR_ID                  69
-#define TOK_UNIT_TENSOR                     70
+#define TOK_IDENTITY_TENSOR                 70
 #define TOK_TENSOR_ID                       71
 #define TOK_STENSOR_ID                      72
 #define TOK_LTRUE                           73

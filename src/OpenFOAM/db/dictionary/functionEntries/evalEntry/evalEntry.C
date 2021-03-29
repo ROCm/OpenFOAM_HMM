@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "stringOps.H"
 #include "fieldExprDriver.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include <cctype>
 
 #undef  DetailInfo
 #define DetailInfo  if (::Foam::infoDetailLevel > 0) InfoErr
@@ -69,34 +70,35 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
         << is.lineNumber() << " in file " <<  parentDict.name() << nl;
     #endif
 
-    // String to evaluate
-    string s;
-
     token tok(is);
-
-    if (!tok.good())
+    label fieldWidth(1);  // Field width for the result
+    if (tok.isLabel())
     {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get string to evaluate"
-            << exit(FatalIOError);
-
-        return tokenList();
+        // - #eval INT "expr"
+        // - #eval INT { expr }
+        // - #eval INT #{ expr #}
+        fieldWidth = max(1, tok.labelToken());
+        is >> tok;
     }
 
+    string s;  // String to evaluate
     if (tok.isString())
     {
+        // - #eval "expr"
+        // - #eval #{ expr #}
         s = tok.stringToken();
     }
-    else if (tok == token::BEGIN_BLOCK)
+    else if (tok.isPunctuation(token::BEGIN_BLOCK))
     {
+        // - #eval { expr }
         dynamic_cast<ISstream&>(is).getLine(s, token::END_BLOCK);
     }
     else
     {
-        is.putBack(tok);
-
         FatalIOErrorInFunction(is)
-            << "Invalid input for #eval" << nl
+            << "Invalid input for #eval."
+               " Expecting a string or block to evaluate, but found" << nl
+            << tok.info() << endl
             << exit(FatalIOError);
     }
 
@@ -111,15 +113,31 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     expressions::exprString::inplaceExpand(s, parentDict, true);
     stringOps::inplaceTrim(s);
 
-    // An extraneous trailing ';' is a common input error, catch it now.
-    // May need to relax in the future, trim or something else
+    // An extraneous trailing ';' is a common input error.
+    // - trim if it does not influence the result
 
-    if (std::string::npos != s.find(';'))
+    const auto trailing = s.find(';');
+    if (std::string::npos != trailing)
     {
-        FatalIOErrorInFunction(is)
-            << "Invalid input for #eval" << nl
-            << s << endl
-            << exit(FatalIOError);
+        bool ignore = true;
+        for (size_t other = trailing; ignore && other < s.length(); ++other)
+        {
+            ignore = s[other] == ';' || std::isspace(s[other]);
+        }
+
+        if (ignore)
+        {
+            // Can trim trailing without semantical change
+            s.erase(trailing);
+            stringOps::inplaceTrim(s);
+        }
+        else
+        {
+            FatalIOErrorInFunction(is)
+                << "Invalid input (after trailing ';') for #eval" << nl
+                << s << endl
+                << exit(FatalIOError);
+        }
     }
 
     #ifdef FULLDEBUG
@@ -138,7 +156,7 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
 
     expressions::exprResult result;
     {
-        expressions::fieldExprDriver driver(1);
+        expressions::fieldExprDriver driver(fieldWidth);
         driver.parse(s);
         result = std::move(driver.result());
     }
@@ -152,11 +170,15 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
         return tokenList();
     }
 
-    // Could average/reduce to a single value, but probably not needed
-    //// result.testIfSingleValue(false);  // No parallel check
-
     OTstream toks;
-    result.writeValue(toks);
+    if (result.size() <= 1)
+    {
+        result.writeValue(toks);
+    }
+    else
+    {
+        result.writeField(toks);
+    }
 
     return std::move(toks);
 }

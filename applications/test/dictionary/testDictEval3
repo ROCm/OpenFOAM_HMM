@@ -68,4 +68,8 @@ apiMonth   #eval{ ($FOAM_API % 100) };
 empty  #eval "";
 
 
+// Field of specified length
+random  #eval 4  { vector(rand(), 0, 0) ; /* trailing rubbish */ ; };
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

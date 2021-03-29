@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,12 @@ Description
     with scalars, vectors etc.
 
     The input can any form of string or, for convenience,
-    a '{}' delimited string literal.  In all cases, C/C++ comment stripping
-    is also performed.
+    a '{}' delimited string literal.
+    In all cases, C/C++ comment stripping is performed.
+    The default size of the evaluated field is one,
+    which can be overridden by providing an initial integer value.
 
-    For example,
-
+    Some examples,
     \verbatim
     a 1;
     b 3;
@@ -45,12 +46,15 @@ Description
         // ignore: sin(pi()*$a/$b)
         sin(degToRad(45))
     };
+
+    // With different field length:
+    points #eval 4 #{ vector(rand(), 0, 0) #};
     \endverbatim
 
 Note
     The string expansions support use of environment variables.
     Unknown variables will expand to an empty string, so it can be advisable
-    to an expansion with an alternative. For example,
+    to expand with an alternative. For example,
 
     \verbatim
     d #eval{ sin(degToRad( ${angle:-0} )) };

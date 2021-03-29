@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -289,7 +289,7 @@ static int driverTokenType
     "Zero"      =>{ EMIT_TOKEN(ZERO); };
     "true"      =>{ EMIT_TOKEN(LTRUE); };
     "false"     =>{ EMIT_TOKEN(LFALSE); };
-    "tensor::I" =>{ EMIT_TOKEN(UNIT_TENSOR); };
+    "tensor::I" =>{ EMIT_TOKEN(IDENTITY_TENSOR); };
     "arg"       =>{ EMIT_TOKEN(ARG); };
 ##    "time"      =>{ EMIT_TOKEN(TIME); };
 

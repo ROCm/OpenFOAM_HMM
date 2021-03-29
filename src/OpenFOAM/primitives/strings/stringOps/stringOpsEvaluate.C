@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,17 @@ License
 
 Foam::string Foam::stringOps::evaluate
 (
+    label fieldWidth,
     const std::string& str,
     size_t pos,
     size_t len
 )
 {
+    if (fieldWidth < 1)
+    {
+        fieldWidth = 1;
+    }
+
     /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
 
     const auto trimPoints = stringOps::findTrim(str, pos, len);
@@ -49,14 +55,14 @@ Foam::string Foam::stringOps::evaluate
 
     if (!len)
     {
-        return "";
+        return string();
     }
 
     /// InfoErr<< "Evaluate " << str.substr(pos, len) << nl;
 
     expressions::exprResult result;
     {
-        expressions::fieldExprDriver driver(1);
+        expressions::fieldExprDriver driver(fieldWidth);
         driver.parse(str, pos, len);
         result = std::move(driver.result());
     }
@@ -67,13 +73,31 @@ Foam::string Foam::stringOps::evaluate
             << "Failed evaluation: "
             << str.substr(pos, len) << nl;
 
-        return "";
+        return string();
     }
 
     OStringStream os;
-    result.writeValue(os);
+    if (result.size() <= 1)
+    {
+        result.writeValue(os);
+    }
+    else
+    {
+        result.writeField(os);
+    }
 
     return os.str();
+}
+
+
+Foam::string Foam::stringOps::evaluate
+(
+    const std::string& str,
+    size_t pos,
+    size_t len
+)
+{
+    return stringOps::evaluate(1, str, pos, len);
 }
 
 

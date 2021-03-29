@@ -7,7 +7,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -595,7 +595,7 @@ tr9:
 	goto st11;
 tr11:
 #line 418 "patchExprScanner.rl"
-	{te = p+1;{ EMIT_TOKEN(UNIT_TENSOR); }}
+	{te = p+1;{ EMIT_TOKEN(IDENTITY_TENSOR); }}
 	goto st11;
 tr12:
 #line 359 "patchExprScanner.rl"

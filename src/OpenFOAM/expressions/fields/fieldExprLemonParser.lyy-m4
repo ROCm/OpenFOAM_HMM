@@ -7,7 +7,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,7 +283,7 @@ dnl
 \*---------------------------------------------------------------------------*/
 
 evaluate ::= _target_ (a) . { driver->setResult(a); }
-tfield (lhs) ::= UNIT_TENSOR .  { lhs = _new_tfield(Foam::tensor::I); }
+tfield (lhs) ::= IDENTITY_TENSOR . { lhs = _new_tfield(Foam::tensor::I); }
 
 rule_get_field(_target_, TENSOR_ID)
 

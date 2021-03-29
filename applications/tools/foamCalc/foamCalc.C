@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption("rules", "Print parser rules and exit");
     argList::addBoolOption("tokens", "Print token names and exit");
     argList::addOption("precision", "int", "Output with specified precision");
+    argList::addOption("size", "int", "Field output width (default: 1)");
 
     // Flag arguments as optional so that -rules and -tokens works
     argList::noMandatoryArgs();
@@ -110,6 +111,7 @@ int main(int argc, char *argv[])
 
     const bool printRules = args.found("rules");
     const bool printNames = args.found("tokens");
+    const label fieldWidth = args.getOrDefault<label>("size", 1);
 
     if (printNames || printRules)
     {
@@ -155,7 +157,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Info<< stringOps::evaluate(expr).c_str() << nl;
+    Info<< stringOps::evaluate(fieldWidth, expr).c_str() << nl;
 
     return 0;
 }
