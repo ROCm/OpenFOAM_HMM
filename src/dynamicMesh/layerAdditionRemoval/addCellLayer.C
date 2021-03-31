@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -423,19 +424,21 @@ void Foam::layerAdditionRemoval::addCellLayer
 
         label patchID = -1;
         label zoneID = -1;
+        label extrudeFaceID = -1;
 
-        forAll(curFaces, facei)
+        forAll(curFaces, curFacei)
         {
-            const label cf = curFaces[facei];
+            extrudeFaceID = curFaces[curFacei];
 
-            if (!mesh.isInternalFace(cf))
+            if (!mesh.isInternalFace(extrudeFaceID))
             {
-                // Face not internal. Check if it is in the zone
-                if (zoneMesh.whichZone(cf) != faceZoneID_.index())
+                // Face not internal. Check if it is not in the zone
+                const label cfZone = zoneMesh.whichZone(extrudeFaceID);
+                if (cfZone != faceZoneID_.index())
                 {
                     // Found the face in a boundary patch which is not in zone
-                    patchID = mesh.boundaryMesh().whichPatch(cf);
-                    zoneID = mesh.faceZones().whichZone(cf);
+                    patchID = mesh.boundaryMesh().whichPatch(extrudeFaceID);
+                    zoneID = cfZone;
 
                     break;
                 }
@@ -473,6 +476,56 @@ void Foam::layerAdditionRemoval::addCellLayer
                 << " into patch " << patchID
                 << " own: " << addedCells[edgeFaces[curEdgeID][0]]
                 << endl;
+        }
+
+        // Handle duplicate boundary faces (for e.g. cyclicACMI)
+        if (patchID != -1)
+        {
+            for (const label cf : curFaces)
+            {
+                if (cf != extrudeFaceID && !mesh.isInternalFace(cf))
+                {
+                    // Check if it is not in the zone and duplicate of
+                    // extrudeFaceID
+                    const label cfZone = zoneMesh.whichZone(cf);
+                    if
+                    (
+                        cfZone != faceZoneID_.index()
+                     && face::compare(faces[cf], faces[extrudeFaceID]) == 1
+                    )
+                    {
+                        // Found the face in a boundary patch which is not
+                        // in zone (so would not be extruded above)
+                        patchID = mesh.boundaryMesh().whichPatch(cf);
+                        zoneID = cfZone;
+
+                        ref.setAction
+                        (
+                            polyAddFace
+                            (
+                                newFace,                            // face
+                                addedCells[edgeFaces[curEdgeID][0]],// owner
+                                -1,                                 // neighbour
+                                -1,                                 // point
+                                meshEdges[curEdgeID],               // edge
+                                -1,                                 // face
+                                false,                              // flip flux
+                                patchID,                            // patch
+                                zoneID,                             // zone
+                                false                               // zone flip
+                            )
+                        );
+
+                        if (debug > 1)
+                        {
+                            Pout<< "add duplicate boundary face: " << newFace
+                                << " into patch " << patchID
+                                << " own: "
+                                << addedCells[edgeFaces[curEdgeID][0]] << endl;
+                        }
+                    }
+                }
+            }
         }
     }
 

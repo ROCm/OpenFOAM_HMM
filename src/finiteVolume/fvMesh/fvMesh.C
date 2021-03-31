@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -224,7 +224,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
 }
 
 
-void Foam::fvMesh::clearOut()
+void Foam::fvMesh::clearOutLocal()
 {
     clearGeom();
     surfaceInterpolation::clearOut();
@@ -233,7 +233,12 @@ void Foam::fvMesh::clearOut()
 
     // Clear mesh motion flux
     deleteDemandDrivenData(phiPtr_);
+}
 
+
+void Foam::fvMesh::clearOut()
+{
+    clearOutLocal();
     polyMesh::clearOut();
 }
 
@@ -659,7 +664,8 @@ Foam::polyMesh::readUpdateState Foam::fvMesh::readUpdate()
     {
         DebugInfo << "Topological update" << endl;
 
-        clearOut();
+        // fvMesh::clearOut() but without the polyMesh::clearOut
+        clearOutLocal();
     }
     else if (state == polyMesh::POINTS_MOVED)
     {

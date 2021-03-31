@@ -396,8 +396,12 @@ void Foam::layerAdditionRemoval::removeCellLayer
                 << " flipFace: " << flipFace
                 << " newPatchID: " << newPatchID
                 << " newZoneID: " << newZoneID << nl
-                << " oldOwn: " << own[mf[facei]]
-                << " oldNei: " << nei[mf[facei]] << endl;
+                << " oldOwn: " << own[mf[facei]];
+            if (newPatchID == -1)
+            {
+                Pout<< " oldNei: " << nei[mf[facei]];
+            }
+            Pout<< endl;
         }
 
         ref.setAction
