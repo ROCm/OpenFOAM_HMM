@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,12 +365,16 @@ int main(int argc, char *argv[])
     (
         dict.lookup("facesToTriangulate")
     );
+    // Optional
+    List<Pair<point>> facesToSplit;
+    dict.readIfPresent("facesToSplit", facesToSplit);
 
     bool cutBoundary =
     (
         pointsToMove.size()
      || edgesToSplit.size()
      || facesToTriangulate.size()
+     || facesToSplit.size()
     );
 
     List<Pair<point>> edgesToCollapse(dict.lookup("edgesToCollapse"));
@@ -388,6 +392,7 @@ int main(int argc, char *argv[])
         << "  Boundary cutting module:" << nl
         << "    points to move      :" << pointsToMove.size() << nl
         << "    edges to split      :" << edgesToSplit.size() << nl
+        << "    faces to split      :" << facesToSplit.size() << nl
         << "    faces to triangulate:" << facesToTriangulate.size() << nl
         << "  Cell splitting module:" << nl
         << "    cells to split      :" << cellsToPyramidise.size() << nl
@@ -480,6 +485,53 @@ int main(int argc, char *argv[])
         }
     }
 
+
+    Info<< nl << "Looking up faces to split ..." << nl << endl;
+    Map<labelPair> faceToSplit(facesToSplit.size());
+    for (const Pair<point>& pts : facesToSplit)
+    {
+        label facei = findFace(mesh, allBoundary, pts.first());
+        if (facei == -1)
+        {
+            Info<< "Could not insert mesh face " << facei
+                << " for input point " << pts.first() << nl
+                << "Perhaps the face is already marked for splitting?" << endl;
+
+            validInputs = false;
+        }
+        else
+        {
+            // Find nearest points on face
+            const primitivePatch pp
+            (
+                SubList<face>(mesh.faces(), 1, facei),
+                mesh.points()
+            );
+
+            const label p0 = findPoint(pp, pts.first());
+            const label p1 = findPoint(pp, pts.second());
+
+            const face& f = mesh.faces()[facei];
+
+            if
+            (
+                p0 != -1
+             && p1 != -1
+             && faceToSplit.insert(facei, labelPair(f.find(p0), f.find(p1)))
+            )
+            {}
+            else
+            {
+                Info<< "Could not insert mesh face " << facei
+                    << " for input coordinates " << pts
+                    << " with vertices " << p0 << " and " << p1 << nl
+                    << "Perhaps the face is already marked for splitting?"
+                    << endl;
+
+            }
+        }
+    }
+DebugVar(faceToSplit);
 
 
     Info<< nl << "Looking up cells to convert to pyramids around"
@@ -652,7 +704,7 @@ int main(int argc, char *argv[])
         (
             pointToPos,
             edgeToCuts,
-            Map<labelPair>(0),  // Faces to split diagonally
+            faceToSplit,        // Faces to split diagonally
             faceToDecompose,    // Faces to triangulate
             meshMod
         );

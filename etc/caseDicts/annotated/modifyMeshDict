@@ -30,6 +30,16 @@ edgesToSplit
     (( -0.17692 -0.45312 0.74516)( -0.18 -0.45 0.742))
 );
 
+// Split a boundary face:
+// The two coordinates indicate an edge on a face:
+//  - find the face where the first coordinate is on (so the point should be
+//    on the plane of the face
+//  - find nearest vertex on the face for both coordinates
+facesToSplit
+(
+    ((0.99 0 0.01)(0.99 0 0.99))    // edge (1 0 0)(1 0 1) on bottom face
+);
+
 // Triangulate a boundary face:
 // First coord is a point on the face to triangulate. It will introduce a
 // point on the face, triangulate and move the point to the second coordinate.
