@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenFOAM Foundation
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,13 +70,6 @@ Foam::AnisothermalPhaseModel<BasePhaseModel>::AnisothermalPhaseModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::AnisothermalPhaseModel<BasePhaseModel>::~AnisothermalPhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>
@@ -100,23 +93,32 @@ Foam::tmp<Foam::fvScalarMatrix>
 Foam::AnisothermalPhaseModel<BasePhaseModel>::heEqn()
 {
     const volScalarField& alpha = *this;
+    const volScalarField& rho = this->rho();
 
-    const volVectorField U(this->U());
-    const surfaceScalarField alphaPhi(this->alphaPhi());
-    const surfaceScalarField alphaRhoPhi(this->alphaRhoPhi());
+    const tmp<volVectorField> tU(this->U());
+    const volVectorField& U(tU());
 
-    const volScalarField contErr(this->continuityError());
-    const volScalarField K(this->K());
+    const tmp<surfaceScalarField> talphaPhi(this->alphaPhi());
+    const surfaceScalarField& alphaPhi(talphaPhi());
+
+    const tmp<surfaceScalarField> talphaRhoPhi(this->alphaRhoPhi());
+    const surfaceScalarField& alphaRhoPhi(talphaRhoPhi());
+
+    const tmp<volScalarField> tcontErr(this->continuityError());
+    const volScalarField& contErr(tcontErr());
+
+    tmp<volScalarField> tK(this->K());
+    const volScalarField& K(tK());
 
     volScalarField& he = this->thermo_->he();
 
     tmp<fvScalarMatrix> tEEqn
     (
-        fvm::ddt(alpha, this->rho(), he)
+        fvm::ddt(alpha, rho, he)
       + fvm::div(alphaRhoPhi, he)
       - fvm::Sp(contErr, he)
 
-      + fvc::ddt(alpha, this->rho(), K) + fvc::div(alphaRhoPhi, K)
+      + fvc::ddt(alpha, rho, K) + fvc::div(alphaRhoPhi, K)
       - contErr*K
 
       - fvm::laplacian
@@ -135,7 +137,7 @@ Foam::AnisothermalPhaseModel<BasePhaseModel>::heEqn()
         tEEqn.ref() += filterPressureWork
         (
             fvc::div(fvc::absolute(alphaPhi, alpha, U), this->thermo().p())
-          + this->thermo().p()*fvc::ddt(alpha)
+          + (fvc::ddt(alpha) - contErr/rho)*this->thermo().p()
         );
     }
     else if (this->thermo_->dpdt())

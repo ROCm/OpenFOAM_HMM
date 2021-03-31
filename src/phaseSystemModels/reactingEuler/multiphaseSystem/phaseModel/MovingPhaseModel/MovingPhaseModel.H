@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +66,7 @@ class MovingPhaseModel
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Velocity field
         volVectorField U_;
@@ -103,7 +104,7 @@ protected:
 
 private:
 
-    // Private static member functions
+    // Private Member Functions
 
         //- Calculate and return the flux field
         tmp<surfaceScalarField> phi(const volVectorField& U) const;
@@ -113,6 +114,7 @@ public:
 
     // Constructors
 
+        //- Construct from phase system and phase name
         MovingPhaseModel
         (
             const phaseSystem& fluid,
@@ -122,7 +124,7 @@ public:
 
 
     //- Destructor
-    virtual ~MovingPhaseModel();
+    virtual ~MovingPhaseModel() = default;
 
 
     // Member Functions
