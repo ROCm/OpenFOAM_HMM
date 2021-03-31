@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Group
     grpRadiationModels
 
 Description
-    The solar load radiation model includes Sun primary hits, their
+    The \c solarLoad radiation model includes Sun primary hits, their
     reflective fluxes and diffusive sky radiative fluxes.
 
     The primary hit rays are calculated using a face shading algorithm.
@@ -43,14 +43,52 @@ Description
     Fair Weather Conditions Method from the ASHRAE Handbook.
 
     By default the energy is included in cells adjacent to the patches into
-    the energy Equation (wallCoupled = false). On coupled patches the flux is
+    the energy equation (\c wallCoupled=false). On coupled patches the flux is
     by default added to the wall and considered into the solid
-    (solidCoupled = true).
+    (\c solidCoupled=true).
 
-    The solarLoad model can be used in conjuntion with fvDOM and viewFactor
-    radiation models. The flag useSolarLoad must be true on the rediation
-    dictionary.
+    The \c solarLoad model can be used in conjuntion with \c fvDOM and
+    \c viewFactor radiation models. The flag \c useSolarLoad must be
+    \c true on the \c radiationProperties dictionary.
 
+Usage
+    Minimal examples by using \c constant/radiationProperties:
+
+    \verbatim
+    solarLoadCoeffs
+    {
+        // Mandatory entries
+        useReflectedRays            true;
+        spectralDistribution        (1 5 1 2);
+
+        // Optional entries
+        solidCoupled                true;
+        wallCoupled                 false;
+        updateAbsorptivity          true;
+
+        // Mandatory/Optional (inherited) entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                      | Type  | Reqd   | Deflt
+      useReflectedRays | Flag to use reflected rays   | bool  | yes    | -
+      spectralDistribution | Spectral distribution for the integrated <!--
+                   --> solar heat flux | TimeFunction1\<scalarField\> | yes | -
+      solidCoupled     | Flag to couple solids through mapped         <!--
+                   --> boundary patch using qr        | bool  | no     | true
+      wallCoupled      | Flag to couple wall patches using qr         <!--
+                   -->                                | bool  | no     | false
+      updateAbsorptivity | Flag to enable absorptivity updates        <!--
+                   -->                                | bool  | no     | false
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link radiationModel.H \endlink
+     - \link solarCalculator.H \endlink
+     - \link TimeFunction1.H \endlink
 
 SourceFiles
     solarLoad.C
@@ -65,6 +103,7 @@ SourceFiles
 #include "faceShading.H"
 #include "faceReflecting.H"
 #include "solarCalculator.H"
+#include "TimeFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,10 +120,10 @@ class solarLoad
 :
     public radiationModel
 {
+    // Private Data
 
-private:
-
-    // Private data
+        //- Solar calculator
+        solarCalculator solarCalc_;
 
         //- Dictionary
         dictionary dict_;
@@ -102,46 +141,46 @@ private:
         //- and wallCoupled false
         DimensionedField<scalar, volMesh> Ru_;
 
-        //- Solar calculator
-        solarCalculator solarCalc_;
-
-        //- Vertical direction (Default is g vector)
-        vector verticalDir_;
-
-        //- Include reflected rays from specular surfaces
-        bool useReflectedRays_;
+        //- Absorptivity list
+        List<List<tmp<scalarField>>> absorptivity_;
 
         //- Spectral distribution for the integrated solar heat flux
         scalarList spectralDistribution_;
 
-        //-Number of bands
-        label nBands_;
+        //- Time-dependent spectral distributions
+        autoPtr<TimeFunction1<scalarField>> spectralDistributions_;
 
         //- Primary solar radiative heat flux per band [W/m2]
         PtrList<volScalarField> qprimaryRad_;
 
-        //- Couple solids through mapped boundary patch using qr (default:true)
-        bool solidCoupled_;
+        //- Vertical direction (default is g vector)
+        vector verticalDir_;
 
-        //- Couple wall patches using qr (default:false)
-        bool wallCoupled_;
-
-        //- Absorptivity list
-        List<List<tmp<scalarField>>> absorptivity_;
-
-        //- Update absorptivity
-        bool updateAbsorptivity_;
-
-        //- First iteration
-        bool firstIter_;
+        //- Number of bands
+        label nBands_;
 
         //- Update Sun position index
         label updateTimeIndex_;
 
+        //- Couple solids through mapped boundary patch using qr
+        bool solidCoupled_;
+
+        //- Couple wall patches using qr
+        bool wallCoupled_;
+
+        //- Update absorptivity
+        bool updateAbsorptivity_;
+
+        //- Include reflected rays from specular surfaces
+        bool useReflectedRays_;
+
+        //- First iteration
+        bool firstIter_;
+
 
     // Private Member Functions
 
-        //- Initialise
+        //- Initialise model parameters
         void initialise(const dictionary&);
 
         //- Update direct hit faces radiation
@@ -165,6 +204,7 @@ private:
 
         //- Update absorptivity
         void updateAbsorptivity(const labelHashSet& includePatches);
+
 
         //- No copy construct
         solarLoad(const solarLoad&) = delete;
@@ -192,15 +232,18 @@ public:
     virtual ~solarLoad() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Edit
+        // Evaluation
 
-            //- Solve
+            //- Read radiationProperties dictionary
+            bool read();
+
+            //- Solve radiation equations
             void calculate();
 
-            //- Read radiation properties dictionary
-            bool read();
+
+        // Access
 
             //- Source term component (for power of T^4)
             virtual tmp<volScalarField> Rp() const;
@@ -208,17 +251,17 @@ public:
             //- Source term component (constant)
             virtual tmp<DimensionedField<scalar, volMesh>> Ru() const;
 
+            //- Return const access to the number of bands
+            label nBands() const noexcept
+            {
+                return nBands_;
+            }
 
-    // Access
-
-        //- Number of bands
-        label nBands() const;
-
-        //- Primary solar heat flux
-        const volScalarField& qprimaryRad(const label bandI) const
-        {
-            return qprimaryRad_[bandI];
-        }
+            //- Return const access to the primary solar heat flux
+            const volScalarField& qprimaryRad(const label bandI) const
+            {
+                return qprimaryRad_[bandI];
+            }
 };
 
 

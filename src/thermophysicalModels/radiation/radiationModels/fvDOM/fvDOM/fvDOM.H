@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,6 @@ Usage
     spectralDistribution is the energy spectral distribution of the collimated
     external beam.
 
-
 SourceFiles
     fvDOM.C
 
@@ -121,8 +120,7 @@ class fvDOM
 :
     public radiationModel
 {
-    // Private data
-
+    // Private Data
 
         //- Incident radiation  [W/m2]
         volScalarField G_;
@@ -184,6 +182,9 @@ class fvDOM
         //- Spectral energy distribution for the external beam
         scalarList spectralDistribution_;
 
+        //- Time-dependent spectral distributions
+        autoPtr<TimeFunction1<scalarField>> spectralDistributions_;
+
         //- Solar calculator
         autoPtr<solarCalculator> solarCalculator_;
 
@@ -222,10 +223,10 @@ public:
 
 
     //- Destructor
-    virtual ~fvDOM();
+    virtual ~fvDOM() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Edit
 

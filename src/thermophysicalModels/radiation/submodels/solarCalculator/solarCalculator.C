@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +46,12 @@ const Foam::Enum
 >
 Foam::solarCalculator::sunDirectionModelTypeNames_
 ({
+    { sunDirModel::mSunDirConstant, "constant" },
+    { sunDirModel::mSunDirTracking, "tracking" },
+
+    // old long names (v2012 and earlier)
     { sunDirModel::mSunDirConstant, "sunDirConstant" },
-    { sunDirModel::mSunDirTracking, "sunDirTracking" },
+    { sunDirModel::mSunDirTracking, "sunDirTracking" }
 });
 
 
@@ -55,14 +59,20 @@ const Foam::Enum
 <
     Foam::solarCalculator::sunLModel
 >
-Foam::solarCalculator::sunLoadModelTypeNames_
+Foam::solarCalculator::sunLModelTypeNames_
 ({
+    { sunLModel::mSunLoadConstant, "constant" },
+    { sunLModel::mSunLoadTimeDependent, "timeDependent" },
+    { sunLModel::mSunLoadFairWeatherConditions, "fairWeather" },
+    { sunLModel::mSunLoadTheoreticalMaximum, "theoreticalMaximum" },
+
+    // old long names (v2012 and earlier)
     { sunLModel::mSunLoadConstant, "sunLoadConstant" },
     {
         sunLModel::mSunLoadFairWeatherConditions,
         "sunLoadFairWeatherConditions"
     },
-    { sunLModel::mSunLoadTheoreticalMaximum, "sunLoadTheoreticalMaximum" },
+    { sunLModel::mSunLoadTheoreticalMaximum, "sunLoadTheoreticalMaximum" }
 });
 
 
@@ -70,41 +80,34 @@ Foam::solarCalculator::sunLoadModelTypeNames_
 
 void Foam::solarCalculator::calculateBetaTheta()
 {
-    scalar runTime = 0.0;
-    switch (sunDirectionModel_)
+    scalar runTime = 0;
+
+    if (sunDirectionModel_ == mSunDirTracking)
     {
-        case mSunDirTracking:
-        {
-            runTime = mesh_.time().value();
-            break;
-        }
-        case mSunDirConstant:
-        {
-            break;
-        }
+        runTime = mesh_.time().value();
     }
 
-    scalar LSM = 15.0*(dict_.get<scalar>("localStandardMeridian"));
+    const scalar LSM = 15.0*(dict_.get<scalar>("localStandardMeridian"));
 
-    scalar D = dict_.get<scalar>("startDay") + runTime/86400.0;
-    scalar M = 6.24004 + 0.0172*D;
-    scalar EOT = -7.659*sin(M) + 9.863*sin(2*M + 3.5932);
+    const scalar D = dict_.get<scalar>("startDay") + runTime/86400.0;
+    const scalar M = 6.24004 + 0.0172*D;
+    const scalar EOT = -7.659*sin(M) + 9.863*sin(2*M + 3.5932);
 
     dict_.readEntry("startTime", startTime_);
 
-    scalar LST =  startTime_ + runTime/3600.0;
+    const scalar LST =  startTime_ + runTime/3600.0;
 
-    scalar LON = dict_.get<scalar>("longitude");
+    const scalar LON = dict_.get<scalar>("longitude");
 
-    scalar AST = LST + EOT/60.0 + (LON - LSM)/15;
+    const scalar AST = LST + EOT/60.0 + (LON - LSM)/15;
 
-    scalar delta = 23.45*sin(degToRad((360*(284 + D))/365));
+    const scalar delta = 23.45*sin(degToRad((360*(284 + D))/365));
 
-    scalar H = degToRad(15*(AST - 12));
+    const scalar H = degToRad(15*(AST - 12));
 
-    scalar L = degToRad(dict_.get<scalar>("latitude"));
+    const scalar L = degToRad(dict_.get<scalar>("latitude"));
 
-    scalar deltaRad = degToRad(delta);
+    const scalar deltaRad = degToRad(delta);
     beta_ = max(asin(cos(L)*cos(deltaRad)*cos(H) + sin(L)*sin(deltaRad)), 1e-3);
     theta_ = acos((sin(beta_)*sin(L) - sin(deltaRad))/(cos(beta_)*cos(L)));
 
@@ -150,7 +153,7 @@ void Foam::solarCalculator::calculateSunDirection()
 }
 
 
-void Foam::solarCalculator::init()
+void Foam::solarCalculator::initialise()
 {
     switch (sunDirectionModel_)
     {
@@ -165,7 +168,6 @@ void Foam::solarCalculator::init()
                 calculateBetaTheta();
                 calculateSunDirection();
             }
-
             break;
         }
         case mSunDirTracking:
@@ -197,6 +199,32 @@ void Foam::solarCalculator::init()
             dict_.readEntry("diffuseSolarRad", diffuseSolarRad_);
             break;
         }
+        case mSunLoadTimeDependent:
+        {
+            directSolarRads_.reset
+            (
+                new TimeFunction1<scalar>
+                (
+                    mesh_.time(),
+                    "directSolarRad",
+                    dict_
+                )
+            );
+
+            diffuseSolarRads_.reset
+            (
+                new TimeFunction1<scalar>
+                (
+                    mesh_.time(),
+                    "diffuseSolarRad",
+                    dict_
+                )
+            );
+
+            directSolarRad_ = directSolarRads_->value(mesh_.time().value());
+            diffuseSolarRad_ = diffuseSolarRads_->value(mesh_.time().value());
+            break;
+        }
         case mSunLoadFairWeatherConditions:
         {
             dict_.readIfPresent
@@ -207,7 +235,8 @@ void Foam::solarCalculator::init()
 
             dict_.readEntry("A", A_);
             dict_.readEntry("B", B_);
-
+            dict_.readEntry("C", C_);
+            dict_.readEntry("groundReflectivity", groundReflectivity_);
             if (!dict_.readIfPresent("beta", beta_))
             {
                 calculateBetaTheta();
@@ -216,17 +245,16 @@ void Foam::solarCalculator::init()
             directSolarRad_ =
                 (1.0 - 0.75*pow(skyCloudCoverFraction_, 3.0))
               * A_/exp(B_/sin(beta_));
-
-            dict_.readEntry("groundReflectivity", groundReflectivity_);
             break;
         }
         case mSunLoadTheoreticalMaximum:
         {
             dict_.readEntry("Setrn", Setrn_);
             dict_.readEntry("SunPrime", SunPrime_);
-            directSolarRad_ = Setrn_*SunPrime_;
-
             dict_.readEntry("groundReflectivity", groundReflectivity_);
+            dict_.readEntry("C", C_);
+
+            directSolarRad_ = Setrn_*SunPrime_;
             break;
         }
     }
@@ -243,26 +271,32 @@ Foam::solarCalculator::solarCalculator
 :
     mesh_(mesh),
     dict_(dict),
-    direction_(Zero),
-    directSolarRad_(0.0),
-    diffuseSolarRad_(0.0),
-    groundReflectivity_(0.0),
-    A_(0.0),
-    B_(0.0),
-    beta_(0.0),
-    theta_(0.0),
-    skyCloudCoverFraction_(0.0),
-    Setrn_(0.0),
-    SunPrime_(0.0),
-    C_(dict.get<scalar>("C")),
     sunDirectionModel_
     (
         sunDirectionModelTypeNames_.get("sunDirectionModel", dict)
     ),
-    sunLoadModel_(sunLoadModelTypeNames_.get("sunLoadModel", dict)),
-    coord_()
+    sunLoadModel_(sunLModelTypeNames_.get("sunLoadModel", dict)),
+    direction_(Zero),
+    sunTrackingUpdateInterval_(0),
+    startTime_(0),
+    gridUp_(Zero),
+    eastDir_(Zero),
+    coord_(),
+    directSolarRad_(0),
+    diffuseSolarRad_(0),
+    directSolarRads_(),
+    diffuseSolarRads_(),
+    skyCloudCoverFraction_(0),
+    groundReflectivity_(0),
+    A_(0),
+    B_(0),
+    beta_(0),
+    theta_(0),
+    C_(0.058),
+    Setrn_(0),
+    SunPrime_(0)
 {
-    init();
+    initialise();
 }
 
 
@@ -270,19 +304,29 @@ Foam::solarCalculator::solarCalculator
 
 void Foam::solarCalculator::correctSunDirection()
 {
-    switch (sunDirectionModel_)
+    if (sunDirectionModel_ == mSunDirTracking)
     {
-        case mSunDirConstant:
-        {
-            break;
-        }
-        case mSunDirTracking:
-        {
-            calculateBetaTheta();
-            calculateSunDirection();
-            directSolarRad_ = A_/exp(B_/sin(max(beta_, ROOTVSMALL)));
-            break;
-        }
+        calculateBetaTheta();
+        calculateSunDirection();
+        directSolarRad_ = A_/exp(B_/sin(max(beta_, ROOTVSMALL)));
+    }
+}
+
+
+void Foam::solarCalculator::correctDirectSolarRad()
+{
+    if (sunLoadModel_ == mSunLoadTimeDependent)
+    {
+        directSolarRad_ = directSolarRads_->value(mesh_.time().value());
+    }
+}
+
+
+void Foam::solarCalculator::correctDiffuseSolarRad()
+{
+    if (sunLoadModel_ == mSunLoadTimeDependent)
+    {
+        diffuseSolarRad_ = diffuseSolarRads_->value(mesh_.time().value());
     }
 }
 
