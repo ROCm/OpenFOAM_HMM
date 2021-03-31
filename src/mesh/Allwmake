@@ -4,6 +4,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 #------------------------------------------------------------------------------
 
+# Make sure extrudeModel can find blockEdgeList.H
+wmakeLnInclude -u blockMesh
+
 wmake $targetType snappyHexMesh
 wmake $targetType blockMesh
 wmake $targetType extrudeModel
