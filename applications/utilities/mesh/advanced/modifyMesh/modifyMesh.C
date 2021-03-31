@@ -531,7 +531,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-DebugVar(faceToSplit);
 
 
     Info<< nl << "Looking up cells to convert to pyramids around"
