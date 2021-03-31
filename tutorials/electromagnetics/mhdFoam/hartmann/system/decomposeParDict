@@ -9,43 +9,19 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      B;
+    class       dictionary;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 0 -2 0 0 -1 0];
+numberOfSubdomains 4;
 
-internalField   uniform (0 20 0);
+method          hierarchical;
 
-boundaryField
+coeffs
 {
-    inlet
-    {
-        type            zeroGradient;
-    }
-
-    outlet
-    {
-        type            zeroGradient;
-    }
-
-    lowerWall
-    {
-        type            fixedValue;
-        value           uniform (0 20 0);
-    }
-
-    upperWall
-    {
-        type            fixedValue;
-        value           uniform (0 20 0);
-    }
-
-    frontAndBack
-    {
-        type            empty;
-    }
+    n           (2 2 1);
 }
+
 
 // ************************************************************************* //
