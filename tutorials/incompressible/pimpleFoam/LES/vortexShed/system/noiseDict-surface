@@ -36,6 +36,8 @@ surfaceNoiseCoeffs
     // Input file
     file        "postProcessing/curleSurface/surface/surface.case";
 
+    areaAverage yes;
+
     // Surface reader
     reader      ensight;
 

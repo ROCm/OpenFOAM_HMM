@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -310,9 +310,14 @@ scalar surfaceNoise::writeSurfaceData
                 writerPtr_->clear();
             }
 
-            // TO BE VERIFIED: area-averaged values
-            // areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
-            areaAverage = sum(allData)/(allData.size() + ROOTVSMALL);
+            if (areaAverage_)
+            {
+                areaAverage = sum(allData*surf.magSf())/sum(surf.magSf());
+            }
+            else
+            {
+                areaAverage = sum(allData)/(allData.size() + ROOTVSMALL);
+            }
         }
         Pstream::scatter(areaAverage);
 
@@ -342,9 +347,14 @@ scalar surfaceNoise::writeSurfaceData
             writerPtr_->clear();
         }
 
-        // TO BE VERIFIED: area-averaged values
-        // return sum(data*surf.magSf())/sum(surf.magSf());
-        return sum(data)/(data.size() + ROOTVSMALL);
+        if (areaAverage_)
+        {
+            return sum(data*surf.magSf())/sum(surf.magSf());
+        }
+        else
+        {
+            return sum(data)/(data.size() + ROOTVSMALL);
+        }
     }
 }
 
@@ -426,6 +436,7 @@ surfaceNoise::surfaceNoise(const dictionary& dict, const bool readFields)
     startTimeIndex_(0),
     nFace_(0),
     fftWriteInterval_(1),
+    areaAverage_(false),
     readerType_(word::null),
     readerPtr_(nullptr),
     writerPtr_(nullptr)
@@ -449,8 +460,22 @@ bool surfaceNoise::read(const dictionary& dict)
             dict.readEntry("file", inputFileNames_.first());
         }
 
-        dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
         dict.readIfPresent("p", pName_);
+        dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
+
+        Info<< "    Pressure field name: " << pName_ << nl
+            << "    FFT write interval: " << fftWriteInterval_ << nl;
+
+        dict.readIfPresent("areaAverage", areaAverage_);
+
+        if (areaAverage_)
+        {
+            Info<< "    Averaging: area weighted" << endl;
+        }
+        else
+        {
+            Info<< "    Averaging: ensemble" << endl;
+        }
 
         readerType_ = dict.get<word>("reader");
 
@@ -464,6 +489,8 @@ bool surfaceNoise::read(const dictionary& dict)
 
         // Use outputDir/TIME/surface-name
         writerPtr_->useTimeDir(true);
+
+        Info << endl;
 
         return true;
     }

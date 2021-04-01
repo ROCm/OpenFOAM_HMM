@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,11 +60,15 @@ Description
     // Write interval for FFT data, default = 1
     fftWriteInterval 100;
 
+    // Area-weighted averaging switch, default = no (ensemble) for backwards
+    // compatibility
+    areaAverage     yes;
+
     // Surface reader
-    reader      ensight;
+    reader          ensight;
 
     // Surface writer
-    writer      ensight;
+    writer          ensight;
 
     // Collate times for ensight output - ensures geometry is only written once
     writeOptions
@@ -158,6 +162,10 @@ protected:
         //  nSamples/2 data points are returned from the FFT, which can
         //  result in a very large number of output files (1 per frequency)
         label fftWriteInterval_;
+
+        //- Apply area average; default = no (ensemble average) for backwards
+        //- compatibility
+        bool areaAverage_;
 
         //- Reader type
         word readerType_;
