@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Description
        codeInclude | include files
        codeOptions | include paths; inserted into EXE_INC in Make/options
        codeLibs    | link line; inserted into LIB_LIBS in Make/options
-       codeData    | c++; local member data (null constructed);
+       codeData    | c++; local member data (default constructed);
        localCode   | c++; local static functions;
        codeRead    | c++; upon functionObject::read();
        codeExecute | c++; upon functionObject::execute();
@@ -122,17 +122,17 @@ protected:
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
-        //- Adapt the context for the current object
-        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
-
-        //- Return a description (type + name) for the output
+        //- Description (type + name) for the output
         virtual string description() const;
 
-        //- Clear any redirected objects
+        //- Clear redirected object(s)
         virtual void clearRedirect() const;
 
-        //- The dictionary to initialize the codeContext
+        //- The code dictionary
         virtual const dictionary& codeDict() const;
+
+        //- Adapt the context for the current object
+        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
 
         //- No copy construct

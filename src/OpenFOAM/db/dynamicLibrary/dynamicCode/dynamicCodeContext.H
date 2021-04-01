@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,9 @@ SourceFiles
 #ifndef dynamicCodeContext_H
 #define dynamicCodeContext_H
 
-#include <functional>
 #include "dictionary.H"
 #include "SHA1.H"
+#include <functional>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,27 +61,27 @@ class dynamicCodeContext
         //- The SHA1 of the contents
         SHA1 sha1_;
 
-        //- Optional "codeOptions" entry
-        string options_;
+        //- The "codeOptions" entry (optional)
+        string codeOptions_;
 
-        //- Optional "codeLibs" entry
-        string libs_;
+        //- The "codeLibs" entry (optional)
+        string codeLibs_;
 
-        //- Optional "codeInclude" entry
-        string include_;
+        //- The "codeInclude" entry (optional)
+        string codeInclude_;
 
-        //- Optional "code" entry
-        string code_;
-
-        //- Optional "localCode" entry
+        //- The "localCode" entry (optional)
         string localCode_;
+
+        //- The "code" entry (optional)
+        string code_;
 
 
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         dynamicCodeContext();
 
         //- Construct from a dictionary
@@ -91,7 +91,7 @@ public:
     // Static Member Functions
 
         //- Cleanup string and expand with dictionary parameters
-        static void inplaceExpand(string& code, const dictionary& dict);
+        static void inplaceExpand(string& str, const dictionary& dict);
 
         //- Prefix a \#line directive to code.
         //  The input lineNum is 0-based.
@@ -104,7 +104,7 @@ public:
         (
             string& code,
             label lineNum,
-            const fileName& file
+            const string& file
         );
 
         //- Prefix a \#line directive to code.
@@ -120,49 +120,49 @@ public:
     // Member Functions
 
         //- Considered valid if not using dictionary::null as the context
-        bool valid() const;
+        bool valid() const noexcept;
 
         //- Set code context from a dictionary
         void setCodeContext(const dictionary& dict);
 
         //- Return the parent dictionary context
-        const dictionary& dict() const
+        const dictionary& dict() const noexcept
         {
             return dict_.get();
         }
 
-        //- Return the code-includes
-        const string& include() const
+        //- The code options (Make/options)
+        const string& options() const noexcept
         {
-            return include_;
+            return codeOptions_;
         }
 
-        //- Return the code-options
-        const string& options() const
+        //- The code libs (LIB_LIBS)
+        const string& libs() const noexcept
         {
-            return options_;
+            return codeLibs_;
         }
 
-        //- Return the code-libs
-        const string& libs() const
+        //- The code includes
+        const string& include() const noexcept
         {
-            return libs_;
+            return codeInclude_;
         }
 
-        //- Return the code
-        const string& code() const
-        {
-            return code_;
-        }
-
-        //- Return the local (file-scope) code
-        const string& localCode() const
+        //- The local (file-scope) code
+        const string& localCode() const noexcept
         {
             return localCode_;
         }
 
-        //- Return SHA1 calculated from options, libs, include, code
-        const SHA1& sha1() const
+        //- The code
+        const string& code() const noexcept
+        {
+            return code_;
+        }
+
+        //- The SHA1 calculated from options, libs, include, code, etc.
+        const SHA1& sha1() const noexcept
         {
             return sha1_;
         }
@@ -174,14 +174,39 @@ public:
         }
 
 
+    // Reading
+
+        //- Read string entry from context dictionary
+        //- append content to SHA1 hashing and add line number etc.
+        //
+        //  The string is cleared before reading.
+        bool readEntry
+        (
+            const word& key,
+            string& str,
+            bool mandatory = true,
+            bool withLineNum = true
+        );
+
+        //- Read optional string entry from context dictionary,
+        //- append content to SHA1 hashing and add line number etc.
+        //
+        //  The string is cleared before reading.
+        bool readIfPresent
+        (
+            const word& key,
+            string& str,
+            bool withLineNum = true
+        );
+
+
     // Member Operators
 
         //- Cast to dictionary
-        operator const dictionary&() const
+        operator const dictionary&() const noexcept
         {
             return dict_.get();
         }
-
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,12 +34,12 @@ License
 
 void Foam::dynamicCodeContext::inplaceExpand
 (
-    string& code,
+    string& str,
     const dictionary& dict
 )
 {
-    stringOps::inplaceTrim(code);
-    stringOps::inplaceExpand(code, dict);
+    stringOps::inplaceTrim(str);
+    stringOps::inplaceExpand(str, dict);
 }
 
 
@@ -47,7 +47,7 @@ unsigned Foam::dynamicCodeContext::addLineDirective
 (
     string& code,
     label lineNum,
-    const fileName& file
+    const string& file
 )
 {
     ++lineNum;  // Change from 0-based to 1-based
@@ -94,9 +94,64 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::dynamicCodeContext::valid() const
+bool Foam::dynamicCodeContext::valid() const noexcept
 {
     return &(dict_.get()) != &(dictionary::null);
+}
+
+
+bool Foam::dynamicCodeContext::readEntry
+(
+    const word& key,
+    string& str,
+    bool mandatory,
+    bool withLineNum
+)
+{
+    str.clear();
+    sha1_.append("<" + key + ">");
+
+    const dictionary& dict = this->dict();
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (!eptr)
+    {
+        if (mandatory)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entry '" << key << "' not found in dictionary "
+                << dict.name() << nl
+                << exit(FatalIOError);
+        }
+
+        return false;
+    }
+
+    // Expand dictionary entries.
+    // Removing any leading/trailing whitespace is necessary for compilation
+    // options, but is also convenient for includes and code body.
+
+    eptr->readEntry(str);
+    dynamicCodeContext::inplaceExpand(str, dict);
+    sha1_.append(str);
+
+    if (withLineNum)
+    {
+        addLineDirective(str, eptr->startLineNumber(), dict);
+    }
+
+    return true;
+}
+
+
+bool Foam::dynamicCodeContext::readIfPresent
+(
+    const word& key,
+    string& str,
+    bool withLineNum
+)
+{
+    return readEntry(key, str, false, withLineNum);
 }
 
 
@@ -105,61 +160,15 @@ void Foam::dynamicCodeContext::setCodeContext(const dictionary& dict)
     dict_ = std::cref<dictionary>(dict);
     sha1_.clear();
 
-    // Expand dictionary entries.
-    // Removing any leading/trailing whitespace is necessary for compilation
-    // options, but is also convenient for includes and code body.
+    // No #line for options (Make/options)
+    readIfPresent("codeOptions", codeOptions_, false);
 
-    const entry* eptr;
+    // No #line for libs (LIB_LIBS)
+    readIfPresent("codeLibs", codeLibs_, false);
 
-    options_.clear();
-    sha1_.append("<codeOptions>");
-    if ((eptr = dict.findEntry("codeOptions", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(options_);
-        dynamicCodeContext::inplaceExpand(options_, dict);
-        sha1_.append(options_);
-        // No #line for options (Make/options)
-    }
-
-    libs_.clear();
-    sha1_.append("<codeLibs>");
-    if ((eptr = dict.findEntry("codeLibs", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(libs_);
-        dynamicCodeContext::inplaceExpand(libs_, dict);
-        sha1_.append(libs_);
-        // No #line for libs (LIB_LIBS)
-    }
-
-    include_.clear();
-    sha1_.append("<codeInclude>");
-    if ((eptr = dict.findEntry("codeInclude", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(include_);
-        dynamicCodeContext::inplaceExpand(include_, dict);
-        sha1_.append(include_);
-        addLineDirective(include_, eptr->startLineNumber(), dict);
-    }
-
-    code_.clear();
-    sha1_.append("<code>");
-    if ((eptr = dict.findEntry("code", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(code_);
-        dynamicCodeContext::inplaceExpand(code_, dict);
-        sha1_.append(code_);
-        addLineDirective(code_, eptr->startLineNumber(), dict);
-    }
-
-    localCode_.clear();
-    sha1_.append("<localCode>");
-    if ((eptr = dict.findEntry("localCode", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(localCode_);
-        dynamicCodeContext::inplaceExpand(localCode_, dict);
-        sha1_.append(localCode_);
-        addLineDirective(localCode_, eptr->startLineNumber(), dict);
-    }
+    readIfPresent("codeInclude", codeInclude_);
+    readIfPresent("localCode", localCode_);
+    readIfPresent("code", code_);
 }
 
 

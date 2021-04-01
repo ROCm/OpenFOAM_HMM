@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,35 @@ License
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+
+template<class Type>
+Foam::dlLibraryTable& Foam::fv::CodedSource<Type>::libs() const
+{
+    return mesh_.time().libs();
+}
+
+
+template<class Type>
+Foam::string Foam::fv::CodedSource<Type>::description() const
+{
+    return "fvOption::" + name_;
+}
+
+
+template<class Type>
+void Foam::fv::CodedSource<Type>::clearRedirect() const
+{
+    redirectFvOptionPtr_.reset(nullptr);
+}
+
+
+template<class Type>
+const Foam::dictionary& Foam::fv::CodedSource<Type>::codeDict() const
+{
+    return coeffs_;
+}
+
+
 template<class Type>
 void Foam::fv::CodedSource<Type>::prepare
 (
@@ -53,17 +82,17 @@ void Foam::fv::CodedSource<Type>::prepare
     dynCode.setFilterVariable("codeAddSup", codeAddSup_);
     dynCode.setFilterVariable("codeConstrain", codeConstrain_);
 
-    // compile filtered C template
-    dynCode.addCompileFile("codedFvOptionTemplate.C");
+    // Compile filtered C template
+    dynCode.addCompileFile(codeTemplateC);
 
-    // copy filtered H template
-    dynCode.addCopyFile("codedFvOptionTemplate.H");
+    // Copy filtered H template
+    dynCode.addCopyFile(codeTemplateH);
 
-    // debugging: make  verbose
-    // dynCode.setFilterVariable("verbose", "true");
-    // DetailInfo
-    //     <<"compile " << name_ << " sha1: "
-    //     << context.sha1() << endl;
+    #ifdef FULLDEBUG
+    dynCode.setFilterVariable("verbose", "true");
+    DetailInfo
+        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+    #endif
 
     // define Make/options
     dynCode.setMakeOptions
@@ -75,40 +104,12 @@ void Foam::fv::CodedSource<Type>::prepare
         "-I$(LIB_SRC)/sampling/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
+        "    -lfiniteVolume \\\n"
         "    -lfvOptions \\\n"
         "    -lmeshTools \\\n"
         "    -lsampling \\\n"
-        "    -lfiniteVolume \\\n"
       + context.libs()
     );
-}
-
-
-template<class Type>
-Foam::dlLibraryTable& Foam::fv::CodedSource<Type>::libs() const
-{
-    return mesh_.time().libs();
-}
-
-
-template<class Type>
-Foam::string Foam::fv::CodedSource<Type>::description() const
-{
-    return "fvOption::" + name_;
-}
-
-
-template<class Type>
-void Foam::fv::CodedSource<Type>::clearRedirect() const
-{
-    redirectFvOptionPtr_.clear();
-}
-
-
-template<class Type>
-const Foam::dictionary& Foam::fv::CodedSource<Type>::codeDict() const
-{
-    return coeffs_;
 }
 
 
@@ -140,7 +141,7 @@ Foam::fv::option& Foam::fv::CodedSource<Type>::redirectFvOption() const
         constructDict.set("type", name_);
         constructDict.changeKeyword(modelType_ & "Coeffs", name_ & "Coeffs");
 
-        redirectFvOptionPtr_ = option::New
+        redirectFvOptionPtr_ = fv::option::New
         (
             name_,
             constructDict,

@@ -108,8 +108,8 @@ protected:
 
     // Static Data Members
 
-        //- Root of the LIB target for Make/files
-        static const char* const libTargetRoot;
+        //- Directory for library targets for Make/files
+        static const char* const targetLibDir;
 
         //- Top-level directory name for copy/compiling
         static const char* const topDirName;

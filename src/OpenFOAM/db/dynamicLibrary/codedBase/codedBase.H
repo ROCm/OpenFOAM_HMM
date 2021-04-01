@@ -49,7 +49,6 @@ SourceFiles
 
 #include "dictionary.H"
 #include "dynamicCodeContext.H"
-#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,9 +56,9 @@ namespace Foam
 {
 
 // Forward Declarations
-class Ostream;
 class dynamicCode;
 class dlLibraryTable;
+class objectRegistry;
 
 /*---------------------------------------------------------------------------*\
                        Class codedBase Declaration
@@ -104,11 +103,24 @@ class codedBase
 
 protected:
 
+    // Protected Member Functions
+
         //- Write code-dictionary contents
         static void writeCodeDict(Ostream& os, const dictionary& dict);
 
+        //- Return "codeDict" from objectRegistry or read from disk
+        static const dictionary& codeDict
+        (
+            const objectRegistry& obr,
+            const word& dictName = "codeDict"
+        );
 
-    // Protected Member Functions
+
+        //- Access to the dynamic code context
+        dynamicCodeContext& codeContext()
+        {
+            return context_;
+        }
 
         //- Set code context from a dictionary
         void setCodeContext(const dictionary& dict);
@@ -136,15 +148,9 @@ protected:
         //- or use the codeDict() to generate one
         void updateLibrary(const word& name) const;
 
+
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const = 0;
-
-        //- Adapt the context for the current object
-        virtual void prepare
-        (
-            dynamicCode& dynCode,
-            const dynamicCodeContext& context
-        ) const = 0;
 
         // Return a description (type + name) for the output
         virtual string description() const = 0;
@@ -154,6 +160,13 @@ protected:
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const = 0;
+
+        //- Adapt the context for the current object
+        virtual void prepare
+        (
+            dynamicCode& dynCode,
+            const dynamicCodeContext& context
+        ) const = 0;
 
 
         //- No copy construct

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,7 +123,7 @@ namespace fv
 template<class Type>
 class CodedSource
 :
-    public cellSetOption,
+    public fv::cellSetOption,
     protected codedBase
 {
 protected:
@@ -136,8 +136,8 @@ protected:
         string codeAddSup_;
         string codeConstrain_;
 
-        //- Underlying functionObject
-        mutable autoPtr<option> redirectFvOptionPtr_;
+        //- Underlying code
+        mutable autoPtr<fv::option> redirectFvOptionPtr_;
 
 
     // Protected Member Functions
@@ -145,20 +145,31 @@ protected:
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
+        //- Description (type + name) for the output
+        virtual string description() const;
+
+        //- Clear redirected object(s)
+        virtual void clearRedirect() const;
+
+        //- Get the dictionary to initialize the code context
+        virtual const dictionary& codeDict() const;
+
         //- Adapt the context for the current object
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
-        //- Return a description (type + name) for the output
-        virtual string description() const;
-
-        //- Clear any redirected objects
-        virtual void clearRedirect() const;
-
-        //- Get the dictionary to initialize the codeContext
-        virtual const dictionary& codeDict() const;
-
 
 public:
+
+    // Static Data Members
+
+        //- Name of the C code template to be used
+        static constexpr const char* const codeTemplateC
+            = "codedFvOptionTemplate.C";
+
+        //- Name of the H code template to be used
+        static constexpr const char* const codeTemplateH
+            = "codedFvOptionTemplate.H";
+
 
     //- Runtime type information
     TypeName("coded");
