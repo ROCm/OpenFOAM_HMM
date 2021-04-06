@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,14 +100,9 @@ Foam::polyPatch::polyPatch
     faceCellsPtr_(nullptr),
     mePtr_(nullptr)
 {
-    if
-    (
-        patchType != word::null
-     && constraintType(patchType)
-     && !inGroups().found(patchType)
-    )
+    if (!patchType.empty() && constraintType(patchType))
     {
-        inGroups().append(patchType);
+        inGroups().appendUniq(patchType);
     }
 }
 
@@ -161,14 +156,9 @@ Foam::polyPatch::polyPatch
     faceCellsPtr_(nullptr),
     mePtr_(nullptr)
 {
-    if
-    (
-        patchType != word::null
-     && constraintType(patchType)
-     && !inGroups().found(patchType)
-    )
+    if (!patchType.empty() && constraintType(patchType))
     {
-        inGroups().append(patchType);
+        inGroups().appendUniq(patchType);
     }
 }
 

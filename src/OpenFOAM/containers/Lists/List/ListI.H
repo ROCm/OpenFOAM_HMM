@@ -218,6 +218,21 @@ inline void Foam::List<T>::append(const IndirectListBase<T, Addr>& list)
 }
 
 
+template<class T>
+inline Foam::label Foam::List<T>::appendUniq(const T& val)
+{
+    if (this->found(val))
+    {
+        return 0;
+    }
+    else
+    {
+        this->append(val);
+        return 1;  // Increased list length by one
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

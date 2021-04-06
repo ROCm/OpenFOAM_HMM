@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1101,10 +1101,7 @@ void Foam::interfaceTrackingFvMesh::correctPointDisplacement
 
                 if (index == -1)
                 {
-                    if (!pointSet.found(curPoint))
-                    {
-                        pointSet.insert(curPoint);
-                    }
+                    pointSet.insert(curPoint);
                 }
             }
         }
@@ -1127,10 +1124,7 @@ void Foam::interfaceTrackingFvMesh::correctPointDisplacement
 
                 if (index != -1)
                 {
-                    if (!faceSet.found(curFace))
-                    {
-                        faceSet.insert(curFace);
-                    }
+                    faceSet.insert(curFace);
                 }
             }
 
@@ -1197,10 +1191,7 @@ void Foam::interfaceTrackingFvMesh::correctPointDisplacement
 
                 if (index != -1)
                 {
-                    if (!faceSet.found(curFace))
-                    {
-                        faceSet.insert(curFace);
-                    }
+                    faceSet.insert(curFace);
                 }
             }
 

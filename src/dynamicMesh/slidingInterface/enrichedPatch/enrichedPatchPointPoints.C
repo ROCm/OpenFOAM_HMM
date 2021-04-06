@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,19 +58,11 @@ void Foam::enrichedPatch::calcPointPoints() const
 
             // Do next label
             const label next = curFace.nextLabel(pointi);
-
-            if (!curPp.found(next))
-            {
-                curPp.append(next);
-            }
+            curPp.appendUniq(next);
 
             // Do previous label
             const label prev = curFace.prevLabel(pointi);
-
-            if (!curPp.found(prev))
-            {
-                curPp.append(prev);
-            }
+            curPp.appendUniq(prev);
         }
     }
 

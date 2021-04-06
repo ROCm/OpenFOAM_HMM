@@ -305,12 +305,9 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         if (Pstream::master())
         {
             DynamicList<word> allWorlds(numprocs);
-            for (const auto& world : worlds)
+            for (const word& world : worlds)
             {
-                if (!allWorlds.found(world))
-                {
-                    allWorlds.append(world);
-                }
+                allWorlds.appendUniq(world);
             }
             allWorlds_ = std::move(allWorlds);
 

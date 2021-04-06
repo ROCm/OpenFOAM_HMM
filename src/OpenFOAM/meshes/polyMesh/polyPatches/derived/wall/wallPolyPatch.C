@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,10 +54,7 @@ Foam::wallPolyPatch::wallPolyPatch
     polyPatch(name, size, start, index, bm, patchType)
 {
     //  wall is not constraint type so add wall group explicitly
-    if (!inGroups().found(typeName))
-    {
-        inGroups().append(typeName);
-    }
+    inGroups().appendUniq(typeName);
 }
 
 
@@ -72,10 +70,7 @@ Foam::wallPolyPatch::wallPolyPatch
     polyPatch(name, dict, index, bm, patchType)
 {
     //  wall is not constraint type so add wall group explicitly
-    if (!inGroups().found(typeName))
-    {
-        inGroups().append(typeName);
-    }
+    inGroups().appendUniq(typeName);
 }
 
 

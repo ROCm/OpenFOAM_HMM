@@ -100,10 +100,7 @@ int main(int argc, char *argv[])
             const wordList& regions = iter();
             forAll(regions, i)
             {
-                if (!regionNames.found(regions[i]))
-                {
-                    regionNames.append(regions[i]);
-                }
+                regionNames.appendUniq(regions[i]);
             }
         }
         regionDirs = regionNames;

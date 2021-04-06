@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -290,8 +290,8 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
     const List<DynamicList<label>>& tgtToSrc
 ) const
 {
-    DynamicList<label> testCells(10);
-    DynamicList<label> visitedCells(10);
+    DynamicList<label> testCells(16);
+    DynamicList<label> visitedCells(16);
 
     testCells.append(tgtCelli);
 
@@ -312,11 +312,11 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
             {
                 const labelList& nbrCells = tgt_.cellCells()[tgtI];
 
-                forAll(nbrCells, i)
+                for (const label nbrCelli : nbrCells)
                 {
-                    if (!visitedCells.found(nbrCells[i]))
+                    if (!visitedCells.found(nbrCelli))
                     {
-                        testCells.append(nbrCells[i]);
+                        testCells.append(nbrCelli);
                     }
                 }
             }

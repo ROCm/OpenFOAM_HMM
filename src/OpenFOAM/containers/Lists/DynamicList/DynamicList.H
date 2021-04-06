@@ -258,6 +258,10 @@ public:
             inline DynamicList<T, SizeMin>&
             append(SortableList<T>&& lst);
 
+            //- Append an element if not already in the list.
+            //  \return the change in list length
+            inline label appendUniq(const T& val);
+
             //- Remove and return the last element. Fatal on an empty list.
             inline T remove();
 

@@ -242,6 +242,10 @@ public:
             template<class Addr>
             inline void append(const IndirectListBase<T, Addr>& list);
 
+            //- Append an element if not already in the list.
+            //  \return the change in list length
+            inline label appendUniq(const T& val);
+
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
             void transfer(List<T>& list);

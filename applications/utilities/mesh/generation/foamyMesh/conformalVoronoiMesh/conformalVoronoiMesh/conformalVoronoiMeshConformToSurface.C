@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -727,11 +727,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseSurfaceTrees
             if (nearest.hit() || nearestEdge.hit())
             {
                 nStoppedInsertion++;
-
-                if (!hits[proci].found(peI))
-                {
-                    hits[proci].insert(peI);
-                }
+                hits[proci].insert(peI);
             }
         }
     }
@@ -822,11 +818,7 @@ Foam::label Foam::conformalVoronoiMesh::synchroniseEdgeTrees
 //                    << endl;
 
                 nStoppedInsertion++;
-
-                if (!hits[proci].found(peI))
-                {
-                    hits[proci].insert(peI);
-                }
+                hits[proci].insert(peI);
             }
         }
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2014 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,13 +194,9 @@ void Foam::meshToMeshMethod::appendNbrCells
     // filter out cells already visited from cell neighbours
     for (const label nbrCelli : nbrCells)
     {
-        if
-        (
-            !visitedCells.found(nbrCelli)
-         && !nbrCellIDs.found(nbrCelli)
-        )
+        if (!visitedCells.found(nbrCelli))
         {
-            nbrCellIDs.append(nbrCelli);
+            nbrCellIDs.appendUniq(nbrCelli);
         }
     }
 }

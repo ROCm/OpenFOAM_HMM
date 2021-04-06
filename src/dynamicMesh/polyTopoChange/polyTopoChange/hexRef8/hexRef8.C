@@ -1849,17 +1849,14 @@ bool Foam::hexRef8::matchHexShape
                         if (iter.found())
                         {
                             labelList& pFaces = iter.val();
-                            if (!pFaces.found(facei))
-                            {
-                                pFaces.append(facei);
-                            }
+                            pFaces.appendUniq(facei);
                         }
                         else
                         {
                             pointFaces.insert
                             (
                                 pointi,
-                                labelList(1, facei)
+                                labelList(one{}, facei)
                             );
                         }
                     }

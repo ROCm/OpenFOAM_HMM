@@ -1974,14 +1974,11 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 //                if (faceFnd.found())
 //                {
 //                    labelList& faces = faceFnd();
-//                    if (!faces.found(patchFacei))
-//                    {
-//                        faces.append(patchFacei);
-//                    }
+//                    faces.appendUniq(patchFacei);
 //                }
 //                else
 //                {
-//                    cellToFaces.insert(celli, labelList(1, patchFacei));
+//                    cellToFaces.insert(celli, labelList(one{}, patchFacei));
 //                }
 //            }
 //

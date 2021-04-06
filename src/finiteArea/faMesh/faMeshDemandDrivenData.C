@@ -945,7 +945,7 @@ void Foam::faMesh::calcPointAreaNormals() const
 
         labelList curPointPoints = curPatch.edgeLoops()[0];
 
-        for (int i = 0; i < curPointPoints.size(); ++i)
+        for (label i = 0; i < curPointPoints.size(); ++i)
         {
             vector d1 =
                 points[curPatch.meshPoints()[curPointPoints[i]]]
@@ -1212,60 +1212,35 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         labelHashSet pointSet;
 
-        pointSet.insert(curPoint);
-        for (label i=0; i<curFaces.size(); ++i)
+        for (const label facei : curFaces)
         {
-            const labelList& facePoints = faces[curFaces[i]];
-            for (label j=0; j<facePoints.size(); ++j)
-            {
-                if (!pointSet.found(facePoints[j]))
-                {
-                    pointSet.insert(facePoints[j]);
-                }
-            }
+            const labelList& facePoints = faces[facei];
+            pointSet.insert(facePoints);
         }
         pointSet.erase(curPoint);
         labelList curPoints(pointSet.toc());
 
-        if (curPoints.size() < 5)
+        if (pointSet.size() < 5)
         {
             DebugInfo
                 << "WARNING: Extending point set for fitting." << endl;
 
             labelHashSet faceSet(pointFaces[curPoint]);
             labelList curFaces(faceSet.toc());
-            forAll(curFaces, faceI)
+            for (const label facei : curFaces)
             {
-                const labelList& curFaceFaces =
-                    patch().faceFaces()[curFaces[faceI]];
-
-                forAll(curFaceFaces, fI)
-                {
-                    label curFaceFace = curFaceFaces[fI];
-
-                    if (!faceSet.found(curFaceFace))
-                    {
-                        faceSet.insert(curFaceFace);
-                    }
-                }
+                const labelList& curFaceFaces = patch().faceFaces()[facei];
+                faceSet.insert(curFaceFaces);
             }
             curFaces = faceSet.toc();
 
-            labelHashSet pointSet;
+            pointSet.clear();
 
-            pointSet.insert(curPoint);
-            for (label i=0; i<curFaces.size(); ++i)
+            for (const label facei : curFaces)
             {
-                const labelList& facePoints = faces[curFaces[i]];
-                for (label j=0; j<facePoints.size(); ++j)
-                {
-                    if (!pointSet.found(facePoints[j]))
-                    {
-                        pointSet.insert(facePoints[j]);
-                    }
-                }
+                const labelList& facePoints = faces[facei];
+                pointSet.insert(facePoints);
             }
-
             pointSet.erase(curPoint);
             curPoints = pointSet.toc();
         }
@@ -1372,17 +1347,10 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 labelHashSet pointSet;
 
-                pointSet.insert(curPoint);
-                for (label i=0; i<curFaces.size(); ++i)
+                for (const label facei : curFaces)
                 {
-                    const labelList& facePoints = faces[curFaces[i]];
-                    for (label j=0; j<facePoints.size(); ++j)
-                    {
-                        if (!pointSet.found(facePoints[j]))
-                        {
-                            pointSet.insert(facePoints[j]);
-                        }
-                    }
+                    const labelList& facePoints = faces[facei];
+                    pointSet.insert(facePoints);
                 }
                 pointSet.erase(curPoint);
                 labelList curPoints = pointSet.toc();
@@ -1456,17 +1424,10 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 labelHashSet pointSet;
 
-                pointSet.insert(curPoint);
-                for (label i=0; i<curFaces.size(); ++i)
+                for (const label facei : curFaces)
                 {
-                    const labelList& facePoints = faces[curFaces[i]];
-                    for (label j=0; j<facePoints.size(); ++j)
-                    {
-                        if (!pointSet.found(facePoints[j]))
-                        {
-                            pointSet.insert(facePoints[j]);
-                        }
-                    }
+                    const labelList& facePoints = faces[facei];
+                    pointSet.insert(facePoints);
                 }
                 pointSet.erase(curPoint);
                 labelList curPoints = pointSet.toc();
@@ -1653,17 +1614,10 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                 const labelList curFaces(faceSet.toc());
 
                 labelHashSet pointSet;
-                pointSet.insert(curPoint);
-                for (label i=0; i<curFaces.size(); ++i)
+                for (const label facei : curFaces)
                 {
-                    const labelList& facePoints = faces[curFaces[i]];
-                    for (label j=0; j<facePoints.size(); ++j)
-                    {
-                        if (!pointSet.found(facePoints[j]))
-                        {
-                            pointSet.insert(facePoints[j]);
-                        }
-                    }
+                    const labelList& facePoints = faces[facei];
+                    pointSet.insert(facePoints);
                 }
                 pointSet.erase(curPoint);
                 labelList curPoints = pointSet.toc();

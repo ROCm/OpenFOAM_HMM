@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,13 +78,10 @@ void Foam::primitiveMesh::calcCellEdges() const
 
             const labelList& curEdges = fe[facei];
 
-            forAll(curEdges, edgeI)
+            for (const label edgei : curEdges)
             {
-                if (!curCellEdges.found(curEdges[edgeI]))
-                {
-                    // Add the edge
-                    curCellEdges.append(curEdges[edgeI]);
-                }
+                // Add the edge
+                curCellEdges.appendUniq(edgei);
             }
         }
 
@@ -93,13 +91,10 @@ void Foam::primitiveMesh::calcCellEdges() const
 
             const labelList& curEdges = fe[facei];
 
-            forAll(curEdges, edgeI)
+            for (const label edgei : curEdges)
             {
-                if (!curCellEdges.found(curEdges[edgeI]))
-                {
-                    // add the edge
-                    curCellEdges.append(curEdges[edgeI]);
-                }
+                // Add the edge
+                curCellEdges.appendUniq(edgei);
             }
         }
 
