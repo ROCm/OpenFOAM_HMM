@@ -36,6 +36,7 @@ Description
 #define dictionaryContent_H
 
 #include "dictionary.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,6 +85,28 @@ public:
 
 
     // Member Functions
+
+        //- Copy construct a dictionary,
+        //- filtered by a combination of allow/deny lists
+        //
+        //  An empty 'allow' list accepts everything not in the 'deny' list.
+        //  A literal match has higher priority over a regex match.
+        //
+        //  \verbatim
+        //     input:  ( abc apple wall wall1 wall2 )
+        //     allow:  ( abc def "wall.*" )
+        //     deny:   ( "[ab].*" wall )
+        //
+        //     result: (abc wall1 wall2)
+        //  \endverbatim
+        //
+        //  \return filtered dictionary copy
+        static dictionary copyDict
+        (
+            const dictionary& input,
+            const wordRes& allow = wordRes(),
+            const wordRes& deny = wordRes()
+        );
 
         //- Read-access to the content
         const dictionary& dict() const noexcept

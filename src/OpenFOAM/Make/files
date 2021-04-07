@@ -274,6 +274,8 @@ $(dictionary)/dictionaryIO.C
 $(dictionary)/dictionarySearch.C
 $(dictionary)/dictionaryCompat.C
 
+$(dictionary)/dictionaryContent/dictionaryContent.C
+
 entry = $(dictionary)/entry
 $(entry)/entry.C
 $(entry)/entryIO.C
