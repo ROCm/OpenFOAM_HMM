@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,13 +135,13 @@ public:
             //  \note Matching patchGroups currently not supported
             labelList indices
             (
-                const keyType& key,
+                const wordRe& matcher,
                 const bool useGroups = false  /* ignored */
             ) const;
 
             //- Return patch index for the first match, return -1 if not found
             //  A no-op (returns -1) for an empty key
-            label findIndex(const keyType& key) const;
+            label findIndex(const wordRe& key) const;
 
             //- Find patch index given a name, return -1 if not found
             //  A no-op (returns -1) for an empty name
@@ -175,11 +175,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices
-        (
-            const keyType& key,
-            const bool useGroups = false
-        ) const
+        labelList findIndices(const wordRe& key, bool useGroups=false) const
         {
             return indices(key, useGroups);
         }

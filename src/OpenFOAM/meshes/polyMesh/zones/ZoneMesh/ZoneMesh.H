@@ -38,10 +38,10 @@ SourceFiles
 #ifndef ZoneMesh_H
 #define ZoneMesh_H
 
-#include "List.H"
 #include "regIOobject.H"
 #include "pointField.H"
 #include "Map.H"
+#include "PtrList.H"
 #include "bitSet.H"
 #include "wordRes.H"
 
@@ -51,7 +51,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 template<class ZoneType, class MeshType> class ZoneMesh;
 
 template<class ZoneType, class MeshType>
@@ -131,7 +130,7 @@ public:
     // Member Functions
 
         //- Return the mesh reference
-        const MeshType& mesh() const
+        const MeshType& mesh() const noexcept
         {
             return mesh_;
         }
@@ -167,8 +166,8 @@ public:
 
 
         //- Return zone indices for all matches
-        //  A no-op (returns empty list) for an empty key
-        labelList indices(const keyType& key) const;
+        //  A no-op (returns empty list) for an empty matcher
+        labelList indices(const wordRe& matcher) const;
 
         //- Return zone indices for all matches
         //  A no-op (returns empty list) for an empty matcher
@@ -176,7 +175,7 @@ public:
 
         //- Zone index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty key
-        label findIndex(const keyType& key) const;
+        label findIndex(const wordRe& key) const;
 
         //- Zone index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty matcher
@@ -205,8 +204,8 @@ public:
         //- specification as a bitSet.
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
-        //  A no-op (returns empty bitSet) for an empty key
-        bitSet selection(const keyType& key) const;
+        //  A no-op (returns empty bitSet) for an empty matcher
+        bitSet selection(const wordRe& matcher) const;
 
         //- Return all elements (cells, faces, points) that match the zone
         //- specification as a bitSet.
@@ -288,7 +287,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices(const keyType& key) const
+        labelList findIndices(const wordRes& key) const
         {
             return indices(key);
         }

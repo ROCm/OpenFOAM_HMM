@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockMeshTools.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+static inline const Foam::entry* resolveLabel(const entry& e, const label val)
+{
+    if (e.isStream())
+    {
+        const tokenList& toks = e.stream();
+
+        if (!toks.empty() && toks[0].isLabel(val))
+        {
+            return &e;
+        }
+    }
+
+    return nullptr;
+}
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -93,21 +117,18 @@ void Foam::blockMeshTools::write
 {
     for (const entry& e : dict)
     {
-        if (e.isStream())
+        const entry* eptr = resolveLabel(e, val);
+        if (eptr)
         {
-            label keyVal(Foam::readLabel(e.stream()));
-            if (keyVal == val)
-            {
-                os << e.keyword();
-                return;
-            }
+            os << eptr->keyword();
+            return;
         }
     }
     os << val;
 }
 
 
-const Foam::keyType& Foam::blockMeshTools::findEntry
+const Foam::entry* Foam::blockMeshTools::findEntry
 (
     const dictionary& dict,
     const label val
@@ -115,17 +136,14 @@ const Foam::keyType& Foam::blockMeshTools::findEntry
 {
     for (const entry& e : dict)
     {
-        if (e.isStream())
+        const entry* eptr = resolveLabel(e, val);
+        if (eptr)
         {
-            label keyVal(Foam::readLabel(e.stream()));
-            if (keyVal == val)
-            {
-                return e.keyword();
-            }
+            return eptr;
         }
     }
 
-    return keyType::null;
+    return nullptr;
 }
 
 

@@ -110,8 +110,8 @@ public:
         lduInterfacePtrsList interfaces() const;
 
         //- Return patch indices for all matches.
-        //  A no-op (returns empty list) for an empty key
-        labelList indices(const keyType& key, const bool useGroups) const;
+        //  A no-op (returns empty list) for an empty matcher
+        labelList indices(const wordRe& matcher, const bool useGroups) const;
 
         //- Find patch index given a name
         //  A no-op (returns -1) for an empty patchName
@@ -137,7 +137,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices(const keyType& key, const bool useGroups) const
+        labelList findIndices(const wordRe& key, bool useGroups) const
         {
             return indices(key, useGroups);
         }

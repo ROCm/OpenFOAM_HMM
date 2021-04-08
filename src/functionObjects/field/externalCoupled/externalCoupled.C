@@ -278,7 +278,7 @@ void Foam::functionObjects::externalCoupled::writeGeometry
         (
             mesh.boundaryMesh().patchSet
             (
-                List<wordRe>{groupName}
+                wordRes(one{}, groupName)
             ).sortedToc()
         );
 

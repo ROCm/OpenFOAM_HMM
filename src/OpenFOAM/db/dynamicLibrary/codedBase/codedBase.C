@@ -59,11 +59,9 @@ static inline void writeEntryIfPresent
 )
 {
     const entry* eptr = dict.findEntry(key, keyType::LITERAL);
-
     if (eptr)
     {
         const tokenList& toks = eptr->stream();
-
         if (!toks.empty())
         {
             os.writeEntry(key, toks[0]);

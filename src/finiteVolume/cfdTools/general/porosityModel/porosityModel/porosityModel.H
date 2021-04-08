@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +45,6 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "coordinateSystem.H"
 #include "dimensionedVector.H"
-#include "keyType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +70,7 @@ class porosityModel
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Porosity name
         word name_;
@@ -88,7 +88,7 @@ protected:
         bool active_;
 
         //- Name(s) of cell-zone
-        keyType zoneName_;
+        wordRe zoneName_;
 
         //- Cell zone IDs
         labelList cellZoneIDs_;

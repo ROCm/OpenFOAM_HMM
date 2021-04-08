@@ -311,25 +311,14 @@ const
 template<class ZoneType, class MeshType>
 Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
 (
-    const keyType& key
+    const wordRe& matcher
 ) const
 {
-    if (key.empty())
+    if (matcher.empty())
     {
         return labelList();
     }
-    else if (key.isPattern())
-    {
-        // Match as regex
-        const regExp matcher(key);
-        return PtrListOps::findMatching(*this, matcher);
-    }
-    else
-    {
-        // Compare as literal string
-        const word& matcher = key;
-        return PtrListOps::findMatching(*this, matcher);
-    }
+    return PtrListOps::findMatching(*this, matcher);
 }
 
 
@@ -350,25 +339,14 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
 template<class ZoneType, class MeshType>
 Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
 (
-    const keyType& key
+    const wordRe& key
 ) const
 {
     if (key.empty())
     {
         return -1;
     }
-    else if (key.isPattern())
-    {
-        // Find as regex
-        const regExp matcher(key);
-        return PtrListOps::firstMatching(*this, matcher);
-    }
-    else
-    {
-        // Find as literal string
-        const word& matcher = key;
-        return PtrListOps::firstMatching(*this, matcher);
-    }
+    return PtrListOps::firstMatching(*this, key);
 }
 
 
@@ -378,7 +356,11 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
     const wordRes& matcher
 ) const
 {
-    return (matcher.empty() ? -1 : PtrListOps::firstMatching(*this, matcher));
+    if (matcher.empty())
+    {
+        return -1;
+    }
+    return PtrListOps::firstMatching(*this, matcher);
 }
 
 
@@ -495,11 +477,11 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 template<class ZoneType, class MeshType>
 Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 (
-    const keyType& key
+    const wordRe& matcher
 ) const
 {
-    // key.empty() is handled by indices()
-    return this->selection(this->indices(key));
+    // matcher.empty() is handled by indices()
+    return this->selection(this->indices(matcher));
 }
 
 

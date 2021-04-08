@@ -179,24 +179,13 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::coordinateSystems::indices(const keyType& key) const
+Foam::labelList Foam::coordinateSystems::indices(const wordRe& key) const
 {
     if (key.empty())
     {
         return labelList();
     }
-    else if (key.isPattern())
-    {
-        // Match as regex
-        const regExp matcher(key);
-        return PtrListOps::findMatching(*this, matcher);
-    }
-    else
-    {
-        // Compare as literal string
-        const word& matcher = key;
-        return PtrListOps::findMatching(*this, matcher);
-    }
+    return PtrListOps::findMatching(*this, key);
 }
 
 
@@ -210,24 +199,13 @@ Foam::labelList Foam::coordinateSystems::indices(const wordRes& matcher) const
 }
 
 
-Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
+Foam::label Foam::coordinateSystems::findIndex(const wordRe& key) const
 {
     if (key.empty())
     {
         return -1;
     }
-    else if (key.isPattern())
-    {
-        // Find as regex
-        const regExp matcher(key);
-        return PtrListOps::firstMatching(*this, matcher);
-    }
-    else
-    {
-        // Find as literal string
-        const word& matcher = key;
-        return PtrListOps::firstMatching(*this, matcher);
-    }
+    return PtrListOps::firstMatching(*this, key);
 }
 
 
@@ -241,7 +219,7 @@ Foam::label Foam::coordinateSystems::findIndex(const wordRes& matcher) const
 }
 
 
-bool Foam::coordinateSystems::found(const keyType& key) const
+bool Foam::coordinateSystems::found(const wordRe& key) const
 {
     return findIndex(key) != -1;
 }
@@ -250,13 +228,16 @@ bool Foam::coordinateSystems::found(const keyType& key) const
 const Foam::coordinateSystem*
 Foam::coordinateSystems::cfind(const word& name) const
 {
-    const label index = this->findIndex(name);
+    const label index =
+    (
+        name.empty() ? -1 : PtrListOps::firstMatching(*this, name)
+    );
 
     if (coordinateSystem::debug)
     {
         InfoInFunction
             << "Global coordinate system: "
-            << name << "=" << index << endl;
+            << name << '=' << index << endl;
     }
 
     if (index < 0)
@@ -271,9 +252,9 @@ Foam::coordinateSystems::cfind(const word& name) const
 const Foam::coordinateSystem&
 Foam::coordinateSystems::lookup(const word& name) const
 {
-    const label index = this->findIndex(name);
+    const coordinateSystem* ptr = this->cfind(name);
 
-    if (index < 0)
+    if (!ptr)
     {
         FatalErrorInFunction
             << "Could not find coordinate system: " << name << nl
@@ -281,14 +262,8 @@ Foam::coordinateSystems::lookup(const word& name) const
             << flatOutput(names()) << nl << nl
             << exit(FatalError);
     }
-    if (coordinateSystem::debug)
-    {
-        InfoInFunction
-            << "Global coordinate system: "
-            << name << "=" << index << endl;
-    }
 
-    return this->operator[](index);
+    return *ptr;
 }
 
 
@@ -298,34 +273,13 @@ Foam::wordList Foam::coordinateSystems::names() const
 }
 
 
-Foam::wordList Foam::coordinateSystems::names(const keyType& key) const
+Foam::wordList Foam::coordinateSystems::names(const wordRe& key) const
 {
     if (key.empty())
     {
         return wordList();
     }
-    else if (key.isPattern())
-    {
-        // Find as regex
-        const regExp matcher(key);
-        return PtrListOps::names(*this, matcher);
-    }
-    else
-    {
-        // Find as literal string
-        const word& matcher = key;
-        return PtrListOps::names(*this, matcher);
-    }
-}
-
-
-Foam::wordList Foam::coordinateSystems::names(const wordRe& matcher) const
-{
-    if (matcher.empty())
-    {
-        return wordList();
-    }
-    return PtrListOps::names(*this, matcher);
+    return PtrListOps::names(*this, key);
 }
 
 

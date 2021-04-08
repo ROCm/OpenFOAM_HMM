@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,15 +67,7 @@ Foam::label Foam::ParticleErosion<CloudType>::applyToPatch
     const label globalPatchi
 ) const
 {
-    forAll(patchIDs_, i)
-    {
-        if (patchIDs_[i] == globalPatchi)
-        {
-            return i;
-        }
-    }
-
-    return -1;
+    return patchIDs_.find(globalPatchi);
 }
 
 
@@ -120,7 +112,7 @@ Foam::ParticleErosion<CloudType>::ParticleErosion
     labelHashSet uniqIds;
     for (const wordRe& re : patchNames)
     {
-        labelList ids = findStrings(re, allPatchNames);
+        labelList ids = findMatchingStrings(re, allPatchNames);
 
         if (ids.empty())
         {

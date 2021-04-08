@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ Foam::porosityModel::porosityModel
         coordinateSystem::New(mesh, coeffs_, coordinateSystem::typeName_())
     )
 {
-    if (zoneName_ == word::null)
+    if (zoneName_.empty())
     {
         dict.readIfPresent("active", active_);
         dict_.readEntry("cellZone", zoneName_);
