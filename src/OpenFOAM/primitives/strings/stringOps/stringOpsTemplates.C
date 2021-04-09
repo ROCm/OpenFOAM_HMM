@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,45 @@ License
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class StringType, class UnaryPredicate>
+StringType Foam::stringOps::quotemeta
+(
+    const StringType& str,
+    const UnaryPredicate& meta,
+    const char quote
+)
+{
+    if (str.empty() || !quote)
+    {
+        return str;
+    }
+
+    StringType result;
+    result.reserve(1.5*str.size());  // Moderately pessimistic
+
+    bool escaped = false;
+    for (const char c : str)
+    {
+        if (c == quote)
+        {
+            escaped = !escaped;  // toggle state
+        }
+        else if (escaped)
+        {
+            escaped = false;
+        }
+        else if (meta(c))
+        {
+            result += quote;
+        }
+        result += c;
+    }
+
+    result.shrink_to_fit();
+    return result;
+}
+
 
 template<class StringType>
 Foam::SubStrings<StringType> Foam::stringOps::split

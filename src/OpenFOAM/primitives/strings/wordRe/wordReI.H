@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,21 +28,9 @@ License
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline bool Foam::wordRe::meta(char c)
-{
-    return regExp::meta(c);
-}
-
-
 inline bool Foam::wordRe::valid(char c)
 {
     return keyType::valid(c);
-}
-
-
-inline bool Foam::wordRe::isPattern(const std::string& str)
-{
-    return string::meta<regExp>(str);
 }
 
 
@@ -184,7 +172,7 @@ inline bool Foam::wordRe::compile(const compOption opt)
         }
         else if (opt & wordRe::DETECT)
         {
-            comp = string::meta<regExp>(*this) || !string::valid<word>(*this);
+            comp = regExp::is_meta(*this) || !string::valid<word>(*this);
         }
         else if (opt & wordRe::ICASE)
         {
@@ -234,12 +222,6 @@ inline bool Foam::wordRe::match(const std::string& text, bool literal) const
     }
 
     return !compare(text);  // Compare as literal
-}
-
-
-inline Foam::string Foam::wordRe::quotemeta() const
-{
-    return string::quotemeta<regExp>(*this);
 }
 
 

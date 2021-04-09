@@ -173,68 +173,6 @@ inline bool Foam::string::stripInvalid(std::string& str)
 
 
 template<class String>
-inline bool Foam::string::meta(const std::string& str, const char quote)
-{
-    int escaped = 0;
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-    {
-        const char c = *iter;
-        if (quote && c == quote)
-        {
-            escaped ^= 1;  // toggle state
-        }
-        else if (escaped)
-        {
-            escaped = 0;
-        }
-        else if (String::meta(c))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-template<class String>
-inline Foam::string
-Foam::string::quotemeta(const std::string& str, const char quote)
-{
-    if (!quote)
-    {
-        return str;
-    }
-
-    string sQuoted;
-    sQuoted.reserve(2*str.size());
-
-    int escaped = 0;
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-    {
-        const char c = *iter;
-        if (c == quote)
-        {
-            escaped ^= 1;  // toggle state
-        }
-        else if (escaped)
-        {
-            escaped = 0;
-        }
-        else if (String::meta(c))
-        {
-            sQuoted += quote;
-        }
-
-        sQuoted += c;
-    }
-
-    sQuoted.shrink_to_fit();
-
-    return sQuoted;
-}
-
-
-template<class String>
 inline String Foam::string::validate(const std::string& str)
 {
     String out;

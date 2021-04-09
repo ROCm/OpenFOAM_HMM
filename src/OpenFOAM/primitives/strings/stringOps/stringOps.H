@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,6 +76,15 @@ namespace stringOps
     {
         return wordRes::matcher(patterns)(text);
     }
+
+    //- Quote any meta-characters in given string
+    template<class StringType, class UnaryPredicate>
+    StringType quotemeta
+    (
+        const StringType& str,
+        const UnaryPredicate& meta,
+        const char quote = '\\'
+    );
 
     //- Expand occurrences of variables according to the mapping
     //- and return the expanded string.

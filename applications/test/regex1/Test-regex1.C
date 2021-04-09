@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 #include "IFstream.H"
 #include "Switch.H"
 
+#include "stringOps.H"
 #include "SubStrings.H"
 #include "regExpCxx.H"
 #ifndef _WIN32
@@ -294,19 +295,16 @@ int main(int argc, char *argv[])
     argList::noFunctionObjects();
     argList::noParallel();
 
-    argList::addBoolOption
-    (
-        "cxx",
-        "Test C++11 regular expressions"
-    );
-
+    argList::addBoolOption("cxx", "Test C++11 regular expressions");
     #ifndef _WIN32
-    argList::addBoolOption
-    (
-        "posix",
-        "Test POSIX regular expressions"
-    );
+    argList::addBoolOption("posix", "Test POSIX regular expressions");
     #endif
+    argList::addOption
+    (
+        "regex",
+        "expression",
+        "regular expression to test"
+    );
 
     argList::addArgument("file");
     argList::addArgument("...");
@@ -315,24 +313,50 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
+    // Newer compilers support regex directly
+    #ifdef _GLIBCXX_RELEASE
+    Info<< "_GLIBCXX_RELEASE = " << (_GLIBCXX_RELEASE) << nl;
+    #endif
+
     if (std::is_same<regExp, regExpCxx>::value)
     {
-        Info<<"Foam::regExp uses C++11 regex" << nl << nl;
+        Info<< "Foam::regExp uses C++11 regex" << nl;
     }
     #ifndef _WIN32
     if (std::is_same<regExp, regExpPosix>::value)
     {
-        Info<<"Foam::regExp uses POSIX regex" << nl << nl;
+        Info<< "Foam::regExp uses POSIX regex" << nl;
     }
     #endif
 
     if (!args.count({"cxx", "posix"}))
     {
-        Info<< "Specified one or more of -cxx, -posix" << nl;
-        return 1;
+        args.setOption("cxx");
+        Info<< "Assuming -cxx as default" << nl;
     }
+    Info<< nl;
 
-    if (args.size() < 2)
+    if (args.found("regex"))
+    {
+        std::string expr(args["regex"]);
+        Info<< "regex: " << expr << nl;
+
+        Info<< "(cxx)" << nl
+            << "meta : " << Switch(regExpCxx::is_meta(expr)) << nl
+            << "quotemeta: "
+            << stringOps::quotemeta(expr, regExpCxx::meta()) << nl
+            << nl;
+
+        #ifndef _WIN32
+        Info<< "(posix):" << nl
+            << "meta : " << Switch(regExpPosix::is_meta(expr)) << nl
+            << "quotemeta: "
+            << stringOps::quotemeta(expr, regExpPosix::meta()) << nl
+            << nl;
+        #endif
+        Info<< nl;
+    }
+    else if (args.size() < 2)
     {
         Info<< "No test files specified .. restrict to general tests" << nl;
 
@@ -351,7 +375,8 @@ int main(int argc, char *argv[])
 
     for (label argi = 1; argi < args.size(); ++argi)
     {
-        List<regexTest> tests(IFstream(args[argi])());
+        IFstream is(args[argi]);
+        List<regexTest> tests(is);
 
         Info<< "Test expressions:" << tests << endl;
         IOobject::writeDivider(Info) << endl;

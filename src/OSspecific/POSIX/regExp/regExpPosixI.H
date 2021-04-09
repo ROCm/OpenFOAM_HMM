@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,65 +27,43 @@ License
 
 #include <algorithm>
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-inline bool Foam::regExpPosix::meta(char c)
-{
-    return
-    (
-        (c == '.')                           // any character
-     || (c == '*' || c == '+' || c == '?')   // quantifiers
-     || (c == '(' || c == ')' || c == '|')   // grouping/branching
-     || (c == '[' || c == ']')               // range
-    );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::regExpPosix::regExpPosix()
+inline Foam::regExpPosix::regExpPosix() noexcept
 :
     preg_(nullptr)
 {}
 
 
-inline Foam::regExpPosix::regExpPosix(const char* pattern)
-:
-    preg_(nullptr)
-{
-    set(pattern, false);
-}
-
-
-inline Foam::regExpPosix::regExpPosix(const std::string& pattern)
-:
-    preg_(nullptr)
-{
-    set(pattern, false);
-}
-
-
-inline Foam::regExpPosix::regExpPosix(const char* pattern, bool ignoreCase)
-:
-    preg_(nullptr)
-{
-    set(pattern, ignoreCase);
-}
-
-
-inline Foam::regExpPosix::regExpPosix(const std::string& pattern, bool ignoreCase)
-:
-    preg_(nullptr)
-{
-    set(pattern, ignoreCase);
-}
-
-
-inline Foam::regExpPosix::regExpPosix(regExpPosix&& rgx)
+inline Foam::regExpPosix::regExpPosix(regExpPosix&& rgx) noexcept
 :
     preg_(rgx.preg_)
 {
     rgx.preg_ = nullptr;
+}
+
+
+inline Foam::regExpPosix::regExpPosix
+(
+    const char* pattern,
+    const bool ignoreCase
+)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
+}
+
+
+inline Foam::regExpPosix::regExpPosix
+(
+    const std::string& pattern,
+    const bool ignoreCase
+)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
 }
 
 
@@ -143,8 +121,12 @@ inline bool Foam::regExpPosix::operator()(const std::string& text) const
 
 inline void Foam::regExpPosix::operator=(regExpPosix&& rgx)
 {
-    clear();
-    swap(rgx);
+    if (this != &rgx)
+    {
+        // Self-assignment is a no-op
+        clear();
+        swap(rgx);
+    }
 }
 
 

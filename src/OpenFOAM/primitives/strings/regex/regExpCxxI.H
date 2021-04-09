@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ inline std::regex::flag_type Foam::regExpCxx::syntax()
 }
 
 
-inline bool Foam::regExpCxx::meta(const char c)
+inline bool Foam::regExpCxx::is_meta(const char c) noexcept
 {
     return
     (
@@ -48,6 +48,32 @@ inline bool Foam::regExpCxx::meta(const char c)
      || (c == '(' || c == ')' || c == '|')   // grouping/branching
      || (c == '[' || c == ']')               // range
     );
+}
+
+
+inline bool Foam::regExpCxx::is_meta
+(
+    const std::string& str,
+    const char quote
+)
+{
+    bool escaped = false;
+    for (const char c : str)
+    {
+        if (quote && c == quote)
+        {
+            escaped = !escaped;  // toggle state
+        }
+        else if (escaped)
+        {
+            escaped = false;
+        }
+        else if (is_meta(c))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -67,7 +93,7 @@ inline Foam::regExpCxx::regExpCxx(const regExpCxx& rgx)
 {}
 
 
-inline Foam::regExpCxx::regExpCxx(regExpCxx&& rgx)
+inline Foam::regExpCxx::regExpCxx(regExpCxx&& rgx) noexcept
 :
     re_(std::move(rgx.re_)),
     ok_(rgx.ok_)
@@ -76,25 +102,11 @@ inline Foam::regExpCxx::regExpCxx(regExpCxx&& rgx)
 }
 
 
-inline Foam::regExpCxx::regExpCxx(const char* pattern)
-:
-    re_(),
-    ok_(false)
-{
-    set(pattern, false);
-}
-
-
-inline Foam::regExpCxx::regExpCxx(const std::string& pattern)
-:
-    re_(),
-    ok_(false)
-{
-    set(pattern, false);
-}
-
-
-inline Foam::regExpCxx::regExpCxx(const char* pattern, bool ignoreCase)
+inline Foam::regExpCxx::regExpCxx
+(
+    const char* pattern,
+    const bool ignoreCase
+)
 :
     re_(),
     ok_(false)
@@ -103,7 +115,11 @@ inline Foam::regExpCxx::regExpCxx(const char* pattern, bool ignoreCase)
 }
 
 
-inline Foam::regExpCxx::regExpCxx(const std::string& pattern, bool ignoreCase)
+inline Foam::regExpCxx::regExpCxx
+(
+    const std::string& pattern,
+    const bool ignoreCase
+)
 :
     re_(),
     ok_(false)
@@ -208,15 +224,23 @@ inline bool Foam::regExpCxx::operator()(const std::string& text) const
 
 inline void Foam::regExpCxx::operator=(const regExpCxx& rgx)
 {
-    re_ = rgx.re_;
-    ok_ = rgx.ok_;
+    if (this != &rgx)
+    {
+        // Self-assignment is a no-op
+        re_ = rgx.re_;
+        ok_ = rgx.ok_;
+    }
 }
 
 
 inline void Foam::regExpCxx::operator=(regExpCxx&& rgx)
 {
-    clear();
-    swap(rgx);
+    if (this != &rgx)
+    {
+        // Self-assignment is a no-op
+        clear();
+        swap(rgx);
+    }
 }
 
 

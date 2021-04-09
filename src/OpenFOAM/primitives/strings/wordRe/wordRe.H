@@ -153,16 +153,10 @@ public:
 
     // Member Functions
 
-        //- Is this a meta character?
-        inline static bool meta(char c);
-
         //- Is this character valid for a wordRe?
         //  This is largely identical with what word accepts, but also
         //  permit brace-brackets, which are valid for some regexs.
         inline static bool valid(char c);
-
-        //- Test string for regular expression meta characters
-        inline static bool isPattern(const std::string& str);
 
 
     // Access
@@ -210,9 +204,6 @@ public:
 
 
     // Miscellaneous
-
-        //- Return a string with quoted meta-characters
-        inline string quotemeta() const;
 
         //- Output some basic info
         Ostream& info(Ostream& os) const;

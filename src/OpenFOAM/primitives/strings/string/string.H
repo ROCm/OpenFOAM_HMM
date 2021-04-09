@@ -192,11 +192,6 @@ public:
         template<class String>
         static inline bool valid(const std::string& str);
 
-        //- Does this string contain meta-characters?
-        //  The meta characters can be optionally quoted.
-        template<class String>
-        static inline bool meta(const std::string& str, const char quote='\\');
-
         //- Strip invalid characters from the given string
         template<class String>
         static inline bool stripInvalid(std::string& str);
@@ -204,14 +199,6 @@ public:
         //- Return a valid String from the given string
         template<class String>
         static inline String validate(const std::string& str);
-
-        //- Return a String with quoted meta-characters from the given string
-        template<class String>
-        static inline string quotemeta
-        (
-            const std::string& str,
-            const char quote = '\\'
-        );
 
 
     // Member Functions
