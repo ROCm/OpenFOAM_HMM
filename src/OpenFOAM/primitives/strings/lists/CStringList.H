@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ namespace Foam
 {
 
 // Forward Declarations
-template<class String> class SubStrings;
+template<class StringType> class SubStrings;
 
 /*---------------------------------------------------------------------------*\
                          Class CStringList Declaration
@@ -111,7 +111,7 @@ public:
 
     // Constructors
 
-        //- Construct empty, adding content later (via reset).
+        //- Default construct, adding content later (via reset).
         inline CStringList();
 
         //- Copy construct from a list of strings
@@ -190,7 +190,7 @@ public:
         static inline List<StringType> asList(const char * const argv[]);
 
 
-    // Member operators
+    // Member Operators
 
         //- Return element at the given index. No bounds checking.
         inline const char* operator[](int i) const;

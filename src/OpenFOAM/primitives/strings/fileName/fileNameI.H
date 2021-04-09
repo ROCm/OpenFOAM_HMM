@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,18 +171,6 @@ inline bool Foam::fileName::hasPath() const
 }
 
 
-inline bool Foam::fileName::hasExt() const
-{
-    return string::hasExt();
-}
-
-
-inline bool Foam::fileName::hasExt(const word& ending) const
-{
-    return string::hasExt(ending);
-}
-
-
 inline std::string Foam::fileName::path(const std::string& str)
 {
     const auto i = str.rfind('/');
@@ -253,12 +241,6 @@ inline Foam::fileName Foam::fileName::lessExt() const
 inline bool Foam::fileName::removePath()
 {
     return string::removePath();
-}
-
-
-inline bool Foam::fileName::removeExt()
-{
-    return string::removeExt();
 }
 
 

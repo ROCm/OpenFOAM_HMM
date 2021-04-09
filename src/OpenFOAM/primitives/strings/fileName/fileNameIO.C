@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,45 +29,59 @@ License
 #include "fileName.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileName::fileName(Istream& is)
-:
-    string()
 {
     is >> *this;
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, fileName& val)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileName::assign(const token& tok)
 {
-    token t(is);
-
-    if (!t.good())
-    {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get string"
-            << exit(FatalIOError);
-        is.setBad();
-        return is;
-    }
-
-    if (t.isStringType())
+    if (tok.isWord())
     {
         // Also accept a plain word as a fileName
-        val = t.stringToken();
+        assign(tok.wordToken());
+        return true;
     }
-    else
+    else if (tok.isQuotedString())
     {
-        FatalIOErrorInFunction(is)
-            << "Wrong token type - expected string, found "
-            << t.info()
-            << exit(FatalIOError);
+        assign(tok.stringToken());
+        stripInvalid();  // More stringent for fileName than string
+        return true;
+    }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, fileName& val)
+{
+    token tok(is);
+
+    if (!val.assign(tok))
+    {
+        FatalIOErrorInFunction(is);
+        if (tok.good())
+        {
+            FatalIOError
+                << "Wrong token type - expected string, found "
+                << tok.info();
+        }
+        else
+        {
+            FatalIOError
+                << "Bad token - could not get fileName";
+        }
+        FatalIOError << exit(FatalIOError);
         is.setBad();
         return is;
     }
-
-    val.stripInvalid();
 
     is.check(FUNCTION_NAME);
     return is;

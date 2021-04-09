@@ -464,12 +464,6 @@ Foam::fileName Foam::fileName::relative
 }
 
 
-bool Foam::fileName::hasExt(const wordRe& ending) const
-{
-    return string::hasExt(ending);
-}
-
-
 Foam::wordList Foam::fileName::components(const char delim) const
 {
     const auto parsed = stringOps::split<string>(*this, delim);

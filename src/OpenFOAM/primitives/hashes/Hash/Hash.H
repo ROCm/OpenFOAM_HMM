@@ -41,6 +41,7 @@ Description
 #include "uLabel.H"
 #include "Hasher.H"
 #include "fileName.H"
+#include "keyType.H"
 #include "wordRe.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

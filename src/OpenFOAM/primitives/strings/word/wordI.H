@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <cctype>
 #include <iostream>  // For std::cerr
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -54,6 +53,21 @@ inline Foam::word Foam::word::printf
     word output;
     string_printf(output, fmt, val);
     return output;
+}
+
+
+inline bool Foam::word::valid(char c)
+{
+    return
+    (
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+     && c != '/'   // path separator
+     && c != ';'   // end statement
+     && c != '{'   // beg block (eg, subdict)
+     && c != '}'   // end block (eg, subdict)
+    );
 }
 
 
@@ -127,21 +141,6 @@ inline Foam::word::word(const char* s, size_type len, bool doStrip)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::word::valid(char c)
-{
-    return
-    (
-        !isspace(c)
-     && c != '"'   // string quote
-     && c != '\''  // string quote
-     && c != '/'   // path separator
-     && c != ';'   // end statement
-     && c != '{'   // beg subdict
-     && c != '}'   // end subdict
-    );
-}
-
-
 inline void Foam::word::stripInvalid()
 {
     // Only strip when debug is active (potentially costly operation)
@@ -159,18 +158,6 @@ inline void Foam::word::stripInvalid()
             std::exit(1);
         }
     }
-}
-
-
-inline bool Foam::word::hasExt() const
-{
-    return string::hasExt();
-}
-
-
-inline bool Foam::word::removeExt()
-{
-    return string::removeExt();
 }
 
 

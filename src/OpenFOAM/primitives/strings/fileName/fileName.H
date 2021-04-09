@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,13 +55,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+class fileName;
+class token;
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
-
-class wordRe;
-class fileName;
 
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration
@@ -100,7 +99,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         fileName() = default;
 
         //- Copy construct
@@ -141,6 +140,13 @@ public:
 
 
     // Member Functions
+
+        //- Inherit all regular string assign() methods
+        using string::assign;
+
+        //- Assign from word or string token.
+        //  \return false if the token was the incorrect type
+        bool assign(const token& tok);
 
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
@@ -322,17 +328,11 @@ public:
         //  or when the file name is empty or ended with a '/'.
         inline fileName& ext(const word& ending);
 
-        //- Return true if it has an extension or simply ends with a '.'
-        inline bool hasExt() const;
-
-        //- Return true if the extension is the same as the given ending.
-        inline bool hasExt(const word& ending) const;
-
-        //- Return true if the extension matches the given ending.
-        bool hasExt(const wordRe& ending) const;
+        //- Various checks for extensions
+        using string::hasExt;
 
         //- Remove extension, returning true if string changed.
-        inline bool removeExt();
+        using string::removeExt;
 
 
         //- Return path components as wordList
@@ -389,7 +389,7 @@ public:
         inline fileName& operator=(const char* str);
 
 
-    // Other operators
+    // Other Operators
 
         //- Append a path element with '/' separator.
         //  No '/' separator is added if this or the argument are empty.

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ Description
 #include "IOstreams.H"
 #include "IOobject.H"
 #include "IFstream.H"
+#include "ITstream.H"
 #include "List.H"
 #include "Tuple2.H"
 #include "keyType.H"
@@ -51,11 +52,84 @@ word typeOf(wordRe::compOption retval)
 }
 
 
+Ostream& printInfo(const wordRe& wre)
+{
+    if (wre.isPattern())
+    {
+        Info<< "wordRe(regex) ";
+    }
+    else
+    {
+        Info<< "wordRe(plain) ";
+    }
+    Info<< wre;
+    return Info;
+}
+
+
+// Could use something like this for reading wordRes
+void exptl_reading(Istream& is, wordRes& list)
+{
+    token tok(is);
+
+    bool ok = ((tok.isWord() || tok.isQuotedString()) && !tok.isCompound());
+    if (ok)
+    {
+        list.resize(1);
+        ok = list[0].assign(tok);
+    }
+    if (!ok)
+    {
+        if (tok.good())
+        {
+            is.putBack(tok);
+        }
+        list.readList(is);
+    }
+}
+
+
+bool testReadList_wordRes(const std::string& input)
+{
+    ITstream is("input", input);
+    wordRes list;
+
+    exptl_reading(is, list);
+
+    const label nTrailing = is.nRemainingTokens();
+
+    Info<< "input:<<<<" << nl << input.c_str() << nl
+        << ">>>> with " << nTrailing << " tokens remaining" << nl
+        << "list: " << flatOutput(list) << nl;
+
+    return !nTrailing;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
+    if (true)
+    {
+        Info<< "Test input for wordRes" << nl << nl;
+
+        testReadList_wordRes
+        (
+            "("
+            "this \"x.*\" \"file[a-b]\" xvalues \"xv.*\""
+            ")"
+        );
+
+        testReadList_wordRes
+        (
+            "\".*\""
+        );
+
+        Info<< nl << nl;
+    }
+
     wordRe wre;
     std::string s1("this .* file");
     Foam::string s2("this .* file");
@@ -64,13 +138,13 @@ int main(int argc, char *argv[])
     keyType keyre("x.*", keyType::REGEX);
 
     wordRes wordrelist
-    {
+    ({
         {"this", wordRe::LITERAL},
         {"x.*", wordRe::REGEX},
         {"file[a-b]", wordRe::REGEX},
         {"xvalues", wordRe::LITERAL},
         {"xv.*", wordRe::REGEX},
-    };
+    });
 
     if (false)
     {
@@ -169,45 +243,45 @@ int main(int argc, char *argv[])
     }
     Info<< nl;
 
-    wordRe(s1, wordRe::DETECT).info(Info) << nl;
-    wordRe(s2).info(Info) << nl;
-    wordRe(s2, wordRe::DETECT).info(Info) << nl;
-    wordRe(s3, wordRe::REGEX).info(Info) << nl;
+    printInfo(wordRe(s1, wordRe::DETECT)) << nl;
+    printInfo(wordRe(s2)) << nl;
+    printInfo(wordRe(s2, wordRe::DETECT)) << nl;
+    printInfo(wordRe(s3, wordRe::REGEX)) << nl;
 
     wre = "this .* file";
 
     Info<<"substring: " << wre.substr(4) << nl;
 
-    wre.info(Info) << nl;
+    printInfo(wre) << nl;
     wre = s1;
-    wre.info(Info) << nl;
+    printInfo(wre) << nl;
     wre.uncompile();
-    wre.info(Info) << nl;
+    printInfo(wre) << nl;
 
     wre = "something";
-    wre.info(Info) << " before" << nl;
+    printInfo(wre) << " before" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << nl;
+    printInfo(wre) << " uncompiled" << nl;
     wre.compile(wordRe::DETECT);
-    wre.info(Info) << " after DETECT" << nl;
+    printInfo(wre) << " after DETECT" << nl;
     wre.compile(wordRe::ICASE);
-    wre.info(Info) << " after ICASE" << nl;
+    printInfo(wre) << " after ICASE" << nl;
     wre.compile(wordRe::DETECT_ICASE);
-    wre.info(Info) << " after DETECT_ICASE" << nl;
+    printInfo(wre) << " after DETECT_ICASE" << nl;
 
     wre = "something .* value";
-    wre.info(Info) << " before" << nl;
+    printInfo(wre) << " before" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << nl;
+    printInfo(wre) << " uncompiled" << nl;
     wre.compile(wordRe::DETECT);
-    wre.info(Info) << " after DETECT" << nl;
+    printInfo(wre) << " after DETECT" << nl;
     wre.uncompile();
-    wre.info(Info) << " uncompiled" << nl;
+    printInfo(wre) << " uncompiled" << nl;
     wre.compile();
-    wre.info(Info) << " re-compiled" << nl;
+    printInfo(wre) << " re-compiled" << nl;
 
     wre.set("something .* value", wordRe::LITERAL);
-    wre.info(Info) << " set as LITERAL" << nl;
+    printInfo(wre) << " set as LITERAL" << nl;
 
     IOobject::writeDivider(Info);
 
@@ -220,7 +294,7 @@ int main(int argc, char *argv[])
         const wordRe& wre = rawList[elemI].first();
         const string& str = rawList[elemI].second();
 
-        wre.info(Info)
+        printInfo(wre)
             << " equals:" << (wre == str)
             << "(" << wre.match(str, true) << ")"
             << " match:" << wre.match(str)
@@ -230,11 +304,10 @@ int main(int argc, char *argv[])
         wordRe wre2;
         wre2.set(wre, wordRe::ICASE);
 
-        wre2.info(Info)
+        printInfo(wre2)
             << " match:" << wre2.match(str)
             << "  str=" << str
             << nl;
-
     }
 
     Info<< "\nEnd\n" << endl;

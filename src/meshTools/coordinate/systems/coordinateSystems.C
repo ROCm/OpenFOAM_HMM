@@ -321,12 +321,20 @@ Foam::wordList Foam::coordinateSystems::names(const keyType& key) const
 
 Foam::wordList Foam::coordinateSystems::names(const wordRe& matcher) const
 {
+    if (matcher.empty())
+    {
+        return wordList();
+    }
     return PtrListOps::names(*this, matcher);
 }
 
 
 Foam::wordList Foam::coordinateSystems::names(const wordRes& matcher) const
 {
+    if (matcher.empty())
+    {
+        return wordList();
+    }
     return PtrListOps::names(*this, matcher);
 }
 

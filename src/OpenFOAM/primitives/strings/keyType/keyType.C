@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,9 @@ License
 
 #include "keyType.H"
 #include "regExp.H"
+#include "token.H"
 #include "IOstreams.H"
+#include <algorithm>  // For swap
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -38,15 +40,24 @@ const Foam::keyType Foam::keyType::null;
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::keyType::keyType(Istream& is)
-:
-    word(),
-    type_(option::LITERAL)
 {
     is  >> *this;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::keyType::swap(keyType& rhs)
+{
+    if (this == &rhs)
+    {
+        return;  // Self-swap is a no-op
+    }
+
+    word::swap(static_cast<word&>(rhs));
+    std::swap(type_, rhs.type_);
+}
+
 
 bool Foam::keyType::match(const std::string& text, bool literal) const
 {
@@ -59,37 +70,40 @@ bool Foam::keyType::match(const std::string& text, bool literal) const
 }
 
 
+bool Foam::keyType::assign(const token& tok)
+{
+    if (tok.isWord())
+    {
+        // Assign from word - literal
+        assign(tok.wordToken());
+        uncompile();
+        return true;
+    }
+    else if (tok.isQuotedString())
+    {
+        // Assign from quoted string - regular expression
+        assign(tok.stringToken());
+        compile();
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
 {
-    token t(is);
+    token tok(is);
 
-    if (!t.good())
+    if (val.assign(tok))
     {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get a word/regex"
-            << exit(FatalIOError);
-        is.setBad();
-        return is;
-    }
-
-    if (t.isWord())
-    {
-        val = t.wordToken();
-        val.setType(keyType::LITERAL);
-    }
-    else if (t.isString())
-    {
-        // Assign from string, treat as regular expression
-        val = t.stringToken();
-        val.setType(keyType::REGEX);
-
-        // Flag empty strings as an error
         if (val.empty())
         {
+            // Empty strings are an error
             FatalIOErrorInFunction(is)
-                << "Empty word/expression"
+                << "Zero-length regex"
                 << exit(FatalIOError);
             is.setBad();
             return is;
@@ -97,10 +111,19 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
     }
     else
     {
-        FatalIOErrorInFunction(is)
-            << "Wrong token type - expected word or string, found "
-            << t.info()
-            << exit(FatalIOError);
+        FatalIOErrorInFunction(is);
+        if (tok.good())
+        {
+            FatalIOError
+                << "Wrong token type - expected word or string, found "
+                << tok.info();
+        }
+        else
+        {
+            FatalIOError
+                << "Bad token - could not get keyType";
+        }
+        FatalIOError << exit(FatalIOError);
         is.setBad();
         return is;
     }

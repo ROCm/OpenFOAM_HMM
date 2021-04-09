@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,10 @@ protected:
         inline bool hasExt() const;
 
         //- Return true if the extension is the same as the given ending.
-        bool hasExt(const word& ending) const;
+        inline bool hasExt(const char* ending) const;
+
+        //- Return true if the extension is the same as the given ending.
+        inline bool hasExt(const std::string& ending) const;
 
         //- Return true if the extension matches the given ending.
         bool hasExt(const wordRe& ending) const;
@@ -161,7 +164,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         string() = default;
 
         //- Copy construct from std::string
@@ -189,16 +192,16 @@ public:
     // Static Member Functions
 
         //- Does the string contain valid characters only?
-        template<class String>
+        template<class StringType>
         static inline bool valid(const std::string& str);
 
         //- Strip invalid characters from the given string
-        template<class String>
+        template<class StringType>
         static inline bool stripInvalid(std::string& str);
 
         //- Return a valid String from the given string
-        template<class String>
-        static inline String validate(const std::string& str);
+        template<class StringType>
+        static inline StringType validate(const std::string& str);
 
 
     // Member Functions

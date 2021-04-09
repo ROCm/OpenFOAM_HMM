@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,12 @@ Description
 using namespace Foam;
 
 // Simple utility
-template<class String>
-void printSubStrings(const String& str, const SubStrings<String>& split)
+template<class StringType>
+void printSubStrings
+(
+    const StringType& str,
+    const SubStrings<StringType>& split
+)
 {
     Info<< "string {" << str.size() << " chars} = " << str << nl
         << split.size() << " elements {" << split.length() << " chars}"
