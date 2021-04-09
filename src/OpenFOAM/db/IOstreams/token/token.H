@@ -87,7 +87,7 @@ public:
 
         // Pointer types
         WORD,             //!< A Foam::word
-        STRING,           //!< A string
+        STRING,           //!< A string (usually double-quoted)
         DIRECTIVE,        //!< A dictionary \c \#directive (word variant)
         VARIABLE,         //!< A dictionary \c \$variable (string variant)
         VERBATIM,         //!< Verbatim string content
@@ -456,6 +456,9 @@ public:
         //- Token is LABEL
         inline bool isLabel() const noexcept;
 
+        //- True if token is LABEL and equal to parameter
+        inline bool isLabel(const label val) const noexcept;
+
         //- Token is FLOAT
         inline bool isFloat() const noexcept;
 
@@ -477,7 +480,10 @@ public:
         //- Token is DIRECTIVE (word variant)
         inline bool isDirective() const noexcept;
 
-        //- Token is STRING, VARIABLE or VERBATIM string
+        //- Token is (quoted) STRING (string variant)
+        inline bool isQuotedString() const noexcept;
+
+        //- Token is STRING, VARIABLE or VERBATIM (string variant)
         inline bool isString() const noexcept;
 
         //- Token is VARIABLE (string variant)

@@ -496,6 +496,16 @@ inline bool Foam::token::isLabel() const noexcept
 }
 
 
+inline bool Foam::token::isLabel(const label val) const noexcept
+{
+    return
+    (
+        type_ == tokenType::LABEL
+     && data_.labelVal == val
+    );
+}
+
+
 inline Foam::label Foam::token::labelToken() const
 {
     if (type_ == tokenType::LABEL)
@@ -627,6 +637,12 @@ inline const Foam::word& Foam::token::wordToken() const
 
     parseError("word");
     return word::null;
+}
+
+
+inline bool Foam::token::isQuotedString() const noexcept
+{
+    return (type_ == tokenType::STRING);
 }
 
 
@@ -921,11 +937,7 @@ inline bool Foam::token::operator==(const std::string& s) const
 
 inline bool Foam::token::operator==(const label val) const noexcept
 {
-    return
-    (
-        type_ == tokenType::LABEL
-     && data_.labelVal == val
-    );
+    return isLabel(val);
 }
 
 
