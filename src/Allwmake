@@ -55,6 +55,7 @@ wmake $targetType finiteVolume
 wmake $targetType mesh/blockMesh
 wmake $targetType mesh/extrudeModel  # Requires: blockMesh
 wmake $targetType dynamicMesh  # Requires: extrudeModel
+wmake $targetType genericPatchFields
 
 wmake $targetType parallel/decompose/decompositionMethods
 
@@ -99,8 +100,6 @@ fvAgglomerationMethods/Allwmake $targetType $*
 wmake $targetType waveModels
 
 wmake $targetType engine
-
-wmake $targetType genericPatchFields
 
 conversion/Allwmake $targetType $*
 

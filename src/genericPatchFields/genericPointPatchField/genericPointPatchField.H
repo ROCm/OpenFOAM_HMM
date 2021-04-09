@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ SourceFiles
 #define genericPointPatchField_H
 
 #include "calculatedPointPatchField.H"
-#include "HashPtrTable.H"
+#include "genericPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,19 +54,11 @@ namespace Foam
 template<class Type>
 class genericPointPatchField
 :
-    public calculatedPointPatchField<Type>
+    public calculatedPointPatchField<Type>,
+    public genericPatchFieldBase
 {
-    // Private Data
-
-        const word actualTypeName_;
-
-        dictionary dict_;
-
-        HashPtrTable<scalarField> scalarFields_;
-        HashPtrTable<vectorField> vectorFields_;
-        HashPtrTable<sphericalTensorField> sphTensorFields_;
-        HashPtrTable<symmTensorField> symmTensorFields_;
-        HashPtrTable<tensorField> tensorFields_;
+    //- The parent boundary condition type
+    typedef calculatedPointPatchField<Type> parent_bctype;
 
 
 public:
@@ -113,6 +105,9 @@ public:
             );
         }
 
+        //- Default copy construct
+        genericPointPatchField(const genericPointPatchField<Type>&) = default;
+
         //- Construct as copy setting internal field reference
         genericPointPatchField
         (
@@ -139,27 +134,21 @@ public:
 
     // Member Functions
 
-        // Mapping Functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const pointPatchFieldMapper&
-            );
-
-            //- Reverse map the given pointPatchField onto this pointPatchField
-            virtual void rmap
-            (
-                const pointPatchField<Type>&,
-                const labelList&
-            );
-
-
-        //- Return the actual type
-        const word& actualType() const;
-
         //- Write
         virtual void write(Ostream&) const;
+
+
+    // Mapping Functions
+
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap(const pointPatchFieldMapper&);
+
+        //- Reverse map the given pointPatchField onto this pointPatchField
+        virtual void rmap
+        (
+            const pointPatchField<Type>&,
+            const labelList&
+        );
 };
 
 
