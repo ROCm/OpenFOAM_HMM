@@ -23,6 +23,18 @@ x3        #eval{ 10.0*$R };
 xOutlet   #eval{ 18.6667*$R };
 xInlet    #eval{ -10.125*$R };
 
+RsinPi8   #eval{ $R*sin(0.125*pi()) };
+RsinPi8n  #eval{ -$RsinPi8 };
+RcosPi8   #eval{ $R*cos(0.125*pi()) };
+RcosPi8n  #eval{ -$RcosPi8 };
+RsinPi4   #eval{ $R*sin(0.25*pi()) };
+
+x2sinPi8  #eval{ $x2*sin(0.125*pi()) };
+x2sinPi8n #eval{ -$x2sinPi8 };
+x2cosPi8  #eval{ $x2*cos(0.125*pi()) };
+x2cosPi8n #eval{ -$x2cosPi8 };
+x2sinPi4  #eval{ $x2*sin(0.25*pi()) };
+
 z0        -0.0075;
 z1        0.0075;
 nz        1;
@@ -37,18 +49,15 @@ vertices #codeStream
 
     code
     #{
-        // sin(45), cos(45)
-        const scalar sqrt05 = sqrt(0.5);
-
         pointField points(19);
         points[0] = point($R, 0, $z0);
         points[1] = point($x2, 0, $z0);
         points[2] = point($x3, 0, $z0);
-        points[3] = point($x3, $x2*sqrt05, $z0);
-        points[4] = point($x2*sqrt05, $x2*sqrt05, $z0);
-        points[5] = point($R*sqrt05, $R*sqrt05, $z0);
+        points[3] = point($x3, $x2sinPi4, $z0);
+        points[4] = point($x2sinPi4, $x2sinPi4, $z0);
+        points[5] = point($RsinPi4, $RsinPi4, $z0);
         points[6] = point($x3, $x3, $z0);
-        points[7] = point($x2*sqrt05, $x3, $z0);
+        points[7] = point($x2sinPi4, $x3, $z0);
 
         // Mirror +x points to -x side
         points[11] = point(-points[0].x(), points[0].y(), points[0].z());
@@ -67,7 +76,7 @@ vertices #codeStream
 
         // Mirror -z points to +z side
         label sz = points.size();
-        points.resize(2*sz);
+        points.setSize(2*sz);
         for (label i = 0; i < sz; ++i)
         {
             const point& pt = points[i];
@@ -77,7 +86,7 @@ vertices #codeStream
         // Add an inner cylinder
         sz = points.size();
         label nAdd = 6;
-        points.resize(sz + nAdd);
+        points.setSize(sz + nAdd);
 
         // Points within the inner cylinder
         points[sz] = point(0, 0, $z0);
@@ -93,7 +102,7 @@ vertices #codeStream
 
         // Mirror -z points to +z side
         sz = points.size();
-        points.resize(sz + nAdd);
+        points.setSize(sz + nAdd);
         for (label i = 0; i < nAdd; ++i)
         {
             const point& pt = points[i+sz-nAdd];
@@ -103,21 +112,21 @@ vertices #codeStream
         // Add downstream and upstream blocks
         sz = points.size();
         nAdd = 6;
-        points.resize(sz + nAdd);
+        points.setSize(sz + nAdd);
 
         // Points on outlet
         points[sz] = point($xOutlet, 0, $z0);
         points[sz + 1] = point($xOutlet, $x3, $z0);
-        points[sz + 4] = point($xOutlet, $x2*sqrt05, $z0);
+        points[sz + 4] = point($xOutlet, $x2sinPi4, $z0);
 
         // Points on inlet
         points[sz + 2] = point($xInlet, 0, $z0);
         points[sz + 3] = point($xInlet, $x3, $z0);
-        points[sz + 5] = point($xInlet, $x2*sqrt05, $z0);
+        points[sz + 5] = point($xInlet, $x2sinPi4, $z0);
 
         // Mirror -z points to +z side
         sz = points.size();
-        points.resize(sz + nAdd);
+        points.setSize(sz + nAdd);
         for (label i = 0; i < nAdd; ++i)
         {
             const point& pt = points[i + sz - nAdd];
@@ -149,22 +158,22 @@ blocks
 
 edges
 (
-    arc  0  5 origin (0 0 $z0)
-    arc  5 10 origin (0 0 $z0)
-    arc  1  4 origin (0 0 $z0)
-    arc  4  9 origin (0 0 $z0)
-    arc 19 24 origin (0 0 $z1)
-    arc 24 29 origin (0 0 $z1)
-    arc 20 23 origin (0 0 $z1)
-    arc 23 28 origin (0 0 $z1)
-    arc 11 16 origin (0 0 $z0)
-    arc 16 10 origin (0 0 $z0)
-    arc 12 15 origin (0 0 $z0)
-    arc 15  9 origin (0 0 $z0)
-    arc 30 35 origin (0 0 $z1)
-    arc 35 29 origin (0 0 $z1)
-    arc 31 34 origin (0 0 $z1)
-    arc 34 28 origin (0 0 $z1)
+    arc  0  5 ($RcosPi8   $RsinPi8  $z0)
+    arc  5 10 ($RsinPi8   $RcosPi8  $z0)
+    arc  1  4 ($x2cosPi8  $x2sinPi8 $z0)
+    arc  4  9 ($x2sinPi8  $x2cosPi8 $z0)
+    arc 19 24 ($RcosPi8   $RsinPi8  $z1)
+    arc 24 29 ($RsinPi8   $RcosPi8  $z1)
+    arc 20 23 ($x2cosPi8  $x2sinPi8 $z1)
+    arc 23 28 ($x2sinPi8  $x2cosPi8 $z1)
+    arc 11 16 ($RcosPi8n  $RsinPi8  $z0)
+    arc 16 10 ($RsinPi8n  $RcosPi8  $z0)
+    arc 12 15 ($x2cosPi8n $x2sinPi8 $z0)
+    arc 15  9 ($x2sinPi8n $x2cosPi8 $z0)
+    arc 30 35 ($RcosPi8n  $RsinPi8  $z1)
+    arc 35 29 ($RsinPi8n  $RcosPi8  $z1)
+    arc 31 34 ($x2cosPi8n $x2sinPi8 $z1)
+    arc 34 28 ($x2sinPi8n $x2cosPi8 $z1)
 );
 
 boundary
@@ -260,9 +269,6 @@ boundary
         );
     }
 );
-
-mergePatchPairs
-();
 
 
 // ************************************************************************* //
