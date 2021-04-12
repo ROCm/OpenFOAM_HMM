@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,72 +52,164 @@ int Foam::fileName::allowSpaceInFileName
 const Foam::fileName Foam::fileName::null;
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::fileName Foam::fileName::validate
+namespace
+{
+
+// doClean:
+//   - remove duplicate slashes, "/./" and "/../" components.
+//
+// checkValid:
+//   - similar to stripInvalid (but silent)
+//
+// return True if the content changed
+static bool cleanFileName
 (
-    const std::string& s,
-    const bool doClean
+    std::string& str,
+    const bool doClean,
+    const bool checkValid
 )
 {
-    // The logic is very similar to stripInvalid,
-    // but silently removes bad characters
+    const auto maxLen = str.length();
+    std::string::size_type nChar = 0;
 
-    fileName out;
-    out.resize(s.length());
-
-    std::string::size_type len = 0;
-
-    auto iter = s.cbegin();
-
-    #ifdef _WIN32
-    // Preserve UNC \\server-name\...
-    if (s.length() > 2 && s[0] == '\\' && s[1] == '\\')
+    // Preserve UNC \\server\path (windows)
+    // - MS-windows only, but handle for other systems
+    //   since there is no collision with this pattern
+    if (maxLen > 2 && str[0] == '\\' && str[1] == '\\')
     {
-        len += 2;
-        ++iter;
-        ++iter;
+        nChar += 2;
     }
-    #endif
 
     char prev = 0;
-    for (/*nil*/; iter != s.cend(); ++iter)
+    auto top = std::string::npos;  // Not yet found
+    bool changed = false;
+
+    for (auto src = nChar; src < maxLen; /*nil*/)
     {
-        char c = *iter;
+        char c = str[src++];
 
-        // Treat raw backslash like a path separator. There is no "normal"
-        // way for these to be there (except for an OS that uses them), but
-        // could also cause issues when writing strings, shell commands etc.
-
+        // Treat raw backslash like a path separator.
+        // There is no "normal" way for these to be there
+        // (except for an OS that uses them), but can cause issues
+        // when writing strings, shell commands etc.
         if (c == '\\')
         {
             c = '/';
+            str[nChar] = c;
+            changed = true;
+        }
+        else if (checkValid && !Foam::fileName::valid(c))
+        {
+            // Ignore invalid chars
+            // Could explicitly allow space character or rely on
+            // allowSpaceInFileName via fileName::valid()
+            continue;
         }
 
-        // Could explicitly allow space character or rely on
-        // allowSpaceInFileName via fileName::valid()
-
-        if (fileName::valid(c))
+        if (c == '/' && top == std::string::npos)
         {
-            if (doClean && prev == '/' && c == '/')
+            // Top-level slash not previously determined
+            top = (src-1);
+        }
+
+        if (doClean && prev == '/')
+        {
+            // Repeated '/' - skip it
+            if (c == '/')
             {
-                // Avoid repeated '/';
                 continue;
             }
 
-            // Only track valid chars
-            out[len++] = prev = c;
+            // Could be "/./", "/../" or a trailing "/."
+            if (c == '.')
+            {
+                // Trailing "/." - skip it
+                if (src >= maxLen)
+                {
+                    break;
+                }
+
+                // Peek at the next character
+                const char c1 = str[src];
+
+                // Found "/./" - skip over it
+                if (c1 == '/' || c1 == '\\')
+                {
+                    ++src;
+                    continue;
+                }
+
+                // Trailing "/.." or intermediate "/../"
+                if
+                (
+                    c1 == '.'
+                 &&
+                    (
+                        src+1 >= maxLen
+                     || str[src+1] == '/' || str[src+1] == '\\'
+                    )
+                )
+                {
+                    // Backtrack to find the parent directory
+                    // Minimum of 3 characters:  '/x/../'
+                    // Strip it, provided it is above the top point
+
+                    std::string::size_type parent;
+                    if
+                    (
+                        nChar > 2
+                     && top != std::string::npos
+                     && (parent = str.rfind('/', nChar-2)) != std::string::npos
+                     && parent >= top
+                    )
+                    {
+                        nChar = parent + 1;   // Retain '/' from the parent
+                        src += 2;
+                        continue;
+                    }
+
+                    // Bad resolution, eg 'abc/../../'
+                    // Retain the sequence, but move the top to avoid it being
+                    // considered a valid parent later
+                    top = nChar + 2;
+                }
+            }
         }
+
+        str[nChar++] = prev = c;
     }
 
-    if (doClean && prev == '/' && len > 1)
+    // Remove trailing '/'
+    if (doClean && nChar > 1 && str[nChar-1] == '/')
     {
-        // Avoid trailing '/'
-        --len;
+        --nChar;
     }
 
-    out.resize(len);
+    str.erase(nChar);
+    return changed || (nChar != maxLen);
+}
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::fileName::clean(std::string& str)
+{
+    return cleanFileName(str, true, false);  // clean, checkValid = false
+}
+
+
+Foam::fileName Foam::fileName::validate
+(
+    const std::string& str,
+    const bool doClean
+)
+{
+    fileName out(str, false);           // copy, no stripping
+    cleanFileName(out, doClean, true);  // checkValid = true
     return out;
 }
 
@@ -288,114 +380,16 @@ Foam::fileName& Foam::fileName::toAbsolute()
     {
         fileName& f = *this;
         f = cwd()/f;
-        f.clean();
+        f.clean();  // Remove unneeded ".."
     }
 
     return *this;
 }
 
 
-bool Foam::fileName::clean(std::string& str)
-{
-    // Start with the top slash found - we are never allowed to go above it
-    char prev = '/';
-    auto top = str.find(prev);
-
-    // No slashes - nothing to do
-    if (top == std::string::npos)
-    {
-        return false;
-    }
-
-    // Number of output characters
-    auto nChar = top+1;
-
-    const auto maxLen = str.length();
-
-    for (auto src = nChar; src < maxLen; /*nil*/)
-    {
-        const char c = str[src++];
-
-        if (prev == '/')
-        {
-            // Repeated '/' - skip it
-            if (c == '/')
-            {
-                continue;
-            }
-
-            // Could be "/./", "/../" or a trailing "/."
-            if (c == '.')
-            {
-                // Trailing "/." - skip it
-                if (src >= maxLen)
-                {
-                    break;
-                }
-
-                // Peek at the next character
-                const char c1 = str[src];
-
-                // Found "/./" - skip it
-                if (c1 == '/')
-                {
-                    ++src;
-                    continue;
-                }
-
-                // Trailing "/.." or intermediate "/../"
-                if (c1 == '.' && (src+1 >= maxLen || str[src+1] == '/'))
-                {
-                    string::size_type parent;
-
-                    // Backtrack to find the parent directory
-                    // Minimum of 3 characters:  '/x/../'
-                    // Strip it, provided it is above the top point
-                    if
-                    (
-                        nChar > 2
-                     && (parent = str.rfind('/', nChar-2)) != string::npos
-                     && parent >= top
-                    )
-                    {
-                        nChar = parent + 1;   // Retain '/' from the parent
-                        src += 2;
-                        continue;
-                    }
-
-                    // Bad resolution, eg 'abc/../../'
-                    // Retain the sequence, but move the top to avoid it being
-                    // considered a valid parent later
-                    top = nChar + 2;
-                }
-            }
-        }
-        str[nChar++] = prev = c;
-    }
-
-    // Remove trailing slash
-    if (nChar > 1 && str[nChar-1] == '/')
-    {
-        nChar--;
-    }
-
-    str.resize(nChar);
-
-    return (nChar != maxLen);
-}
-
-
 bool Foam::fileName::clean()
 {
     return fileName::clean(*this);
-}
-
-
-Foam::fileName Foam::fileName::clean() const
-{
-    fileName cleaned(*this);
-    fileName::clean(cleaned);
-    return cleaned;
 }
 
 

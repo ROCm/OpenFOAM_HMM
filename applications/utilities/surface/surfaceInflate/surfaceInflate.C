@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -609,12 +609,12 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const word inputName(args[1]);
-    const scalar distance(args.get<scalar>(2));
-    const scalar extendFactor(args.get<scalar>(3));
+    const auto inputName = args.get<word>(1);
+    const auto distance = args.get<scalar>(2);
+    const auto extendFactor = args.get<scalar>(3);
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
-    const label nSmooth = args.getOrDefault<label>("nSmooth", 10);
-    const scalar featureAngle = args.getOrDefault<scalar>("featureAngle", 180);
+    const auto nSmooth = args.getOrDefault<label>("nSmooth", 10);
+    const auto featureAngle = args.getOrDefault<scalar>("featureAngle", 180);
     const bool debug = args.found("debug");
 
 

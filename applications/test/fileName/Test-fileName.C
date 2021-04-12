@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ unsigned testClean(std::initializer_list<Pair<std::string>> tests)
         const std::string& expected = test.second();
 
         fileName cleaned(test.first());
-        cleaned.clean();
+        cleaned.clean();  // Remove unneeded ".."
 
         if (cleaned == expected)
         {

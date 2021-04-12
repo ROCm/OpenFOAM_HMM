@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,11 +77,18 @@ int main(int argc, char *argv[])
 
     speciesTable species;
 
-    chemkinReader cr(species, args[1], args[3], args[2], newFormat);
+    chemkinReader cr
+    (
+        species,
+        args.get<fileName>(1),  // chemkin fileName
+        args.get<fileName>(3),  // thermo fileName
+        args.get<fileName>(2),  // transport fileName
+        newFormat
+    );
 
     {
         // output: reactions file
-        OFstream reactionsFile(args[4]);
+        OFstream reactionsFile(args.get<fileName>(4));
 
         reactionsFile.writeEntry("elements", cr.elementNames()) << nl;
         reactionsFile.writeEntry("species", cr.species()) << nl;
@@ -113,7 +121,7 @@ int main(int argc, char *argv[])
 
     // output: thermo file
 
-    thermoDict.write(OFstream(args[5])(), false);
+    thermoDict.write(OFstream(args.get<fileName>(5))(), false);
 
 
     Info<< "End\n" << endl;

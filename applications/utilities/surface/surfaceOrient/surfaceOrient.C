@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,9 +76,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName surfFileName = args[1];
-    const point visiblePoint    = args.get<point>(2);
-    const fileName outFileName  = args[3];
+    const auto surfFileName = args.get<fileName>(1);
+    const auto visiblePoint = args.get<point>(2);
+    const auto outFileName  = args.get<fileName>(3);
 
     const bool orientInside = args.found("inside");
     const bool usePierceTest = args.found("usePierceTest");

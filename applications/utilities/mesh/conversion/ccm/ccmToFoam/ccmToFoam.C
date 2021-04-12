@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     }
 
     // CCM reader for reading geometry/solution
-    ccm::reader reader(args[1], rOpts);
+    ccm::reader reader(args.get<fileName>(1), rOpts);
 
     // list the geometry information
     if (optList)

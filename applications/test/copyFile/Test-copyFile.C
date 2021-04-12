@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,8 +135,8 @@ int main(int argc, char *argv[])
     args.readIfPresent("maxPath", maxPath);
     #endif
 
-    const fileName srcFile(fileName::validate(args[1]));
-    const fileName dstFile(fileName::validate(args[2]));
+    const auto srcFile = args.get<fileName>(1);
+    const auto dstFile = args.get<fileName>(2);
     const fileName tmpFile(dstFile + Foam::name(pid()));
 
     Info<< "src   : " << srcFile << nl

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,10 +90,10 @@ Foam::fileName Foam::functionObjects::externalCoupled::groupDir
     fileName result
     (
         commsDir
-       /regionGroupName
-       /string::validate<fileName>(groupName)
+      / regionGroupName
+      / word::validate(groupName)
     );
-    result.clean();
+    result.clean();  // Remove unneeded ".."
 
     return result;
 }

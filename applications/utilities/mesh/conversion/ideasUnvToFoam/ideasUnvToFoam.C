@@ -666,7 +666,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName ideasName = args[1];
+    const auto ideasName = args.get<fileName>(1);
     IFstream inFile(ideasName);
 
     if (!inFile.good())

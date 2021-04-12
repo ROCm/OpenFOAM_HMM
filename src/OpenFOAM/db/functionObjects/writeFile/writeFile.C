@@ -52,7 +52,7 @@ Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
     // Put in undecomposed case
     // (Note: gives problems for distributed data running)
 
-    fileName baseDir =
+    fileName baseDir
     (
         fileObr_.time().globalPath()
       / functionObject::outputPrefix
@@ -67,7 +67,6 @@ Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
             baseDir /= mesh.name();
         }
     }
-
     baseDir.clean();  // Remove unneeded ".."
 
     return baseDir;

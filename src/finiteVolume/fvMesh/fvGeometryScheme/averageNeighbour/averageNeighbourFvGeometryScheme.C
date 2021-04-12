@@ -699,13 +699,13 @@ void Foam::averageNeighbourFvGeometryScheme::movePoints()
 
 
             // Write current non-ortho
-            fileName outputDir =
+            fileName outputDir
             (
                 mesh_.time().globalPath()
               / functionObject::outputPrefix
               / mesh_.pointsInstance()
             );
-            outputDir.clean();
+            outputDir.clean();  // Remove unneeded ".."
             writerPtr = surfaceWriter::New
             (
                 "ensight" //"vtk"

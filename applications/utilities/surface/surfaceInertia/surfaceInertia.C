@@ -6,7 +6,7 @@
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName surfFileName = args[1];
+    const auto surfFileName = args.get<fileName>(1);
     const scalar density = args.getOrDefault<scalar>("density", 1);
 
     vector refPt = Zero;

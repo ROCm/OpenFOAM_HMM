@@ -871,7 +871,7 @@ Foam::chemkinReader::chemkinReader
     fileName chemkinFile(thermoDict.get<fileName>("CHEMKINFile"));
     chemkinFile.expand();
 
-    fileName thermoFile = fileName::null;
+    fileName thermoFile;
     thermoDict.readIfPresent("CHEMKINThermoFile", thermoFile);
     thermoFile.expand();
 
@@ -887,7 +887,7 @@ Foam::chemkinReader::chemkinReader
             chemkinFile = relPath/chemkinFile;
         }
 
-        if (thermoFile != fileName::null && !thermoFile.isAbsolute())
+        if (!thermoFile.empty() && !thermoFile.isAbsolute())
         {
             thermoFile = relPath/thermoFile;
         }

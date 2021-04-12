@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +98,7 @@ int main(int argc, char *argv[])
 
     if (args.found("pointsFile"))
     {
-        mesh.insertPoints(args["pointsFile"]);
+        mesh.insertPoints(args.get<fileName>("pointsFile"));
     }
     else
     {

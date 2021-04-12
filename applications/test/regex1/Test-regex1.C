@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
 
     for (label argi = 1; argi < args.size(); ++argi)
     {
-        IFstream is(args[argi]);
+        IFstream is(args.get<fileName>(argi));
         List<regexTest> tests(is);
 
         Info<< "Test expressions:" << tests << endl;

@@ -151,10 +151,10 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
-        //- Construct fileName with no invalid characters, possibly applying
+        //- Construct fileName without invalid characters, possibly applying
         //- other transformations such as changing the path separator,
         //- removing duplicate or trailing slashes, etc.
-        static fileName validate(const std::string& s, const bool doClean=true);
+        static fileName validate(const std::string&, const bool doClean=true);
 
         //- Join two strings with a path separator ('/' by default).
         //  No separator is added if either argument is an empty string or
@@ -174,43 +174,47 @@ public:
         //- Strip invalid characters
         inline void stripInvalid();
 
-        //- Cleanup filename
+        //- Cleanup filename string, possibly applies other transformations
+        //- such as changing the path separator etc.
         //
-        // Removes trailing \c /
-        //   \verbatim
-        //       /                 -->   /
-        //       /abc/             -->   /abc
-        //   \endverbatim
+        // Changes back-slash to forward-slash path separator,
+        // while preserving windows UNC:
+        // \verbatim
+        //     \\server\abc\def  -->   \\server/abc/def
+        // \endverbatim
         //
-        // Removes repeated slashes
-        //   \verbatim
-        //       /abc////def        -->   /abc/def
-        //   \endverbatim
+        // Removes trailing slash:
+        // \verbatim
+        //     /                 -->   /
+        //     /abc/             -->   /abc
+        // \endverbatim
         //
-        // Removes \c /./ (current directory)
-        //   \verbatim
-        //       /abc/def/./ghi/.   -->   /abc/def/ghi
-        //       abc/def/./         -->   abc/def
-        //       ./abc/             -->   ./abc
-        //   \endverbatim
+        // Removes repeated slashes, but preserves UNC:
+        // \verbatim
+        //     /abc////def          -->   /abc/def
+        //     \\server\abc////def  -->   \\server/abc/def
+        // \endverbatim
         //
-        // Removes \c /../ (parent directory)
-        //   \verbatim
-        //       /abc/def/../ghi/jkl/nmo/..   -->   /abc/ghi/jkl
-        //       abc/../def/ghi/../jkl        -->   abc/../def/jkl
-        //   \endverbatim
+        // Removes \c "/./" (current directory), except for leading one:
+        // \verbatim
+        //     /abc/def/./ghi/.   -->   /abc/def/ghi
+        //     abc/def/./         -->   abc/def
+        //     ./abc/             -->   ./abc
+        // \endverbatim
+        //
+        // Removes \c "/../" (parent directory), except for leading one:
+        // \verbatim
+        //     /abc/def/../ghi/jkl/nmo/..   -->   /abc/ghi/jkl
+        //     abc/../def/ghi/../jkl        -->   abc/../def/jkl
+        // \endverbatim
+        // .
         //
         // \return True if the content changed
         static bool clean(std::string& str);
 
-
-        //- Cleanup filename inplace
-        //  \return True if any contents changed
+        //- Cleanup filename (inplace)
+        //  \return True if the content changed
         bool clean();
-
-        //- Cleanup filename
-        //  \return cleaned copy of fileName
-        fileName clean() const;
 
 
     // Interrogation
@@ -223,10 +227,13 @@ public:
         //  \param checkGzip add an additional test for a gzip FILE
         Type type(bool followLink=true, bool checkGzip=false) const;
 
-        //- Return true if string starts with a '/'
+        //- Return true if filename starts with a '/' or '\\'
+        //- or (windows-only) with a filesystem-root
         inline static bool isAbsolute(const std::string& str);
 
-        //- Return true if file name is absolute (starts with a '/')
+        //- Return true if filename is absolute,
+        //- which means it starts with a '/' or '\\'
+        //- or (windows-only) with a filesystem-root
         inline bool isAbsolute() const;
 
         //- Convert from relative to absolute

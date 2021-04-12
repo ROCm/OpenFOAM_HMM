@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +25,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    fileNameCleanTest
+    Test-fileNameClean
 
 Description
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +51,7 @@ void printCleaning(fileName& pathName)
     Info<< "components  = " << flatOutput(pathName.components()) << nl;
     Info<< "component 2 = " << pathName.component(2) << nl;
 
-    pathName.clean();
+    pathName.clean();  // Remove unneeded ".."
 
     Info<< "cleaned  = " << pathName << nl
         << "  path() = " << pathName.path() << nl
@@ -94,9 +94,15 @@ int main(int argc, char *argv[])
         printCleaning(pathName);
     }
 
-    for (label argI=1; argI < args.size(); ++argI)
+    for (label argi=1; argi < args.size(); ++argi)
     {
-        pathName = args[argI];
+        fileName fn(args[argi], false); // no strip
+        Info<< "Input = " << fn << nl;
+        fn.clean();  // Remove unneeded ".."
+        Info<< "cleaned = " << fn << nl;
+        Info<< "get = " << args.get<fileName>(argi) << nl;
+
+        pathName = fileName::validate(args[argi]);
         printCleaning(pathName);
     }
 

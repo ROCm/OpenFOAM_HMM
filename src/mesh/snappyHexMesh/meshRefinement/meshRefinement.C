@@ -2559,10 +2559,12 @@ Foam::label Foam::meshRefinement::findRegions
                 if (Pstream::master())
                 {
                     outputDir =
+                    (
                         mesh.time().globalPath()
                       / functionObject::outputPrefix
-                      / mesh.pointsInstance();
-                    outputDir.clean();
+                      / mesh.pointsInstance()
+                    );
+                    outputDir.clean();  // Remove unneeded ".."
                     mkDir(outputDir);
                 }
 

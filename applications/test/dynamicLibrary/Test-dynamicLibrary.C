@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (int argi = 1; argi < args.size(); ++argi)
     {
-        const fileName libName(fileName::validate(args[argi]));
+        const auto libName = args.get<fileName>(argi);
 
         if (libName.empty())
         {

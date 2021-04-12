@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName controlFileName(args[1]);
+    const auto controlFileName = args.get<fileName>(1);
 
     // Construct control dictionary
     IFstream controlFile(controlFileName);

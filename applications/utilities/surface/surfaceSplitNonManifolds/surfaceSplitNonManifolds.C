@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -691,8 +691,8 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName inSurfName  = args[1];
-    const fileName outSurfName = args[2];
+    const auto inSurfName  = args.get<fileName>(1);
+    const auto outSurfName = args.get<fileName>(2);
     const bool debug = args.found("debug");
 
     Info<< "Reading surface from " << inSurfName << endl;

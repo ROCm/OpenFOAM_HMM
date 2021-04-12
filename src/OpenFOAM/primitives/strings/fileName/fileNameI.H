@@ -135,20 +135,22 @@ inline void Foam::fileName::stripInvalid()
 
 inline bool Foam::fileName::isAbsolute(const std::string& str)
 {
-    return
+    return !str.empty() &&
     (
-        (!str.empty() && str.front() == '/')  // ie, str.starts_with('/')
-        #ifdef _WIN32
-        ||
-        (
-            // Eg, d:/path or \\machine/path
-            (str.length() > 2) &&
-            (
-                (str[1] == ':'  && str[2] == '/')
-             || (str[0] == '\\' && str[1] == '\\')
-            )
+        // Starts with '/', but also accept '\\' since it will be
+        // converted to a generic '/' or it is part of a (windows)
+        // UNC '\\server-name\path'
+        // - accept even on non-windows systems
+
+        (str[0] == '/' || str[0] == '\\')
+
+#ifdef _WIN32
+         // Filesytem root - eg, d:/path or d:\path
+     || (
+            (str.length() > 2 && str[1] == ':')
+         && (str[2] == '/' || str[2] == '\\')
         )
-        #endif
+#endif
     );
 }
 

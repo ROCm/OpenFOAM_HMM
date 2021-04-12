@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,11 +167,10 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
     if (dict.readIfPresent("file", file_))
     {
         file_.expand();
-
-        if (!file_.isAbsolute() && file_.size())
+        if (!file_.empty() && !file_.isAbsolute())
         {
             file_ = time_.globalPath()/file_;
-            file_.clean();
+            file_.clean();  // Remove unneeded ".."
         }
     }
 
@@ -179,7 +178,7 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
     if (file_.empty())
     {
         file_ = time_.globalPath()/name();
-        file_.clean();
+        file_.clean();  // Remove unneeded ".."
     }
 
     triggered_ = false;

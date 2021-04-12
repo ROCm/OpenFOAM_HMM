@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -378,6 +378,7 @@ public:
 
         //- Get a value from the argument at index.
         //  Index 1 is the first (non-option) argument.
+        //  For fileName type, invokes fileName::validate()
         template<class T>
         inline T get(const label index) const;
 
@@ -388,6 +389,7 @@ public:
 
         //- Get a value from the named option
         //  The default template parameter is string (ie, no conversion).
+        //  For fileName type, invokes fileName::validate()
         template<class T=string>
         inline T get(const word& optName) const;
 

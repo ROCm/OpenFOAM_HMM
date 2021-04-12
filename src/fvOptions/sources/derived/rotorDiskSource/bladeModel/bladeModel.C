@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ License
 
 bool Foam::bladeModel::readFromFile() const
 {
-    return fName_ != fileName::null;
+    return !fName_.empty();
 }
 
 
@@ -96,7 +96,7 @@ Foam::bladeModel::bladeModel(const dictionary& dict)
     radius_(),
     twist_(),
     chord_(),
-    fName_(fileName::null)
+    fName_()
 {
     List<Tuple2<word, vector>> data;
     if (readFromFile())

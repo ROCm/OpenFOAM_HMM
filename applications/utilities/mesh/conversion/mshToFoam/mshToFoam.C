@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const bool readHex = args.found("hex");
-    IFstream mshStream(args[1]);
+    IFstream mshStream(args.get<fileName>(1));
 
     label nCells;
     mshStream >> nCells;

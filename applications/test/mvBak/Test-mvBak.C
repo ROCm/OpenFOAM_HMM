@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,9 +54,9 @@ int main(int argc, char *argv[])
 
     label ok = 0;
 
-    for (label argI=1; argI < args.size(); ++argI)
+    for (label argi=1; argi < args.size(); ++argi)
     {
-        const string& srcFile = args[argI];
+        const auto srcFile = args.get<fileName>(argi);
 
         if (args.found("ext"))
         {

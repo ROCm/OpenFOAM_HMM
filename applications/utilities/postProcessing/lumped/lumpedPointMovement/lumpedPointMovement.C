@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
     args.readIfPresent("visual-length", lumpedPointState::visLength);
 
-    const fileName responseFile(args[1]);
+    const auto responseFile = args.get<fileName>(1);
 
     // ----------------------------------------------------------------------
     // Slave mode

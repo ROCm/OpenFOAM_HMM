@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     for (label argi=1; argi < args.size(); ++argi)
     {
-        IFstream is(args[argi]);
+        IFstream is(args.get<fileName>(argi));
 
         dictionary dict(is);
 

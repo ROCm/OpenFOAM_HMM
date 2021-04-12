@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -653,7 +653,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const fileName gambitFile = args[1];
+    const auto gambitFile = args.get<fileName>(1);
     std::ifstream gambitStream(gambitFile);
 
     if (!gambitStream)

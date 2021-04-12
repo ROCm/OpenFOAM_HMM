@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
     }
     else if (slash == 0)
     {
-        // (isAbsolute)
+        // isAbsolute:
         // Ascend to top-level
         while (&dictPtr->parent_ != &dictionary::null)
         {
@@ -385,8 +385,9 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDict
     }
 
     const dictionary* dictPtr = this;
-    if (fileName::isAbsolute(dictPath))
+    if (dictPath[0] == '/')
     {
+        // isAbsolute:
         // Ascend to top-level
         while (&dictPtr->parent_ != &dictionary::null)
         {
@@ -394,10 +395,11 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDict
         }
     }
 
-    fileName path = dictPath.clean();
-    const wordList cmpts = path.components();
+    fileName path(dictPath); // Work on copy
+    path.clean();  // Remove unneeded ".."
+    const wordList dictCmpts(path.components()); // Split on '/'
 
-    for (const word& cmpt : cmpts)
+    for (const word& cmpt : dictCmpts)
     {
         if (cmpt == ".")
         {
@@ -486,8 +488,9 @@ Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
     }
 
     dictionary* dictPtr = this;
-    if (fileName::isAbsolute(dictPath))
+    if (dictPath[0] == '/')
     {
+        // isAbsolute:
         // Ascend to top-level
         while (&dictPtr->parent_ != &dictionary::null)
         {
@@ -495,14 +498,11 @@ Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
         }
     }
 
-    // Work on a copy, without any assumptions
-    std::string path = dictPath;
-    fileName::clean(path);
+    std::string path(dictPath); // Work on a copy
+    fileName::clean(path);  // Remove unneeded ".."
+    auto dictCmpts = stringOps::split(path, '/'); // Split on '/'
 
-    // Split on '/'
-    auto cmpts = stringOps::split(path, '/');
-
-    for (const auto& cmpt : cmpts)
+    for (const auto& cmpt : dictCmpts)
     {
         if (cmpt == ".")
         {

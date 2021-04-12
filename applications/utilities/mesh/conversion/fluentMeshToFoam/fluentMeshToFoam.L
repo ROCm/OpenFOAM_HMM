@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -912,7 +912,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const fileName fluentFile = args[1];
+    const auto fluentFile = args.get<fileName>(1);
     std::ifstream fluentStream(fluentFile);
 
     if (!fluentStream)

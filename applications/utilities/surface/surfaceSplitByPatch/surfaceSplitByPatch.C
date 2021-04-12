@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName surfName = args[1];
+    const auto surfName = args.get<fileName>(1);
 
     const fileName surfBase(surfName.lessExt());
 

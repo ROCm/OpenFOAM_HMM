@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     for (label argi = 1; argi < args.size(); ++argi)
     {
-        const fileName inputName(args[argi]);
+        const auto inputName = args.get<fileName>(argi);
 
         InfoErr<< "input: " << inputName;
 

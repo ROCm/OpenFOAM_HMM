@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,7 +221,7 @@ namespace Foam
     template<>
     inline fileName argList::get<Foam::fileName>(const label index) const
     {
-        return args_[index];
+        return fileName::validate(args_[index]);
     }
 
 
@@ -240,7 +240,7 @@ namespace Foam
     template<>
     inline fileName argList::get<Foam::fileName>(const word& optName) const
     {
-        return options_[optName];
+        return fileName::validate(options_[optName]);
     }
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());
 
-    fileName casePath = args[1];
+    const auto casePath = args.get<fileName>(1);
     const fileName rootDirSource = casePath.path().toAbsolute();
     const fileName caseDirSource = casePath.name();
 
