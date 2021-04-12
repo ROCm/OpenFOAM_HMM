@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -658,11 +658,11 @@ int main(int argc, char *argv[])
 
         Info<<"hash of " << flatOutput(list1)
             << " = " << Hash<labelList>()(list1) << " or "
-            << labelList::Hash<>()(list1) << nl;
+            << labelList::hasher()(list1) << nl;
 
         Info<<"hash of " << flatOutput(list2) << " = "
             << Hash<labelList>()(list2) << " or "
-            << labelList::Hash<>()(list2) << nl;
+            << labelList::hasher()(list2) << nl;
     }
 
     return 0;

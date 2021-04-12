@@ -147,28 +147,21 @@ public:
 
     // Hashing
 
-        //- Symmetrical hashing for Pair data.
-        //  The lower value is hashed first.
-        template<class HashT=Foam::Hash<T>>
-        struct SymmHash
+        //- Symmetric hashing functor for Pair, hashes lower value first
+        //  Regular hasher inherited from FixedList
+        struct symmHasher
         {
-            inline unsigned operator()
-            (
-                const Pair<T>& obj,
-                unsigned seed=0
-            ) const
+            unsigned operator()(const Pair<T>& obj, unsigned seed=0) const
             {
-                if (obj.first() < obj.second())
+                Foam::Hash<T> op;
+                if (obj.second() < obj.first())
                 {
-                    seed = HashT()(obj.first(), seed);
-                    seed = HashT()(obj.second(), seed);
+                    return op(obj.first(), op(obj.second(), seed));
                 }
                 else
                 {
-                    seed = HashT()(obj.second(), seed);
-                    seed = HashT()(obj.first(), seed);
+                    return op(obj.second(), op(obj.first(), seed));
                 }
-                return seed;
             }
         };
 };
@@ -188,28 +181,12 @@ struct is_contiguous_label<Pair<T>> : is_contiguous_label<T> {};
 template<class T>
 struct is_contiguous_scalar<Pair<T>> : is_contiguous_scalar<T> {};
 
+//- Hashing for Pair of data
+template<class T>
+struct Hash<Pair<T>> : Pair<T>::hasher {};
+
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
-
-//- Hashing for Pair data, which uses Hasher for contiguous data and
-//- element-wise incrementally hashing otherwise.
-template<class T>
-struct Hash<Pair<T>>
-{
-    inline unsigned operator()(const Pair<T>& obj, unsigned seed=0) const
-    {
-        if (is_contiguous<T>::value)
-        {
-            return Hasher(obj.cdata(), obj.size_bytes(), seed);
-        }
-
-        seed = Hash<T>()(obj.first(), seed);
-        seed = Hash<T>()(obj.second(), seed);
-
-        return seed;
-    }
-};
-
 
 //- Return reverse of a Pair
 template<class T>

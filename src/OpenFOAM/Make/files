@@ -180,7 +180,8 @@ $(ops)/flipOp.C
 
 primitives/predicates/scalar/scalarPredicates.C
 
-primitives/hashes/Hasher/Hasher.C
+hash = primitives/hashes/Hash
+$(hash)/Hasher.C
 
 sha1 = primitives/hashes/SHA1
 $(sha1)/SHA1.C

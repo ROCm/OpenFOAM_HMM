@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -285,31 +285,36 @@ public:
 
     // Hashing
 
-        //- The (commutative) hash-value for edge
-        inline unsigned hashval(unsigned seed=0) const
+        //- The (commutative) hash value for edge, hashes lower value first
+        inline unsigned hash_code(unsigned seed=0) const
         {
-            if (first() < second())
+            Foam::Hash<label> op;
+            if (second() < first())
             {
-                seed = Foam::Hash<label>()(first(), seed);
-                seed = Foam::Hash<label>()(second(), seed);
+                return op(first(), op(second(), seed));
             }
             else
             {
-                seed = Foam::Hash<label>()(second(), seed);
-                seed = Foam::Hash<label>()(first(), seed);
+                return op(second(), op(first(), seed));
             }
-            return seed;
         }
 
-        //- Hashing function class for edge (commutative)
+        //- Hashing functor for edge (commutative)
         //  Also useful for inheritance in sub-classes
-        template<class HashT=Foam::Hash<label>>
-        struct Hash
+        struct hasher
         {
-            inline unsigned operator()(const edge& obj, unsigned seed=0) const
+            unsigned operator()(const edge& obj, unsigned seed=0) const
             {
-                return obj.hashval(seed);
+                return obj.hash_code(seed);
             }
+        };
+
+        //- Deprecated(2021-04) hashing functor. Use hasher()
+        // \deprecated(2021-04) - use hasher() functor
+        template<class Unused=bool>
+        struct Hash : edge::hasher
+        {
+            FOAM_DEPRECATED_FOR(2021-04, "hasher()") Hash() {}
         };
 };
 
@@ -322,6 +327,9 @@ template<> struct is_contiguous<edge> : std::true_type {};
 //- Contiguous label data for edge (a pair of labels)
 template<> struct is_contiguous_label<edge> : std::true_type {};
 
+//- Hashing for edge uses commutative (incremental) hash
+template<> struct Hash<edge> : edge::hasher {};
+
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
@@ -330,17 +338,6 @@ inline edge reverse(const edge& e)
 {
     return edge(e.second(), e.first());
 }
-
-
-//- Hash specialization for edge, using a commutative (incremental) hash.
-template<>
-struct Hash<edge>
-{
-    inline unsigned operator()(const edge& e, unsigned seed=0) const
-    {
-        return e.hashval(seed);
-    }
-};
 
 
 // * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //

@@ -62,7 +62,7 @@ Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl);
                         Class HashPtrTable Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, class Key=word, class Hash=string::hash>
+template<class T, class Key=word, class Hash=Foam::Hash<Key>>
 class HashPtrTable
 :
     public HashTable<T*, Key, Hash>

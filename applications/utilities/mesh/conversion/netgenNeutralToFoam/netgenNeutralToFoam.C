@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     label maxPatch = 0;
 
     // Boundary faces as three vertices
-    HashTable<label, triFace, triFace::Hash<>> vertsToBoundary(nFaces);
+    HashTable<label, triFace> vertsToBoundary(nFaces);
 
     forAll(boundaryFaces, facei)
     {

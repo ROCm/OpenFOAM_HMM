@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Ostream& operator<<
 );
 
 
-template<class T, class Key, class Hash>
+template<class T, class Key, class Hash=Foam::Hash<Key>>
 class HashSorter
 {
     const HashTable<T, Key, Hash>& table;
@@ -219,8 +219,8 @@ int main(int argc, char *argv[])
         Info<< nl << "Test inplaceMapValue" << nl << nl;
 
         HashTable<label> input;
-        typedef HashSorter<label, label, Hash<label>> Mapper;
-        typedef HashSorter<label, word, string::hash> Sorter;
+        typedef HashSorter<label, label> Mapper;
+        typedef HashSorter<label, word> Sorter;
 
         for (label i=0; i < 10; ++i)
         {

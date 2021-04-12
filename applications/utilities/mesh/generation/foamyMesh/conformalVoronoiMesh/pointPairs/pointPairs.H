@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +56,15 @@ namespace Foam
 template<class Triangulation>
 class pointPairs
 :
-    public HashSet<labelPairPair, labelPairPair::Hash<>>
+    public HashSet<labelPairPair>
 {
-    // Private typedefs
+    // Private Typedefs
 
-    typedef HashSet<labelPairPair, labelPairPair::Hash<>> StorageContainer;
+    typedef HashSet<labelPairPair> StorageContainer;
     typedef typename Triangulation::Vertex_handle Vertex_handle;
 
 
-    // Private data
+    // Private Data
 
         const Triangulation& triangulation_;
 

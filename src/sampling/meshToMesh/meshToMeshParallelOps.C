@@ -611,7 +611,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
     // Count any coupled faces
     typedef FixedList<label, 3> label3;
-    typedef HashTable<label, label3, label3::Hash<>> procCoupleInfo;
+    typedef HashTable<label, label3> procCoupleInfo;
     procCoupleInfo procFaceToGlobalCell;
 
     forAll(allNbrProcIDs, proci)

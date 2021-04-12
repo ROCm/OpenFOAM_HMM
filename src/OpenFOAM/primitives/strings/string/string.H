@@ -52,9 +52,9 @@ SourceFiles
 
 #include "char.H"
 #include "Hasher.H"
-#include <string>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -139,6 +139,21 @@ protected:
 
 public:
 
+    // Public Classes
+
+        //- Hashing functor for string and derived string classes
+        struct hasher
+        {
+            unsigned operator()(const std::string& str, unsigned seed=0) const
+            {
+                return Foam::Hasher(str.data(), str.length(), seed);
+            }
+        };
+
+        //- Hashing functor for string and derived string classes
+        struct hash : string::hasher {};
+
+
     // Static Data Members
 
         //- The type name "string"
@@ -149,17 +164,6 @@ public:
 
         //- An empty string
         static const string null;
-
-
-    //- Hashing function for string and derived string classes
-    struct hash
-    {
-        inline unsigned operator()
-        (
-            const std::string& str,
-            unsigned seed = 0
-        ) const;
-    };
 
 
     // Constructors

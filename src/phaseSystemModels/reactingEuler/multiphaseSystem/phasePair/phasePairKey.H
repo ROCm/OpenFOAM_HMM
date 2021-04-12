@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2014-2016 OpenFOAM Foundation
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +28,15 @@ Class
     Foam::phasePairKey
 
 Description
+    An ordered or unorder pair of phase names.
+    Typically specified as follows.
+    \verbatim
+       (phase1 and phase2)  // unordered
+       (phase1 in  phase2)  // ordered
+    \endverbatim
 
 SourceFiles
+    phasePairKey.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,16 +50,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class phasePairKey;
 
-bool operator==(const phasePairKey&, const phasePairKey&);
-bool operator!=(const phasePairKey&, const phasePairKey&);
+bool operator==(const phasePairKey& a, const phasePairKey& b);
+bool operator!=(const phasePairKey& a, const phasePairKey& b);
 
-Istream& operator>>(Istream&, phasePairKey&);
-Ostream& operator<<(Ostream&, const phasePairKey&);
-
+Istream& operator>>(Istream& is, phasePairKey& key);
+Ostream& operator<<(Ostream& os, const phasePairKey& key);
 
 /*---------------------------------------------------------------------------*\
                          Class phasePairKey Declaration
@@ -61,30 +67,7 @@ class phasePairKey
 :
     public Pair<word>
 {
-public:
-
-        class hash
-        :
-            public Hash<phasePairKey>
-        {
-        public:
-
-            // Constructors
-
-                // Construct null
-                hash();
-
-
-            // Member operators
-
-                // Generate a hash from a phase pair key
-                label operator()(const phasePairKey& key) const;
-        };
-
-
-private:
-
-    // Private data
+    // Private Data
 
         //- Flag to indicate whether ordering is important
         bool ordered_;
@@ -94,10 +77,10 @@ public:
 
     // Constructors
 
-        //- Construct null
-        phasePairKey();
+        //- Default construct
+        phasePairKey() = default;
 
-        //- Construct from names and the ordering flag
+        //- Construct from names and (optional) ordering flag
         phasePairKey
         (
             const word& name1,
@@ -106,30 +89,61 @@ public:
         );
 
 
-    // Destructor
-    virtual ~phasePairKey();
+    //- Destructor
+    virtual ~phasePairKey() = default;
 
 
-    // Access
+    // Member Functions
 
         //- Return the ordered flag
-        bool ordered() const;
+        bool ordered() const noexcept
+        {
+            return ordered_;
+        }
 
 
     // Friend Operators
 
-        //- Test if keys are equal
+        //- Test for equality
         friend bool operator==(const phasePairKey& a, const phasePairKey& b);
 
-        //- Test if keys are unequal
+        //- Test for inequality
         friend bool operator!=(const phasePairKey& a, const phasePairKey& b);
 
-        //- Read from stdin
+        //- Read from Istream
         friend Istream& operator>>(Istream& is, phasePairKey& key);
 
-        //- Write to stdout
+        //- Write to Ostream
         friend Ostream& operator<<(Ostream& os, const phasePairKey& key);
+
+
+    // Hashing
+
+        //- Hashing functor for phasePairKey
+        struct hasher
+        {
+            unsigned operator()(const phasePairKey& key) const
+            {
+                if (key.ordered())
+                {
+                    return Pair<word>::hasher()(key);
+                }
+                else
+                {
+                    return Pair<word>::symmHasher()(key);
+                }
+            }
+        };
+
+        //- Alternative name for functor
+        using hash = phasePairKey::hasher;
 };
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hashing for phasePairKey
+template<> struct Hash<phasePairKey> : phasePairKey::hasher {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

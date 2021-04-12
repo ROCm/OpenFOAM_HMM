@@ -99,8 +99,7 @@ protected:
             dictTable;
 
         typedef
-            HashTable<autoPtr<blendingMethod>, word, word::hash>
-            blendingMethodTable;
+            HashTable<autoPtr<blendingMethod>> blendingMethodTable;
 
         typedef
             HashTable

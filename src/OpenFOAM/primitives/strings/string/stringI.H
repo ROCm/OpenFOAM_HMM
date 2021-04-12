@@ -239,14 +239,4 @@ inline bool Foam::string::operator()(const std::string& text) const
 }
 
 
-inline unsigned Foam::string::hash::operator()
-(
-    const std::string& str,
-    unsigned seed
-) const
-{
-    return Hasher(str.data(), str.size(), seed);
-}
-
-
 // ************************************************************************* //

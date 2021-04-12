@@ -594,6 +594,12 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Hashing for bitSet data
+template<> struct Hash<bitSet> : bitSet::hasher {};
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Write bitset to Ostream with 40 items per line.

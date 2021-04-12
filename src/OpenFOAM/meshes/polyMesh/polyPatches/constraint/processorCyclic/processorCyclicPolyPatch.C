@@ -203,11 +203,11 @@ int Foam::processorCyclicPolyPatch::tag() const
 
         if (owner())
         {
-            tag_ = string::hash()(cycPatch.name()) % 32768u;
+            tag_ = string::hasher()(cycPatch.name()) % 32768u;
         }
         else
         {
-            tag_ = string::hash()(cycPatch.neighbPatch().name()) % 32768u;
+            tag_ = string::hasher()(cycPatch.neighbPatch().name()) % 32768u;
         }
 
         if (tag_ == Pstream::msgType() || tag_ == -1)

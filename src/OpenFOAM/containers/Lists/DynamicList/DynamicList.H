@@ -372,6 +372,11 @@ inline void Swap(DynamicList<T, SizeMinA>& a, DynamicList<T, SizeMinB>& b)
 }
 
 
+//- Hashing for List data
+template<class T, int SizeMin>
+struct Hash<DynamicList<T, SizeMin>> : List<T>::hasher {};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

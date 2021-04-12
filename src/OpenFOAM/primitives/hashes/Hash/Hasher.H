@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2018 OpenFOAM Foundation
+    Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,86 +23,46 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::blendingMethods::linear
+InNamespace
+    Foam
 
 Description
+    Miscellaneous hashing functions, mostly from Bob Jenkins.
+
+    The Jenkins hashing function(s) is similar in speed to Paul Hsieh's
+    SuperFast hash, but is public domain, supports incremental hashing
+    and has been reported to have better characteristics.
+    It is also what postgresql seems to be using.
+
+See also
+    http://burtleburtle.net/bob/c/lookup3.c
+    and HasherInt.H for a specialized version
 
 SourceFiles
-    linear.C
+    Hasher.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linear_H
-#define linear_H
+#ifndef Hasher_H
+#define Hasher_H
 
-#include "blendingMethod.H"
+#include <cstddef>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace blendingMethods
-{
-
-/*---------------------------------------------------------------------------*\
-                         Class linear Declaration
-\*---------------------------------------------------------------------------*/
-
-class linear
-:
-    public blendingMethod
-{
-    // Private data
-
-        //- Minimum fraction of phases which can be considered fully continuous
-        HashTable<dimensionedScalar> minFullyContinuousAlpha_;
-
-        //- Minimum fraction of phases which can be considered partly continuous
-        HashTable<dimensionedScalar> minPartlyContinuousAlpha_;
-
-
-public:
-
-    //- Runtime type information
-    TypeName("linear");
-
-
-    // Constructors
-
-        //- Construct from a dictionary and two phases
-        linear
-        (
-            const dictionary& dict,
-            const wordList& phaseNames
-        );
-
-
-    //- Destructor
-    ~linear() = default;
-
-
-    // Member Functions
-
-        //- Factor for primary phase
-        virtual tmp<volScalarField> f1
-        (
-            const phaseModel& phase1,
-            const phaseModel& phase2
-        ) const;
-
-        //- Factor for secondary phase
-        virtual tmp<volScalarField> f2
-        (
-            const phaseModel& phase1,
-            const phaseModel& phase2
-        ) const;
-};
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace blendingMethods
+//- Bob Jenkins's 96-bit mixer hashing function (lookup3)
+//  \param[in] data - a character stream
+//  \param[in] len  - the number of bytes
+//  \param[in] seed - the previous hash, or an arbitrary value
+unsigned Hasher(const void* data, size_t len, unsigned seed = 0);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -93,7 +93,7 @@ namespace stringOps
     string expand
     (
         const std::string& s,
-        const HashTable<string, word, string::hash>& mapping,
+        const HashTable<string>& mapping,
         const char sigil = '$'
     );
 
@@ -135,7 +135,7 @@ namespace stringOps
     void inplaceExpand
     (
         std::string& s,
-        const HashTable<string, word, string::hash>& mapping,
+        const HashTable<string>& mapping,
         const char sigil = '$'
     );
 

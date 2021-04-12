@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,20 +29,22 @@ Class
 
 Description
     Hash function class.
-    The default definition is for primitives, non-primitives used to hash
-    entries on hash tables likely need a specialized version of this class.
+    The default definition is for primitives.
+    Non-primitives used to hash entries on hash tables will likely need
+    a specialized version.
+
+Note
+    The second template parameter (bool) is used for SFINAE overloading,
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Hash_H
 #define Hash_H
 
-#include "label.H"
-#include "uLabel.H"
 #include "Hasher.H"
-#include "fileName.H"
-#include "keyType.H"
-#include "wordRe.H"
+#include <cstdint>
+#include <string>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,107 +55,82 @@ namespace Foam
                             Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
+template<class T, class SFINAEType=bool>
 struct Hash
 {
-    inline unsigned operator()(const T& obj, unsigned seed=0) const
+    unsigned operator()(const T& obj, unsigned seed=0) const
     {
-        return Hasher(&obj, sizeof(obj), seed);
+        return Foam::Hasher(&obj, sizeof(T), seed);
     }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Hash specialization for label
-template<>
-struct Hash<Foam::label>
-{
-    //- Incrementally hash a label.
-    //  This will necessarily return a different value than the
-    //  non-incremental version.
-    inline unsigned operator()(const label obj, unsigned seed) const
-    {
-        return Hasher(&obj, sizeof(label), seed);
+// Specialization for trivial (integer) types
+
+#undef  FOAM_INTHASHER
+#define FOAM_INTHASHER(IntType)                                               \
+    /*! \brief Hashing specialization for IntType */                          \
+    /*! Unseeded (single value) uses natural order, otherwise incremental */  \
+    template<> struct Hash<IntType>                                           \
+    {                                                                         \
+        unsigned operator()(const IntType val) const                          \
+        {                                                                     \
+            return static_cast<unsigned>(val);                                \
+        }                                                                     \
+        unsigned operator()(const IntType val, unsigned seed) const           \
+        {                                                                     \
+            return Foam::Hasher(&val, sizeof(IntType), seed);                 \
+        }                                                                     \
     }
 
-    //- Return the unsigned representation of a label.
-    //  This helps if people have relied on the hash value corresponding to
-    //  the natural order.
-    inline unsigned operator()(const label obj) const
+FOAM_INTHASHER(bool);
+FOAM_INTHASHER(char);
+FOAM_INTHASHER(int32_t);
+FOAM_INTHASHER(int64_t);
+FOAM_INTHASHER(uint32_t);
+
+#undef FOAM_INTHASHER
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hashing specialization for nullptr. Always 0
+template<>
+struct Hash<std::nullptr_t>
+{
+    unsigned operator()(std::nullptr_t, unsigned seed=0) const noexcept
     {
-        return obj;
+        return seed;
     }
 };
 
-
-//- Hash specialization for string
-template<>
-struct Hash<Foam::string>
-{
-    inline unsigned operator()(const string& obj, unsigned seed=0) const
-    {
-        return string::hash()(obj, seed);
-    }
-};
-
-
-//- Hash specialization for word
-template<>
-struct Hash<Foam::word>
-{
-    inline unsigned operator()(const word& obj, unsigned seed=0) const
-    {
-        return string::hash()(obj, seed);
-    }
-};
-
-
-//- Hash specialization for fileName
-template<>
-struct Hash<Foam::fileName>
-{
-    inline unsigned operator()(const fileName& obj, unsigned seed=0) const
-    {
-        return string::hash()(obj, seed);
-    }
-};
-
-
-//- Hash specialization for wordRe
-template<>
-struct Hash<Foam::wordRe>
-{
-    inline unsigned operator()(const wordRe& obj, unsigned seed=0) const
-    {
-        return string::hash()(obj, seed);
-    }
-};
-
-
-//- Hash specialization for keyType
-template<>
-struct Hash<Foam::keyType>
-{
-    inline unsigned operator()(const keyType& obj, unsigned seed=0) const
-    {
-        return string::hash()(obj, seed);
-    }
-};
-
-
-//- Hash specialization for pointers, interpret pointer as a integer type.
+//- Hashing specialization for pointers, interpret pointer as a integer type
 template<>
 struct Hash<void*>
 {
-    inline unsigned operator()(const void* const& obj, unsigned seed) const
+    unsigned operator()(const void* const ptr, unsigned seed=0) const
     {
-        return Hash<intptr_t>()(intptr_t(obj), seed);
+        const uintptr_t addr = uintptr_t(ptr);
+        return Foam::Hasher(&addr, sizeof(addr), seed);
     }
+};
 
-    inline unsigned operator()(const void* const& obj) const
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hashing partial specialization for derived string types
+template<class StringType>
+struct Hash
+<
+    StringType,
+    typename std::enable_if
+    <std::is_base_of<std::string, StringType>::value, bool>::type
+>
+{
+    unsigned operator()(const std::string& str, unsigned seed=0) const
     {
-        return Hash<intptr_t>()(intptr_t(obj));
+        return Foam::Hasher(str.data(), str.length(), seed);
     }
 };
 

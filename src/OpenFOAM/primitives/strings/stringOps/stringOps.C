@@ -719,7 +719,7 @@ std::string::size_type Foam::stringOps::count(const char* s, const char c)
 Foam::string Foam::stringOps::expand
 (
     const std::string& s,
-    const HashTable<string, word, string::hash>& mapping,
+    const HashTable<string>& mapping,
     const char sigil
 )
 {
@@ -732,7 +732,7 @@ Foam::string Foam::stringOps::expand
 void Foam::stringOps::inplaceExpand
 (
     std::string& s,
-    const HashTable<string, word, string::hash>& mapping,
+    const HashTable<string>& mapping,
     const char sigil
 )
 {

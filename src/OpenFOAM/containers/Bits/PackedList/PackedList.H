@@ -518,6 +518,24 @@ public:
         );
 
 
+    // Hashing
+
+        //- Hashing functor for PackedList
+        //  Seeded with logical size for disambiguation of padding
+        struct hasher
+        {
+            unsigned operator()(const PackedList<Width>& obj) const
+            {
+                return Foam::Hasher
+                (
+                    obj.cdata(),
+                    obj.size_bytes(),
+                    unsigned(obj.size())
+                );
+            }
+        };
+
+
     // Housekeeping
 
         //- Deprecated(2020-11) use fill()
@@ -531,6 +549,13 @@ public:
         //- Alias for resize()
         void setSize(const label n, unsigned int val = 0u) { resize(n, val); }
 };
+
+
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Hashing for PackedList data
+template<unsigned Width>
+struct Hash<PackedList<Width>> : PackedList<Width>::hasher {};
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

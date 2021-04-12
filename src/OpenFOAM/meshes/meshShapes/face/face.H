@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -421,20 +421,55 @@ public:
 
         //- Return true if the faces have the same vertices
         static bool sameVertices(const face& a, const face& b);
+
+
+    // Hashing
+
+        //- The symmetric hash value for face.
+        //  Starts with lowest vertex value and walks in the direction
+        //  of the next lowest value.
+        static unsigned symmhash_code(const UList<label>& f, unsigned seed=0);
+
+        //- The hash value for face.
+        //  Currently hashes as sequential contiguous data,
+        //  but could/should be commutative
+        inline unsigned hash_code(unsigned seed=0) const
+        {
+            return Foam::Hasher(this->cdata(), this->size_bytes(), seed);
+        }
+
+        //- The symmetric hash value for face.
+        //  Starts with lowest vertex value and walks in the direction
+        //  of the next lowest value.
+        inline unsigned symmhash_code(unsigned seed=0) const
+        {
+            return face::symmhash_code(*this, seed);
+        }
+
+        //- Hashing functor for face
+        struct hasher
+        {
+            unsigned operator()(const face& obj, unsigned seed=0) const
+            {
+                return obj.hash_code(seed);
+            }
+        };
+
+        //- Symmetric hashing functor for face
+        struct symmHasher
+        {
+            unsigned operator()(const face& obj, unsigned seed=0) const
+            {
+                return face::symmhash_code(obj, seed);
+            }
+        };
 };
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Hash specialization for face
-template<>
-struct Hash<face>
-{
-    inline unsigned operator()(const face& obj, unsigned seed=0) const
-    {
-        return Hasher(obj.cdata(), obj.size()*sizeof(label), seed);
-    }
-};
+//- Hash face as contiguous (non-commutative) list data
+template<> struct Hash<face> : face::hasher {};
 
 
 //- Specialization to offset faces, used in ListListOps::combineOffset

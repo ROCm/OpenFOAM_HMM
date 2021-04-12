@@ -1196,7 +1196,7 @@ void Foam::fvMeshDistribute::findCouples
 
 
     // Insert all into big map. Find matches
-    HashTable<labelPair, labelPair, labelPair::Hash<>> map(2*sum(nProcFaces));
+    LabelPairMap<labelPair> map(2*sum(nProcFaces));
 
     nProcFaces = 0;
 
