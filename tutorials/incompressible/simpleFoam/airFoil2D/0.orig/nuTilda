@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      nut;
+    object      nuTilda;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -34,7 +34,7 @@ boundaryField
 
     walls
     {
-        type            nutUSpaldingWallFunction;
+        type            fixedValue;
         value           uniform 0;
     }
 
@@ -43,5 +43,6 @@ boundaryField
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

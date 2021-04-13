@@ -10,31 +10,32 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      p;
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 2 -1 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform 0.14;
 
 boundaryField
 {
     inlet
     {
-        type            freestreamPressure;
-        freestreamValue $internalField;
+        type            freestream;
+        freestreamValue uniform 0.14;
     }
 
     outlet
     {
-        type            freestreamPressure;
-        freestreamValue $internalField;
+        type            freestream;
+        freestreamValue uniform 0.14;
     }
 
     walls
     {
-        type            zeroGradient;
+        type            nutUSpaldingWallFunction;
+        value           uniform 0;
     }
 
     frontAndBack
@@ -42,5 +43,6 @@ boundaryField
         type            empty;
     }
 }
+
 
 // ************************************************************************* //
