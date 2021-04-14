@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
@@ -55,20 +55,22 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 
     if
     (
-        actualPatchType == word::null
+        actualPatchType.empty()
      || actualPatchType != p.type()
     )
     {
         if (pfPtr().constraintType() != p.constraintType())
         {
-            // Use default constraint type
+            // Incompatible (constraint-wise) with the patch type
+            // - use default constraint type
+
             auto patchTypeCstrIter =
                 pointPatchConstructorTablePtr_->cfind(p.type());
 
             if (!patchTypeCstrIter.found())
             {
                 FatalErrorInFunction
-                    << "inconsistent patch and patchField types for \n"
+                    << "Inconsistent patch and patchField types for\n"
                     << "    patch type " << p.type()
                     << " and patchField type " << patchFieldType
                     << exit(FatalError);
@@ -138,20 +140,17 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
 
     if
     (
-       !dict.found("patchType")
+        !dict.found("patchType")
      || dict.get<word>("patchType") != p.type()
     )
     {
-        if (pfPtr().constraintType() == p.constraintType())
+        if (pfPtr().constraintType() != p.constraintType())
         {
-            // Compatible (constraint-wise) with the patch type
-            return pfPtr;
-        }
-        else
-        {
-            // Use default constraint type
-            auto patchTypeCstrIter
-                = dictionaryConstructorTablePtr_->cfind(p.type());
+            // Incompatible (constraint-wise) with the patch type
+            // - use default constraint type
+
+            auto patchTypeCstrIter =
+                dictionaryConstructorTablePtr_->cfind(p.type());
 
             if (!patchTypeCstrIter.found())
             {
@@ -166,7 +165,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
         }
     }
 
-    return cstrIter()(p, iF, dict);
+    return pfPtr;
 }
 
 
