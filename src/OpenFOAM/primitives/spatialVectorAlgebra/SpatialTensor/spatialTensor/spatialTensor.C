@@ -37,7 +37,7 @@ const char* const Foam::spatialTensor::vsType::componentNames[] =
 {
     "Exx",  "Exy",  "Exz",    "Erxx", "Erxy", "Erxz",
     "Eyx",  "Eyy",  "Eyz",    "Eryx", "Eryy", "Eryz",
-    "Ezx",  "Ezy",  "Ezz",    "Erzx", "Erzy", "Erzz"
+    "Ezx",  "Ezy",  "Ezz",    "Erzx", "Erzy", "Erzz",
 
     "Erxx", "Erxy", "Erxz",   "Exx",  "Exy",  "Exz",
     "Eryx", "Eryy", "Eryz",   "Eyx",  "Eyy",  "Eyz",
