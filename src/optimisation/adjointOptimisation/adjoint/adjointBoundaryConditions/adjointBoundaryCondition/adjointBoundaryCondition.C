@@ -68,8 +68,8 @@ adjointBoundaryCondition<Type>::computePatchGrad(word name)
     // stream.
     // Interpolation scheme is now read through interpolation schemes.
     /*
-    word  gradSchemeName       ("grad(" + name + ')');
-    Istream& is = mesh.gradScheme(gradSchemeName);
+    word gradSchemeName("grad(" + name + ')');
+    ITstream& is = mesh.gradScheme(gradSchemeName);
     word schemeData(is);
     */
 

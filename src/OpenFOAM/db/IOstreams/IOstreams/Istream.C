@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,27 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::token& Foam::Istream::peekBack() const noexcept
+{
+    return (putBackAvail_ ? putBackToken_ : token::undefinedToken);
+}
+
+
+bool Foam::Istream::peekBack(token& tok)
+{
+    if (putBackAvail_)
+    {
+        tok = putBackToken_;
+    }
+    else
+    {
+        tok.reset();
+    }
+
+    return putBackAvail_;
+}
+
+
 void Foam::Istream::putBack(const token& tok)
 {
     if (bad())
@@ -58,7 +79,7 @@ void Foam::Istream::putBack(const token& tok)
             << "Attempt to put back onto bad stream"
             << exit(FatalIOError);
     }
-    else if (putBack_)
+    else if (putBackAvail_)
     {
         FatalIOErrorInFunction(*this)
             << "Attempt to put back another token"
@@ -66,8 +87,8 @@ void Foam::Istream::putBack(const token& tok)
     }
     else
     {
+        putBackAvail_ = true;
         putBackToken_ = tok;
-        putBack_ = true;
     }
 }
 
@@ -80,29 +101,14 @@ bool Foam::Istream::getBack(token& tok)
             << "Attempt to get back from bad stream"
             << exit(FatalIOError);
     }
-    else if (putBack_)
+    else if (putBackAvail_)
     {
+        putBackAvail_ = false;
         tok = putBackToken_;
-        putBack_ = false;
         return true;
     }
 
     return false;
-}
-
-
-bool Foam::Istream::peekBack(token& tok)
-{
-    if (putBack_)
-    {
-        tok = putBackToken_;
-    }
-    else
-    {
-        tok.reset();
-    }
-
-    return putBack_;
 }
 
 

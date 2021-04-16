@@ -184,7 +184,7 @@ Foam::label Foam::solution::upgradeSolverDict
     {
         if (!dEntry.isDict())
         {
-            Istream& is = dEntry.stream();
+            ITstream& is = dEntry.stream();
             word name(is);
             dictionary subdict;
 
@@ -201,7 +201,7 @@ Foam::label Foam::solution::upgradeSolverDict
 
                 if (eptr && !eptr->isDict())
                 {
-                    Istream& is = eptr->stream();
+                    ITstream& is = eptr->stream();
                     is >> name;
 
                     if (!is.eof())

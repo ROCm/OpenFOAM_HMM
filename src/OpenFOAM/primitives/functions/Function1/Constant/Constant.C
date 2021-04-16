@@ -52,7 +52,7 @@ Foam::Function1Types::Constant<Type>::Constant
     Function1<Type>(entryName, dict),
     value_(Zero)
 {
-    Istream& is = dict.lookup(entryName);
+    ITstream& is = dict.lookup(entryName);
     word entryType(is);
     is  >> value_;
 }

@@ -178,7 +178,7 @@ void Foam::cloudSolution::read()
             schemes_[i].first() = vars[i];
 
             // set semi-implicit (1) explicit (0) flag
-            Istream& is = schemesDict.lookup(vars[i]);
+            ITstream& is = schemesDict.lookup(vars[i]);
             const word scheme(is);
             if (scheme == "semiImplicit")
             {

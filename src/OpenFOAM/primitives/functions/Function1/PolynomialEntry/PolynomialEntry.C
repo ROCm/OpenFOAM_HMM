@@ -41,7 +41,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     coeffs_(),
     canIntegrate_(true)
 {
-    Istream& is = dict.lookup(entryName);
+    ITstream& is = dict.lookup(entryName);
     const word entryType(is);
 
     is  >> coeffs_;

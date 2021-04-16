@@ -39,7 +39,7 @@ Foam::Function1Types::Table<Type>::Table
 :
     TableBase<Type>(entryName, dict)
 {
-    Istream& is = dict.lookup(entryName);
+    ITstream& is = dict.lookup(entryName);
     const word entryType(is);
     is  >> this->table_;
     TableBase<Type>::check();

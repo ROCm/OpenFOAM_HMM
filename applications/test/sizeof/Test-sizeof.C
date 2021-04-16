@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     {
         cout<<"IOstreamOption:" << sizeof(IOstreamOption) << nl;
         cout<<"IOstream:" << sizeof(IOstream) << nl;
+        cout<<"token:" << sizeof(token) << nl;
         cout<<"Istream:" << sizeof(Istream) << nl;
         cout<<"Ostream:" << sizeof(Ostream) << nl;
 

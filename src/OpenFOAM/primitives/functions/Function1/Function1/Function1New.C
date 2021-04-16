@@ -65,7 +65,7 @@ Foam::Function1<Type>::New
         // - non-word : value for constant function
         // - word : the modelType
 
-        Istream& is = eptr->stream();
+        ITstream& is = eptr->stream();
 
         token firstToken(is);
 
