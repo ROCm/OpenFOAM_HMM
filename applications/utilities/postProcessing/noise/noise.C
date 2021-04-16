@@ -114,6 +114,10 @@ int main(int argc, char *argv[])
     argList::addOption("dict", "file", "Alternative noiseDict");
 
     #include "setRootCase.H"
+
+    // As much as possible avoid synchronised operation
+    const_cast<fileOperation&>(fileHandler()).distributed(true);
+
     #include "createTime.H"
 
     const word dictName("noiseDict");
