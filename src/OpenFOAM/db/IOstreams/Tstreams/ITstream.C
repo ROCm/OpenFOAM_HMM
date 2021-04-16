@@ -31,6 +31,31 @@ License
 #include "StringStream.H"
 #include "UIListStream.H"
 
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+// Failsafe read-access.
+// Return the token at location, or undefinedToken.
+inline static const Foam::token& peekTokenAt
+(
+    const Foam::UList<Foam::token>& list,
+    const Foam::label i
+)
+{
+    return
+    (
+        i >= 0 && i < list.size()
+      ? list[i]
+      : Foam::token::undefinedToken
+    );
+}
+
+} // End anonymous namespace
+
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
@@ -270,20 +295,21 @@ void Foam::ITstream::print(Ostream& os) const
 {
     os  << "ITstream : " << name_.c_str() << ", line ";
 
-    if (size())
-    {
-        os  << tokenList::first().lineNumber();
+    const tokenList& toks = *this;
 
-        if (tokenList::first().lineNumber() < tokenList::last().lineNumber())
-        {
-            os  << '-' << tokenList::last().lineNumber();
-        }
-    }
-    else
+    if (toks.empty())
     {
         os  << lineNumber();
     }
+    else
+    {
+        os  << toks.first().lineNumber();
 
+        if (toks.first().lineNumber() < toks.last().lineNumber())
+        {
+            os  << '-' << toks.last().lineNumber();
+        }
+    }
     os  << ", ";
 
     IOstream::print(os);
@@ -292,44 +318,155 @@ void Foam::ITstream::print(Ostream& os) const
 
 std::string Foam::ITstream::toString() const
 {
-    OStringStream buf;
-
-    const tokenList& tokens = *this;
-
-    label len = tokens.size();
-
     // NOTE: may wish to have special handling if there is a single token
     // and it is already a string or word
 
-    for (const token& tok : tokens)
+    OStringStream buf;
+    unsigned i = 0;
+    for (const token& tok : *this)
     {
-        buf << tok;
-
-        if (--len)
+        if (i++)
         {
             buf << ' ';
         }
+        buf << tok;
     }
 
     return buf.str();
 }
 
 
+const Foam::token& Foam::ITstream::peekFirst() const
+{
+    return peekTokenAt(*this, 0);
+}
+
+
+const Foam::token& Foam::ITstream::peekLast() const
+{
+    return peekTokenAt(*this, tokenList::size()-1);
+}
+
+
+const Foam::token& Foam::ITstream::peek() const
+{
+    // Use putback token if it exists
+    if (Istream::hasPutback())
+    {
+        return Istream::peekBack();
+    }
+
+    return peekTokenAt(*this, tokenIndex_);
+}
+
+
+void Foam::ITstream::seek(label pos)
+{
+    lineNumber_ = 0;
+    const tokenList& toks = *this;
+    const label nToks = toks.size();
+
+    if (!pos)
+    {
+        // Seek begin (rewind)
+        tokenIndex_ = 0;
+
+        if (nToks)
+        {
+            lineNumber_ = toks.first().lineNumber();
+        }
+
+        setOpened();
+        setGood();
+    }
+    else if (pos < 0 || pos >= nToks)
+    {
+        // Seek end or seek is out of range
+        tokenIndex_ = nToks;
+
+        if (nToks)
+        {
+            lineNumber_ = toks.last().lineNumber();
+        }
+
+        setEof();
+    }
+    else
+    {
+        // Seek middle (from the beginning)
+        tokenIndex_ = pos;
+
+        if (nToks)
+        {
+            lineNumber_ = toks[tokenIndex_].lineNumber();
+        }
+
+        setOpened();
+        setGood();
+    }
+}
+
+
+void Foam::ITstream::skip(label n)
+{
+    const tokenList& toks = *this;
+    const label nToks = toks.size();
+
+    if (n < 0)
+    {
+        // Move backwards
+        while (n++ && tokenIndex_)
+        {
+            --tokenIndex_;
+        }
+
+        if (tokenIndex_ < nToks)
+        {
+            lineNumber_ = toks[tokenIndex_].lineNumber();
+            setOpened();
+            setGood();
+        }
+    }
+    else if (n > 0)
+    {
+        // Move forward
+        while (n-- && tokenIndex_ < nToks)
+        {
+            ++tokenIndex_;
+        }
+
+        if (tokenIndex_ < nToks)
+        {
+            lineNumber_ = toks[tokenIndex_].lineNumber();
+            setOpened();
+            setGood();
+        }
+        else
+        {
+            setEof();
+        }
+    }
+}
+
+
 Foam::Istream& Foam::ITstream::read(token& tok)
 {
-    // Return the put back token if it exists
+    // Use putback token if it exists
     if (Istream::getBack(tok))
     {
         lineNumber_ = tok.lineNumber();
         return *this;
     }
 
-    if (tokenIndex_ < size())
+    tokenList& toks = *this;
+    const label nToks = toks.size();
+
+    if (tokenIndex_ < nToks)
     {
-        tok = operator[](tokenIndex_++);
+        tok = toks[tokenIndex_++];
         lineNumber_ = tok.lineNumber();
 
-        if (tokenIndex_ == size())
+        if (tokenIndex_ == nToks)
         {
             setEof();
         }
@@ -350,9 +487,9 @@ Foam::Istream& Foam::ITstream::read(token& tok)
 
         tok.reset();
 
-        if (size())
+        if (nToks)
         {
-            tok.lineNumber(tokenList::last().lineNumber());
+            tok.lineNumber(toks.last().lineNumber());
         }
         else
         {
@@ -423,52 +560,6 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 void Foam::ITstream::rewind()
 {
     seek(0);
-}
-
-
-void Foam::ITstream::seek(label pos)
-{
-    lineNumber_ = 0;
-    tokenList& toks = *this;
-
-    if (!pos)
-    {
-        // Seek begin (rewind)
-        tokenIndex_ = 0;
-
-        if (!toks.empty())
-        {
-            lineNumber_ = toks.first().lineNumber();
-        }
-
-        setOpened();
-        setGood();
-    }
-    else if (pos < 0 || pos >= toks.size())
-    {
-        // Seek end or seek is out of range
-        tokenIndex_ = toks.size();
-
-        if (!toks.empty())
-        {
-            lineNumber_ = toks.last().lineNumber();
-        }
-
-        setEof();
-    }
-    else
-    {
-        // Seek middle (from the beginning)
-        tokenIndex_ = pos;
-
-        if (!toks.empty())
-        {
-            lineNumber_ = toks[tokenIndex_].lineNumber();
-        }
-
-        setOpened();
-        setGood();
-    }
 }
 
 

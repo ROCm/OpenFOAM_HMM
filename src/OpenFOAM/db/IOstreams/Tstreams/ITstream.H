@@ -187,28 +187,48 @@ public:
 
     // Token Access
 
+        //- Failsafe peek at the \b first token in the list.
+        //  \return \c undefinedToken if the list is empty.
+        const token& peekFirst() const;
+
+        //- Failsafe peek at the \b last token in the list.
+        //  \return \c undefinedToken if the list is empty.
+        const token& peekLast() const;
+
+        //- Failsafe peek at what the next read would return,
+        //  including handling of any putback
+        //  \return \c undefinedToken if list is exhausted
+        const token& peek() const;
+
         //- The current token index when reading, or the insertion point.
-        label tokenIndex() const
+        label tokenIndex() const noexcept
         {
             return tokenIndex_;
         }
 
         //- Non-const access to the current token index
-        label& tokenIndex()
+        label& tokenIndex() noexcept
         {
             return tokenIndex_;
         }
 
-        //- The number of remaining tokens
-        label nRemainingTokens() const
+        //- Number of tokens remaining
+        label nRemainingTokens() const noexcept
         {
             return size() - tokenIndex_;
         }
 
-        //- Move the tokenIndex to the specified position.
+        //- Move tokenIndex to the specified position
         //  Using seek(0) is identical to rewind.
         //  Using seek(-1) moves to the end.
         void seek(label pos);
+
+        //- Move tokenIndex relative to the current position.
+        //  Will not overrun the beginning or end positions.
+        //
+        //  Use skip(2) to move forward two tokens.
+        //  Use skip(-2) to move backward two tokens.
+        void skip(label n = 1);
 
 
     // Inquiry

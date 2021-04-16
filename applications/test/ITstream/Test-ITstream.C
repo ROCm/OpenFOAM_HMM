@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ void printTokens(Istream& is)
         if (t.good())
         {
             ++count;
-            Info<<"token: " << t << endl;
+            Info<< "token: " << t << endl;
         }
     }
 
@@ -86,14 +86,28 @@ void printTokens(Istream& is)
 }
 
 
-template<class BUF>
-void doTest(const string& name, const BUF& input, bool verbose=false)
+Ostream& reportPeek(const ITstream& is)
 {
-    Info<<"test " << name.c_str() << ":" << nl
-        <<"====" << nl;
+    Info<< "  index : " << is.tokenIndex() << nl
+        << "  peek  : " << is.peek().info() << nl;
+    return Info;
+}
+
+
+template<class BUF>
+void doTest
+(
+    const string& name,
+    const BUF& input,
+    bool verbose = false,
+    bool testskip = false
+)
+{
+    Info<< "test " << name.c_str() << ":" << nl
+        << "====" << nl;
     toString(Info, input)
         << nl
-        <<"====" << nl << endl;
+        << "====" << nl << endl;
 
     ITstream its(name, input);
     Info<< "got " << its.size() << " tokens - index at "
@@ -107,6 +121,35 @@ void doTest(const string& name, const BUF& input, bool verbose=false)
         }
         Info<< nl;
     }
+
+    if (testskip)
+    {
+        Info<< " first : " << its.peekFirst().info() << nl
+            << " last  : " << its.peekLast().info() << nl;
+
+        Info<< "rewind():" << nl;
+        reportPeek(its);
+
+        its.skip(3);
+        Info<< "skip(3):" << nl;
+        reportPeek(its);
+
+        its.skip(2);
+        Info<< "skip(2):" << nl;
+        reportPeek(its);
+
+        its.skip(-2);
+        Info<< "skip(-2):" << nl;
+        reportPeek(its);
+
+        its.skip(100);
+        Info<< "skip(100):" << nl;
+        reportPeek(its);
+
+        its.skip(-1000);
+        Info<< "skip(-1000):" << nl;
+        reportPeek(its);
+    }
 }
 
 
@@ -116,14 +159,16 @@ void doTest(const string& name, const BUF& input, bool verbose=false)
 int main(int argc, char *argv[])
 {
     const char* charInput =
-        "( const char input \"string\" to tokenize )"
+        "( const char input \"string\" to tokenize )\n"
         "List<label> 5(0 1 2 3 4);";
 
     string stringInput("( string     ;    input \"string\" to tokenize )");
 
     List<char> listInput(stringInput.cbegin(), stringInput.cend());
 
-    doTest("char*", charInput, true);
+    doTest("empty", "", true, true);
+
+    doTest("char*", charInput, true, true);
     doTest("string", stringInput, true);
     doTest("List<char>", listInput, true);
 
