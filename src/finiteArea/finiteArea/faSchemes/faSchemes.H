@@ -58,28 +58,28 @@ class faSchemes
     // Private Data
 
         dictionary ddtSchemes_;
-        ITstream defaultDdtScheme_;
+        ITstream ddtSchemeDefault_;
 
         dictionary d2dt2Schemes_;
-        ITstream defaultD2dt2Scheme_;
+        ITstream d2dt2SchemeDefault_;
 
         dictionary interpolationSchemes_;
-        ITstream defaultInterpolationScheme_;
+        ITstream interpolationSchemeDefault_;
 
         dictionary divSchemes_;
-        ITstream defaultDivScheme_;
+        ITstream divSchemeDefault_;
 
         dictionary gradSchemes_;
-        ITstream defaultGradScheme_;
+        ITstream gradSchemeDefault_;
 
         dictionary lnGradSchemes_;
-        ITstream defaultLnGradScheme_;
+        ITstream lnGradSchemeDefault_;
 
         dictionary laplacianSchemes_;
-        ITstream defaultLaplacianScheme_;
+        ITstream laplacianSchemeDefault_;
 
         mutable dictionary fluxRequired_;
-        bool defaultFluxRequired_;
+        bool fluxRequiredDefault_;
 
 
     // Private Member Functions
@@ -90,11 +90,27 @@ class faSchemes
         //- Read settings from the dictionary
         void read(const dictionary&);
 
+        //- Write dictionary (possibly modified) settings
+        void writeDicts(Ostream& os) const;
+
         //- No copy construct
         faSchemes(const faSchemes&) = delete;
 
         //- No copy assignment
         void operator=(const faSchemes&) = delete;
+
+
+    // Constructors
+
+        //- Construct for objectRegistry, system dictName, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        faSchemes
+        (
+            const objectRegistry& obr,
+            const word& dictName,
+            const dictionary* fallback
+        );
 
 
 public:
@@ -112,11 +128,17 @@ public:
         (
             const objectRegistry& obr,
             const dictionary* fallback = nullptr
-        );
+        )
+        :
+            faSchemes(obr, "faSchemes", fallback)
+        {}
 
         //- Construct for objectRegistry, and
         //- fallback dictionary content (for a NO_READ or missing file)
-        faSchemes(const objectRegistry& obr, const dictionary& dict);
+        faSchemes(const objectRegistry& obr, const dictionary& dict)
+        :
+            faSchemes(obr, "faSchemes", &dict)
+        {}
 
 
     // Member Functions
@@ -147,49 +169,49 @@ public:
         // Edit
 
             //- Return access to ddt schemes
-            dictionary& ddtSchemes()
+            dictionary& ddtSchemes() noexcept
             {
                 return ddtSchemes_;
             }
 
             //- Return access to d2dt2 schemes
-            dictionary& d2dt2Schemes()
+            dictionary& d2dt2Schemes() noexcept
             {
                 return d2dt2Schemes_;
             }
 
             //- Return access to interpolation schemes
-            dictionary& interpolationSchemes()
+            dictionary& interpolationSchemes() noexcept
             {
                 return interpolationSchemes_;
             }
 
             //- Return access to div schemes
-            dictionary& divSchemes()
+            dictionary& divSchemes() noexcept
             {
                 return divSchemes_;
             }
 
             //- Return access to grad schemes
-            dictionary& gradSchemes()
+            dictionary& gradSchemes() noexcept
             {
                 return gradSchemes_;
             }
 
             //- Return access to lnGrad schemes
-            dictionary& lnGradSchemes()
+            dictionary& lnGradSchemes() noexcept
             {
                 return lnGradSchemes_;
             }
 
             //- Return access to laplacian schemes
-            dictionary& laplacianSchemes()
+            dictionary& laplacianSchemes() noexcept
             {
                 return laplacianSchemes_;
             }
 
             //- Return access to flux required
-            dictionary& fluxRequired()
+            dictionary& fluxRequired() noexcept
             {
                 return fluxRequired_;
             }
