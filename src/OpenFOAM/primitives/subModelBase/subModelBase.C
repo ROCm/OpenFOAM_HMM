@@ -40,12 +40,12 @@ bool Foam::subModelBase::subModelBase::inLine() const
 
 Foam::subModelBase::subModelBase(dictionary& properties)
 :
-    modelName_(word::null),
+    modelName_(),
     properties_(properties),
-    dict_(dictionary::null),
-    baseName_(word::null),
-    modelType_(word::null),
-    coeffDict_(dictionary::null)
+    dict_(),
+    baseName_(),
+    modelType_(),
+    coeffDict_()
 {}
 
 
@@ -58,7 +58,7 @@ Foam::subModelBase::subModelBase
     const word& dictExt
 )
 :
-    modelName_(word::null),
+    modelName_(),
     properties_(properties),
     dict_(dict),
     baseName_(baseName),

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +47,7 @@ Foam::regionModels::regionModelFunctionObject::regionModelFunctionObject
     regionModel& region
 )
 :
-    dict_(dictionary::null),
+    dict_(),
     regionModel_(region),
     modelType_("modelType")
 {}

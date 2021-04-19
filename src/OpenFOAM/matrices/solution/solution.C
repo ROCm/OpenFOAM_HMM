@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,13 +135,13 @@ Foam::solution::solution
             IOobject::NO_WRITE
         )
     ),
-    cache_(dictionary::null),
+    cache_(),
     caching_(false),
-    fieldRelaxDict_(dictionary::null),
-    eqnRelaxDict_(dictionary::null),
+    fieldRelaxDict_(),
+    eqnRelaxDict_(),
     fieldRelaxDefault_(0),
     eqnRelaxDefault_(0),
-    solvers_(dictionary::null)
+    solvers_()
 {
     if
     (
@@ -179,13 +179,13 @@ Foam::solution::solution
         ),
         dict
     ),
-    cache_(dictionary::null),
+    cache_(),
     caching_(false),
-    fieldRelaxDict_(dictionary::null),
-    eqnRelaxDict_(dictionary::null),
+    fieldRelaxDict_(),
+    eqnRelaxDict_(),
     fieldRelaxDefault_(0),
     eqnRelaxDefault_(0),
-    solvers_(dictionary::null)
+    solvers_()
 {
     if
     (

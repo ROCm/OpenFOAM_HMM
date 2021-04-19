@@ -73,13 +73,13 @@ Foam::IOobject Foam::radiation::radiationModel::createIOobject
     if (io.typeHeaderOk<IOdictionary>(true))
     {
         io.readOpt(IOobject::MUST_READ_IF_MODIFIED);
-        return io;
     }
     else
     {
         io.readOpt(IOobject::NO_READ);
-        return io;
     }
+
+    return io;
 }
 
 
@@ -129,7 +129,7 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     time_(T.time()),
     T_(T),
     radiation_(false),
-    coeffs_(dictionary::null),
+    coeffs_(),
     solverFreq_(0),
     firstIter_(true),
     absorptionEmission_(nullptr),

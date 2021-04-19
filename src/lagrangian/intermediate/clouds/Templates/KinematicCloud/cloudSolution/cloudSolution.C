@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,7 +97,7 @@ Foam::cloudSolution::cloudSolution(const cloudSolution& cs)
 Foam::cloudSolution::cloudSolution(const fvMesh& mesh)
 :
     mesh_(mesh),
-    dict_(dictionary::null),
+    dict_(),
     active_(false),
     transient_(false),
     calcFrequency_(0),

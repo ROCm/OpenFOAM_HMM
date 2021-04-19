@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF),
     baffle_(),
-    dict_(dictionary::null)
+    dict_()
 {}
 
 

@@ -388,7 +388,7 @@ public:
                 //- Return access to the constant properties
                 inline typename parcelType::constantProperties& constProps();
 
-                    //- Return reference to the sub-models dictionary
+                //- Return reference to the sub-models dictionary
                 inline const dictionary& subModelProperties() const;
 
 

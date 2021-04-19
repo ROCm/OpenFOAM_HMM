@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,14 +132,14 @@ public:
 
         // Constructors
 
-            //- Null constructor
-            constantProperties();
+            //- Default construct
+            inline constantProperties();
 
             //- Copy constructor
-            constantProperties(const constantProperties& cp);
+            inline constantProperties(const constantProperties& cp);
 
             //- Construct from dictionary
-            constantProperties(const dictionary& parentDict);
+            inline constantProperties(const dictionary& parentDict);
 
 
         // Member Functions

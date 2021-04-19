@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +33,9 @@ License
 template<class CloudType>
 Foam::WallInteractionModel<CloudType>::WallInteractionModel(CloudType& owner)
 :
-    dict_(dictionary::null),
     owner_(owner),
-    coeffDict_(dictionary::null)
+    dict_(dictionary::null),
+    coeffDict_()
 {}
 
 
@@ -46,8 +47,8 @@ Foam::WallInteractionModel<CloudType>::WallInteractionModel
     const word& type
 )
 :
-    dict_(dict),
     owner_(owner),
+    dict_(dict),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 

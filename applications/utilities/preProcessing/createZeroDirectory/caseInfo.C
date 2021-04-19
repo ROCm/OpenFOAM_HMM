@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,7 +194,7 @@ Foam::dictionary Foam::caseInfo::generateBoundaryField
     const boundaryTemplates& bcTemplates
 ) const
 {
-    dictionary boundaryField = dictionary::null;
+    dictionary boundaryField;
 
     forAll(boundaryInfo_.names(), j)
     {
@@ -202,7 +202,7 @@ Foam::dictionary Foam::caseInfo::generateBoundaryField
 
         if (boundaryInfo_.constraint()[j])
         {
-            dictionary patchDict = dictionary::null;
+            dictionary patchDict;
             patchDict.add("type", boundaryInfo_.types()[j]);
 
             // Add value for processor patches
@@ -228,7 +228,7 @@ Foam::dictionary Foam::caseInfo::generateBoundaryField
 
             const word& patchType = patchTypes_[conditionI];
 
-            dictionary optionDict = dictionary::null;
+            dictionary optionDict;
             if (bcTemplates.optionsRequired(regionPrefix, category, patchType))
             {
                 optionDict = bcDict_.subDict(condition).subDict("options");

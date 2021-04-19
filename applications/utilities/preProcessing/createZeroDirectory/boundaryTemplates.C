@@ -40,8 +40,8 @@ Foam::boundaryTemplates::boundaryTemplates
     const word& solverType
 )
 :
-    templates_(dictionary::null),
-    options_(dictionary::null)
+    templates_(),
+    options_()
 {
     Info<< "    Reading boundary templates" << endl;
 
@@ -62,8 +62,8 @@ Foam::boundaryTemplates::boundaryTemplates
         const word& regionType = dEntry.keyword();
         wordList patchTypes(regionBCs.lookup(regionType));
 
-        dictionary regionTemplate = dictionary::null;
-        dictionary regionOptions = dictionary::null;
+        dictionary regionTemplate;
+        dictionary regionOptions;
 
         // read general boundary types
         forAll(patchTypes, i)
@@ -250,8 +250,8 @@ Foam::dictionary Foam::boundaryTemplates::generatePatchDict
             // look for field name
             if (patchDict.found(fieldName))
             {
-                dictionary dict(dictionary::null);
-                const dictionary& fieldDict(patchDict.subDict(fieldName));
+                dictionary dict;
+                const dictionary& fieldDict = patchDict.subDict(fieldName);
 
                 for (const entry& dEntry : fieldDict)
                 {
