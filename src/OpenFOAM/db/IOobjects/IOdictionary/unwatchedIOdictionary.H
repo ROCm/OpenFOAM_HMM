@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +29,11 @@ Class
 
 Description
     unwatchedIOdictionary is like IOdictionary but stores
-    dependencies as files instead of fileMonitor watchIndices. Used
-    to read controlDict since there fileMonitor not yet setup.
+    dependencies as files instead of fileMonitor watchIndices.
+    Used to read controlDict since there fileMonitor not yet setup.
+
+SourceFiles
+    unwatchedIOdictionary.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,31 +55,51 @@ class unwatchedIOdictionary
 :
     public baseIOdictionary
 {
+    // Private Data
 
-    fileNameList files_;
+        //- The files that would be watched
+        fileNameList files_;
+
 
 public:
 
     // Constructors
 
         //- Construct given an IOobject
-        unwatchedIOdictionary(const IOobject& io);
+        //- and optional fallback dictionary content
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit unwatchedIOdictionary
+        (
+            const IOobject& io,
+            const dictionary* fallback = nullptr
+        );
 
-        //- Construct given an IOobject and dictionary
+        //- Construct given an IOobject and fallback dictionary content
         unwatchedIOdictionary
         (
             const IOobject& io,
             const dictionary& dict
         );
 
+        //- Construct given an IOobject, wanted typeName
+        //- and optional fallback dictionary content
+        //  A null dictionary pointer is treated like an empty dictionary.
+        unwatchedIOdictionary
+        (
+            const IOobject& io,
+            const word& wantedType,
+            const dictionary* fallback = nullptr
+        );
+
         //- Construct given an IOobject and Istream
         unwatchedIOdictionary(const IOobject& io, Istream& is);
 
+
     //- Destructor
-    virtual ~unwatchedIOdictionary();
+    virtual ~unwatchedIOdictionary() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Is object global
         virtual bool global() const
@@ -93,22 +117,25 @@ public:
         //- Add file watch on object (READ_IF_MODIFIED)
         virtual void addWatch();
 
-        //- Add file watch for fileName on object if not yet watched. Return
-        //  index of watch
+        //- Add file watch for fileName on object if not yet watched.
+        //  \return index of watch
         virtual label addWatch(const fileName&);
 
-        const fileNameList& files() const
+        //- Return the files that would be watched
+        const fileNameList& files() const noexcept
         {
             return files_;
         }
 
-        fileNameList& files()
+        //- Access to the files that would be watched
+        fileNameList& files() noexcept
         {
             return files_;
         }
-
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Template function for obtaining global status
 template<>

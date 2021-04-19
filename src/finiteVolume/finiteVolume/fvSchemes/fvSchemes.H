@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ class fvSchemes
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         dictionary ddtSchemes_;
         ITstream defaultDdtScheme_;
@@ -109,12 +109,17 @@ public:
 
     // Constructors
 
-        //- Construct for objectRegistry
-        fvSchemes(const objectRegistry& obr);
+        //- Construct for objectRegistry, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit fvSchemes
+        (
+            const objectRegistry& obr,
+            const dictionary* fallback = nullptr
+        );
 
-        //- Construct from objectRegistry and supplied (optional) content
-        //  (gets used in case of NO_READ or fvSchemes dictionary cannot be
-        //   read)
+        //- Construct for objectRegistry, and
+        //- fallback dictionary content (for a NO_READ or missing file)
         fvSchemes(const objectRegistry& obr, const dictionary& dict);
 
 

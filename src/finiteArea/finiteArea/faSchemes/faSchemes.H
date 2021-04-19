@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ class faSchemes
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         dictionary ddtSchemes_;
         ITstream defaultDdtScheme_;
@@ -104,8 +105,18 @@ public:
 
     // Constructors
 
-        //- Construct from objectRegistry
-        faSchemes(const objectRegistry& obr);
+        //- Construct for objectRegistry, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit faSchemes
+        (
+            const objectRegistry& obr,
+            const dictionary* fallback = nullptr
+        );
+
+        //- Construct for objectRegistry, and
+        //- fallback dictionary content (for a NO_READ or missing file)
+        faSchemes(const objectRegistry& obr, const dictionary& dict);
 
 
     // Member Functions

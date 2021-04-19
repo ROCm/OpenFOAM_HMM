@@ -48,7 +48,6 @@ Note
 #include "polyMesh.H"
 #include "distributedTriSurfaceMesh.H"
 #include "mapDistribute.H"
-#include "localIOdictionary.H"
 #include "decompositionModel.H"
 
 using namespace Foam;

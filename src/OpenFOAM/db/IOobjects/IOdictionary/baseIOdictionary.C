@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +46,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::baseIOdictionary::baseIOdictionary(const IOobject& io)
+Foam::baseIOdictionary::baseIOdictionary
+(
+    const IOobject& io,
+    const dictionary* fallback
+)
 :
     regIOobject(io)
 {
@@ -59,10 +64,8 @@ Foam::baseIOdictionary::baseIOdictionary
     const dictionary& dict
 )
 :
-    regIOobject(io)
-{
-    dictionary::name() = IOobject::objectPath();
-}
+    baseIOdictionary(io, &dict)
+{}
 
 
 Foam::baseIOdictionary::baseIOdictionary
@@ -82,6 +85,31 @@ Foam::baseIOdictionary::baseIOdictionary
 const Foam::word& Foam::baseIOdictionary::name() const
 {
     return regIOobject::name();
+}
+
+
+bool Foam::baseIOdictionary::readData(Istream& is)
+{
+    is >> *this;
+
+    if (writeDictionaries && Pstream::master() && !is.bad())
+    {
+        Sout<< nl
+            << "--- baseIOdictionary " << name()
+            << ' ' << objectPath() << ":" << nl;
+        writeHeader(Sout);
+        writeData(Sout);
+        Sout<< "--- End of baseIOdictionary " << name() << nl << endl;
+    }
+
+    return !is.bad();
+}
+
+
+bool Foam::baseIOdictionary::writeData(Ostream& os) const
+{
+    dictionary::write(os, false);
+    return os.good();
 }
 
 

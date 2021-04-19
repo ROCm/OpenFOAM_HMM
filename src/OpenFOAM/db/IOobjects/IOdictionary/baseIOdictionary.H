@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,6 @@ Description
 
 SourceFiles
     baseIOdictionary.C
-    baseIOdictionaryIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,6 +63,7 @@ class baseIOdictionary
 
         static bool writeDictionaries;
 
+
 public:
 
     //- Declare type-name, virtual type (with debug switch)
@@ -85,13 +85,20 @@ public:
     // Constructors
 
         //- Construct given an IOobject
-        baseIOdictionary(const IOobject&);
+        //- and optional fallback dictionary content (ununsed)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit baseIOdictionary
+        (
+            const IOobject& io,
+            const dictionary* fallback = nullptr
+        );
 
-        //- Construct given an IOobject and dictionary
-        baseIOdictionary(const IOobject&, const dictionary&);
+        //- Construct given an IOobject and fallback dictionary
+        //- content (ununsed)
+        baseIOdictionary(const IOobject& io, const dictionary& dict);
 
-        //- Construct given an IOobject and Istream
-        baseIOdictionary(const IOobject&, Istream&);
+        //- Construct given an IOobject and Istream (ununsed)
+        baseIOdictionary(const IOobject& io, Istream& is);
 
 
     // Member Functions
@@ -117,7 +124,7 @@ public:
     // Member Operators
 
         //- Copy assignment of dictionary entries (leave regIOobject untouched)
-        void operator=(const baseIOdictionary&);
+        void operator=(const baseIOdictionary& rhs);
 
         //- Copy assignment of dictionary entries
         using dictionary::operator=;

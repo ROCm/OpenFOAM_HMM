@@ -53,20 +53,9 @@ class solver
 :
     public localIOdictionary
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        solver(const solver&) = delete;
-
-        //- No copy assignment
-        void operator=(const solver&) = delete;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the mesh database
         fvMesh& mesh_;
@@ -92,6 +81,15 @@ protected:
         //- Base variableSet pointer.
         //  To be allocated in derived classes
         autoPtr<variablesSet> vars_;
+
+
+    // Protected Member Functions
+
+        //- No copy construct
+        solver(const solver&) = delete;
+
+        //- No copy assignment
+        void operator=(const solver&) = delete;
 
 
 public:
@@ -121,6 +119,7 @@ public:
     // Member Functions
 
         virtual bool readDict(const dictionary& dict);
+
 
         // Access
 

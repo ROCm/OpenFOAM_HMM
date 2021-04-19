@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,7 +191,11 @@ void Foam::faSchemes::read(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::faSchemes::faSchemes(const objectRegistry& obr)
+Foam::faSchemes::faSchemes
+(
+    const objectRegistry& obr,
+    const dictionary* fallback
+)
 :
     IOdictionary
     (
@@ -207,7 +211,8 @@ Foam::faSchemes::faSchemes(const objectRegistry& obr)
               : obr.readOpt()
             ),
             IOobject::NO_WRITE
-        )
+        ),
+        fallback
     ),
     ddtSchemes_
     (
@@ -320,6 +325,12 @@ Foam::faSchemes::faSchemes(const objectRegistry& obr)
         read(schemesDict());
     }
 }
+
+
+Foam::faSchemes::faSchemes(const objectRegistry& obr, const dictionary& dict)
+:
+    faSchemes(obr, &dict)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
