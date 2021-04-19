@@ -64,7 +64,6 @@ See Also
 #ifndef UIListStream_H
 #define UIListStream_H
 
-#include "FixedList.H"
 #include "UList.H"
 #include "ISstream.H"
 #include "memoryStreamBuffer.H"
@@ -245,17 +244,6 @@ public:
             UIListStream(buffer.cdata(), buffer.size(), streamOpt)
         {}
 
-        //- Construct using data area from a FixedList
-        template<unsigned N>
-        explicit UIListStream
-        (
-            const FixedList<char, N>& buffer,
-            IOstreamOption streamOpt = IOstreamOption()
-        )
-        :
-            UIListStream(buffer.cdata(), N, streamOpt)
-        {}
-
 
     // Member Functions
 
@@ -324,18 +312,6 @@ public:
         )
         :
             UIListStream(buf.cdata(), buf.size(), IOstreamOption(fmt, ver))
-        {}
-
-        //- Construct using data area from a FixedList
-        template<unsigned N>
-        UIListStream
-        (
-            const FixedList<char, N>& buffer,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
-        :
-            UIListStream(buffer.cdata(), N, IOstreamOption(fmt, ver))
         {}
 
     #endif /* Foam_IOstream_extras */

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,7 +168,7 @@ bool Foam::primitiveEntry::expandVariable
 
         // Parse string into a series of tokens
 
-        tokenList toks(ITstream::parse(str, IOstream::ASCII));
+        tokenList toks(ITstream::parse(str));  // ASCII
 
         ITstream::append(std::move(toks), true);  // Lazy resizing
     }
@@ -183,7 +183,7 @@ bool Foam::primitiveEntry::expandVariable
             // Not found or empty:  use ":-" alternative value
             // Found and not empty: use ":+" alternative value
 
-            toks = ITstream::parse(altValue, IOstream::ASCII);
+            toks = ITstream::parse(altValue);  // ASCII
         }
 
         ITstream::append(std::move(toks), true);  // Lazy resizing
@@ -197,7 +197,7 @@ bool Foam::primitiveEntry::expandVariable
             // Not found or empty:  use ":-" alternative value
             // Found and not empty: use ":+" alternative value
 
-            tokenList toks(ITstream::parse(altValue, IOstream::ASCII));
+            tokenList toks(ITstream::parse(altValue));  // ASCII
 
             ITstream::append(std::move(toks), true);  // Lazy resizing
         }
@@ -216,14 +216,14 @@ bool Foam::primitiveEntry::expandVariable
 Foam::primitiveEntry::primitiveEntry(const keyType& key)
 :
     entry(key),
-    ITstream(key, tokenList())
+    ITstream(zero{}, key)
 {}
 
 
 Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& tok)
 :
     entry(key),
-    ITstream(key, tokenList(1, tok))
+    ITstream(key, tokenList(one{}, tok))
 {}
 
 
@@ -254,7 +254,7 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
     entry(key),
     ITstream(is)
 {
-    name() += '.' + key;
+    ITstream::name() += '.' + key;
 }
 
 

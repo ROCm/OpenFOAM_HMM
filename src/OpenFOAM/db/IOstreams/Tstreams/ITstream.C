@@ -72,7 +72,7 @@ Foam::tokenList Foam::ITstream::parse
     IOstreamOption streamOpt
 )
 {
-    UIListStream is(input.data(), input.size(), streamOpt);
+    UIListStream is(input.data(), input.length(), streamOpt);
 
     tokenList tokens;
     parseStream(is, tokens);
@@ -131,17 +131,99 @@ void Foam::ITstream::reserveCapacity
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::ITstream::ITstream(const ITstream& is)
+:
+    Istream(static_cast<IOstreamOption>(is)),
+    tokenList(is),
+    name_(is.name_),
+    tokenIndex_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
+Foam::ITstream::ITstream(ITstream&& is)
+:
+    Istream(static_cast<IOstreamOption>(is)),
+    tokenList(std::move(static_cast<tokenList&>(is))),
+    name_(std::move(is.name_)),
+    tokenIndex_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
 Foam::ITstream::ITstream
 (
-    const string& name,
-    const UList<char>& input,
-    IOstreamOption streamOpt
+    IOstreamOption streamOpt,
+    const string& name
 )
 :
     Istream(streamOpt.format(), streamOpt.version()),
     tokenList(),
     name_(name),
     tokenIndex_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
+Foam::ITstream::ITstream
+(
+    const Foam::zero,
+    const string& name,
+    IOstreamOption streamOpt
+)
+:
+    ITstream(streamOpt, name)
+{}
+
+
+Foam::ITstream::ITstream
+(
+    const string& name,
+    const UList<token>& tokens,
+    IOstreamOption streamOpt
+)
+:
+    Istream(streamOpt.format(), streamOpt.version()),
+    tokenList(tokens),
+    name_(name),
+    tokenIndex_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
+Foam::ITstream::ITstream
+(
+    const string& name,
+    List<token>&& tokens,
+    IOstreamOption streamOpt
+)
+:
+    Istream(streamOpt.format(), streamOpt.version()),
+    tokenList(std::move(tokens)),
+    name_(name),
+    tokenIndex_(0)
+{
+    setOpened();
+    setGood();
+}
+
+
+Foam::ITstream::ITstream
+(
+    const UList<char>& input,
+    IOstreamOption streamOpt,
+    const string& name
+)
+:
+    ITstream(streamOpt, name)
 {
     UIListStream is(input, streamOpt);
 
@@ -152,17 +234,14 @@ Foam::ITstream::ITstream
 
 Foam::ITstream::ITstream
 (
-    const string& name,
     const std::string& input,
-    IOstreamOption streamOpt
+    IOstreamOption streamOpt,
+    const string& name
 )
 :
-    Istream(streamOpt.format(), streamOpt.version()),
-    tokenList(),
-    name_(name),
-    tokenIndex_(0)
+    ITstream(streamOpt, name)
 {
-    UIListStream is(input.data(), input.size(), streamOpt);
+    UIListStream is(input.data(), input.length(), streamOpt);
 
     parseStream(is, static_cast<tokenList&>(*this));
     ITstream::rewind();
@@ -171,15 +250,12 @@ Foam::ITstream::ITstream
 
 Foam::ITstream::ITstream
 (
-    const string& name,
     const char* input,
-    IOstreamOption streamOpt
+    IOstreamOption streamOpt,
+    const string& name
 )
 :
-    Istream(streamOpt.format(), streamOpt.version()),
-    tokenList(),
-    name_(name),
-    tokenIndex_(0)
+    ITstream(streamOpt, name)
 {
     UIListStream is(input, strlen(input), streamOpt);
 
@@ -448,18 +524,20 @@ void Foam::ITstream::append(List<token>&& newTokens, const bool lazy)
 
 void Foam::ITstream::operator=(const ITstream& is)
 {
-    Istream::operator=(is);
-    tokenList::operator=(is);
-    name_ = is.name_;
-
-    rewind();
+    // Self-assignment is a no-op
+    if (this != &is)
+    {
+        Istream::operator=(is);
+        tokenList::operator=(is);
+        name_ = is.name_;
+        rewind();
+    }
 }
 
 
 void Foam::ITstream::operator=(const UList<token>& toks)
 {
     tokenList::operator=(toks);
-
     rewind();
 }
 
@@ -467,7 +545,6 @@ void Foam::ITstream::operator=(const UList<token>& toks)
 void Foam::ITstream::operator=(List<token>&& toks)
 {
     tokenList::operator=(std::move(toks));
-
     rewind();
 }
 

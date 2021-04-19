@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -370,7 +370,6 @@ int main(int argc, char *argv[])
     (
         ITstream
         (
-            "input",
             "(1 n 1 n 1 n 1 1 off 0 0 f f 0 y yes y true y false on t)"
         )()
     );

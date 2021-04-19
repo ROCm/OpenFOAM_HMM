@@ -156,7 +156,7 @@ inline bool Foam::argList::found(const word& optName) const
 
 inline Foam::ITstream Foam::argList::lookup(const word& optName) const
 {
-    return ITstream(optName, options_[optName]);
+    return ITstream(options_[optName]);
 }
 
 
@@ -250,7 +250,7 @@ namespace Foam
 template<class T>
 inline T Foam::argList::get(const label index) const
 {
-    ITstream is(Foam::name(index), args_[index]);
+    ITstream is(args_[index]);
 
     T val;
     is >> val;
@@ -264,7 +264,7 @@ inline T Foam::argList::get(const label index) const
 template<class T>
 inline T Foam::argList::get(const word& optName) const
 {
-    ITstream is(optName, options_[optName]);
+    ITstream is(options_[optName]);
 
     T val;
     is >> val;
@@ -329,7 +329,7 @@ inline bool Foam::argList::readIfPresent
 template<class T>
 inline Foam::List<T> Foam::argList::getList(const label index) const
 {
-    ITstream is(Foam::name(index), args_[index]);
+    ITstream is(args_[index]);
 
     List<T> list;
     readList(is, list);
@@ -351,7 +351,7 @@ inline Foam::List<T> Foam::argList::getList
 
     if (mandatory || found(optName))
     {
-        ITstream is(optName, options_[optName]);
+        ITstream is(options_[optName]);
 
         readList(is, list);
 
@@ -371,7 +371,7 @@ inline bool Foam::argList::readListIfPresent
 {
     if (found(optName))
     {
-        ITstream is(optName, options_[optName]);
+        ITstream is(options_[optName]);
 
         readList(is, list);
 

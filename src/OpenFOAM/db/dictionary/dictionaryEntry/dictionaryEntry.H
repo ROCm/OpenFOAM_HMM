@@ -119,7 +119,7 @@ public:
             return dictionary::name();
         }
 
-        //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
+        //- Return scoped dictionary name for modification
         virtual fileName& name()
         {
             return dictionary::name();

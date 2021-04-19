@@ -573,7 +573,7 @@ public:
         ) const;
 
         //- Find and return an entry data stream.
-        //- FatalIOError if not found, or if the number of tokens is incorrect.
+        //- FatalIOError if not found, or not a stream
         //
         //  \param matchOpt the default search is non-recursive with patterns
         ITstream& lookup

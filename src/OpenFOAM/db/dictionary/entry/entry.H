@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class ITstream;
 class dictionary;
 class entry;
@@ -185,21 +185,21 @@ public:
     // Member Functions
 
         //- Return keyword
-        const keyType& keyword() const
+        const keyType& keyword() const noexcept
         {
             return keyword_;
         }
 
         //- Return non-const access to keyword
-        keyType& keyword()
+        keyType& keyword() noexcept
         {
             return keyword_;
         }
 
-        //- Return the dictionary name
+        //- Return the entry name
         virtual const fileName& name() const = 0;
 
-        //- Return the dictionary name
+        //- Return the entry name for modification
         virtual fileName& name() = 0;
 
         //- Return line number of first token in dictionary
