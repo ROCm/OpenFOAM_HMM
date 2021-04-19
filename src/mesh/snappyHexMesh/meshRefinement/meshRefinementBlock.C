@@ -514,8 +514,8 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
         }
     }
     // Clever limiting of the number of iterations (= max cells in the channel)
-    // since it has too many problematic issues, e.g. with volume refinement.
-    // Since the real check uses the proper distance anyway just disable.
+    // since it has too many problematic issues, e.g. with volume refinement
+    // and the real check uses the proper distance anyway just disable.
     const label nIters = mesh_.globalData().nTotalCells();
 
 
@@ -613,11 +613,21 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
     DynamicList<FixedList<label, 3>> originSurface(2);
     //DynamicList<point> originNormal(2);
 
+
+    //- To avoid walking through surfaces we mark all faces that have been
+    //  intersected. We can either mark only those faces intersecting
+    //  blockedSurfaces (i.e. with a 'blockLevel') or mark faces intersecting
+    //  any (refinement) surface (this includes e.g. faceZones). This is
+    //  much easier since that information is already cached
+    //  (meshRefinement::intersectedFaces())
+
+    //bitSet isBlockedFace(mesh_.nFaces());
     forAll(testFaces, i)
     {
         if (hit1[i].hit())
         {
             const label facei = testFaces[i];
+            //isBlockedFace.set(facei);
             const point& fc = mesh_.faceCentres()[facei];
             const labelList& fz1 = faceZones[surface1[i]];
 
@@ -656,6 +666,8 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                 );
             }
 
+            // Collect all seed data. Currently walking does not look at
+            // surface direction - if so pass in surface normal as well
             faceDist[n] = wallPoints
             (
                 originLocation,     // origin
@@ -683,14 +695,21 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
     List<wallPoints> allFaceInfo(mesh_.nFaces());
     List<wallPoints> allCellInfo(mesh_.nCells());
 
-    FaceCellWave<wallPoints> wallDistCalc
+    // Any refinement surface (even a faceZone) should stop the gap walking.
+    // This is exactly the information which is cached in the surfaceIndex_
+    // field.
+    const bitSet isBlockedFace(intersectedFaces());
+
+    wallPoints::trackData td(isBlockedFace);
+    FaceCellWave<wallPoints, wallPoints::trackData> wallDistCalc
     (
         mesh_,
         changedFaces,
         faceDist,
         allFaceInfo,
         allCellInfo,
-        0             // max iterations
+        0,            // max iterations
+        td
     );
     wallDistCalc.iterate(nIters);
 

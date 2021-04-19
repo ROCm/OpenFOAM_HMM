@@ -113,8 +113,10 @@ castellatedMeshControls
             //     surfaces
             //gapLevel    (1 2 10);
 
-            //MEJ: from cell level 2 onwards start checking for opposite
-            //     surfaces
+            // Block any gap (opposite surfaces or opposite disconnected region
+            // of surface):
+            //  - thinner than 2*blockcellsize where blockcellsize
+            //    is the size of a cell at blockLevel
             blockLevel  2;
         }
     }

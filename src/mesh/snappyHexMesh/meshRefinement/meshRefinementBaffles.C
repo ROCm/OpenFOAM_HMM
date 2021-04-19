@@ -2408,14 +2408,18 @@ void Foam::meshRefinement::growCellZone
 
 
     List<wallPoints> allFaceInfo(mesh_.nFaces());
-    FaceCellWave<wallPoints> wallDistCalc
+
+    const bitSet isBlockedFace(mesh_.nFaces());
+    wallPoints::trackData td(isBlockedFace);
+    FaceCellWave<wallPoints, wallPoints::trackData> wallDistCalc
     (
         mesh_,
         changedFaces,
         faceDist,
         allFaceInfo,
         allCellInfo,
-        0             // max iterations
+        0,            // max iterations
+        td
     );
     wallDistCalc.iterate(nGrowCellZones);
 
