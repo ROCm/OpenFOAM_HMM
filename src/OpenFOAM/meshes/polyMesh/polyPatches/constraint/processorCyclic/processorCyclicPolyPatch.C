@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,10 +181,10 @@ Foam::labelList Foam::processorCyclicPolyPatch::patchIDs
 {
     return bm.indices
     (
-        keyType
+        wordRe
         (
             "procBoundary.*to.*through" + cyclicPolyPatchName,
-            keyType::REGEX
+            wordRe::REGEX
         )
     );
 }
@@ -203,11 +203,11 @@ int Foam::processorCyclicPolyPatch::tag() const
 
         if (owner())
         {
-            tag_ = string::hash()(cycPatch.name()) % 32768u;
+            tag_ = string::hasher()(cycPatch.name()) % 32768u;
         }
         else
         {
-            tag_ = string::hash()(cycPatch.neighbPatch().name()) % 32768u;
+            tag_ = string::hasher()(cycPatch.neighbPatch().name()) % 32768u;
         }
 
         if (tag_ == Pstream::msgType() || tag_ == -1)

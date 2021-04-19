@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const fileName importName = args[1];
+    const auto importName = args.get<fileName>(1);
 
     word ext;
     if (!args.readIfPresent("ext", ext))

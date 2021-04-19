@@ -41,7 +41,6 @@ SourceFiles
 #define Enum_H
 
 #include "wordList.H"
-#include <initializer_list>
 #include <ostream>
 #include <utility>
 

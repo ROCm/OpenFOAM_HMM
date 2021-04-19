@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1325,7 +1325,7 @@ int main(int argc, char *argv[])
     }
 
     const bool keepOrientation = args.found("keepOrientation");
-    IFstream inFile(args[1]);
+    IFstream inFile(args.get<fileName>(1));
 
     // Storage for points
     pointField points;

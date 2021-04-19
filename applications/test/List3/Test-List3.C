@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
         {
             if (true)
             {
-                IFstream is(args[argi]);
+                IFstream is(args.get<fileName>(argi));
 
                 Info<< nl << nl
                     << "read from " << is.name() << nl << endl;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
             if (true)
             {
-                IFstream is(args[argi]);
+                IFstream is(args.get<fileName>(argi));
 
                 Info<< nl << nl
                     << "read from " << is.name() << nl << endl;

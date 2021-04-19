@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,9 @@ SourceFiles
 
 #include "char.H"
 #include "Hasher.H"
-#include <string>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -122,7 +122,10 @@ protected:
         inline bool hasExt() const;
 
         //- Return true if the extension is the same as the given ending.
-        bool hasExt(const word& ending) const;
+        inline bool hasExt(const char* ending) const;
+
+        //- Return true if the extension is the same as the given ending.
+        inline bool hasExt(const std::string& ending) const;
 
         //- Return true if the extension matches the given ending.
         bool hasExt(const wordRe& ending) const;
@@ -136,6 +139,21 @@ protected:
 
 public:
 
+    // Public Classes
+
+        //- Hashing functor for string and derived string classes
+        struct hasher
+        {
+            unsigned operator()(const std::string& str, unsigned seed=0) const
+            {
+                return Foam::Hasher(str.data(), str.length(), seed);
+            }
+        };
+
+        //- Hashing functor for string and derived string classes
+        struct hash : string::hasher {};
+
+
     // Static Data Members
 
         //- The type name "string"
@@ -148,20 +166,9 @@ public:
         static const string null;
 
 
-    //- Hashing function for string and derived string classes
-    struct hash
-    {
-        inline unsigned operator()
-        (
-            const std::string& str,
-            unsigned seed = 0
-        ) const;
-    };
-
-
     // Constructors
 
-        //- Construct null
+        //- Default construct
         string() = default;
 
         //- Copy construct from std::string
@@ -189,29 +196,16 @@ public:
     // Static Member Functions
 
         //- Does the string contain valid characters only?
-        template<class String>
+        template<class StringType>
         static inline bool valid(const std::string& str);
 
-        //- Does this string contain meta-characters?
-        //  The meta characters can be optionally quoted.
-        template<class String>
-        static inline bool meta(const std::string& str, const char quote='\\');
-
         //- Strip invalid characters from the given string
-        template<class String>
+        template<class StringType>
         static inline bool stripInvalid(std::string& str);
 
         //- Return a valid String from the given string
-        template<class String>
-        static inline String validate(const std::string& str);
-
-        //- Return a String with quoted meta-characters from the given string
-        template<class String>
-        static inline string quotemeta
-        (
-            const std::string& str,
-            const char quote = '\\'
-        );
+        template<class StringType>
+        static inline StringType validate(const std::string& str);
 
 
     // Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
+#include "token.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -41,27 +42,27 @@ Foam::string::string(Istream& is)
 
 Foam::Istream& Foam::operator>>(Istream& is, string& val)
 {
-    token t(is);
+    token tok(is);
 
-    if (!t.good())
+    if (tok.isString())
     {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get string"
-            << exit(FatalIOError);
-        is.setBad();
-        return is;
-    }
-
-    if (t.isString())
-    {
-        val = t.stringToken();
+        val = tok.stringToken();
     }
     else
     {
-        FatalIOErrorInFunction(is)
-            << "Wrong token type - expected string, found "
-            << t.info()
-            << exit(FatalIOError);
+        FatalIOErrorInFunction(is);
+        if (tok.good())
+        {
+            FatalIOError
+                << "Wrong token type - expected string, found "
+                << tok.info();
+        }
+        else
+        {
+            FatalIOError
+                << "Bad token - could not get string";
+        }
+        FatalIOError << exit(FatalIOError);
         is.setBad();
         return is;
     }

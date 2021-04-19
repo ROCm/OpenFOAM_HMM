@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ SourceFiles
 #ifndef regExpPosix_H
 #define regExpPosix_H
 
+#include "regExpCxx.H"
 #include <regex.h>
-#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,8 +66,7 @@ namespace Foam
 {
 
 // Forward Declarations
-template<class String> class SubStrings;
-
+template<class StringType> class SubStrings;
 
 /*---------------------------------------------------------------------------*\
                          Class regExpPosix Declaration
@@ -77,7 +76,7 @@ class regExpPosix
 {
     // Private Data
 
-        //- Precompiled regular expression
+        //- Compiled regular expression
         regex_t* preg_;
 
 public:
@@ -96,39 +95,53 @@ public:
 
     // Static Member Functions
 
-        //- Test if character appears to be a regular expression meta-character
-        //  \return true if character is one of the following:
-        //  - any character: '.' \n
-        //  - quantifiers:  '*', '+', '?' \n
-        //  - grouping: '(', '|', ')' \n
-        //  - range: '[', ']' \n
-        //
-        // \note The presence of '{', '}' regex bounds is not considered
-        inline static bool meta(char c);
+        //- Test if character is a regex meta-character
+        inline static bool is_meta(const char c) noexcept
+        {
+            return regExpCxx::is_meta(c);
+        }
+
+        //- Test if string contains any (unquoted) meta-characters
+        inline static bool is_meta
+        (
+            const std::string& str,
+            const char quote = '\\'
+        )
+        {
+            return regExpCxx::is_meta(str, quote);
+        }
+
+
+    // Public Classes
+
+        //- Functor wrapper for testing meta-characters
+        using meta = regExpCxx::meta;
 
 
     // Constructors
 
-        //- Construct null
-        inline regExpPosix();
+        //- Default construct
+        inline regExpPosix() noexcept;
 
         //- Copy construct - disallowed
         regExpPosix(const regExpPosix&) = delete;
 
         //- Move construct
-        inline regExpPosix(regExpPosix&& rgx);
-
-        //- Construct from character array
-        inline explicit regExpPosix(const char* pattern);
-
-        //- Construct from string
-        inline explicit regExpPosix(const std::string& pattern);
+        inline regExpPosix(regExpPosix&& rgx) noexcept;
 
         //- Construct from character array, optionally ignore case
-        inline regExpPosix(const char* pattern, bool ignoreCase);
+        inline explicit regExpPosix
+        (
+            const char* pattern,
+            const bool ignoreCase = false
+        );
 
         //- Construct from string, optionally ignore case
-        inline regExpPosix(const std::string& pattern, bool ignoreCase);
+        inline explicit regExpPosix
+        (
+            const std::string& pattern,
+            const bool ignoreCase = false
+        );
 
 
     //- Destructor

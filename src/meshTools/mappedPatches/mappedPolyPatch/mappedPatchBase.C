@@ -1760,14 +1760,15 @@ Foam::pointIndexHit Foam::mappedPatchBase::facePoint
 const Foam::objectRegistry& Foam::mappedPatchBase::subRegistry
 (
     const objectRegistry& obr,
-    const fileName& rawFName
+    const fileName& path
 )
 {
-    // Lookup (and create if non existing) a registry using a '/' separated
-    // path.
+    // Lookup (and create if non-existing) a registry using
+    // '/' separated path. Like 'mkdir -p'
 
-    const fileName fName(rawFName.clean());
-    const wordList names(fName.components());
+    fileName cleanedPath(path);
+    cleanedPath.clean();  // Remove unneeded ".."
+    const wordList names(cleanedPath.components());
 
     if (names.empty())
     {

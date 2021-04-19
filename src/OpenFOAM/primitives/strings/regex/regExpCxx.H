@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,7 @@ class regExpCxx
         //- Track if input pattern was OK - ie, has a length
         bool ok_;
 
+
     // Private Member Functions
 
         //- Select grammar based on regExpCxx optimisationSwitch
@@ -102,39 +103,67 @@ public:
 
     // Static Member Functions
 
-        //- Test if character appears to be a regular expression meta-character
-        //  \return true if character is one of the following:
+        //- Test if character is a regex meta-character
+        //  \return True if character is one of the following:
         //  - any character: '.' \n
         //  - quantifiers:  '*', '+', '?' \n
         //  - grouping: '(', '|', ')' \n
         //  - range: '[', ']' \n
         //
-        // \note The presence of '{', '}' regex bounds is not considered
-        inline static bool meta(const char c);
+        // \note Regex bounds '{', '}' are not considered
+        inline static bool is_meta(const char c) noexcept;
+
+        //- Test if string contains any (unquoted) meta-characters
+        inline static bool is_meta
+        (
+            const std::string& str,
+            const char quote = '\\'
+        );
+
+
+    // Public Classes
+
+        //- Functor wrapper for testing meta-characters
+        struct meta
+        {
+            //- Test if character is a regex meta-character
+            bool operator()(const char c) const noexcept
+            {
+                return is_meta(c);
+            }
+
+            //- Test string for meta-characters
+            bool operator()(const std::string& s, const char q = '\\') const
+            {
+                return is_meta(s, q);
+            }
+        };
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         inline regExpCxx();
 
         //- Copy construct
         inline regExpCxx(const regExpCxx& rgx);
 
         //- Move construct
-        inline regExpCxx(regExpCxx&& rgx);
-
-        //- Construct from character array
-        inline explicit regExpCxx(const char* pattern);
-
-        //- Construct from string
-        inline explicit regExpCxx(const std::string& pattern);
+        inline regExpCxx(regExpCxx&& rgx) noexcept;
 
         //- Construct from character array, optionally ignore case
-        inline regExpCxx(const char* pattern, bool ignoreCase);
+        inline explicit regExpCxx
+        (
+            const char* pattern,
+            const bool ignoreCase = false
+        );
 
         //- Construct from string, optionally ignore case
-        inline regExpCxx(const std::string& pattern, bool ignoreCase);
+        inline explicit regExpCxx
+        (
+            const std::string& pattern,
+            const bool ignoreCase = false
+        );
 
 
     //- Destructor

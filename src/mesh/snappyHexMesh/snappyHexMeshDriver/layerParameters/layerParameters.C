@@ -532,7 +532,7 @@ Foam::layerParameters::layerParameters
 
             const labelHashSet patchIDs
             (
-                boundaryMesh.patchSet(List<wordRe>(1, wordRe(key)))
+                boundaryMesh.patchSet(wordRes(one{}, wordRe(key)))
             );
 
             if (patchIDs.size() == 0)

@@ -50,11 +50,11 @@ namespace blockMeshTools
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     //- In-place read with dictionary lookup
-    void read(Istream&, label&, const dictionary&);
+    void read(Istream&, label& val, const dictionary&);
 
     //- In-place read with dictionary lookup
     template<class T>
-    void read(Istream&, List<T>&, const dictionary&);
+    void read(Istream&, List<T>& list, const dictionary&);
 
     //- Return-read with dictionary lookup
     label read(Istream&, const dictionary&);
@@ -64,10 +64,10 @@ namespace blockMeshTools
     List<T> read(Istream& is, const dictionary&);
 
     //- Write with dictionary lookup
-    void write(Ostream&, const label, const dictionary&);
+    void write(Ostream&, const label val, const dictionary&);
 
-    //- Linear search for label entry
-    const keyType& findEntry(const dictionary&, const label);
+    //- Linear search for labelled entry, nullptr if not found
+    const entry* findEntry(const dictionary& dict, const label val);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

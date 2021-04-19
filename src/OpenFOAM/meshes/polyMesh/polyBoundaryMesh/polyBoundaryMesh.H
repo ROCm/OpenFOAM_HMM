@@ -132,6 +132,7 @@ public:
     //- Destructor
     ~polyBoundaryMesh() = default;
 
+
         //- Clear geometry at this level and at patches
         void clearGeom();
 
@@ -142,7 +143,7 @@ public:
     // Member Functions
 
         //- Return the mesh reference
-        const polyMesh& mesh() const
+        const polyMesh& mesh() const noexcept
         {
             return mesh_;
         }
@@ -200,14 +201,14 @@ public:
         //  A no-op (returns empty list) for an empty key
         labelList indices
         (
-            const keyType& key,
+            const wordRe& matcher,
             const bool useGroups = true
         ) const;
 
 
         //- Return patch index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty key
-        label findIndex(const keyType& key) const;
+        label findIndex(const wordRe& key) const;
 
         //- Find patch index given a name, return -1 if not found
         //  A no-op (returns -1) for an empty patchName
@@ -296,7 +297,7 @@ public:
         polyPatch& operator[](const word& patchName);
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream& os, const polyBoundaryMesh& pbm);
 
@@ -305,11 +306,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices
-        (
-            const keyType& key,
-            const bool useGroups = true
-        ) const
+        labelList findIndices(const wordRe& key, bool useGroups=true) const
         {
             return this->indices(key, useGroups);
         }

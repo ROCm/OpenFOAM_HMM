@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ Description
 #ifndef SubStrings_H
 #define SubStrings_H
 
-#include <regex>
+#include <regex>  // For std::sub_match
 #include <string>
 #include <vector>
 
@@ -48,21 +48,22 @@ namespace Foam
                          Class SubStrings Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class String>
+template<class StringType>
 class SubStrings
 :
-    public std::vector<std::sub_match<typename String::const_iterator>>
+    public std::vector<std::sub_match<typename StringType::const_iterator>>
 {
 public:
 
-    // Typedefs
+    // Types
 
         //- The element type
         using value_type =
-            typename std::sub_match<typename String::const_iterator>;
+            typename std::sub_match<typename StringType::const_iterator>;
 
         //- The const_iterator for the underlying string type
-        using string_iterator = typename String::const_iterator;
+        using string_iterator =
+            typename StringType::const_iterator;
 
 
     // Constructors
@@ -87,12 +88,11 @@ public:
             return len;
         }
 
-
         //- Append sub-string defined by begin/end iterators
         void append
         (
-            const typename String::const_iterator& b,
-            const typename String::const_iterator& e
+            const typename StringType::const_iterator& b,
+            const typename StringType::const_iterator& e
         )
         {
             value_type range;
@@ -103,14 +103,12 @@ public:
             this->push_back(range);
         }
 
-
         //- Const reference to the first element,
         //- for consistency with other OpenFOAM containers
         auto first() const -> decltype(this->front())
         {
             return this->front();
         }
-
 
         //- Const reference to the last element,
         //- for consistency with other OpenFOAM containers
@@ -119,9 +117,8 @@ public:
             return this->back();
         }
 
-
-        //- Get element pos, converted to a string type.
-        String str(size_t pos) const
+        //- Get element at pos, converted to a string type.
+        StringType str(size_t pos) const
         {
             return (*this)[pos].str();
         }

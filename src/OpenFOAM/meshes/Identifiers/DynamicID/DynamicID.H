@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,18 +39,13 @@ Description
 #ifndef DynamicID_H
 #define DynamicID_H
 
-#include "keyType.H"
+#include "wordRe.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declarations
-template<class> class DynamicID;
-template<class ObjectType>
-Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&);
 
 /*---------------------------------------------------------------------------*\
                           Class DynamicID Declaration
@@ -59,12 +54,12 @@ Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&);
 template<class ObjectType>
 class DynamicID
 {
-    // Private data
+    // Private Data
 
-        //- Zone name
-        keyType key_;
+        //- Selector name
+        wordRe key_;
 
-        //- Zone indices
+        //- Selection indices
         labelList indices_;
 
 
@@ -72,18 +67,36 @@ public:
 
     // Constructors
 
-        //- Construct from name
-        DynamicID(const keyType& key, const ObjectType& obj)
+        //- Construct from selector name and object
+        DynamicID(const wordRe& key, const ObjectType& obj)
         :
             key_(key),
             indices_(obj.indices(key_))
         {}
 
-        //- Construct from Istream
+        //- Construct from selector name and object
+        DynamicID(wordRe&& key, const ObjectType& obj)
+        :
+            key_(std::move(key)),
+            indices_(obj.indices(key_))
+        {}
+
+        //- Construct from selector name and object
+        DynamicID(const word& key, const ObjectType& obj)
+        :
+            DynamicID(wordRe(key), obj)
+        {}
+
+        //- Construct from selector name and object
+        DynamicID(const keyType& key, const ObjectType& obj)
+        :
+            DynamicID(wordRe(key), obj)
+        {}
+
+        //- Construct from Istream and object
         DynamicID(Istream& is, const ObjectType& obj)
         :
-            key_(is),
-            indices_(obj.indices(key_))
+            DynamicID(wordRe(is), obj)
         {}
 
 
@@ -93,56 +106,50 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return name
-            const keyType& name() const
-            {
-                return key_;
-            }
+        //- The selector name
+        const wordRe& name() const noexcept
+        {
+            return key_;
+        }
 
-            //- Return indices of matching zones
-            const labelList& indices() const
-            {
-                return indices_;
-            }
+        //- The indices of matching items
+        const labelList& indices() const noexcept
+        {
+            return indices_;
+        }
 
-            //- Return index of first matching zone
-            label index() const
-            {
-                return indices_.empty() ? -1 : indices_.first();
-            }
+        //- The index of the first matching items, -1 if no matches
+        label index() const
+        {
+            return indices_.empty() ? -1 : indices_.first();
+        }
 
-            //- Has the zone been found
-            bool active() const
-            {
-                return !indices_.empty();
-            }
-
-
-        // Edit
-
-            //- Update
-            void update(const ObjectType& obj)
-            {
-                indices_ = obj.indices(key_);
-            }
+        //- Has the zone been found
+        bool active() const noexcept
+        {
+            return !indices_.empty();
+        }
 
 
-    // IOstream Operators
+    // Edit
 
-        friend Ostream& operator<< <ObjectType>
-        (Ostream&, const DynamicID<ObjectType>&);
+        //- Update
+        void update(const ObjectType& obj)
+        {
+            indices_ = obj.indices(key_);
+        }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class ObjectType>
-Ostream& operator<<(Ostream& os, const DynamicID<ObjectType>& dynId)
+Ostream& operator<<(Ostream& os, const DynamicID<ObjectType>& obj)
 {
     os  << token::BEGIN_LIST
-        << dynId.name() << token::SPACE << dynId.index()
+        << obj.name() << token::SPACE << obj.index()
         << token::END_LIST;
 
     os.check(FUNCTION_NAME);

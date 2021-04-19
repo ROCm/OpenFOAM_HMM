@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,23 +36,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::shortEdgeFilter2D::addRegion
-(
-    const label regionI,
-    DynamicList<label>& bPointRegions
-) const
-{
-    if (bPointRegions.empty())
-    {
-        bPointRegions.append(regionI);
-    }
-    else if (!bPointRegions.found(regionI))
-    {
-        bPointRegions.append(regionI);
-    }
-}
-
-
 void Foam::shortEdgeFilter2D::assignBoundaryPointRegions
 (
     List<DynamicList<label>>& boundaryPointRegions
@@ -61,13 +44,10 @@ void Foam::shortEdgeFilter2D::assignBoundaryPointRegions
     forAllConstIters(mapEdgesRegion_, iter)
     {
         const edge& e = iter.key();
-        const label& regionI = iter();
+        const label regi = iter.val();
 
-        const label startI = e.start();
-        const label endI = e.end();
-
-        addRegion(regionI, boundaryPointRegions[startI]);
-        addRegion(regionI, boundaryPointRegions[endI]);
+        boundaryPointRegions[e.start()].appendUniq(regi);
+        boundaryPointRegions[e.end()].appendUniq(regi);
     }
 }
 

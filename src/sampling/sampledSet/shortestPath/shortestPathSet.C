@@ -1316,13 +1316,13 @@ Foam::shortestPathSet::shortestPathSet
 {
     if (debug)
     {
-        fileName outputDir =
+        fileName outputDir
         (
             mesh.time().globalPath()
           / functionObject::outputPrefix
           / mesh.pointsInstance()
         );
-        outputDir.clean();
+        outputDir.clean();  // Remove unneeded ".."
 
         Info<< "shortestPathSet : Writing blocked faces to "
             << outputDir << endl;

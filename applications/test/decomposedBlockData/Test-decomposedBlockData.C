@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const fileName file(args[1]);
+    const auto file = args.get<fileName>(1);
 
     Info<< "Reading " << file << nl << endl;
     decomposedBlockData data

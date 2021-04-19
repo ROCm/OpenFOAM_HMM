@@ -894,15 +894,8 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
             const label faceOwner = pMesh.faceOwner()[facei];
             const label faceNeighbour = pMesh.faceNeighbour()[facei];
 
-            if (!cellsToResizeMap.found(faceOwner))
-            {
-                cellsToResizeMap.insert(faceOwner);
-            }
-
-            if (!cellsToResizeMap.found(faceNeighbour))
-            {
-                cellsToResizeMap.insert(faceNeighbour);
-            }
+            cellsToResizeMap.insert(faceOwner);
+            cellsToResizeMap.insert(faceNeighbour);
         }
 
         cellsToResizeMap += protrudingCells;

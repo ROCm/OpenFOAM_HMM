@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ Description
 
 SourceFiles
     keyType.C
+    keyTypeI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,6 +44,7 @@ SourceFiles
 #define keyType_H
 
 #include "word.H"
+#include "wordRe.H"
 #include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,8 +53,10 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
+class keyType;
+class token;
+Istream& operator>>(Istream& is, keyType& val);
+Ostream& operator<<(Ostream& os, const keyType& val);
 
 /*---------------------------------------------------------------------------*\
                            Class keyType Declaration
@@ -90,12 +94,6 @@ private:
         option type_;
 
 
-    // Private Member Functions
-
-        //- No assignment where we cannot determine string/word type
-        void operator=(const std::string&) = delete;
-
-
 public:
 
     // Static Data Members
@@ -106,69 +104,82 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, empty literal
         inline keyType();
 
-        //- Copy construct, retaining type (literal or regex)
-        inline keyType(const keyType& s);
+        //- Copy construct
+        keyType(const keyType&) = default;
 
-        //- Copy construct from word, treat as literal.
-        inline keyType(const word& s);
+        //- Move construct
+        keyType(keyType&&) = default;
 
-        //- Copy construct from string, treat as regular expression.
-        inline keyType(const string& s);
+        //- Implicit copy construct from word, treat as LITERAL
+        inline keyType(const word& str);
 
-        //- Construct as copy of character array, treat as literal.
-        inline keyType(const char* s);
+        //- Implicit move construct from word, treat as LITERAL
+        inline keyType(word&& str);
+
+        //- Implicit copy construct from Foam::string, treat as REGEX
+        inline keyType(const string& str);
+
+        //- Implicit move construct from Foam::string, treat as REGEX
+        inline keyType(string&& str);
 
         //- Copy construct from std::string with specified treatment
-        inline keyType(const std::string& s, option opt);
-
-        //- Move construct, retaining type (literal or regex)
-        inline keyType(keyType&& s);
-
-        //- Move construct from word, treat as literal.
-        inline keyType(word&& s);
-
-        //- Move construct from string, treat as regular expression.
-        inline keyType(string&& s);
+        inline keyType(const std::string& str, option opt);
 
         //- Move construct from std::string with specified treatment
-        inline keyType(std::string&& s, option opt);
+        inline keyType(std::string&& str, option opt);
 
-        //- Construct from Istream
+        //- Implicit construct from character array,
+        //- with specified compile option (default is LITERAL)
+        inline keyType(const char* str, option opt = option::LITERAL);
+
+        //- Construct from Istream by reading a token
         //  Treat as regular expression if surrounded by quotation marks.
         explicit keyType(Istream& is);
 
 
     // Member Functions
 
-        //- Is this character valid for a keyType?
-        //  This is largely identical with what word accepts, but also
-        //  permit brace-brackets, which are valid for some regexs.
-        inline static bool valid(char c);
+        //- Test for valid keyType character?
+        //  Like Foam::word, but with brace-brackets,
+        //  which are valid for some regexs.
+        inline static bool valid(const char c);
 
 
     // Access
 
         //- The keyType is treated as literal, not as pattern.
-        inline bool isLiteral() const;
+        inline bool isLiteral() const noexcept;
 
         //- The keyType is treated as a pattern, not as literal string.
-        inline bool isPattern() const;
+        inline bool isPattern() const noexcept;
 
 
     // Infrastructure
 
-        //- Change the representation
+        //- Inherit all regular string assign() methods
+        using word::assign;
+
+        //- Assign from word or string token.
+        //  Words are treated as literals, strings as regex
+        //  \return false if the token was the incorrect type
+        bool assign(const token& tok);
+
+        //- Change the representation, optionally stripping invalid word
+        //- characters when changing to a literal
         inline void setType(option opt, bool adjust = false);
 
         //- Mark as regular expression
-        inline bool compile();
+        inline bool compile() noexcept;
 
-        //- Mark as literal, instead of a regular expression.
-        //  Optionally strip invalid word characters.
-        inline void uncompile(bool adjust = false);
+        //- Mark as literal string
+        inline void uncompile() noexcept;
+
+        //- Mark as literal string, optionally strip invalid word
+        //- characters when changing to a literal
+        inline void uncompile(bool adjust);
 
 
     // Editing
@@ -177,7 +188,7 @@ public:
         inline void clear();
 
         //- Swap contents. Self-swapping is a no-op.
-        inline void swap(keyType& s);
+        void swap(keyType& rhs);
 
 
     // Matching/Searching
@@ -193,23 +204,25 @@ public:
         //  Allows use as a predicate.
         inline bool operator()(const std::string& text) const;
 
+        //- No assignment where type could be indeterminate
+        void operator=(const std::string&) = delete;
 
         //- Copy assignment, retaining type (literal or regex)
         //  Self-assignment is a no-op.
-        inline void operator=(const keyType& s);
+        inline void operator=(const keyType& str);
 
         //- Move assignment, retaining type (literal or regex)
         //  Self-assignment is a no-op.
-        inline void operator=(keyType&& s);
+        inline void operator=(keyType&& str);
 
-        //- Assign as word, treat as literal
-        inline void operator=(const word& s);
+        //- Assign from word, treat as literal
+        inline void operator=(const word& str);
 
         //- Assign from Foam::string, treat as regular expression
-        inline void operator=(const string& s);
+        inline void operator=(const string& str);
 
-        //- Assign as word, treat as literal
-        inline void operator=(const char* s);
+        //- Assign from character array, treat as literal
+        inline void operator=(const char* str);
 
 
     // Housekeeping

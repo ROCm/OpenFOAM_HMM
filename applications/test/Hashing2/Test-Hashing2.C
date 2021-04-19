@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    testHashing
+    Test-Hashing2
 
 Description
 
@@ -44,6 +44,7 @@ Description
 #include "triFaceList.H"
 
 #include "Hash.H"
+#include "HashSet.H"
 
 using namespace Foam;
 
@@ -84,7 +85,7 @@ void reportHashList(const UList<string>& list)
 
     for (const string& val : list)
     {
-        unsigned hash1 = string::hash()(val);
+        unsigned hash1 = string::hasher()(val);
 
         Info<< hex << hash1 << ": " << val << nl;
     }
@@ -117,11 +118,11 @@ void reportHashList(const UList<face>& list)
     for (const face& f : list)
     {
         // Direct value
-        unsigned hash1 = face::Hash<>()(f);
+        unsigned hash1 = face::hasher()(f);
 
         unsigned hash2 = Hash<face>()(f);
 
-        Info<< hex << "face::Hash<> " << hash1
+        Info<< hex << "face hash " << hash1
             << " Hash<face> " << hash2
             << ": " << dec << flatOutput(f) << nl;
     }
@@ -132,14 +133,10 @@ void reportHashList(const UList<labelList>& list)
 {
     for (const labelList& val : list)
     {
-        unsigned hash1 = Hasher
-        (
-            val.cdata(),
-            val.size() * sizeof(label)
-        );
+        unsigned hash1 = Foam::Hasher(val.cdata(), val.size_bytes());
 
         unsigned hash2 = Hash<labelList>()(val);
-        unsigned hash2b = labelList::Hash<>()(val);
+        unsigned hash2b = labelList::hasher()(val);
 
         Info<< hex << hash1 << " or " << hash2
             << "(" << hash2b << ") "
@@ -147,7 +144,7 @@ void reportHashList(const UList<labelList>& list)
     }
 
     unsigned hash2 = Hash<labelListList>()(list);
-    unsigned hash2bad = HasherT(list);
+    unsigned hash2bad = Foam::Hasher(&list, sizeof(list));
 
     Info<< hex << hash2 << " : " << dec << flatOutput(list) << nl
         << hex << hash2bad << " as direct hash would be wrong"
@@ -164,10 +161,10 @@ void reportHashList(const UList<wordPair>& list)
         unsigned hash1 = Hash<wordPair>()(pr);
 
         // as FixedList
-        unsigned hash2 = wordPair::Hash<>()(pr);
+        unsigned hash2 = wordPair::hasher()(pr);
 
         // as FixedList
-        unsigned hash2sym = wordPair::SymmHash<>()(pr);
+        unsigned hash2sym = wordPair::symmHasher()(pr);
 
         // as FixedList
         unsigned hash3 = Hash<FixedList<word,2>>()(pr);
@@ -189,7 +186,7 @@ void reportHashList(const UList<labelPair>& list)
         unsigned hash1 = Hash<labelPair>()(pr);
 
         // as FixedList
-        unsigned hash2 = labelPair::Hash<>()(pr);
+        unsigned hash2 = labelPair::hasher()(pr);
 
         // as FixedList
         unsigned hash3 = Hash<labelPair>()(pr);
@@ -210,7 +207,7 @@ void reportHashList(const UList<labelPairPair>& list)
         unsigned hash1 = Hash<labelPairPair>()(pr);
 
         // as FixedList
-        unsigned hash2 = labelPairPair::Hash<>()(pr);
+        unsigned hash2 = labelPairPair::hasher()(pr);
 
         // as FixedList
         unsigned hash3 = Hash<labelPairPair>()(pr);
@@ -231,7 +228,7 @@ void reportHashList(const UList<edge>& list)
         unsigned hash1 = Hash<edge>()(e);
 
         // as FixedList
-        unsigned hash2 = labelPair::Hash<>()(e);
+        unsigned hash2 = labelPair::hasher()(e);
 
         // as FixedList
         unsigned hash3 = Hash<labelPair>()(e);
@@ -251,7 +248,7 @@ void reportHashList(const UList<triFace>& list)
     {
         // direct value
         unsigned hash1 = Hash<triFace>()(f);
-        unsigned hash2 = FixedList<label, 3>::Hash<>()(f);
+        unsigned hash2 = FixedList<label, 3>::hasher()(f);
 
         Info<< hex << hash1 << " (as FixedList: " << hash2
             << "): " << dec << f << nl;

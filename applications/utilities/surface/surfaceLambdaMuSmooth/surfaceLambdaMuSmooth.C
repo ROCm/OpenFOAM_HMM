@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,11 +156,11 @@ int main(int argc, char *argv[])
     );
     argList args(argc, argv);
 
-    const fileName surfFileName = args[1];
-    const scalar lambda = args.get<scalar>(2);
-    const scalar mu = args.get<scalar>(3);
-    const label  iters = args.get<label>(4);
-    const fileName outFileName = args[5];
+    const auto surfFileName = args.get<fileName>(1);
+    const auto lambda = args.get<scalar>(2);
+    const auto mu = args.get<scalar>(3);
+    const auto iters = args.get<label>(4);
+    const auto outFileName = args.get<fileName>(5);
 
     if (lambda < 0 || lambda > 1)
     {
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
     if (args.found("featureFile"))
     {
-        const fileName featureFileName(args["featureFile"]);
+        const auto featureFileName = args.get<fileName>("featureFile");
         Info<< "Reading features from " << featureFileName << " ..." << endl;
 
         edgeMesh feMesh(featureFileName);

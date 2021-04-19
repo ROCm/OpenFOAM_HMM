@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,15 +67,13 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     Info<< "Reading dictionary " << args[1] << " ..." << endl;
-    IFstream dictFile(args[1]);
+    IFstream dictFile(args.get<fileName>(1));
     dictionary meshSubsetDict(dictFile);
 
     Info<< "Reading surface " << args[2] << " ..." << endl;
+    meshedSurface surf1(args.get<fileName>(2));
 
-    meshedSurface surf1(args[2]);
-
-    const fileName outFileName(args[3]);
-
+    const auto outFileName(args.get<fileName>(3));
 
     Info<< "Original:" << endl;
     surf1.writeStats(Info);
@@ -217,7 +215,7 @@ int main(int argc, char *argv[])
     {
         const dictionary& surfDict = meshSubsetDict.subDict("surface");
 
-        const fileName surfName(surfDict.get<fileName>("name"));
+        const auto surfName(surfDict.get<fileName>("name"));
 
         const volumeType::type volType =
         (

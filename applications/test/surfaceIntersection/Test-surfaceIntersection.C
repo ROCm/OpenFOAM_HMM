@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,13 +139,13 @@ int main(int argc, char *argv[])
 
     const word outputFile(args.executable() + ".obj");
 
-    const fileName surf1Name(args[1]);
+    const auto surf1Name = args.get<fileName>(1);
     triSurface surf1 = loadSurface(runTime, surf1Name, scaleFactor)();
     Info<< surf1Name << " statistics:" << endl;
     surf1.writeStats(Info);
     Info<< endl;
 
-    const fileName surf2Name(args[2]);
+    const auto surf2Name = args.get<fileName>(2);
     triSurface surf2 = loadSurface(runTime, surf2Name, scaleFactor)();
     Info<< surf2Name << " statistics:" << endl;
     surf2.writeStats(Info);

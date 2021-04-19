@@ -50,11 +50,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class word;
-Istream& operator>>(Istream& is, word& w);
-Ostream& operator<<(Ostream& os, const word& w);
-
+Istream& operator>>(Istream& is, word& val);
+Ostream& operator<<(Ostream& os, const word& val);
 
 /*---------------------------------------------------------------------------*\
                            Class word Declaration
@@ -80,7 +79,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         word() = default;
 
         //- Copy construct
@@ -169,17 +168,11 @@ public:
         //  or when the file name is empty or ended with a '/'.
         word& ext(const word& ending);
 
-        //- Return true if it has an extension or simply ends with a '.'
-        inline bool hasExt() const;
-
-        //- Return true if the extension is the same as the given ending.
-        bool hasExt(const word& ending) const;
-
-        //- Return true if the extension matches the given ending.
-        bool hasExt(const wordRe& ending) const;
+        //- Various checks for extensions
+        using string::hasExt;
 
         //- Remove extension, returning true if string changed.
-        inline bool removeExt();
+        using string::removeExt;
 
 
     // Member Operators

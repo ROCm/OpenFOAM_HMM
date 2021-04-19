@@ -154,8 +154,8 @@ bool Foam::IOobject::fileNameComponents
     // Convert explicit relative file-system path to absolute file-system path.
     if (path.starts_with("./") || path.starts_with("../"))
     {
-        fileName absPath = cwd()/path;
-        absPath.clean();
+        fileName absPath(cwd()/path);
+        absPath.clean();  // Remove unneeded ".."
 
         return fileNameComponents(absPath, instance, local, name);
     }

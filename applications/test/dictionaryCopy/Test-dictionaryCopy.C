@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     for (label argi=1; argi < args.size(); ++argi)
     {
-        const string& dictFile = args[argi];
+        const auto dictFile = args.get<fileName>(argi);
         IFstream is(dictFile);
 
         dictionary input(is);

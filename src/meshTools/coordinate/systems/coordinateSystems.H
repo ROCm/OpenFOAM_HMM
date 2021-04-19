@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +134,7 @@ public:
 
         //- Find and return indices for all matches
         //  A no-op (returns empty list) for an empty key
-        labelList indices(const keyType& key) const;
+        labelList indices(const wordRe& key) const;
 
         //- Find and return indices for all matches
         //  A no-op (returns empty list) for an empty matcher
@@ -142,14 +142,14 @@ public:
 
         //- Find and return index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty key
-        label findIndex(const keyType& key) const;
+        label findIndex(const wordRe& key) const;
 
         //- Find and return index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty matcher
         label findIndex(const wordRes& matcher) const;
 
         //- Search if given key exists
-        bool found(const keyType& key) const;
+        bool found(const wordRe& key) const;
 
         //- Return pointer to named coordinateSystem or nullptr on error
         const coordinateSystem* cfind(const word& name) const;
@@ -161,10 +161,7 @@ public:
         wordList names() const;
 
         //- A list of the coordinate-system names satisfying the input matcher
-        wordList names(const keyType& key) const;
-
-        //- A list of the coordinate-system names satisfying the input matcher
-        wordList names(const wordRe& matcher) const;
+        wordList names(const wordRe& key) const;
 
         //- A list of the coordinate-system names satisfying the input matcher
         wordList names(const wordRes& matcher) const;
@@ -193,7 +190,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices(const keyType& key) const
+        labelList findIndices(const wordRe& key) const
         {
             return this->indices(key);
         }

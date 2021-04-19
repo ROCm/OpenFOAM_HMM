@@ -236,7 +236,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
         // Standard postProcessing/ naming
         outputDir_ = time_.globalPath()/functionObject::outputPrefix/name();
     }
-    outputDir_.clean();
+    outputDir_.clean();  // Remove unneeded ".."
 
     return true;
 }

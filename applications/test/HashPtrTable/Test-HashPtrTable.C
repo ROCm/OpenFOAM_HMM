@@ -127,13 +127,13 @@ int main()
     myTable.insert("sqrt2", autoPtr<double>::New(1.414214));
     myTable.insert("euler", autoPtr<double>::New(0.577216));
 
-    HashTable<std::unique_ptr<double>, word, string::hash> myTable1;
+    HashTable<std::unique_ptr<double>> myTable1;
 
     myTable1.set("abc", std::unique_ptr<double>(new double(42.1)));
     myTable1.set("pi", std::unique_ptr<double>(new double(3.14159)));
     myTable1.set("natlog", std::unique_ptr<double>(new double(2.718282)));
 
-    HashTable<autoPtr<double>, word, string::hash> myTable2;
+    HashTable<autoPtr<double>> myTable2;
 
     myTable2.set("abc", autoPtr<double>(new double(42.1)));
     myTable2.set("pi", autoPtr<double>(new double(3.14159)));
@@ -148,7 +148,7 @@ int main()
 
     {
         auto iter2 = myTable2.find("pi");
-        Info<< nl "Got pi=";
+        Info<< nl << "Got pi=";
         if (iter2.good())
         {
             Info<< **iter2 << nl;

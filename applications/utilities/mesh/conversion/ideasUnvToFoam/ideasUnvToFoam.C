@@ -666,7 +666,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName ideasName = args[1];
+    const auto ideasName = args.get<fileName>(1);
     IFstream inFile(ideasName);
 
     if (!inFile.good())
@@ -850,35 +850,39 @@ int main(int argc, char *argv[])
     Map<label> faceToCell[2];
 
     {
-        HashTable<label, face, face::Hash<>> faceToFaceID(boundaryFaces.size());
-        forAll(boundaryFaces, facei)
+        // Can use face::symmHasher or use sorted indices instead
+        // - choose the latter in case UNV has anything odd
+        HashTable<label, face> faceToFaceID(2*boundaryFaces.size());
+
+        forAll(boundaryFaces, bfacei)
         {
-            SortableList<label> sortedVerts(boundaryFaces[facei]);
-            faceToFaceID.insert(face(sortedVerts), facei);
+            face sortedVerts(boundaryFaces[bfacei]);
+            Foam::sort(sortedVerts);
+            faceToFaceID.insert(sortedVerts, bfacei);
         }
 
         forAll(cellVerts, celli)
         {
-            faceList faces = cellVerts[celli].faces();
-            forAll(faces, i)
+            const cellShape& shape = cellVerts[celli];
+
+            for (const face& f : shape.faces())
             {
-                SortableList<label> sortedVerts(faces[i]);
-                const auto fnd = faceToFaceID.find(face(sortedVerts));
-
-                if (fnd.found())
+                face sortedVerts(f);
+                Foam::sort(sortedVerts);
+                const label bfacei = faceToFaceID.lookup(sortedVerts, -1);
+                if (bfacei != -1)
                 {
-                    label facei = *fnd;
-                    int stat = face::compare(faces[i], boundaryFaces[facei]);
+                    const int cmp = face::compare(f, boundaryFaces[bfacei]);
 
-                    if (stat == 1)
+                    if (cmp == 1)
                     {
                         // Same orientation. Cell is owner.
-                        own[facei] = celli;
+                        own[bfacei] = celli;
                     }
-                    else if (stat == -1)
+                    else if (cmp == -1)
                     {
                         // Opposite orientation. Cell is neighbour.
-                        nei[facei] = celli;
+                        nei[bfacei] = celli;
                     }
                 }
             }
@@ -958,15 +962,13 @@ int main(int argc, char *argv[])
         {
             const cellShape& shape = cellVerts[celli];
 
-            const faceList shapeFaces(shape.faces());
-
-            forAll(shapeFaces, i)
+            for (const face& f : shape.faces())
             {
-                label patchi = findPatch(dofGroups, shapeFaces[i]);
+                label patchi = findPatch(dofGroups, f);
 
                 if (patchi != -1)
                 {
-                    dynPatchFaces[patchi].append(shapeFaces[i]);
+                    dynPatchFaces[patchi].append(f);
                 }
             }
         }

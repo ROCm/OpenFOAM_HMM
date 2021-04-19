@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
 
-    const fileName importName(args[1]);
-    const fileName exportName(args[2]);
+    const auto importName = args.get<fileName>(1);
+    const auto exportName = args.get<fileName>(2);
 
     // Disable inplace editing
     if (importName == exportName)

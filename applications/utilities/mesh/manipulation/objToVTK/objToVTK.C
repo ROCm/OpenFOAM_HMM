@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
     argList::addArgument("vtk-file", "The output vtk file");
     argList args(argc, argv);
 
-    const fileName objName = args[1];
-    const fileName outName = args[2];
+    const auto objName = args.get<fileName>(1);
+    const auto outName = args.get<fileName>(2);
 
     std::ifstream OBJfile(objName);
 

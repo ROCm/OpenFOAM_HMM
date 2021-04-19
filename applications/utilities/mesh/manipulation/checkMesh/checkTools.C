@@ -306,7 +306,7 @@ void Foam::mergeAndWrite
       / mesh.pointsInstance()
       / set.name()
     );
-    outputDir.clean();
+    outputDir.clean();  // Remove unneeded ".."
 
     mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
 }
@@ -399,7 +399,7 @@ void Foam::mergeAndWrite
       / mesh.pointsInstance()
       / set.name()
     );
-    outputDir.clean();
+    outputDir.clean();  // Remove unneeded ".."
 
     mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
 }
@@ -498,7 +498,7 @@ void Foam::mergeAndWrite
           / mesh.pointsInstance()
           // set.name()
         );
-        outputDir.clean();
+        outputDir.clean();  // Remove unneeded ".."
         mkDir(outputDir);
 
         fileName outputFile(outputDir/writer.getFileName(points, wordList()));

@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const fileName surfFileName = args[1];
-    const word distTypeName = args[2];
+    const auto surfFileName = args.get<fileName>(1);
+    const auto distTypeName = args.get<word>(2);
     const label distType =
         distributedTriSurfaceMesh::distributionTypeNames_[distTypeName];
 

@@ -604,20 +604,19 @@ Foam::labelRange Foam::polyBoundaryMesh::range(const label patchi) const
 
 Foam::labelList Foam::polyBoundaryMesh::indices
 (
-    const keyType& key,
+    const wordRe& matcher,
     const bool useGroups
 ) const
 {
-    if (key.empty())
+    if (matcher.empty())
     {
         return labelList();
     }
 
     DynamicList<label> patchIndices;
 
-    if (key.isPattern())
+    if (matcher.isPattern())
     {
-        const regExp matcher(key);
         patchIndices = PtrListOps::findMatching(*this, matcher);
 
         // Only examine patch groups if requested and when they exist.
@@ -648,7 +647,6 @@ Foam::labelList Foam::polyBoundaryMesh::indices
         // Literal string.
         // Special version of above for reduced memory footprint
 
-        const word& matcher = key;
         const label patchId = PtrListOps::firstMatching(*this, matcher);
 
         if (patchId >= 0)
@@ -659,7 +657,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
         // Only examine patch groups if requested and when they exist.
         if (useGroups && !groupPatchIDs().empty())
         {
-            const auto iter = groupPatchIDs().cfind(key);
+            const auto iter = groupPatchIDs().cfind(matcher);
 
             if (iter.found())
             {
@@ -676,24 +674,13 @@ Foam::labelList Foam::polyBoundaryMesh::indices
 }
 
 
-Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
+Foam::label Foam::polyBoundaryMesh::findIndex(const wordRe& key) const
 {
     if (key.empty())
     {
         return -1;
     }
-    else if (key.isPattern())
-    {
-        // Find as regex
-        const regExp matcher(key);
-        return PtrListOps::firstMatching(*this, matcher);
-    }
-    else
-    {
-        // Find as literal string
-        const word& matcher = key;
-        return PtrListOps::firstMatching(*this, matcher);
-    }
+    return PtrListOps::firstMatching(*this, key);
 }
 
 

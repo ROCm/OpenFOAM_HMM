@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +62,10 @@ namespace HashSetOps
 {
 
 //- Combine HashSet operation. Equivalent to 'a |= b'
-template<class Key=word, class Hash=string::hash>
+template<class Key=word, class HashType=Foam::Hash<Key>>
 struct plusEqOp
 {
-    typedef HashSet<Key, Hash> value_type;
+    typedef HashSet<Key, HashType> value_type;
 
     void operator()(value_type& a, const value_type& b) const
     {
@@ -131,10 +131,10 @@ namespace HashTableOps
 {
 
 //- Combine HashTable operation. Equivalent to 'a += b'
-template<class T, class Key=word, class Hash=string::hash>
+template<class T, class Key=word, class HashType=Foam::Hash<Key>>
 struct plusEqOp
 {
-    typedef HashTable<T, Key, Hash> value_type;
+    typedef HashTable<T, Key, HashType> value_type;
 
     void operator()(value_type& a, const value_type& b) const
     {

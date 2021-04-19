@@ -141,6 +141,29 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Hashing for Tuple2 data
+template<class T1, class T2>
+struct Hash<Tuple2<T1, T2>>
+{
+    unsigned operator()(const Tuple2<T1, T2>& obj, unsigned seed=0) const
+    {
+        return Hash<T2>()(obj.second(), Hash<T1>()(obj.first(), seed));
+    }
+};
+
+//- Hashing for std::pair data
+template<class T1, class T2>
+struct Hash<std::pair<T1, T2>>
+{
+    unsigned operator()(const std::pair<T1, T2>& obj, unsigned seed=0) const
+    {
+        return Hash<T2>()(obj.second, Hash<T1>()(obj.first, seed));
+    }
+};
+
+
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Return reverse of a Tuple2

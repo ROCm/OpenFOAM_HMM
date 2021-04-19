@@ -835,7 +835,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const fileName fluentFile = args[1];
+    const auto fluentFile = args.get<fileName>(1);
     IFstream fluentStream(fluentFile);
 
     if (!fluentStream)

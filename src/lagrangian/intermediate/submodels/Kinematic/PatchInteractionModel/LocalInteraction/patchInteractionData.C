@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,37 +34,11 @@ License
 
 Foam::patchInteractionData::patchInteractionData()
 :
-    interactionTypeName_("unknownInteractionTypeName"),
-    patchName_("unknownPatch"),
-    e_(0.0),
-    mu_(0.0)
+    interactionTypeName_(),
+    patchName_(),
+    e_(0),
+    mu_(0)
 {}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-const Foam::word& Foam::patchInteractionData::interactionTypeName() const
-{
-    return interactionTypeName_;
-}
-
-
-const Foam::keyType& Foam::patchInteractionData::patchName() const
-{
-    return patchName_;
-}
-
-
-Foam::scalar Foam::patchInteractionData::e() const
-{
-    return e_;
-}
-
-
-Foam::scalar Foam::patchInteractionData::mu() const
-{
-    return mu_;
-}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

@@ -38,7 +38,7 @@ See also
 #define HasherInt_H
 
 #include "Hasher.H"
-#include "int.H"
+#include <cstdint>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

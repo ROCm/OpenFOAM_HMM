@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ddt2.H"
+#include "stringOps.H"
 #include "stringListOps.H"
 #include "volFields.H"
 #include "dictionary.H"
@@ -107,7 +108,7 @@ Foam::functionObjects::ddt2::ddt2
 :
     fvMeshFunctionObject(name, runTime, dict),
     selectFields_(),
-    resultName_(word::null),
+    resultName_(),
     denyField_(),
     results_(),
     mag_(dict.getOrDefault("mag", false))
@@ -150,10 +151,8 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
     {
         denyField_.set
         (
-            string::quotemeta<regExp>
-            (
-                resultName_
-            ).replace("@@", "(.+)")
+            stringOps::quotemeta(resultName_, regExp::meta())
+            .replace("@@", "(.+)")
         );
 
         return true;

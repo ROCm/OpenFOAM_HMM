@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ Description
     typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;              \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable<argNames##ConstructorPtr, word, string::hash>            \
+    typedef HashTable<argNames##ConstructorPtr, word>                          \
         argNames##ConstructorTable;                                            \
                                                                                \
     /* Construct from argList function pointer table pointer */                \
@@ -152,7 +152,7 @@ Description
     typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;              \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable<argNames##ConstructorPtr, word, string::hash>            \
+    typedef HashTable<argNames##ConstructorPtr, word>                          \
         argNames##ConstructorTable;                                            \
                                                                                \
     /* Construct from argList function pointer table pointer */                \

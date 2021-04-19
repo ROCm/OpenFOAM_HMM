@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,11 +104,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class dynamicCode;
-class dynamicCodeContext;
-class IOdictionary;
-
 /*---------------------------------------------------------------------------*\
                    Class codedMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
@@ -122,16 +117,11 @@ class codedMixedFvPatchField
     // Private Data
 
         //- Dictionary contents for the boundary condition
-        mutable dictionary dict_;
+        dictionary dict_;
 
         const word name_;
 
         mutable autoPtr<mixedFvPatchField<Type>> redirectPatchFieldPtr_;
-
-
-    // Private Member Functions
-
-        const IOdictionary& dict() const;
 
 
 protected:
@@ -141,17 +131,17 @@ protected:
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
-        //- Adapt the context for the current object
-        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
-
-        // Return a description (type + name) for the output
+        //- Description (type + name) for the output
         virtual string description() const;
 
-        // Clear the ptr to the redirected object
+        //- Clear redirected object(s)
         virtual void clearRedirect() const;
 
-        // Get the dictionary to initialize the codeContext
+        //- The code dictionary. Inline "code" or from system/codeDict
         virtual const dictionary& codeDict() const;
+
+        //- Adapt the context for the current object
+        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
 
 public:

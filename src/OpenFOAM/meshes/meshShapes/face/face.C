@@ -30,7 +30,6 @@ License
 #include "triFace.H"
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
-#include "Swap.H"
 #include "ConstCirculator.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -304,24 +303,18 @@ int Foam::face::compare(const face& a, const face& b)
     // will be circular in the same order (but not necessarily in the
     // same direction or from the same starting point).
 
-    // Trivial reject: faces are different size
-    label sizeA = a.size();
-    label sizeB = b.size();
+    const label sizeA = a.size();
+    const label sizeB = b.size();
 
+    // Trivial reject: faces are different size
     if (sizeA != sizeB || sizeA == 0)
     {
         return 0;
     }
     else if (sizeA == 1)
     {
-        if (a[0] == b[0])
-        {
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
+        // Trivial: face with a single vertex
+        return (a[0] == b[0] ? 1 : 0);
     }
 
     ConstCirculator<face> aCirc(a);
@@ -410,7 +403,7 @@ bool Foam::face::sameVertices(const face& a, const face& b)
     {
         return false;
     }
-    // Check faces with a single vertex
+    // Trivial: face with a single vertex
     else if (sizeA == 1)
     {
         return (a[0] == b[0]);
@@ -437,6 +430,57 @@ bool Foam::face::sameVertices(const face& a, const face& b)
     }
 
     return true;
+}
+
+
+unsigned Foam::face::symmhash_code(const UList<label>& f, unsigned seed)
+{
+    Foam::Hash<label> op;
+
+    label len = f.size();
+
+    if (!len)
+    {
+        // Trivial: zero-sized
+        return 0;
+    }
+    else if (len == 1)
+    {
+        // Trivial: single vertex
+        return op(f[0], seed);
+    }
+
+    // Find location of the min vertex
+    label pivot = 0;
+    for (label i = 1; i < len; ++i)
+    {
+        if (f[pivot] > f[i])
+        {
+            pivot = i;
+        }
+    }
+
+    // Use next lowest value for deciding direction to circulate
+    if (f.fcValue(pivot) < f.rcValue(pivot))
+    {
+        // Forward circulate
+        while (len--)
+        {
+            seed = op(f[pivot], seed);
+            pivot = f.fcIndex(pivot);
+        }
+    }
+    else
+    {
+        // Reverse circulate
+        while (len--)
+        {
+            seed = op(f[pivot], seed);
+            pivot = f.rcIndex(pivot);
+        }
+    }
+
+    return seed;
 }
 
 

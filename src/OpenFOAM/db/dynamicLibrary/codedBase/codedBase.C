@@ -31,10 +31,13 @@ License
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "dlLibraryTable.H"
+#include "objectRegistry.H"
+#include "IOdictionary.H"
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
 #include "Ostream.H"
+#include "Time.H"
 #include "regIOobject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -50,7 +53,6 @@ namespace Foam
 namespace Foam
 {
 
-//! \cond fileScope
 static inline void writeEntryIfPresent
 (
     Ostream& os,
@@ -59,18 +61,24 @@ static inline void writeEntryIfPresent
 )
 {
     const entry* eptr = dict.findEntry(key, keyType::LITERAL);
-
-    if (eptr)
+    if (!eptr)
+    {
+        // Nothing to do
+    }
+    else if (eptr->isDict())
+    {
+        eptr->dict().writeEntry(os);
+    }
+    else
     {
         const tokenList& toks = eptr->stream();
 
-        if (!toks.empty())
+        if (!toks.empty())  // Could also check that it is a string-type
         {
             os.writeEntry(key, toks[0]);
         }
     }
 }
-//! \endcond
 
 } // End namespace Foam
 
@@ -79,11 +87,42 @@ static inline void writeEntryIfPresent
 
 void Foam::codedBase::writeCodeDict(Ostream& os, const dictionary& dict)
 {
+    writeEntryIfPresent(os, dict, "codeContext");
     writeEntryIfPresent(os, dict, "codeInclude");
     writeEntryIfPresent(os, dict, "localCode");
     writeEntryIfPresent(os, dict, "code");
     writeEntryIfPresent(os, dict, "codeOptions");
     writeEntryIfPresent(os, dict, "codeLibs");
+}
+
+
+const Foam::dictionary&
+Foam::codedBase::codeDict
+(
+    const objectRegistry& obr,
+    const word& dictName
+)
+{
+    IOdictionary* dictptr = obr.getObjectPtr<IOdictionary>(dictName);
+
+    if (!dictptr)
+    {
+        dictptr = new IOdictionary
+        (
+            IOobject
+            (
+                dictName,
+                obr.time().system(),
+                obr,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            )
+        );
+
+        obr.store(dictptr);
+    }
+
+    return *dictptr;
 }
 
 

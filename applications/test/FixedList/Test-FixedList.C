@@ -186,14 +186,14 @@ int main(int argc, char *argv[])
         FixedList<label, 4> list1{2, 3, 4, 5};
 
         Info<< "list1:" << list1
-            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << nl
+            << " hash:" << FixedList<label, 4>::hasher()(list1) << nl
             << " hash:" << Hash<FixedList<label, 4>>()(list1) << nl;
 
         label a[4] = {0, 1, 2, 3};
         FixedList<label, 4> list2(a);
 
         Info<< "list2:" << list2
-            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << nl
+            << " hash:" << FixedList<label, 4>::hasher()(list2) << nl
             << " hash:" << Hash<FixedList<label, 4>>()(list2) << nl;
 
 

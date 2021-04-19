@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dynamicCode.H"
+#include "dynamicCodeContext.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -34,6 +35,48 @@ Foam::dlLibraryTable&
 Foam::PatchFunction1Types::CodedField<Type>::libs() const
 {
     return this->patch_.boundaryMesh().mesh().time().libs();
+}
+
+
+template<class Type>
+Foam::string
+Foam::PatchFunction1Types::CodedField<Type>::description() const
+{
+    return "CodedField " + name_;
+}
+
+
+template<class Type>
+void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
+{
+    redirectFunctionPtr_.reset(nullptr);
+}
+
+
+template<class Type>
+const Foam::dictionary&
+Foam::PatchFunction1Types::CodedField<Type>::codeDict
+(
+    const dictionary& dict
+) const
+{
+    // Use named subdictionary if present to provide the code.
+    // This allows running with multiple PatchFunction1s
+
+    return
+    (
+        dict.found("code")
+      ? dict
+      : dict.subDict(name_)
+    );
+}
+
+
+template<class Type>
+const Foam::dictionary&
+Foam::PatchFunction1Types::CodedField<Type>::codeDict() const
+{
+    return codeDict(dict_);
 }
 
 
@@ -65,67 +108,25 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
     // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make verbose
-    // dynCode.setFilterVariable("verbose", "true");
-    // DetailInfo
-    //     <<"compile " << name_ << " sha1: "
-    //     << context.sha1() << endl;
+    #ifdef FULLDEBUG
+    dynCode.setFilterVariable("verbose", "true");
+    DetailInfo
+        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+    #endif
 
     // Define Make/options
     dynCode.setMakeOptions
     (
         "EXE_INC = -g \\\n"
-        "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
         "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
+        "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
         "    -lOpenFOAM \\\n"
         "    -lfiniteVolume \\\n"
+        "    -lmeshTools \\\n"
       + context.libs()
     );
-}
-
-
-template<class Type>
-const Foam::dictionary&
-Foam::PatchFunction1Types::CodedField<Type>::codeDict
-(
-    const dictionary& dict
-) const
-{
-    // Use named subdictionary if present to provide the code. This allows
-    // running with multiple PatchFunction1s
-
-    return
-    (
-        dict.found("code")
-      ? dict
-      : dict.subDict(name_)
-    );
-}
-
-
-template<class Type>
-const Foam::dictionary&
-Foam::PatchFunction1Types::CodedField<Type>::codeDict() const
-{
-    return codeDict(dict_);
-}
-
-
-template<class Type>
-Foam::string
-Foam::PatchFunction1Types::CodedField<Type>::description() const
-{
-    return "CodedField " + name_;
-}
-
-
-template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
-{
-    // remove instantiation of fvPatchField provided by library
-    redirectFunctionPtr_.clear();
 }
 
 

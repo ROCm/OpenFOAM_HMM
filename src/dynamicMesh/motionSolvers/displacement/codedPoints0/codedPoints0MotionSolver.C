@@ -47,6 +47,31 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::dlLibraryTable& Foam::codedPoints0MotionSolver::libs() const
+{
+    return mesh().time().libs();
+}
+
+
+Foam::string Foam::codedPoints0MotionSolver::description() const
+{
+    return "points0MotionSolver " + name();
+}
+
+
+void Foam::codedPoints0MotionSolver::clearRedirect() const
+{
+    redirectMotionSolverPtr_.reset(nullptr);
+}
+
+
+const Foam::dictionary&
+Foam::codedPoints0MotionSolver::codeDict() const
+{
+    return motionSolver::coeffDict();
+}
+
+
 void Foam::codedPoints0MotionSolver::prepare
 (
     dynamicCode& dynCode,
@@ -62,11 +87,11 @@ void Foam::codedPoints0MotionSolver::prepare
     // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make verbose
-    // dynCode.setFilterVariable("verbose", "true");
-    // DetailInfo
-    //     <<"compile " << name_ << " sha1: "
-    //     << context.sha1() << endl;
+    #ifdef FULLDEBUG
+    dynCode.setFilterVariable("verbose", "true");
+    DetailInfo
+        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+    #endif
 
     // Define Make/options
     dynCode.setMakeOptions
@@ -87,31 +112,6 @@ void Foam::codedPoints0MotionSolver::prepare
 }
 
 
-Foam::dlLibraryTable& Foam::codedPoints0MotionSolver::libs() const
-{
-    return mesh().time().libs();
-}
-
-
-Foam::string Foam::codedPoints0MotionSolver::description() const
-{
-    return "points0MotionSolver " + name();
-}
-
-
-void Foam::codedPoints0MotionSolver::clearRedirect() const
-{
-    redirectMotionSolverPtr_.clear();
-}
-
-
-const Foam::dictionary&
-Foam::codedPoints0MotionSolver::codeDict() const
-{
-    return coeffDict();
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::codedPoints0MotionSolver::codedPoints0MotionSolver
@@ -121,10 +121,10 @@ Foam::codedPoints0MotionSolver::codedPoints0MotionSolver
 )
 :
     motionSolver(mesh, dict, typeName),
-    codedBase()
+    codedBase(),
+    name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
+    redirectMotionSolverPtr_(nullptr)
 {
-    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
-
     updateLibrary(name_);
     redirectMotionSolver();
 }
@@ -140,7 +140,7 @@ Foam::codedPoints0MotionSolver::redirectMotionSolver() const
         // Get the dictionary for the solver and override the
         // solver name (in case it is not a subdictionary and contains
         // the 'coded' as the motionSolver)
-        dictionary constructDict(coeffDict());
+        dictionary constructDict(motionSolver::coeffDict());
         constructDict.set("solver", name_);
         constructDict.set("motionSolver", name_);
 

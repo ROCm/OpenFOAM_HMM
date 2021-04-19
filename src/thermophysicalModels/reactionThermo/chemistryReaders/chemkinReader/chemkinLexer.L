@@ -270,8 +270,6 @@ scalar RRreaction = RRcal;
 scalar allCommonT = 1000.0;
 
 word currentElementName;
-label currentElementIndex = 0;
-
 word currentSpecieName;
 label currentSpecieIndex = 0;
 label nSpecieElements = 0;
@@ -332,9 +330,8 @@ bool finishReaction = false;
         currentElementName = word::validate(YYText());
         correctElementName(currentElementName);
 
-        if (!elementIndices_.found(currentElementName))
+        if (elementIndices_.insert(currentElementName, elementNames_.size()))
         {
-            elementIndices_.insert(currentElementName, currentElementIndex++);
             elementNames_.append(currentElementName);
         }
         else

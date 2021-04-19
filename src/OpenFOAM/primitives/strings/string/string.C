@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,34 +78,21 @@ bool Foam::string::ext(const word& ending)
 }
 
 
-bool Foam::string::hasExt(const word& ending) const
-{
-    auto i = find_ext();
-    if (i == npos)
-    {
-        return false;
-    }
-
-    ++i; // Compare *after* the dot
-    return
-    (
-        // Lengths must match
-        ((size() - i) == ending.size())
-     && !compare(i, npos, ending)
-    );
-}
-
-
 bool Foam::string::hasExt(const wordRe& ending) const
 {
+    if (ending.isLiteral() || ending.empty())
+    {
+        return hasExt(static_cast<const std::string&>(ending));
+    }
+
     const auto i = find_ext();
     if (i == npos)
     {
         return false;
     }
 
-    const std::string end = substr(i+1);  // Compare *after* the dot
-    return ending.match(end);
+    // Regex match - compare *after* the dot
+    return ending.match(substr(i+1));
 }
 
 

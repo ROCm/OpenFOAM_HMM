@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +46,7 @@ Description
     typedef returnType (*memberFunction##argNames##MemberFunctionPtr)argList;  \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable                                                          \
-        <memberFunction##argNames##MemberFunctionPtr, word, string::hash>      \
+    typedef HashTable<memberFunction##argNames##MemberFunctionPtr, word>       \
         memberFunction##argNames##MemberFunctionTable;                         \
                                                                                \
     /* Construct from argList function pointer table pointer */                \

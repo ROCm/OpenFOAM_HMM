@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,20 +135,22 @@ inline void Foam::fileName::stripInvalid()
 
 inline bool Foam::fileName::isAbsolute(const std::string& str)
 {
-    return
+    return !str.empty() &&
     (
-        (!str.empty() && str.front() == '/')  // ie, str.starts_with('/')
-        #ifdef _WIN32
-        ||
-        (
-            // Eg, d:/path or \\machine/path
-            (str.length() > 2) &&
-            (
-                (str[1] == ':'  && str[2] == '/')
-             || (str[0] == '\\' && str[1] == '\\')
-            )
+        // Starts with '/', but also accept '\\' since it will be
+        // converted to a generic '/' or it is part of a (windows)
+        // UNC '\\server-name\path'
+        // - accept even on non-windows systems
+
+        (str[0] == '/' || str[0] == '\\')
+
+#ifdef _WIN32
+         // Filesytem root - eg, d:/path or d:\path
+     || (
+            (str.length() > 2 && str[1] == ':')
+         && (str[2] == '/' || str[2] == '\\')
         )
-        #endif
+#endif
     );
 }
 
@@ -168,18 +170,6 @@ inline bool Foam::fileName::isBackup() const
 inline bool Foam::fileName::hasPath() const
 {
     return string::hasPath();
-}
-
-
-inline bool Foam::fileName::hasExt() const
-{
-    return string::hasExt();
-}
-
-
-inline bool Foam::fileName::hasExt(const word& ending) const
-{
-    return string::hasExt(ending);
 }
 
 
@@ -253,12 +243,6 @@ inline Foam::fileName Foam::fileName::lessExt() const
 inline bool Foam::fileName::removePath()
 {
     return string::removePath();
-}
-
-
-inline bool Foam::fileName::removeExt()
-{
-    return string::removeExt();
 }
 
 

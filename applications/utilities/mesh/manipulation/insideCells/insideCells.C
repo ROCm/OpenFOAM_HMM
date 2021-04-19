@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createPolyMesh.H"
 
-    const fileName surfName = args[1];
-    const fileName setName  = args[2];
+    const auto surfName = args.get<fileName>(1);
+    const auto setName  = args.get<fileName>(2);
 
     // Read surface
     Info<< "Reading surface from " << surfName << endl;

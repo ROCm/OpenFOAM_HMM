@@ -56,7 +56,7 @@ class hyperbolic
     // Private data
 
         //- Minimum fraction of phases which can be considered continuous
-        HashTable<dimensionedScalar, word, word::hash> minContinuousAlpha_;
+        HashTable<dimensionedScalar> minContinuousAlpha_;
 
         //- Width of the transition
         const dimensionedScalar transitionAlphaScale_;

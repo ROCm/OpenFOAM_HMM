@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    IFstream str(args[1]);
+    IFstream str(args.get<fileName>(1));
 
     //
     // Read nodes.
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     label maxPatch = 0;
 
     // Boundary faces as three vertices
-    HashTable<label, triFace, triFace::Hash<>> vertsToBoundary(nFaces);
+    HashTable<label, triFace> vertsToBoundary(nFaces);
 
     forAll(boundaryFaces, facei)
     {

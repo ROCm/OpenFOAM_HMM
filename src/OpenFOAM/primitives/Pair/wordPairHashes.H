@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,57 +24,41 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam
+Alias
+    Foam::WordPairMap
+    A HashTable to objects of type \<T\> with a wordPair key.
+
+Typedef
+    Foam::wordPairHashSet
 
 Description
-    Misc. hashing functions, mostly from Bob Jenkins.
+    A HashSet for a wordPair.
 
-    The Jenkins hashing function(s) is similar in speed to Paul Hsieh's
-    SuperFast hash, but is public domain, supports incremental hashing
-    and has been reported to have better characteristics.
-    It is also what postgresql seems to be using.
+Typedef
+    Foam::wordPairHashTable
 
-See also
-    http://burtleburtle.net/bob/c/lookup3.c
-    and HasherInt.H for a specialized version
-
-SourceFiles
-    Hasher.C
+Description
+    HashTable of wordPair
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Hasher_H
-#define Hasher_H
+#ifndef wordPairHashes_H
+#define wordPairHashes_H
 
-#include <cstddef>
+#include "wordPair.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    template<class T>
+    using WordPairMap = HashTable<T, wordPair, Foam::Hash<wordPair>>;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    typedef HashSet<wordPair, Foam::Hash<wordPair>> wordPairHashSet;
 
-//- Bob Jenkins's 96-bit mixer hashing function (lookup3)
-//  \param[in] data - a character stream
-//  \param[in] len  - the number of bytes
-//  \param[in] seed - the previous hash, or an arbitrary value
-unsigned Hasher(const void* data, size_t len, unsigned seed = 0);
-
-
-//- Hashing of bit-wise internal content of given data object.
-//  For primitives and simple collections of primitives this is reasonable,
-//  but ill-advised for more complex data structures.
-template<class T>
-inline unsigned HasherT(const T& obj, unsigned seed = 0)
-{
-    return Hasher(&obj, sizeof(obj), seed);
+    typedef HashTable<word, wordPair, Foam::Hash<wordPair>> wordPairHashTable;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

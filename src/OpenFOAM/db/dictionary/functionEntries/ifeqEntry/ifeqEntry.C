@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,6 +205,10 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 return equal(t1.floatToken(), t2.floatToken());
             }
+            else if (t2.isLabel())
+            {
+                return t1.floatToken() == t2.labelToken();
+            }
             else if (t2.isScalar())
             {
                 return t1.scalarToken() == t2.scalarToken();
@@ -215,6 +219,10 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             if (eqType)
             {
                 return equal(t1.doubleToken(), t2.doubleToken());
+            }
+            else if (t2.isLabel())
+            {
+                return t1.doubleToken() == t2.labelToken();
             }
             else if (t2.isScalar())
             {

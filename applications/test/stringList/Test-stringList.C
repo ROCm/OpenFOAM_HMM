@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    stringList strLst
+    stringList strings
     {
         "hello",
         "heello",
@@ -53,51 +53,57 @@ int main(int argc, char *argv[])
         "okkey",
         "okkkey",
     };
+    labelList matches;
 
-    wordRes reLst(IStringStream("( okey \"[hy]e+.*\" )")());
+    wordRes matcher1(IStringStream("( okey \"[hy]e+.*\" )")());
 
-    Info<< "stringList " << strLst << nl;
+    Info<< "stringList " << strings << nl;
 
-    labelList matches = findStrings(regExp(".*ee.*"), strLst);
-
-    Info<< "matches found for regexp .*ee.* :" << nl << matches << nl;
-
-    forAll(matches, i)
     {
-        Info<< " -> " << strLst[matches[i]] << nl;
+        keyType key(".*ee.*", keyType::REGEX);
+        matches = findMatchingStrings(regExp(key), strings);
+
+        Info<< "matches found for regexp " << key << " :" << nl
+            << matches << nl;
+
+        for (const label idx : matches)
+        {
+            Info<< " -> " << strings[idx] << nl;
+        }
     }
 
     Info<< "Match found using ListOps = "
-        << ListOps::found(strLst, regExp(".*ee.*")) << nl;
+        << ListOps::found(strings, regExp(".*ee.*")) << nl;
 
     Info<< "First index = "
-        << ListOps::find(strLst, regExp(".*ee.*")) << nl;
+        << ListOps::find(strings, regExp(".*ee.*")) << nl;
 
     Info<< endl;
 
-    matches = findStrings(reLst, strLst);
+    matches = findMatchingStrings(matcher1, strings);
 
-    Info<< "matching " << flatOutput(reLst) << " => "
-        << reLst.matching(strLst) << nl;
-    Info<< "matches found for " << flatOutput(reLst) << " => "
+    Info<< "matching " << flatOutput(matcher1) << " => "
+        << matcher1.matching(strings) << nl;
+    Info<< "matches found for " << flatOutput(matcher1) << " => "
         << matches << nl;
-    forAll(matches, i)
+
+    for (const label idx : matches)
     {
-        Info<< " -> " << strLst[matches[i]] << nl;
+        Info<< " -> " << strings[idx] << nl;
     }
     Info<< endl;
 
-    stringList subLst = subsetStrings(regExp(".*ee.*"), strLst);
+    stringList subLst = subsetStrings(regExp(".*ee.*"), strings);
     Info<< "subset stringList: " << subLst << nl;
 
-    subLst = subsetStrings(reLst, strLst);
+    subLst = subsetStrings(matcher1, strings);
     Info<< "subset stringList: " << subLst << nl;
 
-    inplaceSubsetStrings(reLst, strLst);
-    Info<< "subsetted stringList: " << strLst << nl;
+    inplaceSubsetStrings(matcher1, strings);
+    Info<< "subsetted stringList: " << strings << nl;
 
-    inplaceSubsetStrings(regExp(".*l.*"), strLst);
-    Info<< "subsetted stringList: " << strLst << nl;
+    inplaceSubsetStrings(regExp(".*l.*"), strings);
+    Info<< "subsetted stringList: " << strings << nl;
 
     Info<< "\nEnd\n" << endl;
 

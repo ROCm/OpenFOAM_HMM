@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ Description
 #ifndef functionObjects_fieldInfo_H
 #define functionObjects_fieldInfo_H
 
-#include "wordRe.H"
 #include "label.H"
+#include "wordRes.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,19 +46,20 @@ namespace Foam
 namespace functionObjects
 {
 
-/*---------------------------------------------------------------------------*\
-                          Class fieldInfo Declaration
-\*---------------------------------------------------------------------------*/
-
+// Forward Declarations
 class fieldInfo;
 Istream& operator>>(Istream&, fieldInfo&);
 Ostream& operator<<(Ostream&, const fieldInfo&);
 
+/*---------------------------------------------------------------------------*\
+                          Class fieldInfo Declaration
+\*---------------------------------------------------------------------------*/
+
 class fieldInfo
 {
-    // Pivate data
+    // Pivate Data
 
-        //- Pattern for the field name
+        //- Pattern for the field name(s)
         wordRe name_;
 
         //- Field component
@@ -72,10 +73,10 @@ public:
 
     // Constructors
 
-        //- Null constructor
+        //- Default construct
         fieldInfo()
         :
-            name_(word::null),
+            name_(),
             component_(-1),
             found_(false)
         {}
@@ -153,6 +154,7 @@ public:
 } // End namespace functionObjects
 } // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

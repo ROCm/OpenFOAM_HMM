@@ -115,7 +115,7 @@ Ostream& operator<<(Ostream&, const HashTable<T, Key, Hash>&);
                           Class HashTable Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, class Key=word, class Hash=string::hash>
+template<class T, class Key=word, class Hash=Foam::Hash<Key>>
 class HashTable
 :
     public HashTableCore

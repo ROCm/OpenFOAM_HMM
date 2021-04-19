@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,36 +35,31 @@ Description
 #ifndef patchInteractionData_H
 #define patchInteractionData_H
 
-#include "Istream.H"
+#include "wordRe.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declaration
+class patchInteractionData;
+Istream& operator>>(Istream& is, patchInteractionData& pid);
+
 /*---------------------------------------------------------------------------*\
                     Class patchInteractionData Declaration
 \*---------------------------------------------------------------------------*/
 
-// Forward declaration of classes
-class patchInteractionData;
-
-// Forward declaration of friend functions
-Istream& operator>>
-(
-    Istream& is,
-    patchInteractionData& pid
-);
-
-
 class patchInteractionData
 {
-    // Private data
+    // Private Data
 
         //- Interaction type name
         word interactionTypeName_;
 
-        //- Patch name
-        keyType patchName_;
+        //- Patch name(s)
+        wordRe patchName_;
 
         //- Elasticity coefficient
         scalar e_;
@@ -76,35 +72,41 @@ public:
 
     // Constructor
 
-        //- Construct null
+        //- Default construct
         patchInteractionData();
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- The interaction type name
+        const word& interactionTypeName() const noexcept
+        {
+            return interactionTypeName_;
+        }
 
-            //- Return const access to the interaction type name
-            const word& interactionTypeName() const;
+        //- The patch name(s)
+        const wordRe& patchName() const noexcept
+        {
+            return patchName_;
+        }
 
-            //- Return const access to the patch name
-            const keyType& patchName() const;
+        //- The elasticity coefficient
+        scalar e() const noexcept
+        {
+            return e_;
+        }
 
-            //- Return const access to the elasticity coefficient
-            scalar e() const;
+        //- The restitution coefficient
+        scalar mu() const noexcept
+        {
+            return mu_;
+        }
 
-            //- Return const access to the restitution coefficient
-            scalar mu() const;
 
+    // IO Operators
 
-        // I-O
-
-            //- Istream operator
-            friend Istream& operator>>
-            (
-                Istream& is,
-                patchInteractionData& pid
-            );
+        //- Istream operator
+        friend Istream& operator>>(Istream& is, patchInteractionData& pid);
 };
 
 

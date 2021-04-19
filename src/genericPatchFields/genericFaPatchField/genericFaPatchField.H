@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ SourceFiles
 #define genericFaPatchField_H
 
 #include "calculatedFaPatchField.H"
-#include "HashPtrTable.H"
+#include "genericPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,19 +58,11 @@ namespace Foam
 template<class Type>
 class genericFaPatchField
 :
-    public calculatedFaPatchField<Type>
+    public calculatedFaPatchField<Type>,
+    public genericPatchFieldBase
 {
-    // Private Data
-
-        const word actualTypeName_;
-
-        dictionary dict_;
-
-        HashPtrTable<scalarField> scalarFields_;
-        HashPtrTable<vectorField> vectorFields_;
-        HashPtrTable<sphericalTensorField> sphTensorFields_;
-        HashPtrTable<symmTensorField> symmTensorFields_;
-        HashPtrTable<tensorField> tensorFields_;
+    //- The parent boundary condition type
+    typedef calculatedFaPatchField<Type> parent_bctype;
 
 
 public:
@@ -105,12 +97,6 @@ public:
             const faPatchFieldMapper&
         );
 
-        //- Construct as copy
-        genericFaPatchField
-        (
-            const genericFaPatchField<Type>&
-        );
-
         //- Construct and return a clone
         virtual tmp<faPatchField<Type>> clone() const
         {
@@ -119,6 +105,9 @@ public:
                 new genericFaPatchField<Type>(*this)
             );
         }
+
+        //- Default construct
+        genericFaPatchField(const genericFaPatchField<Type>&) = default;
 
         //- Construct as copy setting internal field reference
         genericFaPatchField
@@ -142,52 +131,38 @@ public:
 
     // Member Functions
 
-        // Mapping Functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const faPatchFieldMapper&
-            );
-
-            //- Reverse map the given faPatchField onto this faPatchField
-            virtual void rmap
-            (
-                const faPatchField<Type>&,
-                const labelList&
-            );
-
-
-        // Evaluation Functions
-
-            //- Return the matrix diagonal coefficients corresponding to the
-            //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type>> valueInternalCoeffs
-            (
-                const tmp<scalarField>&
-            ) const;
-
-            //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type>> valueBoundaryCoeffs
-            (
-                const tmp<scalarField>&
-            ) const;
-
-            //- Return the matrix diagonal coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
-            tmp<Field<Type>> gradientInternalCoeffs() const;
-
-            //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
-            tmp<Field<Type>> gradientBoundaryCoeffs() const;
-
-
-        //- Return the actual type
-        const word& actualType() const;
-
         //- Write
         virtual void write(Ostream&) const;
+
+
+    // Mapping Functions
+
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap(const faPatchFieldMapper&);
+
+        //- Reverse map the given faPatchField onto this faPatchField
+        virtual void rmap
+        (
+            const faPatchField<Type>&,
+            const labelList&
+        );
+
+
+    // Evaluation Functions
+
+        //- Fatal
+        virtual tmp<Field<Type>>
+        valueInternalCoeffs(const tmp<scalarField>&) const;
+
+        //- Fatal
+        virtual tmp<Field<Type>>
+        valueBoundaryCoeffs(const tmp<scalarField>&) const;
+
+        //- Fatal
+        tmp<Field<Type>> gradientInternalCoeffs() const;
+
+        //- Fatal
+        tmp<Field<Type>> gradientBoundaryCoeffs() const;
 };
 
 

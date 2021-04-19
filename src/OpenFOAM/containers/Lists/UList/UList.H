@@ -53,8 +53,8 @@ SourceFiles
 #include "contiguous.H"
 #include "nullObject.H"
 #include "stdFoam.H"
+#include "Hash.H"
 #include "Swap.H"
-#include "HashFwd.H"
 #include "ListPolicy.H"
 
 #include <initializer_list>
@@ -522,13 +522,10 @@ public:
         }
 
 
-    // Other
+    // Hashing
 
-        //- Hashing function class for UList.
-        //  Can use this one (instead of the global Hash<>) for inheritance
-        //  in sub-classes
-        template<class HashT=Foam::Hash<T>>
-        struct Hash
+        //- Hashing functor for UList
+        struct hasher
         {
             inline unsigned operator()
             (
@@ -538,15 +535,24 @@ public:
             {
                 if (is_contiguous<T>::value)
                 {
-                    return Hasher(obj.cdata(), obj.size_bytes(), seed);
+                    return Foam::Hasher(obj.cdata(), obj.size_bytes(), seed);
                 }
 
+                Foam::Hash<T> op;
                 for (const T& val : obj)
                 {
-                    seed = HashT()(val, seed);
+                    seed = op(val, seed);
                 }
                 return seed;
             }
+        };
+
+        //- Deprecated(2021-04) hashing functor. Use hasher()
+        // \deprecated(2021-04) - use hasher() functor
+        template<class Unused=bool>
+        struct Hash : UList<T>::hasher
+        {
+            FOAM_DEPRECATED_FOR(2021-04, "hasher()") Hash() {}
         };
 };
 
@@ -617,27 +623,12 @@ inline void Swap(UList<T>& a, UList<T>& b)
 }
 
 
-//- Hashing for UList data, which uses Hasher for contiguous data and
-//- element-wise incrementally hashing otherwise.
-template<class T>
-struct Hash<UList<T>>
-{
-    inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
-    {
-        if (is_contiguous<T>::value)
-        {
-            return Hasher(obj.cdata(), obj.size_bytes(), seed);
-        }
-        for (const T& val : obj)
-        {
-            seed = Hash<T>()(val, seed);
-        }
-        return seed;
-    }
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hashing for List data
+template<class T>
+struct Hash<UList<T>> : UList<T>::hasher {};
+
 
 //- Object access operator or list access operator.
 //- \sa ListListOps::combine()

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,58 +27,59 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "word.H"
+#include "token.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::word::word(Istream& is)
-:
-    string()
 {
     is >> *this;
 }
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
 Foam::Istream& Foam::operator>>(Istream& is, word& val)
 {
-    token t(is);
+    token tok(is);
 
-    if (!t.good())
+    if (tok.isWord())
     {
-        FatalIOErrorInFunction(is)
-            << "Bad token - could not get word"
-            << exit(FatalIOError);
-        is.setBad();
-        return is;
+        val = tok.wordToken();
     }
-
-    if (t.isWord())
-    {
-        val = t.wordToken();
-    }
-    else if (t.isString())
+    else if (tok.isQuotedString())
     {
         // Try a bit harder and convert string to word
-        val = t.stringToken();
+        val = tok.stringToken();
+        const auto oldLen = val.length();
         string::stripInvalid<word>(val);
 
         // Flag empty strings and bad chars as an error
-        if (val.empty() || val.size() != t.stringToken().size())
+        if (val.empty() || val.length() != oldLen)
         {
             FatalIOErrorInFunction(is)
                 << "Empty word or non-word characters "
-                << t.info()
-                << exit(FatalIOError);
+                << tok.info() << exit(FatalIOError);
             is.setBad();
             return is;
         }
     }
     else
     {
-        FatalIOErrorInFunction(is)
-            << "Wrong token type - expected word, found "
-            << t.info()
-            << exit(FatalIOError);
+        FatalIOErrorInFunction(is);
+        if (tok.good())
+        {
+            FatalIOError
+                << "Wrong token type - expected word, found "
+                << tok.info();
+        }
+        else
+        {
+            FatalIOError
+                << "Bad token - could not get word";
+        }
+        FatalIOError << exit(FatalIOError);
         is.setBad();
         return is;
     }

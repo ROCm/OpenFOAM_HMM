@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,16 +180,12 @@ void Foam::cellFeatures::walkSuperFace
     Map<label>& toSuperFace
 ) const
 {
-    if (!toSuperFace.found(facei))
+    if (toSuperFace.insert(facei, superFacei))
     {
-        toSuperFace.insert(facei, superFacei);
-
         const labelList& fEdges = mesh_.faceEdges()[facei];
 
-        forAll(fEdges, fEdgeI)
+        for (const label edgeI : fEdges)
         {
-            label edgeI = fEdges[fEdgeI];
-
             if (!featureEdge_.found(edgeI))
             {
                 label face0;

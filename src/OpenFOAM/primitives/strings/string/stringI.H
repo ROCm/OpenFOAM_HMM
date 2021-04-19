@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,26 @@ inline bool Foam::string::hasPath() const
 inline bool Foam::string::hasExt() const
 {
     return (npos != find_ext());
+}
+
+
+inline bool Foam::string::hasExt(const char* ending) const
+{
+    return (ending && string::hasExt(std::string(ending)));
+}
+
+
+inline bool Foam::string::hasExt(const std::string& ending) const
+{
+    const auto len = ending.size();
+    auto i = find_ext();
+    if (i == npos || !len)
+    {
+        return false;
+    }
+
+    ++i; // Compare *after* the dot
+    return ((size() - i) == len) && !compare(i, npos, ending);
 }
 
 
@@ -128,12 +148,12 @@ inline Foam::string::string(const size_type len, const char c)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class String>
+template<class StringType>
 inline bool Foam::string::valid(const std::string& str)
 {
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
-        if (!String::valid(*iter))
+        if (!StringType::valid(*iter))
         {
             return false;
         }
@@ -143,10 +163,10 @@ inline bool Foam::string::valid(const std::string& str)
 }
 
 
-template<class String>
+template<class StringType>
 inline bool Foam::string::stripInvalid(std::string& str)
 {
-    if (!valid<String>(str))
+    if (!string::valid<StringType>(str))
     {
         size_type nChar = 0;
         iterator outIter = str.begin();
@@ -155,7 +175,7 @@ inline bool Foam::string::stripInvalid(std::string& str)
         {
             const char c = *iter;
 
-            if (String::valid(c))
+            if (StringType::valid(c))
             {
                 *outIter = c;
                 ++outIter;
@@ -172,79 +192,17 @@ inline bool Foam::string::stripInvalid(std::string& str)
 }
 
 
-template<class String>
-inline bool Foam::string::meta(const std::string& str, const char quote)
+template<class StringType>
+inline StringType Foam::string::validate(const std::string& str)
 {
-    int escaped = 0;
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-    {
-        const char c = *iter;
-        if (quote && c == quote)
-        {
-            escaped ^= 1;  // toggle state
-        }
-        else if (escaped)
-        {
-            escaped = 0;
-        }
-        else if (String::meta(c))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-template<class String>
-inline Foam::string
-Foam::string::quotemeta(const std::string& str, const char quote)
-{
-    if (!quote)
-    {
-        return str;
-    }
-
-    string sQuoted;
-    sQuoted.reserve(2*str.size());
-
-    int escaped = 0;
-    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-    {
-        const char c = *iter;
-        if (c == quote)
-        {
-            escaped ^= 1;  // toggle state
-        }
-        else if (escaped)
-        {
-            escaped = 0;
-        }
-        else if (String::meta(c))
-        {
-            sQuoted += quote;
-        }
-
-        sQuoted += c;
-    }
-
-    sQuoted.shrink_to_fit();
-
-    return sQuoted;
-}
-
-
-template<class String>
-inline String Foam::string::validate(const std::string& str)
-{
-    String out;
+    StringType out;
     out.resize(str.size());
 
     size_type len = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
         const char c = *iter;
-        if (String::valid(c))
+        if (StringType::valid(c))
         {
             out[len] = c;
             ++len;
@@ -278,16 +236,6 @@ inline void Foam::string::swap(std::string& str)
 inline bool Foam::string::operator()(const std::string& text) const
 {
     return !compare(text);  // Always compare as literal string
-}
-
-
-inline unsigned Foam::string::hash::operator()
-(
-    const std::string& str,
-    unsigned seed
-) const
-{
-    return Hasher(str.data(), str.size(), seed);
 }
 
 

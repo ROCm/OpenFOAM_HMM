@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
 
     // Remove extensions and/or trailing '.'
-    const fileName prefix = fileName(args[1]).lessExt();
+    const auto prefix = args.get<fileName>(1).lessExt();
 
 
     fileFormats::STARCDMeshReader reader

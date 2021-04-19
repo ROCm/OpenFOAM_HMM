@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,12 +60,12 @@ int main(int argc, char *argv[])
     argList::addArgument("output", "The output surface file");
     argList args(argc, argv);
 
-    fileName surfFileName(args[1]);
+    const auto surfFileName = args.get<fileName>(1);
     Info<< "Reading surface from " << surfFileName << endl;
 
-    fileName outFileName(args[2]);
-    fileName outFileBaseName = outFileName.lessExt();
-    word outExtension = outFileName.ext();
+    const auto outFileName = args.get<fileName>(2);
+    const fileName outFileBaseName = outFileName.lessExt();
+    const word outExtension = outFileName.ext();
 
     // Load surface
     triSurface surf(surfFileName);

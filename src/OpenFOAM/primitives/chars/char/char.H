@@ -61,15 +61,17 @@ Ostream& operator<<(Ostream& os, const char c);
 //- Write a nul-terminated C-string
 Ostream& operator<<(Ostream& os, const char* str);
 
-//- Test for whitespace
-inline bool isspace(char c)
+//- Test for whitespace (C-locale)
+inline bool isspace(char c) noexcept
 {
     return
     (
-        c == ' '
-     || c == '\n'
-     || c == '\r'
-     || c == '\t'
+        c == ' '    // (0x20)  space (SPC)
+     || c == '\t'   // (0x09)  horizontal tab (TAB)
+     || c == '\n'   // (0x0a)  newline (LF)
+     || c == '\v'   // (0x0b)  vertical tab (VT)
+     || c == '\f'   // (0x0c)  feed (FF)
+     || c == '\r'   // (0x0d)  carriage return (CR)
     );
 }
 

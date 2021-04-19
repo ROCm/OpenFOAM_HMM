@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,8 +141,8 @@ int main(int argc, char *argv[])
     bool changed = false;
     for (label orig = 0; orig < names.size()-1; ++orig)
     {
-        // skip patterns or entries that have already been done
-        if (names[orig].empty() || wordRe::isPattern(names[orig]))
+        // Skip patterns or entries that have already been done
+        if (names[orig].empty() || regExp::is_meta(names[orig]))
         {
             continue;
         }
@@ -150,15 +151,15 @@ int main(int argc, char *argv[])
 
         for (label check = orig+1; check < names.size(); ++check)
         {
-            // skip patterns or entries that have already been done
-            if (names[check].empty() || wordRe::isPattern(names[check]))
+            // Skip patterns or entries that have already been done
+            if (names[check].empty() || regExp::is_meta(names[check]))
             {
                 continue;
             }
 
             const dictionary& dict2 = solverDict.subDict(names[check]);
 
-            // check for identical content
+            // Check for identical content
             if (checkDictionaryContent(dict1, dict2))
             {
                 names[orig] += "|" + names[check];

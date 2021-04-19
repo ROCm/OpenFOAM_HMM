@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -270,32 +270,34 @@ public:
 
     // Hashing
 
-        //- The (commutative) hash-value for triFace
-        inline unsigned hashval(unsigned seed=0) const
+        //- The (commutative) hash value for triFace
+        inline unsigned hash_code(unsigned seed=0) const
         {
             // Fortunately we don't need this very often
             const uLabel t0((*this)[0]);
             const uLabel t1((*this)[1]);
             const uLabel t2((*this)[2]);
 
-            const uLabel val = (t0*t1*t2 + t0+t1+t2);
+            const uLabel val(t0*t1*t2 + t0+t1+t2);
 
             return Foam::Hash<uLabel>()(val, seed);
         }
 
-        //- Hashing function class for triFace (commutative)
-        //  Also useful for inheritance in sub-classes
-        template<class HashT=Foam::Hash<label>>
-        struct Hash
+        //- Hashing functor for triFace (commutative)
+        struct hasher
         {
-            inline unsigned operator()
-            (
-                const triFace& obj,
-                unsigned seed=0
-            ) const
+            unsigned operator()(const triFace& obj, unsigned seed=0) const
             {
-                return obj.hashval(seed);
+                return obj.hash_code(seed);
             }
+        };
+
+        //- Deprecated(2021-04) hashing functor. Use hasher()
+        // \deprecated(2021-04) - use hasher() functor
+        template<class Unused=bool>
+        struct Hash : triFace::hasher
+        {
+            FOAM_DEPRECATED_FOR(2021-04, "hasher()") Hash() {}
         };
 };
 
@@ -308,16 +310,8 @@ template<> struct is_contiguous<triFace> : std::true_type {};
 //- Contiguous label data for triFace
 template<> struct is_contiguous_label<triFace> : std::true_type {};
 
-
-//- Hash specialization for triFace as a commutative hash value.
-template<>
-struct Hash<triFace>
-{
-    inline unsigned operator()(const triFace& obj, unsigned seed=0) const
-    {
-        return obj.hashval(seed);
-    }
-};
+//- Hashing for triFace uses commutative (incremental) hash
+template<> struct Hash<triFace> : triFace::hasher {};
 
 
 //- Specialization to offset faces, used in ListListOps::combineOffset

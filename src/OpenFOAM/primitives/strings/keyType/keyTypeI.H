@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,20 +26,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <algorithm>
-
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline bool Foam::keyType::valid(char c)
+inline bool Foam::keyType::valid(const char c)
 {
-    return
-    (
-        !isspace(c)
-     && c != '"'   // string quote
-     && c != '\''  // string quote
-     && c != '/'   // path separator
-     && c != ';'   // end statement
-    );
+    // Also accept '{' and '}' (for regex grouping?)
+    return (word::valid(c) || c == '{' || c == '}');
 }
 
 
@@ -52,80 +44,64 @@ inline Foam::keyType::keyType()
 {}
 
 
-inline Foam::keyType::keyType(const keyType& s)
+inline Foam::keyType::keyType(const word& str)
 :
-    word(s, false),
-    type_(s.type_)
-{}
-
-
-inline Foam::keyType::keyType(const word& s)
-:
-    word(s, false),
+    word(str),
     type_(option::LITERAL)
 {}
 
 
-inline Foam::keyType::keyType(const string& s)
+inline Foam::keyType::keyType(word&& str)
 :
-    word(s, false),
+    word(std::move(str)),
+    type_(option::LITERAL)
+{}
+
+
+inline Foam::keyType::keyType(const string& str)
+:
+    word(str, false),  // No stripping
     type_(option::REGEX)
 {}
 
 
-inline Foam::keyType::keyType(const char* s)
+inline Foam::keyType::keyType(string&& str)
 :
-    word(s, false),
-    type_(option::LITERAL)
+    word(std::move(str), false),  // No stripping
+    type_(option::REGEX)
 {}
 
 
-inline Foam::keyType::keyType(const std::string& s, option opt)
+inline Foam::keyType::keyType(const std::string& str, option opt)
 :
-    word(s, false),
+    word(str, false),  // No stripping
     type_(option(opt & 0x0F))
 {}
 
 
-inline Foam::keyType::keyType(keyType&& s)
+inline Foam::keyType::keyType(std::string&& str, option opt)
 :
-    word(std::move(static_cast<word&>(s)), false),
-    type_(s.type_)
-{
-    s.type_ = option::LITERAL;
-}
-
-
-inline Foam::keyType::keyType(word&& s)
-:
-    word(std::move(s), false),
-    type_(option::LITERAL)
+    word(std::move(str), false),  // No stripping
+    type_(option(opt & 0x0F))
 {}
 
 
-inline Foam::keyType::keyType(string&& s)
+inline Foam::keyType::keyType(const char* str, option opt)
 :
-    word(std::move(s), false),
-    type_(option::REGEX)
-{}
-
-
-inline Foam::keyType::keyType(std::string&& s, option opt)
-:
-    word(std::move(s), false),
+    word(str, false),  // No stripping
     type_(option(opt & 0x0F))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::keyType::isLiteral() const
+inline bool Foam::keyType::isLiteral() const noexcept
 {
-    return (type_ != option::REGEX);
+    return !(type_ & option::REGEX);
 }
 
 
-inline bool Foam::keyType::isPattern() const
+inline bool Foam::keyType::isPattern() const noexcept
 {
     return (type_ & option::REGEX);
 }
@@ -138,7 +114,7 @@ inline void Foam::keyType::setType(option opt, bool adjust)
     if (type_ != opt)
     {
         // Only strip when debug is active (potentially costly operation)
-        if (isPattern() && adjust && word::debug)
+        if (adjust && isPattern() && word::debug)
         {
             string::stripInvalid<word>(*this);
         }
@@ -148,16 +124,28 @@ inline void Foam::keyType::setType(option opt, bool adjust)
 }
 
 
-inline bool Foam::keyType::compile()
+inline bool Foam::keyType::compile() noexcept
 {
     type_ = option::REGEX;
     return true;
 }
 
 
+inline void Foam::keyType::uncompile() noexcept
+{
+    type_ = option::LITERAL;
+}
+
+
 inline void Foam::keyType::uncompile(bool adjust)
 {
-    setType(option::LITERAL, adjust);
+    // Only strip when debug is active (potentially costly operation)
+    if (adjust && isPattern() && word::debug)
+    {
+        string::stripInvalid<word>(*this);
+    }
+
+    type_ = option::LITERAL;
 }
 
 
@@ -165,18 +153,6 @@ inline void Foam::keyType::clear()
 {
     word::clear();
     type_ = option::LITERAL;
-}
-
-
-inline void Foam::keyType::swap(keyType& s)
-{
-    if (this == &s)
-    {
-        return;  // Self-swap is a no-op
-    }
-
-    word::swap(static_cast<word&>(s));
-    std::swap(type_, s.type_);
 }
 
 
@@ -188,48 +164,48 @@ inline bool Foam::keyType::operator()(const std::string& text) const
 }
 
 
-inline void Foam::keyType::operator=(const keyType& s)
+inline void Foam::keyType::operator=(const keyType& str)
 {
-    if (this == &s)
+    if (this == &str)
     {
         return;  // Self-assignment is a no-op
     }
 
-    assign(s); // Bypasses char checking
-    type_ = s.type_;
+    assign(str); // Bypasses char checking
+    type_ = str.type_;
 }
 
 
-inline void Foam::keyType::operator=(keyType&& s)
+inline void Foam::keyType::operator=(keyType&& str)
 {
-    if (this == &s)
+    if (this == &str)
     {
         return;  // Self-assignment is a no-op
     }
 
     clear();
-    swap(s);
+    swap(str);
 }
 
 
-inline void Foam::keyType::operator=(const word& s)
+inline void Foam::keyType::operator=(const char* str)
 {
-    assign(s); // Bypasses char checking
+    assign(str); // Bypasses char checking
     type_ = option::LITERAL;
 }
 
 
-inline void Foam::keyType::operator=(const string& s)
+inline void Foam::keyType::operator=(const word& str)
 {
-    assign(s); // Bypasses char checking
+    assign(str); // Bypasses char checking
+    type_ = option::LITERAL;
+}
+
+
+inline void Foam::keyType::operator=(const string& str)
+{
+    assign(str); // Bypasses char checking
     type_ = option::REGEX;
-}
-
-
-inline void Foam::keyType::operator=(const char* s)
-{
-    assign(s); // Bypasses char checking
-    type_ = option::LITERAL;
 }
 
 

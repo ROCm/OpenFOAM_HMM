@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,8 +64,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const labelVector n(args.get<labelVector>(1));
-    const fileName exportName = args[2];
+    const auto n = args.get<labelVector>(1);
+    const auto exportName = args.get<fileName>(2);
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"
         << " writing re-sampled " << n << " to " << exportName

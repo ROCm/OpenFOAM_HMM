@@ -40,7 +40,7 @@ int Foam::regExpPosix::grammar(0);
 namespace
 {
 
-// Verify that the entire len was matched
+// Matched entire length
 static inline bool fullMatch(const regmatch_t& m, const regoff_t len)
 {
     return (m.rm_so == 0 && m.rm_eo == len);

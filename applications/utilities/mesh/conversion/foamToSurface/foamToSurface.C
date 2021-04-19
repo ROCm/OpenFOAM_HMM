@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    fileName exportName = args[1];
+    auto exportName = args.get<fileName>(1);
 
     const scalar scaleFactor = args.getOrDefault<scalar>("scale", 0);
     const bool doTriangulate = args.found("tri");

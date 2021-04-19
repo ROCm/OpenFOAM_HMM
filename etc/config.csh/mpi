@@ -331,8 +331,7 @@ case INTELMPI*:
         setenv MPI_ARCH_PATH "$MPI_ROOT"
     else if ( "$MPI_ARCH_PATH" != "" ) then
         # MPI_ARCH_PATH: Set I_MPI_ROOT accordingly
-        export I_MPI_ROOT="$MPI_ARCH_PATH"
-
+        setenv I_MPI_ROOT "$MPI_ARCH_PATH"
     endif
 
     if ( -d "$MPI_ARCH_PATH" ) then

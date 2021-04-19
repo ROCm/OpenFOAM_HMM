@@ -3,8 +3,8 @@
 #include "Hasher.H"
 #include "int.H"
 
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+#include <ctime>
 
 #ifndef CLOCKS_PER_SEC
     #ifdef CLK_TCK
@@ -1048,7 +1048,7 @@ int32_t i;
 
 struct tagtest {
         double res;
-        char * name;
+        const char * name;
         hashFn hash;
 } tests[] = {
 //      { 0.0, "CRC32\t\t", GetCRC32                  },

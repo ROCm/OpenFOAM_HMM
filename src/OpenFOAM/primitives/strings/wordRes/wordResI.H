@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,34 +33,36 @@ inline const Foam::wordRes& Foam::wordRes::null()
 }
 
 
-inline bool Foam::wordRes::found_match
+inline Foam::label Foam::wordRes::first_match
 (
-    const UList<wordRe>& patterns,
+    const UList<wordRe>& selectors,
     const std::string& text,
-    bool literal
+    const bool literal
 )
 {
-    for (const wordRe& select : patterns)
+    label index = 0;
+    for (const wordRe& select : selectors)
     {
         if (select.match(text, literal))
         {
-            return true;
+            return index;
         }
+        ++index;
     }
 
-    return false;
+    return -1;
 }
 
 
 inline Foam::wordRe::compOption Foam::wordRes::found_matched
 (
-    const UList<wordRe>& patterns,
+    const UList<wordRe>& selectors,
     const std::string& text
 )
 {
     auto retval(wordRe::compOption::UNKNOWN);
 
-    for (const wordRe& select : patterns)
+    for (const wordRe& select : selectors)
     {
         if (select.isLiteral())
         {
@@ -69,12 +71,14 @@ inline Foam::wordRe::compOption Foam::wordRes::found_matched
                 return wordRe::compOption::LITERAL;
             }
         }
-        else if (wordRe::compOption::UNKNOWN == retval)
+        else if
+        (
+            // Only match regex once
+            retval == wordRe::compOption::UNKNOWN
+         && select.match(text, false)
+        )
         {
-            if (select.match(text, false))
-            {
-                retval = wordRe::compOption::REGEX;
-            }
+            retval = wordRe::compOption::REGEX;
         }
     }
 
@@ -86,7 +90,7 @@ inline Foam::wordRe::compOption Foam::wordRes::found_matched
 
 inline bool Foam::wordRes::match(const std::string& text, bool literal) const
 {
-    return found_match(*this, text, literal);
+    return (first_match(*this, text, literal) >= 0);
 }
 
 
@@ -127,7 +131,13 @@ inline Foam::labelList Foam::wordRes::matching
 
 inline bool Foam::wordRes::operator()(const std::string& text) const
 {
-    return found_match(*this, text);
+    return (wordRes::first_match(*this, text) >= 0);
+}
+
+
+inline bool Foam::wordRes::matcher::operator()(const std::string& text) const
+{
+    return (wordRes::first_match(values, text) >= 0);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,21 +28,10 @@ License
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline bool Foam::wordRe::meta(char c)
+inline bool Foam::wordRe::valid(const char c)
 {
-    return regExp::meta(c);
-}
-
-
-inline bool Foam::wordRe::valid(char c)
-{
-    return keyType::valid(c);
-}
-
-
-inline bool Foam::wordRe::isPattern(const std::string& str)
-{
-    return string::meta<regExp>(str);
+    // Also accept '{' and '}' (for regex grouping?)
+    return (word::valid(c) || c == '{' || c == '}');
 }
 
 
@@ -57,8 +46,7 @@ inline Foam::wordRe::wordRe()
 
 inline Foam::wordRe::wordRe(const wordRe& str)
 :
-    word(str, false),
-    re_()
+    word(static_cast<const word&>(str))
 {
     if (str.isPattern())
     {
@@ -74,52 +62,23 @@ inline Foam::wordRe::wordRe(wordRe&& str)
 {}
 
 
-inline Foam::wordRe::wordRe(const keyType& str)
-:
-    word(str, false),
-    re_()
-{
-    if (str.isPattern())
-    {
-        compile();
-    }
-}
-
-
-inline Foam::wordRe::wordRe(const char* str)
-:
-    word(str, false),
-    re_()
-{}
-
-
-inline Foam::wordRe::wordRe(const std::string& str)
-:
-    word(str, false),
-    re_()
-{}
-
-
-inline Foam::wordRe::wordRe(const string& str)
-:
-    word(str, false),
-    re_()
-{}
-
-
 inline Foam::wordRe::wordRe(const word& str)
 :
-    word(str, false),
-    re_()
+    word(str)
 {}
 
 
-inline Foam::wordRe::wordRe(const keyType& str, const compOption opt)
+inline Foam::wordRe::wordRe(word&& str)
 :
-    word(str, false),
-    re_()
+    word(std::move(str))
+{}
+
+
+inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
+:
+    word(str, false)  // No stripping
 {
-    if (str.isPattern())
+    if (opt != wordRe::LITERAL)
     {
         compile(opt);
     }
@@ -128,45 +87,24 @@ inline Foam::wordRe::wordRe(const keyType& str, const compOption opt)
 
 inline Foam::wordRe::wordRe(const char* str, const compOption opt)
 :
-    wordRe(str)
+    word(str, false)  // No stripping
 {
-    compile(opt);
-}
-
-
-inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
-:
-    wordRe(str)
-{
-    compile(opt);
-}
-
-
-inline Foam::wordRe::wordRe(const string& str, const compOption opt)
-:
-    wordRe(str)
-{
-    compile(opt);
-}
-
-
-inline Foam::wordRe::wordRe(const word& str, const compOption opt)
-:
-    wordRe(str)
-{
-    compile(opt);
+    if (opt != wordRe::LITERAL)
+    {
+        compile(opt);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::wordRe::isLiteral() const
+inline bool Foam::wordRe::isLiteral() const noexcept
 {
     return !re_.exists();
 }
 
 
-inline bool Foam::wordRe::isPattern() const
+inline bool Foam::wordRe::isPattern() const noexcept
 {
     return re_.exists();
 }
@@ -174,7 +112,7 @@ inline bool Foam::wordRe::isPattern() const
 
 inline bool Foam::wordRe::compile(const compOption opt)
 {
-    if (opt)
+    if (opt != wordRe::LITERAL)
     {
         bool comp = false;
 
@@ -184,7 +122,7 @@ inline bool Foam::wordRe::compile(const compOption opt)
         }
         else if (opt & wordRe::DETECT)
         {
-            comp = string::meta<regExp>(*this) || !string::valid<word>(*this);
+            comp = regExp::is_meta(*this) || !string::valid<word>(*this);
         }
         else if (opt & wordRe::ICASE)
         {
@@ -209,13 +147,20 @@ inline bool Foam::wordRe::compile()
 }
 
 
+inline void Foam::wordRe::uncompile()
+{
+    re_.clear();
+}
+
+
 inline void Foam::wordRe::uncompile(bool adjust)
 {
     // Only strip when debug is active (potentially costly operation)
-    if (re_.clear() && adjust && word::debug)
+    if (adjust && isPattern() && word::debug)
     {
         string::stripInvalid<word>(*this);
     }
+    re_.clear();
 }
 
 
@@ -234,12 +179,6 @@ inline bool Foam::wordRe::match(const std::string& text, bool literal) const
     }
 
     return !compare(text);  // Compare as literal
-}
-
-
-inline Foam::string Foam::wordRe::quotemeta() const
-{
-    return string::quotemeta<regExp>(*this);
 }
 
 
@@ -300,20 +239,6 @@ inline void Foam::wordRe::operator=(const word& str)
 {
     assign(str);
     re_.clear();
-}
-
-
-inline void Foam::wordRe::operator=(const keyType& str)
-{
-    assign(str);
-    if (str.isPattern())
-    {
-        compile();
-    }
-    else
-    {
-        re_.clear();
-    }
 }
 
 

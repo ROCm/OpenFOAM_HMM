@@ -51,7 +51,7 @@ namespace Foam
 
 class shortEdgeFilter2D
 {
-    // Private data
+    // Private Data
 
         const CV2D& cv2Dmesh_;
 
@@ -71,12 +71,6 @@ class shortEdgeFilter2D
 
 
     // Private Member Functions
-
-        void addRegion
-        (
-            const label regionI,
-            DynamicList<label>& bPointRegions
-        ) const;
 
         void assignBoundaryPointRegions
         (

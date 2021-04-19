@@ -242,6 +242,10 @@ public:
             template<class Addr>
             inline void append(const IndirectListBase<T, Addr>& list);
 
+            //- Append an element if not already in the list.
+            //  \return the change in list length
+            inline label appendUniq(const T& val);
+
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
             void transfer(List<T>& list);
@@ -360,33 +364,16 @@ public:
 template<>
 Istream& List<char>::readList(Istream& is);
 
+//- Hashing for List data
+template<class T>
+struct Hash<List<T>> : List<T>::hasher {};
+
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Create identity map of the given length with (map[i] == i)
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 labelList identity(const label len, label start=0);
-
-
-//- Hashing for List data, which uses Hasher for contiguous data and
-//- element-wise incrementally hashing otherwise.
-template<class T>
-struct Hash<List<T>>
-{
-    inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
-    {
-        if (is_contiguous<T>::value)
-        {
-            return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
-        }
-
-        for (const T& val : obj)
-        {
-            seed = Hash<T>()(val, seed);
-        }
-        return seed;
-    }
-};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

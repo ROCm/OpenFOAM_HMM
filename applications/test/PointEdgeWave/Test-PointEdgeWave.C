@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,11 +50,13 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createPolyMesh.H"
 
+    const wordRes patchSelection(args.getList<wordRe>(1));
+
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
     labelList patchIDs
     (
-        pbm.patchSet(args.getList<wordRe>(1)).sortedToc()
+        pbm.patchSet(patchSelection).sortedToc()
     );
 
     Info<< "Starting walk from patches "

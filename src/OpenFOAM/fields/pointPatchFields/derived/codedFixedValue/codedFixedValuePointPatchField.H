@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,16 +35,15 @@ Description
     \verbatim
     movingWall
     {
-        type            codedFixedValue;
-        value           uniform 0;
+        type    codedFixedValue;
+        value   uniform 0;
         name    rampedFixedValue;   // name of generated bc
 
         code
         #{
             operator==
             (
-                vector(0,0,1)
-                *min(10, 0.1*this->db().time().value())
+                vector(0,0,1) * min(10, 0.1*this->db().time().value())
             );
         #};
 
@@ -93,9 +92,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class IOdictionary;
-
 /*---------------------------------------------------------------------------*\
                Class codedFixedValuePointPatchField Declaration
 \*---------------------------------------------------------------------------*/
@@ -109,7 +105,7 @@ class codedFixedValuePointPatchField
     // Private Data
 
         //- Dictionary contents for the boundary condition
-        mutable dictionary dict_;
+        dictionary dict_;
 
         const word name_;
 
@@ -118,22 +114,20 @@ class codedFixedValuePointPatchField
 
     // Private Member Functions
 
-        const IOdictionary& dict() const;
-
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
-        //- Adapt the context for the current object
-        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
-
-        // Return a description (type + name) for the output
+        //- Description (type + name) for the output
         virtual string description() const;
 
-        // Clear the ptr to the redirected object
+        //- Clear redirected object(s)
         virtual void clearRedirect() const;
 
-        // Get the dictionary to initialize the codeContext
+        //- The code dictionary. Inline "code" or from system/codeDict
         virtual const dictionary& codeDict() const;
+
+        //- Adapt the context for the current object
+        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
 
 public:

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,37 +36,41 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-const Foam::IOdictionary& Foam::codedFixedValueFvPatchField<Type>::dict() const
+Foam::dlLibraryTable& Foam::codedFixedValueFvPatchField<Type>::libs() const
 {
-    const objectRegistry& obr = this->db();
-
-    const IOdictionary* dictptr = obr.cfindObject<IOdictionary>("codeDict");
-    if (dictptr)
-    {
-        return *dictptr;
-    }
-
-    return obr.store
-    (
-        new IOdictionary
-        (
-            IOobject
-            (
-                "codeDict",
-                this->db().time().system(),
-                this->db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        )
-    );
+    return this->db().time().libs();
 }
 
 
 template<class Type>
-Foam::dlLibraryTable& Foam::codedFixedValueFvPatchField<Type>::libs() const
+Foam::string Foam::codedFixedValueFvPatchField<Type>::description() const
 {
-    return this->db().time().libs();
+    return
+        "patch "
+      + this->patch().name()
+      + " on field "
+      + this->internalField().name();
+}
+
+
+template<class Type>
+void Foam::codedFixedValueFvPatchField<Type>::clearRedirect() const
+{
+    redirectPatchFieldPtr_.reset(nullptr);
+}
+
+
+template<class Type>
+const Foam::dictionary&
+Foam::codedFixedValueFvPatchField<Type>::codeDict() const
+{
+    // Inline "code" or from system/codeDict
+    return
+    (
+        dict_.found("code")
+      ? dict_
+      : codedBase::codeDict(this->db()).subDict(name_)
+    );
 }
 
 
@@ -89,56 +93,25 @@ void Foam::codedFixedValueFvPatchField<Type>::prepare
     // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make verbose
-    // dynCode.setFilterVariable("verbose", "true");
-    // DetailInfo
-    //     <<"compile " << name_ << " sha1: "
-    //     << context.sha1() << endl;
+    #ifdef FULLDEBUG
+    dynCode.setFilterVariable("verbose", "true");
+    DetailInfo
+        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+    #endif
 
     // Define Make/options
     dynCode.setMakeOptions
     (
         "EXE_INC = -g \\\n"
         "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
+        "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
         "    -lOpenFOAM \\\n"
         "    -lfiniteVolume \\\n"
+        "    -lmeshTools \\\n"
       + context.libs()
     );
-}
-
-
-template<class Type>
-const Foam::dictionary& Foam::codedFixedValueFvPatchField<Type>::codeDict()
-const
-{
-    // use system/codeDict or in-line
-    return
-    (
-        dict_.found("code")
-      ? dict_
-      : this->dict().subDict(name_)
-    );
-}
-
-
-template<class Type>
-Foam::string Foam::codedFixedValueFvPatchField<Type>::description() const
-{
-    return
-        "patch "
-      + this->patch().name()
-      + " on field "
-      + this->internalField().name();
-}
-
-
-template<class Type>
-void Foam::codedFixedValueFvPatchField<Type>::clearRedirect() const
-{
-    // remove instantiation of fvPatchField provided by library
-    redirectPatchFieldPtr_.clear();
 }
 
 
@@ -153,7 +126,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     codedBase(),
-    redirectPatchFieldPtr_()
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
@@ -186,7 +159,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     codedBase(),
     dict_(dict),
     name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
-    redirectPatchFieldPtr_()
+    redirectPatchFieldPtr_(nullptr)
 {
     updateLibrary(name_);
 }

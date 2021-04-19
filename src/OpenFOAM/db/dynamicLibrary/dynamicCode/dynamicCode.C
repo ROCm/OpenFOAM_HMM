@@ -52,10 +52,11 @@ const Foam::word Foam::dynamicCode::codeTemplateEnvName
 const Foam::fileName Foam::dynamicCode::codeTemplateDirName
     = "codeTemplates/dynamicCode";
 
-const char* const Foam::dynamicCode::libTargetRoot =
-    "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib/lib";
+const char* const Foam::dynamicCode::targetLibDir
+    = "LIB = $(PWD)/../platforms/$(WM_OPTIONS)/lib";
 
-const char* const Foam::dynamicCode::topDirName = "dynamicCode";
+const char* const Foam::dynamicCode::topDirName
+    = "dynamicCode";
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -224,7 +225,8 @@ bool Foam::dynamicCode::createMakeFiles() const
     }
 
     os  << nl
-        << libTargetRoot << codeName_.c_str() << nl;
+        << targetLibDir
+        << "/lib" << codeName_.c_str() << nl;
 
     return true;
 }

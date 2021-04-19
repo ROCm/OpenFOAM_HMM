@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const fileName inFileName1 = args[1];
-    const fileName inFileName2 = args[2];
-    const fileName outFileName = args[3];
+    const auto inFileName1 = args.get<fileName>(1);
+    const auto inFileName2 = args.get<fileName>(2);
+    const auto outFileName = args.get<fileName>(3);
 
     const bool addPoint     = args.found("points");
     const bool mergeRegions = args.found("mergeRegions");
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
             << nl << endl;
 
         Info<< "Surface  : " << inFileName1<< nl
-            << "Points   : " << args["points"] << nl
+            << "Points   : " << args.get<fileName>("points") << nl
             << "Writing  : " << outFileName << nl << endl;
     }
     else
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
     if (addPoint)
     {
-        IFstream pointsFile(args["points"]);
+        IFstream pointsFile(args.get<fileName>("points"));
         const pointField extraPoints(pointsFile);
 
         Info<< "Additional Points:" << extraPoints.size() << endl;

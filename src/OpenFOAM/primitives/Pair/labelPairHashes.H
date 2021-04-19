@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,19 +52,19 @@ Description
 #ifndef labelPairHashes_H
 #define labelPairHashes_H
 
-#include "HashSet.H"
 #include "labelPair.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     template<class T>
-    using LabelPairMap = HashTable<T, labelPair, labelPair::Hash<>>;
+    using LabelPairMap = HashTable<T, labelPair, Foam::Hash<labelPair>>;
 
-    typedef HashSet<labelPair, labelPair::Hash<>> labelPairHashSet;
+    typedef HashSet<labelPair, Foam::Hash<labelPair>> labelPairHashSet;
 
-    typedef HashTable<label, labelPair, labelPair::Hash<>> labelPairLookup;
+    typedef HashTable<label, labelPair, Foam::Hash<labelPair>> labelPairLookup;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

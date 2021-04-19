@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 
         for (label argi=1; argi < args.size(); ++argi)
         {
-            const string& dictFile = args[argi];
+            const auto dictFile = args.get<fileName>(argi);
             IFstream is(dictFile);
 
             dictionary inputDict(is);
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     {
         for (label argi=1; argi < args.size(); ++argi)
         {
-            const string& dictFile = args[argi];
+            const auto dictFile = args.get<fileName>(argi);
             IFstream is(dictFile);
 
             dictionary inputDict(is);

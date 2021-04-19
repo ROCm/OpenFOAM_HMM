@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,20 +120,24 @@ protected:
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
+        //- Description (type + name) for the output
+        virtual string description() const;
+
+        //- Clear redirected object(s)
+        virtual void clearRedirect() const;
+
+        // Get the code (sub)dictionary
+        virtual const dictionary& codeDict(const dictionary& dict) const;
+
+        // Get the code dictionary
+        virtual const dictionary& codeDict() const;
+
         //- Adapt the context for the current object
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
-        // Return a description (type + name) for the output
-        virtual string description() const;
 
-        // Clear the ptr to the redirected object
-        virtual void clearRedirect() const;
-
-        // Get the (sub)dictionary to initialize the codeContext
-        virtual const dictionary& codeDict(const dictionary& fullDict) const;
-
-        // Get the dictionary to initialize the codeContext
-        virtual const dictionary& codeDict() const;
+        //- No copy assignment
+        void operator=(const CodedField<Type>&) = delete;
 
 public:
 
@@ -150,12 +154,6 @@ public:
 
     //- Runtime type information
     TypeName("coded");
-
-
-    // Generated Methods
-
-        //- No copy assignment
-        void operator=(const CodedField<Type>&) = delete;
 
 
     // Constructors

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ using namespace Foam;
 
 void getRootCase(fileName& casePath)
 {
-    casePath.clean();
+    casePath.clean();  // Remove unneeded ".."
 
     if (casePath.empty() || casePath == ".")
     {
@@ -56,7 +56,7 @@ void getRootCase(fileName& casePath)
     {
         // avoid relative cases ending in '..' - makes for very ugly names
         casePath = cwd()/casePath;
-        casePath.clean();
+        casePath.clean();  // Remove unneeded ".."
     }
 }
 
@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
 
     const bool overwrite = args.found("overwrite");
 
-    fileName masterCase = args[1];
-    fileName addCase = args[2];
+    auto masterCase = args.get<fileName>(1);
+    auto addCase = args.get<fileName>(2);
 
     const word masterRegion =
         args.getOrDefault<word>("masterRegion", polyMesh::defaultRegion);

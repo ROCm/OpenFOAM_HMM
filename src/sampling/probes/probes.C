@@ -208,14 +208,13 @@ Foam::label Foam::probes::prepare()
         // Put in undecomposed case
         // (Note: gives problems for distributed data running)
 
-        fileName probeDir =
+        fileName probeDir
         (
             mesh_.time().globalPath()
           / functionObject::outputPrefix
           / probeSubDir
           / mesh_.time().timeName()
         );
-
         probeDir.clean();  // Remove unneeded ".."
 
         // ignore known fields, close streams for fields that no longer exist

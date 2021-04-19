@@ -103,7 +103,7 @@ Foam::externalFileCoupler::externalFileCoupler()
     log(false)
 {
     commsDir_.expand();
-    commsDir_.clean();
+    commsDir_.clean();  // Remove unneeded ".."
 }
 
 
@@ -118,7 +118,7 @@ Foam::externalFileCoupler::externalFileCoupler(const fileName& commsDir)
     log(false)
 {
     commsDir_.expand();
-    commsDir_.clean();
+    commsDir_.clean();  // Remove unneeded ".."
 
     if (Pstream::master())
     {
@@ -158,7 +158,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
     {
         dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
-        commsDir_.clean();
+        commsDir_.clean();  // Remove unneeded ".."
         statusDone_ = dict.getOrDefault<word>("statusDone", "done");
         slaveFirst_ = dict.getOrDefault("initByExternal", false);
 

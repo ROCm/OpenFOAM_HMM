@@ -609,6 +609,21 @@ Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
+inline Foam::label Foam::DynamicList<T, SizeMin>::appendUniq(const T& val)
+{
+    if (this->found(val))
+    {
+        return 0;
+    }
+    else
+    {
+        this->append(val);
+        return 1;  // Increased list length by one
+    }
+}
+
+
+template<class T, int SizeMin>
 inline T Foam::DynamicList<T, SizeMin>::remove()
 {
     // Location of last element and simultaneously the new size

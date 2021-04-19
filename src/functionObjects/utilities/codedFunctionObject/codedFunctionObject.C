@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "dictionary.H"
 #include "Time.H"
 #include "dynamicCode.H"
+#include "dynamicCodeContext.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -52,6 +53,31 @@ namespace functionObjects
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::dlLibraryTable& Foam::functionObjects::codedFunctionObject::libs() const
+{
+    return time_.libs();
+}
+
+
+Foam::string Foam::functionObjects::codedFunctionObject::description() const
+{
+    return "functionObject " + name();
+}
+
+
+void Foam::functionObjects::codedFunctionObject::clearRedirect() const
+{
+    redirectFunctionObjectPtr_.reset(nullptr);
+}
+
+
+const Foam::dictionary&
+Foam::functionObjects::codedFunctionObject::codeDict() const
+{
+    return dict_;
+}
+
+
 void Foam::functionObjects::codedFunctionObject::prepare
 (
     dynamicCode& dynCode,
@@ -72,11 +98,11 @@ void Foam::functionObjects::codedFunctionObject::prepare
     // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make verbose
-    // dynCode.setFilterVariable("verbose", "true");
-    // DetailInfo
-    //     <<"compile " << name_ << " sha1: "
-    //     << context.sha1() << endl;
+    #ifdef FULLDEBUG
+    dynCode.setFilterVariable("verbose", "true");
+    DetailInfo
+        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+    #endif
 
     // Define Make/options
     dynCode.setMakeOptions
@@ -91,31 +117,6 @@ void Foam::functionObjects::codedFunctionObject::prepare
         "    -lmeshTools \\\n"
       + context.libs()
     );
-}
-
-
-Foam::dlLibraryTable& Foam::functionObjects::codedFunctionObject::libs() const
-{
-    return time_.libs();
-}
-
-
-Foam::string Foam::functionObjects::codedFunctionObject::description() const
-{
-    return "functionObject " + name();
-}
-
-
-void Foam::functionObjects::codedFunctionObject::clearRedirect() const
-{
-    redirectFunctionObjectPtr_.clear();
-}
-
-
-const Foam::dictionary&
-Foam::functionObjects::codedFunctionObject::codeDict() const
-{
-    return dict_;
 }
 
 
@@ -189,99 +190,15 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
-    label nKeywords = 0;
+    auto& ctx = codedBase::codeContext();
 
-    const entry* eptr;
-
-    codeData_.clear();
-    codedBase::append("<codeData>");
-    if ((eptr = dict.findEntry("codeData", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(codeData_);
-        dynamicCodeContext::inplaceExpand(codeData_, dict);
-        codedBase::append(codeData_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeData_,
-            eptr->startLineNumber(),
-            dict.name()
-        );
-
-        ++nKeywords;
-    }
-
-    codeRead_.clear();
-    codedBase::append("<codeRead>");
-    if ((eptr = dict.findEntry("codeRead", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(codeRead_);
-        dynamicCodeContext::inplaceExpand(codeRead_, dict);
-        codedBase::append(codeRead_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeRead_,
-            eptr->startLineNumber(),
-            dict.name()
-        );
-
-        ++nKeywords;
-    }
-
-    codeExecute_.clear();
-    codedBase::append("<codeExecute>");
-    if ((eptr = dict.findEntry("codeExecute", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(codeExecute_);
-        dynamicCodeContext::inplaceExpand(codeExecute_, dict);
-        codedBase::append(codeExecute_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeExecute_,
-            eptr->startLineNumber(),
-            dict.name()
-        );
-
-        ++nKeywords;
-    }
-
-    codeWrite_.clear();
-    codedBase::append("<codeWrite>");
-    if ((eptr = dict.findEntry("codeWrite", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(codeWrite_);
-        dynamicCodeContext::inplaceExpand(codeWrite_, dict);
-        codedBase::append(codeWrite_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeWrite_,
-            eptr->startLineNumber(),
-            dict.name()
-        );
-
-        ++nKeywords;
-    }
-
-    codeEnd_.clear();
-    codedBase::append("<codeEnd>");
-    if ((eptr = dict.findEntry("codeEnd", keyType::LITERAL)) != nullptr)
-    {
-        eptr->readEntry(codeEnd_);
-        dynamicCodeContext::inplaceExpand(codeEnd_, dict);
-        codedBase::append(codeEnd_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeEnd_,
-            eptr->startLineNumber(),
-            dict.name()
-        );
-
-        ++nKeywords;
-    }
+    // Get code chunks, no short-circuiting
+    int nKeywords = 0;
+    nKeywords += ctx.readIfPresent("codeData", codeData_);
+    nKeywords += ctx.readIfPresent("codeRead", codeRead_);
+    nKeywords += ctx.readIfPresent("codeExecute", codeExecute_);
+    nKeywords += ctx.readIfPresent("codeWrite", codeWrite_);
+    nKeywords += ctx.readIfPresent("codeEnd", codeEnd_);
 
     if (!nKeywords)
     {

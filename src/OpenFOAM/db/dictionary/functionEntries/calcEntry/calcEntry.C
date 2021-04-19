@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +27,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "calcEntry.H"
-#include "addToMemberFunctionSelectionTable.H"
+#include "codeStream.H"
 #include "dictionary.H"
 #include "dynamicCode.H"
-#include "codeStream.H"
+#include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,24 +59,23 @@ class multiphaseMixtureThermo
 {
 public:
 
+    //- Symmetric pair of interface names
     class interfacePair
     :
         public Pair<word>
     {
     public:
 
-        struct hash
-        {
-            label operator()(const interfacePair& key) const
-            {
-                return word::hash()(key.first()) + word::hash()(key.second());
-            }
-        };
+        // Always use symmetric hashing
+        using hasher = Pair<word>::symmHasher;
+
+        // Always use symmetric hashing (alias)
+        using hash = Pair<word>::symmHasher;
 
 
         // Constructors
 
-            interfacePair() {} // = default
+            interfacePair() = default;
 
             interfacePair(const word& alpha1Name, const word& alpha2Name)
             :
@@ -97,11 +96,7 @@ public:
                 const interfacePair& b
             )
             {
-                return
-                (
-                    ((a.first() == b.first()) && (a.second() == b.second()))
-                 || ((a.first() == b.second()) && (a.second() == b.first()))
-                );
+                return (0 != Pair<word>::compare(a, b));
             }
 
             friend bool operator!=
@@ -117,7 +112,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Dictionary of phases
         PtrDictionary<phaseModel> phases_;
@@ -140,7 +135,7 @@ private:
         const dimensionedScalar deltaN_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         void calcAlphas();
 

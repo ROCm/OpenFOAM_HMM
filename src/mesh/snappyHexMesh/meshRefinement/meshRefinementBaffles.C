@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -5155,7 +5155,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // 1. Detect inter-region face and allocate names
 
-        HashTable<word, labelPair, labelPair::Hash<>> zoneIDsToFaceZone;
+        LabelPairMap<word> zoneIDsToFaceZone;
 
         for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
         {
@@ -5208,10 +5208,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             << endl;
 
         // From cellZone indices to faceZone index
-        HashTable<label, labelPair, labelPair::Hash<>> fZoneLookup
-        (
-            zonesToFaceZone.size()
-        );
+        LabelPairMap<label> fZoneLookup(zonesToFaceZone.size());
 
         const cellZoneMesh& cellZones = mesh_.cellZones();
 

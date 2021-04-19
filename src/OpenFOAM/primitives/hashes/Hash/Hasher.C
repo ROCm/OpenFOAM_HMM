@@ -159,6 +159,114 @@ Description
     }
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+// ----------------------------------------------------------------------------
+//  This works on all machines.  To be useful, it requires
+//  -- that the key be an array of uint32_t's, and
+//  -- that the length be the number of uint32_t's in the key
+//
+//  The function hashword() is identical to hashlittle() on little-endian
+//  machines, and identical to hashbig() on big-endian machines,
+//  except that the length has to be measured in uint32_ts rather than in
+//  bytes.  hashlittle() is more complicated than hashword() only because
+//  hashlittle() has to dance around fitting the key bytes into registers.
+// ----------------------------------------------------------------------------
+unsigned Foam::HasherInt
+(
+    const uint32_t *k,
+    size_t length,
+    unsigned seed
+)
+{
+    uint32_t a, b, c;
+
+    // Set up the internal state
+    a = b = c = 0xdeadbeef + (static_cast<uint32_t>(length) << 2) + seed;
+
+    // handle most of the key
+    while (length > 3)
+    {
+        a += k[0];
+        b += k[1];
+        c += k[2];
+        bitMixer(a,b,c);
+        length -= 3;
+        k += 3;
+    }
+
+    // handle the last 3 uint32_t's
+    switch (length)  // all case statements fall through
+    {
+        case 3 : c += k[2]; [[fallthrough]];
+        case 2 : b += k[1]; [[fallthrough]];
+        case 1 : a += k[0];
+            bitMixerFinal(a,b,c);
+            [[fallthrough]];
+        case 0 :  // case 0: nothing left to add
+            break;
+    }
+
+    return c;
+}
+
+
+// ----------------------------------------------------------------------------
+// hashword2() -- same as hashword(), but take two seeds and return two
+// 32-bit values.  pc and pb must both be non-null, and *pc and *pb must
+// both be initialized with seeds.  If you pass in (*pb)==0, the output
+// (*pc) will be the same as the return value from hashword().
+// ----------------------------------------------------------------------------
+
+// Currently unused
+#if 0
+unsigned Foam::HasherDual
+(
+    const uint32_t *k,
+    size_t length,
+    unsigned& hash1,  // IN: seed OUT: primary hash value
+    unsigned& hash2   // IN: more seed OUT: secondary hash value
+)
+{
+    uint32_t a, b, c;
+
+    // Set up the internal state
+    a = b = c = 0xdeadbeef + (static_cast<uint32_t>(length) << 2) + hash1;
+    c += hash2;
+
+    // handle most of the key
+    while (length > 3)
+    {
+        a += k[0];
+        b += k[1];
+        c += k[2];
+        bitMixer(a,b,c);
+        length -= 3;
+        k += 3;
+    }
+
+    // handle the last 3 uint32_t's
+    switch (length)  // all case statements fall through
+    {
+        case 3 : c += k[2]; [[fallthrough]];
+        case 2 : b += k[1]; [[fallthrough]];
+        case 1 : a += k[0];
+            bitMixerFinal(a,b,c);
+            [[fallthrough]];
+        case 0 :  // case 0: nothing left to add
+            break;
+    }
+
+    // report the result
+    hash1 = c;
+    hash2 = b;
+
+    // return primary hash value
+    return c;
+}
+#endif
+
+
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
 // ----------------------------------------------------------------------------
@@ -304,6 +412,7 @@ static unsigned jenkins_hashlittle
     }
     else
     {
+        // need to read the key one byte at a time
         const uint8_t *k = reinterpret_cast<const uint8_t*>(key);
 
         // all but the last block: affect some 32 bits of (a,b,c)
@@ -468,7 +577,6 @@ static unsigned jenkins_hashbig
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-
 unsigned Foam::Hasher
 (
     const void *key,
@@ -483,108 +591,6 @@ unsigned Foam::Hasher
 #else
     #error "Cannot determine WM_BIG_ENDIAN or WM_LITTLE_ENDIAN."
 #endif
-}
-
-
-// ----------------------------------------------------------------------------
-//  This works on all machines.  To be useful, it requires
-//  -- that the key be an array of uint32_t's, and
-//  -- that the length be the number of uint32_t's in the key
-//
-//  The function hashword() is identical to hashlittle() on little-endian
-//  machines, and identical to hashbig() on big-endian machines,
-//  except that the length has to be measured in uint32_ts rather than in
-//  bytes.  hashlittle() is more complicated than hashword() only because
-//  hashlittle() has to dance around fitting the key bytes into registers.
-// ----------------------------------------------------------------------------
-unsigned Foam::HasherInt
-(
-    const uint32_t *k,
-    size_t length,
-    unsigned seed
-)
-{
-    uint32_t a, b, c;
-
-    // Set up the internal state
-    a = b = c = 0xdeadbeef + (static_cast<uint32_t>(length) << 2) + seed;
-
-    // handle most of the key
-    while (length > 3)
-    {
-        a += k[0];
-        b += k[1];
-        c += k[2];
-        bitMixer(a,b,c);
-        length -= 3;
-        k += 3;
-    }
-
-    // handle the last 3 uint32_t's
-    switch (length)  // all case statements fall through
-    {
-        case 3 : c += k[2]; [[fallthrough]];
-        case 2 : b += k[1]; [[fallthrough]];
-        case 1 : a += k[0];
-            bitMixerFinal(a,b,c);
-            [[fallthrough]];
-        case 0 :  // case 0: nothing left to add
-            break;
-    }
-
-    return c;
-}
-
-
-// ----------------------------------------------------------------------------
-// hashword2() -- same as hashword(), but take two seeds and return two
-// 32-bit values.  pc and pb must both be non-null, and *pc and *pb must
-// both be initialized with seeds.  If you pass in (*pb)==0, the output
-// (*pc) will be the same as the return value from hashword().
-// ----------------------------------------------------------------------------
-unsigned Foam::HasherDual
-(
-    const uint32_t *k,
-    size_t length,
-    unsigned& hash1,  // IN: seed OUT: primary hash value
-    unsigned& hash2   // IN: more seed OUT: secondary hash value
-)
-{
-    uint32_t a, b, c;
-
-    // Set up the internal state
-    a = b = c = 0xdeadbeef + (static_cast<uint32_t>(length) << 2) + hash1;
-    c += hash2;
-
-    // handle most of the key
-    while (length > 3)
-    {
-        a += k[0];
-        b += k[1];
-        c += k[2];
-        bitMixer(a,b,c);
-        length -= 3;
-        k += 3;
-    }
-
-    // handle the last 3 uint32_t's
-    switch (length)  // all case statements fall through
-    {
-        case 3 : c += k[2]; [[fallthrough]];
-        case 2 : b += k[1]; [[fallthrough]];
-        case 1 : a += k[0];
-            bitMixerFinal(a,b,c);
-            [[fallthrough]];
-        case 0 :  // case 0: nothing left to add
-            break;
-    }
-
-    // report the result
-    hash1 = c;
-    hash2 = b;
-
-    // return primary hash value
-    return c;
 }
 
 

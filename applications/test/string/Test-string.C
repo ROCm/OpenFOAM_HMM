@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
 
     Info<< "string:" << test << nl << "hash:"
-        << unsigned(string::hash()(test)) << endl;
+        << unsigned(string::hasher()(test)) << endl;
 
     Info<<"trimLeft: " << stringOps::trimLeft(test) << endl;
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
@@ -333,11 +333,11 @@ int main(int argc, char *argv[])
     cout<< "output string with " << s2.length() << " characters\n";
     cout<< "ostream<<  >" << s2 << "<\n";
     Info<< "Ostream<<  >" << s2 << "<\n";
-    Info<< "hash:" << hex << string::hash()(s2) << dec << endl;
+    Info<< "hash:" << hex << string::hasher()(s2) << dec << endl;
 
     cout<< "\ntest Foam::name()\n";
 
-    Info<< "hash: = " << word::printf("0x%012X", string::hash()(s2)) << endl;
+    Info<< "hash: = " << word::printf("0x%012X", string::hasher()(s2)) << endl;
 
     // Test formatting on int
     {

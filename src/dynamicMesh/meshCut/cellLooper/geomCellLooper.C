@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -290,14 +290,12 @@ bool Foam::geomCellLooper::cut
         // Check distance of endpoints to cutPlane
         //
 
-        if (!checkedPoints.found(e.start()))
+        if (checkedPoints.insert(e.start()))
         {
-            checkedPoints.insert(e.start());
+            const scalar typLen = pointEqualTol_ * minEdgeLen(e.start());
 
-            scalar typStartLen = pointEqualTol_ * minEdgeLen(e.start());
-
-            // Check distance of startPt to plane.
-            if (cutPlane.distance(points[e.start()]) < typStartLen)
+            // Check distance to plane.
+            if (cutPlane.distance(points[e.start()]) < typLen)
             {
                 // Use point.
                 localLoop.append(vertToEVert(e.start()));
@@ -306,14 +304,13 @@ bool Foam::geomCellLooper::cut
                 useStart = true;
             }
         }
-        if (!checkedPoints.found(e.end()))
+
+        if (checkedPoints.insert(e.end()))
         {
-            checkedPoints.insert(e.end());
+            const scalar typLen = pointEqualTol_ * minEdgeLen(e.end());
 
-            scalar typEndLen = pointEqualTol_ * minEdgeLen(e.end());
-
-            // Check distance of endPt to plane.
-            if (cutPlane.distance(points[e.end()]) < typEndLen)
+            // Check distance to plane.
+            if (cutPlane.distance(points[e.end()]) < typLen)
             {
                 // Use point.
                 localLoop.append(vertToEVert(e.end()));

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -289,7 +289,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
         }
     }
 
-    if (foamyHexMeshControls().objOutput() && fName != fileName::null)
+    if (foamyHexMeshControls().objOutput() && !fName.empty())
     {
         DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }
@@ -324,7 +324,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
         }
     }
 
-    if (foamyHexMeshControls().objOutput() && fName != fileName::null)
+    if (foamyHexMeshControls().objOutput() && !fName.empty())
     {
         DelaunayMeshTools::writeOBJ(time().path()/fName, pts);
     }

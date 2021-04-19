@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,14 +94,14 @@ public:
     // Member Functions
 
         //- Return the mesh reference
-        const pointMesh& mesh() const
+        const pointMesh& mesh() const noexcept
         {
             return mesh_;
         }
 
         //- Find patch indices given a name
         //  A no-op (returns empty list) for an empty key
-        labelList indices(const keyType& key, const bool useGroups) const;
+        labelList indices(const wordRe& matcher, const bool useGroups) const;
 
         //- Find patch index given a name
         //  A no-op (returns -1) for an empty patchName
@@ -118,7 +118,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices(const keyType& key, const bool useGroups) const
+        labelList findIndices(const wordRe& key, bool useGroups) const
         {
             return indices(key, useGroups);
         }

@@ -195,7 +195,7 @@ bool Foam::functionObjects::dataCloud::read(const dictionary& dict)
         // Standard postProcessing/ naming
         directory_ = time_.globalPath()/functionObject::outputPrefix/name();
     }
-    directory_.clean();
+    directory_.clean();  // Remove unneeded ".."
 
     return true;
 }

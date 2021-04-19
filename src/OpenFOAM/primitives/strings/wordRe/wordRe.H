@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,10 +42,11 @@ Description
 
 Note
     If the string contents are changed - eg, by the operator+=() or by
-    string::replace(), etc - it will be necessary to use compile() to
-    synchronize the regular expression.
+    string::replace(), etc - it will be necessary to use compile()
+    or uncompile() to synchronize the regular expression.
 
 SourceFiles
+    wordReI.H
     wordRe.C
 
 \*---------------------------------------------------------------------------*/
@@ -55,7 +56,7 @@ SourceFiles
 
 #include "word.H"
 #include "regExp.H"
-#include "keyType.H"
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,8 +64,11 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
+class keyType;
+class token;
+class wordRe;
+Istream& operator>>(Istream& is, wordRe& val);
+Ostream& operator<<(Ostream& os, const wordRe& val);
 
 /*---------------------------------------------------------------------------*\
                            Class wordRe Declaration
@@ -99,7 +103,7 @@ public:
             ICASE   = 2, //!< Ignore case in regular expression
             NOCASE  = 2, //!< \deprecated(2018-04) Alias for ICASE
             DETECT  = 4, //!< Detect if the string contains meta-characters
-            UNKNOWN = 4, //!< Unknown content.
+            UNKNOWN = 4, //!< Unknown content (for return value).
             REGEX_ICASE  = (REGEX|ICASE),   //!< Combined REGEX and ICASE
             DETECT_ICASE = (DETECT|ICASE),  //!< Combined DETECT and ICASE
         };
@@ -107,7 +111,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct, empty literal
         inline wordRe();
 
         //- Copy construct
@@ -116,75 +120,75 @@ public:
         //- Move construct
         inline wordRe(wordRe&& str);
 
-        //- Construct from keyType, using its compile information
-        inline explicit wordRe(const keyType& str);
+        //- Implicit copy construct from word, as LITERAL
+        inline wordRe(const word& str);
 
-        //- Copy from character array, treat as a literal
-        inline explicit wordRe(const char* str);
+        //- Implicit move construct from word, as LITERAL
+        inline wordRe(word&& str);
 
-        //- Copy from std::string, treat as a literal
-        inline explicit wordRe(const std::string& str);
+        //- Implicit copy construct from other string-types,
+        //- with specified compile option (default is LITERAL)
+        inline wordRe
+        (
+            const std::string& str,
+            const compOption opt = compOption::LITERAL
+        );
 
-        //- Copy from string, treat as a literal
-        inline explicit wordRe(const string& str);
+        //- Implicit construct from character array,
+        //- with specified compile option (default is LITERAL)
+        inline wordRe
+        (
+            const char* str,
+            const compOption opt = compOption::LITERAL
+        );
 
-        //- Copy from word, treat as a literal
-        inline explicit wordRe(const word& str);
+        //- Implicit copy construct from keyType, using its compile type
+        wordRe(const keyType& str);
 
-        //- Copy from keyType, use specified compile option
-        inline wordRe(const keyType& str, const compOption opt);
-
-        //- Copy from character array, use specified compile option
-        inline wordRe(const char* str, const compOption opt);
-
-        //- Copy from std::string, use specified compile option
-        inline wordRe(const std::string& str, const compOption opt);
-
-        //- Copy from string, use specified compile option
-        inline wordRe(const string& str, const compOption opt);
-
-        //- Copy from word, use specified compile option
-        inline wordRe(const word& str, const compOption opt);
-
-        //- Construct from Istream
-        //  Words are treated as literals, strings with an auto-test
+        //- Construct from Istream by reading a token
+        //  Words are treated as literals, strings with an auto-detect
         explicit wordRe(Istream& is);
 
 
     // Member Functions
 
-        //- Is this a meta character?
-        inline static bool meta(char c);
-
-        //- Is this character valid for a wordRe?
-        //  This is largely identical with what word accepts, but also
-        //  permit brace-brackets, which are valid for some regexs.
-        inline static bool valid(char c);
-
-        //- Test string for regular expression meta characters
-        inline static bool isPattern(const std::string& str);
+        //- Test for valid wordRe character?
+        //  Like Foam::word, but with brace-brackets,
+        //  which are valid for some regexs.
+        inline static bool valid(const char c);
 
 
     // Access
 
         //- The wordRe is treated as literal string, not as pattern.
-        inline bool isLiteral() const;
+        inline bool isLiteral() const noexcept;
 
         //- The wordRe is treated as a pattern, not as literal string.
-        inline bool isPattern() const;
+        inline bool isPattern() const noexcept;
 
 
     // Infrastructure
 
-        //- Compile the regular expression
+        //- Inherit all regular string assign() methods
+        using word::assign;
+
+        //- Assign from word or string token.
+        //  Words are treated as literals, strings with an auto-detect
+        //  \return false if the token was the incorrect type
+        bool assign(const token& tok);
+
+        //- Compile as regular expression
         inline bool compile();
+
+        //- Mark as literal string, remove any regular expression
+        inline void uncompile();
 
         //- Possibly compile the regular expression, with greater control
         inline bool compile(const compOption opt);
 
-        //- Make wordRe a literal again, instead of a regular expression.
-        //  Optionally strip invalid word characters.
-        inline void uncompile(bool adjust = false);
+        //- Mark as literal string, optionally stripping invalid word
+        //- characters when changing to a literal
+        inline void uncompile(bool adjust);
 
 
     // Editing
@@ -209,15 +213,6 @@ public:
         inline bool match(const std::string& text, bool literal=false) const;
 
 
-    // Miscellaneous
-
-        //- Return a string with quoted meta-characters
-        inline string quotemeta() const;
-
-        //- Output some basic info
-        Ostream& info(Ostream& os) const;
-
-
     // Member Operators
 
         //- Perform smart match on text, as per match()
@@ -234,7 +229,7 @@ public:
 
         //- Copy keyType and its type (literal or regex)
         //  Always case sensitive
-        inline void operator=(const keyType& str);
+        void operator=(const keyType& str);
 
         //- Copy string, auto-test for regular expression
         //  Always case sensitive

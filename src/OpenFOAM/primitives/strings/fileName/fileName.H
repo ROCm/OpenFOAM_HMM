@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,13 +55,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+class fileName;
+class token;
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
-
-class wordRe;
-class fileName;
 
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration
@@ -100,7 +99,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         fileName() = default;
 
         //- Copy construct
@@ -142,13 +141,20 @@ public:
 
     // Member Functions
 
+        //- Inherit all regular string assign() methods
+        using string::assign;
+
+        //- Assign from word or string token.
+        //  \return false if the token was the incorrect type
+        bool assign(const token& tok);
+
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
-        //- Construct fileName with no invalid characters, possibly applying
+        //- Construct fileName without invalid characters, possibly applying
         //- other transformations such as changing the path separator,
         //- removing duplicate or trailing slashes, etc.
-        static fileName validate(const std::string& s, const bool doClean=true);
+        static fileName validate(const std::string&, const bool doClean=true);
 
         //- Join two strings with a path separator ('/' by default).
         //  No separator is added if either argument is an empty string or
@@ -168,43 +174,47 @@ public:
         //- Strip invalid characters
         inline void stripInvalid();
 
-        //- Cleanup filename
+        //- Cleanup filename string, possibly applies other transformations
+        //- such as changing the path separator etc.
         //
-        // Removes trailing \c /
-        //   \verbatim
-        //       /                 -->   /
-        //       /abc/             -->   /abc
-        //   \endverbatim
+        // Changes back-slash to forward-slash path separator,
+        // while preserving windows UNC:
+        // \verbatim
+        //     \\server\abc\def  -->   \\server/abc/def
+        // \endverbatim
         //
-        // Removes repeated slashes
-        //   \verbatim
-        //       /abc////def        -->   /abc/def
-        //   \endverbatim
+        // Removes trailing slash:
+        // \verbatim
+        //     /                 -->   /
+        //     /abc/             -->   /abc
+        // \endverbatim
         //
-        // Removes \c /./ (current directory)
-        //   \verbatim
-        //       /abc/def/./ghi/.   -->   /abc/def/ghi
-        //       abc/def/./         -->   abc/def
-        //       ./abc/             -->   ./abc
-        //   \endverbatim
+        // Removes repeated slashes, but preserves UNC:
+        // \verbatim
+        //     /abc////def          -->   /abc/def
+        //     \\server\abc////def  -->   \\server/abc/def
+        // \endverbatim
         //
-        // Removes \c /../ (parent directory)
-        //   \verbatim
-        //       /abc/def/../ghi/jkl/nmo/..   -->   /abc/ghi/jkl
-        //       abc/../def/ghi/../jkl        -->   abc/../def/jkl
-        //   \endverbatim
+        // Removes \c "/./" (current directory), except for leading one:
+        // \verbatim
+        //     /abc/def/./ghi/.   -->   /abc/def/ghi
+        //     abc/def/./         -->   abc/def
+        //     ./abc/             -->   ./abc
+        // \endverbatim
+        //
+        // Removes \c "/../" (parent directory), except for leading one:
+        // \verbatim
+        //     /abc/def/../ghi/jkl/nmo/..   -->   /abc/ghi/jkl
+        //     abc/../def/ghi/../jkl        -->   abc/../def/jkl
+        // \endverbatim
+        // .
         //
         // \return True if the content changed
         static bool clean(std::string& str);
 
-
-        //- Cleanup filename inplace
-        //  \return True if any contents changed
+        //- Cleanup filename (inplace)
+        //  \return True if the content changed
         bool clean();
-
-        //- Cleanup filename
-        //  \return cleaned copy of fileName
-        fileName clean() const;
 
 
     // Interrogation
@@ -217,10 +227,13 @@ public:
         //  \param checkGzip add an additional test for a gzip FILE
         Type type(bool followLink=true, bool checkGzip=false) const;
 
-        //- Return true if string starts with a '/'
+        //- Return true if filename starts with a '/' or '\\'
+        //- or (windows-only) with a filesystem-root
         inline static bool isAbsolute(const std::string& str);
 
-        //- Return true if file name is absolute (starts with a '/')
+        //- Return true if filename is absolute,
+        //- which means it starts with a '/' or '\\'
+        //- or (windows-only) with a filesystem-root
         inline bool isAbsolute() const;
 
         //- Convert from relative to absolute
@@ -322,17 +335,11 @@ public:
         //  or when the file name is empty or ended with a '/'.
         inline fileName& ext(const word& ending);
 
-        //- Return true if it has an extension or simply ends with a '.'
-        inline bool hasExt() const;
-
-        //- Return true if the extension is the same as the given ending.
-        inline bool hasExt(const word& ending) const;
-
-        //- Return true if the extension matches the given ending.
-        bool hasExt(const wordRe& ending) const;
+        //- Various checks for extensions
+        using string::hasExt;
 
         //- Remove extension, returning true if string changed.
-        inline bool removeExt();
+        using string::removeExt;
 
 
         //- Return path components as wordList
@@ -389,7 +396,7 @@ public:
         inline fileName& operator=(const char* str);
 
 
-    // Other operators
+    // Other Operators
 
         //- Append a path element with '/' separator.
         //  No '/' separator is added if this or the argument are empty.

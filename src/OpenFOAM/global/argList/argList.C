@@ -715,8 +715,7 @@ void Foam::argList::setCasePaths()
 
     if (optIter.found())
     {
-        caseDir = fileName::validate(optIter.val());
-        caseDir.clean();
+        caseDir = fileName::validate(optIter.val());  // includes 'clean'
 
         if (caseDir.empty() || caseDir == ".")
         {
@@ -1193,7 +1192,7 @@ void Foam::argList::parse
                 // Could also check for absolute path, but shouldn't be needed
                 if (adjustOpt)
                 {
-                    source.clean();
+                    source.clean();  // Remove unneeded ".."
                     options_.set("decomposeParDict", source);
                 }
             }

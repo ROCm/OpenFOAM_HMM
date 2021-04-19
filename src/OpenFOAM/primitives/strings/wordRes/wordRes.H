@@ -56,21 +56,22 @@ class wordRes
     // Private Methods
 
         //- Smart match as literal or regex, stopping on the first match.
-        inline static bool found_match
+        //  \return index of first match, -1 if not found
+        inline static label first_match
         (
-            const UList<wordRe>& patterns,
+            const UList<wordRe>& selectors,
             const std::string& text,
-            bool literal=false
+            const bool literal=false
         );
 
-        //- Smart match across entire list, returning the match type.
+        //- Smart match across entire list, returning the best match type.
         //  Stops on the first literal match, or continues to examine
         //  if a regex match occurs.
         //  \return wordRe::LITERAL, wordRe::REGEX on match and
         //      wordRe::UNKNOWN otherwise.
         inline static wordRe::compOption found_matched
         (
-            const UList<wordRe>& patterns,
+            const UList<wordRe>& selectors,
             const std::string& text
         );
 
@@ -84,17 +85,14 @@ public:
         {
             const UList<wordRe>& values;
 
-            matcher(const UList<wordRe>& list)
+            matcher(const UList<wordRe>& selectors)
             :
-                values(list)
+                values(selectors)
             {}
 
-            //- Return true if string matches ANY of the regular expressions
+            //- True if text matches ANY of the entries.
             //  Allows use as a predicate.
-            bool operator()(const std::string& text) const
-            {
-                return found_match(values, text);
-            }
+            inline bool operator()(const std::string& text) const;
         };
 
 
@@ -104,7 +102,7 @@ public:
         inline static const wordRes& null();
 
         //- Return a wordRes with duplicate entries filtered out.
-        //  No distinction made between literals or regular expressions.
+        //  No distinction made between literals and regular expressions.
         static wordRes uniq(const UList<wordRe>& input);
 
 
@@ -121,7 +119,7 @@ public:
     // Member Functions
 
         //- Filter out duplicate entries (inplace).
-        //  No distinction made between literals or regular expressions.
+        //  No distinction made between literals and regular expressions.
         void uniq();
 
         //- Smart match as literal or regex, stopping on the first match.
@@ -133,16 +131,16 @@ public:
         //- Smart match in the list of matchers, returning the match type.
         //  It stops if there is a literal match, or continues to examine
         //  other regexs.
-        //  \return LITERAL if a lteral match was found, REGEX if a regex
-        //      match was found and UNKNOWN otherwise.
+        //  \return LITERAL if a lteral match was found,
+        //      REGEX if any regex match was found,
+        //      UNKNOWN otherwise.
         inline wordRe::compOption matched(const std::string& text) const;
 
-        //- Extract list indices for all matches.
+        //- Return list indices for all matches.
         //
         //  \param input  A list of string inputs to match against
         //  \param invert invert the matching logic
-        //  \return The locations (indices) in the input list where match()
-        //      is true
+        //  \return indices of the matches in the input list
         template<class StringType>
         inline labelList matching
         (

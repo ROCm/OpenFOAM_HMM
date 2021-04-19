@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -467,15 +468,8 @@ inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
 
     forAll(c1Procs, aPI)
     {
-        if (!procsAttached.found(c1Procs[aPI]))
-        {
-            procsAttached.append(c1Procs[aPI]);
-        }
-
-        if (!procsAttached.found(c2Procs[aPI]))
-        {
-            procsAttached.append(c2Procs[aPI]);
-        }
+        procsAttached.appendUniq(c1Procs[aPI]);
+        procsAttached.appendUniq(c2Procs[aPI]);
     }
 
     return List<label>(procsAttached);

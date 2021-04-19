@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,69 +41,29 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
     }
 
     coeffs_.readEntry("fields", fieldNames_);
-    applied_.setSize(fieldNames_.size(), false);
+    applied_.resize(fieldNames_.size(), false);
 
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
-    // Code chunks
 
-    codedBase::append("<codeCorrect>");
-    {
-        const entry& e =
-            coeffs_.lookupEntry("codeCorrect", keyType::LITERAL);
+    // Code context chunks
 
-        e.readEntry(codeCorrect_);
-        dynamicCodeContext::inplaceExpand(codeCorrect_, coeffs_);
+    auto& ctx = codedBase::codeContext();
 
-        codedBase::append(codeCorrect_);
+    ctx.readEntry("codeCorrect", codeCorrect_);
+    ctx.readEntry("codeAddSup", codeAddSup_);
 
-        dynamicCodeContext::addLineDirective
+    // ctx.readEntry("codeConstrain", codeConstrain_);
+    ctx.readEntry  // Compatibility
+    (
+        coeffs_.lookupEntryCompat
         (
-            codeCorrect_,
-            e.startLineNumber(),
-            coeffs_
-        );
-    }
-
-    codedBase::append("<codeAddSup>");
-    {
-        const entry& e =
-            coeffs_.lookupEntry("codeAddSup", keyType::LITERAL);
-
-        e.readEntry(codeAddSup_);
-        dynamicCodeContext::inplaceExpand(codeAddSup_, coeffs_);
-
-        codedBase::append(codeAddSup_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeAddSup_,
-            e.startLineNumber(),
-            coeffs_
-        );
-    }
-
-    codedBase::append("<codeConstrain>");
-    {
-        const entry& e =
-            coeffs_.lookupEntryCompat
-            (
-                "codeConstrain",
-                {{ "codeSetValue", 1812 }}, keyType::LITERAL
-            );
-
-        e.readEntry(codeConstrain_);
-        dynamicCodeContext::inplaceExpand(codeConstrain_, coeffs_);
-
-        codedBase::append(codeConstrain_);
-
-        dynamicCodeContext::addLineDirective
-        (
-            codeConstrain_,
-            e.startLineNumber(),
-            coeffs_
-        );
-    }
+            "codeConstrain",
+            {{ "codeSetValue", 1812 }},
+            keyType::LITERAL
+        ).keyword(),
+        codeConstrain_
+    );
 
     return true;
 }

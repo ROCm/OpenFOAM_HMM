@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,7 +172,7 @@ void Foam::localPointRegion::countPointRegions
                         }
                         else
                         {
-                            label localPointi = meshPointMap_.size();
+                            const label localPointi = meshPointMap_.size();
                             meshPointMap_.insert(pointi, localPointi);
                             labelList regions(2);
                             regions[0] = minPointRegion[pointi];
@@ -180,7 +180,7 @@ void Foam::localPointRegion::countPointRegions
                             pointRegions.append(regions);
                         }
 
-                        label meshFaceMapI = meshFaceMap_.size();
+                        const label meshFaceMapI = meshFaceMap_.size();
                         meshFaceMap_.insert(facei, meshFaceMapI);
                     }
                 }
@@ -372,7 +372,7 @@ void Foam::localPointRegion::calcPointRegions
                         const label pointi = f[fp];
                         auto iter = minPointValue.find(pointi);
 
-                        if (iter == minPointValue.end())
+                        if (!iter.found())
                         {
                             minPointValue.insert(pointi, minRegion[facei][fp]);
                         }

@@ -157,18 +157,17 @@ Foam::wordList Foam::faBoundaryMesh::types() const
 
 Foam::labelList Foam::faBoundaryMesh::indices
 (
-    const keyType& key,
+    const wordRe& matcher,
     const bool useGroups  // ignored
 ) const
 {
-    if (key.empty())
+    if (matcher.empty())
     {
         return labelList();
     }
 
-    if (key.isPattern())
+    if (matcher.isPattern())
     {
-        const regExp matcher(key);
         return PtrListOps::findMatching(*this, matcher);
     }
     else
@@ -176,7 +175,6 @@ Foam::labelList Foam::faBoundaryMesh::indices
         // Literal string.
         // Special version of above for reduced memory footprint
 
-        const word& matcher = key;
         const label patchId = PtrListOps::firstMatching(*this, matcher);
 
         if (patchId >= 0)
@@ -189,24 +187,13 @@ Foam::labelList Foam::faBoundaryMesh::indices
 }
 
 
-Foam::label Foam::faBoundaryMesh::findIndex(const keyType& key) const
+Foam::label Foam::faBoundaryMesh::findIndex(const wordRe& key) const
 {
     if (key.empty())
     {
         return -1;
     }
-    else if (key.isPattern())
-    {
-        // Find as regex
-        const regExp matcher(key);
-        return PtrListOps::firstMatching(*this, matcher);
-    }
-    else
-    {
-        // Find as literal string
-        const word& matcher = key;
-        return PtrListOps::firstMatching(*this, matcher);
-    }
+    return PtrListOps::firstMatching(*this, key);
 }
 
 

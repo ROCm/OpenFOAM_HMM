@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -373,7 +373,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const fileName dictFileName(args[1]);
+    const auto dictFileName = args.get<fileName>(1);
 
     autoPtr<IFstream> dictFile(new IFstream(dictFileName));
     if (!dictFile().good())

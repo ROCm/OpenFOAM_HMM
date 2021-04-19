@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,50 +68,25 @@ class multiphaseSystem
     public IOdictionary,
     public transportModel
 {
-
 public:
 
+    //- Name pair for the interface
     class interfacePair
     :
         public Pair<word>
     {
     public:
 
-        class symmHash
-        :
-            public Hash<interfacePair>
-        {
-        public:
+        // Ordered hashing (alias)
+        using hash = Pair<word>::hasher;
 
-            symmHash()
-            {}
-
-            label operator()(const interfacePair& key) const
-            {
-                return word::hash()(key.first()) + word::hash()(key.second());
-            }
-        };
-
-        class hash
-        :
-             public Hash<interfacePair>
-        {
-        public:
-
-            hash()
-            {}
-
-            label operator()(const interfacePair& key) const
-            {
-                return word::hash()(key.first(), word::hash()(key.second()));
-            }
-        };
+        // Unordered hashing (alias)
+        using symmHash = Pair<word>::symmHasher;
 
 
         // Constructors
 
-            interfacePair()
-            {}
+            interfacePair() = default;
 
             interfacePair(const word& alpha1Name, const word& alpha2Name)
             :
@@ -132,11 +107,7 @@ public:
                 const interfacePair& b
             )
             {
-                return
-                (
-                    ((a.first() == b.first()) && (a.second() == b.second()))
-                 || ((a.first() == b.second()) && (a.second() == b.first()))
-                );
+                return (0 != Pair<word>::compare(a, b));
             }
 
             friend bool operator!=

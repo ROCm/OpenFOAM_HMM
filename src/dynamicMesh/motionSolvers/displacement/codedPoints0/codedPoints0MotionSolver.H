@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,17 +106,17 @@ protected:
         //- Mutable access to the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
-        //- Adapt the context for the current object
-        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
-
-        //- Return a description (type + name) for the output
+        //- Description (type + name) for the output
         virtual string description() const;
 
-        //- Clear any redirected objects
+        //- Clear redirected object(s)
         virtual void clearRedirect() const;
 
         // The dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
+        //- Adapt the context for the current object
+        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
 
         //- No copy construct

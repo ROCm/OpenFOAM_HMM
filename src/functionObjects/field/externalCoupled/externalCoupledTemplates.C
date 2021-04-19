@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,10 @@ bool Foam::functionObjects::externalCoupled::readData
     }
 
 
+    const wordRes patchSelection(one{}, groupName);
+
     label nFound = 0;
+
     for (const fvMesh& mesh : meshes)
     {
         const volFieldType* vfptr = mesh.findObject<volFieldType>(fieldName);
@@ -89,7 +92,7 @@ bool Foam::functionObjects::externalCoupled::readData
         {
             continue;
         }
-        nFound++;
+        ++nFound;
 
         typename volFieldType::Boundary& bf =
             const_cast<volFieldType*>(vfptr)->boundaryFieldRef();
@@ -97,10 +100,7 @@ bool Foam::functionObjects::externalCoupled::readData
         // Get the patches
         const labelList patchIDs
         (
-            mesh.boundaryMesh().patchSet
-            (
-                List<wordRe>{groupName}
-            ).sortedToc()
+            mesh.boundaryMesh().patchSet(patchSelection).sortedToc()
         );
 
         // Handle column-wise reading of patch data. Supports most easy types
@@ -261,7 +261,7 @@ bool Foam::functionObjects::externalCoupled::readData
         }
     }
 
-    return nFound > 0;
+    return nFound;
 }
 
 
@@ -352,8 +352,9 @@ bool Foam::functionObjects::externalCoupled::writeData
     }
 
 
-    bool headerDone = false;
+    const wordRes patchSelection(one{}, groupName);
 
+    bool headerDone = false;
     label nFound = 0;
 
     for (const fvMesh& mesh : meshes)
@@ -364,7 +365,7 @@ bool Foam::functionObjects::externalCoupled::writeData
         {
             continue;
         }
-        nFound++;
+        ++nFound;
 
         const typename volFieldType::Boundary& bf =
             vfptr->boundaryField();
@@ -372,10 +373,7 @@ bool Foam::functionObjects::externalCoupled::writeData
         // Get the patches
         const labelList patchIDs
         (
-            mesh.boundaryMesh().patchSet
-            (
-                List<wordRe>{groupName}
-            ).sortedToc()
+            mesh.boundaryMesh().patchSet(patchSelection).sortedToc()
         );
 
         // Handle column-wise writing of patch data. Supports most easy types
@@ -474,7 +472,7 @@ bool Foam::functionObjects::externalCoupled::writeData
         }
     }
 
-    return nFound > 0;
+    return nFound;
 }
 
 

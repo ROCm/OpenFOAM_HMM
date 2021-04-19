@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     #include "createNamedMesh.H"
 
-    IFstream smapFile(args[1]);
+    IFstream smapFile(args.get<fileName>(1));
 
     if (!smapFile.good())
     {

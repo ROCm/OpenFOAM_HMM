@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    IFstream plot3dFile(args[1]);
+    IFstream plot3dFile(args.get<fileName>(1));
 
     // Read the plot3d information using a fixed format reader.
     // Comments in the file are in C++ style, so the stream parser will remove

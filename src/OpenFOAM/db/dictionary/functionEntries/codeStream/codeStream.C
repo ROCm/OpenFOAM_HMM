@@ -27,11 +27,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "codeStream.H"
-#include "addToMemberFunctionSelectionTable.H"
-#include "StringStream.H"
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "StringStream.H"
 #include "Time.H"
+#include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,11 +69,7 @@ Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
     const dictionary& dict
 )
 {
-    const baseIOdictionary& d = static_cast<const baseIOdictionary&>
-    (
-        dict.topDict()
-    );
-    return d.time().libs();
+    return static_cast<const baseIOdictionary&>(dict.topDict()).time().libs();
 }
 
 
@@ -82,28 +78,27 @@ bool Foam::functionEntries::codeStream::doingMasterOnlyReading
     const dictionary& dict
 )
 {
-    const dictionary& topDict = dict.topDict();
+    // Fallback value
+    bool masterOnly = regIOobject::masterOnlyReading;
 
-    if (isA<baseIOdictionary>(topDict))
+    const auto* iodictPtr = isA<baseIOdictionary>(dict.topDict());
+
+    if (iodictPtr)
     {
-        const baseIOdictionary& d = static_cast<const baseIOdictionary&>
-        (
-            topDict
-        );
+        masterOnly = iodictPtr->globalObject();
 
         DebugPout
             << "codeStream : baseIOdictionary:" << dict.name()
-            << " master-only-reading:" << d.globalObject() << endl;
-
-        return d.globalObject();
+            << " master-only-reading:" << masterOnly << endl;
+    }
+    else
+    {
+        DebugPout
+            << "codeStream : not a baseIOdictionary:" << dict.name()
+            << " master-only-reading:" << masterOnly << endl;
     }
 
-    DebugPout
-        << "codeStream : not a baseIOdictionary:" << dict.name()
-        << " master-only-reading:" << regIOobject::masterOnlyReading << endl;
-
-    // Fall back to regIOobject::masterOnlyReading
-    return regIOobject::masterOnlyReading;
+    return masterOnly;
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ void Foam::cuttingSurfaceBase::walkCellCuts
     Map<label> endPoints;
 
     // Hash of faces (face points) that are exactly on a cell face
-    HashSet<labelList, labelList::Hash<>> onCellFace;
+    HashSet<labelList> onCellFace;
 
 
     // Failure handling

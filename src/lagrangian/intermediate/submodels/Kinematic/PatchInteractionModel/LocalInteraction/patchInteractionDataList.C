@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,14 +51,14 @@ Foam::patchInteractionDataList::patchInteractionDataList
     const List<patchInteractionData>& items = *this;
     forAllReverse(items, i)
     {
-        const keyType& patchName = items[i].patchName();
+        const wordRe& patchName = items[i].patchName();
         labelList ids = bMesh.indices(patchName);
 
         if (ids.empty())
         {
             WarningInFunction
-                << "Cannot find any patch names matching " << patchName
-                << endl;
+                << "Cannot find any patch names matching "
+                << patchName << endl;
         }
 
         patchGroupIDs_[i].transfer(ids);
@@ -65,9 +66,8 @@ Foam::patchInteractionDataList::patchInteractionDataList
 
     // Check that all patches are specified
     DynamicList<word> badPatches;
-    forAll(bMesh, patchi)
+    for (const polyPatch& pp : bMesh)
     {
-        const polyPatch& pp = bMesh[patchi];
         if
         (
             !pp.coupled()
@@ -79,12 +79,13 @@ Foam::patchInteractionDataList::patchInteractionDataList
         }
     }
 
-    if (badPatches.size() > 0)
+    if (!badPatches.empty())
     {
         FatalErrorInFunction
             << "All patches must be specified when employing local patch "
             << "interaction. Please specify data for patches:" << nl
-            << badPatches << nl << exit(FatalError);
+            << badPatches << nl
+            << exit(FatalError);
     }
 }
 
@@ -103,15 +104,11 @@ Foam::patchInteractionDataList::patchInteractionDataList
 
 Foam::label Foam::patchInteractionDataList::applyToPatch(const label id) const
 {
-    forAll(patchGroupIDs_, groupI)
+    forAll(patchGroupIDs_, groupi)
     {
-        const labelList& patchIDs = patchGroupIDs_[groupI];
-        forAll(patchIDs, patchi)
+        if (patchGroupIDs_[groupi].found(id))
         {
-            if (patchIDs[patchi] == id)
-            {
-                return groupI;
-            }
+            return groupi;
         }
     }
 
