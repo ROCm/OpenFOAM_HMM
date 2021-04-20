@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -246,10 +246,13 @@ int main(int argc, char *argv[])
 
     for (const entry& dEntry : dict)
     {
-        if (!dEntry.isDict() || dEntry.keyword().isPattern())  // safety
+        if (!dEntry.isDict())  // dictionary entries only
         {
             continue;
         }
+
+        // Note - do not check for shell meta-characters
+        // - user responsibility
 
         const word& dictName = dEntry.keyword();
         const dictionary& surfaceDict = dEntry.dict();
