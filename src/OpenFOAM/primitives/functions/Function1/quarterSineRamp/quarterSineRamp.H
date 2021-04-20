@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quarterSineRamp_H
-#define quarterSineRamp_H
+#ifndef Function1Types_quarterSineRamp_H
+#define Function1Types_quarterSineRamp_H
 
 #include "ramp.H"
 

@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quarterCosineRamp_H
-#define quarterCosineRamp_H
+#ifndef Function1Types_quarterCosineRamp_H
+#define Function1Types_quarterCosineRamp_H
 
 #include "ramp.H"
 

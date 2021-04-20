@@ -101,8 +101,8 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1Types_Square_H
-#define function1Types_Square_H
+#ifndef Function1Types_Square_H
+#define Function1Types_Square_H
 
 #include "Sine.H"
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,37 @@ License
 
 #include "PolynomialEntry.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::Function1Types::Polynomial<Type>::checkCoefficients()
+{
+    if (coeffs_.empty())
+    {
+        FatalErrorInFunction
+            << "Invalid (empty) polynomial coefficients for "
+            << this->name() << nl
+            << exit(FatalError);
+    }
+
+    for (const auto& coeff : coeffs_)
+    {
+        if (mag(coeff.second() + pTraits<Type>::one) < ROOTVSMALL)
+        {
+            canIntegrate_ = false;
+            break;
+        }
+    }
+
+    if (debug && !canIntegrate_)
+    {
+        WarningInFunction
+            << "Polynomial " << this->name() << " cannot be integrated"
+            << endl;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -41,37 +72,31 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     coeffs_(),
     canIntegrate_(true)
 {
-    ITstream& is = dict.lookup(entryName);
-    const word entryType(is);
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
 
-    is  >> coeffs_;
-
-    if (!coeffs_.size())
+    if (eptr && eptr->isStream())
     {
-        FatalErrorInFunction
-            << "Invalid (empty) polynomial coefficients for "
-            << this->name() << nl
-            << exit(FatalError);
-    }
+        // Primitive (inline) format. Eg,
+        // key polynomial ((0 0) (10 1));
 
-    forAll(coeffs_, i)
-    {
-        if (mag(coeffs_[i].second() + pTraits<Type>::one) < ROOTVSMALL)
+        ITstream& is = eptr->stream();
+        if (is.peek().isWord())
         {
-            canIntegrate_ = false;
-            break;
+            is.skip();  // Discard leading 'polynomial'
         }
+        is >> this->coeffs_;
+        dict.checkITstream(is, entryName);
+    }
+    else
+    {
+        // Dictionary format - "values" lookup. Eg,
+        //
+        // key { type polynomial; coeffs ((0 0) (10 1)); }
+
+        dict.readEntry("coeffs", this->coeffs_);
     }
 
-    if (debug)
-    {
-        if (!canIntegrate_)
-        {
-            WarningInFunction
-                << "Polynomial " << this->name() << " cannot be integrated"
-                << endl;
-        }
-    }
+    this->checkCoefficients();
 }
 
 
@@ -86,32 +111,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     coeffs_(coeffs),
     canIntegrate_(true)
 {
-    if (!coeffs_.size())
-    {
-        FatalErrorInFunction
-            << "Invalid (empty) polynomial coefficients for "
-            << this->name() << nl
-            << exit(FatalError);
-    }
-
-    forAll(coeffs_, i)
-    {
-        if (mag(coeffs_[i].second() + 1) < ROOTVSMALL)
-        {
-            canIntegrate_ = false;
-            break;
-        }
-    }
-
-    if (debug)
-    {
-        if (!canIntegrate_)
-        {
-            WarningInFunction
-                << "Polynomial " << this->name() << " cannot be integrated"
-                << endl;
-        }
-    }
+    this->checkCoefficients();
 }
 
 

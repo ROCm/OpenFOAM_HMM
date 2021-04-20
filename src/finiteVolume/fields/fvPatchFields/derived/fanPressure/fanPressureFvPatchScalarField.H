@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd
+    Copyright (C) 2017-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,11 +71,11 @@ Usage
     {
         type            fanPressure;
         direction       in;
-        fanCurve        tableFile;
-        fanCurveCoeffs
+        fanCurve
         {
-            file        "<constant>/fanCurve";
-            outOfBounds clamp;
+            type table;
+            file "<constant>/fanCurve";
+            outOfBounds clamp;  // Optional out-of-bounds handling
         }
         p0              uniform 0;
         value           uniform 0;

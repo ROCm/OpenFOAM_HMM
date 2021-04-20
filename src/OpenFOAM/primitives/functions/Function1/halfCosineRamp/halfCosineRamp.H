@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef halfCosineRamp_H
-#define halfCosineRamp_H
+#ifndef Function1Types_halfCosineRamp_H
+#define Function1Types_halfCosineRamp_H
 
 #include "ramp.H"
 

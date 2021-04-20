@@ -25,11 +25,10 @@ boundaryField
     {
         type            fanPressure;
         direction       in;
-        fanCurve        tableFile;
-        fanCurveCoeffs
+        fanCurve
         {
-            file        "<constant>/FluxVsdP.dat";
-            // readerType  openFoam;   // Default
+            type table;
+            file "<constant>/FluxVsdP.dat";
             // outOfBounds clamp;      // Default
         }
         //nonDimensional  true;

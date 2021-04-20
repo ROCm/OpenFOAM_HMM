@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearRamp_H
-#define linearRamp_H
+#ifndef Function1Types_linearRamp_H
+#define Function1Types_linearRamp_H
 
 #include "ramp.H"
 

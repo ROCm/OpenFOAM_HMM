@@ -59,8 +59,11 @@ functions
         type            setTimeStep;
         libs            (utilityFunctionObjects);
         enabled         yes;
-        deltaT          tableFile;
-        file            "<system>/deltaTvalues";
+        deltaT
+        {
+            type table;
+            file "<system>/deltaTvalues";
+        }
     }
 
     minMaxp

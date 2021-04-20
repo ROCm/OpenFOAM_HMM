@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,12 @@ Class
 Description
     Templated table container function.
 
-    Items are stored in a list of Tuple2's. First column is always stored as
-    scalar entries. Data is read in Tuple2 form.
+    Items are stored in a list of Tuple2, with the first column always
+    being a scalar and the second column (the lookup value) in
+    required data type.
 
     Usage:
+    Inline specification.
     \verbatim
         <entryName>   table
         (
@@ -42,13 +44,43 @@ Description
         );
     \endverbatim
 
+    Dictionary specification, external data reference.
+    \verbatim
+        <entryName>
+        {
+            type table;
+            file "<case>/path/tableValues";
+        }
+    \endverbatim
+
+    Dictionary specification, embedded content
+    Dictionary form.
+    \verbatim
+        <entryName>
+        {
+            type table;
+            values
+            (
+                (0.0 (1 2 3))
+                (1.0 (4 5 6))
+            );
+        }
+    \endverbatim
+
+Note
+    The external data reference (using the \c file keyword) is
+    used in preference to the \c values specification.
+
+See Also
+    Foam::Function1Types::TableFile
+
 SourceFiles
     Table.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Table_H
-#define Table_H
+#ifndef Function1Types_Table_H
+#define Function1Types_Table_H
 
 #include "TableBase.H"
 
@@ -68,6 +100,12 @@ class Table
 :
     public TableBase<Type>
 {
+    // Private Data
+
+        //- Input name for file-based input (optional)
+        fileName fName_;
+
+
     // Private Member Functions
 
         //- No copy assignment
@@ -81,10 +119,10 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
+        //- Construct from entry name and dictionary.
         Table(const word& entryName, const dictionary& dict);
 
-        //- Copy constructor
+        //- Copy construct
         explicit Table(const Table<Type>& tbl);
 
         //- Construct and return a clone
@@ -96,6 +134,12 @@ public:
 
     //- Destructor
     virtual ~Table() = default;
+
+
+    // Member Functions
+
+        //- Write coefficients in dictionary format
+        virtual void writeData(Ostream& os) const;
 };
 
 

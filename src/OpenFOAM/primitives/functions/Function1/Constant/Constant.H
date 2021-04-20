@@ -30,18 +30,31 @@ Class
 Description
     Templated function that returns a constant value.
 
-    Usage - for entry \<entryName\> returning the value <value>:
+    Usage - for entry \<entryName\> returning the value \<value\>,
+    can be specified is different formats.
+
+    Inline specification:
     \verbatim
-        <entryName>    constant  <value>
+        <entryName>  constant <value>
+    \endverbatim
+
+    Dictionary format:
+    \verbatim
+        <entryName>
+        {
+            type    constant;
+            value   <value>;
+        }
     \endverbatim
 
 SourceFiles
     Constant.C
+    ConstantI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Constant_H
-#define Constant_H
+#ifndef Function1Types_Constant_H
+#define Function1Types_Constant_H
 
 #include "Function1.H"
 
@@ -93,7 +106,7 @@ public:
         Constant(const word& entryName, Istream& is);
 
         //- Copy constructor
-        explicit Constant(const Constant<Type>& cnst);
+        explicit Constant(const Constant<Type>& rhs);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const
@@ -117,7 +130,7 @@ public:
         //- Return value as a function of (scalar) independent variable
         virtual tmp<Field<Type>> value(const scalarField& x) const;
 
-        //- Write in dictionary format
+        //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
 };
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,11 +37,53 @@ Foam::Function1Types::Table<Type>::Table
     const dictionary& dict
 )
 :
-    TableBase<Type>(entryName, dict)
+    TableBase<Type>(entryName, dict),
+    fName_()
 {
-    ITstream& is = dict.lookup(entryName);
-    const word entryType(is);
-    is  >> this->table_;
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
+
+    if (eptr && eptr->isStream())
+    {
+        // Primitive (inline) format. Eg,
+        // key table ((0 0) (10 1));
+
+        ITstream& is = eptr->stream();
+        if (is.peek().isWord())
+        {
+            is.skip();  // Discard leading 'table'
+        }
+        is >> this->table_;
+        dict.checkITstream(is, entryName);
+    }
+    else if (dict.readIfPresent("file", fName_))
+    {
+        // Dictionary format - "file" lookup. Eg,
+        // key { type table; file "name"; }
+
+        fileName expandedFile(fName_);
+        expandedFile.expand();
+
+        autoPtr<ISstream> isPtr(fileHandler().NewIFstream(expandedFile));
+        if (isPtr && isPtr->good())
+        {
+            *isPtr >> this->table_;
+        }
+        else
+        {
+            FatalIOErrorInFunction(dict)
+                << "Cannot open file: " << expandedFile << nl
+                << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        // Dictionary format - "values" lookup. Eg,
+        //
+        // key { type table; values ((0 0) (10 1)); }
+
+        dict.readEntry("values", this->table_);
+    }
+
     TableBase<Type>::check();
 }
 
@@ -49,8 +91,36 @@ Foam::Function1Types::Table<Type>::Table
 template<class Type>
 Foam::Function1Types::Table<Type>::Table(const Table<Type>& tbl)
 :
-    TableBase<Type>(tbl)
+    TableBase<Type>(tbl),
+    fName_(tbl.fName_)
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::Function1Types::Table<Type>::writeData(Ostream& os) const
+{
+    Function1<Type>::writeData(os);
+    os.endEntry();
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+
+    // Note: for TableBase write the dictionary entries it needs but not
+    // the values themselves
+    TableBase<Type>::writeEntries(os);
+
+    if (fName_.empty())
+    {
+        os.writeEntry("values", this->table_);
+    }
+    else
+    {
+        os.writeEntry("file", fName_);
+    }
+
+    os.endBlock();
+}
 
 
 // ************************************************************************* //

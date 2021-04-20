@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +32,26 @@ Description
     list of Tuple2's. Data is input in the form,
     e.g. for an entry \<entryName\> that describes y = x^2 + 2x^3
 
+    Inline specification:
     \verbatim
         <entryName>  polynomial
         (
-            (1    2)
-            (2    3)
+            (1  2)
+            (2  3)
         );
+    \endverbatim
+
+    Dictionary format:
+    \verbatim
+        <entryName>
+        {
+            type   polynomial;
+            coeffs
+            (
+                (1 2)
+                (2 3)
+            );
+        }
     \endverbatim
 
 SourceFiles
@@ -44,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PolynomialEntry_H
-#define PolynomialEntry_H
+#ifndef Function1Types_Polynomial_H
+#define Function1Types_Polynomial_H
 
 #include "Function1.H"
 #include "Tuple2.H"
@@ -72,11 +87,14 @@ class Polynomial
         //- Polynomial coefficients - list of prefactor, exponent
         List<Tuple2<Type, Type>> coeffs_;
 
-        //- Flag to indicate whether poly can be integrated
+        //- Flag to indicate whether polynomial can be integrated
         bool canIntegrate_;
 
 
     // Private Member Functions
+
+        //- Check coefficients and if polynomial can be integrated
+        void checkCoefficients();
 
         //- No copy assignment
         void operator=(const Polynomial<Type>&) = delete;
@@ -125,8 +143,7 @@ public:
         //- Integrate between two (scalar) values
         virtual Type integrate(const scalar x1, const scalar x2) const;
 
-
-        //- Write in dictionary format
+        //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
 };
 

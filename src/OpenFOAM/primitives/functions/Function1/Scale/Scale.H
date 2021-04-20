@@ -63,8 +63,8 @@ Description
     Where:
     \table
         Property | Description                                  | Required
-        value    | Function of type Function1<Type>             | yes
         scale    | Scaling function of type Function1<scalar>   | yes
+        value    | Function of type Function1<Type>             | yes
     \endtable
 
 SourceFiles
@@ -72,8 +72,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Scale_H
-#define Scale_H
+#ifndef Function1Types_Scale_H
+#define Function1Types_Scale_H
 
 #include "Function1.H"
 

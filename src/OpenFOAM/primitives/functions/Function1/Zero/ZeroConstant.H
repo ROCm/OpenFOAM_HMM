@@ -31,8 +31,17 @@ Description
     Templated function that returns the corresponding 0 (zero).
 
     Usage:
+    Inline specification:
     \verbatim
-        <entryName> zero;
+        <entryName>  zero;
+    \endverbatim
+
+    In dictionary format:
+    \verbatim
+        <entryName>
+        {
+            type    zero;
+        }
     \endverbatim
 
 SourceFiles
@@ -40,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ZeroConstant_H
-#define ZeroConstant_H
+#ifndef Function1Types_ZeroConstant_H
+#define Function1Types_ZeroConstant_H
 
 #include "Function1.H"
 
@@ -94,7 +103,7 @@ public:
         //- Integrate between two values
         virtual inline Type integrate(const scalar x1, const scalar x2) const;
 
-        //- Write in dictionary format
+        //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
 };
 

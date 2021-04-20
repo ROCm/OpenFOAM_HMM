@@ -24,10 +24,10 @@ boundaryField
     inlet
     {
         type            flowRateInletVelocity;
-        massFlowRate    tableFile;
-        massFlowRateCoeffs
+        massFlowRate
         {
-            file            "<constant>/massLossRate";
+            type table;
+            file "<constant>/massLossRate";
         }
         value           uniform (0 0 0);
     }

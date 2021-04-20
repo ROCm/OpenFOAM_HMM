@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OneConstant_H
-#define OneConstant_H
+#ifndef Function1Types_OneConstant_H
+#define Function1Types_OneConstant_H
 
 #include "Function1.H"
 
@@ -110,7 +110,7 @@ public:
             const scalarField& x2
         ) const;
 
-        //- Write in dictionary format
+        //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
 };
 

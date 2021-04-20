@@ -53,8 +53,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CSV_H
-#define CSV_H
+#ifndef Function1Types_CSV_H
+#define Function1Types_CSV_H
 
 #include "Function1.H"
 #include "TableBase.H"

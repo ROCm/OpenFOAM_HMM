@@ -81,7 +81,7 @@ public:
         //- Construct from entry name
         explicit function1Base(const word& entryName);
 
-        //- Construct from entry name and dictionary
+        //- Construct from entry name and dictionary (unused)
         function1Base(const word& entryName, const dictionary& dict);
 
         //- Copy construct
