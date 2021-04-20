@@ -1,0 +1,24 @@
+SUFFIXES += .C .cc .cpp .cxx
+
+CC          = icpx -std=c++11
+
+c++ARCH     =
+c++DBUG     =
+c++OPT      = -O2
+ptFLAGS     = -DNoRepository
+
+# - Standard warnings
+# - Less restrictive warnings (may be needed for flex++, CGAL, etc.).
+
+c++WARN     = \
+    -Wall -Wextra \
+    -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
+    -Wno-unknown-pragmas \
+    -Wno-undefined-var-template \
+    -diag-disable 327,654,1125,1292,2289,2304,11062,11074,11076 \
+    $(FOAM_EXTRA_CXXFLAGS)
+
+c++LESSWARN = \
+    -diag-disable 1224,2026,2305
+
+#------------------------------------------------------------------------------

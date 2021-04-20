@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-include $(GENERAL_RULES)/Icc/c
+include $(GENERAL_RULES)/Icx/c
 
 cARCH       =
 
@@ -10,7 +10,6 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
-include $(GENERAL_RULES)/Icc/link-c
+include $(GENERAL_RULES)/Icx/link-c
 
-#legacy: LINK_LIBS   += -L$(IA32ROOT)/lib
 #------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -23,11 +23,36 @@
 #     The default values for gcc/clang are not a recommendation,
 #     but typically correspond to the minimum usable version.
 #
+#     I_MPI_CC, I_MPI_CXX environment variables may be defined for the
+#     Intel mpicc/mpicxx wrappers
+#
+#------------------------------------------------------------------------------
+
+# Initial mpi/compiler associations
+switch ("$WM_COMPILER")
+case Icc*:
+    setenv I_MPI_CC icc
+    setenv I_MPI_CXX icpc
+    breaksw
+case Icx*:
+    setenv I_MPI_CC icx
+    setenv I_MPI_CXX icpx
+    breaksw
+case Gcc*:
+    switch ("$WM_MPLIB")
+    case INTELMPI*:
+        setenv I_MPI_CC gcc
+        setenv I_MPI_CXX g++
+        breaksw
+    endsw
+    breaksw
+endsw
+
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
 case ThirdParty:
-    # Default versions (CLANG, GCC, GMP, MPFR, MPC) - override as necessary
+    # Default/minimum versions (compiler, GMP, MPFR, MPC) - override as needed
 
     set default_clang_version=llvm-3.7.1
     set default_gcc_version=gcc-4.8.5
@@ -43,6 +68,9 @@ case ThirdParty:
     switch ("$WM_COMPILER")
     case Gcc:
         set gcc_version="$default_gcc_version"
+        breaksw
+    case Gcc103*:
+        set gcc_version=gcc-10.3.0
         breaksw
     case Gcc102*:
         set gcc_version=gcc-10.2.0
@@ -128,8 +156,11 @@ case ThirdParty:
     case Clang:
         set clang_version="$default_clang_version"
         breaksw
+    case Clang111*:
+        set clang_version=llvm-11.1.0
+        breaksw
     case Clang110*:
-        set clang_version=llvm-11.0.0
+        set clang_version=llvm-11.0.1
         breaksw
     case Clang100*:
         set clang_version=llvm-10.0.1
@@ -184,6 +215,7 @@ UNKNOWN_COMPILER
     breaksw
 endsw
 
+#------------------------------------------------------------------------------
 
 unset default_gcc_version default_clang_version
 unset default_gmp_version default_mpfr_version default_mpc_version

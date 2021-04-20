@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -23,11 +23,36 @@
 #     The default values for gcc/clang are not a recommendation,
 #     but typically correspond to the minimum usable version.
 #
+#     I_MPI_CC, I_MPI_CXX environment variables may be defined for the
+#     Intel mpicc/mpicxx wrappers
+#
+#------------------------------------------------------------------------------
+
+# Initial mpi/compiler associations
+case "$WM_COMPILER" in
+Icc*)
+    export I_MPI_CC=icc
+    export I_MPI_CXX=icpc
+    ;;
+Icx*)
+    export I_MPI_CC=icx
+    export I_MPI_CXX=icpx
+    ;;
+Gcc*)
+    case "$WM_MPLIB" in
+    INTELMPI*)
+        export I_MPI_CC=gcc
+        export I_MPI_CXX=g++
+        ;;
+    esac
+    ;;
+esac
+
 #------------------------------------------------------------------------------
 
 case "$WM_COMPILER_TYPE" in
 ThirdParty)
-    # Default versions (CLANG, GCC, GMP, MPFR, MPC) - override as necessary
+    # Default/minimum versions (compiler, GMP, MPFR, MPC) - override as needed
 
     default_clang_version=llvm-3.7.1
     default_gcc_version=gcc-4.8.5
@@ -45,6 +70,7 @@ ThirdParty)
 
     case "$WM_COMPILER" in
     Gcc)    gcc_version="$default_gcc_version" ;;
+    Gcc103*) gcc_version=gcc-10.3.0 ;;
     Gcc102*) gcc_version=gcc-10.2.0 ;;
     Gcc101*) gcc_version=gcc-10.1.0 ;;
     Gcc93*) gcc_version=gcc-9.3.0 ;;
@@ -74,7 +100,8 @@ ThirdParty)
     Gcc48*) gcc_version=gcc-4.8.5 ;;
 
     Clang)    clang_version="$default_clang_version" ;;
-    Clang110*) clang_version=llvm-11.0.0 ;;
+    Clang111*) clang_version=llvm-11.1.0 ;;
+    Clang110*) clang_version=llvm-11.0.1 ;;
     Clang100*) clang_version=llvm-10.0.1 ;;
     Clang90*) clang_version=llvm-9.0.1 ;;
     Clang80*) clang_version=llvm-8.0.1 ;;
@@ -107,6 +134,7 @@ UNKNOWN_COMPILER
     ;;
 esac
 
+#------------------------------------------------------------------------------
 
 unset default_gcc_version default_clang_version
 unset default_gmp_version default_mpfr_version default_mpc_version

@@ -21,9 +21,6 @@
 #     For USERMPI, the user is responsible for supplying an appropriate
 #     wmake/rules/General/mplibUSERMPI file and managing all settings
 #
-#     For INTELMPI, note that the (I_MPI_CC, I_MPI_CCX) environment variables
-#     define the underlying compiler to be used
-#
 # User adjustments are controlled by these types of files:
 #     - config.csh/prefs.fjmpi
 #     - config.csh/prefs.intelmpi
@@ -42,6 +39,9 @@
 #     but are not permitted to unset it.
 #
 # Environment
+#     I_MPI_CC, I_MPI_CXX environment variables define the compiler
+#     to be used the Intel mpicc/mpicxx wrappers
+#
 #     MPI_BUFFER_SIZE overrides 'mpiBufferSize' (controlDict entry).
 #     Eg,  setenv MPI_BUFFER_SIZE 20000000
 #
@@ -81,7 +81,9 @@ case SYSTEMOPENMPI:
         unset libDir
     endif
 
-    # TDB: extra openmpi major qualifier on name?
+    #-
+    # TBD: extra (major) version qualifier on name?
+    #-
     ## if ( "$FOAM_MPI" == "sys-openmpi" ) then
     ##     set _foamMpiVersion=`echo "$MPI_ARCH_PATH" | sed -e 's/^.*mpi//'`
     ##     switch ("$_foamMpiVersion")
@@ -321,6 +323,7 @@ case SGIMPI:
 
 
 case INTELMPI*:
+    setenv FOAM_MPI intelmpi
     _foamEtc -config prefs.intelmpi  ## Optional adjustments
 
     if ( $?I_MPI_ROOT ) then
@@ -340,26 +343,38 @@ case INTELMPI*:
             setenv MPI_ARCH_PATH "${MPI_ARCH_PATH:h}"
         endif
 
-        # Subdir name is FOAM_MPI name
-        setenv FOAM_MPI "${MPI_ARCH_PATH:t}"
-
-        # If subdir is version number only, prefix with 'impi-'
-        switch ("$FOAM_MPI")
-        case [0-9]*:
-            setenv FOAM_MPI "impi-$FOAM_MPI"
-            breaksw
-        endsw
-
+        #-
+        # TBD: extra version qualifier on name?
+        #      eg, when subdir is version number only
+        #-
+        ## if ( "$FOAM_MPI" == "intelmpi" ) then
+        ##     set _foamMpiVersion="${MPI_ARCH_PATH:t}"
+        ##     switch ("$_foamMpiVersion")
+        ##     case [1-9]*:
+        ##         setenv FOAM_MPI "intelmpi-${_foamMpiVersion}"
+        ##         breaksw
+        ##     endsw
+        ## endif
     else
         echo "${_foamMpiWarning}invalid $WM_MPLIB directory"
         echo "    => ${MPI_ARCH_PATH}"
-        echo "Please set I_MPI_ROOT or MPI_ROOT correctly."
+        echo "Please set I_MPI_ROOT (or MPI_ROOT) correctly."
     endif
 
-    _foamAddPath    "$MPI_ARCH_PATH"/intel64/bin
-    _foamAddLib     "$MPI_ARCH_PATH"/intel64/lib
-    breaksw
+    # With/without "intel64/" directory - handled here and in mpi rules
 
+    # Path, lib-path may have been set prior to call
+    if (1) then
+        if ( -d "$MPI_ARCH_PATH"/intel64/lib ) then
+            _foamAddPath "$MPI_ARCH_PATH"/intel64/bin
+            _foamAddLib "$MPI_ARCH_PATH"/intel64/lib
+            _foamAddLib "$MPI_ARCH_PATH"/intel64/lib/release
+        else if ( -d "$MPI_ARCH_PATH"/lib ) then
+            _foamAddPath "$MPI_ARCH_PATH"/bin
+            _foamAddLib "$MPI_ARCH_PATH"/lib
+            _foamAddLib "$MPI_ARCH_PATH"/lib/release
+        endif
+    endif
 endsw
 
 

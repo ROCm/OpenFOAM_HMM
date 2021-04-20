@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
-include $(GENERAL_RULES)/Icc/c++
+include $(GENERAL_RULES)/Icx/c++
 
-c++ARCH     = -pthread -fp-trap=common -fp-model precise
+c++ARCH     = -fp-model precise
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
@@ -12,7 +12,6 @@ cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
 
-include $(GENERAL_RULES)/Icc/link-c++
+include $(GENERAL_RULES)/Icx/link-c++
 
-#legacy: LINK_LIBS   += -L$(IA64ROOT)/lib
 #------------------------------------------------------------------------------
