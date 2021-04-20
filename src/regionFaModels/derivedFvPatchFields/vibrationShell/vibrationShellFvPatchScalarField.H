@@ -85,7 +85,7 @@ class vibrationShellFvPatchScalarField
         autoPtr<regionModels::vibrationShellModel> baffle_;
 
         //- Dictionary
-        mutable dictionary dict_;
+        dictionary dict_;
 
 
 public:

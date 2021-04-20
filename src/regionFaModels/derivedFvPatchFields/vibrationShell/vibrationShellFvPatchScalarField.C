@@ -27,6 +27,7 @@ License
 
 #include "vibrationShellFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,7 +81,20 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 :
     mixedFvPatchField<scalar>(p, iF),
     baffle_(),
-    dict_(dict)
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value", "refValue", "refGradient", "valueFraction"
+            })
+        )
+    )
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
@@ -148,7 +162,6 @@ void vibrationShellFvPatchScalarField::updateCoeffs()
 void vibrationShellFvPatchScalarField::write(Ostream& os) const
 {
     mixedFvPatchField<scalar>::write(os);
-
     dict_.write(os, false);
 }
 
