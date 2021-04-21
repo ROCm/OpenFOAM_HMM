@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -277,6 +278,37 @@ Foam::tmp<Foam::scalarField> Foam::polyMeshTools::volRatio
     }
 
     return tratio;
+}
+
+
+Foam::polyMesh::readUpdateState Foam::polyMeshTools::combine
+(
+    const polyMesh::readUpdateState& state0,
+    const polyMesh::readUpdateState& state1
+)
+{
+    if
+    (
+        (
+            state0 == polyMesh::UNCHANGED
+         && state1 != polyMesh::UNCHANGED
+        )
+     || (
+            state0 == polyMesh::POINTS_MOVED
+         && (state1 != polyMesh::UNCHANGED && state1 != polyMesh::POINTS_MOVED)
+        )
+     || (
+            state0 == polyMesh::TOPO_CHANGE
+         && state1 == polyMesh::TOPO_PATCH_CHANGE
+        )
+    )
+    {
+        return state1;
+    }
+    else
+    {
+        return state0;
+    }
 }
 
 
