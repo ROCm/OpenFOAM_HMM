@@ -41,6 +41,9 @@ License
 #include "PatchParticleHistogram.H"
 #include "RemoveParcels.H"
 #include "VoidFraction.H"
+#include "NusseltNumber.H"
+#include "HeatTransferCoeff.H"
+#include "ThermoReynoldsNumber.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +61,10 @@ License
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
     makeCloudFunctionObjectType(PatchParticleHistogram, CloudType);            \
     makeCloudFunctionObjectType(RemoveParcels, CloudType);                     \
-    makeCloudFunctionObjectType(VoidFraction, CloudType);
+    makeCloudFunctionObjectType(VoidFraction, CloudType);                      \
+    makeCloudFunctionObjectType(NusseltNumber, CloudType);                     \
+    makeCloudFunctionObjectType(HeatTransferCoeff, CloudType);                 \
+    makeCloudFunctionObjectType(ThermoReynoldsNumber, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
