@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            calculated;
-        value           uniform 0.76699;
+        value           uniform 0;
     }
     entrainment
     {

@@ -23,7 +23,7 @@ boundaryField
     fuel
     {
         type            fixedValue;
-        value           uniform 1;
+        value           uniform 10;
     }
 
     air
@@ -36,7 +36,7 @@ boundaryField
     {
         type            inletOutlet;
         inletValue      uniform 0;
-        value           uniform 0;
+        value           uniform 1;
     }
 
     frontAndBack

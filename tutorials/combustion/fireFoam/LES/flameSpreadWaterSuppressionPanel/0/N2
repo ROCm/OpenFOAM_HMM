@@ -43,7 +43,7 @@ boundaryField
     inlet
     {
         type            calculated;
-        value           $internalField;
+        value           uniform 0;
     }
 
     region0_to_pyrolysisRegion_coupledWall
