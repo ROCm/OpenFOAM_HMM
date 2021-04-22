@@ -8,7 +8,7 @@ EXE_INC = \
     -I$(PTSCOTCH_INC_DIR) \
     -I$(SCOTCH_INC_DIR) \
     $(PFLAGS) $(PINC) \
-    -I../decompositionMethods/lnInclude
+    -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude
 
 /*
  * The '-lscotch' is a slight hack:
