@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,14 +187,11 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        hierarchGeomDecomp(const dictionary& decompDict);
-
-        //- Construct for decomposition dictionary and region name
-        hierarchGeomDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit hierarchGeomDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 

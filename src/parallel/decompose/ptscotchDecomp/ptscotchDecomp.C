@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,19 +61,11 @@ static_assert
 namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         ptscotchDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        ptscotchDecomp,
-        dictionaryRegion
     );
 }
 
@@ -644,13 +636,6 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict),
-    coeffsDict_(findCoeffsDict("scotchCoeffs", selectionType::NULL_DICT))
-{}
-
-
 Foam::ptscotchDecomp::ptscotchDecomp
 (
     const dictionary& decompDict,
@@ -677,11 +662,10 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     if (points.size() != mesh.nCells())
     {
         FatalErrorInFunction
-            << "Can use this decomposition method only for the whole mesh"
-            << endl
-            << "and supply one coordinate (cellCentre) for every cell." << endl
-            << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh.nCells()
+            << "Can only use this decomposition method for entire mesh" << nl
+            << "and supply one coordinate (cellCentre) for every cell." << nl
+            << "The number of coordinates " << points.size() << nl
+            << "The number of cells in the mesh " << mesh.nCells() << nl
             << exit(FatalError);
     }
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,14 +121,11 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        kahipDecomp(const dictionary& decompDict);
-
-        //- Construct given the decomposition dictionary and region name
-        kahipDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit kahipDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 

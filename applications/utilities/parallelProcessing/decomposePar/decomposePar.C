@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
                         runTime,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
-                        false
+                        false       // do not register
                     ),
                     decompDictFile
                 )

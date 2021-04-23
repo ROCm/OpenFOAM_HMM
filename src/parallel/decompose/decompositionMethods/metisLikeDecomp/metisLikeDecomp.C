@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,18 +158,6 @@ Foam::metisLikeDecomp::metisLikeDecomp
 (
     const word& derivedType,
     const dictionary& decompDict,
-    int select
-)
-:
-    decompositionMethod(decompDict),
-    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select))
-{}
-
-
-Foam::metisLikeDecomp::metisLikeDecomp
-(
-    const word& derivedType,
-    const dictionary& decompDict,
     const word& regionName,
     int select
 )
@@ -191,10 +179,10 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     if (points.size() != mesh.nCells())
     {
         FatalErrorInFunction
-            << "Can use this decomposition method only for entire mesh" << nl
+            << "Can only use this decomposition method for entire mesh" << nl
             << "and supply one coordinate (cellCentre) for every cell." << nl
             << "The number of coordinates " << points.size() << nl
-            << "The number of cells in the mesh " << mesh.nCells()
+            << "The number of cells in the mesh " << mesh.nCells() << nl
             << exit(FatalError);
     }
 

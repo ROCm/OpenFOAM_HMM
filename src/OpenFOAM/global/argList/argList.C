@@ -838,7 +838,7 @@ Foam::argList::argList
             if (!*optName)
             {
                 Warning
-                    <<"Ignoring lone '-' on the command-line" << endl;
+                    << "Ignoring lone '-' on the command-line" << endl;
             }
             else if
             (
@@ -1057,7 +1057,7 @@ void Foam::argList::parse
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
                 << "Host   : " << Foam::hostName().c_str() << nl
-                << "PID    : " << pid() << endl;
+                << "PID    : " << pid() << nl;
         }
 
         jobInfo.add("startDate", dateString);
@@ -1281,13 +1281,24 @@ void Foam::argList::parse
                 if (dictStream && dictStream->good())
                 {
                     dictionary decompDict(*dictStream);
-                    decompDict.readEntry("numberOfSubdomains", dictNProcs);
+                    bool nDomainsMandatory = false;
 
                     if (decompDict.getOrDefault("distributed", false))
                     {
+                        nDomainsMandatory = true;
                         parRunControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
                     }
+
+                    // Get numberOfSubdomains if it exists.
+                    // - mandatory when running with distributed roots
+                    decompDict.readEntry
+                    (
+                        "numberOfSubdomains",
+                        dictNProcs,
+                        keyType::LITERAL,
+                        nDomainsMandatory
+                    );
                 }
                 else
                 {
@@ -1325,7 +1336,7 @@ void Foam::argList::parse
                 roots.resize(Pstream::nProcs()-1, rootName);
 
                 // Adjust dictNProcs for command-line '-roots' option
-                if (dictNProcs < 0)
+                if (dictNProcs <= 0)
                 {
                     dictNProcs = roots.size()+1;
                 }
@@ -1494,7 +1505,7 @@ void Foam::argList::parse
     if (Pstream::master() && bannerEnabled())
     {
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
-            << "nProcs : " << nProcs << endl;
+            << "nProcs : " << nProcs << nl;
 
         if (parRunControl_.parRun())
         {
@@ -1532,13 +1543,13 @@ void Foam::argList::parse
                 << "    commsType          : "
                 << Pstream::commsTypeNames[Pstream::defaultCommsType] << nl
                 << "    polling iterations : " << Pstream::nPollProcInterfaces
-                << endl;
+                << nl;
             if (UPstream::allWorlds().size() > 1)
             {
                 Info<< "    worlds             : "
                     << flatOutput(UPstream::allWorlds()) << nl
                     << "    world              : " << UPstream::myWorld()
-                    << endl;
+                    << nl;
             }
         }
     }
@@ -1613,7 +1624,7 @@ void Foam::argList::parse
                 Info<< "Disallowing";
             }
             Info<< " user-supplied system call operations" << nl
-                << endl;
+                << nl;
             IOobject::writeDivider(Info);
         }
     }

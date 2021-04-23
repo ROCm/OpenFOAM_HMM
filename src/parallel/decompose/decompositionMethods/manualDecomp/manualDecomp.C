@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,39 +30,21 @@ License
 #include "labelIOList.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(manualDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         manualDecomp,
         dictionary
     );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        manualDecomp,
-        dictionaryRegion
-    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::manualDecomp::manualDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict),
-    dataFile_
-    (
-        findCoeffsDict(typeName + "Coeffs").get<fileName>("dataFile")
-    )
-{}
-
 
 Foam::manualDecomp::manualDecomp
 (

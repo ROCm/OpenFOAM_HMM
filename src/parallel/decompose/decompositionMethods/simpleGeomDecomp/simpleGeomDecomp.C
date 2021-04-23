@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,26 +32,49 @@ License
 #include "globalIndex.H"
 #include "SubField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(simpleGeomDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         simpleGeomDecomp,
         dictionary
     );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        simpleGeomDecomp,
-        dictionaryRegion
-    );
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// A list compare binary predicate for normal sort by vector component
+struct vectorLessOp
+{
+    const UList<vector>& values;
+    direction sortCmpt;
+
+    vectorLessOp(const UList<vector>& list, direction cmpt = vector::X)
+    :
+        values(list),
+        sortCmpt(cmpt)
+    {}
+
+    void setComponent(direction cmpt)
+    {
+        sortCmpt = cmpt;
+    }
+
+    bool operator()(const label a, const label b) const
+    {
+        return values[a][sortCmpt] < values[b][sortCmpt];
+    }
+};
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -149,24 +172,20 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     labelList processorGroups(points.size());
 
-    labelList pointIndices(points.size());
-    forAll(pointIndices, i)
-    {
-        pointIndices[i] = i;
-    }
+    labelList pointIndices(identity(points.size()));
 
     const pointField rotatedPoints(rotDelta_ & points);
+
+    vectorLessOp sorter(rotatedPoints);
 
     // and one to take the processor group id's. For each direction.
     // we assign the processors to groups of processors labelled
     // 0..nX to give a banded structure on the mesh. Then we
     // construct the actual processor number by treating this as
     // the units part of the processor number.
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::X))
-    );
+
+    sorter.setComponent(vector::X);
+    Foam::sort(pointIndices, sorter);
 
     assignToProcessorGroup(processorGroups, n_.x());
 
@@ -178,11 +197,9 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     // now do the same thing in the Y direction. These processor group
     // numbers add multiples of nX to the proc. number (columns)
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::Y))
-    );
+
+    sorter.setComponent(vector::Y);
+    Foam::sort(pointIndices, sorter);
 
     assignToProcessorGroup(processorGroups, n_.y());
 
@@ -194,11 +211,9 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     // finally in the Z direction. Now we add multiples of nX*nY to give
     // layers
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::Z))
-    );
+
+    sorter.setComponent(vector::Z);
+    Foam::sort(pointIndices, sorter);
 
     assignToProcessorGroup(processorGroups, n_.z());
 
@@ -222,24 +237,20 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     labelList processorGroups(points.size());
 
-    labelList pointIndices(points.size());
-    forAll(pointIndices, i)
-    {
-        pointIndices[i] = i;
-    }
+    labelList pointIndices(identity(points.size()));
 
     const pointField rotatedPoints(rotDelta_ & points);
+
+    vectorLessOp sorter(rotatedPoints);
 
     // and one to take the processor group id's. For each direction.
     // we assign the processors to groups of processors labelled
     // 0..nX to give a banded structure on the mesh. Then we
     // construct the actual processor number by treating this as
     // the units part of the processor number.
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::X))
-    );
+
+    sorter.setComponent(vector::X);
+    Foam::sort(pointIndices, sorter);
 
     const scalar summedWeights = sum(weights);
     assignToProcessorGroup
@@ -259,11 +270,9 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     // now do the same thing in the Y direction. These processor group
     // numbers add multiples of nX to the proc. number (columns)
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::Y))
-    );
+
+    sorter.setComponent(vector::Y);
+    Foam::sort(pointIndices, sorter);
 
     assignToProcessorGroup
     (
@@ -282,11 +291,9 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     // finally in the Z direction. Now we add multiples of nX*nY to give
     // layers
-    sort
-    (
-        pointIndices,
-        UList<scalar>::less(rotatedPoints.component(vector::Z))
-    );
+
+    sorter.setComponent(vector::Z);
+    Foam::sort(pointIndices, sorter);
 
     assignToProcessorGroup
     (
@@ -307,12 +314,6 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::simpleGeomDecomp::simpleGeomDecomp(const dictionary& decompDict)
-:
-    geomDecomp(typeName, decompDict)
-{}
-
 
 Foam::simpleGeomDecomp::simpleGeomDecomp
 (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,19 +44,11 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(kahipDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         kahipDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        kahipDecomp,
-        dictionaryRegion
     );
 }
 
@@ -272,12 +264,6 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::kahipDecomp::kahipDecomp(const dictionary& decompDict)
-:
-    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
-{}
-
 
 Foam::kahipDecomp::kahipDecomp
 (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,19 +65,16 @@ class randomDecomp
 public:
 
     //- Runtime type information
-    TypeName("random");
+    TypeNameNoDebug("random");
 
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        randomDecomp(const dictionary& decompDict);
-
-        //- Construct for decomposition dictionary and region name
-        randomDecomp
+        //- Construct for decomposition dictionary and optional region name
+        explicit randomDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 
@@ -92,6 +89,7 @@ public:
         {
             return true;
         }
+
 
     // No topology (implemented by geometric decomposers)
 

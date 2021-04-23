@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,19 +60,11 @@ static_assert
 namespace Foam
 {
     defineTypeNameAndDebug(scotchDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         scotchDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        scotchDecomp,
-        dictionaryRegion
     );
 }
 
@@ -379,12 +371,6 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::scotchDecomp::scotchDecomp(const dictionary& decompDict)
-:
-    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
-{}
-
 
 Foam::scotchDecomp::scotchDecomp
 (

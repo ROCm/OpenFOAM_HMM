@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,12 +29,11 @@ License
 #include "noDecomp.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeName(noDecomp);
-
     addNamedToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -42,24 +41,10 @@ namespace Foam
         dictionary,
         none
     );
-
-    addNamedToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        noDecomp,
-        dictionaryRegion,
-        none
-    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::noDecomp::noDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict)
-{}
-
 
 Foam::noDecomp::noDecomp
 (

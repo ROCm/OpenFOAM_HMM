@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ class noDecomp
 :
     public decompositionMethod
 {
-
     // Private Member Functions
 
         //- No copy construct
@@ -66,19 +65,16 @@ class noDecomp
 public:
 
     //- Runtime type information
-    TypeName("noDecomp");
+    TypeNameNoDebug("none");
 
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        noDecomp(const dictionary& decompDict);
-
-        //- Construct given the decomposition dictionary and region name
-        noDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit noDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 
@@ -88,7 +84,7 @@ public:
 
     // Member Functions
 
-        //- Does not care about proc boundaries, it is all up to the user.
+        //- Does not care about proc boundaries
         virtual bool parallelAware() const
         {
             return true;
@@ -122,7 +118,6 @@ public:
         {
             return labelList(globalCellCells.size(), Pstream::myProcNo());
         }
-
 };
 
 

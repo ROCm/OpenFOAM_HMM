@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,19 +36,11 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(hierarchGeomDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         hierarchGeomDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        hierarchGeomDecomp,
-        dictionaryRegion
     );
 }
 
@@ -717,18 +709,6 @@ Foam::label Foam::hierarchGeomDecomp::sortComponent
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::hierarchGeomDecomp::hierarchGeomDecomp
-(
-    const dictionary& decompDict
-)
-:
-    geomDecomp(typeName, decompDict),
-    order_({0,1,2})
-{
-    setOrder();
-}
-
 
 Foam::hierarchGeomDecomp::hierarchGeomDecomp
 (

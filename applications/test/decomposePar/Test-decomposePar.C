@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     (
         "decomposeParDict",
         "file",
-        "read decomposePar dictionary from specified location"
+        "Use specified file for decomposePar dictionary"
     );
     #include "addRegionOption.H"
     argList::addBoolOption

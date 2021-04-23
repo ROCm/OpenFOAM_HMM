@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,19 +55,11 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(metisDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         metisDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        metisDecomp,
-        dictionaryRegion
     );
 }
 
@@ -245,12 +237,6 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::metisDecomp::metisDecomp(const dictionary& decompDict)
-:
-    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
-{}
-
 
 Foam::metisDecomp::metisDecomp
 (

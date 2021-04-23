@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,24 +29,16 @@ License
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(randomDecomp, 0);
-
+    defineTypeName(randomDecomp);
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         randomDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        randomDecomp,
-        dictionaryRegion
     );
 }
 
@@ -69,12 +61,6 @@ Foam::labelList Foam::randomDecomp::randomMap(const label nCells) const
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::randomDecomp::randomDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict)
-{}
-
 
 Foam::randomDecomp::randomDecomp
 (

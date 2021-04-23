@@ -45,7 +45,6 @@ static const char* notImplementedMessage =
 namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -98,13 +97,6 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict),
-    coeffsDict_()
-{}
-
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (

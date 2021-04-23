@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +81,7 @@ protected:
             labelList& decomp
         ) const = 0;
 
+
         //- No copy construct
         metisLikeDecomp(const metisLikeDecomp&) = delete;
 
@@ -88,23 +89,21 @@ protected:
         void operator=(const metisLikeDecomp&) = delete;
 
 
-public:
-
     // Constructors
 
         //- Construct for derived type name and decomposition dictionary.
-        //  The default search for the coefficients will return dictionary::null
-        //  on failure. This avoids a name clash of a metis "method" with the
-        //  top level.
         metisLikeDecomp
         (
             const word& derivedType,
             const dictionary& decompDict,
             int select = selectionType::NULL_DICT
-        );
+        )
+        :
+            metisLikeDecomp(derivedType, decompDict, "", select)
+        {}
 
         //- Construct for derived type name, decomposition dictionary
-        //-  and region name
+        //- and (optional) region name
         //  The default search for the coefficients will return dictionary::null
         //  on failure. This avoids a name clash of a metis "method" with the
         //  top level.
@@ -116,6 +115,7 @@ public:
             int select = selectionType::NULL_DICT
         );
 
+public:
 
     //- Destructor
     virtual ~metisLikeDecomp() = default;
