@@ -31,8 +31,9 @@ License
 template<class T>
 inline void Foam::List<T>::doAlloc()
 {
-    if (this->size_)
+    if (this->size_ > 0)
     {
+        // With sign-check to avoid spurious -Walloc-size-larger-than
         this->v_ = new T[this->size_];
     }
 }

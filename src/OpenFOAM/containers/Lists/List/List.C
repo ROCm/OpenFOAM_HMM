@@ -50,6 +50,7 @@ void Foam::List<T>::doResize(const label newSize)
     {
         if (newSize > 0)
         {
+            // With sign-check to avoid spurious -Walloc-size-larger-than
             T* nv = new T[newSize];
 
             const label overlap = min(this->size_, newSize);
