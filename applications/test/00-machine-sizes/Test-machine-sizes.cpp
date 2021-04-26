@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,16 +31,28 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include <cstdint>
 #include <climits>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <typeinfo>
 
 template<class T>
-void print(const char* msg)
+void print(const char* name, bool showLimits = true)
 {
-    std::cout<< msg << ' ' << sizeof(T) << '\n';
+    std::cout
+        << "name=\"" << name << "\" sizeof=" << sizeof(T);
+
+    if (showLimits)
+    {
+        std::cout
+            << " \"max\"=" << std::numeric_limits<T>::max();
+    }
+
+    std::cout<< '\n';
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -52,12 +64,13 @@ int main(int argc, char *argv[])
     print<short>("short");
     print<int>("int");
     print<long>("long");
+    print<unsigned long>("unsigned long");
+    print<std::size_t>("std::size_t");
     print<long long>("long long");
+
     print<float>("float");
     print<double>("double");
     print<long double>("long double");
-    print<std::string>("std::string");
-    print<std::string::size_type>("std::string::size_type");
 
     std::cout << "\n---\nEnd\n\n";
 
