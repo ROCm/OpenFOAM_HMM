@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -492,9 +492,10 @@ template<class MatrixType>
 MatrixType Foam::pinv
 (
     const MatrixType& A,
-    const scalar tol
+    const scalar tolerance
 )
 {
+    scalar tol = tolerance;
     typedef typename MatrixType::cmptType cmptType;
 
     if (A.empty())
@@ -506,7 +507,12 @@ MatrixType Foam::pinv
 
     if (A.size() == 1)
     {
-        return MatrixType({1, 1}, cmptType(1.0)/(A(0,0) + cmptType(VSMALL)));
+        if (A(0,0) == cmptType(0))
+        {
+            return MatrixType({1, 1}, cmptType(0));
+        }
+
+        return MatrixType({1, 1}, cmptType(1)/(A(0,0) + cmptType(VSMALL)));
     }
 
     QRMatrix<MatrixType> QRM
@@ -521,27 +527,47 @@ MatrixType Foam::pinv
     // R1 (KP:p. 648)
     // Find the first diagonal element index with (almost) zero value in R
     label firstZeroElemi = 0;
+    label i = 0;
+    while (i < 2)
     {
         const List<cmptType> diag(R.diag());
 
-        auto lessT = [&](const cmptType& x) { return mag(x) < tol; };
+        auto lessThan = [=](const cmptType& x) { return tol > mag(x); };
 
         firstZeroElemi =
             std::distance
             (
                 diag.cbegin(),
-                std::find_if(diag.cbegin(), diag.cend(), lessT)
+                std::find_if(diag.cbegin(), diag.cend(), lessThan)
             );
-    }
 
-    if (firstZeroElemi == 0)
-    {
-        WarningInFunction
-            << "The largest (magnitude) diagonal element is (almost) zero."
-            << nl << "Returning a zero matrix."
-            << endl;
+        if (firstZeroElemi == 0)
+        {
+            if (i == 0)
+            {
+                WarningInFunction
+                    << "The largest diagonal element magnitude is nearly zero. "
+                    << "Tightening the tolerance."
+                    << endl;
 
-        return MatrixType(A.sizes(), Zero);
+                tol = 1e-13;
+                ++i;
+            }
+            else
+            {
+                WarningInFunction
+                    << "The largest diagonal element magnitude is nearly zero. "
+                    << "Returning a zero matrix."
+                    << endl;
+                ++i;
+
+                return MatrixType({A.n(), A.m()}, Zero);
+            }
+        }
+        else
+        {
+            i += 2;
+        }
     }
 
     // Exclude the first (almost) zero diagonal row and the rows below
@@ -598,5 +624,6 @@ MatrixType Foam::pinv
         return MatrixType((QRM.P()^R2)^Q);
     }
 }
+
 
 // ************************************************************************* //

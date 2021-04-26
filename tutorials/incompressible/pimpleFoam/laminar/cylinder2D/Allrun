@@ -13,15 +13,24 @@ runParallel renumberMesh -overwrite
 
 cp -f system/decomposeParDict system/coarseMesh
 
-runApplication -s coarseMesh decomposePar -region coarseMesh
+runApplication -s coarseMesh \
+    decomposePar -region coarseMesh
 
-runParallel -s coarseMesh renumberMesh -overwrite -region coarseMesh
+runParallel -s coarseMesh \
+    renumberMesh -overwrite -region coarseMesh
 
 runParallel $(getApplication)
 
-runParallel -s main redistributePar -reconstruct -latestTime
+runParallel -s main \
+    redistributePar -reconstruct -overwrite
 
-runParallel -s coarseMesh redistributePar -reconstruct \
-    -region coarseMesh -time '50,100,200'
+runParallel -s coarseMesh \
+    redistributePar -reconstruct -region coarseMesh -time '50,100' -overwrite
+
+if notTest "$@"
+then
+    runParallel -s postProcess \
+        $(getApplication) -postProcess -fields '(U p)' -time '10:'
+fi
 
 #------------------------------------------------------------------------------

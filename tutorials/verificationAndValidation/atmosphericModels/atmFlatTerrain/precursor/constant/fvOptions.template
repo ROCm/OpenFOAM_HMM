@@ -43,7 +43,7 @@ atmAmbientTurbSource1
     atmAmbientTurbSourceCoeffs
     {
         selectionMode   all;
-        kAmb            0.001;
+        kAmb            1.0e-04;
         epsilonAmb      7.208e-08;
     }
 }

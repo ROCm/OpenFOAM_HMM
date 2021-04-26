@@ -121,6 +121,9 @@ stabilityBlendingFactor/stabilityBlendingFactor.C
 
 interfaceHeight/interfaceHeight.C
 
-STDMD/STDMD.C
+DMD/DMD.C
+DMD/DMDModels/DMDModel/DMDModel.C
+DMD/DMDModels/DMDModel/DMDModelNew.C
+DMD/DMDModels/derived/STDMD/STDMD.C
 
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
