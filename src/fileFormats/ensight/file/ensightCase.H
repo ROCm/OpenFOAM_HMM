@@ -74,10 +74,10 @@ public:
 
     // Public Data
 
-        //- The name for "data" subdirectory
+        //- The name for data subdirectory: "data"
         static const char* dataDirName;
 
-        //- The name for geometry files
+        //- The name for geometry files: "geometry"
         static const char* geometryName;
 
 

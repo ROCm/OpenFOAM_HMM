@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -522,10 +522,10 @@ void Foam::ensightCase::write() const
 
     if (staticGeom)
     {
-        // Steady
+        // Static mesh: store under data/constant/geometry
         *os_
             << setw(16)  << "model:"
-            << geometryName
+            << (dataDirName/word("constant")/geometryName).c_str()
             << nl;
     }
     else if (meshIndex >= 0)
@@ -681,13 +681,13 @@ Foam::ensightCase::newGeometry
         {
             // Moving mesh: write as "data/********/geometry"
             path = dataDir()/padded(timeIndex_);
-            mkDir(path);
         }
         else
         {
-            // Static mesh: write as "geometry"
-            path = ensightDir_;
+            // Static mesh: write as "data/constant/geometry"
+            path = dataDir()/word("constant");
         }
+        mkDir(path);
 
         noteGeometry(moving);   // note for later use
 
