@@ -54,13 +54,21 @@ notTest()
 }
 
 #
-# Test for wmake and compiler suite or emit warning
+# Test for make/wmake, compiler suite or emit warning
 #
 canCompile()
 {
+    # system
+    if ! command -v make >/dev/null
+    then
+        echo "No system 'make' command found ... cannot compile" 1>&2
+        return 1
+    fi
+
+    # OpenFOAM-specific
     if ! command -v wmake >/dev/null
     then
-        echo "No wmake command found ... cannot compile" 1>&2
+        echo "No openfoam 'wmake' command found ... cannot compile" 1>&2
         return 1
     fi
 
@@ -69,7 +77,7 @@ canCompile()
 
     if [ -z "$cxx_compiler" ]
     then
-        echo "No wmake rule for C++ compiler? ... cannot compile" 1>&2
+        echo "No wmake rule for C++ compiler ... cannot compile" 1>&2
         return 1
     elif ! command -v "$cxx_compiler"  >/dev/null
     then

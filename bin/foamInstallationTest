@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2015 OpenFOAM Foundation
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -245,6 +245,10 @@ reportExecutable()
         VERSION=$(flex --version /dev/null 2>&1 \
             | sed -ne 's/flex \([0-9][0-9.]*\).*/\1/p')
         ;;
+    make)
+        VERSION=$(make --version /dev/null 2>&1 \
+            | sed -ne 's/^.*[Mm]ake \([0-9][0-9.]*\).*/\1/p')
+        ;;
     wmake)
         VERSION="$(wmake --version 2>/dev/null)"
         ;;
@@ -442,6 +446,7 @@ hline
 echo "$(fixlen Software 12) $(fixlen Version 10) $(fixlen Location 10)"
 hline
 reportExecutable flex
+reportExecutable make
 reportExecutable wmake
 
 for compilerType in c cxx
