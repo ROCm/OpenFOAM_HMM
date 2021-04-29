@@ -71,6 +71,7 @@ $(crot)/axisAngleRotation.C
 $(crot)/coordinateRotation.C
 $(crot)/cylindricalRotation.C
 $(crot)/identityRotation.C
+$(crot)/specifiedRotation.C
 $(crot)/EulerCoordinateRotation.C
 $(crot)/STARCDCoordinateRotation.C
 

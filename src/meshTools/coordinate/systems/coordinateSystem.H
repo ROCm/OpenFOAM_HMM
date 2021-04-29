@@ -260,7 +260,7 @@ public:
 
     // Constructors
 
-        //- Construct null. This is an identity coordinateSystem.
+        //- Default construct. This is an identity coordinate system
         coordinateSystem();
 
         //- Copy construct from rotation with origin=0

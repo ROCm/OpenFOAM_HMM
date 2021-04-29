@@ -47,42 +47,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::hierarchGeomDecomp::setOrder()
-{
-    const word order(coeffsDict_.getOrDefault<word>("order", ""));
-
-    if (order.empty())
-    {
-        return;
-    }
-    else if (order.size() != 3)
-    {
-        FatalIOErrorInFunction(decompDict_)
-            << "Number of characters in order (" << order << ") != 3"
-            << exit(FatalIOError);
-    }
-
-    for (int i = 0; i < 3; ++i)
-    {
-        // Change [x-z] -> [0-2]
-
-        switch (order[i])
-        {
-            case 'x': order_[i] = 0; break;
-            case 'y': order_[i] = 1; break;
-            case 'z': order_[i] = 2; break;
-
-            default:
-                FatalIOErrorInFunction(decompDict_)
-                    << "Illegal decomposition order " << order << nl
-                    << "It should only contain x, y or z"
-                    << exit(FatalError);
-                break;
-        }
-    }
-}
-
-
 Foam::label Foam::hierarchGeomDecomp::findLower
 (
     const UList<scalar>& list,
@@ -363,7 +327,7 @@ Foam::label Foam::hierarchGeomDecomp::sortComponent
     (
         (
             sortedCoord.size()
-          ? sortedCoord[0]
+          ? sortedCoord.first()
           : GREAT
         ),
         minOp<scalar>()
@@ -567,7 +531,7 @@ Foam::label Foam::hierarchGeomDecomp::sortComponent
     (
         (
             sortedCoord.size()
-          ? sortedCoord[0]
+          ? sortedCoord.first()
           : GREAT
         ),
         minOp<scalar>()
@@ -716,11 +680,8 @@ Foam::hierarchGeomDecomp::hierarchGeomDecomp
     const word& regionName
 )
 :
-    geomDecomp(typeName, decompDict, regionName),
-    order_({0,1,2})
-{
-    setOrder();
-}
+    geomDecomp(typeName, decompDict, regionName)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -736,7 +697,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     // Start off with every point sorted onto itself.
     labelList slice(identity(points.size()));
 
-    pointField rotatedPoints(rotDelta_ & points);
+    const pointField rotatedPoints(adjustPoints(points));
 
     // Calculate tolerance of cell distribution. For large cases finding
     // distribution to the cell exact would cause too many iterations so allow
@@ -778,7 +739,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     // Start off with every point sorted onto itself.
     labelList slice(identity(points.size()));
 
-    pointField rotatedPoints(rotDelta_ & points);
+    const pointField rotatedPoints(adjustPoints(points));
 
     // Calculate tolerance of cell distribution. For large cases finding
     // distribution to the cell exact would cause too many iterations so allow

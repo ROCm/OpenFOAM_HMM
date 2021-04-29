@@ -52,8 +52,9 @@ Description
     \table
         Property  | Description                             | Required | Default
         n         | (nx ny nz)                              | yes |
-        delta     | delta for rotation matrix               | no  | 0.001
         order     | order of operation                      | no  | xyz
+        delta     | delta (jitter) for rotation matrix      | no  | 0.001
+        transform | cartesian coordinate transformation     | no  |
     \endtable
 
 SourceFiles
@@ -65,8 +66,6 @@ SourceFiles
 #define hierarchGeomDecomp_H
 
 #include "geomDecomp.H"
-#include "FixedList.H"
-#include "direction.H"
 
 namespace Foam
 {
@@ -79,17 +78,7 @@ class hierarchGeomDecomp
 :
     public geomDecomp
 {
-    // Private Data
-
-        //- Decomposition order in terms of components.
-        FixedList<direction, 3> order_;
-
-
     // Private Member Functions
-
-        //- Convert ordering string ("xyz") into list of components.
-        //  Checks for bad entries, but no check for duplicate entries.
-        void setOrder();
 
         //- Find index of value in list between
         //- first (inclusive) and last (exclusive)
@@ -172,14 +161,13 @@ class hierarchGeomDecomp
         ) const;
 
 
-        //- No copy construct
-        hierarchGeomDecomp(const hierarchGeomDecomp&) = delete;
-
-        //- No copy assignment
-        void operator=(const hierarchGeomDecomp&) = delete;
-
-
 public:
+
+    //- No copy construct
+    hierarchGeomDecomp(const hierarchGeomDecomp&) = delete;
+
+    //- No copy assignment
+    void operator=(const hierarchGeomDecomp&) = delete;
 
     //- Runtime type information
     TypeName("hierarchical");
@@ -255,7 +243,7 @@ public:
         //  - the connections are across coupled patches
         virtual labelList decompose
         (
-            const labelListList& globalCellCells,
+            const labelListList& globalCellCells,  // unused
             const pointField& cc,
             const scalarField& cWeights
         ) const
@@ -265,7 +253,7 @@ public:
 
         virtual labelList decompose
         (
-            const labelListList& globalCellCells,
+            const labelListList& globalCellCells,  // unused
             const pointField& cc
         ) const
         {

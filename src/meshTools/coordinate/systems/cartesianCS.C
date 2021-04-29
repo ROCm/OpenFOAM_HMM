@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,12 @@ Foam::coordSystem::cartesian::cartesian(coordinateSystem&& csys)
 Foam::coordSystem::cartesian::cartesian(autoPtr<coordinateSystem>&& csys)
 :
     coordinateSystem(std::move(csys))
+{}
+
+
+Foam::coordSystem::cartesian::cartesian(const coordinateRotation& crot)
+:
+    coordinateSystem(crot)
 {}
 
 

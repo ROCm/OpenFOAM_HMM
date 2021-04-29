@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +32,11 @@ Description
 
     Base coefficients:
     \table
-        Property  | Description                 | Required | Default
-        n         | (nx ny nz)                  | yes
-        delta     | delta for rotation matrix   | no | 0.001
+        Property  | Description                             | Required | Default
+        n         | (nx ny nz)                              | yes |
+        order     | order of operation                      | no  | xyz
+        delta     | delta (jitter) for rotation matrix      | no  | 0.001
+        rotation  | coordinate rotation                     | no  |
     \endtable
 
 SourceFiles
@@ -46,7 +48,9 @@ SourceFiles
 #define geomDecomp_H
 
 #include "decompositionMethod.H"
+#include "cartesianCS.H"
 #include "Vector.H"
+#include "tmp.H"
 
 namespace Foam
 {
@@ -59,28 +63,44 @@ class geomDecomp
 :
     public decompositionMethod
 {
+    // Private Data
+
+        //- Small delta (default: 0.001) to avoid staggering when
+        //- mesh itself is aligned with x/y/z
+        scalar delta_;
+
+        //- Local coordinates, or delta rotation tensor
+        coordSystem::cartesian csys_;
+
+
     // Private Member Functions
 
-        //- Read input values and initialize the rotDelta_
+        //- Convert ordering string ("xyz") into list of components.
+        //  Checks for bad entries, but no check for duplicate entries.
+        void setOrder();
+
+        //- Read input values and initialize rotation matrix
         void readCoeffs();
 
 
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- The divisions
+        Vector<label> n_;
+
+        //- Decomposition order in terms of components (optional)
+        Vector<direction> order_;
 
         //- Coefficients for all derived methods
         const dictionary& coeffsDict_;
 
-        Vector<label> n_;
-
-        //- Default = 0.001
-        scalar delta_;
-
-        tensor rotDelta_;
-
 
     // Protected Member Functions
+
+        //- Apply delta (jitter) or rotation to coordinates
+        tmp<pointField> adjustPoints(const pointField&) const;
 
         //- Check that mesh directions are compatible with decomposition
         void checkDecompositionDirections(const Vector<label>&) const;
@@ -120,7 +140,6 @@ public:
 
         //- Decompose with uniform weights on the points
         virtual labelList decompose(const pointField& points) const = 0;
-
 };
 
 

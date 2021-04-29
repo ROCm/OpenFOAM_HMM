@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +105,12 @@ Foam::coordSystem::cylindrical::cylindrical(coordinateSystem&& csys)
 Foam::coordSystem::cylindrical::cylindrical(autoPtr<coordinateSystem>&& csys)
 :
     coordinateSystem(std::move(csys))
+{}
+
+
+Foam::coordSystem::cylindrical::cylindrical(const coordinateRotation& crot)
+:
+    coordinateSystem(crot)
 {}
 
 

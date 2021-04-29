@@ -28,7 +28,6 @@ License
 
 #include "simpleGeomDecomp.H"
 #include "addToRunTimeSelectionTable.H"
-#include "SortableList.H"
 #include "globalIndex.H"
 #include "SubField.H"
 
@@ -174,7 +173,7 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     labelList pointIndices(identity(points.size()));
 
-    const pointField rotatedPoints(rotDelta_ & points);
+    const pointField rotatedPoints(adjustPoints(points));
 
     vectorLessOp sorter(rotatedPoints);
 
@@ -239,7 +238,7 @@ Foam::labelList Foam::simpleGeomDecomp::decomposeOneProc
 
     labelList pointIndices(identity(points.size()));
 
-    const pointField rotatedPoints(rotDelta_ & points);
+    const pointField rotatedPoints(adjustPoints(points));
 
     vectorLessOp sorter(rotatedPoints);
 
@@ -350,11 +349,11 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             SubField<point>(allPoints, points.size()) = points;
             nTotalPoints += points.size();
 
-            // Add slaves
-            for (const int slave : Pstream::subProcs())
+            // Add received
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                pointField nbrPoints(fromSlave);
+                IPstream fromProc(Pstream::commsTypes::scheduled, subproci);
+                pointField nbrPoints(fromProc);
                 SubField<point>
                 (
                     allPoints,
@@ -368,14 +367,14 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints));
 
             // Send back
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                toSlave << SubField<label>
+                OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                toProc << SubField<label>
                 (
                     finalDecomp,
-                    globalNumbers.localSize(slave),
-                    globalNumbers.offset(slave)
+                    globalNumbers.localSize(subproci),
+                    globalNumbers.offset(subproci)
                 );
             }
             // Get my own part
@@ -435,12 +434,12 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             SubField<scalar>(allWeights, points.size()) = weights;
             nTotalPoints += points.size();
 
-            // Add slaves
-            for (const int slave : Pstream::subProcs())
+            // Add received
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                pointField nbrPoints(fromSlave);
-                scalarField nbrWeights(fromSlave);
+                IPstream fromProc(Pstream::commsTypes::scheduled, subproci);
+                pointField nbrPoints(fromProc);
+                scalarField nbrWeights(fromProc);
                 SubField<point>
                 (
                     allPoints,
@@ -460,14 +459,14 @@ Foam::labelList Foam::simpleGeomDecomp::decompose
             labelList finalDecomp(decomposeOneProc(allPoints, allWeights));
 
             // Send back
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
-                toSlave << SubField<label>
+                OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                toProc << SubField<label>
                 (
                     finalDecomp,
-                    globalNumbers.localSize(slave),
-                    globalNumbers.offset(slave)
+                    globalNumbers.localSize(subproci),
+                    globalNumbers.offset(subproci)
                 );
             }
             // Get my own part

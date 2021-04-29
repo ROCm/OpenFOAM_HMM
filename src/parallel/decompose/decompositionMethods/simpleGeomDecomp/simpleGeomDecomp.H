@@ -32,9 +32,11 @@ Description
 
     Method coefficients:
     \table
-        Property  | Description                 | Required | Default
-        n         | (nx ny nz)                  | yes
-        delta     | delta for rotation matrix   | no | 0.001
+        Property  | Description                             | Required | Default
+        n         | (nx ny nz)                              | yes |
+        order     | order of operation (unused)             | no  | xyz
+        delta     | delta (jitter) for rotation matrix      | no  | 0.001
+        transform | cartesian coordinate transformation     | no  |
     \endtable
 
 SourceFiles
@@ -60,7 +62,11 @@ class simpleGeomDecomp
 {
     // Private Member Functions
 
-        static void assignToProcessorGroup(labelList&, const label);
+        static void assignToProcessorGroup
+        (
+            labelList& processorGroup,
+            const label nProcGroup
+        );
 
         static void assignToProcessorGroup
         (
@@ -80,14 +86,13 @@ class simpleGeomDecomp
         ) const;
 
 
-        //- No copy construct
-        void operator=(const simpleGeomDecomp&) = delete;
-
-        //- No copy assignment
-        simpleGeomDecomp(const simpleGeomDecomp&) = delete;
-
-
 public:
+
+    //- No copy construct
+    void operator=(const simpleGeomDecomp&) = delete;
+
+    //- No copy assignment
+    simpleGeomDecomp(const simpleGeomDecomp&) = delete;
 
     //- Runtime type information
     TypeName("simple");
@@ -151,7 +156,7 @@ public:
         //- Explicitly provided connectivity
         virtual labelList decompose
         (
-            const labelListList& globalCellCells,
+            const labelListList& globalCellCells,  // unused
             const pointField& cc,
             const scalarField& cWeights
         ) const

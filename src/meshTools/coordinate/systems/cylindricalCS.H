@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,7 +114,7 @@ public:
 
     // Constructors
 
-        //- Construct null (identity coordinateSystem)
+        //- Default construct. This is an identity coordinate system
         cylindrical();
 
         //- Copy construct
@@ -131,6 +131,9 @@ public:
 
         //- Move construct from autoPtr of another coordinateSystem type
         explicit cylindrical(autoPtr<coordinateSystem>&& csys);
+
+        //- Copy construct from rotation with origin=0
+        explicit cylindrical(const coordinateRotation& crot);
 
         //- Construct from origin and rotation
         cylindrical(const point& origin, const coordinateRotation& crot);

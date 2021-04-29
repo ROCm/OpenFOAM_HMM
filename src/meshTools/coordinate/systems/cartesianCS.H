@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +75,7 @@ public:
 
     // Constructors
 
-        //- Construct null. This is an identity coordinateSystem.
+        //- Default construct. This is an identity coordinate system
         cartesian();
 
         //- Copy construct
@@ -92,6 +92,12 @@ public:
 
         //- Move construct from autoPtr of another coordinateSystem type
         explicit cartesian(autoPtr<coordinateSystem>&& csys);
+
+        //- Copy construct from rotation with origin=0
+        explicit cartesian(const coordinateRotation& crot);
+
+        //- Move construct from rotation with origin=0
+        explicit cartesian(coordinateRotation&& crot);
 
         //- Construct from origin and rotation
         cartesian(const point& origin, const coordinateRotation& crot);

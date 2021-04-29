@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,36 +27,103 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "geomDecomp.H"
+#include "specifiedRotation.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::geomDecomp::setOrder()
+{
+    const word order(coeffsDict_.getOrDefault<word>("order", ""));
+
+    if (order.empty())
+    {
+        return;
+    }
+    else if (order.size() != 3)
+    {
+        FatalIOErrorInFunction(decompDict_)
+            << "Number of characters in order (" << order << ") != 3"
+            << exit(FatalIOError);
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        // Change [x-z] -> [0-2]
+
+        switch (order[i])
+        {
+            case 'x': order_[i] = 0; break;
+            case 'y': order_[i] = 1; break;
+            case 'z': order_[i] = 2; break;
+
+            default:
+                FatalIOErrorInFunction(decompDict_)
+                    << "Illegal decomposition order " << order << nl
+                    << "It should only contain x, y or z"
+                    << exit(FatalError);
+                break;
+        }
+    }
+}
+
 
 void Foam::geomDecomp::readCoeffs()
 {
     coeffsDict_.readIfPresent("delta", delta_);
+
     coeffsDict_.readEntry("n", n_);
 
-    // Verify that the input makes sense
     if (nDomains_ != n_.x()*n_.y()*n_.z())
     {
+        // Verify that the input makes sense
         FatalErrorInFunction
             << "Wrong number of domain divisions in geomDecomp:" << nl
             << "Number of domains    : " << nDomains_ << nl
             << "Wanted decomposition : " << n_
             << exit(FatalError);
     }
+    setOrder();
 
-    const scalar d = 1 - 0.5*delta_*delta_;
-    const scalar d2 = sqr(d);
+    const dictionary* transformDict =
+        coeffsDict_.findDict("transform", keyType::LITERAL);
 
-    const scalar a = delta_;
-    const scalar a2 = sqr(a);
+    if (transformDict)
+    {
+        csys_ = coordinateSystem(*transformDict);
+    }
+    else if (equal(delta_, 0))
+    {
+        csys_.clear();  // Reset to identity
+    }
+    else
+    {
+        const scalar d = 1 - 0.5*delta_*delta_;
+        const scalar d2 = sqr(d);
 
-    rotDelta_ = tensor
-    (
-        d2,         -a*d,         a,
-        a*d - a2*d,  a*a2 + d2,  -2*a*d,
-        a*d2 + a2,   a*d - a2*d,  d2 - a2
-    );
+        const scalar a = delta_;
+        const scalar a2 = sqr(a);
+
+        // Direction (forward/reverse) doesn't matter much
+        tensor rot
+        (
+            d2,         -a*d,         a,
+            a*d - a2*d,  a*a2 + d2,  -2*a*d,
+            a*d2 + a2,   a*d - a2*d,  d2 - a2
+        );
+
+        // origin=0
+        csys_ = coordinateSystem(coordinateRotations::specified(rot));
+    }
+}
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::tmp<Foam::pointField> Foam::geomDecomp::adjustPoints
+(
+    const pointField& points
+) const
+{
+    return csys_.localPosition(points);
 }
 
 
@@ -90,10 +157,11 @@ Foam::geomDecomp::geomDecomp
 )
 :
     decompositionMethod(decompDict),
-    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select)),
-    n_(1,1,1),
     delta_(0.001),
-    rotDelta_(I)
+    csys_(),
+    n_(1,1,1),
+    order_(0,1,2),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select))
 {
     readCoeffs();
 }
@@ -108,10 +176,11 @@ Foam::geomDecomp::geomDecomp
 )
 :
     decompositionMethod(decompDict, regionName),
-    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select)),
-    n_(1,1,1),
     delta_(0.001),
-    rotDelta_(I)
+    csys_(),
+    n_(1,1,1),
+    order_(0,1,2),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select))
 {
     readCoeffs();
 }
