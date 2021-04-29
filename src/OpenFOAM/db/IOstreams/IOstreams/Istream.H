@@ -65,11 +65,22 @@ class Istream
 {
     // Private Data
 
-        //- Has a token been put back on the stream?
-        bool putBack_;
-
         //- The last token put back on the stream
         token putBackToken_;
+
+        //- Is a put-back token available?
+        bool putBackAvail_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- True if putback token is in use
+        inline bool hasPutback() const noexcept
+        {
+            return putBackAvail_;
+        }
 
 
 public:
@@ -90,7 +101,7 @@ public:
         explicit Istream(IOstreamOption streamOpt = IOstreamOption())
         :
             IOstream(streamOpt),
-            putBack_(false)
+            putBackAvail_(false)
         {}
 
         //- Construct with format, version (compression)
@@ -107,20 +118,28 @@ public:
 
     // Member Functions
 
-        // Read Functions
+        // Token put-back
 
-            //- Put back token
-            //  Only a single put back is permitted
+            //- Examine putback token without removing it.
+            //  Returns const reference to \c token::undefinedToken
+            //  if a putback is unavailable.
+            const token& peekBack() const noexcept;
+
+            //- Fetch putback token without removing it.
+            //  \return false sets the token to undefined if no put-back
+            //  was available
+            bool peekBack(token& tok);
+
+            //- Put back a token. Only a single put back is permitted
             void putBack(const token& tok);
 
-            //- Get the put back token if there is one and return true.
-            //  Return false if no put back token is available.
+            //- Get the put-back token if there is one.
+            //  \return false and sets token to undefined if no put-back
+            //  was available
             bool getBack(token& tok);
 
-            //- Peek at the put back token without removing it.
-            //  Returns false if no put back token is available and set the
-            //  token to undefined.
-            bool peekBack(token& tok);
+
+       // Read Functions
 
             //- Return next token from stream
             virtual Istream& read(token&) = 0;
@@ -181,8 +200,7 @@ public:
     // Member Operators
 
         //- Return a non-const reference to const Istream
-        //  Needed for read-constructors where the stream argument is temporary:
-        //  e.g. thing thisThing(IFstream("thingFileName")());
+        //  Needed for read-constructors where the stream argument is temporary
         Istream& operator()() const;
 };
 

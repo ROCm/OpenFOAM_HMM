@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -276,14 +276,11 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        scotchDecomp(const dictionary& decompDict);
-
-        //- Construct given the decomposition dictionary and region name
-        scotchDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit scotchDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 

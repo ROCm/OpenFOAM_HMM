@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef quadraticRamp_H
-#define quadraticRamp_H
+#ifndef Function1Types_quadraticRamp_H
+#define Function1Types_quadraticRamp_H
 
 #include "ramp.H"
 

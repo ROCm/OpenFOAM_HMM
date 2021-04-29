@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +33,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::unwatchedIOdictionary::unwatchedIOdictionary(const IOobject& io)
+Foam::unwatchedIOdictionary::unwatchedIOdictionary
+(
+    const IOobject& io,
+    const dictionary* fallback
+)
 :
-    baseIOdictionary(io)
-{
-    readHeaderOk(IOstream::ASCII, typeName);
-
-    // For if MUST_READ_IF_MODIFIED
-    addWatch();
-}
+    unwatchedIOdictionary(io, typeName, fallback)
+{}
 
 
 Foam::unwatchedIOdictionary::unwatchedIOdictionary
@@ -49,11 +49,22 @@ Foam::unwatchedIOdictionary::unwatchedIOdictionary
     const dictionary& dict
 )
 :
-    baseIOdictionary(io, dict)
+    unwatchedIOdictionary(io, typeName, &dict)
+{}
+
+
+Foam::unwatchedIOdictionary::unwatchedIOdictionary
+(
+    const IOobject& io,
+    const word& wantedType,
+    const dictionary* fallback
+)
+:
+    baseIOdictionary(io, fallback)
 {
-    if (!readHeaderOk(IOstream::ASCII, typeName))
+    if (!readHeaderOk(IOstream::ASCII, wantedType) && fallback)
     {
-        dictionary::operator=(dict);
+        dictionary::operator=(*fallback);
     }
 
     // For if MUST_READ_IF_MODIFIED
@@ -69,8 +80,7 @@ Foam::unwatchedIOdictionary::unwatchedIOdictionary
 :
     baseIOdictionary(io, is)
 {
-    // Note that we do construct the dictionary null and read in
-    // afterwards
+    // Default construct dictionary and read in afterwards
     // so that if there is some fancy massaging due to a
     // functionEntry in
     // the dictionary at least the type information is already complete.
@@ -79,12 +89,6 @@ Foam::unwatchedIOdictionary::unwatchedIOdictionary
     // For if MUST_READ_IF_MODIFIED
     addWatch();
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::unwatchedIOdictionary::~unwatchedIOdictionary()
-{}
 
 
 // * * * * * * * * * * * * * * * Members Functions * * * * * * * * * * * * * //
@@ -112,7 +116,7 @@ void Foam::unwatchedIOdictionary::addWatch()
     if (readOpt() == MUST_READ_IF_MODIFIED)
     {
         fileName f = filePath();
-        if (!f.size())
+        if (f.empty())
         {
             // We don't have this file but would like to re-read it.
             // Possibly if master-only reading mode.
@@ -123,7 +127,8 @@ void Foam::unwatchedIOdictionary::addWatch()
         {
             FatalErrorInFunction
                 << "Object " << objectPath() << " of type " << type()
-                << " already watched" << abort(FatalError);
+                << " already watched" << nl
+                << abort(FatalError);
         }
 
         // If master-only reading only the master will have all dependencies

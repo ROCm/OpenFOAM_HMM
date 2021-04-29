@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,17 +151,6 @@ public:
             decompositionMethod,
             dictionary,
             (
-                const dictionary& decompDict
-            ),
-            (decompDict)
-        );
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            decompositionMethod,
-            dictionaryRegion,
-            (
                 const dictionary& decompDict,
                 const word& regionName
             ),
@@ -171,19 +160,17 @@ public:
 
     // Static Methods
 
-        //- Return the \c numberOfSubdomains entry from the dictionary
-        static label nDomains(const dictionary& decompDict);
-
-        //- Return the \c numberOfSubdomains from a region within the
-        //  "regions" sub-dictionary
+        //- Return region-specific or top-level \c numberOfSubdomains entry.
+        //  The region-specific version is found within the "regions"
+        //  sub-dictionary.
         static label nDomains
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
-        //- Return an optional region dictionary from "regions" sub-dictionary
-        //  or dictionary::null on failure.
+        //- Return an optional region-specific dictionary
+        //- from "regions" sub-dictionary, or dictionary::null on failure
         static const dictionary& optionalRegionDict
         (
             const dictionary& decompDict,
@@ -193,31 +180,23 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected decomposition method
-        static autoPtr<decompositionMethod> New
-        (
-            const dictionary& decompDict
-        );
-
         //- Return a reference to the selected decomposition method,
-        //- with region specification
+        //- optionally region-specific
         static autoPtr<decompositionMethod> New
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        decompositionMethod(const dictionary& decompDict);
-
-        //- Construct given the decomposition dictionary for specific region
-        decompositionMethod
+        //- Construct given the decomposition dictionary,
+        //- optionally region-specific
+        explicit decompositionMethod
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 
@@ -228,7 +207,7 @@ public:
     // Member Functions
 
         //- Number of domains
-        inline label nDomains() const
+        inline label nDomains() const noexcept
         {
             return nDomains_;
         }
@@ -240,23 +219,15 @@ public:
 
     // No topology (implemented by geometric decomposers)
 
-        //- Return for every coordinate the wanted processor number.
+        //- Return the wanted processor number for every coordinate.
         virtual labelList decompose
         (
             const pointField& points,
             const scalarField& pointWeights
-        ) const
-        {
-            NotImplemented;
-            return labelList();
-        }
+        ) const;
 
         //- Decompose with uniform weights on the points
-        virtual labelList decompose(const pointField& points) const
-        {
-            NotImplemented;
-            return labelList();
-        }
+        virtual labelList decompose(const pointField& points) const;
 
 
     // Topology provided by mesh
@@ -419,7 +390,6 @@ public:
             const polyMesh& mesh,
             const scalarField& cWeights
         ) const;
-
 };
 
 

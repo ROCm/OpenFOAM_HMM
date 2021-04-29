@@ -96,7 +96,7 @@ class thermalShellFvPatchScalarField
         autoPtr<regionModels::thermalShellModel> baffle_;
 
         //- Dictionary
-        mutable dictionary dict_;
+        dictionary dict_;
 
 
 public:

@@ -66,8 +66,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ramp_H
-#define ramp_H
+#ifndef Function1Types_ramp_H
+#define Function1Types_ramp_H
 
 #include "Function1.H"
 

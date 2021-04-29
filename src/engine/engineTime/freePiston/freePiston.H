@@ -36,15 +36,14 @@ Description
 
     For example,
     \verbatim
-        pistonPositionTime  table ( (0 0.13) (0.020 0.03) );
+        pistonPositionTime  table ((0 0.13) (0.020 0.03));
     \endverbatim
-
-    or with a tableFile
+    or
     \verbatim
-        pistonPositionTime  tableFile;
-        pistonPositionTimeCoeffs
+        pistonPositionTime
         {
-            fileName            "data";
+            type    table;
+            file    "<constant>/pistonPosition.dat";
             outOfBounds         clamp;
             interpolationScheme linear;
         }
@@ -76,7 +75,7 @@ class freePiston
 :
     public engineTime
 {
-    // Private data
+    // Private Data
 
         autoPtr<Function1<scalar>> pistonPositionTime_;
 

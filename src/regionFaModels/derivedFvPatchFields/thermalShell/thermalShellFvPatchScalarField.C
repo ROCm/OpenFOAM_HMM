@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 
 #include "thermalShellFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +46,7 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF),
     baffle_(),
-    dict_(dictionary::null)
+    dict_()
 {}
 
 
@@ -78,7 +79,20 @@ thermalShellFvPatchScalarField::thermalShellFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
     baffle_(),
-    dict_(dict)
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value"
+            })
+        )
+    )
 {
     typedef regionModels::thermalShellModel baffle;
 
@@ -127,10 +141,6 @@ void thermalShellFvPatchScalarField::updateCoeffs()
 void thermalShellFvPatchScalarField::write(Ostream& os) const
 {
     fixedValueFvPatchField<scalar>::write(os);
-
-    // Remove value and type already written by fixedValueFvPatchField
-    dict_.remove("value");
-    dict_.remove("type");
     dict_.write(os, false);
 }
 

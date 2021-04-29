@@ -206,7 +206,8 @@ public:
         //  Needed for read-constructors where the stream argument is temporary
         Istream& operator()() const
         {
-            return const_cast<Istream&>(static_cast<const Istream&>(*this));
+            // Could also rewind
+            return const_cast<IListStream&>(*this);
         }
 
 

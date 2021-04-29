@@ -27,7 +27,6 @@ Class
     Foam::reconstructionSchemes
 
 Description
-
     Original code supplied by Henning Scheufler, DLR (2019)
 
 SourceFiles

@@ -32,13 +32,16 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "argList.H"
+#include "IOstreams.H"
 #include "Function1.H"
 #include "scalarIndList.H"
 #include "scalarField.H"
 #include "IOdictionary.H"
 #include "linearInterpolationWeights.H"
 #include "splineInterpolationWeights.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

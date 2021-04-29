@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Foam::ReactionList<ThermoType>::ReactionList
     SLPtrList<Reaction<ThermoType>>(),
     species_(species),
     thermoDb_(thermoDb),
-    dict_(dictionary::null)
+    dict_()
 {}
 
 

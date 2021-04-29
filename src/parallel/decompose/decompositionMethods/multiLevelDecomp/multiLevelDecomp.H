@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ class multiLevelDecomp
 :
     public decompositionMethod
 {
-    // Private data
+    // Private Data
 
         //- Original coefficients for this method
         const dictionary& coeffsDict_;
@@ -114,14 +114,11 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        multiLevelDecomp(const dictionary& decompDict);
-
-        //- Construct given decomposition dictionary and region name
-        multiLevelDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit multiLevelDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,24 +32,16 @@ License
 #include "globalIndex.H"
 #include "mapDistribute.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(multiLevelDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
         multiLevelDecomp,
         dictionary
-    );
-
-    addToRunTimeSelectionTable
-    (
-        decompositionMethod,
-        multiLevelDecomp,
-        dictionaryRegion
     );
 }
 
@@ -567,25 +559,6 @@ void Foam::multiLevelDecomp::decompose
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::multiLevelDecomp::multiLevelDecomp(const dictionary& decompDict)
-:
-    decompositionMethod(decompDict),
-    coeffsDict_
-    (
-        findCoeffsDict
-        (
-            typeName + "Coeffs",
-            (selectionType::EXACT | selectionType::MANDATORY)
-        )
-    ),
-    methodsDict_(),
-    methods_()
-{
-    createMethodsDict();
-    setMethods();
-}
-
 
 Foam::multiLevelDecomp::multiLevelDecomp
 (

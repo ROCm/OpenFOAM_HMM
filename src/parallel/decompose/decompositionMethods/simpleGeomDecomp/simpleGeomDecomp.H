@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,14 +95,11 @@ public:
 
     // Constructors
 
-        //- Construct given decomposition dictionary
-        simpleGeomDecomp(const dictionary& decompDict);
-
-        //- Construct given decomposition dictionary and region name
-        simpleGeomDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit simpleGeomDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,8 @@ void Foam::solution::read(const dictionary& dict)
 Foam::solution::solution
 (
     const objectRegistry& obr,
-    const fileName& dictName
+    const fileName& dictName,
+    const dictionary* fallback
 )
 :
     IOdictionary
@@ -133,15 +134,16 @@ Foam::solution::solution
               : obr.readOpt()
             ),
             IOobject::NO_WRITE
-        )
+        ),
+        fallback
     ),
-    cache_(dictionary::null),
+    cache_(),
     caching_(false),
-    fieldRelaxDict_(dictionary::null),
-    eqnRelaxDict_(dictionary::null),
+    fieldRelaxDict_(),
+    eqnRelaxDict_(),
     fieldRelaxDefault_(0),
     eqnRelaxDefault_(0),
-    solvers_(dictionary::null)
+    solvers_()
 {
     if
     (
@@ -162,41 +164,8 @@ Foam::solution::solution
     const dictionary& dict
 )
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            dictName,
-            obr.time().system(),
-            obr,
-            (
-                obr.readOpt() == IOobject::MUST_READ
-             || obr.readOpt() == IOobject::READ_IF_PRESENT
-              ? IOobject::MUST_READ_IF_MODIFIED
-              : obr.readOpt()
-            ),
-            IOobject::NO_WRITE
-        ),
-        dict
-    ),
-    cache_(dictionary::null),
-    caching_(false),
-    fieldRelaxDict_(dictionary::null),
-    eqnRelaxDict_(dictionary::null),
-    fieldRelaxDefault_(0),
-    eqnRelaxDefault_(0),
-    solvers_(dictionary::null)
-{
-    if
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        read(solutionDict());
-    }
-}
+    solution(obr, dictName, &dict)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -215,7 +184,7 @@ Foam::label Foam::solution::upgradeSolverDict
     {
         if (!dEntry.isDict())
         {
-            Istream& is = dEntry.stream();
+            ITstream& is = dEntry.stream();
             word name(is);
             dictionary subdict;
 
@@ -232,7 +201,7 @@ Foam::label Foam::solution::upgradeSolverDict
 
                 if (eptr && !eptr->isDict())
                 {
-                    Istream& is = eptr->stream();
+                    ITstream& is = eptr->stream();
                     is >> name;
 
                     if (!is.eof())

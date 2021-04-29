@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +41,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
     PtrList<ParticleForce<CloudType>>(),
     owner_(owner),
     mesh_(mesh),
-    dict_(dictionary::null),
+    dict_(),
     calcCoupled_(true),
     calcNonCoupled_(true)
 {}
@@ -71,7 +72,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
         label count = 0;
         for (const entry& dEntry : dict)
         {
-            const word& model = dEntry.keyword();
+            const word& modelName = dEntry.keyword();
             if (dEntry.isDict())
             {
                 this->set
@@ -82,7 +83,7 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
                         owner,
                         mesh,
                         dEntry.dict(),
-                        model
+                        modelName
                     )
                 );
             }
@@ -96,11 +97,10 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
                         owner,
                         mesh,
                         dict,
-                        model
+                        modelName
                     )
                 );
             }
-
             ++count;
         }
 

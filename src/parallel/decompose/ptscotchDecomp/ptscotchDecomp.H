@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ class ptscotchDecomp
 :
     public decompositionMethod
 {
-    // Private data
+    // Private Data
 
         //- Original coefficients for this method
         dictionary coeffsDict_;
@@ -123,12 +123,12 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        ptscotchDecomp(const dictionary& decompDict);
-
-
-        //- Construct given the decomposition dictionary and region name
-        ptscotchDecomp(const dictionary& decompDict, const word& regionName);
+        //- Construct given decomposition dictionary and optional region name
+        explicit ptscotchDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName = ""
+        );
 
 
     //- Destructor

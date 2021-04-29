@@ -175,6 +175,7 @@ public:
         //  Needed for read-constructors where the stream argument is temporary.
         Istream& operator()() const
         {
+            // Could also rewind
             return const_cast<IStringStream&>(*this);
         }
 

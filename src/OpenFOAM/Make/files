@@ -307,10 +307,9 @@ $(functionEntries)/ifEntry/ifEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/baseIOdictionary.C
-$(IOdictionary)/baseIOdictionaryIO.C
-$(IOdictionary)/IOdictionary.C
 $(IOdictionary)/localIOdictionary.C
 $(IOdictionary)/unwatchedIOdictionary.C
+$(IOdictionary)/IOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
 db/IOobjects/decomposedBlockData/decomposedBlockData.C

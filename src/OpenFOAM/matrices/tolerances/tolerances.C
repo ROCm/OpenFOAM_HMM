@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,12 +43,11 @@ Foam::tolerances::tolerances(const Time& t, const fileName& dictName)
             IOobject::NO_WRITE
         )
     ),
-    relaxationFactors_(ITstream("relaxationFactors", tokenList())()),
-    solverTolerances_(ITstream("solverTolerances", tokenList())()),
-    solverRelativeTolerances_
-    (
-        ITstream("solverRelativeTolerances", tokenList())()
-    )
+
+    // Named, but empty dictionaries
+    relaxationFactors_("relaxationFactors"),
+    solverTolerances_("solverTolerances"),
+    solverRelativeTolerances_("solverRelativeTolerances")
 {
     read();
 }
@@ -60,7 +60,7 @@ bool Foam::tolerances::read()
     if (regIOobject::read())
     {
         const word toleranceSetName(get<word>("toleranceSet"));
-        const dictionary& toleranceSet(subDict(toleranceSetName));
+        const dictionary& toleranceSet = subDict(toleranceSetName);
 
         if (toleranceSet.found("relaxationFactors"))
         {

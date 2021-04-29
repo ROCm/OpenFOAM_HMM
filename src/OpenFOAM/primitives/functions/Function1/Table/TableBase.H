@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TableBase_H
-#define TableBase_H
+#ifndef Function1Types_TableBase_H
+#define Function1Types_TableBase_H
 
 #include "tableBounds.H"
 #include "Function1.H"

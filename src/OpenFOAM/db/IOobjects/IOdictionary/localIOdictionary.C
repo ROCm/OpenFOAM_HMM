@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,30 +30,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::localIOdictionary::localIOdictionary(const IOobject& io)
-:
-    baseIOdictionary(io)
-{
-    readHeaderOk(IOstream::ASCII, typeName);
-
-    // For if MUST_READ_IF_MODIFIED
-    addWatch();
-}
-
-
 Foam::localIOdictionary::localIOdictionary
 (
     const IOobject& io,
-    const word& wantedType
+    const dictionary* fallback
 )
 :
-    baseIOdictionary(io)
-{
-    readHeaderOk(IOstream::ASCII, wantedType);
-
-    // For if MUST_READ_IF_MODIFIED
-    addWatch();
-}
+    localIOdictionary(io, typeName, fallback)
+{}
 
 
 Foam::localIOdictionary::localIOdictionary
@@ -61,11 +46,22 @@ Foam::localIOdictionary::localIOdictionary
     const dictionary& dict
 )
 :
-    baseIOdictionary(io, dict)
+    localIOdictionary(io, typeName, &dict)
+{}
+
+
+Foam::localIOdictionary::localIOdictionary
+(
+    const IOobject& io,
+    const word& wantedType,
+    const dictionary* fallback
+)
+:
+    baseIOdictionary(io, fallback)
 {
-    if (!readHeaderOk(IOstream::ASCII, typeName))
+    if (!readHeaderOk(IOstream::ASCII, wantedType) && fallback)
     {
-        dictionary::operator=(dict);
+        dictionary::operator=(*fallback);
     }
 
     // For if MUST_READ_IF_MODIFIED
@@ -81,8 +77,7 @@ Foam::localIOdictionary::localIOdictionary
 :
     baseIOdictionary(io, is)
 {
-    // Note that we do construct the dictionary null and read in
-    // afterwards
+    // Default construct dictionary and read in afterwards
     // so that if there is some fancy massaging due to a
     // functionEntry in
     // the dictionary at least the type information is already complete.
@@ -91,12 +86,6 @@ Foam::localIOdictionary::localIOdictionary
     // For if MUST_READ_IF_MODIFIED
     addWatch();
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::localIOdictionary::~localIOdictionary()
-{}
 
 
 // ************************************************************************* //

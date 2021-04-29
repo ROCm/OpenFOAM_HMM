@@ -31,7 +31,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "dynamicCode.H"
-#include "dynamicCodeContext.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -157,7 +157,20 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF, dict),
     codedBase(),
-    dict_(dict),
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value"
+            })
+        )
+    ),
     name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
     redirectPatchFieldPtr_(nullptr)
 {

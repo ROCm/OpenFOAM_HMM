@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,11 @@ License
 #include "topoDistanceData.H"
 #include "fvMeshSubset.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(structuredDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -49,7 +48,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::structuredDecomp::structuredDecomp(const dictionary& decompDict)
+Foam::structuredDecomp::structuredDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
 :
     decompositionMethod(decompDict),
     methodDict_(findCoeffsDict(typeName + "Coeffs", selectionType::MANDATORY)),

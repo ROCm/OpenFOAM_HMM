@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,21 +49,35 @@ namespace Foam
 {
     defineTypeNameAndDebug(decompositionMethod, 0);
     defineRunTimeSelectionTable(decompositionMethod, dictionary);
-    defineRunTimeSelectionTable(decompositionMethod, dictionaryRegion);
 
-    // Fallback name when searching for optional coefficients directories
-    static const word defaultName("coeffs");
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Find named coefficents dictionary, or use default "coeffs"
+static inline const dictionary* cfindCoeffsDict
+(
+    const dictionary& dict,
+    const word& coeffsName,
+    const bool allowDefault
+)
+{
+    const dictionary* dictptr = dict.findDict(coeffsName);
+    if (!dictptr && allowDefault)
+    {
+        dictptr = dict.findDict("coeffs");
+    }
+    return dictptr;
+}
 
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::label Foam::decompositionMethod::nDomains(const dictionary& decompDict)
-{
-    return decompDict.get<label>("numberOfSubdomains");
-}
-
 
 Foam::label Foam::decompositionMethod::nDomains
 (
@@ -71,23 +85,27 @@ Foam::label Foam::decompositionMethod::nDomains
     const word& regionName
 )
 {
-    const label nDomainsGlobal = nDomains(decompDict);
+    const label nDomainsGlobal = decompDict.get<label>("numberOfSubdomains");
 
-    const dictionary& regionDict(optionalRegionDict(decompDict, regionName));
-
-    label nDomainsRegion;
-    if (regionDict.readIfPresent("numberOfSubdomains", nDomainsRegion))
+    if (!regionName.empty())
     {
-        if (nDomainsRegion >= 1 && nDomainsRegion <= nDomainsGlobal)
-        {
-            return nDomainsRegion;
-        }
+        const dictionary& regionDict =
+            optionalRegionDict(decompDict, regionName);
 
-        WarningInFunction
-            << "ignoring out of range numberOfSubdomains "
-            << nDomainsRegion << " for region " << regionName
-            << nl << nl
-            << endl;
+        label nDomainsRegion;
+        if (regionDict.readIfPresent("numberOfSubdomains", nDomainsRegion))
+        {
+            if (nDomainsRegion >= 1 && nDomainsRegion <= nDomainsGlobal)
+            {
+                return nDomainsRegion;
+            }
+
+            WarningInFunction
+                << "ignoring out of range numberOfSubdomains "
+                << nDomainsRegion << " for region " << regionName
+                << nl << nl
+                << endl;
+        }
     }
 
     return nDomainsGlobal;
@@ -100,19 +118,16 @@ const Foam::dictionary& Foam::decompositionMethod::optionalRegionDict
     const word& regionName
 )
 {
-    auto finder = decompDict.csearch("regions");
-
-    if (!regionName.empty() && finder.isDict())
+    const dictionary* dictptr = nullptr;
+    if
+    (
+        !regionName.empty()
+     && (dictptr = decompDict.findDict("regions")) != nullptr
+    )
     {
-        finder = finder.dict().csearch(regionName);
-
-        if (finder.isDict())
-        {
-            return finder.dict();
-        }
+        dictptr = dictptr->findDict(regionName);
     }
-
-    return dictionary::null;
+    return (dictptr ? *dictptr : dictionary::null);
 }
 
 
@@ -232,19 +247,14 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
     int select
 )
 {
-    dictionary::const_searcher fnd;
+    const bool allowDefault = !(select & selectionType::EXACT);
 
-    if
-    (
-        (fnd = dict.csearch(coeffsName)).isDict()
-     ||
-        (
-            !(select & selectionType::EXACT)
-         && (fnd = dict.csearch(defaultName)).isDict()
-        )
-    )
+    const dictionary* dictptr =
+        cfindCoeffsDict(dict, coeffsName, allowDefault);
+
+    if (dictptr)
     {
-        return fnd.dict();
+        return *dictptr;
     }
 
     // Not found
@@ -261,7 +271,7 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
         return dictionary::null;
     }
 
-    return dict;
+    return dict;  // Return original dictionary
 }
 
 
@@ -271,36 +281,24 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
     int select
 ) const
 {
-    dictionary::const_searcher fnd;
+    const bool allowDefault = !(select & selectionType::EXACT);
 
-    if
-    (
-        !decompRegionDict_.empty()
-    &&
-        (
-            (fnd = decompRegionDict_.csearch(coeffsName)).isDict()
-         ||
-            (
-                !(select & selectionType::EXACT)
-             && (fnd = decompRegionDict_.csearch(defaultName)).isDict()
-            )
-        )
-    )
+    const dictionary* dictptr = nullptr;
+
+    if (!decompRegionDict_.empty())
     {
-        return fnd.dict();
+        // Region-specific dictionary
+        dictptr = cfindCoeffsDict(decompRegionDict_, coeffsName, allowDefault);
+    }
+    if (!dictptr)
+    {
+        // General
+        dictptr = cfindCoeffsDict(decompDict_, coeffsName, allowDefault);
     }
 
-    if
-    (
-        (fnd = decompDict_.csearch(coeffsName)).isDict()
-     ||
-        (
-            !(select & selectionType::EXACT)
-         && (fnd = decompDict_.csearch(defaultName)).isDict()
-        )
-    )
+    if (dictptr)
     {
-        return fnd.dict();
+        return *dictptr;
     }
 
     // Not found
@@ -317,24 +315,11 @@ const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
         return dictionary::null;
     }
 
-    return decompDict_;
+    return decompDict_;  // Return general dictionary
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::decompositionMethod::decompositionMethod
-(
-    const dictionary& decompDict
-)
-:
-    decompDict_(decompDict),
-    decompRegionDict_(dictionary::null),
-    nDomains_(nDomains(decompDict))
-{
-    readConstraints();
-}
-
 
 Foam::decompositionMethod::decompositionMethod
 (
@@ -357,10 +342,14 @@ Foam::decompositionMethod::decompositionMethod
 
 Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 (
-    const dictionary& decompDict
+    const dictionary& decompDict,
+    const word& regionName
 )
 {
-    const word methodType(decompDict.get<word>("method"));
+    word methodType(decompDict.get<word>("method"));
+
+    const dictionary& regionDict = optionalRegionDict(decompDict, regionName);
+    regionDict.readIfPresent("method", methodType);
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
@@ -377,52 +366,14 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 
     // verbose
     {
-        Info<< "Selecting decompositionMethod " << methodType
-            << " [" << (nDomains(decompDict)) << "]" << endl;
-    }
+        Info<< "Decomposition method " << methodType
+            << " [" << (nDomains(decompDict, regionName)) << ']';
 
-    return autoPtr<decompositionMethod>(cstrIter()(decompDict));
-}
-
-
-Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
-(
-    const dictionary& decompDict,
-    const word& regionName
-)
-{
-    const dictionary& regionDict(optionalRegionDict(decompDict, regionName));
-
-    if (regionDict.empty())
-    {
-        // No region-specific information - just forward to normal routine
-        return decompositionMethod::New(decompDict);
-    }
-
-    word methodType(decompDict.get<word>("method"));
-    regionDict.readIfPresent("method", methodType);
-
-    auto cstrIter = dictionaryRegionConstructorTablePtr_->cfind(methodType);
-
-    if (!cstrIter.found())
-    {
-        WarningInFunction
-            << nl
-            << "Unknown region decompositionMethod "
-            << methodType << nl << nl
-            << "Valid decompositionMethods : " << endl
-            << dictionaryRegionConstructorTablePtr_->sortedToc() << nl
-            << "Reverting to non-region version" << nl
-            << endl;
-
-        return decompositionMethod::New(decompDict);
-    }
-
-    // verbose
-    {
-        Info<< "Selecting decompositionMethod " << methodType
-            << " [" << (nDomains(decompDict, regionName)) << "] (region "
-            << regionName << ")" << endl;
+        if (!regionName.empty())
+        {
+            Info<< " (region " << regionName << ')';
+        }
+        Info<< endl;
     }
 
     return autoPtr<decompositionMethod>(cstrIter()(decompDict, regionName));
@@ -1365,6 +1316,29 @@ Foam::labelList Foam::decompositionMethod::decompose
     );
 
     return finalDecomp;
+}
+
+
+// * * * * * * * * * * * * * * * Stub Functions  * * * * * * * * * * * * * * //
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
+    const pointField& points,
+    const scalarField& pointWeights
+) const
+{
+    NotImplemented;
+    return labelList();
+}
+
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
+    const pointField& points
+) const
+{
+    NotImplemented;
+    return labelList();
 }
 
 

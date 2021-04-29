@@ -194,12 +194,11 @@ public:
 
     // Access
 
-        //- Return the name of the stream
-        //  Useful for Fstream to return the filename
+        //- Return the name of the stream.
+        //  Useful for Fstream to remember the filename
         virtual const fileName& name() const;
 
-        //- Return non-const access to the name of the stream
-        //  Useful to alter the stream name
+        //- Return stream name for modification
         virtual fileName& name();
 
 

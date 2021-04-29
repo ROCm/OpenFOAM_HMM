@@ -53,7 +53,6 @@ class doxygenXmlParser
 :
     public dictionary
 {
-
 public:
 
     //- Construct from components

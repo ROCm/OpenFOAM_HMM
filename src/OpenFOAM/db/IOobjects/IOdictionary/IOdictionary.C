@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +33,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IOdictionary::IOdictionary(const IOobject& io)
+Foam::IOdictionary::IOdictionary
+(
+    const IOobject& io,
+    const dictionary* fallback
+)
 :
-    baseIOdictionary(io)
-{
-    readHeaderOk(IOstream::ASCII, typeName);
-
-    // For if MUST_READ_IF_MODIFIED
-    addWatch();
-}
+    IOdictionary(io, typeName, fallback)
+{}
 
 
 Foam::IOdictionary::IOdictionary
@@ -49,11 +49,22 @@ Foam::IOdictionary::IOdictionary
     const dictionary& dict
 )
 :
-    baseIOdictionary(io, dict)
+    IOdictionary(io, typeName, &dict)
+{}
+
+
+Foam::IOdictionary::IOdictionary
+(
+    const IOobject& io,
+    const word& wantedType,
+    const dictionary* fallback
+)
+:
+    baseIOdictionary(io, fallback)
 {
-    if (!readHeaderOk(IOstream::ASCII, typeName))
+    if (!readHeaderOk(IOstream::ASCII, wantedType) && fallback)
     {
-        dictionary::operator=(dict);
+        dictionary::operator=(*fallback);
     }
 
     // For if MUST_READ_IF_MODIFIED
@@ -69,8 +80,7 @@ Foam::IOdictionary::IOdictionary
 :
     baseIOdictionary(io, is)
 {
-    // Note that we do construct the dictionary null and read in
-    // afterwards
+    // Default construct dictionary and read in afterwards
     // so that if there is some fancy massaging due to a
     // functionEntry in
     // the dictionary at least the type information is already complete.
@@ -79,12 +89,6 @@ Foam::IOdictionary::IOdictionary
     // For if MUST_READ_IF_MODIFIED
     addWatch();
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::IOdictionary::~IOdictionary()
-{}
 
 
 // ************************************************************************* //

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,13 +31,13 @@ Description
 
     Example usage for limiting a polynomial:
     \verbatim
-        limitedPolyTest        limitRange;
-        limitedPolyTestCoeffs
+        <entryName>
         {
-            min         0.4;
-            max         1.4;
+            type limitRange;
+            min  0.4;
+            max  1.4;
 
-            value       polynomial
+            value polynomial
             (
                 (5 1)
                 (-2 2)
@@ -53,16 +53,19 @@ Description
     - poly(x) for 0.4 < x < 1.4.
 
 
-    Example usage for limiting a table
+    Example usage for limiting a file-based table:
     \verbatim
-        limitedTableFileTest   limitRange;
-        limitedTableFileTestCoeffs
+        <entryName>
         {
-            min             0.4;
-            max             1.4;
+            type limitRange;
+            min  0.4;
+            max  1.4;
 
-            value           tableFile;
-            file            "<system>/fanCurve.txt";
+            value
+            {
+                type table;
+                file "<system>/fanCurve.txt";
+            }
         }
     \endverbatim
 
@@ -79,8 +82,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LimitRange_H
-#define LimitRange_H
+#ifndef Function1Types_LimitRange_H
+#define Function1Types_LimitRange_H
 
 #include "Function1.H"
 

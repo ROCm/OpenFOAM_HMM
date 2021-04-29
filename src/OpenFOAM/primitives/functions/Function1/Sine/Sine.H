@@ -98,8 +98,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1Types_Sine_H
-#define function1Types_Sine_H
+#ifndef Function1Types_Sine_H
+#define Function1Types_Sine_H
 
 #include "Function1.H"
 

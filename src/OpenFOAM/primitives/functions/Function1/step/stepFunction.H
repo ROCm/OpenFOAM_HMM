@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stepFunction_H
-#define stepFunction_H
+#ifndef Function1Types_stepFunction_H
+#define Function1Types_stepFunction_H
 
 #include "ramp.H"
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +48,7 @@ Foam::trimModel::trimModel
 :
     rotor_(rotor),
     name_(name),
-    coeffs_(dictionary::null)
+    coeffs_()
 {
     read(dict);
 }

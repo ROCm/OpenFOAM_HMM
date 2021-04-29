@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ class manualDecomp
 :
     public decompositionMethod
 {
-    // Private data
+    // Private Data
 
         fileName dataFile_;
 
@@ -79,14 +79,11 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        manualDecomp(const dictionary& decompDict);
-
-        //- Construct given the decomposition dictionary and region name
-        manualDecomp
+        //- Construct given decomposition dictionary and optional region name
+        explicit manualDecomp
         (
             const dictionary& decompDict,
-            const word& regionName
+            const word& regionName = ""
         );
 
 
@@ -124,7 +121,6 @@ public:
             NotImplemented;
             return labelList();
         }
-
 };
 
 

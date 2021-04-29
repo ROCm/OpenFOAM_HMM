@@ -52,9 +52,29 @@ Foam::Function1Types::Constant<Type>::Constant
     Function1<Type>(entryName, dict),
     value_(Zero)
 {
-    Istream& is = dict.lookup(entryName);
-    word entryType(is);
-    is  >> value_;
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
+
+    if (eptr && eptr->isStream())
+    {
+        // Primitive (inline) format. Eg,
+        // - key constant 1.2;
+        // - key 1.2;
+
+        ITstream& is = eptr->stream();
+        if (is.peek().isWord())
+        {
+            is.skip();  // Discard leading 'constant'
+        }
+        is >> value_;
+        dict.checkITstream(is, entryName);
+    }
+    else
+    {
+        // Dictionary format. Eg,
+        // key { type constant; value 1.2; }
+
+        dict.readEntry("value", value_);
+    }
 }
 
 
@@ -71,10 +91,10 @@ Foam::Function1Types::Constant<Type>::Constant
 
 
 template<class Type>
-Foam::Function1Types::Constant<Type>::Constant(const Constant<Type>& cnst)
+Foam::Function1Types::Constant<Type>::Constant(const Constant<Type>& rhs)
 :
-    Function1<Type>(cnst),
-    value_(cnst.value_)
+    Function1<Type>(rhs),
+    value_(rhs.value_)
 {}
 
 

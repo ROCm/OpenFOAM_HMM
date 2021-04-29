@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Uniform_H
-#define Uniform_H
+#ifndef Function1Types_Uniform_H
+#define Function1Types_Uniform_H
 
 #include "Function1.H"
 

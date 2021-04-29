@@ -143,7 +143,7 @@ public:
         //- Construct from entry name
         explicit Function1(const word& entryName);
 
-        //- Construct from entry name and dictionary
+        //- Construct from entry name and dictionary (unused)
         Function1(const word& entryName, const dictionary& dict);
 
         //- Copy construct

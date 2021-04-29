@@ -101,27 +101,26 @@ public:
 
     // Member Functions
 
-        // Enquiry
+    // Characteristics
 
-            //- Return the name of the stream
-            //  Useful for Fstream to return the filename
-            virtual const fileName& name() const
-            {
-                return name_;
-            }
+        //- Get the name of the stream.
+        //  Useful for Fstream to remember the filename
+        virtual const fileName& name() const
+        {
+            return name_;
+        }
 
-            //- Return non-const access to the name of the stream
-            //  Useful to alter the stream name
-            virtual fileName& name()
-            {
-                return name_;
-            }
+        //- Return stream name for modification
+        virtual fileName& name()
+        {
+            return name_;
+        }
 
-            //- Return flags of output stream
-            virtual ios_base::fmtflags flags() const;
+        //- Get stream flags
+        virtual ios_base::fmtflags flags() const;
 
 
-        // Write functions
+    // Write Functions
 
             //- Write token to stream or otherwise handle it.
             //  \return false if the token type was not handled by this method

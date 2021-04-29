@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,19 +40,26 @@ int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", 0));
 void Foam::fvSchemes::clear()
 {
     ddtSchemes_.clear();
-    defaultDdtScheme_.clear();
+    ddtSchemeDefault_.clear();
+
     d2dt2Schemes_.clear();
-    defaultD2dt2Scheme_.clear();
+    d2dt2SchemeDefault_.clear();
+
     interpolationSchemes_.clear();
-    defaultInterpolationScheme_.clear();
+    interpolationSchemeDefault_.clear();
+
     divSchemes_.clear();
-    defaultDivScheme_.clear();
+    divSchemeDefault_.clear();
+
     gradSchemes_.clear();
-    defaultGradScheme_.clear();
+    gradSchemeDefault_.clear();
+
     snGradSchemes_.clear();
-    defaultSnGradScheme_.clear();
+    snGradSchemeDefault_.clear();
+
     laplacianSchemes_.clear();
-    defaultLaplacianScheme_.clear();
+    laplacianSchemeDefault_.clear();
+
     // Do not clear fluxRequired settings
 }
 
@@ -74,10 +81,10 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(ddtSchemes_.lookup("default")) != "none"
     )
     {
-        defaultDdtScheme_ = ddtSchemes_.lookup("default");
+        ddtSchemeDefault_ = ddtSchemes_.lookup("default");
         steady_ =
         (
-            word(defaultDdtScheme_)
+            word(ddtSchemeDefault_)
          == fv::steadyStateDdtScheme<scalar>::typeName
         );
     }
@@ -98,7 +105,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(d2dt2Schemes_.lookup("default")) != "none"
     )
     {
-        defaultD2dt2Scheme_ = d2dt2Schemes_.lookup("default");
+        d2dt2SchemeDefault_ = d2dt2Schemes_.lookup("default");
     }
 
 
@@ -117,7 +124,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(interpolationSchemes_.lookup("default")) != "none"
     )
     {
-        defaultInterpolationScheme_ =
+        interpolationSchemeDefault_ =
             interpolationSchemes_.lookup("default");
     }
 
@@ -130,7 +137,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(divSchemes_.lookup("default")) != "none"
     )
     {
-        defaultDivScheme_ = divSchemes_.lookup("default");
+        divSchemeDefault_ = divSchemes_.lookup("default");
     }
 
 
@@ -142,7 +149,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(gradSchemes_.lookup("default")) != "none"
     )
     {
-        defaultGradScheme_ = gradSchemes_.lookup("default");
+        gradSchemeDefault_ = gradSchemes_.lookup("default");
     }
 
 
@@ -161,7 +168,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(snGradSchemes_.lookup("default")) != "none"
     )
     {
-        defaultSnGradScheme_ = snGradSchemes_.lookup("default");
+        snGradSchemeDefault_ = snGradSchemes_.lookup("default");
     }
 
 
@@ -173,7 +180,7 @@ void Foam::fvSchemes::read(const dictionary& dict)
      && word(laplacianSchemes_.lookup("default")) != "none"
     )
     {
-        defaultLaplacianScheme_ = laplacianSchemes_.lookup("default");
+        laplacianSchemeDefault_ = laplacianSchemes_.lookup("default");
     }
 
 
@@ -187,153 +194,40 @@ void Foam::fvSchemes::read(const dictionary& dict)
          && fluxRequired_.get<word>("default") != "none"
         )
         {
-            defaultFluxRequired_ = fluxRequired_.get<bool>("default");
+            fluxRequiredDefault_ = fluxRequired_.get<bool>("default");
         }
     }
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            "fvSchemes",
-            obr.time().system(),
-            obr,
-            (
-                obr.readOpt() == IOobject::MUST_READ
-             || obr.readOpt() == IOobject::READ_IF_PRESENT
-              ? IOobject::MUST_READ_IF_MODIFIED
-              : obr.readOpt()
-            ),
-            IOobject::NO_WRITE
-        )
-    ),
-    ddtSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".ddtSchemes",
-            tokenList()
-        )()
-    ),
-    defaultDdtScheme_
-    (
-        ddtSchemes_.name() + ".default",
-        tokenList()
-    ),
-    d2dt2Schemes_
-    (
-        ITstream
-        (
-            objectPath() + ".d2dt2Schemes",
-            tokenList()
-        )()
-    ),
-    defaultD2dt2Scheme_
-    (
-        d2dt2Schemes_.name() + ".default",
-        tokenList()
-    ),
-    interpolationSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".interpolationSchemes",
-            tokenList()
-        )()
-    ),
-    defaultInterpolationScheme_
-    (
-        interpolationSchemes_.name() + ".default",
-        tokenList()
-    ),
-    divSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".divSchemes",
-            tokenList()
-        )()
-    ),
-    defaultDivScheme_
-    (
-        divSchemes_.name() + ".default",
-        tokenList()
-    ),
-    gradSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".gradSchemes",
-            tokenList()
-        )()
-    ),
-    defaultGradScheme_
-    (
-        gradSchemes_.name() + ".default",
-        tokenList()
-    ),
-    snGradSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".snGradSchemes",
-            tokenList()
-        )()
-    ),
-    defaultSnGradScheme_
-    (
-        snGradSchemes_.name() + ".default",
-        tokenList()
-    ),
-    laplacianSchemes_
-    (
-        ITstream
-        (
-            objectPath() + ".laplacianSchemes",
-            tokenList()
-        )()
-    ),
-    defaultLaplacianScheme_
-    (
-        laplacianSchemes_.name() + ".default",
-        tokenList()
-    ),
-    fluxRequired_
-    (
-        ITstream
-        (
-            objectPath() + ".fluxRequired",
-            tokenList()
-        )()
-    ),
-    defaultFluxRequired_(false),
-    steady_(false)
+void Foam::fvSchemes::writeDicts(Ostream& os) const
 {
-    if
-    (
-        readOpt() == IOobject::MUST_READ
-     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
-     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
-    )
-    {
-        read(schemesDict());
-    }
+    // Write dictionaries
+    ddtSchemes_.writeEntry(os);
+    d2dt2Schemes_.writeEntry(os);
+    interpolationSchemes_.writeEntry(os);
+    divSchemes_.writeEntry(os);
+    gradSchemes_.writeEntry(os);
+    snGradSchemes_.writeEntry(os);
+    laplacianSchemes_.writeEntry(os);
+    fluxRequired_.writeEntry(os);
 }
 
 
-Foam::fvSchemes::fvSchemes(const objectRegistry& obr, const dictionary& dict)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fvSchemes::fvSchemes
+(
+    const objectRegistry& obr,
+    const word& dictName,
+    const dictionary* fallback
+)
 :
     IOdictionary
     (
         IOobject
         (
-            "fvSchemes",
+            dictName,
             obr.time().system(),
             obr,
             (
@@ -344,108 +238,78 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr, const dictionary& dict)
             ),
             IOobject::NO_WRITE
         ),
-        dict
+        fallback
     ),
+
+    // Named, but empty dictionaries and default schemes
     ddtSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".ddtSchemes",
-            tokenList()
-        )()
+        objectPath() + ".ddtSchemes"
     ),
-    defaultDdtScheme_
+    ddtSchemeDefault_
     (
-        ddtSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        ddtSchemes_.name() + ".default"
     ),
     d2dt2Schemes_
     (
-        ITstream
-        (
-            objectPath() + ".d2dt2Schemes",
-            tokenList()
-        )()
+        objectPath() + ".d2dt2Schemes"
     ),
-    defaultD2dt2Scheme_
+    d2dt2SchemeDefault_
     (
-        d2dt2Schemes_.name() + ".default",
-        tokenList()
+        zero{},
+        d2dt2Schemes_.name() + ".default"
     ),
     interpolationSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".interpolationSchemes",
-            tokenList()
-        )()
+        objectPath() + ".interpolationSchemes"
     ),
-    defaultInterpolationScheme_
+    interpolationSchemeDefault_
     (
-        interpolationSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        interpolationSchemes_.name() + ".default"
     ),
     divSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".divSchemes",
-            tokenList()
-        )()
+        objectPath() + ".divSchemes"
     ),
-    defaultDivScheme_
+    divSchemeDefault_
     (
-        divSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        divSchemes_.name() + ".default"
     ),
     gradSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".gradSchemes",
-            tokenList()
-        )()
+        objectPath() + ".gradSchemes"
     ),
-    defaultGradScheme_
+    gradSchemeDefault_
     (
-        gradSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        gradSchemes_.name() + ".default"
     ),
     snGradSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".snGradSchemes",
-            tokenList()
-        )()
+        objectPath() + ".snGradSchemes"
     ),
-    defaultSnGradScheme_
+    snGradSchemeDefault_
     (
-        snGradSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        snGradSchemes_.name() + ".default"
     ),
     laplacianSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".laplacianSchemes",
-            tokenList()
-        )()
+        objectPath() + ".laplacianSchemes"
     ),
-    defaultLaplacianScheme_
+    laplacianSchemeDefault_
     (
-        laplacianSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        laplacianSchemes_.name() + ".default"
     ),
     fluxRequired_
     (
-        ITstream
-        (
-            objectPath() + ".fluxRequired",
-            tokenList()
-        )()
+        objectPath() + ".fluxRequired"
     ),
-    defaultFluxRequired_(false),
+    fluxRequiredDefault_(false),
     steady_(false)
 {
     if
@@ -458,7 +322,6 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr, const dictionary& dict)
         read(schemesDict());
     }
 }
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -492,147 +355,137 @@ const Foam::dictionary& Foam::fvSchemes::schemesDict() const
 
 Foam::ITstream& Foam::fvSchemes::ddtScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup ddtScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup ddtScheme for " << name << endl;
 
-    if (ddtSchemes_.found(name) || defaultDdtScheme_.empty())
+    if (ddtSchemes_.found(name) || ddtSchemeDefault_.empty())
     {
         return ddtSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultDdtScheme_).rewind();
-        return const_cast<ITstream&>(defaultDdtScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(ddtSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::d2dt2Scheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup d2dt2Scheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup d2dt2Scheme for " << name << endl;
 
-    if (d2dt2Schemes_.found(name) || defaultD2dt2Scheme_.empty())
+    if (d2dt2Schemes_.found(name) || d2dt2SchemeDefault_.empty())
     {
         return d2dt2Schemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultD2dt2Scheme_).rewind();
-        return const_cast<ITstream&>(defaultD2dt2Scheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(d2dt2SchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::interpolationScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup interpolationScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup interpolationScheme for " << name << endl;
 
     if
     (
         interpolationSchemes_.found(name)
-     || defaultInterpolationScheme_.empty()
+     || interpolationSchemeDefault_.empty()
     )
     {
         return interpolationSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultInterpolationScheme_).rewind();
-        return const_cast<ITstream&>(defaultInterpolationScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(interpolationSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::divScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup divScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup divScheme for " << name << endl;
 
-    if (divSchemes_.found(name) || defaultDivScheme_.empty())
+    if (divSchemes_.found(name) || divSchemeDefault_.empty())
     {
         return divSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultDivScheme_).rewind();
-        return const_cast<ITstream&>(defaultDivScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(divSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::gradScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup gradScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup gradScheme for " << name << endl;
 
-    if (gradSchemes_.found(name) || defaultGradScheme_.empty())
+    if (gradSchemes_.found(name) || gradSchemeDefault_.empty())
     {
         return gradSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultGradScheme_).rewind();
-        return const_cast<ITstream&>(defaultGradScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(gradSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::snGradScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup snGradScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup snGradScheme for " << name << endl;
 
-    if (snGradSchemes_.found(name) || defaultSnGradScheme_.empty())
+    if (snGradSchemes_.found(name) || snGradSchemeDefault_.empty())
     {
         return snGradSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultSnGradScheme_).rewind();
-        return const_cast<ITstream&>(defaultSnGradScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(snGradSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::fvSchemes::laplacianScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup laplacianScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup laplacianScheme for " << name << endl;
 
-    if (laplacianSchemes_.found(name) || defaultLaplacianScheme_.empty())
+    if (laplacianSchemes_.found(name) || laplacianSchemeDefault_.empty())
     {
         return laplacianSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultLaplacianScheme_).rewind();
-        return const_cast<ITstream&>(defaultLaplacianScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(laplacianSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 void Foam::fvSchemes::setFluxRequired(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Setting fluxRequired for " << name << endl;
-    }
+    DebugInfo<< "Setting fluxRequired for " << name << endl;
 
     fluxRequired_.add(name, true, true);
 }
@@ -640,17 +493,14 @@ void Foam::fvSchemes::setFluxRequired(const word& name) const
 
 bool Foam::fvSchemes::fluxRequired(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup fluxRequired for " << name << endl;
-    }
+    DebugInfo<< "Lookup fluxRequired for " << name << endl;
 
     if (fluxRequired_.found(name))
     {
         return true;
     }
 
-    return defaultFluxRequired_;
+    return fluxRequiredDefault_;
 }
 
 

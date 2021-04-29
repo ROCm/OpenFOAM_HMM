@@ -101,52 +101,43 @@ Foam::PatchFunction1Types::ConstantField<Type>::getValue
         }
         ITstream& is = eptr->stream();
 
-        // Read first token
-        token firstToken(is);
-
-        if (firstToken.isWord())
+        if (is.peek().isWord())
         {
-            if
-            (
-                firstToken.wordToken() == "uniform"
-             || firstToken.wordToken() == "constant"
-            )
+            const word contentType(is);
+
+            if (contentType == "uniform" || contentType == "constant")
             {
                 is >> uniformValue;
-                fld.setSize(len);
+                fld.resize(len);
                 fld = uniformValue;
             }
-            else if (firstToken.wordToken() == "nonuniform")
+            else if (contentType == "nonuniform")
             {
-                List<Type>& list = fld;
-                is >> list;
                 isUniform = false;
-
-                const label currentSize = fld.size();
-                if (currentSize != len)
+                is >> static_cast<List<Type>&>(fld);
+                const label lenRead = fld.size();
+                if (len != lenRead)
                 {
                     if
                     (
-                        len < currentSize
+                        len < lenRead
                      && FieldBase::allowConstructFromLargerSize
                     )
                     {
                         #ifdef FULLDEBUG
                         IOWarningInFunction(dict)
-                            << "Sizes do not match. "
-                            << "Re-sizing " << currentSize
-                            << " entries to " << len
-                            << endl;
+                            << "Sizes do not match. Truncating " << lenRead
+                            << " entries to " << len << endl;
                         #endif
 
-                        // Resize (shrink) the data
-                        fld.setSize(len);
+                        // Truncate the data
+                        fld.resize(len);
                     }
                     else
                     {
                         FatalIOErrorInFunction(dict)
-                            << "size " << fld.size()
-                            << " is not equal to the given value of " << len
+                            << "size " << lenRead
+                            << " is not equal to the expected length " << len
                             << exit(FatalIOError);
                     }
                 }
@@ -156,15 +147,15 @@ Foam::PatchFunction1Types::ConstantField<Type>::getValue
                 isUniform = false;
                 FatalIOErrorInFunction(dict)
                     << "Expected keyword 'uniform', 'nonuniform' or 'constant'"
-                    << ", found " << firstToken.wordToken()
+                    << ", found " << contentType
                     << exit(FatalIOError);
             }
         }
         else
         {
-            is.putBack(firstToken);
+            // Uniform (constant) field
             is >> uniformValue;
-            fld.setSize(len);
+            fld.resize(len);
             fld = uniformValue;
         }
     }

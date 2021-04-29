@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,8 @@ const Foam::word Foam::decompositionModel::canonicalName("decomposeParDict");
 Foam::decompositionModel::decompositionModel
 (
     const polyMesh& mesh,
-    const fileName& decompDictFile
+    const fileName& decompDictFile,
+    const dictionary* fallback
 )
 :
     MeshObject
@@ -60,52 +61,18 @@ Foam::decompositionModel::decompositionModel
         (
             IOobject
             (
-                canonicalName,
+                decompositionModel::canonicalName,
                 mesh.time().system(),
                 mesh.local(),
                 mesh.thisDb(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false,  //io.registerObject(),
-                true    //io.globalObject()
-            ),
-            decompDictFile
-        )
-    )
-{}
-
-
-Foam::decompositionModel::decompositionModel
-(
-    const polyMesh& mesh,
-    const dictionary& dict,
-    const fileName& decompDictFile
-)
-:
-    MeshObject
-    <
-        polyMesh,
-        Foam::UpdateableMeshObject,
-        decompositionModel
-    >(mesh),
-    IOdictionary
-    (
-        IOobject::selectIO
-        (
-            IOobject
-            (
-                canonicalName,
-                mesh.time().system(),
-                mesh.local(),
-                mesh.thisDb(),
-                (dict.size() ? IOobject::NO_READ : IOobject::MUST_READ),
+                (fallback ? IOobject::READ_IF_PRESENT : IOobject::MUST_READ),
                 IOobject::NO_WRITE,
                 false,  //io.registerObject(),
                 true    //io.globalObject()
             ),
             decompDictFile
         ),
-        dict
+        fallback
     )
 {}
 
@@ -115,7 +82,8 @@ Foam::decompositionModel::decompositionModel
 const Foam::decompositionModel& Foam::decompositionModel::New
 (
     const polyMesh& mesh,
-    const fileName& decompDictFile
+    const fileName& decompDictFile,
+    const dictionary* content
 )
 {
     return
@@ -124,24 +92,24 @@ const Foam::decompositionModel& Foam::decompositionModel::New
             polyMesh,
             Foam::UpdateableMeshObject,
             decompositionModel
-        >::New(mesh, decompDictFile);
+        >::New(mesh, decompDictFile, content);
 }
 
 
-const Foam::decompositionModel& Foam::decompositionModel::New
-(
-    const polyMesh& mesh,
-    const dictionary& dict,
-    const fileName& decompDictFile
-)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::decompositionMethod& Foam::decompositionModel::decomposer() const
 {
-    return
-        MeshObject
-        <
-            polyMesh,
-            Foam::UpdateableMeshObject,
-            decompositionModel
-        >::New(mesh, dict, decompDictFile);
+    if (!decomposerPtr_)
+    {
+        decomposerPtr_ =
+            decompositionMethod::New
+            (
+                *this,
+                this->mesh().name()  // Name of mesh region
+            );
+    }
+    return *decomposerPtr_;
 }
 
 

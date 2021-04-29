@@ -31,6 +31,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "dynamicCode.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -156,7 +157,20 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 :
     mixedFvPatchField<Type>(p, iF, dict),
     codedBase(),
-    dict_(dict),
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value", "refValue", "refGradient", "valueFraction"
+            })
+        )
+    ),
     name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
     redirectPatchFieldPtr_(nullptr)
 {

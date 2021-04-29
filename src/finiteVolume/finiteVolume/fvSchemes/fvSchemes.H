@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,31 +55,31 @@ class fvSchemes
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         dictionary ddtSchemes_;
-        ITstream defaultDdtScheme_;
+        ITstream ddtSchemeDefault_;
 
         dictionary d2dt2Schemes_;
-        ITstream defaultD2dt2Scheme_;
+        ITstream d2dt2SchemeDefault_;
 
         dictionary interpolationSchemes_;
-        ITstream defaultInterpolationScheme_;
+        ITstream interpolationSchemeDefault_;
 
         dictionary divSchemes_;
-        ITstream defaultDivScheme_;
+        ITstream divSchemeDefault_;
 
         dictionary gradSchemes_;
-        ITstream defaultGradScheme_;
+        ITstream gradSchemeDefault_;
 
         dictionary snGradSchemes_;
-        ITstream defaultSnGradScheme_;
+        ITstream snGradSchemeDefault_;
 
         dictionary laplacianSchemes_;
-        ITstream defaultLaplacianScheme_;
+        ITstream laplacianSchemeDefault_;
 
         mutable dictionary fluxRequired_;
-        bool defaultFluxRequired_;
+        bool fluxRequiredDefault_;
 
         //- Steady-state run indicator
         //  Set true if the default ddtScheme is steadyState
@@ -94,11 +94,27 @@ class fvSchemes
         //- Read settings from the dictionary
         void read(const dictionary&);
 
+        //- Write dictionary (possibly modified) settings
+        void writeDicts(Ostream& os) const;
+
         //- No copy construct
         fvSchemes(const fvSchemes&) = delete;
 
         //- No copy assignment
         void operator=(const fvSchemes&) = delete;
+
+
+    // Constructors
+
+        //- Construct for objectRegistry, system dictName, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        fvSchemes
+        (
+            const objectRegistry& obr,
+            const word& dictName,
+            const dictionary* fallback
+        );
 
 
 public:
@@ -109,13 +125,24 @@ public:
 
     // Constructors
 
-        //- Construct for objectRegistry
-        fvSchemes(const objectRegistry& obr);
+        //- Construct for objectRegistry, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit fvSchemes
+        (
+            const objectRegistry& obr,
+            const dictionary* fallback = nullptr
+        )
+        :
+            fvSchemes(obr, "fvSchemes", fallback)
+        {}
 
-        //- Construct from objectRegistry and supplied (optional) content
-        //  (gets used in case of NO_READ or fvSchemes dictionary cannot be
-        //   read)
-        fvSchemes(const objectRegistry& obr, const dictionary& dict);
+        //- Construct for objectRegistry, and
+        //- fallback dictionary content (for a NO_READ or missing file)
+        fvSchemes(const objectRegistry& obr, const dictionary& dict)
+        :
+            fvSchemes(obr, "fvSchemes", &dict)
+        {}
 
 
     // Member Functions
@@ -142,14 +169,14 @@ public:
 
             bool fluxRequired(const word& name) const;
 
-            //- Return true if the default ddtScheme is steadyState
-            bool steady() const
+            //- True if the default ddtScheme is steadyState
+            bool steady() const noexcept
             {
                 return steady_;
             }
 
-            //- Return true if the default ddtScheme is not steadyState
-            bool transient() const
+            //- True if the default ddtScheme is not steadyState
+            bool transient() const noexcept
             {
                 return !steady_;
             }

@@ -143,13 +143,13 @@ public:
         //- Inherit read from ITstream
         using ITstream::read;
 
-        //- Return the dictionary name
+        //- Return the token stream name
         virtual const fileName& name() const
         {
             return ITstream::name();
         }
 
-        //- Return the dictionary name
+        //- Return token stream name for modification
         virtual fileName& name()
         {
             return ITstream::name();

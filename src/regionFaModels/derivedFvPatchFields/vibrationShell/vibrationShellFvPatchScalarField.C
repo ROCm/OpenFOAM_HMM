@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 
 #include "vibrationShellFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 :
     mixedFvPatchField<scalar>(p, iF),
     baffle_(),
-    dict_(dictionary::null)
+    dict_()
 {
     refValue() = 0;
     refGrad() = 0;
@@ -80,7 +81,20 @@ vibrationShellFvPatchScalarField::vibrationShellFvPatchScalarField
 :
     mixedFvPatchField<scalar>(p, iF),
     baffle_(),
-    dict_(dict)
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value", "refValue", "refGradient", "valueFraction"
+            })
+        )
+    )
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
@@ -148,7 +162,6 @@ void vibrationShellFvPatchScalarField::updateCoeffs()
 void vibrationShellFvPatchScalarField::write(Ostream& os) const
 {
     mixedFvPatchField<scalar>::write(os);
-
     dict_.write(os, false);
 }
 

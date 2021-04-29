@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +40,7 @@ Foam::doxygenXmlParser::doxygenXmlParser
     const word& ext
 )
 :
-    dictionary(dictionary::null)
+    dictionary()
 {
     // Pre-construct and compile regular expressions
     const regExp nameRe(".*.H");
@@ -155,7 +156,7 @@ Foam::doxygenXmlParser::doxygenXmlParser
                     //    preferentially take exact match if it exists
                     if (exactMatch && (tName + "." + ext) == name)
                     {
-                        dictionary dict(dictionary::null);
+                        dictionary dict;
                         dict.add("name", name);
                         dict.add("filename", fName + ".html");
                         dict.add("path", path);
@@ -168,7 +169,7 @@ Foam::doxygenXmlParser::doxygenXmlParser
                      && regExp(".*" + tName + ".*").match(name)
                     )
                     {
-                        dictionary dict(dictionary::null);
+                        dictionary dict;
                         dict.add("name", name);
                         dict.add("filename", fName + ".html");
                         dict.add("path", path);

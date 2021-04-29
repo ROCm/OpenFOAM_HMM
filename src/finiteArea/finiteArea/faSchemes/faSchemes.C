@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,21 +39,28 @@ int Foam::faSchemes::debug(Foam::debug::debugSwitch("faSchemes", 0));
 void Foam::faSchemes::clear()
 {
     ddtSchemes_.clear();
-    defaultDdtScheme_.clear();
+    ddtSchemeDefault_.clear();
+
     d2dt2Schemes_.clear();
-    defaultD2dt2Scheme_.clear();
+    d2dt2SchemeDefault_.clear();
+
     interpolationSchemes_.clear();
-    defaultInterpolationScheme_.clear();
+    interpolationSchemeDefault_.clear();
+
     divSchemes_.clear(); // optional
-    defaultDivScheme_.clear();
+    divSchemeDefault_.clear();
+
     gradSchemes_.clear(); // optional
-    defaultGradScheme_.clear();
+    gradSchemeDefault_.clear();
+
     lnGradSchemes_.clear();
-    defaultLnGradScheme_.clear();
+    lnGradSchemeDefault_.clear();
+
     laplacianSchemes_.clear(); // optional
-    defaultLaplacianScheme_.clear();
+    laplacianSchemeDefault_.clear();
+
     fluxRequired_.clear();
-    defaultFluxRequired_ = false;
+    fluxRequiredDefault_ = false;
 }
 
 
@@ -74,8 +81,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(ddtSchemes_.lookup("default")) != "none"
     )
     {
-        defaultDdtScheme_ = ddtSchemes_.lookup("default");
-
+        ddtSchemeDefault_ = ddtSchemes_.lookup("default");
     }
 
 
@@ -94,7 +100,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(d2dt2Schemes_.lookup("default")) != "none"
     )
     {
-        defaultD2dt2Scheme_ = d2dt2Schemes_.lookup("default");
+        d2dt2SchemeDefault_ = d2dt2Schemes_.lookup("default");
     }
 
 
@@ -113,7 +119,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(interpolationSchemes_.lookup("default")) != "none"
     )
     {
-        defaultInterpolationScheme_ =
+        interpolationSchemeDefault_ =
             interpolationSchemes_.lookup("default");
     }
 
@@ -126,7 +132,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(divSchemes_.lookup("default")) != "none"
     )
     {
-        defaultDivScheme_ = divSchemes_.lookup("default");
+        divSchemeDefault_ = divSchemes_.lookup("default");
     }
 
 
@@ -138,7 +144,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(gradSchemes_.lookup("default")) != "none"
     )
     {
-        defaultGradScheme_ = gradSchemes_.lookup("default");
+        gradSchemeDefault_ = gradSchemes_.lookup("default");
     }
 
 
@@ -157,7 +163,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(lnGradSchemes_.lookup("default")) != "none"
     )
     {
-        defaultLnGradScheme_ = lnGradSchemes_.lookup("default");
+        lnGradSchemeDefault_ = lnGradSchemes_.lookup("default");
     }
 
 
@@ -169,7 +175,7 @@ void Foam::faSchemes::read(const dictionary& dict)
      && word(laplacianSchemes_.lookup("default")) != "none"
     )
     {
-        defaultLaplacianScheme_ = laplacianSchemes_.lookup("default");
+        laplacianSchemeDefault_ = laplacianSchemes_.lookup("default");
     }
 
 
@@ -183,21 +189,40 @@ void Foam::faSchemes::read(const dictionary& dict)
          && fluxRequired_.get<word>("default") != "none"
         )
         {
-            defaultFluxRequired_ = fluxRequired_.get<bool>("default");
+            fluxRequiredDefault_ = fluxRequired_.get<bool>("default");
         }
     }
 }
 
 
+void Foam::faSchemes::writeDicts(Ostream& os) const
+{
+    // Write dictionaries
+    ddtSchemes_.writeEntry(os);
+    d2dt2Schemes_.writeEntry(os);
+    interpolationSchemes_.writeEntry(os);
+    divSchemes_.writeEntry(os);
+    gradSchemes_.writeEntry(os);
+    lnGradSchemes_.writeEntry(os);
+    laplacianSchemes_.writeEntry(os);
+    fluxRequired_.writeEntry(os);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::faSchemes::faSchemes(const objectRegistry& obr)
+Foam::faSchemes::faSchemes
+(
+    const objectRegistry& obr,
+    const word& dictName,
+    const dictionary* fallback
+)
 :
     IOdictionary
     (
         IOobject
         (
-            "faSchemes",
+            dictName,
             obr.time().system(),
             obr,
             (
@@ -207,108 +232,79 @@ Foam::faSchemes::faSchemes(const objectRegistry& obr)
               : obr.readOpt()
             ),
             IOobject::NO_WRITE
-        )
+        ),
+        fallback
     ),
+
+    // Named, but empty dictionaries and default schemes
     ddtSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".ddtSchemes",
-            tokenList()
-        )()
+        objectPath() + ".ddtSchemes"
     ),
-    defaultDdtScheme_
+    ddtSchemeDefault_
     (
-        ddtSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        ddtSchemes_.name() + ".default"
     ),
     d2dt2Schemes_
     (
-        ITstream
-        (
-            objectPath() + ".d2dt2Schemes",
-            tokenList()
-        )()
+        objectPath() + ".d2dt2Schemes"
     ),
-    defaultD2dt2Scheme_
+    d2dt2SchemeDefault_
     (
-        d2dt2Schemes_.name() + ".default",
-        tokenList()
+        zero{},
+        d2dt2Schemes_.name() + ".default"
     ),
     interpolationSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".interpolationSchemes",
-            tokenList()
-        )()
+        objectPath() + ".interpolationSchemes"
     ),
-    defaultInterpolationScheme_
+    interpolationSchemeDefault_
     (
-        interpolationSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        interpolationSchemes_.name() + ".default"
     ),
     divSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".divSchemes",
-            tokenList()
-        )()
+        objectPath() + ".divSchemes"
     ),
-    defaultDivScheme_
+    divSchemeDefault_
     (
-        divSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        divSchemes_.name() + ".default"
     ),
     gradSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".gradSchemes",
-            tokenList()
-        )()
+        objectPath() + ".gradSchemes"
     ),
-    defaultGradScheme_
+    gradSchemeDefault_
     (
-        gradSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        gradSchemes_.name() + ".default"
     ),
     lnGradSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".snGradSchemes",
-            tokenList()
-        )()
+        objectPath() + ".lnGradSchemes"
     ),
-    defaultLnGradScheme_
+    lnGradSchemeDefault_
     (
-        lnGradSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        lnGradSchemes_.name() + ".default"
     ),
     laplacianSchemes_
     (
-        ITstream
-        (
-            objectPath() + ".laplacianSchemes",
-            tokenList()
-        )()
+        objectPath() + ".laplacianSchemes"
     ),
-    defaultLaplacianScheme_
+    laplacianSchemeDefault_
     (
-        laplacianSchemes_.name() + ".default",
-        tokenList()
+        zero{},
+        laplacianSchemes_.name() + ".default"
     ),
     fluxRequired_
     (
-        ITstream
-        (
-            objectPath() + ".fluxRequired",
-            tokenList()
-        )()
+        objectPath() + ".fluxRequired"
     ),
-    defaultFluxRequired_(false)
+    fluxRequiredDefault_(false)
 {
     if
     (
@@ -353,147 +349,137 @@ const Foam::dictionary& Foam::faSchemes::schemesDict() const
 
 Foam::ITstream& Foam::faSchemes::ddtScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup ddtScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup ddtScheme for " << name << endl;
 
-    if (ddtSchemes_.found(name) || defaultDdtScheme_.empty())
+    if (ddtSchemes_.found(name) || ddtSchemeDefault_.empty())
     {
         return ddtSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultDdtScheme_).rewind();
-        return const_cast<ITstream&>(defaultDdtScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(ddtSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::d2dt2Scheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup d2dt2Scheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup d2dt2Scheme for " << name << endl;
 
-    if (d2dt2Schemes_.found(name) || defaultD2dt2Scheme_.empty())
+    if (d2dt2Schemes_.found(name) || d2dt2SchemeDefault_.empty())
     {
         return d2dt2Schemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultD2dt2Scheme_).rewind();
-        return const_cast<ITstream&>(defaultD2dt2Scheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(d2dt2SchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::interpolationScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup interpolationScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup interpolationScheme for " << name << endl;
 
     if
     (
         interpolationSchemes_.found(name)
-     || defaultInterpolationScheme_.empty()
+     || interpolationSchemeDefault_.empty()
     )
     {
         return interpolationSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultInterpolationScheme_).rewind();
-        return const_cast<ITstream&>(defaultInterpolationScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(interpolationSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::divScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup divScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup divScheme for " << name << endl;
 
-    if (divSchemes_.found(name) || defaultDivScheme_.empty())
+    if (divSchemes_.found(name) || divSchemeDefault_.empty())
     {
         return divSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultDivScheme_).rewind();
-        return const_cast<ITstream&>(defaultDivScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(divSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::gradScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup gradScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup gradScheme for " << name << endl;
 
-    if (gradSchemes_.found(name) || defaultGradScheme_.empty())
+    if (gradSchemes_.found(name) || gradSchemeDefault_.empty())
     {
         return gradSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultGradScheme_).rewind();
-        return const_cast<ITstream&>(defaultGradScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(gradSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::lnGradScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup snGradScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup lnGradScheme for " << name << endl;
 
-    if (lnGradSchemes_.found(name) || defaultLnGradScheme_.empty())
+    if (lnGradSchemes_.found(name) || lnGradSchemeDefault_.empty())
     {
         return lnGradSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultLnGradScheme_).rewind();
-        return const_cast<ITstream&>(defaultLnGradScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(lnGradSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 Foam::ITstream& Foam::faSchemes::laplacianScheme(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup laplacianScheme for " << name << endl;
-    }
+    DebugInfo<< "Lookup laplacianScheme for " << name << endl;
 
-    if (laplacianSchemes_.found(name) || defaultLaplacianScheme_.empty())
+    if (laplacianSchemes_.found(name) || laplacianSchemeDefault_.empty())
     {
         return laplacianSchemes_.lookup(name);
     }
     else
     {
-        const_cast<ITstream&>(defaultLaplacianScheme_).rewind();
-        return const_cast<ITstream&>(defaultLaplacianScheme_);
+        // Default scheme
+        ITstream& is = const_cast<ITstream&>(laplacianSchemeDefault_);
+        is.rewind();
+        return is;
     }
 }
 
 
 void Foam::faSchemes::setFluxRequired(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Setting fluxRequired for " << name << endl;
-    }
+    DebugInfo<< "Setting fluxRequired for " << name << endl;
 
     fluxRequired_.add(name, true, true);
 }
@@ -501,49 +487,20 @@ void Foam::faSchemes::setFluxRequired(const word& name) const
 
 bool Foam::faSchemes::fluxRequired(const word& name) const
 {
-    if (debug)
-    {
-        Info<< "Lookup fluxRequired for " << name << endl;
-    }
+    DebugInfo<< "Lookup fluxRequired for " << name << endl;
 
     if (fluxRequired_.found(name))
     {
         return true;
     }
-    else
-    {
-        return defaultFluxRequired_;
-    }
+
+    return fluxRequiredDefault_;
 }
 
 
 bool Foam::faSchemes::writeData(Ostream& os) const
 {
-    // Write dictionaries
-    os << nl << "ddtSchemes";
-    ddtSchemes_.write(os, true);
-
-    os << nl << "d2dt2Schemes";
-    d2dt2Schemes_.write(os, true);
-
-    os << nl << "interpolationSchemes";
-    interpolationSchemes_.write(os, true);
-
-    os << nl << "divSchemes";
-    divSchemes_.write(os, true);
-
-    os << nl << "gradSchemes";
-    gradSchemes_.write(os, true);
-
-    os << nl << "lnGradSchemes";
-    lnGradSchemes_.write(os, true);
-
-    os << nl << "laplacianSchemes";
-    laplacianSchemes_.write(os, true);
-
-    os << nl << "fluxRequired";
-    fluxRequired_.write(os, true);
-
+    this->writeDicts(os);
     return true;
 }
 

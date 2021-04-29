@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,6 @@ static const char* notImplementedMessage =
 namespace Foam
 {
     defineTypeNameAndDebug(scotchDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -80,15 +79,6 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::scotchDecomp::scotchDecomp
-(
-    const dictionary& decompDict
-)
-:
-    metisLikeDecomp("scotch", decompDict)
-{}
-
 
 Foam::scotchDecomp::scotchDecomp
 (

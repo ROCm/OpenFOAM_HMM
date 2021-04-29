@@ -174,7 +174,19 @@ public:
         {}
 
 
-    // Stream state functions
+    // Stream State Functions
+
+        //- Get flags of output stream
+        virtual ios_base::fmtflags flags() const
+        {
+            return ios_base::fmtflags(0);
+        }
+
+        //- Set flags of stream - ignored
+        std::ios_base::fmtflags flags(const ios_base::fmtflags)
+        {
+            return ios_base::fmtflags(0);
+        }
 
         //- Flush stream
         virtual void flush()
@@ -224,24 +236,6 @@ public:
         }
 
 
-    // Inquiry
-
-        //- Return flags of output stream
-        virtual ios_base::fmtflags flags() const
-        {
-            return ios_base::fmtflags(0);
-        }
-
-
-    // Edit
-
-        //- Set flags of stream
-        ios_base::fmtflags flags(const ios_base::fmtflags)
-        {
-            return ios_base::fmtflags(0);
-        }
-
-
     // Other
 
         //- Reset the output buffer and rewind the stream
@@ -254,6 +248,8 @@ public:
         virtual void rewind()
         {
             DynamicList<token>::clear();
+            setOpened();
+            setGood();
         }
 
         //- Print stream description to Ostream

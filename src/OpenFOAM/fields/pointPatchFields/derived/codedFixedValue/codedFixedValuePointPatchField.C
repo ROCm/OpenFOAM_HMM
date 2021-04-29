@@ -31,6 +31,7 @@ License
 #include "pointPatchFieldMapper.H"
 #include "pointFields.H"
 #include "dynamicCode.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -157,7 +158,20 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
 :
     fixedValuePointPatchField<Type>(p, iF, dict, valueRequired),
     codedBase(),
-    dict_(dict),
+    dict_
+    (
+        // Copy dictionary, but without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordRes(),  // allow
+            wordRes     // deny
+            ({
+                "type",  // redundant
+                "value"
+            })
+        )
+    ),
     name_(dict.getCompat<word>("name", {{"redirectType", 1706}})),
     redirectPatchFieldPtr_(nullptr)
 {

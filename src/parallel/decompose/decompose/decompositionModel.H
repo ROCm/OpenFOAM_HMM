@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapPolyMesh;
 class polyMesh;
 
@@ -65,7 +65,6 @@ class decompositionModel
     >,
     public IOdictionary
 {
-
     // Private Data
 
         mutable autoPtr<decompositionMethod> decomposerPtr_;
@@ -81,61 +80,38 @@ public:
     static const word canonicalName;
 
 
-    // Selectors
-
-        //- Read (optionally from absolute path) and register on mesh
-        static const decompositionModel& New
-        (
-            const polyMesh& mesh,
-            const fileName& decompDictFile = ""
-        );
-
-        //- Read (optionally from supplied dictionary) and register on mesh
-        static const decompositionModel& New
-        (
-            const polyMesh& mesh,
-            const dictionary& dict,
-            const fileName& decompDictFile = ""
-        );
-
-
     // Constructors
 
-        //- Construct from typeName or optional path to controlDictionary
-        decompositionModel
+        //- Construct from typeName, optional decomposeParDict path/name
+        //- or with fallback content
+        explicit decompositionModel
         (
             const polyMesh& mesh,
-            const fileName& decompDictFile = ""
+            const fileName& decompDictFile = "",
+            const dictionary* fallback = nullptr
         );
 
 
-        //- Construct from typeName or optional path to controlDictionary
-        decompositionModel
+    // Selectors
+
+        //- Read and register on mesh,
+        //- optionally with alternative decomposeParDict path/name
+        //- or with fallback content
+        static const decompositionModel& New
         (
             const polyMesh& mesh,
-            const dictionary& dict,
-            const fileName& decompDictFile = ""
+            const fileName& decompDictFile = "",
+            const dictionary* fallback = nullptr
         );
 
 
     // Member Functions
 
-        decompositionMethod& decomposer() const
-        {
-            if (!decomposerPtr_)
-            {
-                decomposerPtr_ =
-                    decompositionMethod::New
-                    (
-                        *this,
-                        this->mesh().name()  // Name of mesh region
-                    );
-            }
-            return *decomposerPtr_;
-        }
+        //- Return demand-driven decomposition method
+        decompositionMethod& decomposer() const;
 
 
-      // UpdateableMeshObject
+    // UpdateableMeshObject Functions
 
         virtual bool movePoints()
         {
@@ -148,18 +124,44 @@ public:
 
     // Housekeeping
 
+        //- Deprecated(2021-04) compatibility constructor
+        //  \deprecated(2021-04)
+        FOAM_DEPRECATED(2021-04)
+        decompositionModel
+        (
+            const polyMesh& mesh,
+            const dictionary& dict,
+            const fileName& decompDictFile = ""
+        )
+        :
+            decompositionModel(mesh, decompDictFile, &dict)
+        {}
+
+        //- Deprecated(2021-04) compatibility selector
+        //  \deprecated(2021-04)
+        FOAM_DEPRECATED(2021-04)
+        static const decompositionModel& New
+        (
+            const polyMesh& mesh,
+            const dictionary& dict,
+            const fileName& decompDictFile = ""
+        )
+        {
+            return Foam::decompositionModel::New(mesh, decompDictFile, &dict);
+        }
+
         //- Deprecated(2018-08) compatibility method
         //  \deprecated(2018-08) - use IOobject::selectIO directly
+        FOAM_DEPRECATED_FOR(2018-08, "IOobject::selectIO")
         static IOobject selectIO
         (
             const IOobject& io,
-            const fileName& altFile,
-            const word& ioName = ""
+            const fileName& file,
+            const word& name = ""
         )
         {
-            return IOobject::selectIO(io, altFile, ioName);
+            return IOobject::selectIO(io, file, name);
         }
-
 };
 
 

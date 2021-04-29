@@ -51,13 +51,16 @@ Description
         );
     \endverbatim
 
+See Also
+    Foam::Function1Types::Table
+
 SourceFiles
     TableFile.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TableFile_H
-#define TableFile_H
+#ifndef Function1Types_TableFile_H
+#define Function1Types_TableFile_H
 
 #include "TableBase.H"
 

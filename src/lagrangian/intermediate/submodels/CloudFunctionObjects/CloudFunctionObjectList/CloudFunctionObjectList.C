@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 :
     PtrList<CloudFunctionObject<CloudType>>(),
     owner_(owner),
-    dict_(dictionary::null)
+    dict_()
 {}
 
 
@@ -57,23 +57,19 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
 {
     if (readFields)
     {
-        wordList modelNames(dict.toc());
-
         Info<< "Constructing cloud functions" << endl;
 
-        if (modelNames.size() > 0)
+        this->resize(dict.size());
+
+        label count = 0;
+        for (const word& modelName : dict.toc())
         {
-            this->setSize(modelNames.size());
+            const dictionary& modelDict = dict.subDict(modelName);
 
-            forAll(modelNames, i)
             {
-                const word& modelName = modelNames[i];
-
-                const dictionary& modelDict(dict.subDict(modelName));
-
                 this->set
                 (
-                    i,
+                    count,
                     CloudFunctionObject<CloudType>::New
                     (
                         modelDict,
@@ -83,8 +79,10 @@ Foam::CloudFunctionObjectList<CloudType>::CloudFunctionObjectList
                     )
                 );
             }
+            ++count;
         }
-        else
+
+        if (!count)
         {
             Info<< "    none" << endl;
         }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ class solution
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         //- Dictionary of temporary fields to cache
         dictionary cache_;
@@ -102,15 +102,18 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary name
+        //- Construct for given objectRegistry, dictionary name and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
         solution
         (
             const objectRegistry& obr,
-            const fileName& dictName
+            const fileName& dictName,
+            const dictionary* fallback = nullptr
         );
 
-        //- Construct for given objectRegistry, dictionary name and (optional)
-        //  content (gets used in case of NO_READ or dictionary cannot be read)
+        //- Construct for given objectRegistry, dictionary name and
+        //- fallback dictionary content (for a NO_READ or missing file)
         solution
         (
             const objectRegistry& obr,

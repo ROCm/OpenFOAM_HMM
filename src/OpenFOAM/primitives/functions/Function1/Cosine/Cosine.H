@@ -96,8 +96,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1Types_Cosine_H
-#define function1Types_Cosine_H
+#ifndef Function1Types_Cosine_H
+#define Function1Types_Cosine_H
 
 #include "Sine.H"
 

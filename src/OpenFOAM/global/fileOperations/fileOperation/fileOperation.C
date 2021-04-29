@@ -223,7 +223,7 @@ Foam::labelList Foam::fileOperation::ioRanks()
 {
     labelList ranks;
 
-    ITstream is("ioranks", Foam::getEnv("FOAM_IORANKS"));
+    ITstream is(Foam::getEnv("FOAM_IORANKS"));
     if (!is.empty())
     {
         is >> ranks;

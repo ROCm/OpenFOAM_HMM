@@ -56,11 +56,11 @@ class WallInteractionModel
 {
     // Private data
 
-        //- The cloud dictionary
-        const dictionary& dict_;
-
-        // reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
+
+        //- Reference to the cloud dictionary
+        const dictionary& dict_;
 
         //- The coefficients dictionary
         const dictionary coeffDict_;

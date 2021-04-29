@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,10 @@ Foam::Function1<Type>::New
     {
         // Dictionary entry
 
+        DebugInFunction
+            << "For " << entryName << " with dictionary entries: "
+            << flatOutput(coeffs->toc()) << nl;
+
         coeffs->readEntry
         (
             "type",
@@ -62,17 +66,21 @@ Foam::Function1<Type>::New
     else if (eptr)
     {
         // Primitive entry
-        // - non-word : value for constant function
         // - word : the modelType
+        // - non-word : value for constant function
 
-        Istream& is = eptr->stream();
+        DebugInFunction
+            << "For " << entryName << " with primitive entry" << nl;
 
-        token firstToken(is);
+        ITstream& is = eptr->stream();
 
-        if (!firstToken.isWord())
+        if (is.peek().isWord())
         {
-            // A value
-            is.putBack(firstToken);
+            modelType = is.peek().wordToken();
+        }
+        else
+        {
+            // A value - compatibility for reading constant
 
             const Type constValue = pTraits<Type>(is);
 
@@ -80,10 +88,6 @@ Foam::Function1<Type>::New
             (
                 new Function1Types::Constant<Type>(entryName, constValue)
             );
-        }
-        else
-        {
-            modelType = firstToken.wordToken();
         }
 
         // Fallthrough

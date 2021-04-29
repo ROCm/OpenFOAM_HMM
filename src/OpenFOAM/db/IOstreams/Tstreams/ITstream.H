@@ -88,92 +88,67 @@ public:
     // Constructors
 
         //- Copy construct
-        ITstream(const ITstream& is)
-        :
-            Istream(ASCII, currentVersion),
-            tokenList(is),
-            name_(is.name_),
-            tokenIndex_(0)
-        {
-            setOpened();
-            setGood();
-        }
+        ITstream(const ITstream& is);
 
-        //- Construct empty stream with given name
+        //- Move construct
+        ITstream(ITstream&& is);
+
+        //- Default construct. Empty stream, optionally with given name
         explicit ITstream
         (
-            const string& name,
-            IOstreamOption streamOpt = IOstreamOption()
-        )
-        :
-            Istream(streamOpt),
-            tokenList(),
-            name_(name),
-            tokenIndex_(0)
-        {
-            setOpened();
-            setGood();
-        }
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
+        );
 
-        //- Construct from components, copying the tokens
+        //- Construct empty, optionally with given name
+        explicit ITstream
+        (
+            const Foam::zero,
+            const string& name = "input",
+            IOstreamOption streamOpt = IOstreamOption()
+        );
+
+        //- Copy construct from tokens, with given name
         ITstream
         (
             const string& name,
             const UList<token>& tokens,
             IOstreamOption streamOpt = IOstreamOption()
-        )
-        :
-            Istream(streamOpt.format(), streamOpt.version()),
-            tokenList(tokens),
-            name_(name),
-            tokenIndex_(0)
-        {
-            setOpened();
-            setGood();
-        }
+        );
 
-        //- Construct from components, transferring the tokens
+        //- Move construct from tokens, with given name
         ITstream
         (
             const string& name,
             List<token>&& tokens,
             IOstreamOption streamOpt = IOstreamOption()
-        )
-        :
-            Istream(streamOpt.format(), streamOpt.version()),
-            tokenList(std::move(tokens)),
-            name_(name),
-            tokenIndex_(0)
-        {
-            setOpened();
-            setGood();
-        }
+        );
 
         //- Construct token list by parsing the input character sequence
-        //  Uses UIListStream internally.
-        ITstream
+        //  Uses static parse function internally.
+        explicit ITstream
         (
-            const string& name,
             const UList<char>& input,
-            IOstreamOption streamOpt = IOstreamOption()
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
         );
 
         //- Construct token list by parsing the input string
-        //  Uses UIListStream internally.
-        ITstream
+        //  Uses static parse function internally.
+        explicit ITstream
         (
-            const string& name,
             const std::string& input,
-            IOstreamOption streamOpt = IOstreamOption()
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
         );
 
         //- Construct token list by parsing the input character sequence
-        //  Uses UIListStream internally.
-        ITstream
+        //  Uses static parse function internally.
+        explicit ITstream
         (
-            const string& name,
             const char* input,
-            IOstreamOption streamOpt = IOstreamOption()
+            IOstreamOption streamOpt = IOstreamOption(),
+            const string& name = "input"
         );
 
 
@@ -183,24 +158,24 @@ public:
 
     // Static Functions
 
-        //- Create token list by parsing the input character sequence until
-        //- no good tokens remain.
+        //- Create token list by parsing the input character sequence
+        //- until no good tokens remain.
         static tokenList parse
         (
             const UList<char>& input,
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Create token list by parsing the input string until
-        //- no good tokens remain.
+        //- Create token list by parsing the input string
+        //- until no good tokens remain.
         static tokenList parse
         (
             const std::string& input,
             IOstreamOption streamOpt = IOstreamOption()
         );
 
-        //- Create token list by parsing the input character sequence until
-        //- no good tokens remain.
+        //- Create token list by parsing the input character sequence
+        //- until no good tokens remain.
         static tokenList parse
         (
             const char* input,
@@ -210,43 +185,107 @@ public:
 
     // Member Functions
 
-        // Inquiry
+    // Token Access
 
-            //- Return the name of the stream
-            virtual const fileName& name() const
-            {
-                return name_;
-            }
+        //- Failsafe peek at the \b first token in the list.
+        //  \return \c undefinedToken if the list is empty.
+        const token& peekFirst() const;
 
-            //- Return non-const access to the name of the stream
-            virtual fileName& name()
-            {
-                return name_;
-            }
+        //- Failsafe peek at the \b last token in the list.
+        //  \return \c undefinedToken if the list is empty.
+        const token& peekLast() const;
 
-            //- The current token index when reading, or the insertion point.
-            label tokenIndex() const
-            {
-                return tokenIndex_;
-            }
+        //- Failsafe peek at what the next read would return,
+        //  including handling of any putback
+        //  \return \c undefinedToken if list is exhausted
+        const token& peek() const;
 
-            //- Non-const access to the current token index
-            label& tokenIndex()
-            {
-                return tokenIndex_;
-            }
+        //- The current token index when reading, or the insertion point.
+        label tokenIndex() const noexcept
+        {
+            return tokenIndex_;
+        }
 
-            //- The number of remaining tokens
-            label nRemainingTokens() const
-            {
-                return size() - tokenIndex_;
-            }
+        //- Non-const access to the current token index
+        label& tokenIndex() noexcept
+        {
+            return tokenIndex_;
+        }
 
-            //- Return flags of output stream
-            ios_base::fmtflags flags() const
-            {
-                return ios_base::fmtflags(0);
-            }
+        //- Number of tokens remaining
+        label nRemainingTokens() const noexcept
+        {
+            return size() - tokenIndex_;
+        }
+
+        //- Move tokenIndex to the specified position
+        //  Using seek(0) is identical to rewind.
+        //  Using seek(-1) moves to the end.
+        void seek(label pos);
+
+        //- Move tokenIndex relative to the current position.
+        //  Will not overrun the beginning or end positions.
+        //
+        //  Use skip(2) to move forward two tokens.
+        //  Use skip(-2) to move backward two tokens.
+        void skip(label n = 1);
+
+
+    // Inquiry
+
+        //- Get the name of the stream
+        virtual const fileName& name() const
+        {
+            return name_;
+        }
+
+        //- Return stream name for modification
+        virtual fileName& name()
+        {
+            return name_;
+        }
+
+
+    // Token list modification
+
+        //- Copy append a token at the current tokenIndex,
+        //- incrementing the index.
+        void append(const token& t, const bool lazy);
+
+        //- Move append a token at the current tokenIndex,
+        //- incrementing the index.
+        void append(token&& t, const bool lazy);
+
+        //- Copy append a list of tokens at the current tokenIndex,
+        //- incrementing the index.
+        //
+        //  \param newTokens the list of tokens to copy append
+        //  \param lazy leaves any excess capacity for further appends.
+        //      The caller will be responsible for resizing later.
+        void append(const UList<token>& newTokens, const bool lazy);
+
+        //- Move append a list of tokens at the current tokenIndex,
+        //- incrementing the index.
+        //
+        //  \param newTokens the list of tokens to move append
+        //  \param lazy leaves any excess capacity for further appends.
+        //      The caller will be responsible for resizing later.
+        void append(List<token>&& newTokens, const bool lazy);
+
+
+    // Stream State Functions
+
+        //- Get stream flags - always 0
+        virtual ios_base::fmtflags flags() const
+        {
+            return ios_base::fmtflags(0);
+        }
+
+        //- Set flags of stream - ignored
+        ios_base::fmtflags flags(const ios_base::fmtflags)
+        {
+            return ios_base::fmtflags(0);
+        }
 
 
         // Read Functions
@@ -294,44 +333,6 @@ public:
 
             //- Rewind the stream so that it may be read again
             virtual void rewind();
-
-            //- Move the tokenIndex to the specified position.
-            //  Using seek(0) is identical to rewind.
-            //  Using seek(-1) moves to the end.
-            void seek(label pos);
-
-
-        // Edit
-
-            //- Copy append a token at the current tokenIndex,
-            //- incrementing the index.
-            void append(const token& t, const bool lazy);
-
-            //- Move append a token at the current tokenIndex,
-            //- incrementing the index.
-            void append(token&& t, const bool lazy);
-
-            //- Copy append a list of tokens at the current tokenIndex,
-            //- incrementing the index.
-            //
-            //  \param newTokens the list of tokens to copy append
-            //  \param lazy leaves any excess capacity for further appends.
-            //      The caller will be responsible for resizing later.
-            void append(const UList<token>& newTokens, const bool lazy);
-
-            //- Move append a list of tokens at the current tokenIndex,
-            //- incrementing the index.
-            //
-            //  \param newTokens the list of tokens to move append
-            //  \param lazy leaves any excess capacity for further appends.
-            //      The caller will be responsible for resizing later.
-            void append(List<token>&& newTokens, const bool lazy);
-
-            //- Set flags of stream
-            ios_base::fmtflags flags(const ios_base::fmtflags)
-            {
-                return ios_base::fmtflags(0);
-            }
 
 
     // Output
@@ -382,79 +383,6 @@ public:
         :
             ITstream(name, std::move(tokens), IOstreamOption(fmt, ver))
         {}
-
-        //- Construct token list by parsing the input character sequence
-        //  Uses UIListStream internally.
-        ITstream
-        (
-            const string& name,
-            const UList<char>& input,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
-        :
-            ITstream(name, input, IOstreamOption(fmt, ver))
-        {}
-
-        //- Construct token list by parsing the input string
-        //  Uses UIListStream internally.
-        ITstream
-        (
-            const string& name,
-            const std::string& input,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
-        :
-            ITstream(name, input, IOstreamOption(fmt, ver))
-        {}
-
-        //- Construct token list by parsing the input character sequence
-        //  Uses UIListStream internally.
-        ITstream
-        (
-            const string& name,
-            const char* input,
-            IOstreamOption::streamFormat fmt,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
-        )
-        :
-            ITstream(name, input, IOstreamOption(fmt, ver))
-        {}
-
-
-        //- Create token list by parsing the input character sequence until
-        //- no good tokens remain.
-        static tokenList parse
-        (
-            const UList<char>& input,
-            IOstreamOption::streamFormat fmt
-        )
-        {
-            return parse(input, IOstreamOption(fmt));
-        }
-
-        //- Create token list by parsing the input string until
-        //- no good tokens remain.
-        static tokenList parse
-        (
-            const std::string& input,
-            IOstreamOption::streamFormat fmt
-        )
-        {
-            return parse(input, IOstreamOption(fmt));
-        }
-
-        //- Create token list by parsing the input character sequence until
-        //- no good tokens remain.
-        static tokenList parse
-        (
-            const char* input,
-            IOstreamOption::streamFormat fmt
-        )
-        {
-            return parse(input, IOstreamOption(fmt));
-        }
 
     #endif /* Foam_IOstream_extras */
 };

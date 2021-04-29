@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ class structuredDecomp
 :
     public decompositionMethod
 {
-    // Private data
+    // Private Data
 
         dictionary methodDict_;
 
@@ -78,8 +78,12 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        structuredDecomp(const dictionary& decompDict);
+        //- Construct given decomposition dictionary. Region ignored
+        explicit structuredDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName = ""
+        );
 
 
     //- Destructor

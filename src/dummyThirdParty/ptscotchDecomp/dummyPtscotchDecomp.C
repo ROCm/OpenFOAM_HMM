@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,6 @@ static const char* notImplementedMessage =
 namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -101,22 +100,12 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (
-    const dictionary& decompDict
-)
-:
-    decompositionMethod(decompDict),
-    coeffsDict_(dictionary::null)
-{}
-
-
-Foam::ptscotchDecomp::ptscotchDecomp
-(
     const dictionary& decompDict,
     const word& regionName
 )
 :
     decompositionMethod(decompDict, regionName),
-    coeffsDict_(dictionary::null)
+    coeffsDict_()
 {}
 
 

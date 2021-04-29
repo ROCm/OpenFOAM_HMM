@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,10 @@ Foam::PatchFunction1<Type>::New
     {
         // Dictionary entry
 
+        DebugInFunction
+            << "For " << entryName << " with dictionary entries: "
+            << flatOutput(coeffs->toc()) << nl;
+
         coeffs->readEntry
         (
             "type",
@@ -60,18 +64,21 @@ Foam::PatchFunction1<Type>::New
     else if (eptr)
     {
         // Primitive entry
-        // - non-word : value for constant (uniform) function
         // - word : the modelType, or uniform/nonuniform
+        // - non-word : value for constant (uniform) function
+
+        DebugInFunction
+            << "For " << entryName << " with primitive entry" << nl;
 
         ITstream& is = eptr->stream();
 
-        token firstToken(is);
-
-        // Compatibility for reading straight fields
-        if (!firstToken.isWord())
+        if (is.peek().isWord())
         {
-            // A value
-            is.putBack(firstToken);
+            modelType = is.peek().wordToken();
+        }
+        else
+        {
+            // A value - compatibility for reading uniform (constant) field
 
             const Type constValue = pTraits<Type>(is);
 
@@ -87,8 +94,6 @@ Foam::PatchFunction1<Type>::New
                 )
             );
         }
-
-        modelType = firstToken.wordToken();
 
         // Looks like a normal field entry?
         if (modelType == "uniform" || modelType == "nonuniform")

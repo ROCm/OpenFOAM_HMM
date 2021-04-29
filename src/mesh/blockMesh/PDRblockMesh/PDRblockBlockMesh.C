@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -778,7 +778,7 @@ Foam::dictionary Foam::PDRblock::blockMeshDict() const
     OTstream os;
     blockMeshDict(os);
 
-    ITstream is("blockMeshDict", tokenList());
+    ITstream is;
     is.transfer(os.tokens());
 
     return dictionary(is);

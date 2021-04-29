@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,6 @@ static const char* notImplementedMessage =
 namespace Foam
 {
     defineTypeNameAndDebug(kahipDecomp, 0);
-
     addToRunTimeSelectionTable
     (
         decompositionMethod,
@@ -70,15 +69,6 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::kahipDecomp::kahipDecomp
-(
-    const dictionary& decompDict
-)
-:
-    metisLikeDecomp("kahip", decompDict)
-{}
-
 
 Foam::kahipDecomp::kahipDecomp
 (

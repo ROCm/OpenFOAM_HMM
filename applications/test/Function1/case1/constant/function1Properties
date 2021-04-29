@@ -26,10 +26,43 @@ x
 );
 
 
-function1 table
+constant1 constant 100;
+
+table1 table
 (
     (0 0)(10 1)
 );
+
+table2
+{
+    type table;
+    values
+    (
+        (0 0)(10 1)
+    );
+}
+
+table3
+{
+    type table;
+    file "<constant>/table-values";
+}
+
+poly1 polynomial
+(
+    (0 1)
+    (1 1)
+);
+
+poly2
+{
+    type polynomial;
+    coeffs
+    (
+        (0 1)
+        (1 1)
+    );
+}
 
 function2
 {

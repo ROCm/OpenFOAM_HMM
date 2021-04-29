@@ -81,7 +81,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         ReactionList
         (
             const speciesTable& species,
