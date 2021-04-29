@@ -29,13 +29,7 @@ coeffs
 
 scotchCoeffs
 {
-    //processorWeights
-    //(
-    //    1
-    //    1
-    //    1
-    //    1
-    //);
+    //processorWeights ( 1 1 1 1 );
     //writeGraph  true;
     //strategy "b";
 }
