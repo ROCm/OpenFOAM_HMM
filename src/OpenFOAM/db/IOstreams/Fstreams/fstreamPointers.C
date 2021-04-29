@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ namespace Foam
         // Disallow writing into symlinked files.
         // Eg, avoid problems with symlinked initial fields
 
-        if (!append && Foam::type(targetName) == fileName::LINK)
+        if (!append && Foam::type(targetName, false) == fileName::LINK)
         {
             Foam::rm(targetName);
         }
