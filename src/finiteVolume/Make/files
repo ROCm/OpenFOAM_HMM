@@ -405,7 +405,6 @@ $(multivariateSchemes)/limitedLinear/multivariateLimitedLinear.C
 $(multivariateSchemes)/limitedCubic/multivariateLimitedCubic.C
 
 finiteVolume/fv/fv.C
-finiteVolume/fvSchemes/fvSchemes.C
 
 ddtSchemes = finiteVolume/ddtSchemes
 $(ddtSchemes)/ddtScheme/ddtSchemeBase.C

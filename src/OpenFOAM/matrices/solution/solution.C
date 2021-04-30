@@ -157,17 +157,6 @@ Foam::solution::solution
 }
 
 
-Foam::solution::solution
-(
-    const objectRegistry& obr,
-    const fileName& dictName,
-    const dictionary& dict
-)
-:
-    solution(obr, dictName, &dict)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::solution::upgradeSolverDict
@@ -237,9 +226,7 @@ bool Foam::solution::cache(const word& name) const
 {
     if (caching_)
     {
-        DebugInfo
-            << "Cache: find entry for " << name << endl;
-
+        DebugInfo<< "Cache: find entry for " << name << endl;
         return cache_.found(name);
     }
 
@@ -259,17 +246,14 @@ bool Foam::solution::relaxField(const word& name) const
 
 bool Foam::solution::relaxEquation(const word& name) const
 {
-    DebugInfo
-        << "Find equation relaxation factor for " << name << endl;
-
+    DebugInfo<< "Find equation relaxation factor for " << name << endl;
     return eqnRelaxDict_.found(name) || eqnRelaxDict_.found("default");
 }
 
 
 Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
 {
-    DebugInfo
-        << "Lookup variable relaxation factor for " << name << endl;
+    DebugInfo<< "Lookup variable relaxation factor for " << name << endl;
 
     if (fieldRelaxDict_.found(name))
     {
@@ -291,8 +275,7 @@ Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
 
 Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
 {
-    DebugInfo
-        << "Lookup equation relaxation factor for " << name << endl;
+    DebugInfo<< "Lookup equation relaxation factor for " << name << endl;
 
     if (eqnRelaxDict_.found(name))
     {
@@ -325,18 +308,14 @@ const Foam::dictionary& Foam::solution::solutionDict() const
 
 const Foam::dictionary& Foam::solution::solverDict(const word& name) const
 {
-    DebugInfo
-        << "Lookup solver for " << name << endl;
-
+    DebugInfo<< "Lookup solver for " << name << endl;
     return solvers_.subDict(name);
 }
 
 
 const Foam::dictionary& Foam::solution::solver(const word& name) const
 {
-    DebugInfo
-        << "Lookup solver for " << name << endl;
-
+    DebugInfo<< "Lookup solver for " << name << endl;
     return solvers_.subDict(name);
 }
 

@@ -85,7 +85,6 @@ $(schemes)/blended/blendedEdgeInterpolationMake.C
 $(schemes)/skewCorrected/skewCorrectedEdgeInterpolationMake.C
 
 finiteArea/fa/fa.C
-finiteArea/faSchemes/faSchemes.C
 
 ddtSchemes = finiteArea/ddtSchemes
 $(ddtSchemes)/faDdtScheme/faDdtSchemes.C

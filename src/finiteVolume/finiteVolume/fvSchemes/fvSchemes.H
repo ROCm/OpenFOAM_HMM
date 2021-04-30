@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -29,18 +29,17 @@ Class
 
 Description
     Selector class for finite volume differencing schemes.
-    fvMesh is derived from fvShemes so that all fields have access to the
+    fvMesh is derived from fvSchemes so that all fields have access to the
     fvSchemes from the mesh reference they hold.
 
 SourceFiles
-    fvSchemes.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef fvSchemes_H
 #define fvSchemes_H
 
-#include "IOdictionary.H"
+#include "schemesLookup.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,49 +52,11 @@ namespace Foam
 
 class fvSchemes
 :
-    public IOdictionary
+    public schemesLookup
 {
-    // Private Data
+public:
 
-        dictionary ddtSchemes_;
-        ITstream ddtSchemeDefault_;
-
-        dictionary d2dt2Schemes_;
-        ITstream d2dt2SchemeDefault_;
-
-        dictionary interpolationSchemes_;
-        ITstream interpolationSchemeDefault_;
-
-        dictionary divSchemes_;
-        ITstream divSchemeDefault_;
-
-        dictionary gradSchemes_;
-        ITstream gradSchemeDefault_;
-
-        dictionary snGradSchemes_;
-        ITstream snGradSchemeDefault_;
-
-        dictionary laplacianSchemes_;
-        ITstream laplacianSchemeDefault_;
-
-        mutable dictionary fluxRequired_;
-        bool fluxRequiredDefault_;
-
-        //- Steady-state run indicator
-        //  Set true if the default ddtScheme is steadyState
-        bool steady_;
-
-
-    // Private Member Functions
-
-        //- Clear the dictionaries and streams before reading
-        void clear();
-
-        //- Read settings from the dictionary
-        void read(const dictionary&);
-
-        //- Write dictionary (possibly modified) settings
-        void writeDicts(Ostream& os) const;
+    // Constructors
 
         //- No copy construct
         fvSchemes(const fvSchemes&) = delete;
@@ -103,27 +64,18 @@ class fvSchemes
         //- No copy assignment
         void operator=(const fvSchemes&) = delete;
 
-
-    // Constructors
-
-        //- Construct for objectRegistry, system dictName, and optional
+        //- Construct for objectRegistry, dictionary name and optional
         //- fallback dictionary content (for a NO_READ or missing file)
         //  A null dictionary pointer is treated like an empty dictionary.
         fvSchemes
         (
             const objectRegistry& obr,
             const word& dictName,
-            const dictionary* fallback
-        );
-
-
-public:
-
-    //- Debug switch
-    static int debug;
-
-
-    // Constructors
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, dictName, fallback)
+        {}
 
         //- Construct for objectRegistry, and optional
         //- fallback dictionary content (for a NO_READ or missing file)
@@ -143,49 +95,6 @@ public:
         :
             fvSchemes(obr, "fvSchemes", &dict)
         {}
-
-
-    // Member Functions
-
-        // Access
-
-            const dictionary& schemesDict() const;
-
-            ITstream& ddtScheme(const word& name) const;
-
-            ITstream& d2dt2Scheme(const word& name) const;
-
-            ITstream& interpolationScheme(const word& name) const;
-
-            ITstream& divScheme(const word& name) const;
-
-            ITstream& gradScheme(const word& name) const;
-
-            ITstream& snGradScheme(const word& name) const;
-
-            ITstream& laplacianScheme(const word& name) const;
-
-            void setFluxRequired(const word& name) const;
-
-            bool fluxRequired(const word& name) const;
-
-            //- True if the default ddtScheme is steadyState
-            bool steady() const noexcept
-            {
-                return steady_;
-            }
-
-            //- True if the default ddtScheme is not steadyState
-            bool transient() const noexcept
-            {
-                return !steady_;
-            }
-
-
-        // Read
-
-            //- Read the fvSchemes
-            bool read();
 };
 
 

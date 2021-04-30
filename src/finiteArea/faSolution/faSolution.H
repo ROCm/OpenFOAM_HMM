@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,22 +56,41 @@ class faSolution
 :
     public solution
 {
-    // Private Member Functions
-
-        //- No copy construct
-        faSolution(const faSolution&) = delete;
-
-        //- No copy assignment
-        void operator=(const faSolution&) = delete;
-
-
 public:
 
-    //- Construct from objectRegistry
-    faSolution(const objectRegistry& obr)
-    :
-        solution(obr, "faSolution")
-    {}
+    //- No copy construct
+    faSolution(const faSolution&) = delete;
+
+    //- No copy assignment
+    void operator=(const faSolution&) = delete;
+
+
+    // Constructors
+
+        //- Construct for objectRegistry, dictionary name and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        faSolution
+        (
+            const objectRegistry& obr,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
+        :
+            solution(obr, dictName, fallback)
+        {}
+
+        //- Construct for objectRegistry, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit faSolution
+        (
+            const objectRegistry& obr,
+            const dictionary* fallback = nullptr
+        )
+        :
+            faSolution(obr, "faSolution", fallback)
+        {}
 };
 
 

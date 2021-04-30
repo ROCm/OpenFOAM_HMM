@@ -119,7 +119,10 @@ public:
             const objectRegistry& obr,
             const fileName& dictName,
             const dictionary& dict
-        );
+        )
+        :
+            solution(obr, dictName, &dict)
+        {}
 
 
     // Member Functions

@@ -376,6 +376,8 @@ dimensionedTypes/dimensionedTensor/dimensionedTensor.C
 
 orientedType/orientedType.C
 
+matrices/schemes/schemesLookup.C
+matrices/schemes/schemesLookupDetail.C
 matrices/solution/solution.C
 
 scalarMatrices = matrices/scalarMatrices
