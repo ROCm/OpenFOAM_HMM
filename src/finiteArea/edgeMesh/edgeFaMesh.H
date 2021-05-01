@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,28 +55,35 @@ class edgeMesh
 :
     public GeoMesh<faMesh>
 {
-
 public:
 
-    explicit edgeMesh(const faMesh& mesh)
-    :
-        GeoMesh<faMesh>(mesh)
-    {}
+    // Constructors
 
-    label size() const
-    {
-        return size(mesh_);
-    }
+        //- Construct finite-area edge mesh faMesh reference
+        explicit edgeMesh(const faMesh& mesh)
+        :
+            GeoMesh<faMesh>(mesh)
+        {}
 
-    static label size(const Mesh& mesh)
-    {
-        return mesh.nInternalEdges();
-    }
+    // Member Functions
 
-    const edgeVectorField& C()
-    {
-        return mesh_.edgeCentres();
-    }
+        //- Return size. Number of internal edges
+        static label size(const Mesh& mesh)
+        {
+            return mesh.nInternalEdges();
+        }
+
+        //- Return size. Number of internal edges
+        label size() const
+        {
+            return size(mesh_);
+        }
+
+        //- Field of edge centres
+        const edgeVectorField& C() const
+        {
+            return mesh_.edgeCentres();
+        }
 };
 
 

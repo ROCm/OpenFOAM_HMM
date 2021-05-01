@@ -93,16 +93,16 @@ public:
 
     // Member Functions
 
-        //- Return number of points
-        label size() const
-        {
-            return size(*this);
-        }
-
-        //- Return number of points
+        //- Return size. Number of points
         static label size(const Mesh& mesh)
         {
             return mesh.GeoMesh<polyMesh>::mesh_.nPoints();
+        }
+
+        //- Return size. Number of points
+        label size() const
+        {
+            return size(*this);
         }
 
         //- Return reference to boundary mesh

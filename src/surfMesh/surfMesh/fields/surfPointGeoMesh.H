@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,6 @@ class surfPointGeoMesh
 :
     public GeoMesh<surfMesh>
 {
-
 public:
 
     // Constructors
@@ -66,13 +66,13 @@ public:
 
     // Member Functions
 
-        //- Return size
-        static label size(const surfMesh& mesh)
+        //- Return size. Number of points
+        static label size(const Mesh& mesh)
         {
             return mesh.nPoints();
         }
 
-        //- Return size
+        //- Return size. Number of points
         label size() const
         {
             return size(mesh_);

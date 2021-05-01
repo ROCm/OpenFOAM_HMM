@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +28,7 @@ Class
     Foam::triSurfaceGeoMesh
 
 Description
-    The triSurface GeoMesh (for holding fields).
-
-    Similar to the volGeoMesh used for the Finite Volume discretization.
+    The triSurface GeoMesh (for holding face fields).
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,7 +49,6 @@ class triSurfaceGeoMesh
 :
     public GeoMesh<triSurface>
 {
-
 public:
 
     // Constructors
@@ -64,19 +62,19 @@ public:
 
     // Member Functions
 
-        //- Return size
-        static label size(const triSurface& mesh)
+        //- Return size. Numer of faces
+        static label size(const Mesh& mesh)
         {
             return mesh.size();
         }
 
-        //- Return size
+        //- Return size. Numer of faces
         label size() const
         {
             return size(mesh_);
         }
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

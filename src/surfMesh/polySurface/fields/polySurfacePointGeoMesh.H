@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,13 +63,13 @@ public:
 
     // Member Functions
 
-        //- Return size
-        static label size(const polySurface& mesh)
+        //- Return size. Number of points
+        static label size(const Mesh& mesh)
         {
-            return mesh.points().size();
+            return mesh.nPoints();
         }
 
-        //- Return size
+        //- Return size. Number of points
         label size() const
         {
             return size(mesh_);

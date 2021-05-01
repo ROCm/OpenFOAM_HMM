@@ -51,28 +51,36 @@ class surfaceMesh
 :
     public GeoMesh<fvMesh>
 {
-
 public:
 
-    explicit surfaceMesh(const fvMesh& mesh)
-    :
-        GeoMesh<fvMesh>(mesh)
-    {}
+    // Constructors
 
-    label size() const
-    {
-        return size(mesh_);
-    }
+        //- Construct surface mesh from fvMesh reference
+        explicit surfaceMesh(const fvMesh& mesh)
+        :
+            GeoMesh<fvMesh>(mesh)
+        {}
 
-    static label size(const Mesh& mesh)
-    {
-        return mesh.nInternalFaces();
-    }
 
-    const surfaceVectorField& C()
-    {
-        return mesh_.Cf();
-    }
+    // Member Functions
+
+        //- Return size. Number of internal faces
+        static label size(const Mesh& mesh)
+        {
+            return mesh.nInternalFaces();
+        }
+
+        //- Return size. Number of internal faces
+        label size() const
+        {
+            return size(mesh_);
+        }
+
+        //- Field of face centres
+        const surfaceVectorField& C() const
+        {
+            return mesh_.Cf();
+        }
 };
 
 

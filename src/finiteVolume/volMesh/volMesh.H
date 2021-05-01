@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,20 +66,20 @@ public:
 
     // Member Functions
 
-        //- Return size
+        //- Return size. Number of cells
         static label size(const Mesh& mesh)
         {
             return mesh.nCells();
         }
 
-        //- Return size
+        //- Return size. Number of cells
         label size() const
         {
             return size(mesh_);
         }
 
-        //- Return cell centres
-        const volVectorField& C()
+        //- Field of cell centres
+        const volVectorField& C() const
         {
             return mesh_.C();
         }

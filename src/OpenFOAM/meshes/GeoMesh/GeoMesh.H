@@ -48,10 +48,9 @@ namespace Foam
 template<class MESH>
 class GeoMesh
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to Mesh
         const MESH& mesh_;
@@ -59,7 +58,7 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         typedef MESH Mesh;
         typedef typename MESH::BoundaryMesh BoundaryMesh;
@@ -67,7 +66,7 @@ public:
 
     // Constructors
 
-        //- Construct from MESH
+        //- Construct from mesh reference
         explicit GeoMesh(const MESH& mesh)
         :
             mesh_(mesh)
@@ -91,7 +90,7 @@ public:
 
     // Member Operators
 
-        //- Return reference to polyMesh
+        //- Return reference to the underlying mesh
         const MESH& operator()() const
         {
             return mesh_;

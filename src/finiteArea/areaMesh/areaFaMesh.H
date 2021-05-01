@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,28 +55,36 @@ class areaMesh
 :
     public GeoMesh<faMesh>
 {
-
 public:
 
-    explicit areaMesh(const faMesh& mesh)
-    :
-        GeoMesh<faMesh>(mesh)
-    {}
+    // Constructors
 
-    label size() const
-    {
-        return size(mesh_);
-    }
+        //- Construct finite-area mesh from faMesh reference
+        explicit areaMesh(const faMesh& mesh)
+        :
+            GeoMesh<faMesh>(mesh)
+        {}
 
-    static label size(const Mesh& mesh)
-    {
-        return mesh.nFaces();
-    }
 
-    const areaVectorField& C()
-    {
-        return mesh_.areaCentres();
-    }
+    // Member Functions
+
+        //- Return size. Number of faces
+        static label size(const Mesh& mesh)
+        {
+            return mesh.nFaces();
+        }
+
+        //- Return size. Number of faces
+        label size() const
+        {
+            return size(mesh_);
+        }
+
+        //- Field of face centres
+        const areaVectorField& C() const
+        {
+            return mesh_.areaCentres();
+        }
 };
 
 
