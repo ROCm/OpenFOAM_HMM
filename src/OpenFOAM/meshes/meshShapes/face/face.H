@@ -76,14 +76,8 @@ class face
 {
     // Private Member Functions
 
-        //- Edge to the right of face vertex i
-        inline label right(const label i) const;
-
-        //- Edge to the left of face vertex i
-        inline label left(const label i) const;
-
         //- Construct list of edge vectors for face
-        tmp<vectorField> calcEdges
+        tmp<vectorField> calcEdgeVectors
         (
             const UList<point>& points
         ) const;
@@ -190,7 +184,7 @@ public:
         void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const UList<point>& points) const;
+        inline pointField points(const UList<point>& pts) const;
 
         //- Centre point of face
         point centre(const UList<point>& points) const;
@@ -227,12 +221,13 @@ public:
 
         // Navigation through face vertices
 
-        //- Return true if the point label is found in face.
-        inline bool found(const label pointLabel) const;
-
-        //- Find local index on face for the point label,
+        //- Find local index on face for the point label, same as find()
         //  \return position in face (0,1,2,...) or -1 if not found.
         inline label which(const label pointLabel) const;
+
+        //- The vertex on face - identical to operator[], but with naming
+        //- similar to nextLabel(), prevLabel()
+        inline label thisLabel(const label i) const;
 
         //- Next vertex on face
         inline label nextLabel(const label i) const;
@@ -342,24 +337,44 @@ public:
         ) const;
 
         //- Return number of edges
-        inline label nEdges() const;
+        inline label nEdges() const noexcept;
 
-        //- Return edges in face point ordering,
+        //- Return i-th face edge in forward walk order.
+        //- The faceEdge(0) is the edge between [0] and [1]
+        inline Foam::edge faceEdge(const label edgei) const;
+
+        //- Return i-th face edge in forward walk order.
+        //- Identical to faceEdge() but with generic name
+        inline Foam::edge edge(const label edgei) const;
+
+        //- Return vector of i-th face edge in forward walk order.
+        inline vector edge(const label edgei, const UList<point>& pts) const;
+
+        //- Return i-th face edge in reverse walk order.
+        //- The rcEdge(0) is the edge between [0] and [n-1]
+        inline Foam::edge rcEdge(const label edgei) const;
+
+        //- Return vector of i-th face edge in reverse walk order.
+        inline vector rcEdge(const label edgei, const UList<point>& pts) const;
+
+        //- Return list of edges in forward walk order.
         //  i.e. edges()[0] is edge between [0] and [1]
         edgeList edges() const;
 
-        //- Return n-th face edge
-        inline edge faceEdge(const label n) const;
+        //- Return list of edges in reverse walk order.
+        //  i.e. rcEdges()[0] is edge between [0] and [n-1]
+        edgeList rcEdges() const;
 
-        //- The edge direction on the face
+        //- Test the edge direction on the face
         //  \return
         //  -  0: edge not found on the face
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
-        int edgeDirection(const edge& e) const;
+        int edgeDirection(const Foam::edge& e) const;
 
         //- Find the longest edge on a face.
         label longestEdge(const UList<point>& pts) const;
+
 
         // Face splitting utilities
 
@@ -491,13 +506,6 @@ struct offsetOp<face>
         return result;
     }
 };
-
-
-//- Deprecated(2017-04) find the longest edge on a face.
-//- Face point labels index into pts.
-//  \deprecated(2017-04) use class method instead
-FOAM_DEPRECATED_FOR(2017-04, "use face::longestEdge() method")
-label longestEdge(const face& f, const UList<point>& pts);
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

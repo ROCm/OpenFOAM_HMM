@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +25,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline Foam::label Foam::face::right(const label i) const
-{
-    return i;
-}
-
-
-inline Foam::label Foam::face::left(const label i) const
-{
-    return rcIndex(i);
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -98,23 +84,19 @@ inline Foam::face::face(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::pointField Foam::face::points
-(
-    const UList<point>& meshPoints
-) const
+inline Foam::pointField Foam::face::points(const UList<point>& pts) const
 {
     // There are as many points as there are labels for them
     pointField p(size());
 
-    // For each point in list, set it to the point in 'pnts' addressed
-    // by 'labs'
-    label i = 0;
+    auto iter = p.begin();
+
     for (const label pointi : *this)
     {
-        p[i++] = meshPoints[pointi];
+        *iter = pts[pointi];
+        ++iter;
     }
 
-    // Return list
     return p;
 }
 
@@ -133,28 +115,66 @@ inline Foam::scalar Foam::face::mag(const UList<point>& p) const
 }
 
 
-inline Foam::label Foam::face::nEdges() const
+inline Foam::label Foam::face::nEdges() const noexcept
 {
     // for a closed polygon a number of edges is the same as number of points
     return size();
 }
 
 
-inline Foam::edge Foam::face::faceEdge(const label n) const
+inline Foam::edge Foam::face::faceEdge(const label edgei) const
 {
-    return edge(operator[](n), operator[](fcIndex(n)));
+    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
 }
 
 
-inline bool Foam::face::found(const label pointLabel) const
+inline Foam::edge Foam::face::edge(const label edgei) const
 {
-    return labelList::found(pointLabel);
+    return faceEdge(edgei);
+}
+
+
+inline Foam::vector Foam::face::edge
+(
+    const label edgei,
+    const UList<point>& pts
+) const
+{
+    return vector(pts[nextLabel(edgei)] - pts[thisLabel(edgei)]);
+}
+
+
+inline Foam::edge Foam::face::rcEdge(const label edgei) const
+{
+    // Edge 0 (forward and reverse) always starts at [0]
+    // for consistency with face flipping
+    const label pointi = edgei ? (nEdges() - edgei) : 0;
+    return Foam::edge(thisLabel(pointi), prevLabel(pointi));
+}
+
+
+inline Foam::vector Foam::face::rcEdge
+(
+    const label edgei,
+    const UList<point>& pts
+) const
+{
+    // Edge 0 (forward and reverse) always starts at [0]
+    // for consistency with face flipping
+    const label pointi = edgei ? (3 - edgei) : 0;
+    return vector(pts[prevLabel(pointi)] - pts[thisLabel(pointi)]);
 }
 
 
 inline Foam::label Foam::face::which(const label pointLabel) const
 {
     return labelList::find(pointLabel);
+}
+
+
+inline Foam::label Foam::face::thisLabel(const label i) const
+{
+    return labelList::operator[](i);
 }
 
 

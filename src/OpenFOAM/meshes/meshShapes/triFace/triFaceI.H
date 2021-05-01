@@ -29,7 +29,7 @@ License
 #include "IOstreams.H"
 #include "face.H"
 #include "triPointRef.H"
-#include "Swap.H"
+#include <algorithm>  // For std::swap
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -144,13 +144,13 @@ inline void Foam::triFace::flip()
 }
 
 
-inline Foam::pointField Foam::triFace::points(const UList<point>& points) const
+inline Foam::pointField Foam::triFace::points(const UList<point>& pts) const
 {
     pointField p(3);
 
-    p[0] = points[operator[](0)];
-    p[1] = points[operator[](1)];
-    p[2] = points[operator[](2)];
+    p[0] = pts[operator[](0)];
+    p[1] = pts[operator[](1)];
+    p[2] = pts[operator[](2)];
 
     return p;
 }
@@ -209,7 +209,7 @@ inline Foam::scalar Foam::triFace::mag(const UList<point>& points) const
 }
 
 
-inline Foam::label Foam::triFace::nTriangles() const
+inline Foam::label Foam::triFace::nTriangles() const noexcept
 {
     return 1;
 }
@@ -222,15 +222,27 @@ inline Foam::triFace Foam::triFace::reverseFace() const
 }
 
 
-inline bool Foam::triFace::found(const label pointLabel) const
-{
-    return FixedList<label, 3>::found(pointLabel);
-}
-
-
 inline Foam::label Foam::triFace::which(const label pointLabel) const
 {
     return FixedList<label, 3>::find(pointLabel);
+}
+
+
+inline Foam::label Foam::triFace::thisLabel(const label i) const
+{
+    return operator[](i);
+}
+
+
+inline Foam::label Foam::triFace::nextLabel(const label i) const
+{
+    return operator[]((i == 2 ? 0 : i+1));
+}
+
+
+inline Foam::label Foam::triFace::prevLabel(const label i) const
+{
+    return operator[]((i ? i-1 : 2));
 }
 
 
@@ -353,61 +365,109 @@ inline int Foam::triFace::sign
 }
 
 
-inline Foam::label Foam::triFace::nEdges() const
+inline Foam::label Foam::triFace::nEdges() const noexcept
 {
     return 3;
 }
 
 
+inline Foam::edge Foam::triFace::faceEdge(const label edgei) const
+{
+    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
+}
+
+
+inline Foam::edge Foam::triFace::edge(const label edgei) const
+{
+    return faceEdge(edgei);
+}
+
+
+inline Foam::vector Foam::triFace::edge
+(
+    const label edgei,
+    const UList<point>& pts
+) const
+{
+    return vector(pts[nextLabel(edgei)] - pts[thisLabel(edgei)]);
+}
+
+
+inline Foam::edge Foam::triFace::rcEdge(const label edgei) const
+{
+    // Edge 0 (forward and reverse) always starts at [0]
+    // for consistency with face flipping
+    const label pointi = edgei ? (3 - edgei) : 0;
+    return Foam::edge(thisLabel(pointi), prevLabel(pointi));
+}
+
+
+inline Foam::vector Foam::triFace::rcEdge
+(
+    const label edgei,
+    const UList<point>& pts
+) const
+{
+    // Edge 0 (forward and reverse) always starts at [0]
+    // for consistency with face flipping
+    const label pointi = edgei ? (3 - edgei) : 0;
+    return vector(pts[prevLabel(pointi)] - pts[thisLabel(pointi)]);
+}
+
+
 inline Foam::edgeList Foam::triFace::edges() const
 {
-    edgeList e(3);
+    edgeList theEdges(3);
 
-    e[0].first()  = operator[](0);
-    e[0].second() = operator[](1);
+    theEdges[0].first()  = operator[](0);
+    theEdges[0].second() = operator[](1);
 
-    e[1].first()  = operator[](1);
-    e[1].second() = operator[](2);
+    theEdges[1].first()  = operator[](1);
+    theEdges[1].second() = operator[](2);
 
-    e[2].first()  = operator[](2);
-    e[2].second() = operator[](0);
+    theEdges[2].first()  = operator[](2);
+    theEdges[2].second() = operator[](0);
 
-    return e;
+    return theEdges;
 }
 
 
-inline Foam::edge Foam::triFace::faceEdge(const label n) const
+inline Foam::edgeList Foam::triFace::rcEdges() const
 {
-    return edge(operator[](n), operator[](fcIndex(n)));
+    edgeList theEdges(3);
+
+    theEdges[0].first()  = operator[](0);
+    theEdges[0].second() = operator[](2);
+
+    theEdges[1].first()  = operator[](2);
+    theEdges[1].second() = operator[](1);
+
+    theEdges[2].first()  = operator[](1);
+    theEdges[2].second() = operator[](0);
+
+    return theEdges;
 }
 
 
-// return
-//  - +1: forward (counter-clockwise) on the face
-//  - -1: reverse (clockwise) on the face
-//  -  0: edge not found on the face
-inline int Foam::triFace::edgeDirection(const edge& e) const
+inline int Foam::triFace::edgeDirection(const Foam::edge& e) const
 {
-    if
-    (
-        (operator[](0) == e.first() && operator[](1) == e.second())
-     || (operator[](1) == e.first() && operator[](2) == e.second())
-     || (operator[](2) == e.first() && operator[](0) == e.second())
-    )
+    if (e.first() == operator[](0))
     {
-        return 1;
+        if (e.second() == operator[](1)) return 1;  // Forward
+        if (e.second() == operator[](2)) return -1; // Reverse
     }
-    else if
-    (
-        (operator[](0) == e.second() && operator[](1) == e.first())
-     || (operator[](1) == e.second() && operator[](2) == e.first())
-     || (operator[](2) == e.second() && operator[](0) == e.first())
-    )
+    if (e.first() == operator[](1))
     {
-        return -1;
+        if (e.second() == operator[](2)) return 1;  // Forward
+        if (e.second() == operator[](0)) return -1; // Reverse
+    }
+    if (e.first() == operator[](2))
+    {
+        if (e.second() == operator[](0)) return 1;  // Forward
+        if (e.second() == operator[](1)) return -1; // Reverse
     }
 
-    return 0;
+    return 0;  // Not found
 }
 
 

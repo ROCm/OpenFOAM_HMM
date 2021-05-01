@@ -134,7 +134,7 @@ void Foam::cuttingSurfaceBase::walkCellCuts
 
             forAll(f, fp)
             {
-                edge e(f.faceEdge(fp));
+                edge e(f.edge(fp));
 
                 // Action #1: Orient edge (+ve gradient) and detect intersect
                 if (!edgeOrientIntersect(e))

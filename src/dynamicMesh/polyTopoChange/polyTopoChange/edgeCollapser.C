@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +37,15 @@ License
 #include "motionSmoother.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 defineTypeNameAndDebug(edgeCollapser, 0);
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::labelHashSet Foam::edgeCollapser::checkBadFaces
 (
@@ -415,7 +417,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
     {
         // It is possible that all the points of a face are the same
 
-        collapseAxis = f.edges()[f.longestEdge(pts)].unitVec(pts);
+        collapseAxis = f.edge(f.longestEdge(pts)).unitVec(pts);
 
         // Empirical correlation for high aspect ratio faces
 
@@ -432,7 +434,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
             // Cannot necessarily determine linearly independent
             // eigenvectors, or any at all, use longest edge direction.
 
-            collapseAxis = f.edges()[f.longestEdge(pts)].unitVec(pts);
+            collapseAxis = f.edge(f.longestEdge(pts)).unitVec(pts);
 
             aspectRatio = 1.0;
         }

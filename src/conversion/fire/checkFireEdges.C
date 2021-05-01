@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,9 +81,9 @@ Foam::label Foam::checkFireEdges
     {
         const face& faceA = faces[faceI];
 
-        forAll(faceA, edgeI)
+        forAll(faceA, edgei)
         {
-            const edge currEdge = faceA.faceEdge(edgeI);
+            const edge currEdge = faceA.edge(edgei);
 
             // all faces attached to the first point
             const labelList& otherFaceIds = pointFaces[currEdge[0]];

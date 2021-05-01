@@ -116,7 +116,7 @@ public:
         inline void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const UList<point>& points) const;
+        inline pointField points(const UList<point>& pts) const;
 
         //- Return triangle as a face
         inline face triFaceFace() const;
@@ -148,19 +148,26 @@ public:
         //- Magnitude of face area
         inline scalar mag(const UList<point>& points) const;
 
-        //- Number of triangles after splitting
-        inline label nTriangles() const;
+        //- Number of triangles after splitting == 1
+        inline label nTriangles() const noexcept;
 
         //- Return face with reverse direction
         //  The starting points of the original and reverse face are identical.
         inline triFace reverseFace() const;
 
-        //- Return true if the point label is found in face.
-        inline bool found(const label pointLabel) const;
-
-        //- Find local index on face for the point label.
+        //- Find local index on face for the point label, same as find()
         //  \return position in face (0,1,2) or -1 if not found.
         inline label which(const label pointLabel) const;
+
+        //- Next vertex on face
+        inline label nextLabel(const label i) const;
+
+        //- Previous vertex on face
+        inline label prevLabel(const label i) const;
+
+        //- The vertex on face - identical to operator[], but with naming
+        //- similar to nextLabel(), prevLabel()
+        inline label thisLabel(const label i) const;
 
         //- Return swept-volume from old-points to new-points
         inline scalar sweptVol
@@ -243,22 +250,41 @@ public:
             const scalar tol = SMALL
         ) const;
 
-        //- Return number of edges
-        inline label nEdges() const;
+        //- Return number of edges == 3
+        inline label nEdges() const noexcept;
 
-        //- Return edges in face point ordering,
+        //- Return i-th face edge in forward walk order.
+        //- The faceEdge(0) is the edge between [0] and [1]
+        inline Foam::edge faceEdge(const label edgei) const;
+
+        //- Return i-th face edge in forward walk order.
+        //- Identical to faceEdge() but with generic name
+        inline Foam::edge edge(const label edgei) const;
+
+        //- Return vector of i-th face edge in forward walk order.
+        inline vector edge(const label edgei, const UList<point>& pts) const;
+
+        //- Return i-th face edge in reverse walk order.
+        //- The rcEdge(0) is the edge between [0] to [n-1]
+        inline Foam::edge rcEdge(const label edgei) const;
+
+        //- Return vector of i-th face edge in reverse walk order.
+        inline vector rcEdge(const label edgei, const UList<point>& pts) const;
+
+        //- Return list of edges in forward walk order.
         //  i.e. edges()[0] is edge between [0] and [1]
         inline edgeList edges() const;
 
-        //- Return n-th face edge
-        inline edge faceEdge(const label n) const;
+        //- Return list of edges in reverse walk order.
+        //  i.e. rcEdges()[0] is edge between [0] to [n-1]
+        inline edgeList rcEdges() const;
 
-        //- Return the edge direction on the face
+        //- Test the edge direction on the face
         //  \return
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
         //  -  0: edge not found on the face
-        inline int edgeDirection(const edge& e) const;
+        inline int edgeDirection(const Foam::edge& e) const;
 
         //- Compare triFaces
         //  \return:
