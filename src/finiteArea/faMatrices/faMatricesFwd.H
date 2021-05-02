@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,46 +23,37 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Forward declarations of standard faMatrix types/specializations.
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef faMatricesFwd_H
+#define faMatricesFwd_H
 
-inline const Foam::word& Foam::fv::option::name() const noexcept
+#include "fieldTypes.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return name_;
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::fvMesh& Foam::fv::option::mesh() const noexcept
-{
-    return mesh_;
-}
+template<class Type> class faMatrix;
 
+typedef faMatrix<scalar> faScalarMatrix;
+typedef faMatrix<vector> faVectorMatrix;
+typedef faMatrix<sphericalTensor> faSphericalTensorMatrix;
+typedef faMatrix<symmTensor> faSymmTensorMatrix;
+typedef faMatrix<tensor> faTensorMatrix;
 
-inline const Foam::dictionary& Foam::fv::option::coeffs() const noexcept
-{
-    return coeffs_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
-inline bool Foam::fv::option::active() const noexcept
-{
-    return active_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-inline bool Foam::fv::option::active(const bool on) noexcept
-{
-    bool old(active_);
-    active_ = on;
-    return old;
-}
-
-
-inline void Foam::fv::option::setApplied(const label fieldi)
-{
-    applied_[fieldi] = true;
-}
-
+#endif
 
 // ************************************************************************* //

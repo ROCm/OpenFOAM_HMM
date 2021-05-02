@@ -46,10 +46,9 @@ SourceFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward Declarations
 namespace Foam
 {
-
-// Forward declaration of friend functions and operators
 namespace fa
 {
     class optionList;
@@ -66,7 +65,7 @@ namespace fa
 
 class optionList
 :
-    public PtrList<option>
+    public PtrList<fa::option>
 {
 protected:
 
@@ -118,7 +117,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct from patch
         optionList(const fvPatch& p);
 
         //- Construct from mesh and dictionary
@@ -126,8 +125,7 @@ public:
 
 
     //- Destructor
-    virtual ~optionList()
-    {}
+    virtual ~optionList() = default;
 
 
     // Member Functions

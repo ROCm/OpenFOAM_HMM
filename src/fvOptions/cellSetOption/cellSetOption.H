@@ -117,7 +117,7 @@ namespace fv
 
 class cellSetOption
 :
-    public option
+    public fv::option
 {
 public:
 

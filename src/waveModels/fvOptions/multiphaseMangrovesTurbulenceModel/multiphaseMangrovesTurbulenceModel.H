@@ -59,7 +59,7 @@ namespace fv
 
 class multiphaseMangrovesTurbulenceModel
 :
-    public option
+    public fv::option
 {
     // Private Member Functions
 

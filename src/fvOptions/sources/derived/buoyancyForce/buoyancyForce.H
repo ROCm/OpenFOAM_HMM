@@ -110,7 +110,7 @@ namespace fv
 
 class buoyancyForce
 :
-    public option
+    public fv::option
 {
     // Private Data
 

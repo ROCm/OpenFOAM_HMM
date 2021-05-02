@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,17 +40,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-void Foam::fa::option::constructMeshObjects()
-{
-    regionMeshPtr_.reset(new faMesh(mesh_));
-
-    vsmPtr_.reset(new volSurfaceMapping(regionMeshPtr_()));
-}
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fa::option::option
@@ -67,16 +56,15 @@ Foam::fa::option::option
     patch_(patch),
     dict_(dict),
     coeffs_(dict.optionalSubDict(modelType + "Coeffs")),
-    active_(dict.getOrDefault<Switch>("active", true)),
     fieldNames_(),
     applied_(),
     regionName_(dict.get<word>("region")),
     regionMeshPtr_(nullptr),
-    vsmPtr_(nullptr)
+    vsmPtr_(nullptr),
+    active_(dict.getOrDefault("active", true)),
+    log(true)
 {
-    constructMeshObjects();
-
-    Info<< incrIndent << indent << "Source: " << name_ << endl << decrIndent;
+    Log << incrIndent << indent << "Source: " << name_ << endl << decrIndent;
 }
 
 

@@ -92,7 +92,7 @@ Foam::fa::optionList::optionList
     const dictionary& dict
 )
 :
-    PtrList<option>(),
+    PtrList<fa::option>(),
     mesh_(p.boundaryMesh().mesh()),
     patch_(p),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
@@ -103,7 +103,7 @@ Foam::fa::optionList::optionList
 
 Foam::fa::optionList::optionList(const fvPatch& p)
 :
-    PtrList<option>(),
+    PtrList<fa::option>(),
     mesh_(p.boundaryMesh().mesh()),
     patch_(p),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)

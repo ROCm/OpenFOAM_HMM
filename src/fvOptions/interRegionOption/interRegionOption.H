@@ -87,7 +87,7 @@ namespace fv
 
 class interRegionOption
 :
-    public option
+    public fv::option
 {
 protected:
 

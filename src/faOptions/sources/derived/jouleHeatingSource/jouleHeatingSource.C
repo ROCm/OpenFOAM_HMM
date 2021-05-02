@@ -26,8 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "jouleHeatingSource.H"
-#include "faMatrices.H"
-#include "faCFD.H"
+#include "fam.H"
+#include "faScalarMatrix.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

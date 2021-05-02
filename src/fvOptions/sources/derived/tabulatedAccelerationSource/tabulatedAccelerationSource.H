@@ -87,7 +87,7 @@ namespace fv
 
 class tabulatedAccelerationSource
 :
-    public option
+    public fv::option
 {
 protected:
 

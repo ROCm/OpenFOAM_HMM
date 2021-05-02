@@ -175,7 +175,7 @@ namespace fv
 
 class jouleHeatingSource
 :
-    public option
+    public fv::option
 {
     // Private Data
 
