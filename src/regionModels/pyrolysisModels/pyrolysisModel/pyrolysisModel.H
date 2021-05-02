@@ -30,7 +30,6 @@ Description
     Base class for pyrolysis models
 
 SourceFiles
-    pyrolysisModelI.H
     pyrolysisModel.C
 
 \*---------------------------------------------------------------------------*/
