@@ -148,19 +148,6 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
-template<class InputIterator>
-inline Foam::DynamicList<T, SizeMin>::DynamicList
-(
-    InputIterator begIter,
-    InputIterator endIter
-)
-:
-    List<T>(begIter, endIter),
-    capacity_(List<T>::size())
-{}
-
-
-template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
     std::initializer_list<T> lst

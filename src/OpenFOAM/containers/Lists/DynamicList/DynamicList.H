@@ -122,11 +122,6 @@ public:
         template<unsigned N>
         inline DynamicList(const FixedList<T, N>& lst);
 
-        //- Construct given begin/end iterators.
-        //  Uses std::distance to determine the size.
-        template<class InputIterator>
-        inline DynamicList(InputIterator begIter, InputIterator endIter);
-
         //- Construct from an initializer list. Size set to list size.
         inline explicit DynamicList(std::initializer_list<T> lst);
 

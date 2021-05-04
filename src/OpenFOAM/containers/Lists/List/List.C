@@ -337,14 +337,6 @@ Foam::List<T>::List
 
 
 template<class T>
-template<class InputIterator>
-Foam::List<T>::List(InputIterator begIter, InputIterator endIter)
-:
-    List<T>(begIter, endIter, std::distance(begIter, endIter))
-{}
-
-
-template<class T>
 template<unsigned N>
 Foam::List<T>::List(const FixedList<T, N>& list)
 :

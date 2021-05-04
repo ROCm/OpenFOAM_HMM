@@ -160,11 +160,6 @@ public:
         template<unsigned N>
         List(const UList<T>& list, const FixedList<label, N>& indices);
 
-        //- Construct given begin/end iterators.
-        //  Uses std::distance for the size.
-        template<class InputIterator>
-        List(InputIterator begIter, InputIterator endIter);
-
         //- Construct as copy of FixedList\<T, N\>
         template<unsigned N>
         explicit List(const FixedList<T, N>& list);
