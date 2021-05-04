@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,9 +84,9 @@ inline bool Foam::IndirectListBase<T, Addr>::uniform() const
         return false;
     }
 
-    const T& val = (*this)[0];
+    const T& val = (*this)[0];  // first
 
-    for (label i=1; i<len; ++i)
+    for (label i = 1; i < len; ++i)
     {
         if (val != (*this)[i])
         {
@@ -106,6 +106,74 @@ inline bool Foam::IndirectListBase<T, Addr>::found
 ) const
 {
     return (this->find(val, pos) >= 0);
+}
+
+
+template<class T, class Addr>
+inline Foam::label Foam::IndirectListBase<T, Addr>::fcIndex(const label i) const
+{
+    return (i == addr_.size()-1 ? 0 : i+1);
+}
+
+
+template<class T, class Addr>
+inline Foam::label Foam::IndirectListBase<T, Addr>::rcIndex(const label i) const
+{
+    return (i ? i-1 : addr_.size()-1);
+}
+
+
+template<class T, class Addr>
+inline const T& Foam::IndirectListBase<T, Addr>::first() const
+{
+    return values_[addr_.first()];
+}
+
+template<class T, class Addr>
+inline T& Foam::IndirectListBase<T, Addr>::first()
+{
+    return values_[addr_.first()];
+}
+
+
+template<class T, class Addr>
+inline const T& Foam::IndirectListBase<T, Addr>::last() const
+{
+    return values_[addr_.last()];
+}
+
+template<class T, class Addr>
+inline T& Foam::IndirectListBase<T, Addr>::last()
+{
+    return values_[addr_.last()];
+}
+
+
+template<class T, class Addr>
+inline const T& Foam::IndirectListBase<T, Addr>::fcValue(const label i) const
+{
+    return values_[this->fcIndex(i)];
+}
+
+
+template<class T, class Addr>
+inline T& Foam::IndirectListBase<T, Addr>::fcValue(const label i)
+{
+    return values_[this->fcIndex(i)];
+}
+
+
+template<class T, class Addr>
+inline const T& Foam::IndirectListBase<T, Addr>::rcValue(const label i) const
+{
+    return values_[this->rcIndex(i)];
+}
+
+
+template<class T, class Addr>
+inline T& Foam::IndirectListBase<T, Addr>::rcValue(const label i)
+{
+    return values_[this->rcIndex(i)];
 }
 
 

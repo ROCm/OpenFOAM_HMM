@@ -232,19 +232,19 @@ public:
 
         // Access
 
-            //- Return the forward circular index, i.e. next index
+            //- The forward circular index. The next index in the list
             //- which returns to the first at the end of the list
-            inline label fcIndex(const label i) const;
+            inline label fcIndex(const label i) const noexcept;
+
+            //- The reverse circular index. The previous index in the list
+            //- which returns to the last at the beginning of the list
+            inline label rcIndex(const label i) const noexcept;
 
             //- Return forward circular value (ie, next value in the list)
             inline const T& fcValue(const label i) const;
 
             //- Return forward circular value (ie, next value in the list)
             inline T& fcValue(const label i);
-
-            //- Return the reverse circular index, i.e. previous index
-            //- which returns to the last at the beginning of the list
-            inline label rcIndex(const label i) const;
 
             //- Return reverse circular value (ie, previous value in the list)
             inline const T& rcValue(const label i) const;

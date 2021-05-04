@@ -123,52 +123,25 @@ public:
     // Access
 
         //- The number of elements in the list
-        inline label size() const
+        inline label size() const noexcept
         {
             return addr_.size();
         }
 
         //- True if the list is empty (ie, size() is zero).
-        inline bool empty() const
+        inline bool empty() const noexcept
         {
             return addr_.empty();
         }
 
-        //- True if all entries have identical values, and list is non-empty
-        inline bool uniform() const;
-
-        //- The first element of the list.
-        inline T& first()
-        {
-            return values_[addr_.first()];
-        }
-
-        //- The first element of the list.
-        inline const T& first() const
-        {
-            return values_[addr_.first()];
-        }
-
-        //- The last element of the list.
-        inline T& last()
-        {
-            return values_[addr_.last()];
-        }
-
-        //- The last element of the list.
-        inline const T& last() const
-        {
-            return values_[addr_.last()];
-        }
-
         //- The list of values (without addressing)
-        inline const UList<T>& values() const
+        inline const UList<T>& values() const noexcept
         {
             return values_;
         }
 
         //- The list of values (without addressing)
-        inline UList<T>& values()
+        inline UList<T>& values() noexcept
         {
             return values_;
         }
@@ -178,6 +151,41 @@ public:
         {
             return addr_;
         }
+
+        //- True if all entries have identical values, and list is non-empty
+        inline bool uniform() const;
+
+        //- The first element of the list.
+        inline const T& first() const;
+
+        //- The first element of the list.
+        inline T& first();
+
+        //- The last element of the list.
+        inline const T& last() const;
+
+        //- The last element of the list.
+        inline T& last();
+
+        //- The forward circular index. The next index in the list
+        //- which returns to the first at the end of the list
+        inline label fcIndex(const label i) const;
+
+        //- The reverse circular index. The previous index in the list
+        //- which returns to the last at the beginning of the list
+        inline label rcIndex(const label i) const;
+
+        //- Return forward circular value (ie, next value in the list)
+        inline const T& fcValue(const label i) const;
+
+        //- Return forward circular value (ie, next value in the list)
+        inline T& fcValue(const label i);
+
+        //- Return reverse circular value (ie, previous value in the list)
+        inline const T& rcValue(const label i) const;
+
+        //- Return reverse circular value (ie, previous value in the list)
+        inline T& rcValue(const label i);
 
 
     // Search
