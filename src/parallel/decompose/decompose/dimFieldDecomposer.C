@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,51 +28,32 @@ License
 
 #include "dimFieldDecomposer.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
-Foam::dimFieldDecomposer::decomposeField
+Foam::dimFieldDecomposer::dimFieldDecomposer
 (
-    const DimensionedField<Type, volMesh>& field
-) const
-{
-    // Create and map the internal field values
-    Field<Type> mappedField(field, cellAddressing_);
-
-    // Create the field for the processor
-    return tmp<DimensionedField<Type, volMesh>>
-    (
-        new DimensionedField<Type, volMesh>
-        (
-            IOobject
-            (
-                field.name(),
-                procMesh_.time().timeName(),
-                procMesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            procMesh_,
-            field.dimensions(),
-            mappedField
-        )
-    );
-}
+    const fvMesh& procMesh,
+    const labelList& cellAddressing
+)
+:
+    procMesh_(procMesh),
+    cellAddressing_(cellAddressing)
+{}
 
 
-template<class GeoField>
-void Foam::dimFieldDecomposer::decomposeFields
+Foam::dimFieldDecomposer::dimFieldDecomposer
 (
-    const PtrList<GeoField>& fields
-) const
-{
-    forAll(fields, fieldi)
-    {
-        decomposeField(fields[fieldi])().write();
-    }
-}
+    const fvMesh& completeMesh,
+    const fvMesh& procMesh,
+    const labelList& faceAddressing,
+    const labelList& cellAddressing
+)
+:
+    //UNUSED: completeMesh_(completeMesh),
+    procMesh_(procMesh),
+    //UNUSED: faceAddressing_(faceAddressing),
+    cellAddressing_(cellAddressing)
+{}
 
 
 // ************************************************************************* //

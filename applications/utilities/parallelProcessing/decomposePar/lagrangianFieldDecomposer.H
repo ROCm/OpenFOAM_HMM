@@ -31,7 +31,7 @@ Description
 
 SourceFiles
     lagrangianFieldDecomposer.C
-    lagrangianFieldDecomposerDecomposeFields.C
+    lagrangianFieldDecomposerFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,7 +84,7 @@ public:
         //- Construct from components
         lagrangianFieldDecomposer
         (
-            const polyMesh& mesh,
+            const polyMesh& mesh,       //<! unused
             const polyMesh& procMesh,
             const labelList& faceProcAddressing,
             const labelList& cellProcAddressing,
@@ -156,7 +156,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "lagrangianFieldDecomposerDecomposeFields.C"
+    #include "lagrangianFieldDecomposerFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

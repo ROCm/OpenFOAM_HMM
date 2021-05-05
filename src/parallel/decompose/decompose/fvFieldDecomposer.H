@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ Description
 
 SourceFiles
     fvFieldDecomposer.C
-    fvFieldDecomposerDecomposeFields.C
+    fvFieldDecomposerFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,8 +48,6 @@ SourceFiles
 namespace Foam
 {
 
-class IOobjectList;
-
 /*---------------------------------------------------------------------------*\
                     Class fvFieldDecomposer Declaration
 \*---------------------------------------------------------------------------*/
@@ -62,7 +61,7 @@ public:
         :
             public fvPatchFieldMapper
         {
-            // Private data
+            // Private Data
 
                 labelList directAddressing_;
 
@@ -78,7 +77,7 @@ public:
                 );
 
 
-            // Member functions
+            // Member Functions
 
                 label size() const
                 {
@@ -110,7 +109,7 @@ public:
         :
             public fvPatchFieldMapper
         {
-            // Private data
+            // Private Data
 
                 labelList directAddressing_;
 
@@ -124,7 +123,7 @@ public:
             );
 
 
-            // Member functions
+            // Member Functions
 
                 label size() const
                 {
@@ -199,7 +198,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to complete mesh
         const fvMesh& completeMesh_;
@@ -225,20 +224,17 @@ private:
         PtrList<processorSurfacePatchFieldDecomposer>
             processorSurfacePatchFieldDecomposerPtrs_;
 
-
         PtrList<scalarField> faceSign_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        fvFieldDecomposer(const fvFieldDecomposer&) = delete;
-
-        //- No copy assignment
-        void operator=(const fvFieldDecomposer&) = delete;
-
-
 public:
+
+    //- No copy construct
+    fvFieldDecomposer(const fvFieldDecomposer&) = delete;
+
+    //- No copy assignment
+    void operator=(const fvFieldDecomposer&) = delete;
+
 
     // Constructors
 
@@ -254,10 +250,18 @@ public:
 
 
     //- Destructor
-    ~fvFieldDecomposer();
+    ~fvFieldDecomposer() = default;
 
 
     // Member Functions
+
+        //- Decompose internal field
+        template<class Type>
+        tmp<DimensionedField<Type, volMesh>>
+        decomposeField
+        (
+            const DimensionedField<Type, volMesh>& field
+        ) const;
 
         //- Decompose volume field
         template<class Type>
@@ -276,6 +280,7 @@ public:
             const GeometricField<Type, fvsPatchField, surfaceMesh>& field
         ) const;
 
+        //- Decompose list of fields
         template<class GeoField>
         void decomposeFields(const PtrList<GeoField>& fields) const;
 };
@@ -288,7 +293,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fvFieldDecomposerDecomposeFields.C"
+    #include "fvFieldDecomposerFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

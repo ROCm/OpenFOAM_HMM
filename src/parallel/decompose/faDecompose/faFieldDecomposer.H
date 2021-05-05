@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +36,7 @@ Author
 
 SourceFiles
     faFieldDecomposer.C
-    faFieldDecomposerDecomposeFields.C
+    faFieldDecomposerFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +52,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class IOobjectList;
 
 /*---------------------------------------------------------------------------*\
@@ -66,7 +68,7 @@ public:
         :
             public faPatchFieldMapper
         {
-            // Private data
+            // Private Data
 
                 label sizeBeforeMapping_;
                 labelList directAddressing_;
@@ -241,12 +243,12 @@ private:
         const labelList& boundaryAddressing_;
 
         //- List of patch field decomposers
-        List<patchFieldDecomposer*> patchFieldDecomposerPtrs_;
+        PtrList<patchFieldDecomposer> patchFieldDecomposerPtrs_;
 
-        List<processorAreaPatchFieldDecomposer*>
+        PtrList<processorAreaPatchFieldDecomposer>
             processorAreaPatchFieldDecomposerPtrs_;
 
-        List<processorEdgePatchFieldDecomposer*>
+        PtrList<processorEdgePatchFieldDecomposer>
             processorEdgePatchFieldDecomposerPtrs_;
 
 
@@ -275,8 +277,7 @@ public:
 
 
     // Destructor
-
-        ~faFieldDecomposer();
+    ~faFieldDecomposer() = default;
 
 
     // Member Functions
@@ -299,6 +300,33 @@ public:
 
         template<class GeoField>
         void decomposeFields(const PtrList<GeoField>& fields) const;
+
+
+    // Reading helpers
+
+        //- Read the fields and hold on the pointer list
+        template
+        <
+            class Type,
+            template<class> class PatchField,
+            class GeoMesh
+        >
+        static void readFields
+        (
+            const typename GeoMesh::Mesh& mesh,
+            const IOobjectList& objects,
+            PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields,
+            const bool readOldTime
+        );
+
+        //- Read fields and hold on the pointer list
+        template<class Mesh, class GeoField>
+        static void readFields
+        (
+            const Mesh& mesh,
+            const IOobjectList& objects,
+            PtrList<GeoField>& fields
+        );
 };
 
 
@@ -309,7 +337,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faFieldDecomposerDecomposeFields.C"
+    #include "faFieldDecomposerFields.C"
+    #include "faFieldDecomposerReadFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,0 +1,4 @@
+processorFaMeshes.C
+faFieldReconstructor.C
+
+LIB = $(FOAM_LIBBIN)/libfaReconstruct

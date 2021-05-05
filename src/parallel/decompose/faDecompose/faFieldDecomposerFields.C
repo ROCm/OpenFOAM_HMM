@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,16 +30,11 @@ License
 #include "processorFaPatchField.H"
 #include "processorFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh>>
-faFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
+Foam::faFieldDecomposer::decomposeField
 (
     const GeometricField<Type, faPatchField, areaMesh>& field
 ) const
@@ -51,17 +47,19 @@ faFieldDecomposer::decomposeField
 
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        const label oldPatchi = boundaryAddressing_[patchi];
+
+        if (oldPatchi >= 0)
         {
             patchFields.set
             (
                 patchi,
                 faPatchField<Type>::New
                 (
-                    field.boundaryField()[boundaryAddressing_[patchi]],
+                    field.boundaryField()[oldPatchi],
                     procMesh_.boundary()[patchi],
                     DimensionedField<Type, areaMesh>::null(),
-                    *patchFieldDecomposerPtrs_[patchi]
+                    patchFieldDecomposerPtrs_[patchi]
                 )
             );
         }
@@ -77,7 +75,7 @@ faFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         field.internalField(),
-                        *processorAreaPatchFieldDecomposerPtrs_[patchi]
+                        processorAreaPatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
@@ -85,9 +83,8 @@ faFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    return tmp<GeometricField<Type, faPatchField, areaMesh>>
-    (
-        new GeometricField<Type, faPatchField, areaMesh>
+    return
+        tmp<GeometricField<Type, faPatchField, areaMesh>>::New
         (
             IOobject
             (
@@ -101,14 +98,13 @@ faFieldDecomposer::decomposeField
             field.dimensions(),
             internalField,
             patchFields
-        )
-    );
+        );
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh>>
-faFieldDecomposer::decomposeField
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::faFieldDecomposer::decomposeField
 (
     const GeometricField<Type, faePatchField, edgeMesh>& field
 ) const
@@ -147,7 +143,7 @@ faFieldDecomposer::decomposeField
 
     forAll(field.boundaryField(), patchi)
     {
-        const Field<Type> & p = field.boundaryField()[patchi];
+        const Field<Type>& p = field.boundaryField()[patchi];
 
         const label patchStart = field.mesh().boundary()[patchi].start();
 
@@ -162,17 +158,19 @@ faFieldDecomposer::decomposeField
 
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        const label oldPatchi = boundaryAddressing_[patchi];
+
+        if (oldPatchi >= 0)
         {
             patchFields.set
             (
                 patchi,
                 faePatchField<Type>::New
                 (
-                    field.boundaryField()[boundaryAddressing_[patchi]],
+                    field.boundaryField()[oldPatchi],
                     procMesh_.boundary()[patchi],
                     DimensionedField<Type, edgeMesh>::null(),
-                    *patchFieldDecomposerPtrs_[patchi]
+                    patchFieldDecomposerPtrs_[patchi]
                 )
             );
         }
@@ -188,7 +186,7 @@ faFieldDecomposer::decomposeField
                     Field<Type>
                     (
                         allEdgeField,
-                        *processorEdgePatchFieldDecomposerPtrs_[patchi]
+                        processorEdgePatchFieldDecomposerPtrs_[patchi]
                     )
                 )
             );
@@ -196,9 +194,8 @@ faFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    return tmp<GeometricField<Type, faePatchField, edgeMesh>>
-    (
-        new GeometricField<Type, faePatchField, edgeMesh>
+    return
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>::New
         (
             IOobject
             (
@@ -212,13 +209,12 @@ faFieldDecomposer::decomposeField
             field.dimensions(),
             internalField,
             patchFields
-        )
-    );
+        );
 }
 
 
 template<class GeoField>
-void faFieldDecomposer::decomposeFields
+void Foam::faFieldDecomposer::decomposeFields
 (
     const PtrList<GeoField>& fields
 ) const
@@ -229,9 +225,5 @@ void faFieldDecomposer::decomposeFields
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

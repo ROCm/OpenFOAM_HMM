@@ -34,8 +34,8 @@ License
 #include "faMesh.H"
 #include "OSspecific.H"
 #include "Map.H"
+#include "SLList.H"
 #include "globalMeshData.H"
-#include "decompositionModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -43,7 +43,7 @@ void Foam::faMeshDecomposition::distributeFaces()
 {
     const word& polyMeshRegionName = mesh().name();
 
-    Info<< "\nCalculating distribution of faces" << endl;
+    Info<< "\nCalculating distribution of finiteArea faces" << endl;
 
     cpuTime decompositionTime;
 
@@ -162,22 +162,12 @@ void Foam::faMeshDecomposition::distributeFaces()
 Foam::faMeshDecomposition::faMeshDecomposition
 (
     const fvMesh& mesh,
-    const fileName& decompDictFile
+    const label nProcessors,
+    const dictionary& params
 )
 :
     faMesh(mesh),
-    decompDictFile_(decompDictFile),
-    nProcs_
-    (
-        decompositionMethod::nDomains
-        (
-            decompositionModel::New
-            (
-                mesh,
-                decompDictFile
-            )
-        )
-    ),
+    nProcs_(nProcessors),
     distributed_(false),
     hasGlobalFaceZones_(false),
     faceToProc_(nFaces()),
@@ -195,21 +185,27 @@ Foam::faMeshDecomposition::faMeshDecomposition
     procNeighbourProcessors_(nProcs_),
     procProcessorPatchSize_(nProcs_),
     procProcessorPatchStartIndex_(nProcs_),
-    globallySharedPoints_(0),
+    globallySharedPoints_(),
     cyclicParallel_(false)
 {
-    const decompositionModel& model = decompositionModel::New
-    (
-        mesh,
-        decompDictFile
-    );
-
-    model.readIfPresent("distributed", distributed_);
-    hasGlobalFaceZones_ = model.found("globalFaceZones");
+    updateParameters(params);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::faMeshDecomposition::updateParameters
+(
+    const dictionary& params
+)
+{
+    params.readIfPresent("distributed", distributed_);
+    if (params.found("globalFaceZones"))
+    {
+        hasGlobalFaceZones_ = true;
+    }
+}
+
 
 void Foam::faMeshDecomposition::decomposeMesh()
 {
@@ -220,30 +216,42 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     Info<< "\nDistributing faces to processors" << endl;
 
-    // Memory management
+    labelList nLocalFaces(nProcs_, Zero);
+
+    // Pass 1: determine local sizes, sanity check
+
+    forAll(faceToProc_, facei)
     {
-        List<SLList<label>> procFaceList(nProcs());
+        const label proci = faceToProc_[facei];
 
-        forAll(faceToProc_, faceI)
+        if (proci < 0 || proci >= nProcs_)
         {
-            if (faceToProc_[faceI] >= nProcs())
-            {
-                FatalErrorInFunction
-                    << "Impossible processor label " << faceToProc_[faceI]
-                    << "for face " << faceI << nl
-                    << abort(FatalError);
-            }
-            else
-            {
-                procFaceList[faceToProc_[faceI]].append(faceI);
-            }
+            FatalErrorInFunction
+                << "Invalid processor label " << proci
+                << " for face " << facei << nl
+                << abort(FatalError);
         }
+        else
+        {
+            ++nLocalFaces[proci];
+        }
+    }
 
-        // Convert linked lists into normal lists
-        forAll(procFaceList, procI)
-        {
-            procFaceAddressing_[procI] = procFaceList[procI];
-        }
+    // Adjust lengths
+    forAll(nLocalFaces, proci)
+    {
+        procFaceAddressing_[proci].resize(nLocalFaces[proci]);
+        nLocalFaces[proci] = 0;  // restart list
+    }
+
+    // Pass 2: fill in local lists
+    forAll(faceToProc_, facei)
+    {
+        const label proci = faceToProc_[facei];
+        const label localFacei = nLocalFaces[proci];
+        ++nLocalFaces[proci];
+
+        procFaceAddressing_[proci][localFacei] = facei;
     }
 
 
@@ -1081,12 +1089,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
             procProcessorPatchSize_[procI];
 
         labelListList& curPatchEdgeLabels = procPatchEdgeLabels_[procI];
-        curPatchEdgeLabels =
-            labelListList
-            (
-                curPatchSize.size()
-              + curProcessorPatchSize.size()
-            );
+        curPatchEdgeLabels.resize
+        (
+            curPatchSize.size()
+          + curProcessorPatchSize.size()
+        );
 
         forAll(curPatchSize, patchI)
         {

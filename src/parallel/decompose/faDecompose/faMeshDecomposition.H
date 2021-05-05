@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +45,6 @@ SourceFiles
 #include "fvMesh.H"
 #include "faMesh.H"
 #include "labelList.H"
-#include "SLList.H"
 #include "PtrList.H"
 #include "point.H"
 
@@ -59,10 +59,7 @@ class faMeshDecomposition
 :
     public faMesh
 {
-    // Private data
-
-        //- Optional non-standard file for decomposeParDict
-        const fileName decompDictFile_;
+    // Private Data
 
         //- Number of processors in decomposition
         label nProcs_;
@@ -86,7 +83,7 @@ class faMeshDecomposition
         labelList procNInternalEdges_;
 
         //- Edge labels for patches of processor meshes
-        List<List<List<label>>> procPatchEdgeLabels_;
+        List<labelListList> procPatchEdgeLabels_;
 
         //- Labels of points for each processor
         labelListList procPatchPointAddressing_;
@@ -131,18 +128,21 @@ class faMeshDecomposition
 
         void distributeFaces();
 
+
 public:
 
     // Constructors
 
         //- Construct from components.
+        //- Values will come from the volume decomposition
         //  \param mesh the fvMesh
-        //  \param decompDictFile optional non-standard location for the
-        //      decomposeParDict file
+        //  \param nProcessors the number of processors
+        //  \param params additional parameters, sent to updateParameters
         faMeshDecomposition
         (
             const fvMesh& mesh,
-            const fileName& decompDictFile = ""
+            const label nProcessors,
+            const dictionary& params = dictionary::null
         );
 
 
@@ -152,29 +152,63 @@ public:
 
     // Member Functions
 
+    // Settings
+
         //- Number of processor in decomposition
         label nProcs() const
         {
             return nProcs_;
         }
 
-        //- Is the decomposition data to be distributed for each processor
+        //- Is decomposition data to be distributed for each processor
         bool distributed() const
         {
             return distributed_;
         }
+
+        //- Change distributed flag
+        bool distributed(const bool on)
+        {
+            bool old(distributed_);
+            distributed_ = on;
+            return old;
+        }
+
+        //- Are global face zones used
+        bool useGlobalFaceZones() const
+        {
+            return distributed_;
+        }
+
+        //- Change global face zones flag
+        bool useGlobalFaceZones(const bool on)
+        {
+            bool old(hasGlobalFaceZones_);
+            hasGlobalFaceZones_ = on;
+            return old;
+        }
+
+        //- Update flags based on the decomposition model settings
+        //  Sets "distributed", detects presence of "globalFaceZones"
+        void updateParameters(const dictionary& params);
+
+
+    // Mappings
+
+        //- Face-processor decomposition labels
+        const labelList& faceToProc() const noexcept
+        {
+            return faceToProc_;
+        }
+
+
+    // Decompose
 
         //- Decompose mesh
         void decomposeMesh();
 
         //- Write decomposition
         bool writeDecomposition();
-
-        //- Cell-processor decomposition labels
-        const labelList& faceToProc() const
-        {
-            return faceToProc_;
-        }
 };
 
 

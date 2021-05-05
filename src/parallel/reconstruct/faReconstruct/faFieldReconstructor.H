@@ -35,7 +35,7 @@ Author
 
 SourceFiles
     faFieldReconstructor.C
-    faFieldReconstructorReconstructFields.C
+    faFieldReconstructorFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -194,7 +194,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faFieldReconstructorReconstructFields.C"
+#   include "faFieldReconstructorFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

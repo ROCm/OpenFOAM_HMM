@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "faFieldDecomposer.H"
 #include "GeometricField.H"
-#include "readFields.H"
+#include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::readFields
+void Foam::faFieldDecomposer::readFields
 (
     const typename GeoMesh::Mesh& mesh,
     const IOobjectList& objects,
@@ -44,12 +46,12 @@ void Foam::readFields
     // Search list of objects for fields of type GeoField
     IOobjectList fieldObjects(objects.lookupClass<GeoField>());
 
-    // Remove the cellDist field
-    auto iter = fieldObjects.find("cellDist");
-    if (iter.found())
-    {
-        fieldObjects.erase(iter);
-    }
+    /// // Remove the cellDist field
+    /// auto iter = fieldObjects.find("cellDist");
+    /// if (iter.found())
+    /// {
+    ///     fieldObjects.erase(iter);
+    /// }
 
     // Use sorted set of names
     // (different processors might read objects in different order)
@@ -68,7 +70,7 @@ void Foam::readFields
 
 
 template<class Mesh, class GeoField>
-void Foam::readFields
+void Foam::faFieldDecomposer::readFields
 (
     const Mesh& mesh,
     const IOobjectList& objects,

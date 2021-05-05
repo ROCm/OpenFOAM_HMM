@@ -27,7 +27,6 @@ License
 
 #include "fvFieldDecomposer.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fvFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
@@ -135,11 +134,12 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
 {
     forAll(boundaryAddressing_, patchi)
     {
+        const label oldPatchi = boundaryAddressing_[patchi];
         const fvPatch& fvp = procMesh_.boundary()[patchi];
 
         if
         (
-            boundaryAddressing_[patchi] >= 0
+            oldPatchi >= 0
         && !isA<processorLduInterface>(procMesh.boundary()[patchi])
         )
         {
@@ -149,10 +149,7 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
                 new patchFieldDecomposer
                 (
                     fvp.patchSlice(faceAddressing_),
-                    completeMesh_.boundaryMesh()
-                    [
-                        boundaryAddressing_[patchi]
-                    ].start()
+                    completeMesh_.boundaryMesh()[oldPatchi].start()
                 )
             );
         }
@@ -200,12 +197,6 @@ Foam::fvFieldDecomposer::fvFieldDecomposer
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fvFieldDecomposer::~fvFieldDecomposer()
-{}
 
 
 // ************************************************************************* //

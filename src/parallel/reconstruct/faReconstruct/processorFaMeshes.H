@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,60 +24,70 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dimFieldDecomposer
+    Foam::processorFaMeshes
 
 Description
-    Dimensioned field decomposer.
+    Container for finite-area processor mesh addressing.
+
+Author
+    Zeljko Tukovic, FSB Zagreb
 
 SourceFiles
-    dimFieldDecomposer.C
-    dimFieldDecomposerDecomposeFields.C
+    processorFaMeshes.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimFieldDecomposer_H
-#define dimFieldDecomposer_H
+#ifndef processorFaMeshes_H
+#define processorFaMeshes_H
 
+#include "PtrList.H"
+#include "faMesh.H"
 #include "fvMesh.H"
-#include "surfaceFields.H"
+#include "IOobjectList.H"
+#include "labelIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class IOobjectList;
-
 /*---------------------------------------------------------------------------*\
-                    Class fvFieldDecomposer Declaration
+                     Class processorFaMeshes Declaration
 \*---------------------------------------------------------------------------*/
 
-class dimFieldDecomposer
+class processorFaMeshes
 {
-private:
-
     // Private data
 
-        //- Reference to complete mesh
-        const fvMesh& completeMesh_;
+        //- List of processor finite volume meshes
+        const PtrList<fvMesh>& fvMeshes_;
 
-        //- Reference to processor mesh
-        const fvMesh& procMesh_;
+        //- List of processor finite area meshes
+        PtrList<faMesh> meshes_;
 
-        //- Reference to face addressing
-        const labelList& faceAddressing_;
+        //- List of processor point addressing lists
+        PtrList<labelIOList> pointProcAddressing_;
 
-        //- Reference to cell addressing
-        const labelList& cellAddressing_;
+        //- List of processor face addressing lists
+        PtrList<labelIOList> edgeProcAddressing_;
+
+        //- List of processor cell addressing lists
+        PtrList<labelIOList> faceProcAddressing_;
+
+        //- List of processor boundary addressing lists
+        PtrList<labelIOList> boundaryProcAddressing_;
 
 
     // Private Member Functions
 
+        //- Read all meshes
+        void read();
+
         //- No copy construct
-        dimFieldDecomposer(const dimFieldDecomposer&) = delete;
+        processorFaMeshes(const processorFaMeshes&) = delete;
 
         //- No copy assignment
-        void operator=(const dimFieldDecomposer&) = delete;
+        void operator=(const processorFaMeshes&) = delete;
 
 
 public:
@@ -85,44 +95,46 @@ public:
     // Constructors
 
         //- Construct from components
-        dimFieldDecomposer
-        (
-            const fvMesh& completeMesh,
-            const fvMesh& procMesh,
-            const labelList& faceAddressing,
-            const labelList& cellAddressing
-        );
-
-
-    //- Destructor
-    ~dimFieldDecomposer();
+        processorFaMeshes(const PtrList<fvMesh>& processorFvMeshes);
 
 
     // Member Functions
 
-        //- Decompose field
-        template<class Type>
-        tmp<DimensionedField<Type, volMesh>> decomposeField
-        (
-            const DimensionedField<Type, volMesh>& field
-        ) const;
+        const PtrList<faMesh>& meshes() const
+        {
+            return meshes_;
+        }
 
+        PtrList<faMesh>& meshes()
+        {
+            return meshes_;
+        }
 
-        //- Decompose llist of fields
-        template<class GeoField>
-        void decomposeFields(const PtrList<GeoField>& fields) const;
+        const PtrList<labelIOList>& pointProcAddressing() const
+        {
+            return pointProcAddressing_;
+        }
+
+        PtrList<labelIOList>& edgeProcAddressing()
+        {
+            return edgeProcAddressing_;
+        }
+
+        const PtrList<labelIOList>& faceProcAddressing() const
+        {
+            return faceProcAddressing_;
+        }
+
+        const PtrList<labelIOList>& boundaryProcAddressing() const
+        {
+            return boundaryProcAddressing_;
+        }
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "dimFieldDecomposerDecomposeFields.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,41 +89,28 @@ Foam::pointFieldDecomposer::pointFieldDecomposer
     procMesh_(procMesh),
     pointAddressing_(pointAddressing),
     boundaryAddressing_(boundaryAddressing),
-    patchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<patchFieldDecomposer*>(nullptr)
-    )
+
+    patchFieldDecomposerPtrs_(procMesh_.boundary().size())
 {
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        const label oldPatchi = boundaryAddressing_[patchi];
+
+        if (oldPatchi >= 0)
         {
-            patchFieldDecomposerPtrs_[patchi] = new patchFieldDecomposer
+            patchFieldDecomposerPtrs_.set
             (
-                completeMesh_.boundary()[boundaryAddressing_[patchi]],
-                procMesh_.boundary()[patchi],
-                pointAddressing_
+                patchi,
+                new patchFieldDecomposer
+                (
+                    completeMesh_.boundary()[oldPatchi],
+                    procMesh_.boundary()[patchi],
+                    pointAddressing_
+                )
             );
         }
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointFieldDecomposer::~pointFieldDecomposer()
-{
-    forAll(patchFieldDecomposerPtrs_, patchi)
-    {
-        if (patchFieldDecomposerPtrs_[patchi])
-        {
-            delete patchFieldDecomposerPtrs_[patchi];
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

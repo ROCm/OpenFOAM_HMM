@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,14 +28,9 @@ License
 
 #include "faFieldDecomposer.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
+Foam::faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 (
     const label sizeBeforeMapping,
     const labelUList& addressingSlice,
@@ -54,7 +50,7 @@ faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 }
 
 
-faFieldDecomposer::processorAreaPatchFieldDecomposer::
+Foam::faFieldDecomposer::processorAreaPatchFieldDecomposer::
 processorAreaPatchFieldDecomposer
 (
     const faMesh& mesh,
@@ -108,7 +104,7 @@ processorAreaPatchFieldDecomposer
 }
 
 
-faFieldDecomposer::processorEdgePatchFieldDecomposer::
+Foam::faFieldDecomposer::processorEdgePatchFieldDecomposer::
 processorEdgePatchFieldDecomposer
 (
     label sizeBeforeMapping,
@@ -130,7 +126,7 @@ processorEdgePatchFieldDecomposer
 }
 
 
-faFieldDecomposer::faFieldDecomposer
+Foam::faFieldDecomposer::faFieldDecomposer
 (
     const faMesh& completeMesh,
     const faMesh& procMesh,
@@ -144,47 +140,43 @@ faFieldDecomposer::faFieldDecomposer
     edgeAddressing_(edgeAddressing),
     faceAddressing_(faceAddressing),
     boundaryAddressing_(boundaryAddressing),
-    patchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<patchFieldDecomposer*>(NULL)
-    ),
-    processorAreaPatchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<processorAreaPatchFieldDecomposer*>(NULL)
-    ),
-    processorEdgePatchFieldDecomposerPtrs_
-    (
-        procMesh_.boundary().size(),
-        static_cast<processorEdgePatchFieldDecomposer*>(NULL)
-    )
+
+    patchFieldDecomposerPtrs_(procMesh_.boundary().size()),
+    processorAreaPatchFieldDecomposerPtrs_(procMesh_.boundary().size()),
+    processorEdgePatchFieldDecomposerPtrs_(procMesh_.boundary().size())
 {
     forAll(boundaryAddressing_, patchi)
     {
-        if (boundaryAddressing_[patchi] >= 0)
+        const label oldPatchi = boundaryAddressing_[patchi];
+
+        if (oldPatchi >= 0)
         {
-            patchFieldDecomposerPtrs_[patchi] = new patchFieldDecomposer
+            patchFieldDecomposerPtrs_.set
             (
-                completeMesh_.boundary()[boundaryAddressing_[patchi]].size(),
-                procMesh_.boundary()[patchi].patchSlice(edgeAddressing_),
-//                 completeMesh_.boundaryMesh()
-                completeMesh_.boundary()
-                [
-                    boundaryAddressing_[patchi]
-                ].start()
+                patchi,
+                new patchFieldDecomposer
+                (
+                    completeMesh_.boundary()[oldPatchi].size(),
+                    procMesh_.boundary()[patchi].patchSlice(edgeAddressing_),
+                    completeMesh_.boundary()[oldPatchi].start()
+                )
             );
         }
         else
         {
-            processorAreaPatchFieldDecomposerPtrs_[patchi] =
+            processorAreaPatchFieldDecomposerPtrs_.set
+            (
+                patchi,
                 new processorAreaPatchFieldDecomposer
                 (
                     completeMesh_,
                     procMesh_.boundary()[patchi].patchSlice(edgeAddressing_)
-                );
+                )
+            );
 
-            processorEdgePatchFieldDecomposerPtrs_[patchi] =
+            processorEdgePatchFieldDecomposerPtrs_.set
+            (
+                patchi,
                 new processorEdgePatchFieldDecomposer
                 (
                     procMesh_.boundary()[patchi].size(),
@@ -195,44 +187,11 @@ faFieldDecomposer::faFieldDecomposer
                             edgeAddressing_
                         )
                     )
-                );
+                )
+            );
         }
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-faFieldDecomposer::~faFieldDecomposer()
-{
-    forAll(patchFieldDecomposerPtrs_, patchi)
-    {
-        if (patchFieldDecomposerPtrs_[patchi])
-        {
-            delete patchFieldDecomposerPtrs_[patchi];
-        }
-    }
-
-    forAll(processorAreaPatchFieldDecomposerPtrs_, patchi)
-    {
-        if (processorAreaPatchFieldDecomposerPtrs_[patchi])
-        {
-            delete processorAreaPatchFieldDecomposerPtrs_[patchi];
-        }
-    }
-
-    forAll(processorEdgePatchFieldDecomposerPtrs_, patchi)
-    {
-        if (processorEdgePatchFieldDecomposerPtrs_[patchi])
-        {
-            delete processorEdgePatchFieldDecomposerPtrs_[patchi];
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

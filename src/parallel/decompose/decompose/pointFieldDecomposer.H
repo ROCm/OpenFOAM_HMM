@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ Description
 
 SourceFiles
     pointFieldDecomposer.C
-    pointFieldDecomposerDecomposeFields.C
+    pointFieldDecomposerFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,7 +54,6 @@ namespace Foam
 
 class pointFieldDecomposer
 {
-
 public:
 
         //- Point patch field decomposer class
@@ -107,7 +107,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Reference to complete mesh
         const pointMesh& completeMesh_;
@@ -122,19 +122,17 @@ private:
         const labelList& boundaryAddressing_;
 
         //- List of patch field decomposers
-        List<patchFieldDecomposer*> patchFieldDecomposerPtrs_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        pointFieldDecomposer(const pointFieldDecomposer&) = delete;
-
-        //- No copy assignment
-        void operator=(const pointFieldDecomposer&) = delete;
+        PtrList<patchFieldDecomposer> patchFieldDecomposerPtrs_;
 
 
 public:
+
+    //- No copy construct
+    pointFieldDecomposer(const pointFieldDecomposer&) = delete;
+
+    //- No copy assignment
+    void operator=(const pointFieldDecomposer&) = delete;
+
 
     // Constructors
 
@@ -149,7 +147,7 @@ public:
 
 
     //- Destructor
-    ~pointFieldDecomposer();
+    ~pointFieldDecomposer() = default;
 
 
     // Member Functions
@@ -174,7 +172,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "pointFieldDecomposerDecomposeFields.C"
+    #include "pointFieldDecomposerFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

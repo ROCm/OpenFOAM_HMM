@@ -162,7 +162,6 @@ Usage
 #include "regionProperties.H"
 
 #include "readFields.H"
-#include "dimFieldDecomposer.H"
 #include "fvFieldDecomposer.H"
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
@@ -173,11 +172,52 @@ Usage
 #include "faMeshDecomposition.H"
 #include "faFieldDecomposer.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Read proc addressing at specific instance.
+// Uses polyMesh/fvMesh meshSubDir by default
+autoPtr<labelIOList> procAddressing
+(
+    const fvMesh& procMesh,
+    const word& name,
+    const word& instance,
+    const word& local = fvMesh::meshSubDir
+)
+{
+    return autoPtr<labelIOList>::New
+    (
+        IOobject
+        (
+            name,
+            instance,
+            local,
+            procMesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false  // do not register
+        )
+    );
+}
+
+
+// Read proc addressing at specific instance.
+// Uses the finiteArea meshSubDir
+autoPtr<labelIOList> faProcAddressing
+(
+    const fvMesh& procMesh,
+    const word& name,
+    const word& instance,
+    const word& local = faMesh::meshSubDir
+)
+{
+    return procAddressing(procMesh, name, instance, local);
+}
+
+
+// Return cached or read proc addressing from facesInstance
 const labelIOList& procAddressing
 (
     const PtrList<fvMesh>& procMeshList,
@@ -193,19 +233,7 @@ const labelIOList& procAddressing
         procAddressingList.set
         (
             proci,
-            new labelIOList
-            (
-                IOobject
-                (
-                    name,
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            )
+            procAddressing(procMesh, name, procMesh.facesInstance())
         );
     }
     return procAddressingList[proci];
@@ -275,7 +303,7 @@ void decomposeUniform
     }
 }
 
-}
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -682,7 +710,6 @@ int main(int argc, char *argv[])
             PtrList<labelIOList> cellProcAddressingList(mesh.nProcs());
             PtrList<labelIOList> boundaryProcAddressingList(mesh.nProcs());
             PtrList<fvFieldDecomposer> fieldDecomposerList(mesh.nProcs());
-            PtrList<dimFieldDecomposer> dimFieldDecomposerList(mesh.nProcs());
             PtrList<labelIOList> pointProcAddressingList(mesh.nProcs());
             PtrList<pointFieldDecomposer> pointFieldDecomposerList
             (
@@ -1047,7 +1074,6 @@ int main(int argc, char *argv[])
                 {
                     Info<< "Processor " << proci << ": field transfer" << endl;
 
-
                     // open the database
                     if (!processorDbList.set(proci))
                     {
@@ -1112,7 +1138,7 @@ int main(int argc, char *argv[])
                     );
 
 
-                    // FV fields
+                    // FV fields: volume, surface, internal
                     {
                         if (!fieldDecomposerList.set(proci))
                         {
@@ -1132,6 +1158,7 @@ int main(int argc, char *argv[])
                         const fvFieldDecomposer& fieldDecomposer =
                             fieldDecomposerList[proci];
 
+                        // vol fields
                         fieldDecomposer.decomposeFields(volScalarFields);
                         fieldDecomposer.decomposeFields(volVectorFields);
                         fieldDecomposer.decomposeFields
@@ -1141,6 +1168,7 @@ int main(int argc, char *argv[])
                         fieldDecomposer.decomposeFields(volSymmTensorFields);
                         fieldDecomposer.decomposeFields(volTensorFields);
 
+                        // surface fields
                         fieldDecomposer.decomposeFields(surfaceScalarFields);
                         fieldDecomposer.decomposeFields(surfaceVectorFields);
                         fieldDecomposer.decomposeFields
@@ -1153,41 +1181,17 @@ int main(int argc, char *argv[])
                         );
                         fieldDecomposer.decomposeFields(surfaceTensorFields);
 
+                        // internal fields
+                        fieldDecomposer.decomposeFields(dimScalarFields);
+                        fieldDecomposer.decomposeFields(dimVectorFields);
+                        fieldDecomposer.decomposeFields(dimSphericalTensorFields);
+                        fieldDecomposer.decomposeFields(dimSymmTensorFields);
+                        fieldDecomposer.decomposeFields(dimTensorFields);
+
                         if (times.size() == 1)
                         {
                             // Clear cached decomposer
                             fieldDecomposerList.set(proci, nullptr);
-                        }
-                    }
-
-                    // Dimensioned fields
-                    {
-                        if (!dimFieldDecomposerList.set(proci))
-                        {
-                            dimFieldDecomposerList.set
-                            (
-                                proci,
-                                new dimFieldDecomposer
-                                (
-                                    mesh,
-                                    procMesh,
-                                    faceProcAddressing,
-                                    cellProcAddressing
-                                )
-                            );
-                        }
-                        const dimFieldDecomposer& dimDecomposer =
-                            dimFieldDecomposerList[proci];
-
-                        dimDecomposer.decomposeFields(dimScalarFields);
-                        dimDecomposer.decomposeFields(dimVectorFields);
-                        dimDecomposer.decomposeFields(dimSphericalTensorFields);
-                        dimDecomposer.decomposeFields(dimSymmTensorFields);
-                        dimDecomposer.decomposeFields(dimTensorFields);
-
-                        if (times.size() == 1)
-                        {
-                            dimFieldDecomposerList.set(proci, nullptr);
                         }
                     }
 
@@ -1366,18 +1370,24 @@ int main(int argc, char *argv[])
                     faMesh::meshSubDir,
                     mesh,
                     IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false  // not registered
                 );
 
 
                 if (faMeshBoundaryIOobj.typeHeaderOk<faBoundaryMesh>(true))
                 {
-                    Info << "\nFinite area mesh decomposition" << endl;
+                    Info<< "\nFinite area mesh decomposition" << endl;
 
-                    faMeshDecomposition aMesh(mesh);
+                    // Always based on the volume decomposition!
+                    faMeshDecomposition aMesh
+                    (
+                        mesh,
+                        mesh.nProcs(),
+                        mesh.model()
+                    );
 
                     aMesh.decomposeMesh();
-
                     aMesh.writeDecomposition();
 
 
@@ -1404,13 +1414,29 @@ int main(int argc, char *argv[])
                     PtrList<edgeScalarField> edgeScalarFields;
                     readFields(aMesh, objects, edgeScalarFields);
 
-                    Info << endl;
+                    const label nAreaFields =
+                    (
+                        areaScalarFields.size()
+                      + areaVectorFields.size()
+                      + areaSphericalTensorFields.size()
+                      + areaSymmTensorFields.size()
+                      + areaTensorFields.size()
+                      + edgeScalarFields.size()
+                    );
+
+                    Info<< endl;
+                    Info<< "Finite area field transfer: "
+                        << nAreaFields << " fields" << endl;
 
                     // Split the fields over processors
-                    for (label procI = 0; procI < mesh.nProcs(); procI++)
+                    for
+                    (
+                        label proci = 0;
+                        nAreaFields && proci < mesh.nProcs();
+                        ++proci
+                    )
                     {
-                        Info<< "Processor " << procI
-                            << ": finite area field transfer" << endl;
+                        Info<< "    Processor " << proci << endl;
 
                         // open the database
                         Time processorDb
@@ -1418,7 +1444,7 @@ int main(int argc, char *argv[])
                             Time::controlDictName,
                             args.rootPath(),
                             args.caseName()
-                          / ("processor" + Foam::name(procI))
+                          / ("processor" + Foam::name(proci))
                         );
 
                         processorDb.setTime(runTime);
@@ -1441,7 +1467,7 @@ int main(int argc, char *argv[])
                         //     procAddressing
                         //     (
                         //         procMeshList,
-                        //         procI,
+                        //         proci,
                         //         "faceProcAddressing",
                         //         faceProcAddressingList
                         //     );
@@ -1450,84 +1476,59 @@ int main(int argc, char *argv[])
                         //     procAddressing
                         //     (
                         //         procMeshList,
-                        //         procI,
+                        //         proci,
                         //         "boundaryProcAddressing",
                         //         boundaryProcAddressingList
                         //     );
 
-                        labelIOList faceProcAddressing
-                        (
-                            IOobject
+                        // Addressing from faMesh (not polyMesh) meshSubDir
+
+                        autoPtr<labelIOList> tfaceProcAddr =
+                            faProcAddressing
                             (
+                                procFvMesh,
                                 "faceProcAddressing",
-                                "constant",
-                                procMesh.meshSubDir,
-                                procFvMesh,
-                                IOobject::MUST_READ,
-                                IOobject::NO_WRITE
-                            )
-                        );
+                                runTime.constant()
+                            );
+                        auto& faceProcAddressing = *tfaceProcAddr;
 
-                        labelIOList boundaryProcAddressing
-                        (
-                            IOobject
+                        autoPtr<labelIOList> tboundaryProcAddr =
+                            faProcAddressing
                             (
+                                procFvMesh,
                                 "boundaryProcAddressing",
-                                "constant",
-                                procMesh.meshSubDir,
+                                runTime.constant()
+                            );
+                        auto& boundaryProcAddressing = *tboundaryProcAddr;
+
+                        autoPtr<labelIOList> tedgeProcAddr =
+                            faProcAddressing
+                            (
                                 procFvMesh,
-                                IOobject::MUST_READ,
-                                IOobject::NO_WRITE
-                            )
+                                "edgeProcAddressing",
+                                runTime.constant()
+                            );
+                        const auto& edgeProcAddressing = *tedgeProcAddr;
+
+                        faFieldDecomposer fieldDecomposer
+                        (
+                            aMesh,
+                            procMesh,
+                            edgeProcAddressing,
+                            faceProcAddressing,
+                            boundaryProcAddressing
                         );
 
-                        // FA fields
-                        if
+                        fieldDecomposer.decomposeFields(areaScalarFields);
+                        fieldDecomposer.decomposeFields(areaVectorFields);
+                        fieldDecomposer.decomposeFields
                         (
-                            areaScalarFields.size()
-                         || areaVectorFields.size()
-                         || areaSphericalTensorFields.size()
-                         || areaSymmTensorFields.size()
-                         || areaTensorFields.size()
-                         || edgeScalarFields.size()
-                        )
-                        {
-                            labelIOList edgeProcAddressing
-                            (
-                                IOobject
-                                (
-                                    "edgeProcAddressing",
-                                    "constant",
-                                    procMesh.meshSubDir,
-                                    procFvMesh,
-                                    IOobject::MUST_READ,
-                                    IOobject::NO_WRITE
-                                )
-                            );
+                            areaSphericalTensorFields
+                        );
+                        fieldDecomposer.decomposeFields(areaSymmTensorFields);
+                        fieldDecomposer.decomposeFields(areaTensorFields);
 
-                            faFieldDecomposer fieldDecomposer
-                            (
-                                aMesh,
-                                procMesh,
-                                edgeProcAddressing,
-                                faceProcAddressing,
-                                boundaryProcAddressing
-                            );
-
-                            fieldDecomposer.decomposeFields(areaScalarFields);
-                            fieldDecomposer.decomposeFields(areaVectorFields);
-                            fieldDecomposer.decomposeFields
-                            (
-                                areaSphericalTensorFields
-                            );
-                            fieldDecomposer.decomposeFields
-                            (
-                                areaSymmTensorFields
-                            );
-                            fieldDecomposer.decomposeFields(areaTensorFields);
-
-                            fieldDecomposer.decomposeFields(edgeScalarFields);
-                        }
+                        fieldDecomposer.decomposeFields(edgeScalarFields);
                     }
                 }
             }

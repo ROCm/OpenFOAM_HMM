@@ -4,7 +4,8 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
-    -I$(LIB_SRC)/parallel/reconstruct/reconstruct/lnInclude
+    -I$(LIB_SRC)/parallel/reconstruct/reconstruct/lnInclude \
+    -I$(LIB_SRC)/parallel/reconstruct/faReconstruct/lnInclude
 
 EXE_LIBS = \
     -lfiniteArea \
@@ -13,4 +14,5 @@ EXE_LIBS = \
     -llagrangian \
     -lgenericPatchFields \
     -ldynamicMesh \
-    -lreconstruct
+    -lreconstruct \
+    -lfaReconstruct

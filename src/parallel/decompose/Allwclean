@@ -8,6 +8,7 @@ wclean kahipDecomp
 wclean scotchDecomp
 wclean decompositionMethods
 wclean decompose
+wclean faDecompose
 
 ./Allwclean-mpi
 

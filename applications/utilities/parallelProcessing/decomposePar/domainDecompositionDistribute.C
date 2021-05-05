@@ -26,12 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "domainDecomposition.H"
-#include "decompositionMethod.H"
 #include "cpuTime.H"
-#include "cellSet.H"
-#include "regionSplit.H"
-#include "Tuple2.H"
-#include "faceSet.H"
+#include "decompositionMethod.H"
 #include "decompositionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

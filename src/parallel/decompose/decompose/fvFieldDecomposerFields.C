@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +34,36 @@ License
 #include "emptyFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh>>
+Foam::fvFieldDecomposer::decomposeField
+(
+    const DimensionedField<Type, volMesh>& field
+) const
+{
+    // Create and map the internal field values
+    Field<Type> mappedField(field, cellAddressing_);
+
+    // Create the field for the processor
+    return
+        tmp<DimensionedField<Type, volMesh>>::New
+        (
+            IOobject
+            (
+                field.name(),
+                procMesh_.time().timeName(),
+                procMesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            procMesh_,
+            field.dimensions(),
+            std::move(mappedField)
+        );
+}
+
 
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>

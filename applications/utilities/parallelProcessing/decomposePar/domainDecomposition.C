@@ -120,15 +120,26 @@ Foam::domainDecomposition::domainDecomposition
     procProcessorPatchSubPatchIDs_(nProcs_),
     procProcessorPatchSubPatchStarts_(nProcs_)
 {
-    decompositionModel::New
-    (
-        *this,
-        decompDictFile
-    ).readIfPresent("distributed", distributed_);
+    updateParameters(this->model());
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::decompositionModel& Foam::domainDecomposition::model() const
+{
+    return decompositionModel::New(*this, decompDictFile_);
+}
+
+
+void Foam::domainDecomposition::updateParameters
+(
+    const dictionary& params
+)
+{
+    params.readIfPresent("distributed", distributed_);
+}
+
 
 bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 {
@@ -408,10 +419,9 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             nInterProcPatches += curSubPatchIDs[procPatchi].size();
         }
 
-        List<polyPatch*> procPatches
+        PtrList<polyPatch> procPatches
         (
-            curPatchSizes.size() + nInterProcPatches,
-            reinterpret_cast<polyPatch*>(0)
+            curPatchSizes.size() + nInterProcPatches
         );
 
         label nPatches = 0;
@@ -434,13 +444,17 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             );
 
             // Map existing patches
-            procPatches[nPatches] = meshPatch.clone
+            procPatches.set
             (
-                procMesh.boundaryMesh(),
                 nPatches,
-                patchMapper.directAddressing(),
-                curPatchStarts[patchi]
-            ).ptr();
+                meshPatch.clone
+                (
+                    procMesh.boundaryMesh(),
+                    nPatches,
+                    patchMapper.directAddressing(),
+                    curPatchStarts[patchi]
+                )
+            );
 
             nPatches++;
         }
@@ -464,7 +478,9 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                 if (subPatchID[i] == -1)
                 {
                     // From internal faces
-                    procPatches[nPatches] =
+                    procPatches.set
+                    (
+                        nPatches,
                         new processorPolyPatch
                         (
                             size,
@@ -473,7 +489,8 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                             procMesh.boundaryMesh(),
                             proci,
                             curNeighbourProcessors[procPatchi]
-                        );
+                        )
+                    );
                 }
                 else
                 {
@@ -483,7 +500,9 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                               boundaryMesh()[subPatchID[i]]
                           );
 
-                    procPatches[nPatches] =
+                    procPatches.set
+                    (
+                        nPatches,
                         new processorCyclicPolyPatch
                         (
                             size,
@@ -494,12 +513,12 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                             curNeighbourProcessors[procPatchi],
                             pcPatch.name(),
                             pcPatch.transform()
-                        );
+                        )
+                    );
                 }
 
                 curStart += size;
-
-                nPatches++;
+                ++nPatches;
             }
         }
 

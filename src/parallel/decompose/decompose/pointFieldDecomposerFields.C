@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +47,7 @@ Foam::pointFieldDecomposer::decomposeField
     // Create and map the patch field values
     forAll(boundaryAddressing_, patchi)
     {
-        if (patchFieldDecomposerPtrs_[patchi])
+        if (patchFieldDecomposerPtrs_.set(patchi))
         {
             patchFields.set
             (
@@ -56,7 +57,7 @@ Foam::pointFieldDecomposer::decomposeField
                     field.boundaryField()[boundaryAddressing_[patchi]],
                     procMesh_.boundary()[patchi],
                     DimensionedField<Type, pointMesh>::null(),
-                    *patchFieldDecomposerPtrs_[patchi]
+                    patchFieldDecomposerPtrs_[patchi]
                 )
             );
         }
@@ -75,9 +76,8 @@ Foam::pointFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    return tmp<GeometricField<Type, pointPatchField, pointMesh>>
-    (
-        new GeometricField<Type, pointPatchField, pointMesh>
+    return
+        tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
         (
             IOobject
             (
@@ -92,8 +92,7 @@ Foam::pointFieldDecomposer::decomposeField
             field.dimensions(),
             internalField,
             patchFields
-        )
-    );
+        );
 }
 
 
