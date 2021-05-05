@@ -14,27 +14,44 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// A flat plate that is only partial covered by the finiteArea mesh.
+// Depending on the decomposition, the outflow boundary may
+// coincide with a processor patch.
+
 scale   0.1;
+
+height  0.1;
+width   1;
+len     3;
+out     1;
+out     #eval{ $out + $len };
+
+nx 60;
+ny 20;
+nz 1;
+nout 20;
 
 vertices
 (
-    (0 0 0)
-    (3 0 0)
-    (3 1 0)
-    (0 1 0)
-    (0 0 0.1)
-    (3 0 0.1)
-    (3 1 0.1)
-    (0 1 0.1)
+    /* 0*/ (0 0 0)
+    /* 1*/ ($len 0 0)
+    /* 2*/ ($len $width 0)
+    /* 3*/ (0 $width 0)
+    /* 4*/ (0 0 $height)
+    /* 5*/ ($len 0 $height)
+    /* 6*/ ($len $width $height)
+    /* 7*/ (0 $width $height)
+
+    /* 8*/ ($out 0 0)
+    /* 9*/ ($out 1 0)
+    /*10*/ ($out 0 $height)
+    /*11*/ ($out 1 $height)
 );
 
 blocks
 (
-    hex (0 1 2 3 4 5 6 7) (60 20 1) simpleGrading (1 1 1)
-);
-
-edges
-(
+    hex (0 1 2 3 4 5 6 7)   ($nx   $ny $nz) grading (1 1 1)
+    hex (1 8 9 2 5 10 11 6) ($nout $ny $nz) grading (1 1 1)
 );
 
 boundary
@@ -44,7 +61,7 @@ boundary
         type patch;
         faces
         (
-           (0 4 7 3)
+            (0 4 7 3)
         );
     }
 
@@ -53,8 +70,12 @@ boundary
         type wall;
         faces
         (
-           (3 7 6 2)
-           (1 5 4 0)
+            (3 7 6 2)
+            (1 5 4 0)
+
+            // outflow
+            (1 8 10 5)
+            (2 6 11 9)
         );
     }
 
@@ -63,7 +84,7 @@ boundary
         type patch;
         faces
         (
-            (2 6 5 1)
+            (8 9 10 11)
         );
     }
 
@@ -73,6 +94,7 @@ boundary
         faces
         (
             (0 3 2 1)
+            (1 8 9 2)
         );
     }
 
@@ -84,10 +106,15 @@ boundary
             (4 5 6 7)
         );
     }
-);
 
-mergePatchPairs
-(
+    outflow
+    {
+        type patch;
+        faces
+        (
+            (5 10 11 6)
+        );
+    }
 );
 
 

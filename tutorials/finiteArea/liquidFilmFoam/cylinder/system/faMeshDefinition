@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant/faMesh";
     object      faMeshDefinition;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  1( film );
+polyMeshPatches  ( film );
 
 boundary
 {
@@ -53,6 +52,13 @@ boundary
         ownerPolyPatch      film;
         neighbourPolyPatch  cylinder;
     }
+}
+
+
+defaultPatch
+{
+    name    empty;
+    type    empty;
 }
 
 

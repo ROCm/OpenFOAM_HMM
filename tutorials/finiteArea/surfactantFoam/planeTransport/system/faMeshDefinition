@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  1( top );
+polyMeshPatches  ( top );
 
 boundary
 {
@@ -28,7 +28,8 @@ boundary
     {
         type patch;
         ownerPolyPatch top;
-        neighbourPolyPatch outlet;
+        // neighbourPolyPatch outlet;
+        neighbourPolyPatch outflow;
     }
     bound
     {

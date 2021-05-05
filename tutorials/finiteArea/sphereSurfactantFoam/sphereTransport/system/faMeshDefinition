@@ -10,18 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      decomposeParDict;
+    object      faMeshDefinition;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 4;
+polyMeshPatches  ( outer );
 
-method      simple;
-
-coeffs
+boundary
 {
-    n       ( 2 2 1 );
 }
 
 
-// ************************************************************************* //
+// ************************************************************************** //

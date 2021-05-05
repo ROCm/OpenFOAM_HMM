@@ -10,21 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      faMeshDefinition;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// With 4 divisions in x-direction (coincides with finiteArea boundary)
 
-polyMeshPatches  1(window);
+numberOfSubdomains 4;
 
-boundary
+method      simple;
+
+coeffs
 {
-    sealing
-    {
-        type                patch;
-        ownerPolyPatch      window;
-        neighbourPolyPatch  fixedWall;
-    }
+    n       ( 4 1 1 );
 }
 
 
-// ************************************************************************** //
+// ************************************************************************* //

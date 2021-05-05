@@ -1,0 +1,19 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication blockMesh
+
+decompDict="-decomposeParDict system/decomposeParDict-procBoundary8"
+fileHandler="-fileHandler collated"
+
+runApplication $decompDict decomposePar $fileHandler
+
+runParallel $decompDict makeFaMesh $fileHandler
+
+runParallel $decompDict $(getApplication) $fileHandler
+
+runApplication reconstructPar $fileHandler
+
+#------------------------------------------------------------------------------
