@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -313,12 +313,10 @@ int main(int argc, char *argv[])
 
     #include "createNamedMesh.H"
 
-    fileName regionPrefix; // Mesh instance (region0 gets filtered out)
-    if (regionName != polyMesh::defaultRegion)
-    {
-        regionPrefix = regionName;
-    }
-
+    const word& regionDir =
+    (
+        regionName == polyMesh::defaultRegion ? word::null : regionName
+    );
 
     //
     // Configuration

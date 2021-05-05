@@ -2263,12 +2263,9 @@ int main(int argc, char *argv[])
     // enable -constant ... if someone really wants it
     // enable -zeroTime to prevent accidentally trashing the initial fields
     timeSelector::addOptions(true, true);
-    #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "allRegions",
-        "operate on all regions in regionProperties"
-    );
+
+    #include "addAllRegionOptions.H"
+
     #include "addOverwriteOption.H"
     argList::addBoolOption("decompose", "Decompose case");
     argList::addBoolOption("reconstruct", "Reconstruct case");
@@ -2506,20 +2503,12 @@ int main(int argc, char *argv[])
     const fileName decompDictFile =
         args.getOrDefault<fileName>("decomposeParDict", "");
 
-    // Get all region names
-    wordList regionNames;
-    if (args.found("allRegions"))
-    {
-        regionNames = regionProperties(runTime).names();
+    // Get region names
+    #include "getAllRegionOptions.H"
 
-        Info<< "Decomposing all regions in regionProperties" << nl
-            << "    " << flatOutput(regionNames) << nl << endl;
-    }
-    else
+    if (regionNames.size() == 1 && regionNames[0] != polyMesh::defaultRegion)
     {
-        regionNames.resize(1);
-        regionNames.first() =
-            args.getOrDefault<word>("region", fvMesh::defaultRegion);
+        Info<< "Using region: " << regionNames[0] << nl << endl;
     }
 
 
@@ -2553,12 +2542,11 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-            const fileName meshSubDir
+            const word& regionDir =
             (
-                regionName == fvMesh::defaultRegion
-              ? fileName(polyMesh::meshSubDir)
-              : regionNames[regioni]/polyMesh::meshSubDir
+                regionName == polyMesh::defaultRegion ? word::null : regionName
             );
+            const fileName meshSubDir(regionDir/polyMesh::meshSubDir);
 
             Info<< "\n\nReconstructing mesh " << regionName << nl << endl;
 

@@ -1,5 +1,32 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2018-2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+
+Description
+    Create a fvMesh (specified region or defaultRegion) with
+    additional handling of -dry-run and -dry-run-write options.
+
+Required Variables
+    - args [argList]
+    - runTime [Time]
+
+Provided Variables
+    - regionName [word]
+    - mesh [fvMesh]
+    - meshPtr [autoPtr<fvMesh>]
+
+\*---------------------------------------------------------------------------*/
+
 Foam::autoPtr<Foam::fvMesh> meshPtr(nullptr);
-Foam::word regionName = Foam::fvMesh::defaultRegion;
+Foam::word regionName(Foam::polyMesh::defaultRegion);
 
 if (args.found("dry-run") || args.found("dry-run-write"))
 {
@@ -42,16 +69,13 @@ else
 {
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info
-            << "Create mesh " << regionName << " for time = "
-            << runTime.timeName() << Foam::nl << Foam::endl;
+        Foam::Info << "Create mesh " << regionName;
     }
     else
     {
-        Foam::Info
-            << "Create mesh for time = "
-            << runTime.timeName() << Foam::nl << Foam::endl;
+        Foam::Info << "Create mesh";
     }
+    Foam::Info << " for time = " << runTime.timeName() << Foam::nl;
 
     meshPtr.reset
     (
@@ -68,6 +92,11 @@ else
         )
     );
     meshPtr().init(true);   // initialise all (lower levels and current)
+
+    Foam::Info << Foam::endl;
 }
 
 Foam::fvMesh& mesh = meshPtr();
+
+
+// ************************************************************************* //

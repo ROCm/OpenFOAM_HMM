@@ -5,50 +5,41 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Create a polyMesh for a specified region, or the defaultRegion
+    Add multi-region command-line options: -allRegions, -regions, -region
 
-Required Variables
-    - runTime [Time]
-
-Provided Variables
-    - regionName [word]
-    - mesh [polyMesh]
+See Also
+    getAllRegionOptions.H
 
 \*---------------------------------------------------------------------------*/
 
-Foam::word regionName(Foam::polyMesh::defaultRegion);
-
 {
-    if (args.readIfPresent("region", regionName))
-    {
-        Foam::Info << "Create polyMesh " << regionName;
-    }
-    else
-    {
-        Foam::Info << "Create polyMesh";
-    }
-    Foam::Info << " for time = " << runTime.timeName() << Foam::nl;
+    Foam::argList::addBoolOption
+    (
+        "allRegions",
+        "Use all regions in regionProperties"
+    );
+
+    Foam::argList::addOption
+    (
+        "regions",
+        "wordRes",
+        "Use specified mesh region. Eg, -regions gas\n"
+        "Or from regionProperties.  Eg, -regions '(gas \"solid.*\")'"
+    );
+
+    Foam::argList::addOption
+    (
+        "region",
+        "name",
+        "Use specified mesh region. Eg, -region gas"
+    );
 }
 
-
-Foam::polyMesh mesh
-(
-    Foam::IOobject
-    (
-        regionName,
-        runTime.timeName(),
-        runTime,
-        Foam::IOobject::MUST_READ
-    )
-);
-
-Foam::Info << Foam::endl;
 
 // ************************************************************************* //

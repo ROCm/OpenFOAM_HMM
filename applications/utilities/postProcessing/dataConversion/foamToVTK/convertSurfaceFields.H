@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,7 +102,7 @@ Description
                 meshProxy.mesh(),
                 writeOpts,
                 (
-                    outputDir/regionPrefix
+                    outputDir/regionDir
                   / "surface-fields"/"surfaceFields" + timeDesc
                 ),
                 Pstream::parRun()
@@ -205,7 +205,7 @@ Description
                 pp,
                 writeOpts,
                 (
-                    outputDir/regionPrefix/fz.name()
+                    outputDir/regionDir/fz.name()
                   / (meshProxy.useSubMesh() ? meshProxy.name() : fz.name())
                   + timeDesc
                 ),

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
 
 if (doLagrangian)
 {
-    const fileName cloudPrefix = (regionPrefix/cloud::prefix);
+    const fileName cloudPrefix = (regionDir/cloud::prefix);
 
     wordList cloudNames = ListOps::create<word>
     (
@@ -89,7 +89,7 @@ if (doLagrangian)
             writeOpts,
             // Output name for the cloud
             (
-                outputDir/regionPrefix/cloud::prefix
+                outputDir/regionDir/cloud::prefix
               / cloudName/cloudName + timeDesc
             ),
             Pstream::parRun()

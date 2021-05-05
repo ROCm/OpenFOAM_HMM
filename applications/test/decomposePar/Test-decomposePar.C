@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,12 +62,9 @@ int main(int argc, char *argv[])
         "file",
         "Use specified file for decomposePar dictionary"
     );
-    #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "allRegions",
-        "Operate on all regions in regionProperties"
-    );
+
+    #include "addAllRegionOptions.H"
+
     argList::addBoolOption
     (
         "verbose",
@@ -107,7 +104,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool optRegion  = args.found("region");
-    const bool allRegions = args.found("allRegions");
     const bool verbose    = args.found("verbose");
 
     const label numSubdomains = args.getOrDefault<label>("domains", 0);
@@ -122,27 +118,20 @@ int main(int argc, char *argv[])
     const fileName decompDictFile =
         args.getOrDefault<fileName>("decomposeParDict", "");
 
-    // Get all region names
-    wordList regionNames;
-    if (allRegions)
-    {
-        regionNames = regionProperties(runTime).names();
+    // Get region names
+    #include "getAllRegionOptions.H"
 
-        Info<< "Decomposing all regions in regionProperties" << nl
-            << "    " << flatOutput(regionNames) << nl << endl;
-    }
-    else
-    {
-        regionNames.resize(1);
-        regionNames.first() =
-            args.getOrDefault<word>("region", fvMesh::defaultRegion);
-    }
+    Info<< "Decomposing regions: "
+        << flatOutput(regionNames) << nl << endl;
+
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
         const word& regionDir =
-            (regionName == fvMesh::defaultRegion ? word::null : regionName);
+        (
+            regionName == polyMesh::defaultRegion ? word::null : regionName
+        );
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
         Info<< "Create mesh..." << flush;

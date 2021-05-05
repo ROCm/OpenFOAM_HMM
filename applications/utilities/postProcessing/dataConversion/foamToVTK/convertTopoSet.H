@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ if (faceSetName.size())
 
     fileName outputName
     (
-        outputDir/regionPrefix/"face-set"
+        outputDir/regionDir/"face-set"
       / set.name()/set.name() + timeDesc
     );
 
@@ -67,7 +67,7 @@ if (pointSetName.size())
 
     fileName outputName
     (
-        outputDir/regionPrefix/"point-set"
+        outputDir/regionDir/"point-set"
       / set.name()/set.name() + timeDesc
     );
 

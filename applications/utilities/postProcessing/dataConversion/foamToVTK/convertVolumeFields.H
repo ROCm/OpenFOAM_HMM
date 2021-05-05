@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ Description
 
     fileName vtmOutputBase
     (
-        outputDir/regionPrefix/vtkName + timeDesc
+        outputDir/regionDir/vtkName + timeDesc
     );
 
     // Combined internal + boundary in a vtm file
@@ -148,7 +148,7 @@ Description
                 writeOpts.legacy()
               ?
                 (
-                    outputDir/regionPrefix/"boundary"
+                    outputDir/regionDir/"boundary"
                   / (meshProxy.useSubMesh() ? meshProxy.name() : "boundary")
                   + timeDesc
                 )
@@ -203,7 +203,7 @@ Description
                     writeOpts.legacy()
                   ?
                     (
-                        outputDir/regionPrefix/pp.name()
+                        outputDir/regionDir/pp.name()
                       / (meshProxy.useSubMesh() ? meshProxy.name() : pp.name())
                       + timeDesc
                     )
@@ -461,7 +461,7 @@ Description
                 series.write(seriesName);
 
                 // Add to multi-region vtm
-                vtmMultiRegion.add(regionName, regionPrefix, vtmWriter);
+                vtmMultiRegion.add(regionName, regionDir, vtmWriter);
             }
 
             if (vtmBoundaries.size())

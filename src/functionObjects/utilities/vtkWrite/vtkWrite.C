@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -280,11 +280,10 @@ bool Foam::functionObjects::vtkWrite::write()
     label regioni = 0;
     for (const word& regionName : meshes_.sortedToc())
     {
-        fileName regionPrefix;
-        if (regionName != polyMesh::defaultRegion)
-        {
-            regionPrefix = regionName;
-        }
+        const word& regionDir =
+        (
+            regionName == polyMesh::defaultRegion ? word::null : regionName
+        );
 
         auto& meshProxy = meshSubsets_[regioni];
         auto& vtuMeshCells = vtuMappings_[regioni];
@@ -331,7 +330,7 @@ bool Foam::functionObjects::vtkWrite::write()
 
         fileName vtmOutputBase
         (
-            outputDir_/regionPrefix/vtkName + timeDesc
+            outputDir_/regionDir/vtkName + timeDesc
         );
 
         // Combined internal + boundary in a vtm file
@@ -412,7 +411,7 @@ bool Foam::functionObjects::vtkWrite::write()
                 // Output name for one patch: "boundary"
                 (
                     writeOpts_.legacy()
-                  ? (outputDir_/regionPrefix/"boundary"/"boundary" + timeDesc)
+                  ? (outputDir_/regionDir/"boundary"/"boundary" + timeDesc)
                   : (vtmOutputBase / "boundary")
                 ),
                 Pstream::parRun()
@@ -464,7 +463,7 @@ bool Foam::functionObjects::vtkWrite::write()
                         writeOpts_.legacy()
                       ?
                         (
-                            outputDir_/regionPrefix/pp.name()
+                            outputDir_/regionDir/pp.name()
                           / (pp.name()) + timeDesc
                         )
                       : (vtmOutputBase / "boundary" / pp.name())
@@ -704,7 +703,7 @@ bool Foam::functionObjects::vtkWrite::write()
                     series.write(seriesName);
 
                     // Add to multi-region vtm
-                    vtmMultiRegion.add(regionName, regionPrefix, vtmWriter);
+                    vtmMultiRegion.add(regionName, regionDir, vtmWriter);
                 }
 
                 if (vtmBoundaries.size())
