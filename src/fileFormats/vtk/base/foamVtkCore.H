@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkCore_H
-#define foamVtkCore_H
+#ifndef Foam_vtk_core_H
+#define Foam_vtk_core_H
 
 #include <cstdint>
 #include "Enum.H"

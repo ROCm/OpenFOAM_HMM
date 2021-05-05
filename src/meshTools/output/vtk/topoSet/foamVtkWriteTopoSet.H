@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkWriteTopoSet_H
-#define foamVtkWriteTopoSet_H
+#ifndef Foam_vtk_WriteTopoSet_H
+#define Foam_vtk_WriteTopoSet_H
 
 #include "fileName.H"
 #include "UPstream.H"

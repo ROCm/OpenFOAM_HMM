@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,17 +39,20 @@ SourceFiles
 #define writeAreaFields_H
 
 #include "readFields.H"
-#include "foamVtkSurfaceMeshWriter.H"
+#include "foamVtkIndPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Writer type for finite-area mesh + fields
+typedef vtk::indirectPatchGeoFieldsWriter vtkWriterType_areaMesh;
+
 template<class GeoField>
 bool writeAreaField
 (
-    vtk::surfaceMeshWriter& writer,
+    vtkWriterType_areaMesh& writer,
     const tmp<GeoField>& tfield
 )
 {
@@ -68,7 +71,7 @@ bool writeAreaField
 template<class GeoField>
 label writeAreaFields
 (
-    vtk::surfaceMeshWriter& writer,
+    vtkWriterType_areaMesh& writer,
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
     const bool syncPar
@@ -97,7 +100,7 @@ label writeAreaFields
 
 label writeAllAreaFields
 (
-    vtk::surfaceMeshWriter& writer,
+    vtkWriterType_areaMesh& writer,
     const faMesh& mesh,
     const IOobjectList& objects,
     const bool syncPar

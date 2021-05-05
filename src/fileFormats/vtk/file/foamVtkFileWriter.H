@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkFileWriter_H
-#define foamVtkFileWriter_H
+#ifndef Foam_vtk_fileWriter_H
+#define Foam_vtk_fileWriter_H
 
 #include <fstream>
 #include "Enum.H"
@@ -116,6 +116,12 @@ protected:
 
     // Protected Member Functions
 
+        //- Generate message reporting bad writer state
+        Ostream& reportBadState(Ostream&, outputState expected) const;
+
+        //- Generate message reporting bad writer state
+        Ostream& reportBadState(Ostream&, outputState, outputState) const;
+
         //- The backend ostream in use
         inline std::ofstream& os();
 
@@ -138,6 +144,14 @@ protected:
             const label nValues
         );
 
+        //- Write basic (primitive) field content
+        //  No context checking (eg, file-open, CellData, PointData, etc)
+        template<class Type>
+        void writeBasicField
+        (
+            const word& fieldName,
+            const UList<Type>& field
+        );
 
         //- Trigger change state to Piece. Resets nCellData_, nPointData_.
         bool enter_Piece();
@@ -200,13 +214,13 @@ public:
         inline bool legacy() const;
 
         //- Parallel output requested?
-        inline bool parallel() const;
+        inline bool parallel() const noexcept;
 
         //- The output state in printable format
         inline const word& state() const;
 
         //- The current output file name
-        inline const fileName& output() const;
+        inline const fileName& output() const noexcept;
 
 
         //- Open file for writing (creates parent directory).
@@ -257,10 +271,10 @@ public:
         virtual bool beginPointData(label nFields = 0) = 0;
 
         //- Return the number of CellData written for the Piece thus far.
-        inline label nCellData() const;
+        inline label nCellData() const noexcept;
 
         //- Return the number of PointData written for the Piece thus far.
-        inline label nPointData() const;
+        inline label nPointData() const noexcept;
 
 
         //- Explicitly end FieldData output and switch to DECLARED state
@@ -281,7 +295,6 @@ public:
         //      (OPENED | DECLARED) states, in which case it invokes
         //      beginFieldData(1) internally.
         void writeTimeValue(scalar timeValue);
-
 };
 
 

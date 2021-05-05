@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,21 +24,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtk::appendBase64Formatter
+    Foam::vtk::GenericPatchGeoFieldsWriter
 
 Description
-    Appended base-64 encoded binary output.
-    Uses an output filter layer to write base-64 encoded content.
+    A Foam::vtk::GenericPatchWriter with support for geometric fields.
+
+    Caution, currently only works properly for indirect patches.
 
 SourceFiles
-    foamVtkAppendBase64Formatter.C
+    foamVtkGenericPatchGeoFieldsWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_appendBase64Formatter_H
-#define Foam_vtk_appendBase64Formatter_H
+#ifndef Foam_vtk_GenericPatchGeoFieldsWriter_H
+#define Foam_vtk_GenericPatchGeoFieldsWriter_H
 
-#include "foamVtkBase64Layer.H"
+#include "areaFields.H"
+#include "surfaceFields.H"
+#include "foamVtkGenericPatchWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,63 +51,70 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class vtk::appendBase64Formatter Declaration
+              Class vtk::GenericPatchGeoFieldsWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class appendBase64Formatter
+template<class PatchType>
+class GenericPatchGeoFieldsWriter
 :
-    public foamVtkBase64Layer
+    public vtk::GenericPatchWriter<PatchType>
 {
-    // Private Data Members
-
-        static const char* name_;
-        static const outputOptions opts_;
-
-        //- The current offset for append data.
-        uint64_t offset_;
-
-
     // Private Member Functions
 
-        //- No copy construct
-        appendBase64Formatter(const appendBase64Formatter&) = delete;
+        //- Get face field (internal face or boundary face)
+        template<class Type>
+        tmp<Field<Type>> getFaceField
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
+        ) const;
 
-        //- No copy assignment
-        void operator=(const appendBase64Formatter&) = delete;
 
+    //- No copy construct
+    GenericPatchGeoFieldsWriter
+    (
+        const GenericPatchGeoFieldsWriter<PatchType>&
+    ) = delete;
+
+    //- No copy assignment
+    void operator=(const GenericPatchGeoFieldsWriter<PatchType>&) = delete;
 
 public:
 
     // Constructors
 
-        //- Construct and attach to an output stream
-        appendBase64Formatter(std::ostream& os);
-
-
-    //- Destructor. Closes/flushes the underlying layer.
-    virtual ~appendBase64Formatter();
+        //- Inherit constructors from GenericPatchWriter
+        using vtk::GenericPatchWriter<PatchType>::GenericPatchWriter;
 
 
     // Member Functions
 
-        //- The output is APPEND_BASE64.
-        virtual const outputOptions& opts() const;
+        //- Write volume-mesh surface field (CellData)
+        template<class Type>
+        void write
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+        );
 
-        //- Output name for XML type ("append")
-        virtual const char* name() const;
-
-        //- Increase the append data offset by numbytes and sizeof(uint64_t).
-        //  The additional (uint64_t) size information is consistent with
-        //  writeSize().
-        //
-        //  \return The previous data offset
-        virtual uint64_t offset(const uint64_t numbytes);
+        //- Write area-mesh surface field (CellData)
+        template<class Type>
+        void write
+        (
+            const GeometricField<Type, faPatchField, areaMesh>& field
+        );
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace vtk
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "foamVtkGenericPatchGeoFieldsWriter.C"
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

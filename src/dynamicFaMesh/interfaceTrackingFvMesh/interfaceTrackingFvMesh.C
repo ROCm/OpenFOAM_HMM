@@ -48,6 +48,7 @@ License
 #include "turbulentTransportModel.H"
 #include "demandDrivenData.H"
 #include "unitConversion.H"
+#include "foamVtkIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2269,112 +2270,46 @@ bool Foam::interfaceTrackingFvMesh::update()
 
 void Foam::interfaceTrackingFvMesh::writeVTK() const
 {
-    // Write patch and points into VTK
-    OFstream mps(mesh().time().timePath()/"freeSurface.vtk");
-
-    const vectorField& points = aMesh().patch().points();
-    const IndirectList<face>& faces = aMesh().patch();
-
-    mps << "# vtk DataFile Version 2.0" << nl
-        << mesh().time().timePath()/"freeSurface.vtk" << nl
-        << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << points.size() << " float" << nl;
-
-    // Write points
-    List<float> mlpBuffer(3*points.size());
-
-    label counter = 0;
-    forAll(points, i)
-    {
-        mlpBuffer[counter++] = float(points[i].x());
-        mlpBuffer[counter++] = float(points[i].y());
-        mlpBuffer[counter++] = float(points[i].z());
-    }
-
-    forAll(mlpBuffer, i)
-    {
-        mps << mlpBuffer[i] << ' ';
-
-        if (i > 0 && (i % 10) == 0)
-        {
-            mps << nl;
-        }
-    }
-
-    // Write faces
-    label nFaceVerts = 0;
-
-    forAll(faces, faceI)
-    {
-        nFaceVerts += faces[faceI].size() + 1;
-    }
-    labelList mlfBuffer(nFaceVerts);
-
-    counter = 0;
-    forAll(faces, faceI)
-    {
-        const face& f = faces[faceI];
-
-        mlfBuffer[counter++] = f.size();
-
-        forAll(f, fpI)
-        {
-            mlfBuffer[counter++] = f[fpI];
-        }
-    }
-    mps << nl;
-
-    mps << "POLYGONS " << faces.size() << ' ' << nFaceVerts << endl;
-
-    forAll(mlfBuffer, i)
-    {
-        mps << mlfBuffer[i] << ' ';
-
-        if (i > 0 && (i % 10) == 0)
-        {
-            mps << nl;
-        }
-    }
-    mps << nl;
-
-    // aMesh().patch().writeVTK
-    // (
-    //     mesh().time().timePath()/"freeSurface",
-    //     aMesh().patch(),
-    //     aMesh().patch().points()
-    // );
+    vtk::indirectPatchWriter writer
+    (
+        aMesh().patch(),
+        vtk::formatType::LEGACY_ASCII,
+        mesh().time().timePath()/"freeSurface",
+        false // serial only
+    );
+    writer.writeGeometry();
 }
 
 
 void Foam::interfaceTrackingFvMesh::writeVTKControlPoints()
 {
     // Write control points into VTK
-    fileName name(mesh().time().timePath()/"freeSurfaceControlPoints.vtk");
-    OFstream mps(name);
+    OFstream os
+    (
+        mesh().time().timePath()/"freeSurfaceControlPoints.vtk"
+    );
 
-    Info<< "Writing free surface control point to " << name << endl;
+    Info<< "Writing free surface control points to " << os.name() << nl;
 
-    mps << "# vtk DataFile Version 2.0" << nl
-        << name << nl
+    os  << "# vtk DataFile Version 2.0" << nl
+        << "freeSurfaceControlPoints" << nl
         << "ASCII" << nl
-        << "DATASET POLYDATA" << nl
-        << "POINTS " << controlPoints().size() << " float" << nl;
+        << "DATASET POLYDATA" << nl;
 
-    forAll(controlPoints(), pointI)
+    const label nPoints = controlPoints().size();
+
+    os  << "POINTS " << nPoints << " float" << nl;
+    for (const point& p : controlPoints())
     {
-        mps << controlPoints()[pointI].x() << ' '
-            << controlPoints()[pointI].y() << ' '
-            << controlPoints()[pointI].z() << nl;
+        os  << float(p.x()) << ' '
+            << float(p.y()) << ' '
+            << float(p.z()) << nl;
     }
 
-    // Write vertices
-    mps << "VERTICES " << controlPoints().size() << ' '
-        << controlPoints().size()*2 << nl;
-
-    forAll(controlPoints(), pointI)
+    os  << "VERTICES " << nPoints << ' ' << 2*nPoints << nl;
+    for (label id = 0; id < nPoints; ++id)
     {
-        mps << 1 << ' ' << pointI << nl;
+        os  << 1 << ' ' << id << nl;
     }
 }
 

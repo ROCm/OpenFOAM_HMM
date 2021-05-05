@@ -26,6 +26,8 @@ License
 Description
     Code chunk for converting finite-area - included by foamToVTK.
 
+    Typedef vtkWriterType_areaMesh is declared in writeAreaFields.H
+
 \*---------------------------------------------------------------------------*/
 
 //
@@ -62,7 +64,7 @@ if (doFiniteArea)
 
         const auto& pp = faMeshPtr->patch();
 
-        vtk::surfaceMeshWriter writer
+        vtkWriterType_areaMesh writer
         (
             pp,
             writeOpts,

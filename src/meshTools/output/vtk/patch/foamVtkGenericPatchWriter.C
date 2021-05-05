@@ -23,45 +23,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vtk::surfaceMeshWriter
-
-Description
-    Alias for Foam::vtk::indirectPatchGeoFieldsWriter.
-
-    Write vtp file (or legacy vtk) with support for geometric fields.
-
-See Also
-    Foam::vtk::GenericPatchWriter
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_surfaceMeshWriter_H
-#define Foam_vtk_surfaceMeshWriter_H
-
-#include "foamVtkGenericPatchGeoFieldsWriter.H"
-#include "indirectPrimitivePatch.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class PatchType>
+template<class Type>
+void Foam::vtk::GenericPatchWriter<PatchType>::writeCellData
+(
+    const word& fieldName,
+    const UList<Type>& field
+)
 {
-namespace vtk
-{
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for field " << fieldName << nl << endl
+            << exit(FatalError);
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    this->polyWriter::write(fieldName, field);
+}
 
-typedef
-    GenericPatchGeoFieldsWriter<indirectPrimitivePatch>
-    surfaceMeshWriter;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace vtk
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

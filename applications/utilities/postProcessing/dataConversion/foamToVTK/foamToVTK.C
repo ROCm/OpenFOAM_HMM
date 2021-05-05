@@ -160,6 +160,7 @@ Note
 #include "writeDimFields.H"
 #include "writeVolFields.H"
 #include "writePointFields.H"
+#include "writeSurfaceFields.H"
 
 #include "memInfo.H"
 

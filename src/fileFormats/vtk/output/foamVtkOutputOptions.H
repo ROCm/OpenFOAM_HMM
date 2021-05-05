@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkOutputOptions_H
-#define foamVtkOutputOptions_H
+#ifndef Foam_vtk_outputOptions_H
+#define Foam_vtk_outputOptions_H
 
 #include "foamVtkOutput.H"
 #include "string.H"

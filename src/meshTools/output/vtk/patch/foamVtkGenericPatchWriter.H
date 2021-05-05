@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +24,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtk::surfaceFieldWriter
+    Foam::vtk::GenericPatchWriter
 
 Description
-    Write surfaces fields (as PointData) in VTP format.
-    Legacy VTK format is intentionally not supported.
+    Write concrete PrimitivePatch faces/points (optionally with fields)
+    as a vtp file or a legacy vtk file.
+    The patch type is limited to representations of polygon faces
+    and 3D points and must support the following methods:
 
-    The file output is structured as HEAD, FIELD_DATA, PIECE followed by any
-    CELL_DATA or POINT_DATA. These states are tracked internally to help
-    detect logic errors.
+    - localPoints()
+    - localFaces()
+    .
 
-    The FieldData element is to be placed prior to writing any geometry
-    Piece. This moves the information to the front of the output file
-    for visibility and simplifies the logic.
+    The file output states are managed by the Foam::vtk::fileWriter class.
+    FieldData (eg, TimeValue) must appear before any geometry pieces.
 
 Note
     Parallel output is combined into a single Piece without point merging,
@@ -46,17 +46,12 @@ Note
     In the future, the duplicate points at processor connections
     may be addressed using ghost points.
 
-SourceFiles
-    surfaceFieldWriter.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_surfaceFieldWriter_H
-#define Foam_vtk_surfaceFieldWriter_H
+#ifndef Foam_vtk_GenericPatchWriter_H
+#define Foam_vtk_GenericPatchWriter_H
 
-#include "foamVtkFileWriter.H"
-#include "fvMesh.H"
-#include "pointField.H"
+#include "foamVtkPolyWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,116 +61,114 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class vtk::surfaceFieldWriter Declaration
+                   Class vtk::GenericPatchWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfaceFieldWriter
+template<class PatchType>
+class GenericPatchWriter
 :
-    public vtk::fileWriter
+    public vtk::polyWriter
 {
     // Private Member Data
 
-        //- Reference to the OpenFOAM mesh (or subset)
-        const fvMesh& mesh_;
-
-        //- The number of field points for the current Piece
-        label numberOfPoints_;
+        //- Reference to faces/points as a patch
+        const PatchType& pp_;
 
 
     // Private Member Functions
 
-        //- Flatten boundary field values into a contiguous list
-        List<vector> flattenBoundary(const surfaceVectorField& field) const;
-
-
         //- No copy construct
-        surfaceFieldWriter(const surfaceFieldWriter&) = delete;
+        GenericPatchWriter(const GenericPatchWriter<PatchType>&) = delete;
 
         //- No copy assignment
-        void operator=(const surfaceFieldWriter&) = delete;
+        void operator=(const GenericPatchWriter<PatchType>&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Construct from mesh (default format INLINE_BASE64)
-        surfaceFieldWriter
+        //- Construct from patch (default output INLINE_BASE64)
+        explicit GenericPatchWriter
         (
-            const fvMesh& mesh,
+            const PatchType& pp,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
-        );
+        )
+        :
+            vtk::polyWriter(opts),
+            pp_(pp)
+        {}
 
-        //- Construct from mesh (default format INLINE_BASE64),
+        //- Construct from components (default output INLINE_BASE64),
         //- and open the file for writing.
         //  The file name is with/without an extension.
-        surfaceFieldWriter
+        GenericPatchWriter
         (
-            const fvMesh& mesh,
+            const PatchType& pp,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::polyWriter(file, parallel),
+            pp_(pp)
+        {}
 
-        //- Construct from mesh and open the file for writing.
+        //- Construct from components and open the file for writing.
         //  The file name is with/without an extension.
-        surfaceFieldWriter
+        GenericPatchWriter
         (
-            const fvMesh& mesh,
+            const PatchType& pp,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
-        );
+        )
+        :
+            vtk::polyWriter(opts, file, parallel),
+            pp_(pp)
+        {}
 
 
     //- Destructor
-    virtual ~surfaceFieldWriter() = default;
+    virtual ~GenericPatchWriter() = default;
 
 
     // Member Functions
 
-        //- File extension for current format type.
-        using vtk::fileWriter::ext;
-
-        //- File extension for given output type
-        inline static word ext(vtk::outputOptions)
+        //- Reference to the originating face/points patch
+        const PatchType& patch() const noexcept
         {
-            // No legacy
-            return vtk::fileExtension[vtk::fileTag::POLY_DATA];
+            return pp_;
         }
-
 
         //- Write file header (non-collective)
         //  \note Expected calling states: (OPENED).
-        virtual bool beginFile(std::string title = "");
+        virtual bool beginFile(std::string title = "surface")
+        {
+            return vtk::polyWriter::beginFile(title);
+        }
 
-        //- Write cloud positions
+        //- Write patch topology
         //  Also writes the file header if not previously written.
         //  \note Must be called prior to writing CellData or PointData
-        virtual bool writeGeometry();
-
-        //- Begin CellData output section for specified number of fields.
-        //  Must be called prior to writing any cell data fields.
-        //  \param nFields is the number of fields, which is required for
-        //      legacy format.
-        //  \note Expected calling states: (PIECE | POINT_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginCellData(label nFields=0);
-
-        //- Begin PointData output section
-        //  Must be called prior to writing data fields.
-        //  \note Expected calling states: (PIECE).
-        //
-        //  \return True if the state changed
-        virtual bool beginPointData(label nFields=0);
+        virtual bool writeGeometry()
+        {
+            return writePolyGeometry(pp_.localPoints(), pp_.localFaces());
+        }
 
 
-    // Write
+    // Write Fields
 
-        //- Write field
-        void write(const surfaceVectorField& field);
+        //- Write primitive field of CellData
+        template<class Type>
+        void writeCellData(const word& fieldName, const UList<Type>& field);
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "foamVtkGenericPatchWriter.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

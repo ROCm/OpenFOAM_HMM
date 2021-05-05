@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,9 +49,12 @@ void Foam::vtk::internalMeshWriter::writeUniform
     }
     else
     {
-        WarningInFunction
-            << "Ignore bad writer state (" << stateNames[state_]
-            << ") for field " << fieldName << nl << endl
+        reportBadState
+        (
+            FatalErrorInFunction,
+            outputState::CELL_DATA,
+            outputState::POINT_DATA
+        )   << " for field " << fieldName << nl << endl
             << exit(FatalError);
     }
 }
@@ -70,10 +73,8 @@ void Foam::vtk::internalMeshWriter::writeCellData
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for field " << fieldName << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for field " << fieldName << nl << endl
             << exit(FatalError);
     }
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtk::patchMeshWriter
+    Foam::vtk::polyWriter
 
 Description
-    Write OpenFOAM patches and patch fields in VTP or legacy vtk format.
+    Write faces/points (optionally with fields)
+    as a vtp file or a legacy vtk file.
 
     The file output states are managed by the Foam::vtk::fileWriter class.
     FieldData (eg, TimeValue) must appear before any geometry pieces.
@@ -39,20 +40,18 @@ Note
     In the future, the duplicate points at processor connections
     may be addressed using ghost points.
 
-See Also
-    Foam::vtk::patchWriter
-
 SourceFiles
-    foamVtkPatchMeshWriter.C
-    foamVtkPatchMeshWriterTemplates.C
+    foamVtkPolyWriter.C
+    foamVtkPolyWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkPatchMeshWriter_H
-#define foamVtkPatchMeshWriter_H
+#ifndef Foam_vtk_polyWriter_H
+#define Foam_vtk_polyWriter_H
 
 #include "foamVtkFileWriter.H"
-#include "polyMesh.H"
+#include "pointField.H"
+#include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,22 +61,16 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class vtk::patchMeshWriter Declaration
+                       Class vtk::polyWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class patchMeshWriter
+class polyWriter
 :
     public vtk::fileWriter
 {
 protected:
 
-    // Protected Member Data
-
-        //- Reference to the OpenFOAM mesh (or subset)
-        const polyMesh& mesh_;
-
-        //- The selected patch ids
-        labelList patchIDs_;
+    // Protected Data
 
         //- The number of field points for the current Piece
         label numberOfPoints_;
@@ -95,29 +88,30 @@ protected:
         label nLocalVerts_;
 
 
+private:
+
     // Private Member Functions
 
         //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
-        //- and begin piece.
-        void beginPiece();
+        //- and begin piece
+        void beginPiece(const pointField& points, const faceList& faces);
 
-        //- Write patch points
-        void writePoints();
+        //- Write points
+        void writePoints(const pointField& points);
 
-        //- Write patch faces, legacy format
+        //- Write faces, legacy format
         //  \param pointOffset processor-local point offset
-        void writePolysLegacy(const label pointOffset);
+        void writePolysLegacy(const faceList& faces, const label pointOffset);
 
-        //- Write patch faces
+        //- Write faces
         //  \param pointOffset processor-local point offset
-        void writePolys(const label pointOffset);
-
+        void writePolys(const faceList& faces, const label pointOffset);
 
         //- No copy construct
-        patchMeshWriter(const patchMeshWriter&) = delete;
+        polyWriter(const polyWriter&) = delete;
 
         //- No copy assignment
-        void operator=(const patchMeshWriter&) = delete;
+        void operator=(const polyWriter&) = delete;
 
 
 public:
@@ -125,31 +119,24 @@ public:
     // Constructors
 
         //- Construct from components (default format INLINE_BASE64)
-        patchMeshWriter
+        explicit polyWriter
         (
-            const polyMesh& mesh,
-            const labelList& patchIDs,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
         );
 
         //- Construct from components (default format INLINE_BASE64),
         //- and open the file for writing.
         //  The file name is with/without an extension.
-        patchMeshWriter
+        explicit polyWriter
         (
-            const polyMesh& mesh,
-            const labelList& patchIDs,
             const fileName& file,
             bool parallel = Pstream::parRun()
         );
 
-        //- Construct from components (default format INLINE_BASE64),
         //- Construct from components and open the file for writing.
         //  The file name is with/without an extension.
-        patchMeshWriter
+        polyWriter
         (
-            const polyMesh& mesh,
-            const labelList& patchIDs,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
@@ -157,7 +144,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchMeshWriter() = default;
+    virtual ~polyWriter() = default;
 
 
     // Member Functions
@@ -166,25 +153,25 @@ public:
         using vtk::fileWriter::ext;
 
         //- File extension for given output type
-        inline static word ext(vtk::outputOptions opts)
+        static word ext(vtk::outputOptions opts)
         {
             return opts.ext(vtk::fileTag::POLY_DATA);
         }
 
-        //- The patch IDs
-        inline const labelList& patchIDs() const
-        {
-            return patchIDs_;
-        }
+        //- Dummy write mesh topology method - Fatal if called
+        //  Provided for special-purpose writers that do not hold
+        //  their own geomety, but use writePolyGeometry() directly
+        virtual bool writeGeometry();
 
-        //- Write file header (non-collective)
-        //  \note Expected calling states: (OPENED).
-        virtual bool beginFile(std::string title = "");
-
-        //- Write patch topology
+        //- Low-level write face/point topology.
+        //- Normally used by writeGeometry() in a derived class
         //  Also writes the file header if not previously written.
         //  \note Must be called prior to writing CellData or PointData
-        virtual bool writeGeometry();
+        bool writePolyGeometry
+        (
+            const pointField& points,
+            const faceList& faces
+        );
 
         //- Begin CellData output section for specified number of fields.
         //  Must be called prior to writing any cell data fields.
@@ -205,24 +192,15 @@ public:
         virtual bool beginPointData(label nFields = 0);
 
 
-        //- Write patch ids as CellData.
-        //  Must be called within the CELL_DATA state.
-        void writePatchIDs();
-
-        //- Write processor ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
-        bool writeProcIDs();
-
-        //- Write processor neighbour ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
-        bool writeNeighIDs();
-
-
     // Write
 
         //- Write a uniform field of Cell (Face) or Point values
         template<class Type>
         void writeUniform(const word& fieldName, const Type& val);
+
+        //- Write a list of Cell (Face) or Point values
+        template<class Type>
+        void write(const word& fieldName, const UList<Type>& field);
 };
 
 
@@ -234,7 +212,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "foamVtkPatchMeshWriterTemplates.C"
+    #include "foamVtkPolyWriterTemplates.C"
 #endif
 
 

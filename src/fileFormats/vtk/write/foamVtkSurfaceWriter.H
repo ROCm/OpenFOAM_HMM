@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,12 +46,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkSurfaceWriter_H
-#define foamVtkSurfaceWriter_H
+#ifndef Foam_vtk_surfaceWriter_H
+#define Foam_vtk_surfaceWriter_H
 
-#include "foamVtkFileWriter.H"
-#include "pointField.H"
-#include "faceList.H"
+#include "foamVtkPolyWriter.H"
 #include "instant.H"
 #include <functional>
 
@@ -68,7 +66,7 @@ namespace vtk
 
 class surfaceWriter
 :
-    public vtk::fileWriter
+    public vtk::polyWriter
 {
     // Private Member Data
 
@@ -78,42 +76,11 @@ class surfaceWriter
         //- Reference to the faces
         std::reference_wrapper<const faceList> faces_;
 
-        //- The number of field points for the current Piece
-        label numberOfPoints_;
-
-        //- The number of field cells (faces) for the current Piece
-        label numberOfCells_;
-
-        //- Local number of points
-        label nLocalPoints_;
-
-        //- Local number of faces
-        label nLocalFaces_;
-
-        //- Local face vertices (connectivity) count. Sum of face sizes.
-        label nLocalVerts_;
-
         //- Time name/value
         instant instant_;
 
 
     // Private Member Functions
-
-        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
-        //- and begin piece
-        void beginPiece();
-
-        //- Write points
-        void writePoints();
-
-        //- Write faces, legacy format
-        //  \param pointOffset processor-local point offset
-        void writePolysLegacy(const label pointOffset);
-
-        //- Write faces
-        //  \param pointOffset processor-local point offset
-        void writePolys(const label pointOffset);
-
 
         //- No copy construct
         surfaceWriter(const surfaceWriter&) = delete;
@@ -163,15 +130,6 @@ public:
 
     // Member Functions
 
-        //- File extension for current format type.
-        using vtk::fileWriter::ext;
-
-        //- File extension for given output type
-        inline static word ext(vtk::outputOptions opts)
-        {
-            return opts.ext(vtk::fileTag::POLY_DATA);
-        }
-
         //- Define a time name/value for the output
         virtual void setTime(const instant& inst);
 
@@ -183,24 +141,6 @@ public:
         //  Also writes the file header if not previously written.
         //  \note Must be called prior to writing CellData or PointData
         virtual bool writeGeometry();
-
-        //- Begin CellData output section for specified number of fields.
-        //  Must be called prior to writing any cell data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | POINT_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginCellData(label nFields = 0);
-
-        //- Begin PointData for specified number of fields.
-        //  Must be called prior to writing any point data fields.
-        //  \param nFields is for legacy format only.
-        //      When nFields=0, this a no-op for legacy format.
-        //  \note Expected calling states: (PIECE | CELL_DATA).
-        //
-        //  \return True if the state changed
-        virtual bool beginPointData(label nFields = 0);
 
         //- Write "TimeValue" FieldData (name as per Catalyst output)
         //  Must be called within the FIELD_DATA state.
@@ -214,17 +154,6 @@ public:
 
         //- Reset point, face references to begin a new piece
         void piece(const pointField& points, const faceList& faces);
-
-
-    // Write
-
-        //- Write a uniform field of Cell (Face) or Point values
-        template<class Type>
-        void writeUniform(const word& fieldName, const Type& val);
-
-        //- Write a list of Cell (Face) or Point values
-        template<class Type>
-        void write(const word& fieldName, const UList<Type>& field);
 };
 
 
@@ -232,13 +161,6 @@ public:
 
 } // End namespace vtk
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "foamVtkSurfaceWriterTemplates.C"
-#endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

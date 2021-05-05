@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkOutput_H
-#define foamVtkOutput_H
+#ifndef Foam_vtk_output_H
+#define Foam_vtk_output_H
 
 #include "autoPtr.H"
 #include "bitSet.H"

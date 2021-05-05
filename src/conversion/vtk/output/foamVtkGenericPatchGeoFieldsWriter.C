@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +27,10 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class PatchType>
 template<class Type>
 Foam::tmp<Foam::Field<Type>>
-Foam::vtk::surfaceMeshWriter::getFaceField
+Foam::vtk::GenericPatchGeoFieldsWriter<PatchType>::getFaceField
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
 ) const
@@ -65,41 +65,33 @@ Foam::vtk::surfaceMeshWriter::getFaceField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class PatchType>
 template<class Type>
-void Foam::vtk::surfaceMeshWriter::write
+void Foam::vtk::GenericPatchGeoFieldsWriter<PatchType>::write
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& field
 )
 {
-    if (notState(outputState::CELL_DATA))
-    {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for field " << field.name() << nl << endl
-            << exit(FatalError);
-    }
-
-    this->indirectPatchWriter::write(field.name(), getFaceField(field)());
+    this->GenericPatchWriter<PatchType>::writeCellData
+    (
+        field.name(),
+        getFaceField(field)()
+    );
 }
 
 
+template<class PatchType>
 template<class Type>
-void Foam::vtk::surfaceMeshWriter::write
+void Foam::vtk::GenericPatchGeoFieldsWriter<PatchType>::write
 (
     const GeometricField<Type, faPatchField, areaMesh>& field
 )
 {
-    if (notState(outputState::CELL_DATA))
-    {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for field " << field.name() << nl << endl
-            << exit(FatalError);
-    }
-
-    this->indirectPatchWriter::write(field.name(), field.primitiveField());
+    this->GenericPatchWriter<PatchType>::writeCellData
+    (
+        field.name(),
+        field.primitiveField()
+    );
 }
 
 

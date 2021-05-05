@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkLegacyRawFormatter_H
-#define foamVtkLegacyRawFormatter_H
+#ifndef Foam_vtk_legacyRawFormatter_H
+#define Foam_vtk_legacyRawFormatter_H
 
 #include "foamVtkFormatter.H"
 

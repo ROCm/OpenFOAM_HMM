@@ -46,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtuCells_H
-#define foamVtuCells_H
+#ifndef Foam_vtk_vtuCells_H
+#define Foam_vtk_vtuCells_H
 
 #include "foamVtkCore.H"
 #include "foamVtkMeshMaps.H"

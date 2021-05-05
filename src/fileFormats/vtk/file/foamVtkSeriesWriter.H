@@ -52,8 +52,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkSeriesWriter_H
-#define foamVtkSeriesWriter_H
+#ifndef Foam_vtk_seriesWriter_H
+#define Foam_vtk_seriesWriter_H
 
 #include <fstream>
 #include "foamVtkOutputOptions.H"

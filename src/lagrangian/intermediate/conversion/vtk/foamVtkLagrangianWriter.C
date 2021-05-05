@@ -57,7 +57,7 @@ Foam::pointField Foam::vtk::lagrangianWriter::positions() const
 
 void Foam::vtk::lagrangianWriter::writeVerts()
 {
-    // No collectives - can skip on slave processors
+    // No collectives - can skip on sub-processes
     if (!format_) return;
 
     const label nVerts = numberOfPoints_;

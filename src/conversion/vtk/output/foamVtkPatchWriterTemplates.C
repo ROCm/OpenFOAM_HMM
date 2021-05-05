@@ -42,10 +42,8 @@ void Foam::vtk::patchWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << field.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << field.name() << nl << endl
             << exit(FatalError);
     }
 
@@ -106,13 +104,13 @@ void Foam::vtk::patchWriter::write
             Field<Type> recv;
 
             // Receive each patch field and write
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
                 for (label i=0; i < nPatches; ++i)
                 {
-                    fromSlave >> recv;
+                    fromProc >> recv;
 
                     vtk::writeList(format(), recv);
                 }
@@ -120,8 +118,8 @@ void Foam::vtk::patchWriter::write
         }
         else
         {
-            // Send each patch field to master
-            OPstream toMaster
+            // Send each patch field
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
@@ -135,11 +133,11 @@ void Foam::vtk::patchWriter::write
                 const auto* vpp = isA<Field<Type>>(pfld);
                 if (vpp)
                 {
-                    toMaster << *vpp;
+                    toProc << *vpp;
                 }
                 else
                 {
-                    toMaster << pfld.patchInternalField();
+                    toProc << pfld.patchInternalField();
                 }
             }
         }
@@ -166,10 +164,8 @@ void Foam::vtk::patchWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for field " << field.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for field " << field.name() << nl << endl
             << exit(FatalError);
     }
 
@@ -227,13 +223,13 @@ void Foam::vtk::patchWriter::write
             Field<Type> recv;
 
             // Receive each patch field and write
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
                 for (label i=0; i < nPatches; ++i)
                 {
-                    fromSlave >> recv;
+                    fromProc >> recv;
 
                     vtk::writeList(format(), recv);
                 }
@@ -241,8 +237,8 @@ void Foam::vtk::patchWriter::write
         }
         else
         {
-            // Send each patch field to master
-            OPstream toMaster
+            // Send each patch field
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
@@ -254,11 +250,11 @@ void Foam::vtk::patchWriter::write
 
                 if (useNearCellValue_)
                 {
-                    toMaster << pfld.patchInternalField()();
+                    toProc << pfld.patchInternalField()();
                 }
                 else
                 {
-                    toMaster << static_cast<const Field<Type>&>(pfld);
+                    toProc << static_cast<const Field<Type>&>(pfld);
                 }
             }
         }
@@ -286,10 +282,8 @@ void Foam::vtk::patchWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << field.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << field.name() << nl << endl
             << exit(FatalError);
     }
 
@@ -356,13 +350,13 @@ void Foam::vtk::patchWriter::write
             Field<Type> recv;
 
             // Receive each patch field and write
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
                 for (label i=0; i < nPatches; ++i)
                 {
-                    fromSlave >> recv;
+                    fromProc >> recv;
 
                     vtk::writeList(format(), recv);
                 }
@@ -370,8 +364,8 @@ void Foam::vtk::patchWriter::write
         }
         else
         {
-            // Send each patch field to master
-            OPstream toMaster
+            // Send each patch field
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
@@ -389,13 +383,13 @@ void Foam::vtk::patchWriter::write
                             pfld.patchInternalField()()
                         );
 
-                    toMaster << tfield();
+                    toProc << tfield();
                 }
                 else
                 {
                     auto tfield = pInter.faceToPointInterpolate(pfld);
 
-                    toMaster << tfield();
+                    toProc << tfield();
                 }
             }
         }

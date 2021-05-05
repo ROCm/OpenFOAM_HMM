@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkMeshMaps_H
-#define foamVtkMeshMaps_H
+#ifndef Foam_vtk_vtkMeshMaps_H
+#define Foam_vtk_vtkMeshMaps_H
 
 #include "DynamicList.H"
 

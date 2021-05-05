@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkTools_H
-#define foamVtkTools_H
+#ifndef Foam_vtk_vtkTools_H
+#define Foam_vtk_vtkTools_H
 
 #include "faceList.H"
 #include "pointField.H"

@@ -317,13 +317,13 @@ meshStructure/meshStructure.C
 
 coupling/externalFileCoupler.C
 
-output/foamVtkIndPatchWriter.C
-output/foamVtkInternalMeshWriter.C
-output/foamVtkPatchMeshWriter.C
-output/foamVtkWriteTopoSet.C
-output/foamVtkWriteFaceSet.C
-output/foamVtkWritePointSet.C
-output/foamVtkWriteCellSetFaces.C
+vtk = output/vtk
+$(vtk)/mesh/foamVtkInternalMeshWriter.C
+$(vtk)/patch/foamVtkPatchMeshWriter.C
+$(vtk)/topoSet/foamVtkWriteTopoSet.C
+$(vtk)/topoSet/foamVtkWriteFaceSet.C
+$(vtk)/topoSet/foamVtkWritePointSet.C
+$(vtk)/topoSet/foamVtkWriteCellSetFaces.C
 
 regionModel/regionProperties/regionProperties.C
 

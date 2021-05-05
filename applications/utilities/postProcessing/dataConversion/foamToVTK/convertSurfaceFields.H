@@ -194,13 +194,13 @@ Description
                 continue;
             }
 
-            indirectPrimitivePatch pp
+            uindirectPrimitivePatch pp
             (
-                IndirectList<face>(mesh.faces(), fz),
+                UIndirectList<face>(mesh.faces(), fz),
                 mesh.points()
             );
 
-            vtk::surfaceMeshWriter writer
+            vtkWriterType_faceZone writer
             (
                 pp,
                 writeOpts,

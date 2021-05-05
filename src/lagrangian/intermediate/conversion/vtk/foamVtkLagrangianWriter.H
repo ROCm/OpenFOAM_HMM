@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkLagrangianWriter_H
-#define foamVtkLagrangianWriter_H
+#ifndef Foam_vtk_lagrangianWriter_H
+#define Foam_vtk_lagrangianWriter_H
 
 #include "fvMesh.H"
 #include "pointField.H"

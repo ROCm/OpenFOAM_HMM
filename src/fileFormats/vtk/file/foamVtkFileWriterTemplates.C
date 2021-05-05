@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +84,81 @@ void Foam::vtk::fileWriter::writeUniform
     if (format_)
     {
         vtk::write(format(), val, nValues);
+    }
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+}
+
+
+template<class Type>
+void Foam::vtk::fileWriter::writeBasicField
+(
+    const word& fieldName,
+    const UList<Type>& field
+)
+{
+    static_assert
+    (
+        (
+            std::is_same<label, typename pTraits<Type>::cmptType>::value
+         || std::is_floating_point<typename pTraits<Type>::cmptType>::value
+        ),
+        "Label and Floating-point vector space only"
+    );
+
+    const direction nCmpt(pTraits<Type>::nComponents);
+
+    label nValues = field.size();
+
+    if (parallel_)
+    {
+        reduce(nValues, sumOp<label>());
+    }
+
+    if (format_)
+    {
+        if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
+        {
+            if (legacy())
+            {
+                legacy::intField<nCmpt>(format(), fieldName, nValues);
+            }
+            else
+            {
+                const uint64_t payLoad = vtk::sizeofData<label, nCmpt>(nValues);
+
+                format().beginDataArray<label, nCmpt>(fieldName);
+                format().writeSize(payLoad);
+            }
+        }
+        else
+        {
+            if (legacy())
+            {
+                legacy::floatField<nCmpt>(format(), fieldName, nValues);
+            }
+            else
+            {
+                const uint64_t payLoad = vtk::sizeofData<float, nCmpt>(nValues);
+
+                format().beginDataArray<float, nCmpt>(fieldName);
+                format().writeSize(payLoad);
+            }
+        }
+    }
+
+
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), field);
+    }
+    else
+    {
+        vtk::writeList(format(), field);
     }
 
     if (format_)

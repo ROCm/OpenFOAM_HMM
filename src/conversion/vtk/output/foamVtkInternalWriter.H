@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkInternalWriter_H
-#define foamVtkInternalWriter_H
+#ifndef Foam_vtk_internalWriter_H
+#define Foam_vtk_internalWriter_H
 
 #include "foamVtkInternalMeshWriter.H"
 #include "volFields.H"

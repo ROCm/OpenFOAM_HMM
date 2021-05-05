@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -485,10 +485,11 @@ Foam::vtk::internalMeshWriter::internalMeshWriter
 )
 :
     vtk::fileWriter(vtk::fileTag::UNSTRUCTURED_GRID, opts),
-    mesh_(mesh),
-    vtuCells_(cells),
     numberOfPoints_(0),
-    numberOfCells_(0)
+    numberOfCells_(0),
+
+    mesh_(mesh),
+    vtuCells_(cells)
 {
     // We do not currently support append mode
     opts_.append(false);
@@ -621,10 +622,8 @@ void Foam::vtk::internalMeshWriter::writeCellIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for cellID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for cellID field" << nl << endl
             << exit(FatalError);
     }
 
@@ -680,10 +679,8 @@ bool Foam::vtk::internalMeshWriter::writeProcIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for procID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for procID field" << nl << endl
             << exit(FatalError);
     }
 
@@ -736,10 +733,8 @@ void Foam::vtk::internalMeshWriter::writePointIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for pointID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for pointID field" << nl << endl
             << exit(FatalError);
     }
 

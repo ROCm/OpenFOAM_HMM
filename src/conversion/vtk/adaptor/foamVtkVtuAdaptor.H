@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtk_vtuAdaptor_H
-#define foamVtk_vtuAdaptor_H
+#ifndef Foam_vtk_vtuAdaptor_H
+#define Foam_vtk_vtuAdaptor_H
 
 #include "fvMesh.H"
 #include "volFieldsFwd.H"

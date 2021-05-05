@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkAppendRawFormatter_H
-#define foamVtkAppendRawFormatter_H
+#ifndef Foam_vtk_appendRawFormatter_H
+#define Foam_vtk_appendRawFormatter_H
 
 #include "foamVtkFormatter.H"
 

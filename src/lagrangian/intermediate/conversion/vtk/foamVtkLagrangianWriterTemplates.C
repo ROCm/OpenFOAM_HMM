@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,38 +34,10 @@ License
 template<class Type>
 void Foam::vtk::lagrangianWriter::write(const IOField<Type>& field)
 {
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-    }
-    else if (isState(outputState::POINT_DATA))
-    {
-        ++nPointData_;
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") or (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << field.name() << nl << endl
-            << exit(FatalError);
-    }
-
-    static_assert
-    (
-        (
-            std::is_same<label, typename pTraits<Type>::cmptType>::value
-         || std::is_floating_point<typename pTraits<Type>::cmptType>::value
-        ),
-        "Label and Floating-point vector space only"
-    );
-
-
     // Other integral types (eg, bool etc) would need cast/convert to label.
     // Similarly for labelVector etc.
 
-    // // Ensure consistent output width
+    // Ensure consistent output width
     // for (const Type& val : field)
     // {
     //     for (int cmpt=0; cmpt < nCmpt; ++cmpt)
@@ -74,50 +46,26 @@ void Foam::vtk::lagrangianWriter::write(const IOField<Type>& field)
     //     }
     // }
 
-
-    const direction nCmpt(pTraits<Type>::nComponents);
-
-    label nVals = field.size();
-
-    if (parallel_)
+    if (isState(outputState::CELL_DATA))
     {
-        reduce(nVals, sumOp<label>());
+        ++nCellData_;
+        vtk::fileWriter::writeBasicField<Type>(field.name(), field);
     }
-
-    if (format_)
+    else if (isState(outputState::POINT_DATA))
     {
-        // Non-legacy
-
-        if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
-        {
-            const uint64_t payLoad = vtk::sizeofData<label, nCmpt>(nVals);
-
-            format().beginDataArray<label, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-        else
-        {
-            const uint64_t payLoad = vtk::sizeofData<float, nCmpt>(nVals);
-
-            format().beginDataArray<float, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-    }
-
-    if (parallel_)
-    {
-        vtk::writeListParallel(format_.ref(), field);
+        ++nPointData_;
+        vtk::fileWriter::writeBasicField<Type>(field.name(), field);
     }
     else
     {
-        vtk::writeList(format(), field);
-    }
-
-
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
+        reportBadState
+        (
+            FatalErrorInFunction,
+            outputState::CELL_DATA,
+            outputState::POINT_DATA
+        )
+            << " for field " << field.name() << nl << endl
+            << exit(FatalError);
     }
 }
 

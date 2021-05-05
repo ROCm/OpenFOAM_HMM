@@ -77,7 +77,7 @@ inline bool Foam::vtk::fileWriter::legacy() const
 }
 
 
-inline bool Foam::vtk::fileWriter::parallel() const
+inline bool Foam::vtk::fileWriter::parallel() const noexcept
 {
     return parallel_;
 }
@@ -89,19 +89,19 @@ inline const Foam::word& Foam::vtk::fileWriter::state() const
 }
 
 
-inline const Foam::fileName& Foam::vtk::fileWriter::output() const
+inline const Foam::fileName& Foam::vtk::fileWriter::output() const noexcept
 {
     return outputFile_;
 }
 
 
-inline Foam::label Foam::vtk::fileWriter::nCellData() const
+inline Foam::label Foam::vtk::fileWriter::nCellData() const noexcept
 {
     return nCellData_;
 }
 
 
-inline Foam::label Foam::vtk::fileWriter::nPointData() const
+inline Foam::label Foam::vtk::fileWriter::nPointData() const noexcept
 {
     return nPointData_;
 }

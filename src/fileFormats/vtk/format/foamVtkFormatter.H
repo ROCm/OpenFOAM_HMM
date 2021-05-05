@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtkFormatter_H
-#define foamVtkFormatter_H
+#ifndef Foam_vtk_formatter_H
+#define Foam_vtk_formatter_H
 
 #include "int.H"
 #include "label.H"

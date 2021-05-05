@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,10 +44,8 @@ void Foam::vtk::internalWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << field.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << field.name() << nl << endl
             << exit(FatalError);
     }
 
@@ -135,10 +133,8 @@ void Foam::vtk::internalWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << vfield.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << vfield.name() << nl << endl
             << exit(FatalError);
     }
 
@@ -204,10 +200,8 @@ void Foam::vtk::internalWriter::write
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << vfield.name() << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << vfield.name() << nl << endl
             << exit(FatalError);
     }
 

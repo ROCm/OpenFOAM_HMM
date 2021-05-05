@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +25,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkIndPatchWriter.H"
+#include "foamVtkPolyWriter.H"
 #include "foamVtkOutput.H"
 #include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtk::indirectPatchWriter::beginPiece()
+void Foam::vtk::polyWriter::beginPiece
+(
+    const pointField& points,
+    const faceList& faces
+)
 {
     // Basic sizes
-    nLocalPoints_ = pp_.nPoints();
-    nLocalFaces_  = pp_.size();
+    nLocalPoints_ = points.size();
+    nLocalFaces_  = faces.size();
     nLocalVerts_  = 0;
 
-    for (const face& f : pp_)
+    for (const face& f : faces)
     {
         nLocalVerts_ += f.size();
     }
@@ -68,7 +72,10 @@ void Foam::vtk::indirectPatchWriter::beginPiece()
 }
 
 
-void Foam::vtk::indirectPatchWriter::writePoints()
+void Foam::vtk::polyWriter::writePoints
+(
+    const pointField& points
+)
 {
     if (format_)
     {
@@ -92,7 +99,7 @@ void Foam::vtk::indirectPatchWriter::writePoints()
     if (parallel_ ? Pstream::master() : true)
     {
         {
-            vtk::writeList(format(), pp_.localPoints());
+            vtk::writeList(format(), points);
         }
     }
 
@@ -104,12 +111,12 @@ void Foam::vtk::indirectPatchWriter::writePoints()
             pointField recv;
 
             // Receive each point field and write
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
                 {
-                    fromSlave >> recv;
+                    fromProc >> recv;
 
                     vtk::writeList(format(), recv);
                 }
@@ -117,15 +124,15 @@ void Foam::vtk::indirectPatchWriter::writePoints()
         }
         else
         {
-            // Send to master
-            OPstream toMaster
+            // Send
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
             );
 
             {
-                toMaster << pp_.localPoints();
+                toProc << points;
             }
         }
     }
@@ -145,7 +152,11 @@ void Foam::vtk::indirectPatchWriter::writePoints()
 }
 
 
-void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
+void Foam::vtk::polyWriter::writePolysLegacy
+(
+    const faceList& faces,
+    const label pointOffset
+)
 {
     // Connectivity count without additional storage (done internally)
 
@@ -179,7 +190,7 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
         label off = pointOffset;
 
         {
-            for (const face& f : pp_.localFaces())
+            for (const face& f : faces)
             {
                 *iter = f.size();       // The size prefix
                 ++iter;
@@ -190,7 +201,7 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
                     ++iter;
                 }
             }
-            // off += pp_.nPoints();
+            // off += points.size();
         }
     }
 
@@ -211,7 +222,11 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
 }
 
 
-void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
+void Foam::vtk::polyWriter::writePolys
+(
+    const faceList& faces,
+    const label pointOffset
+)
 {
     if (format_)
     {
@@ -248,7 +263,7 @@ void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
             label off = pointOffset;
 
             {
-                for (const face& f : pp_.localFaces())
+                for (const face& f : faces)
                 {
                     for (const label pfi : f)
                     {
@@ -256,7 +271,7 @@ void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
                         ++iter;
                     }
                 }
-                // off += pp_.nPoints();
+                // off += points.size();
             }
         }
 
@@ -305,10 +320,11 @@ void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
             parallel_ ? globalIndex(nLocalVerts_).localStart() : 0
         );
 
+
         auto iter = vertOffsets.begin();
 
         {
-            for (const face& f : pp_)
+            for (const face& f : faces)
             {
                 off += f.size();   // End offset
                 *iter = off;
@@ -343,14 +359,12 @@ void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtk::indirectPatchWriter::indirectPatchWriter
+Foam::vtk::polyWriter::polyWriter
 (
-    const indirectPrimitivePatch& pp,
     const vtk::outputOptions opts
 )
 :
     vtk::fileWriter(vtk::fileTag::POLY_DATA, opts),
-    pp_(pp),
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
@@ -362,28 +376,26 @@ Foam::vtk::indirectPatchWriter::indirectPatchWriter
 }
 
 
-Foam::vtk::indirectPatchWriter::indirectPatchWriter
+Foam::vtk::polyWriter::polyWriter
 (
-    const indirectPrimitivePatch& pp,
     const fileName& file,
     bool parallel
 )
 :
-    indirectPatchWriter(pp)
+    polyWriter()
 {
     open(file, parallel);
 }
 
 
-Foam::vtk::indirectPatchWriter::indirectPatchWriter
+Foam::vtk::polyWriter::polyWriter
 (
-    const indirectPrimitivePatch& pp,
     const vtk::outputOptions opts,
     const fileName& file,
     bool parallel
 )
 :
-    indirectPatchWriter(pp, opts)
+    polyWriter(opts)
 {
     open(file, parallel);
 }
@@ -391,25 +403,28 @@ Foam::vtk::indirectPatchWriter::indirectPatchWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::vtk::indirectPatchWriter::beginFile(std::string title)
+bool Foam::vtk::polyWriter::writeGeometry()
 {
-    if (title.size())
-    {
-        return vtk::fileWriter::beginFile(title);
-    }
+    FatalErrorInFunction
+        << "Method was not overloaded, called without a geometry!!" << nl
+        << "    Indicates a programming error" << nl << endl
+        << abort(FatalError);
 
-    // Provide default title
-    return vtk::fileWriter::beginFile("surfaces");
+    return false;
 }
 
 
-bool Foam::vtk::indirectPatchWriter::writeGeometry()
+bool Foam::vtk::polyWriter::writePolyGeometry
+(
+    const pointField& points,
+    const faceList& faces
+)
 {
     enter_Piece();
 
-    beginPiece();
+    beginPiece(points, faces);
 
-    writePoints();
+    writePoints(points);
 
     const label pointOffset =
     (
@@ -418,24 +433,24 @@ bool Foam::vtk::indirectPatchWriter::writeGeometry()
 
     if (legacy())
     {
-        writePolysLegacy(pointOffset);
+        writePolysLegacy(faces, pointOffset);
     }
     else
     {
-        writePolys(pointOffset);
+        writePolys(faces, pointOffset);
     }
 
     return true;
 }
 
 
-bool Foam::vtk::indirectPatchWriter::beginCellData(label nFields)
+bool Foam::vtk::polyWriter::beginCellData(label nFields)
 {
     return enter_CellData(numberOfCells_, nFields);
 }
 
 
-bool Foam::vtk::indirectPatchWriter::beginPointData(label nFields)
+bool Foam::vtk::polyWriter::beginPointData(label nFields)
 {
     return enter_PointData(numberOfPoints_, nFields);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,13 +125,13 @@ void Foam::vtk::patchMeshWriter::writePoints()
             pointField recv;
 
             // Receive each point field and write
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
                 for (label i=0; i < nPatches; ++i)
                 {
-                    fromSlave >> recv;
+                    fromProc >> recv;
 
                     vtk::writeList(format(), recv);
                 }
@@ -139,8 +139,8 @@ void Foam::vtk::patchMeshWriter::writePoints()
         }
         else
         {
-            // Send each point field to master
-            OPstream toMaster
+            // Send each point field
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
@@ -150,7 +150,7 @@ void Foam::vtk::patchMeshWriter::writePoints()
             {
                 const polyPatch& pp = patches[patchId];
 
-                toMaster << pp.localPoints();
+                toProc << pp.localPoints();
             }
         }
     }
@@ -392,13 +392,14 @@ Foam::vtk::patchMeshWriter::patchMeshWriter
 )
 :
     vtk::fileWriter(vtk::fileTag::POLY_DATA, opts),
-    mesh_(mesh),
-    patchIDs_(patchIDs),
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
     nLocalFaces_(0),
-    nLocalVerts_(0)
+    nLocalVerts_(0),
+
+    mesh_(mesh),
+    patchIDs_(patchIDs)
 {
     // We do not currently support append mode
     opts_.append(false);
@@ -532,10 +533,8 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for patchID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for patchID field" << nl << endl
             << exit(FatalError);
     }
 
@@ -579,11 +578,11 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
             labelList recv;
 
             // Receive each pair
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
-                fromSlave >> recv;
+                fromProc >> recv;
 
                 // Receive as [size, id] pairs
                 for (label i=0; i < recv.size(); i += 2)
@@ -597,17 +596,15 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
         }
         else
         {
-            // Send to master
-            OPstream toMaster
+            // Send
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
             );
 
-
-            labelList send(2*patchIDs_.size());
-
             // Encode as [size, id] pairs
+            labelList send(2*patchIDs_.size());
             label i = 0;
             for (const label patchId : patchIDs_)
             {
@@ -617,7 +614,7 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
                 i += 2;
             }
 
-            toMaster << send;
+            toProc << send;
         }
     }
 
@@ -648,10 +645,8 @@ bool Foam::vtk::patchMeshWriter::writeProcIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for patchID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for patchID field" << nl << endl
             << exit(FatalError);
     }
 
@@ -728,10 +723,8 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
     }
     else
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") for patchID field" << nl << endl
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for patchID field" << nl << endl
             << exit(FatalError);
     }
 
@@ -783,11 +776,11 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
             labelList recv;
 
             // Receive each pair
-            for (const int slave : Pstream::subProcs())
+            for (const int subproci : Pstream::subProcs())
             {
-                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
 
-                fromSlave >> recv;
+                fromProc >> recv;
 
                 // Receive as [size, id] pairs
                 for (label i=0; i < recv.size(); i += 2)
@@ -801,16 +794,15 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
         }
         else
         {
-            // Send to master
-            OPstream toMaster
+            // Send
+            OPstream toProc
             (
                 Pstream::commsTypes::blocking,
                 Pstream::masterNo()
             );
 
-            labelList send(2*patchIDs_.size());
-
             // Encode as [size, id] pairs
+            labelList send(2*patchIDs_.size());
             label i = 0;
             for (const label patchId : patchIDs_)
             {
@@ -822,7 +814,7 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
                 i += 2;
             }
 
-            toMaster << send;
+            toProc << send;
         }
     }
 

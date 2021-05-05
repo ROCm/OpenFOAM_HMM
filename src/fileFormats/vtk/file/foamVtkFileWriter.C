@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,31 @@ Foam::vtk::fileWriter::stateNames
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::Ostream& Foam::vtk::fileWriter::reportBadState
+(
+    Ostream& os,
+    outputState expected
+) const
+{
+    os  << "Bad writer state (" << stateNames[state_]
+        << ") - should be (" << stateNames[expected] << ')';
+    return os;
+}
+
+
+Foam::Ostream& Foam::vtk::fileWriter::reportBadState
+(
+    Ostream& os,
+    outputState expected,
+    outputState expected2
+) const
+{
+    reportBadState(os, expected)
+        << " or (" << stateNames[expected2] << ')';
+    return os;
+}
+
+
 bool Foam::vtk::fileWriter::enter_Piece()
 {
     // Finish other output
@@ -59,9 +84,7 @@ bool Foam::vtk::fileWriter::enter_Piece()
     }
     if (notState(outputState::DECLARED))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::DECLARED] << ')'
+        reportBadState(FatalErrorInFunction, outputState::DECLARED)
             << exit(FatalError);
     }
     state_ = outputState::PIECE;
@@ -103,9 +126,7 @@ bool Foam::vtk::fileWriter::enter_CellData(label nEntries, label nFields)
 
     if (notState(outputState::PIECE))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::PIECE] << ')'
+        reportBadState(FatalErrorInFunction, outputState::PIECE)
             << exit(FatalError);
     }
 
@@ -142,9 +163,7 @@ bool Foam::vtk::fileWriter::enter_PointData(label nEntries, label nFields)
 
     if (notState(outputState::PIECE))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::PIECE] << ')'
+        reportBadState(FatalErrorInFunction, outputState::PIECE)
             << exit(FatalError);
     }
 
@@ -193,11 +212,8 @@ bool Foam::vtk::fileWriter::exit_File()
         return true;
     }
 
-    WarningInFunction
-        << "Bad writer state (" << stateNames[state_]
-        << ") - should be (" << stateNames[outputState::CLOSED]
-        << ") or (" << stateNames[outputState::OPENED]
-        << ") for contentType (" << vtk::fileTagNames[contentType_]
+    reportBadState(WarningInFunction, outputState::CLOSED, outputState::OPENED)
+        << " for contentType (" << vtk::fileTagNames[contentType_] << ')'
         << nl << endl;
 
     return false;
@@ -241,9 +257,7 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
 {
     if (notState(outputState::CLOSED))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CLOSED] << ')'
+        reportBadState(FatalErrorInFunction, outputState::CLOSED)
             << exit(FatalError);
     }
 
@@ -323,9 +337,7 @@ bool Foam::vtk::fileWriter::beginFile(std::string title)
     }
     if (notState(outputState::OPENED))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::OPENED] << ')'
+        reportBadState(FatalErrorInFunction, outputState::OPENED)
             << exit(FatalError);
     }
     state_ = outputState::DECLARED;
@@ -366,9 +378,7 @@ bool Foam::vtk::fileWriter::beginFieldData(label nFields)
     }
     if (notState(outputState::DECLARED))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::DECLARED] << ')'
+        reportBadState(FatalErrorInFunction, outputState::DECLARED)
             << exit(FatalError);
     }
     state_ = outputState::FIELD_DATA;
@@ -452,9 +462,7 @@ void Foam::vtk::fileWriter::writeTimeValue(scalar timeValue)
     }
     if (notState(outputState::FIELD_DATA))
     {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::FIELD_DATA] << ')'
+        reportBadState(FatalErrorInFunction, outputState::FIELD_DATA)
             << exit(FatalError);
     }
 

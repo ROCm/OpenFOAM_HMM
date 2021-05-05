@@ -105,8 +105,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtuSizing_H
-#define foamVtuSizing_H
+#ifndef Foam_vtk_vtuSizing_H
+#define Foam_vtk_vtuSizing_H
 
 #include "label.H"
 #include "labelList.H"

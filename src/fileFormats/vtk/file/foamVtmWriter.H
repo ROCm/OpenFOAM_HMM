@@ -68,8 +68,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamVtmWriter_H
-#define foamVtmWriter_H
+#ifndef Foam_vtk_vtmWriter_H
+#define Foam_vtk_vtmWriter_H
 
 #include "foamVtkOutputOptions.H"
 #include "DynamicList.H"

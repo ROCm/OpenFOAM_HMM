@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,69 +23,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::vtkPTraits
+InNamespace
+    Foam
 
 Description
-    Names for VTK primitive types.
+    Write surface fields from volume mesh
+
+SourceFiles
+    writeSurfaceFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_vtkPTraits_H
-#define Foam_vtk_vtkPTraits_H
+#ifndef writeSurfaceFields_H
+#define writeSurfaceFields_H
 
-#include <cstdint>
-#include <string>
+#include "readFields.H"
+#include "foamVtkUIndPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-class endian;
-
-/*---------------------------------------------------------------------------*\
-                         Class vtkPTraits Declaration
-\*---------------------------------------------------------------------------*/
-
-template<class PrimitiveType>
-struct vtkPTraits
-{
-    // Static data members
-    static const char* const typeName;
-};
-
-
-template<>
-const char* const vtkPTraits<uint8_t>::typeName;  // UInt8
-
-template<>
-const char* const vtkPTraits<int32_t>::typeName;  // Int32
-
-template<>
-const char* const vtkPTraits<uint32_t>::typeName; // UInt32
-
-template<>
-const char* const vtkPTraits<int64_t>::typeName;  // Int64
-
-template<>
-const char* const vtkPTraits<uint64_t>::typeName; // UInt64
-
-template<>
-const char* const vtkPTraits<float>::typeName;    // Float32
-
-template<>
-const char* const vtkPTraits<double>::typeName;   // Float64
-
-template<>
-const char* const vtkPTraits<Foam::endian>::typeName; // (Big|Little)Endian
-
-template<>
-const char* const vtkPTraits<std::string>::typeName; // String
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Writer type for face zones + fields
+typedef vtk::uindirectPatchGeoFieldsWriter vtkWriterType_faceZone;
 
 } // End namespace Foam
 
