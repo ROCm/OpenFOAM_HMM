@@ -245,7 +245,7 @@ void Foam::cyclicAMIFvPatch::movePoints()
         }
 
         scalarField srcMeshPhi(phip);
-        if (Pstream::parRun())
+        if (AMI().distributed())
         {
             AMI().srcMap().distribute(srcMeshPhi);
         }
