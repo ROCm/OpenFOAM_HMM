@@ -79,19 +79,63 @@ Foam::pointFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 
 Foam::pointFieldDecomposer::pointFieldDecomposer
 (
+    const Foam::zero,
+    const pointMesh& procMesh,
+    const labelList& pointAddressing,
+    const labelList& boundaryAddressing
+)
+:
+    procMesh_(procMesh),
+    pointAddressing_(pointAddressing),
+    boundaryAddressing_(boundaryAddressing),
+    // Mappers
+    patchFieldDecomposerPtrs_()
+{}
+
+
+Foam::pointFieldDecomposer::pointFieldDecomposer
+(
     const pointMesh& completeMesh,
     const pointMesh& procMesh,
     const labelList& pointAddressing,
     const labelList& boundaryAddressing
 )
 :
-    completeMesh_(completeMesh),
-    procMesh_(procMesh),
-    pointAddressing_(pointAddressing),
-    boundaryAddressing_(boundaryAddressing),
-
-    patchFieldDecomposerPtrs_(procMesh_.boundary().size())
+    pointFieldDecomposer
+    (
+        zero{},
+        procMesh,
+        pointAddressing,
+        boundaryAddressing
+    )
 {
+    reset(completeMesh);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::pointFieldDecomposer::empty() const
+{
+    return patchFieldDecomposerPtrs_.empty();
+}
+
+
+void Foam::pointFieldDecomposer::clear()
+{
+    patchFieldDecomposerPtrs_.clear();
+}
+
+
+void Foam::pointFieldDecomposer::reset
+(
+    const pointMesh& completeMesh
+)
+{
+    clear();
+    const label nMappers = procMesh_.boundary().size();
+    patchFieldDecomposerPtrs_.resize(nMappers);
+
     forAll(boundaryAddressing_, patchi)
     {
         const label oldPatchi = boundaryAddressing_[patchi];
@@ -103,7 +147,7 @@ Foam::pointFieldDecomposer::pointFieldDecomposer
                 patchi,
                 new patchFieldDecomposer
                 (
-                    completeMesh_.boundary()[oldPatchi],
+                    completeMesh.boundary()[oldPatchi],
                     procMesh_.boundary()[patchi],
                     pointAddressing_
                 )

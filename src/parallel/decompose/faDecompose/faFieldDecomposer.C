@@ -53,37 +53,46 @@ Foam::faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
 Foam::faFieldDecomposer::processorAreaPatchFieldDecomposer::
 processorAreaPatchFieldDecomposer
 (
-    const faMesh& mesh,
-    const labelUList& addressingSlice
+    const label nTotalFaces,
+    const labelUList& owner,  // == mesh.edgeOwner()
+    const labelUList& neigh,  // == mesh.edgeNeighbour()
+    const labelUList& addressingSlice,
+    const scalarField& weights
 )
 :
-    sizeBeforeMapping_(mesh.nFaces()),
+    sizeBeforeMapping_(nTotalFaces),
     addressing_(addressingSlice.size()),
     weights_(addressingSlice.size())
 {
-    const scalarField& weights = mesh.weights().internalField();
-    const labelList& own = mesh.edgeOwner();
-    const labelList& neighb = mesh.edgeNeighbour();
-
     forAll(addressing_, i)
     {
         // Subtract one to align addressing.
         label ai = addressingSlice[i];
 //         label ai = mag(addressingSlice[i]) - 1;
 
-        if (ai < neighb.size())
+        if (ai < neigh.size())
         {
             // This is a regular edge. it has been an internal edge
             // of the original mesh and now it has become a edge
             // on the parallel boundary
-            addressing_[i].setSize(2);
-            weights_[i].setSize(2);
+            addressing_[i].resize(2);
+            weights_[i].resize(2);
 
-            addressing_[i][0] = own[ai];
-            addressing_[i][1] = neighb[ai];
+            addressing_[i][0] = owner[ai];
+            addressing_[i][1] = neigh[ai];
 
-            weights_[i][0] = weights[ai];
-            weights_[i][1] = 1.0 - weights[ai];
+            if (ai < weights.size())
+            {
+                // Edge weights exist/are usable
+                weights_[i][0] = weights[ai];
+                weights_[i][1] = 1.0 - weights[ai];
+            }
+            else
+            {
+                // No edge weights. use equal weighting
+                weights_[i][0] = 0.5;
+                weights_[i][1] = 0.5;
+            }
         }
         else
         {
@@ -92,16 +101,34 @@ processorAreaPatchFieldDecomposer
             // do the interpolation properly (I would need to look
             // up the different (edge) list of data), so I will
             // just grab the value from the owner face
-            //
-            addressing_[i].setSize(1);
-            weights_[i].setSize(1);
 
-            addressing_[i][0] = own[ai];
+            addressing_[i].resize(1);
+            weights_[i].resize(1);
+
+            addressing_[i][0] = owner[ai];
 
             weights_[i][0] = 1.0;
         }
     }
 }
+
+
+Foam::faFieldDecomposer::processorAreaPatchFieldDecomposer::
+processorAreaPatchFieldDecomposer
+(
+    const faMesh& mesh,
+    const labelUList& addressingSlice
+)
+:
+    processorAreaPatchFieldDecomposer
+    (
+        mesh.nFaces(),
+        mesh.edgeOwner(),
+        mesh.edgeNeighbour(),
+        addressingSlice,
+        mesh.weights().internalField()
+    )
+{}
 
 
 Foam::faFieldDecomposer::processorEdgePatchFieldDecomposer::
@@ -117,13 +144,35 @@ processorEdgePatchFieldDecomposer
 {
     forAll(addressing_, i)
     {
-        addressing_[i].setSize(1);
-        weights_[i].setSize(1);
+        addressing_[i].resize(1);
+        weights_[i].resize(1);
 
         addressing_[i][0] = mag(addressingSlice[i]) - 1;
         weights_[i][0] = sign(addressingSlice[i]);
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faFieldDecomposer::faFieldDecomposer
+(
+    const Foam::zero,
+    const faMesh& procMesh,
+    const labelList& edgeAddressing,
+    const labelList& faceAddressing,
+    const labelList& boundaryAddressing
+)
+:
+    procMesh_(procMesh),
+    edgeAddressing_(edgeAddressing),
+    faceAddressing_(faceAddressing),
+    boundaryAddressing_(boundaryAddressing),
+    // Mappers
+    patchFieldDecomposerPtrs_(),
+    processorAreaPatchFieldDecomposerPtrs_(),
+    processorEdgePatchFieldDecomposerPtrs_()
+{}
 
 
 Foam::faFieldDecomposer::faFieldDecomposer
@@ -135,19 +184,81 @@ Foam::faFieldDecomposer::faFieldDecomposer
     const labelList& boundaryAddressing
 )
 :
-    completeMesh_(completeMesh),
-    procMesh_(procMesh),
-    edgeAddressing_(edgeAddressing),
-    faceAddressing_(faceAddressing),
-    boundaryAddressing_(boundaryAddressing),
-
-    patchFieldDecomposerPtrs_(procMesh_.boundary().size()),
-    processorAreaPatchFieldDecomposerPtrs_(procMesh_.boundary().size()),
-    processorEdgePatchFieldDecomposerPtrs_(procMesh_.boundary().size())
+    faFieldDecomposer
+    (
+        zero{},
+        procMesh,
+        edgeAddressing,
+        faceAddressing,
+        boundaryAddressing
+    )
 {
+    reset(completeMesh);
+}
+
+
+Foam::faFieldDecomposer::faFieldDecomposer
+(
+    const label nTotalFaces,
+    const List<labelRange>& boundaryRanges,
+    const labelUList& edgeOwner,
+    const labelUList& edgeNeigbour,
+
+    const faMesh& procMesh,
+    const labelList& edgeAddressing,
+    const labelList& faceAddressing,
+    const labelList& boundaryAddressing
+)
+:
+    faFieldDecomposer
+    (
+        zero{},
+        procMesh,
+        edgeAddressing,
+        faceAddressing,
+        boundaryAddressing
+    )
+{
+    reset(nTotalFaces, boundaryRanges, edgeOwner, edgeNeigbour);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::faFieldDecomposer::empty() const
+{
+    return patchFieldDecomposerPtrs_.empty();
+}
+
+
+void Foam::faFieldDecomposer::clear()
+{
+    patchFieldDecomposerPtrs_.clear();
+    processorAreaPatchFieldDecomposerPtrs_.clear();
+    processorEdgePatchFieldDecomposerPtrs_.clear();
+}
+
+
+void Foam::faFieldDecomposer::reset
+(
+    const label nTotalFaces,
+    const List<labelRange>& boundaryRanges,
+    const labelUList& edgeOwner,
+    const labelUList& edgeNeigbour
+)
+{
+    clear();
+    const label nMappers = procMesh_.boundary().size();
+
+    patchFieldDecomposerPtrs_.resize(nMappers);
+    processorAreaPatchFieldDecomposerPtrs_.resize(nMappers);
+    processorEdgePatchFieldDecomposerPtrs_.resize(nMappers);
+
     forAll(boundaryAddressing_, patchi)
     {
         const label oldPatchi = boundaryAddressing_[patchi];
+        const faPatch& fap = procMesh_.boundary()[patchi];
+        const labelSubList localPatchSlice(fap.patchSlice(edgeAddressing_));
 
         if (oldPatchi >= 0)
         {
@@ -156,9 +267,9 @@ Foam::faFieldDecomposer::faFieldDecomposer
                 patchi,
                 new patchFieldDecomposer
                 (
-                    completeMesh_.boundary()[oldPatchi].size(),
-                    procMesh_.boundary()[patchi].patchSlice(edgeAddressing_),
-                    completeMesh_.boundary()[oldPatchi].start()
+                    boundaryRanges[oldPatchi].size(),
+                    localPatchSlice,
+                    boundaryRanges[oldPatchi].start()
                 )
             );
         }
@@ -169,8 +280,10 @@ Foam::faFieldDecomposer::faFieldDecomposer
                 patchi,
                 new processorAreaPatchFieldDecomposer
                 (
-                    completeMesh_,
-                    procMesh_.boundary()[patchi].patchSlice(edgeAddressing_)
+                    nTotalFaces,
+                    edgeOwner,
+                    edgeNeigbour,
+                    localPatchSlice
                 )
             );
 
@@ -180,13 +293,60 @@ Foam::faFieldDecomposer::faFieldDecomposer
                 new processorEdgePatchFieldDecomposer
                 (
                     procMesh_.boundary()[patchi].size(),
-                    static_cast<const labelUList&>
-                    (
-                        procMesh_.boundary()[patchi].patchSlice
-                        (
-                            edgeAddressing_
-                        )
-                    )
+                    static_cast<const labelUList&>(localPatchSlice)
+                )
+            );
+        }
+    }
+}
+
+
+void Foam::faFieldDecomposer::reset(const faMesh& completeMesh)
+{
+    clear();
+    const label nMappers = procMesh_.boundary().size();
+    patchFieldDecomposerPtrs_.resize(nMappers);
+    processorAreaPatchFieldDecomposerPtrs_.resize(nMappers);
+    processorEdgePatchFieldDecomposerPtrs_.resize(nMappers);
+
+    forAll(boundaryAddressing_, patchi)
+    {
+        const label oldPatchi = boundaryAddressing_[patchi];
+        const faPatch& fap = procMesh_.boundary()[patchi];
+        const labelSubList localPatchSlice(fap.patchSlice(edgeAddressing_));
+
+        if (oldPatchi >= 0)
+        {
+            patchFieldDecomposerPtrs_.set
+            (
+                patchi,
+                new patchFieldDecomposer
+                (
+                    completeMesh.boundary()[oldPatchi].size(),
+                    localPatchSlice,
+                    completeMesh.boundary()[oldPatchi].start()
+                )
+            );
+        }
+        else
+        {
+            processorAreaPatchFieldDecomposerPtrs_.set
+            (
+                patchi,
+                new processorAreaPatchFieldDecomposer
+                (
+                    completeMesh,
+                    localPatchSlice
+                )
+            );
+
+            processorEdgePatchFieldDecomposerPtrs_.set
+            (
+                patchi,
+                new processorEdgePatchFieldDecomposer
+                (
+                    procMesh_.boundary()[patchi].size(),
+                    static_cast<const labelUList&>(localPatchSlice)
                 )
             );
         }

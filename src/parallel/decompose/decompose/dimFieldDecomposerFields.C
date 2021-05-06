@@ -66,9 +66,9 @@ void Foam::dimFieldDecomposer::decomposeFields
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll(fields, fieldi)
+    for (const auto& fld : fields)
     {
-        decomposeField(fields[fieldi])().write();
+        decomposeField(fld)().write();
     }
 }
 

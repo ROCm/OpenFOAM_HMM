@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class pointFieldDecomposer Declaration
+                    Class pointFieldDecomposer Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointFieldDecomposer
@@ -109,9 +109,6 @@ private:
 
     // Private Data
 
-        //- Reference to complete mesh
-        const pointMesh& completeMesh_;
-
         //- Reference to processor mesh
         const pointMesh& procMesh_;
 
@@ -136,6 +133,15 @@ public:
 
     // Constructors
 
+        //- Construct without mappers, added later with reset()
+        pointFieldDecomposer
+        (
+            const Foam::zero,
+            const pointMesh& procMesh,
+            const labelList& pointAddressing,
+            const labelList& boundaryAddressing
+        );
+
         //- Construct from components
         pointFieldDecomposer
         (
@@ -152,6 +158,18 @@ public:
 
     // Member Functions
 
+        //- True if no mappers have been allocated
+        bool empty() const;
+
+        //- Remove all mappers
+        void clear();
+
+        //- Reset mappers using information from the complete mesh
+        void reset(const pointMesh& completeMesh);
+
+
+    // Mapping
+
         //- Decompose point field
         template<class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh>>
@@ -160,6 +178,7 @@ public:
             const GeometricField<Type, pointPatchField, pointMesh>&
         ) const;
 
+        //- Decompose list of fields
         template<class GeoField>
         void decomposeFields(const PtrList<GeoField>& fields) const;
 };

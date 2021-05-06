@@ -120,7 +120,7 @@ public:
         :
             public faPatchFieldMapper
         {
-            // Private data
+            // Private Data
 
                 label sizeBeforeMapping_;
                 labelListList addressing_;
@@ -128,7 +128,17 @@ public:
 
         public:
 
-            //- Construct given addressing
+            //- Construct addressing from details
+            processorAreaPatchFieldDecomposer
+            (
+                const label nTotalFaces,
+                const labelUList& edgeOwner,
+                const labelUList& edgeNeigbour,
+                const labelUList& addressingSlice,
+                const scalarField& edgeWeights = scalarField::null()
+            );
+
+            //- Construct given addressing from complete mesh
             processorAreaPatchFieldDecomposer
             (
                 const faMesh& mesh,
@@ -136,7 +146,7 @@ public:
             );
 
 
-            // Member functions
+            // Member Functions
 
                 label size() const
                 {
@@ -189,7 +199,7 @@ public:
             );
 
 
-            // Member functions
+            // Member Functions
 
                 label size() const
                 {
@@ -225,10 +235,7 @@ public:
 
 private:
 
-    // Private data
-
-        //- Reference to complete mesh
-        const faMesh& completeMesh_;
+    // Private Data
 
         //- Reference to processor mesh
         const faMesh& procMesh_;
@@ -265,7 +272,17 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct without mappers, added later with reset()
+        faFieldDecomposer
+        (
+            const Foam::zero,
+            const faMesh& procMesh,
+            const labelList& edgeAddressing,
+            const labelList& faceAddressing,
+            const labelList& boundaryAddressing
+        );
+
+        //- Construct from components using information from the complete mesh
         faFieldDecomposer
         (
             const faMesh& completeMesh,
@@ -275,12 +292,49 @@ public:
             const labelList& boundaryAddressing
         );
 
+        //- Construct from components without the complete mesh
+        faFieldDecomposer
+        (
+            // Information about the complete mesh
+            const label nTotalFaces,
+            const List<labelRange>& boundaryRanges,
+            const labelUList& edgeOwner,
+            const labelUList& edgeNeigbour,
 
-    // Destructor
+            // Addressing for processor mesh
+            const faMesh& procMesh,
+            const labelList& edgeAddressing,
+            const labelList& faceAddressing,
+            const labelList& boundaryAddressing
+        );
+
+
+    //- Destructor
     ~faFieldDecomposer() = default;
 
 
     // Member Functions
+
+        //- True if no mappers have been allocated
+        bool empty() const;
+
+        //- Remove all mappers
+        void clear();
+
+        //- Reset mappers using information from the complete mesh
+        void reset(const faMesh& completeMesh);
+
+        //- Reset mapper using information about the complete mesh
+        void reset
+        (
+            const label nTotalFaces,
+            const List<labelRange>& boundaryRanges,
+            const labelUList& edgeOwner,
+            const labelUList& edgeNeigbour
+        );
+
+
+    // Mapping
 
         //- Decompose area field
         template<class Type>

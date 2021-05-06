@@ -43,13 +43,12 @@ Foam::dimFieldDecomposer::dimFieldDecomposer
 
 Foam::dimFieldDecomposer::dimFieldDecomposer
 (
-    const fvMesh& completeMesh,
+    const fvMesh& /* unused: completeMesh */,
     const fvMesh& procMesh,
-    const labelList& faceAddressing,
+    const labelList& /* unused: faceAddressing */,
     const labelList& cellAddressing
 )
 :
-    //UNUSED: completeMesh_(completeMesh),
     procMesh_(procMesh),
     //UNUSED: faceAddressing_(faceAddressing),
     cellAddressing_(cellAddressing)

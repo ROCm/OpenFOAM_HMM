@@ -115,7 +115,15 @@ public:
 
         public:
 
-            //- Construct given addressing
+            //- Construct addressing from details
+            processorVolPatchFieldDecomposer
+            (
+                const labelUList& faceOwner,
+                const labelUList& faceNeigbour,
+                const labelUList& addressingSlice
+            );
+
+            //- Construct given addressing from complete mesh
             processorVolPatchFieldDecomposer
             (
                 const fvMesh& mesh,
@@ -200,9 +208,6 @@ private:
 
     // Private Data
 
-        //- Reference to complete mesh
-        const fvMesh& completeMesh_;
-
         //- Reference to processor mesh
         const fvMesh& procMesh_;
 
@@ -238,10 +243,35 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct without mappers, added later with reset()
+        fvFieldDecomposer
+        (
+            const Foam::zero,
+            const fvMesh& procMesh,
+            const labelList& faceAddressing,
+            const labelList& cellAddressing,
+            const labelList& boundaryAddressing
+        );
+
+        //- Construct from components using information from the complete mesh
         fvFieldDecomposer
         (
             const fvMesh& completeMesh,
+            const fvMesh& procMesh,
+            const labelList& faceAddressing,
+            const labelList& cellAddressing,
+            const labelList& boundaryAddressing
+        );
+
+        //- Construct from components without the complete mesh
+        fvFieldDecomposer
+        (
+            // Information about the complete mesh
+            const List<labelRange>& boundaryRanges,
+            const labelUList& faceOwner,
+            const labelUList& faceNeigbour,
+
+            // Addressing for processor mesh
             const fvMesh& procMesh,
             const labelList& faceAddressing,
             const labelList& cellAddressing,
@@ -254,6 +284,26 @@ public:
 
 
     // Member Functions
+
+        //- True if no mappers have been allocated
+        bool empty() const;
+
+        //- Remove all mappers
+        void clear();
+
+        //- Reset mappers using information from the complete mesh
+        void reset(const fvMesh& completeMesh);
+
+        //- Reset mapper using information about the complete mesh
+        void reset
+        (
+            const List<labelRange>& boundaryRanges,
+            const labelUList& faceOwner,
+            const labelUList& faceNeigbour
+        );
+
+
+    // Mapping
 
         //- Decompose internal field
         template<class Type>
