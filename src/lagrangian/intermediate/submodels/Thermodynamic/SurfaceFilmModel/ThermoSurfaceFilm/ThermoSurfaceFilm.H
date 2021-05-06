@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,19 +33,6 @@ Group
 Description
     Thermo parcel surface film model.
 
-    Responsible for:
-    - injecting parcelss from the film model into the cloud, e.g. for dripping
-    - parcel interaction with the film, e.g absorb, bounce, splash
-
-    Splash model references:
-
-        Bai and Gosman, `Mathematical modelling of wall films formed by
-        impinging sprays', SAE 960626, 1996
-
-        Bai et al, `Modelling of gasoline spray impingement', Atom. Sprays,
-        vol 12, pp 1-27, 2002
-
-
 SourceFiles
     ThermoSurfaceFilm.C
     ThermoSurfaceFilmI.H
@@ -54,29 +42,13 @@ SourceFiles
 #ifndef ThermoSurfaceFilm_H
 #define ThermoSurfaceFilm_H
 
-#include "SurfaceFilmModel.H"
+#include "KinematicSurfaceFilm.H"
 #include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-//Forward declaration of classes
-namespace regionModels
-{
-    namespace surfaceFilmModels
-    {
-        class surfaceFilmRegionModel;
-    }
-}
-namespace regionModels
-{
-    namespace areaSurfaceFilmModels
-    {
-        class liquidFilmBase;
-    }
-}
 
 /*---------------------------------------------------------------------------*\
                       Class ThermoSurfaceFilm Declaration
@@ -85,36 +57,11 @@ namespace regionModels
 template<class CloudType>
 class ThermoSurfaceFilm
 :
-    public SurfaceFilmModel<CloudType>
+    public KinematicSurfaceFilm<CloudType>
 {
-public:
-
-    // Public data
-
-        //  Interaction type enumerations
-        enum interactionType
-        {
-            itAbsorb,
-            itBounce,
-            itSplashBai
-        };
-
-        //- Word descriptions of interaction type names
-        static wordList interactionTypeNames_;
-
-
-    // Public Member Functions
-
-        // Return interaction type enum from word
-        interactionType interactionTypeEnum(const word& it) const;
-
-        // Return word from interaction type enum
-        word interactionTypeStr(const interactionType& it) const;
-
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
@@ -125,17 +72,9 @@ protected:
         typedef typename
             regionModels::surfaceFilmModels::surfaceFilmRegionModel regionFilm;
 
-        //- Reference to the cloud random number generator
-        Random& rndGen_;
-
         //- Reference to the cloud thermo package
         const SLGThermo& thermo_;
 
-        //- Pointer to filmModel
-        regionFilm* filmModel_;
-
-        //- UPointers to area films
-        UPtrList<areaFilm> areaFilms_;
 
         // Cached injector fields per film patch
 
@@ -146,118 +85,9 @@ protected:
             scalarField CpFilmPatch_;
 
 
-        // Interaction model data
-
-            //- Interaction type enumeration
-            interactionType interactionType_;
-
-            //- Film thickness beyond which patch is assumed to be wet
-            scalar deltaWet_;
-
-            //- Splash parcel type label - id assigned to identify parcel for
-            //  post-processing. If not specified, defaults to originating cloud
-            //  type
-            label splashParcelType_;
-
-            //- Number of new parcels resulting from splash event
-            label parcelsPerSplash_;
-
-
-            // Surface roughness coefficient typically in the range 1300 - 5200
-            // and decreases with increasing surface roughness
-
-                //- Dry surface roughness coefficient
-                //  = 2630 for dry interaction (ref. Bai)
-                scalar Adry_;
-
-                //- Wet surface roughness coefficient
-                //  = 1320 for wet interaction (ref. Bai)
-                scalar Awet_;
-
-
-            //- Skin friction typically in the range 0.6 < Cf < 0.8
-            scalar Cf_;
-
-            //- Counter for number of new splash parcels
-            label nParcelsSplashed_;
-
-
     // Protected Member Functions
 
-        //- Return a vector tangential to input vector, v
-        vector tangentVector(const vector& v) const;
-
-        //- Return splashed parcel direction
-        vector splashDirection
-        (
-            const vector& tanVec1,
-            const vector& tanVec2,
-            const vector& nf
-        ) const;
-
-        //- Init films pointers
-        void init();
-
-
-        // Interaction models
-
-            //- Absorb parcel into film
-            template<class filmType>
-            void absorbInteraction
-            (
-                filmType&,
-                const parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                const scalar mass,
-                bool& keepParticle
-            );
-
-            //- Bounce parcel (flip parcel normal velocity)
-            void bounceInteraction
-            (
-                parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                bool& keepParticle
-            ) const;
-
-            //- Parcel interaction with dry surface
-            template<class filmType>
-            void drySplashInteraction
-            (
-                filmType&,
-                const parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                bool& keepParticle
-            );
-
-            //- Parcel interaction with wetted surface
-            template<class filmType>
-            void wetSplashInteraction
-            (
-                filmType&,
-                parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                bool& keepParticle
-            );
-
-            //- Bai parcel splash interaction model
-            template<class filmType>
-            void splashInteraction
-            (
-                filmType&,
-                const parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                const scalar mRatio,
-                const scalar We,
-                const scalar Wec,
-                const scalar sigma,
-                bool& keepParticle
-            );
+        // Injection from sheet (ejection) helper functions
 
             virtual void cacheFilmFields
             (
@@ -265,17 +95,13 @@ protected:
                 const areaFilm&
             );
 
-        // Injection from sheet (ejection) helper functions
-
-             //- Cache the film fields in preparation for injection
+            //- Cache the film fields in preparation for injection
             virtual void cacheFilmFields
             (
                 const label filmPatchi,
                 const label primaryPatchi,
-                const regionModels::surfaceFilmModels::surfaceFilmRegionModel&
+                const regionFilm&
             );
-
-
 
             //- Set the individual parcel properties
             virtual void setParcelProperties
@@ -310,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~ThermoSurfaceFilm();
+    virtual ~ThermoSurfaceFilm() = default;
 
 
     // Member Functions

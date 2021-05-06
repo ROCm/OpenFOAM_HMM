@@ -27,7 +27,6 @@ License
 
 #include "liquidFilmBase.H"
 #include "faMesh.H"
-#include "faCFD.H"
 #include "gravityMeshObject.H"
 #include "movingWallVelocityFvPatchVectorField.H"
 #include "turbulentFluidThermoModel.H"
@@ -51,52 +50,7 @@ defineRunTimeSelectionTable(liquidFilmBase, dictionary);
 
 const Foam::word liquidFilmName("liquidFilm");
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-
-bool liquidFilmBase::read(const dictionary& dict)
-{
-    regionFaModel::read(dict);
-    if (active_)
-    {
-        const dictionary& solution = this->solution().subDict("PIMPLE");
-        solution.readEntry("momentumPredictor", momentumPredictor_);
-        solution.readEntry("nOuterCorr", nOuterCorr_);
-        solution.readEntry("nCorr", nCorr_);
-        solution.readEntry("nFilmCorr", nFilmCorr_);
-    }
-    return true;
-}
-
-
-scalar liquidFilmBase::CourantNumber() const
-{
-    scalar CoNum = 0.0;
-    scalar velMag = 0.0;
-
-    edgeScalarField SfUfbyDelta
-    (
-        regionMesh().edgeInterpolation::deltaCoeffs()*mag(phif_)
-    );
-
-    CoNum = max(SfUfbyDelta/regionMesh().magLe())
-        .value()*time().deltaT().value();
-
-    velMag = max(mag(phif_)/regionMesh().magLe()).value();
-
-    reduce(CoNum, maxOp<scalar>());
-    reduce(velMag, maxOp<scalar>());
-
-    Info<< "Film Courant Number: "
-        << " max: " << CoNum
-        << " Film velocity magnitude: (h)" << velMag << endl;
-
-    return CoNum;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 liquidFilmBase::liquidFilmBase
 (
@@ -291,6 +245,7 @@ liquidFilmBase::liquidFilmBase
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 liquidFilmBase::~liquidFilmBase()
@@ -298,6 +253,32 @@ liquidFilmBase::~liquidFilmBase()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+scalar liquidFilmBase::CourantNumber() const
+{
+    scalar CoNum = 0.0;
+    scalar velMag = 0.0;
+
+    edgeScalarField SfUfbyDelta
+    (
+        regionMesh().edgeInterpolation::deltaCoeffs()*mag(phif_)
+    );
+
+    CoNum =
+        max(SfUfbyDelta/regionMesh().magLe()).value()*time().deltaT().value();
+
+    velMag = max(mag(phif_)/regionMesh().magLe()).value();
+
+    reduce(CoNum, maxOp<scalar>());
+    reduce(velMag, maxOp<scalar>());
+
+    Info<< "Film Courant Number: "
+        << " max: " << CoNum
+        << " Film velocity magnitude: (h)" << velMag << endl;
+
+    return CoNum;
+}
+
 
 Foam::tmp<Foam::areaVectorField> liquidFilmBase::Uw() const
 {
@@ -413,6 +394,7 @@ Foam::tmp<Foam::areaVectorField> liquidFilmBase::Up() const
     return tUp;
 }
 
+
 tmp<areaScalarField> liquidFilmBase::pg() const
 {
     tmp<areaScalarField> tpg
@@ -444,7 +426,6 @@ tmp<areaScalarField> liquidFilmBase::pg() const
 
         pfg.primitiveFieldRef() = vsmPtr_->mapInternalToSurface<scalar>(pw)();
     }
-
     return tpg;
 }
 
@@ -483,13 +464,9 @@ void liquidFilmBase::addSources
     const scalar energySource
 )
 {
-
     massSource_.boundaryFieldRef()[patchi][facei] += massSource;
-
     pnSource_.boundaryFieldRef()[patchi][facei] += pressureSource;
-
     momentumSource_.boundaryFieldRef()[patchi][facei] += momentumSource;
-
 }
 
 
@@ -497,6 +474,7 @@ void liquidFilmBase::preEvolveRegion()
 {
     regionFaModel::preEvolveRegion();
 }
+
 
 void liquidFilmBase::postEvolveRegion()
 {
@@ -514,51 +492,65 @@ void liquidFilmBase::postEvolveRegion()
     regionFaModel::postEvolveRegion();
 }
 
+
 Foam::fa::options& liquidFilmBase::faOptions()
 {
      return faOptions_;
 }
+
 
 const areaVectorField& liquidFilmBase::Uf() const
 {
      return Uf_;
 }
 
+
 const areaScalarField& liquidFilmBase::gn() const
 {
      return gn_;
 }
+
 
 const uniformDimensionedVectorField& liquidFilmBase::g() const
 {
     return g_;
 }
 
+
 const areaScalarField& liquidFilmBase::h() const
 {
      return h_;
 }
+
 
 const edgeScalarField& liquidFilmBase::phif() const
 {
     return phif_;
 }
 
+
 const edgeScalarField& liquidFilmBase::phi2s() const
 {
     return phi2s_;
 }
+
 
 const dimensionedScalar& liquidFilmBase::h0() const
 {
      return h0_;
 }
 
+
 const regionFaModel& liquidFilmBase::region() const
 {
     return *this;
 }
 
+
+scalar liquidFilmBase::pRef()
+{
+    return pRef_;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

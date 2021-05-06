@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,505 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ThermoSurfaceFilm.H"
-#include "surfaceFilmRegionModel.H"
-#include "liquidFilmBase.H"
-#include "addToRunTimeSelectionTable.H"
-#include "unitConversion.H"
-#include "Pstream.H"
-
-using namespace Foam::constant::mathematical;
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::wordList Foam::ThermoSurfaceFilm<CloudType>::interactionTypeNames_
-{
-    "absorb", "bounce", "splashBai"
-};
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-template<class CloudType>
-typename Foam::ThermoSurfaceFilm<CloudType>::interactionType
-Foam::ThermoSurfaceFilm<CloudType>::interactionTypeEnum(const word& it) const
-{
-    forAll(interactionTypeNames_, i)
-    {
-        if (interactionTypeNames_[i] == it)
-        {
-            return interactionType(i);
-        }
-    }
-
-    FatalErrorInFunction
-        << "Unknown interaction type " << it
-        << ". Valid interaction types include: " << interactionTypeNames_
-        << abort(FatalError);
-
-    return interactionType(0);
-}
-
-
-template<class CloudType>
-Foam::word Foam::ThermoSurfaceFilm<CloudType>::interactionTypeStr
-(
-    const interactionType& it
-) const
-{
-    if (it >= interactionTypeNames_.size())
-    {
-        FatalErrorInFunction
-            << "Unknown interaction type enumeration" << abort(FatalError);
-    }
-
-    return interactionTypeNames_[it];
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::vector Foam::ThermoSurfaceFilm<CloudType>::tangentVector
-(
-    const vector& v
-) const
-{
-    vector tangent = Zero;
-    scalar magTangent = 0.0;
-
-    while (magTangent < SMALL)
-    {
-        vector vTest = rndGen_.sample01<vector>();
-        tangent = vTest - (vTest & v)*v;
-        magTangent = mag(tangent);
-    }
-
-    return tangent/magTangent;
-}
-
-
-template<class CloudType>
-Foam::vector Foam::ThermoSurfaceFilm<CloudType>::splashDirection
-(
-    const vector& tanVec1,
-    const vector& tanVec2,
-    const vector& nf
-) const
-{
-    // Azimuthal angle [rad]
-    const scalar phiSi = twoPi*rndGen_.sample01<scalar>();
-
-    // Ejection angle [rad]
-    const scalar thetaSi = degToRad(rndGen_.sample01<scalar>()*(50 - 5) + 5);
-
-    // Direction vector of new parcel
-    const scalar alpha = sin(thetaSi);
-    const scalar dcorr = cos(thetaSi);
-    const vector normal = alpha*(tanVec1*cos(phiSi) + tanVec2*sin(phiSi));
-    vector dirVec = dcorr*nf;
-    dirVec += normal;
-
-    return dirVec/mag(dirVec);
-}
-
-
-template<class CloudType>
-void Foam::ThermoSurfaceFilm<CloudType>::init()
-{
-    const fvMesh& mesh = this->owner().mesh();
-
-    // set up filmModel pointer
-    filmModel_ =
-        const_cast<regionFilm*>
-        (
-            mesh.time().objectRegistry::template findObject
-            <
-                regionFilm
-            >
-            (
-                "surfaceFilmProperties"
-            )
-        );
-
-    // set up areaFilms
-    const wordList names =
-        mesh.time().objectRegistry::template
-            sortedNames<regionModels::regionFaModel>();
-
-    forAll(names, i)
-    {
-        const regionModels::regionFaModel* regionFa =
-            mesh.time().objectRegistry::template findObject
-            <
-                regionModels::regionFaModel
-            >(names[i]);
-
-        if (regionFa && isA<areaFilm>(*regionFa))
-        {
-            areaFilm& film =
-                const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
-            areaFilms_.append(&film);
-        }
-    }
-}
-
-
-template<class CloudType>
-template<class filmType>
-void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
-(
-    filmType& film,
-    const parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    const scalar mass,
-    bool& keepParticle
-)
-{
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " absorbInteraction" << endl;
-    }
-
-    // Patch face normal
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Patch velocity
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-
-    // Relative parcel velocity
-    const vector Urel = p.U() - Up;
-
-    // Parcel normal velocity
-    const vector Un = nf*(Urel & nf);
-
-    // Parcel tangential velocity
-    const vector Ut = Urel - Un;
-
-    film.addSources
-    (
-        pp.index(),
-        facei,
-        mass,                             // mass
-        mass*Ut,                          // tangential momentum
-        mass*mag(Un),                     // impingement pressure
-        mass*p.hs()                       // energy
-    );
-
-    this->nParcelsTransferred()++;
-
-    this->totalMassTransferred() += mass;
-
-    keepParticle = false;
-}
-
-
-template<class CloudType>
-void Foam::ThermoSurfaceFilm<CloudType>::bounceInteraction
-(
-    parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    bool& keepParticle
-) const
-{
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " bounceInteraction" << endl;
-    }
-
-    // Patch face normal
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Patch velocity
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-
-    // Relative parcel velocity
-    const vector Urel = p.U() - Up;
-
-    // Flip parcel normal velocity component
-    p.U() -= 2.0*nf*(Urel & nf);
-
-    keepParticle = true;
-}
-
-
-template<class CloudType>
-template<class filmType>
-void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
-(
-    filmType& filmModel,
-    const parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    bool& keepParticle
-)
-{
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " drySplashInteraction" << endl;
-    }
-
-    const liquidProperties& liq = thermo_.liquids().properties()[0];
-
-    // Patch face velocity and normal
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Local pressure
-    const scalar pc = thermo_.thermo().p()[p.cell()];
-
-    // Retrieve parcel properties
-    const scalar m = p.mass()*p.nParticle();
-    const scalar rho = p.rho();
-    const scalar d = p.d();
-    const scalar sigma = liq.sigma(pc, p.T());
-    const scalar mu = liq.mu(pc, p.T());
-    const vector Urel = p.U() - Up;
-    const vector Un = nf*(Urel & nf);
-
-    // Laplace number
-    const scalar La = rho*sigma*d/sqr(mu);
-
-    // Weber number
-    const scalar We = rho*magSqr(Un)*d/sigma;
-
-    // Critical Weber number
-    const scalar Wec = Adry_*pow(La, -0.183);
-
-    if (We < Wec) // Adhesion - assume absorb
-    {
-        absorbInteraction<filmType>
-            (filmModel, p, pp, facei, m, keepParticle);
-    }
-    else // Splash
-    {
-        // Ratio of incident mass to splashing mass
-        const scalar mRatio = 0.2 + 0.6*rndGen_.sample01<scalar>();
-        splashInteraction<filmType>
-            (filmModel, p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
-    }
-}
-
-
-template<class CloudType>
-template<class filmType>
-void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
-(
-    filmType& filmModel,
-    parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    bool& keepParticle
-)
-{
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " wetSplashInteraction" << endl;
-    }
-
-    const liquidProperties& liq = thermo_.liquids().properties()[0];
-
-    // Patch face velocity and normal
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Local pressure
-    const scalar pc = thermo_.thermo().p()[p.cell()];
-
-    // Retrieve parcel properties
-    const scalar m = p.mass()*p.nParticle();
-    const scalar rho = p.rho();
-    const scalar d = p.d();
-    vector& U = p.U();
-    const scalar sigma = liq.sigma(pc, p.T());
-    const scalar mu = liq.mu(pc, p.T());
-    const vector Urel = p.U() - Up;
-    const vector Un = nf*(Urel & nf);
-    const vector Ut = Urel - Un;
-
-    // Laplace number
-    const scalar La = rho*sigma*d/sqr(mu);
-
-    // Weber number
-    const scalar We = rho*magSqr(Un)*d/sigma;
-
-    // Critical Weber number
-    const scalar Wec = Awet_*pow(La, -0.183);
-
-    if (We < 2) // Adhesion - assume absorb
-    {
-        absorbInteraction<filmType>
-            (filmModel, p, pp, facei, m, keepParticle);
-    }
-    else if ((We >= 2) && (We < 20)) // Bounce
-    {
-        // Incident angle of impingement
-        const scalar theta = piByTwo - acos(U/mag(U) & nf);
-
-        // Restitution coefficient
-        const scalar epsilon = 0.993 - theta*(1.76 - theta*(1.56 - theta*0.49));
-
-        // Update parcel velocity
-        U = -epsilon*(Un) + 5.0/7.0*(Ut);
-
-        keepParticle = true;
-        return;
-    }
-    else if ((We >= 20) && (We < Wec)) // Spread - assume absorb
-    {
-        absorbInteraction<filmType>
-            (filmModel, p, pp, facei, m, keepParticle);
-    }
-    else    // Splash
-    {
-        // Ratio of incident mass to splashing mass
-        // splash mass can be > incident mass due to film entrainment
-        const scalar mRatio = 0.2 + 0.9*rndGen_.sample01<scalar>();
-        splashInteraction<filmType>
-            (filmModel, p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
-    }
-}
-
-
-template<class CloudType>
-template<class filmType>
-void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
-(
-    filmType& filmModel,
-    const parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    const scalar mRatio,
-    const scalar We,
-    const scalar Wec,
-    const scalar sigma,
-    bool& keepParticle
-)
-{
-    // Patch face velocity and normal
-    const fvMesh& mesh = this->owner().mesh();
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Determine direction vectors tangential to patch normal
-    const vector tanVec1 = tangentVector(nf);
-    const vector tanVec2 = nf^tanVec1;
-
-    // Retrieve parcel properties
-    const scalar np = p.nParticle();
-    const scalar m = p.mass()*np;
-    const scalar d = p.d();
-    const vector Urel = p.U() - Up;
-    const vector Un = nf*(Urel & nf);
-    const vector Ut = Urel - Un;
-    const vector& posC = mesh.C()[p.cell()];
-    const vector& posCf = mesh.Cf().boundaryField()[pp.index()][facei];
-
-    // Total mass of (all) splashed parcels
-    const scalar mSplash = m*mRatio;
-
-    // Number of splashed particles per incoming particle
-    const scalar Ns = 5.0*(We/Wec - 1.0);
-
-    // Average diameter of splashed particles
-    const scalar dBarSplash = 1/cbrt(6.0)*cbrt(mRatio/Ns)*d + ROOTVSMALL;
-
-    // Cumulative diameter splash distribution
-    const scalar dMax = 0.9*cbrt(mRatio)*d;
-    const scalar dMin = 0.1*dMax;
-    const scalar K = exp(-dMin/dBarSplash) - exp(-dMax/dBarSplash);
-
-    // Surface energy of secondary parcels [J]
-    scalar ESigmaSec = 0;
-
-    // Sample splash distribution to determine secondary parcel diameters
-    scalarList dNew(parcelsPerSplash_);
-    scalarList npNew(parcelsPerSplash_);
-    forAll(dNew, i)
-    {
-        const scalar y = rndGen_.sample01<scalar>();
-        dNew[i] = -dBarSplash*log(exp(-dMin/dBarSplash) - y*K);
-        npNew[i] = mRatio*np*pow3(d)/pow3(dNew[i])/parcelsPerSplash_;
-        ESigmaSec += npNew[i]*sigma*p.areaS(dNew[i]);
-    }
-
-    // Incident kinetic energy [J]
-    const scalar EKIn = 0.5*m*magSqr(Un);
-
-    // Incident surface energy [J]
-    const scalar ESigmaIn = np*sigma*p.areaS(d);
-
-    // Dissipative energy
-    const scalar Ed = max(0.8*EKIn, np*Wec/12*pi*sigma*sqr(d));
-
-    // Total energy [J]
-    const scalar EKs = EKIn + ESigmaIn - ESigmaSec - Ed;
-
-    // Switch to absorb if insufficient energy for splash
-    if (EKs <= 0)
-    {
-        absorbInteraction<filmType>
-            (filmModel, p, pp, facei, m, keepParticle);
-        return;
-    }
-
-    // Helper variables to calculate magUns0
-    const scalar logD = log(d);
-    const scalar coeff2 = log(dNew[0]) - logD + ROOTVSMALL;
-    scalar coeff1 = 0.0;
-    forAll(dNew, i)
-    {
-        coeff1 += sqr(log(dNew[i]) - logD);
-    }
-
-    // Magnitude of the normal velocity of the first splashed parcel
-    const scalar magUns0 =
-        sqrt(2.0*parcelsPerSplash_*EKs/mSplash/(1.0 + coeff1/sqr(coeff2)));
-
-    // Set splashed parcel properties
-    forAll(dNew, i)
-    {
-        const vector dirVec = splashDirection(tanVec1, tanVec2, -nf);
-
-        // Create a new parcel by copying source parcel
-        parcelType* pPtr = new parcelType(p);
-
-        pPtr->origId() = pPtr->getNewParticleID();
-
-        pPtr->origProc() = Pstream::myProcNo();
-
-        if (splashParcelType_ >= 0)
-        {
-            pPtr->typeId() = splashParcelType_;
-        }
-
-        // Perturb new parcels towards the owner cell centre
-        pPtr->track(0.5*rndGen_.sample01<scalar>()*(posC - posCf), 0);
-
-        pPtr->nParticle() = npNew[i];
-
-        pPtr->d() = dNew[i];
-
-        pPtr->U() = dirVec*(mag(Cf_*Ut) + magUns0*(log(dNew[i]) - logD)/coeff2);
-
-        // Apply correction to velocity for 2-D cases
-        meshTools::constrainDirection(mesh, mesh.solutionD(), pPtr->U());
-
-        // Add the new parcel
-        this->owner().addParticle(pPtr);
-
-        nParcelsSplashed_++;
-    }
-
-    // Transfer remaining part of parcel to film 0 - splashMass can be -ve
-    // if entraining from the film
-    const scalar mDash = m - mSplash;
-    absorbInteraction<filmType>
-        (filmModel, p, pp, facei, mDash, keepParticle);
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -536,45 +37,14 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     CloudType& owner
 )
 :
-    SurfaceFilmModel<CloudType>(dict, owner, typeName),
-    rndGen_(owner.rndGen()),
+    KinematicSurfaceFilm<CloudType>(dict, owner, typeName,  false),
     thermo_
     (
         owner.db().objectRegistry::template lookupObject<SLGThermo>("SLGThermo")
     ),
-    filmModel_(nullptr),
-    areaFilms_(0),
     TFilmPatch_(0),
-    CpFilmPatch_(0),
-    interactionType_
-    (
-        interactionTypeEnum(this->coeffDict().getWord("interactionType"))
-    ),
-    deltaWet_(0.0),
-    splashParcelType_(0),
-    parcelsPerSplash_(0),
-    Adry_(0.0),
-    Awet_(0.0),
-    Cf_(0.0),
-    nParcelsSplashed_(0)
-{
-    Info<< "    Applying " << interactionTypeStr(interactionType_)
-        << " interaction model" << endl;
-
-    if (interactionType_ == itSplashBai)
-    {
-        this->coeffDict().readEntry("deltaWet", deltaWet_);
-        splashParcelType_ =
-            this->coeffDict().getOrDefault("splashParcelType", -1);
-        parcelsPerSplash_ =
-            this->coeffDict().getOrDefault("parcelsPerSplash", 2);
-        this->coeffDict().readEntry("Adry", Adry_);
-        this->coeffDict().readEntry("Awet", Awet_);
-        this->coeffDict().readEntry("Cf", Cf_);
-    }
-
-    init();
-}
+    CpFilmPatch_(0)
+{}
 
 
 template<class CloudType>
@@ -583,30 +53,10 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     const ThermoSurfaceFilm<CloudType>& sfm
 )
 :
-    SurfaceFilmModel<CloudType>(sfm),
-    rndGen_(sfm.rndGen_),
+    KinematicSurfaceFilm<CloudType>(sfm, false),
     thermo_(sfm.thermo_),
-    filmModel_(nullptr),
-    areaFilms_(0),
     TFilmPatch_(sfm.TFilmPatch_),
-    CpFilmPatch_(sfm.CpFilmPatch_),
-    interactionType_(sfm.interactionType_),
-    deltaWet_(sfm.deltaWet_),
-    splashParcelType_(sfm.splashParcelType_),
-    parcelsPerSplash_(sfm.parcelsPerSplash_),
-    Adry_(sfm.Adry_),
-    Awet_(sfm.Awet_),
-    Cf_(sfm.Cf_),
-    nParcelsSplashed_(sfm.nParcelsSplashed_)
-{
-    init();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ThermoSurfaceFilm<CloudType>::~ThermoSurfaceFilm()
+    CpFilmPatch_(sfm.CpFilmPatch_)
 {}
 
 
@@ -625,40 +75,46 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
     bool bInteraction(false);
 
     // Check the singleLayer film models
-    if (filmModel_ && filmModel_->isRegionPatch(patchi))
+    if (this->filmModel_ && this->filmModel_->isRegionPatch(patchi))
     {
         const label facei = pp.whichFace(p.face());
 
-        switch (interactionType_)
+        switch (this->interactionType_)
         {
-            case itBounce:
+            case KinematicSurfaceFilm<CloudType>::itBounce:
             {
-                bounceInteraction(p, pp, facei, keepParticle);
+                this->bounceInteraction(p, pp, facei, keepParticle);
 
                 break;
             }
-            case itAbsorb:
+            case KinematicSurfaceFilm<CloudType>::itAbsorb:
             {
                 const scalar m = p.nParticle()*p.mass();
 
-                absorbInteraction<regionFilm>
-                    (*filmModel_, p, pp, facei, m, keepParticle);
+                this->absorbInteraction //<regionFilm>
+                    (*(this->filmModel_), p, pp, facei, m, keepParticle);
 
                 break;
             }
-            case itSplashBai:
+            case KinematicSurfaceFilm<CloudType>::itSplashBai:
             {
-                bool dry = this->deltaFilmPatch_[patchi][facei] < deltaWet_;
+                // Local pressure
+                const scalar pc = thermo_.thermo().p()[p.cell()];
+                const liquidProperties& liq = thermo_.liquids().properties()[0];
+                const scalar sigma = liq.sigma(pc, p.T());
+                const scalar mu = liq.mu(pc, p.T());
+
+                bool dry = this->deltaFilmPatch_[patchi][facei] < this->deltaWet_;
 
                 if (dry)
                 {
-                    drySplashInteraction<regionFilm>
-                        (*filmModel_, p, pp, facei, keepParticle);
+                    this->drySplashInteraction //<CloudType, regionFilm>
+                        (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
                 }
                 else
                 {
-                    wetSplashInteraction<regionFilm>
-                        (*filmModel_, p, pp, facei, keepParticle);
+                    this->wetSplashInteraction //<regionFilm>
+                        (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
                 }
 
                 break;
@@ -675,45 +131,51 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
         bInteraction = true;
     }
 
-
-    for (areaFilm& film : areaFilms_)
+    for (areaFilm& film : this->areaFilms_)
     {
+
         if (patchi == film.patchID())
         {
             const label facei = pp.whichFace(p.face());
 
-            switch (interactionType_)
+            switch (this->interactionType_)
             {
                 // It only supports absorp model
-                case itAbsorb:
+                case KinematicSurfaceFilm<CloudType>::itAbsorb:
                 {
                     const scalar m = p.nParticle()*p.mass();
 
-                    absorbInteraction<areaFilm>
+                    this->absorbInteraction //<areaFilm>
                     (
                         film, p, pp, facei, m, keepParticle
                     );
                     break;
                 }
-                case itBounce:
+                case KinematicSurfaceFilm<CloudType>::itBounce:
                 {
-                    bounceInteraction(p, pp, facei, keepParticle);
+                    this->bounceInteraction(p, pp, facei, keepParticle);
 
                     break;
                 }
-                case itSplashBai:
+                case KinematicSurfaceFilm<CloudType>::itSplashBai:
                 {
-                    bool dry = film.h()[facei] < deltaWet_;
+                    // Local pressure
+                    const scalar pc = thermo_.thermo().p()[p.cell()];
+                    const liquidProperties& liq = thermo_.liquids().properties()[0];
+                    const scalar sigma = liq.sigma(pc, p.T());
+                    const scalar mu = liq.mu(pc, p.T());
+
+                    bool dry = film.h()[facei] < this->deltaWet_;
 
                     if (dry)
                     {
-                        drySplashInteraction<areaFilm>
-                            (film, p, pp, facei, keepParticle);
+                        this->drySplashInteraction //<areaFilm>
+                            (film, sigma, mu, p, pp, facei, keepParticle);
                     }
                     else
                     {
-                        wetSplashInteraction<areaFilm>
-                            (film, p, pp, facei, keepParticle);
+                        this->wetSplashInteraction //<areaFilm>
+                            (film, sigma, mu, p, pp, facei, keepParticle);
                     }
 
                     break;
@@ -743,7 +205,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     const regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel
 )
 {
-    SurfaceFilmModel<CloudType>::cacheFilmFields
+    KinematicSurfaceFilm<CloudType>::cacheFilmFields
     (
         filmPatchi,
         primaryPatchi,
@@ -765,7 +227,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     const areaFilm& filmModel
 )
 {
-    SurfaceFilmModel<CloudType>::cacheFilmFields
+    KinematicSurfaceFilm<CloudType>::cacheFilmFields
     (
         filmPatchi,
         filmModel
@@ -786,7 +248,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::setParcelProperties
     const label filmFacei
 ) const
 {
-    SurfaceFilmModel<CloudType>::setParcelProperties(p, filmFacei);
+    KinematicSurfaceFilm<CloudType>::setParcelProperties(p, filmFacei);
 
     // Set parcel properties
     p.T() = TFilmPatch_[filmFacei];
@@ -797,19 +259,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::setParcelProperties
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::info(Ostream& os)
 {
-    SurfaceFilmModel<CloudType>::info(os);
-
-    label nSplash0 = this->template getModelProperty<label>("nParcelsSplashed");
-    label nSplashTotal =
-        nSplash0 + returnReduce(nParcelsSplashed_, sumOp<label>());
-
-    os  << "      - new splash parcels          = " << nSplashTotal << endl;
-
-    if (this->writeTime())
-    {
-        this->setModelProperty("nParcelsSplashed", nSplashTotal);
-        nParcelsSplashed_ = 0;
-    }
+    KinematicSurfaceFilm<CloudType>::info(os);
 }
 
 

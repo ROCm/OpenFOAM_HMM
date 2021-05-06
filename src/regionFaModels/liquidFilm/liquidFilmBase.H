@@ -39,7 +39,7 @@ SourceFiles
 
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
-#include "areaFieldsFwd.H"
+#include "faCFD.H"
 #include "volFieldsFwd.H"
 #include "uniformDimensionedFields.H"
 #include "regionFaModel.H"
@@ -62,20 +62,6 @@ class liquidFilmBase
 :
     public regionFaModel
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        liquidFilmBase(const liquidFilmBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const liquidFilmBase&) = delete;
-
-        //- Initialize thermal Baffle
-        void init();
-
-
 protected:
 
     // Protected Data
@@ -141,34 +127,26 @@ protected:
             uniformDimensionedVectorField g_;
 
 
-            // Mass exchanage fields from the primary region (lagragian)
+        // Mass exchanage fields from the primary region (lagragian)
 
-                //- Mass
-                volScalarField massSource_;
+            //- Mass
+            volScalarField massSource_;
 
-                //- Momentum
-                volVectorField momentumSource_;
+            //- Momentum
+            volVectorField momentumSource_;
 
-                //- Normal pressure by particles
-                volScalarField pnSource_;
+            //- Normal pressure by particles
+            volScalarField pnSource_;
 
-                //- Energy
-                volScalarField energySource_;
+            //- Energy
+            volScalarField energySource_;
 
-                //- Total mass added
-                scalar addedMassTotal_;
+            //- Total mass added
+            scalar addedMassTotal_;
 
 
-
-        //- Pointer to faOptions
+        //- faOptions
         Foam::fa::options& faOptions_;
-
-
-
-    // Protected Member Functions
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary&);
 
 
 public:
@@ -203,6 +181,12 @@ public:
             const fvPatch& patch,
             const dictionary& dict
         );
+
+        //- No copy construct
+        liquidFilmBase(const liquidFilmBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const liquidFilmBase&) = delete;
 
 
     // Selectors
@@ -273,6 +257,9 @@ public:
 
             //- Access to this region
             const regionFaModel& region() const;
+
+            //- Access to pRef
+            scalar pRef();
 
 
             // Transfer fields - to the primary region (lagragian injection)

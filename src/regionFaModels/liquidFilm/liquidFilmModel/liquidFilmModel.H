@@ -42,15 +42,10 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "liquidFilmBase.H"
 #include "faMesh.H"
-
 #include "filmTurbulenceModel.H"
-
 #include "liquidMixtureProperties.H"
 #include "injectionModelList.H"
-
 #include "faCFD.H"
-
-//#include "transferModelList.H"
 #include "forceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +57,6 @@ namespace regionModels
 namespace areaSurfaceFilmModels
 {
 
-
 /*---------------------------------------------------------------------------*\
                         Class liquidFilmModel Declaration
 \*---------------------------------------------------------------------------*/
@@ -71,99 +65,78 @@ class liquidFilmModel
 :
     public liquidFilmBase
 {
-private:
-
-    // Private member functions
-
-        //- No copy construct
-        liquidFilmModel(const liquidFilmModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const liquidFilmModel&) = delete;
-
-        //- Initialize liquidFilmModel
-        void init();
-
-
 protected:
-
 
     // Thermo properties
 
+        //- Liquid thermo
+        liquidMixtureProperties thermo_;
 
-            //- Liquid thermo
-            liquidMixtureProperties thermo_;
-
-
-            // Fields
-
-                //- Density [kg/m3]
-                areaScalarField rho_;
-
-                //- Dynamic viscosity [Pa.s]
-                areaScalarField mu_;
-
-                //- Film temperature
-                areaScalarField Tf_;
-
-                 //- Film Heat capacity
-                areaScalarField Cp_;
-
-                //- Surface tension [m/s2]
-                areaScalarField sigma_;
-
-                //- Film rho*height
-                areaScalarField hRho_;
-
-                // Mass exchange sources
-
-                    //- Mass source
-                    areaScalarField rhoSp_;
-
-                    //- Momentum source
-                    areaVectorField USp_;
-
-                    //- Normal pressure by particles
-                    areaScalarField pnSp_;
+        //- Reference tempararure
+        scalar Tref_;
 
 
-                 // Transfer fields
+    // Fields
 
-                    //- Film mass  for transfer to cloud
-                    volScalarField cloudMassTrans_;
+        //- Density [kg/m3]
+        areaScalarField rho_;
 
-                    //- Parcel diameters originating from film to cloud
-                    volScalarField cloudDiameterTrans_;
+        //- Dynamic viscosity [Pa.s]
+        areaScalarField mu_;
+
+        //- Film temperature
+        areaScalarField Tf_;
+
+        //- Film Heat capacity
+        areaScalarField Cp_;
+
+        //- Surface tension [m/s2]
+        areaScalarField sigma_;
+
+        //- Film rho*height
+        areaScalarField hRho_;
+
+
+    // Mass exchange sources
+
+        //- Mass source
+        areaScalarField rhoSp_;
+
+        //- Momentum source
+        areaVectorField USp_;
+
+        //- Normal pressure by particles
+        areaScalarField pnSp_;
+
+
+    // Transfer fields
+
+        //- Film mass  for transfer to cloud
+        volScalarField cloudMassTrans_;
+
+        //- Parcel diameters originating from film to cloud
+        volScalarField cloudDiameterTrans_;
 
 
     // General properties
 
+        //- Turbulence model
+        autoPtr<filmTurbulenceModel> turbulence_;
 
 
-            //- Turbulence model
-            autoPtr<filmTurbulenceModel> turbulence_;
+        // Sub-models
 
+            //- Available mass for transfer via sub-models
+            scalarField availableMass_;
 
-            // Sub-models
+            //- Cloud injection
+            injectionModelList injection_;
 
-                //- Available mass for transfer via sub-models
-                scalarField availableMass_;
+            //- Transfer with the continuous phase
+            //transferModelList transfer_;
 
-                //- Cloud injection
-                injectionModelList injection_;
-
-                //- Transfer with the continuous phase
-                //transferModelList transfer_;
-
-                //- List of film forces
-                forceList forces_;
-
-
-    // Protected member functions
-
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary& dict);
+            //- List of film forces
+            forceList forces_;
 
 
 public:
@@ -174,7 +147,6 @@ public:
 
     // Constructors
 
-
         //- Construct from components and dict
         liquidFilmModel
         (
@@ -183,21 +155,26 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        liquidFilmModel(const liquidFilmModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const liquidFilmModel&) = delete;
+
 
     //- Destructor
-    virtual ~liquidFilmModel();
+    virtual ~liquidFilmModel() = default;
 
 
     // Member Functions
 
-        // Help function
-
+        // Helpers
 
             //- Correct thermo
             void correctThermoFields();
 
 
-        // Access functions
+        // Access
 
             //- Access const reference mu
             const areaScalarField& mu() const;
@@ -214,28 +191,32 @@ public:
             //- Access const reference Cp
             const areaScalarField& Cp() const;
 
+            //- Access to thermo
+            const liquidMixtureProperties& thermo() const;
 
-            // Transfer fields - to the primary region (lagragian injection)
+            //- Access to reference temperature
+            scalar Tref() const;
 
-                //- Return the film mass available for transfer to cloud
-                virtual const volScalarField& cloudMassTrans() const;
 
-                //- Return the parcel diameters originating from film to cloud
-                virtual const volScalarField& cloudDiameterTrans() const;
+        // Transfer fields - to the primary region (lagragian injection)
+
+            //- Return the film mass available for transfer to cloud
+            virtual const volScalarField& cloudMassTrans() const;
+
+            //- Return the parcel diameters originating from film to cloud
+            virtual const volScalarField& cloudDiameterTrans() const;
+
 
         // Evolution
 
             //- Pre-evolve film
             virtual void preEvolveRegion();
 
-            //- Evolve the film
-            //virtual void evolveRegion();
-
             //- Post-evolve film
             virtual void postEvolveRegion();
 
 
-       // I-O
+        // I-O
 
             //- Provide some feedback
             virtual void info();
