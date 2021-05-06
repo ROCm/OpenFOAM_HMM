@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +92,11 @@ int main(int argc, char *argv[])
         }
     }
 
+
+    Info<< "Max number of cells: " << globalNumbering.maxSize() << nl;
+    Pout<< "nCells: "
+        << globalNumbering.localSize() << " Max off-processor: "
+        << globalNumbering.maxNonLocalSize() << nl;
 
     // Try whichProcID on a few borderline cases.
 

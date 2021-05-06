@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,13 +73,13 @@ inline bool Foam::globalIndex::empty() const
 }
 
 
-inline const Foam::labelList& Foam::globalIndex::offsets() const
+inline const Foam::labelList& Foam::globalIndex::offsets() const noexcept
 {
     return offsets_;
 }
 
 
-inline Foam::labelList& Foam::globalIndex::offsets()
+inline Foam::labelList& Foam::globalIndex::offsets() noexcept
 {
     return offsets_;
 }
@@ -124,6 +124,19 @@ inline Foam::label Foam::globalIndex::localSize(const label proci) const
 inline Foam::label Foam::globalIndex::localSize() const
 {
     return localSize(Pstream::myProcNo());
+}
+
+
+inline Foam::label Foam::globalIndex::maxSize() const
+{
+    // Use out-of-range proci to avoid excluding any processor
+    return maxNonLocalSize(-1);
+}
+
+
+inline Foam::label Foam::globalIndex::maxNonLocalSize() const
+{
+    return maxNonLocalSize(Pstream::myProcNo());
 }
 
 

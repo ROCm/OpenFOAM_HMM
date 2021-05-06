@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class globalIndex;
 class labelRange;
@@ -81,7 +81,7 @@ class globalIndex
         );
 
 
-    // Private data
+    // Private Data
 
         //- Start of proci. Size is nProcs()+1. (so like CompactListList)
         labelList offsets_;
@@ -91,7 +91,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         globalIndex() = default;
 
         //- Construct from local max size.
@@ -120,11 +120,8 @@ public:
 
     // Member Functions
 
-        //- Check for null constructed or global sum == 0
+        //- Check for default constructed or global sum == 0
         inline bool empty() const;
-
-        //- Const-access to the offsets
-        inline const labelList& offsets() const;
 
         //- Global sum of localSizes
         inline label size() const;
@@ -132,11 +129,17 @@ public:
         //- The local sizes
         labelList sizes() const;
 
+        //- Global max of localSizes
+        inline label maxSize() const;
+
+        //- Const-access to the offsets
+        inline const labelList& offsets() const noexcept;
+
 
     // Edit
 
         //- Write-access to the offsets, for changing after construction
-        inline labelList& offsets();
+        inline labelList& offsets() noexcept;
 
         //- Reset from local size.
         //  Does communication with default communicator and message tag.
@@ -153,6 +156,8 @@ public:
         );
 
 
+        // Queries
+
         // Queries relating to my processor (using world communicator)
 
             //- My local start
@@ -160,6 +165,9 @@ public:
 
             //- My local size
             inline label localSize() const;
+
+            //- The max of localSizes, excluding current processor
+            inline label maxNonLocalSize() const;
 
             //- Return start/size range of local processor data
             inline labelRange range() const;
@@ -181,7 +189,7 @@ public:
             inline label toLocal(const label i) const;
 
 
-        // Global queries
+        // Global (off-processor) queries
 
             //- Start of proci data
             inline label offset(const label proci) const;
@@ -191,6 +199,9 @@ public:
 
             //- Size of proci data
             inline label localSize(const label proci) const;
+
+            //- The max of localSizes, excluding the specified processor
+            label maxNonLocalSize(const label proci) const;
 
             //- Return start/size range of proci data
             inline labelRange range(const label proci) const;

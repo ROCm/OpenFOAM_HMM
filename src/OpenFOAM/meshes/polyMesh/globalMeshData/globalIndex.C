@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,6 +156,30 @@ Foam::labelList Foam::globalIndex::sizes() const
     }
 
     return values;
+}
+
+
+Foam::label Foam::globalIndex::maxNonLocalSize(const label proci) const
+{
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1)
+    {
+        return 0;
+    }
+
+    label maxLen = 0;
+
+    for (label i=0; i < len; ++i)
+    {
+        if (i != proci)
+        {
+            const label localLen = (offsets_[i+1] - offsets_[i]);
+            maxLen = max(maxLen, localLen);
+        }
+    }
+
+    return maxLen;
 }
 
 
