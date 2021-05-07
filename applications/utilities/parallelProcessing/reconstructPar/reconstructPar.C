@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,12 +89,9 @@ int main(int argc, char *argv[])
     // Enable -withZero to prevent accidentally trashing the initial fields
     timeSelector::addOptions(true, true);  // constant(true), zero(true)
     argList::noParallel();
-    #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "allRegions",
-        "Operate on all regions in regionProperties"
-    );
+
+    #include "addAllRegionOptions.H"
+
     argList::addOption
     (
         "fields",
@@ -171,29 +168,23 @@ int main(int argc, char *argv[])
     }
 
     const bool newTimes   = args.found("newTimes");
-    const bool allRegions = args.found("allRegions");
 
-    wordList regionNames;
-    wordList regionDirs;
-    if (allRegions)
+    // Get region names
+    #include "getAllRegionOptions.H"
+
+    wordList regionDirs(regionNames);
+
+    if (regionNames.size() == 1)
     {
-        regionNames = regionProperties(runTime).names();
-        regionDirs = regionNames;
-
-        Info<< "Reconstructing all regions in regionProperties" << nl
-            << "    " << flatOutput(regionNames) << nl << endl;
-    }
-    else
-    {
-        regionNames.resize(1, fvMesh::defaultRegion);
-        regionDirs.resize(1, word::null);
-
-        if (args.readIfPresent("region", regionNames.first()))
+        if (regionNames[0] == polyMesh::defaultRegion)
         {
-            regionDirs.first() = regionNames.first();
+            regionDirs[0].clear();
+        }
+        else
+        {
+            Info<< "Using region: " << regionNames[0] << nl << endl;
         }
     }
-
 
     // Determine the processor count
     label nProcs = fileHandler().nProcs(args.path(), regionDirs[0]);

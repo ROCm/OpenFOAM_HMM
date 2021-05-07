@@ -57,6 +57,8 @@ Description
 #include "pointSet.H"
 #include "processorMeshes.H"
 #include "hexRef8Data.H"
+#include "regionProperties.H"
+#include "polyMeshTools.H"
 
 #ifdef HAVE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -613,7 +615,7 @@ int main(int argc, char *argv[])
         "Renumber mesh cells to reduce the bandwidth"
     );
 
-    #include "addRegionOption.H"
+    #include "addAllRegionOptions.H"
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
 
@@ -629,7 +631,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
-
+    #include "getAllRegionOptions.H"
 
     // Force linker to include zoltan symbols. This section is only needed since
     // Zoltan is a static library
@@ -637,7 +639,6 @@ int main(int argc, char *argv[])
         Info<< "renumberMesh built with zoltan support." << nl << endl;
         (void)zoltanRenumber::typeName;
     #endif
-
 
     // Get times list
     instantList Times = runTime.times();
@@ -647,574 +648,20 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-    #include "createNamedMesh.H"
-
-    const word oldInstance = mesh.pointsInstance();
+    #include "createNamedMeshes.H"
 
     const bool readDict = args.found("dict");
     const bool doFrontWidth = args.found("frontWidth");
     const bool overwrite = args.found("overwrite");
 
-    label band;
-    scalar profile;
-    scalar sumSqrIntersect;
-    getBand
-    (
-        doFrontWidth,
-        mesh.nCells(),
-        mesh.faceOwner(),
-        mesh.faceNeighbour(),
-        band,
-        profile,
-        sumSqrIntersect
-    );
 
-    reduce(band, maxOp<label>());
-    reduce(profile, sumOp<scalar>());
-    scalar rmsFrontwidth = Foam::sqrt
-    (
-        returnReduce
-        (
-            sumSqrIntersect,
-            sumOp<scalar>()
-        )/mesh.globalData().nTotalCells()
-    );
-
-    Info<< "Mesh size: " << mesh.globalData().nTotalCells() << nl
-        << "Before renumbering :" << nl
-        << "    band           : " << band << nl
-        << "    profile        : " << profile << nl;
-
-    if (doFrontWidth)
+    for (fvMesh& mesh : meshes)
     {
-        Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
-    }
+        // Reset time in case of multiple meshes and not overwrite
+        runTime.setTime(Times[startTime], startTime);
 
-    Info<< endl;
+        const word oldInstance = mesh.pointsInstance();
 
-    bool sortCoupledFaceCells = false;
-    bool writeMaps = false;
-    bool orderPoints = false;
-    label blockSize = 0;
-
-    // Construct renumberMethod
-    autoPtr<IOdictionary> renumberDictPtr;
-    autoPtr<renumberMethod> renumberPtr;
-
-    if (readDict)
-    {
-        const word dictName("renumberMeshDict");
-        #include "setSystemMeshDictionaryIO.H"
-
-        Info<< "Renumber according to " << dictIO.name() << nl << endl;
-
-        renumberDictPtr.reset(new IOdictionary(dictIO));
-        const IOdictionary& renumberDict = renumberDictPtr();
-
-        renumberPtr = renumberMethod::New(renumberDict);
-
-        sortCoupledFaceCells = renumberDict.getOrDefault
-        (
-            "sortCoupledFaceCells",
-            false
-        );
-        if (sortCoupledFaceCells)
-        {
-            Info<< "Sorting cells on coupled boundaries to be last." << nl
-                << endl;
-        }
-
-        blockSize = renumberDict.getOrDefault("blockSize", 0);
-        if (blockSize > 0)
-        {
-            Info<< "Ordering cells into regions of size " << blockSize
-                << " (using decomposition);"
-                << " ordering faces into region-internal and region-external."
-                << nl << endl;
-
-            if (blockSize < 0 || blockSize >= mesh.nCells())
-            {
-                FatalErrorInFunction
-                    << "Block size " << blockSize
-                    << " should be positive integer"
-                    << " and less than the number of cells in the mesh."
-                    << exit(FatalError);
-            }
-        }
-
-        orderPoints = renumberDict.getOrDefault("orderPoints", false);
-        if (orderPoints)
-        {
-            Info<< "Ordering points into internal and boundary points." << nl
-                << endl;
-        }
-
-        renumberDict.readEntry("writeMaps", writeMaps);
-        if (writeMaps)
-        {
-            Info<< "Writing renumber maps (new to old) to polyMesh." << nl
-                << endl;
-        }
-    }
-    else
-    {
-        Info<< "Using default renumberMethod." << nl << endl;
-        dictionary renumberDict;
-        renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
-    }
-
-    Info<< "Selecting renumberMethod " << renumberPtr().type() << nl << endl;
-
-
-
-    // Read parallel reconstruct maps
-    labelIOList cellProcAddressing
-    (
-        IOobject
-        (
-            "cellProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        labelList(0)
-    );
-
-    labelIOList faceProcAddressing
-    (
-        IOobject
-        (
-            "faceProcAddressing",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        labelList(0)
-    );
-    labelIOList pointProcAddressing
-    (
-        IOobject
-        (
-            "pointProcAddressing",
-            mesh.pointsInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        labelList(0)
-    );
-    labelIOList boundaryProcAddressing
-    (
-        IOobject
-        (
-            "boundaryProcAddressing",
-            mesh.pointsInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        labelList(0)
-    );
-
-
-    // Read objects in time directory
-    IOobjectList objects(mesh, runTime.timeName());
-
-
-    // Read vol fields.
-
-    PtrList<volScalarField> vsFlds;
-    ReadFields(mesh, objects, vsFlds);
-
-    PtrList<volVectorField> vvFlds;
-    ReadFields(mesh, objects, vvFlds);
-
-    PtrList<volSphericalTensorField> vstFlds;
-    ReadFields(mesh, objects, vstFlds);
-
-    PtrList<volSymmTensorField> vsymtFlds;
-    ReadFields(mesh, objects, vsymtFlds);
-
-    PtrList<volTensorField> vtFlds;
-    ReadFields(mesh, objects, vtFlds);
-
-
-    // Read surface fields.
-
-    PtrList<surfaceScalarField> ssFlds;
-    ReadFields(mesh, objects, ssFlds);
-
-    PtrList<surfaceVectorField> svFlds;
-    ReadFields(mesh, objects, svFlds);
-
-    PtrList<surfaceSphericalTensorField> sstFlds;
-    ReadFields(mesh, objects, sstFlds);
-
-    PtrList<surfaceSymmTensorField> ssymtFlds;
-    ReadFields(mesh, objects, ssymtFlds);
-
-    PtrList<surfaceTensorField> stFlds;
-    ReadFields(mesh, objects, stFlds);
-
-
-    // Read point fields.
-
-    PtrList<pointScalarField> psFlds;
-    ReadFields(pointMesh::New(mesh), objects, psFlds);
-
-    PtrList<pointVectorField> pvFlds;
-    ReadFields(pointMesh::New(mesh), objects, pvFlds);
-
-    PtrList<pointSphericalTensorField> pstFlds;
-    ReadFields(pointMesh::New(mesh), objects, pstFlds);
-
-    PtrList<pointSymmTensorField> psymtFlds;
-    ReadFields(pointMesh::New(mesh), objects, psymtFlds);
-
-    PtrList<pointTensorField> ptFlds;
-    ReadFields(pointMesh::New(mesh), objects, ptFlds);
-
-
-    // Read sets
-    PtrList<cellSet> cellSets;
-    PtrList<faceSet> faceSets;
-    PtrList<pointSet> pointSets;
-    {
-        // Read sets
-        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
-        ReadFields(objects, cellSets);
-        ReadFields(objects, faceSets);
-        ReadFields(objects, pointSets);
-    }
-
-
-    Info<< endl;
-
-    // From renumbering:
-    // - from new cell/face back to original cell/face
-    labelList cellOrder;
-    labelList faceOrder;
-
-    if (blockSize > 0)
-    {
-        // Renumbering in two phases. Should be done in one so mapping of
-        // fields is done correctly!
-
-        label nBlocks = mesh.nCells()/blockSize;
-        Info<< "nBlocks   = " << nBlocks << endl;
-
-        // Read decompositionMethod dictionary
-        dictionary decomposeDict(renumberDictPtr().subDict("blockCoeffs"));
-        decomposeDict.set("numberOfSubdomains", nBlocks);
-
-        const bool oldParRun = UPstream::parRun(false);
-
-        autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
-        (
-            decomposeDict
-        );
-
-        labelList cellToRegion
-        (
-            decomposePtr().decompose
-            (
-                mesh,
-                mesh.cellCentres()
-            )
-        );
-
-        UPstream::parRun(oldParRun);  // Restore parallel state
-
-
-        // For debugging: write out region
-        createScalarField
-        (
-            mesh,
-            "cellDist",
-            cellToRegion
-        )().write();
-
-        Info<< nl << "Written decomposition as volScalarField to "
-            << "cellDist for use in postprocessing."
-            << nl << endl;
-
-
-        cellOrder = regionRenumber(renumberPtr(), mesh, cellToRegion);
-
-        // Determine new to old face order with new cell numbering
-        faceOrder = getRegionFaceOrder
-        (
-            mesh,
-            cellOrder,
-            cellToRegion
-        );
-    }
-    else
-    {
-        // Determines sorted back to original cell ordering
-        cellOrder = renumberPtr().renumber
-        (
-            mesh,
-            mesh.cellCentres()
-        );
-
-        if (sortCoupledFaceCells)
-        {
-            // Change order so all coupled patch faceCells are at the end.
-            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-            // Collect all boundary cells on coupled patches
-            label nBndCells = 0;
-            forAll(pbm, patchi)
-            {
-                if (pbm[patchi].coupled())
-                {
-                    nBndCells += pbm[patchi].size();
-                }
-            }
-
-            labelList reverseCellOrder = invert(mesh.nCells(), cellOrder);
-
-            labelList bndCells(nBndCells);
-            labelList bndCellMap(nBndCells);
-            nBndCells = 0;
-            forAll(pbm, patchi)
-            {
-                if (pbm[patchi].coupled())
-                {
-                    const labelUList& faceCells = pbm[patchi].faceCells();
-                    forAll(faceCells, i)
-                    {
-                        label celli = faceCells[i];
-
-                        if (reverseCellOrder[celli] != -1)
-                        {
-                            bndCells[nBndCells] = celli;
-                            bndCellMap[nBndCells++] = reverseCellOrder[celli];
-                            reverseCellOrder[celli] = -1;
-                        }
-                    }
-                }
-            }
-            bndCells.setSize(nBndCells);
-            bndCellMap.setSize(nBndCells);
-
-            // Sort
-            labelList order(sortedOrder(bndCellMap));
-
-            // Redo newReverseCellOrder
-            labelList newReverseCellOrder(mesh.nCells(), -1);
-
-            label sortedI = mesh.nCells();
-            forAllReverse(order, i)
-            {
-                label origCelli = bndCells[order[i]];
-                newReverseCellOrder[origCelli] = --sortedI;
-            }
-
-            Info<< "Ordered all " << nBndCells << " cells with a coupled face"
-                << " to the end of the cell list, starting at " << sortedI
-                << endl;
-
-            // Compact
-            sortedI = 0;
-            forAll(cellOrder, newCelli)
-            {
-                label origCelli = cellOrder[newCelli];
-                if (newReverseCellOrder[origCelli] == -1)
-                {
-                    newReverseCellOrder[origCelli] = sortedI++;
-                }
-            }
-
-            // Update sorted back to original (unsorted) map
-            cellOrder = invert(mesh.nCells(), newReverseCellOrder);
-        }
-
-
-        // Determine new to old face order with new cell numbering
-        faceOrder = getFaceOrder
-        (
-            mesh,
-            cellOrder      // New to old cell
-        );
-    }
-
-
-    if (!overwrite)
-    {
-        ++runTime;
-    }
-
-
-    // Change the mesh.
-    autoPtr<mapPolyMesh> map = reorderMesh(mesh, cellOrder, faceOrder);
-
-
-    if (orderPoints)
-    {
-        polyTopoChange meshMod(mesh);
-        autoPtr<mapPolyMesh> pointOrderMap = meshMod.changeMesh
-        (
-            mesh,
-            false,      // inflate
-            true,       // syncParallel
-            false,      // orderCells
-            orderPoints // orderPoints
-        );
-
-        // Combine point reordering into map.
-        const_cast<labelList&>(map().pointMap()) = labelUIndList
-        (
-            map().pointMap(),
-            pointOrderMap().pointMap()
-        )();
-
-        inplaceRenumber
-        (
-            pointOrderMap().reversePointMap(),
-            const_cast<labelList&>(map().reversePointMap())
-        );
-    }
-
-
-    // Update fields
-    mesh.updateMesh(map());
-
-    // Update proc maps
-    if (cellProcAddressing.headerOk())
-    {
-        bool localOk = (cellProcAddressing.size() == mesh.nCells());
-
-        if (returnReduce(localOk, andOp<bool>()))
-        {
-            Info<< "Renumbering processor cell decomposition map "
-                << cellProcAddressing.name() << endl;
-
-            cellProcAddressing = labelList
-            (
-                labelUIndList(cellProcAddressing, map().cellMap())
-            );
-        }
-        else
-        {
-            Info<< "Not writing inconsistent processor cell decomposition"
-                << " map " << cellProcAddressing.filePath() << endl;
-            cellProcAddressing.writeOpt(IOobject::NO_WRITE);
-        }
-    }
-    else
-    {
-        cellProcAddressing.writeOpt(IOobject::NO_WRITE);
-    }
-
-    if (faceProcAddressing.headerOk())
-    {
-        bool localOk = (faceProcAddressing.size() == mesh.nFaces());
-
-        if (returnReduce(localOk, andOp<bool>()))
-        {
-            Info<< "Renumbering processor face decomposition map "
-                << faceProcAddressing.name() << endl;
-
-            faceProcAddressing = labelList
-            (
-                labelUIndList(faceProcAddressing, map().faceMap())
-            );
-
-            // Detect any flips.
-            const labelHashSet& fff = map().flipFaceFlux();
-            for (const label facei : fff)
-            {
-                label masterFacei = faceProcAddressing[facei];
-
-                faceProcAddressing[facei] = -masterFacei;
-
-                if (masterFacei == 0)
-                {
-                    FatalErrorInFunction
-                        << " masterFacei:" << masterFacei << exit(FatalError);
-                }
-            }
-        }
-        else
-        {
-            Info<< "Not writing inconsistent processor face decomposition"
-                << " map " << faceProcAddressing.filePath() << endl;
-            faceProcAddressing.writeOpt(IOobject::NO_WRITE);
-        }
-    }
-    else
-    {
-        faceProcAddressing.writeOpt(IOobject::NO_WRITE);
-    }
-
-    if (pointProcAddressing.headerOk())
-    {
-        bool localOk = (pointProcAddressing.size() == mesh.nPoints());
-
-        if (returnReduce(localOk, andOp<bool>()))
-        {
-            Info<< "Renumbering processor point decomposition map "
-                << pointProcAddressing.name() << endl;
-
-            pointProcAddressing = labelList
-            (
-                labelUIndList(pointProcAddressing, map().pointMap())
-            );
-        }
-        else
-        {
-            Info<< "Not writing inconsistent processor point decomposition"
-                << " map " << pointProcAddressing.filePath() << endl;
-            pointProcAddressing.writeOpt(IOobject::NO_WRITE);
-        }
-    }
-    else
-    {
-        pointProcAddressing.writeOpt(IOobject::NO_WRITE);
-    }
-
-    if (boundaryProcAddressing.headerOk())
-    {
-        bool localOk =
-        (
-            boundaryProcAddressing.size()
-         == mesh.boundaryMesh().size()
-        );
-        if (returnReduce(localOk, andOp<bool>()))
-        {
-            // No renumbering needed
-        }
-        else
-        {
-            Info<< "Not writing inconsistent processor patch decomposition"
-                << " map " << boundaryProcAddressing.filePath() << endl;
-            boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
-        }
-    }
-    else
-    {
-        boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
-    }
-
-
-
-
-    // Move mesh (since morphing might not do this)
-    if (map().hasMotionPoints())
-    {
-        mesh.movePoints(map().preMotionPoints());
-    }
-
-
-    {
         label band;
         scalar profile;
         scalar sumSqrIntersect;
@@ -1228,6 +675,7 @@ int main(int argc, char *argv[])
             profile,
             sumSqrIntersect
         );
+
         reduce(band, maxOp<label>());
         reduce(profile, sumOp<scalar>());
         scalar rmsFrontwidth = Foam::sqrt
@@ -1239,181 +687,747 @@ int main(int argc, char *argv[])
             )/mesh.globalData().nTotalCells()
         );
 
-        Info<< "After renumbering :" << nl
+        Info<< "Mesh " << mesh.name()
+            << " size: " << mesh.globalData().nTotalCells() << nl
+            << "Before renumbering :" << nl
             << "    band           : " << band << nl
             << "    profile        : " << profile << nl;
 
         if (doFrontWidth)
         {
-
             Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
         }
 
         Info<< endl;
-    }
 
-    if (orderPoints)
-    {
-        // Force edge calculation (since only reason that points would need to
-        // be sorted)
-        (void)mesh.edges();
+        bool sortCoupledFaceCells = false;
+        bool writeMaps = false;
+        bool orderPoints = false;
+        label blockSize = 0;
 
-        label nTotPoints = returnReduce
-        (
-            mesh.nPoints(),
-            sumOp<label>()
-        );
-        label nTotIntPoints = returnReduce
-        (
-            mesh.nInternalPoints(),
-            sumOp<label>()
-        );
+        // Construct renumberMethod
+        autoPtr<IOdictionary> renumberDictPtr;
+        autoPtr<renumberMethod> renumberPtr;
 
-        label nTotEdges = returnReduce
-        (
-            mesh.nEdges(),
-            sumOp<label>()
-        );
-        label nTotIntEdges = returnReduce
-        (
-            mesh.nInternalEdges(),
-            sumOp<label>()
-        );
-        label nTotInt0Edges = returnReduce
-        (
-            mesh.nInternal0Edges(),
-            sumOp<label>()
-        );
-        label nTotInt1Edges = returnReduce
-        (
-            mesh.nInternal1Edges(),
-            sumOp<label>()
-        );
+        if (readDict)
+        {
+            const word dictName("renumberMeshDict");
+            #include "setSystemMeshDictionaryIO.H"
 
-        Info<< "Points:" << nl
-            << "    total   : " << nTotPoints << nl
-            << "    internal: " << nTotIntPoints << nl
-            << "    boundary: " << nTotPoints-nTotIntPoints << nl
-            << "Edges:" << nl
-            << "    total   : " << nTotEdges << nl
-            << "    internal: " << nTotIntEdges << nl
-            << "        internal using 0 boundary points: "
-            << nTotInt0Edges << nl
-            << "        internal using 1 boundary points: "
-            << nTotInt1Edges-nTotInt0Edges << nl
-            << "        internal using 2 boundary points: "
-            << nTotIntEdges-nTotInt1Edges << nl
-            << "    boundary: " << nTotEdges-nTotIntEdges << nl
+            Info<< "Renumber according to " << dictIO.name() << nl << endl;
+
+            renumberDictPtr.reset(new IOdictionary(dictIO));
+            const IOdictionary& renumberDict = renumberDictPtr();
+
+            renumberPtr = renumberMethod::New(renumberDict);
+
+            sortCoupledFaceCells = renumberDict.getOrDefault
+            (
+                "sortCoupledFaceCells",
+                false
+            );
+            if (sortCoupledFaceCells)
+            {
+                Info<< "Sorting cells on coupled boundaries to be last." << nl
+                    << endl;
+            }
+
+            blockSize = renumberDict.getOrDefault("blockSize", 0);
+            if (blockSize > 0)
+            {
+                Info<< "Ordering cells into regions of size " << blockSize
+                    << " (using decomposition);"
+                    << " ordering faces into region-internal"
+                    << " and region-external."
+                    << nl << endl;
+
+                if (blockSize < 0 || blockSize >= mesh.nCells())
+                {
+                    FatalErrorInFunction
+                        << "Block size " << blockSize
+                        << " should be positive integer"
+                        << " and less than the number of cells in the mesh."
+                        << exit(FatalError);
+                }
+            }
+
+            orderPoints = renumberDict.getOrDefault("orderPoints", false);
+            if (orderPoints)
+            {
+                Info<< "Ordering points into internal and boundary points."
+                    << nl
+                    << endl;
+            }
+
+            renumberDict.readEntry("writeMaps", writeMaps);
+            if (writeMaps)
+            {
+                Info<< "Writing renumber maps (new to old) to polyMesh." << nl
+                    << endl;
+            }
+        }
+        else
+        {
+            Info<< "Using default renumberMethod." << nl << endl;
+            dictionary renumberDict;
+            renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
+        }
+
+        Info<< "Selecting renumberMethod " << renumberPtr().type() << nl
             << endl;
-    }
 
 
-    if (overwrite)
-    {
-        mesh.setInstance(oldInstance);
-    }
-    else
-    {
-        mesh.setInstance(runTime.timeName());
-    }
 
-
-    Info<< "Writing mesh to " << mesh.facesInstance() << endl;
-
-    // Remove old procAddressing files
-    processorMeshes::removeFiles(mesh);
-
-    // Update refinement data
-    hexRef8Data refData
-    (
-        IOobject
-        (
-            "dummy",
-            mesh.facesInstance(),
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-    refData.updateMesh(map());
-    refData.write();
-
-    // Update sets
-    topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
-    topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);
-    topoSet::updateMesh(mesh.facesInstance(), map(), pointSets);
-
-    mesh.write();
-
-    if (writeMaps)
-    {
-        // For debugging: write out region
-        createScalarField
-        (
-            mesh,
-            "origCellID",
-            map().cellMap()
-        )().write();
-
-        createScalarField
-        (
-            mesh,
-            "cellID",
-            identity(mesh.nCells())
-        )().write();
-
-        Info<< nl << "Written current cellID and origCellID as volScalarField"
-            << " for use in postprocessing."
-            << nl << endl;
-
-        labelIOList
+        // Read parallel reconstruct maps
+        labelIOList cellProcAddressing
         (
             IOobject
             (
-                "cellMap",
+                "cellProcAddressing",
                 mesh.facesInstance(),
                 polyMesh::meshSubDir,
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
             ),
-            map().cellMap()
-        ).write();
+            labelList(0)
+        );
 
-        labelIOList
+        labelIOList faceProcAddressing
         (
             IOobject
             (
-                "faceMap",
+                "faceProcAddressing",
                 mesh.facesInstance(),
                 polyMesh::meshSubDir,
                 mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
             ),
-            map().faceMap()
-        ).write();
-
-        labelIOList
+            labelList(0)
+        );
+        labelIOList pointProcAddressing
         (
             IOobject
             (
-                "pointMap",
+                "pointProcAddressing",
+                mesh.pointsInstance(),
+                polyMesh::meshSubDir,
+                mesh,
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            labelList(0)
+        );
+        labelIOList boundaryProcAddressing
+        (
+            IOobject
+            (
+                "boundaryProcAddressing",
+                mesh.pointsInstance(),
+                polyMesh::meshSubDir,
+                mesh,
+                IOobject::READ_IF_PRESENT,
+                IOobject::AUTO_WRITE
+            ),
+            labelList(0)
+        );
+
+
+        // Read objects in time directory
+        IOobjectList objects(mesh, runTime.timeName());
+
+
+        // Read vol fields.
+
+        PtrList<volScalarField> vsFlds;
+        ReadFields(mesh, objects, vsFlds);
+
+        PtrList<volVectorField> vvFlds;
+        ReadFields(mesh, objects, vvFlds);
+
+        PtrList<volSphericalTensorField> vstFlds;
+        ReadFields(mesh, objects, vstFlds);
+
+        PtrList<volSymmTensorField> vsymtFlds;
+        ReadFields(mesh, objects, vsymtFlds);
+
+        PtrList<volTensorField> vtFlds;
+        ReadFields(mesh, objects, vtFlds);
+
+
+        // Read surface fields.
+
+        PtrList<surfaceScalarField> ssFlds;
+        ReadFields(mesh, objects, ssFlds);
+
+        PtrList<surfaceVectorField> svFlds;
+        ReadFields(mesh, objects, svFlds);
+
+        PtrList<surfaceSphericalTensorField> sstFlds;
+        ReadFields(mesh, objects, sstFlds);
+
+        PtrList<surfaceSymmTensorField> ssymtFlds;
+        ReadFields(mesh, objects, ssymtFlds);
+
+        PtrList<surfaceTensorField> stFlds;
+        ReadFields(mesh, objects, stFlds);
+
+
+        // Read point fields.
+
+        PtrList<pointScalarField> psFlds;
+        ReadFields(pointMesh::New(mesh), objects, psFlds);
+
+        PtrList<pointVectorField> pvFlds;
+        ReadFields(pointMesh::New(mesh), objects, pvFlds);
+
+        PtrList<pointSphericalTensorField> pstFlds;
+        ReadFields(pointMesh::New(mesh), objects, pstFlds);
+
+        PtrList<pointSymmTensorField> psymtFlds;
+        ReadFields(pointMesh::New(mesh), objects, psymtFlds);
+
+        PtrList<pointTensorField> ptFlds;
+        ReadFields(pointMesh::New(mesh), objects, ptFlds);
+
+
+        // Read sets
+        PtrList<cellSet> cellSets;
+        PtrList<faceSet> faceSets;
+        PtrList<pointSet> pointSets;
+        {
+            // Read sets
+            IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+            ReadFields(objects, cellSets);
+            ReadFields(objects, faceSets);
+            ReadFields(objects, pointSets);
+        }
+
+
+        Info<< endl;
+
+        // From renumbering:
+        // - from new cell/face back to original cell/face
+        labelList cellOrder;
+        labelList faceOrder;
+
+        if (blockSize > 0)
+        {
+            // Renumbering in two phases. Should be done in one so mapping of
+            // fields is done correctly!
+
+            label nBlocks = mesh.nCells()/blockSize;
+            Info<< "nBlocks   = " << nBlocks << endl;
+
+            // Read decompositionMethod dictionary
+            dictionary decomposeDict(renumberDictPtr().subDict("blockCoeffs"));
+            decomposeDict.set("numberOfSubdomains", nBlocks);
+
+            const bool oldParRun = UPstream::parRun(false);
+
+            autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
+            (
+                decomposeDict
+            );
+
+            labelList cellToRegion
+            (
+                decomposePtr().decompose
+                (
+                    mesh,
+                    mesh.cellCentres()
+                )
+            );
+
+            UPstream::parRun(oldParRun);  // Restore parallel state
+
+
+            // For debugging: write out region
+            createScalarField
+            (
+                mesh,
+                "cellDist",
+                cellToRegion
+            )().write();
+
+            Info<< nl << "Written decomposition as volScalarField to "
+                << "cellDist for use in postprocessing."
+                << nl << endl;
+
+
+            cellOrder = regionRenumber(renumberPtr(), mesh, cellToRegion);
+
+            // Determine new to old face order with new cell numbering
+            faceOrder = getRegionFaceOrder
+            (
+                mesh,
+                cellOrder,
+                cellToRegion
+            );
+        }
+        else
+        {
+            // Determines sorted back to original cell ordering
+            cellOrder = renumberPtr().renumber
+            (
+                mesh,
+                mesh.cellCentres()
+            );
+
+            if (sortCoupledFaceCells)
+            {
+                // Change order so all coupled patch faceCells are at the end.
+                const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+                // Collect all boundary cells on coupled patches
+                label nBndCells = 0;
+                forAll(pbm, patchi)
+                {
+                    if (pbm[patchi].coupled())
+                    {
+                        nBndCells += pbm[patchi].size();
+                    }
+                }
+
+                labelList reverseCellOrder = invert(mesh.nCells(), cellOrder);
+
+                labelList bndCells(nBndCells);
+                labelList bndCellMap(nBndCells);
+                nBndCells = 0;
+                forAll(pbm, patchi)
+                {
+                    if (pbm[patchi].coupled())
+                    {
+                        const labelUList& faceCells = pbm[patchi].faceCells();
+                        forAll(faceCells, i)
+                        {
+                            label celli = faceCells[i];
+
+                            if (reverseCellOrder[celli] != -1)
+                            {
+                                bndCells[nBndCells] = celli;
+                                bndCellMap[nBndCells++] =
+                                    reverseCellOrder[celli];
+                                reverseCellOrder[celli] = -1;
+                            }
+                        }
+                    }
+                }
+                bndCells.setSize(nBndCells);
+                bndCellMap.setSize(nBndCells);
+
+                // Sort
+                labelList order(sortedOrder(bndCellMap));
+
+                // Redo newReverseCellOrder
+                labelList newReverseCellOrder(mesh.nCells(), -1);
+
+                label sortedI = mesh.nCells();
+                forAllReverse(order, i)
+                {
+                    label origCelli = bndCells[order[i]];
+                    newReverseCellOrder[origCelli] = --sortedI;
+                }
+
+                Info<< "Ordered all " << nBndCells
+                    << " cells with a coupled face"
+                    << " to the end of the cell list, starting at " << sortedI
+                    << endl;
+
+                // Compact
+                sortedI = 0;
+                forAll(cellOrder, newCelli)
+                {
+                    label origCelli = cellOrder[newCelli];
+                    if (newReverseCellOrder[origCelli] == -1)
+                    {
+                        newReverseCellOrder[origCelli] = sortedI++;
+                    }
+                }
+
+                // Update sorted back to original (unsorted) map
+                cellOrder = invert(mesh.nCells(), newReverseCellOrder);
+            }
+
+
+            // Determine new to old face order with new cell numbering
+            faceOrder = getFaceOrder
+            (
+                mesh,
+                cellOrder      // New to old cell
+            );
+        }
+
+
+        if (!overwrite)
+        {
+            ++runTime;
+        }
+
+
+        // Change the mesh.
+        autoPtr<mapPolyMesh> map = reorderMesh(mesh, cellOrder, faceOrder);
+
+
+        if (orderPoints)
+        {
+            polyTopoChange meshMod(mesh);
+            autoPtr<mapPolyMesh> pointOrderMap = meshMod.changeMesh
+            (
+                mesh,
+                false,      // inflate
+                true,       // syncParallel
+                false,      // orderCells
+                orderPoints // orderPoints
+            );
+
+            // Combine point reordering into map.
+            const_cast<labelList&>(map().pointMap()) = labelUIndList
+            (
+                map().pointMap(),
+                pointOrderMap().pointMap()
+            )();
+
+            inplaceRenumber
+            (
+                pointOrderMap().reversePointMap(),
+                const_cast<labelList&>(map().reversePointMap())
+            );
+        }
+
+
+        // Update fields
+        mesh.updateMesh(map());
+
+        // Update proc maps
+        if (cellProcAddressing.headerOk())
+        {
+            bool localOk = (cellProcAddressing.size() == mesh.nCells());
+
+            if (returnReduce(localOk, andOp<bool>()))
+            {
+                Info<< "Renumbering processor cell decomposition map "
+                    << cellProcAddressing.name() << endl;
+
+                cellProcAddressing = labelList
+                (
+                    labelUIndList(cellProcAddressing, map().cellMap())
+                );
+            }
+            else
+            {
+                Info<< "Not writing inconsistent processor cell decomposition"
+                    << " map " << cellProcAddressing.filePath() << endl;
+                cellProcAddressing.writeOpt(IOobject::NO_WRITE);
+            }
+        }
+        else
+        {
+            cellProcAddressing.writeOpt(IOobject::NO_WRITE);
+        }
+
+        if (faceProcAddressing.headerOk())
+        {
+            bool localOk = (faceProcAddressing.size() == mesh.nFaces());
+
+            if (returnReduce(localOk, andOp<bool>()))
+            {
+                Info<< "Renumbering processor face decomposition map "
+                    << faceProcAddressing.name() << endl;
+
+                faceProcAddressing = labelList
+                (
+                    labelUIndList(faceProcAddressing, map().faceMap())
+                );
+
+                // Detect any flips.
+                const labelHashSet& fff = map().flipFaceFlux();
+                for (const label facei : fff)
+                {
+                    label masterFacei = faceProcAddressing[facei];
+
+                    faceProcAddressing[facei] = -masterFacei;
+
+                    if (masterFacei == 0)
+                    {
+                        FatalErrorInFunction
+                            << " masterFacei:" << masterFacei
+                            << exit(FatalError);
+                    }
+                }
+            }
+            else
+            {
+                Info<< "Not writing inconsistent processor face decomposition"
+                    << " map " << faceProcAddressing.filePath() << endl;
+                faceProcAddressing.writeOpt(IOobject::NO_WRITE);
+            }
+        }
+        else
+        {
+            faceProcAddressing.writeOpt(IOobject::NO_WRITE);
+        }
+
+        if (pointProcAddressing.headerOk())
+        {
+            bool localOk = (pointProcAddressing.size() == mesh.nPoints());
+
+            if (returnReduce(localOk, andOp<bool>()))
+            {
+                Info<< "Renumbering processor point decomposition map "
+                    << pointProcAddressing.name() << endl;
+
+                pointProcAddressing = labelList
+                (
+                    labelUIndList(pointProcAddressing, map().pointMap())
+                );
+            }
+            else
+            {
+                Info<< "Not writing inconsistent processor point decomposition"
+                    << " map " << pointProcAddressing.filePath() << endl;
+                pointProcAddressing.writeOpt(IOobject::NO_WRITE);
+            }
+        }
+        else
+        {
+            pointProcAddressing.writeOpt(IOobject::NO_WRITE);
+        }
+
+        if (boundaryProcAddressing.headerOk())
+        {
+            bool localOk =
+            (
+                boundaryProcAddressing.size()
+             == mesh.boundaryMesh().size()
+            );
+            if (returnReduce(localOk, andOp<bool>()))
+            {
+                // No renumbering needed
+            }
+            else
+            {
+                Info<< "Not writing inconsistent processor patch decomposition"
+                    << " map " << boundaryProcAddressing.filePath() << endl;
+                boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
+            }
+        }
+        else
+        {
+            boundaryProcAddressing.writeOpt(IOobject::NO_WRITE);
+        }
+
+
+
+
+        // Move mesh (since morphing might not do this)
+        if (map().hasMotionPoints())
+        {
+            mesh.movePoints(map().preMotionPoints());
+        }
+
+
+        {
+            label band;
+            scalar profile;
+            scalar sumSqrIntersect;
+            getBand
+            (
+                doFrontWidth,
+                mesh.nCells(),
+                mesh.faceOwner(),
+                mesh.faceNeighbour(),
+                band,
+                profile,
+                sumSqrIntersect
+            );
+            reduce(band, maxOp<label>());
+            reduce(profile, sumOp<scalar>());
+            scalar rmsFrontwidth = Foam::sqrt
+            (
+                returnReduce
+                (
+                    sumSqrIntersect,
+                    sumOp<scalar>()
+                )/mesh.globalData().nTotalCells()
+            );
+
+            Info<< "After renumbering :" << nl
+                << "    band           : " << band << nl
+                << "    profile        : " << profile << nl;
+
+            if (doFrontWidth)
+            {
+
+                Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
+            }
+
+            Info<< endl;
+        }
+
+        if (orderPoints)
+        {
+            // Force edge calculation (since only reason that points would
+            // need to be sorted)
+            (void)mesh.edges();
+
+            label nTotPoints = returnReduce
+            (
+                mesh.nPoints(),
+                sumOp<label>()
+            );
+            label nTotIntPoints = returnReduce
+            (
+                mesh.nInternalPoints(),
+                sumOp<label>()
+            );
+
+            label nTotEdges = returnReduce
+            (
+                mesh.nEdges(),
+                sumOp<label>()
+            );
+            label nTotIntEdges = returnReduce
+            (
+                mesh.nInternalEdges(),
+                sumOp<label>()
+            );
+            label nTotInt0Edges = returnReduce
+            (
+                mesh.nInternal0Edges(),
+                sumOp<label>()
+            );
+            label nTotInt1Edges = returnReduce
+            (
+                mesh.nInternal1Edges(),
+                sumOp<label>()
+            );
+
+            Info<< "Points:" << nl
+                << "    total   : " << nTotPoints << nl
+                << "    internal: " << nTotIntPoints << nl
+                << "    boundary: " << nTotPoints-nTotIntPoints << nl
+                << "Edges:" << nl
+                << "    total   : " << nTotEdges << nl
+                << "    internal: " << nTotIntEdges << nl
+                << "        internal using 0 boundary points: "
+                << nTotInt0Edges << nl
+                << "        internal using 1 boundary points: "
+                << nTotInt1Edges-nTotInt0Edges << nl
+                << "        internal using 2 boundary points: "
+                << nTotIntEdges-nTotInt1Edges << nl
+                << "    boundary: " << nTotEdges-nTotIntEdges << nl
+                << endl;
+        }
+
+
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+        }
+        else
+        {
+            mesh.setInstance(runTime.timeName());
+        }
+
+
+        Info<< "Writing mesh to " << mesh.facesInstance() << endl;
+
+        // Remove old procAddressing files
+        processorMeshes::removeFiles(mesh);
+
+        // Update refinement data
+        hexRef8Data refData
+        (
+            IOobject
+            (
+                "dummy",
                 mesh.facesInstance(),
                 polyMesh::meshSubDir,
                 mesh,
-                IOobject::NO_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
                 false
-            ),
-            map().pointMap()
-        ).write();
+            )
+        );
+        refData.updateMesh(map());
+        refData.write();
+
+        // Update sets
+        topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
+        topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);
+        topoSet::updateMesh(mesh.facesInstance(), map(), pointSets);
+
+        mesh.write();
+
+        if (writeMaps)
+        {
+            // For debugging: write out region
+            createScalarField
+            (
+                mesh,
+                "origCellID",
+                map().cellMap()
+            )().write();
+
+            createScalarField
+            (
+                mesh,
+                "cellID",
+                identity(mesh.nCells())
+            )().write();
+
+            Info<< nl
+                << "Written current cellID and origCellID as volScalarField"
+                << " for use in postprocessing." << nl << endl;
+
+            labelIOList
+            (
+                IOobject
+                (
+                    "cellMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                map().cellMap()
+            ).write();
+
+            labelIOList
+            (
+                IOobject
+                (
+                    "faceMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                map().faceMap()
+            ).write();
+
+            labelIOList
+            (
+                IOobject
+                (
+                    "pointMap",
+                    mesh.facesInstance(),
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                map().pointMap()
+            ).write();
+        }
     }
-
 
     Info<< "End\n" << endl;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,20 +405,7 @@ int main(int argc, char *argv[])
     );
     argList::addOptionCompat("one-boundary", {"allPatches", 1806});
 
-    #include "addRegionOption.H"
-
-    argList::addOption
-    (
-        "regions",
-        "wordRes",
-        "Operate on selected regions from regionProperties.\n"
-        "Eg, '( gas \"solid.*\" )'"
-    );
-    argList::addBoolOption
-    (
-        "allRegions",
-        "Operate on all regions in regionProperties"
-    );
+    #include "addAllRegionOptions.H"
 
     argList::addOption
     (
@@ -473,7 +460,6 @@ int main(int argc, char *argv[])
 
     const bool oneBoundary   = args.found("one-boundary") && doBoundary;
     const bool nearCellValue = args.found("nearCellValue") && doBoundary;
-    const bool allRegions    = args.found("allRegions");
 
     const vtk::outputOptions writeOpts = getOutputOptions(args);
 
@@ -563,80 +549,8 @@ int main(int argc, char *argv[])
     // Information for file series
     HashTable<vtk::seriesWriter, fileName> vtkSeries;
 
-    wordList regionNames;
-    wordRes selectRegions;
-    if (allRegions)
-    {
-        regionNames =
-            regionProperties(runTime, IOobject::READ_IF_PRESENT).names();
-
-        if (regionNames.empty())
-        {
-            Info<< "Warning: "
-                << "No regionProperties - assuming default region"
-                << nl << endl;
-
-            regionNames.resize(1);
-            regionNames.first() = fvMesh::defaultRegion;
-        }
-        else
-        {
-            Info<< "Using all regions in regionProperties" << nl
-                << "    "<< flatOutput(regionNames) << nl;
-        }
-    }
-    else if (args.readListIfPresent<wordRe>("regions", selectRegions))
-    {
-        if (selectRegions.empty())
-        {
-            regionNames.resize(1);
-            regionNames.first() = fvMesh::defaultRegion;
-        }
-        else if
-        (
-            selectRegions.size() == 1 && selectRegions.first().isLiteral()
-        )
-        {
-            // Identical to -region NAME
-            regionNames.resize(1);
-            regionNames.first() = selectRegions.first();
-        }
-        else
-        {
-            regionNames =
-                regionProperties(runTime, IOobject::READ_IF_PRESENT).names();
-
-            if (regionNames.empty())
-            {
-                Info<< "Warning: "
-                    << "No regionProperties - assuming default region"
-                    << nl << endl;
-
-                regionNames.resize(1);
-                regionNames.first() = fvMesh::defaultRegion;
-            }
-            else
-            {
-                inplaceSubsetStrings(selectRegions, regionNames);
-
-                if (regionNames.empty())
-                {
-                    Info<< "No matching regions ... stopping" << nl << endl;
-                    return 1;
-                }
-
-                Info<< "Using matching regions: "
-                    << flatOutput(regionNames) << nl;
-            }
-        }
-    }
-    else
-    {
-        regionNames.resize(1);
-        regionNames.first() =
-            args.getOrDefault<word>("region", fvMesh::defaultRegion);
-    }
-
+    // Handle -allRegions, -regions, -region
+    #include "getAllRegionOptions.H"
 
     // Names for sets and zones
     word cellSelectionName;
@@ -686,13 +600,7 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    cpuTime timer;
-    memInfo mem;
-    Info<< "Initial memory " << mem.update().size() << " kB" << endl;
-
-    #include "createMeshes.H"
-
+    // ------------------------------------------------------------------------
     // Directory management
 
     // Sub-directory for output
@@ -705,28 +613,38 @@ int main(int argc, char *argv[])
         // Overwrite or create the VTK/regionName directories.
         // For the default region, this is simply "VTK/"
 
-        fileName regionDir;
         for (const word& regionName : regionNames)
         {
-            if (regionName != polyMesh::defaultRegion)
-            {
-                regionDir = outputDir / regionName;
-            }
-            else
-            {
-                regionDir = outputDir;
-            }
+            const word& regionDir =
+            (
+                regionName == polyMesh::defaultRegion ? word::null : regionName
+            );
 
-            if (args.found("overwrite") && isDir(regionDir))
+            fileName regionalDir(outputDir/regionDir);
+
+            if (args.found("overwrite") && Foam::isDir(regionalDir))
             {
                 Info<< "Removing old directory "
-                    << args.relativePath(regionDir)
+                    << args.relativePath(regionalDir)
                     << nl << endl;
-                rmDir(regionDir);
+                Foam::rmDir(regionalDir);
             }
-            mkDir(regionDir);
+            Foam::mkDir(regionalDir);
         }
     }
+
+    // ------------------------------------------------------------------------
+
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory " << mem.update().size() << " kB" << endl;
+
+    #include "createNamedMeshes.H"
+    #include "createMeshAccounting.H"
+
+    Info<< "VTK mesh topology: "
+        << timer.cpuTimeIncrement() << " s, "
+        << mem.update().size() << " kB" << endl;
 
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -749,11 +667,13 @@ int main(int argc, char *argv[])
         forAll(regionNames, regioni)
         {
             const word& regionName = regionNames[regioni];
-
-            fileName regionPrefix;
-            if (regionName != polyMesh::defaultRegion)
+            const word& regionDir =
+            (
+                regionName == polyMesh::defaultRegion ? word::null : regionName
+            );
+            if (regionNames.size() > 1 || !regionDir.empty())
             {
-                regionPrefix = regionName;
+                Info<< "region = " << regionName << nl;
             }
 
             auto& meshProxy = meshProxies[regioni];

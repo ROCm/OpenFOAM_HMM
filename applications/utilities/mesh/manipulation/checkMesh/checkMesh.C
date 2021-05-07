@@ -50,6 +50,9 @@ Usage
       - \par -region \<name\>
         Specify an alternative mesh region.
 
+      - \par -allRegions
+        Check all regions in regionProperties.
+
     \param -writeSets \<surfaceFormat\> \n
     Reconstruct all cellSets and faceSets geometry and write to postProcessing
     directory according to surfaceFormat (e.g. vtk or ensight). Additionally
@@ -74,6 +77,8 @@ Usage
 #include "vtkSetWriter.H"
 #include "vtkSurfaceWriter.H"
 #include "IOdictionary.H"
+#include "regionProperties.H"
+#include "polyMeshTools.H"
 
 #include "checkTools.H"
 #include "checkTopology.H"
@@ -93,7 +98,8 @@ int main(int argc, char *argv[])
     );
 
     timeSelector::addOptions();
-    #include "addRegionOption.H"
+    #include "addAllRegionOptions.H"
+
     argList::addBoolOption
     (
         "noTopology",
@@ -139,8 +145,9 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
     #include "createTime.H"
+    #include "getAllRegionOptions.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-    #include "createNamedMesh.H"
+    #include "createNamedMeshes.H"
 
     const bool noTopology  = args.found("noTopology");
     const bool allGeometry = args.found("allGeometry");
@@ -230,23 +237,27 @@ int main(int argc, char *argv[])
     }
 
 
-    autoPtr<IOdictionary> qualDict;
+    PtrList<IOdictionary> qualDict(meshes.size());
     if (meshQuality)
     {
-        qualDict.reset
-        (
-            new IOdictionary
+        forAll(meshes, meshi)
+        {
+            qualDict.set
             (
-                IOobject
+                meshi,
+                new IOdictionary
                 (
-                    "meshQualityDict",
-                    mesh.time().system(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
+                    IOobject
+                    (
+                        "meshQualityDict",
+                        meshes[meshi].time().system(),
+                        meshes[meshi],
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
                 )
-            )
-        );
+            );
+        }
     }
 
 
@@ -263,7 +274,13 @@ int main(int argc, char *argv[])
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
-        polyMesh::readUpdateState state = mesh.readUpdate();
+        // Get most changed of all meshes
+        polyMesh::readUpdateState state = polyMesh::UNCHANGED;
+        for (auto& mesh : meshes)
+        {
+            state = polyMeshTools::combine(state, mesh.readUpdate());
+        }
+
 
         if
         (
@@ -274,87 +291,100 @@ int main(int argc, char *argv[])
         {
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
-            // Reconstruct globalMeshData
-            mesh.globalData();
-
-            printMeshStats(mesh, allTopology);
-
-            label nFailedChecks = 0;
-
-            if (!noTopology)
+            forAll(meshes, meshi)
             {
-                nFailedChecks += checkTopology
+                const auto& mesh = meshes[meshi];
+
+                // Reconstruct globalMeshData
+                mesh.globalData();
+
+                printMeshStats(mesh, allTopology);
+
+                label nFailedChecks = 0;
+
+                if (!noTopology)
+                {
+                    nFailedChecks += checkTopology
+                    (
+                        mesh,
+                        allTopology,
+                        allGeometry,
+                        surfWriter,
+                        setWriter
+                    );
+                }
+
+                nFailedChecks += checkGeometry
                 (
                     mesh,
-                    allTopology,
                     allGeometry,
                     surfWriter,
                     setWriter
                 );
+
+                if (meshQuality)
+                {
+                    nFailedChecks +=
+                        checkMeshQuality(mesh, qualDict[meshi], surfWriter);
+                }
+
+
+                // Note: no reduction in nFailedChecks necessary since is
+                //       counter of checks, not counter of failed cells,faces
+                //       etc.
+
+                if (nFailedChecks == 0)
+                {
+                    Info<< "\nMesh OK.\n" << endl;
+                }
+                else
+                {
+                    Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
+                        << endl;
+                }
+
+
+                // Write selected fields
+                Foam::writeFields(mesh, selectedFields, writeFaceFields);
             }
-
-            nFailedChecks += checkGeometry
-            (
-                mesh,
-                allGeometry,
-                surfWriter,
-                setWriter
-            );
-
-            if (meshQuality)
-            {
-                nFailedChecks += checkMeshQuality(mesh, qualDict(), surfWriter);
-            }
-
-
-            // Note: no reduction in nFailedChecks necessary since is
-            //       counter of checks, not counter of failed cells,faces etc.
-
-            if (nFailedChecks == 0)
-            {
-                Info<< "\nMesh OK.\n" << endl;
-            }
-            else
-            {
-                Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
-                    << endl;
-            }
-
-
-            // Write selected fields
-            Foam::writeFields(mesh, selectedFields, writeFaceFields);
         }
         else if (state == polyMesh::POINTS_MOVED)
         {
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
-            label nFailedChecks = checkGeometry
-            (
-                mesh,
-                allGeometry,
-                surfWriter,
-                setWriter
-            );
-
-            if (meshQuality)
+            forAll(meshes, meshi)
             {
-                nFailedChecks += checkMeshQuality(mesh, qualDict(), surfWriter);
+                const auto& mesh = meshes[meshi];
+
+                label nFailedChecks = checkGeometry
+                (
+                    mesh,
+                    allGeometry,
+                    surfWriter,
+                    setWriter
+                );
+
+                if (meshQuality)
+                {
+                    nFailedChecks +=
+                        checkMeshQuality(mesh, qualDict[meshi], surfWriter);
+                }
+
+
+                if (nFailedChecks)
+                {
+                    Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
+                        << endl;
+                }
+                else
+                {
+                    Info<< "\nMesh OK.\n" << endl;
+                }
+
+
+                // Write selected fields
+                Foam::writeFields(mesh, selectedFields, writeFaceFields);
             }
-
-
-            if (nFailedChecks)
-            {
-                Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
-                    << endl;
-            }
-            else
-            {
-                Info<< "\nMesh OK.\n" << endl;
-            }
-
-
-            // Write selected fields
-            Foam::writeFields(mesh, selectedFields, writeFaceFields);
         }
     }
 

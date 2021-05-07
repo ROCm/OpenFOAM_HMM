@@ -7,7 +7,7 @@ HashTable<HashTable<word>> cloudFields;
 if (timeDirs.size() && doLagrangian)
 {
     const fileName& baseDir = mesh.time().path();
-    const fileName cloudPrefix(regionPrefix/cloud::prefix);
+    const fileName cloudPrefix(regionDir/cloud::prefix);
 
     Info<< "Searching for lagrangian ... " << flush;
 

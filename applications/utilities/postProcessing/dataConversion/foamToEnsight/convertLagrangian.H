@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ if (doLagrangian)
         (
             readDir
             (
-                runTime.timePath()/regionPrefix/cloud::prefix,
+                runTime.timePath()/regionDir/cloud::prefix,
                 fileName::DIRECTORY
             )
         );

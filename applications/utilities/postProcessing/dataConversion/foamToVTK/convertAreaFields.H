@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ if (doFiniteArea)
             pp,
             writeOpts,
             (
-                outputDir/regionPrefix/"finite-area"
+                outputDir/regionDir/"finite-area"
               / "finiteArea" + timeDesc
             ),
             Pstream::parRun()

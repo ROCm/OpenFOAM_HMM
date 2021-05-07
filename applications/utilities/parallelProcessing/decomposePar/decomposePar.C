@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -294,12 +294,9 @@ int main(int argc, char *argv[])
         "file",
         "Use specified file for decomposePar dictionary"
     );
-    #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "allRegions",
-        "Operate on all regions in regionProperties"
-    );
+
+    #include "addAllRegionOptions.H"
+
     argList::addBoolOption
     (
         "dry-run",
@@ -354,8 +351,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool dryrun           = args.found("dry-run");
-    const bool optRegion        = args.found("region");
-    const bool allRegions       = args.found("allRegions");
     const bool writeCellDist    = args.found("cellDist");
     const bool verbose          = args.found("verbose");
 
@@ -391,27 +386,24 @@ int main(int argc, char *argv[])
         decompDictFile = runTime.globalPath()/decompDictFile;
     }
 
-    // Get all region names
-    wordList regionNames;
-    if (allRegions)
-    {
-        regionNames = regionProperties(runTime).names();
+    // Get region names
+    #include "getAllRegionOptions.H"
 
-        Info<< "Decomposing all regions in regionProperties" << nl
-            << "    " << flatOutput(regionNames) << nl << endl;
-    }
-    else
+    const bool optRegions =
+        (regionNames.size() != 1 || regionNames[0] != polyMesh::defaultRegion);
+
+    if (regionNames.size() == 1 && regionNames[0] != polyMesh::defaultRegion)
     {
-        regionNames.resize(1);
-        regionNames.first() =
-            args.getOrDefault<word>("region", fvMesh::defaultRegion);
+        Info<< "Using region: " << regionNames[0] << nl << endl;
     }
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
         const word& regionDir =
-            (regionName == fvMesh::defaultRegion ? word::null : regionName);
+        (
+            regionName == polyMesh::defaultRegion ? word::null : regionName
+        );
 
         if (dryrun)
         {
@@ -436,7 +428,12 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
+        Info<< "\n\nDecomposing mesh";
+        if (!regionDir.empty())
+        {
+            Info<< ' ' << regionName;
+        }
+        Info<< nl << endl;
 
         // Determine the existing processor count directly
         label nProcs = fileHandler().nProcs(runTime.path(), regionDir);
@@ -495,7 +492,7 @@ int main(int argc, char *argv[])
                 Info<< "Using existing processor directories" << nl;
             }
 
-            if (allRegions || optRegion)
+            if (optRegions)
             {
                 procDirsProblem = false;
                 forceOverwrite = false;

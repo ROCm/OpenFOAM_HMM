@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,6 +93,13 @@ public:
         const scalarField& vol
     );
 
+    //- Combine readUpdateState. topo change trumps geom-only
+    //  change etc.
+    static polyMesh::readUpdateState combine
+    (
+        const polyMesh::readUpdateState& state0,
+        const polyMesh::readUpdateState& state1
+    );
 };
 
 

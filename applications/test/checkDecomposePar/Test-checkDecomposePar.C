@@ -55,12 +55,8 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::noBanner();
 
-    #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "allRegions",
-        "operate on all regions in regionProperties"
-    );
+    #include "addAllRegionOptions.H"
+
     argList::addBoolOption
     (
         "verbose",
@@ -76,11 +72,11 @@ int main(int argc, char *argv[])
 
     const auto decompFile = args.get<fileName>(1);
     const bool region     = args.found("region");
-    const bool allRegions = args.found("allRegions");
     const bool verbose    = args.found("verbose");
 
     // Set time from database
     #include "createTime.H"
+
     // Allow override of time
     instantList times = timeSelector::selectIfPresent(runTime, args);
 
@@ -88,31 +84,18 @@ int main(int argc, char *argv[])
     const fileName decompDictFile =
         args.getOrDefault<fileName>("decomposeParDict", "");
 
-    wordList regionNames;
-    wordList regionDirs;
-    if (allRegions)
+    // Get region names
+    #include "getAllRegionOptions.H"
+
+    wordList regionDirs(regionNames);
+    if (regionDirs.size() == 1 && regionDirs[0] == polyMesh::defaultRegion)
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << endl;
-        regionProperties rp(runTime);
-        forAllConstIters(rp, iter)
-        {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                regionNames.appendUniq(regions[i]);
-            }
-        }
-        regionDirs = regionNames;
+        regionDirs[0].clear();
     }
     else
     {
-        regionNames.resize(1, fvMesh::defaultRegion);
-        regionDirs.resize(1, word::null);
-
-        if (args.readIfPresent("region", regionNames.first()))
-        {
-            regionDirs.first() = regionNames.first();
-        }
+        Info<< "Decomposing regions: "
+            << flatOutput(regionNames) << nl << endl;
     }
 
     labelList cellToProc;
