@@ -142,8 +142,10 @@ bool Foam::dynamicMotionSolverFvMeshAMI::update()
 
     // Scan all patches and see if we want to apply a mesh topology  update
     bool changeRequired = false;
-    for (polyPatch& pp : pbm)
+    for (label patchi = 0; patchi < pbm.nNonProcessor(); ++patchi)
     {
+        const polyPatch& pp = pbm[patchi];
+
         DebugInfo
             << "pre-topology change: patch " << pp.name()
             << " size:" << returnReduce(pp.size(), sumOp<label>())
