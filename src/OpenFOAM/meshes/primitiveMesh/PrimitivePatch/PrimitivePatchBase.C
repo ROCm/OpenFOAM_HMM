@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,36 +26,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatch.H"
-#include "HashSet.H"
+#include "PrimitivePatchBase.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class FaceList, class PointField>
-void
-Foam::PrimitivePatch<FaceList, PointField>::calcBdryPoints() const
+namespace Foam
 {
-    DebugInFunction << "Calculating boundary points" << nl;
-
-    if (boundaryPointsPtr_)
-    {
-        // Error to recalculate if already allocated
-        FatalErrorInFunction
-            << "boundaryPoints already calculated"
-            << abort(FatalError);
-    }
-
-    labelHashSet bp(2*nEdges());
-
-    for (const edge& e : boundaryEdges())
-    {
-        bp.insert(e.first());
-        bp.insert(e.second());
-    }
-
-    boundaryPointsPtr_.reset(new labelList(bp.sortedToc()));
-
-    DebugInfo << "    Finished." << nl;
+defineTypeNameAndDebug(PrimitivePatchBase, 0);
 }
 
 

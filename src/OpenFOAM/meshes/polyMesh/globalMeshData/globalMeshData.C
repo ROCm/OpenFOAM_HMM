@@ -2507,7 +2507,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 (
     const labelList& meshPoints,
-    const Map<label>& meshPointMap,
+    const Map<label>& /* unused: meshPointMap */,
     labelList& pointToGlobal,
     labelList& uniqueMeshPoints
 ) const

@@ -41,13 +41,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcLocalPointOrder() const
     // Note: Cannot use bandCompressing as point-point addressing does
     // not exist and is not considered generally useful.
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-            << "calcLocalPointOrder() : "
-            << "calculating local point order"
-            << endl;
-    }
+    DebugInFunction << "Calculating local point order" << endl;
 
     if (localPointOrderPtr_)
     {
@@ -116,13 +110,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcLocalPointOrder() const
         }
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-            << "calcLocalPointOrder() "
-            << "finished calculating local point order"
-            << endl;
-    }
+    DebugInfo << "Calculated local point order" << endl;
 }
 
 

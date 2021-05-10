@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,47 +43,38 @@ meshEdges
     DebugInFunction
         << "Calculating labels of patch edges in mesh edge list" << nl;
 
-    // get reference to the list of edges on the patch
+    // The list of edges on the patch
     const edgeList& PatchEdges = edges();
+
+    // The output storage
+    labelList meshEdges(PatchEdges.size());
 
     const labelListList& EdgeFaces = edgeFaces();
 
-    // create the storage
-    labelList meshEdges(PatchEdges.size());
-
-    bool found = false;
-
-    // get reference to the points on the patch
+    // The mesh points associated with the patch
     const labelList& pp = meshPoints();
 
     // WARNING: Remember that local edges address into local point list;
     // local-to-global point label translation is necessary
-    forAll(PatchEdges, edgeI)
+    forAll(PatchEdges, edgei)
     {
-        const edge curEdge
-            (pp[PatchEdges[edgeI].start()], pp[PatchEdges[edgeI].end()]);
+        bool found = false;
 
-        found = false;
+        const edge globalEdge(pp, PatchEdges[edgei]);
 
-        // get the patch faces sharing the edge
-        const labelList& curFaces = EdgeFaces[edgeI];
-
-        forAll(curFaces, facei)
+        // For each patch face sharing the edge
+        for (const label patchFacei : EdgeFaces[edgei])
         {
-            // get the cell next to the face
-            label curCell = faceCells[curFaces[facei]];
+            // The cell next to the face
+            const label curCelli = faceCells[patchFacei];
 
-            // get reference to edges on the cell
-            const labelList& ce = cellEdges[curCell];
-
-            forAll(ce, cellEdgeI)
+            // Check the cell edges
+            for (const label cellEdgei : cellEdges[curCelli])
             {
-                if (allEdges[ce[cellEdgeI]] == curEdge)
+                if (allEdges[cellEdgei] == globalEdge)
                 {
                     found = true;
-
-                    meshEdges[edgeI] = ce[cellEdgeI];
-
+                    meshEdges[edgei] = cellEdgei;
                     break;
                 }
             }
@@ -107,29 +98,27 @@ Foam::PrimitivePatch<FaceList, PointField>::meshEdges
     DebugInFunction
         << "Calculating labels of patch edges in mesh edge list" << nl;
 
-    // get reference to the list of edges on the patch
+    // The list of edges on the patch
     const edgeList& PatchEdges = edges();
 
-    // create the storage
+    // The output storage
     labelList meshEdges(PatchEdges.size());
 
-    // get reference to the points on the patch
+    // The mesh points associated with the patch
     const labelList& pp = meshPoints();
 
     // WARNING: Remember that local edges address into local point list;
     // local-to-global point label translation is necessary
-    forAll(PatchEdges, edgeI)
+    forAll(PatchEdges, edgei)
     {
-        const label globalPointi = pp[PatchEdges[edgeI].start()];
-        const edge curEdge(globalPointi, pp[PatchEdges[edgeI].end()]);
+        const edge globalEdge(pp, PatchEdges[edgei]);
 
-        const labelList& pe = pointEdges[globalPointi];
-
-        forAll(pe, i)
+        // Check the attached edges
+        for (const label patchEdgei : pointEdges[globalEdge.start()])
         {
-            if (allEdges[pe[i]] == curEdge)
+            if (allEdges[patchEdgei] == globalEdge)
             {
-                meshEdges[edgeI] = pe[i];
+                meshEdges[edgei] = patchEdgei;
                 break;
             }
         }
@@ -148,18 +137,16 @@ Foam::PrimitivePatch<FaceList, PointField>::whichEdge
     const edge& e
 ) const
 {
-    // Get pointEdges from the starting point and search all the candidates
-    const edgeList& Edges = edges();
-
-    if (e.start() > -1 && e.start() < nPoints())
+    if (e.start() >= 0 && e.start() < nPoints())
     {
-        const labelList& pe = pointEdges()[e.start()];
+        // Get pointEdges from the starting point and search all the candidates
+        const edgeList& Edges = edges();
 
-        forAll(pe, peI)
+        for (const label patchEdgei : pointEdges()[e.start()])
         {
-            if (e == Edges[pe[peI]])
+            if (e == Edges[patchEdgei])
             {
-                return pe[peI];
+                return patchEdgei;
             }
         }
     }

@@ -35,13 +35,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcMeshData() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMeshData() : "
-               "calculating mesh data in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating mesh data" << endl;
 
     if (meshPointsPtr_ || localFacesPtr_)
     {
@@ -117,13 +111,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcMeshData() const
         }
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMeshData() : "
-               "finished calculating mesh data in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated mesh data" << endl;
 }
 
 
@@ -131,13 +119,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcMeshPointMap() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMeshPointMap() : "
-               "calculating mesh point map in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating mesh point map" << endl;
 
     if (meshPointMapPtr_)
     {
@@ -157,13 +139,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcMeshPointMap() const
         mpMap.insert(mp[i], i);
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMeshPointMap() : "
-               "finished calculating mesh point map in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated mesh point map" << endl;
 }
 
 
@@ -171,13 +147,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcLocalPoints() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcLocalPoints() : "
-               "calculating localPoints in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating localPoints" << endl;
 
     if (localPointsPtr_)
     {
@@ -197,13 +167,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcLocalPoints() const
         locPts[pointi] = points_[meshPts[pointi]];
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-            << "calcLocalPoints() : "
-            << "finished calculating localPoints in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated localPoints" << endl;
 }
 
 
@@ -211,13 +175,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcPointNormals() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcPointNormals() : "
-               "calculating pointNormals in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating pointNormals" << endl;
 
     if (pointNormalsPtr_)
     {
@@ -248,13 +206,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointNormals() const
         curNormal.normalise();
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcPointNormals() : "
-               "finished calculating pointNormals in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated pointNormals" << endl;
 }
 
 
@@ -262,13 +214,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcFaceCentres() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceCentres() : "
-               "calculating faceCentres in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating faceCentres" << endl;
 
     if (faceCentresPtr_)
     {
@@ -286,13 +232,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcFaceCentres() const
         c[facei] = this->operator[](facei).centre(points_);
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceCentres() : "
-               "finished calculating faceCentres in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated faceCentres" << endl;
 }
 
 
@@ -300,13 +240,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcMagFaceAreas() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMagFaceAreas() : "
-               "calculating magFaceAreas in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating magFaceAreas" << endl;
 
     if (magFaceAreasPtr_)
     {
@@ -324,13 +258,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcMagFaceAreas() const
         a[facei] = this->operator[](facei).mag(points_);
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcMagFaceAreas() : "
-               "finished calculating magFaceAreas in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated magFaceAreas" << endl;
 }
 
 
@@ -338,13 +266,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcFaceAreas() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceAreas() : "
-               "calculating faceAreas in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating faceAreas" << endl;
 
     if (faceAreasPtr_)
     {
@@ -362,13 +284,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcFaceAreas() const
         n[facei] = this->operator[](facei).areaNormal(points_);
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceAreas() : "
-               "finished calculating faceAreas in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated faceAreas" << endl;
 }
 
 
@@ -376,13 +292,7 @@ template<class FaceList, class PointField>
 void
 Foam::PrimitivePatch<FaceList, PointField>::calcFaceNormals() const
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceNormals() : "
-               "calculating faceNormals in PrimitivePatch"
-            << endl;
-    }
+    DebugInFunction << "Calculating faceNormals" << endl;
 
     if (faceNormalsPtr_)
     {
@@ -400,13 +310,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcFaceNormals() const
         n[facei] = this->operator[](facei).unitNormal(points_);
     }
 
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-               "calcFaceNormals() : "
-               "finished calculating faceNormals in PrimitivePatch"
-            << endl;
-    }
+    DebugInfo << "Calculated faceNormals" << endl;
 }
 
 

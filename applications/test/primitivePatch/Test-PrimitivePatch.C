@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 #include "polyMesh.H"
 #include "primitiveFacePatch.H"
 #include "primitivePatch.H"
+#include "IndirectList.H"
 #include "Fstream.H"
 
 using namespace Foam;
@@ -242,6 +243,28 @@ int main(int argc, char *argv[])
         writeEdgeFaces(localPoints, localFaces, edges, edgeFaces);
 
         writeFaceFaces(localPoints, localFaces, faceFaces);
+
+        const labelList bndFaceIds(pp.boundaryFaces());
+
+        Info<< "Have: " << bndFaceIds.size() << " boundary faces" << nl;
+
+        // Can calculate by hand
+        if (!pp.hasFaceCentres())
+        {
+            pointField boundaryCentres(bndFaceIds.size());
+
+            forAll(bndFaceIds, facei)
+            {
+                boundaryCentres[facei] =
+                    pp[bndFaceIds[facei]].centre(pp.points());
+            }
+            Info << "calc faceCentres:"
+                << boundaryCentres << nl;
+        }
+
+        // But will often use the cached information
+        Info<< "faceCentres:"
+            << UIndirectList<point>(pp.faceCentres(), bndFaceIds) << nl;
     }
 
     // Move construct
