@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,6 +167,17 @@ inline void Foam::Field<Type>::operator=(const UList<Type>& rhs)
 
 template<class Type>
 inline void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
+{
+    List<Type>::operator=(rhs);
+}
+
+
+template<class Type>
+template<class Addr>
+inline void Foam::Field<Type>::operator=
+(
+    const IndirectListBase<Type, Addr>& rhs
+)
 {
     List<Type>::operator=(rhs);
 }

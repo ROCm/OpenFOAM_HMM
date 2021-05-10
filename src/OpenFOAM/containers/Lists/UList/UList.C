@@ -110,8 +110,8 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
     if (len != list.size_)
     {
         FatalErrorInFunction
-            << "ULists have different sizes: "
-            << len << " " << list.size_
+            << "Lists have different sizes: "
+            << len << " != " << list.size() << nl
             << abort(FatalError);
     }
     else if (len)
@@ -133,6 +133,30 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
             {
                 lhs[i] = rhs[i];
             }
+        }
+    }
+}
+
+
+template<class T>
+template<class Addr>
+void Foam::UList<T>::deepCopy(const IndirectListBase<T, Addr>& list)
+{
+    const label len = this->size_;
+
+    if (len != list.size())
+    {
+        FatalErrorInFunction
+            << "Lists have different sizes: "
+            << len << " != " << list.size() << nl
+            << abort(FatalError);
+    }
+    else if (len)
+    {
+        List_ACCESS(T, (*this), lhs);
+        for (label i = 0; i < len; ++i)
+        {
+            lhs[i] = list[i];
         }
     }
 }

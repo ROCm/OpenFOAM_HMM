@@ -53,16 +53,12 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
-
 template<class T> class List;
 template<class T, unsigned N> class FixedList;
 template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
 template<class T> class SortableList;
-template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 

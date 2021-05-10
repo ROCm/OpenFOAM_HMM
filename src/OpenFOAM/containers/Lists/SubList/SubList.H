@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,11 +125,15 @@ public:
         //- Allow cast to a const List\<T\>&
         inline operator const Foam::List<T>&() const;
 
-        //- Copy assign entries from given sub-list
+        //- Copy assign entries from given sub-list. Sizes must match!
         inline void operator=(const SubList<T>& list);
 
-        //- Copy assign entries from given list
+        //- Copy assign entries from given list. Sizes must match!
         inline void operator=(const UList<T>& list);
+
+        //- Copy assign entries from given indirect list. Sizes must match!
+        template<class Addr>
+        inline void operator=(const IndirectListBase<T, Addr>& list);
 
         //- Assign all entries to the given value
         inline void operator=(const T& val);

@@ -62,7 +62,9 @@ void testFind(const T& val, const ListType& lst)
 
 int main(int argc, char *argv[])
 {
-    List<label> completeList(20);
+    labelList completeList(20);
+    labelList scratch(20);
+    scratch = -1;
 
     forAll(completeList, i)
     {
@@ -71,11 +73,23 @@ int main(int argc, char *argv[])
 
     Info<< "raw : " << flatOutput(completeList) << nl << endl;
 
-    List<label> addresses{1, 0, 3, 7, 4, 8, 5, 1, 0, 3, 7, 4, 8, 5, };
+    List<label> addresses({ 1, 0, 3, 7, 4, 8, 5, 1, 0, 3, 7, 4, 8, 5 });
 
     labelUIndList idl1(completeList, addresses);
 
     printInfo(idl1);
+
+    labelList::subList slice(scratch, idl1.size());
+    slice = idl1;
+
+    Info<< "sliced: " << flatOutput(slice) << nl;
+    Info<< "scratch: " << flatOutput(scratch) << nl;
+
+    // Again, but offset and using intermediate only
+    scratch = -1;
+    labelList::subList(scratch, idl1.size(), 5) = idl1;
+    Info<< "offset: " << flatOutput(scratch) << nl;
+
 
     for (const label val : { 10, 30, 40, 50, 90, 80, 120 } )
     {

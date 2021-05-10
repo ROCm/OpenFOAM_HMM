@@ -68,10 +68,15 @@ namespace Foam
 {
 
 // Forward Declarations
+class Istream;
+class Ostream;
 class labelRange;
+
 template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
+template<class T, class Addr> class IndirectListBase;
+
 template<class T> Istream& operator>>(Istream&, UList<T>&);
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
@@ -342,6 +347,10 @@ public:
         //- Copy elements of the given UList
         void deepCopy(const UList<T>& list);
 
+        //- Copy elements of the given indirect list
+        template<class Addr>
+        void deepCopy(const IndirectListBase<T, Addr>& list);
+
 
     // Member Operators
 
@@ -493,7 +502,7 @@ public:
         typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline test(const label i) const
         {
-            return (i >= 0 && i < size() && v_[i]);
+            return (i >= 0 && i < size_ && v_[i]);
         }
 
         //- A bitSet::get() method for a list of bool
