@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "randomise.H"
+#include "volFields.H"
+#include "Random.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -43,17 +45,72 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class Type>
+bool Foam::functionObjects::randomise::calcTemplate()
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    const auto* fieldPtr = cfindObject<VolFieldType>(fieldName_);
+
+    if (fieldPtr)
+    {
+        const auto& field = *fieldPtr;
+
+        resultName_ = fieldName_ & "Random";
+
+        auto trfield = tmp<VolFieldType>::New(field);
+        auto& rfield = trfield.ref();
+
+        Random rng(1234567);
+
+        auto applyPerturbation = [&](Type& cellval)
+        {
+            Type rndPert;
+            rng.randomise01(rndPert);
+            rndPert = 2.0*rndPert - pTraits<Type>::one;
+            rndPert /= mag(rndPert);
+
+            cellval += magPerturbation_*rndPert;
+        };
+
+        if (this->volRegion::useAllCells())
+        {
+            for (Type& cellval : rfield)
+            {
+                applyPerturbation(cellval);
+            }
+        }
+        else
+        {
+            for (const label celli : cellIDs())
+            {
+                applyPerturbation(rfield[celli]);
+            }
+        }
+
+        return store(resultName_, trfield);
+    }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 bool Foam::functionObjects::randomise::calc()
 {
-    bool processed = false;
+    // Ensure volRegion is properly up-to-date.
+    // Purge old fields if we need to etc.
+    (void)volRegion::update();
 
-    processed = processed || calcRandomised<scalar>();
-    processed = processed || calcRandomised<vector>();
-    processed = processed || calcRandomised<sphericalTensor>();
-    processed = processed || calcRandomised<symmTensor>();
-    processed = processed || calcRandomised<tensor>();
-
-    return processed;
+    return
+    (
+        calcTemplate<scalar>()
+     || calcTemplate<vector>()
+     || calcTemplate<sphericalTensor>()
+     || calcTemplate<symmTensor>()
+     || calcTemplate<tensor>()
+    );
 }
 
 
@@ -66,7 +123,8 @@ Foam::functionObjects::randomise::randomise
     const dictionary& dict
 )
 :
-    fieldExpression(name, runTime, dict)
+    fieldExpression(name, runTime, dict),
+    volRegion(fieldExpression::mesh_, dict)
 {
     read(dict);
 }
@@ -77,6 +135,7 @@ Foam::functionObjects::randomise::randomise
 bool Foam::functionObjects::randomise::read(const dictionary& dict)
 {
     fieldExpression::read(dict);
+    volRegion::read(dict);
 
     dict.readEntry("magPerturbation", magPerturbation_);
 

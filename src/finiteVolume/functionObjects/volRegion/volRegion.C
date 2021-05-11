@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,8 +108,8 @@ void Foam::functionObjects::volRegion::calculateCache()
     {
         FatalErrorInFunction
             << regionTypeNames_[regionType_]
-            << "(" << regionName_ << "):" << nl
-            << "    Region has no cells"
+            << '(' << regionName_ << "):" << nl
+            << "    Region has no cells" << nl
             << exit(FatalError);
     }
 
@@ -127,7 +127,7 @@ void Foam::functionObjects::volRegion::writeFileHeader
 {
     wf.writeCommented(file, "Region");
     file<< setw(1) << ':' << setw(1) << ' '
-        << regionTypeNames_[regionType_] << " " << regionName_ << endl;
+        << regionTypeNames_[regionType_] << ' ' << regionName_ << endl;
     wf.writeHeaderValue(file, "Cells", nCells_);
     wf.writeHeaderValue(file, "Volume", V_);
 }
@@ -184,7 +184,7 @@ bool Foam::functionObjects::volRegion::read(const dictionary& dict)
         default:
         {
             FatalIOErrorInFunction(dict)
-                << "Unknown region type. Valid region types are:"
+                << "Unknown region type. Valid region types: "
                 << flatOutput(regionTypeNames_.names()) << nl
                 << exit(FatalIOError);
             break;

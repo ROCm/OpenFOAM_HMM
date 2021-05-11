@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ Usage
     \table
         Property     | Description                          | Required | Default
         regionType   | Selection type: all/cellSet/cellZone | no | all
-        name         | Name of cellSet/cellZone if required | no |
+        name         | Name of cellSet/cellZone if required | conditional |
     \endtable
 
 See also
@@ -86,7 +86,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class fvMesh;
 class polyMesh;
 class mapPolyMesh;
@@ -130,7 +130,7 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            vrtAll,             //!< All cells
+            vrtAll = 0,         //!< All cells
             vrtCellSet,         //!< A cellSet
             vrtCellZone         //!< A cellZone
         };
@@ -155,6 +155,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Use all cells, not the cellIDs
+        inline bool useAllCells() const noexcept;
+
         //- Output file header information
         void writeFileHeader(const writeFile& wf, Ostream& file) const;
 
@@ -177,13 +180,14 @@ public:
 
     // Member Functions
 
-        //- Return the region type
-        inline const regionTypes& regionType() const;
+        //- The region type
+        inline regionTypes regionType() const noexcept;
 
-        //- Return the local list of cell IDs
+        //- Return the local list of cell IDs.
+        //  Empty or invalid for 'all'
         const labelList& cellIDs() const;
 
-        //- Return the number of cells selected in the region
+        //- Return the total number of cells selected in the region
         inline label nCells() const;
 
         //- Return total volume of the selected region

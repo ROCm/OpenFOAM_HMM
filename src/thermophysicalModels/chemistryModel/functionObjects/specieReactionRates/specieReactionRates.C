@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
 
     const scalar volTotal = this->volRegion::V();
 
-    const bool useAll = (volRegion::vrtAll == this->volRegion::regionType());
+    const bool useAll = this->volRegion::useAllCells();
 
     for (label ri=0; ri<nReaction; ri++)
     {

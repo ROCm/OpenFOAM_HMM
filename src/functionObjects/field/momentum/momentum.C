@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,26 +200,20 @@ void Foam::functionObjects::momentum::calc()
     sumMomentum_ = Zero;
     sumAngularMom_ = Zero;
 
-    switch (regionType_)
+    if (volRegion::useAllCells())
     {
-        case vrtCellSet:
-        case vrtCellZone:
+        for (label celli=0; celli < mesh_.nCells(); ++celli)
         {
-            for (const label celli : cellIDs())
-            {
-                sumMomentum_ += momentum[celli];
-                sumAngularMom_ += angularMom[celli];
-            }
-            break;
+            sumMomentum_ += momentum[celli];
+            sumAngularMom_ += angularMom[celli];
         }
-        case vrtAll:
+    }
+    else
+    {
+        for (const label celli : cellIDs())
         {
-            for (label celli=0; celli < mesh_.nCells(); ++celli)
-            {
-                sumMomentum_ += momentum[celli];
-                sumAngularMom_ += angularMom[celli];
-            }
-            break;
+            sumMomentum_ += momentum[celli];
+            sumAngularMom_ += angularMom[celli];
         }
     }
 
@@ -248,7 +242,7 @@ void Foam::functionObjects::momentum::writeFileHeader(Ostream& os)
         writeHeader(os, "Momentum");
     }
 
-    if (regionType_ != vrtAll)
+    if (!volRegion::useAllCells())
     {
         writeHeader
         (
@@ -315,7 +309,7 @@ void Foam::functionObjects::momentum::writeValues(Ostream& os)
 
         Info<< "    Sum of Momentum";
 
-        if (regionType_ != vrtAll)
+        if (!volRegion::useAllCells())
         {
             Info<< ' ' << regionTypeNames_[regionType_]
                 << ' ' << regionName_;

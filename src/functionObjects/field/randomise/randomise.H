@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,8 +69,10 @@ Usage
       Property     | Description                          | Type | Req'd | Dflt
       type         | Type name: randomise                 | word |  yes  | -
       libs         | Library name: fieldFunctionObjects   | word |  yes  | -
+      regionType   | Selection type: all/cellSet/cellZone | word |  no  | all
       magPerturbation | The magnitude of the perturbation | scalar |  yes  | -
-      field        | Name of the operand field            | word   |  yes  | -
+      field  | Name of the operand field            | word | yes  | -
+      name   | Name of cellSet/cellZone if required | word | conditional  | -
     \endtable
 
     The inherited entries are elaborated in:
@@ -90,7 +92,6 @@ See also
 
 SourceFiles
     randomise.C
-    randomiseTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -98,6 +99,7 @@ SourceFiles
 #define functionObjects_randomise_H
 
 #include "fieldExpression.H"
+#include "volRegion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,7 +114,8 @@ namespace functionObjects
 
 class randomise
 :
-    public fieldExpression
+    public fieldExpression,
+    public volRegion
 {
     // Private Data
 
@@ -122,15 +125,28 @@ class randomise
 
     // Private Member Functions
 
-        //- Calculate the randomised field and register the result
+        //- Calculate randomised field and register result
+        //  Defined as file-local template implementation
         template<class Type>
-        bool calcRandomised();
+        bool calcTemplate();
+
+
+protected:
+
+    // Protected Member Functions
 
         //- Calculate the randomised field and return true if successful
         virtual bool calc();
 
+        //- No copy construct
+        randomise(const randomise&) = delete;
+
+        //- No copy assignment
+        void operator=(const randomise&) = delete;
+
 
 public:
+
 
     //- Runtime type information
     TypeName("randomise");
@@ -146,12 +162,6 @@ public:
             const dictionary& dict
         );
 
-        //- No copy construct
-        randomise(const randomise&) = delete;
-
-        //- No copy assignment
-        void operator=(const randomise&) = delete;
-
 
     //- Destructor
     virtual ~randomise() = default;
@@ -160,7 +170,7 @@ public:
     // Member Functions
 
         //- Read the randomise data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 };
 
 
@@ -168,12 +178,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "randomiseTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

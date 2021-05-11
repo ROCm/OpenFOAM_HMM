@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,18 +28,15 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::functionObjects::volRegion::regionTypes&
-Foam::functionObjects::volRegion::regionType() const
+inline bool Foam::functionObjects::volRegion::useAllCells() const noexcept
 {
-    #ifdef FULLDEBUG
-    if (requireUpdate_)
-    {
-        FatalErrorInFunction
-            << "Retrieving cached values that are not up-to-date" << nl
-            << exit(FatalError);
-    }
-    #endif
+    return (regionType_ == vrtAll);
+}
 
+
+inline Foam::functionObjects::volRegion::regionTypes
+Foam::functionObjects::volRegion::regionType() const noexcept
+{
     return regionType_;
 }
 
