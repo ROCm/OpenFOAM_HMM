@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         runTime.printExecutionTime(Info);
     }
 
-    Info<< "\n end\n";
+    Info<< "End\n";
 
     return 0;
 }
