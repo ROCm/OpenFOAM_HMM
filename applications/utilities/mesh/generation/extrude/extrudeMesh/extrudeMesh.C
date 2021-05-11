@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        regionName = fvMesh::defaultRegion;
+        regionName = polyMesh::defaultRegion;
         Info<< "Create mesh for time = "
             << runTimeExtruded.timeName() << nl << endl;
     }
@@ -787,7 +787,7 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    extrudedMesh::defaultRegion,
+                    polyMesh::defaultRegion,
                     runTimeExtruded.constant(),
                     runTimeExtruded
                 ),

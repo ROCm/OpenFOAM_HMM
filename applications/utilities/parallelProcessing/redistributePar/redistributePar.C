@@ -2905,7 +2905,7 @@ int main(int argc, char *argv[])
             const word& regionName = regionNames[regioni];
             const fileName meshSubDir
             (
-                regionName == fvMesh::defaultRegion
+                regionName == polyMesh::defaultRegion
               ? fileName(polyMesh::meshSubDir)
               : regionNames[regioni]/polyMesh::meshSubDir
             );

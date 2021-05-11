@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
 
 
         fileName regionPrefix;
-        if (regionName != fvMesh::defaultRegion)
+        if (regionName != polyMesh::defaultRegion)
         {
             regionPrefix = regionName;
         }

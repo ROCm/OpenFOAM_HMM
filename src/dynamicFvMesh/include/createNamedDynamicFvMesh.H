@@ -1,4 +1,4 @@
-    Foam::word regionName = Foam::fvMesh::defaultRegion;
+    Foam::word regionName = Foam::polyMesh::defaultRegion;
 
     if (args.readIfPresent("region", regionName))
     {

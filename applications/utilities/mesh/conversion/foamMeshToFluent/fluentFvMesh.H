@@ -56,7 +56,7 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        fluentFvMesh(const IOobject& io);
+        explicit fluentFvMesh(const IOobject& io);
 
 
     // Member functions

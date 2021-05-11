@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            fluentFvMesh::defaultRegion,
+            polyMesh::defaultRegion,
             runTime.constant(),
             runTime
         )

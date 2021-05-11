@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -325,7 +325,7 @@ public:
     // Constructors
 
         //- Read construct from IOobject
-        polyMesh(const IOobject& io, const bool doInit = true);
+        explicit polyMesh(const IOobject& io, const bool doInit = true);
 
         //- Construct from IOobject or as zero-sized mesh
         //  Boundary is added using addPatches() member function

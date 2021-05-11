@@ -1756,7 +1756,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            polyMesh::defaultRegion,
             runTime.timeName(),
             runTime,
             IOobject::NO_READ
