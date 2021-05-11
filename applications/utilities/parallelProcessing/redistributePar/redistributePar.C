@@ -2303,7 +2303,7 @@ int main(int argc, char *argv[])
     //                than it writes to
     // - reconstruct - reads parallel, write on master only and to parent
     //                 directory
-    const_cast<fileOperation&>(fileHandler()).distributed(true);
+    fileHandler().distributed(true);
 
 
     #include "foamDlOpenLibs.H"

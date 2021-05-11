@@ -112,7 +112,7 @@ protected:
         const label comm_;
 
         //- Distributed roots (parallel run)
-        bool distributed_;
+        mutable bool distributed_;
 
         //- Detected processors directories
         mutable HashTable<dirIndexList> procsDirs_;
@@ -181,6 +181,9 @@ public:
     //- Static fileOperation
     static autoPtr<fileOperation> fileHandlerPtr_;
 
+    //- Static construct the commonly used uncollatedFileOperation
+    static autoPtr<fileOperation> NewUncollated();
+
 
     // Constructors
 
@@ -239,13 +242,9 @@ public:
             return distributed_;
         }
 
-        //- Set distributed roots on/off, return old value
-        bool distributed(bool on) noexcept
-        {
-            bool old(distributed_);
-            distributed_ = on;
-            return old;
-        }
+        //- Set distributed roots on/off (mutable)
+        //  \return old value
+        bool distributed(bool on) const noexcept;
 
 
         // OSSpecific equivalents
@@ -595,14 +594,16 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Global declarations: defined in fileOperation.C
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+// Note: defined in fileOperation.C
 
 //- Get current file handler
 const fileOperation& fileHandler();
 
-//- Replace, reset file handler
-void fileHandler(autoPtr<fileOperation>&& newHandler);
+//- Replace, reset file handler.
+//  \return old handler on change, null otherwise
+autoPtr<fileOperation> fileHandler(autoPtr<fileOperation>&& newHandler);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
