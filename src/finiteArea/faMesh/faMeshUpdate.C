@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,11 +61,12 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     // Set new labels
     m.faceLabels_ = mapper.areaMap().newFaceLabels();
 
-    const indirectPrimitivePatch& bp = patch();
+    const uindirectPrimitivePatch& bp = patch();
 
     // Collect patch data
     const label nTotalEdges = bp.nEdges();
     const label nInternalEdges = bp.nInternalEdges();
+    const label nBoundaryEdges = bp.nBoundaryEdges();
     const labelListList& edgeFaces = bp.edgeFaces();
 
     labelListList patchEdges(boundary_.size());
@@ -73,7 +74,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     // Special handling required for faces that have more than one edge
     // Each patch will be visited separately
 
-    labelList edgeToPatch(nTotalEdges - nInternalEdges, -1);
+    labelList edgeToPatch(nBoundaryEdges, -1);
     const labelList& newFaceLabelsMap = mapper.areaMap().newFaceLabelsMap();
 
     const labelListList& oldPatchEdgeFaces = mapper.oldPatchEdgeFaces();
@@ -81,7 +82,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     forAll(oldPatchEdgeFaces, patchI)
     {
         labelList& curPatchEdges = patchEdges[patchI];
-        curPatchEdges.setSize(nTotalEdges - nInternalEdges);
+        curPatchEdges.resize(nBoundaryEdges);
         label nCurPatchEdges = 0;
 
         // Note: it is possible to pick up the old-to-new boundary patch

@@ -54,7 +54,7 @@ Foam::faBoundaryMesh::faBoundaryMesh
     {
         faPatchList& patches = *this;
 
-        // Read polyPatchList
+        // Read faPatch list
         Istream& is = readStream(typeName);
 
         PtrList<entry> patchEntries(is);
@@ -117,12 +117,6 @@ void Foam::faBoundaryMesh::calcGeometry()
 }
 
 
-const Foam::faMesh& Foam::faBoundaryMesh::mesh() const
-{
-    return mesh_;
-}
-
-
 Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 {
     lduInterfacePtrsList interfaces(size());
@@ -143,6 +137,26 @@ Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 }
 
 
+Foam::label Foam::faBoundaryMesh::nNonProcessor() const
+{
+    const faPatchList& patches = *this;
+
+    label nonProc = 0;
+
+    for (const faPatch& p : patches)
+    {
+        if (isA<processorFaPatch>(p))
+        {
+            break;
+        }
+
+        ++nonProc;
+    }
+
+    return nonProc;
+}
+
+
 Foam::wordList Foam::faBoundaryMesh::names() const
 {
     return PtrListOps::get<word>(*this, nameOp<faPatch>());
@@ -152,6 +166,71 @@ Foam::wordList Foam::faBoundaryMesh::names() const
 Foam::wordList Foam::faBoundaryMesh::types() const
 {
     return PtrListOps::get<word>(*this, typeOp<faPatch>());
+}
+
+
+Foam::labelList Foam::faBoundaryMesh::patchStarts() const
+{
+    // Manually: faPatch does not have independent start() information
+
+    const faPatchList& patches = *this;
+
+    labelList list(patches.size());
+
+    label beg = mesh_.nInternalEdges();
+    forAll(patches, patchi)
+    {
+        const label len = patches[patchi].nEdges();
+        list[patchi] = beg;
+        beg += len;
+    }
+    return list;
+}
+
+
+Foam::labelList Foam::faBoundaryMesh::patchSizes() const
+{
+    return
+        PtrListOps::get<label>
+        (
+            *this,
+            [](const faPatch& p) { return p.nEdges(); }  // avoid virtual
+        );
+}
+
+
+Foam::List<Foam::labelRange> Foam::faBoundaryMesh::patchRanges() const
+{
+    const faPatchList& patches = *this;
+
+    List<labelRange> list(patches.size());
+
+    label beg = mesh_.nInternalEdges();
+    forAll(patches, patchi)
+    {
+        const label len = patches[patchi].nEdges();
+        list[patchi].reset(beg, len);
+        beg += len;
+    }
+    return list;
+}
+
+
+Foam::label Foam::faBoundaryMesh::start() const
+{
+    return mesh_.nInternalEdges();
+}
+
+
+Foam::label Foam::faBoundaryMesh::nEdges() const
+{
+    return mesh_.nBoundaryEdges();
+}
+
+
+Foam::labelRange Foam::faBoundaryMesh::range() const
+{
+    return labelRange(mesh_.nInternalEdges(), mesh_.nBoundaryEdges());
 }
 
 
@@ -354,6 +433,22 @@ bool Foam::faBoundaryMesh::writeData(Ostream& os) const
     return os.good();
 }
 
+
+bool Foam::faBoundaryMesh::writeObject
+(
+    IOstreamOption streamOpt,
+    const bool valid
+) const
+{
+    // Allow/disallow compression?
+    // 1. keep readable
+    // 2. save some space
+    // ??? streamOpt.compression(IOstreamOption::UNCOMPRESSED);
+    return regIOobject::writeObject(streamOpt, valid);
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const faBoundaryMesh& bm)
 {

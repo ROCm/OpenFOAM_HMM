@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,8 @@ License
 
 void Foam::faMeshDecomposition::distributeFaces()
 {
+    const word& polyMeshRegionName = mesh().name();
+
     Info<< "\nCalculating distribution of faces" << endl;
 
     cpuTime decompositionTime;
@@ -58,7 +60,7 @@ void Foam::faMeshDecomposition::distributeFaces()
         (
             IOobject
             (
-                GeoMesh<polyMesh>::mesh_.name(),
+                polyMeshRegionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -214,6 +216,8 @@ void Foam::faMeshDecomposition::decomposeMesh()
     // Decide which cell goes to which processor
     distributeFaces();
 
+    const word& polyMeshRegionName = mesh().name();
+
     Info<< "\nDistributing faces to processors" << endl;
 
     // Memory management
@@ -224,9 +228,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
         {
             if (faceToProc_[faceI] >= nProcs())
             {
-                FatalErrorIn("Finite area mesh decomposition")
+                FatalErrorInFunction
                     << "Impossible processor label " << faceToProc_[faceI]
-                    << "for face " << faceI
+                    << "for face " << faceI << nl
                     << abort(FatalError);
             }
             else
@@ -258,7 +262,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         (
             IOobject
             (
-                GeoMesh<polyMesh>::mesh_.name(),
+                polyMeshRegionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -314,7 +318,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                 fvFaceProcAddressingHash.find
                 (
                     faceLabels()[curProcFaceAddressing[faceI]] + 1
-                )();
+                ).val();
         }
 
         // create processor finite area mesh
@@ -324,38 +328,35 @@ void Foam::faMeshDecomposition::decomposeMesh()
             procFaceLabels_[procI]
         );
 
-        const indirectPrimitivePatch& patch = this->patch();
+        const uindirectPrimitivePatch& patch = this->patch();
         const Map<label>& map = patch.meshPointMap();
 
         EdgeMap<label> edgesHash;
 
-        label edgeI = -1;
-
         const label nIntEdges = patch.nInternalEdges();
 
-        for (label curEdge = 0; curEdge < nIntEdges; curEdge++)
+        for (label edgei = 0; edgei < nIntEdges; ++edgei)
         {
-            edgesHash.insert(patch.edges()[curEdge], ++edgeI);
+            edgesHash.insert(patch.edges()[edgei], edgesHash.size());
         }
 
-        forAll(boundary(), patchI)
+        forAll(boundary(), patchi)
         {
             // Include emptyFaPatch
+            const label size = boundary()[patchi].labelList::size();
 
-            const label size = boundary()[patchI].labelList::size();
-
-            for(int eI=0; eI<size; eI++)
+            for (label edgei=0; edgei < size; ++edgei)
             {
                 edgesHash.insert
                 (
-                    patch.edges()[boundary()[patchI][eI]],
-                    ++edgeI
+                    patch.edges()[boundary()[patchi][edgei]],
+                    edgesHash.size()
                 );
             }
         }
 
 
-        const indirectPrimitivePatch& procPatch = procMesh.patch();
+        const uindirectPrimitivePatch& procPatch = procMesh.patch();
         const vectorField& procPoints = procPatch.localPoints();
         const labelList& procMeshPoints = procPatch.meshPoints();
         const edgeList& procEdges = procPatch.edges();
@@ -370,20 +371,17 @@ void Foam::faMeshDecomposition::decomposeMesh()
         }
 
         labelList& curPatchEdgeAddressing = procPatchEdgeAddressing_[procI];
-        curPatchEdgeAddressing.setSize(procEdges.size(), -1);
+        curPatchEdgeAddressing.resize(procEdges.size(), -1);
+
+        Map<label>& curMap = procMeshEdgesMap_[procI];
+        curMap.clear();
+        curMap.resize(2*procEdges.size());
 
         forAll(procEdges, edgeI)
         {
-            edge curGlobalEdge = procEdges[edgeI];
-            curGlobalEdge[0] = curPatchPointAddressing[curGlobalEdge[0]];
-            curGlobalEdge[1] = curPatchPointAddressing[curGlobalEdge[1]];
-
-            curPatchEdgeAddressing[edgeI] = edgesHash.find(curGlobalEdge)();
+            edge curGlobalEdge(curPatchPointAddressing, procEdges[edgeI]);
+            curPatchEdgeAddressing[edgeI] = edgesHash.find(curGlobalEdge).val();
         }
-
-        Map<label>& curMap = procMeshEdgesMap_[procI];
-
-        curMap = Map<label>(2*procEdges.size());
 
         forAll(curPatchEdgeAddressing, edgeI)
         {
@@ -1057,7 +1055,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         (
             IOobject
             (
-                GeoMesh<polyMesh>::mesh_.name(),
+                polyMeshRegionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -1137,8 +1135,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
 bool Foam::faMeshDecomposition::writeDecomposition()
 {
-    Info<< "\nConstructing processor FA meshes" << endl;
+    const word& polyMeshRegionName = mesh().name();
 
+    Info<< "\nConstructing processor FA meshes" << endl;
 
     // Make a lookup map for globally shared points
     Map<label> sharedPointLookup(2*globallySharedPoints_.size());
@@ -1175,7 +1174,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         (
             IOobject
             (
-                GeoMesh<polyMesh>::mesh_.name(),
+                polyMeshRegionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -1195,7 +1194,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         );
 
 
-        // create finite area mesh
+        // Create finite area mesh
         faMesh procMesh
         (
             procFvMesh,
@@ -1219,11 +1218,9 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         const faPatchList& meshPatches = boundary();
 
-        List<faPatch*> procPatches
+        PtrList<faPatch> procPatches
         (
-            curPatchSizes.size()
-          + curProcessorPatchSizes.size(),
-            reinterpret_cast<faPatch*>(NULL)
+            curPatchSizes.size() + curProcessorPatchSizes.size()
         );
 
         label nPatches = 0;
@@ -1232,44 +1229,51 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         {
             const labelList& curEdgeLabels = curPatchEdgeLabels[nPatches];
 
-            const label ngbPolyPatchIndex =
+            const label neiPolyPatchId =
                 fvBoundaryProcAddressing.find
                 (
                     meshPatches[curBoundaryAddressing[patchi]]
                     .ngbPolyPatchIndex()
                 );
 
-            procPatches[nPatches] =
+            procPatches.set
+            (
+                nPatches,
                 meshPatches[curBoundaryAddressing[patchi]].clone
                 (
                     procMesh.boundary(),
                     curEdgeLabels,
                     nPatches,
-                    ngbPolyPatchIndex
-                ).ptr();
-
-            nPatches++;
+                    neiPolyPatchId
+                )
+            );
+            ++nPatches;
         }
 
         forAll(curProcessorPatchSizes, procPatchI)
         {
             const labelList& curEdgeLabels = curPatchEdgeLabels[nPatches];
 
-            procPatches[nPatches] =
+            procPatches.set
+            (
+                nPatches,
                 new processorFaPatch
                 (
-                    word("procBoundary") + Foam::name(procI)
-                  + word("to")
-                  + Foam::name(curNeighbourProcessors[procPatchI]),
+                    processorPolyPatch::newName
+                    (
+                        procI,
+                        curNeighbourProcessors[procPatchI]
+                    ),
                     curEdgeLabels,
                     nPatches,
                     procMesh.boundary(),
                     -1,
                     procI,
                     curNeighbourProcessors[procPatchI]
-                );
+                )
+            );
 
-            nPatches++;
+            ++nPatches;
         }
 
         // Add boundary patches
@@ -1291,23 +1295,19 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         forAll(procMesh.boundary(), patchi)
         {
-            if
-            (
-                procMesh.boundary()[patchi].type()
-             == processorFaPatch::typeName
-            )
+            const auto* ppp =
+                isA<processorFaPatch>(procMesh.boundary()[patchi]);
+
+            if (ppp)
             {
-                const processorFaPatch& ppp =
-                refCast<const processorFaPatch>
-                (
-                    procMesh.boundary()[patchi]
-                );
+                const auto& procPatch = *ppp;
 
                 Info<< "    Number of edges shared with processor "
-                    << ppp.neighbProcNo() << " = " << ppp.size() << endl;
+                    << procPatch.neighbProcNo() << " = "
+                    << procPatch.size() << endl;
 
-                nProcPatches++;
-                nProcEdges += ppp.size();
+                nProcEdges += procPatch.size();
+                ++nProcPatches;
             }
             else
             {

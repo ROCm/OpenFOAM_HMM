@@ -1,11 +1,13 @@
 faMesh/faGlobalMeshData/faGlobalMeshData.C
 faMesh/faMesh.C
 faMesh/faMeshDemandDrivenData.C
+faMesh/faMeshPatches.C
 faMesh/faMeshUpdate.C
 faMesh/faBoundaryMesh/faBoundaryMesh.C
 
 faPatches = faMesh/faPatches
 $(faPatches)/faPatch/faPatch.C
+$(faPatches)/faPatch/faPatchData.C
 $(faPatches)/faPatch/faPatchNew.C
 $(faPatches)/basic/coupled/coupledFaPatch.C
 $(faPatches)/constraint/empty/emptyFaPatch.C

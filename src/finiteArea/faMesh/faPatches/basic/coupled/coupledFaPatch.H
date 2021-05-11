@@ -135,7 +135,7 @@ public:
 
 
     //- Destructor
-    virtual ~coupledFaPatch();
+    virtual ~coupledFaPatch() = default;
 
 
     // Member Functions

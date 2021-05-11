@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +43,6 @@ Author
 #ifndef faMesh_H
 #define faMesh_H
 
-#include "GeoMesh.H"
 #include "MeshObject.H"
 #include "polyMesh.H"
 #include "lduMesh.H"
@@ -53,7 +53,7 @@ Author
 #include "DimensionedField.H"
 #include "areaFieldsFwd.H"
 #include "edgeFieldsFwd.H"
-#include "indirectPrimitivePatch.H"
+#include "uindirectPrimitivePatch.H"
 #include "edgeInterpolation.H"
 #include "labelIOList.H"
 #include "FieldFields.H"
@@ -67,9 +67,10 @@ Author
 namespace Foam
 {
 
-// Class forward declarations
+// Forward Declarations
 class faMeshLduAddressing;
 class faMeshMapper;
+class faPatchData;
 
 /*---------------------------------------------------------------------------*\
                            Class faMesh Declaration
@@ -77,7 +78,6 @@ class faMeshMapper;
 
 class faMesh
 :
-    public GeoMesh<polyMesh>,
     public MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>,
     public lduMesh,
     public edgeInterpolation,
@@ -85,7 +85,7 @@ class faMesh
     public faSolution,
     public data
 {
-    // Private data
+    // Private Data
 
         //- Face labels
         labelIOList faceLabels_;
@@ -130,7 +130,7 @@ class faMesh
     // Demand-driven data
 
         //- Primitive patch
-        mutable indirectPrimitivePatch* patchPtr_;
+        mutable uindirectPrimitivePatch* patchPtr_;
 
         //- Ldu addressing data
         mutable faMeshLduAddressing* lduPtr_;
@@ -186,8 +186,8 @@ class faMesh
 
         // Other mesh-related data
 
-            //- Parallel info
-            mutable faGlobalMeshData* globalMeshDataPtr_;
+        //- Parallel info
+        mutable autoPtr<faGlobalMeshData> globalMeshDataPtr_;
 
 
     // Static Private Data
@@ -204,6 +204,8 @@ class faMesh
         //- No copy assignment
         void operator=(const faMesh&) = delete;
 
+        //- Set indirect patch, removing any old one
+        void initPatch() const;
 
         //- Set primitive mesh data
         void setPrimitiveMeshData();
@@ -262,9 +264,36 @@ class faMesh
             //- Clear demand-driven data
             void clearOut() const;
 
+
+    // Helpers
+
+        //- Create a single patch
+        PtrList<faPatch> createOnePatch
+        (
+            const word& patchName,
+            const word& patchType = ""
+        ) const;
+
+        //- Create list of patches from boundary definition
+        PtrList<faPatch> createPatchList
+        (
+            const dictionary& bndDict,
+            const word& emptyPatchName = "",
+            const dictionary* defaultPatchDefinition = nullptr
+        ) const;
+
+        //- Reorder processor edges using order of the
+        //- neighbour processorPolyPatch
+        void reorderProcEdges
+        (
+            faPatchData& patchDef,
+            const labelUList& meshEdges
+        ) const;
+
+
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         typedef faMesh Mesh;
         typedef faBoundaryMesh BoundaryMesh;
@@ -273,36 +302,38 @@ public:
     //- Runtime type information
     TypeName("faMesh");
 
+        //- The prefix to local: %finite-area
+        static const word prefix;
 
-    //- Return the mesh sub-directory name (usually "faMesh")
-    static word meshSubDir;
+        //- The mesh sub-directory name (usually "faMesh")
+        static word meshSubDir;
 
 
     // Constructors
 
-        //- Construct from polyMesh
-        explicit faMesh(const polyMesh& m);
+        //- Construct zero-sized from polyMesh
+        //  Boundary is added using addFaPatches() member function
+        faMesh(const polyMesh& pMesh, const Foam::zero);
 
-        //- Construct from components without boundary.
+        //- Construct from polyMesh
+        explicit faMesh(const polyMesh& pMesh);
+
+        //- Construct for specified face labels without boundary.
         //  Boundary is added using addFaPatches() member function
         faMesh
         (
-            const polyMesh& m,
-            const labelList& faceLabels
+            const polyMesh& pMesh,
+            const UList<label>& faceLabels
         );
 
-        //- Construct from finite area mesh definition file
-        faMesh
-        (
-            const polyMesh& m,
-            const fileName& defFile
-        );
+        //- Construct from single polyPatch
+        explicit faMesh(const polyPatch& pp);
 
-        //- Construct from polyPatch
+        //- Construct from definition
         faMesh
         (
-            const polyMesh& m,
-            const label polyPatchID
+            const polyMesh& pMesh,
+            const dictionary& faMeshDefinition
         );
 
 
@@ -312,25 +343,30 @@ public:
 
     // Member Functions
 
-        // Helpers
+    // Helpers
 
-            //- Add boundary patches. Constructor helper
-            void addFaPatches(const List<faPatch*> &);
+        //- Add boundary patches. Constructor helper
+        void addFaPatches
+        (
+            PtrList<faPatch>& plist,
+            const bool validBoundary = true
+        );
+
+        //- Add boundary patches. Constructor helper
+        void addFaPatches
+        (
+            const List<faPatch*>& p,
+            const bool validBoundary = true
+        );
 
 
         // Database
 
             //- Return access to polyMesh
-            const polyMesh& mesh() const
-            {
-                return
-                    MeshObject
-                    <
-                        polyMesh,
-                        Foam::UpdateableMeshObject,
-                        faMesh
-                    >::mesh();
-            }
+            inline const polyMesh& mesh() const;
+
+            //- Interface to referenced polyMesh (similar to GeoMesh)
+            const polyMesh& operator()() const { return mesh(); }
 
             //- Return the local mesh directory (dbDir()/meshSubDir)
             fileName meshDir() const;
@@ -347,60 +383,50 @@ public:
             const fileName& facesInstance() const;
 
 
+        // Communication support
+
+            //- Return communicator used for parallel communication
+            inline label comm() const noexcept;
+
+            //- Return communicator used for parallel communication
+            inline label& comm() noexcept;
+
+
             // Mesh size parameters
 
-                inline label nPoints() const
-                {
-                    return nPoints_;
-                }
+                //- Number of local mesh points
+                inline label nPoints() const noexcept;
 
-                inline label nEdges() const
-                {
-                    return nEdges_;
-                }
+                //- Number of local mesh edges
+                inline label nEdges() const noexcept;
 
-                inline label nInternalEdges() const
-                {
-                    return nInternalEdges_;
-                }
+                //- Number of internal faces
+                inline label nInternalEdges() const noexcept;
 
-                inline label nFaces() const
-                {
-                    return nFaces_;
-                }
+                //- Number of boundary edges (== nEdges - nInternalEdges)
+                inline label nBoundaryEdges() const noexcept;
+
+                //- Number of patch faces
+                inline label nFaces() const noexcept;
 
 
             // Primitive mesh data
 
-                //- Return mesh points
-                const pointField& points() const;
+                //- Return local patch points
+                inline const pointField& points() const;
 
-                //- Return edges
-                const edgeList& edges() const;
+                //- Return local patch edges with reordered boundary
+                inline const edgeList& edges() const noexcept;
 
-                //- Return faces
-                const faceList& faces() const;
+                //- Return local patch faces
+                inline const faceList& faces() const;
 
                 //- Edge owner addressing
-                inline const labelList& edgeOwner() const
-                {
-                    return edgeOwner_;
-                }
+                inline const labelList& edgeOwner() const noexcept;
 
                 //- Edge neighbour addressing
-                inline const labelList& edgeNeighbour() const
-                {
-                    return edgeNeighbour_;
-                }
+                inline const labelList& edgeNeighbour() const noexcept;
 
-
-            // Communication support
-
-                //- Return communicator used for parallel communication
-                label comm() const;
-
-                //- Return communicator used for parallel communication
-                label& comm();
 
 
         // Access
@@ -419,13 +445,10 @@ public:
             }
 
             //- Return constant reference to boundary mesh
-            const faBoundaryMesh& boundary() const;
+            inline const faBoundaryMesh& boundary() const noexcept;
 
             //- Return faMesh face labels
-            const labelList& faceLabels() const
-            {
-                return faceLabels_;
-            }
+            inline const labelList& faceLabels() const noexcept;
 
 
             //- Return parallel info
@@ -453,10 +476,10 @@ public:
                 return lduAddr().upperAddr();
             }
 
-            //- Return true if given edge label is internal to the mesh
-            inline bool isInternalEdge(const label edgeIndex) const
+            //- True if given edge label is internal to the mesh
+            bool isInternalEdge(const label edgeIndex) const
             {
-                return edgeIndex < nInternalEdges();
+                return (edgeIndex < nInternalEdges_);
             }
 
 
@@ -487,10 +510,10 @@ public:
         // Demand-driven data
 
             //- Return constant reference to primitive patch
-            const indirectPrimitivePatch& patch() const;
+            inline const uindirectPrimitivePatch& patch() const;
 
             //- Return reference to primitive patch
-            indirectPrimitivePatch& patch();
+            inline uindirectPrimitivePatch& patch();
 
             //- Return patch starts
             const labelList& patchStarts() const;
@@ -546,6 +569,7 @@ public:
             //- Set whether point normals should be corrected for a patch
             boolList& correctPatchPointNormals() const;
 
+
         //- Write mesh
         virtual bool write(const bool valid = true) const;
 
@@ -563,6 +587,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "faMeshI.H"
 
 #ifdef NoRepository
     #include "faPatchFaMeshTemplates.C"

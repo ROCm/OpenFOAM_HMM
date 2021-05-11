@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,7 +21,7 @@ License
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
 
-//     You should have received a copy of the GNU General Public License
+    You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
@@ -68,7 +68,7 @@ Foam::faPatch::faPatch
 :
     labelList(edgeLabels),
     patchIdentifier(name, index),
-    ngbPolyPatchIndex_(ngbPolyPatchIndex),
+    nbrPolyPatchId_(ngbPolyPatchIndex),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
@@ -86,7 +86,7 @@ Foam::faPatch::faPatch
 :
     labelList(dict.get<labelList>("edgeLabels")),
     patchIdentifier(name, dict, index),
-    ngbPolyPatchIndex_(dict.get<label>("ngbPolyPatchIndex")),
+    nbrPolyPatchId_(dict.get<label>("ngbPolyPatchIndex")),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
@@ -98,7 +98,7 @@ Foam::faPatch::faPatch(const faPatch& p, const faBoundaryMesh& bm)
 :
     labelList(p),
     patchIdentifier(p, p.index()),
-    ngbPolyPatchIndex_(p.ngbPolyPatchIndex_),
+    nbrPolyPatchId_(p.nbrPolyPatchId_),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
@@ -116,13 +116,13 @@ Foam::faPatch::~faPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::faPatch::ngbPolyPatchIndex() const
+Foam::label Foam::faPatch::ngbPolyPatchIndex() const noexcept
 {
-    return ngbPolyPatchIndex_;
+    return nbrPolyPatchId_;
 }
 
 
-const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const
+const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
 }
@@ -240,38 +240,22 @@ const Foam::labelListList& Foam::faPatch::pointEdges() const
 
 Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 {
-    labelList ngbFaces;
-
-    if (ngbPolyPatchIndex() == -1)
+    if (nbrPolyPatchId_ < 0)
     {
-        return ngbFaces;
+        return labelList();
     }
 
-    ngbFaces.setSize(faPatch::size());
+    labelList ngbFaces(faPatch::size());
 
     const faMesh& aMesh = boundaryMesh().mesh();
-    const polyMesh& pMesh = aMesh();
-    const indirectPrimitivePatch& patch = aMesh.patch();
+    const polyMesh& pMesh = aMesh.mesh();
+    const auto& patch = aMesh.patch();
 
     const labelListList& edgeFaces = pMesh.edgeFaces();
 
-    labelList faceCells(patch.size(), -1);
-
-    forAll(faceCells, faceI)
-    {
-        label faceID = aMesh.faceLabels()[faceI];
-
-        faceCells[faceI] = pMesh.faceOwner()[faceID];
-    }
-
-    labelList meshEdges
+    const labelList meshEdges
     (
-        patch.meshEdges
-        (
-            pMesh.edges(),
-            pMesh.cellEdges(),
-            faceCells
-        )
+        patch.meshEdges(pMesh.edges(), pMesh.pointEdges())
     );
 
     forAll(ngbFaces, edgeI)
@@ -288,7 +272,7 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 
             label curPatchID = pMesh.boundaryMesh().whichPatch(curFace);
 
-            if (curPatchID == ngbPolyPatchIndex())
+            if (curPatchID == nbrPolyPatchId_)
             {
                 ngbFaces[edgeI] = curFace;
             }
@@ -308,13 +292,13 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
 {
+    if (nbrPolyPatchId_ < 0)
+    {
+        return tmp<vectorField>::New();
+    }
+
     auto tfN = tmp<vectorField>::New();
     auto& fN = tfN.ref();
-
-    if (ngbPolyPatchIndex() == -1)
-    {
-        return tfN;
-    }
 
     fN.setSize(faPatch::size());
 
@@ -336,7 +320,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
 {
-    if (ngbPolyPatchIndex() == -1)
+    if (nbrPolyPatchId_ < 0)
     {
         return tmp<vectorField>::New();
     }
@@ -468,12 +452,17 @@ void Foam::faPatch::movePoints(const pointField& points)
 {}
 
 
-void Foam::faPatch::resetEdges(const labelList& newEdges)
+void Foam::faPatch::resetEdges(const UList<label>& newEdges)
 {
-    Info<< "Resetting patch edges" << endl;
-    labelList::operator=(newEdges);
-
     clearOut();
+    static_cast<labelList&>(*this) = newEdges;
+}
+
+
+void Foam::faPatch::resetEdges(labelList&& newEdges)
+{
+    clearOut();
+    static_cast<labelList&>(*this) = std::move(newEdges);
 }
 
 
@@ -483,9 +472,8 @@ void Foam::faPatch::write(Ostream& os) const
 
     patchIdentifier::write(os);
 
-    const labelList& edgeLabels = *this;
-    edgeLabels.writeEntry("edgeLabels", os);
-    os.writeEntry("ngbPolyPatchIndex", ngbPolyPatchIndex_);
+    os.writeEntry("ngbPolyPatchIndex", nbrPolyPatchId_);
+    static_cast<const labelList&>(*this).writeEntry("edgeLabels", os);
 }
 
 

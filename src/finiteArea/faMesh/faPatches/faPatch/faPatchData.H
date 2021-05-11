@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,8 @@ Class
     Foam::faPatchData
 
 Description
-    Class which holds data needed for faPatch construction
+    Helper class for holding data during faPatch construction.
+    Most data members are exposed at the moment.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,25 +43,81 @@ Description
 namespace Foam
 {
 
+// Forward Declarations
+class edge;
+class faPatch;
+class dictionary;
+
 /*---------------------------------------------------------------------------*\
                          Class faPatchData Declaration
 \*---------------------------------------------------------------------------*/
 
-struct faPatchData
+class faPatchData
 {
-    word name_;
-    word type_;
-    dictionary dict_;
-    label ownPolyPatchID_;
-    label ngbPolyPatchID_;
-    labelList edgeLabels_;
-    faPatchData()
-    :
-        name_(word::null),
-        type_(word::null),
-        ownPolyPatchID_(-1),
-        ngbPolyPatchID_(-1)
-    {}
+public:
+
+    // Data Members
+
+        word name_;
+        word type_;
+
+        label ownerPolyPatchId_;
+        label neighPolyPatchId_;
+
+        //- The owner/neighbour for processor patches
+        int ownerProcId_;
+        int neighProcId_;
+
+        // Storge (temporary or otherwise) for edge labels
+        labelList edgeLabels_;
+
+
+    // Constructors
+
+        //- Default construct
+        faPatchData();
+
+
+    // Member Functions
+
+    // Opaque read-only access
+
+        //- Return the name
+        const word& name() const noexcept;
+
+        //- Contents transcribed into a patch dictionary,
+        //- usually including the edge labels.
+        dictionary dict(const bool withEdgeLabels = true) const;
+
+
+    // Other Functions
+
+        //- Reset data
+        void clear();
+
+        //- Clear and populate with values from finiteArea patch
+        void assign(const faPatch& fap);
+
+        //- True if owner/neighbour processor ids are non-equal
+        bool coupled() const noexcept
+        {
+            return (ownerProcId_ != neighProcId_);
+        }
+
+        //- Does this side own the patch? Also true for non-coupled patches
+        bool owner() const noexcept
+        {
+            return (ownerProcId_ <= neighProcId_);
+        }
+
+        //- Does the other side own the patch?
+        bool neighbour() const noexcept
+        {
+            return !owner();
+        }
+
+        //- True it matches the owner/neighbour patch pair (any order)
+        bool foundPatchPair(const edge& patchPair) const;
 };
 
 

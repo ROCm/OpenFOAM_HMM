@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,6 @@ class emptyFaPatch
 :
     public faPatch
 {
-
 public:
 
     //- Runtime type information
@@ -66,7 +66,16 @@ public:
 
     // Constructors
 
-         //- Construct from components
+        //- Minimal construct from components
+        emptyFaPatch
+        (
+            const word& name,
+            const label index,
+            const faBoundaryMesh& bm,
+            const label ngbPolyPatchIndex = -1
+        );
+
+        //- Construct from components
         emptyFaPatch
         (
             const word& name,
@@ -74,10 +83,7 @@ public:
             const label index,
             const faBoundaryMesh& bm,
             const label ngbPolyPatchIndex
-        )
-        :
-            faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
-        {}
+        );
 
         //- Construct from dictionary
         emptyFaPatch
@@ -114,6 +120,7 @@ public:
             );
         }
 
+
     // Member Functions
 
         virtual label size() const
@@ -124,7 +131,6 @@ public:
         //- Return face normals. Over-riding base class return to get zero size
         //
 //         virtual const vectorField& edgeNormals() const;
-
 };
 
 

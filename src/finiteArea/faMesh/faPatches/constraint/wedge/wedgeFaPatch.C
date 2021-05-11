@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,22 +88,21 @@ Foam::wedgeFaPatch::wedgeFaPatch
     axisPoint_(-1),
     axisPointChecked_(false)
 {
-    if (ngbPolyPatchIndex() == -1)
+    if (ngbPolyPatchIndex() < 0)
     {
         FatalErrorInFunction
             << "Neighbour polyPatch index is not specified for faPatch "
             << this->name() << exit(FatalError);
     }
 
-    if (isA<wedgePolyPatch>(bm.mesh()().boundaryMesh()[ngbPolyPatchIndex()]))
-    {
-        const wedgePolyPatch& wedge =
-            refCast<const wedgePolyPatch>
-            (
-                bm.mesh()().boundaryMesh()[ngbPolyPatchIndex()]
-            );
+    const auto* wedgePtr = isA<wedgePolyPatch>
+    (
+        bm.mesh()().boundaryMesh()[ngbPolyPatchIndex()]
+    );
 
-        wedgePolyPatchPtr_ = &wedge;
+    if (wedgePtr)
+    {
+        wedgePolyPatchPtr_ = wedgePtr;
     }
     else
     {

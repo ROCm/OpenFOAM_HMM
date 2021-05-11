@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,30 @@ License
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
 
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// A bitSet (size patch nPoints()) with boundary points marked
+static Foam::bitSet markupBoundaryPoints(const uindirectPrimitivePatch& p)
+{
+    // Initially all unmarked
+    bitSet markPoints(p.nPoints());
+    for (const edge& e : p.boundaryEdges())
+    {
+        // Mark boundary points
+        markPoints.set(e.first());
+        markPoints.set(e.second());
+    }
+
+    return markPoints;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::faMesh::calcLduAddressing() const
@@ -70,16 +94,7 @@ void Foam::faMesh::calcPatchStarts() const
             << abort(FatalError);
     }
 
-    patchStartsPtr_ = new labelList(boundary().size(), -1);
-    labelList& patchStarts = *patchStartsPtr_;
-
-    patchStarts[0] = nInternalEdges();
-
-    for (label i = 1; i < boundary().size(); ++i)
-    {
-        patchStarts[i] =
-            patchStarts[i - 1] + boundary()[i - 1].faPatch::size();
-    }
+    patchStartsPtr_ = new labelList(boundary().patchStarts());
 }
 
 
@@ -211,13 +226,11 @@ void Foam::faMesh::calcMagLe() const
 
     const pointField& localPoints = points();
 
-    const edgeList::subList internalEdges =
-        edgeList::subList(edges(), nInternalEdges());
-
-
-    forAll(internalEdges, edgeI)
+    label edgei = 0;
+    for (const edge& e : patch().internalEdges())
     {
-        magLe.ref()[edgeI] = internalEdges[edgeI].mag(localPoints);
+        magLe.ref()[edgei] = e.mag(localPoints);
+        ++edgei;
     }
 
 
@@ -331,13 +344,12 @@ void Foam::faMesh::calcEdgeCentres() const
 
     const pointField& localPoints = points();
 
-    const edgeList::subList internalEdges =
-        edgeList::subList(edges(), nInternalEdges());
 
-
-    forAll(internalEdges, edgeI)
+    label edgei = 0;
+    for (const edge& e : patch().internalEdges())
     {
-        edgeCentres.ref()[edgeI] = internalEdges[edgeI].centre(localPoints);
+        edgeCentres.ref()[edgei] = e.centre(localPoints);
+        ++edgei;
     }
 
 
@@ -850,31 +862,10 @@ Foam::labelList Foam::faMesh::internalPoints() const
     DebugInFunction
         << "Calculating internal points" << endl;
 
-    const edgeList& edges = patch().edges();
-    label nIntEdges = patch().nInternalEdges();
+    bitSet markPoints(markupBoundaryPoints(this->patch()));
+    markPoints.flip();
 
-    List<bool> internal(nPoints(), true);
-
-    for (label curEdge = nIntEdges; curEdge < edges.size(); ++curEdge)
-    {
-        internal[edges[curEdge].start()] = false;
-
-        internal[edges[curEdge].end()] = false;
-    }
-
-    SLList<label> internalPoints;
-
-    forAll(internal, pointI)
-    {
-        if (internal[pointI])
-        {
-            internalPoints.append(pointI);
-        }
-    }
-
-    labelList result(internalPoints);
-
-    return result;
+    return markPoints.sortedToc();
 }
 
 
@@ -883,31 +874,9 @@ Foam::labelList Foam::faMesh::boundaryPoints() const
     DebugInFunction
         << "Calculating boundary points" << endl;
 
-    const edgeList& edges = patch().edges();
-    label nIntEdges = patch().nInternalEdges();
+    bitSet markPoints(markupBoundaryPoints(this->patch()));
 
-    List<bool> internal(nPoints(), true);
-
-    for (label curEdge = nIntEdges; curEdge < edges.size(); ++curEdge)
-    {
-        internal[edges[curEdge].start()] = false;
-
-        internal[edges[curEdge].end()] = false;
-    }
-
-    SLList<label> boundaryPoints;
-
-    forAll(internal, pointI)
-    {
-        if (!internal[pointI])
-        {
-            boundaryPoints.append(pointI);
-        }
-    }
-
-    labelList result(boundaryPoints);
-
-    return result;
+    return markPoints.sortedToc();
 }
 
 
@@ -1168,7 +1137,7 @@ void Foam::faMesh::calcPointAreaNormals() const
 
         if (correctPatchPointNormals(patchI) && !fap.coupled())
         {
-            if (fap.ngbPolyPatchIndex() == -1)
+            if (fap.ngbPolyPatchIndex() < 0)
             {
                 FatalErrorInFunction
                     << "Neighbour polyPatch index is not defined "
