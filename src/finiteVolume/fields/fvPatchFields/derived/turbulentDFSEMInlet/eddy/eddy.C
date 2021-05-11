@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,37 +49,37 @@ bool Foam::eddy::setScales
     vector& alpha
 ) const
 {
-    // Static array of gamma^2 vs c2 coefficient
+    // Static array of gamma^2 vs c2 coefficient (PCR:Table 1)
     static const scalar gamma2VsC2[8] =
         {2, 1.875, 1.737, 1.75, 0.91, 0.825, 0.806, 1.5};
 
-    scalar gamma = Foam::sqrt(scalar(gamma2));
+    const scalar gamma = Foam::sqrt(scalar(gamma2));
 
     // c2 coefficient retrieved from array
-    scalar c2 = gamma2VsC2[gamma2 - 1];
+    const scalar c2 = gamma2VsC2[gamma2 - 1];
 
-    // Length scale in largest eigenvalue direction
-    label d1 = dir1_;
-    label d2 = (d1 + 1) % 3;
-    label d3 = (d1 + 2) % 3;
+    // Length scale in the largest eigenvalue direction
+    const label d1 = dir1_;
+    const label d2 = (d1 + 1) % 3;
+    const label d3 = (d1 + 2) % 3;
 
     sigma[d1] = sigmaX;
 
     // Note: sigma_average = 1/3*(sigma_x + sigma_y + sigma_z)
     // Substituting for sigma_y = sigma_x/gamma and sigma_z = sigma_y
-    //sigma[d1] = 3*sigmaX/(1 + 2/gamma);
     // Other length scales equal, as function of major axis length and gamma
     sigma[d2] = sigma[d1]/gamma;
     sigma[d3] = sigma[d2];
 
-    vector sigma2 = cmptMultiply(sigma, sigma);
-    scalar slos2 = cmptSum(cmptDivide(lambda, sigma2));
+    // (PCR:Eq. 13)
+    const vector sigma2(cmptMultiply(sigma, sigma));
+    const scalar slos2 = cmptSum(cmptDivide(lambda, sigma2));
 
     bool ok = true;
 
-    for (label beta = 0; beta < 3; ++beta)
+    for (label beta = 0; beta < vector::nComponents; ++beta)
     {
-        scalar x = slos2 - 2*lambda[beta]/sigma2[beta];
+        const scalar x = slos2 - 2*lambda[beta]/sigma2[beta];
 
         if (x < 0)
         {
@@ -88,6 +88,7 @@ bool Foam::eddy::setScales
         }
         else
         {
+            // (SST:Eq. 23)
             alpha[beta] = e[beta]*sqrt(x/(2*c2));
         }
     }
@@ -145,7 +146,7 @@ Foam::eddy::eddy
     dir1_(0)
 {
     // Principal stresses - eigenvalues returned in ascending order
-    vector lambda(eigenValues(R));
+    const vector lambda(eigenValues(R));
 
     // Eddy rotation from principal-to-global axes
     // - given by the 3 eigenvectors of the Reynold stress tensor as rows in
@@ -174,17 +175,17 @@ Foam::eddy::eddy
     {
         // Random length scale ratio, gamma = sigmax/sigmay = sigmax/sigmaz
         // - using gamma^2 to ease lookup of c2 coefficient
-        label g2 = Gamma2[i];
+        const label gamma2 = Gamma2[i];
 
-        if (setScales(sigmaX, g2, e, lambda, sigma_, alpha_))
+        if (setScales(sigmaX, gamma2, e, lambda, sigma_, alpha_))
         {
             found = true;
             break;
         }
     }
 
-    // Normalisation coefficient (eq. 11)
-    // Note: sqrt(10*V)/sqrt(nEddy) applied outside when computing uDash
+    // Normalisation coefficient (PCR:Eq. 11)
+    // Note: sqrt(10*V)/sqrt(nEddy) applied outside when computing uPrime
     c1_ = cmptAv(sigma_)/cmptProduct(sigma_)*cmptMin(sigma_);
 
     if (found)
@@ -226,27 +227,27 @@ Foam::eddy::eddy(const eddy& e)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::eddy::uDash(const point& xp, const vector& n) const
+Foam::vector Foam::eddy::uPrime(const point& xp, const vector& n) const
 {
-    // Relative position inside eddy (global system)
-    const vector r = cmptDivide(xp - position(n), sigma_);
+    // Relative position inside eddy (global system) (PCR:p. 524)
+    const vector r(cmptDivide(xp - position(n), sigma_));
 
-    if (mag(r) > 1)
+    if (mag(r) >= scalar(1))
     {
         return vector::zero;
     }
 
     // Relative position inside eddy (eddy principal system)
-    const vector rp = Rpg_.T() & r;
+    const vector rp(Rpg_.T() & r);
 
     // Shape function (eddy principal system)
-    const vector q = cmptMultiply(sigma_, vector::one - cmptMultiply(rp, rp));
+    const vector q(cmptMultiply(sigma_, vector::one - cmptMultiply(rp, rp)));
 
-    // Fluctuating velocity (eddy principal system) (eq. 8)
-    const vector uDashp = cmptMultiply(q, rp^alpha_);
+    // Fluctuating velocity (eddy principal system) (PCR:Eq. 8)
+    const vector uPrimep(cmptMultiply(q, rp^alpha_));
 
-    // Convert into global system (eq. 10)
-    return c1_*(Rpg_ & uDashp);
+    // Convert into global system (PCR:Eq. 10)
+    return c1_*(Rpg_ & uPrimep);
 }
 
 
@@ -256,7 +257,7 @@ void Foam::eddy::writeCentreOBJ
     Ostream& os
 ) const
 {
-    point p = position(n);
+    const point p(position(n));
     os  << "v " << p.x() << " " << p.y() << " " << p.z() << nl;
 }
 
@@ -295,14 +296,14 @@ Foam::label Foam::eddy::writeSurfaceOBJ
     x[nEddyPoints - 1] = - axisDir*s[dir1_];
 
     label eddyPtI = 1;
-    for (label axisI = 1; axisI < nFaceAxis; axisI++)
+    for (label axisI = 1; axisI < nFaceAxis; ++axisI)
     {
-        scalar z = s[dir1_]*cos(axisI*dPhi);
-        scalar r = sqrt(sqr(s[dir2])*(1 - sqr(z)/sqr(s[dir1_])));
+        const scalar z = s[dir1_]*cos(axisI*dPhi);
+        const scalar r = sqrt(sqr(s[dir2])*(1 - sqr(z)/sqr(s[dir1_])));
 
-        for (label thetaI = 0; thetaI < nFaceTheta; thetaI++)
+        for (label thetaI = 0; thetaI < nFaceTheta; ++thetaI)
         {
-            scalar theta = thetaI*dTheta;
+            const scalar theta = thetaI*dTheta;
             point& p = x[eddyPtI++];
             p[dir1_] = z;
             p[dir2] = r*sin(theta);
@@ -313,33 +314,33 @@ Foam::label Foam::eddy::writeSurfaceOBJ
     // Write points
     forAll(x, i)
     {
-        point p = position(n) + (Rpg_ & x[i]);
+        const point p = position(n) + (Rpg_ & x[i]);
         os  << "v " << p.x() << " " << p.y() << " " << p.z() << nl;
     }
 
     // Write the end cap tri faces
-    for (label faceI = 0; faceI < nFaceTheta; faceI++)
+    for (label faceI = 0; faceI < nFaceTheta; ++faceI)
     {
-        label p1 = pointI + 1;
-        label p2 = p1 + faceI + 1;
+        const label p1 = pointI + 1;
+        const label p2 = p1 + faceI + 1;
         label p3 = p2 + 1;
         if (faceI == nFaceTheta - 1) p3 -= nFaceTheta;
         os  << "f " << p1 << " " << p2 << " " << p3 << nl;
 
-        label q1 = pointI + nEddyPoints;
-        label q2 = q1 - faceI - 1;
+        const label q1 = pointI + nEddyPoints;
+        const label q2 = q1 - faceI - 1;
         label q3 = q2 - 1;
         if (faceI == nFaceTheta - 1) q3 += nFaceTheta;
         os  << "f " << q1 << " " << q2 << " " << q3 << nl;
     }
 
     // Write quad faces
-    for (label axisI = 1; axisI < nFaceAxis - 1; axisI++)
+    for (label axisI = 1; axisI < nFaceAxis - 1; ++axisI)
     {
-        for (label thetaI = 0; thetaI < nFaceTheta; thetaI++)
+        for (label thetaI = 0; thetaI < nFaceTheta; ++thetaI)
         {
-            label p1 = pointI + 1 + (axisI - 1)*nFaceTheta + thetaI + 1;
-            label p2 = p1 + nFaceTheta;
+            const label p1 = pointI + 1 + (axisI - 1)*nFaceTheta + thetaI + 1;
+            const label p2 = p1 + nFaceTheta;
             label p3 = p2 + 1;
             label p4 = p1 + 1;
 

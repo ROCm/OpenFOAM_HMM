@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,56 +31,107 @@ Group
     grpInletBoundaryConditions
 
 Description
-    Velocity boundary condition including synthesised eddies for use with LES
-    and DES turbulent flows.
+    The \c turbulentDFSEMInlet is a synthesised-eddy based velocity inlet
+    boundary condition to generate synthetic turbulence-alike time-series
+    from a given set of turbulence statistics for LES and hybrid RANS-LES
+    computations.
 
     Reference:
     \verbatim
-        Poletto, R., Craft, T., & Revell, A. (2013).
-        A new divergence free synthetic eddy method for
-        the reproduction of inlet flow conditions for LES.
-        Flow, turbulence and combustion, 91(3), 519-539.
-        DOI:10.1007/s10494-013-9488-2
-    \endverbatim
+        Standard model (tag:PCR):
+            Poletto, R., Craft, T., & Revell, A. (2013).
+            A new divergence free synthetic eddy method for
+            the reproduction of inlet flow conditions for LES.
+            Flow, turbulence and combustion, 91(3), 519-539.
+            DOI:10.1007/s10494-013-9488-2
 
-    Reynolds stress, velocity and turbulence length scale values can either
-    be specified directly, or mapped.  If mapping, the values should be
-    entered in the same form as the \c timeVaryingMappedFixedValue condition,
-    except that no interpolation in time is supported.  These should be
-    located in the directory:
-
-    \verbatim
-        \$FOAM_CASE/constant/boundaryData/\<patchName\>/points
-        \$FOAM_CASE/constant/boundaryData/\<patchName\>/0/\{R|U|L\}
+        Expression for the average length scale (tag:SST):
+            Shur, M., Strelets, M., Travin, A.,
+            Probst, A., Probst, S., Schwamborn, D., ... & Revell, A. (2018).
+            Improved embedded approaches.
+            In: Mockett C., Haase W., Schwamborn D. (eds)
+            Go4Hybrid: Grey area mitigation for hybrid RANS-LES methods.
+            Notes on Numerical Fluid Mechanics and Multidisciplinary Design.
+            p. 51-87. Springer, Cham.
+            DOI:10.1007/978-3-319-52995-0_3
     \endverbatim
 
 Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type            turbulentDFSEMInlet;
+        delta           <scalar>;
+        R               <PatchFunction1>;
+        U               <PatchFunction1>;
+        L               <PatchFunction1>;
+
+            // e.g.
+            // R        uniform (<Rxx> <Rxy> <Rxz> <Ryy> <Ryz> <Rzz>);
+            // U        uniform (<Ux> <Uy> <Uz>);
+            // L        uniform <L>;
+
+        // Optional entries
+        d               <scalar>;
+        nCellPerEddy    <label>;
+        kappa           <scalar>;
+        Uref            <scalar>;
+        Lref            <scalar>;
+        scale           <scalar>;
+        m               <scalar>;
+        writeEddies     <bool>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
     \table
-        Property  | Description         | Required             | Default value
-        value     | Restart value       | yes                  |
-        delta     | Local limiting length scale          | yes |
-        R         | Reynolds stress field                | no  |
-        U         | Velocity field                       | no  |
-        L         | Turbulence length scale field        | no  |
-        d         | Eddy density (fill fraction)         | no  | 1
-        kappa     | Von Karman constant                  | no  | 0.41
-        mapMethod | Method to map reference values       | no  | nearestCell
-        perturb   | Point perturbation for interpolation | no  | 1e-5
-        interpolateR | Flag to interpolate the R field   | no  | false
-        interpolateL | Flag to interpolate the L field   | no  | false
-        interpolateU | Flag to interpolate the U field   | no  | false
-        writeEddies | Flag to write eddies as OBJ file   | no  | no
+      Property | Description                         | Type       | Reqd | Deflt
+      type     | Type name: turbulentDFSEMInlet      | word       | yes  | -
+      delta    | Characteristic length scale         | scalar     | yes  | -
+      R        | Reynolds-stress tensor field        <!--
+               -->                 | PatchFunction1\<symmTensor\> | yes  | -
+      U        | Mean velocity field                 <!--
+               -->                 | PatchFunction1<vector>       | yes  | -
+      L        | Integral-length scale field         <!--
+               -->                 | PatchFunction1<scalar>       | yes  | -
+      d        | Ratio of sum of eddy volumes to eddy box volume  <!--
+               --> i.e. eddy density (fill fraction) | scalar     | no   | 1.0
+      nCellPerEddy | Minimum eddy length in units of number of cells     <!--
+               -->                                   | label      | no   | 5
+      kappa    | von Karman constant                 | scalar     | no   | 0.41
+      Uref     | Normalisation factor for Reynolds-stress         <!--
+               --> tensor and mean velocity          | scalar     | no   | 1.0
+      Lref     | Normalisation factor for integral-length scale   <!--
+               -->                                   | scalar     | no   | 1.0
+      scale    | Heuristic scaling factor being applied           <!--
+               --> on the normalisation factor C1    | scalar     | no   | 1.0
+      m        | The power of V defined in C1        | scalar     | no   | 0.5
+      writeEddies  | Flag to write eddies as OBJ file  | bool     | no   | false
     \endtable
 
-Note
-    - The \c delta value typically represents the characteristic scale of flow
-      or flow domain, e.g. a channel half-height
-    - For \c R, \c U and \c L specification: if the entry is not user input,
-      it is assumed that the data will be mapped
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
+      - \link PatchFunction1.H \endlink
+      - \link MappedFile.H \endlink
 
-SeeAlso
-    timeVaryingMappedFixedValueFvPatchField
-    turbulentDigitalFilterInlet
+Note
+  - The \c delta value typically represents the characteristic scale of flow
+    or flow domain, e.g. a channel half height for plane channel flows.
+  - \c nCellPerEddy and \c scale entries are heuristic entries
+    which do not exist in the standard method, yet are necessary
+    to reproduce the results published in the original journal paper.
+  - In the original journal paper, \c C1 in Eq. 11 is not dimensionless.
+    It is not clear whether this dimensionality issue was intentional.
+    To alleviate this matter, users can alter the input entry \c m, which is
+    the power of the eddy-box volume defined in the \c C1, to obtain a
+    dimensionless \c C1 coefficient. The default value of \c m is 0.5,
+    which is the value stated in the original journal paper,
+    and \c m=1/3 leads to a dimensionless \c C1.
 
 SourceFiles
     turbulentDFSEMInletFvPatchVectorField.C
@@ -94,14 +145,12 @@ SourceFiles
 #include "Random.H"
 #include "eddy.H"
 #include "pointIndexHit.H"
-#include "instantList.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class pointToPointPlanarInterpolation;
 
 /*---------------------------------------------------------------------------*\
            Class turbulentDFSEMInletFvPatchVectorField Declaration
@@ -116,50 +165,38 @@ class turbulentDFSEMInletFvPatchVectorField
         //- Maximum number of attempts when seeding eddies
         static label seedIterMax_;
 
-        //- Characteristic length scale, e.g. half channel height
+        //- Mean velocity field
+        autoPtr<PatchFunction1<vector>> U_;
+
+        //- Reynolds stress tensor field
+        autoPtr<PatchFunction1<symmTensor>> R_;
+
+        //- Integral-length scale field
+        autoPtr<PatchFunction1<scalar>> L_;
+
+        //- Characteristic length scale
         const scalar delta_;
 
-        //- Ratio of sum of eddy volumes to eddy box volume; default = 1
+        //- Ratio of sum of eddy volumes to eddy box volume, i.e. eddy density
         const scalar d_;
 
-        //- Von Karman constant
+        //- von Karman constant
         const scalar kappa_;
 
-        //- Global numbering for faces
-        mutable autoPtr<globalIndex> globalFacesPtr_;
+        //- Normalisation factor for Reynolds-stress tensor and mean velocity
+        const scalar Uref_;
 
+        //- Normalisation factor for integral-length scale
+        const scalar Lref_;
 
-        // Table reading for patch inlet flow properties
+        //- Heuristic scaling factor being applied on the normalisation factor
+        const scalar scale_;
 
-            //- Fraction of perturbation (fraction of bounding box) to add
-            scalar perturb_;
+        //- The power of V defined in C1
+        const scalar m_;
 
-            //- Interpolation scheme to use (nearestCell | planarInterpolation)
-            word mapMethod_;
-
-            //- 2D interpolation (for 'planarInterpolation' mapMethod)
-            mutable autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
-
-            //- Flag to identify to interpolate the R field
-            bool interpolateR_;
-
-            //- Flag to identify to interpolate the L field
-            bool interpolateL_;
-
-            //- Flag to identify to interpolate the U field
-            bool interpolateU_;
-
-            //- Reynolds stress tensor
-            symmTensorField R_;
-
-            //- Length scale
-            scalarField L_;
-
-            //- Inlet velocity
-            vectorField U_;
-
-            //- Mean inlet velocity
-            vector UMean_;
+        //- Minimum eddy length in units of number of cells
+        const label nCellPerEddy_;
 
 
         // Patch information
@@ -179,45 +216,50 @@ class turbulentDFSEMInletFvPatchVectorField
             //- Cumulative area fractions per processor
             scalarList sumTriMagSf_;
 
+            //- Patch normal into the domain
+            vector patchNormal_;
 
-        //- List of eddies
-        List<eddy> eddies_;
+            //- Patch bounds (local processor)
+            boundBox patchBounds_;
 
-        //- Minimum number of cells required to resolve an eddy
-        label nCellPerEddy_;
 
-        //- Patch normal into the domain
-        vector patchNormal_;
+        // Eddy information
 
-        //- Eddy box volume
-        scalar v0_;
+            //- List of eddies
+            List<eddy> eddies_;
 
-        //- Random number generator
-        Random rndGen_;
+            //- Eddy box volume
+            scalar v0_;
 
-        //- Length scale per patch face
-        scalarField sigmax_;
+            //- Random number generator
+            Random rndGen_;
 
-        //- Maximum length scale (across all processors)
-        scalar maxSigmaX_;
+            //- Integral-length scale per patch face
+            scalarField sigmax_;
 
-        //- Global number of eddies
-        label nEddy_;
+            //- Maximum integral-length scale (across all processors)
+            scalar maxSigmaX_;
 
-        //- Current time index (used for updating)
-        label curTimeIndex_;
+            //- Global number of eddies
+            label nEddy_;
 
-        //- Patch bounds (local processor)
-        boundBox patchBounds_;
+            //- Current time index (used for updating)
+            label curTimeIndex_;
 
-        //- Single processor contains all eddies (flag)
-        bool singleProc_;
+            //- Single processor contains all eddies (flag)
+            bool singleProc_;
 
-        //- Flag to write the eddies to file
-        bool writeEddies_;
+            //- Flag to write the eddies to file
+            bool writeEddies_;
 
 
     // Private Member Functions
+
+        //- Write Lumley coefficients to file
+        void writeLumleyCoeffs() const;
+
+        //- Write eddy info in OBJ format
+        void writeEddyOBJ() const;
 
         //- Initialise info for patch point search
         void initialisePatch();
@@ -231,37 +273,11 @@ class turbulentDFSEMInletFvPatchVectorField
         //- Initialise eddies
         void initialiseEddies();
 
-        //- Convect the eddies
-        void convectEddies(const scalar deltaT);
+        //- Convect the eddies with the bulk velocity
+        void convectEddies(const vector& UBulk, const scalar deltaT);
 
-        //- Calculate the velocity fluctuation at a point
-        vector uDashEddy(const List<eddy>& eddies, const point& globalX) const;
-
-        //- Helper function to interpolate values from the boundary data or
-        //- read from dictionary
-        template<class Type>
-        tmp<Field<Type>> interpolateOrRead
-        (
-            const word& fieldName,
-            const dictionary& dict,
-            bool& interpolateField
-        ) const;
-
-        //- Helper function to interpolate values from the boundary data
-        template<class Type>
-        tmp<Field<Type>> interpolateBoundaryData
-        (
-            const word& fieldName
-        ) const;
-
-        //- Write Lumley coefficients to file
-        void writeLumleyCoeffs() const;
-
-        //- Write eddy info in OBJ format
-        void writeEddyOBJ() const;
-
-        //- Return a reference to the patch mapper object
-        const pointToPointPlanarInterpolation& patchMapper() const;
+        //- Return velocity fluctuation vector at a given point
+        vector uPrimeEddy(const List<eddy>& eddies, const point& globalX) const;
 
         //- Return eddies from remote processors that interact with local
         //- processor
@@ -345,11 +361,11 @@ public:
 
     // Member Functions
 
-        //- Helper function to check that Reynold stresses are valid
+        //- Return true if input Reynold stresses are valid
         static bool checkStresses(const symmTensorField& Rf);
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap(const fvPatchFieldMapper& m);
@@ -362,26 +378,22 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
 
-        //- Write
-        virtual void write(Ostream&) const;
+        // IO
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "turbulentDFSEMInletFvPatchVectorFieldTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ Ostream& operator<<(Ostream& os, const eddy& e);
 
 class eddy
 {
-    // Private data
+    // Private Data
 
         static label Gamma2Values[8];
         static UList<label> Gamma2;
@@ -83,7 +83,7 @@ class eddy
         //- Distance from reference position in normal direction
         scalar x_;
 
-        //- Length scales in 3-D space
+        //- Integral-length scales in 3-D space
         vector sigma_;
 
         //- Time-averaged intensity
@@ -133,14 +133,18 @@ public:
             const label patchFaceI,     // patch face index
             const point& position0,     // reference position
             const scalar x,             // distance from reference position
-            const scalar sigmaX,        // length scale
-            const symmTensor& R,        // Stress tensor
+            const scalar sigmaX,        // integral-length scale
+            const symmTensor& R,        // Reynolds stress tensor
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         eddy(const eddy& e);
 
+
+    // Public Data
+
+        //- Flag to activate debug statements
         static int debug;
 
 
@@ -149,26 +153,26 @@ public:
         // Access
 
             //- Return the patch face index that spawned the eddy
-            inline label patchFaceI() const;
+            inline label patchFaceI() const noexcept;
 
             //- Return the reference position
-            inline const point& position0() const;
+            inline const point& position0() const noexcept;
 
             //- Return the distance from the reference position
-            inline scalar x() const;
+            inline scalar x() const noexcept;
 
-            //- Return the lLength scales in 3-D space
-            inline const vector& sigma() const;
+            //- Return the length scales in 3-D space
+            inline const vector& sigma() const noexcept;
 
             //- Return the time-averaged intensity
-            inline const vector& alpha() const;
+            inline const vector& alpha() const noexcept;
 
             //- Return the coordinate system transformation from local
-            //  principal to global axes
-            inline const tensor& Rpg() const;
+            //- principal to global axes
+            inline const tensor& Rpg() const noexcept;
 
             //- Return the model coefficient c1
-            inline scalar c1() const;
+            inline scalar c1() const noexcept;
 
             //- Return the eddy position
             inline point position(const vector& n) const;
@@ -192,10 +196,10 @@ public:
             inline boundBox bounds(const bool global = true) const;
 
 
-        // Evaluate
+        // Evaluation
 
             //- Return the fluctuating velocity contribution at local point xp
-            vector uDash(const point& xp, const vector& n) const;
+            vector uPrime(const point& xp, const vector& n) const;
 
 
         // Writing
