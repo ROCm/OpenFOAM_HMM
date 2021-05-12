@@ -29,6 +29,8 @@ Application
 
 Description
     A mesh generator for finiteArea mesh.
+    When called in parallel, it will also try to act like decomposePar,
+    create procAddressing and decompose serial finite-area fields.
 
 Author
     Zeljko Tukovic, FAMENA
@@ -36,15 +38,17 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#include "objectRegistry.H"
 #include "Time.H"
 #include "argList.H"
 #include "OSspecific.H"
 #include "faMesh.H"
-#include "fvMesh.H"
 #include "IOdictionary.H"
-#include "globalIndex.H"
-#include "globalMeshData.H"
+#include "IOobjectList.H"
+
+#include "areaFields.H"
+#include "faFieldDecomposer.H"
+#include "faMeshReconstructor.H"
+#include "OBJstream.H"
 
 using namespace Foam;
 
@@ -65,10 +69,17 @@ int main(int argc, char *argv[])
     );
     argList::addOption("dict", "file", "Alternative faMeshDefinition");
 
+    argList::addBoolOption
+    (
+        "write-edges-obj",
+        "Write mesh edges as obj files and exit",
+        false  // could make an advanced option
+    );
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createNamedMesh.H"
+    #include "createNamedPolyMesh.H"
 
     // Reading faMeshDefinition dictionary
     #include "findMeshDefinitionDict.H"
@@ -80,12 +91,29 @@ int main(int argc, char *argv[])
         meshDefDict.add("emptyPatch", patchName, true);
     }
 
-    // Creation
+    // Create
     faMesh areaMesh(mesh, meshDefDict);
 
-    // Writing faMesh
-    Info << "Write finite area mesh ... ";
+    bool quickExit = false;
+
+    if (args.found("write-edges-obj"))
+    {
+        quickExit = true;
+        #include "faMeshWriteEdgesOBJ.H"
+    }
+
+    if (quickExit)
+    {
+        Info<< "\nEnd\n" << endl;
+        return 0;
+    }
+
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(10);
+
+    Info<< nl << "Write finite area mesh." << nl;
     areaMesh.write();
+    Info<< endl;
 
     #include "decomposeFaFields.H"
 
