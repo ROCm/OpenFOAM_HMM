@@ -382,7 +382,8 @@ Foam::vtk::polyWriter::polyWriter
     bool parallel
 )
 :
-    polyWriter()
+    // Default parameter fails for gcc-4.8.5, thus specify format here
+    polyWriter(vtk::formatType::INLINE_BASE64)
 {
     open(file, parallel);
 }
