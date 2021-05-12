@@ -48,27 +48,28 @@ namespace reconstruction
 void Foam::reconstruction::plicRDF::interpolateNormal()
 {
     scalar dt = mesh_.time().deltaTValue();
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
 
     leastSquareGrad<scalar> lsGrad("polyDegree1",mesh_.geometricD());
 
-    exchangeFields_.setUpCommforZone(interfaceCell_,false);
+    exchangeFields.setUpCommforZone(interfaceCell_,false);
 
     Map<vector> mapCentre
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, centre_)
+        exchangeFields.getDatafromOtherProc(interfaceCell_, centre_)
     );
     Map<vector> mapNormal
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, normal_)
+        exchangeFields.getDatafromOtherProc(interfaceCell_, normal_)
     );
 
     Map<vector> mapCC
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, mesh_.C())
+        exchangeFields.getDatafromOtherProc(interfaceCell_, mesh_.C())
     );
     Map<scalar> mapAlpha
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, alpha1_)
+        exchangeFields.getDatafromOtherProc(interfaceCell_, alpha1_)
     );
 
     DynamicField<vector > cellCentre(100);
@@ -76,7 +77,7 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
 
     DynamicList<vector> foundNormals(30);
 
-    const labelListList& stencil = exchangeFields_.getStencil();
+    const labelListList& stencil = exchangeFields.getStencil();
 
     forAll(interfaceLabels_, i)
     {
@@ -84,17 +85,16 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
         vector estimatedNormal{Zero};
         scalar weight{0};
         foundNormals.clear();
-        forAll(stencil[celli], i)
+        for (const label gblIdx : stencil[celli])
         {
-            const label gblIdx = stencil[celli][i];
             vector n =
-                exchangeFields_.getValue(normal_, mapNormal, gblIdx);
+                exchangeFields.getValue(normal_, mapNormal, gblIdx);
             point p = mesh_.C()[celli]-U_[celli]*dt;
             if (mag(n) != 0)
             {
                 n /= mag(n);
                 vector centre =
-                    exchangeFields_.getValue(centre_, mapCentre, gblIdx);
+                    exchangeFields.getValue(centre_, mapCentre, gblIdx);
                 vector distanceToIntSeg = (tensor::I- n*n) & (p - centre);
                 estimatedNormal += n /max(mag(distanceToIntSeg), SMALL);
                 weight += 1/max(mag(distanceToIntSeg), SMALL);
@@ -143,11 +143,11 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
                 const label gblIdx = stencil[celli][i];
                 cellCentre.append
                 (
-                    exchangeFields_.getValue(mesh_.C(), mapCC, gblIdx)
+                    exchangeFields.getValue(mesh_.C(), mapCC, gblIdx)
                 );
                 alphaValues.append
                 (
-                    exchangeFields_.getValue(alpha1_, mapAlpha, gblIdx)
+                    exchangeFields.getValue(alpha1_, mapAlpha, gblIdx)
                 );
             }
             cellCentre -= mesh_.C()[celli];
@@ -160,22 +160,23 @@ void Foam::reconstruction::plicRDF::interpolateNormal()
 void Foam::reconstruction::plicRDF::gradSurf(const volScalarField& phi)
 {
     leastSquareGrad<scalar> lsGrad("polyDegree1", mesh_.geometricD());
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
 
-    exchangeFields_.setUpCommforZone(interfaceCell_, false);
+    exchangeFields.setUpCommforZone(interfaceCell_, false);
 
     Map<vector> mapCC
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, mesh_.C())
+        exchangeFields.getDatafromOtherProc(interfaceCell_, mesh_.C())
     );
     Map<scalar> mapPhi
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, phi)
+        exchangeFields.getDatafromOtherProc(interfaceCell_, phi)
     );
 
     DynamicField<vector> cellCentre(100);
     DynamicField<scalar> phiValues(100);
 
-    const labelListList& stencil = exchangeFields_.getStencil();
+    const labelListList& stencil = exchangeFields.getStencil();
 
     forAll(interfaceLabels_, i)
     {
@@ -188,11 +189,11 @@ void Foam::reconstruction::plicRDF::gradSurf(const volScalarField& phi)
         {
             cellCentre.append
             (
-                exchangeFields_.getValue(mesh_.C(), mapCC, gblIdx)
+                exchangeFields.getValue(mesh_.C(), mapCC, gblIdx)
             );
             phiValues.append
             (
-                exchangeFields_.getValue(phi, mapPhi, gblIdx)
+                exchangeFields.getValue(phi, mapPhi, gblIdx)
             );
         }
 
@@ -204,6 +205,8 @@ void Foam::reconstruction::plicRDF::gradSurf(const volScalarField& phi)
 
 void Foam::reconstruction::plicRDF::setInitNormals(bool interpolate)
 {
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
+
     interfaceLabels_.clear();
 
     forAll(alpha1_, celli)
@@ -218,7 +221,7 @@ void Foam::reconstruction::plicRDF::setInitNormals(bool interpolate)
 
     RDF_.markCellsNearSurf(interfaceCell_, 1);
     const boolList& nextToInterface_ = RDF_.nextToInterface();
-    exchangeFields_.updateStencil(nextToInterface_);
+    exchangeFields.updateStencil(nextToInterface_);
 
     if (interpolate)
     {
@@ -236,15 +239,15 @@ void Foam::reconstruction::plicRDF::calcResidual
     List<normalRes>& normalResidual
 )
 {
-    exchangeFields_.setUpCommforZone(interfaceCell_,false);
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
+    exchangeFields.setUpCommforZone(interfaceCell_,false);
 
     Map<vector> mapNormal
     (
-        exchangeFields_.getDatafromOtherProc(interfaceCell_, normal_)
+        exchangeFields.getDatafromOtherProc(interfaceCell_, normal_)
     );
 
-    const labelListList& stencil = exchangeFields_.getStencil();
-
+    const labelListList& stencil = exchangeFields.getStencil();
 
     forAll(interfaceLabels_, i)
     {
@@ -265,7 +268,7 @@ void Foam::reconstruction::plicRDF::calcResidual
         {
             const label gblIdx = stencil[celli][j];
             vector normal =
-                exchangeFields_.getValue(normal_, mapNormal, gblIdx);
+                exchangeFields.getValue(normal_, mapNormal, gblIdx);
 
             if (mag(normal) != 0 && j != 0)
             {
@@ -328,7 +331,6 @@ Foam::reconstruction::plicRDF::plicRDF
     iteration_(modelDict().getOrDefault<label>("iterations", 5)),
     interpolateNormal_(modelDict().getOrDefault("interpolateNormal", true)),
     RDF_(mesh_),
-    exchangeFields_(zoneDistribute::New(mesh_)),
     sIterPLIC_(mesh_,surfCellTol_)
 {
     setInitNormals(false);
@@ -375,6 +377,7 @@ Foam::reconstruction::plicRDF::plicRDF
 
 void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
 {
+    zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
     const bool uptodate = alreadyReconstructed(forceUpdate);
 
     if (uptodate && !forceUpdate)
@@ -403,7 +406,7 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
 
     bitSet tooCoarse(mesh_.nCells(),false);
 
-    for (int iter=0; iter<iteration_; ++iter)
+    for (label iter=0; iter<iteration_; ++iter)
     {
         forAll(interfaceLabels_, i)
         {
@@ -452,7 +455,7 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
                 nextToInterface_,
                 centre_,
                 normal_,
-                exchangeFields_,
+                exchangeFields,
                 false
             );
             RDF_.updateContactAngle(alpha1_, U_, nHatb);
@@ -492,7 +495,6 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
                 resCounter++;
 
             }
-
         }
 
         reduce(avgRes,sumOp<scalar>());

@@ -123,12 +123,26 @@ void Foam::zoneCPCStencil::calcPointBoundaryData
 
 Foam::zoneCPCStencil::zoneCPCStencil(const fvMesh& mesh)
 :
+    MeshObject<fvMesh, Foam::TopologicalMeshObject, zoneCPCStencil>(mesh),
     zoneCellStencils(mesh),
     nonEmptyBoundaryPoints_(nonEmptyFacesPatch()().meshPoints()),
     uptodate_(mesh.nCells(), false)
 {
     // Mark boundary faces to be included in stencil (i.e. not coupled or empty)
     validBoundaryFaces(isValidBFace_);
+}
+
+Foam::zoneCPCStencil& Foam::zoneCPCStencil::New(const fvMesh& mesh)
+{
+    auto* ptr = mesh.thisDb().getObjectPtr<zoneCPCStencil>("zoneCPCStencil");
+
+    if (!ptr)
+    {
+        ptr = new zoneCPCStencil(mesh);
+        regIOobject::store(ptr);
+    }
+
+    return *ptr;
 }
 
 
@@ -220,21 +234,6 @@ void Foam::zoneCPCStencil::calculateStencil
 
             uptodate_[celli] = true;
         }
-    }
-}
-
-
-void Foam::zoneCPCStencil::updateMesh(const mapPolyMesh& mpm)
-{
-    if (mesh_.topoChanging())
-    {
-        // resize map and globalIndex
-        zoneCellStencils::updateMesh(mpm);
-
-        nonEmptyBoundaryPoints_ = nonEmptyFacesPatch()().meshPoints();
-        uptodate_.resize(mesh_.nCells());
-        uptodate_ = false;
-        validBoundaryFaces(isValidBFace_);
     }
 }
 

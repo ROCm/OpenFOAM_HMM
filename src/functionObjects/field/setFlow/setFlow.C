@@ -291,48 +291,42 @@ bool Foam::functionObjects::setFlow::execute()
             Uc.replace(vector::Z, sin(2*pi*x)*sqr(sin(pi*z)));
 
             U = U & R_;
+            U.correctBoundaryConditions();
 
-            // Calculating incompressible flux based on stream function
+            // Calculating phi
             // Note: R_ rotation not implemented in phi calculation
-            const scalarField xp(mesh_.points().component(0) - origin_[0]);
-            const scalarField yp(mesh_.points().component(1) - origin_[1]);
-            const scalarField zp(mesh_.points().component(2) - origin_[2]);
-            const scalarField psi((1.0/pi)*sqr(sin(pi*xp))*sqr(sin(pi*zp)));
+            const vectorField Cf(mesh_.Cf().primitiveField() - origin_);
+            const scalarField Xf(Cf.component(vector::X));
+            const scalarField Yf(Cf.component(vector::Y));
+            const scalarField Zf(Cf.component(vector::Z));
+            vectorField Uf(Xf.size());
+            Uf.replace(vector::X, -sin(2*pi*Zf)*sqr(sin(pi*Xf)));
+            Uf.replace(vector::Y, scalar(0));
+            Uf.replace(vector::Z, sin(2*pi*Xf)*sqr(sin(pi*Zf)));
 
             scalarField& phic = phi.primitiveFieldRef();
-            forAll(phic, fi)
-            {
-                phic[fi] = 0;
-                const face& f = mesh_.faces()[fi];
-                const label nPoints = f.size();
-
-                forAll(f, fpi)
-                {
-                    const label p1 = f[fpi];
-                    const label p2 = f[(fpi + 1) % nPoints];
-                    phic[fi] += 0.5*(psi[p1] + psi[p2])*(yp[p2] - yp[p1]);
-                }
-            }
+            const vectorField& Sfc = mesh_.Sf().primitiveField();
+            phic = Uf & Sfc;
 
             surfaceScalarField::Boundary& phibf = phi.boundaryFieldRef();
+            const surfaceVectorField::Boundary& Sfbf =
+                mesh_.Sf().boundaryField();
+            const surfaceVectorField::Boundary& Cfbf =
+                mesh_.Cf().boundaryField();
+
             forAll(phibf, patchi)
             {
                 scalarField& phif = phibf[patchi];
-                const label start = mesh_.boundaryMesh()[patchi].start();
-
-                forAll(phif, fi)
-                {
-                    phif[fi] = 0;
-                    const face& f = mesh_.faces()[start + fi];
-                    const label nPoints = f.size();
-
-                    forAll(f, fpi)
-                    {
-                        const label p1 = f[fpi];
-                        const label p2 = f[(fpi + 1) % nPoints];
-                        phif[fi] += 0.5*(psi[p1] + psi[p2])*(yp[p2] - yp[p1]);
-                    }
-                }
+                const vectorField& Sff = Sfbf[patchi];
+                const vectorField& Cff = Cfbf[patchi];
+                const scalarField xf(Cff.component(vector::X));
+                const scalarField yf(Cff.component(vector::Y));
+                const scalarField zf(Cff.component(vector::Z));
+                vectorField Ufb(xf.size());
+                Ufb.replace(vector::X, -sin(2*pi*zf)*sqr(sin(pi*xf)));
+                Ufb.replace(vector::Y, scalar(0));
+                Ufb.replace(vector::Z, sin(2*pi*xf)*sqr(sin(pi*zf)));
+                phif = Ufb & Sff;
             }
 
             break;

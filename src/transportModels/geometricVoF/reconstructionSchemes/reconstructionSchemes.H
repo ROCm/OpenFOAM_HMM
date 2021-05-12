@@ -209,13 +209,13 @@ public:
     // Member Functions
 
         //- Access to the model dictionary
-        dictionary& modelDict()
+        dictionary& modelDict() noexcept
         {
             return reconstructionSchemesCoeffs_;
         }
 
         //- Const access to the model dictionary
-        const dictionary& modelDict() const
+        const dictionary& modelDict() const noexcept
         {
             return reconstructionSchemesCoeffs_;
         }
@@ -223,26 +223,38 @@ public:
         //- Reconstruct the interface
         virtual void reconstruct(bool forceUpdate = true) = 0;
 
+        //- const-Reference to interface normals
+        const volVectorField& normal() const noexcept
+        {
+            return normal_;
+        }
+
+        //- const-Reference to interface centres
+        const volVectorField& centre() const noexcept
+        {
+            return centre_;
+        }
+
         //- Reference to interface normals
-        const volVectorField& normal() const
+        volVectorField& normal() noexcept
         {
             return normal_;
         }
 
         //- Reference to interface centres
-        const volVectorField& centre() const
+        volVectorField& centre() noexcept
         {
             return centre_;
         }
 
         //- Does the cell contain interface
-        const boolList& interfaceCell() const
+        const boolList& interfaceCell() const noexcept
         {
             return interfaceCell_;
         }
 
         //- List of cells with an interface
-        const DynamicField<label>& interfaceLabels() const
+        const DynamicField<label>& interfaceLabels() const noexcept
         {
             return interfaceLabels_;
         }

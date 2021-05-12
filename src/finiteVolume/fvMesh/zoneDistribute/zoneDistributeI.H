@@ -43,11 +43,8 @@ Type Foam::zoneDistribute::getLocalValue
     {
         return phi[localIdx];
     }
-    else
-    {
-        return faceValue(phi,localIdx);
-    }
 
+    return faceValue(phi,localIdx);
 }
 
 
@@ -88,9 +85,9 @@ Type Foam::zoneDistribute::getValue
     const label gblIdx
 ) const
 {
-    if (globalNumbering().isLocal(gblIdx))
+    if (gblIdx_.isLocal(gblIdx))
     {
-        const label idx = globalNumbering().toLocal(gblIdx);
+        const label idx = gblIdx_.toLocal(gblIdx);
         return getLocalValue(phi,idx);
     }
     else // from other proc
@@ -115,7 +112,6 @@ Foam::Map<Foam::Field<Type>> Foam::zoneDistribute::getFields
             << "do not match. Did the mesh change?"
             << exit(FatalError);
 
-        return Map<Field<Type>>();
     }
 
 
@@ -160,7 +156,6 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
             << "do not match. Did the mesh change?"
             << exit(FatalError);
 
-        return Map<Type>();
     }
 
 
@@ -177,7 +172,7 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
                 sendValues[domaini].insert
                 (
                     sendIdx,
-                    getLocalValue(phi,globalNumbering().toLocal(sendIdx))
+                    getLocalValue(phi,gblIdx_.toLocal(sendIdx))
                 );
             }
         }

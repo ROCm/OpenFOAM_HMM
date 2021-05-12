@@ -104,7 +104,7 @@ void Foam::reconstructedDistanceFunction::markCellsNearSurf
     // do coupled face first
     Map<bool> syncMap;
 
-    for (int level=0;level<=neiRingLevel;level++)
+    for (label level=0;level<=neiRingLevel;level++)
     {
         // parallel
         if (level > 0)
@@ -280,9 +280,8 @@ const Foam::volScalarField&  Foam::reconstructedDistanceFunction::constructRDF
                 scalar avgWeight = 0;
                 const point p = mesh_.C()[celli];
 
-                forAll(stencil[celli], i)
+                for (const label gblIdx : stencil[celli])
                 {
-                    const label gblIdx = stencil[celli][i];
                     vector n = -distribute.getValue(normal, mapNormal, gblIdx);
                     if (mag(n) != 0)
                     {

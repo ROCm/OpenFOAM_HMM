@@ -58,6 +58,12 @@ namespace Foam
 
 class zoneCPCStencil
 :
+    public MeshObject
+    <
+        fvMesh,
+        TopologicalMeshObject,
+        zoneCPCStencil
+    >,
     public zoneCellStencils
 {
     // Private Data
@@ -97,6 +103,11 @@ class zoneCPCStencil
             labelListList& globalCellCells
         );
 
+        //- No copy construct
+        zoneCPCStencil(const zoneCPCStencil&) = delete;
+
+        //- No copy assignment
+        void operator=(const zoneCPCStencil&) = delete;
 
 public:
 
@@ -109,13 +120,10 @@ public:
         //- Construct from all cells and boundary faces
         explicit zoneCPCStencil(const fvMesh&);
 
+    // Selectors
 
-    // Member Functions
+        static zoneCPCStencil& New(const fvMesh&);
 
-        //- Calculates per cell the neighbour data
-        //-  (= cell or boundary in global numbering).
-        //-  First element is always cell itself!
-        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 

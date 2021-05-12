@@ -64,12 +64,10 @@ namespace Foam
 
 class zoneDistribute
 :
-    public MeshObject<fvMesh, UpdateableMeshObject, zoneDistribute>
+    public MeshObject<fvMesh, TopologicalMeshObject, zoneDistribute>
 {
     // Private Data
 
-        //- cell-point-cell stencil elements are in global addressing
-        zoneCPCStencil stencil_;
 
         //- labels of the points on coupled patches
         labelList coupledBoundaryPoints_;
@@ -79,6 +77,10 @@ class zoneDistribute
 
         //- Return patch of all coupled faces.
         autoPtr<indirectPrimitivePatch> coupledFacesPatch() const;
+
+        zoneCPCStencil& stencil_;
+
+        const globalIndex& gblIdx_;
 
 
         //- Gives patchNumber and patchFaceNumber for a given
@@ -118,6 +120,11 @@ public:
         static zoneDistribute& New(const fvMesh&);
 
 
+    //- Destructor
+
+        virtual ~zoneDistribute() = default;
+
+
     // Member Functions
 
         //- Update stencil with boolList the size has to match mesh nCells
@@ -127,15 +134,15 @@ public:
         void updateStencil(const boolList& zone);
 
         //- Stencil reference
-        const labelListList& getStencil()
+        const labelListList& getStencil() noexcept
         {
             return stencil_;
         }
 
         //- Addressing reference
-        const globalIndex& globalNumbering() const
+        const globalIndex& globalNumbering() const noexcept
         {
-            return stencil_.globalNumbering();
+            return gblIdx_;
         }
 
         //- Gives patchNumber and patchFaceNumber for a given
@@ -164,13 +171,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>& phi
         );
 
-        virtual void updateMesh(const mapPolyMesh& mpm);
 
-        virtual bool movePoints()
-        {
-            // do nothing
-            return false;
-        }
 };
 
 
