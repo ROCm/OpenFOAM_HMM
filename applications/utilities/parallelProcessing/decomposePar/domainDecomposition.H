@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,8 @@ Description
 
 SourceFiles
     domainDecomposition.C
-    decomposeMesh.C
+    domainDecompositionDistribute.C
+    domainDecompositionMesh.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,15 +42,15 @@ SourceFiles
 
 #include "fvMesh.H"
 #include "labelList.H"
-#include "SLList.H"
-#include "PtrList.H"
 #include "point.H"
 #include "Time.H"
 #include "volFields.H"
 
-
 namespace Foam
 {
+
+// Forward Declarations
+class decompositionModel;
 
 /*---------------------------------------------------------------------------*\
                      Class domainDecomposition Declaration
@@ -58,7 +60,7 @@ class domainDecomposition
 :
     public fvMesh
 {
-    // Private data
+    // Private Data
 
         //- Optional: points at the facesInstance
         autoPtr<pointIOField> facesInstancePointsPtr_;
@@ -117,6 +119,7 @@ class domainDecomposition
         //- Sub patch sizes for inter-processor patches
         List<labelListList> procProcessorPatchSubPatchStarts_;
 
+
     // Private Member Functions
 
         void distributeCells();
@@ -165,7 +168,7 @@ public:
         //  \param io the IOobject for mesh
         //  \param decompDictFile optional non-standard location for the
         //      decomposeParDict file
-        domainDecomposition
+        explicit domainDecomposition
         (
             const IOobject& io,
             const fileName& decompDictFile = ""
@@ -178,17 +181,53 @@ public:
 
     // Member Functions
 
+        //- The mesh
+        const fvMesh& mesh() const noexcept
+        {
+            return *this;
+        }
+
+
+    // Settings
+
         //- Number of processor in decomposition
-        label nProcs() const
+        label nProcs() const noexcept
         {
             return nProcs_;
         }
 
-        //- Is the decomposition data to be distributed for each processor
-        bool distributed() const
+        //- Is decomposition data to be distributed for each processor
+        bool distributed() const noexcept
         {
             return distributed_;
         }
+
+        //- Change distributed flag
+        bool distributed(const bool on) noexcept
+        {
+            bool old(distributed_);
+            distributed_ = on;
+            return old;
+        }
+
+        //- Return decomposition model used
+        const decompositionModel& model() const;
+
+        //- Update flags based on the decomposition model settings
+        //  Sets "distributed"
+        void updateParameters(const dictionary& params);
+
+
+    // Mappings
+
+        //- Cell-processor decomposition labels
+        const labelList& cellToProc() const noexcept
+        {
+            return cellToProc_;
+        }
+
+
+    // Decompose
 
         //- Decompose mesh
         void decomposeMesh();
@@ -196,11 +235,14 @@ public:
         //- Write decomposition
         bool writeDecomposition(const bool decomposeSets);
 
-        //- Cell-processor decomposition labels
-        const labelList& cellToProc() const
-        {
-            return cellToProc_;
-        }
+
+    // Write
+
+        //- Write decomposition as volScalarField for visualization
+        void writeVolField(const word& timeName) const;
+
+        //- Write cell distribution as VTU file (binary)
+        void writeVTK(const fileName& file) const;
 };
 
 

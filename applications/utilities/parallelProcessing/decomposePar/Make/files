@@ -2,7 +2,11 @@ decomposePar.C
 domainDecomposition.C
 domainDecompositionMesh.C
 domainDecompositionDistribute.C
+domainDecompositionWrite.C
+
 domainDecompositionDryRun.C
+domainDecompositionDryRunWrite.C
+
 dimFieldDecomposer.C
 pointFieldDecomposer.C
 faMeshDecomposition.C

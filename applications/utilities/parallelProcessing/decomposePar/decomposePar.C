@@ -47,7 +47,7 @@ Usage
 
       - \par -cellDist
         Write the cell distribution as a labelList, for use with 'manual'
-        decomposition method and as a volScalarField for visualization.
+        decomposition method and as a VTK or volScalarField for visualization.
 
       - \par -constant
         Include the 'constant/' dir in the times list.
@@ -67,7 +67,7 @@ Usage
 
       - \par -dry-run
         Test without writing the decomposition. Changes -cellDist to
-        only write volScalarField.
+        only write VTK output.
 
       - \par -fields
         Use existing geometry decomposition and convert fields only.
@@ -301,13 +301,28 @@ int main(int argc, char *argv[])
     (
         "dry-run",
         "Test without writing the decomposition. "
-        "Changes -cellDist to only write volScalarField."
+        "Changes -cellDist to only write VTK output."
     );
     argList::addBoolOption
     (
         "verbose",
         "Additional verbosity"
     );
+    argList::addOption
+    (
+        "domains",
+        "N",
+        "Override numberOfSubdomains (-dry-run only)",
+        true  // Advanced option
+    );
+    argList::addOption
+    (
+        "method",
+        "name",
+        "Override decomposition method (-dry-run only)",
+        true  // Advanced option
+    );
+
     argList::addBoolOption
     (
         "cellDist",
@@ -421,7 +436,9 @@ int main(int argc, char *argv[])
                     IOobject::NO_WRITE,
                     false
                 ),
-                decompDictFile
+                decompDictFile,
+                args.getOrDefault<label>("domains", 0),
+                args.getOrDefault<word>("method", word::null)
             );
 
             decompTest.execute(writeCellDist, verbose);
@@ -580,33 +597,9 @@ int main(int argc, char *argv[])
             {
                 const labelList& procIds = mesh.cellToProc();
 
-                // Write decomposition as volScalarField for visualization
-                volScalarField cellDist
-                (
-                    IOobject
-                    (
-                        "cellDist",
-                        runTime.timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    mesh,
-                    dimensionedScalar("cellDist", dimless, -1),
-                    zeroGradientFvPatchScalarField::typeName
-                );
-
-                forAll(procIds, celli)
-                {
-                   cellDist[celli] = procIds[celli];
-                }
-
-                cellDist.correctBoundaryConditions();
-                cellDist.write();
-
-                Info<< nl << "Wrote decomposition as volScalarField to "
-                    << cellDist.name() << " for visualization."
-                    << endl;
+                // Write decomposition for visualization
+                mesh.writeVolField("cellDist");
+                //TBD: mesh.writeVTK("cellDist");
 
                 // Write decomposition as labelList for use with 'manual'
                 // decomposition method.
@@ -626,7 +619,7 @@ int main(int argc, char *argv[])
                 cellDecomposition.write();
 
                 Info<< nl << "Wrote decomposition to "
-                    << cellDecomposition.objectPath()
+                    << runTime.relativePath(cellDecomposition.objectPath())
                     << " for use in manual decomposition." << endl;
             }
 

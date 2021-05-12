@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,23 @@ class domainDecompositionDryRun
         const word methodNameOverride_;
 
 
+    // Private Members
+
+        //- Write decomposition as volScalarField for visualization
+        void writeVolField
+        (
+            const word& timeName,
+            const labelUList& cellToProc
+        ) const;
+
+        //- Write cell distribution as VTU file (binary)
+        void writeVTK
+        (
+            const fileName& file,
+            const labelUList& cellToProc
+        ) const;
+
+
 public:
 
     // Constructors
@@ -87,6 +104,12 @@ public:
 
 
     // Member Functions
+
+        //- The mesh
+        const fvMesh& mesh() const noexcept
+        {
+            return mesh_;
+        }
 
         //- Perform dry-run
         void execute(const bool writeCellDist, const bool verbose = false);

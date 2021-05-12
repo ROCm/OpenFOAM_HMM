@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "volFields.H"
 #include "decompositionModel.H"
 #include "decompositionInformation.H"
-#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -137,32 +136,9 @@ void Foam::domainDecompositionDryRun::execute
 
     if (writeCellDist)
     {
-        // Write decomposition as volScalarField for visualization
-        volScalarField cellDist
-        (
-            IOobject
-            (
-                "cellDist",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("cellDist", dimless, -1),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        forAll(cellToProc, celli)
-        {
-            cellDist[celli] = cellToProc[celli];
-        }
-
-        cellDist.correctBoundaryConditions();
-        cellDist.write();
-
-        Info<< "Wrote decomposition as volScalarField for visualization:"
-            << nl << cellDist.objectPath() << nl;
+        // Write decomposition for visualization
+        // - write as VTU to avoid any impact
+        writeVTK("cellDist", cellToProc);
 
 // Less likely that this is actually required, but may be useful...
 //
@@ -183,9 +159,9 @@ void Foam::domainDecompositionDryRun::execute
 //        );
 //        cellDecomposition.write();
 //
-//        Info<< "Wrote decomposition for use in manual decomposition:"
-//            << nl << cellDecomposition.objectPath() << nl;
-// #endif
+//        Info<< nl << "Wrote decomposition to "
+//            << runTime.relativePath(cellDecomposition.objectPath())
+//            << " for use in manual decomposition." << endl;
 
         Info<< nl;
     }
