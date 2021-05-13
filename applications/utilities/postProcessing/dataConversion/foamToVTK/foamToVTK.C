@@ -351,10 +351,11 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "finiteAreaFields",
+        "finite-area",
         "Write finite area fields",
         true  // mark as an advanced option
     );
+    argList::addOptionCompat("finite-area", {"finiteAreaFields", 2012});
     argList::addBoolOption
     (
         "nearCellValue",
@@ -456,7 +457,7 @@ int main(int argc, char *argv[])
     const bool doBoundary    = !args.found("no-boundary");
     const bool doInternal    = !args.found("no-internal");
     const bool doLagrangian  = !args.found("no-lagrangian");
-    const bool doFiniteArea  = args.found("finiteAreaFields");
+    const bool doFiniteArea  = args.found("finite-area");
     const bool doSurfaceFields = args.found("surfaceFields");
 
     const bool oneBoundary   = args.found("one-boundary") && doBoundary;
