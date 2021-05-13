@@ -10,41 +10,32 @@ FoamFile
     version     2.0;
     format      ascii;
     class       areaVectorField;
-    location    "0";
     object      Us;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions          [0 1 -1 0 0 0 0];
 
-internalField       uniform (0 0 0);
+internalField       uniform (0.05 0 0);
 
 boundaryField
 {
     inlet
     {
-        type zeroGradient;
+        type        fixedValue;
+        value       $internalField;
     }
 
     outlet
     {
-        type zeroGradient;
+        type        zeroGradient;
     }
 
-    side
+    bound
     {
-        type slip;
-    }
-
-    symmetry
-    {
-        type symmetry;
-    }
-
-    cylinder
-    {
-        type slip;
+        type        symmetry;
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// ************************************************************************* //

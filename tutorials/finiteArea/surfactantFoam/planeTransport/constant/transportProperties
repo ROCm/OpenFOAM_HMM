@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Ds              Ds [ 0 2 -1 0 0 0 0 ] 0.00001;
+Ds              0.00001; // m2/s
 
 
 // ************************************************************************* //
