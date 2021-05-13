@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ Description
 
 #include "argList.H"
 #include "labelledTri.H"
+#include "faceList.H"
+#include "triFaceList.H"
 #include "pointList.H"
 #include "ListOps.H"
 
@@ -60,6 +62,35 @@ void testSign
     {
         Info<< "  point:" << p << " sign=" << f.sign(p, points) << nl;
     }
+}
+
+
+template<class Face>
+void testEdges(const Face& f)
+{
+    const label nEdges = f.nEdges();
+    Info<< "face: " << f << nl
+        << "flip: " << f.reverseFace() << nl
+        << "  fc edges:" << flatOutput(f.edges()) << nl
+        << "  rc edges:" << flatOutput(f.rcEdges()) << nl;
+
+    Info<< "  forward edges" << nl;
+    for (label edgei = 0; edgei < nEdges; ++edgei)
+    {
+        Info<< "    " << edgei << " : " << f.edge(edgei) << nl;
+    }
+    Info<< "  reverse edges" << nl;
+    for (label edgei = 0; edgei < nEdges; ++edgei)
+    {
+        Info<< "    " << edgei << " : " << f.rcEdge(edgei) << nl;
+    }
+}
+
+
+void testCompare(const triFace& a, const triFace& b)
+{
+    Info<< "compare: " << a << " with " << b
+        <<  " == " << triFace::compare(a, b) << nl;
 }
 
 
@@ -92,7 +123,7 @@ int main(int argc, char *argv[])
         { 2, 2, 2}
     });
 
-    face f1{ 1, 2, 3, 4 };
+    face f1({1, 2, 3, 4});
     Info<< "face:"; faceInfo(f1, points1); Info << nl;
     testSign(f1, points1, testPoints);
 
@@ -100,7 +131,7 @@ int main(int argc, char *argv[])
     testSign(f1, points2, testPoints);
     Info<< nl;
 
-    triFace t1{ 1, 2, 3 };
+    triFace t1({1, 2, 3});
     Info<< "triFace:"; faceInfo(t1, points1); Info << nl;
     testSign(t1, points1, testPoints);
 
@@ -115,11 +146,12 @@ int main(int argc, char *argv[])
     f1 = t1.triFaceFace();
     Info<< "face:" << f1 << nl;
 
-    // expect these to fail
+    #if 0
+    // Expect failure, but triggers abort which cannot be caught
     const bool throwingError = FatalError.throwExceptions();
     try
     {
-        labelledTri l1{ 1, 2, 3, 10, 24 };
+        labelledTri l1({1, 2, 3, 10, 24});
         Info<< "labelled:" << l1 << nl;
     }
     catch (const Foam::error& err)
@@ -128,11 +160,12 @@ int main(int argc, char *argv[])
             << "Caught FatalError " << err << nl << endl;
     }
     FatalError.throwExceptions(throwingError);
+    #endif
 
-    labelledTri l2{ 1, 2, 3 };
+    labelledTri l2({1, 2, 3});
     Info<< "labelled:" << l2 << nl;
 
-    labelledTri l3{ 1, 2, 3, 10 };
+    labelledTri l3({1, 2, 3, 10});
     Info<< "labelled:" << l3 << nl;
 
     t1.flip();
@@ -140,6 +173,62 @@ int main(int argc, char *argv[])
 
     Info<< "flip:" << t1 << nl;
     Info<< "flip:" << l3 << nl;
+
+    {
+        triFaceList faceList1
+        ({
+            triFace{1, 2, 3},
+            triFace{4, 2, 100},
+            triFace{1, 3, 2},
+        });
+
+        Info<< nl << "Test edges" << nl;
+
+        for (const auto& f : faceList1)
+        {
+            testEdges(f);
+            Info<< nl;
+        }
+    }
+
+    {
+        faceList faceList1
+        ({
+            face{1, 2, 3, 4},
+            face{1, 4, 3, 2},
+            face{4, 2, 100, 8, 35},
+        });
+
+        Info<< nl << "Test edges" << nl;
+
+        for (const auto& f : faceList1)
+        {
+            testEdges(f);
+            Info<< nl;
+        }
+    }
+
+    {
+        triFaceList faceList1
+        ({
+            triFace{1, 2, 3},
+            triFace{1, 3, 2},
+            triFace{3, 1, 2},
+            triFace{4, 5, 1},
+        });
+
+        Info<< nl << "Test triFace compare" << nl;
+        for (const triFace& a : faceList1)
+        {
+            for (const triFace& b : faceList1)
+            {
+                testCompare(a, b);
+            }
+        }
+        Info<< nl;
+    }
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

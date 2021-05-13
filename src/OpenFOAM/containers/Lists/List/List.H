@@ -53,16 +53,12 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
-
 template<class T> class List;
 template<class T, unsigned N> class FixedList;
 template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
 template<class T> class SortableList;
-template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
@@ -159,11 +155,6 @@ public:
         //- Copy construct subset of list
         template<unsigned N>
         List(const UList<T>& list, const FixedList<label, N>& indices);
-
-        //- Construct given begin/end iterators.
-        //  Uses std::distance for the size.
-        template<class InputIterator>
-        List(InputIterator begIter, InputIterator endIter);
 
         //- Construct as copy of FixedList\<T, N\>
         template<unsigned N>

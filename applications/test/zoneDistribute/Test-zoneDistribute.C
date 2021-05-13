@@ -38,8 +38,6 @@ Description
 #include "centredCPCCellToCellStencilObject.H"
 #include "zoneDistribute.H"
 
-#include "SortableList.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])

@@ -103,7 +103,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
         (
             runTime,
             runTime.timeName(),
-            (regionName_ == fvMesh::defaultRegion ? "" : regionName_)
+            (regionName_ == polyMesh::defaultRegion ? "" : regionName_)
         );
 
         if (objects.empty())
@@ -411,7 +411,7 @@ Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo
     regionName_(regionName),
     regionPrefix_
     (
-        regionName_ == fvMesh::defaultRegion
+        regionName_ == polyMesh::defaultRegion
       ? ""
       : regionName_ + '/'
     ),

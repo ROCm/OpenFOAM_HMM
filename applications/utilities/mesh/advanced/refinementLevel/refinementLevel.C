@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            polyMesh::defaultRegion,
             runTime.timeName(),
             runTime,
             IOobject::NO_READ,

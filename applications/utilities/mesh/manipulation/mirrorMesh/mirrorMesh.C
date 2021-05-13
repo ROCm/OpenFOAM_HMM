@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            mirrorFvMesh::defaultRegion,
+            polyMesh::defaultRegion,
             runTime.constant(),
             runTime
         ),

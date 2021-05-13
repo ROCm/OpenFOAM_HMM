@@ -149,7 +149,7 @@ public:
     columnFvMesh
     (
         const Time& runTime,
-        const word& regionName = fvMesh::defaultRegion
+        const word& regionName = polyMesh::defaultRegion
     );
 };
 

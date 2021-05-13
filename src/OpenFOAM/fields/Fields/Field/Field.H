@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,7 +101,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         //  For temporary fields that are initialised after construction
         inline constexpr Field() noexcept;
 
@@ -374,8 +374,13 @@ public:
         //- Copy assignment
         void operator=(const Field<Type>&);
         void operator=(const tmp<Field<Type>>&);
-        inline void operator=(const UList<Type>&);
-        inline void operator=(const SubField<Type>&);
+
+        inline void operator=(const UList<Type>& rhs);
+        inline void operator=(const SubField<Type>& rhs);
+
+        //- Copy assign from IndirectList
+        template<class Addr>
+        inline void operator=(const IndirectListBase<Type, Addr>& rhs);
 
         //- Move assignment
         inline void operator=(Field<Type>&& rhs);

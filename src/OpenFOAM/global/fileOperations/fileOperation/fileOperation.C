@@ -729,6 +729,14 @@ Foam::fileOperation::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::fileOperation::distributed(bool on) const noexcept
+{
+    bool old(distributed_);
+    distributed_ = on;
+    return old;
+}
+
+
 Foam::fileName Foam::fileOperation::objectPath
 (
     const IOobject& io,
@@ -1461,6 +1469,17 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::NewUncollated()
+{
+    return autoPtr<fileOperation>
+    (
+        new fileOperations::uncollatedFileOperation(false)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 const Foam::fileOperation& Foam::fileHandler()
@@ -1481,7 +1500,8 @@ const Foam::fileOperation& Foam::fileHandler()
 }
 
 
-void Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
+Foam::autoPtr<Foam::fileOperation>
+Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
 {
     if
     (
@@ -1490,10 +1510,14 @@ void Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
      && newHandler->type() == fileOperation::fileHandlerPtr_->type()
     )
     {
-        return;
+        return nullptr;  // No change
     }
 
+    autoPtr<fileOperation> old(std::move(fileOperation::fileHandlerPtr_));
+
     fileOperation::fileHandlerPtr_ = std::move(newHandler);
+
+    return old;
 }
 
 

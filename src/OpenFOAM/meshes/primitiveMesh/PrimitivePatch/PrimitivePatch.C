@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +130,6 @@ Foam::PrimitivePatch<FaceList, PointField>::PrimitivePatch
     const PrimitivePatch<FaceList, PointField>& pp
 )
 :
-    PrimitivePatchName(),
     FaceList(pp),
     points_(pp.points_),
     edgesPtr_(nullptr),
@@ -173,13 +172,7 @@ Foam::PrimitivePatch<FaceList, PointField>::movePoints
     const Field<point_type>&
 )
 {
-    if (debug)
-    {
-        Pout<< "PrimitivePatch<FaceList, PointField>::"
-            << "movePoints() : "
-            << "recalculating PrimitivePatch geometry following mesh motion"
-            << endl;
-    }
+    DebugInFunction << "Recalculating geometry following mesh motion" << endl;
 
     clearGeom();
 }
@@ -199,6 +192,24 @@ Foam::PrimitivePatch<FaceList, PointField>::edges() const
 
 
 template<class FaceList, class PointField>
+const Foam::edgeList::subList
+Foam::PrimitivePatch<FaceList, PointField>::internalEdges() const
+{
+    const edgeList& allEdges = this->edges();  // Force demand-driven
+    return edgeList::subList(allEdges, nInternalEdges());
+}
+
+
+template<class FaceList, class PointField>
+const Foam::edgeList::subList
+Foam::PrimitivePatch<FaceList, PointField>::boundaryEdges() const
+{
+    const edgeList& allEdges = this->edges();  // Force demand-driven
+    return edgeList::subList(allEdges, nBoundaryEdges(), nInternalEdges());
+}
+
+
+template<class FaceList, class PointField>
 Foam::label
 Foam::PrimitivePatch<FaceList, PointField>::nInternalEdges() const
 {
@@ -208,6 +219,15 @@ Foam::PrimitivePatch<FaceList, PointField>::nInternalEdges() const
     }
 
     return nInternalEdges_;
+}
+
+
+template<class FaceList, class PointField>
+Foam::label
+Foam::PrimitivePatch<FaceList, PointField>::nBoundaryEdges() const
+{
+    const edgeList& allEdges = this->edges();  // Force demand-driven
+    return (allEdges.size() - this->nInternalEdges());
 }
 
 
@@ -496,6 +516,7 @@ Foam::PrimitivePatch<FaceList, PointField>::operator=
 #include "PrimitivePatchAddressing.C"
 #include "PrimitivePatchEdgeLoops.C"
 #include "PrimitivePatchClear.C"
+#include "PrimitivePatchBdryFaces.C"
 #include "PrimitivePatchBdryPoints.C"
 #include "PrimitivePatchLocalPointOrder.C"
 #include "PrimitivePatchMeshData.C"

@@ -237,7 +237,7 @@ public:
         // Other
 
             //- Collect data in processor order on master (== procIDs[0]).
-            //  Needs offsets only on master.
+            //  Offsets needed on master only.
             template<class Container, class Type>
             static void gather
             (
@@ -247,12 +247,25 @@ public:
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+            );
+
+            //- Collect indirect data in processor order on master
+            //  Offsets needed on master only.
+            template<class Type, class Addr>
+            static void gather
+            (
+                const labelUList& offsets,
+                const label comm,
+                const UList<int>& procIDs,
+                const IndirectListBase<Type, Addr>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes = Pstream::commsTypes::scheduled
             );
 
             //- Collect data in processor order on master (== procIDs[0]).
-            //  Needs offsets only on master.
+            //  Offsets needed on master only.
             template<class Container, class Type>
             void gather
             (
@@ -276,8 +289,18 @@ public:
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+            ) const;
+
+            //- Collect data indirectly in processor order on master.
+            //  Does communication with default communicator and message tag.
+            template<class Type, class Addr>
+            void gather
+            (
+                const IndirectListBase<Type, Addr>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes = Pstream::commsTypes::scheduled
             ) const;
 
             //- Collect data in processor order on master.
@@ -288,8 +311,7 @@ public:
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             );
 
 
@@ -303,8 +325,7 @@ public:
                 const Container& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             );
 
             //- Inplace collect in processor order on master (== procIDs[0]).
@@ -331,8 +352,7 @@ public:
             (
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             ) const;
 
             //- Inplace collect data in processor order on master
@@ -343,8 +363,7 @@ public:
             (
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             );
 
 
@@ -358,8 +377,7 @@ public:
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
@@ -386,8 +404,7 @@ public:
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
             ) const;
 
             //- Get (potentially remote) data. Elements required given as

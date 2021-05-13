@@ -297,7 +297,7 @@ void Foam::particle::changeFace(const label tetTriI)
         (
             ;
             edgeI < newFace.size()
-         && edge::compare(sharedEdge, newFace.faceEdge(edgeI)) != edgeComp;
+         && edge::compare(sharedEdge, newFace.edge(edgeI)) != edgeComp;
             ++ edgeI
         );
 

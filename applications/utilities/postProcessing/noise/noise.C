@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     // As much as possible avoid synchronised operation
-    const_cast<fileOperation&>(fileHandler()).distributed(true);
+    fileHandler().distributed(true);
 
     #include "createTime.H"
 

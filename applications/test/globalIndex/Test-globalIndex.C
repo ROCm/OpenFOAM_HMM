@@ -28,14 +28,16 @@ Application
     globalIndexTest
 
 Description
-    Simple demonstration and test application for the globalIndex class.
+    Simple tests for the globalIndex class.
 
 \*---------------------------------------------------------------------------*/
 
 #include "globalIndex.H"
+#include "globalMeshData.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "IndirectList.H"
 #include "IOstreams.H"
 #include "Random.H"
 
@@ -218,6 +220,34 @@ int main(int argc, char *argv[])
         }
     }
 
+    Info<< "Gather indirect list of boundary points (patch = 0)\n";
+    {
+        const polyPatch& pp = mesh.boundaryMesh()[0];
+
+        // Map mesh point index to local (compact) point index
+        labelList pointToGlobal;
+        labelList uniqueMeshPointLabels;
+
+        autoPtr<globalIndex> globalPointsPtr =
+            mesh.globalData().mergePoints
+            (
+                pp.meshPoints(),
+                pp.meshPointMap(),
+                pointToGlobal,
+                uniqueMeshPointLabels
+            );
+
+        Info<< "local-sizes: " << globalPointsPtr().sizes() << nl;
+
+        UIndirectList<point> procPoints(mesh.points(), uniqueMeshPointLabels);
+        pointField patchPoints;
+
+        globalPointsPtr().gather(procPoints, patchPoints);
+
+        Info<< "gathered point field = " << patchPoints.size() << " points\n";
+    }
+
+    Info<< "\nEnd\n" << endl;
     return 0;
 }
 

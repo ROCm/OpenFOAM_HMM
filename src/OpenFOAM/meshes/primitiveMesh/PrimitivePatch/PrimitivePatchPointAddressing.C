@@ -54,8 +54,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointEdges() const
 
     invertManyToMany(pe.size(), edges(), pe);
 
-    DebugInfo
-        << "    Finished." << endl;
+    DebugInfo << "    Finished." << endl;
 }
 
 
@@ -81,9 +80,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
 
     forAll(locFcs, facei)
     {
-        const face_type& curPoints = locFcs[facei];
-
-        for (const label pointi : curPoints)
+        for (const label pointi : locFcs[facei])
         {
             pointFcs[pointi].append(facei);
         }
@@ -98,8 +95,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
         pf[pointi] = pointFcs[pointi];
     }
 
-    DebugInfo
-        << "    Finished." << endl;
+    DebugInfo << "    Finished." << endl;
 }
 
 

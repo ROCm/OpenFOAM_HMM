@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    wordList regionNames(1, fvMesh::defaultRegion);
+    wordList regionNames(1, polyMesh::defaultRegion);
     if (!args.readIfPresent("region", regionNames.first()))
     {
         args.readIfPresent("regions", regionNames);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,9 +142,9 @@ Foam::tmp<Foam::Field<Type>> Foam::levelSetAverage
         vector a(Zero);
         sumType r = Zero;
 
-        for (label eI = 0; eI < f.size(); ++eI)
+        for (label edgei = 0; edgei < f.nEdges(); ++edgei)
         {
-            const edge e = f.faceEdge(eI);
+            const edge e = f.edge(edgei);
 
             const FixedList<point, 3>
                 tri =

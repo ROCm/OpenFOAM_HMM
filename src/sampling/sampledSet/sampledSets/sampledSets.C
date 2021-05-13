@@ -104,7 +104,7 @@ Foam::sampledSets::sampledSets
         mesh_.time().globalPath()/functionObject::outputPrefix/name
     );
 
-    if (mesh_.name() != fvMesh::defaultRegion)
+    if (mesh_.name() != polyMesh::defaultRegion)
     {
         outputPath_ = outputPath_/mesh_.name();
     }
@@ -137,7 +137,7 @@ Foam::sampledSets::sampledSets
         mesh_.time().globalPath()/functionObject::outputPrefix/name
     );
 
-    if (mesh_.name() != fvMesh::defaultRegion)
+    if (mesh_.name() != polyMesh::defaultRegion)
     {
         outputPath_ = outputPath_/mesh_.name();
     }

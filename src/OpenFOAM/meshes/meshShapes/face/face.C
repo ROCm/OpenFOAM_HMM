@@ -31,6 +31,7 @@ License
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
 #include "ConstCirculator.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,25 +41,18 @@ const char* const Foam::face::typeName = "face";
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField>
-Foam::face::calcEdges(const UList<point>& points) const
+Foam::face::calcEdgeVectors(const UList<point>& points) const
 {
-    tmp<vectorField> tedges(new vectorField(size()));
-    vectorField& edges = tedges.ref();
+    auto tedgeVecs = tmp<vectorField>::New(size());
+    auto& edgeVecs = tedgeVecs.ref();
 
     forAll(*this, i)
     {
-        label ni = fcIndex(i);
-
-        point thisPt = points[operator[](i)];
-        point nextPt = points[operator[](ni)];
-
-        vector vec(nextPt - thisPt);
-        vec /= Foam::mag(vec) + VSMALL;
-
-        edges[i] = vec;
+        edgeVecs[i] = vector(points[nextLabel(i)] - points[thisLabel(i)]);
+        edgeVecs[i].normalise();
     }
 
-    return tedges;
+    return tedgeVecs;
 }
 
 
@@ -68,11 +62,11 @@ Foam::scalar Foam::face::edgeCos
     const label index
 ) const
 {
-    label leftEdgeI = left(index);
-    label rightEdgeI = right(index);
+    const vector& leftEdge = edges[rcIndex(index)];
+    const vector& rightEdge = edges[index];
 
     // Note negate on left edge to get correct left-pointing edge.
-    return -(edges[leftEdgeI] & edges[rightEdgeI]);
+    return -(leftEdge & rightEdge);
 }
 
 
@@ -90,12 +84,12 @@ Foam::label Foam::face::mostConcaveAngle
 
     forAll(edges, i)
     {
-        label leftEdgeI = left(i);
-        label rightEdgeI = right(i);
+        const vector& leftEdge = edges[rcIndex(i)];
+        const vector& rightEdge = edges[i];
 
-        vector edgeNormal = edges[rightEdgeI] ^ edges[leftEdgeI];
+        vector edgeNormal = (rightEdge ^ leftEdge);
 
-        scalar edgeCos = edges[leftEdgeI] & edges[rightEdgeI];
+        scalar edgeCos = (leftEdge & rightEdge);
         scalar edgeAngle = acos(max(-1.0, min(1.0, edgeCos)));
 
         scalar angle;
@@ -133,15 +127,15 @@ Foam::label Foam::face::split
     faceList& quadFaces
 ) const
 {
-    label oldIndices = (triI + quadI);
+    const label oldIndices = (triI + quadI);
 
-    if (size() <= 2)
+    if (size() < 3)
     {
         FatalErrorInFunction
             << "Serious problem: asked to split a face with < 3 vertices"
             << abort(FatalError);
     }
-    if (size() == 3)
+    else if (size() == 3)
     {
         // Triangle. Just copy.
         if (mode == COUNTTRIANGLE || mode == COUNTQUAD)
@@ -166,7 +160,7 @@ Foam::label Foam::face::split
         else if (mode == SPLITTRIANGLE)
         {
             //  Start at point with largest internal angle.
-            const vectorField edges(calcEdges(points));
+            const vectorField edges(calcEdgeVectors(points));
 
             scalar minAngle;
             label startIndex = mostConcaveAngle(points, edges, minAngle);
@@ -197,13 +191,13 @@ Foam::label Foam::face::split
     {
         // General case. Like quad: search for largest internal angle.
 
-        const vectorField edges(calcEdges(points));
+        const vectorField edges(calcEdgeVectors(points));
 
         scalar minAngle = 1;
         label startIndex = mostConcaveAngle(points, edges, minAngle);
 
         scalar bisectAngle = minAngle/2;
-        vector rightEdge = edges[right(startIndex)];
+        const vector& rightEdge = edges[startIndex];
 
         //
         // Look for opposite point which as close as possible bisects angle
@@ -222,7 +216,7 @@ Foam::label Foam::face::split
                 points[operator[](index)]
               - points[operator[](startIndex)]
             );
-            splitEdge /= Foam::mag(splitEdge) + VSMALL;
+            splitEdge.normalise();
 
             const scalar splitCos = splitEdge & rightEdge;
             const scalar splitAngle = acos(max(-1.0, min(1.0, splitCos)));
@@ -786,62 +780,57 @@ Foam::tensor Foam::face::inertia
 
 Foam::edgeList Foam::face::edges() const
 {
-    const labelList& points = *this;
+    const labelList& verts = *this;
+    const label nVerts = verts.size();
 
-    edgeList e(points.size());
+    edgeList theEdges(nVerts);
 
-    for (label pointi = 0; pointi < points.size() - 1; ++pointi)
+    // Last edge closes the polygon
+    theEdges.last().first() = verts.last();
+    theEdges.last().second() = verts[0];
+
+    for (label verti = 0; verti < nVerts - 1; ++verti)
     {
-        e[pointi] = edge(points[pointi], points[pointi + 1]);
+        theEdges[verti].first() = verts[verti];
+        theEdges[verti].second() = verts[verti + 1];
     }
 
-    // Add last edge
-    e.last() = edge(points.last(), points[0]);
-
-    return e;
+    return theEdges;
 }
 
 
-int Foam::face::edgeDirection(const edge& e) const
+Foam::edgeList Foam::face::rcEdges() const
 {
-    forAll(*this, i)
+    const labelList& verts = *this;
+    const label nVerts = verts.size();
+
+    edgeList theEdges(nVerts);
+
+    // First edge closes the polygon
+    theEdges.first().first() = verts[0];
+    theEdges.first().second() = verts.last();
+
+    for (label verti = 1; verti < nVerts; ++verti)
     {
-        if (operator[](i) == e.first())
-        {
-            if (operator[](rcIndex(i)) == e.second())
-            {
-                // Reverse direction
-                return -1;
-            }
-            else if (operator[](fcIndex(i)) == e.second())
-            {
-                // Forward direction
-                return 1;
-            }
-
-            // No match
-            return 0;
-        }
-        else if (operator[](i) == e.second())
-        {
-            if (operator[](rcIndex(i)) == e.first())
-            {
-                // Forward direction
-                return 1;
-            }
-            else if (operator[](fcIndex(i)) == e.first())
-            {
-                // Reverse direction
-                return -1;
-            }
-
-            // No match
-            return 0;
-        }
+        theEdges[verti].first() = verts[nVerts - verti];
+        theEdges[verti].second() = verts[nVerts - verti - 1];
     }
 
-    // Not found
-    return 0;
+    return theEdges;
+}
+
+
+int Foam::face::edgeDirection(const Foam::edge& e) const
+{
+    const label idx = find(e.first());
+
+    if (idx != -1)
+    {
+        if (e.second() == nextLabel(idx)) return 1;  // Forward
+        if (e.second() == prevLabel(idx)) return -1; // Reverse
+    }
+
+    return 0;  // Not found
 }
 
 
@@ -894,29 +883,26 @@ Foam::label Foam::face::trianglesQuads
 
 Foam::label Foam::face::longestEdge(const UList<point>& pts) const
 {
-    const edgeList& eds = this->edges();
+    const labelList& verts = *this;
+    const label nVerts = verts.size();
 
-    label longestEdgeI = -1;
-    scalar longestEdgeLength = -SMALL;
+    // Last edge closes the polygon. Use it to initialize loop
+    label longest = nVerts - 1;
+    scalar longestLen = Foam::edge(verts.first(), verts.last()).mag(pts);
 
-    forAll(eds, edI)
+    // Examine other edges
+    for (label edgei = 0; edgei < nVerts - 1; ++edgei)
     {
-        scalar edgeLength = eds[edI].mag(pts);
+        scalar edgeLen = Foam::edge(verts[edgei], verts[edgei + 1]).mag(pts);
 
-        if (edgeLength > longestEdgeLength)
+        if (longestLen < edgeLen)
         {
-            longestEdgeI = edI;
-            longestEdgeLength = edgeLength;
+            longest = edgei;
+            longestLen = edgeLen;
         }
     }
 
-    return longestEdgeI;
-}
-
-
-Foam::label Foam::longestEdge(const face& f, const UList<point>& pts)
-{
-    return f.longestEdge(pts);
+    return longest;
 }
 
 

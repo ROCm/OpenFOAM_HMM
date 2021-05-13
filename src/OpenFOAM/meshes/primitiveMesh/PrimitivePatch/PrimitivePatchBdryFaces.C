@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,30 +31,22 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class FaceList, class PointField>
-void
-Foam::PrimitivePatch<FaceList, PointField>::calcBdryPoints() const
+Foam::labelList
+Foam::PrimitivePatch<FaceList, PointField>::boundaryFaces() const
 {
-    DebugInFunction << "Calculating boundary points" << nl;
+    // By definition boundary edges have a _single_ face attached,
+    // but a face can easily have multiple boundary edges.
 
-    if (boundaryPointsPtr_)
+    const labelListList& edgeToFace = edgeFaces();
+
+    labelHashSet bndFaces(2*nBoundaryEdges());
+
+    for (label edgei = nInternalEdges(); edgei < edgeToFace.size(); ++edgei)
     {
-        // Error to recalculate if already allocated
-        FatalErrorInFunction
-            << "boundaryPoints already calculated"
-            << abort(FatalError);
+        bndFaces.insert(edgeToFace[edgei][0]);
     }
 
-    labelHashSet bp(2*nEdges());
-
-    for (const edge& e : boundaryEdges())
-    {
-        bp.insert(e.first());
-        bp.insert(e.second());
-    }
-
-    boundaryPointsPtr_.reset(new labelList(bp.sortedToc()));
-
-    DebugInfo << "    Finished." << nl;
+    return bndFaces.sortedToc();
 }
 
 

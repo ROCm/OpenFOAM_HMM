@@ -55,6 +55,9 @@ See also
 #include <numeric>
 #include <functional>
 
+// see issue #2083
+#undef Foam_constructList_from_iterators
+
 namespace Foam
 {
 
@@ -254,8 +257,12 @@ int main(int argc, char *argv[])
     Info<< "list4: " << list4 << nl
         << "list5: " << list5 << endl;
 
+    #ifdef Foam_constructList_from_iterators
     List<vector> list6(list4.begin(), list4.end());
     Info<< "list6: " << list6 << endl;
+    #else
+    Info<< "NOTE: no construction from two iterators" << endl;
+    #endif
 
     // Subset
     const labelList map{0, 2};
@@ -273,9 +280,13 @@ int main(int argc, char *argv[])
         // scalarList slist = identity(15);
         //
         // More writing, but does work:
+        #ifdef Foam_constructList_from_iterators
         scalarList slist(labelRange().begin(), labelRange(15).end());
 
         Info<<"scalar identity:" << flatOutput(slist) << endl;
+        #else
+        Info<<"No iterator means of creating a scalar identity list" << endl;
+        #endif
 
         printListOutputType<label>("labels") << nl;
 
@@ -384,6 +395,7 @@ int main(int argc, char *argv[])
         }
         Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;
 
+        #ifdef Foam_constructList_from_iterators
         // Construct from a label-range
         labelRange range(25,15);
 
@@ -406,6 +418,10 @@ int main(int argc, char *argv[])
         // Even weird things like this
         List<scalar> sident4(labelRange().begin(), labelRange(8).end());
         Info<<"range-list (scalar)=" << sident4 << nl;
+        #else
+        Info<< "NOTE: no construction of labelList from range pair" << nl
+            << "use identity(...) instead" << endl;
+        #endif
     }
 
     wordReList reLst;

@@ -655,7 +655,7 @@ $(mapPolyMesh)/mapDistribute/IOmapDistribute.C
 $(mapPolyMesh)/mapAddedPolyMesh.C
 
 PrimitivePatch = $(primitiveMesh)/PrimitivePatch
-$(PrimitivePatch)/PrimitivePatchName.C
+$(PrimitivePatch)/PrimitivePatchBase.C
 
 pointMesh = meshes/pointMesh
 $(pointMesh)/pointMesh.C

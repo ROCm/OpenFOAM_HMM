@@ -7,7 +7,7 @@
         (
             IOobject
             (
-                engineMesh::defaultRegion,
+                polyMesh::defaultRegion,
                 runTime.timeName(),
                 runTime,
                 Foam::IOobject::MUST_READ

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +49,15 @@ Foam::PrimitivePatch<FaceList, PointField>::calcEdgeLoops() const
     }
 
     const edgeList& patchEdges = edges();
-    label nIntEdges = nInternalEdges();
-    label nBdryEdges = patchEdges.size() - nIntEdges;
+    const label nIntEdges = nInternalEdges();
+    const label nBdryEdges = patchEdges.size() - nIntEdges;
+
+    // Size return list plenty big
+    edgeLoopsPtr_.reset(new labelListList(nBdryEdges));
+    auto& edgeLoops = *edgeLoopsPtr_;
 
     if (nBdryEdges == 0)
     {
-        edgeLoopsPtr_.reset(new labelListList(0));
         return;
     }
 
@@ -67,11 +70,6 @@ Foam::PrimitivePatch<FaceList, PointField>::calcEdgeLoops() const
 
     // Loop per (boundary) edge.
     labelList loopNumber(nBdryEdges, -1);
-
-    // Size return list plenty big
-    edgeLoopsPtr_.reset(new labelListList(nBdryEdges));
-    auto& edgeLoops = *edgeLoopsPtr_;
-
 
     // Current loop number.
     label loopI = 0;

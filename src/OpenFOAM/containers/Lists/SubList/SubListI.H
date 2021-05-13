@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,6 +130,14 @@ inline void Foam::SubList<T>::operator=(const SubList<T>& list)
 
 template<class T>
 inline void Foam::SubList<T>::operator=(const UList<T>& list)
+{
+    UList<T>::deepCopy(list);
+}
+
+
+template<class T>
+template<class Addr>
+inline void Foam::SubList<T>::operator=(const IndirectListBase<T, Addr>& list)
 {
     UList<T>::deepCopy(list);
 }

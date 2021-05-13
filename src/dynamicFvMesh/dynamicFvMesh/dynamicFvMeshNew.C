@@ -154,7 +154,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
             (
                 IOobject
                 (
-                    dynamicFvMesh::defaultRegion,
+                    polyMesh::defaultRegion,
                     runTime.timeName(),
                     runTime,
                     IOobject::MUST_READ
@@ -168,7 +168,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
             (
                 IOobject
                 (
-                    dynamicFvMesh::defaultRegion,
+                    polyMesh::defaultRegion,
                     runTime.timeName(),
                     runTime,
                     IOobject::MUST_READ

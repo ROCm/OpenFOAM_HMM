@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -342,7 +342,7 @@ public:
         // Access
 
             //- Return the mesh reference
-            const polyMesh& mesh() const
+            const polyMesh& mesh() const noexcept
             {
                 return mesh_;
             }
@@ -351,25 +351,25 @@ public:
             //  not running parallel)
             bool parallel() const
             {
-                return processorPatches_.size() > 0;
+                return !processorPatches_.empty();
             }
 
             //- Return total number of points in decomposed mesh. Not
             //  compensated for duplicate points!
-            label nTotalPoints() const
+            label nTotalPoints() const noexcept
             {
                 return nTotalPoints_;
             }
 
             //- Return total number of faces in decomposed mesh. Not
             //  compensated for duplicate faces!
-            label nTotalFaces() const
+            label nTotalFaces() const noexcept
             {
                 return nTotalFaces_;
             }
 
             //- Return total number of cells in decomposed mesh.
-            label nTotalCells() const
+            label nTotalCells() const noexcept
             {
                 return nTotalCells_;
             }
@@ -379,7 +379,7 @@ public:
 
             //- Return list of processor patch labels
             //  (size of list = number of processor patches)
-            const labelList& processorPatches() const
+            const labelList& processorPatches() const noexcept
             {
                 return processorPatches_;
             }
@@ -387,14 +387,14 @@ public:
             //- Return list of indices into processorPatches_ for each patch.
             //  Index = -1 for non-processor parches.
             //  (size of list = number of patches)
-            const labelList& processorPatchIndices() const
+            const labelList& processorPatchIndices() const noexcept
             {
                 return processorPatchIndices_;
             }
 
             //- Return processorPatchIndices of the neighbours
             //  processor patches. -1 if not running parallel.
-            const labelList& processorPatchNeighbours() const
+            const labelList& processorPatchNeighbours() const noexcept
             {
                 return processorPatchNeighbours_;
             }
@@ -577,7 +577,7 @@ public:
                 autoPtr<globalIndex> mergePoints
                 (
                     const labelList& meshPoints,
-                    const Map<label>& meshPointMap,
+                    const Map<label>& meshPointMap,  //!< currently unused
                     labelList& pointToGlobal,
                     labelList& uniqueMeshPoints
                 ) const;

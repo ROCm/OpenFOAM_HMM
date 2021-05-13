@@ -57,9 +57,16 @@ inline const Foam::UList<T>& Foam::UList<T>::null()
 
 
 template<class T>
-inline Foam::label Foam::UList<T>::fcIndex(const label i) const
+inline Foam::label Foam::UList<T>::fcIndex(const label i) const noexcept
 {
     return (i == size()-1 ? 0 : i+1);
+}
+
+
+template<class T>
+inline Foam::label Foam::UList<T>::rcIndex(const label i) const noexcept
+{
+    return (i ? i-1 : size()-1);
 }
 
 
@@ -74,13 +81,6 @@ template<class T>
 inline T& Foam::UList<T>::fcValue(const label i)
 {
     return this->operator[](this->fcIndex(i));
-}
-
-
-template<class T>
-inline Foam::label Foam::UList<T>::rcIndex(const label i) const
-{
-    return (i ? i-1 : size()-1);
 }
 
 
@@ -146,14 +146,14 @@ inline bool Foam::UList<T>::uniform() const
 {
     const label len = size();
 
-    if (len == 0)
+    if (!len)
     {
         return false;
     }
 
-    const T& val = first();
+    const T& val = (*this)[0];  // first
 
-    for (label i=1; i<len; ++i)
+    for (label i = 1; i < len; ++i)
     {
         if (val != (*this)[i])
         {

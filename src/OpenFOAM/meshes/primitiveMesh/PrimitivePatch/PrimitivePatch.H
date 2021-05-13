@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,16 +36,16 @@ Description
     using List and pointField.
 
 SourceFiles
-    PrimitivePatchAddressing.C
-    PrimitivePatchBdryPoints.C
     PrimitivePatch.C
+    PrimitivePatchAddressing.C
+    PrimitivePatchBdryFaces.C
+    PrimitivePatchBdryPoints.C
     PrimitivePatchCheck.C
     PrimitivePatchClear.C
     PrimitivePatchEdgeLoops.C
     PrimitivePatchLocalPointOrder.C
     PrimitivePatchMeshData.C
     PrimitivePatchMeshEdges.C
-    PrimitivePatchName.C
     PrimitivePatchPointAddressing.C
     PrimitivePatchProjectPoints.C
 
@@ -61,6 +61,7 @@ SourceFiles
 #include "intersection.H"
 #include "HashSet.H"
 #include "objectHit.H"
+#include "PrimitivePatchBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,20 +73,13 @@ class face;
 template<class T> class Map;
 
 /*---------------------------------------------------------------------------*\
-                        Class PrimitivePatchName Declaration
-\*---------------------------------------------------------------------------*/
-
-TemplateName(PrimitivePatch);
-
-
-/*---------------------------------------------------------------------------*\
                            Class PrimitivePatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class FaceList, class PointField>
 class PrimitivePatch
 :
-    public PrimitivePatchName,
+    public PrimitivePatchBase,
     public FaceList
 {
 public:
@@ -129,7 +123,7 @@ private:
         PointField points_;
 
 
-    // Demand driven private data
+    // Demand-driven Private Data
 
         //- Edges of the patch; address into local point list;
         //  sorted with internal edges first in upper-triangular order
@@ -194,10 +188,10 @@ private:
 
     // Private Member Functions
 
-        //- Calculate edges of the patch
-        void calcIntBdryEdges() const;
+        //- Calculate internal points on a patch
+        void calcInternPoints() const;
 
-        //- Calculated boundary points on a patch
+        //- Calculate boundary points on a patch
         void calcBdryPoints() const;
 
         //- Calculate addressing
@@ -308,18 +302,24 @@ public:
             return points_;
         }
 
+        //- Number of faces in the patch
+        label nFaces() const
+        {
+            return FaceList::size();
+        }
+
 
     // Access functions for demand-driven data
 
         // Topological data; no mesh required.
 
-            //- Return number of points supporting patch faces
+            //- Number of points supporting patch faces
             label nPoints() const
             {
                 return meshPoints().size();
             }
 
-            //- Return number of edges in patch
+            //- Number of edges in patch
             label nEdges() const
             {
                 return edges().size();
@@ -328,8 +328,17 @@ public:
             //- Return list of edges, address into LOCAL point list
             const edgeList& edges() const;
 
+            //- Return sub-list of internal edges, address into LOCAL point list
+            const edgeList::subList internalEdges() const;
+
+            //- Return sub-list of boundary edges, address into LOCAL point list
+            const edgeList::subList boundaryEdges() const;
+
             //- Number of internal edges
             label nInternalEdges() const;
+
+            //- Number of boundary edges == (nEdges() - nInternalEdges())
+            label nBoundaryEdges() const;
 
             //- Is internal edge?
             bool isInternalEdge(const label edgei) const
@@ -358,6 +367,10 @@ public:
             //- Return patch faces addressing into local point list
             const List<face_type>& localFaces() const;
 
+            //- Calculate and return list of local boundary faces.
+            //  These are the faces attached to boundary edges.
+            labelList boundaryFaces() const;
+
 
         // Addressing into mesh
 
@@ -382,7 +395,7 @@ public:
 
             //- Given an edge in local point labels, return its
             //- index in the edge list.  If the edge is not found, return -1
-            label whichEdge(const edge&) const;
+            label whichEdge(const edge& e) const;
 
             //- Return labels of patch edges in the global edge list using
             //- cell addressing

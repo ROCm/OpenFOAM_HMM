@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,7 +84,7 @@ Foam::label Foam::surfaceIntersection::getEdge
     const label fp
 )
 {
-    const edge faceEdge = surf.localFaces()[facei].faceEdge(fp);
+    const edge faceEdge = surf.localFaces()[facei].edge(fp);
 
     const labelList& eLabels = surf.faceEdges()[facei];
 

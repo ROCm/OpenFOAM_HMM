@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,7 +200,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectPoints
                     }
                 }
 
-                if (debug) Info<< ".";
+                DebugInfo << '.';
             } while (closer);
         }
 
@@ -211,10 +211,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectPoints
         {
             nNSquaredSearches++;
 
-            if (debug)
-            {
-                Info<< "p " << curLocalPointLabel << ": ";
-            }
+            DebugInfo << "p " << curLocalPointLabel << ": ";
 
             result[curLocalPointLabel] = objectHit(false, -1);
             scalar minDistance = GREAT;
@@ -254,23 +251,18 @@ Foam::PrimitivePatch<FaceList, PointField>::projectPoints
                 }
             }
 
-            if (debug)
-            {
-                Info<< result[curLocalPointLabel] << nl;
-            }
+            DebugInfo << result[curLocalPointLabel] << nl;
         }
         else
         {
-            if (debug) Info<< "x";
+            DebugInfo << 'x';
         }
     }
 
-    if (debug)
-    {
-        Info<< nl << "Executed " << nNSquaredSearches
-            << " n-squared searches out of total of "
-            << nPoints() << endl;
-    }
+    DebugInfo
+        << nl << "Executed " << nNSquaredSearches
+        << " n-squared searches out of total of "
+        << nPoints() << endl;
 
     return result;
 }
@@ -439,7 +431,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
                     }
                 }
 
-                if (debug) Info<< ".";
+                DebugInfo << '.';
             } while (closer);
         }
 
@@ -447,10 +439,7 @@ Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
         {
             nNSquaredSearches++;
 
-            if (debug)
-            {
-                Info<< "p " << curLocalFaceLabel << ": ";
-            }
+            DebugInfo << "p " << curLocalFaceLabel << ": ";
 
             result[curLocalFaceLabel] = objectHit(false, -1);
             scalar minDistance = GREAT;
@@ -490,23 +479,19 @@ Foam::PrimitivePatch<FaceList, PointField>::projectFaceCentres
                 }
             }
 
-            if (debug)
-            {
-                Info<< result[curLocalFaceLabel] << nl;
-            }
+            DebugInfo << result[curLocalFaceLabel] << nl;
         }
         else
         {
-            if (debug) Info<< "x";
+            DebugInfo << 'x';
         }
     }
 
-    if (debug)
-    {
-        Info<< nl << "Executed " << nNSquaredSearches
-            << " n-squared searches out of total of "
-            << this->size() << endl;
-    }
+    DebugInfo
+        << nl
+        << "Executed " << nNSquaredSearches
+        << " n-squared searches out of total of "
+        << this->size() << endl;
 
     return result;
 }

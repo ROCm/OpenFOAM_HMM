@@ -663,7 +663,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
         (
             time_.globalPath()/functionObject::outputPrefix/"sets"/name()
         );
-        if (mesh_.name() != fvMesh::defaultRegion)
+        if (mesh_.name() != polyMesh::defaultRegion)
         {
             vtkPath = vtkPath/mesh_.name();
         }

@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
     const fileName caseDirSource = casePath.name();
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
-    word sourceRegion = fvMesh::defaultRegion;
+    word sourceRegion = polyMesh::defaultRegion;
     if (args.found("sourceRegion"))
     {
         sourceRegion = args["sourceRegion"];
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
-    word targetRegion = fvMesh::defaultRegion;
+    word targetRegion = polyMesh::defaultRegion;
     if (args.found("targetRegion"))
     {
         targetRegion = args["targetRegion"];

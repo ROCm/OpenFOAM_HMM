@@ -42,9 +42,21 @@ void Foam::globalIndex::gather
     const Pstream::commsTypes commsType
 )
 {
+    if
+    (
+        !is_contiguous<Type>::value
+     && commsType == Pstream::commsTypes::nonBlocking
+    )
+    {
+        FatalErrorInFunction
+            << "Cannot use nonBlocking with non-contiguous data"
+            << exit(FatalError);
+        // Could also warn and change to scheduled etc...
+    }
+
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.setSize(off.last());
+        allFld.resize(off.last());
 
         // Assign my local data
         SubList<Type>(allFld, fld.size(), 0) = fld;
@@ -73,7 +85,7 @@ void Foam::globalIndex::gather
                 }
                 else
                 {
-                    IPstream fromSlave
+                    IPstream fromProc
                     (
                         commsType,
                         procIDs[i],
@@ -81,22 +93,15 @@ void Foam::globalIndex::gather
                         tag,
                         comm
                     );
-                    fromSlave >> procSlot;
+                    fromProc >> procSlot;
                 }
             }
         }
         else
         {
-            // nonBlocking
+            // nonBlocking && is_contiguous == true (already checked)
 
-            if (!is_contiguous<Type>::value)
-            {
-                FatalErrorInFunction
-                    << "nonBlocking not supported for non-contiguous data"
-                    << exit(FatalError);
-            }
-
-            label startOfRequests = Pstream::nRequests();
+            const label startOfRequests = Pstream::nRequests();
 
             // Set up reads
             for (label i = 1; i < procIDs.size(); ++i)
@@ -108,7 +113,7 @@ void Foam::globalIndex::gather
                     commsType,
                     procIDs[i],
                     reinterpret_cast<char*>(procSlot.data()),
-                    procSlot.byteSize(),
+                    procSlot.size_bytes(),
                     tag,
                     comm
                 );
@@ -153,16 +158,9 @@ void Foam::globalIndex::gather
         }
         else
         {
-            // nonBlocking
+            // nonBlocking && is_contiguous == true (already checked)
 
-            if (!is_contiguous<Type>::value)
-            {
-                FatalErrorInFunction
-                    << "nonBlocking not supported for non-contiguous data"
-                    << exit(FatalError);
-            }
-
-            label startOfRequests = Pstream::nRequests();
+            const label startOfRequests = Pstream::nRequests();
 
             // Set up write
             OPstream::write
@@ -182,6 +180,64 @@ void Foam::globalIndex::gather
 }
 
 
+template<class Type, class Addr>
+void Foam::globalIndex::gather
+(
+    const labelUList& off,
+    const label comm,
+    const UList<int>& procIDs,
+    const IndirectListBase<Type, Addr>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    if (commsType == Pstream::commsTypes::nonBlocking)
+    {
+        WarningInFunction
+            << "Cannot use nonBlocking with indirect list of data"
+            << exit(FatalError);
+        // Could also warn and change to scheduled etc...
+    }
+
+    if (Pstream::myProcNo(comm) == procIDs[0])
+    {
+        allFld.resize(off.last());
+
+        // Assign my local data
+        SubList<Type>(allFld, fld.size(), 0) = fld;
+
+        // Already verified commsType != nonBlocking
+        for (label i = 1; i < procIDs.size(); ++i)
+        {
+            SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
+
+            IPstream fromProc
+            (
+                commsType,
+                procIDs[i],
+                0,
+                tag,
+                comm
+            );
+            fromProc >> procSlot;
+        }
+    }
+    else
+    {
+        OPstream toMaster
+        (
+            commsType,
+            procIDs[0],
+            0,
+            tag,
+            comm
+        );
+        toMaster << fld;
+    }
+}
+
+
 template<class Type>
 void Foam::globalIndex::gather
 (
@@ -193,6 +249,28 @@ void Foam::globalIndex::gather
 {
     gather
     (
+        UPstream::worldComm,
+        UPstream::procID(UPstream::worldComm),
+        fld,
+        allFld,
+        tag,
+        commsType
+    );
+}
+
+
+template<class Type, class Addr>
+void Foam::globalIndex::gather
+(
+    const IndirectListBase<Type, Addr>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    gather
+    (
+        offsets_,
         UPstream::worldComm,
         UPstream::procID(UPstream::worldComm),
         fld,
@@ -293,6 +371,18 @@ void Foam::globalIndex::scatter
     const Pstream::commsTypes commsType
 )
 {
+    if
+    (
+        !is_contiguous<Type>::value
+     && commsType == Pstream::commsTypes::nonBlocking
+    )
+    {
+        FatalErrorInFunction
+            << "Cannot use nonBlocking with non-contiguous data"
+            << exit(FatalError);
+        // Could also warn and change to scheduled etc...
+    }
+
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
         fld.deepCopy(SubList<Type>(allFld, off[1]-off[0]));
@@ -305,12 +395,7 @@ void Foam::globalIndex::scatter
         {
             for (label i = 1; i < procIDs.size(); ++i)
             {
-                const SubList<Type> procSlot
-                (
-                    allFld,
-                    off[i+1]-off[i],
-                    off[i]
-                );
+                const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
                 if (is_contiguous<Type>::value)
                 {
@@ -326,7 +411,7 @@ void Foam::globalIndex::scatter
                 }
                 else
                 {
-                    OPstream toSlave
+                    OPstream toProc
                     (
                         commsType,
                         procIDs[i],
@@ -334,32 +419,20 @@ void Foam::globalIndex::scatter
                         tag,
                         comm
                     );
-                    toSlave << procSlot;
+                    toProc << procSlot;
                 }
             }
         }
         else
         {
-            // nonBlocking
+            // nonBlocking && is_contiguous == true (already checked)
 
-            if (!is_contiguous<Type>::value)
-            {
-                FatalErrorInFunction
-                    << "nonBlocking not supported for non-contiguous data"
-                    << exit(FatalError);
-            }
-
-            label startOfRequests = Pstream::nRequests();
+            const label startOfRequests = Pstream::nRequests();
 
             // Set up writes
             for (label i = 1; i < procIDs.size(); ++i)
             {
-                const SubList<Type> procSlot
-                (
-                    allFld,
-                    off[i+1]-off[i],
-                    off[i]
-                );
+                const SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
                 OPstream::write
                 (
@@ -411,16 +484,9 @@ void Foam::globalIndex::scatter
         }
         else
         {
-            // nonBlocking
+            // nonBlocking && is_contiguous == true (already checked)
 
-            if (!is_contiguous<Type>::value)
-            {
-                FatalErrorInFunction
-                    << "nonBlocking not supported for non-contiguous data"
-                    << exit(FatalError);
-            }
-
-            label startOfRequests = Pstream::nRequests();
+            const label startOfRequests = Pstream::nRequests();
 
             // Set up read
             IPstream::read
@@ -472,7 +538,7 @@ void Foam::globalIndex::get
     const int tag
 ) const
 {
-    allFld.setSize(globalIds.size());
+    allFld.resize(globalIds.size());
     if (globalIds.size())
     {
         // Sort according to processor
