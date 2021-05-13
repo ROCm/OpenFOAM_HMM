@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +38,10 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 )
 :
     jumpCyclicFvPatchField<Type>(p, iF),
-    jump_(this->size(), Zero)
+    jump_(this->size(), Zero),
+    jump0_(this->size(), Zero),
+    relaxFactor_(-1),
+    timeIndex_(-1)
 {}
 
 
@@ -51,7 +55,10 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 )
 :
     jumpCyclicFvPatchField<Type>(ptf, p, iF, mapper),
-    jump_(ptf.jump_, mapper)
+    jump_(ptf.jump_, mapper),
+    jump0_(ptf.jump0_, mapper),
+    relaxFactor_(ptf.relaxFactor_),
+    timeIndex_(ptf.timeIndex_)
 {}
 
 
@@ -63,12 +70,20 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     const dictionary& dict
 )
 :
-    jumpCyclicFvPatchField<Type>(p, iF),
-    jump_(p.size(), Zero)
+    jumpCyclicFvPatchField<Type>(p, iF, dict),
+    jump_(p.size(), Zero),
+    jump0_(p.size(), Zero),
+    relaxFactor_(dict.getOrDefault<scalar>("relax", -1)),
+    timeIndex_(this->db().time().timeIndex())
 {
     if (this->cyclicPatch().owner())
     {
         jump_ = Field<Type>("jump", dict, p.size());
+
+        if (dict.found("jump0"))
+        {
+            jump0_ = Field<Type>("jump0", dict, p.size());
+        }
     }
 
     if (dict.found("value"))
@@ -92,7 +107,10 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 )
 :
     jumpCyclicFvPatchField<Type>(ptf),
-    jump_(ptf.jump_)
+    jump_(ptf.jump_),
+    jump0_(ptf.jump0_),
+    relaxFactor_(ptf.relaxFactor_),
+    timeIndex_(ptf.timeIndex_)
 {}
 
 
@@ -104,7 +122,10 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 )
 :
     jumpCyclicFvPatchField<Type>(ptf, iF),
-    jump_(ptf.jump_)
+    jump_(ptf.jump_),
+    jump0_(ptf.jump0_),
+    relaxFactor_(ptf.relaxFactor_),
+    timeIndex_(ptf.timeIndex_)
 {}
 
 
@@ -128,6 +149,49 @@ Foam::tmp<Foam::Field<Type>> Foam::fixedJumpFvPatchField<Type>::jump() const
 
 
 template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::fixedJumpFvPatchField<Type>::jump0() const
+{
+    if (this->cyclicPatch().owner())
+    {
+        return jump0_;
+    }
+    else
+    {
+        return refCast<const fixedJumpFvPatchField<Type>>
+        (
+            this->neighbourPatchField()
+        ).jump0();
+    }
+}
+
+
+template<class Type>
+Foam::scalar Foam::fixedJumpFvPatchField<Type>::relaxFactor() const
+{
+    return relaxFactor_;
+}
+
+
+template<class Type>
+void Foam::fixedJumpFvPatchField<Type>::relax()
+{
+    if (!this->cyclicPatch().owner() || relaxFactor_ < 0)
+    {
+        return;
+    }
+
+    jump_ = relaxFactor_*jump_ + (1 - relaxFactor_)*jump0_;
+
+    if (timeIndex_ != this->db().time().timeIndex())
+    {
+        jump0_ = jump_;
+
+        timeIndex_ = this->db().time().timeIndex();
+    }
+}
+
+
+template<class Type>
 void Foam::fixedJumpFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
@@ -135,6 +199,7 @@ void Foam::fixedJumpFvPatchField<Type>::autoMap
 {
     jumpCyclicFvPatchField<Type>::autoMap(m);
     jump_.autoMap(m);
+    jump0_.autoMap(m);
 }
 
 
@@ -147,9 +212,9 @@ void Foam::fixedJumpFvPatchField<Type>::rmap
 {
     jumpCyclicFvPatchField<Type>::rmap(ptf, addr);
 
-    const fixedJumpFvPatchField<Type>& tiptf =
-        refCast<const fixedJumpFvPatchField<Type>>(ptf);
-    jump_.rmap(tiptf.jump_, addr);
+    const auto& fjptf = refCast<const fixedJumpFvPatchField<Type>>(ptf);
+    jump_.rmap(fjptf.jump_, addr);
+    jump0_.rmap(fjptf.jump0_, addr);
 }
 
 
@@ -157,11 +222,22 @@ template<class Type>
 void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeEntry("patchType", this->interfaceFieldType());
+
+    // Write patchType if not done already by fvPatchField
+    if (!this->patchType().size())
+    {
+        os.writeEntry("patchType", this->interfaceFieldType());
+    }
 
     if (this->cyclicPatch().owner())
     {
         jump_.writeEntry("jump", os);
+
+        if (relaxFactor_ > 0)
+        {
+            os.writeEntry("relax", relaxFactor_);
+            jump0_.writeEntry("jump0", os);
+        }
     }
 
     this->writeEntry("value", os);
