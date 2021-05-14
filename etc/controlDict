@@ -590,7 +590,6 @@ DebugSwitches
     fvMotionSolver      0;
     fvPatchField        0;
     fvScalarMatrix      0;
-    fvSchemes           0;
     fvSphericalTensorMatrix 0;
     fvSymmTensorMatrix  0;
     fvTensorMatrix      0;

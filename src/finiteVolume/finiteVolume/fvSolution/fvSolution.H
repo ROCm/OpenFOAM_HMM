@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,29 +52,46 @@ class fvSolution
 :
     public solution
 {
-    // Private Member Functions
-
-        //- No copy construct
-        fvSolution(const fvSolution&) = delete;
-
-        //- No copy assignment
-        void operator=(const fvSolution&) = delete;
-
-
 public:
+
+    //- No copy construct
+    fvSolution(const fvSolution&) = delete;
+
+    //- No copy assignment
+    void operator=(const fvSolution&) = delete;
+
 
     // Constructors
 
-        //- Construct for objectRegistry
-        fvSolution(const objectRegistry& obr)
+        //- Construct for objectRegistry, dictionary name and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        fvSolution
+        (
+            const objectRegistry& obr,
+            const word& dictName,
+            const dictionary* fallback = nullptr
+        )
         :
-            solution(obr, "fvSolution")
+            solution(obr, dictName, fallback)
+        {}
+
+        //- Construct for objectRegistry, and optional
+        //- fallback dictionary content (for a NO_READ or missing file)
+        //  A null dictionary pointer is treated like an empty dictionary.
+        explicit fvSolution
+        (
+            const objectRegistry& obr,
+            const dictionary* fallback = nullptr
+        )
+        :
+            fvSolution(obr, "fvSolution", fallback)
         {}
 
         //- Construct for objectRegistry and optional contents
         fvSolution(const objectRegistry& obr, const dictionary& dict)
         :
-            solution(obr, "fvSolution", dict)
+            fvSolution(obr, "fvSolution", &dict)
         {}
 };
 

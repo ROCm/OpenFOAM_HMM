@@ -29,18 +29,17 @@ Class
 
 Description
     Selector class for finite area differencing schemes.
-    faMesh is derived from faShemes so that all fields have access to the
+    faMesh is derived from faSchemes so that all fields have access to the
     faSchemes from the mesh reference they hold.
 
 SourceFiles
-    faSchemes.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef faSchemes_H
 #define faSchemes_H
 
-#include "IOdictionary.H"
+#include "schemesLookup.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,73 +52,31 @@ namespace Foam
 
 class faSchemes
 :
-    public IOdictionary
+    public schemesLookup
 {
-    // Private Data
+public:
 
-        dictionary ddtSchemes_;
-        ITstream ddtSchemeDefault_;
+    //- No copy construct
+    faSchemes(const faSchemes&) = delete;
 
-        dictionary d2dt2Schemes_;
-        ITstream d2dt2SchemeDefault_;
-
-        dictionary interpolationSchemes_;
-        ITstream interpolationSchemeDefault_;
-
-        dictionary divSchemes_;
-        ITstream divSchemeDefault_;
-
-        dictionary gradSchemes_;
-        ITstream gradSchemeDefault_;
-
-        dictionary lnGradSchemes_;
-        ITstream lnGradSchemeDefault_;
-
-        dictionary laplacianSchemes_;
-        ITstream laplacianSchemeDefault_;
-
-        mutable dictionary fluxRequired_;
-        bool fluxRequiredDefault_;
-
-
-    // Private Member Functions
-
-        //- Clear the dictionaries and streams before reading
-        void clear();
-
-        //- Read settings from the dictionary
-        void read(const dictionary&);
-
-        //- Write dictionary (possibly modified) settings
-        void writeDicts(Ostream& os) const;
-
-        //- No copy construct
-        faSchemes(const faSchemes&) = delete;
-
-        //- No copy assignment
-        void operator=(const faSchemes&) = delete;
+    //- No copy assignment
+    void operator=(const faSchemes&) = delete;
 
 
     // Constructors
 
-        //- Construct for objectRegistry, system dictName, and optional
+        //- Construct for objectRegistry, dictionary name and optional
         //- fallback dictionary content (for a NO_READ or missing file)
         //  A null dictionary pointer is treated like an empty dictionary.
         faSchemes
         (
             const objectRegistry& obr,
             const word& dictName,
-            const dictionary* fallback
-        );
-
-
-public:
-
-    //- Debug switch
-    static int debug;
-
-
-    // Constructors
+            const dictionary* fallback = nullptr
+        )
+        :
+            schemesLookup(obr, dictName, fallback)
+        {}
 
         //- Construct for objectRegistry, and optional
         //- fallback dictionary content (for a NO_READ or missing file)
@@ -139,94 +96,6 @@ public:
         :
             faSchemes(obr, "faSchemes", &dict)
         {}
-
-
-    // Member Functions
-
-        // Access
-
-            const dictionary& schemesDict() const;
-
-            ITstream& ddtScheme(const word& name) const;
-
-            ITstream& d2dt2Scheme(const word& name) const;
-
-            ITstream& interpolationScheme(const word& name) const;
-
-            ITstream& divScheme(const word& name) const;
-
-            ITstream& gradScheme(const word& name) const;
-
-            ITstream& lnGradScheme(const word& name) const;
-
-            ITstream& laplacianScheme(const word& name) const;
-
-            void setFluxRequired(const word& name) const;
-
-            bool fluxRequired(const word& name) const;
-
-
-        // Edit
-
-            //- Return access to ddt schemes
-            dictionary& ddtSchemes() noexcept
-            {
-                return ddtSchemes_;
-            }
-
-            //- Return access to d2dt2 schemes
-            dictionary& d2dt2Schemes() noexcept
-            {
-                return d2dt2Schemes_;
-            }
-
-            //- Return access to interpolation schemes
-            dictionary& interpolationSchemes() noexcept
-            {
-                return interpolationSchemes_;
-            }
-
-            //- Return access to div schemes
-            dictionary& divSchemes() noexcept
-            {
-                return divSchemes_;
-            }
-
-            //- Return access to grad schemes
-            dictionary& gradSchemes() noexcept
-            {
-                return gradSchemes_;
-            }
-
-            //- Return access to lnGrad schemes
-            dictionary& lnGradSchemes() noexcept
-            {
-                return lnGradSchemes_;
-            }
-
-            //- Return access to laplacian schemes
-            dictionary& laplacianSchemes() noexcept
-            {
-                return laplacianSchemes_;
-            }
-
-            //- Return access to flux required
-            dictionary& fluxRequired() noexcept
-            {
-                return fluxRequired_;
-            }
-
-
-        // Read
-
-            //- Read the faSchemes
-            bool read();
-
-
-        // Write
-
-            //- WriteData function required for regIOobject write operation
-            virtual bool writeData(Ostream&) const;
 };
 
 
