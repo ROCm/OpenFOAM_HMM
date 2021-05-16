@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,26 +25,31 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+
     outlet
     {
         type            calculated;
         value           uniform 0;
     }
+
     innerWall
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     outerWall
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     cyclic_half0
     {
         type            cyclic;
         value           uniform 0;
     }
+
     cyclic_half1
     {
         type            cyclic;

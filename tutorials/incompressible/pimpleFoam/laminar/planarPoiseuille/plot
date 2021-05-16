@@ -3,48 +3,83 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-models="
-Maxwell
-Stokes
-"
+# settings
+
+    # operand setups
+    setups="
+    Maxwell
+    Stokes
+    "
+
 
 #------------------------------------------------------------------------------
 
-# Plot streamwise flow speed at y=1.0 [m] as a function of time
-#
-# $* = models
-# ----
-plot() {
-    # Require gnuplot
-    command -v gnuplot >/dev/null || {
-        echo "gnuplot not found - skipping graph creation" 1>&2
-        exit 1
-    }
+# Requires gnuplot
+command -v gnuplot >/dev/null || {
+    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
 
-    models=$*
-    endTime=$(foamDictionary -entry endTime -value system/controlDict)
+# Check "results" directory
+[ -d "results" ] || {
+    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+
+plot_t_vs_Ux() {
+
+    setups=$@
+
+    benchmarkFile="WatersKing.dat"
+
+    n=0
+    for setup in $setups
+    do
+        sampleFiles[$n]="results/$setup/postProcessing/probes/0/Unp"
+        n=$(($n+1))
+    done
+
+    endTime=$(foamDictionary system/controlDict -entry endTime -value)
+    image="plots/planarPoiseuille.png"
 
     gnuplot<<PLT
-    set terminal pngcairo font "helvetica,16" size 800,600
-    set output "planarPoiseuille.png"
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
     set grid
-    set key right top
+    set key left top
     set xrange [0:"$endTime"]
     set yrange [0:8]
     set xlabel "t [s]"
-    set ylabel "U_x [m/s]" rotate by 0 offset 3,0,0
+    set ylabel "U_x [m/s]"
+    set output "$image"
 
-    results=system("ls *.txt")
-    names="${models[*]}"
+    # Benchmark - analytical
+        benchmark="$benchmarkFile"
+
+    # OpenFOAM
+        names="${setups[*]}"
+        samples="${sampleFiles[*]}"
+
     plot \
-        "WatersKing.dat" w lines t "Analytical" lt -1, \
-        for [i=1:words(results)] word(results, i) t word(names, i) \
+        benchmark u 1:2 t "Analytical" w l lt -1, \
+        for [i=1:words(samples)] word(samples, i) t word(names, i) \
             w linespoints pointinterval 100 lt i pt 6 ps 1.5
 PLT
 }
 
+
 #------------------------------------------------------------------------------
 
-plot $models
+echo ""
+echo "# Plots for the streamwise flow speed at y=1.0 [m] as a function of time"
+echo ""
+
+dirPlots="plots"
+[ -d "$dirPlots" ] || mkdir -p "$dirPlots"
+
+plot_t_vs_Ux $setups
+
 
 #------------------------------------------------------------------------------

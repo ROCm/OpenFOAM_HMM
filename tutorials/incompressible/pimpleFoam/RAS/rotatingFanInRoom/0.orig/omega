@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,31 +25,37 @@ boundaryField
         type            cyclicAMI;
         value           uniform 0.1;
     }
+
     AMI2
     {
         type            cyclicAMI;
         value           uniform 0.1;
     }
+
     fan
     {
         type            omegaWallFunction;
         value           uniform 0.1;
     }
+
     door
     {
         type            turbulentMixingLengthFrequencyInlet;
         mixingLength    1.2;
         value           uniform 0.1;
     }
+
     outlet
     {
         type            zeroGradient;
     }
+
     room
     {
         type            omegaWallFunction;
         value           uniform 0.1;
     }
+
     desk
     {
         type            omegaWallFunction;

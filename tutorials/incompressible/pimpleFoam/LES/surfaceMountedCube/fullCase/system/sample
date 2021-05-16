@@ -10,19 +10,17 @@ FoamFile
     version         2.0;
     format          ascii;
     class           dictionary;
-    location        "system";
     object          sample;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 type            sets;
 libs            (sampling);
 writeControl    writeTime;
-
 interpolationScheme cellPoint;
+setFormat       raw;
 
-setFormat raw;
+fields          ( U UMean );
 
 sets
 (
@@ -118,8 +116,6 @@ sets
         end             (8.5 4.5 2);
     }
 );
-
-fields          (U UMean);
 
 
 // ************************************************************************* //

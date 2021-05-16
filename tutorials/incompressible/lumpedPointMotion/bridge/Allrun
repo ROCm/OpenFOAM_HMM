@@ -15,6 +15,7 @@ steady/Allrun $*
 
 if notTest "$@"
 then
+
     if canCompile
     then
         (cd code && wmake)

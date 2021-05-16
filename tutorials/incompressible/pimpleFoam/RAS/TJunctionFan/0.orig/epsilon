@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,18 +26,21 @@ boundaryField
         mixingLength    0.01;
         value           uniform 200;
     }
+
     outlet1
     {
         type            inletOutlet;
         inletValue      uniform 200;
         value           uniform 200;
     }
+
     outlet2
     {
         type            inletOutlet;
         inletValue      uniform 200;
         value           uniform 200;
     }
+
     defaultFaces
     {
         type            epsilonWallFunction;

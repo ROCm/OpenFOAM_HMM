@@ -21,21 +21,23 @@ SIMPLE
 
 solvers
 {
-    "p|pa.*"
+    "(p|pa).*"
     {
         solver           PCG;
         preconditioner   DIC;
         tolerance        1e-9;
         relTol           0.01;
     };
-    "m|ma.*"
+
+    "(m|ma).*"
     {
         solver           PCG;
         preconditioner   DIC;
         tolerance        1e-9;
         relTol           0.01;
     };
-    "U|Ua.*"
+
+    "(U|Ua).*"
     {
         solver           PBiCGStab;
         preconditioner   DILU;
@@ -57,5 +59,6 @@ relaxationFactors
        "Ua.*"           0.7;
     }
 }
+
 
 // ************************************************************************* //

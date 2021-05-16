@@ -5,7 +5,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -rf postProcessing-*
-rm -f *.dat *.png constant/turbulenceProperties
+rm -rf 0.orig
+rm -rf system
+rm -rf constant
+rm -rf results
+rm -rf plots
+rm -f setups.orig/common/system/blockMeshDict
 
 #------------------------------------------------------------------------------

@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -48,7 +47,7 @@ actions
         source  setToCellZone;
         set     actuationDisk2CellSet;
     }
-
 );
+
 
 // ************************************************************************* //

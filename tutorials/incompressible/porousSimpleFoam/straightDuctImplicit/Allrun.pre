@@ -3,6 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
+cp -rf \
+    "$FOAM_TUTORIALS"/resources/geometry/straightDuctImplicit \
+    constant/triSurface
+
 runApplication surfaceFeatureExtract
 
 runApplication foamyHexMesh
@@ -21,9 +27,10 @@ latestTime=$(foamListTimes -latestTime)
 
 # Move the mesh into polyMesh
 rm -rf constant/polyMesh
-mv "${latestTime}"/polyMesh constant
+
+mv -f "${latestTime}"/polyMesh constant
 
 # Clean up intermediate meshes
-rm -r [1-9]*
+rm -rf [1-9]*
 
 #------------------------------------------------------------------------------

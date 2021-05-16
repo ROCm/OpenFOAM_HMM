@@ -1,14 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
-  =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Website:  www.openfoam.com
-     \\/     M anipulation  |
--------------------------------------------------------------------------------
-Description
-    Writes out files of streamlines with interpolated field data in VTK format.
-
-\*---------------------------------------------------------------------------*/
+// -*- C++ -*-
 
 nLines  10;
 start   (-0.0205 0.001  0.00001);
@@ -18,5 +8,6 @@ U       U;
 
 // Must be last entry
 #includeEtc "caseDicts/postProcessing/visualization/streamlines.cfg"
+
 
 // ************************************************************************* //

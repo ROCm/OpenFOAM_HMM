@@ -3,14 +3,19 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-./Allrun.pre
+if notTest "$@"
+then
 
-restore0Dir
+    ./Allrun.pre
 
-runApplication decomposePar
+    restore0Dir
 
-runParallel $(getApplication)
+    runApplication decomposePar
 
-runApplication reconstructPar
+    runParallel $(getApplication)
+
+    runApplication reconstructPar
+
+fi
 
 #------------------------------------------------------------------------------

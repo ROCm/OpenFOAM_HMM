@@ -16,8 +16,8 @@ FoamFile
 
 scale   1;
 
-zmin -1;
-zmax 1;
+zmin    -1;
+zmax    1;
 
 vertices
 (
@@ -210,8 +210,5 @@ boundary
     }
 );
 
-mergePatchPairs
-(
-);
 
 // ************************************************************************* //

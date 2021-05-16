@@ -5,6 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 # Make a 2D mesh by extruding a patch and solve to steady state.
 runApplication extrudeMesh
+
 runApplication createPatch -overwrite
 
 #------------------------------------------------------------------------------

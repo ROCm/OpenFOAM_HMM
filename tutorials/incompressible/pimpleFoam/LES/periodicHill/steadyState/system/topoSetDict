@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -47,5 +46,6 @@ actions
         set     inletCellSet;
     }
 );
+
 
 // ************************************************************************* //

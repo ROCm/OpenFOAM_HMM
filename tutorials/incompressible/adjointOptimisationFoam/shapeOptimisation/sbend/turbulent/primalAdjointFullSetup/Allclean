@@ -3,7 +3,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
-rm 0/dxi* 2> /dev/null
+cleanCase0
 
 #------------------------------------------------------------------------------

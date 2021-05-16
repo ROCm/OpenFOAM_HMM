@@ -44,10 +44,6 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-// adjustTimeStep  yes;
-
-// maxCo           1;
-
 functions
 {
     #include "ensightWrite"
@@ -55,7 +51,6 @@ functions
 
     // Demonstrate runTimePostProcessing
     #include "visualization"
-
     #include "profiling"
 }
 

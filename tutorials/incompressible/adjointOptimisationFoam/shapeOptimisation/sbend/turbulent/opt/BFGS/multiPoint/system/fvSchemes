@@ -48,7 +48,6 @@ divSchemes
 laplacianSchemes
 {
     default         Gauss linear corrected;
-
 }
 
 interpolationSchemes
@@ -72,5 +71,6 @@ wallDist
         epsilon   0.1;
     }
 }
+
 
 // ************************************************************************* //

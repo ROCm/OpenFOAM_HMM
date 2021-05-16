@@ -1,16 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
-  =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Website:  www.openfoam.com
-     \\/     M anipulation  |
--------------------------------------------------------------------------------
-Description
-    Writes graph data for specified fields along a line, specified by start
-    and end points.
-
-\*---------------------------------------------------------------------------*/
-
+// -*- C++ -*-
 
 // Sampling and I/O settings
 #includeEtc "caseDicts/postProcessing/graphs/sampleDict.cfg"

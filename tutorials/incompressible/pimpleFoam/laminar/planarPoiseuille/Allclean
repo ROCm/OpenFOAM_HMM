@@ -3,8 +3,15 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
-rm -rf *.{dat,png,txt} system/controlDict constant/turbulenceProperties results
-wclean validation/WatersKing
+cleanCase0
+
+rm -rf 0.orig
+rm -rf system
+rm -rf constant
+rm -rf results
+rm -rf plots
+rm -f *.dat
+
+( cd validation/WatersKing && wclean WatersKing )
 
 #------------------------------------------------------------------------------

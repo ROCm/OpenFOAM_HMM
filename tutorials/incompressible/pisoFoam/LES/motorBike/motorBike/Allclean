@@ -5,10 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-# Remove surface
-rm -f constant/triSurface/motorBike.obj.gz
+rm -rf constant/triSurface
 
 # Reset decomposeParDict
-cp system/decomposeParDict.hierarchical system/decomposeParDict
+cp -f system/decomposeParDict.hierarchical system/decomposeParDict
 
 #------------------------------------------------------------------------------

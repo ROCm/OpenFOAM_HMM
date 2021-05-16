@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -20,8 +19,6 @@ application     pimpleFoam;
 startFrom       startTime;
 
 startTime       0;
-//startTime       0.28;
-//startTime       0.66;
 
 stopAt          endTime;
 
@@ -56,5 +53,6 @@ functions
         writeControl    writeTime;
     }
 }
+
 
 // ************************************************************************* //

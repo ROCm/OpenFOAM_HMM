@@ -16,7 +16,5 @@ FoamFile
 
 #includeEtc "caseDicts/mesh/generation/meshQualityDict.cfg"
 
-//- minFaceWeight (0 -> 0.5)
-//minFaceWeight 0.02;
 
 // ************************************************************************* //

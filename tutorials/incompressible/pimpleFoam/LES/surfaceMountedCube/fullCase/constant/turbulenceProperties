@@ -14,14 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType LES;
+simulationType      LES;
 
 LES
 {
-    turbulence      on;
-
     LESModel        SpalartAllmarasIDDES;
 
+    turbulence      on;
 
     printCoeffs     on;
 

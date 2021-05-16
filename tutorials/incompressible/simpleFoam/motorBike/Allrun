@@ -9,7 +9,12 @@ decompDict="-decomposeParDict system/decomposeParDict.6"
 # unset decompDict
 
 # copy motorbike surface from resources directory
-\cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
+mkdir -p constant/triSurface
+
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/motorBike.obj.gz \
+    constant/triSurface/
+
 runApplication surfaceFeatureExtract
 
 runApplication blockMesh
@@ -35,12 +40,15 @@ runParallel $decompDict topoSet
 restore0Dir -processor
 
 runParallel $decompDict patchSummary
+
 runParallel $decompDict potentialFoam -writephi
+
 runParallel $decompDict checkMesh -writeFields '(nonOrthoAngle)' -constant
 
 runParallel $decompDict $(getApplication)
 
 runApplication reconstructParMesh -constant
+
 runApplication reconstructPar -latestTime
 
 #------------------------------------------------------------------------------

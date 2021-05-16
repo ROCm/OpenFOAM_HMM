@@ -24,23 +24,28 @@ boundaryField
     {
        type             zeroGradient;
     }
+
     outlet
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     up
     {
         type            symmetry;
     }
+
     hole
     {
         type            zeroGradient;
     }
+
     frontAndBack
     {
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

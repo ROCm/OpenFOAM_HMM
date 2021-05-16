@@ -11,6 +11,6 @@ do
     [ -d "$proc" ] && ln -sf "$proc" .
 done
 
-runParallel pimpleFoam
+runParallel $(getApplication)
 
 #------------------------------------------------------------------------------

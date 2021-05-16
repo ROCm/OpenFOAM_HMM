@@ -9,7 +9,6 @@
 forces
 {
     type          forces;
-
     libs          (forces);
 
     writeControl  timeStep;

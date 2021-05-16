@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,12 +27,14 @@ boundaryField
         type            fixedValue;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     walls
     {
         type            nutkWallFunction;

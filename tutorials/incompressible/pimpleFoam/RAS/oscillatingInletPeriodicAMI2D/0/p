@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,11 +26,13 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     walls
     {
         type            zeroGradient;

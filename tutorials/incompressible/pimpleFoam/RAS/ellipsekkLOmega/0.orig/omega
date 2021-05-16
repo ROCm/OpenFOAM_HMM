@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,20 +25,24 @@ boundaryField
         type            fixedValue;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     up
     {
         type            symmetry;
     }
+
     hole
     {
         type            zeroGradient;
     }
+
     frontAndBack
     {
         type            empty;

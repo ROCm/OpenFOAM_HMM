@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nuTilda;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,14 +24,17 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     outlet1
     {
         type            zeroGradient;
     }
+
     outlet2
     {
         type            zeroGradient;
     }
+
     defaultFaces
     {
         type            zeroGradient;
