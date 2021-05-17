@@ -16,9 +16,27 @@ FoamFile
 
 scale   1;
 
-// Front/back locations
-zmin -0.5;
-zmax 0.5;
+// Geometric parameters
+rInner  0.5;
+rOuter  1;
+xmax    2;
+ymax    2;
+
+zmin   -0.5;  // Back/front locations
+zmax    0.5;
+
+// Divisions: Radial, quarter circumference, outer region and z-directions.
+nRadial  10;
+nQuarter 10;
+nxOuter  20;
+nyOuter  20;
+nz       1;
+
+// ----------------
+
+// Derived quantities
+rInner45    ${{ $rInner * sqrt(0.5) }};
+rOuter45    ${{ $rOuter * sqrt(0.5) }};
 
 vertices #codeStream
 {
@@ -29,30 +47,27 @@ vertices #codeStream
 
     code
     #{
-        // sin(45), cos(45)
-        const scalar sqrt05 = sqrt(0.5);
-
         pointField points
         ({
-            /* 0*/ {0.5, 0, $zmin},
-            /* 1*/ {1, 0, $zmin},
-            /* 2*/ {2, 0, $zmin},
-            /* 3*/ {2, sqrt05, $zmin},
-            /* 4*/ {sqrt05, sqrt05, $zmin},
-            /* 5*/ {sqrt05/2, sqrt05/2, $zmin},
-            /* 6*/ {2, 2, $zmin},
-            /* 7*/ {sqrt05, 2, $zmin},
-            /* 8*/ {0, 2, $zmin},
-            /* 9*/ {0, 1, $zmin},
-            /*10*/ {0, 0.5, $zmin},
-            /*11*/ {-0.5, 0, $zmin},
-            /*12*/ {-1, 0, $zmin},
-            /*13*/ {-2, 0, $zmin},
-            /*14*/ {-2, sqrt05, $zmin},
-            /*15*/ {-sqrt05, sqrt05, $zmin},
-            /*16*/ {-sqrt05/2, sqrt05/2, $zmin},
-            /*17*/ {-2, 2, $zmin},
-            /*18*/ {-sqrt05, 2, $zmin}
+            /* 0*/ { $rInner, 0, $zmin },
+            /* 1*/ { $rOuter, 0, $zmin },
+            /* 2*/ { $xmax, 0, $zmin },
+            /* 3*/ { $xmax, $rOuter45, $zmin },
+            /* 4*/ { $rOuter45, $rOuter45, $zmin },
+            /* 5*/ { $rInner45, $rInner45, $zmin },
+            /* 6*/ { $xmax, $ymax, $zmin },
+            /* 7*/ { $rOuter45, $ymax, $zmin },
+            /* 8*/ { 0, $ymax, $zmin },
+            /* 9*/ { 0, $rOuter, $zmin },
+            /*10*/ { 0, $rInner, $zmin },
+            /*11*/ { -$rInner, 0, $zmin },
+            /*12*/ { -$rOuter, 0, $zmin },
+            /*13*/ { -$xmax, 0, $zmin },
+            /*14*/ { -$xmax, $rOuter45, $zmin },
+            /*15*/ { -$rOuter45, $rOuter45, $zmin },
+            /*16*/ { -$rInner45, $rInner45, $zmin },
+            /*17*/ { -$xmax, $ymax, $zmin },
+            /*18*/ { -$rOuter45, $ymax, $zmin }
         });
 
         // Duplicate z points for zmax
@@ -68,19 +83,21 @@ vertices #codeStream
     #};
 };
 
+// Can remove unneeded variables
+#remove ( "r(Inner|Outer).*"  "[xy](min|max)" )
 
 blocks
 (
-    hex (5 4 9 10 24 23 28 29) (10 10 1) simpleGrading (1 1 1)
-    hex (0 1 4 5 19 20 23 24) (10 10 1) simpleGrading (1 1 1)
-    hex (1 2 3 4 20 21 22 23) (20 10 1) simpleGrading (1 1 1)
-    hex (4 3 6 7 23 22 25 26) (20 20 1) simpleGrading (1 1 1)
-    hex (9 4 7 8 28 23 26 27) (10 20 1) simpleGrading (1 1 1)
-    hex (15 16 10 9 34 35 29 28) (10 10 1) simpleGrading (1 1 1)
-    hex (12 11 16 15 31 30 35 34) (10 10 1) simpleGrading (1 1 1)
-    hex (13 12 15 14 32 31 34 33) (20 10 1) simpleGrading (1 1 1)
-    hex (14 15 18 17 33 34 37 36) (20 20 1) simpleGrading (1 1 1)
-    hex (15 9 8 18 34 28 27 37) (10 20 1) simpleGrading (1 1 1)
+    hex (5 4 9 10 24 23 28 29)    ($nRadial  $nQuarter $nz) grading (1 1 1)
+    hex (0 1 4 5 19 20 23 24)     ($nRadial  $nQuarter $nz) grading (1 1 1)
+    hex (1 2 3 4 20 21 22 23)     ($nxOuter  $nQuarter $nz) grading (1 1 1)
+    hex (4 3 6 7 23 22 25 26)     ($nxOuter  $nyOuter  $nz) grading (1 1 1)
+    hex (9 4 7 8 28 23 26 27)     ($nQuarter $nyOuter  $nz) grading (1 1 1)
+    hex (15 16 10 9 34 35 29 28)  ($nRadial  $nQuarter $nz) grading (1 1 1)
+    hex (12 11 16 15 31 30 35 34) ($nRadial  $nQuarter $nz) grading (1 1 1)
+    hex (13 12 15 14 32 31 34 33) ($nxOuter  $nQuarter $nz) grading (1 1 1)
+    hex (14 15 18 17 33 34 37 36) ($nxOuter  $nyOuter  $nz) grading (1 1 1)
+    hex (15 9 8 18 34 28 27 37)   ($nQuarter $nyOuter  $nz) grading (1 1 1)
 );
 
 edges

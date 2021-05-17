@@ -44,35 +44,33 @@ geometry
 }
 
 
-// Outer box sizes (approximate)
+// Outer box size (approximate)
 vo   #eval{ sqrt($outerRadius/3) };
-mvo  #eval{ -$vo };
 
-// Inner box sizes - % of overall dimension
+// Inner box size - % of overall dimension
 vi   #eval{ $vo * $innerRatio };
-mvi  #eval{ -$vi };
 
 vertices
 (
     // Inner block points
-    project ($mvi $mvi $mvi) (innerSphere)
-    project ( $vi $mvi $mvi) (innerSphere)
-    project ( $vi  $vi $mvi) (innerSphere)
-    project ($mvi  $vi $mvi) (innerSphere)
-    project ($mvi $mvi  $vi) (innerSphere)
-    project ( $vi $mvi  $vi) (innerSphere)
+    project (-$vi -$vi -$vi) (innerSphere)
+    project ( $vi -$vi -$vi) (innerSphere)
+    project ( $vi  $vi -$vi) (innerSphere)
+    project (-$vi  $vi -$vi) (innerSphere)
+    project (-$vi -$vi  $vi) (innerSphere)
+    project ( $vi -$vi  $vi) (innerSphere)
     project ( $vi  $vi  $vi) (innerSphere)
-    project ($mvi  $vi  $vi) (innerSphere)
+    project (-$vi  $vi  $vi) (innerSphere)
 
     // Outer block points
-    project ($mvo $mvo $mvo) (sphere)
-    project ( $vo $mvo $mvo) (sphere)
-    project ( $vo  $vo $mvo) (sphere)
-    project ($mvo  $vo $mvo) (sphere)
-    project ($mvo $mvo  $vo) (sphere)
-    project ( $vo $mvo  $vo) (sphere)
+    project (-$vo -$vo -$vo) (sphere)
+    project ( $vo -$vo -$vo) (sphere)
+    project ( $vo  $vo -$vo) (sphere)
+    project (-$vo  $vo -$vo) (sphere)
+    project (-$vo -$vo  $vo) (sphere)
+    project ( $vo -$vo  $vo) (sphere)
     project ( $vo  $vo  $vo) (sphere)
-    project ($mvo  $vo  $vo) (sphere)
+    project (-$vo  $vo  $vo) (sphere)
 );
 
 blocks

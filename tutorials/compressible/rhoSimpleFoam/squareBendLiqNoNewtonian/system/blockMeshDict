@@ -40,8 +40,6 @@ nz      #eval{ round($nz / 5) };
 #endif
 
 zmin    #eval{ -$zmax };
-mrad0   #eval{ -$rad0 };
-mrad1   #eval{ -$rad1 };
 
 vertices
 (
@@ -52,13 +50,13 @@ vertices
     (     0  $rad1  $zmin)      // pt 2
     (  $xin  $rad1  $zmin)      // pt 3
     // outlet region
-    ( $xout  $mrad1  $zmin)     // pt 4
-    (     0  $mrad1  $zmin)     // pt 5
-    (     0  $mrad0  $zmin)     // pt 6
-    ( $xout  $mrad0  $zmin)     // pt 7
+    ( $xout -$rad1  $zmin)      // pt 4
+    (     0 -$rad1  $zmin)      // pt 5
+    (     0 -$rad0  $zmin)      // pt 6
+    ( $xout -$rad0  $zmin)      // pt 7
     // bend mid-points
-    ( $rad0       0  $zmin)     // pt 8
-    ( $rad1       0  $zmin)     // pt 9
+    ( $rad0      0  $zmin)      // pt 8
+    ( $rad1      0  $zmin)      // pt 9
     // front-plane:
     // inlet region
     (  $xin   $rad0  $zmax)     // pt 0 + 10
@@ -66,10 +64,10 @@ vertices
     (     0   $rad1  $zmax)     // pt 2 + 10
     (  $xin   $rad1  $zmax)     // pt 3 + 10
     // outlet region
-    ( $xout   $mrad1  $zmax)    // pt 4 + 10
-    (     0   $mrad1  $zmax)    // pt 5 + 10
-    (     0   $mrad0  $zmax)    // pt 6 + 10
-    ( $xout   $mrad0  $zmax)    // pt 7 + 10
+    ( $xout  -$rad1  $zmax)     // pt 4 + 10
+    (     0  -$rad1  $zmax)     // pt 5 + 10
+    (     0  -$rad0  $zmax)     // pt 6 + 10
+    ( $xout  -$rad0  $zmax)     // pt 7 + 10
     // bend mid-points
     ( $rad0        0  $zmax)    // pt 8 + 10
     ( $rad1        0  $zmax)    // pt 9 + 10

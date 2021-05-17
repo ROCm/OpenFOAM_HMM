@@ -34,20 +34,19 @@ geometry
     }
 }
 
-// Box sizes
+// Box size
 vo   #eval{ sqrt($outerRadius/3) };
-mvo  #eval{ -$vo };
 
 vertices
 (
-    ($mvo $mvo $mvo)
-    ( $vo $mvo $mvo)
-    ( $vo  $vo $mvo)
-    ($mvo  $vo $mvo)
-    ($mvo $mvo  $vo)
-    ( $vo $mvo  $vo)
+    (-$vo -$vo -$vo)
+    ( $vo -$vo -$vo)
+    ( $vo  $vo -$vo)
+    (-$vo  $vo -$vo)
+    (-$vo -$vo  $vo)
+    ( $vo -$vo  $vo)
     ( $vo  $vo  $vo)
-    ($mvo  $vo  $vo)
+    (-$vo  $vo  $vo)
 );
 
 blocks

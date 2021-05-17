@@ -44,47 +44,42 @@ geometry
     innerSphere
     {
         $sphere
-        radius
-        (
-            #eval{ $rxo * $innerRatio }
-            #eval{ $ryo * $innerRatio }
-            #eval{ $rzo * $innerRatio }
-        );
+        radius  #eval{ $innerRatio*$[(vector) ../sphere/radius] };
     }
 }
 
 
 // Outer box sizes (approximate)
-vxo #eval{ sqrt(1.0/3.0) * $rxo };  mvxo #eval{ -$vxo };
-vyo #eval{ sqrt(1.0/3.0) * $ryo };  mvyo #eval{ -$vyo };
-vzo #eval{ sqrt(1.0/3.0) * $rzo };  mvzo #eval{ -$vzo };
+vxo #eval{ sqrt(1.0/3.0) * $rxo };
+vyo #eval{ sqrt(1.0/3.0) * $ryo };
+vzo #eval{ sqrt(1.0/3.0) * $rzo };
 
 // Inner box sizes - % of overall dimension
-vxi #eval{ $vxo * $innerRatio };  mvxi #eval{ -$vxi };
-vyi #eval{ $vyo * $innerRatio };  mvyi #eval{ -$vyi };
-vzi #eval{ $vzo * $innerRatio };  mvzi #eval{ -$vzi };
+vxi #eval{ $vxo * $innerRatio };
+vyi #eval{ $vyo * $innerRatio };
+vzi #eval{ $vzo * $innerRatio };
 
 vertices
 (
     // Inner block points
-    project ($mvxi $mvyi $mvzi) (innerSphere)
-    project ( $vxi $mvyi $mvzi) (innerSphere)
-    project ( $vxi  $vyi $mvzi) (innerSphere)
-    project ($mvxi  $vyi $mvzi) (innerSphere)
-    project ($mvxi $mvyi  $vzi) (innerSphere)
-    project ( $vxi $mvyi  $vzi) (innerSphere)
+    project (-$vxi -$vyi -$vzi) (innerSphere)
+    project ( $vxi -$vyi -$vzi) (innerSphere)
+    project ( $vxi  $vyi -$vzi) (innerSphere)
+    project (-$vxi  $vyi -$vzi) (innerSphere)
+    project (-$vxi -$vyi  $vzi) (innerSphere)
+    project ( $vxi -$vyi  $vzi) (innerSphere)
     project ( $vxi  $vyi  $vzi) (innerSphere)
-    project ($mvxi  $vyi  $vzi) (innerSphere)
+    project (-$vxi  $vyi  $vzi) (innerSphere)
 
     // Outer block points
-    project ($mvxo $mvyo $mvzo) (sphere)
-    project ( $vxo $mvyo $mvzo) (sphere)
-    project ( $vxo  $vyo $mvzo) (sphere)
-    project ($mvxo  $vyo $mvzo) (sphere)
-    project ($mvxo $mvyo  $vzo) (sphere)
-    project ( $vxo $mvyo  $vzo) (sphere)
+    project (-$vxo -$vyo -$vzo) (sphere)
+    project ( $vxo -$vyo -$vzo) (sphere)
+    project ( $vxo  $vyo -$vzo) (sphere)
+    project (-$vxo  $vyo -$vzo) (sphere)
+    project (-$vxo -$vyo  $vzo) (sphere)
+    project ( $vxo -$vyo  $vzo) (sphere)
     project ( $vxo  $vyo  $vzo) (sphere)
-    project ($mvxo  $vyo  $vzo) (sphere)
+    project (-$vxo  $vyo  $vzo) (sphere)
 );
 
 blocks
