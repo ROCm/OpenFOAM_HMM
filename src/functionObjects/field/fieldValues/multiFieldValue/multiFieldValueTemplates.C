@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,56 +26,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "FlatOutput.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::fieldValues::fieldValueDelta::applyOperation
+bool Foam::functionObjects::fieldValues::multiFieldValue::applyOperation
 (
     const word& resultType,
-    const word& name1,
-    const word& name2,
-    const word& entryName1,
-    const word& entryName2,
-    bool& found
+    const wordList& names,
+    const wordList& entryNames
 )
 {
     if (pTraits<Type>::typeName != resultType)
     {
-        return;
+        return false;
     }
 
     Type result = Zero;
 
-    Type value1 = this->getObjectResult<Type>(name1, entryName1);
-    Type value2 = this->getObjectResult<Type>(name2, entryName2);
+    Field<Type> values(names.size());
+    forAll(values, i)
+    {
+        values[i] = this->getObjectResult<Type>(names[i], entryNames[i]);
+    }
 
     const word& opName = operationTypeNames_[operation_];
 
     switch (operation_)
     {
+        case opSum:
         case opAdd:
         {
-            result = value1 + value2;
+            result = sum(values);
             break;
         }
         case opSubtract:
         {
-            result = value1 - value2;
+            result = values[0];
+            for (label i = 1; i < values.size(); ++i)
+            {
+                result -= values[i];
+            }
             break;
         }
         case opMin:
         {
-            result = min(value1, value2);
+            result = min(values);
             break;
         }
         case opMax:
         {
-            result = max(value1, value2);
+            result = max(values);
             break;
         }
         case opAverage:
         {
-            result = 0.5*(value1 + value2);
+            result = average(values);
             break;
         }
         default:
@@ -87,8 +94,9 @@ void Foam::functionObjects::fieldValues::fieldValueDelta::applyOperation
         }
     }
 
-    const word resultName(opName + '(' + entryName1 + ',' + entryName2 + ')');
-
+    OStringStream os;
+    os << opName << flatOutput(entryNames, FlatOutput::ParenComma{});
+    const word resultName(os.str());
     Log << "    " << resultName << " = " << result << endl;
 
     this->file()<< tab << result;
@@ -96,7 +104,7 @@ void Foam::functionObjects::fieldValues::fieldValueDelta::applyOperation
     // Write state/results information
     this->setResult(resultName, result);
 
-    found = true;
+    return true;
 }
 
 

@@ -37,7 +37,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(fieldValue, 0);
-    defineRunTimeSelectionTable(fieldValue, dictionary);
+    defineRunTimeSelectionTable(fieldValue, runTime);
 }
 }
 
@@ -55,7 +55,7 @@ Foam::functionObjects::fieldValue::fieldValue
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, valueType, dict),
     writeFields_(false),
-    regionName_(word::null),
+    regionName_(),
     scaleFactor_(1.0),
     dict_(dict),
     fields_()
@@ -75,7 +75,7 @@ Foam::functionObjects::fieldValue::fieldValue
     fvMeshFunctionObject(name, obr, dict),
     writeFile(obr_, name, valueType, dict),
     writeFields_(false),
-    regionName_(word::null),
+    regionName_(),
     scaleFactor_(1.0),
     dict_(dict),
     fields_()
@@ -88,19 +88,21 @@ Foam::functionObjects::fieldValue::fieldValue
 
 bool Foam::functionObjects::fieldValue::read(const dictionary& dict)
 {
-    if (dict != dict_)
+    if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        dict_ = dict;
+        if (dict != dict_)
+        {
+            dict_ = dict;
+        }
+
+        dict.readEntry("writeFields", writeFields_);
+        scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1.0);
+        dict.readEntry("fields", fields_);
+
+        return true;
     }
 
-    fvMeshFunctionObject::read(dict);
-    writeFile::read(dict);
-
-    dict.readEntry("writeFields", writeFields_);
-    scaleFactor_ = dict.getOrDefault<scalar>("scaleFactor", 1.0);
-    dict.readEntry("fields", fields_);
-
-    return true;
+    return false;
 }
 
 

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,35 +24,50 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::fieldValues::fieldValueDelta
+    Foam::functionObjects::fieldValues::multiFieldValue
 
 Group
     grpFieldFunctionObjects
 
 Description
-    Computes a selected operation between two \c fieldValue function objects.
+    Computes a selected operation between multiple \c fieldValue function
+    objects.
 
     The operation is applied to all results of each \c fieldValue object.
-    Accordingly, each object must generate the same number and type of results.
+
+Note
+    Each object must generate the same number and type of results.
 
 Usage
     Minimal example by using \c system/controlDict.functions:
     \verbatim
-    fieldValueDelta1
+    multiFieldValue1
     {
         // Mandatory entries (unmodifiable)
-        type            fieldValueDelta;
-        libs            (fieldFunctionObjects);
+        type    multiFieldValue;
+        libs    (fieldFunctionObjects);
 
         // Mandatory entries (runtime modifiable)
-        operation       subtract;
-        region1
+        operation   average;
+
+        // List of fieldValue function objects as dictionaries
+        functions
         {
+            region1
+            {
+                ...
+            }
+            region2
+            {
+                ...
+            }
+
             ...
-        }
-        region2
-        {
-            ...
+
+            regionN
+            {
+                ...
+            }
         }
 
         // Optional (inherited) entries
@@ -63,12 +77,11 @@ Usage
 
     where the entries mean:
     \table
-      Property     | Description                        | Type | Req'd | Dflt
-      type         | Type name: fieldValueDelta         | word |  yes  | -
-      libs         | Library name: fieldFunctionObjects | word |  yes  | -
-      operation    | Operation type to apply to values  | word |  yes  | -
-      region1      | Region1 properties                 | dict |  yes  | -
-      region2      | Region2 properties                 | dict |  yes  | -
+      Property     | Description                         | Type | Req'd | Dflt
+      type         | Type name: multiFieldValue          | word |  yes  | -
+      libs         | Library name: fieldFunctionObjects  | word |  yes  | -
+      operation    | Operation type to apply to values   | word |  yes  | -
+      functions    | List of fieldValue function objects | dict |  yes  | -
     \endtable
 
     Options for the \c operation entry:
@@ -88,16 +101,16 @@ Usage
 See also
     - Foam::functionObject
     - Foam::functionObjects::fieldValue
-    - ExtendedCodeGuide::functionObjects::field::fieldValueDelta
+    - ExtendedCodeGuide::functionObjects::field::multiFieldValue
 
 SourceFiles
-    fieldValueDelta.C
-    fieldValueDeltaTemplates.C
+    multiFieldValue.C
+    multiFieldValueTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_fieldValueDelta_H
-#define functionObjects_fieldValueDelta_H
+#ifndef functionObjects_multiFieldValue_H
+#define functionObjects_multiFieldValue_H
 
 #include "stateFunctionObject.H"
 #include "writeFile.H"
@@ -114,23 +127,27 @@ namespace fieldValues
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class fieldValueDelta Declaration
+                       Class multiFieldValue Declaration
 \*---------------------------------------------------------------------------*/
 
-class fieldValueDelta
+class multiFieldValue
 :
-    public fvMeshFunctionObject,
-    public writeFile
+    public functionObjects::stateFunctionObject,
+    public functionObjects::writeFile
 {
 public:
+
+    // Public Data Types
+
         //- Operation type enumeration
         enum operationType
         {
-            opAdd,              //!< Add
-            opSubtract,         //!< Subtract
-            opMin,              //!< Minimum
-            opMax,              //!< Maximum
-            opAverage           //!< Average
+            opSum,              //!< Sum of values
+            opAdd,              //!< Add values (same as sum)
+            opSubtract,         //!< Subtract values from first entry
+            opMin,              //!< Minimum value
+            opMax,              //!< Maximum value
+            opAverage           //!< Average value
         };
 
         //- Operation type names
@@ -144,25 +161,20 @@ private:
         //- Operation to apply to values
         operationType operation_;
 
-        //- Field value region object 1
-        autoPtr<fieldValue> region1Ptr_;
-
-        //- Field value region object 2
-        autoPtr<fieldValue> region2Ptr_;
+        //- List of fieldValue function objects
+        PtrList<fieldValue> functions_;
 
 
     // Private Member Functions
 
-        //- Templated function to apply the operation
+        //- Templated function to apply the operation.
+        //  \return true if Type and resultType are correct
         template<class Type>
-        void applyOperation
+        bool applyOperation
         (
             const word& resultType,
-            const word& name1,
-            const word& name2,
-            const word& entryName1,
-            const word& entryName2,
-            bool& found
+            const wordList& names,
+            const wordList& entryNames
         );
 
 
@@ -177,13 +189,13 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("fieldValueDelta");
+    TypeName("multiFieldValue");
 
 
     // Constructors
 
         //- Construct from Time and dictionary
-        fieldValueDelta
+        multiFieldValue
         (
             const word& name,
             const Time& runTime,
@@ -191,20 +203,20 @@ public:
         );
 
         //- No copy construct
-        fieldValueDelta(const fieldValueDelta&) = delete;
+        multiFieldValue(const multiFieldValue&) = delete;
 
         //- No copy assignment
-        void operator=(const fieldValueDelta&) = delete;
+        void operator=(const multiFieldValue&) = delete;
 
 
     //- Destructor
-    virtual ~fieldValueDelta() = default;
+    virtual ~multiFieldValue() = default;
 
 
     // Public Member Functions
 
         //- Read from dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Do nothing
         virtual bool execute();
@@ -223,7 +235,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fieldValueDeltaTemplates.C"
+    #include "multiFieldValueTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

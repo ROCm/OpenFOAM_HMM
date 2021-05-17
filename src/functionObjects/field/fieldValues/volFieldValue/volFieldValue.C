@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ namespace functionObjects
 namespace fieldValues
 {
     defineTypeNameAndDebug(volFieldValue, 0);
-    addToRunTimeSelectionTable(fieldValue, volFieldValue, dictionary);
+    addToRunTimeSelectionTable(fieldValue, volFieldValue, runTime);
     addToRunTimeSelectionTable(functionObject, volFieldValue, dictionary);
 }
 }

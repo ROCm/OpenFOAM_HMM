@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::functionObjects::fieldValue>
 Foam::functionObjects::fieldValue::New
 (
     const word& name,
-    const objectRegistry& obr,
+    const Time& runTime,
     const dictionary& dict,
     const bool output
 )
@@ -46,7 +46,7 @@ Foam::functionObjects::fieldValue::New
         Info<< "Selecting " << typeName << ' ' << modelType << endl;
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto cstrIter = runTimeConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
@@ -55,12 +55,13 @@ Foam::functionObjects::fieldValue::New
             dict,
             typeName,
             modelType,
-            *dictionaryConstructorTablePtr_
+            *runTimeConstructorTablePtr_
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<fieldValue>(cstrIter()(name, obr, dict));
+    return autoPtr<fieldValue>(cstrIter()(name, runTime, dict));
 }
+
 
 
 // ************************************************************************* //

@@ -98,7 +98,6 @@ class fieldValue
     public fvMeshFunctionObject,
     public writeFile
 {
-
 protected:
 
     // Protected Data
@@ -141,15 +140,14 @@ public:
         (
             autoPtr,
             fieldValue,
-            dictionary,
+            runTime,
             (
                 const word& name,
-                const objectRegistry& obr,
+                const Time& runTime,
                 const dictionary& dict
             ),
-            (name, obr, dict)
+            (name, runTime, dict)
         );
-
 
     // Constructors
 
@@ -175,7 +173,7 @@ public:
         static autoPtr<fieldValue> New
         (
             const word& name,
-            const objectRegistry& obr,
+            const Time& runTime,
             const dictionary& dict,
             const bool output = true
         );
