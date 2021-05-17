@@ -49,6 +49,14 @@ Description
     - mesh with cells put into cellZones (-makeCellZones)
 
     Note:
+
+    - multiple cellZones can be combined into a single cellZone (cluster)
+    for further analysis using the 'combineZones' option:
+        -combineZones '((zoneA "zoneB.*")(none otherZone))
+    This can be combined with e.g. 'cellZones' or 'cellZonesOnly'. The
+    corresponding region name will be the names of the cellZones combined e.g.
+        zoneA_zoneB0_zoneB1
+
     - cellZonesOnly does not do a walk and uses the cellZones only. Use
     this if you don't mind having disconnected domains in a single region.
     This option requires all cells to be in one (and one only) cellZone.
@@ -62,9 +70,8 @@ Description
 
     - Should work in parallel.
     cellZones can differ on either side of processor boundaries in which case
-    the faces get moved from processor patch to directMapped patch. Not
-    the faces get moved from processor patch to mapped patch. Not
-    very well tested.
+    the faces get moved from processor patch to mapped patch. Not very well
+    tested.
 
     - If a cell zone gets split into more than one region it can detect
     the largest matching region (-sloppyCellZones). This will accept any
@@ -1136,53 +1143,127 @@ label findCorrespondingRegion
 }
 
 
-// Get zone per cell
-// - non-unique zoning
-// - coupled zones
-void getZoneID
+void getClusterID
 (
     const polyMesh& mesh,
     const cellZoneMesh& cellZones,
-    labelList& zoneID,
-    labelList& neiZoneID
+    const wordList& clusterNames,
+    const labelListList& clusterToZones,
+    labelList& clusterID,
+    labelList& neiClusterID
 )
 {
     // Existing zoneID
-    zoneID.setSize(mesh.nCells());
-    zoneID = -1;
+    clusterID.setSize(mesh.nCells());
+    clusterID = -1;
 
-    forAll(cellZones, zoneI)
+    forAll(clusterToZones, clusterI)
     {
-        const cellZone& cz = cellZones[zoneI];
-
-        forAll(cz, i)
+        for (const label zoneI : clusterToZones[clusterI])
         {
-            label celli = cz[i];
-            if (zoneID[celli] == -1)
+            const cellZone& cz = cellZones[zoneI];
+
+            forAll(cz, i)
             {
-                zoneID[celli] = zoneI;
-            }
-            else
-            {
-                FatalErrorInFunction
-                    << "Cell " << celli << " with cell centre "
-                    << mesh.cellCentres()[celli]
-                    << " is multiple zones. This is not allowed." << endl
-                    << "It is in zone " << cellZones[zoneID[celli]].name()
-                    << " and in zone " << cellZones[zoneI].name()
-                    << exit(FatalError);
+                label celli = cz[i];
+                if (clusterID[celli] == -1)
+                {
+                    clusterID[celli] = clusterI;
+                }
+                else
+                {
+                    FatalErrorInFunction
+                        << "Cell " << celli << " with cell centre "
+                        << mesh.cellCentres()[celli]
+                        << " is multiple zones. This is not allowed." << endl
+                        << "It is in zone " << clusterNames[clusterID[celli]]
+                        << " and in zone " << clusterNames[clusterI]
+                        << exit(FatalError);
+                }
             }
         }
     }
 
     // Neighbour zoneID.
-    neiZoneID.setSize(mesh.nBoundaryFaces());
+    syncTools::swapBoundaryCellList(mesh, clusterID, neiClusterID);
+}
 
-    forAll(neiZoneID, i)
+
+word makeRegionName
+(
+    const cellZoneMesh& czs,
+    const label regioni,
+    const labelList& zoneIDs
+)
+{
+    // Synthesise region name. Equals the zone name if cluster consist of only
+    // one zone
+
+    if (zoneIDs.empty())
     {
-        neiZoneID[i] = zoneID[mesh.faceOwner()[i+mesh.nInternalFaces()]];
+        return word("domain") + Foam::name(regioni);
     }
-    syncTools::swapBoundaryFaceList(mesh, neiZoneID);
+    else
+    {
+        // Synthesize name from appended cellZone names
+        word regionName(czs[zoneIDs[0]].name());
+        for (label i = 1; i < zoneIDs.size(); i++)
+        {
+            regionName += "_" + czs[zoneIDs[i]].name();
+        }
+        return regionName;
+    }
+}
+
+
+void makeClusters
+(
+    const List<wordRes>& zoneClusters,
+    const cellZoneMesh& cellZones,
+    wordList& clusterNames,
+    labelListList& clusterToZones,
+    labelList& zoneToCluster
+)
+{
+    // Check if there are clustering for zones. If none every zone goes into
+    // its own cluster.
+
+    clusterNames.clear();
+    clusterToZones.clear();
+    zoneToCluster.setSize(cellZones.size());
+    zoneToCluster = -1;
+
+    if (zoneClusters.size())
+    {
+        forAll(zoneClusters, clusteri)
+        {
+            const labelList zoneIDs(cellZones.indices(zoneClusters[clusteri]));
+            UIndirectList<label>(zoneToCluster, zoneIDs) = clusteri;
+            clusterNames.append(makeRegionName(cellZones, clusteri, zoneIDs));
+            clusterToZones.append(std::move(zoneIDs));
+        }
+
+        // Unclustered zone
+        forAll(zoneToCluster, zonei)
+        {
+            if (zoneToCluster[zonei] == -1)
+            {
+                clusterNames.append(cellZones[zonei].name());
+                clusterToZones.append(labelList(1, zonei));
+                zoneToCluster[zonei] = clusterToZones.size();
+            }
+        }
+    }
+    else
+    {
+        for (const auto& cellZone : cellZones)
+        {
+            const label nClusters = clusterToZones.size();
+            clusterNames.append(cellZone.name());
+            clusterToZones.append(labelList(1, cellZone.index()));
+            zoneToCluster[cellZone.index()] = nClusters;
+        }
+    }
 }
 
 
@@ -1191,82 +1272,68 @@ void matchRegions
     const bool sloppyCellZones,
     const polyMesh& mesh,
 
+    const wordList& clusterNames,
+    const labelListList& clusterToZones,
+    const labelList& clusterID,
+
     const label nCellRegions,
     const labelList& cellRegion,
 
-    labelList& regionToZone,
+    labelListList& regionToZones,
     wordList& regionNames,
     labelList& zoneToRegion
 )
 {
     const cellZoneMesh& cellZones = mesh.cellZones();
 
-    regionToZone.setSize(nCellRegions, -1);
+    regionToZones.setSize(nCellRegions);
+    regionToZones = labelList();
     regionNames.setSize(nCellRegions);
+    regionNames = word::null;
     zoneToRegion.setSize(cellZones.size(), -1);
 
-    // Get current per cell zoneID
-    labelList zoneID(mesh.nCells(), -1);
-    labelList neiZoneID(mesh.nBoundaryFaces());
-    getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
-    // Sizes per cellzone
-    labelList zoneSizes(cellZones.size(), Zero);
+    // Sizes per cluster
+    labelList clusterSizes(clusterToZones.size(), Zero);
+    forAll(clusterToZones, clusterI)
     {
-        List<wordList> zoneNames(Pstream::nProcs());
-        zoneNames[Pstream::myProcNo()] = cellZones.names();
-        Pstream::gatherList(zoneNames);
-        Pstream::scatterList(zoneNames);
-
-        forAll(zoneNames, proci)
+        for (const label zoneI : clusterToZones[clusterI])
         {
-            if (zoneNames[proci] != zoneNames[0])
-            {
-                FatalErrorInFunction
-                    << "cellZones not synchronised across processors." << endl
-                    << "Master has cellZones " << zoneNames[0] << endl
-                    << "Processor " << proci
-                    << " has cellZones " << zoneNames[proci]
-                    << exit(FatalError);
-            }
+            clusterSizes[clusterI] += cellZones[zoneI].size();
         }
-
-        forAll(cellZones, zoneI)
-        {
-            zoneSizes[zoneI] = returnReduce
-            (
-                cellZones[zoneI].size(),
-                sumOp<label>()
-            );
-        }
+        reduce(clusterSizes[clusterI], sumOp<label>());
     }
-
 
     if (sloppyCellZones)
     {
         Info<< "Trying to match regions to existing cell zones;"
             << " region can be subset of cell zone." << nl << endl;
 
-        forAll(cellZones, zoneI)
+        forAll(clusterToZones, clusterI)
         {
             label regionI = findCorrespondingRegion
             (
-                zoneID,
+                clusterID,
                 cellRegion,
                 nCellRegions,
-                zoneI,
-                label(0.5*zoneSizes[zoneI]) // minimum overlap
+                clusterI,
+                label(0.5*clusterSizes[clusterI]) // minimum overlap
             );
 
             if (regionI != -1)
             {
                 Info<< "Sloppily matched region " << regionI
                     //<< " size " << regionSizes[regionI]
-                    << " to zone " << zoneI << " size " << zoneSizes[zoneI]
+                    << " to cluster " << clusterI
+                    << " size " << clusterSizes[clusterI]
                     << endl;
-                zoneToRegion[zoneI] = regionI;
-                regionToZone[regionI] = zoneI;
-                regionNames[regionI] = cellZones[zoneI].name();
+                UIndirectList<label>
+                (
+                    zoneToRegion,
+                    clusterToZones[clusterI]
+                ) = regionI;
+                regionToZones[regionI] = clusterToZones[clusterI];
+                regionNames[regionI] = clusterNames[clusterI];
             }
         }
     }
@@ -1274,32 +1341,38 @@ void matchRegions
     {
         Info<< "Trying to match regions to existing cell zones." << nl << endl;
 
-        forAll(cellZones, zoneI)
+        forAll(clusterToZones, clusterI)
         {
             label regionI = findCorrespondingRegion
             (
-                zoneID,
+                clusterID,
                 cellRegion,
                 nCellRegions,
-                zoneI,
-                1               // minimum overlap
+                clusterI,
+                clusterSizes[clusterI]  // require exact match
             );
 
             if (regionI != -1)
             {
-                zoneToRegion[zoneI] = regionI;
-                regionToZone[regionI] = zoneI;
-                regionNames[regionI] = cellZones[zoneI].name();
+                UIndirectList<label>
+                (
+                    zoneToRegion,
+                    clusterToZones[clusterI]
+                ) = regionI;
+                regionToZones[regionI] = clusterToZones[clusterI];
+                regionNames[regionI] = clusterNames[clusterI];
             }
         }
     }
     // Allocate region names for unmatched regions.
-    forAll(regionToZone, regionI)
+    forAll(regionNames, regionI)
     {
-        if (regionToZone[regionI] == -1)
-        {
-            regionNames[regionI] = "domain" + Foam::name(regionI);
-        }
+        regionNames[regionI] = makeRegionName
+        (
+            cellZones,
+            regionI,
+            regionToZones[regionI]
+        );
     }
 }
 
@@ -1383,6 +1456,12 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "combineZones",
+        "lists of zones",
+        "Combine zones in follow-on analysis"
+    );
+    argList::addOption
+    (
         "blockedFaces",
         "faceSet",
         "Specify additional region boundaries that walking does not cross"
@@ -1445,6 +1524,7 @@ int main(int argc, char *argv[])
     const bool useCellZones     = args.found("cellZones");
     const bool useCellZonesOnly = args.found("cellZonesOnly");
     const bool useCellZonesFile = args.found("cellZonesFileOnly");
+    const bool combineZones     = args.found("combineZones");
     const bool overwrite        = args.found("overwrite");
     const bool detectOnly       = args.found("detectOnly");
     const bool sloppyCellZones  = args.found("sloppyCellZones");
@@ -1491,14 +1571,14 @@ int main(int argc, char *argv[])
     }
 
 
-    const cellZoneMesh& cellZones = mesh.cellZones();
+    // Make sure cellZone names consistent across processors
+    mesh.cellZones().checkParallelSync(true);
 
-    // Existing zoneID
-    labelList zoneID(mesh.nCells(), -1);
-    // Neighbour zoneID.
-    labelList neiZoneID(mesh.nBoundaryFaces());
-    getZoneID(mesh, cellZones, zoneID, neiZoneID);
-
+    List<wordRes> zoneClusters;
+    if (combineZones)
+    {
+        zoneClusters = args.get<List<wordRes>>("combineZones");
+    }
 
 
     // Determine per cell the region it belongs to
@@ -1506,8 +1586,8 @@ int main(int argc, char *argv[])
 
     // cellRegion is the labelList with the region per cell.
     labelList cellRegion;
-    // Region per zone
-    labelList regionToZone;
+    // Region to zone(s)
+    labelListList regionToZones;
     // Name of region
     wordList regionNames;
     // Zone to region
@@ -1520,7 +1600,35 @@ int main(int argc, char *argv[])
             << " This requires all"
             << " cells to be in one and only one cellZone." << nl << endl;
 
-        label unzonedCelli = zoneID.find(-1);
+        // Collect sets of zones into clusters. If no cluster is just an identity
+        // list (cluster 0 is cellZone 0 etc.)
+        wordList clusterNames;
+        labelListList clusterToZones;
+        labelList zoneToCluster;
+        makeClusters
+        (
+            zoneClusters,
+            mesh.cellZones(),
+            clusterNames,
+            clusterToZones,
+            zoneToCluster
+        );
+
+        // Existing clusterID
+        labelList clusterID(mesh.nCells(), -1);
+        // Neighbour clusterID.
+        labelList neiClusterID(mesh.nBoundaryFaces());
+        getClusterID
+        (
+            mesh,
+            mesh.cellZones(),
+            clusterNames,
+            clusterToZones,
+            clusterID,
+            neiClusterID
+        );
+
+        label unzonedCelli = clusterID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction
@@ -1531,17 +1639,11 @@ int main(int argc, char *argv[])
                 << " is not in a cellZone. There might be more unzoned cells."
                 << exit(FatalError);
         }
-        cellRegion = zoneID;
+        cellRegion = clusterID;
         nCellRegions = gMax(cellRegion)+1;
-        regionToZone.setSize(nCellRegions);
-        regionNames.setSize(nCellRegions);
-        zoneToRegion.setSize(cellZones.size(), -1);
-        for (label regionI = 0; regionI < nCellRegions; regionI++)
-        {
-            regionToZone[regionI] = regionI;
-            zoneToRegion[regionI] = regionI;
-            regionNames[regionI] = cellZones[regionI].name();
-        }
+        zoneToRegion = zoneToCluster;
+        regionToZones = clusterToZones;
+        regionNames = clusterNames;
     }
     else if (useCellZonesFile)
     {
@@ -1565,11 +1667,35 @@ int main(int argc, char *argv[])
             mesh
         );
 
-        labelList newZoneID(mesh.nCells(), -1);
-        labelList newNeiZoneID(mesh.nBoundaryFaces());
-        getZoneID(mesh, newCellZones, newZoneID, newNeiZoneID);
+        wordList clusterNames;
+        labelListList clusterToZones;
+        labelList zoneToCluster;
+        makeClusters
+        (
+            zoneClusters,
+            newCellZones,
+            clusterNames,
+            clusterToZones,
+            zoneToCluster
+        );
 
-        label unzonedCelli = newZoneID.find(-1);
+
+        // Existing clusterID
+        labelList clusterID(mesh.nCells(), -1);
+        // Neighbour clusterID.
+        labelList neiClusterID(mesh.nBoundaryFaces());
+        getClusterID
+        (
+            mesh,
+            newCellZones,
+            clusterNames,
+            clusterToZones,
+            clusterID,
+            neiClusterID
+        );
+
+
+        label unzonedCelli = clusterID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction
@@ -1580,17 +1706,11 @@ int main(int argc, char *argv[])
                 << " is not in a cellZone. There might be more unzoned cells."
                 << exit(FatalError);
         }
-        cellRegion = newZoneID;
+        cellRegion = clusterID;
         nCellRegions = gMax(cellRegion)+1;
-        zoneToRegion.setSize(newCellZones.size(), -1);
-        regionToZone.setSize(nCellRegions);
-        regionNames.setSize(nCellRegions);
-        for (label regionI = 0; regionI < nCellRegions; regionI++)
-        {
-            regionToZone[regionI] = regionI;
-            zoneToRegion[regionI] = regionI;
-            regionNames[regionI] = newCellZones[regionI].name();
-        }
+        zoneToRegion = zoneToCluster;
+        regionToZones = clusterToZones;
+        regionNames = clusterNames;
     }
     else
     {
@@ -1616,6 +1736,35 @@ int main(int argc, char *argv[])
             }
         }
 
+        // Collect sets of zones into clusters. If no cluster is just an
+        // identity list (cluster 0 is cellZone 0 etc.)
+        wordList clusterNames;
+        labelListList clusterToZones;
+        labelList zoneToCluster;
+        makeClusters
+        (
+            zoneClusters,
+            mesh.cellZones(),
+            clusterNames,
+            clusterToZones,
+            zoneToCluster
+        );
+
+        // Existing clusterID
+        labelList clusterID(mesh.nCells(), -1);
+        // Neighbour clusterID.
+        labelList neiClusterID(mesh.nBoundaryFaces());
+        getClusterID
+        (
+            mesh,
+            mesh.cellZones(),
+            clusterNames,
+            clusterToZones,
+            clusterID,
+            neiClusterID
+        );
+
+
         // Imply from differing cellZones
         if (useCellZones)
         {
@@ -1623,21 +1772,23 @@ int main(int argc, char *argv[])
 
             for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
             {
-                label own = mesh.faceOwner()[facei];
-                label nei = mesh.faceNeighbour()[facei];
-
-                if (zoneID[own] != zoneID[nei])
+                label ownCluster = clusterID[mesh.faceOwner()[facei]];
+                label neiCluster = clusterID[mesh.faceNeighbour()[facei]];
+                
+                if (ownCluster != neiCluster)
                 {
                     blockedFace[facei] = true;
                 }
             }
 
             // Different cellZones on either side of processor patch.
-            forAll(neiZoneID, i)
+            forAll(neiClusterID, i)
             {
                 label facei = i+mesh.nInternalFaces();
+                label ownCluster = clusterID[mesh.faceOwner()[facei]];
+                label neiCluster = neiClusterID[i];
 
-                if (zoneID[mesh.faceOwner()[facei]] != neiZoneID[i])
+                if (ownCluster != neiCluster)
                 {
                     blockedFace[facei] = true;
                 }
@@ -1649,15 +1800,23 @@ int main(int argc, char *argv[])
         nCellRegions = regions.nRegions();
         cellRegion.transfer(regions);
 
-        // Make up region names. If possible match them to existing zones.
+        // Match regions to zones
         matchRegions
         (
             sloppyCellZones,
             mesh,
+
+            // cluster-to-zone and cluster-to-cell addressing
+            clusterNames,
+            clusterToZones,
+            clusterID,
+
+            // cell-to-region addressing
             nCellRegions,
             cellRegion,
 
-            regionToZone,
+            // matched zones
+            regionToZones,
             regionNames,
             zoneToRegion
         );
@@ -1665,9 +1824,9 @@ int main(int argc, char *argv[])
         // Override any default region names if single region selected
         if (largestOnly || insidePoint)
         {
-            forAll(regionToZone, regionI)
+            forAll(regionToZones, regionI)
             {
-                if (regionToZone[regionI] == -1)
+                if (regionToZones[regionI].empty())
                 {
                     if (overwrite)
                     {
@@ -1713,7 +1872,7 @@ int main(int argc, char *argv[])
 
     forAll(regionSizes, regionI)
     {
-        Info<< regionI << '\t' << regionSizes[regionI] << nl;
+        Info<< regionI << "\t\t" << regionSizes[regionI] << nl;
     }
     Info<< endl;
 
@@ -1722,9 +1881,10 @@ int main(int argc, char *argv[])
     // Print region to zone
     Info<< "Region\tZone\tName" << nl
         << "------\t----\t----" << endl;
-    forAll(regionToZone, regionI)
+    forAll(regionToZones, regionI)
     {
-        Info<< regionI << '\t' << regionToZone[regionI] << '\t'
+        Info<< regionI << "\t\t" << flatOutput(regionToZones[regionI])
+            << '\t'
             << regionNames[regionI] << nl;
     }
     Info<< endl;
@@ -1771,8 +1931,8 @@ int main(int argc, char *argv[])
         const edge& e = interfaces[interI];
 
         Info<< interI
-            << "\t\t" << e[0] << '\t' << e[1]
-            << '\t' << interfaceSizes[interI] << nl;
+            << "\t\t\t" << e[0] << "\t\t" << e[1]
+            << "\t\t" << interfaceSizes[interI] << nl;
     }
     Info<< endl;
 
@@ -1844,26 +2004,28 @@ int main(int argc, char *argv[])
 
         for (label regionI = 0; regionI < nCellRegions; regionI++)
         {
-            label zoneI = regionToZone[regionI];
+            const labelList& zones = regionToZones[regionI];
 
-            if (zoneI != -1)
+            if (zones.size() == 1 && zones[0] != -1)
             {
+                // Existing zone
+                const label zoneI = zones[0];
                 Info<< "    Region " << regionI << " : corresponds to existing"
                     << " cellZone "
-                    << zoneI << ' ' << cellZones[zoneI].name() << endl;
+                    << zoneI << ' ' << mesh.cellZones()[zoneI].name() << endl;
             }
             else
             {
                 // Create new cellZone.
-                labelList regionCells = findIndices(cellRegion, regionI);
+                const labelList regionCells(findIndices(cellRegion, regionI));
 
-                word zoneName = "region" + Foam::name(regionI);
+                const word zoneName = "region" + Foam::name(regionI);
 
-                zoneI = cellZones.findZoneID(zoneName);
+                label zoneI = mesh.cellZones().findZoneID(zoneName);
 
                 if (zoneI == -1)
                 {
-                    zoneI = cellZones.size();
+                    zoneI = mesh.cellZones().size();
                     mesh.cellZones().setSize(zoneI+1);
                     mesh.cellZones().set
                     (
@@ -1873,7 +2035,7 @@ int main(int argc, char *argv[])
                             zoneName,           //name
                             std::move(regionCells), //addressing
                             zoneI,              //index
-                            cellZones           //cellZoneMesh
+                            mesh.cellZones()    //cellZoneMesh
                         )
                     );
                 }
@@ -1883,7 +2045,7 @@ int main(int argc, char *argv[])
                     mesh.cellZones()[zoneI] = regionCells;
                 }
                 Info<< "    Region " << regionI << " : created new cellZone "
-                    << zoneI << ' ' << cellZones[zoneI].name() << endl;
+                    << zoneI << ' ' << mesh.cellZones()[zoneI].name() << endl;
             }
         }
         mesh.cellZones().writeOpt(IOobject::AUTO_WRITE);
@@ -1909,10 +2071,8 @@ int main(int argc, char *argv[])
 
         Info<< "Writing cellSets corresponding to cellZones." << nl << endl;
 
-        forAll(cellZones, zoneI)
+        for (const auto& cz : mesh.cellZones())
         {
-            const cellZone& cz = cellZones[zoneI];
-
             cellSet(mesh, cz.name(), cz).write();
         }
     }
