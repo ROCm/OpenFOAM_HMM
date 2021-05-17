@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,7 @@ Description
 
     E.g.
     \verbatim
-        a #calc "0.123";
+        a #eval "0.123";
         b 1.23e-1;
 
         #ifeq $a $b
@@ -90,45 +91,14 @@ class ifeqEntry
 :
     public functionEntry
 {
-
 protected:
+
+    // Data Types
 
     typedef Tuple2<fileName, label> filePos;
 
+
     // Protected Member Functions
-
-        //- Read tokens. Skip dummy tokens
-        static void readToken(token& t, Istream& is);
-
-        //- Expand a variable (string/word/var starting with '$')
-        static token expand
-        (
-            const dictionary& dict,
-            const string& keyword,
-            const token& t
-        );
-
-        //- Expand a string/word/var token
-        static token expand
-        (
-            const dictionary& dict,
-            const token& t
-        );
-
-        static bool equalToken
-        (
-            const token& t1,
-            const token& t2
-        );
-
-        //- Consume tokens until reached a specific word
-        static void skipUntil
-        (
-            DynamicList<filePos>& stack,
-            const dictionary& parentDict,
-            const word& endWord,
-            Istream& is
-        );
 
         static bool evaluate
         (
@@ -154,6 +124,41 @@ protected:
         (
             DynamicList<filePos>& stack,
             dictionary& parentDict,
+            Istream& is
+        );
+
+
+private:
+
+    // Private Member Functions
+
+        //- Read tokens. Skip dummy tokens
+        static void readToken(token& t, Istream& is);
+
+        //- Expand a variable (string/word/var starting with '$')
+        static token expandToken
+        (
+            const dictionary& dict,
+            const string& keyword,
+            const token& t
+        );
+
+        //- Expand a string/word/var token
+        static token expandToken
+        (
+            const dictionary& dict,
+            const token& t
+        );
+
+        //- Test for equality
+        static bool equalToken(const token& t1, const token& t2);
+
+        //- Consume tokens until reached a specific directive
+        static void skipUntil
+        (
+            DynamicList<filePos>& stack,
+            const dictionary& parentDict,
+            const word& endDirective,  //!< end directive (without '#')
             Istream& is
         );
 

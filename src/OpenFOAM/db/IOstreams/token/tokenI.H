@@ -66,8 +66,8 @@ inline bool Foam::token::isseparator(int c) noexcept
         case token::COLON :
         case token::COMMA :
         case token::ASSIGN :
-        case token::ADD :
-        // Excluded token::SUBTRACT since it could start a number
+        case token::PLUS :
+        // Excluded token::MINUS since it could start a number
         case token::MULTIPLY :
         case token::DIVIDE :
         {
@@ -121,6 +121,7 @@ inline Foam::token::token(const token& tok)
         }
 
         case tokenType::STRING:
+        case tokenType::EXPRESSION:
         case tokenType::VARIABLE:
         case tokenType::VERBATIM:
         {
@@ -265,6 +266,7 @@ inline void Foam::token::reset()
         }
 
         case tokenType::STRING:
+        case tokenType::EXPRESSION:
         case tokenType::VARIABLE:
         case tokenType::VERBATIM:
         {
@@ -357,6 +359,7 @@ inline bool Foam::token::setType(token::tokenType tokType) noexcept
         break;
 
         case tokenType::STRING:
+        case tokenType::EXPRESSION:
         case tokenType::VARIABLE:
         case tokenType::VERBATIM:
         {
@@ -364,6 +367,7 @@ inline bool Foam::token::setType(token::tokenType tokType) noexcept
             {
                 // could also go from WORD to STRING etc - to be decided
                 case tokenType::STRING:
+                case tokenType::EXPRESSION:
                 case tokenType::VARIABLE:
                 case tokenType::VERBATIM:
                     type_ = tokType;
@@ -651,9 +655,16 @@ inline bool Foam::token::isString() const noexcept
     return
     (
         type_ == tokenType::STRING
+     || type_ == tokenType::EXPRESSION
      || type_ == tokenType::VARIABLE
      || type_ == tokenType::VERBATIM
     );
+}
+
+
+inline bool Foam::token::isExpression() const noexcept
+{
+    return (type_ == tokenType::EXPRESSION);
 }
 
 
@@ -680,6 +691,7 @@ inline const Foam::string& Foam::token::stringToken() const
     if
     (
         type_ == tokenType::STRING
+     || type_ == tokenType::EXPRESSION
      || type_ == tokenType::VARIABLE
      || type_ == tokenType::VERBATIM
     )
@@ -754,6 +766,7 @@ inline void Foam::token::operator=(const token& tok)
         break;
 
         case tokenType::STRING:
+        case tokenType::EXPRESSION:
         case tokenType::VARIABLE:
         case tokenType::VERBATIM:
         {
@@ -903,6 +916,7 @@ inline bool Foam::token::operator==(const token& tok) const
             return *data_.wordPtr == *tok.data_.wordPtr;
 
         case tokenType::STRING:
+        case tokenType::EXPRESSION:
         case tokenType::VARIABLE:
         case tokenType::VERBATIM:
             return *data_.stringPtr == *tok.data_.stringPtr;

@@ -71,11 +71,13 @@ class token
 public:
 
     //- Enumeration defining the types of token.
-    //  Since these values are also used to tag content in Pstream,
-    //  the maximum number of types is limited to 30.
-    enum tokenType
+    //  Since the enumeration is used to tag content in Pstream, it is of
+    //  type \c char and shall have values that do not overlap with regular
+    //  punctuation characters.
+    enum tokenType : char
     {
-        UNDEFINED = 0,    //!< An undefined token-type
+        UNDEFINED = '\0',     //!< An undefined token-type
+        ERROR     = '\x80',   //!< Token error encountered
 
         // Fundamental types
         FLAG,             //!< stream flag (1-byte bitmask)
@@ -86,14 +88,18 @@ public:
         DOUBLE,           //!< double (double-precision) type
 
         // Pointer types
-        WORD,             //!< A Foam::word
-        STRING,           //!< A string (usually double-quoted)
-        DIRECTIVE,        //!< A dictionary \c \#directive (word variant)
-        VARIABLE,         //!< A dictionary \c \$variable (string variant)
-        VERBATIM,         //!< Verbatim string content
+        WORD,             //!< Foam::word
+        STRING,           //!< Foam::string (usually double-quoted)
         COMPOUND,         //!< Compound type such as \c List\<label\> etc.
 
-        ERROR,            //!< A token error encountered
+        DIRECTIVE,        //!< Word-variant: dictionary \c \#directive
+                          //!< stored with sigil
+        EXPRESSION,       //!< String-variant: math expression for evaluation
+                          //!< stored with delimiters
+        VARIABLE,         //!< String-variant: dictionary \c \$variable
+                          //!< stored with sigil
+        VERBATIM,         //!< String-variant: verbatim string content
+                          //!< stored without delimiters
 
         // Aliases
         FLOAT_SCALAR = FLOAT,
@@ -122,16 +128,16 @@ public:
         COLON          = ':',   //!< Colon [#isseparator]
         SEMICOLON      = ';',   //!< Semicolon [#isseparator]
         COMMA          = ',',   //!< Comma [#isseparator]
-        HASH           = '#',   //!< Hash - directive or verbatim string
-        DOLLAR         = '$',   //!< Dollar - start variable
+        HASH           = '#',   //!< Hash - directive or start verbatim string
+        DOLLAR         = '$',   //!< Dollar - start variable or expression
         QUESTION       = '?',   //!< Question mark (eg, ternary)
         ATSYM          = '@',   //!< The 'at' symbol
         SQUOTE         = '\'',  //!< Single quote
         DQUOTE         = '"',   //!< Double quote
 
         ASSIGN         = '=',   //!< Assignment/equals [#isseparator]
-        ADD            = '+',   //!< Addition [#isseparator]
-        SUBTRACT       = '-',   //!< Subtract or start of negative number
+        PLUS           = '+',   //!< Addition [#isseparator]
+        MINUS          = '-',   //!< Subtract or start of negative number
         MULTIPLY       = '*',   //!< Multiply [#isseparator]
         DIVIDE         = '/',   //!< Divide [#isseparator]
 
@@ -144,6 +150,8 @@ public:
 
         // With semantically meaning
 
+        ADD            = PLUS,      //!< Addition [#isseparator]
+        SUBTRACT       = MINUS,     //!< Subtract or start of negative number
         END_STATEMENT  = SEMICOLON, //!< End entry [#isseparator]
         BEGIN_LIST     = LPAREN,    //!< Begin list [#isseparator]
         END_LIST       = RPAREN,    //!< End list [#isseparator]
@@ -471,10 +479,10 @@ public:
         //- Token is LABEL, FLOAT or DOUBLE
         inline bool isNumber() const noexcept;
 
-        //- Token is WORD or DIRECTIVE word
+        //- Token is word-variant (WORD, DIRECTIVE)
         inline bool isWord() const noexcept;
 
-        //- Token is WORD or DIRECTIVE word and equal to parameter
+        //- Token is word-variant and equal to parameter
         inline bool isWord(const std::string& s) const;
 
         //- Token is DIRECTIVE (word variant)
@@ -483,8 +491,11 @@ public:
         //- Token is (quoted) STRING (string variant)
         inline bool isQuotedString() const noexcept;
 
-        //- Token is STRING, VARIABLE or VERBATIM (string variant)
+        //- Token is string-variant (STRING, EXPRESSION, VARIABLE, VERBATIM)
         inline bool isString() const noexcept;
+
+        //- Token is EXPRESSION (string variant)
+        inline bool isExpression() const noexcept;
 
         //- Token is VARIABLE (string variant)
         inline bool isVariable() const noexcept;
@@ -492,7 +503,8 @@ public:
         //- Token is VERBATIM string (string variant)
         inline bool isVerbatim() const noexcept;
 
-        //- Token is WORD, DIRECTIVE, STRING, VARIABLE or VERBATIM
+        //- Token is word-variant or string-variant
+        //- (WORD, DIRECTIVE, STRING, EXPRESSION, VARIABLE, VERBATIM)
         inline bool isStringType() const noexcept;
 
         //- Token is COMPOUND
@@ -542,7 +554,8 @@ public:
 
         //- Return const reference to the string contents.
         //  Report FatalIOError and return \b "" if token is not a
-        //  STRING, VARIABLE, VERBATIM or an upcast WORD or DIRECTIVE
+        //  STRING, EXPRESSION, VARIABLE, VERBATIM
+        //  or an upcast WORD or DIRECTIVE
         inline const string& stringToken() const;
 
         //- Read access for compound token
@@ -599,16 +612,16 @@ public:
         //- Copy assign from double
         inline void operator=(const doubleScalar val);
 
-        //- Copy assign from word
+        //- Copy assign from word content
         inline void operator=(const word& w);
 
-        //- Copy assign from string
+        //- Copy assign from string content
         inline void operator=(const string& str);
 
-        //- Move assign from word
+        //- Move assign from word content
         inline void operator=(word&& w);
 
-        //- Move assign from string
+        //- Move assign from string content
         inline void operator=(string&& str);
 
         //- Assign compound with reference counting to token

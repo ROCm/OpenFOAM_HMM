@@ -202,14 +202,19 @@ bool Foam::UOPstream::write(const token& tok)
             return true;
         }
 
+        // The word-variants
+        case token::tokenType::WORD :
         case token::tokenType::DIRECTIVE :
         {
-            writeToBuffer(char(token::tokenType::DIRECTIVE));
+            writeToBuffer(char(tok.type()));
             writeStringToBuffer(tok.wordToken());
 
             return true;
         }
 
+        // The string-variants
+        case token::tokenType::STRING :
+        case token::tokenType::EXPRESSION :
         case token::tokenType::VARIABLE :
         case token::tokenType::VERBATIM :
         {

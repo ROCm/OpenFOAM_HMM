@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,16 +145,37 @@ Istream& operator>>(Istream& is, Scalar& val)
         return is;
     }
 
+    // Accept separated '-' (or '+') while expecting a number.
+    // This can arise during dictionary expansions (Eg, -$value)
+
+    char prefix = 0;
+    if (t.isPunctuation())
+    {
+        prefix = t.pToken();
+        if (prefix == token::PLUS || prefix == token::MINUS)
+        {
+            is >> t;
+        }
+    }
+
     if (t.isNumber())
     {
-        val = t.number();
+        val =
+        (
+            (prefix == token::MINUS)
+          ? (0 - t.number())
+          : t.number()
+        );
     }
     else
     {
         FatalIOErrorInFunction(is)
-            << "Wrong token type - expected scalar value, found "
-            << t.info()
-            << exit(FatalIOError);
+            << "Wrong token type - expected scalar value, found ";
+        if (prefix == token::PLUS || prefix == token::MINUS)
+        {
+            FatalIOError << '\'' << prefix << "' followed by ";
+        }
+        FatalIOError << t.info() << exit(FatalIOError);
         is.setBad();
         return is;
     }

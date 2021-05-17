@@ -90,7 +90,8 @@ bool Foam::functionEntry::execute
 
     if (!executedictionaryIstreamMemberFunctionTablePtr_)
     {
-        cerr<< FUNCTION_NAME << nl
+        std::cerr
+            << FUNCTION_NAME << nl
             << "Not yet initialized, function = "
             << functionName.c_str() << std::endl;
 
@@ -128,7 +129,8 @@ bool Foam::functionEntry::execute
 
     if (!executeprimitiveEntryIstreamMemberFunctionTablePtr_)
     {
-        cerr<< FUNCTION_NAME << nl
+        std::cerr
+            << FUNCTION_NAME << nl
             << "Not yet initialized, function = "
             << functionName.c_str() << std::endl;
 

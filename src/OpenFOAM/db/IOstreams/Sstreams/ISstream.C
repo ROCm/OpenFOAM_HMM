@@ -199,8 +199,8 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::COLON :
         case token::COMMA :
         case token::ASSIGN :
-        case token::ADD :
-        // NB: token::SUBTRACT handled later as the possible start of a Number
+        case token::PLUS :
+        // NB: token::MINUS handled later as the possible start of a Number
         case token::MULTIPLY :
         case token::DIVIDE :
         {
@@ -368,7 +368,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 if (nChar == 1 && buf[0] == '-')
                 {
                     // A single '-' is punctuation
-                    t = token::punctuationToken(token::SUBTRACT);
+                    t = token::punctuationToken(token::MINUS);
                 }
                 else if (labelVal && Foam::read(buf, labelVal))
                 {

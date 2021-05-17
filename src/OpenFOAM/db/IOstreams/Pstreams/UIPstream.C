@@ -218,8 +218,8 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         case token::COLON :
         case token::COMMA :
         case token::ASSIGN :
-        case token::ADD :
-        case token::SUBTRACT :
+        case token::PLUS :
+        case token::MINUS :
         case token::MULTIPLY :
         case token::DIVIDE :
         {
@@ -227,12 +227,12 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // Word/directive
+        // The word-variants
         case token::tokenType::WORD :
         case token::tokenType::DIRECTIVE :
         {
             word val;
-            if (read(val))
+            if (readStringFromBuffer(val))
             {
                 if (token::compound::isCompound(val))
                 {
@@ -251,13 +251,14 @@ Foam::Istream& Foam::UIPstream::read(token& t)
             return *this;
         }
 
-        // String types
+        // The string-variants
         case token::tokenType::STRING :
+        case token::tokenType::EXPRESSION :
         case token::tokenType::VARIABLE :
         case token::tokenType::VERBATIM :
         {
             string val;
-            if (read(val))
+            if (readStringFromBuffer(val))
             {
                 t = std::move(val);
                 t.setType(token::tokenType(c));
