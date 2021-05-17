@@ -2639,7 +2639,39 @@ int main(int argc, char *argv[])
                     haveAddressing = true;
                 }
 
-                if (!returnReduce(haveAddressing, andOp<bool>()))
+
+                // Additionally check for master faces being readable. Could
+                // do even more checks, e.g. global number of cells same
+                // as cellProcAddressing
+                bool haveUndecomposedMesh = false;
+                if (Pstream::master())
+                {
+                    Info<< "Checking " << baseRunTime.caseName()
+                        << " for undecomposed mesh" << endl;
+
+                    const bool oldParRun = Pstream::parRun(false);
+                    faceCompactIOList facesIO
+                    (
+                        IOobject
+                        (
+                            "faces",
+                            facesInstance,
+                            meshSubDir,
+                            baseRunTime,
+                            IOobject::NO_READ
+                        )
+                    );
+                    haveUndecomposedMesh = facesIO.headerOk();
+                    Pstream::parRun(oldParRun);
+                }
+                Pstream::scatter(haveUndecomposedMesh);
+
+
+                if
+                (
+                    !haveUndecomposedMesh
+                 || !returnReduce(haveAddressing, andOp<bool>())
+                )
                 {
                     Info<< "loading mesh from " << facesInstance << endl;
                     autoPtr<fvMesh> meshPtr = loadOrCreateMesh
@@ -2662,8 +2694,8 @@ int main(int argc, char *argv[])
                     // Determine decomposition
                     // ~~~~~~~~~~~~~~~~~~~~~~~
 
-                    Info<< "Reconstructing mesh for time " << facesInstance
-                        << endl;
+                    Info<< "Reconstructing mesh for time "
+                        << facesInstance << endl;
 
                     label nDestProcs = 1;
                     labelList finalDecomp = labelList(mesh.nCells(), Zero);
