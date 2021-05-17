@@ -43,6 +43,7 @@ Usage
         patchType    | underlying patch type should be \c cyclic| yes |
         jump         | current jump value      | yes         |
         relax        | under-relaxation factor | no          |
+        minJump      | Minimum jump value      | no          |
     \endtable
 
     Example of the boundary condition specification:
@@ -88,15 +89,17 @@ class fixedJumpFvPatchField
     public jumpCyclicFvPatchField<Type>
 {
 
-protected:
-
-    // Protected data
+    // Private data
 
         //- "jump" field
         Field<Type> jump_;
 
         //- "jump" field at old time level
         Field<Type> jump0_;
+
+        //- Minimum allowable jump value
+        Type minJump_;
+
 
         //- Under-relaxation factor
         scalar relaxFactor_;
@@ -175,6 +178,12 @@ public:
     // Member functions
 
         // Access
+
+            //- Set the jump field
+            virtual void setJump(const Field<Type>& jump);
+
+            //- Set the jump field (uniform value)
+            virtual void setJump(const Type& jump);
 
             //- Return the "jump" across the patch
             virtual tmp<Field<Type>> jump() const;

@@ -40,6 +40,7 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     jumpCyclicFvPatchField<Type>(p, iF),
     jump_(this->size(), Zero),
     jump0_(this->size(), Zero),
+    minJump_(pTraits<Type>::min),
     relaxFactor_(-1),
     timeIndex_(-1)
 {}
@@ -57,6 +58,7 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     jumpCyclicFvPatchField<Type>(ptf, p, iF, mapper),
     jump_(ptf.jump_, mapper),
     jump0_(ptf.jump0_, mapper),
+    minJump_(ptf.minJump_),
     relaxFactor_(ptf.relaxFactor_),
     timeIndex_(ptf.timeIndex_)
 {}
@@ -73,6 +75,7 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     jumpCyclicFvPatchField<Type>(p, iF, dict),
     jump_(p.size(), Zero),
     jump0_(p.size(), Zero),
+    minJump_(dict.getOrDefault<Type>("minJump", pTraits<Type>::min)),
     relaxFactor_(dict.getOrDefault<scalar>("relax", -1)),
     timeIndex_(this->db().time().timeIndex())
 {
@@ -109,6 +112,7 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     jumpCyclicFvPatchField<Type>(ptf),
     jump_(ptf.jump_),
     jump0_(ptf.jump0_),
+    minJump_(ptf.minJump_),
     relaxFactor_(ptf.relaxFactor_),
     timeIndex_(ptf.timeIndex_)
 {}
@@ -124,12 +128,33 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     jumpCyclicFvPatchField<Type>(ptf, iF),
     jump_(ptf.jump_),
     jump0_(ptf.jump0_),
+    minJump_(ptf.minJump_),
     relaxFactor_(ptf.relaxFactor_),
     timeIndex_(ptf.timeIndex_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::fixedJumpFvPatchField<Type>::setJump(const Field<Type>& jump)
+{
+    if (this->cyclicPatch().owner())
+    {
+        jump_ = max(jump, minJump_);
+    }
+}
+
+
+template<class Type>
+void Foam::fixedJumpFvPatchField<Type>::setJump(const Type& jump)
+{
+    if (this->cyclicPatch().owner())
+    {
+        jump_ = max(jump, minJump_);
+    }
+}
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::fixedJumpFvPatchField<Type>::jump() const
@@ -238,6 +263,11 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
             os.writeEntry("relax", relaxFactor_);
             jump0_.writeEntry("jump0", os);
         }
+    }
+
+    if (minJump_ != pTraits<Type>::min)
+    {
+        os.writeEntry("minJump", minJump_);
     }
 
     this->writeEntry("value", os);

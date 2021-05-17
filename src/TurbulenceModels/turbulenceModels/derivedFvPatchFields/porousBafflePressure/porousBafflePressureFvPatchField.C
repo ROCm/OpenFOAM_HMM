@@ -162,21 +162,26 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
     const scalar D = D_->value(t);
     const scalar I = I_->value(t);
 
-    jump_ =
+    setJump
+    (
         -sign(Un)
         *(
             D*turbModel.nu(patch().index())
           + I*0.5*magUn
-         )*magUn*length_;
+         )*magUn*length_
+    );
 
     if (internalField().dimensions() == dimPressure)
     {
-        jump_ *= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        setJump
+        (
+            jump()*patch().lookupPatchField<volScalarField, scalar>(rhoName_)
+        );
     }
 
     if (debug)
     {
-        scalar avePressureJump = gAverage(jump_);
+        scalar avePressureJump = gAverage(jump());
         scalar aveVelocity = gAverage(Un);
 
         Info<< patch().boundaryMesh().mesh().name() << ':'

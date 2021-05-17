@@ -120,7 +120,7 @@ void Foam::uniformJumpFvPatchField<Type>::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        this->jump_ = jumpTable_->value(this->db().time().value());
+        this->setJump(jumpTable_->value(this->db().time().value()));
     }
 
     fixedJumpFvPatchField<Type>::updateCoeffs();
