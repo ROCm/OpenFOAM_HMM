@@ -28,6 +28,7 @@ License
 
 #include "primitiveEntry.H"
 #include "functionEntry.H"
+#include "evalEntry.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -63,25 +64,51 @@ bool Foam::primitiveEntry::acceptToken
 
     if (tok.isDirective())
     {
-        // Directive: wordToken starts with '#'
+        // Directive (wordToken) begins with '#'. Eg, "#include"
+        // Remove leading '#' sigil before dispatching
+
         const word& key = tok.wordToken();
 
+        // Min-size is 2: sigil '#' with any content
         accept =
         (
-            disableFunctionEntries
-         || key.size() == 1
+            (disableFunctionEntries || key.size() < 2)
          || !expandFunction(key.substr(1), dict, is)
+        );
+    }
+    else if (tok.isExpression())
+    {
+        // Expression (stringToken): ${{ expr }}
+        // Surrounding delimiters are stripped as required in evalEntry
+
+        const string& key = tok.stringToken();
+
+        // Min-size is 6: decorators '${{}}' with any content
+        accept =
+        (
+            (disableFunctionEntries || key.size() < 6)
+         || !functionEntries::evalEntry::execute
+            (
+                dict,
+                *this,
+                key,
+                1,      // Field width is 1
+                is      // For error messages
+            )
         );
     }
     else if (tok.isVariable())
     {
-        // Variable: stringToken starts with '$'
+        // Variable (stringToken): starts with '$'
+        // Eg, "$varName" or "${varName}"
+        // Remove leading '$' sigil before dispatching
+
         const string& key = tok.stringToken();
 
+        // Min-size is 2: sigil '$' with any content
         accept =
         (
-            disableFunctionEntries
-         || key.size() == 1
+            (disableFunctionEntries || key.size() < 2)
          || !expandVariable(key.substr(1), dict)
         );
     }
@@ -116,7 +143,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
     // - similarly, the bitmask is tested *after* decreasing depth
 
     uint64_t balanced = 0u;
-    label depth = 0;
+    int depth = 0;
     token tok;
 
     while
@@ -274,19 +301,18 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         os.writeKeyword(keyword());
     }
 
-    bool addSpace = false;  // Separate from previous tokens with a space
+    bool addSpace = false;  // Separate from previous token with a space
     for (const token& tok : *this)
     {
         if (addSpace) os << token::SPACE;
+        addSpace = true;
 
-        // Try to output token directly, with special handling in Ostreams.
-
+        // Output token with direct handling in Ostream(s),
+        // or use normal '<<' output operator
         if (!os.write(tok))
         {
-            os  << tok;   // Revert to normal '<<' output operator
+            os  << tok;
         }
-
-        addSpace = true;  // Separate from following tokens
     }
 
     if (!contentsOnly)

@@ -69,18 +69,6 @@ class ISstream
         //- Get the next valid character
         char nextValid();
 
-        //- Read a word token
-        void readWordToken(token& t);
-
-        //- Read a verbatim string (excluding block delimiters).
-        //  The leading "#{" has been removed prior to calling,
-        //  continues until the closing "#}" has been found.
-        Istream& readVerbatim(std::string& str);
-
-        //- Read a variable name starting with '$'.
-        //  Handles "$var" and "${var}" forms, permits '/' scoping character.
-        Istream& readVariable(std::string& str);
-
         //- No copy assignment
         void operator=(const ISstream&) = delete;
 
@@ -135,6 +123,13 @@ public:
 
         //- Return flags of output stream
         virtual ios_base::fmtflags flags() const;
+
+
+    // Special-purpose Functions
+
+        //- Discard until end of C-style comment '*/'
+        //  \return False if stream exhausted before finding the comment end
+        bool seekCommentEnd_Cstyle();
 
 
         // Read Functions

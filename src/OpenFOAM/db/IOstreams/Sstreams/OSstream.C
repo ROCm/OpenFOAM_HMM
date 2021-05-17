@@ -133,7 +133,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 
 
     // Output with surrounding quotes and backslash escaping
-    os_ << token::BEGIN_STRING;
+    os_ << token::DQUOTE;
 
     unsigned backslash = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
@@ -150,7 +150,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
             ++lineNumber_;
             ++backslash;    // backslash escape for newline
         }
-        else if (c == token::END_STRING)
+        else if (c == token::DQUOTE)
         {
             ++backslash;    // backslash escape for quote
         }
@@ -167,7 +167,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 
     // silently drop any trailing backslashes
     // they would otherwise appear like an escaped end-quote
-    os_ << token::END_STRING;
+    os_ << token::DQUOTE;
 
     setState(os_.rdstate());
     return *this;

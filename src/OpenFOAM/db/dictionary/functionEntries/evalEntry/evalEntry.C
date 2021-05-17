@@ -56,60 +56,163 @@ namespace functionEntries
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+    // This is akin to a SafeIOWarning, which does not yet exist
+    inline void safeIOWarning
+    (
+        const Foam::IOstream& is,
+        const std::string& msg
+    )
+    {
+        std::cerr
+            << "--> FOAM Warning :\n"
+            << "    Reading \"" << is.name() << "\" at line "
+            << is.lineNumber() << '\n'
+            << "    " << msg << std::endl;
+    }
+
+} // End anonymous namespace
+
+
+namespace Foam
+{
+
+// Slurp a string until a closing '}' is found.
+// Track balanced bracket/brace pairs, with max stack depth of 60.
+static bool slurpUntilBalancedBrace(ISstream& is, std::string& str)
+{
+    constexpr const unsigned bufLen = 1024;
+    static char buf[bufLen];
+
+    is.fatalCheck(FUNCTION_NAME);
+
+    unsigned nChar = 0;
+    unsigned depth = 1; // Initial '{' already seen by caller
+    char c;
+
+    str.clear();
+    while (is.get(c))
+    {
+        buf[nChar++] = c;
+
+        if (c == token::BEGIN_BLOCK)
+        {
+            ++depth;
+        }
+        else if (c == token::END_BLOCK)
+        {
+            --depth;
+            if (!depth)
+            {
+                // Closing '}' character - do not include in output
+                --nChar;
+                str.append(buf, nChar);
+                return true;
+            }
+        }
+        else if (c == '/')
+        {
+            // Strip C/C++ comments from expressions
+            // Note: could also peek instead of get/putback
+
+            if (!is.get(c))
+            {
+                break;  // Premature end of stream
+            }
+            else if (c == '/')
+            {
+                --nChar;  // Remove initial '/' from buffer
+
+                // C++ comment: discard through newline
+                (void) is.getLine(nullptr, '\n');
+            }
+            else if (c == '*')
+            {
+                --nChar;  // Remove initial '/' from buffer
+
+                // C-style comment: discard through to "*/" ending
+                if (!is.seekCommentEnd_Cstyle())
+                {
+                    break;  // Premature end of stream
+                }
+            }
+            else
+            {
+                // Reanalyze the char
+                is.putback(c);
+            }
+        }
+
+        if (nChar == bufLen)
+        {
+            str.append(buf, nChar);  // Flush full buffer
+            nChar = 0;
+        }
+    }
+
+
+    // Abnormal exit of the loop
+
+    str.append(buf, nChar);  // Finalize pending content
+
+    safeIOWarning(is, "Premature end while reading expression - missing '}'?");
+
+    is.fatalCheck(FUNCTION_NAME);
+    return false;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::tokenList Foam::functionEntries::evalEntry::evaluate
 (
     const dictionary& parentDict,
-    Istream& is
+    const string& inputExpr,
+    label fieldWidth,
+    const Istream& is
 )
 {
-    #ifdef FULLDEBUG
-    DetailInfo
-        << "Using #eval - line "
-        << is.lineNumber() << " in file " <<  parentDict.name() << nl;
-    #endif
-
-    token tok(is);
-    label fieldWidth(1);  // Field width for the result
-    if (tok.isLabel())
-    {
-        // - #eval INT "expr"
-        // - #eval INT { expr }
-        // - #eval INT #{ expr #}
-        fieldWidth = max(1, tok.labelToken());
-        is >> tok;
-    }
-
-    string s;  // String to evaluate
-    if (tok.isString())
-    {
-        // - #eval "expr"
-        // - #eval #{ expr #}
-        s = tok.stringToken();
-    }
-    else if (tok.isPunctuation(token::BEGIN_BLOCK))
-    {
-        // - #eval { expr }
-        dynamic_cast<ISstream&>(is).getLine(s, token::END_BLOCK);
-    }
-    else
+    // Field width for the result
+    if (fieldWidth < 1)
     {
         FatalIOErrorInFunction(is)
-            << "Invalid input for #eval."
-               " Expecting a string or block to evaluate, but found" << nl
-            << tok.info() << endl
+            << "Invalid field width: " << fieldWidth << nl << endl
             << exit(FatalIOError);
     }
 
     #ifdef FULLDEBUG
     DetailInfo
-        << "input: " << s << endl;
+        << "input: " << inputExpr << endl;
     #endif
 
     // Expand with env=true, empty=true, subDict=false
     // with comments stripped.
     // Special handling of $[...] syntax enabled.
+
+    string s;
+
+    // Passed '${{ expr }}' by accident, or on purpuse
+    if
+    (
+        inputExpr[0] == token::DOLLAR
+     && inputExpr[1] == token::BEGIN_BLOCK
+     && inputExpr[2] == token::BEGIN_BLOCK
+     && inputExpr[inputExpr.length()-1] == token::END_BLOCK
+     && inputExpr[inputExpr.length()-2] == token::END_BLOCK
+    )
+    {
+        s.assign(inputExpr, 3, inputExpr.length()-5);
+    }
+    else
+    {
+        s.assign(inputExpr);
+    }
+
     expressions::exprString::inplaceExpand(s, parentDict, true);
     stringOps::inplaceTrim(s);
 
@@ -184,6 +287,60 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
 }
 
 
+Foam::tokenList Foam::functionEntries::evalEntry::evaluate
+(
+    const dictionary& parentDict,
+    Istream& is
+)
+{
+    #ifdef FULLDEBUG
+    DetailInfo
+        << "Using #eval - line "
+        << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+    #endif
+
+    token tok(is);
+    label fieldWidth(1);  // Field width for the result
+    if (tok.isLabel())
+    {
+        // - #eval INT "expr"
+        // - #eval INT { expr }
+        // - #eval INT #{ expr #}
+        fieldWidth = max(1, tok.labelToken());
+        is >> tok;
+    }
+
+    string str;  // The string to evaluate
+    if (tok.isString())
+    {
+        // - #eval "expr"
+        // - #eval #{ expr #}
+        // - #eval ${{ expr }} - wierd but handled
+        str = tok.stringToken();
+    }
+    else if (tok.isPunctuation(token::BEGIN_BLOCK))
+    {
+        // - #eval { expr }
+        slurpUntilBalancedBrace(dynamic_cast<ISstream&>(is), str);
+    }
+    else
+    {
+        FatalIOErrorInFunction(is)
+            << "Invalid input for #eval."
+               " Expecting a string or block to evaluate, but found" << nl
+            << tok.info() << endl
+            << exit(FatalIOError);
+    }
+
+    tokenList toks
+    (
+        evalEntry::evaluate(parentDict, str, fieldWidth, is)
+    );
+
+    return toks;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionEntries::evalEntry::execute
@@ -194,6 +351,23 @@ bool Foam::functionEntries::evalEntry::execute
 )
 {
     tokenList toks(evaluate(parentDict, is));
+
+    entry.append(std::move(toks), true);  // Lazy resizing
+
+    return true;
+}
+
+
+bool Foam::functionEntries::evalEntry::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    const string& inputExpr,
+    label fieldWidth,
+    Istream& is
+)
+{
+    tokenList toks(evaluate(parentDict, inputExpr, fieldWidth, is));
 
     entry.append(std::move(toks), true);  // Lazy resizing
 
