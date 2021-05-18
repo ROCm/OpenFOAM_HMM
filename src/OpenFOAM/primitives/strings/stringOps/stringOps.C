@@ -693,7 +693,7 @@ static void expandString
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 std::string::size_type Foam::stringOps::count
 (

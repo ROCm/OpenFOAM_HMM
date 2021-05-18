@@ -57,6 +57,7 @@ namespace Foam
 
 // Forward Declarations
 class OSstream;
+template<class T1, class T2> class Tuple2;
 
 /*---------------------------------------------------------------------------*\
                         Namespace stringOps Declaration
@@ -282,6 +283,14 @@ namespace stringOps
     //  Return true if a replacement was successful.
     bool inplaceReplaceVar(std::string& s, const word& varName);
 
+    //- Return a copy of the input string with validated characters
+    template<class StringType, class UnaryPredicate>
+    StringType validate
+    (
+        const std::string& str,
+        const UnaryPredicate& accept,
+        const bool invert=false   //!< Invert the test logic
+    );
 
     //- Find (first, last) non-space locations in string or sub-string.
     //  This may change to std::string_view in the future.
@@ -334,6 +343,30 @@ namespace stringOps
     //- Inplace transform string with std::toupper on each character
     void inplaceUpper(std::string& s);
 
+    //- Split out arguments (named or unnamed) from an input string.
+    //
+    //  For example,
+    //  \verbatim
+    //  (U)
+    //      -> named = ()
+    //      -> unnamed = (U)
+    //
+    //  (patch=inlet, p)
+    //      -> named = ((patch inlet))
+    //      -> unnamed = (p)
+    //
+    //  testing, start=100, stop=200
+    //      -> named = ((start 100)(stop 200))
+    //      -> unnamed = (testing)
+    //  \endverbatim
+    //
+    //  \return total number of arguments
+    label splitFunctionArgs
+    (
+        const std::string& str,
+        wordRes& args,
+        List<Tuple2<word, string>>& namedArgs
+    );
 
     //- Split string into sub-strings at the delimiter character.
     //  Empty sub-strings are normally suppressed.

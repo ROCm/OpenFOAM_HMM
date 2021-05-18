@@ -145,6 +145,7 @@ $(strings)/parsing/genericRagelLemonDriver.C
 $(strings)/stringOps/stringOps.C
 $(strings)/stringOps/stringOpsEvaluate.C
 $(strings)/stringOps/stringOpsSort.C
+$(strings)/stringOps/stringOpsSplit.C
 
 expr = expressions
 $(expr)/exprEntry/expressionEntry.C
