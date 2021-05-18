@@ -276,7 +276,9 @@ $(dictionary)/dictionaryIO.C
 $(dictionary)/dictionarySearch.C
 $(dictionary)/dictionaryCompat.C
 
+/* Additional helpers */
 $(dictionary)/dictionaryContent/dictionaryContent.C
+$(dictionary)/namedDictionary/namedDictionary.C
 
 entry = $(dictionary)/entry
 $(entry)/entry.C

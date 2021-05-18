@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,7 @@ Description
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "IOdictionary.H"
+#include "namedDictionary.H"
 
 using namespace Foam;
 
@@ -237,7 +238,7 @@ int main(int argc, char *argv[])
     IOdictionary topoSetDict(dictIO);
 
     // Read set construct info from dictionary
-    PtrList<dictionary> actions(topoSetDict.lookup("actions"));
+    List<namedDictionary> actionEntries(topoSetDict.lookup("actions"));
 
     forAll(timeDirs, timeI)
     {
@@ -248,8 +249,13 @@ int main(int argc, char *argv[])
         meshReadUpdate(mesh);
 
         // Execute all actions
-        for (const dictionary& dict : actions)
+        for (const namedDictionary& actionEntry : actionEntries)
         {
+            const dictionary& dict = actionEntry.dict();
+            if (dict.empty())
+            {
+                continue;
+            }
             const word setName(dict.get<word>("name"));
             const word setType(dict.get<word>("type"));
 
