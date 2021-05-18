@@ -1,0 +1,121 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# settings
+
+    # operand setups
+    setups="
+    DFSEM
+    "
+
+    # flag to enable computations in parallel mode
+    parallel=true
+
+
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    if [ ! -d constant/polyMesh ]
+    then
+
+        runApplication blockMesh
+
+        runApplication renumberMesh -overwrite -constant
+
+        runApplication checkMesh -allTopology -allGeometry -constant
+
+    fi
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel $(getApplication)
+
+        runApplication reconstructPar
+
+    else
+
+        runApplication $(getApplication)
+
+    fi
+
+    runApplication -s columnAverage \
+        postProcess -func columnAverage -latestTime
+
+    runApplication -s sample \
+        postProcess -func sample -latestTime
+
+    runApplication -s skinFriction \
+        postProcess -func sampleCf -latestTime
+
+    collect "$setup"
+
+done
+
+
+#------------------------------------------------------------------------------

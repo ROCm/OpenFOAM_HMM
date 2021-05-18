@@ -1,0 +1,35 @@
+// -*- C++ -*-
+
+type            sets;
+libs            (sampling);
+interpolationScheme cellPatchConstrained;
+setFormat       raw;
+writeControl    onEnd;
+
+fields
+(
+    columnAverage:columnAverage(UMean)
+    columnAverage:columnAverage(UPrime2Mean)
+);
+
+sets
+(
+    inletPatch
+    {
+        type        face;
+        axis        y;
+        start       (0.0 0 1.57);
+        end         (0.0 2 1.57);
+    }
+
+    inletCell
+    {
+        type        midPoint;
+        axis        y;
+        start       (0.062832 0 1.57);
+        end         (0.062832 2 1.57);
+    }
+);
+
+
+// ************************************************************************* //
