@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -175,8 +175,13 @@ void Foam::PatchFunction1Types::MappedFile<Type>::autoMap
     if (startSampledValues_.size())
     {
         startSampledValues_.autoMap(mapper);
+    }
+
+    if (endSampledValues_.size())
+    {
         endSampledValues_.autoMap(mapper);
     }
+
     // Clear interpolator
     mapperPtr_.clear();
     startSampleTime_ = -1;
@@ -196,8 +201,17 @@ void Foam::PatchFunction1Types::MappedFile<Type>::rmap
     const PatchFunction1Types::MappedFile<Type>& tiptf =
         refCast<const PatchFunction1Types::MappedFile<Type>>(pf1);
 
-    startSampledValues_.rmap(tiptf.startSampledValues_, addr);
-    endSampledValues_.rmap(tiptf.endSampledValues_, addr);
+    if (tiptf.startSampledValues_.size())
+    {
+        startSampledValues_.setSize(this->size());
+        startSampledValues_.rmap(tiptf.startSampledValues_, addr);
+    }
+
+    if (tiptf.endSampledValues_.size())
+    {
+        endSampledValues_.setSize(this->size());
+        endSampledValues_.rmap(tiptf.endSampledValues_, addr);
+    }
 
     // Clear interpolator
     mapperPtr_.clear();
@@ -584,27 +598,11 @@ Foam::PatchFunction1Types::MappedFile<Type>::integrate
 
 
 template<class Type>
-void Foam::PatchFunction1Types::MappedFile<Type>::writeData
+void Foam::PatchFunction1Types::MappedFile<Type>::writeEntries
 (
     Ostream& os
 ) const
 {
-    PatchFunction1<Type>::writeData(os);
-
-    // Check if field name explicitly provided
-    // (e.g. through timeVaryingMapped bc)
-    if (dictConstructed_)
-    {
-        os.writeEntry(this->name(), type());
-
-        os.writeEntryIfDifferent
-        (
-            "fieldTable",
-            this->name(),
-            fieldTableName_
-        );
-    }
-
     if (setAverage_)
     {
         os.writeEntry("setAverage", setAverage_);
@@ -624,6 +622,38 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeData
     if (offset_)
     {
         offset_->writeData(os);
+    }
+}
+
+
+template<class Type>
+void Foam::PatchFunction1Types::MappedFile<Type>::writeData
+(
+    Ostream& os
+) const
+{
+    PatchFunction1<Type>::writeData(os);
+
+    // Check if field name explicitly provided
+    // (e.g. through timeVaryingMapped bc)
+    if (dictConstructed_)
+    {
+        os.writeEntry(this->name(), type());
+
+        os.writeEntryIfDifferent
+        (
+            "fieldTable",
+            this->name(),
+            fieldTableName_
+        );
+
+        os.beginBlock(word(this->name() + "Coeffs"));
+        writeEntries(os);
+        os.endBlock();
+    }
+    else
+    {
+        writeEntries(os);
     }
 }
 
