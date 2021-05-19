@@ -87,16 +87,34 @@ class evalEntry
 {
 
     //- Evaluate and return a token list
-    static tokenList evaluate(const dictionary& parentDict, Istream& is);
+    static tokenList evaluate
+    (
+        const dictionary& parentDict,
+        const string& inputExpr,        //!< String to expand and evaluate
+        label fieldWidth,               //!< Field width for the result
+        const Istream& is               //!< For reporting errors
+    );
 
+    //- Evaluate and return a token list
+    static tokenList evaluate(const dictionary& parentDict, Istream& is);
 
 public:
 
-    //- Execute in a primitiveEntry context
+    //- Execute in a primitiveEntry context, extracts token or line
     static bool execute
     (
         const dictionary& parentDict,
         primitiveEntry& thisEntry,
+        Istream& is
+    );
+
+    //- Execute in a primitiveEntry context, evaluating the given content
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& entry,
+        const string& inputExpr,
+        label fieldWidth,
         Istream& is
     );
 };

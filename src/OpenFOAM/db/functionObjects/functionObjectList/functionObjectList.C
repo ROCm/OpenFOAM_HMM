@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -243,90 +243,41 @@ bool Foam::functionObjectList::readFunctionObject
     //     'patchAverage(patch=inlet, p)' -> funcName = patchAverage;
     //         args = (patch=inlet, p); field = p
 
-    word funcName(funcNameArgs);
-
-    int argLevel = 0;
+    word funcName;
     wordRes args;
-
     List<Tuple2<word, string>> namedArgs;
-    bool hasNamedArg = false;
-    word argName;
 
-    word::size_type start = 0;
-    word::size_type i = 0;
-
-    for
-    (
-        word::const_iterator iter = funcNameArgs.begin();
-        iter != funcNameArgs.end();
-        ++iter
-    )
     {
-        char c = *iter;
-
-        if (c == '(')
+        const auto argsBeg = funcNameArgs.find('(');
+        if (argsBeg == std::string::npos)
         {
-            if (argLevel == 0)
-            {
-                funcName = funcNameArgs.substr(start, i - start);
-                start = i+1;
-            }
-            ++argLevel;
+            // Function name only, no args
+            funcName = word::validate(funcNameArgs);
         }
-        else if (c == ',' || c == ')')
+        else
         {
-            if (argLevel == 1)
-            {
-                if (hasNamedArg)
-                {
-                    namedArgs.append
-                    (
-                        Tuple2<word, string>
-                        (
-                            argName,
-                            funcNameArgs.substr(start, i - start)
-                        )
-                    );
-                    hasNamedArg = false;
-                }
-                else
-                {
-                    args.append
-                    (
-                        wordRe
-                        (
-                            word::validate
-                            (
-                                funcNameArgs.substr(start, i - start)
-                            )
-                        )
-                    );
-                }
-                start = i+1;
-            }
+            // Leading function name
+            funcName = word::validate(funcNameArgs.substr(0, argsBeg));
 
-            if (c == ')')
-            {
-                if (argLevel == 1)
-                {
-                    break;
-                }
-                --argLevel;
-            }
-        }
-        else if (c == '=')
-        {
-            argName = word::validate
+            const auto argsEnd = funcNameArgs.rfind(')');
+
+            stringOps::splitFunctionArgs
             (
-                funcNameArgs.substr(start, i - start)
+                funcNameArgs.substr
+                (
+                    (argsBeg + 1),
+                    (
+                        (argsEnd != std::string::npos && argsBeg < argsEnd)
+                      ? (argsEnd - argsBeg - 1)
+                      : std::string::npos
+                    )
+                ),
+                args,
+                namedArgs
             );
-
-            start = i+1;
-            hasNamedArg = true;
         }
-
-        ++i;
     }
+
 
     // Search for the functionObject dictionary
     fileName path = functionObjectList::findDict(funcName);

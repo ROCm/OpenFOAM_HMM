@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,8 +120,8 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
         return *this;
     }
 
-
-    OFstream::write(static_cast<char>(token::BEGIN_STRING));
+    // Output with surrounding quotes and backslash escaping
+    OFstream::write(static_cast<char>(token::DQUOTE));
 
     unsigned backslash = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
@@ -138,7 +138,7 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
             ++lineNumber_;
             ++backslash;    // backslash escape for newline
         }
-        else if (c == token::END_STRING)
+        else if (c == token::DQUOTE)
         {
             ++backslash;    // backslash escape for quote
         }
@@ -155,7 +155,7 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
 
     // silently drop any trailing backslashes
     // they would otherwise appear like an escaped end-quote
-    OFstream::write(static_cast<char>(token::END_STRING));
+    OFstream::write(static_cast<char>(token::DQUOTE));
 
     return *this;
 }

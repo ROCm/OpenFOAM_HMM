@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      testDict;
+    object      dictionary;
     note        "test with foamDictionary -expand";
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

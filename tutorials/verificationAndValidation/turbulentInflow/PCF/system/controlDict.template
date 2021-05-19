@@ -49,7 +49,7 @@ adjustTimeStep  false;
 
 
 // Allow 10% of time for initialisation before sampling
-timeStart       #eval #{ 0.1 * ${/endTime} #};
+timeStart       #eval{ 0.1 * ${/endTime} };
 
 functions
 {

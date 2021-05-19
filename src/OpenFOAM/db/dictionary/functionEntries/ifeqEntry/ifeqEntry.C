@@ -58,12 +58,7 @@ void Foam::functionEntries::ifeqEntry::readToken(token& t, Istream& is)
     // Skip dummy tokens - avoids entry::getKeyword consuming #else, #endif
     do
     {
-        if
-        (
-            is.read(t).bad()
-         || is.eof()
-         || !t.good()
-        )
+        if (is.read(t).bad() || is.eof() || !t.good())
         {
             return;
         }
@@ -72,7 +67,7 @@ void Foam::functionEntries::ifeqEntry::readToken(token& t, Istream& is)
 }
 
 
-Foam::token Foam::functionEntries::ifeqEntry::expand
+Foam::token Foam::functionEntries::ifeqEntry::expandToken
 (
     const dictionary& dict,
     const string& keyword,
@@ -109,7 +104,7 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
 }
 
 
-Foam::token Foam::functionEntries::ifeqEntry::expand
+Foam::token Foam::functionEntries::ifeqEntry::expandToken
 (
     const dictionary& dict,
     const token& t
@@ -117,15 +112,15 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
 {
     if (t.isWord())
     {
-        return expand(dict, t.wordToken(), t);
+        return expandToken(dict, t.wordToken(), t);
     }
     else if (t.isVariable())
     {
-        return expand(dict, t.stringToken(), t);
+        return expandToken(dict, t.stringToken(), t);
     }
     else if (t.isString())
     {
-        return expand(dict, t.stringToken(), t);
+        return expandToken(dict, t.stringToken(), t);
     }
 
     return t;
@@ -230,6 +225,9 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             }
             return false;
 
+        case token::EXPRESSION:
+            return false;
+
         case token::COMPOUND:
             return false;
 
@@ -245,7 +243,7 @@ void Foam::functionEntries::ifeqEntry::skipUntil
 (
     DynamicList<filePos>& stack,
     const dictionary& parentDict,
-    const word& endWord,
+    const word& endDirective,
     Istream& is
 )
 {
@@ -258,27 +256,25 @@ void Foam::functionEntries::ifeqEntry::skipUntil
         {
             continue;
         }
-        else if
-        (
-            t.wordToken() == "#if"
-         || t.wordToken() == "#ifeq"
-        )
+        else if (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
         {
             stack.append(filePos(is.name(), is.lineNumber()));
             skipUntil(stack, parentDict, "#endif", is);
             stack.remove();
         }
-        else if (t.wordToken() == endWord)
+        else if (t.wordToken() == endDirective)
         {
             return;
         }
     }
 
     FatalIOErrorInFunction(parentDict)
-        << "Did not find matching " << endWord << nl
+        << "Did not find matching " << endDirective << nl
         << exit(FatalIOError);
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::functionEntries::ifeqEntry::evaluate
 (
@@ -292,35 +288,47 @@ bool Foam::functionEntries::ifeqEntry::evaluate
     {
         token t;
         readToken(t, is);
+        bool pending = false;
 
-        if (t.isWord() && t.wordToken() == "#ifeq")
+        if (t.isDirective())
         {
-            // Recurse to evaluate
-            execute(stack, parentDict, is);
-        }
-        else if (t.isWord() && t.wordToken() == "#if")
-        {
-            // Recurse to evaluate
-            ifEntry::execute(stack, parentDict, is);
-        }
-        else if
-        (
-            doIf
-         && t.isWord()
-         && (t.wordToken() == "#else" || t.wordToken() == "#elif")
-        )
-        {
-            // Now skip until #endif
-            skipUntil(stack, parentDict, "#endif", is);
-            stack.remove();
-            break;
-        }
-        else if (t.isWord() && t.wordToken() == "#endif")
-        {
-            stack.remove();
-            break;
+            if (t.wordToken() == "#ifeq")
+            {
+                // Recurse to evaluate
+                execute(stack, parentDict, is);
+            }
+            else if (t.wordToken() == "#if")
+            {
+                // Recurse to evaluate
+                ifEntry::execute(stack, parentDict, is);
+            }
+            else if
+            (
+                doIf
+             && (t.wordToken() == "#else" || t.wordToken() == "#elif")
+            )
+            {
+                // Now skip until #endif
+                skipUntil(stack, parentDict, "#endif", is);
+                stack.remove();
+                break;
+            }
+            else if (t.wordToken() == "#endif")
+            {
+                stack.remove();
+                break;
+            }
+            else
+            {
+                pending = true;
+            }
         }
         else
+        {
+            pending = true;
+        }
+
+        if (pending)
         {
             is.putBack(t);
             bool ok = entry::New(parentDict, is);
@@ -354,21 +362,23 @@ bool Foam::functionEntries::ifeqEntry::execute
         {
             readToken(t, is);
 
-            if
-            (
-                t.isWord()
-             && (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
-            )
+            // Only consider directives
+            if (!t.isDirective())
+            {
+                continue;
+            }
+
+            if (t.wordToken() == "#if" || t.wordToken() == "#ifeq")
             {
                 stack.append(filePos(is.name(), is.lineNumber()));
                 skipUntil(stack, parentDict, "#endif", is);
                 stack.remove();
             }
-            else if (t.isWord() && t.wordToken() == "#else")
+            else if (t.wordToken() == "#else")
             {
                 break;
             }
-            else if (t.isWord() && t.wordToken() == "#elif")
+            else if (t.wordToken() == "#elif")
             {
                 // const label lineNo = is.lineNumber();
 
@@ -386,7 +396,7 @@ bool Foam::functionEntries::ifeqEntry::execute
                     break;
                 }
             }
-            else if (t.isWord() && t.wordToken() == "#endif")
+            else if (t.wordToken() == "#endif")
             {
                 stack.remove();
                 break;
@@ -421,11 +431,11 @@ bool Foam::functionEntries::ifeqEntry::execute
 
     // Read first token and expand any string
     token cond1(is);
-    cond1 = expand(parentDict, cond1);
+    cond1 = expandToken(parentDict, cond1);
 
     // Read second token and expand any string
     token cond2(is);
-    cond2 = expand(parentDict, cond2);
+    cond2 = expandToken(parentDict, cond2);
 
     const bool equal = equalToken(cond1, cond2);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,27 +47,33 @@ bool Foam::OSstream::write(const token& tok)
 
         case token::tokenType::DIRECTIVE :
         {
-            // The '#' sigil is already part of the wordToken
+            // Token stored with leading '#' sigil - output directly
             write(tok.wordToken());
-
             return true;
         }
 
-        case token::tokenType::VERBATIM :
+        case token::tokenType::EXPRESSION :
         {
-            // Surrounding '#{ .. #}' to be recognized as verbatim
-            write(char(token::HASH));
-            write(char(token::BEGIN_BLOCK));
+            // Token stored with surrounding '${{ .. }}' - output directly
             writeQuoted(tok.stringToken(), false);
-            write(char(token::HASH));
-            write(char(token::END_BLOCK));
-
             return true;
         }
 
         case token::tokenType::VARIABLE :
         {
+            // Token stored with leading '$' sigil - output directly
             writeQuoted(tok.stringToken(), false);
+            return true;
+        }
+
+        case token::tokenType::VERBATIM :
+        {
+            // Token stored without surrounding '#{ .. #}'. Add on output
+            write(char(token::HASH));
+            write(char(token::BEGIN_BLOCK));
+            writeQuoted(tok.stringToken(), false);
+            write(char(token::HASH));
+            write(char(token::END_BLOCK));
 
             return true;
         }
@@ -127,7 +133,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 
 
     // Output with surrounding quotes and backslash escaping
-    os_ << token::BEGIN_STRING;
+    os_ << token::DQUOTE;
 
     unsigned backslash = 0;
     for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
@@ -144,7 +150,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
             ++lineNumber_;
             ++backslash;    // backslash escape for newline
         }
-        else if (c == token::END_STRING)
+        else if (c == token::DQUOTE)
         {
             ++backslash;    // backslash escape for quote
         }
@@ -161,7 +167,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
 
     // silently drop any trailing backslashes
     // they would otherwise appear like an escaped end-quote
-    os_ << token::END_STRING;
+    os_ << token::DQUOTE;
 
     setState(os_.rdstate());
     return *this;

@@ -35,7 +35,7 @@ License
 
 //  Find the type/position of the ":-" or ":+" alternative values
 //  Returns 0, '-', '+' corresponding to not-found or ':-' or ':+'
-static inline int findParameterAlternative
+static inline char findParameterAlternative
 (
     const std::string& s,
     std::string::size_type& pos,
@@ -50,7 +50,7 @@ static inline int findParameterAlternative
             if (pos < endPos)
             {
                 // in-range: check for '+' or '-' following the ':'
-                const int altType = s[pos+1];
+                const char altType = s[pos+1];
                 if (altType == '+' || altType == '-')
                 {
                     return altType;
@@ -78,11 +78,13 @@ bool Foam::primitiveEntry::expandVariable
     const dictionary& dict
 )
 {
-    int altType = 0; // Type ('-' or '+') for ":-" or ":+" alternatives
+    char altType = 0; // Type ('-' or '+') for ":-" or ":+" alternatives
     word expanded;
     string altValue;
 
-    if (varName.size() > 1 && varName[0] == token::BEGIN_BLOCK)
+    // Any ${{ expr }} entries have been trapped and processed elsewhere
+
+    if (varName[0] == token::BEGIN_BLOCK && varName.size() > 1)
     {
         // Replace content between {} with string expansion and
         // handle ${parameter:-word} or ${parameter:+word}

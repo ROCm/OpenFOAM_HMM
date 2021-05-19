@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,13 +100,37 @@ Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
         return is;
     }
 
+    // Accept separated '-' (or '+') while expecting a number.
+    // This can arise during dictionary expansions (Eg, -$value)
+
+    char prefix = 0;
+    if (t.isPunctuation())
+    {
+        prefix = t.pToken();
+        if (prefix == token::PLUS || prefix == token::MINUS)
+        {
+            is >> t;
+        }
+    }
+
     if (t.isLabel())
     {
-        val = int64_t(t.labelToken());
+        val = int64_t
+        (
+            (prefix == token::MINUS)
+          ? (0 - t.labelToken())
+          : t.labelToken()
+        );
     }
     else if (t.isScalar())
     {
-        const scalar sval(t.scalarToken());
+        const scalar sval
+        (
+            (prefix == token::MINUS)
+          ? (0 - t.scalarToken())
+          : t.scalarToken()
+        );
+
         const intmax_t parsed = intmax_t(std::round(sval));
         val = 0 + int64_t(parsed);
 
@@ -135,9 +159,12 @@ Foam::Istream& Foam::operator>>(Istream& is, int64_t& val)
     else
     {
         FatalIOErrorInFunction(is)
-            << "Wrong token type - expected label (int64), found "
-            << t.info()
-            << exit(FatalIOError);
+            << "Wrong token type - expected label (int64), found ";
+        if (prefix == token::PLUS || prefix == token::MINUS)
+        {
+            FatalIOError << '\'' << prefix << "' followed by ";
+        }
+        FatalIOError << t.info() << exit(FatalIOError);
         is.setBad();
         return is;
     }

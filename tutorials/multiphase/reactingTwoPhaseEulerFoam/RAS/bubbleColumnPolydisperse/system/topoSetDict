@@ -16,29 +16,25 @@ FoamFile
 
 actions
 (
+    pickCells
     {
         name    zone;
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-           boxes
-           (
-                (0 0.4 0) (0.15 0.5 0.1)
-           );
-        }
+        boxes
+        (
+            (0 0.4 0) (0.15 0.5 0.1)
+        );
     }
 
+    convertToZone
     {
         name    zone;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-           set  zone;
-        }
+        set     zone;
     }
 );
 

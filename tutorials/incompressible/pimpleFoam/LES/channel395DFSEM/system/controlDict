@@ -46,7 +46,7 @@ timePrecision   6;
 runTimeModifiable true;
 
 // Allow 10% run-up before calculating mean
-timeStart       #eval #{ 0.1 * ${/endTime} #};
+timeStart       #eval{ 0.1 * ${/endTime} };
 
 
 functions

@@ -66,6 +66,33 @@ StringType Foam::stringOps::quotemeta
 }
 
 
+template<class StringType, class UnaryPredicate>
+StringType Foam::stringOps::validate
+(
+    const std::string& str,
+    const UnaryPredicate& accept,
+    const bool invert
+)
+{
+    StringType out;
+    out.resize(str.length());
+
+    std::string::size_type len = 0;
+
+    for (std::string::size_type i = 0; i < str.length(); ++i)
+    {
+        const char c = str[i];
+        if (accept(c) ? !invert : invert)
+        {
+            out[len++] += c;
+        }
+    }
+
+    out.erase(len);
+    return out;
+}
+
+
 template<class StringType>
 Foam::SubStrings<StringType> Foam::stringOps::split
 (

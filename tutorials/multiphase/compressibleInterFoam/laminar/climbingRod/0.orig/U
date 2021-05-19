@@ -25,7 +25,7 @@ boundaryField
         type            rotatingWallVelocity;
         axis            (0 1 0);
         origin          (0 0 0);
-        omega           constant #eval{ 2.1 * (2*pi()) };  // rev/s -> rads/s
+        omega           constant ${{ 2.1 * (2*pi()) }};  // rev/s -> rads/s
         value           uniform (0 0 0);
     }
 
