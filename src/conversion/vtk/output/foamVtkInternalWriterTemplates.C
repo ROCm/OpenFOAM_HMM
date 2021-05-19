@@ -49,25 +49,10 @@ void Foam::vtk::internalWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), field.name(), numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
 
-            format().beginDataArray<float, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<Type>(field.name(), numberOfPoints_);
 
     if (parallel_)
     {
@@ -92,11 +77,7 @@ void Foam::vtk::internalWriter::write
         }
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -138,8 +119,6 @@ void Foam::vtk::internalWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     typedef DimensionedField<Type, pointMesh> PointFieldType;
 
     // Use tmp intermediate. Compiler sometimes weird otherwise.
@@ -148,21 +127,8 @@ void Foam::vtk::internalWriter::write
 
     const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), vfield.name(), numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
 
-            format().beginDataArray<float, nCmpt>(vfield.name());
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<Type>(vfield.name(), numberOfPoints_);
 
     if (parallel_)
     {
@@ -179,11 +145,7 @@ void Foam::vtk::internalWriter::write
         vtk::writeLists(format(), pfield, vfield, addPointCellLabels);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -205,8 +167,6 @@ void Foam::vtk::internalWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     typedef GeometricField<Type, pointPatchField, pointMesh> PointFieldType;
 
     // Use tmp intermediate. Compiler sometimes weird otherwise.
@@ -215,21 +175,8 @@ void Foam::vtk::internalWriter::write
 
     const labelList& addPointCellLabels = vtuCells_.addPointCellLabels();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), vfield.name(), numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(numberOfPoints_);
 
-            format().beginDataArray<float, nCmpt>(vfield.name());
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<Type>(vfield.name(), numberOfPoints_);
 
     if (parallel_)
     {
@@ -246,11 +193,7 @@ void Foam::vtk::internalWriter::write
         vtk::writeLists(format(), pfield, vfield, addPointCellLabels);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

@@ -134,6 +134,24 @@ protected:
         //- True if the output state does not correspond to the test state.
         inline bool notState(outputState test) const;
 
+        //- Start of a field or DataArray output (legacy or non-legacy).
+        template<class Type>
+        void beginDataArray
+        (
+            const word& fieldName,
+            const label nValues
+        );
+
+        //- Flush formatter and end of DataArray output (non-legacy)
+        void endDataArray();
+
+        //- Start of a POINTS DataArray
+        void beginPoints(const label nPoints);
+
+        //- End of a POINTS DataArray
+        void endPoints();
+
+
         //- Write uniform field content.
         //  No context checking (eg, file-open, CellData, PointData, etc)
         template<class Type>

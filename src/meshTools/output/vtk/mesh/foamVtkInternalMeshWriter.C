@@ -70,25 +70,7 @@ void Foam::vtk::internalMeshWriter::beginPiece()
 
 void Foam::vtk::internalMeshWriter::writePoints()
 {
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::beginPoints(os_, numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float,3>(numberOfPoints_);
-
-            format()
-                .tag(vtk::fileTag::POINTS)
-                .beginDataArray<float,3>(vtk::dataArrayAttr::POINTS);
-
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginPoints(numberOfPoints_);
 
     if (parallel_)
     {
@@ -112,17 +94,7 @@ void Foam::vtk::internalMeshWriter::writePoints()
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-
-        if (!legacy())
-        {
-            format()
-                .endTag(vtk::fileTag::POINTS);
-        }
-    }
+    this->endPoints();
 }
 
 
@@ -629,21 +601,8 @@ void Foam::vtk::internalMeshWriter::writeCellIDs()
 
     const labelList& cellMap = vtuCells_.cellMap();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            vtk::legacy::intField<1>(format(), "cellID", numberOfCells_);
-        }
-        else
-        {
-            const uint64_t payLoad = vtk::sizeofData<label>(numberOfCells_);
 
-            format().beginDataArray<label>("cellID");
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginDataArray<label>("cellID", numberOfCells_);
 
     if (parallel_)
     {
@@ -657,11 +616,7 @@ void Foam::vtk::internalMeshWriter::writeCellIDs()
         vtk::writeList(format(), cellMap);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -686,39 +641,23 @@ bool Foam::vtk::internalMeshWriter::writeProcIDs()
 
     const globalIndex procMaps(vtuCells_.nFieldCells());
 
+    this->beginDataArray<label>("procID", procMaps.size());
+
     bool good = false;
 
     if (Pstream::master())
     {
-        const label nCells = procMaps.size();
-
-        if (format_)
-        {
-            if (legacy())
-            {
-                vtk::legacy::intField<1>(format(), "procID", nCells);
-            }
-            else
-            {
-                const uint64_t payLoad =
-                    vtk::sizeofData<label>(nCells);
-
-                format().beginDataArray<label>("procID");
-                format().writeSize(payLoad);
-            }
-        }
-
         // Per-processor ids
         for (const int proci : Pstream::allProcs())
         {
             vtk::write(format(), label(proci), procMaps.localSize(proci));
         }
 
-        format().flush();
-        format().endDataArray();
-
         good = true;
     }
+
+    this->endDataArray();
+
 
     // MPI barrier
     return returnReduce(good, orOp<bool>());
@@ -738,21 +677,8 @@ void Foam::vtk::internalMeshWriter::writePointIDs()
             << exit(FatalError);
     }
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            vtk::legacy::intField<1>(format(), "pointID", numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad = vtk::sizeofData<label>(numberOfPoints_);
 
-            format().beginDataArray<label>("pointID");
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginDataArray<label>("pointID", numberOfPoints_);
 
     // Point offset for regular mesh points (without decomposed)
     const label pointOffset =
@@ -786,11 +712,7 @@ void Foam::vtk::internalMeshWriter::writePointIDs()
         vtk::writeList(format(), pointIds);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

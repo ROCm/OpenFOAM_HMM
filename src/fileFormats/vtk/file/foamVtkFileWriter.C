@@ -190,6 +190,55 @@ bool Foam::vtk::fileWriter::enter_PointData(label nEntries, label nFields)
 }
 
 
+void Foam::vtk::fileWriter::endDataArray()
+{
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+}
+
+
+void Foam::vtk::fileWriter::beginPoints(const label nPoints)
+{
+    if (format_)
+    {
+        if (legacy())
+        {
+            legacy::beginPoints(os_, nPoints);
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<float, 3>(nPoints);
+
+            format()
+                .tag(vtk::fileTag::POINTS)
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
+
+            format().writeSize(payLoad);
+        }
+    }
+}
+
+
+void Foam::vtk::fileWriter::endPoints()
+{
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+
+        if (!legacy())
+        {
+            format()
+                .endTag(vtk::fileTag::POINTS);
+        }
+    }
+}
+
+
 bool Foam::vtk::fileWriter::exit_File()
 {
     // Finish other output

@@ -84,25 +84,7 @@ void Foam::vtk::patchMeshWriter::writePoints()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::beginPoints(os_, numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, 3>(numberOfPoints_);
-
-            format()
-                .tag(vtk::fileTag::POINTS)
-                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
-
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginPoints(numberOfPoints_);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -156,17 +138,7 @@ void Foam::vtk::patchMeshWriter::writePoints()
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-
-        if (!legacy())
-        {
-            format()
-                .endTag(vtk::fileTag::POINTS);
-        }
-    }
+    this->endPoints();
 }
 
 
@@ -547,21 +519,8 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
         reduce(nFaces, sumOp<label>());
     }
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::intField<1>(format(), "patchID", nFaces);  // 1 component
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<label>(nFaces);
 
-            format().beginDataArray<label>("patchID");
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<label>("patchID", nFaces);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -619,11 +578,7 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -657,21 +612,8 @@ bool Foam::vtk::patchMeshWriter::writeProcIDs()
         reduce(nFaces, sumOp<label>());
     }
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::intField<1>(format(), "procID", nFaces);  // 1 component
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<label>(nFaces);
 
-            format().beginDataArray<label>("procID");
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<label>("procID", nFaces);
 
     bool good = false;
 
@@ -698,11 +640,7 @@ bool Foam::vtk::patchMeshWriter::writeProcIDs()
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 
     // MPI barrier
     return parallel_ ? returnReduce(good, orOp<bool>()) : good;
@@ -737,21 +675,8 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
         reduce(nFaces, sumOp<label>());
     }
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::intField<1>(format(), "neighID", nFaces);  // 1 component
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<label>(nFaces);
 
-            format().beginDataArray<label>("neighID");
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<label>("neighID", nFaces);
 
     bool good = false;
 
@@ -818,11 +743,7 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
         }
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 
     // MPI barrier
     return parallel_ ? returnReduce(good, orOp<bool>()) : good;

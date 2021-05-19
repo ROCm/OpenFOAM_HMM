@@ -31,10 +31,9 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtk::fileWriter::writeUniform
+void Foam::vtk::fileWriter::beginDataArray
 (
     const word& fieldName,
-    const Type& val,
     const label nValues
 )
 {
@@ -59,7 +58,8 @@ void Foam::vtk::fileWriter::writeUniform
             }
             else
             {
-                const uint64_t payLoad = vtk::sizeofData<label, nCmpt>(nValues);
+                const uint64_t payLoad =
+                    vtk::sizeofData<label, nCmpt>(nValues);
 
                 format().beginDataArray<label, nCmpt>(fieldName);
                 format().writeSize(payLoad);
@@ -73,24 +73,33 @@ void Foam::vtk::fileWriter::writeUniform
             }
             else
             {
-                const uint64_t payLoad = vtk::sizeofData<float, nCmpt>(nValues);
+                const uint64_t payLoad =
+                    vtk::sizeofData<float, nCmpt>(nValues);
 
                 format().beginDataArray<float, nCmpt>(fieldName);
                 format().writeSize(payLoad);
             }
         }
     }
+}
+
+
+template<class Type>
+void Foam::vtk::fileWriter::writeUniform
+(
+    const word& fieldName,
+    const Type& val,
+    const label nValues
+)
+{
+    this->beginDataArray<Type>(fieldName, nValues);
 
     if (format_)
     {
         vtk::write(format(), val, nValues);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -101,17 +110,6 @@ void Foam::vtk::fileWriter::writeBasicField
     const UList<Type>& field
 )
 {
-    static_assert
-    (
-        (
-            std::is_same<label, typename pTraits<Type>::cmptType>::value
-         || std::is_floating_point<typename pTraits<Type>::cmptType>::value
-        ),
-        "Label and Floating-point vector space only"
-    );
-
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     label nValues = field.size();
 
     if (parallel_)
@@ -119,38 +117,7 @@ void Foam::vtk::fileWriter::writeBasicField
         reduce(nValues, sumOp<label>());
     }
 
-    if (format_)
-    {
-        if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
-        {
-            if (legacy())
-            {
-                legacy::intField<nCmpt>(format(), fieldName, nValues);
-            }
-            else
-            {
-                const uint64_t payLoad = vtk::sizeofData<label, nCmpt>(nValues);
-
-                format().beginDataArray<label, nCmpt>(fieldName);
-                format().writeSize(payLoad);
-            }
-        }
-        else
-        {
-            if (legacy())
-            {
-                legacy::floatField<nCmpt>(format(), fieldName, nValues);
-            }
-            else
-            {
-                const uint64_t payLoad = vtk::sizeofData<float, nCmpt>(nValues);
-
-                format().beginDataArray<float, nCmpt>(fieldName);
-                format().writeSize(payLoad);
-            }
-        }
-    }
-
+    this->beginDataArray<Type>(fieldName, nValues);
 
     if (parallel_)
     {
@@ -161,11 +128,7 @@ void Foam::vtk::fileWriter::writeBasicField
         vtk::writeList(format(), field);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

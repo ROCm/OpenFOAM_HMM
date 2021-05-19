@@ -47,7 +47,6 @@ void Foam::vtk::patchWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
 
     label nPoints = nLocalPoints_;
 
@@ -57,22 +56,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), field.name(), nPoints);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(nPoints);
-
-            format().beginDataArray<float, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginDataArray<Type>(field.name(), nPoints);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -144,11 +128,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -169,8 +149,6 @@ void Foam::vtk::patchWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     label nFaces = nLocalFaces_;
 
     if (parallel_)
@@ -179,22 +157,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), field.name(), nFaces);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(nFaces);
-
-            format().beginDataArray<float, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginDataArray<Type>(field.name(), nFaces);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -261,11 +224,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 
@@ -287,8 +246,6 @@ void Foam::vtk::patchWriter::write
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     label nPoints = nLocalPoints_;
 
     if (parallel_)
@@ -297,22 +254,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), field.name(), nPoints);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(nPoints);
-
-            format().beginDataArray<float, nCmpt>(field.name());
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginDataArray<Type>(field.name(), nPoints);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -396,11 +338,7 @@ void Foam::vtk::patchWriter::write
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

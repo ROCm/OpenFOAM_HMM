@@ -78,25 +78,9 @@ void Foam::vtk::internalMeshWriter::writeCellData
             << exit(FatalError);
     }
 
-    const direction nCmpt(pTraits<Type>::nComponents);
-
     const labelList& cellMap = vtuCells_.cellMap();
 
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::floatField<nCmpt>(format(), fieldName, numberOfCells_);
-        }
-        else
-        {
-            const uint64_t payLoad =
-                vtk::sizeofData<float, nCmpt>(numberOfCells_);
-
-            format().beginDataArray<float, nCmpt>(fieldName);
-            format().writeSize(payLoad);
-        }
-    }
+    this->beginDataArray<Type>(fieldName, numberOfCells_);
 
     if (parallel_)
     {
@@ -107,11 +91,7 @@ void Foam::vtk::internalMeshWriter::writeCellData
         vtk::writeList(format(), field, cellMap);
     }
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

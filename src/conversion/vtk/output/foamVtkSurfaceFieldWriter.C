@@ -159,29 +159,19 @@ bool Foam::vtk::surfaceFieldWriter::writeGeometry()
             );
     }
 
-
     // <Point>
-    if (format_)
-    {
-        const uint64_t payLoad =
-            vtk::sizeofData<float,3>(numberOfPoints_);
-
-        format().tag(vtk::fileTag::POINTS)
-            .beginDataArray<float,3>(vtk::dataArrayAttr::POINTS);
-
-        format().writeSize(payLoad);
-    }
+    this->beginPoints(numberOfPoints_);
 
     if (parallel_)
     {
-        // Internal faces
+        // Centres for internal faces
         vtk::writeListParallel
         (
             format_.ref(),
             SubList<point>(centres, mesh_.nInternalFaces())
         );
 
-        // Boundary faces
+        // Centres for boundary faces
         vtk::writeListParallel
         (
             format_.ref(),
@@ -195,15 +185,7 @@ bool Foam::vtk::surfaceFieldWriter::writeGeometry()
         vtk::writeList(format(), centres);
     }
 
-    if (format_)
-    {
-        format().flush();
-
-        // Non-legacy
-        format()
-            .endDataArray()
-            .endTag(vtk::fileTag::POINTS);
-    }
+    this->endPoints();
 
     return true;
 }
@@ -251,15 +233,7 @@ void Foam::vtk::surfaceFieldWriter::write(const surfaceVectorField& field)
             << exit(FatalError);
     }
 
-    if (format_)
-    {
-        // Non-legacy
-        const uint64_t payLoad =
-            vtk::sizeofData<float, 3>(nFaces);
-
-        format().beginDataArray<float, 3>(field.name());
-        format().writeSize(payLoad);
-    }
+    this->beginDataArray<vector>(field.name(), nFaces);
 
 
     // Internal field
@@ -289,11 +263,7 @@ void Foam::vtk::surfaceFieldWriter::write(const surfaceVectorField& field)
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-    }
+    this->endDataArray();
 }
 
 

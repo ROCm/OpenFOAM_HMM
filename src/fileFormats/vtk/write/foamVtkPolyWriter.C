@@ -77,24 +77,7 @@ void Foam::vtk::polyWriter::writePoints
     const pointField& points
 )
 {
-    if (format_)
-    {
-        if (legacy())
-        {
-            legacy::beginPoints(os_, numberOfPoints_);
-        }
-        else
-        {
-            const uint64_t payLoad = vtk::sizeofData<float, 3>(numberOfPoints_);
-
-            format()
-                .tag(vtk::fileTag::POINTS)
-                .beginDataArray<float,3>(vtk::dataArrayAttr::POINTS);
-
-            format().writeSize(payLoad);
-        }
-    }
-
+    this->beginPoints(numberOfPoints_);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -102,7 +85,6 @@ void Foam::vtk::polyWriter::writePoints
             vtk::writeList(format(), points);
         }
     }
-
 
     if (parallel_)
     {
@@ -138,17 +120,7 @@ void Foam::vtk::polyWriter::writePoints
     }
 
 
-    if (format_)
-    {
-        format().flush();
-        format().endDataArray();
-
-        if (!legacy())
-        {
-            format()
-                .endTag(vtk::fileTag::POINTS);
-        }
-    }
+    this->endPoints();
 }
 
 
