@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,12 +144,15 @@ class areaWrite
 
     // Private Member Functions
 
-        //- Write fieldName on surface and on outputDir path
+        //- Write fieldName on surface and on outputDir path.
+        //  Can have a field nullptr for partially missing fields,
+        //  but the caller should generally filter out completely
+        //  missing fields.
         template<class Type>
         void writeSurface
         (
             surfaceWriter& writer,
-            const Field<Type>& values,
+            const Field<Type>* fieldPtr,
             const word& fieldName
         );
 

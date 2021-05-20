@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +35,12 @@ template<class Type>
 void Foam::areaWrite::writeSurface
 (
     surfaceWriter& writer,
-    const Field<Type>& values,
+    const Field<Type>* fieldPtr,
     const word& fieldName
 )
 {
+    const Field<Type>& values = (fieldPtr ? *fieldPtr : Field<Type>::null());
+
     fileName outputName = writer.write(fieldName, values);
 
     // Case-local file name with "<case>" to make relocatable
@@ -64,11 +66,23 @@ void Foam::areaWrite::performAction
     wordList fieldNames;
     if (loadFromFiles_)
     {
-        fieldNames = objects.sortedNames<GeoField>(fieldSelection_);
+        // With syncPar (sorted and parallel-consistent)
+        fieldNames = objects.names<GeoField>(fieldSelection_, true);
     }
     else
     {
-        fieldNames = areaMesh.thisDb().sortedNames<GeoField>(fieldSelection_);
+        fieldNames = areaMesh.thisDb().names<GeoField>(fieldSelection_);
+
+        // With syncPar
+        if (Pstream::parRun())
+        {
+            // Synchronize names
+            Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
+            Pstream::combineScatter(fieldNames);
+        }
+
+        // Sort for consistent order on all processors
+        Foam::sort(fieldNames);
     }
 
     for (const word& fieldName : fieldNames)
@@ -92,16 +106,14 @@ void Foam::areaWrite::performAction
                 areaMesh
             );
 
-            writeSurface(writer, fld, fieldName);
+            writeSurface(writer, &fld, fieldName);
         }
         else
         {
-            writeSurface
-            (
-                writer,
-                areaMesh.thisDb().lookupObject<GeoField>(fieldName),
-                fieldName
-            );
+            const auto* fieldPtr =
+                areaMesh.thisDb().cfindObject<GeoField>(fieldName);
+
+            writeSurface(writer, fieldPtr, fieldName);
         }
     }
 }
