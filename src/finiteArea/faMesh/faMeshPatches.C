@@ -31,14 +31,84 @@ License
 #include "faPatchData.H"
 #include "processorPolyPatch.H"
 #include "processorFaPatch.H"
+#include "globalMeshData.H"
+#include "indirectPrimitivePatch.H"
 #include "edgeHashes.H"
+#include "LabelledItem.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Manage patch pairs with a 'labelled' edge.
+// The edge first/second correspond to the owner/neighbour patches.
+// The index is a face index on the neighbour patch (FUTURE).
+
+// Local typedefs
+
+typedef LabelledItem<edge> patchPairInfo;
+typedef List<patchPairInfo> patchPairInfoList;
+typedef UIndirectList<patchPairInfo> patchPairInfoUIndList;
+
+
+// Synchronize edge patch pairs.
+// - only propagate real (non-processor) patch ids
+
+struct syncEdgePatchPairs
+{
+    const label upperLimit;
+
+    explicit syncEdgePatchPairs(const label nNonProcessor)
+    :
+        upperLimit(nNonProcessor)
+    {}
+
+    void insert(edge& e, const label i) const
+    {
+        // This could probably be simpler
+        if (i >= 0 && i < upperLimit && !e.found(i))
+        {
+            if (e.first() == -1)
+            {
+                e.first() = i;
+            }
+            else if (e.second() == -1)
+            {
+                e.second() = i;
+            }
+            else if (upperLimit < e.first())
+            {
+                e.first() = i;
+            }
+            else if (upperLimit < e.second())
+            {
+                e.second() = i;
+            }
+        }
+    }
+
+    void operator()(edge& x, const edge& y) const
+    {
+        if (edge::compare(x, y) == 0)
+        {
+            insert(x, y.first());
+            insert(x, y.second());
+        }
+    }
+};
+
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::faMesh::reorderProcEdges
 (
     faPatchData& patchDef,
-    const labelUList& meshEdges
+    const labelUList& meshEdges,
+    const List<LabelledItem<edge>>& bndEdgePatchPairs
 ) const
 {
     if (!patchDef.coupled() || patchDef.edgeLabels_.empty())
@@ -245,9 +315,178 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createOnePatch
     return createPatchList
     (
         dictionary::null,
-        "",             // Name for empty patch placeholder
+        word::null,     // Name for empty patch placeholder
         &onePatchDict   // Definitions for defaultPatch
     );
+}
+
+
+Foam::List<Foam::LabelledItem<Foam::edge>>
+Foam::faMesh::getBoundaryEdgePatchPairs
+(
+    const labelUList& meshEdges
+) const
+{
+    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+    const labelListList& edgeFaces = mesh().edgeFaces();
+
+    const label nInternalEdges = patch().nInternalEdges();
+    const label nBoundaryEdges = patch().nBoundaryEdges();
+
+    // Map edges (mesh numbering) back to a boundary index
+    EdgeMap<label> edgeToBoundaryIndex(2*nBoundaryEdges);
+
+
+    // Use 'edge' for accounting
+    patchPairInfoList bndEdgePatchPairs(nBoundaryEdges);
+
+    // Get pair of polyPatches for each boundary edge
+    for (label bndEdgei = 0; bndEdgei < nBoundaryEdges; ++bndEdgei)
+    {
+        edgeToBoundaryIndex.insert
+        (
+            patch().meshEdge(bndEdgei + nInternalEdges),
+            edgeToBoundaryIndex.size()
+        );
+
+        const label patchEdgei = (bndEdgei + nInternalEdges);
+        const label meshEdgei = meshEdges[patchEdgei];
+
+        patchPairInfo& patchPair = bndEdgePatchPairs[bndEdgei];
+
+        for (const label meshFacei : edgeFaces[meshEdgei])
+        {
+            const label patchId = pbm.whichPatch(meshFacei);
+
+            // Note: negative labels never insert
+            patchPair.insert(patchId);
+        }
+    }
+
+
+    // Synchronize edge information - we want the 'global' patch connectivity
+
+    // Looks like PatchTools::matchEdges
+
+    const indirectPrimitivePatch& cpp = mesh().globalData().coupledPatch();
+
+    labelList patchEdgeLabels(nBoundaryEdges);
+    labelList coupledEdgeLabels(nBoundaryEdges);
+
+    {
+        label nMatches = 0;
+        forAll(cpp.edges(), coupledEdgei)
+        {
+            const edge coupledMeshEdge(cpp.meshEdge(coupledEdgei));
+
+            const auto iter = edgeToBoundaryIndex.cfind(coupledMeshEdge);
+
+            if (iter.found())
+            {
+                patchEdgeLabels[nMatches] = iter.val();
+                coupledEdgeLabels[nMatches] = coupledEdgei;
+                ++nMatches;
+            }
+        }
+
+        patchEdgeLabels.resize(nMatches);
+        coupledEdgeLabels.resize(nMatches);
+    }
+
+
+    const globalMeshData& globalData = mesh().globalData();
+    const mapDistribute& map = globalData.globalEdgeSlavesMap();
+
+    //- Construct with all data
+    patchPairInfoList cppEdgeData(map.constructSize());
+
+    // Convert patch-edge data into cpp-edge data
+    patchPairInfoUIndList(cppEdgeData, coupledEdgeLabels) =
+        patchPairInfoUIndList(bndEdgePatchPairs, patchEdgeLabels);
+
+
+    // Also need to check for dangling edges, which are finiteArea
+    // boundary edges that only exist on one side of a proc boundary.
+    // Eg, proc boundary coincides with the end of the finiteArea
+
+    {
+        boolList edgeInUse(map.constructSize(), false);
+
+        for (const label coupledEdgei : coupledEdgeLabels)
+        {
+            edgeInUse[coupledEdgei] = true;
+        }
+
+        // Retain pre-synchronized state for later xor
+        const boolList nonSyncEdgeInUse
+        (
+            SubList<bool>(edgeInUse, cpp.nEdges())
+        );
+
+        globalData.syncData
+        (
+            edgeInUse,
+            globalData.globalEdgeSlaves(),
+            globalData.globalEdgeTransformedSlaves(),
+            map,
+            orEqOp<bool>()
+        );
+
+        // Check for anything coupled from the other side,
+        // but not originally from this.
+        //
+        // Process these dangling edges, obtain the attached pair
+        // of polyPatches for each.
+        //
+        // These edges have no finiteArea correspondence on this processor,
+        // but the information is obviously needed for other processors
+
+        forAll(nonSyncEdgeInUse, coupledEdgei)
+        {
+            // Coupled, but originating from elsewhere
+            if (edgeInUse[coupledEdgei] && !nonSyncEdgeInUse[coupledEdgei])
+            {
+                // Already default initialized
+                patchPairInfo& patchPair = cppEdgeData[coupledEdgei];
+
+                const label meshEdgei =
+                    cpp.meshEdge
+                    (
+                        coupledEdgei,
+                        mesh().edges(),
+                        mesh().pointEdges()
+                    );
+
+                for (const label meshFacei : edgeFaces[meshEdgei])
+                {
+                    const label patchId = pbm.whichPatch(meshFacei);
+
+                    // Note: negative labels never insert
+                    patchPair.insert(patchId);
+                }
+            }
+        }
+    }
+
+    // Convert patch-edge data into cpp-edge data
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    globalData.syncData
+    (
+        cppEdgeData,
+        globalData.globalEdgeSlaves(),
+        globalData.globalEdgeTransformedSlaves(),
+        map,
+        syncEdgePatchPairs(pbm.nNonProcessor())
+    );
+
+    // Back from cpp-edge to patch-edge data
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    patchPairInfoUIndList(bndEdgePatchPairs, patchEdgeLabels) =
+        patchPairInfoUIndList(cppEdgeData, coupledEdgeLabels);
+
+    return bndEdgePatchPairs;
 }
 
 
@@ -259,6 +498,13 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
 ) const
 {
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+
+    const labelListList& edgeFaces = mesh().edgeFaces();
+    const labelList meshEdges
+    (
+        patch().meshEdges(mesh().edges(), mesh().pointEdges())
+    );
+
 
     // Transcribe into patch definitions
     DynamicList<faPatchData> faPatchDefs(bndDict.size() + 4);
@@ -327,47 +573,28 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
 
     // ----------------------------------------------------------------------
 
-    // Determine faPatch ID for each boundary edge.
-    // Result is in the bndEdgeFaPatchIDs list
-
-    const labelList meshEdges
-    (
-        patch().meshEdges(mesh().edges(), mesh().pointEdges())
-    );
-
-    const labelListList& edgeFaces = mesh().edgeFaces();
-
     const label nInternalEdges = patch().nInternalEdges();
     const label nBoundaryEdges = patch().nBoundaryEdges();
+
+    patchPairInfoList bndEdgePatchPairs
+    (
+        getBoundaryEdgePatchPairs(meshEdges)
+    );
 
     labelList bndEdgeFaPatchIDs(nBoundaryEdges, -1);
 
     for (label bndEdgei = 0; bndEdgei < nBoundaryEdges; ++bndEdgei)
     {
-        const label patchEdgei = meshEdges[bndEdgei + nInternalEdges];
+        const patchPairInfo& patchPair = bndEdgePatchPairs[bndEdgei];
 
-        // Use 'edge' for accounting
-        edge curEdgePatchPair;
-
-        for (const label meshFacei : edgeFaces[patchEdgei])
-        {
-            const label polyPatchID = pbm.whichPatch(meshFacei);
-
-            if (polyPatchID != -1)
-            {
-                curEdgePatchPair.insert(polyPatchID);
-            }
-        }
-
-
-        if (curEdgePatchPair.valid())
+        if (patchPair.valid())
         {
             // Non-negative, unique pairing
             // - find corresponding definition
 
             for (label patchi = 0; patchi < faPatchDefs.size(); ++patchi)
             {
-                if (faPatchDefs[patchi].foundPatchPair(curEdgePatchPair))
+                if (faPatchDefs[patchi].foundPatchPair(patchPair))
                 {
                     bndEdgeFaPatchIDs[bndEdgei] = patchi;
                     break;
@@ -535,11 +762,10 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
     {
         if (patchDef.coupled())
         {
-            reorderProcEdges(patchDef, meshEdges);
-            patchDef.neighPolyPatchId_ = -1; // No longer required + confusing
+            reorderProcEdges(patchDef, meshEdges, bndEdgePatchPairs);
+            patchDef.neighPolyPatchId_ = -1; // No lookup of neighbour faces
         }
     }
-
 
     // Now convert list of definitions to list of patches
 

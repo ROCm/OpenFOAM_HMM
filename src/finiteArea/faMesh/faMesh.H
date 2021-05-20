@@ -71,6 +71,7 @@ namespace Foam
 class faMeshLduAddressing;
 class faMeshMapper;
 class faPatchData;
+template<class T> class LabelledItem;
 
 /*---------------------------------------------------------------------------*\
                            Class faMesh Declaration
@@ -267,6 +268,12 @@ class faMesh
 
     // Helpers
 
+        //- Get the polyPatch pairs for the boundary edges (natural order)
+        List<LabelledItem<edge>> getBoundaryEdgePatchPairs
+        (
+            const labelUList& meshEdges
+        ) const;
+
         //- Create a single patch
         PtrList<faPatch> createOnePatch
         (
@@ -287,7 +294,8 @@ class faMesh
         void reorderProcEdges
         (
             faPatchData& patchDef,
-            const labelUList& meshEdges
+            const labelUList& meshEdges,
+            const List<LabelledItem<edge>>& bndEdgePatchPairs
         ) const;
 
 
