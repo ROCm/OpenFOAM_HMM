@@ -11,67 +11,80 @@
     {
         Info<< "Creating merge patch pairs" << nl << endl;
 
-        // Create and add point and face zones and mesh modifiers
-        List<pointZone*> pz(mergePatchPairs.size());
-        List<faceZone*> fz(3*mergePatchPairs.size());
-        List<cellZone*> cz;
-
-        forAll(mergePatchPairs, pairi)
-        {
-            const word mergeName
-            (
-                mergePatchPairs[pairi].first()
-              + mergePatchPairs[pairi].second()
-              + name(pairi)
-            );
-
-            // An empty zone for cut points
-            pz[pairi] = new pointZone
-            (
-                mergeName + "CutPointZone",
-                0,
-                mesh.pointZones()
-            );
-
-            // Master patch
-            const word masterPatchName(mergePatchPairs[pairi].first());
-            const polyPatch& masterPatch =
-                mesh.boundaryMesh()[masterPatchName];
-
-            fz[3*pairi] = new faceZone
-            (
-                mergeName + "MasterZone",
-                identity(masterPatch.range()),
-                false, // none are flipped
-                0,
-                mesh.faceZones()
-            );
-
-            // Slave patch
-            const word slavePatchName(mergePatchPairs[pairi].second());
-            const polyPatch& slavePatch =
-                mesh.boundaryMesh()[slavePatchName];
-
-            fz[3*pairi + 1] = new faceZone
-            (
-                mergeName + "SlaveZone",
-                identity(slavePatch.range()),
-                false, // none are flipped
-                1,
-                mesh.faceZones()
-            );
-
-            // An empty zone for cut faces
-            fz[3*pairi + 2] = new faceZone
-            (
-                mergeName + "CutFaceZone",
-                2,
-                mesh.faceZones()
-            );
-        }  // end of all merge pairs
-
         Info<< "Adding point and face zones" << endl;
-        mesh.addZones(pz, fz, cz);
+        {
+            auto& pzs = mesh.pointZones();
+            pzs.clearAddressing();
+            auto& fzs = mesh.faceZones();
+            fzs.clearAddressing();
+
+            forAll(mergePatchPairs, pairi)
+            {
+                const word mergeName
+                (
+                    mergePatchPairs[pairi].first()
+                  + mergePatchPairs[pairi].second()
+                  + name(pairi)
+                );
+
+                // An empty zone for cut points
+                pzs.append
+                (
+                    new pointZone
+                    (
+                        mergeName + "CutPointZone",
+                        pzs.size(),
+                        pzs
+                    )
+                );
+
+                // Master patch
+                const word masterPatchName(mergePatchPairs[pairi].first());
+                const polyPatch& masterPatch =
+                    mesh.boundaryMesh()[masterPatchName];
+
+                fzs.append
+                (
+                    new faceZone
+                    (
+                        mergeName + "MasterZone",
+                        identity(masterPatch.range()),
+                        false, // none are flipped
+                        fzs.size(),
+                        fzs
+                    )
+                );
+
+                // Slave patch
+                const word slavePatchName(mergePatchPairs[pairi].second());
+                const polyPatch& slavePatch =
+                    mesh.boundaryMesh()[slavePatchName];
+
+                fzs.append
+                (
+                    new faceZone
+                    (
+                        mergeName + "SlaveZone",
+                        identity(slavePatch.range()),
+                        false, // none are flipped
+                        fzs.size(),
+                        fzs
+                    )
+                );
+
+                // An empty zone for cut faces
+                fzs.append
+                (
+                    new faceZone
+                    (
+                        mergeName + "CutFaceZone",
+                        fzs.size(),
+                        fzs
+                    )
+                );
+            }  // end of all merge pairs
+        }
+
 
 
         Info<< "Creating attachPolyTopoChanger" << endl;
