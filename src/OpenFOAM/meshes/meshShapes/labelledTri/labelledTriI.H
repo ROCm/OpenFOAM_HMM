@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,24 +30,28 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::labelledTri::assign(const labelUList& lst)
+template<class ListType>
+inline void Foam::labelledTri::assignList(const ListType& list)
 {
-    const label sz = lst.size();
+    const label len = list.size();
 
     // checkSize
-    if (sz < 3 || sz > 4)
+    if (len < 3 || len > 4)
     {
          FatalErrorInFunction
-            << "size " << sz << " != (3 or 4)"
+            << "size " << len << " != (3 or 4)"
             << abort(FatalError);
     }
 
+    auto iter = list.begin();
+
     for (label i=0; i<3; ++i)
     {
-        operator[](i) = lst[i];
+        this->operator[](i) = *iter;
+        ++iter;
     }
 
-    region_ = (sz > 3 ? lst[3] : 0);
+    index_ = (len == 4) ? *iter : 0;
 }
 
 
@@ -56,7 +60,7 @@ inline void Foam::labelledTri::assign(const labelUList& lst)
 inline Foam::labelledTri::labelledTri()
 :
     triFace(),
-    region_(-1)
+    index_(-1)
 {}
 
 
@@ -67,7 +71,7 @@ inline Foam::labelledTri::labelledTri
 )
 :
     triFace(tri),
-    region_(region)
+    index_(region)
 {}
 
 
@@ -80,44 +84,31 @@ inline Foam::labelledTri::labelledTri
 )
 :
     triFace(a, b, c),
-    region_(region)
+    index_(region)
 {}
 
 
-inline Foam::labelledTri::labelledTri(const labelUList& lst)
+inline Foam::labelledTri::labelledTri(const labelUList& list)
 :
     triFace(),
-    region_(0)
+    index_(0)
 {
-    assign(lst);
+    assignList(list);
 }
 
 
-inline Foam::labelledTri::labelledTri(std::initializer_list<label> initLst)
+inline Foam::labelledTri::labelledTri(std::initializer_list<label> list)
 :
     triFace(),
-    region_(0)
+    index_(0)
 {
-    assign(labelList(initLst));
+    assignList(list);
 }
 
 
 inline Foam::labelledTri::labelledTri(Istream& is)
 {
     operator>>(is, *this);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline Foam::label Foam::labelledTri::region() const
-{
-    return region_;
-}
-
-inline Foam::label& Foam::labelledTri::region()
-{
-    return region_;
 }
 
 
@@ -129,7 +120,7 @@ inline Foam::Istream& Foam::operator>>(Istream& is, labelledTri& t)
     {
         is.readBegin("labelledTri");
 
-        is  >> static_cast<triFace&>(t) >> t.region_;
+        is  >> static_cast<triFace&>(t) >> t.index();
 
         is.readEnd("labelledTri");
     }
@@ -153,7 +144,7 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const labelledTri& t)
     if (os.format() == IOstream::ASCII)
     {
         os  << token::BEGIN_LIST
-            << static_cast<const triFace&>(t) << token::SPACE << t.region_
+            << static_cast<const triFace&>(t) << token::SPACE << t.index()
             << token::END_LIST;
     }
     else

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ void Foam::PatchTools::matchPoints
     labelList& p2PointLabels
 )
 {
-    p1PointLabels.setSize(p1.nPoints());
-    p2PointLabels.setSize(p1.nPoints());
+    p1PointLabels.resize(p1.nPoints());
+    p2PointLabels.resize(p1.nPoints());
 
     label nMatches = 0;
 
@@ -59,11 +59,12 @@ void Foam::PatchTools::matchPoints
         {
             p1PointLabels[nMatches] = pointi;
             p2PointLabels[nMatches] = iter.val();
-            nMatches++;
+            ++nMatches;
         }
     }
-    p1PointLabels.setSize(nMatches);
-    p2PointLabels.setSize(nMatches);
+
+    p1PointLabels.resize(nMatches);
+    p2PointLabels.resize(nMatches);
 }
 
 
@@ -82,43 +83,38 @@ void Foam::PatchTools::matchEdges
     bitSet& sameOrientation
 )
 {
-    p1EdgeLabels.setSize(p1.nEdges());
-    p2EdgeLabels.setSize(p1.nEdges());
-    sameOrientation.setSize(p1.nEdges());
+    p1EdgeLabels.resize(p1.nEdges());
+    p2EdgeLabels.resize(p1.nEdges());
+    sameOrientation.resize(p1.nEdges());
     sameOrientation = false;
 
     label nMatches = 0;
 
     EdgeMap<label> edgeToIndex(2*p1.nEdges());
-    forAll(p1.edges(), edgeI)
+    forAll(p1.edges(), edgei)
     {
-        const edge& e = p1.edges()[edgeI];
-        const edge meshE
-        (
-            p1.meshPoints()[e[0]],
-            p1.meshPoints()[e[1]]
-        );
-        edgeToIndex.insert(meshE, edgeI);
+        // Map lookup with globalEdge
+        edgeToIndex.insert(p1.meshEdge(edgei), edgei);
     }
 
-    forAll(p2.edges(), edgeI)
+    forAll(p2.edges(), edgei)
     {
-        const edge& e = p2.edges()[edgeI];
-        const edge meshE(p2.meshPoints()[e[0]], p2.meshPoints()[e[1]]);
+        const edge meshEdge2(p2.meshEdge(edgei));
 
-        const auto iter = edgeToIndex.cfind(meshE);
+        const auto iter = edgeToIndex.cfind(meshEdge2);
 
         if (iter.found())
         {
             p1EdgeLabels[nMatches] = iter.val();
-            p2EdgeLabels[nMatches] = edgeI;
-            sameOrientation.set(nMatches, (meshE[0] == iter.key()[0]));
+            p2EdgeLabels[nMatches] = edgei;
+            sameOrientation.set(nMatches, (meshEdge2[0] == iter.key()[0]));
             ++nMatches;
         }
     }
-    p1EdgeLabels.setSize(nMatches);
-    p2EdgeLabels.setSize(nMatches);
-    sameOrientation.setSize(nMatches);
+
+    p1EdgeLabels.resize(nMatches);
+    p2EdgeLabels.resize(nMatches);
+    sameOrientation.resize(nMatches);
 }
 
 

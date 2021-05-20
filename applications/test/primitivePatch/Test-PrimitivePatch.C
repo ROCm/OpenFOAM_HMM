@@ -244,9 +244,10 @@ int main(int argc, char *argv[])
 
         writeFaceFaces(localPoints, localFaces, faceFaces);
 
-        const labelList bndFaceIds(pp.boundaryFaces());
+        const labelList bndFaceIds(pp.uniqBoundaryFaces());
 
-        Info<< "Have: " << bndFaceIds.size() << " boundary faces" << nl;
+        Info<< "Have: " << bndFaceIds.size()
+            << " unique boundary faces" << nl;
 
         // Can calculate by hand
         if (!pp.hasFaceCentres())

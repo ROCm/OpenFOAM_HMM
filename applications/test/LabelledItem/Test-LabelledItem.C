@@ -23,65 +23,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Test LabelledItem (formerly 'Keyed', but that was never used)
+
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatch.H"
+#include "IOstreams.H"
+#include "IOobject.H"
+#include "IFstream.H"
+#include "edge.H"
+#include "LabelledItem.H"
+#include "List.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+using namespace Foam;
 
-template<class FaceList, class PointField>
-Foam::labelList
-Foam::PrimitivePatch<FaceList, PointField>::boundaryFaces() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
+
+int main(int argc, char *argv[])
 {
-    labelList bndFaces(nBoundaryEdges());
+    typedef LabelledItem<edge> labelledEdge;
 
-    // The boundary slice
-    const SubList<labelList> bndEdgeToFace
-    (
-        edgeFaces(),
-        bndFaces.size(),
-        nInternalEdges()
-    );
+    List<labelledEdge> edges(10);
 
-    // By definition boundary edges have a _single_ face attached
-    forAll(bndFaces, i)
+    forAll(edges, edgei)
     {
-        bndFaces[i] = bndEdgeToFace[i][0];
-    }
+        auto& e = edges[edgei];
 
-    return bndFaces;
-}
+        e.insert(20-edgei);
+        e.insert(edgei);
 
-
-template<class FaceList, class PointField>
-Foam::labelList
-Foam::PrimitivePatch<FaceList, PointField>::uniqBoundaryFaces() const
-{
-    labelList bndFaces(this->boundaryFaces());
-
-    const label len = bndFaces.size();
-
-    if (len > 1)
-    {
-        Foam::sort(bndFaces);
-
-        label prev = bndFaces[0];
-        label nUniq = 1;
-
-        for (label i=1; i < len; ++i)
+        if (!(edgei % 3))
         {
-            if (prev != bndFaces[i])
-            {
-                prev = bndFaces[i];
-                bndFaces[nUniq] = prev;
-                ++nUniq;
-            }
+            e.setIndex(edgei);
         }
-
-        bndFaces.resize(nUniq);
     }
 
-    return bndFaces;
+    Info<< "edges: " << edges << nl;
+
+    Foam::sort(edges);
+
+    Info<< "sorted: " << edges << nl;
+
+    Info<< "\nEnd\n" << endl;
+
+    return 0;
 }
 
 

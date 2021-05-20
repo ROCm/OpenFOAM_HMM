@@ -5,6 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+    Copyright (C) 2011 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,63 +26,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PrimitivePatch.H"
+#include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class FaceList, class PointField>
-Foam::labelList
-Foam::PrimitivePatch<FaceList, PointField>::boundaryFaces() const
+template<class T>
+inline Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    LabelledItem<T>& item
+)
 {
-    labelList bndFaces(nBoundaryEdges());
+    is.readBegin("LabelledItem");
+    is >> static_cast<T&>(item) >> item.index();
+    is.readEnd("LabelledItem");
 
-    // The boundary slice
-    const SubList<labelList> bndEdgeToFace
-    (
-        edgeFaces(),
-        bndFaces.size(),
-        nInternalEdges()
-    );
-
-    // By definition boundary edges have a _single_ face attached
-    forAll(bndFaces, i)
-    {
-        bndFaces[i] = bndEdgeToFace[i][0];
-    }
-
-    return bndFaces;
+    is.check(FUNCTION_NAME);
+    return is;
 }
 
 
-template<class FaceList, class PointField>
-Foam::labelList
-Foam::PrimitivePatch<FaceList, PointField>::uniqBoundaryFaces() const
+template<class T>
+inline Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const LabelledItem<T>& item
+)
 {
-    labelList bndFaces(this->boundaryFaces());
+    // Output like Tuple2
+    os  << token::BEGIN_LIST
+        << static_cast<const T&>(item) << token::SPACE
+        << item.index()
+        << token::END_LIST;
 
-    const label len = bndFaces.size();
-
-    if (len > 1)
-    {
-        Foam::sort(bndFaces);
-
-        label prev = bndFaces[0];
-        label nUniq = 1;
-
-        for (label i=1; i < len; ++i)
-        {
-            if (prev != bndFaces[i])
-            {
-                prev = bndFaces[i];
-                bndFaces[nUniq] = prev;
-                ++nUniq;
-            }
-        }
-
-        bndFaces.resize(nUniq);
-    }
-
-    return bndFaces;
+    return os;
 }
 
 

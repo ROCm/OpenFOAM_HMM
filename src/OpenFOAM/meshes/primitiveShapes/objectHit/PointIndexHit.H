@@ -243,7 +243,7 @@ public:
              && index_ == rhs.index_
              && point_ == rhs.point_
             );
-         }
+        }
 
         //- Test for inequality of components
         bool operator!=(const PointIndexHit& rhs) const

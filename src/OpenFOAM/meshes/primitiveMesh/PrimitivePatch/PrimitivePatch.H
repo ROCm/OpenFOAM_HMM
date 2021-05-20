@@ -367,9 +367,13 @@ public:
             //- Return patch faces addressing into local point list
             const List<face_type>& localFaces() const;
 
-            //- Calculate and return list of local boundary faces.
-            //  These are the faces attached to boundary edges.
+            //- Extract list of local faces corresponding to
+            //- the boundary edges.
             labelList boundaryFaces() const;
+
+            //- Extract sorted list of unique local faces associated with
+            //- the boundary edges.
+            labelList uniqBoundaryFaces() const;
 
 
         // Addressing into mesh
@@ -393,9 +397,15 @@ public:
             //  If the point is not found, return -1
             label whichPoint(const label gp) const;
 
-            //- Given an edge in local point labels, return its
-            //- index in the edge list.  If the edge is not found, return -1
-            label whichEdge(const edge& e) const;
+            //- Return local edge in terms of the mesh points in patch.
+            edge meshEdge(const label edgei) const;
+
+            //- Return local edge in terms of the mesh points in patch.
+            edge meshEdge(const edge& e) const;
+
+            //- Search for edge (local point labels) and return its
+            //- index in the edge list or -1 if not found.
+            label findEdge(const edge& e) const;
 
             //- Return labels of patch edges in the global edge list using
             //- cell addressing
@@ -406,13 +416,32 @@ public:
                 const labelList& faceCells
             ) const;
 
-            //- Return labels of patch edges in the global edge list using
+            //- Return labels of patch edges into the global edge list using
             //- basic edge addressing.
             labelList meshEdges
             (
                 const edgeList& allEdges,
                 const labelListList& pointEdges
             ) const;
+
+            //- Return label of the local patch edge
+            //- into the global edge list using basic edge addressing.
+            label meshEdge
+            (
+                const label edgei,
+                const edgeList& allEdges,
+                const labelListList& pointEdges
+            ) const;
+
+            //- Return labels of specified patch edges
+            //- into the global edge list using basic edge addressing.
+            labelList meshEdges
+            (
+                const labelUList& edgeLabels,
+                const edgeList& allEdges,
+                const labelListList& pointEdges
+            ) const;
+
 
             //- Return face centres for patch
             const Field<point_type>& faceCentres() const;
@@ -510,6 +539,12 @@ public:
 
         //- Move assign faces. Leave points alone (could be a reference).
         void operator=(PrimitivePatch<FaceList, PointField>&& rhs);
+
+
+    // Housekeeping
+
+        //- Identical to findEdge
+        label whichEdge(const edge& e) const { return this->findEdge(e); }
 };
 
 

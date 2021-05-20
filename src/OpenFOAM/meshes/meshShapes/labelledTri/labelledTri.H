@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::labelledTri
 
 Description
-    Triangle with additional region number.
+    A triFace with additional (region) index.
 
 SourceFiles
     labelledTriI.H
@@ -52,7 +52,7 @@ inline Istream& operator>>(Istream&, labelledTri&);
 inline Ostream& operator<<(Ostream&, const labelledTri&);
 
 /*---------------------------------------------------------------------------*\
-                           Class labelledTri Declaration
+                         Class labelledTri Declaration
 \*---------------------------------------------------------------------------*/
 
 class labelledTri
@@ -61,14 +61,16 @@ class labelledTri
 {
     // Private Data
 
-        label region_;
+        //- The object index (region)
+        label index_;
 
 
     // Private Member Functions
 
-        //- Assign from a list of 3 or 4 labels.
-        //  Default region is 0.
-        inline void assign(const labelUList&);
+        //- Assign from 3 or 4 labels, default region is 0.
+        template<class ListType>
+        inline void assignList(const ListType& list);
+
 
 public:
 
@@ -77,16 +79,16 @@ public:
         //- Default construct, with invalid point labels and region (-1).
         inline labelledTri();
 
-        //- Construct from triFace and region label.
-        //  Default region is 0 if not specified.
+        //- Construct from triFace
+        //- and optional region index (0 if unspecified)
         inline labelledTri
         (
-            const triFace&,
+            const triFace& tri,
             const label region = 0
         );
 
-        //- Construct from three point labels and a region label.
-        //  Default region is 0 if not specified.
+        //- Construct from three point labels
+        //- and optional region index (0 if unspecified)
         inline labelledTri
         (
             const label a,
@@ -95,26 +97,47 @@ public:
             const label region = 0
         );
 
-        //- Construct from a list of 3 or 4 labels.
-        //  Default region is 0.
-        inline explicit labelledTri(const labelUList&);
+        //- Construct from a list of 3 or 4 labels. Default region is 0.
+        inline explicit labelledTri(const labelUList& list);
 
-        //- Construct from an initializer list of 3 or 4 labels.
+        //- Construct from a list of 3 or 4 labels. Default region is 0.
         inline explicit labelledTri(std::initializer_list<label>);
 
         //- Construct from Istream
-        inline labelledTri(Istream&);
+        inline labelledTri(Istream& is);
 
 
     // Member Functions
 
-        // Access
+        //- Return the index (eg, the region)
+        label index() const noexcept
+        {
+            return index_;
+        }
 
-            //- Return region label
-            inline label region() const;
+        //- Non-const access to the index (eg, the region)
+        label& index() noexcept
+        {
+            return index_;
+        }
 
-            //- Return region label
-            inline label& region();
+        //- Set the index (eg, the region)
+        void setIndex(const label idx) noexcept
+        {
+            index_ = idx;
+        }
+
+        //- Return the region index
+        label region() const noexcept
+        {
+            return index_;
+        }
+
+        //- Non-const access to the region index
+        label& region() noexcept
+        {
+            return index_;
+        }
 
 
     // IOstream Operators
@@ -137,17 +160,13 @@ template<> struct is_contiguous_label<labelledTri> : std::true_type {};
 template<>
 struct offsetOp<labelledTri>
 {
-    inline labelledTri operator()
-    (
-        const labelledTri& x,
-        const label offset
-    ) const
+    labelledTri operator()(const labelledTri& x, const label offset) const
     {
         labelledTri result(x);
 
-        forAll(x, xI)
+        forAll(x, xi)
         {
-            result[xI] = x[xI] + offset;
+            result[xi] = x[xi] + offset;
         }
         return result;
     }
