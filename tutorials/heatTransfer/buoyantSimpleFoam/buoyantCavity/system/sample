@@ -10,18 +10,15 @@ FoamFile
     version         2.0;
     format          ascii;
     class           dictionary;
-    location        "system";
     object          sample;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type sets;
+type            sets;
 libs            (sampling);
-
 interpolationScheme cellPointFace;
-
-setFormat raw;
+setFormat       raw;
+fields          ( T U );
 
 sets
 (
@@ -88,12 +85,6 @@ sets
         start           (-1 1.962 0);
         end             (1 1.962 0);
     }
-);
-
-fields
-(
-    T
-    U
 );
 
 

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,17 +24,20 @@ boundaryField
     {
         type            noSlip;
     }
+
     inlet
     {
         type            fixedValue;
         value           uniform (0 0 5);
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform (0 0 0);
         value           uniform (0 0 0);
     }
+
     blades
     {
         type            noSlip;

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/cabin";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,21 +25,25 @@ boundaryField
         type            fixedValue;
         value           uniform 0.03375;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 0.00015;
         value           uniform 0.00015;
     }
+
     symmetry
     {
         type            symmetryPlane;
     }
+
     walls
     {
         type            kqRWallFunction;
         value           uniform 0.00015;
     }
+
     cabin_to_ice
     {
         type            kqRWallFunction;

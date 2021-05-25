@@ -58,7 +58,6 @@ vertices
     ( -0.50   0.10    0.70)  // 31
 );
 
-
 blocks
 (
     hex ( 1 2 3  4 17 18 19 20) cabin (15  5 50) simpleGrading (1 1 1)
@@ -71,7 +70,6 @@ blocks
 
     hex (15 12 13 14 31 28 29 30) exterior (30 45 50) simpleGrading (0.4 1 1)
 );
-
 
 edges
 (
@@ -100,13 +98,11 @@ edges
     arc 1 17 (-0.02 0 0.35)
 );
 
-
 defaultPatch
 {
     name    walls;
     type    wall;
 }
-
 
 boundary
 (
@@ -149,7 +145,6 @@ boundary
         );
     }
 );
-
 
 mergePatchPairs
 (

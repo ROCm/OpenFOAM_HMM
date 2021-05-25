@@ -11,6 +11,9 @@ runParallel $(getApplication)
 
 runApplication -s solid reconstructPar -latestTime -region solid
 
-./createGraphs
+if notTest "$@"
+then
+    ./plot
+fi
 
 #------------------------------------------------------------------------------

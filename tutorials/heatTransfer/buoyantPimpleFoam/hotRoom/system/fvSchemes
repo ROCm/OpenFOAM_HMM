@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,14 +28,19 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss upwind;
-    div(phi,h)      Gauss upwind;
-    div(phi,e)      Gauss upwind;
-    div(phi,k)      Gauss upwind;
-    div(phi,epsilon) Gauss upwind;
-    div(phi,R)      Gauss upwind;
+
+    energy          Gauss upwind;
+    div(phi,h)      $energy;
+    div(phi,e)      $energy;
     div(phi,K)      Gauss linear;
     div(phi,Ekp)    Gauss linear;
+
+    turbulence      Gauss upwind;
+    div(phi,k)      $turbulence;
+    div(phi,epsilon) $turbulence;
+    div(phi,R)      $turbulence;
     div(R)          Gauss linear;
+
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
 

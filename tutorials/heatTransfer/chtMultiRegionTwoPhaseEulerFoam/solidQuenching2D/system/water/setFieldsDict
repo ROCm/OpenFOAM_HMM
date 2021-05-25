@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -18,8 +17,6 @@ FoamFile
 defaultFieldValues
 (
     volScalarFieldValue alpha.gas 1
-    //volScalarFieldValue T.liquid 373
-    //volScalarFieldValue T.gas    373
 );
 
 regions
@@ -31,8 +28,6 @@ regions
         (
             volScalarFieldValue alpha.gas 0
             volScalarFieldValue alpha.liquid 1
-            //volScalarFieldValue T.liquid 333
-            //volScalarFieldValue T.gas 333
         );
     }
 );

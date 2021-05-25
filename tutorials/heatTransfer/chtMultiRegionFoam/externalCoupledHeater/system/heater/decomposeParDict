@@ -10,27 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains  4;
 
-method          scotch;
+method              scotch;
 
-coeffs
-{
-    n           (2 2 1);
-}
-
-scotchCoeffs
-{
-}
-
-manualCoeffs
-{
-    dataFile    "decompositionData";
-}
 
 // ************************************************************************* //

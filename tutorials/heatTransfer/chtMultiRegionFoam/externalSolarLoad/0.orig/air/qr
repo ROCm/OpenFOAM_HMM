@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/air";
     object      qr;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,32 +25,38 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+
     minX
     {
         type            calculated;
         value           uniform 0;
     }
+
     maxX
     {
         type            calculated;
         value           uniform 0;
     }
+
     minY
     {
         type            calculated;
         value           uniform 0;
     }
+
     maxZ
     {
         type            calculated;
         value           uniform 0;
     }
+
     air_to_floor
     {
         type            greyDiffusiveRadiationViewFactor;
         qro             uniform 0;
         value           uniform 0;
     }
+
     air_to_solid
     {
         type            greyDiffusiveRadiationViewFactor;

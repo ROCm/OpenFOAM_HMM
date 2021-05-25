@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0/air";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,42 +26,49 @@ boundaryField
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     minX
     {
         type            pressureInletOutletVelocity;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     maxX
     {
         type            pressureInletOutletVelocity;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     minY
     {
         type            pressureInletOutletVelocity;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     maxZ
     {
         type            pressureInletOutletVelocity;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     air_to_floor
     {
         type            fixedValue;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     air_to_solid
     {
         type            fixedValue;
         value           uniform ( 0 0 0 );
         phi             phi;
     }
+
     region0_to_floor_floor_zone
     {
         type            fixedValue;

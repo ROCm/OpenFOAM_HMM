@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,6 +24,7 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     ceiling
     {
         type               compressible::thermalBaffle;
@@ -95,17 +95,20 @@ boundaryField
             thickness           0.1;
         }
     }
+
     inlet
     {
         type            fixedValue;
         value           uniform 300;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
+
     fixedWalls
     {
         type            empty;

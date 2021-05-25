@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/solid";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,6 +25,7 @@ boundaryField
         type            fixedValue;
         value           uniform 300;
     }
+
     solid_to_air
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
@@ -36,6 +36,7 @@ boundaryField
         qr              none;
         kappa           none;
     }
+
     solid_to_floor
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;

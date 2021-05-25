@@ -16,17 +16,17 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
 {
-    default             Gauss linear;
+    default         Gauss linear;
 }
 
 divSchemes
 {
-    default                         none;
+    default         none;
 
     "div\(phi,alpha.*\)"            Gauss vanLeer;
     "div\(phir,alpha.*\)"           Gauss vanLeer;
@@ -65,5 +65,6 @@ wallDist
     method          meshWave;
     nRequired       yes;
 }
+
 
 // ************************************************************************* //

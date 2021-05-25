@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/air";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,31 +25,37 @@ boundaryField
         type            calculated;
         value           uniform 100000;
     }
+
     minX
     {
         type            calculated;
         value           uniform 100000;
     }
+
     maxX
     {
         type            calculated;
         value           uniform 100000;
     }
+
     minY
     {
         type            calculated;
         value           uniform 100000;
     }
+
     maxZ
     {
         type            calculated;
         value           uniform 100000;
     }
+
     air_to_floor
     {
         type            calculated;
         value           uniform 100000;
     }
+
     air_to_solid
     {
         type            calculated;

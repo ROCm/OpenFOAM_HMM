@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      boundaryRadiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,5 +51,6 @@ air_to_floor
         emissivity      (0.3 0.7);
     };
 }
+
 
 // ************************************************************************* //

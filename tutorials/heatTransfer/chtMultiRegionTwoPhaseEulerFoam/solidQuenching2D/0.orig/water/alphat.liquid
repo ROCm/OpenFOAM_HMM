@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      alphat.liquid;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,6 +33,7 @@ boundaryField
         dmdt            uniform 0;
         value           uniform 1e-8;
     }
+
     water_to_solid
     {
         type            compressible::alphatWallBoilingWallFunction;

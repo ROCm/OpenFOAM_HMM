@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,7 +57,7 @@ functions
         type            surfaceFieldValue;
         libs            (fieldFunctionObjects);
         enabled         yes;
-        writeControl    timeStep; //writeTime;
+        writeControl    timeStep;
         writeInterval   1;
         log             yes;
         writeFields     no;

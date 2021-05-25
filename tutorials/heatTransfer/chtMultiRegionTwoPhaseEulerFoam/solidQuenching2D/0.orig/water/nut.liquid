@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nut.liquid;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,11 +21,13 @@ internalField   uniform 0.000;
 boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
+
     maxY
     {
         type            calculated;
         value           uniform 0.000;
     }
+
     ".*"
     {
         type            nutkWallFunction;

@@ -37,7 +37,6 @@ vertices
     ( $X_MAX_TUNNEL  $Y_MIN_TUNNEL  $Z_MAX_TUNNEL )    //Node 5
     ( $X_MAX_TUNNEL  $Y_MAX_TUNNEL  $Z_MAX_TUNNEL )    //Node 6
     ( $X_MIN_TUNNEL  $Y_MAX_TUNNEL  $Z_MAX_TUNNEL )    //Node 7
-
 );
 
 blocks
@@ -101,5 +100,6 @@ boundary
         );
     }
 );
+
 
 // ************************************************************************* //

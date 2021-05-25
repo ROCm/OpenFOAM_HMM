@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0/water";
     object      U.gas;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,6 +21,7 @@ internalField   uniform ( 0 0 0 );
 boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
+
     maxY
     {
         type            pressureInletOutletVelocity;
@@ -35,6 +35,7 @@ boundaryField
         type            fixedValue;
         value           uniform ( 0 0 0 );
     }
+
     minY
     {
         type            fixedValue;

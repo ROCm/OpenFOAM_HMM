@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/floor";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,21 +25,25 @@ boundaryField
         type            zeroGradient;
         value           uniform 300;
     }
+
     minX
     {
         type            zeroGradient;
         value           uniform 300;
     }
+
     maxX
     {
         type            zeroGradient;
         value           uniform 300;
     }
+
     minY
     {
         type            zeroGradient;
         value           uniform 300;
     }
+
     minZ
     {
         type            externalWallHeatFluxTemperature;
@@ -53,11 +56,13 @@ boundaryField
         kappa           none;
         value           uniform 300;
     }
+
     floor_to_domain3
     {
         type            zeroGradient;
         value           uniform 300;
     }
+
     floor_to_air
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
@@ -68,6 +73,7 @@ boundaryField
         qr              none;
         kappa           none;
     }
+
     floor_to_solid
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;

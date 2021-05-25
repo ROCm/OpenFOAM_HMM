@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/water";
     object      T.liquid;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,6 +21,7 @@ internalField   uniform 333;
 boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
+
     maxY
     {
         type            inletOutlet;
@@ -34,6 +34,7 @@ boundaryField
         type            fixedValue;
         value           uniform 333;
     }
+
     minY
     {
         type            fixedValue;

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/windshield";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,10 +24,12 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     walls
     {
         type            zeroGradient;
     }
+
     windshield_to_cabin
     {
         type            humidityTemperatureCoupledMixed;
@@ -36,6 +37,7 @@ boundaryField
         kappa           none;
         value           uniform 260;
     }
+
     exterior
     {
         type            externalWallHeatFluxTemperature;

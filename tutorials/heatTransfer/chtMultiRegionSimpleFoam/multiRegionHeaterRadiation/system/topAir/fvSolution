@@ -29,9 +29,7 @@ solvers
         solver           GAMG;
         tolerance        1e-7;
         relTol           0.01;
-
         smoother         GaussSeidel;
-
     }
 
     "(U|h|k|epsilon|G|Ii)"
@@ -77,5 +75,6 @@ relaxationFactors
         qr              0.7;
     }
 }
+
 
 // ************************************************************************* //

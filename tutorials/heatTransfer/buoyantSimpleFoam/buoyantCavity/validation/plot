@@ -1,0 +1,171 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+#    Copyright (C) 2011-2016 OpenFOAM Foundation
+#    Copyright (C) 2021 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Script
+#     plot
+#
+# Description
+#     Creates .png graphs of OpenFOAM results vs experiment for the buoyant
+#     cavity case
+#
+#------------------------------------------------------------------------------
+cd "${0%/*}" || exit                                # Run from this directory
+#------------------------------------------------------------------------------
+
+# settings
+
+    # stop on first error
+    set -e
+
+
+#------------------------------------------------------------------------------
+
+plot_T()
+{
+    index="$1"
+    sampleFile="$2"
+    benchmarkFile="$3"
+
+    image="OF_vs_EXPT_T$index.png"
+
+    gnuplot<<PLT_T
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+    set grid
+    set key left top
+    set xrange [0:0.08]
+    set yrange [285:310]
+    set xlabel "Channel width, x / [m]"
+    set ylabel "Temperature / [K]"
+    set output "$image"
+
+    # Benchmark - Experimental
+        benchmark="$benchmarkFile"
+
+    # OpenFOAM
+        samples="$sampleFile"
+
+    plot \
+        benchmark u (\$1/1000):(\$2+273.15) t "Expt 0.$index" w p lt 1 pt 6, \
+        samples t "OpenFOAM 0.$index" w l lt -1
+PLT_T
+}
+
+
+plot_U()
+{
+    index=$1
+    sampleFile="$2"
+    benchmarkFile="$3"
+
+    image="OF_vs_EXPT_U$index.png"
+
+    gnuplot<<PLT_U
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+    set grid
+    set key left top
+    set xrange [0:0.08]
+    set yrange [-0.2:0.2]
+    set xlabel "Channel width, x / [m]"
+    set ylabel "Vertical velocity component, Uy / [m/s]"
+    set output "$image"
+
+    # Benchmark - Experimental
+        benchmark="$benchmarkFile"
+
+    # OpenFOAM
+        samples="$sampleFile"
+
+    plot \
+        benchmark u (\$1/1000):(\$2) t "Expt 0.$index" w p lt 1 pt 6, \
+        samples u 1:3 title "OpenFOAM 0.$index" w l lt -1
+PLT_U
+}
+
+
+#------------------------------------------------------------------------------
+
+# Requires "gnuplot"
+command -v gnuplot >/dev/null || {
+    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+SETSDIR="../postProcessing/sample"
+
+[ -d "$SETSDIR" ] || {
+    echo "FOAM FATAL ERROR: result sets not available in directory $SETSDIR" 1>&2
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+
+echo ""
+echo "# Plot:"
+echo ""
+
+# paths to data
+LATESTTIME=$(ls $SETSDIR)
+OFDATAROOT="$SETSDIR/$LATESTTIME"
+
+EXPTDATAROOT=./exptData
+
+# generate temperature profiles
+TSets="1 3 4 5 6 7 9"
+for i in $TSets
+do
+
+    echo "    processing temperature profile at y/yMax of 0.$i"
+
+    OF="$OFDATAROOT/y0.${i}_T.xy"
+
+    EXPT="$EXPTDATAROOT/mt_z0_${i}0_lo.dat"
+
+    plot_T "$i" "$OF" "$EXPT"
+
+done
+
+
+# generate velocity profiles
+USets="1 3 4 5 6 7 9"
+for i in $USets
+do
+
+    echo "    processing velocity profile at y/yMax of 0.$i"
+
+    OF="$OFDATAROOT/y0.${i}_U.xy"
+
+    EXPT="$EXPTDATAROOT/mv_z0_${i}0_lo.dat"
+
+    plot_U "$i" "$OF" "$EXPT"
+
+done
+
+echo "End"
+
+
+#------------------------------------------------------------------------------

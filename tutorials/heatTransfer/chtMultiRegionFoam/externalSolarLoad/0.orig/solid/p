@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/solid";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,11 +25,13 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+
     solid_to_air
     {
         type            calculated;
         value           uniform 0;
     }
+
     solid_to_floor
     {
         type            calculated;
