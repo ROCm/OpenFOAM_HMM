@@ -27,6 +27,56 @@ License
 
 #include "CatmullRomSpline.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::scalar Foam::CatmullRomSpline::derivative
+(
+    const label segment,
+    const scalar mu
+) const
+{
+    const point& p0 = points()[segment];
+    const point& p1 = points()[segment+1];
+
+    // determine the end points
+    point e0;
+    point e1;
+
+    if (segment == 0)
+    {
+        // end: simple reflection
+        e0 = 2*p0 - p1;
+    }
+    else
+    {
+        e0 = points()[segment-1];
+    }
+
+    if (segment+1 == nSegments())
+    {
+        // end: simple reflection
+        e1 = 2*p1 - p0;
+    }
+    else
+    {
+        e1 = points()[segment+2];
+    }
+    const point derivativePoint
+    (
+        0.5 *
+        (
+            (-e0 + p1)
+          + mu *
+            (
+                2 * (2*e0 - 5*p0 + 4*p1 - e1)
+              + mu * 3 * (-e0 + 3*p0 - 3*p1 + e1)
+            )
+        )
+    );
+    return mag(derivativePoint);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::CatmullRomSpline::CatmullRomSpline
@@ -114,27 +164,51 @@ Foam::point Foam::CatmullRomSpline::position
     }
 
 
-    return 0.5 *
-    (
-        ( 2*p0 )
-      + mu *
+    return
+        0.5 *
         (
-            ( -e0 + p1 )
+            (2*p0)
           + mu *
             (
-                ( 2*e0 - 5*p0 + 4*p1 - e1 )
+                (-e0 + p1)
               + mu *
-                ( -e0 + 3*p0 - 3*p1 + e1 )
+                (
+                    (2*e0 - 5*p0 + 4*p1 - e1)
+                  + mu*(-e0 + 3*p0 - 3*p1 + e1)
+                )
             )
-        )
-    );
+        );
 }
 
 
 Foam::scalar Foam::CatmullRomSpline::length() const
 {
-    NotImplemented;
-    return 1;
+    const solveScalar xi[5]=
+    {
+        -0.9061798459386639927976,
+        -0.5384693101056830910363,
+        0,
+        0.5384693101056830910363,
+        0.9061798459386639927976
+    };
+    const solveScalar wi[5]=
+    {
+        0.2369268850561890875143,
+        0.4786286704993664680413,
+        0.5688888888888888888889,
+        0.4786286704993664680413,
+        0.2369268850561890875143
+    };
+    scalar sum=0;
+    for (label segment=0;segment<nSegments();segment++)
+    {
+        for (int i=0;i<5;i++)
+        {
+            sum+=wi[i]*derivative(segment,(xi[i]+1.0)/2.0)/2.0;
+        }
+    }
+
+    return sum;
 }
 
 
