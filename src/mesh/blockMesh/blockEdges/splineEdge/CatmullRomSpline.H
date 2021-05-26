@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,15 @@ class CatmullRomSpline
 :
     public polyLine
 {
+
+    //- Derivative of spline
+    scalar derivative
+    (
+        const label segment,
+        const scalar mu
+    ) const;
+
+
 public:
 
     // Constructors
@@ -103,7 +112,6 @@ public:
         point position(const label segment, const scalar lambda) const;
 
         //- The length of the curve
-        //  \note NotImplemented
         scalar length() const;
 };
 
