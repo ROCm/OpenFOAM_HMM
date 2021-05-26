@@ -16,22 +16,7 @@ FoamFile
 
 numberOfSubdomains  4;
 
-method          scotch;
-// method          hierarchical;
-// method          simple;
-// method          manual;
-
-coeffs
-{
-    n           (2 2 1);
-}
-
-scotchCoeffs
-{
-    //processorWeights ( 1 1 1 1 );
-    //writeGraph  true;
-    //strategy "b";
-}
+method              scotch;
 
 /*
 constraints
@@ -44,5 +29,6 @@ constraints
     }
 }
 */
+
 
 // ************************************************************************* //

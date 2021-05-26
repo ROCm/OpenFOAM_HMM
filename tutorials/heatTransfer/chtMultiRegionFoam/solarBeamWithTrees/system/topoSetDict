@@ -12,12 +12,10 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
 (
-
     // solid
     {
         name    solid;
@@ -100,5 +98,6 @@ actions
         set     solidCells;     // cellSet
     }
 );
+
 
 // ************************************************************************* //

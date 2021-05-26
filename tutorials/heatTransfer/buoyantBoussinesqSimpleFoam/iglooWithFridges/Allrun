@@ -3,24 +3,51 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+# settings
+
+    # flag to enable computations in parallel mode
+    parallel=false
+
+
+#------------------------------------------------------------------------------
+
+restore0Dir
+
 runApplication blockMesh
 
-# Serial
-runApplication snappyHexMesh -overwrite
-runApplication $(getApplication)
+mkdir -p constant/triSurface
 
-## Parallel
-#runApplication decomposePar -fileHandler collated
-#runParallel snappyHexMesh -overwrite -fileHandler collated
-## Remove any include files from the field dictionaries
-#(   mkdir -p processors/0 && \
-#    cd 0 && \
-#    for f in *; do [ -f "$f" ] && \
-#    foamDictionary "$f" > "../processors/0/$f"; done \
-#)
-#
-#runParallel $(getApplication) -fileHandler collated
-#runApplication reconstructParMesh -constant
-#runApplication reconstructPar
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/fridgeA.eMesh \
+    constant/triSurface
+
+if [ "$parallel" = true ]
+then
+
+    runApplication decomposePar -fileHandler collated
+
+    runParallel snappyHexMesh -overwrite -fileHandler collated
+
+    ## Remove any include files from the field dictionaries
+    (   mkdir -p processors/0 && \
+        cd 0 && \
+        for f in *; do [ -f "$f" ] && \
+        foamDictionary "$f" > "../processors/0/$f"; done \
+    )
+
+    runParallel $(getApplication) -fileHandler collated
+
+    runApplication reconstructParMesh -constant
+
+    runApplication reconstructPar
+
+else
+
+    runApplication snappyHexMesh -overwrite
+
+    runApplication $(getApplication)
+
+fi
+
 
 #------------------------------------------------------------------------------

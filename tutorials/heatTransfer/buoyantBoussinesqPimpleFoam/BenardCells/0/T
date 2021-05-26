@@ -25,11 +25,13 @@ boundaryField
         type            fixedValue;
         value           uniform 301;
     }
+
     ceiling
     {
         type            fixedValue;
         value           uniform 300;
     }
+
     sideWalls
     {
         type            zeroGradient;
@@ -37,5 +39,6 @@ boundaryField
 
     #includeEtc "caseDicts/setConstraintTypes"
 }
+
 
 // ************************************************************************* //

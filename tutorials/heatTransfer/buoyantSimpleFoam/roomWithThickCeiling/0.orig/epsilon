@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -31,6 +30,7 @@ boundaryField
         E               9.8;
         value           uniform 0.01;
     }
+
     ceiling
     {
         type            epsilonWallFunction;
@@ -39,6 +39,7 @@ boundaryField
         E               9.8;
         value           uniform 0.01;
     }
+
     inlet
     {
        type            epsilonWallFunction;
@@ -47,6 +48,7 @@ boundaryField
         E               9.8;
         value           uniform 0.01;
     }
+
     outlet
     {
         type            epsilonWallFunction;
@@ -55,6 +57,7 @@ boundaryField
         E               9.8;
         value           uniform 0.01;
     }
+
     fixedWalls
     {
         type            empty;

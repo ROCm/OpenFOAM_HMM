@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,12 +28,18 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(phi,U)      bounded Gauss upwind;
-    div(phi,h)      bounded Gauss upwind;
-    div(phi,e)      bounded Gauss upwind;
-    div(phi,K)      bounded Gauss upwind;
-    div(phi,k)      bounded Gauss upwind;
-    div(phi,epsilon) bounded Gauss upwind;
+
+    energy          bounded Gauss upwind;
+    div(phi,h)      $energy;
+    div(phi,e)      $energy;
+    div(phi,K)      $energy;
+
+    turbulence      bounded Gauss upwind;
+    div(phi,k)      $turbulence;
+    div(phi,epsilon) $turbulence;
+
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
 

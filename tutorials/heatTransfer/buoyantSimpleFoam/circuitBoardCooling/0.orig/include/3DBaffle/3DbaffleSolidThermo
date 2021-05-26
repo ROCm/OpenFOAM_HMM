@@ -6,7 +6,6 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
- // Solid thermo
 thermoType
 {
     type            heSolidThermo;
@@ -46,5 +45,6 @@ radiation
     scatterModel            none;
     transmissivityModel     none;
 }
+
 
 // ************************************************************************* //

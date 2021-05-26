@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volVectorField;
-    location    "0/ice";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,14 +24,17 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     walls
     {
         type            noSlip;
     }
+
     ice_to_cabin
     {
         type            noSlip;
     }
+
     ice_to_exterior
     {
         type            slip;

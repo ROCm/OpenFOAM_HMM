@@ -14,20 +14,20 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    boundary
+boundary
+{
+    ceiling
     {
-        ceiling
-        {
-            type            mappedWall;
-            sampleMode      nearestPatchFace;
-            samplePatch     bottom;
-            sampleRegion    baffle3DRegion;
-            coupleGroup     ceiling_baffle;
+        type            mappedWall;
+        sampleMode      nearestPatchFace;
+        samplePatch     bottom;
+        sampleRegion    baffle3DRegion;
+        coupleGroup     ceiling_baffle;
 
-            offsetMode      uniform;
-            offset          (0 0 0);
-        }
+        offsetMode      uniform;
+        offset          (0 0 0);
     }
+}
 
 
 // ************************************************************************* //

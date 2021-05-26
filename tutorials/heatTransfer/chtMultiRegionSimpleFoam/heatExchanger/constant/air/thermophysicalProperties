@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,5 +49,6 @@ mixture
         kappaCoeffs<8>  ( 0.0025219 8.506e-05 -1.312e-08 0 0 0 0 0 );
     }
 }
+
 
 // ************************************************************************* //

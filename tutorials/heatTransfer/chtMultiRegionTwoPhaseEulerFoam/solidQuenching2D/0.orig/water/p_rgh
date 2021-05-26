@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0/water";
     object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,6 +21,7 @@ internalField   uniform 100000;
 boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
+
     maxY
     {
         type            prghTotalPressure;
@@ -36,6 +36,7 @@ boundaryField
         type            fixedFluxPressure;
         value           $internalField;
     }
+
     minY
     {
         type            fixedFluxPressure;

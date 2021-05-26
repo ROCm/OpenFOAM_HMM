@@ -4,6 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication blockMesh
+
 runApplication topoSet
 
 # Restore initial fields
@@ -14,13 +15,13 @@ runApplication splitMeshRegions -cellZones -overwrite
 # Remove fluid fields from solid regions (important for post-processing)
 for region in $(foamListRegions solid)
 do
-    rm -f 0/$region/{nut,alphat,epsilon,k,U,p_rgh}
-    rm -f processor*/0/$region/{nut,alphat,epsilon,k,U,p_rgh}
+    rm -f 0/"$region"/{nut,alphat,epsilon,k,U,p_rgh}
+    rm -f processor*/0/"$region"/{nut,alphat,epsilon,k,U,p_rgh}
 done
 
 for region in $(foamListRegions)
 do
-    runApplication -s $region changeDictionary -region $region
+    runApplication -s "$region" changeDictionary -region "$region"
 done
 
 # Create coupling geometry

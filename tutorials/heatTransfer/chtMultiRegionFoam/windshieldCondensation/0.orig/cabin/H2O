@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      H2O;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,11 +25,13 @@ boundaryField
         type            zeroGradient;
         value           uniform 0.01;
     }
+
     cabin_to_windshield
     {
         type            fixedGradient;
         gradient        uniform 0.0;
     }
+
     inlet
     {
         type            uniformFixedValue;
@@ -42,12 +43,14 @@ boundaryField
             (100 0.00)
         );
     }
+
     outlet
     {
         type            inletOutlet;
         value           uniform 0.01;
         inletValue      uniform 0.01;
     }
+
     symmetry
     {
         type            symmetryPlane;

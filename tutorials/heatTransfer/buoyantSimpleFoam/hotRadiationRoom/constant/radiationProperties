@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      radiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,5 +33,6 @@ constantAbsorptionEmissionCoeffs
 scatterModel    none;
 
 sootModel       none;
+
 
 // ************************************************************************* //

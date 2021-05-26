@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/ice";
     object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,16 +24,19 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     walls
     {
         type            fixedFluxPressure;
         value           uniform 100000;
     }
+
     ice_to_cabin
     {
         type            fixedFluxPressure;
         value           uniform 100000;
     }
+
     ice_to_exterior
     {
         type            fixedFluxPressure;

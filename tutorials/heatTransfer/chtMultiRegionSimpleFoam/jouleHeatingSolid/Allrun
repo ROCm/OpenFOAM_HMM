@@ -9,7 +9,7 @@ runApplication $(getApplication)
 
 if notTest "$@"
 then
-    ./createGraphs
+    ./plot
 fi
 
 #------------------------------------------------------------------------------

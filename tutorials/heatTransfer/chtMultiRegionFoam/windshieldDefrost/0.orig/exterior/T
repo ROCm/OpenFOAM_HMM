@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/exterior";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,10 +26,12 @@ boundaryField
         inletValue      uniform 260;
         value           uniform 260;
     }
+
     symmetry
     {
         type            symmetryPlane;
     }
+
     exterior_to_ice
     {
         type            compressible::turbulentTemperatureCoupledBaffleMixed;

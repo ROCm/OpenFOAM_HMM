@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,15 +24,18 @@ boundaryField
     {
         type            fixedFluxPressure;
     }
+
     inlet
     {
         type            fixedFluxPressure;
     }
+
     outlet
     {
         type            fixedValue;
         value           $internalField;
     }
+
     blades
     {
         type            fixedFluxPressure;

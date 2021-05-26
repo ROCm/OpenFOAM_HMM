@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/exterior";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,10 +26,12 @@ boundaryField
         inletValue      uniform 0.00015;
         value           uniform 0.00015;
     }
+
     symmetry
     {
         type            symmetryPlane;
     }
+
     exterior_to_ice
     {
         type            kqRWallFunction;

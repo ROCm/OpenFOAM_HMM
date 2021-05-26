@@ -10,13 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       pointVectorField;
-    location    "0";
     object      pointDisplacement;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 0 0 0 0 0];
-
 
 internalField   uniform (0 0 0);
 
@@ -27,32 +25,38 @@ boundaryField
         type            zeroGradient;
         patchType       overset;
     }
+
     walls
     {
         type            uniformFixedValue;
         value           uniform (0 0 0);
         uniformValue    constant (0 0 0);
     }
+
     inlet
     {
         type            uniformFixedValue;
         value           uniform (0 0 0);
         uniformValue    constant (0 0 0);
     }
+
     outlet
     {
         type            uniformFixedValue;
         value           uniform (0 0 0);
         uniformValue    constant (0 0 0);
     }
+
     hole
     {
         type            zeroGradient;
     }
+
     frontAndBack
     {
         type            empty;
     }
+
     frontAndBack1
     {
         type            empty;

@@ -10,13 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 2 -1 0 0 0 0];
-
 
 internalField   uniform 0;
 
@@ -29,25 +27,30 @@ boundaryField
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     inlet
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     outlet
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     hole
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     frontAndBack
     {
         type            empty;
     }
+
     frontAndBack1
     {
         type            empty;

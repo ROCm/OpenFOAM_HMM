@@ -11,15 +11,15 @@ cd "${0%/*}" || exit                                # Run from this directory
 # Agglomerate patch faces
 for region in bottomAir topAir
 do
-    runApplication -s $region \
-        faceAgglomerate -region $region -dict constant/viewFactorsDict
+    runApplication -s "$region" \
+        faceAgglomerate -region "$region" -dict constant/viewFactorsDict
 done
 
 # Generate view factors
 for region in bottomAir topAir
 do
-    runApplication -s $region \
-        viewFactorsGen -region $region
+    runApplication -s "$region" \
+        viewFactorsGen -region "$region"
 done
 
 runApplication $(getApplication)

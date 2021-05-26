@@ -14,15 +14,15 @@ runApplication decomposePar -allRegions
 # Agglomerate patch faces
 for region in bottomAir topAir
 do
-    runParallel -s $region \
-        faceAgglomerate -region $region -dict constant/viewFactorsDict
+    runParallel -s "$region" \
+        faceAgglomerate -region "$region" -dict constant/viewFactorsDict
 done
 
 # Generate view factors
 for region in bottomAir topAir
 do
-    runParallel -s $region \
-        viewFactorsGen -region $region
+    runParallel -s "$region" \
+        viewFactorsGen -region "$region"
 done
 
 # Run

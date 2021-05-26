@@ -10,10 +10,10 @@ FoamFile
     version         2.0;
     format          ascii;
     class           dictionary;
-    location        "constant";
     object          thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 thermoType
 {
     type            heRhoThermo;
@@ -27,23 +27,21 @@ thermoType
 
 mixture
 {
-
     specie
     {
         molWeight       28.966;
     }
-
     thermodynamics
     {
         Cp              1006.43;
         Hf              0;
     }
-
     transport
     {
         mu              1.846e-05;
         Pr              0.706414;
     }
 }
+
 
 // ************************************************************************* //

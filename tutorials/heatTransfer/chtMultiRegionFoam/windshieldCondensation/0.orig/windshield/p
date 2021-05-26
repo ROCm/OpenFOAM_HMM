@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/windshield";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,6 +24,7 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     ".*"
     {
         type            calculated;

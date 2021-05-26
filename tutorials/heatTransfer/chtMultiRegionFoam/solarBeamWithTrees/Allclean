@@ -7,6 +7,5 @@ cleanCase0
 
 rm -rf constant/cellToRegion
 rm -rf constant/*/polyMesh  # region meshes
-rm -rf constant/triSurface
 
 #------------------------------------------------------------------------------

@@ -31,22 +31,20 @@ mixture
     {
         molWeight   12;
     }
-
     transport
     {
         kappa   0.9;
     }
-
     thermodynamics
     {
         Hf      0;
         Cp      500;
     }
-
     equationOfState
     {
         rho     2400;
     }
 }
+
 
 // ************************************************************************* //

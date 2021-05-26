@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      transportProperties;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 transportModel Newtonian;
@@ -31,5 +30,6 @@ Pr              1.0;
 
 // Turbulent Prandtl number
 Prt             1.0;
+
 
 // ************************************************************************* //

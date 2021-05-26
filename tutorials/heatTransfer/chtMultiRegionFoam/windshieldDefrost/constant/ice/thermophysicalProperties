@@ -31,23 +31,21 @@ mixture
     {
         molWeight   18;
     }
-
     transport
     {
         Pr          1.1e-3;
         mu          1.7e-3;
     }
-
     thermodynamics
     {
         Hf          0;
         Cp          2000;
     }
-
     equationOfState
     {
         rho         1000;
     }
 }
+
 
 // ************************************************************************* //

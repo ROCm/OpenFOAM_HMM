@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      binary;
     class       volScalarField;
-    location    "0/ice";
     object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,10 +24,12 @@ boundaryField
     {
         type            symmetryPlane;
     }
+
     walls
     {
         type            zeroGradient;
     }
+
     ice_to_cabin
     {
         type            compressible::turbulentTemperatureCoupledBaffleMixed;
@@ -37,6 +38,7 @@ boundaryField
         kappaMethod     fluidThermo;
         kappa           none;
     }
+
     ice_to_exterior
     {
         type            compressible::turbulentTemperatureCoupledBaffleMixed;

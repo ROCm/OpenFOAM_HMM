@@ -10,37 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-/*
-    p_rgh
-    {
-        solver          GAMG;
-        tolerance       1e-06;
-        relTol          0.1;
-        smoother        GaussSeidel;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        nFinestSweeps   2;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
-        maxIter         20;
-    }
-
-    p_rghFinal
-    {
-        $p_rgh;
-        smoother        DICGaussSeidel;
-        relTol          0;
-    }
-*/
     p_rgh
     {
         solver          PCG;
@@ -96,5 +71,6 @@ relaxationFactors
         ".*"        1;
     }
 }
+
 
 // ************************************************************************* //
