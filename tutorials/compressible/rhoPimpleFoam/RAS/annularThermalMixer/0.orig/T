@@ -34,11 +34,23 @@ boundaryField
         value           uniform $:outerInlet.T;
     }
 
-    outlet      { $:outlet.T; }
-    staticWalls { $:wall.T; }
-    movingWalls { $staticWalls; }
+    outlet
+    {
+        $:outlet.T;
+    }
+
+    staticWalls
+    {
+        $:wall.T;
+    }
+
+    movingWalls
+    {
+        $staticWalls;
+    }
 
     #includeEtc "caseDicts/setConstraintTypes"
 }
+
 
 // ************************************************************************* //

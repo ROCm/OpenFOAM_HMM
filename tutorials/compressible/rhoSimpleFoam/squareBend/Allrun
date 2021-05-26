@@ -3,6 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
+cp -rf \
+    "$FOAM_TUTORIALS"/resources/geometry/squareBend \
+    constant/triSurface
+
 runApplication blockMesh
 
 # Extract some faces for sampling

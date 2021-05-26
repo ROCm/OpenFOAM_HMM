@@ -31,10 +31,12 @@ divSchemes
     default             none;
 
     div(phi,U)          Gauss linearUpwind limited;
+
     div(phi,e)          Gauss linearUpwind limited;
+    div(phi,K)          Gauss linearUpwind limited;
+
     div(phi,epsilon)    Gauss linearUpwind limited;
     div(phi,k)          Gauss linearUpwind limited;
-    div(phi,K)          Gauss linearUpwind limited;
     div(phiv,p)         Gauss linearUpwind limited;
 
     div(((rho*nuEff)*dev2(T(grad(U)))))      Gauss linear;
@@ -54,5 +56,6 @@ snGradSchemes
 {
     default         corrected;
 }
+
 
 // ************************************************************************* //

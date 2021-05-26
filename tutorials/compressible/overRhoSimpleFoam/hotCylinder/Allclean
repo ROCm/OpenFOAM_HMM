@@ -7,6 +7,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 (cd cylinderAndBackground && ./Allclean)
 
 # The background mesh
-(cd cylinderMesh && foamCleanTutorials)
+(cd cylinderMesh && foamCleanTutorials && rm -rf constant/triSurface)
 
 #------------------------------------------------------------------------------

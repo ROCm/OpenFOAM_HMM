@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fluxScheme      Kurganov;
+fluxScheme          Kurganov;
 
 ddtSchemes
 {
@@ -30,6 +29,7 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(tauMC)      Gauss linear;
 }
 
@@ -41,6 +41,7 @@ laplacianSchemes
 interpolationSchemes
 {
     default         linear;
+
     reconstruct(rho) vanLeer;
     reconstruct(U)  vanLeerV;
     reconstruct(T)  vanLeer;

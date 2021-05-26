@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "";
     object      caseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,6 +21,7 @@ calculated
         type            calculated;
         value           uniform 0;
     }
+
     nut
     {
         type            calculated;
@@ -125,5 +125,6 @@ movingWall
         value           uniform (0 0 0);
     }
 }
+
 
 // ************************************************************************* //

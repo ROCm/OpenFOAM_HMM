@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -20,9 +19,7 @@ solvers
     p
     {
         solver           GAMG;
-
         smoother         GaussSeidel;
-
         tolerance       1e-6;
         relTol          0.01;
     }
@@ -53,7 +50,6 @@ solvers
         $U;
         relTol          0;
     }
-
 }
 
 PIMPLE

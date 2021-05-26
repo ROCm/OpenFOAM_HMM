@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -67,5 +66,6 @@ OptimisationSwitches
     // Force dumping (at next timestep) upon signal: 12 = USR2
     writeNowSignal  12;
 }
+
 
 // ************************************************************************* //

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      caseSettings;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -37,5 +36,6 @@ meshMotionProperties
 }
 
 #include "<constant>/boundaryConditions"
+
 
 // ************************************************************************* //

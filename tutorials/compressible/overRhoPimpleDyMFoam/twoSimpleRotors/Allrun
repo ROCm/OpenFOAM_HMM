@@ -7,11 +7,6 @@ canCompile || exit 0    # Dynamic code
 
 ./Allrun.pre
 
-# Serial
 runApplication $(getApplication)
-
-# Parallel
-#runApplication decomposePar -cellDist
-#runParallel  $(getApplication)
 
 #------------------------------------------------------------------------------

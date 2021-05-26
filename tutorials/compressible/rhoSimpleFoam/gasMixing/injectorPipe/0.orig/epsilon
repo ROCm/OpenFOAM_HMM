@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,27 +28,32 @@ boundaryField
         mixingLength    0.005;
         value           $internalField;
     }
+
     inlet_fuel
     {
         type            turbulentMixingLengthDissipationRateInlet;
         mixingLength    0.001;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     "inlet.*"
     {
         type            zeroGradient;
     }
+
     "wall.*"
     {
         type            epsilonWallFunction;
         value           $internalField;
     }
 }
+
 
 // ************************************************************************* //

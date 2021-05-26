@@ -8,5 +8,6 @@ cleanCase0
 rm -rf constant/boundaryData
 rm -f constant/faMesh/faceLabels
 rm -f constant/faMesh/faBoundary
+rm -rf constant/triSurface
 
 # -----------------------------------------------------------------------------
