@@ -158,6 +158,23 @@ inline bool Foam::mappedPatchBase::sameWorld() const
 }
 
 
+inline bool Foam::mappedPatchBase::masterWorld() const
+{
+    if (sameWorld())
+    {
+        return true;
+    }
+    else
+    {
+        // Use ordering in allWorlds
+        const label myWorld = UPstream::myWorldID();
+        const label mySampleWorld =
+            UPstream::allWorlds().find(sampleWorld_);
+        return myWorld < mySampleWorld;
+    }
+}
+
+
 inline bool Foam::mappedPatchBase::sameRegion() const
 {
     return sameRegion_;

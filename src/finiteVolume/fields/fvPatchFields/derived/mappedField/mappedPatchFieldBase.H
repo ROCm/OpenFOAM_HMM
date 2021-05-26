@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,9 +117,24 @@ protected:
             const objectRegistry& obr,
             const word& region,
             const word& patch,
-            const mapDistribute& map,
+            const labelListList& map,
             const word& fieldName,
             const Field<T>& fld
+        ) const;
+
+        //- Helper : storeField and retrieveField and interpolate. Leaves fld
+        //  unchanged (and returns false) if new values cannot be retrieved.
+        //  Returns true otherwise.
+        template<class T>
+        bool storeAndRetrieveField
+        (
+            const word& fieldName,
+            const labelListList& subMap,
+            const label constructSize,
+            const labelListList& constructMap,
+            const labelListList& address,
+            const scalarListList& weights,
+            Field<T>& fld
         ) const;
 
 
@@ -244,9 +260,10 @@ public:
                 const Field<T>& fld
             ) const;
 
-            //- Construct field from registered elements
+            //- Construct field from registered elements. Return true if
+            //  successful
             template<class T>
-            void retrieveField
+            bool retrieveField
             (
                 const bool allowUnset,
                 const objectRegistry& obr,
