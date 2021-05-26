@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2017,2020 OpenCFD Ltd.
+    Copyright (C) 2015-2017,2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1734,21 +1734,18 @@ void Foam::addPatchCellLayer::setRefinement
         copiedPatchPoints.setSize(firstLayerDisp.size());
         forAll(firstLayerDisp, patchPointi)
         {
-            if (addedPoints_[patchPointi].size())
-            {
-                label meshPointi = meshPoints[patchPointi];
-                label zoneI = mesh_.pointZones().whichZone(meshPointi);
-                copiedPatchPoints[patchPointi] = meshMod.setAction
+            label meshPointi = meshPoints[patchPointi];
+            label zoneI = mesh_.pointZones().whichZone(meshPointi);
+            copiedPatchPoints[patchPointi] = meshMod.setAction
+            (
+                polyAddPoint
                 (
-                    polyAddPoint
-                    (
-                        mesh_.points()[meshPointi],         // point
-                        -1,         // master point
-                        zoneI,      // zone for point
-                        true        // supports a cell
-                    )
-                );
-            }
+                    mesh_.points()[meshPointi],         // point
+                    -1,         // master point
+                    zoneI,      // zone for point
+                    true        // supports a cell
+                )
+            );
         }
     }
 
