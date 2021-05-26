@@ -67,6 +67,7 @@ void Foam::mappedPatchFieldBase<Type>::storeField
     for (label domain = 0; domain < nProcs; domain++)
     {
         const labelList& map = procToMap[domain];
+
         if (map.size())
         {
             const Field<T> subFld(fld, map);
@@ -100,7 +101,7 @@ void Foam::mappedPatchFieldBase<Type>::storeField
 
 template<class Type>
 template<class T>
-void Foam::mappedPatchFieldBase<Type>::retrieveField
+bool Foam::mappedPatchFieldBase<Type>::retrieveField
 (
     const bool allowUnset,
     const objectRegistry& obr,
@@ -112,8 +113,9 @@ void Foam::mappedPatchFieldBase<Type>::retrieveField
 ) const
 {
     // Store my data onto database
-    //const label myRank = Pstream::myProcNo(0);  // comm_
     const label nProcs = Pstream::nProcs(0);    // comm_
+
+    bool ok = true;
 
     for (label domain = 0; domain < nProcs; domain++)
     {
@@ -128,39 +130,68 @@ void Foam::mappedPatchFieldBase<Type>::retrieveField
               / patch
             );
 
-            //const IOField<T>& subFld = subObr.lookupObject<IOField<T>>
-            //(
-            //    fieldName
-            //);
             const IOField<T>* subFldPtr = subObr.getObjectPtr<IOField<T>>
             (
                 fieldName
             );
             if (subFldPtr)
             {
-                UIndirectList<T>(fld, map) = *subFldPtr;
-
-                if (fvPatchField<Type>::debug)
+                if (subFldPtr->size() != map.size())
                 {
-                    Pout<< "*** RETRIEVED :"
-                        << " field:" << fieldName
-                        << " values:" << flatOutput(fld)
-                        << " from:" << subObr.objectPath() << endl;
+                    // This is the dummy value inserted at start-up since the
+                    // map is always non-zero size (checked above)
+                    //Pout<< "*** RETRIEVED DUMMY :"
+                    //    << " field:" << fieldName
+                    //    << " subFldPtr:" << subFldPtr->size()
+                    //    << " map:" << map.size() << endl;
+
+                    ok = false;
+                }
+                else
+                {
+                    UIndirectList<T>(fld, map) = *subFldPtr;
+
+                    if (fvPatchField<Type>::debug)
+                    {
+                        Pout<< "*** RETRIEVED :"
+                            << " field:" << fieldName
+                            << " values:" << flatOutput(fld)
+                            << " from:" << subObr.objectPath() << endl;
+                    }
                 }
             }
             else if (allowUnset)
             {
-                WarningInFunction << "Not found"
-                    << " field:" << fieldName
-                    << " in:" << subObr.objectPath() << endl;
+                if (fvPatchField<Type>::debug)
+                {
+                    WarningInFunction << "Not found"
+                        << " field:" << fieldName
+                        << " in:" << subObr.objectPath() << endl;
+                }
+
+                // Store dummy value so the database has something on it.
+                // Note that size 0 should never occur naturally so we can
+                // detect it if necessary.
+                const Field<T> dummyFld(0);
+
+                mappedPatchBase::storeField
+                (
+                    const_cast<objectRegistry&>(subObr),
+                    fieldName,
+                    dummyFld
+                );
+
+                ok = false;
             }
             else
             {
                 // Not found. Make it fail
                 (void)subObr.lookupObject<IOField<T>>(fieldName);
+                ok = false;
             }
         }
     }
+    return ok;
 }
 
 
@@ -171,18 +202,17 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
     const objectRegistry& obr,
     const word& region,
     const word& patch,
-    const mapDistribute& map,
+    const labelListList& map,
     const word& fieldName,
     const Field<T>& fld
 ) const
 {
     // Store my data onto database
-    //const label myRank = Pstream::myProcNo(0);  // comm_
     const label nProcs = Pstream::nProcs(0);    // comm_
 
     for (label domain = 0; domain < nProcs; domain++)
     {
-        const labelList& constructMap = map.constructMap()[domain];
+        const labelList& constructMap = map[domain];
         if (constructMap.size())
         {
             const objectRegistry& subObr = mappedPatchBase::subRegistry
@@ -213,6 +243,71 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
             );
         }
     }
+}
+
+
+template<class Type>
+template<class T>
+bool Foam::mappedPatchFieldBase<Type>::storeAndRetrieveField
+(
+    const word& fieldName,
+    const labelListList& subMap,
+    const label constructSize,
+    const labelListList& constructMap,
+    const labelListList& address,
+    const scalarListList& weights,
+    Field<T>& fld
+) const
+{
+    storeField
+    (
+        patchField_.internalField().time(),
+        patchField_.patch().boundaryMesh().mesh().name(),
+        patchField_.patch().name(),
+        subMap,
+        fieldName,
+        fld
+    );
+
+    Field<T> work(constructSize);
+    const bool ok = retrieveField
+    (
+        true,                           // allow unset
+        patchField_.internalField().time(),
+        mapper_.sampleRegion(),
+        mapper_.samplePatch(),
+        constructMap,
+        fieldName,
+        work
+    );
+
+    if (ok)
+    {
+        // Do interpolation
+
+        fld.setSize(address.size());
+        fld = Zero;
+
+        const plusEqOp<T> cop;
+        const multiplyWeightedOp<T, plusEqOp<T>> mop(cop);
+
+        forAll(address, facei)
+        {
+            const labelList& slots = address[facei];
+            const scalarList& w = weights[facei];
+
+            forAll(slots, i)
+            {
+                mop(fld[facei], facei, work[slots[i]], w[i]);
+            }
+        }
+    }
+    else
+    {
+        // Leave fld intact
+    }
+
+    return ok;
 }
 
 
@@ -263,15 +358,23 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
     if
     (
         mapper_.sampleDatabase()
-     && mapper_.mode() != mappedPatchBase::NEARESTPATCHFACE
+     && (
+            mapper_.mode() != mappedPatchBase::NEARESTPATCHFACE
+         && mapper_.mode() != mappedPatchBase::NEARESTPATCHFACEAMI
+        )
     )
     {
         FatalErrorInFunction
             << "Mapping using the database only supported for "
-            << "sampleMode "
+            << "sampleModes "
             <<  mappedPatchBase::sampleModeNames_
                 [
                     mappedPatchBase::NEARESTPATCHFACE
+                ]
+            << " and "
+            <<  mappedPatchBase::sampleModeNames_
+                [
+                    mappedPatchBase::NEARESTPATCHFACEAMI
                 ]
             << exit(FatalError);
     }
@@ -297,22 +400,29 @@ Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 :
     mappedPatchFieldBase<Type>::mappedPatchFieldBase(mapper, patchField, dict)
 {
-    if
-    (
-        mapper_.mode() == mappedPatchBase::NEARESTPATCHFACE
-     && mapper_.sampleDatabase()
-    )
+    if (mapper_.sampleDatabase())
     {
-        // Store my data on receive buffers so we have some initial data
-        initRetrieveField
-        (
-            patchField_.internalField().time(),
-            patchField_.patch().boundaryMesh().mesh().name(),
-            patchField_.patch().name(),
-            mapper_.map(),
-            patchField_.internalField().name(),
-            patchField_
-        );
+        if (mapper_.mode() == mappedPatchBase::NEARESTPATCHFACE)
+        {
+            // Store my data on receive buffers so we have some initial data
+            initRetrieveField
+            (
+                patchField_.internalField().time(),
+                //patchField_.patch().boundaryMesh().mesh().name(),
+                mapper_.sampleRegion(),
+                //patchField_.patch().name(),
+                mapper_.samplePatch(),
+                mapper_.map().constructMap(),
+                patchField_.internalField().name(),
+                patchField_
+            );
+        }
+        else if (mapper_.mode() == mappedPatchBase::NEARESTPATCHFACEAMI)
+        {
+            // Depend on fall-back (sorting dummy field) in retrieveField
+            // since it would be too hard to determine the field that gives
+            // the wanted result after interpolation
+        }
     }
 }
 
@@ -410,37 +520,80 @@ template<class T>
 void Foam::mappedPatchFieldBase<Type>::distribute
 (
     const word& fieldName,
-    Field<T>& newValues
+    Field<T>& fld
 ) const
 {
     if (mapper_.sampleDatabase())
     {
-        // Store my data on send buffers
-        storeField
-        (
-            patchField_.internalField().time(),
-            patchField_.patch().boundaryMesh().mesh().name(),
-            patchField_.patch().name(),
-            mapper_.map().subMap(),
-            fieldName,
-            newValues
-        );
-        // Construct my data from receive buffers
-        newValues.setSize(mapper_.map().constructSize());
-        retrieveField
-        (
-            true,                           // allow unset
-            patchField_.internalField().time(),
-            mapper_.sampleRegion(),
-            mapper_.samplePatch(),
-            mapper_.map().constructMap(),
-            fieldName,
-            newValues
-        );
+        if (mapper_.mode() != mappedPatchBase::NEARESTPATCHFACEAMI)
+        {
+            // Store my data on send buffers
+            storeField
+            (
+                patchField_.internalField().time(),
+                patchField_.patch().boundaryMesh().mesh().name(),
+                patchField_.patch().name(),
+                mapper_.map().subMap(),
+                fieldName,
+                fld
+            );
+            // Construct my data from receive buffers
+            fld.setSize(mapper_.map().constructSize());
+            retrieveField
+            (
+                true,                           // allow unset
+                patchField_.internalField().time(),
+                mapper_.sampleRegion(),
+                mapper_.samplePatch(),
+                mapper_.map().constructMap(),
+                fieldName,
+                fld
+            );
+        }
+        else
+        {
+            const AMIPatchToPatchInterpolation& AMI = mapper_.AMI();
+
+            // The AMI does an interpolateToSource/ToTarget. This is a
+            // mapDistribute (so using subMap/constructMap) and then a
+            // weighted sum. We'll store the sent data as before and
+            // do the weighted summation after the retrieveField
+
+            if (mapper_.masterWorld())
+            {
+                // See AMIInterpolation::interpolateToSource. Use tgtMap,
+                // srcAddress, srcWeights
+                storeAndRetrieveField
+                (
+                    fieldName,
+                    AMI.srcMap().subMap(),
+                    AMI.tgtMap().constructSize(),
+                    AMI.tgtMap().constructMap(),
+                    AMI.srcAddress(),
+                    AMI.srcWeights(),
+                    fld
+                );
+            }
+            else
+            {
+                // See AMIInterpolation::interpolateToTarget.
+                // Use srcMap, tgtAddress, tgtWeights
+                storeAndRetrieveField
+                (
+                    fieldName,
+                    AMI.tgtMap().subMap(),
+                    AMI.srcMap().constructSize(),
+                    AMI.srcMap().constructMap(),
+                    AMI.tgtAddress(),
+                    AMI.tgtWeights(),
+                    fld
+                );
+            }
+        }
     }
     else
     {
-        mapper_.distribute(newValues);
+        mapper_.distribute(fld);
     }
 }
 
@@ -825,15 +978,18 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
     {
         // Store my data on receive buffers (reverse of storeField;
         // i.e. retrieveField will obtain patchField)
-        initRetrieveField
-        (
-            patchField_.internalField().time(),
-            mapper_.sampleRegion(),
-            mapper_.samplePatch(),
-            mapper_.map(),
-            fieldName,
-            fld
-        );
+        if (mapper_.mode() == mappedPatchBase::NEARESTPATCHFACE)
+        {
+            initRetrieveField
+            (
+                patchField_.internalField().time(),
+                mapper_.sampleRegion(),
+                mapper_.samplePatch(),
+                mapper_.map().constructMap(),
+                fieldName,
+                fld
+            );
+        }
     }
 }
 

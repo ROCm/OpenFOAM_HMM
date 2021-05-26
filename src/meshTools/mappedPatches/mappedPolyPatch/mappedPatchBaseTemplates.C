@@ -36,7 +36,52 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
         {
             const label oldWorldComm = Pstream::worldComm;
             Pstream::worldComm = comm_;
-            lst = AMI().interpolateToSource(Field<Type>(std::move(lst)));
+
+            if (sameWorld())
+            {
+                // lst is the other side's values
+                lst = AMI().interpolateToSource(Field<Type>(std::move(lst)));
+            }
+            else
+            {
+                // lst is my local data. Now the mapping in the AMI is
+                // from my side to other side. Each processor contains either
+                // faces from one side or from the other side.
+
+                if (masterWorld())
+                {
+                    // I have lst.size() faces on my side, zero of the other
+                    // side
+
+                    tmp<Field<Type>> tmasterFld
+                    (
+                        AMI().interpolateToSource(Field<Type>(0))
+                    );
+                    (void)AMI().interpolateToTarget
+                    (
+                        Field<Type>(std::move(lst))
+                    );
+
+                    // We've received in our interpolateToSource the
+                    // contribution from the other side
+                    lst = tmasterFld;
+                }
+                else
+                {
+                    (void)AMI().interpolateToSource
+                    (
+                        Field<Type>(std::move(lst))
+                    );
+                    tmp<Field<Type>> tmasterFld
+                    (
+                        AMI().interpolateToTarget(Field<Type>(0))
+                    );
+
+                    // We've received in our interpolateToTarget the
+                    // contribution from the other side
+                    lst = tmasterFld;
+                }
+            }
             Pstream::worldComm = oldWorldComm;
             break;
         }

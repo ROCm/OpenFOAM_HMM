@@ -1105,14 +1105,14 @@ void Foam::mappedPatchBase::calcAMI() const
     }
 
     // Check if running locally
-    if (sampleWorld_.empty())
+    if (sampleWorld_.empty() || sameWorld())
     {
         const polyPatch& nbr = samplePolyPatch();
 
         // Transform neighbour patch to local system
-        pointField nbrPoints(samplePoints(nbr.localPoints()));
+        const pointField nbrPoints(samplePoints(nbr.localPoints()));
 
-        primitivePatch nbrPatch0
+        const primitivePatch nbrPatch0
         (
             SubList<face>
             (
@@ -1135,43 +1135,56 @@ void Foam::mappedPatchBase::calcAMI() const
             meshTools::writeOBJ(osO, patch_.localFaces(), patch_.localPoints());
         }
 
-        // Construct/apply AMI interpolation to determine addressing and weights
-        AMIPtr_->calculate(patch_, nbrPatch0, surfPtr());
-    }
-    else
-    {
-        faceList nbrFaces;
-        pointField nbrPoints;
-        if (sampleWorld() == UPstream::myWorld())
-        {
-            const polyPatch& nbr = samplePolyPatch();
-            nbrFaces = nbr.localFaces();
-            nbrPoints = samplePoints(nbr.localPoints());
-        }
-        else
-        {
-            // Leave empty
-        }
+        // Construct/apply AMI interpolation to determine addressing and
+        // weights. Make sure to use optional inter-world communicator.
 
-        primitivePatch nbrPatch0
-        (
-            SubList<face>
-            (
-                nbrFaces,
-                nbrFaces.size()
-            ),
-            nbrPoints
-        );
-
-        // Change to use ALL processors communicator
         const label oldWorldComm = Pstream::worldComm;
         Pstream::worldComm = comm_;
 
         const label oldComm(Pstream::warnComm);
         Pstream::warnComm = UPstream::worldComm;
 
-        // Construct/apply AMI interpolation to determine addressing and weights
         AMIPtr_->calculate(patch_, nbrPatch0, surfPtr());
+
+        Pstream::warnComm = oldComm;
+        Pstream::worldComm = oldWorldComm;
+    }
+    else
+    {
+        faceList dummyFaces;
+        pointField dummyPoints;
+        const primitivePatch dummyPatch
+        (
+            SubList<face>
+            (
+                dummyFaces
+            ),
+            dummyPoints
+        );
+
+        // Change to use inter-world communicator
+        const label oldWorldComm = Pstream::worldComm;
+        Pstream::worldComm = comm_;
+
+        const label oldComm(Pstream::warnComm);
+        Pstream::warnComm = UPstream::worldComm;
+
+        if (masterWorld())
+        {
+            // Construct/apply AMI interpolation to determine addressing
+            // and weights. Have patch_ for src faces, 0 faces for the
+            // target side
+            AMIPtr_->calculate(patch_, dummyPatch, surfPtr());
+        }
+        else
+        {
+            // Construct/apply AMI interpolation to determine addressing
+            // and weights. Have 0 faces for src side, patch_ for the tgt
+            // side
+            AMIPtr_->calculate(dummyPatch, patch_, surfPtr());
+        }
+        // Now the AMI addressing/weights will be from src side (on masterWorld
+        // processors) to tgt side (on other processors)
 
         Pstream::warnComm = oldComm;
         Pstream::worldComm = oldWorldComm;

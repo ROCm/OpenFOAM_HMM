@@ -492,8 +492,11 @@ public:
             //- Communicator
             inline label comm() const;
 
-            //- Is world the local world
+            //- Is sample world the local world?
             inline bool sameWorld() const;
+
+            //- Is my world ordered before the sampleWorld?
+            inline bool masterWorld() const;
 
             //- Cached sampleRegion != mesh.name()
             inline bool sameRegion() const;

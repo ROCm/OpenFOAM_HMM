@@ -1,0 +1,28 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Run serial
+(cd left && runApplication blockMesh && \cp -r 0.orig 0)
+(cd right && runApplication blockMesh && \cp -r 0.orig 0)
+mpirun -app ./mpirun_left_right.schema
+
+# Run with database
+\mv log.run_left log.run_left_direct
+\mv log.run_right log.run_right_direct
+(cd left && foamListTimes -rm && \rm -r 0 && \cp -r 0.orig 0 && foamDictionary 0/T -entry boundaryField.coupled.sampleDatabase -add true)
+(cd right && foamListTimes -rm && \rm -r 0 && \cp -r 0.orig 0 && foamDictionary 0/T -entry boundaryField.coupled.sampleDatabase -add true)
+mpirun -app ./mpirun_left_right.schema
+
+
+
+## Run parallel
+#(cd left && runApplication blockMesh)
+#(cd left && runApplication decomposePar)
+#(cd right && runApplication blockMesh)
+#(cd right && runApplication decomposePar)
+#
+#mpirun -app ./mpirun.schema
+
+#------------------------------------------------------------------------------
