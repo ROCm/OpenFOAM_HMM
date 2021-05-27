@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,8 +27,11 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(phi,U)      bounded Gauss linearUpwind grad(U);
+
     div(phi,nuTilda) bounded Gauss linearUpwind grad(nuTilda);
+
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
@@ -50,7 +52,7 @@ snGradSchemes
 
 wallDist
 {
-    method meshWave;
+    method          meshWave;
 }
 
 

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,21 +48,52 @@ functions
 {
     momErr
     {
-        type        momentumError;
-        libs        (fieldFunctionObjects);
+        type            momentumError;
+        libs            (fieldFunctionObjects);
         executeControl  writeTime;
         writeControl    writeTime;
     }
 
     contErr
     {
-        type        div;
-        libs        (fieldFunctionObjects);
-        field       phi;
+        type            div;
+        libs            (fieldFunctionObjects);
+        field           phi;
         executeControl  writeTime;
         writeControl    writeTime;
     }
 
+
+    turbulenceFields1
+    {
+        type            turbulenceFields;
+        libs            (fieldFunctionObjects);
+        fields
+        (
+            k
+            epsilon
+            nut
+            nuEff
+            R
+            devReff
+            L
+            I
+        );
+
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+
+    mag1
+    {
+        type            mag;
+        libs            (fieldFunctionObjects);
+        field           turbulenceProperties:R;
+
+        result          magR;
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
 }
 
 
