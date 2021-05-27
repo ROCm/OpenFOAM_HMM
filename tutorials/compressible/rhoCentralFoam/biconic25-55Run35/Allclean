@@ -3,8 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
-cleanSamples
-rm -rf 0/pointPriority
+cleanCase0
+
+rm -f grid256.dat
 
 #------------------------------------------------------------------------------

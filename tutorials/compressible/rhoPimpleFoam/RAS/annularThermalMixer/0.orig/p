@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,12 +22,28 @@ internalField   uniform 1e5;
 
 boundaryField
 {
-    inlet       { $:inlet.p; }
-    outlet      { $:outlet.p; }
-    staticWalls { $:wall.p; }
-    movingWalls { $staticWalls; }
+    inlet
+    {
+        $:inlet.p;
+    }
+
+    outlet
+    {
+        $:outlet.p;
+    }
+
+    staticWalls
+    {
+        $:wall.p;
+    }
+
+    movingWalls
+    {
+        $staticWalls;
+    }
 
     #includeEtc "caseDicts/setConstraintTypes"
 }
+
 
 // ************************************************************************* //

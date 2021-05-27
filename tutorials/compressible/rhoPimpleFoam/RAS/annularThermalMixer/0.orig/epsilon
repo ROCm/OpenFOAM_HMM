@@ -35,11 +35,23 @@ boundaryField
         value           uniform $:outerInlet.epsilon;
     }
 
-    outlet      { $:outlet.epsilon; }
-    staticWalls { $:wall.epsilon; }
-    movingWalls { $staticWalls; }
+    outlet
+    {
+        $:outlet.epsilon;
+    }
+
+    staticWalls
+    {
+        $:wall.epsilon;
+    }
+
+    movingWalls
+    {
+        $staticWalls;
+    }
 
     #includeEtc "caseDicts/setConstraintTypes"
 }
+
 
 // ************************************************************************* //

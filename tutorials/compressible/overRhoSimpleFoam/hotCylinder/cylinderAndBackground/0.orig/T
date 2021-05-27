@@ -24,7 +24,6 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
-
     wall
     {
         type            fixedValue;
@@ -49,5 +48,6 @@ boundaryField
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

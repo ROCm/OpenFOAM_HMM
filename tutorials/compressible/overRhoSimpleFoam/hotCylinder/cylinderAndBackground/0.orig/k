@@ -37,12 +37,13 @@ boundaryField
         value           $internalField;
     }
 
-    "outlet|topAndBottom"
+    "(outlet|topAndBottom)"
     {
        type             inletOutlet;
        inletValue       $internalField;
        value            $internalField;
     }
 }
+
 
 // ************************************************************************* //

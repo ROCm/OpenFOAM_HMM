@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,27 +28,32 @@ boundaryField
         massFlowRate    constant 0.095;
         value           uniform (0 0 0);
     }
+
     inlet_fuel
     {
         type            flowRateInletVelocity;
         massFlowRate    constant 0.005;
         value           uniform (0 0 0);
     }
+
     outlet
     {
         type            pressureInletOutletVelocity;
         inletValue      (0 0 0);
         value           $internalField;
     }
+
     "wall.*"
     {
         type            noSlip;
     }
+
     ".*"
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 }
+
 
 // ************************************************************************* //

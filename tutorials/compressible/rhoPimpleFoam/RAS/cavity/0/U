@@ -23,14 +23,12 @@ boundaryField
     movingWall
     {
         type            fixedValue;
-        // Field Value
         value           uniform (1 0 0);
     }
 
     fixedWalls
     {
         type            fixedValue;
-        // Field Value
         value           uniform (0 0 0);
     }
 
@@ -39,5 +37,6 @@ boundaryField
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

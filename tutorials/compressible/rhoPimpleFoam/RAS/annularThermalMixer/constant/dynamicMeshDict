@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      dynamicMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,5 +27,6 @@ solidBodyMotionFunction  rotatingMotion;
 origin      (0 0 0);
 axis        (0 0 1);
 omega       $:meshMotionProperties.omega;
+
 
 // ************************************************************************* //

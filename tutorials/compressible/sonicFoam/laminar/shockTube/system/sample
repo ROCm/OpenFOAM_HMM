@@ -10,17 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      sample;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type sets;
+type            sets;
 libs            (sampling);
-
 interpolationScheme cellPoint;
-
 setFormat       raw;
+fields          (T mag(U) p);
 
 sets
 (
@@ -34,6 +32,5 @@ sets
     }
 );
 
-fields          (T mag(U) p);
 
 // ************************************************************************* //

@@ -18,14 +18,13 @@ solvers
 {
     "rho.*"
     {
-        solver nthn;
+        solver          nthn;
     }
 
     "p.*"
     {
         solver          GAMG;
         smoother        GaussSeidel;
-
         tolerance       1e-7;
         relTol          0;
     }
@@ -34,7 +33,6 @@ solvers
     {
         solver          PBiCGStab;
         preconditioner  DILU;
-
         tolerance       1e-7;
         relTol          0;
     }
@@ -58,5 +56,6 @@ relaxationFactors
         ".*"            1;
     }
 }
+
 
 // ************************************************************************* //

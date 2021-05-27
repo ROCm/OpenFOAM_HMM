@@ -10,20 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+simulationType          RAS;
 
 RAS
 {
-    RASModel        LaunderSharmaKE;
+    RASModel            LaunderSharmaKE;
 
-    turbulence      on;
+    turbulence          on;
 
-    printCoeffs     on;
+    printCoeffs         on;
 }
 
 
