@@ -269,10 +269,7 @@ class faMesh
     // Helpers
 
         //- Get the polyPatch pairs for the boundary edges (natural order)
-        List<LabelledItem<edge>> getBoundaryEdgePatchPairs
-        (
-            const labelUList& meshEdges
-        ) const;
+        List<LabelledItem<edge>> getBoundaryEdgePatchPairs() const;
 
         //- Create a single patch
         PtrList<faPatch> createOnePatch
@@ -294,7 +291,6 @@ class faMesh
         void reorderProcEdges
         (
             faPatchData& patchDef,
-            const labelUList& meshEdges,
             const List<LabelledItem<edge>>& bndEdgePatchPairs
         ) const;
 

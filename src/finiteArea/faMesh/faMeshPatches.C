@@ -52,52 +52,124 @@ typedef List<patchPairInfo> patchPairInfoList;
 typedef UIndirectList<patchPairInfo> patchPairInfoUIndList;
 
 
-// Synchronize edge patch pairs.
-// - only propagate real (non-processor) patch ids
-
-struct syncEdgePatchPairs
+// Handling of dangling coupled edges.
+// Tag values to "push" with special -(patchId+2)
+struct combineDanglingEdge
 {
     const label upperLimit;
 
-    explicit syncEdgePatchPairs(const label nNonProcessor)
+    // Set dangling patchId from real patchId
+    static void setDangling(patchPairInfo& pairing, const label patchId)
+    {
+        pairing.first() = pairing.second() = -(patchId + 2);
+        pairing.setIndex(-1);  // Invalidate
+    }
+
+    // Convert dangling patchId to real patchId
+    static void correct(patchPairInfo& pairing)
+    {
+        if (pairing.first() < -1)
+        {
+            pairing.first() = -(pairing.first() + 2);
+        }
+        if (pairing.second() < -1)
+        {
+            pairing.second() = -(pairing.second() + 2);
+        }
+    }
+
+    //- Construct with upper limit (the number of non-processor patches)
+    explicit combineDanglingEdge(const label nNonProcessor)
     :
         upperLimit(nNonProcessor)
     {}
 
-    void insert(edge& e, const label i) const
-    {
-        // This could probably be simpler
-        if (i >= 0 && i < upperLimit && !e.found(i))
-        {
-            if (e.first() == -1)
-            {
-                e.first() = i;
-            }
-            else if (e.second() == -1)
-            {
-                e.second() = i;
-            }
-            else if (upperLimit < e.first())
-            {
-                e.first() = i;
-            }
-            else if (upperLimit < e.second())
-            {
-                e.second() = i;
-            }
-        }
-    }
 
-    void operator()(edge& x, const edge& y) const
+    // Combine operation: overwrite unused or processor patches with
+    // 'dangling' patch information only
+    void operator()(patchPairInfo& x, const patchPairInfo& y) const
     {
-        if (edge::compare(x, y) == 0)
+        if (y.first() < -1 && edge::compare(x, y) == 0)
         {
-            insert(x, y.first());
-            insert(x, y.second());
+            if (x.first() == -1 || x.first() >= upperLimit)
+            {
+                x.first() = y.first();
+            }
+            if (x.second() == -1 || x.second() >= upperLimit)
+            {
+                x.second() = y.first();
+                x.index() = y.index();
+            }
         }
     }
 };
 
+
+// Populate patch pairings according to the boundary edges
+void findEdgePatchPairing
+(
+    const polyBoundaryMesh& pbm,
+    const EdgeMap<label>& edgeToIndex,
+    patchPairInfoList& patchPairs,
+    label nMissing = -1
+)
+{
+    // Count how many slots (both sides) to be filled
+    if (nMissing < 0)
+    {
+        nMissing = 0;
+        for (const patchPairInfo& pairing : patchPairs)
+        {
+            if (pairing.first() == -1) ++nMissing;
+            if (pairing.second() == -1) ++nMissing;
+        }
+    }
+
+    forAll(pbm, patchID)
+    {
+        if (!nMissing) break;  // Everything filled
+
+        const polyPatch& pp = pbm[patchID];
+
+        const bool isProcPatch = isA<processorPolyPatch>(pp);
+
+        // Examine neighbour boundary edges
+        for (label edgei = pp.nInternalEdges(); edgei < pp.nEdges(); ++edgei)
+        {
+            // Lookup global edge of this neighbour,
+            // find matching owner boundary edge
+
+            const label edgeIndex =
+                edgeToIndex.lookup(pp.meshEdge(edgei), -1);
+
+            if (edgeIndex != -1)
+            {
+                // Add patchId.
+                // - hash-like so will only insert once
+                // - also add in the attached patch face (there is only one),
+                //   saved in mesh face numbering for processor patches
+
+                patchPairInfo& pairing = patchPairs[edgeIndex];
+
+                if (pairing.insert(patchID))
+                {
+                    if (isProcPatch)
+                    {
+                        // Save the mesh face
+
+                        const label patchFacei = pp.edgeFaces()[edgei][0];
+
+                        pairing.index() = (pp.start() + patchFacei);
+                    }
+
+                    --nMissing;
+
+                    if (!nMissing) break;  // Early exit
+                }
+            }
+        }
+    }
+}
 
 } // End namespace Foam
 
@@ -107,7 +179,6 @@ struct syncEdgePatchPairs
 void Foam::faMesh::reorderProcEdges
 (
     faPatchData& patchDef,
-    const labelUList& meshEdges,
     const List<LabelledItem<edge>>& bndEdgePatchPairs
 ) const
 {
@@ -117,37 +188,44 @@ void Foam::faMesh::reorderProcEdges
     }
 
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-    const labelListList& edgeFaces = mesh().edgeFaces();
+
+    const label procPatchID = patchDef.neighPolyPatchId_;
+
+    const auto* procPatch = isA<processorPolyPatch>(pbm[procPatchID]);
+
+    if (!procPatch)
+    {
+        FatalErrorInFunction
+            << "Internal addressing error. Patch " << procPatchID
+            << " is not a processor patch" << nl
+            << abort(FatalError);
+    }
 
     // Reorder processor edges using order of neighbour processorPolyPatch
 
-    const label procPatchID = patchDef.neighPolyPatchId_;
     const label nProcEdges = patchDef.edgeLabels_.size();
 
     labelList procFaces(nProcEdges, -1);
 
     forAll(procFaces, edgei)
     {
-        const label localEdgei = patchDef.edgeLabels_[edgei];
-        const label meshEdgei = meshEdges[localEdgei];
+        const label bndEdgei =
+            (patchDef.edgeLabels_[edgei] - patch().nInternalEdges());
 
-        for (const label meshFacei : edgeFaces[meshEdgei])
-        {
-            if
-            (
-                !faceLabels_.found(meshFacei)
-             && (procPatchID == pbm.whichPatch(meshFacei))
-            )
-            {
-                // The edge's proc-face
-                procFaces[edgei] = meshFacei;
-                break;
-            }
-        }
+        procFaces[edgei] = bndEdgePatchPairs[bndEdgei].index();
     }
 
     // Ascending proc-face numbering
     const labelList sortIndices(Foam::sortedOrder(procFaces));
+
+    if (procFaces.size() && procFaces[sortIndices[0]] < 0)
+    {
+        FatalErrorInFunction
+            << "Internal addressing error. Patch " << procPatchID
+            << " with negative face" << nl
+            << abort(FatalError);
+    }
+
 
     const labelList& oldEdgeLabels = patchDef.edgeLabels_;
     labelList newEdgeLabels(oldEdgeLabels.size());
@@ -161,14 +239,14 @@ void Foam::faMesh::reorderProcEdges
 
     for (label edgei = 0; edgei < nProcEdges; /*nil*/)
     {
-        const label procFacei = procFaces[sortIndices[edgei]];
+        const label meshFacei = procFaces[sortIndices[edgei]];
 
         // Find all identical faces
         label endEdgei = edgei + 1;  // one beyond
         while
         (
             (endEdgei < nProcEdges)
-         && (procFacei == procFaces[sortIndices[endEdgei]])
+         && (meshFacei == procFaces[sortIndices[endEdgei]])
         )
         {
             ++endEdgei;
@@ -184,16 +262,16 @@ void Foam::faMesh::reorderProcEdges
         {
             multihit.clear();
 
-            // Map from global edge to local edgeId
+            // Map from global edge to patch local edgeId
             for (label i = edgei; i < endEdgei; ++i)
             {
-                label localEdgei = oldEdgeLabels[sortIndices[i]];
-                label meshEdgei = meshEdges[localEdgei];
+                const label patchEdgei = oldEdgeLabels[sortIndices[i]];
 
+                // The edge in mesh numbering
                 multihit.insert
                 (
-                    mesh().edges()[meshEdgei],
-                    localEdgei
+                    patch().meshEdge(patchEdgei),
+                    patchEdgei
                 );
             }
 
@@ -207,7 +285,7 @@ void Foam::faMesh::reorderProcEdges
                     << abort(FatalError);
             }
 
-            const face& f = mesh().faces()[procFacei];
+            const face& f = mesh().faces()[meshFacei];
 
             forAll(f, fedgei)  // Note size() == nEdges()
             {
@@ -234,7 +312,7 @@ void Foam::faMesh::reorderProcEdges
             {
                 FatalErrorInFunction
                     << "Missed " << (edgei < endEdgei)
-                    << " edges for face: " << procFacei
+                    << " edges for face: " << meshFacei
                     << " ... indicates serious geometry issue" << nl
                     << multihit << nl
                     << abort(FatalError);
@@ -242,7 +320,7 @@ void Foam::faMesh::reorderProcEdges
             if (!multihit.empty())
             {
                 FatalErrorInFunction
-                    << "Missed edges for face: " << procFacei
+                    << "Missed edges for face: " << meshFacei
                     << " ... indicates serious geometry issue" << nl
                     << multihit << nl
                     << abort(FatalError);
@@ -322,13 +400,9 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createOnePatch
 
 
 Foam::List<Foam::LabelledItem<Foam::edge>>
-Foam::faMesh::getBoundaryEdgePatchPairs
-(
-    const labelUList& meshEdges
-) const
+Foam::faMesh::getBoundaryEdgePatchPairs() const
 {
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-    const labelListList& edgeFaces = mesh().edgeFaces();
 
     const label nInternalEdges = patch().nInternalEdges();
     const label nBoundaryEdges = patch().nBoundaryEdges();
@@ -336,155 +410,260 @@ Foam::faMesh::getBoundaryEdgePatchPairs
     // Map edges (mesh numbering) back to a boundary index
     EdgeMap<label> edgeToBoundaryIndex(2*nBoundaryEdges);
 
-
-    // Use 'edge' for accounting
+    // Use labelled 'edge' for accounting of patch pairs
     patchPairInfoList bndEdgePatchPairs(nBoundaryEdges);
 
-    // Get pair of polyPatches for each boundary edge
-    for (label bndEdgei = 0; bndEdgei < nBoundaryEdges; ++bndEdgei)
+
+    // Pass 1:
+    // - setup lookup (edge -> bnd index)
+    // - add owner patch for each boundary edge
     {
-        edgeToBoundaryIndex.insert
+        const SubList<labelList> bndEdgeToPatchFace
         (
-            patch().meshEdge(bndEdgei + nInternalEdges),
-            edgeToBoundaryIndex.size()
+            patch().edgeFaces(),
+            patch().nBoundaryEdges(),
+            patch().nInternalEdges()
         );
 
-        const label patchEdgei = (bndEdgei + nInternalEdges);
-        const label meshEdgei = meshEdges[patchEdgei];
-
-        patchPairInfo& patchPair = bndEdgePatchPairs[bndEdgei];
-
-        for (const label meshFacei : edgeFaces[meshEdgei])
+        for (label bndEdgei = 0; bndEdgei < nBoundaryEdges; ++bndEdgei)
         {
+            edgeToBoundaryIndex.insert
+            (
+                patch().meshEdge(bndEdgei + nInternalEdges),
+                edgeToBoundaryIndex.size()
+            );
+
+            // The attached patch face (there is only one):
+            const label patchFacei = bndEdgeToPatchFace[bndEdgei][0];
+
+            const label meshFacei = faceLabels_[patchFacei];
+
             const label patchId = pbm.whichPatch(meshFacei);
 
-            // Note: negative labels never insert
-            patchPair.insert(patchId);
+            bndEdgePatchPairs[bndEdgei].insert(patchId);
         }
     }
 
+    // Pass 2:
+    // - Add in first neighbour patch for the boundary edges
+    // - examine all possible connecting neighbours
 
-    // Synchronize edge information - we want the 'global' patch connectivity
+    findEdgePatchPairing
+    (
+        pbm,
+        edgeToBoundaryIndex,
+        bndEdgePatchPairs,
+        edgeToBoundaryIndex.size()  // Number of places to still fill
+    );
 
-    // Looks like PatchTools::matchEdges
 
-    const indirectPrimitivePatch& cpp = mesh().globalData().coupledPatch();
-
-    labelList patchEdgeLabels(nBoundaryEdges);
-    labelList coupledEdgeLabels(nBoundaryEdges);
-
+    // Nothing dangling if running in serial - can return already
+    if (!Pstream::parRun())
     {
-        label nMatches = 0;
-        forAll(cpp.edges(), coupledEdgei)
-        {
-            const edge coupledMeshEdge(cpp.meshEdge(coupledEdgei));
-
-            const auto iter = edgeToBoundaryIndex.cfind(coupledMeshEdge);
-
-            if (iter.found())
-            {
-                patchEdgeLabels[nMatches] = iter.val();
-                coupledEdgeLabels[nMatches] = coupledEdgei;
-                ++nMatches;
-            }
-        }
-
-        patchEdgeLabels.resize(nMatches);
-        coupledEdgeLabels.resize(nMatches);
+        return bndEdgePatchPairs;
     }
 
+    // In parallel need to check for "dangling" edges, which are finiteArea
+    // boundary edges that only exist on one side of a proc boundary.
+    // Eg, proc boundary coincides with the outer extent of the finiteArea
 
     const globalMeshData& globalData = mesh().globalData();
+    const indirectPrimitivePatch& cpp = globalData.coupledPatch();
     const mapDistribute& map = globalData.globalEdgeSlavesMap();
 
-    //- Construct with all data
-    patchPairInfoList cppEdgeData(map.constructSize());
+    // Construct coupled edge usage with all data
+    List<unsigned char> coupledEdgesUsed(map.constructSize(), 0u);
 
-    // Convert patch-edge data into cpp-edge data
-    patchPairInfoUIndList(cppEdgeData, coupledEdgeLabels) =
-        patchPairInfoUIndList(bndEdgePatchPairs, patchEdgeLabels);
-
-
-    // Also need to check for dangling edges, which are finiteArea
-    // boundary edges that only exist on one side of a proc boundary.
-    // Eg, proc boundary coincides with the end of the finiteArea
-
+    forAll(cpp.edges(), coupledEdgei)
     {
-        boolList edgeInUse(map.constructSize(), false);
+        const auto iter =
+            edgeToBoundaryIndex.cfind(cpp.meshEdge(coupledEdgei));
 
-        for (const label coupledEdgei : coupledEdgeLabels)
-        {
-            edgeInUse[coupledEdgei] = true;
-        }
-
-        // Retain pre-synchronized state for later xor
-        const boolList nonSyncEdgeInUse
-        (
-            SubList<bool>(edgeInUse, cpp.nEdges())
-        );
-
-        globalData.syncData
-        (
-            edgeInUse,
-            globalData.globalEdgeSlaves(),
-            globalData.globalEdgeTransformedSlaves(),
-            map,
-            orEqOp<bool>()
-        );
-
-        // Check for anything coupled from the other side,
-        // but not originally from this.
-        //
-        // Process these dangling edges, obtain the attached pair
-        // of polyPatches for each.
-        //
-        // These edges have no finiteArea correspondence on this processor,
-        // but the information is obviously needed for other processors
-
-        forAll(nonSyncEdgeInUse, coupledEdgei)
-        {
-            // Coupled, but originating from elsewhere
-            if (edgeInUse[coupledEdgei] && !nonSyncEdgeInUse[coupledEdgei])
-            {
-                // Already default initialized
-                patchPairInfo& patchPair = cppEdgeData[coupledEdgei];
-
-                const label meshEdgei =
-                    cpp.meshEdge
-                    (
-                        coupledEdgei,
-                        mesh().edges(),
-                        mesh().pointEdges()
-                    );
-
-                for (const label meshFacei : edgeFaces[meshEdgei])
-                {
-                    const label patchId = pbm.whichPatch(meshFacei);
-
-                    // Note: negative labels never insert
-                    patchPair.insert(patchId);
-                }
-            }
-        }
+        // Used from this side or other other side
+        coupledEdgesUsed[coupledEdgei] = (iter.found() ? 1 : 2);
     }
 
-    // Convert patch-edge data into cpp-edge data
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Save the original (pre-sync) coupling state
+    const List<unsigned char> coupledEdgesOrig(coupledEdgesUsed);
 
     globalData.syncData
     (
-        cppEdgeData,
+        coupledEdgesUsed,
         globalData.globalEdgeSlaves(),
-        globalData.globalEdgeTransformedSlaves(),
+        globalData.globalEdgeTransformedSlaves(),  // probably not used
         map,
-        syncEdgePatchPairs(pbm.nNonProcessor())
+        bitOrEqOp<unsigned char>()
     );
 
-    // Back from cpp-edge to patch-edge data
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    patchPairInfoUIndList(bndEdgePatchPairs, patchEdgeLabels) =
-        patchPairInfoUIndList(cppEdgeData, coupledEdgeLabels);
+    // Check for one-sided edge coupling (coupled value == 3)
+    // original == 1:
+    // - coupled to a real finiteArea edge.
+    // - receive a patch-pair value
+    //
+    // original == 2:
+    // - a "dangled" edge. Information required for other procs.
+    // - push a patch-pair value
+
+    // Map edges (mesh numbering) back to a coupled index.
+    // These are the edges to 'push' information for.
+
+    EdgeMap<label> edgeToCoupledIndex;
+
+    label nEdgesPull = 0;
+
+    forAll(coupledEdgesUsed, coupledEdgei)
+    {
+        if (coupledEdgesUsed[coupledEdgei] == 3)
+        {
+            if (coupledEdgesOrig[coupledEdgei] == 1)
+            {
+                // Coupled side with finiteArea
+                ++nEdgesPull;
+            }
+            else if (coupledEdgesOrig[coupledEdgei] == 2)
+            {
+                // Coupled side without finiteArea
+                edgeToCoupledIndex.insert
+                (
+                    cpp.meshEdge(coupledEdgei),
+                    coupledEdgei
+                );
+            }
+        }
+    }
+
+    // Nothing to do - can return already
+    if (returnReduce(edgeToCoupledIndex.empty(), andOp<bool>()))
+    {
+        return bndEdgePatchPairs;
+    }
+
+    // Data locations to pull
+    labelList patchEdgeLabels(nEdgesPull);
+    labelList coupledEdgeLabels(nEdgesPull);
+
+    // Populate the locations
+    {
+        nEdgesPull = 0;
+
+        forAll(cpp.edges(), coupledEdgei)
+        {
+            if
+            (
+                coupledEdgesUsed[coupledEdgei] == 3
+             && coupledEdgesOrig[coupledEdgei] == 1
+            )
+            {
+                // Pull this edge
+                const auto iter =
+                    edgeToBoundaryIndex.cfind(cpp.meshEdge(coupledEdgei));
+
+                if (iter.found())
+                {
+                    patchEdgeLabels[nEdgesPull] = iter.val();
+                    coupledEdgeLabels[nEdgesPull] = coupledEdgei;
+                    ++nEdgesPull;
+                }
+                else
+                {
+                    // Should be impossible to fail here
+                    FatalErrorInFunction
+                        << "Failed on second lookup of "
+                        << cpp.meshEdge(coupledEdgei) << nl
+                        << abort(FatalError);
+                }
+            }
+        }
+
+        if (nEdgesPull != coupledEdgeLabels.size())
+        {
+            FatalErrorInFunction
+                << "Failed lookup of some coupled edges" << nl
+                << abort(FatalError);
+        }
+    }
+
+    //- Construct edge sync with all data
+    patchPairInfoList cppEdgeData(map.constructSize());
+
+    // Fill in for 'push' locations. Only really interested in the owner
+    // (corresponds to non-proc connection), but grab everything
+    findEdgePatchPairing
+    (
+        pbm,
+        edgeToCoupledIndex,
+        cppEdgeData,
+        2*edgeToCoupledIndex.size()  // Accept both sides?
+    );
+
+
+    const label nNonProcessor = pbm.nNonProcessor();
+
+    // Adjust patch information to reflect dangling patch neighbour
+    // Tag with -(value+2)
+    forAllConstIters(edgeToCoupledIndex, iter)
+    {
+        const edge& e = iter.key();
+        const label coupledEdgei = iter.val();
+
+        patchPairInfo& pairing = cppEdgeData[coupledEdgei];
+        const label ownerPatchId = pairing.first();
+
+        // Some sanity checks
+        if (ownerPatchId < 0)
+        {
+            FatalErrorInFunction
+                << "Error finding dangling edge at "
+                << cpp.points()[e.first()] << ' '
+                << cpp.points()[e.second()] << nl
+                << abort(FatalError);
+        }
+        else if (ownerPatchId >= nNonProcessor)
+        {
+            FatalErrorInFunction
+                << "Cannot handle edge on processor-processor connection at "
+                << cpp.points()[e.first()] << ' '
+                << cpp.points()[e.second()] << nl
+                << abort(FatalError);
+        }
+
+        combineDanglingEdge::setDangling(pairing, ownerPatchId);
+
+        // TBD:
+        // may wish to remember the corresponding proc number,
+        // if we wish to bridge across 'fan-like' connections.
+        //
+        // pairing.setIndex(-(Pstream::myProcNo() + 2));
+    }
+
+
+    // Synchronize edge information
+
+    const combineDanglingEdge edgeCombineOp(nNonProcessor);
+
+    globalMeshData::syncData
+    (
+        cppEdgeData,
+        globalData.globalEdgeSlaves(),
+        globalData.globalEdgeTransformedSlaves(),  // probably not used
+        map,
+        edgeCombineOp
+    );
+
+
+    // Combine back from pushed cpp-edge data
+
+    forAll(patchEdgeLabels, i)
+    {
+        patchPairInfo& pairing = bndEdgePatchPairs[patchEdgeLabels[i]];
+        const patchPairInfo& other = cppEdgeData[coupledEdgeLabels[i]];
+
+        edgeCombineOp(pairing, other);
+
+        // Resolve special tagging
+        combineDanglingEdge::correct(pairing);
+    }
 
     return bndEdgePatchPairs;
 }
@@ -498,13 +677,6 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
 ) const
 {
     const polyBoundaryMesh& pbm = mesh().boundaryMesh();
-
-    const labelListList& edgeFaces = mesh().edgeFaces();
-    const labelList meshEdges
-    (
-        patch().meshEdges(mesh().edges(), mesh().pointEdges())
-    );
-
 
     // Transcribe into patch definitions
     DynamicList<faPatchData> faPatchDefs(bndDict.size() + 4);
@@ -576,10 +748,7 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
     const label nInternalEdges = patch().nInternalEdges();
     const label nBoundaryEdges = patch().nBoundaryEdges();
 
-    patchPairInfoList bndEdgePatchPairs
-    (
-        getBoundaryEdgePatchPairs(meshEdges)
-    );
+    patchPairInfoList bndEdgePatchPairs(this->getBoundaryEdgePatchPairs());
 
     labelList bndEdgeFaPatchIDs(nBoundaryEdges, -1);
 
@@ -653,23 +822,10 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
         labelList edgeNbrPolyPatch(undefinedEdges.size(), -1);
         forAll(edgeNbrPolyPatch, edgei)
         {
-            const label localEdgei = undefinedEdges[edgei];
-            const label meshEdgei = meshEdges[localEdgei];
-            label polyPatchID;
+            const label patchEdgei = undefinedEdges[edgei];
+            const label bndEdgei = (patchEdgei - nInternalEdges);
 
-            for (const label meshFacei : edgeFaces[meshEdgei])
-            {
-                if
-                (
-                    !faceLabels_.found(meshFacei)
-                 && (polyPatchID = pbm.whichPatch(meshFacei)) != -1
-                )
-                {
-                    // Found the edge's off-patch neighbour face
-                    edgeNbrPolyPatch[edgei] = polyPatchID;
-                    break;
-                }
-            }
+            edgeNbrPolyPatch[edgei] = bndEdgePatchPairs[bndEdgei].second();
         }
 
         // Categorize as processor/non-processor associations
@@ -762,7 +918,7 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
     {
         if (patchDef.coupled())
         {
-            reorderProcEdges(patchDef, meshEdges, bndEdgePatchPairs);
+            reorderProcEdges(patchDef, bndEdgePatchPairs);
             patchDef.neighPolyPatchId_ = -1; // No lookup of neighbour faces
         }
     }
