@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      combustionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -24,3 +23,6 @@ infinitelyFastChemistryCoeffs
     semiImplicit no;
     C       10;
 }
+
+
+// ************************************************************************* //

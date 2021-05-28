@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,12 +26,14 @@ boundaryField
         mixingLength    0.1;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     "(wall|membrane).*"
     {
         type            epsilonWallFunction;

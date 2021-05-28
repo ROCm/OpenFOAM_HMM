@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
@@ -26,26 +26,25 @@ gradSchemes
 
 divSchemes
 {
-    default        none;
+    default         none;
 }
 
 laplacianSchemes
 {
-    default none;
-    //laplacian(K,T) Gauss linear uncorrected;
+    default         none;
+
     laplacian(kappa,T) Gauss harmonic uncorrected;
     laplacian(thermo:alpha,h) Gauss harmonic uncorrected;
 }
 
 interpolationSchemes
 {
-    default linear;
-    //default none;
+    default         linear;
 }
 
 snGradSchemes
 {
-    default        uncorrected;
+    default         uncorrected;
 }
 
 

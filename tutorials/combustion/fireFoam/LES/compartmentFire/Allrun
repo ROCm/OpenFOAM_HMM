@@ -3,6 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
 m4 system/blockMeshDict.m4 > system/blockMeshDict
 runApplication blockMesh
 
@@ -13,8 +15,8 @@ runApplication snappyHexMesh -overwrite
 runApplication extrudeToRegionMesh -overwrite
 
 runApplication decomposePar
-rm log.decomposePar
-runApplication decomposePar -region panelRegion
+
+runApplication -s panelRegion decomposePar -region panelRegion
 
 runParallel $(getApplication)
 
@@ -23,7 +25,7 @@ paraFoam -touch -region panelRegion
 
 if notTest "$@"
 then
-    (cd validation && ./createGraphs)
+    (cd validation && ./plot)
 fi
 
 #------------------------------------------------------------------------------

@@ -5,7 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -rf chemFoam.out constant/reactions constant/thermo \
-   validation/OF_vs_CHEMKINII.eps validation/chemkinII
+rm -f chemFoam.out
+rm -f constant/reactions
+rm -f constant/thermo
+rm -f validation/OF_vs_CHEMKINII.eps
+rm -f validation/chemkinII
 
 #------------------------------------------------------------------------------

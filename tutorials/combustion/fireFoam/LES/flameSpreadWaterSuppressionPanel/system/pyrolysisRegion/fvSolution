@@ -32,14 +32,13 @@ solvers
         relTol          0;
     }
 
-    "rho|rhot"
+    "(rho|rhot)"
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       0;
         relTol          0;
     };
-
 }
 
 SIMPLE
@@ -54,5 +53,6 @@ relaxationFactors
         h               1;
     }
 }
+
 
 // ************************************************************************* //

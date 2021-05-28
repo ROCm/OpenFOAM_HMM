@@ -28,26 +28,32 @@ boundaryField
         lInf            5;
         value           $internalField;
     }
+
     ground
     {
         type            zeroGradient;
     }
+
     blockedFaces
     {
         type            zeroGradient;
     }
+
     mergingFaces
     {
         type            zeroGradient;
     }
+
     wallFaces
     {
         type            zeroGradient;
     }
+
     ySymmetry
     {
         type            symmetryPlane;
     }
 }
+
 
 // ************************************************************************* //

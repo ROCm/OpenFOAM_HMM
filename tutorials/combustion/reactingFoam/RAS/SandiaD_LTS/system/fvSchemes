@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -30,6 +29,7 @@ divSchemes
     default             none;
 
     div(phi,U)          Gauss limitedLinearV 1;
+
     div(phi,Yi)         Gauss limitedLinear01 1;
     div(phi,h)          Gauss limitedLinear 1;
     div(phi,K)          Gauss limitedLinear 1;

@@ -10,7 +10,6 @@ FoamFile
     version     2.2;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -37,5 +36,6 @@ foamChemistryFile "<constant>/reactions";
 foamChemistryThermoFile "<constant>/thermo.compressibleGas";
 
 dpdt no;
+
 
 // ************************************************************************* //

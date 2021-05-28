@@ -8,37 +8,37 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
-    location    "constant";
     object      pyrolysisZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    pyrolysis
+pyrolysis
+{
+    active          true;
+
+    pyrolysisModel  reactingOneDim;
+
+    region          panelRegion;
+
+    reactingOneDimCoeffs
     {
-        active          true;
+        qrHSource       no; //Energy source term due in depht radiation
 
-        pyrolysisModel  reactingOneDim;
+        filmCoupled     false;
 
-        region          panelRegion;
+        qrHSource       on;
 
-        reactingOneDimCoeffs
-        {
-            qrHSource       no; //Energy source term due in depht radiation
+        minimumDelta    1e-6;
 
-            filmCoupled     false;
+        moveMesh        true;
 
-            qrHSource       on;
-
-            minimumDelta    1e-6;
-
-            moveMesh        true;
-
-            useChemistrySolvers false;
-        }
-
-        infoOutput      true;
+        useChemistrySolvers false;
     }
+
+    infoOutput      true;
+}
+
 
 // ************************************************************************* //

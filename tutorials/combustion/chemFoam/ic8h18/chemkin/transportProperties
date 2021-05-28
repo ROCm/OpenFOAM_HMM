@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "chemkin";
     object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,5 +22,6 @@ FoamFile
         Ts 0;
     }
 }
+
 
 // ************************************************************************* //

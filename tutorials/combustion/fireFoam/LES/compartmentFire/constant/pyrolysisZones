@@ -8,24 +8,23 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
-    location    "constant";
     object      pyrolysisZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    pyrolysis
+pyrolysis
+{
+    active          true;
+
+    pyrolysisModel  thermo;
+
+    region          panelRegion;
+
+    noPyrolysisCoeffs
     {
-        active          true;
-
-        pyrolysisModel  thermo;
-
-        region          panelRegion;
-
-        noPyrolysisCoeffs
-        {
-        }
-
     }
+}
+
 
 // ************************************************************************* //

@@ -10,10 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -25,7 +23,6 @@ solvers
         tolerance       1e-06;
         relTol          0;
     };
-
 
     p_rgh
     {
@@ -90,5 +87,6 @@ relaxationFactors
         "(C7H16|O2|H2O|CO2|h).*"    1;
     }
 }
+
 
 // ************************************************************************* //

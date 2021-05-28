@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,5 +28,6 @@ thermoType
 chemistryReader foamChemistryReader;
 foamChemistryFile "<constant>/reactions";
 foamChemistryThermoFile "<constant>/thermo";
+
 
 // ************************************************************************* //

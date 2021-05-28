@@ -8,9 +8,8 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermo.solid;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,5 +34,6 @@ PMMA
         rho          1114.7;
     }
 };
+
 
 // ************************************************************************* //

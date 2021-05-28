@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,6 +26,7 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            waveTransmissive;
@@ -35,10 +35,12 @@ boundaryField
         lInf            0.2;
         value           $internalField;
     }
+
     wall
     {
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

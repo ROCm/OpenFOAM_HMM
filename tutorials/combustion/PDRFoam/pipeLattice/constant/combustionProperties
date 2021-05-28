@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      combustionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,5 +38,6 @@ ignitionSphereFraction  1.0;
 ignitionThickness       0.05;
 
 ignitionCircleFraction  0.5;
+
 
 // ************************************************************************* //

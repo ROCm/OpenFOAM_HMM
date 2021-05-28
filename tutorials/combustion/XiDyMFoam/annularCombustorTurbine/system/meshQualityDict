@@ -12,12 +12,12 @@ FoamFile
     class       dictionary;
     object      meshQualityDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Include defaults parameters from master dictionary
 #includeEtc "caseDicts/meshQualityDict"
 
 maxNonOrtho 55;
+
 
 // ************************************************************************* //

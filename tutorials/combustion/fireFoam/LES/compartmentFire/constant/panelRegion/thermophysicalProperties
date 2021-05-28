@@ -23,7 +23,6 @@ thermoType
     energy          sensibleEnthalpy;
     equationOfState rhoConst;
     specie          specie;
-
 }
 
 mixture
@@ -32,18 +31,15 @@ mixture
     {
         molWeight   100;
     }
-
     transport
     {
         kappa   0.08;
     }
-
     thermodynamics
     {
         Hf      0;
         Cp      900;
     }
-
     equationOfState
     {
         rho     272;

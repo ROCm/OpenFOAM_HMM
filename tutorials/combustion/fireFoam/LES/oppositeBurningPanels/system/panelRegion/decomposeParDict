@@ -21,7 +21,11 @@ method          structured;
 structuredCoeffs
 {
     method      hierarchical;
-    patches     (region0_to_panelRegion_fRight_zone region0_to_panelRegion_fLeft_zone);
+    patches
+    (
+        region0_to_panelRegion_fRight_zone
+        region0_to_panelRegion_fLeft_zone
+    );
 
     coeffs
     {
@@ -34,5 +38,6 @@ coeffs
     n           (1 2 3);
     dataFile    "cellDecomposition";
 }
+
 
 // ************************************************************************* //

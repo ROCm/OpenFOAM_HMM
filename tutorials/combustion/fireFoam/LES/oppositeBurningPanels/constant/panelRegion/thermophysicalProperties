@@ -25,7 +25,6 @@ thermoType
     energy          sensibleEnthalpy;
 }
 
-
 chemistryReader foamChemistryReader;
 
 foamChemistryFile "<constant>/panelRegion/reactions";
@@ -40,7 +39,6 @@ gasThermoType
     specie          specie;
     energy          sensibleEnthalpy;
 }
-
 
 gas
 {

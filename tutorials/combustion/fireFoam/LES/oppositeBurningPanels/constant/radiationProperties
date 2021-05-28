@@ -5,13 +5,11 @@
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      radiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,7 +69,6 @@ greyMeanAbsorptionEmissionCoeffs
             56.31e12
             -5.8169e15
         );
-
     }
 
     H2O
@@ -188,5 +185,6 @@ greyMeanAbsorptionEmissionCoeffs
 scatterModel    none;
 
 sootModel       none;
+
 
 // ************************************************************************* //

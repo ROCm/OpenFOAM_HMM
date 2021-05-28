@@ -10,11 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       vectorField;
-    location    "constant";
     object      reactingCloud1Positions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 (
-
 )
+
 // ************************************************************************* //

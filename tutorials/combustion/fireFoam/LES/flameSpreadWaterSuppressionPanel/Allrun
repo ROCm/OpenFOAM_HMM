@@ -3,6 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+restore0Dir
+
 # create the underlying block mesh
 runApplication blockMesh
 
@@ -15,24 +17,18 @@ runApplication createPatch -overwrite
 # extrude Film
 runApplication extrudeToRegionMesh -dict system/extrudeToRegionMeshDictFilm -overwrite
 
-rm log.extrudeToRegionMesh
-
 # extrude pyrolysis
-runApplication extrudeToRegionMesh -dict system/extrudeToRegionMeshDictPyr -overwrite
+runApplication -s pyr extrudeToRegionMesh -dict system/extrudeToRegionMeshDictPyr -overwrite
 
 # change samplePatch in the boundary to coupled patch betwee region0 and
 # pyrolysis
 runApplication changeDictionary -region filmRegion -constant
 
 # create faceSets for inlet, outlet, sides for the Film
-rm log.topoSet
-runApplication topoSet -region filmRegion
+runApplication -s filmRegion topoSet -region filmRegion
 
-rm log.createPatch
 # create actual patches
-runApplication createPatch -region filmRegion -overwrite
-
-cp 0/ph_rgh.orig 0/ph_rgh
+runApplication -s filmRegion createPatch -region filmRegion -overwrite
 
 # Run
 runApplication $(getApplication)

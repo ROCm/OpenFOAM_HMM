@@ -3,9 +3,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Application name
-application=$(getApplication)
-
 restore0Dir
 
 runApplication chemkinToFoam \
@@ -13,27 +10,35 @@ runApplication chemkinToFoam \
     constant/reactionsGRI constant/thermo.compressibleGasGRI
 
 runApplication blockMesh
+
 runApplication setFields
 
 if isTest "$@"
 then
     # Test without chemistry
     foamDictionary constant/chemistryProperties -entry chemistry -set off
-    runApplication $application
+
+    runApplication $(getApplication)
+
 else
     # Run without chemistry until 1500 to let the flow field develop
     foamDictionary system/controlDict -entry writeInterval -set 1500
+
     foamDictionary system/controlDict -entry endTime -set 1500
+
     foamDictionary constant/chemistryProperties -entry chemistry -set off
 
-    runApplication $application
+    runApplication $(getApplication)
 
     # Run with chemistry until flame reaches its full size
     foamDictionary system/controlDict -entry writeInterval -set 100
+
     foamDictionary system/controlDict -entry endTime -set 5000
+
     foamDictionary constant/chemistryProperties -entry chemistry -set on
 
-    runApplication -o $application
+    runApplication -o $(getApplication)
+
 fi
 
 #------------------------------------------------------------------------------

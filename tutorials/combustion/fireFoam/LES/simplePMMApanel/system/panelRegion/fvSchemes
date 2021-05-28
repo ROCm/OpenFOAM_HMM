@@ -10,14 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system/pyrolysisRegion";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
@@ -33,6 +32,7 @@ divSchemes
 laplacianSchemes
 {
     default         none;
+
     laplacian(kappa,T)  Gauss harmonic uncorrected;
     laplacian(thermo:alpha,h)  Gauss harmonic uncorrected;
     laplacian(kappa,T) Gauss harmonic uncorrected;

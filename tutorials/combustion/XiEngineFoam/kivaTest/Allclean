@@ -3,12 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-mv ./-180 temp180
+mv -f ./-180 temp180
 
 cleanCase0
 
 rm -f constant/polyMesh/boundary
 
-mv temp180 ./-180
+mv -f temp180 ./-180
 
 #------------------------------------------------------------------------------
