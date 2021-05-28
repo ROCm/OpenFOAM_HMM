@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,50 +27,26 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vtkUnstructuredReader.H"
-#include "labelIOField.H"
-#include "scalarIOField.H"
-#include "stringIOList.H"
-#include "cellModel.H"
-#include "vectorIOField.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class T>
-void Foam::vtkUnstructuredReader::readBlock
-(
-    Istream& inFile,
-    const label n,
-    List<T>& list
-) const
-{
-    list.setSize(n);
-    for (T& val : list)
-    {
-        inFile >> val;
-    }
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtkUnstructuredReader::printFieldStats
-(
-    const objectRegistry& obj
-) const
+void Foam::vtkUnstructuredReader::printFieldStats(const objectRegistry& obj)
 {
-    wordList fieldNames(obj.names(Type::typeName));
+    const wordList fieldNames(obj.names(Type::typeName));
 
     if (fieldNames.size())
     {
-        Info<< "Read " << fieldNames.size() << " " << Type::typeName
+        Info<< "Read " << fieldNames.size() << ' ' << Type::typeName
             << " fields:" << nl
             << "Size\tName" << nl
-            << "----\t----" << endl;
+            << "----\t----" << nl;
 
         for (const word& fieldName : fieldNames)
         {
             Info<< obj.lookupObject<Type>(fieldName).size()
-                << "\t" << fieldName
-                << endl;
+                << '\t' << fieldName
+                << nl;
         }
         Info<< endl;
     }

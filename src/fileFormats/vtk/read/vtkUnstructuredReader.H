@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,12 +69,13 @@ class vtkUnstructuredReader
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the vtk data types
         enum vtkDataType
         {
             VTK_INT,
+            VTK_INT64,
             VTK_UINT,
             VTK_LONG,
             VTK_ULONG,
@@ -111,6 +113,9 @@ public:
 
 
 private:
+
+    //- The VTK version
+    float version_;
 
     //- Header
     string header_;
@@ -160,27 +165,31 @@ private:
 
     // Private Member Functions
 
-        template<class T>
-        void readBlock
+        //- Read OFFSETS, CONNECTIVITY arrays
+        static void readOffsetsConnectivity
         (
-            Istream& inFile,
-            const label n,
-            List<T>& list
-        ) const;
+            ISstream& is,
+            const char* entryName,
+            const label nOffsets,
+            labelList& offsets,
+            const label nConnectivity,
+            labelList& connectivity
+        );
 
-        void warnUnhandledType
+        static void warnUnhandledType
         (
-            Istream& inFile,
+            const Istream& is,  // For error message
             const label type,
             labelHashSet& warningGiven
-        ) const;
+        );
 
         //- Split cellTypes into cells, faces and lines
         void extractCells
         (
-            Istream& inFile,
-            const labelList& cellTypes,
-            const labelList& cellVertData
+            const Istream& is,  // For error message
+            const labelUList& cellTypes,
+            const labelUList& cellOffsets,
+            const labelUList& cellVertData
         );
 
         //- Read single field and stores it on the objectRegistry.
@@ -215,121 +224,122 @@ public:
     //- Runtime type information
     ClassName("vtkUnstructuredReader");
 
+
     // Constructors
 
-        //- Construct from Istream, read all
-        vtkUnstructuredReader(const objectRegistry& obr, ISstream&);
+        //- Construct from input stream, read all
+        vtkUnstructuredReader(const objectRegistry& obr, ISstream& is);
 
 
     // Member Functions
 
         //- Header
-        const string header() const
+        const string& header() const noexcept
         {
             return header_;
         }
 
         //- Title
-        const string& title() const
+        const string& title() const noexcept
         {
             return title_;
         }
 
         //- DataType
-        const string& dataType() const
+        const string& dataType() const noexcept
         {
             return dataType_;
         }
 
 
         //- Points
-        const pointField& points() const
+        const pointField& points() const noexcept
         {
             return points_;
         }
 
-        pointField& points()
+        pointField& points() noexcept
         {
             return points_;
         }
 
-        //- 3D cells.
-        const cellShapeList& cells() const
+        //- 3D cells
+        const cellShapeList& cells() const noexcept
         {
             return cells_;
         }
 
-        cellShapeList& cells()
+        cellShapeList& cells() noexcept
         {
             return cells_;
         }
 
-        const labelList& cellMap() const
+        const labelList& cellMap() const noexcept
         {
             return cellMap_;
         }
 
         //- 2D cells (=faces)
-        const faceList& faces() const
+        const faceList& faces() const noexcept
         {
             return faces_;
         }
 
-        faceList& faces()
+        faceList& faces() noexcept
         {
             return faces_;
         }
 
-        const labelList& faceMap() const
+        const labelList& faceMap() const noexcept
         {
             return faceMap_;
         }
 
         //- 1D cells (=open lines)
-        const labelListList& lines() const
+        const labelListList& lines() const noexcept
         {
             return lines_;
         }
 
-        labelListList& lines()
+        labelListList& lines() noexcept
         {
             return lines_;
         }
 
-        const labelList& lineMap() const
+        const labelList& lineMap() const noexcept
         {
             return lineMap_;
         }
 
         //- Cell based fields
-        const objectRegistry& cellData() const
+        const objectRegistry& cellData() const noexcept
         {
             return cellData_;
         }
 
-        objectRegistry& cellData()
+        objectRegistry& cellData() noexcept
         {
             return cellData_;
         }
 
         //- Point based fields
-        const objectRegistry& pointData() const
+        const objectRegistry& pointData() const noexcept
         {
             return pointData_;
         }
 
-        objectRegistry& pointData()
+        objectRegistry& pointData() noexcept
         {
             return pointData_;
         }
 
         //- Other fields
-        const objectRegistry& otherData() const
+        const objectRegistry& otherData() const noexcept
         {
             return otherData_;
         }
 
-        objectRegistry& otherData()
+        objectRegistry& otherData() noexcept
         {
             return otherData_;
         }
@@ -337,8 +347,7 @@ public:
 
         //- Debug: print contents of objectRegistry
         template<class Type>
-        void printFieldStats(const objectRegistry&) const;
-
+        static void printFieldStats(const objectRegistry&);
 };
 
 
