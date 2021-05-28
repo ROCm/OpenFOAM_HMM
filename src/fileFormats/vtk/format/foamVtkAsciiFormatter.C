@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ Foam::vtk::asciiFormatter::opts_(formatType::INLINE_ASCII);
 
 inline void Foam::vtk::asciiFormatter::next()
 {
-    if (pos_ == 6)
+    if (pos_ >= itemsPerLine_)
     {
         os()<< '\n';
         pos_ = 0;

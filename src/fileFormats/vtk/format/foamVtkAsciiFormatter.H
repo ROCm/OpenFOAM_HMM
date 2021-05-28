@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
 
 Description
     Inline ASCII output.
-    Adds spaces between entries and a newline every 6 items
+    Adds spaces between entries and a newline every 9 items
     (for consistency with what VTK itself outputs).
 
 SourceFiles
@@ -60,6 +60,9 @@ class asciiFormatter
 
         static const char* name_;
         static const outputOptions opts_;
+
+        //- Number of items per line
+        static constexpr unsigned short itemsPerLine_ = 9;
 
         //- Track the current output position
         unsigned short pos_;
