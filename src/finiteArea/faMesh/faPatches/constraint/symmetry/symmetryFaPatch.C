@@ -70,7 +70,7 @@ Foam::symmetryFaPatch::symmetryFaPatch
 :
     faPatch(name, dict, index, bm)
 {
-    if (ngbPolyPatchIndex() == -1)
+    if (ngbPolyPatchIndex() < 0)
     {
         FatalErrorInFunction
             << "Neighbour polyPatch index is not specified for faPatch "

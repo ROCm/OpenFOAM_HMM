@@ -118,7 +118,7 @@ namespace fv
 
 class buoyancyEnergy
 :
-    public option
+    public fv::option
 {
     // Private Data
 

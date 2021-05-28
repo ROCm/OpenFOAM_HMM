@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,33 +27,41 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::fa::option::name() const
+inline const Foam::word& Foam::fa::option::name() const noexcept
 {
     return name_;
 }
 
 
-inline const Foam::fvMesh& Foam::fa::option::mesh() const
+inline const Foam::fvMesh& Foam::fa::option::mesh() const noexcept
 {
     return mesh_;
 }
 
 
-inline const Foam::fvPatch& Foam::fa::option::patch() const
+inline const Foam::fvPatch& Foam::fa::option::patch() const noexcept
 {
     return patch_;
 }
 
 
-inline const Foam::dictionary& Foam::fa::option::coeffs() const
+inline const Foam::dictionary& Foam::fa::option::coeffs() const noexcept
 {
     return coeffs_;
 }
 
 
-inline bool Foam::fa::option::active() const
+inline bool Foam::fa::option::active() const noexcept
 {
     return active_;
+}
+
+
+inline bool Foam::fa::option::active(const bool on) noexcept
+{
+    bool old(active_);
+    active_ = on;
+    return old;
 }
 
 
@@ -63,13 +71,7 @@ inline void Foam::fa::option::setApplied(const label fieldi)
 }
 
 
-inline Foam::Switch& Foam::fa::option::active()
-{
-    return active_;
-}
-
-
-inline const Foam::word& Foam::fa::option::regionName() const
+inline const Foam::word& Foam::fa::option::regionName() const noexcept
 {
     return regionName_;
 }
@@ -77,31 +79,21 @@ inline const Foam::word& Foam::fa::option::regionName() const
 
 inline const Foam::faMesh& Foam::fa::option::regionMesh() const
 {
-    if (regionMeshPtr_.valid())
+    if (!regionMeshPtr_)
     {
-        return regionMeshPtr_();
+        regionMeshPtr_.reset(new faMesh(mesh_));
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Region mesh not available" << abort(FatalError);
-    }
-    return *(new faMesh(mesh_));
+    return *regionMeshPtr_;
 }
 
 
 inline const Foam::volSurfaceMapping& Foam::fa::option::vsm() const
 {
-    if (vsmPtr_.valid())
+    if (!vsmPtr_)
     {
-        return vsmPtr_();
+        vsmPtr_.reset(new volSurfaceMapping(this->regionMesh()));
     }
-    else
-    {
-        FatalErrorInFunction
-            << "vsmPtr not available" << abort(FatalError);
-    }
-    return *(new volSurfaceMapping(regionMeshPtr_()));
+    return *vsmPtr_;
 }
 
 

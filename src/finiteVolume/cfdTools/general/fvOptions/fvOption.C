@@ -58,9 +58,9 @@ Foam::fv::option::option
     mesh_(mesh),
     dict_(dict),
     coeffs_(dict.optionalSubDict(modelType + "Coeffs")),
-    active_(dict_.getOrDefault<Switch>("active", true)),
     fieldNames_(),
     applied_(),
+    active_(dict_.getOrDefault("active", true)),
     log(true)
 {
     Log << incrIndent << indent << "Source: " << name_ << endl << decrIndent;
@@ -101,7 +101,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<option>(cstrIter()(name, modelType, coeffs, mesh));
+    return autoPtr<fv::option>(cstrIter()(name, modelType, coeffs, mesh));
 }
 
 

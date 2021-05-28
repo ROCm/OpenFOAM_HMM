@@ -80,7 +80,7 @@ namespace fv
 
 class radiation
 :
-    public option
+    public fv::option
 {
     // Private Data
 

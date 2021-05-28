@@ -122,7 +122,6 @@ protected:
 public:
 
     //- Runtime type information
-//     TypeName(processorPolyPatch::typeName_());
     TypeName("processor");
 
 
@@ -174,7 +173,7 @@ public:
     virtual ~processorFaPatch();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return interface size
         virtual label interfaceSize() const

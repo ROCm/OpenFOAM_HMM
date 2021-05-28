@@ -89,7 +89,7 @@ void Foam::fv::optionList::checkApplied() const
 
 Foam::fv::optionList::optionList(const fvMesh& mesh, const dictionary& dict)
 :
-    PtrList<option>(),
+    PtrList<fv::option>(),
     mesh_(mesh),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {
@@ -99,7 +99,7 @@ Foam::fv::optionList::optionList(const fvMesh& mesh, const dictionary& dict)
 
 Foam::fv::optionList::optionList(const fvMesh& mesh)
 :
-    PtrList<option>(),
+    PtrList<fv::option>(),
     mesh_(mesh),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {}

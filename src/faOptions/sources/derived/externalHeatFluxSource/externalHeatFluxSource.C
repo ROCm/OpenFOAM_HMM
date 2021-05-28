@@ -26,7 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "externalHeatFluxSource.H"
-#include "addToRunTimeSelectionTable.H"
+#include "fam.H"
+#include "faScalarMatrix.H"
 #include "physicoChemicalConstants.H"
 #include "zeroGradientFaPatchFields.H"
 #include "addToRunTimeSelectionTable.H"

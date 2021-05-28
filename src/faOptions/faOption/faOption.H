@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,13 +75,12 @@ SourceFiles
 #ifndef faOption_H
 #define faOption_H
 
-#include "faMatrices.H"
-#include "areaFields.H"
+#include "faMatricesFwd.H"
+#include "areaFieldsFwd.H"
 #include "dictionary.H"
-#include "Switch.H"
-#include "runTimeSelectionTables.H"
 #include "fvMesh.H"
 #include "volSurfaceMapping.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,26 +123,34 @@ protected:
         //- Dictionary containing source coefficients
         dictionary coeffs_;
 
-        //- Source active flag
-        Switch active_;
-
         //- Field names to apply source to - populated by derived models
         wordList fieldNames_;
 
         //- Applied flag list - corresponds to each fieldNames_ entry
         List<bool> applied_;
 
-         //- Region name
+        //- Region name (finite-area)
         word regionName_;
 
-        //- Pointer to the region mesh database
-        autoPtr<faMesh> regionMeshPtr_;
+private:
 
-        //-Volume-to surface mapping
-        autoPtr<volSurfaceMapping> vsmPtr_;
+    // Private Data
+
+        //- Demand-driven: pointer to region mesh database
+        mutable autoPtr<faMesh> regionMeshPtr_;
+
+        //- Demand-driven: volume-to-surface mapping
+        mutable autoPtr<volSurfaceMapping> vsmPtr_;
+
+        //- Source active flag
+        bool active_;
 
 
 public:
+
+    //- Switch write log to Info
+    bool log;
+
 
     //- Runtime type information
     TypeName("option");
@@ -188,7 +195,6 @@ public:
         //- on the freestore from an Istream
         class iNew
         {
-
             //- Reference to the patch
             const fvPatch& patch_;
 
@@ -239,37 +245,37 @@ public:
         // Access
 
             //- Return const access to the source name
-            inline const word& name() const;
+            inline const word& name() const noexcept;
 
             //- Return const access to the mesh database
-            inline const fvMesh& mesh() const;
+            inline const fvMesh& mesh() const noexcept;
 
             //- Return const access to fvPatch
-            inline const fvPatch& patch() const;
+            inline const fvPatch& patch() const noexcept;
 
             //- Return dictionary
-            inline const dictionary& coeffs() const;
+            inline const dictionary& coeffs() const noexcept;
 
             //- Return const access to the source active flag
-            inline bool active() const;
+            inline bool active() const noexcept;
 
             //- Set the applied flag to true for field index fieldi
             inline void setApplied(const label fieldi);
 
-            //- Return the region mesh database
+            //- The region name
+            inline const word& regionName() const noexcept;
+
+            //- Return the region mesh database (demand-driven)
             inline const faMesh& regionMesh() const;
 
-             //- Return volSurfaceMapping
+            //- Return volSurfaceMapping (demand-driven)
             inline const volSurfaceMapping& vsm() const;
-
-            //- Region name
-            inline const word& regionName() const;
 
 
         // Edit
 
-            //- Return access to the source active flag
-            inline Switch& active();
+            //- Change source active flag, return previous value
+            inline bool active(const bool on) noexcept;
 
 
         // Checks

@@ -28,18 +28,49 @@ License
 #include "emptyFaPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Patch name
 defineTypeNameAndDebug(emptyFaPatch, 0);
 
 // Add the patch constructor functions to the hash tables
 addToRunTimeSelectionTable(faPatch, emptyFaPatch, dictionary);
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::emptyFaPatch::emptyFaPatch
+(
+    const word& name,
+    const label index,
+    const faBoundaryMesh& bm,
+    const label ngbPolyPatchIndex
+)
+:
+    emptyFaPatch(name, labelList(), index, bm, ngbPolyPatchIndex)
+{}
+
+
+Foam::emptyFaPatch::emptyFaPatch
+(
+    const word& name,
+    const labelList& edgeLabels,
+    const label index,
+    const faBoundaryMesh& bm,
+    const label ngbPolyPatchIndex
+)
+:
+    faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 
 // Over-riding the face normals return from the underlying patch
 // This is the only piece of info used out of the underlying primitivePatch
@@ -53,9 +84,5 @@ addToRunTimeSelectionTable(faPatch, emptyFaPatch, dictionary);
 //     return faceAreas();
 // }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

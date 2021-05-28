@@ -39,7 +39,7 @@ SourceFiles
 #define writeAreaFields_H
 
 #include "readFields.H"
-#include "foamVtkIndPatchGeoFieldsWriter.H"
+#include "foamVtkUIndPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 // Writer type for finite-area mesh + fields
-typedef vtk::indirectPatchGeoFieldsWriter vtkWriterType_areaMesh;
+typedef vtk::uindirectPatchGeoFieldsWriter vtkWriterType_areaMesh;
 
 template<class GeoField>
 bool writeAreaField

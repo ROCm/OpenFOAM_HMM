@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,8 @@ Application
 
 Description
     A mesh generator for finiteArea mesh.
+    When called in parallel, it will also try to act like decomposePar,
+    create procAddressing and decompose serial finite-area fields.
 
 Author
     Zeljko Tukovic, FAMENA
@@ -35,35 +38,19 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#include "objectRegistry.H"
 #include "Time.H"
 #include "argList.H"
 #include "OSspecific.H"
 #include "faMesh.H"
-#include "fvMesh.H"
+#include "IOdictionary.H"
+#include "IOobjectList.H"
+
+#include "areaFields.H"
+#include "faFieldDecomposer.H"
+#include "faMeshReconstructor.H"
+#include "OBJstream.H"
 
 using namespace Foam;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-class faPatchData
-{
-public:
-    word name_;
-    word type_;
-    dictionary dict_;
-    label ownPolyPatchID_;
-    label ngbPolyPatchID_;
-    labelList edgeLabels_;
-    faPatchData()
-    :
-        name_(word::null),
-        type_(word::null),
-        ownPolyPatchID_(-1),
-        ngbPolyPatchID_(-1)
-    {}
-};
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,286 +60,64 @@ int main(int argc, char *argv[])
     (
         "A mesh generator for finiteArea mesh"
     );
+    argList::addOption
+    (
+        "empty-patch",
+        "name",
+        "Specify name for a default empty patch",
+        false  // An advanced option, but not enough to worry about that
+    );
+    argList::addOption("dict", "file", "Alternative faMeshDefinition");
+
+    argList::addBoolOption
+    (
+        "write-edges-obj",
+        "Write mesh edges as obj files and exit",
+        false  // could make an advanced option
+    );
 
     #include "addRegionOption.H"
-    argList::noParallel();
-
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createNamedMesh.H"
+    #include "createNamedPolyMesh.H"
 
     // Reading faMeshDefinition dictionary
-    IOdictionary faMeshDefinition
-    (
-        IOobject
-        (
-            "faMeshDefinition",
-            runTime.constant(),
-            "faMesh",
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+    #include "findMeshDefinitionDict.H"
 
-    wordList polyMeshPatches
-    (
-        faMeshDefinition.get<wordList>("polyMeshPatches")
-    );
-
-    const dictionary& bndDict = faMeshDefinition.subDict("boundary");
-
-    const wordList faPatchNames(bndDict.toc());
-
-    List<faPatchData> faPatches(faPatchNames.size()+1);
-
-    forAll(faPatchNames, patchI)
+    // Inject/overwrite name for optional 'empty' patch
+    word patchName;
+    if (args.readIfPresent("empty-patch", patchName))
     {
-        const dictionary& curPatchDict = bndDict.subDict(faPatchNames[patchI]);
-
-        faPatches[patchI].name_ = faPatchNames[patchI];
-
-        faPatches[patchI].type_ = curPatchDict.get<word>("type");
-
-        const word ownName(curPatchDict.get<word>("ownerPolyPatch"));
-
-        faPatches[patchI].ownPolyPatchID_ =
-            mesh.boundaryMesh().findPatchID(ownName);
-
-        if (faPatches[patchI].ownPolyPatchID_ < 0)
-        {
-            FatalErrorIn("makeFaMesh:")
-                << "neighbourPolyPatch " << ownName << " does not exist"
-                << exit(FatalError);
-        }
-
-        const word neiName(curPatchDict.get<word>("neighbourPolyPatch"));
-
-        faPatches[patchI].ngbPolyPatchID_ =
-            mesh.boundaryMesh().findPatchID(neiName);
-
-        if (faPatches[patchI].ngbPolyPatchID_ < 0)
-        {
-            FatalErrorIn("makeFaMesh:")
-                << "neighbourPolyPatch " << neiName << " does not exist"
-                << exit(FatalError);
-        }
+        meshDefDict.add("emptyPatch", patchName, true);
     }
 
-    // Setting faceLabels list size
-    label size = 0;
+    // Create
+    faMesh areaMesh(mesh, meshDefDict);
 
-    labelList patchIDs(polyMeshPatches.size(), -1);
+    bool quickExit = false;
 
-    forAll(polyMeshPatches, patchI)
+    if (args.found("write-edges-obj"))
     {
-        patchIDs[patchI] =
-            mesh.boundaryMesh().findPatchID(polyMeshPatches[patchI]);
-
-        if (patchIDs[patchI] < 0)
-        {
-            FatalErrorIn("makeFaMesh:")
-                << "Patch " << polyMeshPatches[patchI] << " does not exist"
-                << exit(FatalError);
-        }
-
-        size += mesh.boundaryMesh()[patchIDs[patchI]].size();
+        quickExit = true;
+        #include "faMeshWriteEdgesOBJ.H"
     }
 
-    labelList faceLabels(size, -1);
-
-    sort(patchIDs);
-
-
-    // Filling of faceLabels list
-    label faceI = -1;
-
-    forAll(polyMeshPatches, patchI)
+    if (quickExit)
     {
-        label start = mesh.boundaryMesh()[patchIDs[patchI]].start();
-
-        label size  = mesh.boundaryMesh()[patchIDs[patchI]].size();
-
-        for (label i = 0; i < size; ++i)
-        {
-            faceLabels[++faceI] = start + i;
-        }
+        Info<< "\nEnd\n" << endl;
+        return 0;
     }
 
-    // Creating faMesh
-    Info << "Create faMesh ... ";
+    // Set the precision of the points data to 10
+    IOstream::defaultPrecision(10);
 
-    faMesh areaMesh
-    (
-        mesh,
-        faceLabels
-    );
-    Info << "Done" << endl;
-
-
-    // Determination of faPatch ID for each boundary edge.
-    // Result is in the bndEdgeFaPatchIDs list
-    const indirectPrimitivePatch& patch = areaMesh.patch();
-
-    labelList faceCells(faceLabels.size(), -1);
-
-    forAll(faceCells, faceI)
-    {
-        label faceID = faceLabels[faceI];
-
-        faceCells[faceI] = mesh.faceOwner()[faceID];
-    }
-
-    labelList meshEdges =
-        patch.meshEdges
-        (
-            mesh.edges(),
-            mesh.cellEdges(),
-            faceCells
-        );
-
-    const labelListList& edgeFaces = mesh.edgeFaces();
-
-    const label nTotalEdges = patch.nEdges();
-    const label nInternalEdges = patch.nInternalEdges();
-
-    labelList bndEdgeFaPatchIDs(nTotalEdges - nInternalEdges, -1);
-
-    for (label edgeI = nInternalEdges; edgeI < nTotalEdges; ++edgeI)
-    {
-        label curMeshEdge = meshEdges[edgeI];
-
-        labelList curEdgePatchIDs(2, label(-1));
-
-        label patchI = -1;
-
-        forAll(edgeFaces[curMeshEdge], faceI)
-        {
-            label curFace = edgeFaces[curMeshEdge][faceI];
-
-            label curPatchID = mesh.boundaryMesh().whichPatch(curFace);
-
-            if (curPatchID != -1)
-            {
-                curEdgePatchIDs[++patchI] = curPatchID;
-            }
-        }
-
-        for (label pI = 0; pI < faPatches.size() - 1; ++pI)
-        {
-            if
-            (
-                (
-                    curEdgePatchIDs[0] == faPatches[pI].ownPolyPatchID_
-                 && curEdgePatchIDs[1] == faPatches[pI].ngbPolyPatchID_
-                )
-                ||
-                (
-                    curEdgePatchIDs[1] == faPatches[pI].ownPolyPatchID_
-                 && curEdgePatchIDs[0] == faPatches[pI].ngbPolyPatchID_
-                )
-            )
-            {
-                bndEdgeFaPatchIDs[edgeI - nInternalEdges] = pI;
-                break;
-            }
-        }
-    }
-
-
-    // Set edgeLabels for each faPatch
-    for (label pI=0; pI<(faPatches.size()-1); ++pI)
-    {
-        SLList<label> tmpList;
-
-        forAll(bndEdgeFaPatchIDs, eI)
-        {
-            if (bndEdgeFaPatchIDs[eI] == pI)
-            {
-                tmpList.append(nInternalEdges + eI);
-            }
-        }
-
-        faPatches[pI].edgeLabels_ = tmpList;
-    }
-
-    // Check for undefined edges
-    SLList<label> tmpList;
-
-    forAll(bndEdgeFaPatchIDs, eI)
-    {
-        if (bndEdgeFaPatchIDs[eI] == -1)
-        {
-            tmpList.append(nInternalEdges + eI);
-        }
-    }
-
-    if (tmpList.size() > 0)
-    {
-        label pI = faPatches.size()-1;
-
-        faPatches[pI].name_ = "undefined";
-        faPatches[pI].type_ = "patch";
-        faPatches[pI].edgeLabels_ = tmpList;
-    }
-
-    // Add good patches to faMesh
-    SLList<faPatch*> faPatchLst;
-
-    for (label pI = 0; pI < faPatches.size(); ++pI)
-    {
-        faPatches[pI].dict_.add("type", faPatches[pI].type_);
-        faPatches[pI].dict_.add("edgeLabels", faPatches[pI].edgeLabels_);
-        faPatches[pI].dict_.add
-        (
-            "ngbPolyPatchIndex",
-            faPatches[pI].ngbPolyPatchID_
-        );
-
-        if(faPatches[pI].edgeLabels_.size() > 0)
-        {
-            faPatchLst.append
-            (
-                faPatch::New
-                (
-                    faPatches[pI].name_,
-                    faPatches[pI].dict_,
-                    pI,
-                    areaMesh.boundary()
-                ).ptr()
-            );
-        }
-    }
-
-    word emptyPatchName;
-    if (args.readIfPresent("addEmptyPatch", emptyPatchName))
-    {
-        dictionary emptyPatchDict;
-        emptyPatchDict.add("type", "empty");
-        emptyPatchDict.add("edgeLabels", labelList());
-        emptyPatchDict.add("ngbPolyPatchIndex", -1);
-
-        faPatchLst.append
-        (
-            faPatch::New
-            (
-                emptyPatchName,
-                emptyPatchDict,
-                faPatchLst.size(),
-                areaMesh.boundary()
-            ).ptr()
-        );
-    }
-
-    Info << "Add faPatches ... ";
-    areaMesh.addFaPatches(List<faPatch*>(faPatchLst));
-    Info << "Done" << endl;
-
-    // Writing faMesh
-    Info << "Write finite area mesh ... ";
+    Info<< nl << "Write finite area mesh." << nl;
     areaMesh.write();
+    Info<< endl;
 
-    Info << "\nEnd" << endl;
+    #include "decomposeFaFields.H"
+
+    Info << "\nEnd\n" << endl;
 
     return 0;
 }

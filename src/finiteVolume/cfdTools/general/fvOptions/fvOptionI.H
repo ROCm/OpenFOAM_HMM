@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,39 +28,41 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::fv::option::name() const
+inline const Foam::word& Foam::fv::option::name() const noexcept
 {
     return name_;
 }
 
 
-inline const Foam::fvMesh& Foam::fv::option::mesh() const
+inline const Foam::fvMesh& Foam::fv::option::mesh() const noexcept
 {
     return mesh_;
 }
 
 
-inline const Foam::dictionary& Foam::fv::option::coeffs() const
+inline const Foam::dictionary& Foam::fv::option::coeffs() const noexcept
 {
     return coeffs_;
 }
 
 
-inline bool Foam::fv::option::active() const
+inline bool Foam::fv::option::active() const noexcept
 {
     return active_;
+}
+
+
+inline bool Foam::fv::option::active(const bool on) noexcept
+{
+    bool old(active_);
+    active_ = on;
+    return old;
 }
 
 
 inline void Foam::fv::option::setApplied(const label fieldi)
 {
     applied_[fieldi] = true;
-}
-
-
-inline Foam::Switch& Foam::fv::option::active()
-{
-    return active_;
 }
 
 

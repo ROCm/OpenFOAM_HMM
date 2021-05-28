@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class faBoundaryMesh;
 class faPatch;
 Ostream& operator<<(Ostream&, const faPatch&);
@@ -74,7 +75,7 @@ class faPatch
     // Private Data
 
         //- Neighbour polyPatch index
-        const label ngbPolyPatchIndex_;
+        const label nbrPolyPatchId_;
 
         //- Reference to boundary mesh
         const faBoundaryMesh& boundaryMesh_;
@@ -99,7 +100,6 @@ class faPatch
 
         //- No copy assignment
         void operator=(const faPatch&) = delete;
-
 
         //- Clear out topological patch data
         void clearOut();
@@ -225,17 +225,31 @@ public:
 
     // Member Functions
 
-        //- Return number of patch points
+        //- Return the list of edges
+        const labelList& edgeLabels() const noexcept
+        {
+            return static_cast<const labelList&>(*this);
+        }
+
+        void edgeLabels(const UList<label>& newEdgeLabels);
+
+        //- Number of patch points
         label nPoints() const
         {
             return pointLabels().size();
         }
 
+        //- Number of edge labels (boundary edges) addressed by this patch
+        label nEdges() const noexcept
+        {
+            return labelList::size();
+        }
+
         //- Return neighbour polyPatch index
-        label ngbPolyPatchIndex() const;
+        label ngbPolyPatchIndex() const noexcept;
 
         //- Return boundaryMesh reference
-        const faBoundaryMesh& boundaryMesh() const;
+        const faBoundaryMesh& boundaryMesh() const noexcept;
 
         //- Return true if this patch is coupled
         virtual bool coupled() const
@@ -246,7 +260,7 @@ public:
         //- Patch start in edge list
         label start() const;
 
-        //- Patch size
+        //- Patch size is the number of edge labels
         virtual label size() const
         {
             return labelList::size();
@@ -330,8 +344,11 @@ public:
 
         // Topological changes
 
-            //- Reset edge list
-            void resetEdges(const labelList&);
+            //- Reset the list of edges (use with caution)
+            void resetEdges(const UList<label>& newEdges);
+
+            //- Reset the list of edges (use with caution)
+            void resetEdges(labelList&& newEdges);
 
 
         // Evaluation

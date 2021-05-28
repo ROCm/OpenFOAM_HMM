@@ -111,7 +111,7 @@ namespace fv
 
 class viscousDissipation
 :
-    public option
+    public fv::option
 {
     // Private Data
 

@@ -69,7 +69,7 @@ namespace fv
 
 class optionList
 :
-    public PtrList<option>
+    public PtrList<fv::option>
 {
 protected:
 

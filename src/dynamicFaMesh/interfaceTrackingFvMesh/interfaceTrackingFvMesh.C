@@ -48,7 +48,7 @@ License
 #include "turbulentTransportModel.H"
 #include "demandDrivenData.H"
 #include "unitConversion.H"
-#include "foamVtkIndPatchWriter.H"
+#include "foamVtkUIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2270,7 +2270,7 @@ bool Foam::interfaceTrackingFvMesh::update()
 
 void Foam::interfaceTrackingFvMesh::writeVTK() const
 {
-    vtk::indirectPatchWriter writer
+    vtk::uindirectPatchWriter writer
     (
         aMesh().patch(),
         vtk::formatType::LEGACY_ASCII,

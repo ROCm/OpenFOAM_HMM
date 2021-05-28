@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +40,8 @@ const typename GeometricField::Patch& Foam::faPatch::lookupPatchField
 {
     return patchField<GeometricField, Type>
     (
-        boundaryMesh().mesh()().objectRegistry::lookupObject<GeometricField>
-        (
-            name
-        )
+        boundaryMesh().mesh().mesh().objectRegistry::template
+            lookupObject<GeometricField>(name)
     );
 }
 

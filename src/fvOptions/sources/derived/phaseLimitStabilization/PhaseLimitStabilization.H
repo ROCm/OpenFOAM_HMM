@@ -108,7 +108,7 @@ namespace fv
 template<class Type>
 class PhaseLimitStabilization
 :
-    public option
+    public fv::option
 {
     // Private Data
 

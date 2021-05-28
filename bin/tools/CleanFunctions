@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2020 OpenCFD Ltd.
+#     Copyright (C) 2015-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -138,15 +138,16 @@ cleanCase()
         then
             rm -f polyMesh/blockMeshDict
             echo
-            echo "Warning: not removing constant/polyMesh/ "
-            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
+            echo "Warning: not removing constant/polyMesh/"
+            echo "    It contains a 'blockMeshDict.m4' file."
+            echo "    Relocate the file to system/ to avoid this warning"
             echo
         elif [ -e polyMesh/blockMeshDict ]
         then
             echo
-            echo "Warning: not removing constant/polyMesh/ "
-            echo "   it contains a blockMeshDict, which should normally be under system/ instead"
-            echo
+            echo "Warning: not removing constant/polyMesh/"
+            echo "    It contains a 'blockMeshDict' file."
+            echo "    Relocate the file to system/ to avoid this warning"
         else
             # Remove polyMesh entirely if there is no blockMeshDict
             rm -rf polyMesh
@@ -187,12 +188,26 @@ cleanUcomponents()
 }
 
 
-cleanFaMesh ()
+cleanFaMesh()
 {
-    rm -rf \
-        constant/faMesh/faceLabels* \
-        constant/faMesh/faBoundary* \
-    ;
+    (
+        cd constant 2>/dev/null || exit 0
+
+        # Old constant/polyMesh location for blockMeshDict still in use?
+        # - emit a gentle warning
+        if [ -e faMesh/faMeshDefinition ]
+        then
+            rm -f faMesh/faceLabels* faMesh/faBoundary*
+            echo
+            echo "Warning: not removing the constant/faMesh/ directory"
+            echo "    It contains a 'faMeshDefinition' file"
+            echo "    Relocate the file to system/ to avoid this warning"
+            echo
+        else
+            # Remove faMesh/ entirely if there is no faMeshDefinition
+            rm -rf faMesh
+        fi
+    )
 }
 
 

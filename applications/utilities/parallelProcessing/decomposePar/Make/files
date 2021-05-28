@@ -1,4 +1,5 @@
 decomposePar.C
+
 domainDecomposition.C
 domainDecompositionMesh.C
 domainDecompositionDistribute.C
@@ -7,10 +8,6 @@ domainDecompositionWrite.C
 domainDecompositionDryRun.C
 domainDecompositionDryRunWrite.C
 
-dimFieldDecomposer.C
-pointFieldDecomposer.C
-faMeshDecomposition.C
-faFieldDecomposer.C
 lagrangianFieldDecomposer.C
 
 EXE = $(FOAM_APPBIN)/decomposePar

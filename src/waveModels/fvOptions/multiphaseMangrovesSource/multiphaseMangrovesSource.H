@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class MangrovesModel;
 
 namespace fv
@@ -62,7 +62,7 @@ namespace fv
 
 class multiphaseMangrovesSource
 :
-    public option
+    public fv::option
 {
     // Private Member Functions
 

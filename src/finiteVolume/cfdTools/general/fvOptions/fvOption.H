@@ -113,23 +113,25 @@ protected:
         //- Dictionary containing source coefficients
         dictionary coeffs_;
 
-        //- Source active flag
-        Switch active_;
-
         //- Field names to apply source to - populated by derived models
         wordList fieldNames_;
 
         //- Applied flag list - corresponds to each fieldNames_ entry
         List<bool> applied_;
 
+        //- Source active flag
+        bool active_;
+
 
 public:
+
+    //- Switch write log to Info
+    bool log;
+
 
     //- Runtime type information
     TypeName("option");
 
-    //- Switch write log to Info
-    bool log;
 
     // Declare run-time constructor selection table
 
@@ -219,16 +221,16 @@ public:
         // Access
 
             //- Return const access to the source name
-            inline const word& name() const;
+            inline const word& name() const noexcept;
 
             //- Return const access to the mesh database
-            inline const fvMesh& mesh() const;
+            inline const fvMesh& mesh() const noexcept;
 
             //- Return dictionary
-            inline const dictionary& coeffs() const;
+            inline const dictionary& coeffs() const noexcept;
 
-            //- Return const access to the source active flag
-            inline bool active() const;
+            //- True if source is active
+            inline bool active() const noexcept;
 
             //- Set the applied flag to true for field index fieldi
             inline void setApplied(const label fieldi);
@@ -236,8 +238,8 @@ public:
 
         // Edit
 
-            //- Return access to the source active flag
-            inline Switch& active();
+            //- Change source active flag, return previous value
+            inline bool active(const bool on) noexcept;
 
 
         // Checks

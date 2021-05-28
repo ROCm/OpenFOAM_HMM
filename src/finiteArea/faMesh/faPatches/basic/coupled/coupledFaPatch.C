@@ -117,10 +117,4 @@ void Foam::coupledFaPatch::calcTransformTensors
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::coupledFaPatch::~coupledFaPatch()
-{}
-
-
 // ************************************************************************* //

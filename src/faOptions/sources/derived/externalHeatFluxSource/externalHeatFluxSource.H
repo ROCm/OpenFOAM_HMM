@@ -121,7 +121,6 @@ SourceFiles
 #include "Function1.H"
 #include "areaFields.H"
 #include "faceSetOption.H"
-#include "faCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -136,7 +135,7 @@ namespace fa
 
 class externalHeatFluxSource
 :
-    public faceSetOption
+    public fa::faceSetOption
 {
 public:
 

@@ -53,8 +53,6 @@ Author
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // Forward Declarations
 class faMesh;
 class faBoundaryMesh;
@@ -89,14 +87,14 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
+        //- Construct from faMesh
         faBoundaryMesh
         (
             const IOobject& io,
             const faMesh& fam
         );
 
-        //- Construct given size
+        //- Construct from faMesh and given size
         faBoundaryMesh
         (
             const IOobject& io,
@@ -111,62 +109,95 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return the mesh reference
+        const faMesh& mesh() const noexcept
+        {
+            return mesh_;
+        }
 
-            //- Calculate the geometry for the patches
-            //  (transformation tensors etc.)
-            void calcGeometry();
+        //- Return a list of pointers for each patch
+        //- with only those pointing to interfaces being set
+        lduInterfacePtrsList interfaces() const;
 
-            //- Return the mesh reference
-            const faMesh& mesh() const;
+        //- The number of patches before the first processor patch.
+        label nNonProcessor() const;
 
-            //- Return a list of pointers for each patch
-            //- with only those pointing to interfaces being set
-            lduInterfacePtrsList interfaces() const;
+        //- Return a list of patch names
+        wordList names() const;
 
-            //- Return a list of patch names
-            wordList names() const;
+        //- Return a list of patch types
+        wordList types() const;
 
-            //- Return a list of patch types
-            wordList types() const;
+        //- Return a list of patch start indices
+        labelList patchStarts() const;
 
-            //- Return patch indices for all matches.
-            //  A no-op (returns -1) for an empty key
-            //  \note Matching patchGroups currently not supported
-            labelList indices
-            (
-                const wordRe& matcher,
-                const bool useGroups = false  /* ignored */
-            ) const;
+        //- Return a list of patch sizes (number of edges in each patch)
+        labelList patchSizes() const;
 
-            //- Return patch index for the first match, return -1 if not found
-            //  A no-op (returns -1) for an empty key
-            label findIndex(const wordRe& key) const;
+        //- Return a list of patch ranges
+        List<labelRange> patchRanges() const;
 
-            //- Find patch index given a name, return -1 if not found
-            //  A no-op (returns -1) for an empty name
-            label findPatchID(const word& patchName) const;
+        //- The start label of the edges in the faMesh edges list
+        //  Same as mesh.nInternalEdges()
+        label start() const;
 
-            //- Return patch index for a given edge label
-            label whichPatch(const label edgeIndex) const;
+        //- The number of boundary edges for the underlying mesh
+        //  Same as mesh.nBoundaryEdges()
+        label nEdges() const;
 
-            //- Check boundary definition
-            bool checkDefinition(const bool report = false) const;
+        //- The edge range for all boundary edges
+        //  Spans [nInternalEdges, nEdges) of the underlying mesh
+        labelRange range() const;
 
 
-        // Edit
+        //- Return patch indices for all matches.
+        //  A no-op (returns -1) for an empty key
+        //  \note Matching patchGroups currently not supported
+        labelList indices
+        (
+            const wordRe& matcher,
+            const bool useGroups = false  /* ignored */
+        ) const;
 
-            //- Correct faBoundaryMesh after moving points
-            void movePoints(const pointField&);
+        //- Return patch index for the first match, return -1 if not found
+        //  A no-op (returns -1) for an empty key
+        label findIndex(const wordRe& key) const;
 
-            //- Correct faBoundaryMesh after topology update
-            void updateMesh();
+        //- Find patch index given a name, return -1 if not found
+        //  A no-op (returns -1) for an empty name
+        label findPatchID(const word& patchName) const;
 
-            //- writeData member function required by regIOobject
-            bool writeData(Ostream&) const;
+        //- Return patch index for a given edge label
+        label whichPatch(const label edgeIndex) const;
+
+        //- Check boundary definition
+        bool checkDefinition(const bool report = false) const;
 
 
-    // Ostream operator
+    // Edit
+
+        //- Calculate the geometry for the patches
+        //  (transformation tensors etc.)
+        void calcGeometry();
+
+        //- Correct faBoundaryMesh after moving points
+        void movePoints(const pointField&);
+
+        //- Correct faBoundaryMesh after topology update
+        void updateMesh();
+
+        //- The writeData member function required by regIOobject
+        bool writeData(Ostream& os) const;
+
+        //- Write using stream options
+        virtual bool writeObject
+        (
+            IOstreamOption streamOpt,
+            const bool valid
+        ) const;
+
+
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const faBoundaryMesh&);
 

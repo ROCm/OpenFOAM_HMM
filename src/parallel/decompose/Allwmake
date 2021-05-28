@@ -12,6 +12,7 @@ export FOAM_EXT_LIBBIN
 
 wmake $targetType decompositionMethods
 wmake $targetType decompose
+wmake $targetType faDecompose
 
 if have_kahip
 then

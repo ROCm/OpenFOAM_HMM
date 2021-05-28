@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "externalFileSource.H"
-#include "faMatrices.H"
-#include "faCFD.H"
+#include "fam.H"
+#include "faScalarMatrix.H"
 #include "zeroGradientFaPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 

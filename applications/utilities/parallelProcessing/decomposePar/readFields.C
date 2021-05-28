@@ -42,7 +42,7 @@ void Foam::readFields
     typedef GeometricField<Type, PatchField, GeoMesh> GeoField;
 
     // Search list of objects for fields of type GeoField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    IOobjectList fieldObjects(objects.lookupClass<GeoField>());
 
     // Remove the cellDist field
     auto iter = fieldObjects.find("cellDist");
@@ -51,12 +51,12 @@ void Foam::readFields
         fieldObjects.erase(iter);
     }
 
-    // Get sorted set of names (different processors might read objects in
-    // different order)
+    // Use sorted set of names
+    // (different processors might read objects in different order)
     const wordList masterNames(fieldObjects.sortedNames());
 
     // Construct the fields
-    fields.setSize(masterNames.size());
+    fields.resize(masterNames.size());
 
     forAll(masterNames, i)
     {
@@ -76,17 +76,14 @@ void Foam::readFields
 )
 {
     // Search list of objects for fields of type GeomField
-    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+    IOobjectList fieldObjects(objects.lookupClass<GeoField>());
 
-    // Construct the fields
-    fields.setSize(fieldObjects.size());
-
-    // Get sorted set of names (different processors might read objects in
-    // different order)
+    // Use sorted set of names
+    // (different processors might read objects in different order)
     const wordList masterNames(fieldObjects.sortedNames());
 
     // Construct the fields
-    fields.setSize(masterNames.size());
+    fields.resize(masterNames.size());
 
     forAll(masterNames, i)
     {

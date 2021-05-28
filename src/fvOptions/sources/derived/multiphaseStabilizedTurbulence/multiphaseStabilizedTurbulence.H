@@ -133,7 +133,7 @@ namespace fv
 
 class multiphaseStabilizedTurbulence
 :
-    public option
+    public fv::option
 {
     // Private Data
 
