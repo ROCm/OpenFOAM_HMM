@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,8 +130,7 @@ void Foam::blockMesh::createCells() const
             }
 
             // Construct collapsed cell and add to list
-            cells_[celli] = cellShape(hex, cellPoints, true);
-
+            cells_[celli].reset(hex, cellPoints, true);
             ++celli;
         }
     }

@@ -178,15 +178,14 @@ cellShape extrudedTriangleCellShape
 
         return cellShape(prism, cellShapeLabels);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Problem with edge matching. Edges: " << localFaces
-            << abort(FatalError);
-    }
+
+
+    FatalErrorInFunction
+        << "Problem with edge matching. Edges: " << localFaces
+        << abort(FatalError);
 
     // Return added to keep compiler happy
-    return cellShape(prism, labelList(0));
+    return cellShape(prism, labelList());
 }
 
 

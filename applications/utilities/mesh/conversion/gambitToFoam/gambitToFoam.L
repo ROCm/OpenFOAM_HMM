@@ -731,7 +731,7 @@ int main(int argc, char *argv[])
             labelsTet[2] = pointLookup[curCellLabels[3] ];
             labelsTet[3] = pointLookup[curCellLabels[1] ];
 
-            cells[celli] = cellShape(tet, labelsTet);
+            cells[celli].reset(tet, labelsTet);
         }
 
         // Square-based pyramid
@@ -743,7 +743,7 @@ int main(int argc, char *argv[])
             labelsPyramid[3] = pointLookup[curCellLabels[2] ];
             labelsPyramid[4] = pointLookup[curCellLabels[4] ];
 
-            cells[celli] = cellShape(pyr, labelsPyramid);
+            cells[celli].reset(pyr, labelsPyramid);
         }
 
         // Triangular prism
@@ -756,7 +756,7 @@ int main(int argc, char *argv[])
             labelsPrism[4] = pointLookup[curCellLabels[4] ];
             labelsPrism[5] = pointLookup[curCellLabels[5] ];
 
-            cells[celli] = cellShape(prism, labelsPrism);
+            cells[celli].reset(prism, labelsPrism);
         }
 
         // Hex
@@ -771,7 +771,7 @@ int main(int argc, char *argv[])
             labelsHex[6] = pointLookup[curCellLabels[7] ];
             labelsHex[7] = pointLookup[curCellLabels[6] ];
 
-            cells[celli] = cellShape(hex, labelsHex);
+            cells[celli].reset(hex, labelsHex);
         }
     }
 

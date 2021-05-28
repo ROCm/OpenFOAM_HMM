@@ -371,8 +371,7 @@ bool Foam::prismMatcher::matches
         )
     )
     {
-        shape = cellShape(model(), vertLabels());
-
+        shape.reset(model(), vertLabels());
         return true;
     }
 

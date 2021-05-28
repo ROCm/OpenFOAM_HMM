@@ -296,8 +296,7 @@ bool Foam::tetWedgeMatcher::matches
         )
     )
     {
-        shape = cellShape(model(), vertLabels());
-
+        shape.reset(model(), vertLabels());
         return true;
     }
 

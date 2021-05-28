@@ -664,7 +664,7 @@ void readCellsLegacy
 
             renumber(mshToFoam, tetPoints);
 
-            cells[celli++] = cellShape(tet, tetPoints);
+            cells[celli++].reset(tet, tetPoints);
 
             nTet++;
         }
@@ -685,7 +685,7 @@ void readCellsLegacy
 
             renumber(mshToFoam, pyrPoints);
 
-            cells[celli++] = cellShape(pyr, pyrPoints);
+            cells[celli++].reset(pyr, pyrPoints);
 
             nPyr++;
         }
@@ -706,7 +706,7 @@ void readCellsLegacy
 
             renumber(mshToFoam, prismPoints);
 
-            cells[celli] = cellShape(prism, prismPoints);
+            cells[celli].reset(prism, prismPoints);
 
             const cellShape& cell = cells[celli];
 
@@ -721,7 +721,7 @@ void readCellsLegacy
                 prismPoints[4] = cell[4];
                 prismPoints[5] = cell[5];
 
-                cells[celli] = cellShape(prism, prismPoints);
+                cells[celli].reset(prism, prismPoints);
             }
 
             celli++;
@@ -747,7 +747,7 @@ void readCellsLegacy
 
             renumber(mshToFoam, hexPoints);
 
-            cells[celli] = cellShape(hex, hexPoints);
+            cells[celli].reset(hex, hexPoints);
 
             const cellShape& cell = cells[celli];
 
@@ -764,7 +764,7 @@ void readCellsLegacy
                 hexPoints[6] = cell[2];
                 hexPoints[7] = cell[3];
 
-                cells[celli] = cellShape(hex, hexPoints);
+                cells[celli].reset(hex, hexPoints);
             }
 
             celli++;
@@ -1019,7 +1019,7 @@ void readCells
 
                 renumber(mshToFoam, tetPoints);
 
-                cells[celli++] = cellShape(tet, tetPoints);
+                cells[celli++].reset(tet, tetPoints);
             }
         }
         else if (elmType == MSHPYR)
@@ -1046,7 +1046,7 @@ void readCells
 
                 renumber(mshToFoam, pyrPoints);
 
-                cells[celli++] = cellShape(pyr, pyrPoints);
+                cells[celli++].reset(pyr, pyrPoints);
             }
         }
         else if (elmType == MSHPRISM)
@@ -1073,7 +1073,7 @@ void readCells
 
                 renumber(mshToFoam, prismPoints);
 
-                cells[celli] = cellShape(prism, prismPoints);
+                cells[celli].reset(prism, prismPoints);
 
                 const cellShape& cell = cells[celli];
 
@@ -1088,7 +1088,7 @@ void readCells
                     prismPoints[4] = cell[4];
                     prismPoints[5] = cell[5];
 
-                    cells[celli] = cellShape(prism, prismPoints);
+                    cells[celli].reset(prism, prismPoints);
                 }
 
                 celli++;
@@ -1120,7 +1120,7 @@ void readCells
 
                 renumber(mshToFoam, hexPoints);
 
-                cells[celli] = cellShape(hex, hexPoints);
+                cells[celli].reset(hex, hexPoints);
 
                 const cellShape& cell = cells[celli];
 
@@ -1137,7 +1137,7 @@ void readCells
                     hexPoints[6] = cell[2];
                     hexPoints[7] = cell[3];
 
-                    cells[celli] = cellShape(hex, hexPoints);
+                    cells[celli].reset(hex, hexPoints);
                 }
 
                 celli++;

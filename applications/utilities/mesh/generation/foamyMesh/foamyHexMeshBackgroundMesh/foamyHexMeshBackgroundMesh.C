@@ -273,7 +273,7 @@ autoPtr<polyMesh> generateHexMesh
                 hexPoints[5] = vtxLabel(nCells, i+1, j,   k+1);
                 hexPoints[6] = vtxLabel(nCells, i+1, j+1, k+1);
                 hexPoints[7] = vtxLabel(nCells, i,   j+1, k+1);
-                cellShapes[celli++] = cellShape(hex, hexPoints);
+                cellShapes[celli++].reset(hex, hexPoints);
             }
         }
     }

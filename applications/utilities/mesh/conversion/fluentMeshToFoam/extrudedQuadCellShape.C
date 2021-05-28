@@ -238,15 +238,14 @@ cellShape extrudedQuadCellShape
 
         return cellShape(hex, cellShapeLabels);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Problem with edge matching. Edges: " << localFaces
-            << abort(FatalError);
-    }
+
+
+    FatalErrorInFunction
+        << "Problem with edge matching. Edges: " << localFaces
+        << abort(FatalError);
 
     // Return added to keep compiler happy
-    return cellShape(hex, labelList(0));
+    return cellShape(hex, labelList());
 }
 
 

@@ -128,7 +128,7 @@ for (label i=0; i<nPoints; i++)
         hexLabels[6] = i3tab[i1tab[i8tab[i]]];
         hexLabels[7] = i3tab[i8tab[i]];
 
-        cellShapes[activeCells] = cellShape(hex, hexLabels);
+        cellShapes[activeCells].reset(hex, hexLabels);
 
         edgeList edges = cellShapes[activeCells].edges();
 

@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
             }
 
             // Do automatic collapse from hex.
-            cellShapes[nCreatedCells] = cellShape(hex, cellPoints, true);
+            cellShapes[nCreatedCells].reset(hex, cellPoints, true);
 
             nCreatedCells++;
         }

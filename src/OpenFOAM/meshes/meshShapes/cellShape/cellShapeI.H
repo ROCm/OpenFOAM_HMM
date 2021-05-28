@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ inline Foam::cellShape::cellShape
 inline Foam::cellShape::cellShape
 (
     const cellModel& model,
-    labelUList&& labels,
+    labelList&& labels,
     const bool doCollapse
 )
 :
@@ -293,6 +293,23 @@ inline Foam::point Foam::cellShape::centre(const UList<point>& points) const
 inline Foam::scalar Foam::cellShape::mag(const UList<point>& points) const
 {
     return m->mag(*this, points);
+}
+
+
+inline void Foam::cellShape::reset
+(
+    const cellModel& model,
+    const labelUList& labels,
+    const bool doCollapse
+)
+{
+    static_cast<labelList&>(*this) = labels;
+    m = &model;
+
+    if (doCollapse)
+    {
+        collapse();
+    }
 }
 
 

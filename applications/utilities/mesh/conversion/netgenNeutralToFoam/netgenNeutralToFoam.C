@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
         tetPoints[2] = readLabel(str) - 1;
         tetPoints[3] = readLabel(str) - 1;
 
-        cells[celli] = cellShape(tet, tetPoints);
+        cells[celli].reset(tet, tetPoints);
     }
 
 

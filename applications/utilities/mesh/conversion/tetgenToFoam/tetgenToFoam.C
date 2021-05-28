@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
                 tetPoints[i] = nodeToPoint[nodeI];
             }
 
-            cells[celli++] = cellShape(tet, tetPoints);
+            cells[celli++].reset(tet, tetPoints);
 
             // Skip attributes
             for (label i = 0; i < nElemAttr; i++)

@@ -34,8 +34,7 @@ pointField points;
     cellShapes.setSize(bCells.size());
     forAll(cellShapes, celli)
     {
-        cellShapes[celli] =
-            cellShape(hex, labelList(bCells[celli]), false);
+        cellShapes[celli].reset(hex, labelList(bCells[celli]), false);
     }
 
     Info<< "Creating boundary faces" << endl;

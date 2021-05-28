@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             {
                 mshStream >> hexPoints[cp];
             }
-            cells[celli] = cellShape(hex, hexPoints);
+            cells[celli].reset(hex, hexPoints);
         }
     }
     else
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
             {
                 mshStream >> tetPoints[cp];
             }
-            cells[celli] = cellShape(tet, tetPoints);
+            cells[celli].reset(tet, tetPoints);
         }
     }
 

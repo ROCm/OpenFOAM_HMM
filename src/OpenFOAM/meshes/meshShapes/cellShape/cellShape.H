@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ public:
         inline cellShape
         (
             const cellModel& model,
-            labelUList&& labels,
+            labelList&& labels,
             const bool doCollapse = false
         );
 
@@ -173,17 +173,25 @@ public:
         //- Centroid of the cell
         inline point centre(const UList<point>& points) const;
 
+        //- Scalar magnitude
+        inline scalar mag(const UList<point>& points) const;
+
+        //- Reset from components
+        inline void reset
+        (
+            const cellModel& model,
+            const labelUList& labels,
+            const bool doCollapse = false
+        );
+
+        //- Collapse shape to correct one after removing duplicate vertices
+        void collapse();
+
         //- Return info proxy, to print information to a stream
         Foam::InfoProxy<cellShape> info() const
         {
             return *this;
         }
-
-        //- Scalar magnitude
-        inline scalar mag(const UList<point>& points) const;
-
-        //- Collapse shape to correct one after removing duplicate vertices
-        void collapse();
 
 
     // Friend Operators

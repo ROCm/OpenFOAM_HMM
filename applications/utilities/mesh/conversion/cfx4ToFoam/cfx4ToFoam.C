@@ -574,7 +574,7 @@ int main(int argc, char *argv[])
                     ];
             }
 
-            cellShapes[nCreatedCells] = cellShape(hex, cellPoints);
+            cellShapes[nCreatedCells].reset(hex, cellPoints);
 
             nCreatedCells++;
         }

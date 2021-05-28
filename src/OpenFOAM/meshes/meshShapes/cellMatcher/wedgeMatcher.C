@@ -396,8 +396,7 @@ bool Foam::wedgeMatcher::matches
         )
     )
     {
-        shape = cellShape(model(), vertLabels());
-
+        shape.reset(model(), vertLabels());
         return true;
     }
 

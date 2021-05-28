@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
             labelsTet[2] = pointMap[labels[2]];
             labelsTet[3] = pointMap[labels[4]];
 
-            cellShapes[nCells++] = cellShape(tet, labelsTet);
+            cellShapes[nCells++].reset(tet, labelsTet);
         }
 
         else if // Square-based pyramid
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
             labelsPyramid[3] = pointMap[labels[3]];
             labelsPyramid[4] = pointMap[labels[4]];
 
-            cellShapes[nCells++] = cellShape(pyr, labelsPyramid);
+            cellShapes[nCells++].reset(pyr, labelsPyramid);
         }
 
         else if // Triangular prism
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
             labelsPrism[4] = pointMap[labels[5]];
             labelsPrism[5] = pointMap[labels[6]];
 
-            cellShapes[nCells++] = cellShape(prism, labelsPrism);
+            cellShapes[nCells++].reset(prism, labelsPrism);
         }
 
         else // Hex
@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
             labelsHex[6] = pointMap[labels[6]];
             labelsHex[7] = pointMap[labels[7]];
 
-            cellShapes[nCells++] = cellShape(hex, labelsHex);
+            cellShapes[nCells++].reset(hex, labelsHex);
         }
     }
 
