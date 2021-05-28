@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -14,16 +14,15 @@ InNamespace
     Foam
 
 Description
-    Read point fields from disk and write as ensight data
+    Read finiteArea fields from disk and write ensightFaMesh
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensight_writePointFields_H
-#define ensight_writePointFields_H
+#ifndef ensight_writeAreaFields_H
+#define ensight_writeAreaFields_H
 
 #include "readFields.H"
-#include "ensightMesh.H"
-#include "fvMesh.H"
+#include "areaFaMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -31,24 +30,23 @@ namespace Foam
 {
 
 template<class Type>
-bool writePointField
+bool writeAreaField
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
-    const tmp<GeometricField<Type, pointPatchField, pointMesh>>& tfield
+    const ensightFaMesh& ensMesh,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tfield
 )
 {
     if (!tfield.valid())
     {
         return false;
     }
-
     const auto& field = tfield();
 
-    // PointData = true
-    autoPtr<ensightFile> os = ensCase.newData<Type>(field.name(), true);
+    autoPtr<ensightFile> os =
+        ensCase.newData<Type>(field.name());
 
-    bool wrote = ensightOutput::writePointField<Type>
+    bool wrote = ensightOutput::writeAreaField<Type>
     (
         os.ref(),
         field,
@@ -61,16 +59,16 @@ bool writePointField
 
 
 template<class Type>
-label writePointFields
+label writeAreaFields
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
+    const ensightFaMesh& ensMesh,
     const IOobjectList& objects
 )
 {
-    typedef GeometricField<Type, pointPatchField, pointMesh> GeoField;
+    typedef GeometricField<Type, faPatchField, areaMesh> GeoField;
 
-    const pointMesh& ptMesh = pointMesh::New(ensMesh.mesh());
+    const faMesh& mesh = ensMesh.mesh();
 
     label count = 0;
 
@@ -78,11 +76,11 @@ label writePointFields
     {
         if
         (
-            writePointField<Type>
+            writeAreaField<Type>
             (
                 ensCase,
                 ensMesh,
-                getField<GeoField>(ptMesh, objects, fieldName)
+                getField<GeoField>(objects.findObject(fieldName), mesh)
             )
         )
         {
@@ -95,16 +93,16 @@ label writePointFields
 }
 
 
-label writeAllPointFields
+label writeAllAreaFields
 (
     ensightCase& ensCase,
-    const ensightMesh& ensMesh,
+    const ensightFaMesh& ensMesh,
     const IOobjectList& objects
 )
 {
     #undef  ensight_WRITE_FIELD
     #define ensight_WRITE_FIELD(PrimitiveType)          \
-        writePointFields<PrimitiveType>                 \
+        writeAreaFields<PrimitiveType>                  \
         (                                               \
             ensCase,                                    \
             ensMesh,                                    \

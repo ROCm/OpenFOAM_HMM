@@ -24,8 +24,10 @@ done
 
 runApplication $(getApplication)
 
-echo
-echo "Use paraFoam -touch-all to create files for paraview post-processing"
-echo
+runApplication foamToEnsight -allRegions
+
+# echo
+# echo "Use paraFoam -touch-all to create files for paraview post-processing"
+# echo
 
 #------------------------------------------------------------------------------

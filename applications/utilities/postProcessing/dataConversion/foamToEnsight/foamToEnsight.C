@@ -124,6 +124,7 @@ Usage
 #include "OFstream.H"
 #include "PstreamCombineReduceOps.H"
 #include "HashOps.H"
+#include "regionProperties.H"
 
 #include "fvc.H"
 #include "fvMesh.H"
@@ -135,8 +136,10 @@ Usage
 // file-format/conversion
 #include "ensightCase.H"
 #include "ensightGeoFile.H"
+#include "ensightFaMesh.H"
 #include "ensightMesh.H"
 #include "ensightOutputCloud.H"
+#include "ensightOutputAreaField.H"
 #include "ensightOutputVolField.H"
 
 // local files
@@ -144,6 +147,7 @@ Usage
 #include "writeVolFields.H"
 #include "writeDimFields.H"
 #include "writePointFields.H"
+#include "writeAreaFields.H"
 
 #include "memInfo.H"
 
@@ -166,7 +170,7 @@ int main(int argc, char *argv[])
     argList::setAdvanced("decomposeParDict");
     argList::setAdvanced("noFunctionObjects");
 
-    #include "addRegionOption.H"
+    #include "addAllRegionOptions.H"
 
     argList::addBoolOption
     (
@@ -253,6 +257,12 @@ int main(int argc, char *argv[])
     //     "one-boundary",  // allPatches
     //     "Combine all patches into a single part"
     // );
+    argList::addBoolOption
+    (
+        "finite-area",
+        "Write finite area fields",
+        true  // mark as an advanced option
+    );
 
     argList::addOption
     (
@@ -292,8 +302,10 @@ int main(int argc, char *argv[])
     );
     argList::addOptionCompat("cellZones", {"cellZone", 1912});
 
-
     #include "setRootCase.H"
+
+    // ------------------------------------------------------------------------
+    // Configuration
 
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
@@ -303,35 +315,17 @@ int main(int argc, char *argv[])
       : IOstream::BINARY
     );
 
-    cpuTime timer;
-    memInfo mem;
-    Info<< "Initial memory " << mem.update().size() << " kB" << endl;
-
-    #include "createTime.H"
-
-    instantList timeDirs = timeSelector::select0(runTime, args);
-
-    #include "createNamedMesh.H"
-
-    const word& regionDir =
-    (
-        regionName == polyMesh::defaultRegion ? word::null : regionName
-    );
-
-    //
-    // Configuration
-    //
     const bool doBoundary    = !args.found("no-boundary");
     const bool doInternal    = !args.found("no-internal");
     const bool doCellZones   = !args.found("no-cellZones");
     const bool doLagrangian  = !args.found("no-lagrangian");
+    const bool doFiniteArea  = args.found("finite-area");
     const bool doPointValues = !args.found("no-point-data");
     const bool nearCellValue = args.found("nearCellValue") && doBoundary;
 
     // Control for numbering iterations
     label indexingNumber(0);
     const bool doConsecutive = args.readIfPresent("index", indexingNumber);
-
 
     // Write the geometry, unless otherwise specified
     bool doGeometry = !args.found("no-mesh");
@@ -361,15 +355,6 @@ int main(int argc, char *argv[])
     // Can also have separate directory for lagrangian
     // caseOpts.separateCloud(true);
 
-    // Define sub-directory name to use for EnSight data.
-    // The path to the ensight directory is at case level only
-    // - For parallel cases, data only written from master
-    fileName outputDir = args.getOrDefault<word>("name", "EnSight");
-    if (!outputDir.isAbsolute())
-    {
-        outputDir = args.globalPath()/outputDir;
-    }
-
     ensightMesh::options writeOpts;
     writeOpts.useBoundaryMesh(doBoundary);
     writeOpts.useInternalMesh(doInternal);
@@ -396,28 +381,63 @@ int main(int argc, char *argv[])
     // Report the setup
     writeOpts.print(Info);
 
-
-    //
-    // Output configuration (field related)
-    //
-
     wordRes fieldPatterns;
     args.readListIfPresent<wordRe>("fields", fieldPatterns);
 
-    // New ensight case file, initialize header etc.
-    ensightCase ensCase(outputDir, args.globalCaseName(), caseOpts);
+    // ------------------------------------------------------------------------
 
-    // Construct ensight mesh
-    ensightMesh ensMesh(mesh, writeOpts);
+    #include "createTime.H"
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    // Handle -allRegions, -regions, -region
+    #include "getAllRegionOptions.H"
+
+    // ------------------------------------------------------------------------
+    // Directory management
+
+    // Define sub-directory name to use for EnSight data.
+    // The path to the ensight directory is at case level only
+    // - For parallel cases, data only written from master
+
+    // Sub-directory for output
+    const word ensDirName = args.getOrDefault<word>("name", "EnSight");
+
+    fileName outputDir(args.globalPath()/ensDirName);
+
+    if (!outputDir.isAbsolute())
+    {
+        outputDir = args.globalPath()/outputDir;
+    }
+
+
+    // ------------------------------------------------------------------------
+    cpuTime timer;
+    memInfo mem;
+    Info<< "Initial memory " << mem.update().size() << " kB" << endl;
+
+    #include "createNamedMeshes.H"
+    #include "createMeshAccounting.H"
 
     if (Pstream::master())
     {
         Info<< "Converting " << timeDirs.size() << " time steps" << nl;
-        ensCase.printInfo(Info) << endl;
+        // ensCase.printInfo(Info) << endl;
     }
 
+    // Check mesh motion
     #include "checkMeshMoving.H"
+    if (hasMovingMesh && !doGeometry)
+    {
+        Info<< "has moving mesh: ignoring '-no-mesh' option" << endl;
+        doGeometry = true;
+    }
+
+    // Check lagrangian
     #include "findCloudFields.H"
+
+    // Check field availability
+    #include "checkFieldAvailability.H"
 
     // test the pre-check variable if there is a moving mesh
     // time-set for geometries
@@ -429,93 +449,116 @@ int main(int argc, char *argv[])
         << mem.update().size() << " kB" << nl << endl;
 
 
-    // Initially all possible objects that are available at the final time
-    wordHashSet testedObjectNames;
-    {
-        IOobjectList objects(mesh, timeDirs.last().name());
-
-        if (!fieldPatterns.empty())
-        {
-            objects.filterObjects(fieldPatterns);
-        }
-
-        // Remove "*_0" restart fields
-        objects.prune_0();
-
-        if (!doPointValues)
-        {
-            // Prune point fields if disabled
-            objects.filterClasses
-            (
-                [](const word& clsName)
-                {
-                    return fieldTypes::point.found(clsName);
-                },
-                true // prune
-            );
-        }
-
-        wordList objectNames(objects.sortedNames());
-
-        // Check availability for all times...
-        checkData(mesh, timeDirs, objectNames);
-
-        testedObjectNames = objectNames;
-    }
-
-    if (hasMovingMesh && !doGeometry)
-    {
-        Info<< "has moving mesh: ignoring '-no-mesh' option" << endl;
-        doGeometry = true;
-    }
-
     forAll(timeDirs, timei)
     {
         runTime.setTime(timeDirs[timei], timei);
 
-        // Index for the Ensight case
+        // Index for the Ensight case(s). Continues if not possible
         #include "getTimeIndex.H"
-
-        ensCase.setTime(timeDirs[timei], timeIndex);
 
         Info<< "Time [" << timeIndex << "] = " << runTime.timeName() << nl;
 
-        polyMesh::readUpdateState meshState = mesh.readUpdate();
-        const bool moving = (meshState != polyMesh::UNCHANGED);
-
-        if (moving)
+        forAll(regionNames, regioni)
         {
-            ensMesh.expire();
-            ensMesh.correct();
-        }
+            const word& regionName = regionNames[regioni];
+            const word& regionDir =
+            (
+                regionName != polyMesh::defaultRegion
+              ? regionName
+              : word::null
+            );
 
-        if (timei == 0 || moving)
-        {
-            if (doGeometry)
+            if (regionNames.size() > 1)
             {
-                autoPtr<ensightGeoFile> os = ensCase.newGeometry(hasMovingMesh);
-                ensMesh.write(os);
+                Info<< "region=" << regionName << nl;
             }
+
+            auto& mesh = meshes[regioni];
+
+            polyMesh::readUpdateState meshState = mesh.readUpdate();
+            const bool moving = (meshState != polyMesh::UNCHANGED);
+
+            // Ensight
+            auto& ensCase = ensightCases[regioni];
+            auto& ensMesh = ensightMeshes[regioni];
+
+            // Finite-area (can be missing)
+            auto* ensFaCasePtr = ensightCasesFa.get(regioni);
+            auto* ensFaMeshPtr = ensightMeshesFa.get(regioni);
+
+            ensCase.setTime(timeDirs[timei], timeIndex);
+            if (ensFaCasePtr)
+            {
+                ensFaCasePtr->setTime(timeDirs[timei], timeIndex);
+            }
+
+            if (moving)
+            {
+                ensMesh.expire();
+                ensMesh.correct();
+
+                if (ensFaMeshPtr)
+                {
+                    ensFaMeshPtr->expire();
+                    ensFaMeshPtr->correct();
+                }
+            }
+
+            if ((timei == 0 || moving) && doGeometry)
+            {
+                // finite-volume
+                {
+                    autoPtr<ensightGeoFile> os =
+                        ensCase.newGeometry(hasMovingMesh);
+                    ensMesh.write(os);
+                }
+
+                // finite-area
+                if (ensFaCasePtr && ensFaMeshPtr)
+                {
+                    autoPtr<ensightGeoFile> os =
+                        ensFaCasePtr->newGeometry(hasMovingMesh);
+                    ensFaMeshPtr->write(os);
+                }
+            }
+
+            // Objects at this time
+            IOobjectList objects(mesh, runTime.timeName());
+
+            // Restrict to objects that are available for all times
+            objects.filterObjects
+            (
+                availableRegionObjectNames[regioni]
+            );
+
+            // Volume, internal, point fields
+            #include "convertVolumeFields.H"
+
+            // The finiteArea fields
+            #include "convertAreaFields.H"
+
+            // Lagrangian fields
+            #include "convertLagrangian.H"
         }
-
-        // Objects at this time
-        IOobjectList objects(mesh, runTime.timeName());
-
-        // Restrict to objects that are available for all times
-        objects.filterObjects(testedObjectNames);
-
-        // Volume, internal, point fields
-        #include "convertVolumeFields.H"
-
-        // Lagrangian fields
-        #include "convertLagrangian.H"
 
         Info<< "Wrote in "
             << timer.cpuTimeIncrement() << " s, "
             << mem.update().size() << " kB" << nl << nl;
     }
 
-    ensCase.write();
+    // Write cases
+    forAll(ensightCases, regioni)
+    {
+        ensightCases[regioni].write();
+    }
+
+    forAll(ensightCasesFa, regioni)
+    {
+        if (ensightCasesFa.set(regioni))
+        {
+            ensightCasesFa[regioni].write();
+        }
+    }
 
     Info<< "\nEnd: "
         << timer.elapsedCpuTime() << " s, "

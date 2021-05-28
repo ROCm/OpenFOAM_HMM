@@ -28,11 +28,13 @@ done
 # Run
 runParallel $(getApplication)
 
+runParallel foamToEnsight -allRegions
+
 # Reconstruct
 runApplication reconstructPar -allRegions
 
-echo
-echo "Use paraFoam -touch-all to create files for paraview post-processing"
-echo
+# echo
+# echo "Use paraFoam -touch-all to create files for paraview post-processing"
+# echo
 
 #------------------------------------------------------------------------------

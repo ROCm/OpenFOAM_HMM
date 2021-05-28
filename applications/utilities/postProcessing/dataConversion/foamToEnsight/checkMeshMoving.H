@@ -1,46 +1,83 @@
-// Check for "points" in any of the result directories
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
-bool hasMovingMesh = false;
+Description
+    Check for "points" in any of the result directories (each region)
 
-if (timeDirs.size() > 1 && Pstream::master())
+\*---------------------------------------------------------------------------*/
+
+// All regions moving, or no regions moving. Do not mix.
+bool hasMovingMesh(false);
+
+if (timeDirs.size() > 1)
 {
-    // We already loaded a mesh (usually from constant).
+    // We already loaded meshes (usually from constant).
     // See if any other "polyMesh/points" files exist too.
+
+    // Do all regions as moving, or all as static.
+
+    boolList isMoving(meshes.size(), false);
+    label nMoving = 0;
 
     Info<< "Search for moving mesh ... " << flush;
     for (const instant& inst : timeDirs)
     {
         const word& timeName = inst.name();
 
-        hasMovingMesh =
-        (
-            timeName != mesh.pointsInstance()
-         && IOobject
-            (
-                "points",
-                timeName,
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false  // no register
-            ).typeHeaderOk<pointIOField>(true, false)
-        );
+        forAll(meshes, regioni)
+        {
+            const fvMesh& mesh = meshes[regioni];
 
-        if (hasMovingMesh)
+            if
+            (
+                !isMoving[regioni]
+             && (timeName != mesh.pointsInstance())
+             && IOobject
+                (
+                    "points",
+                    timeName,
+                    polyMesh::meshSubDir,
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false  // no register
+                ).typeHeaderOk<pointIOField>(true, false)
+            )
+            {
+                isMoving[regioni] = true;
+                ++nMoving;
+            }
+        }
+
+        if (nMoving == isMoving.size())
         {
             break;
         }
     }
 
-    if (hasMovingMesh)
+    if (nMoving)
     {
-        Info<< "found. Writing meshes for every timestep." << endl;
+        Info<< "found " << nMoving
+            << " moving regions. Writing meshes for every timestep." << endl;
     }
     else
     {
         Info<< "none detected." << endl;
     }
+
+    hasMovingMesh = (nMoving != 0);
 }
 
+// Ensure consistency
 reduce(hasMovingMesh, orOp<bool>());
+
+// ************************************************************************* //

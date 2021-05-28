@@ -5,37 +5,27 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Code chunk for converting volume and dimensioned fields
+    Code chunk for converting area fields
     included by foamToEnsight.
 
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Volume field data output
-if (doBoundary || doInternal)
+// Area fields (finiteArea)
+if (doFiniteArea && ensFaCasePtr && ensFaMeshPtr)
 {
-    Info<< "    volume field (";
+    Info<< "    area   field (";
 
-    writeAllVolFields(ensCase, ensMesh, objects, nearCellValue);
-    writeAllDimFields(ensCase, ensMesh, objects);
+    writeAllAreaFields(*ensFaCasePtr, *ensFaMeshPtr, objects);
 
     Info<< " )" << nl;
-
-    // PointData
-    // - only construct pointMesh on request (it constructs edge addressing)
-    if (doPointValues)
-    {
-        Info<< "    point  field (";
-        writeAllPointFields(ensCase, ensMesh, objects);
-        Info<< " )" << nl;
-    }
 }
 
 

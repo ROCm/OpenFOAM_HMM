@@ -1,68 +1,100 @@
-// check all time directories for the following:
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2018-2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+
+Description
+    Check time directories for lagrangian data.
+
+\*---------------------------------------------------------------------------*/
 
 // The fields for each cloud:
-HashTable<HashTable<word>> cloudFields;
+List<HashTable<HashTable<word>>> regionCloudFields(meshes.size());
 
 // Identify if lagrangian data exist at any time step.
 if (timeDirs.size() && doLagrangian)
 {
-    const fileName& baseDir = mesh.time().path();
-    const fileName cloudPrefix(regionDir/cloud::prefix);
+    Info<< "Search for lagrangian ... " << flush;
 
-    Info<< "Searching for lagrangian ... " << flush;
-
-    for (const instant& inst : timeDirs)
+    forAll(meshes, regioni)
     {
-        const word& timeName = inst.name();
+        const fvMesh& mesh = meshes[regioni];
+        auto& cloudFields = regionCloudFields[regioni];
 
-        // DO NOT USE -->>  runTime.setTime(timeDirs[timeI], timeI);  <<--
-        // It incurs a large overhead when done so frequently.
-
-        fileNameList cloudDirs
+        const word& regionName = regionNames[regioni];
+        const word& regionDir =
         (
-            readDir
-            (
-                baseDir/timeName/cloudPrefix,
-                fileName::DIRECTORY
-            )
+            regionName != polyMesh::defaultRegion
+          ? regionName
+          : word::null
         );
 
-        for (fileName& cloudDir : cloudDirs)
-        {
-            const word cloudName(std::move(cloudDir));
+        const fileName cloudPrefix(regionDir/cloud::prefix);
 
-            IOobjectList cloudObjs
+        for (const instant& inst : timeDirs)
+        {
+            const word& timeName = inst.name();
+
+            // DO NOT USE -->>  runTime.setTime(timeDirs[timeI], timeI);  <<--
+            // It incurs a large overhead when done so frequently.
+
+            fileNameList cloudDirs
             (
-                mesh,
-                timeName,
-                cloudPrefix/cloudName
+                readDir
+                (
+                    mesh.time().path()/timeName/cloudPrefix,
+                    fileName::DIRECTORY
+                )
             );
 
-            // Clouds require "coordinates".
-            // The "positions" are for v1706 and lower.
-            // - detect and remove since these are treated specially
-
-            bool isCloud = false;
-            if (cloudObjs.erase("coordinates"))
+            for (fileName& cloudDir : cloudDirs)
             {
-                isCloud = true;
-            }
-            if (cloudObjs.erase("positions"))
-            {
-                isCloud = true;
-            }
+                const word cloudName(std::move(cloudDir));
 
-            if (isCloud)
-            {
-                // Save the cloud fields on a per cloud basis
-                auto& fieldsPerCloud = cloudFields(cloudName);
+                IOobjectList cloudObjs
+                (
+                    mesh,
+                    timeName,
+                    cloudPrefix/cloudName
+                );
 
-                forAllConstIters(cloudObjs, fieldIter)
+                // Clouds require "coordinates".
+                // The "positions" are for v1706 and lower.
+                // - detect and remove since these are treated specially
+
+                bool isCloud = false;
+                if (cloudObjs.erase("coordinates"))
                 {
-                    const IOobject* io = *fieldIter;
+                    isCloud = true;
+                }
+                if (cloudObjs.erase("positions"))
+                {
+                    isCloud = true;
+                }
 
-                    // Field name/type
-                    fieldsPerCloud.insert(io->name(), io->headerClassName());
+                if (isCloud)
+                {
+                    // Save the cloud fields on a per cloud basis
+                    auto& fieldsPerCloud = cloudFields(cloudName);
+
+                    forAllConstIters(cloudObjs, fieldIter)
+                    {
+                        const IOobject* io = *fieldIter;
+
+                        // Field name/type
+                        fieldsPerCloud.insert
+                        (
+                            io->name(),
+                            io->headerClassName()
+                        );
+                    }
                 }
             }
         }
@@ -70,24 +102,42 @@ if (timeDirs.size() && doLagrangian)
 
     if (Pstream::parRun())
     {
-        Pstream::mapCombineGather(cloudFields, HashTableOps::plusEqOp<word>());
-        Pstream::mapCombineScatter(cloudFields);
-    }
-
-    if (cloudFields.empty())
-    {
-        Info<< "none detected." << endl;
+        for (auto& cloudFields : regionCloudFields)
+        {
+            Pstream::mapCombineGather
+            (
+                cloudFields,
+                HashTableOps::plusEqOp<word>()
+            );
+            Pstream::mapCombineScatter(cloudFields);
+        }
     }
 }
 
-
 // Sorted list of cloud names
-const wordList cloudNames(cloudFields.sortedToc());
+List<wordList> regionCloudNames(meshes.size());
 
-if (cloudNames.size())
 {
-    // Complete the echo information - as flatOutput
-    cloudNames.writeList(Info) << endl;
+    wordHashSet allRegionClouds;
+
+    forAll(regionCloudNames, regioni)
+    {
+        regionCloudNames[regioni] = regionCloudFields[regioni].sortedToc();
+
+        allRegionClouds.insert(regionCloudNames[regioni]);
+    }
+
+    const wordList allCloudNames(allRegionClouds.sortedToc());
+
+    if (allRegionClouds.empty())
+    {
+        Info<< "none detected." << endl;
+    }
+    else
+    {
+        // Complete the echo information - as flatOutput
+        allRegionClouds.writeList(Info) << endl;
+    }
 }
 
 

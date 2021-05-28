@@ -8,20 +8,7 @@
     Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
     Code chunk for post-processing conversion of cloud(s) to Ensight
@@ -31,6 +18,10 @@ Description
 // Cloud field data output
 if (doLagrangian)
 {
+    // Lagrangian
+    const auto& cloudFields = regionCloudFields[regioni];
+    const auto& cloudNames = regionCloudNames[regioni];
+
     for (const word& cloudName : cloudNames)
     {
         const HashTable<word>& theseCloudFields = cloudFields[cloudName];
@@ -44,7 +35,7 @@ if (doLagrangian)
             )
         );
 
-        Info<< "Write " << cloudName << " (";
+        Info<< "Cloud " << cloudName << " (";
 
         const bool cloudExists =
             returnReduce(currentCloudDirs.found(cloudName), orOp<bool>());

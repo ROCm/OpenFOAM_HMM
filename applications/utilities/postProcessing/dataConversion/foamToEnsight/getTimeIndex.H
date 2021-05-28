@@ -1,8 +1,29 @@
-// Read time index from */uniform/time, but treat 0 and constant specially
-// or simply increment from the '-index' option if it was supplied
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2016-2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+
+Description
+    Read time index from ../uniform/time, but treat 0 and constant specially
+    or simply increment from the '-index' option if it was supplied
+
+Note
+    Does a 'continue' out of the loop if not possible to obtain an index
+
+\*---------------------------------------------------------------------------*/
 
 label timeIndex = 0;
 {
+    bool goodTimeIndex = true;
+
     if (doConsecutive)
     {
         timeIndex = indexingNumber++;
@@ -21,7 +42,7 @@ label timeIndex = 0;
             runTime,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false  // no register
+            false   // no register
         );
 
         if (io.typeHeaderOk<IOdictionary>(true, false))
@@ -33,8 +54,16 @@ label timeIndex = 0;
         }
         else
         {
+            goodTimeIndex = false;
             Info<< "skip ... missing entry " << io.objectPath() << endl;
-            continue;
         }
     }
+
+    if (!goodTimeIndex)
+    {
+        continue;
+    }
 }
+
+
+// ************************************************************************* //

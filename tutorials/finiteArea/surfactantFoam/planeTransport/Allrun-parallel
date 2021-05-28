@@ -3,10 +3,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-runApplication blockMesh
-
 decompDict="-decomposeParDict system/decomposeParDict-procBoundary8"
 fileHandler="-fileHandler collated"
+# reconstruct=true
+
+runApplication blockMesh
 
 runApplication $decompDict decomposePar $fileHandler
 
@@ -14,6 +15,13 @@ runParallel $decompDict makeFaMesh $fileHandler
 
 runParallel $decompDict $(getApplication) $fileHandler
 
-runApplication reconstructPar $fileHandler
+runParallel $decompDict foamToEnsight -finite-area
+
+if [ "$reconstruct" = true ]
+then
+    runApplication reconstructPar $fileHandler
+else
+    echo "Skipping reconstructPar $fileHandler"
+fi
 
 #------------------------------------------------------------------------------
