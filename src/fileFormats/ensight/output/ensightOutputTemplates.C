@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,8 +236,6 @@ bool Foam::ensightOutput::Detail::writeFaceSubField
         os.beginPart(part.index());
     }
 
-    labelList localAddr;
-
     for (int typei=0; typei < ensightFaces::nTypes; ++typei)
     {
         const auto etype = ensightFaces::elemType(typei);
@@ -254,6 +252,71 @@ bool Foam::ensightOutput::Detail::writeFaceSubField
     return true;
 }
 
+
+template<class Type>
+bool Foam::ensightOutput::Detail::writeFaceLocalField
+(
+    ensightFile& os,
+    const Field<Type>& fld,
+    const ensightFaces& part,
+    bool parallel
+)
+{
+    parallel = parallel && Pstream::parRun();
+
+    // Preliminary checks: total() contains pre-reduced information
+    {
+        // No geometry
+        if (parallel ? !part.total() : !part.size()) return false;
+
+        bool hasField = !fld.empty();
+
+        if (parallel)
+        {
+            reduce(hasField, orOp<bool>());
+        }
+
+        // No field
+        if (!hasField) return false;
+    }
+
+    bool validAddressing = (part.size() == part.faceOrder().size());
+
+    if (parallel)
+    {
+        reduce(validAddressing, orOp<bool>());
+    }
+
+    if (!validAddressing)
+    {
+        FatalErrorInFunction
+            << "Called without faceOrder having been set" << nl
+            << exit(FatalError);
+    }
+
+    if (Pstream::master())
+    {
+        os.beginPart(part.index());
+    }
+
+    for (int typei=0; typei < ensightFaces::nTypes; ++typei)
+    {
+        const auto etype = ensightFaces::elemType(typei);
+
+        ensightOutput::Detail::writeFieldComponents
+        (
+            os,
+            ensightFaces::key(etype),
+            UIndirectList<Type>(fld, part.faceOrder(etype)),
+            parallel
+        );
+    }
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
 bool Foam::ensightOutput::writeField

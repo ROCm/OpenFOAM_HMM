@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,55 +25,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightPart.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+inline bool Foam::ensightFaMesh::expire()
 {
-    defineTypeName(ensightPart);
+    clear();
+
+    // Already marked as expired
+    if (needsUpdate_)
+    {
+        return false;
+    }
+
+    needsUpdate_ = true;
+    return true;
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::ensightPart::incrAddressing(const label off)
+inline void Foam::ensightFaMesh::write
+(
+    autoPtr<ensightGeoFile>& os,
+    bool parallel
+) const
 {
-    for (label& val : address_)
-    {
-        val += off;
-    }
-}
-
-
-void Foam::ensightPart::decrAddressing(const label off)
-{
-    for (label& val : address_)
-    {
-        val -= off;
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ensightPart::ensightPart()
-:
-    index_(0),
-    identifier_(-1),
-    name_(),
-    address_()
-{}
-
-
-Foam::ensightPart::ensightPart(const string& description)
-:
-    ensightPart()
-{
-    if (!description.empty())
-    {
-        name_ = description;
-    }
+    write(os.ref(), parallel);
 }
 
 

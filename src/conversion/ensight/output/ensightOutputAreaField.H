@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,58 +23,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+InNamespace
+    Foam::ensightOutput
+
+Description
+    A collection of functions for writing areaField content in ensight format.
+
 \*---------------------------------------------------------------------------*/
 
-#include "ensightPart.H"
+#ifndef ensightOutputAreaField_H
+#define ensightOutputAreaField_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "ensightOutput.H"
+#include "ensightFaces.H"
+#include "areaFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeName(ensightPart);
-}
 
+// Forward Declarations
+class ensightFaMesh;
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::ensightPart::incrAddressing(const label off)
+namespace ensightOutput
 {
-    for (label& val : address_)
-    {
-        val += off;
-    }
-}
+
+/*---------------------------------------------------------------------------*\
+                            Namespace ensightOutput
+\*---------------------------------------------------------------------------*/
+
+//- Write finite-area field component-wise
+template<class Type>
+bool writeAreaField
+(
+    ensightFile& os,
+    const GeometricField<Type, faPatchField, areaMesh>& fld,
+    const ensightFaMesh& ensMesh
+);
 
 
-void Foam::ensightPart::decrAddressing(const label off)
-{
-    for (label& val : address_)
-    {
-        val -= off;
-    }
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace ensightOutput
+} // End namespace Foam
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::ensightPart::ensightPart()
-:
-    index_(0),
-    identifier_(-1),
-    name_(),
-    address_()
-{}
+#ifdef NoRepository
+    #include "ensightOutputAreaFieldTemplates.C"
+#endif
 
-
-Foam::ensightPart::ensightPart(const string& description)
-:
-    ensightPart()
-{
-    if (!description.empty())
-    {
-        name_ = description;
-    }
-}
-
+#endif
 
 // ************************************************************************* //

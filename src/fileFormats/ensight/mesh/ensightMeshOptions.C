@@ -43,9 +43,9 @@ static Ostream& printPatterns(Ostream& os, const wordRes& list)
     for (const wordRe& item : list)
     {
         if (sep) os << token::SPACE;
-        os << item;
-
         sep = true;
+
+        os << item;
     }
     os << token::END_LIST;
 
@@ -72,31 +72,31 @@ Foam::ensightMesh::options::options()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::ensightMesh::options::lazy() const
+bool Foam::ensightMesh::options::lazy() const noexcept
 {
     return lazy_;
 }
 
 
-bool Foam::ensightMesh::options::useInternalMesh() const
+bool Foam::ensightMesh::options::useInternalMesh() const noexcept
 {
     return internal_;
 }
 
 
-bool Foam::ensightMesh::options::useBoundaryMesh() const
+bool Foam::ensightMesh::options::useBoundaryMesh() const noexcept
 {
     return boundary_;
 }
 
 
-bool Foam::ensightMesh::options::useCellZones() const
+bool Foam::ensightMesh::options::useCellZones() const noexcept
 {
     return cellZones_;
 }
 
 
-bool Foam::ensightMesh::options::useFaceZones() const
+bool Foam::ensightMesh::options::useFaceZones() const noexcept
 {
     return faceZoneInclude_.size();
 }
@@ -114,20 +114,25 @@ void Foam::ensightMesh::options::reset()
 }
 
 
-void Foam::ensightMesh::options::lazy(bool beLazy)
+bool Foam::ensightMesh::options::lazy(bool on) noexcept
 {
-    lazy_ = beLazy;
+    bool old(lazy_);
+    lazy_ = on;
+    return old;
 }
 
 
-void Foam::ensightMesh::options::useInternalMesh(bool on)
+bool Foam::ensightMesh::options::useInternalMesh(bool on) noexcept
 {
+    bool old(internal_);
     internal_ = on;
+    return old;
 }
 
 
-void Foam::ensightMesh::options::useBoundaryMesh(bool on)
+bool Foam::ensightMesh::options::useBoundaryMesh(bool on)
 {
+    bool old(boundary_);
     boundary_ = on;
 
     if (!boundary_)
@@ -141,11 +146,14 @@ void Foam::ensightMesh::options::useBoundaryMesh(bool on)
                 << endl;
         }
     }
+
+    return old;
 }
 
 
-void Foam::ensightMesh::options::useCellZones(bool on)
+bool Foam::ensightMesh::options::useCellZones(bool on)
 {
+    bool old(cellZones_);
     cellZones_ = on;
 
     if (!cellZones_ && cellZoneInclude_.size())
@@ -156,6 +164,8 @@ void Foam::ensightMesh::options::useCellZones(bool on)
             << "Deactivating cellZones, removed old zone selection"
             << endl;
     }
+
+    return old;
 }
 
 
@@ -264,30 +274,6 @@ void Foam::ensightMesh::options::cellZoneSelection
             << "Ignoring cellZone selection, cellZones are disabled"
             << endl;
     }
-}
-
-
-const Foam::wordRes& Foam::ensightMesh::options::patchSelection() const
-{
-    return patchInclude_;
-}
-
-
-const Foam::wordRes& Foam::ensightMesh::options::patchExclude() const
-{
-    return patchExclude_;
-}
-
-
-const Foam::wordRes& Foam::ensightMesh::options::faceZoneSelection() const
-{
-    return faceZoneInclude_;
-}
-
-
-const Foam::wordRes& Foam::ensightMesh::options::cellZoneSelection() const
-{
-    return cellZoneInclude_;
 }
 
 

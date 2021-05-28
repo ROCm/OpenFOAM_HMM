@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -299,6 +299,18 @@ bool writeFieldComponents
 //- using the sub-list sizing information from ensightFaces
 template<class Type>
 bool writeFaceSubField
+(
+    ensightFile& os,
+    const Field<Type>& fld,
+    const ensightFaces& part,
+    bool parallel  //!< Collective write?
+);
+
+
+//- Write a field of faces values as an indirect list,
+//- using the face order from ensightFaces
+template<class Type>
+bool writeFaceLocalField
 (
     ensightFile& os,
     const Field<Type>& fld,

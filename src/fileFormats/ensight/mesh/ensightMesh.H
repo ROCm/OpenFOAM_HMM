@@ -146,7 +146,10 @@ public:
     // Access
 
         //- Reference to the underlying polyMesh
-        inline const polyMesh& mesh() const;
+        const polyMesh& mesh() const noexcept
+        {
+            return mesh_;
+        }
 
         //- Reference to the writer/mesh options
         inline const ensightMesh::options& option() const;
@@ -154,30 +157,42 @@ public:
         //- Face elements per selected patch, lookup by patch index
         //  Process in sorted order.
         //  May require special treatment for zone -1 (internal).
-        inline const Map<ensightCells>& cellZoneParts() const;
+        const Map<ensightCells>& cellZoneParts() const noexcept
+        {
+            return cellZoneParts_;
+        }
 
         //- Face elements per faceZone, lookup by zone index.
         //  Process in sorted order.
-        inline const Map<ensightFaces>& faceZoneParts() const;
+        const Map<ensightFaces>& faceZoneParts() const noexcept
+        {
+            return faceZoneParts_;
+        }
 
         //- Face elements per selected patch, lookup by patch index
         //  Process in sorted order.
-        inline const Map<ensightFaces>& boundaryParts() const;
+        const Map<ensightFaces>& boundaryParts() const noexcept
+        {
+            return boundaryParts_;
+        }
 
 
     // Sizing Information
 
         //- Any parts?
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- Number of parts
-        inline label size() const;
+        inline label size() const noexcept;
 
 
     // Other
 
         //- Does the content need an update?
-        inline bool needsUpdate() const;
+        bool needsUpdate() const noexcept
+        {
+            return needsUpdate_;
+        }
 
         //- Mark as needing an update.
         //  May also free up unneeded data.
@@ -191,16 +206,16 @@ public:
     // Output
 
         //- Write geometry to file. Normally in parallel
-        inline void write
+        void write
         (
-            autoPtr<ensightGeoFile>& os,
+            ensightGeoFile& os,
             bool parallel = Pstream::parRun()
         ) const;
 
         //- Write geometry to file. Normally in parallel
-        void write
+        inline void write
         (
-            ensightGeoFile& os,
+            autoPtr<ensightGeoFile>& os,
             bool parallel = Pstream::parRun()
         ) const;
 };
@@ -252,32 +267,44 @@ public:
 
     // Access
 
-        //- Lazy creation? (ie, ensightMesh starts as needsUpdate)
-        bool lazy() const;
+        //- Lazy creation? (ie, starts as needsUpdate)
+        bool lazy() const noexcept;
 
         //- Using internal?
-        bool useInternalMesh() const;
+        bool useInternalMesh() const noexcept;
 
         //- Using boundary?
-        bool useBoundaryMesh() const;
+        bool useBoundaryMesh() const noexcept;
 
         //- Using faceZones?
-        bool useFaceZones() const;
+        bool useFaceZones() const noexcept;
 
         //- Using cellZones?
-        bool useCellZones() const;
+        bool useCellZones() const noexcept;
 
         //- Selection of patches. Empty if unspecified.
-        const wordRes& patchSelection() const;
+        const wordRes& patchSelection() const noexcept
+        {
+            return patchInclude_;
+        }
 
         //- Selection of black listed patches. Empty if unspecified.
-        const wordRes& patchExclude() const;
+        const wordRes& patchExclude() const noexcept
+        {
+            return patchExclude_;
+        }
 
         //- Selection of faceZones. Empty if unspecified.
-        const wordRes& faceZoneSelection() const;
+        const wordRes& faceZoneSelection() const noexcept
+        {
+            return faceZoneInclude_;
+        }
 
         //- Selection of faceZones. Empty if unspecified.
-        const wordRes& cellZoneSelection() const;
+        const wordRes& cellZoneSelection() const noexcept
+        {
+            return cellZoneInclude_;
+        }
 
 
     // Edit
@@ -286,16 +313,20 @@ public:
         void reset();
 
         //- Lazy creation - ensightMesh starts as needsUpdate
-        void lazy(bool beLazy);
+        //  \return old value
+        bool lazy(bool on) noexcept;
 
         //- Alter the useBoundaryMesh state
-        void useInternalMesh(bool on);
+        //  \return old value
+        bool useInternalMesh(bool on) noexcept;
 
         //- Alter the useBoundaryMesh state
-        void useBoundaryMesh(bool on);
+        //  \return old value
+        bool useBoundaryMesh(bool on);
 
         //- Alter the useCellZones state
-        void useCellZones(bool on);
+        //  \return old value
+        bool useCellZones(bool on);
 
         //- Define patch selection matcher
         void patchSelection(const UList<wordRe>& patterns);

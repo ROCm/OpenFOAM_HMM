@@ -16,6 +16,9 @@ $(faPatches)/constraint/wedge/wedgeFaPatch.C
 $(faPatches)/constraint/cyclic/cyclicFaPatch.C
 $(faPatches)/constraint/symmetry/symmetryFaPatch.C
 
+ensight = output/ensight
+$(ensight)/ensightFaMesh.C
+
 faMeshMapper = faMesh/faMeshMapper
 $(faMeshMapper)/faMeshMapper.C
 $(faMeshMapper)/faAreaMapper.C

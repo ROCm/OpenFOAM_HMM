@@ -27,36 +27,9 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::polyMesh& Foam::ensightMesh::mesh() const
-{
-    return mesh_;
-}
-
-
 inline const Foam::ensightMesh::options& Foam::ensightMesh::option() const
 {
     return *options_;
-}
-
-
-inline const Foam::Map<Foam::ensightCells>&
-Foam::ensightMesh::cellZoneParts() const
-{
-    return cellZoneParts_;
-}
-
-
-inline const Foam::Map<Foam::ensightFaces>&
-Foam::ensightMesh::faceZoneParts() const
-{
-    return faceZoneParts_;
-}
-
-
-inline const Foam::Map<Foam::ensightFaces>&
-Foam::ensightMesh::boundaryParts() const
-{
-    return boundaryParts_;
 }
 
 
@@ -75,13 +48,7 @@ inline bool Foam::ensightMesh::expire()
 }
 
 
-inline bool Foam::ensightMesh::needsUpdate() const
-{
-    return needsUpdate_;
-}
-
-
-inline bool Foam::ensightMesh::empty() const
+inline bool Foam::ensightMesh::empty() const noexcept
 {
     return
     (
@@ -92,7 +59,7 @@ inline bool Foam::ensightMesh::empty() const
 }
 
 
-inline Foam::label Foam::ensightMesh::size() const
+inline Foam::label Foam::ensightMesh::size() const noexcept
 {
     return
     (

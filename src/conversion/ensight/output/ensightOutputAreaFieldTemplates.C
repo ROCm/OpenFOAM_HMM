@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,55 +25,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightPart.H"
+#include "ensightOutputAreaField.H"
+#include "ensightFaMesh.H"
+#include "areaFaMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+bool Foam::ensightOutput::writeAreaField
+(
+    ensightFile& os,
+    const GeometricField<Type, faPatchField, areaMesh>& fld,
+    const ensightFaMesh& ensMesh
+)
 {
-    defineTypeName(ensightPart);
-}
+    bool parallel = Pstream::parRun();
 
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::ensightPart::incrAddressing(const label off)
-{
-    for (label& val : address_)
+    // Write area part(s)
     {
-        val += off;
+        ensightOutput::Detail::writeFaceLocalField
+        (
+            os,
+            fld,
+            ensMesh.areaPart(),
+            parallel
+        );
     }
-}
 
-
-void Foam::ensightPart::decrAddressing(const label off)
-{
-    for (label& val : address_)
-    {
-        val -= off;
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ensightPart::ensightPart()
-:
-    index_(0),
-    identifier_(-1),
-    name_(),
-    address_()
-{}
-
-
-Foam::ensightPart::ensightPart(const string& description)
-:
-    ensightPart()
-{
-    if (!description.empty())
-    {
-        name_ = description;
-    }
+    return true;
 }
 
 

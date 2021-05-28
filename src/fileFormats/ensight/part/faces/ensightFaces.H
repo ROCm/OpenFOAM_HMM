@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,14 +43,17 @@ Description
         // Can now address into boundaryField
     \endcode
 
+    Additionally, for some uses (eg, finiteArea), the ordered
+    list of faces can be used for a direct local lookup into the field
+    instead of via the overall mesh face addressing.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef ensightFaces_H
 #define ensightFaces_H
 
 #include "ensightPart.H"
-#include "boolList.H"
-#include "faceList.H"
+#include "face.H"
 #include "FixedList.H"
 #include "bitSet.H"
 
@@ -100,7 +103,10 @@ private:
 
     // Private Data
 
-        //- Linear list of face-flips
+        //- The input face order, for indirect face lists
+        labelList faceOrder_;
+
+        //- List of face-flips (optional)
         boolList flipMap_;
 
         //- Begin/end offsets for address/flips of each element type
@@ -113,8 +119,9 @@ private:
 
     // Private Member Functions
 
-        //- Low-level internal addition routine
-        inline void add(const elemType etype, label id, bool flip=false);
+        //- Low-level internal addition routine.
+        //  \return insertion locaion
+        inline label add(const elemType etype, label id, bool flip=false);
 
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();
@@ -168,7 +175,7 @@ public:
         FixedList<label, nTypes> sizes() const;
 
         //- Processor-local face ids of all elements
-        inline const labelList& faceIds() const;
+        inline const labelList& faceIds() const noexcept;
 
         //- Processor-local face ids of the specified element type
         inline const labelUList faceIds(const elemType etype) const;
@@ -178,6 +185,14 @@ public:
 
         //- True for non-zero flip-map that spans the addresses
         inline bool usesFlipMap() const;
+
+        //- Processor-local face order
+        //- (where applicable)
+        inline const labelList& faceOrder() const noexcept;
+
+        //- Processor-local face order of specified element type
+        //- (where applicable)
+        inline const labelUList faceOrder(const elemType etype) const;
 
 
     // Edit
@@ -211,7 +226,7 @@ public:
         //- Sum element counts across all processes.
         void reduce();
 
-        //- Sort element lists numerically.
+        //- Inplace sort element lists numerically.
         void sort();
 
 

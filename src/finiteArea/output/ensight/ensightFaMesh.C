@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,73 +25,89 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "ensightFaMesh.H"
+#include "ensightGeoFile.H"
+#include "faMesh.H"
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline Foam::label Foam::ensightCells::add(const elemType etype, label id)
+void Foam::ensightFaMesh::clear()
 {
-    // Linear addressing location
-    const label index = offsets_[etype] + sizes_[etype]++;
+    areaPart_.clear();
+}
 
-    addressing()[index] = id;
 
-    return index;
+void Foam::ensightFaMesh::renumber()
+{
+    label partNo = 0;
+
+    areaPart_.index() = partNo++;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightFaMesh::ensightFaMesh
+(
+    const faMesh& mesh
+)
+:
+    mesh_(mesh),
+    needsUpdate_(true)
+{
+    // Lazy?
+    if (true)
+    {
+        correct();
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const char* Foam::ensightCells::key(const elemType etype)
+void Foam::ensightFaMesh::correct()
 {
-    return elemNames[etype];
+    clear();
+
+    // Area meshes (currently only one)
+    const label areaId = 0;
+    {
+        ensightFaces& part = areaPart_;
+
+        part.clear();
+        part.identifier() = areaId;
+        part.rename("finite-area");
+
+        part.classify
+        (
+            mesh_.mesh().faces(),
+            mesh_.faceLabels()
+        );
+
+        // Finalize
+        part.reduce();
+
+        // if (!part.total())
+        // {
+        //     areaParts_.erase(areaId);
+        // }
+    }
+
+    renumber();
+
+    needsUpdate_ = false;
 }
 
 
-inline const Foam::FixedList<Foam::label,5>& Foam::ensightCells::totals() const
+void Foam::ensightFaMesh::write
+(
+    ensightGeoFile& os,
+    bool parallel
+) const
 {
-    return sizes_;
-}
-
-
-inline Foam::label Foam::ensightCells::total(const elemType etype) const
-{
-    return sizes_[etype];
-}
-
-
-inline Foam::label Foam::ensightCells::size(const elemType etype) const
-{
-    return (offsets_[etype+1] - offsets_[etype]);
-}
-
-
-inline Foam::labelRange Foam::ensightCells::range(const elemType etype) const
-{
-    return labelRange(offsets_[etype], offsets_[etype+1] - offsets_[etype]);
-}
-
-
-inline const Foam::labelList& Foam::ensightCells::cellIds() const
-{
-    return addressing();
-}
-
-
-inline const Foam::labelUList
-Foam::ensightCells::cellIds(const elemType etype) const
-{
-    return addressing()[range(etype)];
-}
-
-
-inline void Foam::ensightCells::incrCellIds(const label off)
-{
-    incrAddressing(off);
-}
-
-
-inline void Foam::ensightCells::decrCellIds(const label off)
-{
-    decrAddressing(off);
+    // Area meshes (currently only one)
+    // const label areaId = 0;
+    areaPart_.write(os, mesh_.mesh(), parallel);
 }
 
 

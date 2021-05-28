@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,13 +74,13 @@ class ensightPart
 protected:
 
         //- Element addressing
-        const labelList& addressing() const
+        const labelList& addressing() const noexcept
         {
             return address_;
         }
 
         //- Element addressing
-        labelList& addressing()
+        labelList& addressing() noexcept
         {
             return address_;
         }
@@ -109,7 +109,7 @@ public:
     // Constructors
 
         //- Default construct. Index=0, identifier = -1
-        ensightPart() noexcept;
+        ensightPart();
 
         //- Default construct, with description/partName
         explicit ensightPart(const string& description);
@@ -122,43 +122,43 @@ public:
     // Member Functions
 
         //- The index in a list (0-based)
-        label index() const
+        label index() const noexcept
         {
             return index_;
         }
 
         //- The index in a list (0-based)
-        label& index()
+        label& index() noexcept
         {
             return index_;
         }
 
         //- OpenFOAM identifier (patch, zone, etc), -1 when not in use.
-        label identifier() const
+        label identifier() const noexcept
         {
             return identifier_;
         }
 
         //- OpenFOAM identifier (patch, zone, etc), -1 when not in use.
-        label& identifier()
+        label& identifier() noexcept
         {
             return identifier_;
         }
 
         //- Processor-local test for any elements.
-        bool empty() const
+        bool empty() const noexcept
         {
             return address_.empty();
         }
 
         //- Processor-local size of all elements.
-        label size() const
+        label size() const noexcept
         {
             return address_.size();
         }
 
         //- The part name or description
-        const string& name() const
+        const string& name() const noexcept
         {
             return name_;
         }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,8 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline void Foam::ensightFaces::add(const elemType etype, label id, bool flip)
+inline Foam::label
+Foam::ensightFaces::add(const elemType etype, label id, bool flip)
 {
     // Linear addressing location
     const label index = offsets_[etype] + sizes_[etype]++;
@@ -38,6 +39,8 @@ inline void Foam::ensightFaces::add(const elemType etype, label id, bool flip)
     {
         flipMap_[index] = flip;
     }
+
+    return index;
 }
 
 
@@ -73,7 +76,7 @@ inline Foam::labelRange Foam::ensightFaces::range(const elemType etype) const
 }
 
 
-inline const Foam::labelList& Foam::ensightFaces::faceIds() const
+inline const Foam::labelList& Foam::ensightFaces::faceIds() const noexcept
 {
     return addressing();
 }
@@ -95,6 +98,20 @@ inline const Foam::boolList& Foam::ensightFaces::flipMap() const
 inline bool Foam::ensightFaces::usesFlipMap() const
 {
     return (!flipMap_.empty() && flipMap_.size() == size());
+}
+
+
+inline const Foam::labelList&
+Foam::ensightFaces::faceOrder() const noexcept
+{
+    return faceOrder_;
+}
+
+
+inline const Foam::labelUList
+Foam::ensightFaces::faceOrder(const elemType etype) const
+{
+    return faceOrder_[range(etype)];
 }
 
 

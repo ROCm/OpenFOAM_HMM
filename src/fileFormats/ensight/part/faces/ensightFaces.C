@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,9 @@ namespace Foam
 }
 
 const char* Foam::ensightFaces::elemNames[3] =
-    { "tria3", "quad4", "nsided" };
+{
+    "tria3", "quad4", "nsided"
+};
 
 static_assert
 (
@@ -52,7 +54,7 @@ namespace
 {
 
 // Trivial shape classifier
-static inline Foam::ensightFaces::elemType whatType(const Foam::face& f)
+inline Foam::ensightFaces::elemType whatType(const Foam::face& f)
 {
     return
     (
@@ -71,6 +73,12 @@ static inline Foam::ensightFaces::elemType whatType(const Foam::face& f)
 
 void Foam::ensightFaces::resizeAll()
 {
+    // Invalidate any previous face ordering
+    faceOrder_.clear();
+
+    // Invalidate any previous flipMap
+    flipMap_.clear();
+
     // Assign sub-list offsets, determine overall size
 
     label len = 0;
@@ -87,9 +95,6 @@ void Foam::ensightFaces::resizeAll()
 
     // The addressing space
     addressing().resize(len, Zero);
-
-    // Normally assume no flipMap
-    flipMap_.clear();
 }
 
 
@@ -98,6 +103,7 @@ void Foam::ensightFaces::resizeAll()
 Foam::ensightFaces::ensightFaces()
 :
     ensightPart(),
+    faceOrder_(),
     flipMap_(),
     offsets_(Zero),
     sizes_(Zero)
@@ -129,12 +135,12 @@ Foam::FixedList<Foam::label, 3> Foam::ensightFaces::sizes() const
 
 Foam::label Foam::ensightFaces::total() const
 {
-    label n = 0;
+    label nTotal = 0;
     forAll(sizes_, typei)
     {
-        n += sizes_[typei];
+        nTotal += sizes_[typei];
     }
-    return n;
+    return nTotal;
 }
 
 
@@ -144,6 +150,7 @@ void Foam::ensightFaces::clear()
 
     ensightPart::clear();
 
+    faceOrder_.clear();
     flipMap_.clear();
     sizes_ = Zero;
     offsets_ = Zero;
@@ -167,42 +174,42 @@ void Foam::ensightFaces::reduce()
 
 void Foam::ensightFaces::sort()
 {
-    const bool useFlip = (size() == flipMap_.size());
-
-    if (useFlip)
+    // Some extra safety
+    if (faceOrder_.size() != size())
     {
-        // Must sort flip map as well
-        labelList order;
-
-        for (int typei=0; typei < nTypes; ++typei)
-        {
-            const labelRange sub(range(elemType(typei)));
-
-            if (!sub.empty())
-            {
-                SubList<label> ids(addressing(), sub);
-                SubList<bool> flips(flipMap_, sub);
-
-                Foam::sortedOrder(ids, order);
-
-                ids  = reorder<labelList>(order, ids);
-                flips = reorder<boolList>(order,  flips);
-            }
-        }
+        faceOrder_.clear();
     }
-    else
+    if (flipMap_.size() != size())
     {
-        flipMap_.clear();  // Extra safety
+        flipMap_.clear();
+    }
 
-        // No flip-maps, simply sort addresses
-        for (int typei=0; typei < nTypes; ++typei)
+    // Sort by face Ids.
+    // Use to reorder flip maps and face-order too.
+
+    for (int typei=0; typei < nTypes; ++typei)
+    {
+        const labelRange sub(range(elemType(typei)));
+
+        if (!sub.empty())
         {
-            const labelRange sub(range(elemType(typei)));
+            SubList<label> ids(sub, addressing());
+            labelList order(Foam::sortedOrder(ids));
 
-            if (!sub.empty())
+            ids = reorder<labelList>(order, ids);
+
+            // Sort flip map as well
+            if (!flipMap_.empty())
             {
-                SubList<label> ids(addressing(), sub);
-                Foam::sort(ids);
+                SubList<bool> flips(flipMap_, sub);
+                flips = reorder<boolList>(order, flips);
+            }
+
+            // Sort face ordering as well
+            if (!faceOrder_.empty())
+            {
+                SubList<label> faceOrder(faceOrder_, sub);
+                faceOrder = reorder<labelList>(order, faceOrder);
             }
         }
     }
@@ -225,7 +232,6 @@ void Foam::ensightFaces::classify(const UList<face>& faces)
 
     resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes - use for local indexing here
-
 
     // Pass 2: Assign face-id per shape type
 
@@ -283,28 +289,34 @@ void Foam::ensightFaces::classify
     resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes - use for local indexing here
 
+    label nUsed = addressing().size();
+
     if (useFlip)
     {
-        flipMap_.resize(len);
+        flipMap_.resize(nUsed);
         flipMap_ = false;
     }
-    else
-    {
-        flipMap_.clear();  // Extra safety
-    }
+
+    faceOrder_.resize(nUsed);
 
     // Pass 2: Assign face-id per shape type
+    // - also record the face order
 
+    nUsed = 0;
     for (label listi = 0; listi < len; ++listi)
     {
         const label faceId = addr[listi];
-        const bool  doFlip = useFlip && flipMap[listi];
 
         if (!exclude.test(faceId))
         {
+            const bool doFlip = useFlip && flipMap.test(listi);
+
             const auto etype = whatType(faces[faceId]);
 
-            add(etype, faceId, doFlip);
+            const label idx = add(etype, faceId, doFlip);
+
+            faceOrder_[nUsed] = idx;
+            ++nUsed;
         }
     }
 }

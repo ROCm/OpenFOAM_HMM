@@ -99,7 +99,8 @@ private:
     // Private Member Functions
 
         //- Low-level internal addition routine
-        inline void add(const elemType etype, label id);
+        //  \return insertion locaion
+        inline label add(const elemType etype, label id);
 
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();

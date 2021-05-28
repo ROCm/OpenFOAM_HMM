@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,9 @@ namespace Foam
 }
 
 const char* Foam::ensightCells::elemNames[5] =
-    { "tetra4", "pyramid5", "penta6", "hexa8", "nfaced" };
+{
+    "tetra4", "pyramid5", "penta6", "hexa8", "nfaced"
+};
 
 static_assert
 (
@@ -106,12 +108,12 @@ Foam::FixedList<Foam::label, 5> Foam::ensightCells::sizes() const
 
 Foam::label Foam::ensightCells::total() const
 {
-    label n = 0;
+    label nTotal = 0;
     forAll(sizes_, typei)
     {
-        n += sizes_[typei];
+        nTotal += sizes_[typei];
     }
-    return n;
+    return nTotal;
 }
 
 
