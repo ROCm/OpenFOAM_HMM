@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,6 +79,7 @@ Note
 #include "surfaceFields.H"
 #include "ReadFields.H"
 #include "pointFields.H"
+#include "regionProperties.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
 #include "axisAngleRotation.H"
@@ -99,18 +100,18 @@ void readAndRotateFields
 )
 {
     ReadFields(mesh, objects, flds);
-    forAll(flds, i)
+    for (GeoField& fld : flds)
     {
-        Info<< "Transforming " << flds[i].name() << endl;
-        const dimensionedTensor dimT("t", flds[i].dimensions(), rotT);
-        transform(flds[i], dimT, flds[i]);
+        Info<< "Transforming " << fld.name() << endl;
+        const dimensionedTensor dimT("t", fld.dimensions(), rotT);
+        transform(fld, dimT, fld);
     }
 }
 
 
-void rotateFields(const argList& args, const Time& runTime, const tensor& T)
+void rotateFields(const word& regionName, const Time& runTime, const tensor& T)
 {
-    #include "createNamedMesh.H"
+    #include "createRegionMesh.H"
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -300,7 +301,7 @@ int main(int argc, char *argv[])
     // Compatibility with surfaceTransformPoints
     argList::addOptionCompat("scale", {"write-scale", 0});
 
-    #include "addRegionOption.H"
+    #include "addAllRegionOptions.H"
     #include "setRootCase.H"
 
     const bool doRotateFields = args.found("rotateFields");
@@ -336,15 +337,9 @@ int main(int argc, char *argv[])
         }
     }
 
+    // ------------------------------------------------------------------------
+
     #include "createTime.H"
-
-    word regionName = polyMesh::defaultRegion;
-    fileName meshDir = polyMesh::meshSubDir;
-
-    if (args.readIfPresent("region", regionName))
-    {
-        meshDir = regionName/polyMesh::meshSubDir;
-    }
 
     if (args.found("time"))
     {
@@ -359,144 +354,166 @@ int main(int argc, char *argv[])
         }
     }
 
-    pointIOField points
-    (
-        IOobject
+    // Handle -allRegions, -regions, -region
+    #include "getAllRegionOptions.H"
+
+    // ------------------------------------------------------------------------
+
+    forAll(regionNames, regioni)
+    {
+        const word& regionName = regionNames[regioni];
+        const word& regionDir =
         (
-            "points",
-            runTime.findInstance(meshDir, "points"),
-            meshDir,
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-
-    // Begin operations
-
-    vector v;
-    if (args.found("recentre"))
-    {
-        v = boundBox(points).centre();
-        Info<< "Adjust centre " << v << " -> (0 0 0)" << endl;
-        points -= v;
-    }
-
-    if (args.readIfPresent("translate", v))
-    {
-        Info<< "Translating points by " << v << endl;
-        points += v;
-    }
-
-    vector origin;
-    bool useOrigin = args.readIfPresent("origin", origin);
-    if (args.found("auto-origin") && !useOrigin)
-    {
-        useOrigin = true;
-        origin = boundBox(points).centre();
-    }
-
-    if (useOrigin)
-    {
-        Info<< "Set origin for rotations to " << origin << endl;
-        points -= origin;
-    }
-
-    if (args.found("rotate"))
-    {
-        Pair<vector> n1n2
-        (
-            args.lookup("rotate")()
+            regionName == polyMesh::defaultRegion ? word::null : regionName
         );
-        n1n2[0].normalise();
-        n1n2[1].normalise();
+        const fileName meshDir = regionDir/polyMesh::meshSubDir;
 
-        const tensor rot(rotationTensor(n1n2[0], n1n2[1]));
-
-        Info<< "Rotating points by " << rot << endl;
-        points = transform(rot, points);
-
-        if (doRotateFields)
+        if (regionNames.size() > 1)
         {
-            rotateFields(args, runTime, rot);
+            Info<< "region=" << regionName << nl;
         }
-    }
-    else if (args.found("rotate-angle"))
-    {
-        const Tuple2<vector, scalar> rotAxisAngle
+
+        pointIOField points
         (
-            args.lookup("rotate-angle")()
+            IOobject
+            (
+                "points",
+                runTime.findInstance(meshDir, "points"),
+                meshDir,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
         );
 
-        const vector& axis = rotAxisAngle.first();
-        const scalar angle = rotAxisAngle.second();
 
-        Info<< "Rotating points " << nl
-            << "    about " << axis << nl
-            << "    angle " << angle << nl;
+        // Begin operations
 
-        const tensor rot(axisAngle::rotation(axis, angle, true));
-
-        Info<< "Rotating points by " << rot << endl;
-        points = transform(rot, points);
-
-        if (doRotateFields)
+        vector v;
+        if (args.found("recentre"))
         {
-            rotateFields(args, runTime, rot);
+            v = boundBox(points).centre();
+            Info<< "Adjust centre " << v << " -> (0 0 0)" << endl;
+            points -= v;
         }
-    }
-    else if (args.readIfPresent("rollPitchYaw", v))
-    {
-        Info<< "Rotating points by" << nl
-            << "    roll  " << v.x() << nl
-            << "    pitch " << v.y() << nl
-            << "    yaw   " << v.z() << nl;
 
-        const tensor rot(euler::rotation(euler::eulerOrder::XYZ, v, true));
-
-        Info<< "Rotating points by " << rot << endl;
-        points = transform(rot, points);
-
-        if (doRotateFields)
+        if (args.readIfPresent("translate", v))
         {
-            rotateFields(args, runTime, rot);
+            Info<< "Translating points by " << v << endl;
+            points += v;
         }
-    }
-    else if (args.readIfPresent("yawPitchRoll", v))
-    {
-        Info<< "Rotating points by" << nl
-            << "    yaw   " << v.x() << nl
-            << "    pitch " << v.y() << nl
-            << "    roll  " << v.z() << nl;
 
-        const tensor rot(euler::rotation(euler::eulerOrder::ZYX, v, true));
-
-        Info<< "Rotating points by " << rot << endl;
-        points = transform(rot, points);
-
-        if (doRotateFields)
+        vector origin;
+        bool useOrigin = args.readIfPresent("origin", origin);
+        if (args.found("auto-origin") && !useOrigin)
         {
-            rotateFields(args, runTime, rot);
+            useOrigin = true;
+            origin = boundBox(points).centre();
         }
+
+        if (useOrigin)
+        {
+            Info<< "Set origin for rotations to " << origin << endl;
+            points -= origin;
+        }
+
+        if (args.found("rotate"))
+        {
+            Pair<vector> n1n2
+            (
+                args.lookup("rotate")()
+            );
+            n1n2[0].normalise();
+            n1n2[1].normalise();
+
+            const tensor rot(rotationTensor(n1n2[0], n1n2[1]));
+
+            Info<< "Rotating points by " << rot << endl;
+            points = transform(rot, points);
+
+            if (doRotateFields)
+            {
+                rotateFields(regionName, runTime, rot);
+            }
+        }
+        else if (args.found("rotate-angle"))
+        {
+            const Tuple2<vector, scalar> rotAxisAngle
+            (
+                args.lookup("rotate-angle")()
+            );
+
+            const vector& axis = rotAxisAngle.first();
+            const scalar angle = rotAxisAngle.second();
+
+            Info<< "Rotating points " << nl
+                << "    about " << axis << nl
+                << "    angle " << angle << nl;
+
+            const tensor rot(axisAngle::rotation(axis, angle, true));
+
+            Info<< "Rotating points by " << rot << endl;
+            points = transform(rot, points);
+
+            if (doRotateFields)
+            {
+                rotateFields(regionName, runTime, rot);
+            }
+        }
+        else if (args.readIfPresent("rollPitchYaw", v))
+        {
+            Info<< "Rotating points by" << nl
+                << "    roll  " << v.x() << nl
+                << "    pitch " << v.y() << nl
+                << "    yaw   " << v.z() << nl;
+
+            const tensor rot(euler::rotation(euler::eulerOrder::XYZ, v, true));
+
+            Info<< "Rotating points by " << rot << endl;
+            points = transform(rot, points);
+
+            if (doRotateFields)
+            {
+                rotateFields(regionName, runTime, rot);
+            }
+        }
+        else if (args.readIfPresent("yawPitchRoll", v))
+        {
+            Info<< "Rotating points by" << nl
+                << "    yaw   " << v.x() << nl
+                << "    pitch " << v.y() << nl
+                << "    roll  " << v.z() << nl;
+
+            const tensor rot(euler::rotation(euler::eulerOrder::ZYX, v, true));
+
+            Info<< "Rotating points by " << rot << endl;
+            points = transform(rot, points);
+
+            if (doRotateFields)
+            {
+                rotateFields(regionName, runTime, rot);
+            }
+        }
+
+        // Output scaling
+        applyScaling(points, getScalingOpt("scale", args));
+
+        if (useOrigin)
+        {
+            Info<< "Unset origin for rotations from " << origin << endl;
+            points += origin;
+        }
+
+
+        // Set the precision of the points data to 10
+        IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+
+        Info<< "Writing points into directory "
+            << runTime.relativePath(points.path()) << nl
+            << endl;
+        points.write();
     }
-
-    // Output scaling
-    applyScaling(points, getScalingOpt("scale", args));
-
-    if (useOrigin)
-    {
-        Info<< "Unset origin for rotations from " << origin << endl;
-        points += origin;
-    }
-
-
-    // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
-
-    Info<< "Writing points into directory " << points.path() << nl << endl;
-    points.write();
 
     Info<< nl << "End" << nl << endl;
 
