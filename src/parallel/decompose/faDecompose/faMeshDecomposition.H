@@ -42,7 +42,7 @@ SourceFiles
 #ifndef faMeshDecomposition_H
 #define faMeshDecomposition_H
 
-#include "fvMesh.H"
+#include "polyMesh.H"
 #include "faMesh.H"
 #include "labelList.H"
 #include "PtrList.H"
@@ -140,7 +140,7 @@ public:
         //  \param params additional parameters, sent to updateParameters
         faMeshDecomposition
         (
-            const fvMesh& mesh,
+            const polyMesh& mesh,
             const label nProcessors,
             const dictionary& params = dictionary::null
         );

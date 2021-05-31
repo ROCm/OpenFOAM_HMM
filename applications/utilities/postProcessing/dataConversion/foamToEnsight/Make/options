@@ -10,6 +10,7 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lfiniteArea \
     -lfileFormats \
+    -lmeshTools \
     -lconversion \
     -llagrangianIntermediate \
     -lgenericPatchFields

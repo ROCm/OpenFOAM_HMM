@@ -131,15 +131,15 @@ void Foam::processorFaMeshes::read()
 
 Foam::processorFaMeshes::processorFaMeshes
 (
-    const PtrList<fvMesh>& processorFvMeshes
+    const UPtrList<fvMesh>& processorFvMeshes
 )
 :
     fvMeshes_(processorFvMeshes),
     meshes_(processorFvMeshes.size()),
-    pointProcAddressing_(processorFvMeshes.size()),
-    edgeProcAddressing_(processorFvMeshes.size()),
-    faceProcAddressing_(processorFvMeshes.size()),
-    boundaryProcAddressing_(processorFvMeshes.size())
+    pointProcAddressing_(meshes_.size()),
+    edgeProcAddressing_(meshes_.size()),
+    faceProcAddressing_(meshes_.size()),
+    boundaryProcAddressing_(meshes_.size())
 {
     read();
 }

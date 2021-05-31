@@ -60,7 +60,7 @@ class processorFaMeshes
     // Private data
 
         //- List of processor finite volume meshes
-        const PtrList<fvMesh>& fvMeshes_;
+        const UPtrList<fvMesh>& fvMeshes_;
 
         //- List of processor finite area meshes
         PtrList<faMesh> meshes_;
@@ -95,7 +95,7 @@ public:
     // Constructors
 
         //- Construct from components
-        processorFaMeshes(const PtrList<fvMesh>& processorFvMeshes);
+        explicit processorFaMeshes(const UPtrList<fvMesh>& processorFvMeshes);
 
 
     // Member Functions

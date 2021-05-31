@@ -56,7 +56,7 @@ void Foam::faMeshDecomposition::distributeFaces()
             time().caseName()/("processor" + Foam::name(procI))
         );
 
-        fvMesh procMesh
+        polyMesh procMesh
         (
             IOobject
             (
@@ -161,7 +161,7 @@ void Foam::faMeshDecomposition::distributeFaces()
 
 Foam::faMeshDecomposition::faMeshDecomposition
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const label nProcessors,
     const dictionary& params
 )
@@ -266,7 +266,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             time().caseName()/("processor" + Foam::name(procI))
         );
 
-        fvMesh procFvMesh
+        polyMesh procFvMesh
         (
             IOobject
             (
@@ -1058,8 +1058,8 @@ void Foam::faMeshDecomposition::decomposeMesh()
         );
 
 
-        // read finite volume mesh
-        fvMesh procFvMesh
+        // Read volume mesh
+        polyMesh procFvMesh
         (
             IOobject
             (
@@ -1176,8 +1176,8 @@ bool Foam::faMeshDecomposition::writeDecomposition()
             processorCasePath
         );
 
-        // read finite volume mesh
-        fvMesh procFvMesh
+        // Read volume mesh
+        polyMesh procFvMesh
         (
             IOobject
             (
