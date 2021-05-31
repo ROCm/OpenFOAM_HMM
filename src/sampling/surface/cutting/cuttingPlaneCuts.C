@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,20 +162,20 @@ Foam::label Foam::cuttingPlane::calcCellCuts
 
     if (debug && isA<fvMesh>(mesh))
     {
-        const fvMesh& fvm = dynamicCast<const fvMesh&>(mesh);
+        const auto& fvmesh = dynamicCast<const fvMesh>(mesh);
 
         volScalarField cCuts
         (
             IOobject
             (
                 "cuttingPlane.cellCuts",
-                fvm.time().timeName(),
-                fvm.time(),
+                fvmesh.time().timeName(),
+                fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            fvm,
+            fvmesh,
             dimensionedScalar(dimless, Zero)
         );
 

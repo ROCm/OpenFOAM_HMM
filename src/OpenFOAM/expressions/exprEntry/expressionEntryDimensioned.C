@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Original code Copyright (C) 2014-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,14 +92,14 @@ addNamedToRunTimeSelectionTable
 #define defineExpressionEntryType(DimType)                                    \
     Foam::string Foam::exprTools::DimType##Entry::evaluate(const entry& e)    \
     {                                                                         \
-        DimType dt(dynamicCast<const primitiveEntry&>(e));                    \
+        DimType dt(dynamicCast<const primitiveEntry>(e));                     \
         return toExprStr<DimType::value_type>(dt.value());                    \
     }
 
 
 Foam::string Foam::exprTools::dimensionedScalarEntry::evaluate(const entry& e)
 {
-    dimensionedScalar dt(dynamicCast<const primitiveEntry&>(e));
+    dimensionedScalar dt(dynamicCast<const primitiveEntry>(e));
     return std::to_string(dt.value());
 }
 

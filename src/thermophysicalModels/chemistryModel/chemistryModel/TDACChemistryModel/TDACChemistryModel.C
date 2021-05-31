@@ -77,7 +77,7 @@ Foam::TDACChemistryModel<ReactionThermo, ThermoType>::TDACChemistryModel
 
     autoPtr<HashTable<List<specieElement>>> specCompPtr
     (
-        dynamicCast<const reactingMixture<ThermoType>&>(this->thermo())
+        dynamicCast<const reactingMixture<ThermoType>>(this->thermo())
        .specieComposition()
     );
 

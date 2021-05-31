@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,38 +43,26 @@ bool Foam::vtk::writeTopoSet
     bool parallel
 )
 {
-    if (isA<pointSet>(set))
     {
-        return vtk::writePointSet
-        (
-            mesh,
-            dynamicCast<const pointSet&>(set),
-            opts,
-            file,
-            parallel
-        );
+        const auto* ptr = isA<pointSet>(set);
+        if (ptr)
+        {
+            return vtk::writePointSet(mesh, *ptr, opts, file, parallel);
+        }
     }
-    else if (isA<faceSet>(set))
     {
-        return vtk::writeFaceSet
-        (
-            mesh,
-            dynamicCast<const faceSet&>(set),
-            opts,
-            file,
-            parallel
-        );
+        const auto* ptr = isA<faceSet>(set);
+        if (ptr)
+        {
+            return vtk::writeFaceSet(mesh, *ptr, opts, file, parallel);
+        }
     }
-    else if (isA<cellSet>(set))
     {
-        return vtk::writeCellSetFaces
-        (
-            mesh,
-            dynamicCast<const cellSet&>(set),
-            opts,
-            file,
-            parallel
-        );
+        const auto* ptr = isA<cellSet>(set);
+        if (ptr)
+        {
+            return vtk::writeCellSetFaces(mesh, *ptr, opts, file, parallel);
+        }
     }
 
     WarningInFunction

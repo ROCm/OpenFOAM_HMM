@@ -1196,7 +1196,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
     if (debug && isA<fvMesh>(mesh))
     {
-        const fvMesh& fvmesh = dynamicCast<const fvMesh&>(mesh);
+        const auto& fvmesh = dynamicCast<const fvMesh>(mesh);
 
         volScalarField debugField
         (

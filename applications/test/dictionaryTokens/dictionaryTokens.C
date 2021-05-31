@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,46 +60,45 @@ bool Foam::dictionaryTokens::setIterator() const
     {
         const entry& base = *entryIter_;
 
-        if (isA<primitiveEntry>(base))
         {
-            primIter_.reset
-            (
-                new dictionaryTokens::primitive_iterator
+            const auto* eptr = isA<primitiveEntry>(base);
+            if (eptr)
+            {
+                primIter_.reset
                 (
-                    dynamicCast<const primitiveEntry&>(base)
-                )
-            );
-
-            return true;
-        }
-        else if (isA<dictionaryListEntry>(base))
-        {
-            // Must check for isA<dictionaryListEntry> before checking
-            // for isA<dictionaryEntry> !
-
-            dictIter_.reset
-            (
-                new dictionaryTokens::dictionary_iterator
-                (
-                    dynamicCast<const dictionaryListEntry&>(base)
-                )
-            );
-
-            return true;
-        }
-        else if (isA<dictionaryEntry>(base))
-        {
-            dictIter_.reset
-            (
-                new dictionaryTokens::dictionary_iterator
-                (
-                    dynamicCast<const dictionaryEntry&>(base)
-                )
-            );
-
-            return true;
+                    new dictionaryTokens::primitive_iterator(*eptr)
+                );
+                return true;
+            }
         }
 
+        // NB: Must check for isA<dictionaryListEntry> before checking
+        // for isA<dictionaryEntry> !
+
+        {
+            const auto* eptr = isA<dictionaryListEntry>(base);
+
+            if (eptr)
+            {
+                dictIter_.reset
+                (
+                    new dictionaryTokens::dictionary_iterator(*eptr)
+                );
+                return true;
+            }
+        }
+
+        {
+            const auto* eptr = isA<dictionaryEntry>(base);
+            if (eptr)
+            {
+                dictIter_.reset
+                (
+                    new dictionaryTokens::dictionary_iterator(*eptr)
+                );
+                return true;
+            }
+        }
     }
 
     return false;
