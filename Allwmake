@@ -73,10 +73,10 @@ echo
 applications/Allwmake $targetType $*
 
 # Additional components/modules
-if [ "$FOAM_MODULE_PREFIX" = false ]
+if [ "$FOAM_MODULE_PREFIX" = false ] || [ "$FOAM_MODULE_PREFIX" = none ]
 then
     echo "========================================"
-    echo "OpenFOAM modules disabled (prefix=false)"
+    echo "OpenFOAM modules disabled (prefix=${FOAM_MODULE_PREFIX})"
     echo
 elif [ -d "$WM_PROJECT_DIR/modules" ]
 then

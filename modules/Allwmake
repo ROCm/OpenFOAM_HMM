@@ -12,7 +12,13 @@ targetType=libso
 export FOAM_MODULE_PREFIX
 
 echo "========================================"
-echo "Compile OpenFOAM modules"
+if [ "$FOAM_MODULE_PREFIX" = false ] || [ "$FOAM_MODULE_PREFIX" = none ]
+then
+    echo "OpenFOAM modules disabled (prefix=${FOAM_MODULE_PREFIX})"
+    echo
+    exit 0
+fi
+
 echo "prefix = $FOAM_MODULE_PREFIX"
 echo
 echo "    ignoring possible compilation errors"

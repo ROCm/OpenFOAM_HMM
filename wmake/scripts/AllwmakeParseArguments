@@ -120,8 +120,8 @@ do
         # Prefix: openfoam (other)
         (o | openfoam)  FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}" ;;
 
-        # Prefix: false (ie, 'disabled')
-        (false) FOAM_MODULE_PREFIX=false ;;
+        # Prefix: false | none (ie, 'disabled')
+        (false | none)  FOAM_MODULE_PREFIX=false ;;
 
         # Prefix: directory (absolute or relative)
         (*)

@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2015-2016 OpenFOAM Foundation
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -71,8 +71,8 @@ setModulePrefix()
     # Prefix: openfoam (other)
     (o | openfoam)  FOAM_MODULE_PREFIX="${FOAM_LIBBIN%/*}" ;;
 
-    # Prefix: false (ie, 'disabled')
-    (false) FOAM_MODULE_PREFIX=false ;;
+    # Prefix: false | none (ie, 'disabled')
+    (false | none)  FOAM_MODULE_PREFIX=false ;;
 
     # Prefix: directory (absolute or relative)
     (*)
