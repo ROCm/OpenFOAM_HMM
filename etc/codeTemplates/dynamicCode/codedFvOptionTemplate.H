@@ -102,6 +102,7 @@ SourceFiles
 #define codedFvOptionTemplate_H
 
 #include "cellSetOption.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,7 +117,8 @@ namespace fv
 
 class ${typeName}FvOption${SourceType}
 :
-    public fv::cellSetOption
+    public fv::cellSetOption,
+    public dictionaryContent
 {
     // Private Member Functions
 
@@ -152,6 +154,12 @@ public:
 
 
     // Member Functions
+
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
 
         //- Correct field
         virtual void correct

@@ -35,6 +35,7 @@ SourceFiles
 #define codedPatchFunction1Template${FieldType}_H
 
 #include "PatchFunction1.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,11 +50,11 @@ namespace PatchFunction1Types
 
 class ${typeName}PatchFunction1${FieldType}
 :
-    public PatchFunction1<${TemplateType}>
+    public PatchFunction1<${TemplateType}>,
+    public dictionaryContent
 {
     //- The parent PatchFunction1 type
     typedef PatchFunction1<${TemplateType}> parent_bctype;
-
 
     // Private Member Functions
 
@@ -88,7 +89,7 @@ public:
         ${typeName}PatchFunction1${FieldType}
         (
             const ${typeName}PatchFunction1${FieldType}& rhs
-        );
+        ) = default;
 
         //- Copy construct, resetting patch
         ${typeName}PatchFunction1${FieldType}

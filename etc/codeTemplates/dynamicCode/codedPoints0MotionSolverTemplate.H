@@ -36,6 +36,7 @@ SourceFiles
 #define codedPoints0MotionSolverTemplate_H
 
 #include "points0MotionSolver.H"
+#include "dictionaryContent.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -52,7 +53,8 @@ namespace Foam
 
 class ${typeName}Points0MotionSolver
 :
-    public points0MotionSolver
+    public points0MotionSolver,
+    public dictionaryContent
 {
     // Private Member Functions
 
@@ -99,6 +101,12 @@ public:
 
 
     // Member Functions
+
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
 
         //- Provide current points for motion. Uses current motion field
         virtual tmp<pointField> curPoints() const;

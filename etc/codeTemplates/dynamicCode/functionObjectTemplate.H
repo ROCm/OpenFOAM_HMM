@@ -36,6 +36,7 @@ SourceFiles
 #define functionObjectTemplate_H
 
 #include "regionFunctionObject.H"
+#include "dictionaryContent.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -55,7 +56,8 @@ class fvMesh;
 
 class ${typeName}FunctionObject
 :
-    public functionObjects::regionFunctionObject
+    public functionObjects::regionFunctionObject,
+    public dictionaryContent
 {
     // Private Data
 
@@ -112,6 +114,12 @@ public:
 
 
     // Member Functions
+
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
 
         //- Read optional controls
         virtual bool read(const dictionary& dict);

@@ -38,6 +38,7 @@ SourceFiles
 #define fixedValueFvPatchTemplate${FieldType}_H
 
 #include "fixedValueFvPatchFields.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +51,8 @@ namespace Foam
 
 class ${typeName}FixedValueFvPatch${FieldType}
 :
-    public fixedValueFvPatchField<${TemplateType}>
+    public fixedValueFvPatchField<${TemplateType}>,
+    public dictionaryContent
 {
     //- The parent boundary condition type
     typedef fixedValueFvPatchField<${TemplateType}> parent_bctype;
@@ -139,6 +141,12 @@ public:
 
 
     // Member Functions
+
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

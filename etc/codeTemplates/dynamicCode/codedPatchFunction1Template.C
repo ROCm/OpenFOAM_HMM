@@ -110,16 +110,6 @@ ${typeName}PatchFunction1${FieldType}
 ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
-    const ${typeName}PatchFunction1${FieldType}& rhs
-)
-:
-    parent_bctype(rhs)
-{}
-
-
-${typeName}PatchFunction1${FieldType}::
-${typeName}PatchFunction1${FieldType}
-(
     const ${typeName}PatchFunction1${FieldType}& rhs,
     const polyPatch& pp
 )

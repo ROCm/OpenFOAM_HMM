@@ -44,6 +44,7 @@ Description
        codeExecute | c++; upon functionObject::execute()
        codeWrite   | c++; upon functionObject::write()
        codeEnd     | c++; upon functionObject::end()
+       codeContext | additional dictionary context for the code
     \endplaintable
 
 Usage
@@ -66,6 +67,10 @@ Usage
         #};
     }
     \endverbatim
+
+Note
+    The code context dictionary can be supplied separately as the
+    \c codeContext entry.
 
 See also
     Foam::functionObject
@@ -127,6 +132,9 @@ protected:
 
         //- Clear redirected object(s)
         virtual void clearRedirect() const;
+
+        //- Additional 'codeContext' dictionary to pass through
+        virtual const dictionary& codeContext() const;
 
         //- The code dictionary
         virtual const dictionary& codeDict() const;

@@ -62,6 +62,15 @@ void Foam::codedMixedFvPatchField<Type>::clearRedirect() const
 
 template<class Type>
 const Foam::dictionary&
+Foam::codedMixedFvPatchField<Type>::codeContext() const
+{
+    const dictionary* ptr = dict_.findDict("codeContext", keyType::LITERAL);
+    return (ptr ? *ptr : dictionary::null);
+}
+
+
+template<class Type>
+const Foam::dictionary&
 Foam::codedMixedFvPatchField<Type>::codeDict() const
 {
     // Inline "code" or from system/codeDict
@@ -240,6 +249,21 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
                 ).ptr()
             )
         );
+
+        // Forward copy of dictionary content to the code template
+        auto* contentPtr =
+            dynamic_cast<dictionaryContent*>(redirectPatchFieldPtr_.get());
+
+        if (contentPtr)
+        {
+            contentPtr->dict(this->codeContext());
+        }
+        else
+        {
+            WarningInFunction
+                << name_ << " Did not derive from dictionaryContent"
+                << nl << nl;
+        }
     }
     return *redirectPatchFieldPtr_;
 }

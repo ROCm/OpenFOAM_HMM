@@ -62,6 +62,15 @@ void Foam::codedFixedValuePointPatchField<Type>::clearRedirect() const
 
 template<class Type>
 const Foam::dictionary&
+Foam::codedFixedValuePointPatchField<Type>::codeContext() const
+{
+    const dictionary* ptr = dict_.findDict("codeContext", keyType::LITERAL);
+    return (ptr ? *ptr : dictionary::null);
+}
+
+
+template<class Type>
+const Foam::dictionary&
 Foam::codedFixedValuePointPatchField<Type>::codeDict() const
 {
     // Inline "code" or from system/codeDict
@@ -235,6 +244,22 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
                 constructDict
             ).ptr()
         );
+
+
+        // Forward copy of codeContext to the code template
+        auto* contentPtr =
+            dynamic_cast<dictionaryContent*>(redirectPatchFieldPtr_.get());
+
+        if (contentPtr)
+        {
+            contentPtr->dict(this->codeContext());
+        }
+        else
+        {
+            WarningInFunction
+                << name_ << " Did not derive from dictionaryContent"
+                << nl << nl;
+        }
     }
     return *redirectPatchFieldPtr_;
 }

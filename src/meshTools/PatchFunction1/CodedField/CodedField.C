@@ -56,6 +56,15 @@ void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
 
 template<class Type>
 const Foam::dictionary&
+Foam::PatchFunction1Types::CodedField<Type>::codeContext() const
+{
+    // What else would make sense?
+    return dict_;
+}
+
+
+template<class Type>
+const Foam::dictionary&
 Foam::PatchFunction1Types::CodedField<Type>::codeDict
 (
     const dictionary& dict
@@ -148,6 +157,10 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     dict_(dict),
     name_(dict.getOrDefault<word>("name", entryName))
 {
+    this->codedBase::setCodeContext(dict_);
+
+    // No additional code chunks...
+
     updateLibrary(name_);
 }
 
@@ -202,6 +215,21 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
                 this->faceValues()
             )
         );
+
+        // Forward copy of codeContext to the code template
+        auto* contentPtr =
+            dynamic_cast<dictionaryContent*>(redirectFunctionPtr_.get());
+
+        if (contentPtr)
+        {
+            contentPtr->dict(this->codeContext());
+        }
+        else
+        {
+            WarningInFunction
+                << name_ << " Did not derive from dictionaryContent"
+                << nl << nl;
+        }
     }
     return *redirectFunctionPtr_;
 }

@@ -70,6 +70,10 @@ Usage
     }
     \endverbatim
 
+Note
+    The code context dictionary is simply the dictionary used to specify
+    the PatchFunction1 coefficients.
+
 See also
     Foam::dynamicCode
     Foam::codedFixedValue
@@ -131,6 +135,9 @@ protected:
 
         //- Clear redirected object(s)
         virtual void clearRedirect() const;
+
+        //- Additional 'codeContext' dictionary to pass through
+        virtual const dictionary& codeContext() const;
 
         // Get the code (sub)dictionary
         virtual const dictionary& codeDict(const dictionary& dict) const;
