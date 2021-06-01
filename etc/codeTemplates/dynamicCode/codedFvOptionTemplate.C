@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -95,11 +95,11 @@ ${typeName}FvOption${SourceType}
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh)
+    fv::cellSetOption(name, modelType, dict, mesh)
 {
     if (${verbose:-false})
     {
-        printMessage("Construct ${typeName} from components");
+        printMessage("Construct ${typeName} fvOption from dictionary");
     }
 }
 
@@ -118,14 +118,15 @@ ${typeName}FvOption${SourceType}::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FvOption${SourceType}::correct
+void
+${typeName}FvOption${SourceType}::correct
 (
     GeometricField<${TemplateType}, fvPatchField, volMesh>& fld
 )
 {
     if (${verbose:-false})
     {
-        Info<<"${typeName}FvOption${SourceType}::correct()\n";
+        Info<< "${typeName}FvOption${SourceType}::correct()\n";
     }
 
 //{{{ begin code
@@ -134,7 +135,8 @@ void ${typeName}FvOption${SourceType}::correct
 }
 
 
-void ${typeName}FvOption${SourceType}::addSup
+void
+${typeName}FvOption${SourceType}::addSup
 (
     fvMatrix<${TemplateType}>& eqn,
     const label fieldi
@@ -142,7 +144,7 @@ void ${typeName}FvOption${SourceType}::addSup
 {
     if (${verbose:-false})
     {
-        Info<<"${typeName}FvOption${SourceType}::addSup()\n";
+        Info<< "${typeName}FvOption${SourceType}::addSup()\n";
     }
 
 //{{{ begin code
@@ -151,7 +153,8 @@ void ${typeName}FvOption${SourceType}::addSup
 }
 
 
-void ${typeName}FvOption${SourceType}::addSup
+void
+${typeName}FvOption${SourceType}::addSup
 (
     const volScalarField& rho,
     fvMatrix<${TemplateType}>& eqn,
@@ -160,7 +163,7 @@ void ${typeName}FvOption${SourceType}::addSup
 {
     if (${verbose:-false})
     {
-        Info<<"${typeName}FvOption${SourceType}::addSup()\n";
+        Info<< "${typeName}FvOption${SourceType}::addSup()\n";
     }
 
 //{{{ begin code
@@ -169,7 +172,8 @@ void ${typeName}FvOption${SourceType}::addSup
 }
 
 
-void ${typeName}FvOption${SourceType}::constrain
+void
+${typeName}FvOption${SourceType}::constrain
 (
     fvMatrix<${TemplateType}>& eqn,
     const label fieldi
@@ -177,7 +181,7 @@ void ${typeName}FvOption${SourceType}::constrain
 {
     if (${verbose:-false})
     {
-        Info<<"${typeName}FvOption${SourceType}::constrain()\n";
+        Info<< "${typeName}FvOption${SourceType}::constrain()\n";
     }
 
 //{{{ begin code

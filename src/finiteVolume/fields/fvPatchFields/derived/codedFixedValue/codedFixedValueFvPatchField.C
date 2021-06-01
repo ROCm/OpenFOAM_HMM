@@ -124,7 +124,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     codedBase(),
     redirectPatchFieldPtr_(nullptr)
 {}
@@ -133,17 +133,17 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 template<class Type>
 Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 (
-    const codedFixedValueFvPatchField<Type>& ptf,
+    const codedFixedValueFvPatchField<Type>& rhs,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
+    parent_bctype(rhs, p, iF, mapper),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
@@ -155,7 +155,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict),
+    parent_bctype(p, iF, dict),
     codedBase(),
     dict_
     (
@@ -181,29 +181,29 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 template<class Type>
 Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 (
-    const codedFixedValueFvPatchField<Type>& ptf
+    const codedFixedValueFvPatchField<Type>& rhs
 )
 :
-    fixedValueFvPatchField<Type>(ptf),
+    parent_bctype(rhs),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
 template<class Type>
 Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 (
-    const codedFixedValueFvPatchField<Type>& ptf,
+    const codedFixedValueFvPatchField<Type>& rhs,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(ptf, iF),
+    parent_bctype(rhs, iF),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
@@ -219,10 +219,11 @@ Foam::codedFixedValueFvPatchField<Type>::redirectPatchField() const
         // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
-        os.writeEntry("type", name_);
         static_cast<const Field<Type>&>(*this).writeEntry("value", os);
         IStringStream is(os.str());
-        dictionary dict(is);
+        dictionary constructDict(is);
+
+        constructDict.set("type", name_);
 
         redirectPatchFieldPtr_.reset
         (
@@ -230,7 +231,7 @@ Foam::codedFixedValueFvPatchField<Type>::redirectPatchField() const
             (
                 this->patch(),
                 this->internalField(),
-                dict
+                constructDict
             ).ptr()
         );
     }
@@ -256,7 +257,7 @@ void Foam::codedFixedValueFvPatchField<Type>::updateCoeffs()
     // Copy through value
     this->operator==(fvp);
 
-    fixedValueFvPatchField<Type>::updateCoeffs();
+    parent_bctype::updateCoeffs();
 }
 
 
@@ -273,14 +274,14 @@ void Foam::codedFixedValueFvPatchField<Type>::evaluate
 
     const_cast<fvPatchField<Type>&>(fvp).evaluate(commsType);
 
-    fixedValueFvPatchField<Type>::evaluate(commsType);
+    parent_bctype::evaluate(commsType);
 }
 
 
 template<class Type>
 void Foam::codedFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
-    fixedValueFvPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     os.writeEntry("name", name_);
 
     codedBase::writeCodeDict(os, dict_);

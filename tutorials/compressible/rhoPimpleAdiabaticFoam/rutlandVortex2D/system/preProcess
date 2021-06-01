@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  v2106                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,19 +24,14 @@ functions
         libs    (utilityFunctionObjects);
         enabled yes;
 
-        codeInclude
-        #{
-            #include "volFields.H"
-        #};
-
         codeWrite
         #{
-            scalar D = 0.57;
-            scalar UInf = 50;
-            scalar pInf = 101325;
-            scalar TInf = 224;
-            scalar gamma = 1.4;
-            scalar A = -0.3*D*UInf;
+            const scalar D = 0.57;
+            const scalar UInf = 50;
+            const scalar pInf = 101325;
+            const scalar TInf = 224;
+            const scalar gamma = 1.4;
+            const scalar A = -0.3*D*UInf;
             const dimensionedScalar rhoRef("rhoRef", dimDensity, 1);
             const auto& rho = mesh().lookupObject<volScalarField>("rho");
 

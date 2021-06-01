@@ -32,6 +32,7 @@ License
 #include "Time.H"
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "dictionaryContent.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,8 +48,8 @@ namespace functionObjects
         codedFunctionObject,
         dictionary
     );
-}
-}
+} // End namespace functionObjects
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

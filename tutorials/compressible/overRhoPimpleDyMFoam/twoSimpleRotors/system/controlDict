@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  v2106                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -59,7 +59,6 @@ maxCo          1.2;
 
 functions
 {
-    // #include "catalyst"
     probes
     {
         type            probes;
@@ -82,7 +81,6 @@ functions
         (
             (0.015 0.005 0.005)
         );
-
     }
 
     mass
@@ -114,12 +112,10 @@ functions
 
         codeWrite
         #{
-
             const volScalarField& rho =
                 mesh().lookupObject<volScalarField>("rho");
 
             Info<< "rho volume = " << rho.weightedAverage(mesh().Vsc()) << endl;
-
         #};
     }
 }

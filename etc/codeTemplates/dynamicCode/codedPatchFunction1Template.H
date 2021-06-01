@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +51,10 @@ class ${typeName}PatchFunction1${FieldType}
 :
     public PatchFunction1<${TemplateType}>
 {
+    //- The parent PatchFunction1 type
+    typedef PatchFunction1<${TemplateType}> parent_bctype;
+
+
     // Private Member Functions
 
         //- Report a message with the SHA1sum

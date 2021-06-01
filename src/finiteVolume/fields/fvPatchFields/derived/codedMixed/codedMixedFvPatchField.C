@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,7 +124,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    mixedFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     codedBase(),
     redirectPatchFieldPtr_(nullptr)
 {}
@@ -133,17 +133,17 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 template<class Type>
 Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 (
-    const codedMixedFvPatchField<Type>& ptf,
+    const codedMixedFvPatchField<Type>& rhs,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFvPatchField<Type>(ptf, p, iF, mapper),
+    parent_bctype(rhs, p, iF, mapper),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
@@ -155,7 +155,7 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
     const dictionary& dict
 )
 :
-    mixedFvPatchField<Type>(p, iF, dict),
+    parent_bctype(p, iF, dict),
     codedBase(),
     dict_
     (
@@ -181,29 +181,29 @@ Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 template<class Type>
 Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 (
-    const codedMixedFvPatchField<Type>& ptf
+    const codedMixedFvPatchField<Type>& rhs
 )
 :
-    mixedFvPatchField<Type>(ptf),
+    parent_bctype(rhs),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
 template<class Type>
 Foam::codedMixedFvPatchField<Type>::codedMixedFvPatchField
 (
-    const codedMixedFvPatchField<Type>& ptf,
+    const codedMixedFvPatchField<Type>& rhs,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    mixedFvPatchField<Type>(ptf, iF),
+    parent_bctype(rhs, iF),
     codedBase(),
-    dict_(ptf.dict_),
-    name_(ptf.name_),
-    redirectPatchFieldPtr_()
+    dict_(rhs.dict_),
+    name_(rhs.name_),
+    redirectPatchFieldPtr_(nullptr)
 {}
 
 
@@ -220,24 +220,23 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
 
         // Write the data from the mixed b.c.
         OStringStream os;
-        mixedFvPatchField<Type>::write(os);
+        this->parent_bctype::write(os);
         IStringStream is(os.str());
         // Construct dictionary from it.
-        dictionary dict(is);
+        dictionary constructDict(is);
 
-        // Override the type to enforce the fvPatchField::New constructor
-        // to choose our type
-        dict.set("type", name_);
+        // Override type
+        constructDict.set("type", name_);
 
         redirectPatchFieldPtr_.reset
         (
-            dynamic_cast<mixedFvPatchField<Type>*>
+            dynamic_cast<parent_bctype*>
             (
                 fvPatchField<Type>::New
                 (
                     this->patch(),
                     this->internalField(),
-                    dict
+                    constructDict
                 ).ptr()
             )
         );
@@ -257,16 +256,15 @@ void Foam::codedMixedFvPatchField<Type>::updateCoeffs()
     // Make sure library containing user-defined fvPatchField is up-to-date
     updateLibrary(name_);
 
-    const mixedFvPatchField<Type>& fvp = redirectPatchField();
-
-    const_cast<mixedFvPatchField<Type>&>(fvp).updateCoeffs();
+    const parent_bctype& fvp = redirectPatchField();
+    const_cast<parent_bctype&>(fvp).updateCoeffs();
 
     // Copy through coefficients
     this->refValue() = fvp.refValue();
     this->refGrad() = fvp.refGrad();
     this->valueFraction() = fvp.valueFraction();
 
-    mixedFvPatchField<Type>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 
@@ -279,21 +277,21 @@ void Foam::codedMixedFvPatchField<Type>::evaluate
     // Make sure library containing user-defined fvPatchField is up-to-date
     updateLibrary(name_);
 
-    const mixedFvPatchField<Type>& fvp = redirectPatchField();
+    const parent_bctype& fvp = redirectPatchField();
 
     // - updates the value of fvp (though not used)
     // - resets the updated() flag
-    const_cast<mixedFvPatchField<Type>&>(fvp).evaluate(commsType);
+    const_cast<parent_bctype&>(fvp).evaluate(commsType);
 
     // Update the value (using the coefficients) locally
-    mixedFvPatchField<Type>::evaluate(commsType);
+    parent_bctype::evaluate(commsType);
 }
 
 
 template<class Type>
 void Foam::codedMixedFvPatchField<Type>::write(Ostream& os) const
 {
-    mixedFvPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     os.writeEntry("name", name_);
 
     codedBase::writeCodeDict(os, dict_);

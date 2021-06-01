@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "unitConversion.H"
+#include "PatchFunction1.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -87,7 +88,7 @@ ${typeName}FixedValueFvPatch${FieldType}
     const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<${TemplateType}>(p, iF)
+    parent_bctype(p, iF)
 {
     if (${verbose:-false})
     {
@@ -99,13 +100,13 @@ ${typeName}FixedValueFvPatch${FieldType}
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}FixedValueFvPatch${FieldType}& rhs,
     const fvPatch& p,
     const DimensionedField<${TemplateType}, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<${TemplateType}>(ptf, p, iF, mapper)
+    parent_bctype(rhs, p, iF, mapper)
 {
     if (${verbose:-false})
     {
@@ -122,7 +123,7 @@ ${typeName}FixedValueFvPatch${FieldType}
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<${TemplateType}>(p, iF, dict)
+    parent_bctype(p, iF, dict)
 {
     if (${verbose:-false})
     {
@@ -134,10 +135,10 @@ ${typeName}FixedValueFvPatch${FieldType}
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf
+    const ${typeName}FixedValueFvPatch${FieldType}& rhs
 )
 :
-    fixedValueFvPatchField<${TemplateType}>(ptf)
+    parent_bctype(rhs)
 {
     if (${verbose:-false})
     {
@@ -149,11 +150,11 @@ ${typeName}FixedValueFvPatch${FieldType}
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}FixedValueFvPatch${FieldType}& rhs,
     const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<${TemplateType}>(ptf, iF)
+    parent_bctype(rhs, iF)
 {
     if (${verbose:-false})
     {
@@ -176,7 +177,8 @@ ${typeName}FixedValueFvPatch${FieldType}::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
+void
+${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
     {
@@ -192,7 +194,7 @@ void ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
     ${code}
 //}}} end code
 
-    this->fixedValueFvPatchField<${TemplateType}>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 

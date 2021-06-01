@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "codedPoints0MotionSolverTemplate.H"
+#define namespaceFoam  // Suppress <using namespace Foam;>
 #include "fvCFD.H"
 #include "unitConversion.H"
 #include "addToRunTimeSelectionTable.H"

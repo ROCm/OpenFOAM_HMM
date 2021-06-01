@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "unitConversion.H"
+#include "PatchFunction1.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -86,7 +87,7 @@ ${typeName}MixedValueFvPatch${FieldType}
     const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    mixedFvPatchField<${TemplateType}>(p, iF)
+    parent_bctype(p, iF)
 {
     if (${verbose:-false})
     {
@@ -98,13 +99,13 @@ ${typeName}MixedValueFvPatch${FieldType}
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}MixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}MixedValueFvPatch${FieldType}& rhs,
     const fvPatch& p,
     const DimensionedField<${TemplateType}, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFvPatchField<${TemplateType}>(ptf, p, iF, mapper)
+    parent_bctype(rhs, p, iF, mapper)
 {
     if (${verbose:-false})
     {
@@ -121,7 +122,7 @@ ${typeName}MixedValueFvPatch${FieldType}
     const dictionary& dict
 )
 :
-    mixedFvPatchField<${TemplateType}>(p, iF, dict)
+    parent_bctype(p, iF, dict)
 {
     if (${verbose:-false})
     {
@@ -133,10 +134,10 @@ ${typeName}MixedValueFvPatch${FieldType}
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}MixedValueFvPatch${FieldType}& ptf
+    const ${typeName}MixedValueFvPatch${FieldType}& rhs
 )
 :
-    mixedFvPatchField<${TemplateType}>(ptf)
+    parent_bctype(rhs)
 {
     if (${verbose:-false})
     {
@@ -148,11 +149,11 @@ ${typeName}MixedValueFvPatch${FieldType}
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}MixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}MixedValueFvPatch${FieldType}& rhs,
     const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
-    mixedFvPatchField<${TemplateType}>(ptf, iF)
+    parent_bctype(rhs, iF)
 {
     if (${verbose:-false})
     {
@@ -175,7 +176,8 @@ ${typeName}MixedValueFvPatch${FieldType}::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
+void
+${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
     {
@@ -191,7 +193,7 @@ void ${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
     ${code}
 //}}} end code
 
-    this->mixedFvPatchField<${TemplateType}>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 

@@ -36,14 +36,14 @@ Description
     The entries are:
     \plaintable
        codeInclude | include files
-       codeOptions | include paths; inserted into EXE_INC in Make/options
-       codeLibs    | link line; inserted into LIB_LIBS in Make/options
-       codeData    | c++; local member data (default constructed);
-       localCode   | c++; local static functions;
-       codeRead    | c++; upon functionObject::read();
-       codeExecute | c++; upon functionObject::execute();
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       codeData    | c++; local member data (default constructed)
+       localCode   | c++; local static functions
+       codeRead    | c++; upon functionObject::read()
+       codeExecute | c++; upon functionObject::execute()
        codeWrite   | c++; upon functionObject::write()
-       codeEnd     | c++; upon functionObject::end();
+       codeEnd     | c++; upon functionObject::end()
     \endplaintable
 
 Usage

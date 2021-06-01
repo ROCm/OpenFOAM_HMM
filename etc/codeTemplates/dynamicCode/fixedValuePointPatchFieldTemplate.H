@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValuePointPatchTemplate${FieldType}_H
-#define fixedValuePointPatchTemplate${FieldType}_H
+#ifndef coded_fixedValuePointPatchTemplate${FieldType}_H
+#define coded_fixedValuePointPatchTemplate${FieldType}_H
 
 #include "fixedValuePointPatchFields.H"
 
@@ -53,6 +52,10 @@ class ${typeName}FixedValuePointPatch${FieldType}
 :
     public fixedValuePointPatchField<${TemplateType}>
 {
+    //- The parent boundary condition type
+    typedef fixedValuePointPatchField<${TemplateType}> parent_bctype;
+
+
     // Private Member Functions
 
         //- Report a message with the SHA1sum

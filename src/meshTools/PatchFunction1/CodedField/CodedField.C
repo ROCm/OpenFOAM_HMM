@@ -27,6 +27,7 @@ License
 
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -183,15 +184,13 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
 {
     if (!redirectFunctionPtr_)
     {
-        // Construct a PatchFunction1 containing the input code
-        dictionary completeDict(dict_);
+        dictionary constructDict;
+        // Force 'name_' sub-dictionary into existence
+        dictionary& coeffs = constructDict.subDictOrAdd(name_);
 
-        // Override the type to enforce the PatchFunction1::New constructor
-        // to choose our type
-        completeDict.set("type", name_);
-
-        dictionary dict;
-        dict.add(name_, completeDict);
+        coeffs = dict_;  // Copy input code and coefficients
+        coeffs.remove("name");      // Redundant
+        coeffs.set("type", name_);  // Specify our new (redirect) type
 
         redirectFunctionPtr_.reset
         (
@@ -199,7 +198,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
             (
                 this->patch(),
                 name_,
-                dict,
+                constructDict,
                 this->faceValues()
             )
         );

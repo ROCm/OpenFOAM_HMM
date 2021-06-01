@@ -34,6 +34,15 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
+    The code entries:
+    \plaintable
+       codeInclude | include files
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       localCode   | c++; local static functions
+       code        | c++; patch value assignment
+    \endplaintable
+
 Usage
     Example:
     \verbatim
@@ -104,6 +113,10 @@ class codedFixedValueFvPatchField
     public fixedValueFvPatchField<Type>,
     protected codedBase
 {
+    //- The parent boundary condition type
+    typedef fixedValueFvPatchField<Type> parent_bctype;
+
+
     // Private Data
 
         //- Dictionary contents for the boundary condition

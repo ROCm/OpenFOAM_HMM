@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Template for use with dynamic code generation of a source.
+    Template for use with dynamic code generation of a finiteVolume source.
     The hook functions take the following arguments:
 
     \verbatim
@@ -117,7 +116,7 @@ namespace fv
 
 class ${typeName}FvOption${SourceType}
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Member Functions
 
@@ -138,7 +137,7 @@ public:
 
     // Constructors
 
-        //- Construct from patch and internal field
+        //- Construct from mesh
         ${typeName}FvOption${SourceType}
         (
             const word& name,
@@ -146,6 +145,7 @@ public:
             const dictionary& dict,
             const fvMesh& mesh
         );
+
 
     //- Destructor
     virtual ~${typeName}FvOption${SourceType}();
