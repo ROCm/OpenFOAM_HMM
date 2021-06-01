@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CodedSource.H"
+#include "CodedFvSource.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "dynamicCode.H"
@@ -52,7 +52,7 @@ Foam::string Foam::fv::CodedSource<Type>::description() const
 template<class Type>
 void Foam::fv::CodedSource<Type>::clearRedirect() const
 {
-    redirectFvOptionPtr_.reset(nullptr);
+    redirectOptionPtr_.reset(nullptr);
 }
 
 
@@ -124,7 +124,7 @@ Foam::fv::CodedSource<Type>::CodedSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh)
+    fv::cellSetOption(name, modelType, dict, mesh)
 {
     read(dict);
 }
@@ -133,22 +133,62 @@ Foam::fv::CodedSource<Type>::CodedSource
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::fv::option& Foam::fv::CodedSource<Type>::redirectFvOption() const
+bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
-    if (!redirectFvOptionPtr_)
+    codedBase::setCodeContext(coeffs_);
+
+    if (!fv::cellSetOption::read(dict))
+    {
+        return false;
+    }
+
+    coeffs_.readEntry("fields", fieldNames_);
+
+    fv::option::resetApplied();
+
+    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
+
+
+    // Code context chunks
+
+    auto& ctx = codedBase::codeContext();
+
+    ctx.readEntry("codeCorrect", codeCorrect_);
+    ctx.readEntry("codeAddSup", codeAddSup_);
+
+    // ctx.readEntry("codeConstrain", codeConstrain_);
+    ctx.readEntry  // Compatibility
+    (
+        coeffs_.lookupEntryCompat
+        (
+            "codeConstrain",
+            {{ "codeSetValue", 1812 }},
+            keyType::LITERAL
+        ).keyword(),
+        codeConstrain_
+    );
+
+    return true;
+}
+
+
+template<class Type>
+Foam::fv::option& Foam::fv::CodedSource<Type>::redirectOption() const
+{
+    if (!redirectOptionPtr_)
     {
         dictionary constructDict(dict_);
         constructDict.set("type", name_);
         constructDict.changeKeyword(modelType_ & "Coeffs", name_ & "Coeffs");
 
-        redirectFvOptionPtr_ = fv::option::New
+        redirectOptionPtr_ = fv::option::New
         (
             name_,
             constructDict,
             mesh_
         );
     }
-    return *redirectFvOptionPtr_;
+    return *redirectOptionPtr_;
 }
 
 
@@ -159,11 +199,11 @@ void Foam::fv::CodedSource<Type>::correct
 )
 {
     DebugInfo
-        << "CodedSource<" << pTraits<Type>::typeName
+        << "fv::CodedSource<" << pTraits<Type>::typeName
         << ">::correct for source " << name_ << endl;
 
     updateLibrary(name_);
-    redirectFvOption().correct(field);
+    redirectOption().correct(field);
 }
 
 
@@ -175,11 +215,11 @@ void Foam::fv::CodedSource<Type>::addSup
 )
 {
     DebugInfo
-        << "CodedSource<" << pTraits<Type>::typeName
+        << "fv::CodedSource<" << pTraits<Type>::typeName
         << ">::addSup for source " << name_ << endl;
 
     updateLibrary(name_);
-    redirectFvOption().addSup(eqn, fieldi);
+    redirectOption().addSup(eqn, fieldi);
 }
 
 
@@ -192,11 +232,11 @@ void Foam::fv::CodedSource<Type>::addSup
 )
 {
     DebugInfo
-        << "CodedSource<" << pTraits<Type>::typeName
+        << "fv::CodedSource<" << pTraits<Type>::typeName
         << ">::addSup for source " << name_ << endl;
 
     updateLibrary(name_);
-    redirectFvOption().addSup(rho, eqn, fieldi);
+    redirectOption().addSup(rho, eqn, fieldi);
 }
 
 
@@ -208,11 +248,11 @@ void Foam::fv::CodedSource<Type>::constrain
 )
 {
     DebugInfo
-        << "CodedSource<" << pTraits<Type>::typeName
+        << "fv::CodedSource<" << pTraits<Type>::typeName
         << ">::constrain for source " << name_ << endl;
 
     updateLibrary(name_);
-    redirectFvOption().constrain(eqn, fieldi);
+    redirectOption().constrain(eqn, fieldi);
 }
 
 

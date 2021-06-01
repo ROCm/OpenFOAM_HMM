@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ Foam::fv::atmAmbientTurbSource::atmAmbientTurbSource
             << abort(FatalError);
     }
 
-    fieldNames_.setSize(2, "undefined");
+    fieldNames_.resize(2);
 
     tmp<volScalarField> tepsilon = turbPtr->epsilon();
     tmp<volScalarField> tomega = turbPtr->omega();
@@ -140,7 +140,7 @@ Foam::fv::atmAmbientTurbSource::atmAmbientTurbSource
 
     fieldNames_[1] = turbPtr->k()().name();
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     Log << "    Applying atmAmbientTurbSource to: "
         << fieldNames_[0] << " and " << fieldNames_[1]

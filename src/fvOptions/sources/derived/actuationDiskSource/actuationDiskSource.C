@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,9 +219,9 @@ Foam::fv::actuationDiskSource::actuationDiskSource
 {
     setMonitorCells(coeffs_);
 
-    fieldNames_.setSize(1, "U");
+    fieldNames_.resize(1, "U");
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     Info<< "    - creating actuation disk zone: " << this->name() << endl;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ Foam::fv::tabulatedAccelerationSource::tabulatedAccelerationSource
     UName_(coeffs_.getOrDefault<word>("U", "U")),
     g0_("g0", dimAcceleration, Zero)
 {
-    fieldNames_.setSize(1, UName_);
-    applied_.setSize(1, false);
+    fieldNames_.resize(1, UName_);
+    fv::option::resetApplied();
 
     if (mesh.time().foundObject<uniformDimensionedVectorField>("g"))
     {

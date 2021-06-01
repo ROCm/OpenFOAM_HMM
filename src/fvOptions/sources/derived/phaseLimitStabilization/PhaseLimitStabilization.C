@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ Foam::fv::PhaseLimitStabilization<Type>::PhaseLimitStabilization
     rateName_(coeffs_.get<word>("rate")),
     residualAlpha_(coeffs_.get<scalar>("residualAlpha"))
 {
-    fieldNames_.setSize(1, fieldName_);
-    applied_.setSize(1, false);
+    fieldNames_.resize(1, fieldName_);
+    fv::option::resetApplied();
 }
 
 

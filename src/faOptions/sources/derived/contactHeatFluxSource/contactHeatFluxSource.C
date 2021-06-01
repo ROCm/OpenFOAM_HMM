@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,9 +78,9 @@ Foam::fa::contactHeatFluxSource::contactHeatFluxSource
     contactRes_(0),
     curTimeIndex_(-1)
 {
-    fieldNames_.setSize(1, TName_);
+    fieldNames_.resize(1, TName_);
 
-    applied_.setSize(fieldNames_.size(), false);
+    fa::option::resetApplied();
 
     read(dict);
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
         )
     )
 {
-    fieldNames_.setSize(2, "undefined");
+    fieldNames_.resize(2);
 
     // Note: incompressible only
     const auto* turbPtr =
@@ -123,7 +123,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
             << exit(FatalError);
     }
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 }
 
 

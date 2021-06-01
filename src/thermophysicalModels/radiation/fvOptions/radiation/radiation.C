@@ -57,9 +57,9 @@ Foam::fv::radiation::radiation
 {
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
-    fieldNames_.setSize(1);
+    fieldNames_.resize(1);
     fieldNames_[0] = thermo.he().name();
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     radiation_ = Foam::radiation::radiationModel::New(thermo.T());
 }

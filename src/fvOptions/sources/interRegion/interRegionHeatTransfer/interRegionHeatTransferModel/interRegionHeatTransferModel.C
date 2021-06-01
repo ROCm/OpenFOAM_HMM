@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,9 +147,8 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
     if (active())
     {
         coeffs_.readEntry("fields", fieldNames_);
-        applied_.setSize(fieldNames_.size(), false);
-
         coeffs_.readEntry("semiImplicit", semiImplicit_);
+        fv::option::resetApplied();
     }
 }
 

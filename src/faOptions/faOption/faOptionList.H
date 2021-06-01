@@ -83,8 +83,8 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the "options" sub-dictionary if present otherwise return dict
-        const dictionary& optionsDict(const dictionary& dict) const;
+        //- Return "options" sub-dictionary (if present) or return dict
+        static const dictionary& optionsDict(const dictionary& dict);
 
         //- Read options dictionary
         bool readOptions(const dictionary& dict);
@@ -117,11 +117,11 @@ public:
 
     // Constructors
 
-        //- Construct from patch
-        optionList(const fvPatch& p);
+        //- Default construct from patch
+        explicit optionList(const fvPatch& p);
 
-        //- Construct from mesh and dictionary
-        optionList(const fvPatch&, const dictionary& );
+        //- Construct from patch and dictionary
+        optionList(const fvPatch& p, const dictionary&);
 
 
     //- Destructor
@@ -132,6 +132,9 @@ public:
 
         //- Reset the source list
         void reset(const dictionary& dict);
+
+        //- Return whether there is something to apply to the field
+        bool appliesToField(const word& fieldName) const;
 
 
         // Sources

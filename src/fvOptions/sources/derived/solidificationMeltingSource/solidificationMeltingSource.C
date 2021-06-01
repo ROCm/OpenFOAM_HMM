@@ -192,7 +192,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     curTimeIndex_(-1),
     deltaT_(cells_.size(), 0)
 {
-    fieldNames_.setSize(2);
+    fieldNames_.resize(2);
     fieldNames_[0] = UName_;
 
     switch (mode_)
@@ -218,7 +218,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
         }
     }
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -548,7 +548,7 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
     if (cellSetOption::read(dict))
     {
         coeffs_.readEntry("fields", fieldNames_);
-        applied_.setSize(fieldNames_.size(), false);
+        fv::option::resetApplied();
 
         // Read coordinate system/geometry invariant properties
         omega_ = rpmToRads(coeffs_.get<scalar>("rpm"));

@@ -40,6 +40,15 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::fa::option::resetApplied()
+{
+    applied_.resize(fieldNames_.size());
+    applied_ = false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fa::option::option

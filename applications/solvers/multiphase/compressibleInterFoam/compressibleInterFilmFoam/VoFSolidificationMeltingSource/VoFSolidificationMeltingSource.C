@@ -144,10 +144,11 @@ Foam::fv::VoFSolidificationMeltingSource::VoFSolidificationMeltingSource
     ),
     curTimeIndex_(-1)
 {
-    fieldNames_.setSize(2);
+    fieldNames_.resize(2);
     fieldNames_[0] = "U";
     fieldNames_[1] = "T";
-    applied_.setSize(fieldNames_.size(), false);
+
+    fv::option::resetApplied();
 }
 
 

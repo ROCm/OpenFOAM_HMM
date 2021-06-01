@@ -160,9 +160,9 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
-    fieldNames_.setSize(1, thermo.he().name());
+    fieldNames_.resize(1, thermo.he().name());
 
-    applied_.setSize(1, false);
+    fv::option::resetApplied();
 
     eTable_.reset(new interpolation2DTable<scalar>(coeffs_));
 

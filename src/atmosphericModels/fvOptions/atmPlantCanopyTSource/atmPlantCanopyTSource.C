@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,9 +79,9 @@ Foam::fv::atmPlantCanopyTSource::atmPlantCanopyTSource
         mesh
     )
 {
-    fieldNames_.setSize(1, "T");
+    fieldNames_.resize(1, "T");
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     Log << "    Applying atmPlantCanopyTSource to: " << fieldNames_[0] << endl;
 }

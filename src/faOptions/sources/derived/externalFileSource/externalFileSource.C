@@ -83,9 +83,9 @@ Foam::fa::externalFileSource::externalFileSource
     ),
     curTimeIndex_(-1)
 {
-    fieldNames_.setSize(1, fieldName_);
+    fieldNames_.resize(1, fieldName_);
 
-    applied_.setSize(fieldNames_.size(), false);
+    fa::option::resetApplied();
 
     read(dict);
 }

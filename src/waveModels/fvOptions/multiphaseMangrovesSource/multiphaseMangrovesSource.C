@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 IH-Cantabria
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -213,8 +213,7 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
             fieldNames_.resize(1);
             fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
         }
-
-        applied_.setSize(fieldNames_.size(), false);
+        fv::option::resetApplied();
 
         // Create the Mangroves models - 1 per region
         const dictionary& regionsDict(coeffs_.subDict("regions"));

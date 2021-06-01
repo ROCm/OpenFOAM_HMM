@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,10 @@ bool Foam::fv::FixedValueConstraint<Type>::read(const dictionary& dict)
 
         label count = fieldValuesDict.size();
 
-        fieldNames_.setSize(count);
-        fieldValues_.setSize(count);
-        applied_.setSize(count, false);
+        fieldNames_.resize(count);
+        fieldValues_.resize(count);
+
+        fv::option::resetApplied();
 
         count = 0;
         for (const entry& dEntry : fieldValuesDict)

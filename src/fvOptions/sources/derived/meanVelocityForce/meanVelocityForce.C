@@ -98,7 +98,7 @@ Foam::fv::meanVelocityForce::meanVelocityForce
             << "settings are:" << fieldNames_ << exit(FatalError);
     }
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     // Read the initial pressure gradient from file if it exists
     IFstream propsFile
