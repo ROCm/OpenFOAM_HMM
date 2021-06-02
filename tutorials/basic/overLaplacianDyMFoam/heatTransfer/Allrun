@@ -10,7 +10,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 # Parallel
 runApplication decomposePar -cellDist
+
 runParallel $(getApplication)
+
 runApplication reconstructPar
 
 #------------------------------------------------------------------------------

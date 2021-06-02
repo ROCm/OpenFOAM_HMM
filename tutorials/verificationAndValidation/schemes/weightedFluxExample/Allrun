@@ -9,6 +9,7 @@ cp -f system/controlDict.template system/controlDict
 cp -f system/fvSchemes.template system/fvSchemes
 
 runApplication blockMesh
+
 runApplication setFields
 
 # ----

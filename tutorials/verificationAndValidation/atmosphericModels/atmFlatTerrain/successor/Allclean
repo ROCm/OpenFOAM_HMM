@@ -5,7 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -rf constant/polyMesh
-rm -f constant/turbulenceProperties
+rm -rf 0.orig
+rm -rf system
+rm -rf constant
+rm -rf results
+rm -rf plots
 
 #------------------------------------------------------------------------------

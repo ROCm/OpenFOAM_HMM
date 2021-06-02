@@ -26,29 +26,35 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
+
     ground
     {
         type            compressible::kqRWallFunction;
         value           $internalField;
     }
+
     blockedFaces
     {
         type            zeroGradient;
     }
+
     mergingFaces
     {
         type            compressible::kqRWallFunction;
         value           $internalField;
     }
+
     wallFaces
     {
         type            compressible::kqRWallFunction;
         value           $internalField;
     }
+
     ySymmetry
     {
         type            symmetryPlane;
     }
 }
+
 
 // ************************************************************************* //

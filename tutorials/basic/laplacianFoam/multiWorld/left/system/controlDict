@@ -10,23 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs        (utilityFunctionObjects);
-
-DebugSwitches
-{
-//    mappedPatchBase 2;
-//    syncObjects     2;
-}
-
+libs            (utilityFunctionObjects);
 
 application     laplacianFoam;
 
-startFrom       startTime;  //latestTime;
+startFrom       startTime;
 
 startTime       0;
 
@@ -36,8 +28,6 @@ endTime         5;
 
 deltaT          1;
 
-//writeControl    runTime;
-//writeInterval   0.1;
 writeControl    timeStep;
 writeInterval   1;
 
@@ -70,5 +60,6 @@ functions
         //root        "level0/level1/level2";
     }
 }
+
 
 // ************************************************************************* //

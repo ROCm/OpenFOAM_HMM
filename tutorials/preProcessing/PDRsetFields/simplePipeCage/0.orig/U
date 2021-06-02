@@ -12,7 +12,7 @@ FoamFile
     class       volVectorField;
     object      U;
 }
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 -1 0 0 0 0];
 
@@ -26,29 +26,35 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
+
     ground
     {
         type            zeroGradient;
     }
+
     blockedFaces
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     mergingFaces
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     wallFaces
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     ySymmetry
     {
         type            symmetryPlane;
     }
 }
+
 
 // ************************************************************************* //

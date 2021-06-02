@@ -10,7 +10,8 @@ runApplication surfaceTransformPoints \
     -translate '(0 0 5)' \
     -origin '(0 0 5)' \
     -rotate-angle '((1 0 0) 45)' \
-    $FOAM_TUTORIALS/resources/geometry/blob.stl.gz constant/triSurface/blob.obj
+    "$FOAM_TUTORIALS"/resources/geometry/blob.stl.gz \
+    constant/triSurface/blob.obj
 
 runApplication blockMesh
 

@@ -25,15 +25,18 @@ boundaryField
         type            fixedValue;
         value           uniform 1;
     }
+
     bottom
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     sideWalls
     {
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

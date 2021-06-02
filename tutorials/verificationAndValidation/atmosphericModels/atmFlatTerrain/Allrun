@@ -3,8 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-(cd precursor && foamRunTutorials)
+(cd precursor && ./Allrun)
 
-(cd successor && foamRunTutorials)
+(cd successor && ./Allrun)
 
 #------------------------------------------------------------------------------

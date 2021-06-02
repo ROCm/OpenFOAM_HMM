@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 cleanCase0
 
 rm -f *.png
-
-rm -f system/controlDict system/fvSchemes
+rm -f system/controlDict
+rm -f system/fvSchemes
 
 #------------------------------------------------------------------------------

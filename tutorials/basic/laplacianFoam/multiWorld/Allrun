@@ -15,8 +15,8 @@ done
 mpirun -app ./mpirun_left_right.schema
 
 # Run with database
-\mv log.run_left log.run_left_direct
-\mv log.run_right log.run_right_direct
+mv -f log.run_left log.run_left_direct
+mv -f log.run_right log.run_right_direct
 
 for subcase in left right
 do
