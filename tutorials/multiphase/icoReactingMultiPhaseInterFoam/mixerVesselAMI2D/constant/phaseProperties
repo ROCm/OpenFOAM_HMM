@@ -18,7 +18,6 @@ type    massTransferMultiphaseSystem;
 
 phases  (gas mercury oil liquid);
 
-
 oil
 {
     type            pureMovingPhaseModel;

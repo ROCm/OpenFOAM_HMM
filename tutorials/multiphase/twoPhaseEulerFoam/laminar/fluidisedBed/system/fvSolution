@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -21,9 +20,7 @@ solvers
     {
         nAlphaCorr      1;
         nAlphaSubCycles 2;
-
         smoothLimiter   0.1;
-
         implicitPhasePressure yes;
         solver          smoothSolver;
         smoother        symGaussSeidel;

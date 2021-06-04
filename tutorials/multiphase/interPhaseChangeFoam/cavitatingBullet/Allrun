@@ -6,7 +6,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 mkdir -p constant/triSurface
 
 # Copy bullet surface from resources directory
-cp -f $FOAM_TUTORIALS/resources/geometry/bullet.stl.gz constant/triSurface/
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/bullet.stl.gz \
+    constant/triSurface/
 
 # Generate the base block mesh
 runApplication blockMesh

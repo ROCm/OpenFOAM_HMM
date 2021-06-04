@@ -6,7 +6,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 mkdir -p constant/triSurface
 
 # copy motorbike surface from resources directory
-cp -f $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/motorBike.obj.gz \
+    constant/triSurface/
 
 runApplication surfaceFeatureExtract
 

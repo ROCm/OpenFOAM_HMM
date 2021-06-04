@@ -24,20 +24,24 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     right
     {
         type            zeroGradient;
     }
+
     bottom
     {
         type            zeroGradient;
     }
+
     top
     {
         type            inletOutlet;
         inletValue      uniform 1;
         value           uniform 1;
     }
+
     frontAndBack
     {
         type            zeroGradient;

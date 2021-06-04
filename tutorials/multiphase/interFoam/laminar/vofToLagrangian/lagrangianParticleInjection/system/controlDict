@@ -10,14 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     sprayFoam;
 
-startFrom       latestTime; // startTime;
+startFrom       latestTime;
 
 startTime       0;
 

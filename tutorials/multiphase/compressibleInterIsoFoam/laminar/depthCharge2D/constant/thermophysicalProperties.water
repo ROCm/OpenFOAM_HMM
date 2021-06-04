@@ -10,25 +10,9 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-/*
-thermoType
-{
-    type            heRhoThermo;
-    mixture         pureMixture;
-    properties      liquid;
-    energy          sensibleInternalEnergy;
-}
-
-mixture
-{
-    H2O;
-}
-*/
-
 
 thermoType
 {
@@ -63,7 +47,6 @@ mixture
         Pr          2.289;
     }
 }
-
 
 
 // ************************************************************************* //

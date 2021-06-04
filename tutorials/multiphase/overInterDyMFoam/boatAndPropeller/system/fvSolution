@@ -69,7 +69,6 @@ solvers
         relTol          0;
     }
 
-
     "(U|k|omega|epsilon).*"
     {
         solver          smoothSolver;
@@ -94,8 +93,8 @@ PIMPLE
     turbOnFinalIterOnly yes;
 
     oversetAdjustPhi    no;
-
 }
+
 potentialFlow
 {
     nNonOrthogonalCorrectors    2;
@@ -118,5 +117,6 @@ cache
 {
         grad(U);
 }
+
 
 // ************************************************************************* //

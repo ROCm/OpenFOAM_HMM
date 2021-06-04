@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -43,5 +42,6 @@ actions
         cellSet cyclicFacesSlaveCells;
     }
 );
+
 
 // ************************************************************************* //

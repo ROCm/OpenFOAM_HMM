@@ -10,10 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
+
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 type    massTransferMultiphaseSystem;
 
 phases  (gas liquid);
@@ -49,5 +50,6 @@ massTransferModel
         Tactivate           372;
    }
 );
+
 
 // ************************************************************************* //

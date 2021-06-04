@@ -3,12 +3,13 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-mkdir -p constant/triSurface
+mkdir -p constant
 
 # copy propeller surface from resources directory
-cp -f $FOAM_TUTORIALS/resources/geometry/propeller/* constant/triSurface/
+cp -rf \
+    "$FOAM_TUTORIALS"/resources/geometry/propeller \
+    constant/triSurface
 
-# meshing
 runApplication blockMesh
 
 runApplication surfaceFeatureExtract

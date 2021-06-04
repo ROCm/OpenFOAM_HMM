@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      MRFProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,5 +26,6 @@ MRF1
     axis      (0 0 1);
     omega     constant 6.2831853;
 }
+
 
 // ************************************************************************* //

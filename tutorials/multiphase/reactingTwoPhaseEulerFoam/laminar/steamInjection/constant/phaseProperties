@@ -10,17 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type thermalPhaseChangeTwoPhaseSystem;
+type            thermalPhaseChangeTwoPhaseSystem;
 
-phases (steam water);
+phases          (steam water);
 
-phaseChange on;
-
+phaseChange     on;
 
 steam
 {

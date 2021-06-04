@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,6 +27,7 @@ interpolationSchemes
 divSchemes
 {
     default         none;
+
     div(phi,rho)    Gauss limitedLinear 1;
     div(rhoPhi,U)   Gauss limitedLinearV 1;
     div(phi,omega)  Gauss limitedLinear 1;
@@ -52,7 +52,7 @@ snGradSchemes
 
 wallDist
 {
-    method meshWave;
+    method          meshWave;
 }
 
 

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -30,5 +29,6 @@ air
     nu              1.48e-05;
     rho             1;
 }
+
 
 // ************************************************************************* //

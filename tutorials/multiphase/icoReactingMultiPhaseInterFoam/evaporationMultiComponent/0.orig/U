@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       volVectorField;
     object      U.air;
 }
@@ -49,5 +49,6 @@ boundaryField
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

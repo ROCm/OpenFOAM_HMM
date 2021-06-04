@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties.gas;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,7 +25,6 @@ thermoType
     energy          sensibleInternalEnergy;
 }
 
-
 mixture
 {
     specie
@@ -37,7 +35,6 @@ mixture
     {
         rho        1;
     }
-
     thermodynamics
     {
         Hf          0;
@@ -51,5 +48,6 @@ mixture
         Pr          2.289;
     }
 }
+
 
 // ************************************************************************* //

@@ -7,7 +7,6 @@ cleanCase0
 
 rm -f system/topoSetDict
 
-# Remove surface and features
 rm -rf constant/triSurface
 rm -rf constant/extendedFeatureEdgeMesh
 

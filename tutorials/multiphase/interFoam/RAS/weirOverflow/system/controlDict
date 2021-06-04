@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,5 +51,6 @@ maxCo           0.2;
 maxAlphaCo      0.2;
 
 maxDeltaT       1;
+
 
 // ************************************************************************* //

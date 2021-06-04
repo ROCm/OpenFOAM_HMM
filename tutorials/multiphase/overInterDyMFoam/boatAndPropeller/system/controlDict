@@ -59,7 +59,6 @@ maxAlphaCo      5.0;
 
 maxDeltaT       1;
 
-
 functions
 {
     minMax

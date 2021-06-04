@@ -12,18 +12,19 @@ FoamFile
     class       volScalarField;
     object      N2;
 }
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions          [0 0 0 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField       uniform 0.766;
+internalField   uniform 0.766;
 
 boundaryField
 {
     walls
     {
-        type                zeroGradient;
+        type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

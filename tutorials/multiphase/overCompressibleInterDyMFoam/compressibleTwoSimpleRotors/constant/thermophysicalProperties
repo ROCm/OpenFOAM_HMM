@@ -14,14 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water air);
+phases          (water air);
 
-pMin        10000;
+pMin            10000;
 
 sigma
 {
-    type    constant;
-    sigma   0.07;
+    type        constant;
+    sigma       0.07;
 }
 
 

@@ -20,7 +20,7 @@ dynamicFvMesh       dynamicOversetFvMesh;
 
 motionSolver        rigidBodyMotion;
 
-report          on;
+report              on;
 
 solver
 {
@@ -126,6 +126,10 @@ restraints
         body                    rudder;
         referenceOrientation    (1 0 0 0 1 0 0 0 1);
         axis                    (0 1 0);    // Axis of rotation
+        relax                   0.5;
+        p                       0.5;
+        i                       0.5;
+        d                       0.5;
         omega                   sine;       // Function1 entry
         omegaCoeffs
         {
@@ -141,6 +145,10 @@ restraints
         body                    propeller;
         referenceOrientation    (1 0 0 0 1 0 0 0 1);
         axis                    (1 0 0);
+        relax                   0.5;
+        p                       0.5;
+        i                       0.5;
+        d                       0.5;
         omega                   table
         (
             (0 (0 0 0))

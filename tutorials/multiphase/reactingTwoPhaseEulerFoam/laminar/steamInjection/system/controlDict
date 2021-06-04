@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +49,6 @@ adjustTimeStep  yes;
 maxCo           0.1;
 
 maxDeltaT       1e-2;
-
 
 functions
 {

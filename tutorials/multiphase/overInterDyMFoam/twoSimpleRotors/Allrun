@@ -12,6 +12,7 @@ canCompile || exit 0    # Dynamic code
 
 # Parallel
 runApplication decomposePar -cellDist
+
 runParallel  $(getApplication)
 
 #------------------------------------------------------------------------------

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,11 +27,12 @@ endTime         5;
 deltaT          0.005;
 
 writeControl    timeStep;
+
 writeInterval   10;
 
 purgeWrite      0;
 
-writeFormat     ascii;  //binary;
+writeFormat     ascii;
 
 writePrecision  16;
 
@@ -63,5 +63,6 @@ functions
         libs        (utilityFunctionObjects);
     }
 }
+
 
 // ************************************************************************* //

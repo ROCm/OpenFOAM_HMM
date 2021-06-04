@@ -25,22 +25,26 @@ boundaryField
         type            fixedFluxPressure;
         value           uniform 1e5;
     }
+
     right
     {
         type            fixedFluxPressure;
         value           uniform 1e5;
     }
+
     bottom
     {
         type            fixedFluxPressure;
         value           uniform 1e5;
     }
+
     top
     {
         type            prghTotalPressure;
         p0              $internalField;
         value           uniform 100000;
     }
+
     frontAndBack
     {
         type            fixedFluxPressure;
@@ -48,4 +52,5 @@ boundaryField
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// ************************************************************************* //

@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (fuel air);
+phases          (fuel air);
 
 fuel
 {
@@ -32,5 +31,6 @@ air
 }
 
 sigma           0.0261;
+
 
 // ************************************************************************* //

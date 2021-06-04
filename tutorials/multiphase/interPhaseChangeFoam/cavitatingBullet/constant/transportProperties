@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water vapour);
+phases          (water vapour);
 
 phaseChangeTwoPhaseMixture SchnerrSauer;
 
@@ -39,7 +39,7 @@ vapour
 KunzCoeffs
 {
     UInf            U20.0;
-    tInf            t0.005; // L = 0.1 m
+    tInf            0.005; // L = 0.1 m
     Cc              C1000;
     Cv              C1000;
 }

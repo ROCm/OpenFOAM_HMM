@@ -10,18 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+simulationType      RAS;
 
 RAS
 {
-    RASModel buoyantKEpsilon;
+    RASModel        buoyantKEpsilon;
 
     turbulence      on;
+
     printCoeffs     on;
 
     buoyantKEpsilonCoeffs
@@ -29,5 +29,6 @@ RAS
         Cg      0.85;
     }
 }
+
 
 // ************************************************************************* //
