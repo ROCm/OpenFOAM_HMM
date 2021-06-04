@@ -113,8 +113,6 @@ edges
     projectCurve v11 v7 (cylinder2)
     projectCurve v10 v4 (cylinder2)
 
-
-
     // Top cylinder
     project v12 v15 (cylinder)
     project v15 v14 (cylinder)
@@ -169,5 +167,6 @@ boundary
         faces   ((v12 v15 v14 v13));
     }
 );
+
 
 // ************************************************************************* //

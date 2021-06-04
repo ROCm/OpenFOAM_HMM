@@ -10,14 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    default         steadyState;
+    default         none;
 }
 
 gradSchemes
@@ -28,14 +27,6 @@ gradSchemes
 divSchemes
 {
     default         none;
-
-    div(phi,U)      bounded Gauss upwind;
-    div(phi,T)      bounded Gauss upwind;
-    div(phi,k)      bounded Gauss upwind;
-    div(phi,epsilon) bounded Gauss upwind;
-    div(phi,R)      bounded Gauss upwind;
-    div(R)          Gauss linear;
-    div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes
@@ -46,7 +37,7 @@ laplacianSchemes
 
 interpolationSchemes
 {
-    default         linear;
+    default    linear;
 }
 
 snGradSchemes

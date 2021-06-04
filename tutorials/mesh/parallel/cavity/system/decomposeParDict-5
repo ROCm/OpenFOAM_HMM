@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    note        "mesh decomposition control dictionary";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -18,5 +17,6 @@ FoamFile
 numberOfSubdomains  5;
 
 method              scotch;
+
 
 // ************************************************************************* //

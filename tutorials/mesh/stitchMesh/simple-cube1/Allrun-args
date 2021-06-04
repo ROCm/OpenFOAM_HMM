@@ -8,7 +8,7 @@ runApplication ./Allmesh
 # Use stitchMesh with command arguments (no dictionary)
 for dir in x y z
 do
-    runApplication -s dir-$dir stitchMesh -partial outer$dir inner$dir
+    runApplication -s dir-"$dir" stitchMesh -partial outer"$dir" inner"$dir"
 done
 
 runApplication checkMesh

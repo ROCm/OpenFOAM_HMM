@@ -3,8 +3,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-application=$(getApplication)
-
 # Create mesh
 runApplication blockMesh
 
@@ -17,13 +15,13 @@ runApplication topoSet
 # Create baffles and fields
 runApplication createBaffles -overwrite
 
-runApplication $application
+runApplication $(getApplication)
 
 #- RedistributePar to do decomposition
 runParallel redistributePar -decompose -cellDist
 
 #- Continue running for a bit more
-runParallel -s parallel $application
+runParallel -s parallel $(getApplication)
 
 #- Reconstruct all times
 runParallel -s 1 redistributePar -reconstruct

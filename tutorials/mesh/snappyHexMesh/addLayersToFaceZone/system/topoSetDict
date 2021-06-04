@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -66,5 +65,6 @@ actions
         cellSet leftB;  // name of cellSet of slave side
     }
 );
+
 
 // ************************************************************************* //

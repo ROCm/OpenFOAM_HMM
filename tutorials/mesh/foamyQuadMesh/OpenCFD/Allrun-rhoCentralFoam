@@ -3,11 +3,14 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-\cp system/controlDict.rhoCentralFoam system/controlDict
+cp -f system/controlDict.rhoCentralFoam system/controlDict
+
 restore0Dir
 
 runApplication decomposePar
+
 runParallel rhoCentralFoam
+
 runApplication reconstructPar
 
 #------------------------------------------------------------------------------

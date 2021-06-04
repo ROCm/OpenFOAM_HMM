@@ -3,6 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+mkdir -p constant
+
+cp -rf \
+    "$FOAM_TUTORIALS"/resources/geometry/motorBike_leakDetection \
+    constant/triSurface
+
 # Alternative decomposeParDict name:
 decompDict="-decomposeParDict system/decomposeParDict.6"
 ## Standard decomposeParDict name:

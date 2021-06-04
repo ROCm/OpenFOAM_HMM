@@ -5,7 +5,6 @@
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version         2.0;
@@ -13,7 +12,6 @@ FoamFile
     class           dictionary;
     object          controlDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 startFrom       startTime;
@@ -43,5 +41,6 @@ timeFormat      general;
 timePrecision   6;
 
 runTimeModifiable yes;
+
 
 // ************************************************************************* //

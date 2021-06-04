@@ -1,65 +1,45 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  com                                   |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 FoamFile
 {
-    version         2;
-    format          ascii;
-    class           dictionary;
-    object          fvSchemes;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    default         steadyState;
 }
 
 gradSchemes
 {
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-    unlimitedGrad(U) Gauss linear;
 }
 
 divSchemes
 {
-    default         none;
-    div(phi,U)      bounded Gauss linearUpwindV unlimitedGrad(U);
-    turbulence      bounded Gauss limitedLinear 1;
-    div(phi,k)      bounded Gauss limitedLinear 1;
-    div(phi,omega)  bounded Gauss limitedLinear 1;
-    div(phi,nuTilda) bounded Gauss limitedLinear 1;
-    div(phi,epsilon) bounded Gauss limitedLinear 1;
-    div(phi,phit)   bounded Gauss limitedLinear 1;
-    div(phi,f)      bounded Gauss limitedLinear 1;
-    div(phi,gammaInt) bounded Gauss linearUpwind grad;
-    div(phi,ReThetat) bounded Gauss linearUpwind grad;
-    div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes
 {
-    default         Gauss linear limited corrected 0.33;
 }
 
 interpolationSchemes
 {
-    default         linear;
 }
 
 snGradSchemes
 {
-    default         limited corrected 0.33;
 }
 
 wallDist
 {
-    method          meshWave;
 }
 
 geometry

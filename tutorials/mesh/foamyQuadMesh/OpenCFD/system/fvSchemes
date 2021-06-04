@@ -10,12 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//fluxScheme          Kurganov;
 fluxScheme          Tadmor;
 
 ddtSchemes
@@ -51,5 +49,6 @@ snGradSchemes
 {
     default         corrected;
 }
+
 
 // ************************************************************************* //

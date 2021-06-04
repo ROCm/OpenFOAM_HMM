@@ -32,7 +32,7 @@ do
     runApplication -s "$suffix" \
         refineMesh -dict system/refineMeshDict."$suffix" -overwrite
 
-    rm -r 0/*
+    rm -rf 0/*
 done
 
 # Refine over cylindrical coordinates, in 3 passes
@@ -50,7 +50,7 @@ do
     runApplication -s "$suffix" \
         refineMesh -dict system/refineMeshDict."$suffix" -overwrite
 
-    rm -r 0/*
+    rm -rf 0/*
 done
 
 rmdir 0 2>/dev/null

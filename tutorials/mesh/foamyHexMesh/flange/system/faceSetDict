@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      faceSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Name of set to operate on
@@ -31,5 +30,6 @@ topoSetSources
         value #include "../facesToBeRemoved";
     }
 );
+
 
 // ************************************************************************* //
