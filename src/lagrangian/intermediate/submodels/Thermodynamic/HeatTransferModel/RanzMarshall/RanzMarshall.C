@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,14 +37,22 @@ Foam::RanzMarshall<CloudType>::RanzMarshall
     CloudType& cloud
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud, typeName)
+    HeatTransferModel<CloudType>(dict, cloud, typeName),
+    a_(this->coeffDict().template getOrDefault<scalar>("a", 2.0)),
+    b_(this->coeffDict().template getOrDefault<scalar>("b", 0.6)),
+    m_(this->coeffDict().template getOrDefault<scalar>("m", 1.0/2.0)),
+    n_(this->coeffDict().template getOrDefault<scalar>("n", 1.0/3.0))
 {}
 
 
 template<class CloudType>
 Foam::RanzMarshall<CloudType>::RanzMarshall(const RanzMarshall<CloudType>& htm)
 :
-    HeatTransferModel<CloudType>(htm)
+    HeatTransferModel<CloudType>(htm),
+    a_(htm.a_),
+    b_(htm.b_),
+    m_(htm.m_),
+    n_(htm.n_)
 {}
 
 
@@ -63,7 +72,7 @@ Foam::scalar Foam::RanzMarshall<CloudType>::Nu
     const scalar Pr
 ) const
 {
-    return 2.0 + 0.6*sqrt(Re)*cbrt(Pr);
+    return a_ + b_*pow(Re, m_)*pow(Pr, n_);
 }
 
 

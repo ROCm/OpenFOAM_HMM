@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +54,20 @@ class RanzMarshall
 :
     public HeatTransferModel<CloudType>
 {
+    // Private Data
+
+        //- Correlation coefficient
+        const scalar a_;
+
+        //- Correlation coefficient
+        const scalar b_;
+
+        //- Correlation exponent of particle Reynolds number
+        const scalar m_;
+
+        //- Correlation exponent of Prandtl number
+        const scalar n_;
+
 
 public:
 
