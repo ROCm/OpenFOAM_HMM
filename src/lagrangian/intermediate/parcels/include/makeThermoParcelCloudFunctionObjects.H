@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelCloudFunctionObjects_H
-#define makeReactingParcelCloudFunctionObjects_H
+#ifndef makeThermoParcelCloudFunctionObjects_H
+#define makeThermoParcelCloudFunctionObjects_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,11 +41,10 @@ License
 #include "PatchParticleHistogram.H"
 #include "RemoveParcels.H"
 #include "VoidFraction.H"
-#include "WeberNumberReacting.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingParcelCloudFunctionObjects(CloudType)                      \
+#define makeThermoParcelCloudFunctionObjects(CloudType)                        \
                                                                                \
     makeCloudFunctionObject(CloudType);                                        \
                                                                                \
@@ -60,8 +58,7 @@ License
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
     makeCloudFunctionObjectType(PatchParticleHistogram, CloudType);            \
     makeCloudFunctionObjectType(RemoveParcels, CloudType);                     \
-    makeCloudFunctionObjectType(VoidFraction, CloudType);                      \
-    makeCloudFunctionObjectType(WeberNumberReacting, CloudType);
+    makeCloudFunctionObjectType(VoidFraction, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

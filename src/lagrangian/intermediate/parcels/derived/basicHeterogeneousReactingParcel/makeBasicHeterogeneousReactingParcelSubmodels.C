@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "basicHeterogeneousReactingCloud.H"
 
-#include "makeParcelCloudFunctionObjects.H"
+#include "makeReactingParcelCloudFunctionObjects.H"
 
 // Kinematic
 #include "makeThermoParcelForces.H" // thermo variant
@@ -52,7 +52,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeParcelCloudFunctionObjects(basicHeterogeneousReactingCloud);
+makeReactingParcelCloudFunctionObjects(basicHeterogeneousReactingCloud);
 
 // Kinematic sub-models
 makeThermoParcelForces(basicHeterogeneousReactingCloud);

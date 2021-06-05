@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "basicSprayCloud.H"
 
-#include "makeReactingParcelCloudFunctionObjects.H" // Reacting variant
+#include "makeReactingParcelCloudFunctionObjects.H"
 
 // Kinematic
 #include "makeThermoParcelForces.H" // thermo variant
@@ -59,7 +59,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeParcelCloudFunctionObjects(basicSprayCloud);
+makeReactingParcelCloudFunctionObjects(basicSprayCloud);
 
 // Kinematic sub-models
 makeThermoParcelForces(basicSprayCloud);
