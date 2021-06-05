@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,6 +193,18 @@ makeThermos
     heRhoThermo,
     pureMixture,
     polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    tabulatedTransport,
     sensibleEnthalpy,
     hPolynomialThermo,
     icoPolynomial,
@@ -557,6 +569,18 @@ makeThermos
     heRhoThermo,
     pureMixture,
     polynomialTransport,
+    sensibleInternalEnergy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    tabulatedTransport,
     sensibleInternalEnergy,
     hPolynomialThermo,
     icoPolynomial,
