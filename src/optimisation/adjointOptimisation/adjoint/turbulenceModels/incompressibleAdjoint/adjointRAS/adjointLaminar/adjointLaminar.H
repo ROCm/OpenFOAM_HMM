@@ -100,6 +100,12 @@ public:
         //- Return the effective stress tensor, i.e. the adjointLaminar stress
         virtual tmp<volSymmTensorField> devReff() const;
 
+        //- Return the effective stress tensor based on a given velocity field
+        virtual tmp<volSymmTensorField> devReff
+        (
+            const volVectorField& U
+        ) const;
+
         //- Return the diffusion term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
 

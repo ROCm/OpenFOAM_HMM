@@ -703,7 +703,17 @@ adjointSpalartAllmaras::adjointSpalartAllmaras
 tmp<volSymmTensorField> adjointSpalartAllmaras::devReff() const
 {
     const volVectorField& Ua = adjointVars_.UaInst();
-    return tmp<volSymmTensorField>::New
+    return devReff(Ua);
+}
+
+
+tmp<volSymmTensorField> adjointSpalartAllmaras::devReff
+(
+    const volVectorField& U
+) const
+{
+    return
+        tmp<volSymmTensorField>::New
         (
             IOobject
             (
@@ -713,7 +723,7 @@ tmp<volSymmTensorField> adjointSpalartAllmaras::devReff() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nuEff()*dev(twoSymm(fvc::grad(Ua)))
+           -nuEff()*dev(twoSymm(fvc::grad(U)))
         );
 }
 
