@@ -53,7 +53,7 @@ Foam::fa::externalFileSource::externalFileSource
     const fvPatch& p
 )
 :
-    faceSetOption(sourceName, modelType, dict, p),
+    fa::faceSetOption(sourceName, modelType, dict, p),
     fieldName_(dict.get<word>("fieldName")),
     tableName_(dict.get<word>("tableName")),
     pExt_
@@ -118,7 +118,7 @@ void Foam::fa::externalFileSource::addSup
 
 bool Foam::fa::externalFileSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fa::option::read(dict))
     {
         return true;
     }

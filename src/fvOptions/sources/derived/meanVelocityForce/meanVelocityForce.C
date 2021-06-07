@@ -82,7 +82,7 @@ Foam::fv::meanVelocityForce::meanVelocityForce
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     Ubar_(coeffs_.get<vector>("Ubar")),
     gradP0_(0.0),
     dGradP_(0.0),

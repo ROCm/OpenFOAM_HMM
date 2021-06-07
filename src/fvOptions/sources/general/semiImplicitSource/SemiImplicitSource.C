@@ -117,7 +117,7 @@ Foam::fv::SemiImplicitSource<Type>::SemiImplicitSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
     VDash_(1.0)
 {
@@ -203,7 +203,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 template<class Type>
 bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         volumeMode_ = volumeModeTypeNames_.get("volumeMode", coeffs_);
         setFieldData(coeffs_.subDict("injectionRateSuSp"));

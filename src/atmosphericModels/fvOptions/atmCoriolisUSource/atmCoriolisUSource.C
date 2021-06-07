@@ -68,7 +68,7 @@ Foam::fv::atmCoriolisUSource::atmCoriolisUSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     latitude_
     (
         coeffs_.getCheckOrDefault<scalar>

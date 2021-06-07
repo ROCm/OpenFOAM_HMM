@@ -84,7 +84,7 @@ Foam::fv::acousticDampingSource::acousticDampingSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     blendFactor_
     (
         volScalarField
@@ -174,7 +174,7 @@ void Foam::fv::acousticDampingSource::addSup
 
 bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {

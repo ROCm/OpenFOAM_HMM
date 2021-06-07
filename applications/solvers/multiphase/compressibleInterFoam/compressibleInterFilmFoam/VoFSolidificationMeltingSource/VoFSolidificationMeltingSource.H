@@ -99,7 +99,7 @@ namespace fv
 
 class VoFSolidificationMeltingSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private data
 

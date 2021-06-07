@@ -51,7 +51,7 @@ Foam::fv::atmNutSource::atmNutSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     artNutName_(dict.getOrDefault<word>("nut", "artNut")),
     artNut_
     (

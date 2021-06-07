@@ -89,7 +89,7 @@ Foam::fv::viscousDissipation::viscousDissipation
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh),
+    fv::option(sourceName, modelType, dict, mesh),
     UName_(coeffs_.getOrDefault<word>("U", "U")),
     rhoName_(coeffs_.getOrDefault<word>("rho", "none")),
     rho_

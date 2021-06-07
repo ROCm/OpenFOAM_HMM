@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,7 +204,7 @@ Foam::fv::cellSetOption::cellSetOption
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    fv::option(name, modelType, dict, mesh),
     timeStart_(-1.0),
     duration_(0.0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
@@ -224,7 +224,7 @@ Foam::fv::cellSetOption::cellSetOption
 
 bool Foam::fv::cellSetOption::isActive()
 {
-    if (option::isActive() && inTimeLimits(mesh_.time().value()))
+    if (fv::option::isActive() && inTimeLimits(mesh_.time().value()))
     {
         // Update the cell set if the mesh is changing
         if (mesh_.changing())
@@ -254,7 +254,7 @@ bool Foam::fv::cellSetOption::isActive()
 
 bool Foam::fv::cellSetOption::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         if (coeffs_.readIfPresent("timeStart", timeStart_))
         {

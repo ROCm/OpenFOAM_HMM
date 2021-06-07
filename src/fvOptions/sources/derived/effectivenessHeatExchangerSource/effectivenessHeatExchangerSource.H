@@ -218,7 +218,7 @@ namespace fv
 
 class effectivenessHeatExchangerSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

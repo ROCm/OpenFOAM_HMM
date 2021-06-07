@@ -161,7 +161,7 @@ directionalPressureGradientExplicitSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     model_(pressureDropModelNames_.get("model", coeffs_)),
     gradP0_(cells_.size(), Zero),
     dGradP_(cells_.size(), Zero),

@@ -182,7 +182,7 @@ namespace fv
 
 class buoyancyTurbSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

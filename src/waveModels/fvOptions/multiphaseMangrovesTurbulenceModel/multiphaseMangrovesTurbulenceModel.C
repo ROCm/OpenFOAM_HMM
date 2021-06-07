@@ -154,7 +154,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::multiphaseMangrovesTurbulenceModel
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    fv::option(name, modelType, dict, mesh),
     aZone_(),
     NZone_(),
     CkpZone_(),
@@ -227,7 +227,7 @@ void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
 
 bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         if (!coeffs_.readIfPresent("epsilonNames", fieldNames_))
         {

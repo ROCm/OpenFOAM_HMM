@@ -140,7 +140,7 @@ namespace fv
 
 class directionalPressureGradientExplicitSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 public:
 

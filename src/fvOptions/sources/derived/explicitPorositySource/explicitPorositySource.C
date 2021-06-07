@@ -54,7 +54,7 @@ Foam::fv::explicitPorositySource::explicitPorositySource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     porosityPtr_(nullptr)
 {
     read(dict);
@@ -115,7 +115,7 @@ void Foam::fv::explicitPorositySource::addSup
 
 bool Foam::fv::explicitPorositySource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {

@@ -54,7 +54,7 @@ Foam::fa::contactHeatFluxSource::contactHeatFluxSource
     const fvPatch& patch
 )
 :
-    faceSetOption(sourceName, modelType, dict, patch),
+    fa::faceSetOption(sourceName, modelType, dict, patch),
     temperatureCoupledBase(patch, dict),
     TName_(dict.getOrDefault<word>("T", "T")),
     TprimaryName_(dict.get<word>("Tprimary")),
@@ -175,7 +175,7 @@ void Foam::fa::contactHeatFluxSource::addSup
 
 bool Foam::fa::contactHeatFluxSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fa::option::read(dict))
     {
         coeffs_.readIfPresent("T", TName_);
 

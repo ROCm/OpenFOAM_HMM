@@ -42,7 +42,7 @@ Foam::fv::FixedValueConstraint<Type>::FixedValueConstraint
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh)
+    fv::cellSetOption(name, modelType, dict, mesh)
 {
     read(dict);
 }
@@ -53,7 +53,7 @@ Foam::fv::FixedValueConstraint<Type>::FixedValueConstraint
 template<class Type>
 bool Foam::fv::FixedValueConstraint<Type>::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         const dictionary& fieldValuesDict = coeffs_.subDict("fieldValues");
 

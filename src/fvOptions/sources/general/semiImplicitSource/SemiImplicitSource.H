@@ -146,7 +146,7 @@ Ostream& operator<<
 template<class Type>
 class SemiImplicitSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 public:
 

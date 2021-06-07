@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,7 @@ Foam::fa::faceSetOption::faceSetOption
     const fvPatch& patch
 )
 :
-    option(name, modelType, dict, patch),
+    fa::option(name, modelType, dict, patch),
     timeStart_(-1.0),
     duration_(0.0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),

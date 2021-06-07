@@ -113,7 +113,7 @@ namespace fv
 
 class atmPlantCanopyUSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

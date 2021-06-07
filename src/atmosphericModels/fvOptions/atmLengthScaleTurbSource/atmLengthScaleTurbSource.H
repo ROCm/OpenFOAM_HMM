@@ -133,7 +133,7 @@ namespace fv
 
 class atmLengthScaleTurbSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

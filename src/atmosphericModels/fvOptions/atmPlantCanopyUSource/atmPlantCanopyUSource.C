@@ -51,7 +51,7 @@ Foam::fv::atmPlantCanopyUSource::atmPlantCanopyUSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     plantCd_
     (

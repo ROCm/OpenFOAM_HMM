@@ -52,7 +52,7 @@ Foam::fv::limitVelocity::limitVelocity
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     UName_(coeffs_.getOrDefault<word>("U", "U")),
     max_(coeffs_.get<scalar>("max"))
 {
@@ -65,7 +65,7 @@ Foam::fv::limitVelocity::limitVelocity
 
 bool Foam::fv::limitVelocity::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("max", max_);
 

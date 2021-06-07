@@ -146,7 +146,7 @@ namespace fv
 
 class atmCoriolisUSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

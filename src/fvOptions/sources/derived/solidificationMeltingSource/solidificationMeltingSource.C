@@ -162,7 +162,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     Tmelt_(coeffs_.get<scalar>("Tmelt")),
     L_(coeffs_.get<scalar>("L")),
     relax_(coeffs_.getOrDefault<scalar>("relax", 0.9)),
@@ -296,7 +296,7 @@ void Foam::fv::solidificationMeltingSource::addSup
 
 bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("Tmelt", Tmelt_);
         coeffs_.readEntry("L", L_);

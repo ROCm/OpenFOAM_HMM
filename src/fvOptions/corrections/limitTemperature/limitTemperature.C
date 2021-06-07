@@ -53,7 +53,7 @@ Foam::fv::limitTemperature::limitTemperature
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     Tmin_(coeffs_.get<scalar>("min")),
     Tmax_(coeffs_.get<scalar>("max")),
     phase_(coeffs_.getOrDefault<word>("phase", word::null))
@@ -76,7 +76,7 @@ Foam::fv::limitTemperature::limitTemperature
 
 bool Foam::fv::limitTemperature::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("min", Tmin_);
         coeffs_.readEntry("max", Tmax_);

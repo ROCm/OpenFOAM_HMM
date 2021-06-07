@@ -153,7 +153,7 @@ Foam::fv::multiphaseMangrovesSource::multiphaseMangrovesSource
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    fv::option(name, modelType, dict, mesh),
     aZone_(),
     NZone_(),
     CmZone_(),
@@ -206,7 +206,7 @@ void Foam::fv::multiphaseMangrovesSource::addSup
 
 bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {

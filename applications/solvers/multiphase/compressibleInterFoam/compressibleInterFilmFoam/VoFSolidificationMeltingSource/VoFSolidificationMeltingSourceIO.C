@@ -31,7 +31,7 @@ License
 
 bool Foam::fv::VoFSolidificationMeltingSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         alphaSolidT_ = Function1<scalar>::New("alphaSolidT", coeffs_);
         coeffs_.readEntry("L", L_);

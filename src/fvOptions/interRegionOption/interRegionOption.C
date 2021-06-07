@@ -126,7 +126,7 @@ Foam::fv::interRegionOption::interRegionOption
 
 bool Foam::fv::interRegionOption::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         return true;
     }

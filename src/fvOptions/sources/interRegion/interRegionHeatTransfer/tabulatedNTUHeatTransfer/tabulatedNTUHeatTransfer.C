@@ -254,7 +254,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::calculateHtc()
 
 bool Foam::fv::tabulatedNTUHeatTransfer::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         coeffs_.readIfPresent("U", UName_);
         coeffs_.readIfPresent("UNbr", UNbrName_);

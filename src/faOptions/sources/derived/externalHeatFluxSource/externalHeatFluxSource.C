@@ -68,7 +68,7 @@ Foam::fa::externalHeatFluxSource::externalHeatFluxSource
     const fvPatch& patch
 )
 :
-    faceSetOption(sourceName, modelType, dict, patch),
+    fa::faceSetOption(sourceName, modelType, dict, patch),
     mode_(operationModeNames.get("mode", dict)),
     TName_(dict.getOrDefault<word>("T", "T")),
     Q_(0),
@@ -172,7 +172,7 @@ void Foam::fa::externalHeatFluxSource::addSup
 
 bool Foam::fa::externalHeatFluxSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fa::option::read(dict))
     {
         dict.readIfPresent("T", TName_);
         dict.readIfPresent("emissivity", emissivity_);
