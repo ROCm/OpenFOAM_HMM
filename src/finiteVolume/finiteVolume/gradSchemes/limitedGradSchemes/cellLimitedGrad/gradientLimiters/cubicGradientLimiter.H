@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::gradientLimiters::minmod
+    Foam::fv::gradientLimiters::cubic
 
 Description
     Cubic gradient limiter
@@ -44,9 +45,11 @@ Description
         Michalak, K., & Ollivier-Gooch, C. (2008).
         Limiters for unstructured higher-order accurate solutions
         of the Euler equations.
-        In 46th AIAA Aerospace Sciences Meeting and Exhibit (p. 776).
+        In 46th AIAA Aerospace Sciences Meeting and Exhibition.
+        DOI:10.2514/6.2008-776
     \endverbatim
 
+Usage
     Example:
     \verbatim
     gradSchemes
@@ -57,8 +60,8 @@ Description
     \endverbatim
 
 See also
-    Foam::fv::cellLimitedGrad
-    Foam::fv::gradientLimiters::Venkatakrishnan
+  - Foam::fv::cellLimitedGrad
+  - Foam::fv::gradientLimiters::Venkatakrishnan
 
 \*---------------------------------------------------------------------------*/
 
@@ -102,8 +105,8 @@ public:
         cubic(Istream& schemeData)
         :
             rt_(readScalar(schemeData)),
-            a_(2.0/sqr(rt_) - 2.0/pow3(rt_)),
-            b_(-(3.0/2.0)*a_*rt_)
+            a_((rt_ - 2)/pow3(rt_)),
+            b_(-(3*a_*sqr(rt_) + 1)/(2*rt_))
         {
             if (rt_ < 1)
             {
@@ -123,10 +126,8 @@ public:
             {
                 return ((a_*r + b_)*r + 1)*r;
             }
-            else
-            {
-                return 1;
-            }
+
+            return 1;
         }
 };
 
