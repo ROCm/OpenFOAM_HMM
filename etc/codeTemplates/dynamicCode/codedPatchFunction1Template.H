@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +35,7 @@ SourceFiles
 #define codedPatchFunction1Template${FieldType}_H
 
 #include "PatchFunction1.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,8 +50,12 @@ namespace PatchFunction1Types
 
 class ${typeName}PatchFunction1${FieldType}
 :
-    public PatchFunction1<${TemplateType}>
+    public PatchFunction1<${TemplateType}>,
+    public dictionaryContent
 {
+    //- The parent PatchFunction1 type
+    typedef PatchFunction1<${TemplateType}> parent_bctype;
+
     // Private Member Functions
 
         //- Report a message with the SHA1sum
@@ -85,7 +89,7 @@ public:
         ${typeName}PatchFunction1${FieldType}
         (
             const ${typeName}PatchFunction1${FieldType}& rhs
-        );
+        ) = default;
 
         //- Copy construct, resetting patch
         ${typeName}PatchFunction1${FieldType}

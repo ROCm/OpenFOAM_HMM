@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,9 +134,9 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
 
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
-    fieldNames_.setSize(1, thermo.he().name());
+    fieldNames_.resize(1, thermo.he().name());
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     read(dict);
 }

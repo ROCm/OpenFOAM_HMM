@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "functionObjectTemplate.H"
+#define namespaceFoam  // Suppress <using namespace Foam;>
 #include "fvCFD.H"
 #include "unitConversion.H"
 #include "addToRunTimeSelectionTable.H"
@@ -106,7 +107,8 @@ ${typeName}FunctionObject::~${typeName}FunctionObject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool ${typeName}FunctionObject::read(const dictionary& dict)
+bool
+${typeName}FunctionObject::read(const dictionary& dict)
 {
     if (${verbose:-false})
     {
@@ -121,7 +123,8 @@ bool ${typeName}FunctionObject::read(const dictionary& dict)
 }
 
 
-bool ${typeName}FunctionObject::execute()
+bool
+${typeName}FunctionObject::execute()
 {
     if (${verbose:-false})
     {
@@ -136,7 +139,8 @@ bool ${typeName}FunctionObject::execute()
 }
 
 
-bool ${typeName}FunctionObject::write()
+bool
+${typeName}FunctionObject::write()
 {
     if (${verbose:-false})
     {
@@ -151,7 +155,8 @@ bool ${typeName}FunctionObject::write()
 }
 
 
-bool ${typeName}FunctionObject::end()
+bool
+${typeName}FunctionObject::end()
 {
     if (${verbose:-false})
     {

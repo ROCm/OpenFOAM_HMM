@@ -132,6 +132,13 @@ protected:
         //- Region name (finite-area)
         word regionName_;
 
+
+    // Protected Member Functions
+
+        //- Resize/reset applied flag list for all fieldNames_ entries
+        void resetApplied();
+
+
 private:
 
     // Private Data

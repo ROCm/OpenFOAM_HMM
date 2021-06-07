@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,7 +132,7 @@ bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
             fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
         }
 
-        applied_.setSize(fieldNames_.size(), false);
+        fv::option::resetApplied();
 
         return true;
     }

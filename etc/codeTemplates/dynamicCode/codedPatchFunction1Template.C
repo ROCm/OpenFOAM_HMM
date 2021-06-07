@@ -5,6 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+    Copyright (C) 2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -37,6 +38,7 @@ License
 ${codeInclude}
 //}}} end codeInclude
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -96,23 +98,13 @@ ${typeName}PatchFunction1${FieldType}
     const bool faceValues
 )
 :
-    PatchFunction1<${TemplateType}>(pp, entryName, dict, faceValues)
+    parent_bctype(pp, entryName, dict, faceValues)
 {
     if (${verbose:-false})
     {
-        printMessage("Construct ${typeName} from components");
+        printMessage("Construct ${typeName} PatchFunction1 from dictionary");
     }
 }
-
-
-${typeName}PatchFunction1${FieldType}::
-${typeName}PatchFunction1${FieldType}
-(
-    const ${typeName}PatchFunction1${FieldType}& rhs
-)
-:
-    PatchFunction1<${TemplateType}>(rhs)
-{}
 
 
 ${typeName}PatchFunction1${FieldType}::
@@ -122,13 +114,13 @@ ${typeName}PatchFunction1${FieldType}
     const polyPatch& pp
 )
 :
-    PatchFunction1<${TemplateType}>(rhs, pp)
+    parent_bctype(rhs, pp)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<Field<${TemplateType}>>
+Foam::tmp<Foam::Field<Foam::${TemplateType}>>
 ${typeName}PatchFunction1${FieldType}::value
 (
     const scalar x

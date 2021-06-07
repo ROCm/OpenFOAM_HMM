@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) 2020 PCOpt/NTUA
     Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
@@ -40,6 +40,15 @@ namespace Foam
         defineTypeNameAndDebug(option, 0);
         defineRunTimeSelectionTable(option, dictionary);
     }
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::fv::option::resetApplied()
+{
+    applied_.resize(fieldNames_.size());
+    applied_ = false;
 }
 
 

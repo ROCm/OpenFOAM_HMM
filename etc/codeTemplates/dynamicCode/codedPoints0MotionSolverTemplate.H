@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +36,7 @@ SourceFiles
 #define codedPoints0MotionSolverTemplate_H
 
 #include "points0MotionSolver.H"
+#include "dictionaryContent.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -53,7 +53,8 @@ namespace Foam
 
 class ${typeName}Points0MotionSolver
 :
-    public points0MotionSolver
+    public points0MotionSolver,
+    public dictionaryContent
 {
     // Private Member Functions
 
@@ -70,7 +71,10 @@ class ${typeName}Points0MotionSolver
         ) = delete;
 
         //- No copy assignment
-        void operator=(const ${typeName}Points0MotionSolver&) = delete;
+        void operator=
+        (
+            const ${typeName}Points0MotionSolver&
+        ) = delete;
 
 
 public:
@@ -97,6 +101,12 @@ public:
 
 
     // Member Functions
+
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
 
         //- Provide current points for motion. Uses current motion field
         virtual tmp<pointField> curPoints() const;

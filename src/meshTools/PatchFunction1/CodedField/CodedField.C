@@ -27,6 +27,7 @@ License
 
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -50,6 +51,15 @@ template<class Type>
 void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
 {
     redirectFunctionPtr_.reset(nullptr);
+}
+
+
+template<class Type>
+const Foam::dictionary&
+Foam::PatchFunction1Types::CodedField<Type>::codeContext() const
+{
+    // What else would make sense?
+    return dict_;
 }
 
 
@@ -147,6 +157,10 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     dict_(dict),
     name_(dict.getOrDefault<word>("name", entryName))
 {
+    this->codedBase::setCodeContext(dict_);
+
+    // No additional code chunks...
+
     updateLibrary(name_);
 }
 
@@ -183,15 +197,13 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
 {
     if (!redirectFunctionPtr_)
     {
-        // Construct a PatchFunction1 containing the input code
-        dictionary completeDict(dict_);
+        dictionary constructDict;
+        // Force 'name_' sub-dictionary into existence
+        dictionary& coeffs = constructDict.subDictOrAdd(name_);
 
-        // Override the type to enforce the PatchFunction1::New constructor
-        // to choose our type
-        completeDict.set("type", name_);
-
-        dictionary dict;
-        dict.add(name_, completeDict);
+        coeffs = dict_;  // Copy input code and coefficients
+        coeffs.remove("name");      // Redundant
+        coeffs.set("type", name_);  // Specify our new (redirect) type
 
         redirectFunctionPtr_.reset
         (
@@ -199,10 +211,25 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
             (
                 this->patch(),
                 name_,
-                dict,
+                constructDict,
                 this->faceValues()
             )
         );
+
+        // Forward copy of codeContext to the code template
+        auto* contentPtr =
+            dynamic_cast<dictionaryContent*>(redirectFunctionPtr_.get());
+
+        if (contentPtr)
+        {
+            contentPtr->dict(this->codeContext());
+        }
+        else
+        {
+            WarningInFunction
+                << name_ << " Did not derive from dictionaryContent"
+                << nl << nl;
+        }
     }
     return *redirectFunctionPtr_;
 }

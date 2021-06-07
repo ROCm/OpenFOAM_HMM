@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,11 +44,9 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::source
     tmp<faMatrix<Type>> tmtx(new faMatrix<Type>(field, ds));
     faMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fa::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -56,14 +54,24 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::source
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(h, mtx, fieldi);
             }
         }
@@ -127,11 +135,9 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::operator()
     tmp<faMatrix<Type>> tmtx(new faMatrix<Type>(field, ds));
     faMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fa::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -139,14 +145,24 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::operator()
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(h, rho, mtx, fieldi);
             }
         }
@@ -171,11 +187,9 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::operator()
     tmp<faMatrix<Type>> tmtx(new faMatrix<Type>(field, dsMat));
     faMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fa::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(field.name());
+        const label fieldi = source.applyToField(field.name());
 
         if (fieldi != -1)
         {
@@ -183,14 +197,24 @@ Foam::tmp<Foam::faMatrix<Type>> Foam::fa::optionList::operator()
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << field.name() << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << field.name() << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(rho, mtx, fieldi);
             }
         }
@@ -226,11 +250,9 @@ void Foam::fa::optionList::constrain(faMatrix<Type>& eqn)
 {
     checkApplied();
 
-    forAll(*this, i)
+    for (fa::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(eqn.psi().name());
+        const label fieldi = source.applyToField(eqn.psi().name());
 
         if (fieldi != -1)
         {
@@ -238,14 +260,24 @@ void Foam::fa::optionList::constrain(faMatrix<Type>& eqn)
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying constraint " << source.name()
-                        << " to field " << eqn.psi().name() << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Constrain";
+                }
+                else
+                {
+                    Info<< "(Inactive constrain)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << eqn.psi().name() << endl;
+            }
+
+            if (ok)
+            {
                 source.constrain(eqn, fieldi);
             }
         }
@@ -261,11 +293,9 @@ void Foam::fa::optionList::correct
 {
     const word& fieldName = field.name();
 
-    forAll(*this, i)
+    for (fa::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -273,14 +303,24 @@ void Foam::fa::optionList::correct
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Correcting source " << source.name()
-                        << " for field " << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Correct";
+                }
+                else
+                {
+                    Info<< "(Inactive correct)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.correct(field);
             }
         }

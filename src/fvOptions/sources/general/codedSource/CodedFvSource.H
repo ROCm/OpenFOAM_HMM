@@ -58,6 +58,14 @@ Description
         field is the name of the field in the fields list
         eqn is the fvMatrix
 
+    These are in addition to the usual code entries:
+    \plaintable
+       codeInclude | include files
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       localCode   | c++; local static functions
+    \endplaintable
+
 Usage
     Example usage in controlDict:
     \verbatim
@@ -89,7 +97,7 @@ Usage
                 heSource -= 0.1*sqr(time.value())*V;
             #};
 
-            codeContrain
+            codeConstrain
             #{
                 Pout<< "**codeConstrain**" << endl;
             #};
@@ -97,14 +105,13 @@ Usage
     }
     \endverbatim
 
-
 SourceFiles
     codedSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CodedSource_H
-#define CodedSource_H
+#ifndef fv_CodedFvSource_H
+#define fv_CodedFvSource_H
 
 #include "cellSetOption.H"
 #include "codedBase.H"
@@ -137,7 +144,7 @@ protected:
         string codeConstrain_;
 
         //- Underlying code
-        mutable autoPtr<fv::option> redirectFvOptionPtr_;
+        mutable autoPtr<fv::option> redirectOptionPtr_;
 
 
     // Protected Member Functions
@@ -190,7 +197,7 @@ public:
     // Member Functions
 
         //- Dynamically compiled fvOption
-        option& redirectFvOption() const;
+        fv::option& redirectOption() const;
 
 
     // Evaluation
@@ -239,8 +246,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "CodedSource.C"
-    #include "CodedSourceIO.C"
+    #include "CodedFvSource.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

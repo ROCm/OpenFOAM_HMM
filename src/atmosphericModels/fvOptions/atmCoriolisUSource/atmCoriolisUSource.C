@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 CENER
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,9 +109,9 @@ Foam::fv::atmCoriolisUSource::atmCoriolisUSource
             << endl;
     }
 
-    fieldNames_.setSize(1, "U");
+    fieldNames_.resize(1, "U");
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 
     Log << "    Applying atmCoriolisUSource to: " << fieldNames_[0] << endl;
 }

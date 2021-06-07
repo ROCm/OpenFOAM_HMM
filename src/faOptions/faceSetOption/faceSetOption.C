@@ -204,7 +204,7 @@ Foam::fa::faceSetOption::faceSetOption
 
 bool Foam::fa::faceSetOption::isActive()
 {
-    if (option::isActive() && inTimeLimits(mesh_.time().value()))
+    if (fa::option::isActive() && inTimeLimits(mesh_.time().value()))
     {
         // Update the face set if the mesh is changing
         if (mesh_.changing())
@@ -229,7 +229,7 @@ bool Foam::fa::faceSetOption::isActive()
 
 bool Foam::fa::faceSetOption::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fa::option::read(dict))
     {
         if (coeffs_.readIfPresent("timeStart", timeStart_))
         {

@@ -84,8 +84,8 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the "options" sub-dictionary if present otherwise return dict
-        const dictionary& optionsDict(const dictionary& dict) const;
+        //- Return "options" sub-dictionary (if present) or return dict
+        static const dictionary& optionsDict(const dictionary& dict);
 
         //- Read options dictionary
         bool readOptions(const dictionary& dict);
@@ -117,8 +117,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        optionList(const fvMesh& mesh);
+        //- Default construct from mesh
+        explicit optionList(const fvMesh& mesh);
 
         //- Construct from mesh and dictionary
         optionList(const fvMesh& mesh, const dictionary& dict);

@@ -126,8 +126,8 @@ Foam::fv::interRegionExplicitPorositySource::interRegionExplicitPorositySource
 {
     if (active_)
     {
-        fieldNames_.setSize(1, UName_);
-        applied_.setSize(1, false);
+        fieldNames_.resize(1, UName_);
+        fv::option::resetApplied();
     }
 }
 

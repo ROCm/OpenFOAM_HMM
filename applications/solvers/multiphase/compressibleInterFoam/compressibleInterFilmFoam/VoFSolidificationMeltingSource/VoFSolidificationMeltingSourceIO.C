@@ -41,10 +41,6 @@ bool Foam::fv::VoFSolidificationMeltingSource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
 
     return false;
 }

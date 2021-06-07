@@ -123,6 +123,12 @@ protected:
         bool active_;
 
 
+    // Protected Member Functions
+
+        //- Resize/reset applied flag list for all fieldNames_ entries
+        void resetApplied();
+
+
 public:
 
     //- Switch write log to Info

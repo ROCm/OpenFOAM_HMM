@@ -4,7 +4,7 @@ interRegionOption/interRegionOption.C
 /* Sources */
 
 generalSources=sources/general
-$(generalSources)/codedSource/codedSource.C
+$(generalSources)/codedSource/codedFvSources.C
 $(generalSources)/semiImplicitSource/semiImplicitSource.C
 
 derivedSources=sources/derived

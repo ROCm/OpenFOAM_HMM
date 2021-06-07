@@ -34,6 +34,16 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
+    The code entries:
+    \plaintable
+       codeInclude | include files
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       localCode   | c++; local static functions
+       code        | c++; patch value assignment
+       codeContext | additional dictionary context for the code
+    \endplaintable
+
 Usage
     Example:
     \verbatim
@@ -42,6 +52,11 @@ Usage
         type    codedFixedValue;
         value   uniform 0;
         name    rampedFixedValue;   // name of generated BC
+
+        codeContext
+        {
+            ...
+        }
 
         code
         #{
@@ -74,6 +89,10 @@ Usage
     }
     \endverbatim
 
+Note
+    The code context dictionary can be supplied separately as the
+    \c codeContext entry.
+
 See also
     Foam::dynamicCode
     Foam::functionEntries::codeStream
@@ -104,6 +123,10 @@ class codedFixedValueFvPatchField
     public fixedValueFvPatchField<Type>,
     protected codedBase
 {
+    //- The parent boundary condition type
+    typedef fixedValueFvPatchField<Type> parent_bctype;
+
+
     // Private Data
 
         //- Dictionary contents for the boundary condition
@@ -124,6 +147,9 @@ class codedFixedValueFvPatchField
 
         //- Clear redirected object(s)
         virtual void clearRedirect() const;
+
+        //- Additional 'codeContext' dictionary to pass through
+        virtual const dictionary& codeContext() const;
 
         //- The code dictionary. Inline "code" or from system/codeDict
         virtual const dictionary& codeDict() const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +54,10 @@ void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
     label count = dict.size();
 
     fieldNames_.resize(count);
-    Su_.resize(count);
-    Sp_.resize(count);
+    Su_.resize(fieldNames_.size());
+    Sp_.resize(fieldNames_.size());
 
-    applied_.resize(count, false);
+    fv::option::resetApplied();
 
     count = 0;
     for (const entry& dEntry : dict)

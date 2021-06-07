@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,33 +38,27 @@ namespace fa
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 const Foam::dictionary& Foam::fa::optionList::optionsDict
 (
     const dictionary& dict
-) const
+)
 {
-    if (dict.found("options"))
-    {
-        return dict.subDict("options");
-    }
-    else
-    {
-        return dict;
-    }
+    return dict.optionalSubDict("options", keyType::LITERAL);
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::fa::optionList::readOptions(const dictionary& dict)
 {
     checkTimeIndex_ = mesh_.time().timeIndex() + 2;
 
     bool allOk = true;
-    forAll(*this, i)
+    for (fa::option& opt : *this)
     {
-        option& bs = this->operator[](i);
-        bool ok = bs.read(dict.subDict(bs.name()));
+        bool ok = opt.read(dict.subDict(opt.name()));
         allOk = (allOk && ok);
     }
     return allOk;
@@ -75,10 +69,9 @@ void Foam::fa::optionList::checkApplied() const
 {
     if (mesh_.time().timeIndex() == checkTimeIndex_)
     {
-        forAll(*this, i)
+        for (const fa::option& opt : *this)
         {
-            const option& bs = this->operator[](i);
-            bs.checkApplied();
+            opt.checkApplied();
         }
     }
 }
@@ -144,6 +137,22 @@ void Foam::fa::optionList::reset(const dictionary& dict)
 }
 
 
+bool Foam::fa::optionList::appliesToField(const word& fieldName) const
+{
+    for (const fa::option& source : *this)
+    {
+        const label fieldi = source.applyToField(fieldName);
+
+        if (fieldi != -1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 bool Foam::fa::optionList::read(const dictionary& dict)
 {
     return readOptions(optionsDict(dict));
@@ -153,12 +162,12 @@ bool Foam::fa::optionList::read(const dictionary& dict)
 bool Foam::fa::optionList::writeData(Ostream& os) const
 {
     // Write list contents
-    forAll(*this, i)
+    for (const fa::option& opt : *this)
     {
         os  << nl;
-        this->operator[](i).writeHeader(os);
-        this->operator[](i).writeData(os);
-        this->operator[](i).writeFooter(os);
+        opt.writeHeader(os);
+        opt.writeData(os);
+        opt.writeFooter(os);
     }
 
     // Check state of IOstream

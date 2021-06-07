@@ -64,7 +64,7 @@ Foam::fv::buoyancyEnergy::buoyancyEnergy
             << "settings are:" << fieldNames_ << exit(FatalError);
     }
 
-    applied_.setSize(fieldNames_.size(), false);
+    fv::option::resetApplied();
 }
 
 

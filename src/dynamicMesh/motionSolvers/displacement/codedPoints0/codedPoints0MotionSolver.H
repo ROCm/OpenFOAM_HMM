@@ -35,10 +35,10 @@ Description
     The entries are:
     \plaintable
        codeInclude | include files
-       codeOptions | include paths; inserted into EXE_INC in Make/options
-       codeLibs    | link line; inserted into LIB_LIBS in Make/options
-       localCode   | c++; local static functions;
-       code        | c++; upon motionSolver::curPoints();
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       localCode   | c++; local static functions
+       code        | c++; upon motionSolver::curPoints()
     \endplaintable
 
     Note that the dynamically generated motionSolver is an points0MotionSolver,

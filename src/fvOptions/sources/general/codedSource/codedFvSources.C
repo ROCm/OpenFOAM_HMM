@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2012-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,47 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CodedSource.H"
+#include "makeFvOption.H"
+#include "CodedFvSource.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
-{
-    codedBase::setCodeContext(coeffs_);
-
-    if (!cellSetOption::read(dict))
-    {
-        return false;
-    }
-
-    coeffs_.readEntry("fields", fieldNames_);
-    applied_.resize(fieldNames_.size(), false);
-
-    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
-
-
-    // Code context chunks
-
-    auto& ctx = codedBase::codeContext();
-
-    ctx.readEntry("codeCorrect", codeCorrect_);
-    ctx.readEntry("codeAddSup", codeAddSup_);
-
-    // ctx.readEntry("codeConstrain", codeConstrain_);
-    ctx.readEntry  // Compatibility
-    (
-        coeffs_.lookupEntryCompat
-        (
-            "codeConstrain",
-            {{ "codeSetValue", 1812 }},
-            keyType::LITERAL
-        ).keyword(),
-        codeConstrain_
-    );
-
-    return true;
-}
+makeFvOption(CodedSource, scalar);
+makeFvOption(CodedSource, vector);
+makeFvOption(CodedSource, sphericalTensor);
+makeFvOption(CodedSource, symmTensor);
+makeFvOption(CodedSource, tensor);
 
 
 // ************************************************************************* //

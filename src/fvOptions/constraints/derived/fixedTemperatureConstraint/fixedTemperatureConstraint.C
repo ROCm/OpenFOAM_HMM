@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,9 +101,9 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
 
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 
-    fieldNames_.setSize(1, thermo.he().name());
+    fieldNames_.resize(1, thermo.he().name());
 
-    applied_.setSize(1, false);
+    fv::option::resetApplied();
 }
 
 

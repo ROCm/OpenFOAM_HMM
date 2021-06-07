@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,7 +182,7 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
             fieldNames_.first() = coeffs_.getOrDefault<word>("U", "U");
         }
 
-        applied_.setSize(fieldNames_.size(), false);
+        fv::option::resetApplied();
 
         coeffs_.readEntry("frequency", frequency_.value());
         coeffs_.readEntry("URef", URefName_);

@@ -36,6 +36,7 @@ SourceFiles
 #define functionObjectTemplate_H
 
 #include "regionFunctionObject.H"
+#include "dictionaryContent.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -55,7 +56,8 @@ class fvMesh;
 
 class ${typeName}FunctionObject
 :
-    public functionObjects::regionFunctionObject
+    public functionObjects::regionFunctionObject,
+    public dictionaryContent
 {
     // Private Data
 
@@ -76,10 +78,16 @@ class ${typeName}FunctionObject
         const fvMesh& mesh() const;
 
         //- No copy construct
-        ${typeName}FunctionObject(const ${typeName}FunctionObject&) = delete;
+        ${typeName}FunctionObject
+        (
+            const ${typeName}FunctionObject&
+        ) = delete;
 
         //- No copy assignment
-        void operator=(const ${typeName}FunctionObject&) = delete;
+        void operator=
+        (
+            const ${typeName}FunctionObject&
+        ) = delete;
 
 public:
 
@@ -97,7 +105,7 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&
+            const dictionary& dict
         );
 
 
@@ -107,7 +115,13 @@ public:
 
     // Member Functions
 
-        //- Read the dictionary
+        //- Code context as a dictionary
+        const dictionary& codeContext() const
+        {
+            return dictionaryContent::dict();
+        }
+
+        //- Read optional controls
         virtual bool read(const dictionary& dict);
 
         //- Execute (at time-step)

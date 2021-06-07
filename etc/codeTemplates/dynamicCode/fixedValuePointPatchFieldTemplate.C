@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
     Copyright (C) YEAR AUTHOR, AFFILIATION
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 #include "pointPatchFieldMapper.H"
 #include "pointFields.H"
 #include "unitConversion.H"
+#include "PatchFunction1.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
@@ -86,7 +87,7 @@ ${typeName}FixedValuePointPatch${FieldType}
     const DimensionedField<${TemplateType}, pointMesh>& iF
 )
 :
-    fixedValuePointPatchField<${TemplateType}>(p, iF)
+    parent_bctype(p, iF)
 {
     if (${verbose:-false})
     {
@@ -98,13 +99,13 @@ ${typeName}FixedValuePointPatch${FieldType}
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
-    const ${typeName}FixedValuePointPatch${FieldType}& ptf,
+    const ${typeName}FixedValuePointPatch${FieldType}& rhs,
     const pointPatch& p,
     const DimensionedField<${TemplateType}, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
 )
 :
-    fixedValuePointPatchField<${TemplateType}>(ptf, p, iF, mapper)
+    parent_bctype(rhs, p, iF, mapper)
 {
     if (${verbose:-false})
     {
@@ -122,7 +123,7 @@ ${typeName}FixedValuePointPatch${FieldType}
     const bool valueRequired
 )
 :
-    fixedValuePointPatchField<${TemplateType}>(p, iF, dict, valueRequired)
+    parent_bctype(p, iF, dict, valueRequired)
 {
     if (${verbose:-false})
     {
@@ -134,10 +135,10 @@ ${typeName}FixedValuePointPatch${FieldType}
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
-    const ${typeName}FixedValuePointPatch${FieldType}& ptf
+    const ${typeName}FixedValuePointPatch${FieldType}& rhs
 )
 :
-    fixedValuePointPatchField<${TemplateType}>(ptf)
+    parent_bctype(rhs)
 {
     if (${verbose:-false})
     {
@@ -149,11 +150,11 @@ ${typeName}FixedValuePointPatch${FieldType}
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
-    const ${typeName}FixedValuePointPatch${FieldType}& ptf,
+    const ${typeName}FixedValuePointPatch${FieldType}& rhs,
     const DimensionedField<${TemplateType}, pointMesh>& iF
 )
 :
-    fixedValuePointPatchField<${TemplateType}>(ptf, iF)
+    parent_bctype(rhs, iF)
 {
     if (${verbose:-false})
     {
@@ -176,7 +177,8 @@ ${typeName}FixedValuePointPatch${FieldType}::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FixedValuePointPatch${FieldType}::updateCoeffs()
+void
+${typeName}FixedValuePointPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
     {
@@ -192,7 +194,7 @@ void ${typeName}FixedValuePointPatch${FieldType}::updateCoeffs()
     ${code}
 //}}} end code
 
-    this->fixedValuePointPatchField<${TemplateType}>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 

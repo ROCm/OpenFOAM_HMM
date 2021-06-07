@@ -30,6 +30,15 @@ Description
     PatchFunction1 with the code supplied by an on-the-fly compiled C++
     expression.
 
+    The code entries:
+    \plaintable
+       codeInclude | include files
+       codeOptions | compiler line: added to EXE_INC (Make/options)
+       codeLibs    | linker line: added to LIB_LIBS (Make/options)
+       localCode   | c++; local static functions
+       code        | c++; return the patch values at (scalar x)
+    \endplaintable
+
 Usage
     Example:
     \verbatim
@@ -38,11 +47,8 @@ Usage
         type            uniformFixedValue;
         uniformValue
         {
-            type            coded;
-            // Explictly supply name of generated PatchFunction1. Only needed
-            // if entryname ('uniformValue') would clash with existing
-            // runtime selection tables.
-            name            myExpression;
+            type  coded;
+            name  myExpression;  // Name of generated PatchFunction1
 
             code
             #{
@@ -50,19 +56,23 @@ Usage
                 Pout<< "** Patch size:" << pp.size() << endl;
                 return tmp<vectorField>::New(pp.size(), vector(1, 0, 0))
             #};
+
+            //codeInclude
+            //#{
+            //    #include "volFields.H"
+            //#};
+
+            //codeOptions
+            //#{
+            //    -I$(LIB_SRC)/finiteVolume/lnInclude
+            //#};
         }
-
-        //codeInclude
-        //#{
-        //    #include "fvCFD.H"
-        //#};
-
-        //codeOptions
-        //#{
-        //    -I$(LIB_SRC)/finiteVolume/lnInclude
-        //#};
     }
     \endverbatim
+
+Note
+    The code context dictionary is simply the dictionary used to specify
+    the PatchFunction1 coefficients.
 
 See also
     Foam::dynamicCode
@@ -125,6 +135,9 @@ protected:
 
         //- Clear redirected object(s)
         virtual void clearRedirect() const;
+
+        //- Additional 'codeContext' dictionary to pass through
+        virtual const dictionary& codeContext() const;
 
         // Get the code (sub)dictionary
         virtual const dictionary& codeDict(const dictionary& dict) const;

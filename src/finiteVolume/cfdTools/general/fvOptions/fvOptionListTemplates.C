@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
     Copyright (C) 2020 PCOpt/NTUA
     Copyright (C) 2020 FOSS GP
 -------------------------------------------------------------------------------
@@ -45,11 +45,9 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::source
     tmp<fvMatrix<Type>> tmtx(new fvMatrix<Type>(field, ds));
     fvMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -57,14 +55,24 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::source
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(mtx, fieldi);
             }
         }
@@ -124,11 +132,9 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
     tmp<fvMatrix<Type>> tmtx(new fvMatrix<Type>(field, ds));
     fvMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -136,14 +142,24 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(rho, mtx, fieldi);
             }
         }
@@ -185,11 +201,9 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
     tmp<fvMatrix<Type>> tmtx(new fvMatrix<Type>(field, ds));
     fvMatrix<Type>& mtx = tmtx.ref();
 
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -197,14 +211,24 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying source " << source.name() << " to field "
-                        << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Apply";
+                }
+                else
+                {
+                    Info<< "(Inactive)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.addSup(alpha, rho, mtx, fieldi);
             }
         }
@@ -291,11 +315,9 @@ void Foam::fv::optionList::constrain(fvMatrix<Type>& eqn)
 {
     checkApplied();
 
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(eqn.psi().name());
+        const label fieldi = source.applyToField(eqn.psi().name());
 
         if (fieldi != -1)
         {
@@ -303,14 +325,24 @@ void Foam::fv::optionList::constrain(fvMatrix<Type>& eqn)
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Applying constraint " << source.name()
-                        << " to field " << eqn.psi().name() << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Constrain";
+                }
+                else
+                {
+                    Info<< "(Inactive constrain)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << eqn.psi().name() << endl;
+            }
+
+            if (ok)
+            {
                 source.constrain(eqn, fieldi);
             }
         }
@@ -326,11 +358,9 @@ void Foam::fv::optionList::correct
 {
     const word& fieldName = field.name();
 
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -338,14 +368,24 @@ void Foam::fv::optionList::correct
 
             source.setApplied(fieldi);
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Correcting source " << source.name()
-                        << " for field " << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug)
+            {
+                if (ok)
+                {
+                    Info<< "Correct";
+                }
+                else
+                {
+                    Info<< "(Inactive correct)";
+                }
+                Info<< " source " << source.name()
+                    << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.correct(field);
             }
         }
@@ -361,25 +401,24 @@ void Foam::fv::optionList::postProcessSens
     const word& designVariablesName
 )
 {
-    forAll(*this, i)
+    for (fv::option& source : *this)
     {
-        option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
             addProfiling(fvopt, "fvOption::postProcessSens." + source.name());
 
-            if (source.isActive())
-            {
-                if (debug)
-                {
-                    Info<< "Post processing sensitivity from source "
-                        << source.name()
-                        << " for field " << fieldName << endl;
-                }
+            const bool ok = source.isActive();
 
+            if (debug && ok)
+            {
+                Info<< "Post processing sensitivity source "
+                    << source.name() << " for field " << fieldName << endl;
+            }
+
+            if (ok)
+            {
                 source.postProcessSens
                 (
                     sensField,

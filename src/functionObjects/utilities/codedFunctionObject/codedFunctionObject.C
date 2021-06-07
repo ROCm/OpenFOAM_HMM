@@ -32,6 +32,7 @@ License
 #include "Time.H"
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "dictionaryContent.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,8 +48,8 @@ namespace functionObjects
         codedFunctionObject,
         dictionary
     );
-}
-}
+} // End namespace functionObjects
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -68,6 +69,14 @@ Foam::string Foam::functionObjects::codedFunctionObject::description() const
 void Foam::functionObjects::codedFunctionObject::clearRedirect() const
 {
     redirectFunctionObjectPtr_.reset(nullptr);
+}
+
+
+const Foam::dictionary&
+Foam::functionObjects::codedFunctionObject::codeContext() const
+{
+    const dictionary* ptr = dict_.findDict("codeContext", keyType::LITERAL);
+    return (ptr ? *ptr : dictionary::null);
 }
 
 
@@ -156,6 +165,22 @@ Foam::functionObjects::codedFunctionObject::redirectFunctionObject() const
             time_,
             constructDict
         );
+
+
+        // Forward copy of codeContext to the code template
+        auto* contentPtr =
+            dynamic_cast<dictionaryContent*>(redirectFunctionObjectPtr_.get());
+
+        if (contentPtr)
+        {
+            contentPtr->dict(this->codeContext());
+        }
+        else
+        {
+            WarningInFunction
+                << name_ << " Did not derive from dictionaryContent"
+                << nl << nl;
+        }
     }
     return *redirectFunctionObjectPtr_;
 }

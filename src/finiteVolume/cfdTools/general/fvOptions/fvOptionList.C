@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,33 +40,27 @@ namespace fv
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 const Foam::dictionary& Foam::fv::optionList::optionsDict
 (
     const dictionary& dict
-) const
+)
 {
-    if (dict.found("options"))
-    {
-        return dict.subDict("options");
-    }
-    else
-    {
-        return dict;
-    }
+    return dict.optionalSubDict("options", keyType::LITERAL);
 }
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::fv::optionList::readOptions(const dictionary& dict)
 {
     checkTimeIndex_ = mesh_.time().timeIndex() + 2;
 
     bool allOk = true;
-    forAll(*this, i)
+    for (fv::option& opt : *this)
     {
-        option& bs = this->operator[](i);
-        bool ok = bs.read(dict.subDict(bs.name()));
+        bool ok = opt.read(dict.subDict(opt.name()));
         allOk = (allOk && ok);
     }
     return allOk;
@@ -76,10 +71,9 @@ void Foam::fv::optionList::checkApplied() const
 {
     if (mesh_.time().timeIndex() == checkTimeIndex_)
     {
-        forAll(*this, i)
+        for (const fv::option& opt : *this)
         {
-            const option& bs = this->operator[](i);
-            bs.checkApplied();
+            opt.checkApplied();
         }
     }
 }
@@ -141,11 +135,9 @@ void Foam::fv::optionList::reset(const dictionary& dict)
 
 bool Foam::fv::optionList::appliesToField(const word& fieldName) const
 {
-    forAll(*this, i)
+    for (const fv::option& source : *this)
     {
-        const option& source = this->operator[](i);
-
-        label fieldi = source.applyToField(fieldName);
+        const label fieldi = source.applyToField(fieldName);
 
         if (fieldi != -1)
         {
@@ -166,12 +158,12 @@ bool Foam::fv::optionList::read(const dictionary& dict)
 bool Foam::fv::optionList::writeData(Ostream& os) const
 {
     // Write list contents
-    forAll(*this, i)
+    for (const fv::option& opt : *this)
     {
         os  << nl;
-        this->operator[](i).writeHeader(os);
-        this->operator[](i).writeData(os);
-        this->operator[](i).writeFooter(os);
+        opt.writeHeader(os);
+        opt.writeData(os);
+        opt.writeFooter(os);
     }
 
     // Check state of IOstream
