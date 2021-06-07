@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2018 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,7 +222,7 @@ class DEShybrid
                 CH2_*max
                 (
                     scalar(0),
-                    CDES_*delta/max(lTurb*g, 1.0e-15*L0_) - 0.5
+                    CDES_*delta/max(lTurb*g, SMALL*L0_) - 0.5
                 )
             );
 
