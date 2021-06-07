@@ -255,7 +255,7 @@ Foam::scalar Foam::Math::incGammaRatio_Q(const scalar a, const scalar x)
 
             scalar sum = 0;
 
-            for (int n = 1; n <= 10; n++)
+            for (label n = 1; n <= 10; ++n)
             {
                 sum += pow((-x), n)/((a + n)*factorial(n));
             }
@@ -393,7 +393,7 @@ Foam::scalar Foam::Math::incGammaRatio_Q(const scalar a, const scalar x)
                 {
                     scalar sum = 0;
 
-                    for (int n = 0; n <= (a - 1); n++)
+                    for (label n = 0; n <= (a - 1); ++n)
                     {
                         sum += pow(x, n)/factorial(n);
                     }
