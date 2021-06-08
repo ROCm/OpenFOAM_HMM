@@ -3,21 +3,23 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-runApplication -s coarseMesh blockMesh -dict system/blockMeshDict.coarse
+restore0Dir
+
+runApplication -s coarse blockMesh -dict system/blockMeshDict.coarse
 
 mkdir constant/coarseMesh
-mv constant/polyMesh constant/coarseMesh
+mv -f constant/polyMesh constant/coarseMesh
 
 runApplication -s fine blockMesh -dict system/blockMeshDict.fine
 
 runApplication -s fine decomposePar
 
-runApplication -s coarseMesh decomposePar -region coarseMesh
+runApplication -s coarse decomposePar -region coarseMesh
 
 runParallel $(getApplication)
 
 #runApplication -s fine reconstructPar
 #
-#runApplication -s coarseMesh reconstructPar -region coarseMesh
+#runApplication -s coarse reconstructPar -region coarseMesh
 
 #------------------------------------------------------------------------------

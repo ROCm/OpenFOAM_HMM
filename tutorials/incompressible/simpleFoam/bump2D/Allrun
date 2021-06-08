@@ -4,36 +4,43 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-canCompile || exit 0    # Dynamic code
+# settings
 
-runApplication blockMesh
+    # operand setups
+    setups="
+    kOmegaSST
+    SpalartAllmaras
+    kEpsilonPhitF
+    "
 
-# Turbulence closure models
-models="
-kOmegaSST
-SpalartAllmaras
-kEpsilonPhitF
-"
+    # flag to enable computations in parallel mode
+    parallel=true
 
+
+#------------------------------------------------------------------------------
+
+#######################################
 # Extract a value (Eg, from boundaryField/bump/value)
-#
-# $1 = dictEntry
-# $2 = inputFile
-# $3 = outputFile
-#
-# only retain values between, but not including the ( ) delimiters.
-# For example,
-# ----
-# value           nonuniform List<scalar>
-# 110
-# (
-# 0.0041520092
-# 0.012577691
-# 0.021250264
-# 0.030176962
-# )
-# ;
-# ----
+# Arguments:
+#    $1 = dictEntry
+#    $2 = inputFile
+#    $3 = outputFile
+# Outputs:
+#    Writes to 'outputFile'
+# Notes:
+#    Only retains values between, but not including the ( ) delimiters.
+#    For example,
+#----
+#    value           nonuniform List<scalar>
+#    110
+#    (
+#    0.0041520092
+#    0.012577691
+#    0.021250264
+#    0.030176962
+#    )
+#    ;
+#######################################
 extractVal()
 {
     if [ -f "$2" ]
@@ -49,39 +56,121 @@ extractVal()
 }
 
 
-# Possibly disable for test: if notTest "$@"
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
 
-if :
-then
-    for model in $models
-    do
-        echo "Processing model: $model"
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
 
-        sed -e "s/RAS_MODEL/$model/g" \
-            constant/turbulenceProperties.template \
-          > constant/turbulenceProperties
+    collection="$1"
 
-        runApplication $(getApplication)
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
 
-        timeDir=$(foamListTimes -latestTime)
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        endTime=$(foamListTimes -latestTime)
 
         # Create datasets for benchmark comparisons
-        extractVal boundaryField.bump.value "$timeDir/Cx" "Cx.$$"
-        extractVal boundaryField.bump.value "$timeDir/wallShearStress" "tau.$$"
-        extractVal boundaryField.bump.value "$timeDir/Cp" "cp.$$"
+        extractVal boundaryField.bump.value "$endTime/Cx" Cx.$$
+        extractVal boundaryField.bump.value "$endTime/wallShearStress" tau.$$
+        extractVal boundaryField.bump.value "$endTime/Cp" cp.$$
 
         echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
         paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
         rm -f Cx.$$ tau.$$ cp.$$
 
-        # Store results in directory of the same name as the model
-        modelDir="$model"
-        rm -rf "$modelDir"
-        mkdir "$modelDir"
-        mv -f log* profiles.dat "$timeDir" postProcessing "$modelDir"
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        mv -f profiles.dat "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
 
         cleanTimeDirectories
-    done
-fi
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+
+    if [ ! -d "$dirSetup" ]
+    then
+        echo "Setup directory: $dirSetup" \
+             "could not be found - skipping execution" 1>&2
+        exit 1
+    fi
+
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    canCompile || exit 0    # Dynamic code
+
+    if [ ! -d constant/polyMesh ]
+    then
+
+        runApplication blockMesh
+
+        runApplication renumberMesh -overwrite -constant
+
+        runApplication checkMesh -allTopology -allGeometry -constant
+
+    fi
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel -s parallel renumberMesh -overwrite
+
+        runParallel $(getApplication)
+
+        runApplication reconstructPar
+
+    else
+
+        runApplication $(getApplication)
+
+    fi
+
+    collect "$setup"
+
+done
+
 
 #------------------------------------------------------------------------------

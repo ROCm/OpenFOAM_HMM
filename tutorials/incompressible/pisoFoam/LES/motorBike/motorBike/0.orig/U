@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,29 +33,35 @@ boundaryField
         type            fixedValue;
         value           uniform (20 0 0);
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform (0 0 0);
         value           uniform (20 0 0);
     }
+
     lowerWall
     {
         type            fixedValue;
         value           uniform (20 0 0);
     }
+
     "motorBike_.*"
     {
         type            noSlip;
     }
+
     upperWall
     {
         type            symmetryPlane;
     }
+
     "(front|back)"
     {
         type            symmetryPlane;
     }
+
     "proc.*"
     {
         type            processor;

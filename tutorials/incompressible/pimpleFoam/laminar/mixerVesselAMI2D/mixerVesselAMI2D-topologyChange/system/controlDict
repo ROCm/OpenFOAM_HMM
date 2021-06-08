@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.2; // 5;
+endTime         0.2;
 
 deltaT          1e-3;
 

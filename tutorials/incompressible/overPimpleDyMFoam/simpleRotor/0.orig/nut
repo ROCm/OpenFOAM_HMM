@@ -28,22 +28,11 @@ boundaryField
         value           uniform 0;
     }
 
-//    left1
-//    {
-//        type            calculated;
-//        value           uniform 0;
-//    }
-//
-//    right1
-//    {
-//        type            calculated;
-//        value           uniform 0;
-//    }
-
     overset
     {
         type            overset;
     }
 }
+
 
 // ************************************************************************* //

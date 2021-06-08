@@ -5,14 +5,16 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 canCompile || exit 0    # Dynamic code
 
-runApplication blockMesh
-runApplication topoSet
-runApplication refineHexMesh c0 -overwrite
-
 restore0Dir
 
-#runApplication $(getApplication)
+runApplication blockMesh
+
+runApplication topoSet
+
+runApplication refineHexMesh c0 -overwrite
+
 runApplication decomposePar -cellDist
+
 runParallel $(getApplication)
 
 runApplication reconstructPar

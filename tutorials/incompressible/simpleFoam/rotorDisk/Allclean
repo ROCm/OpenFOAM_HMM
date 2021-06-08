@@ -3,13 +3,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
+cleanCase0
 
 # Remove surface and features
 rm -rf constant/extendedFeatureEdgeMesh
-rm -f constant/triSurface/rotatingZone.eMesh
-rm -f constant/triSurface/fixed.eMesh
-rm -f 0/pointLevel
-rm -f 0/cellLevel
+rm -rf constant/triSurface
 
 #------------------------------------------------------------------------------

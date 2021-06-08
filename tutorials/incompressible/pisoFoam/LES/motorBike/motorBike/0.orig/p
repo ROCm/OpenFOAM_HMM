@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,27 +24,33 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     lowerWall
     {
         type            zeroGradient;
     }
+
     "motorBike_.*"
     {
         type            zeroGradient;
     }
+
     upperWall
     {
         type            symmetryPlane;
     }
+
     "(front|back)"
     {
         type            symmetryPlane;
     }
+
     "proc.*"
     {
         type            processor;

@@ -10,27 +10,24 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "include/turbulenceModels"
 
-simulationType LES;
-
+simulationType          LES;
 
 LES
 {
-    turbulence      on;
+    turbulence          on;
 
-    printCoeffs     on;
+    printCoeffs         on;
 
-    LESModel       kEqn;
+    LESModel            kEqn;
 
     ${:$LESModel}
 }
-
 
 
 // ************************************************************************* //

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,31 +25,37 @@ boundaryField
         type            cyclicAMI;
         value           uniform 0.00341;
     }
+
     AMI2
     {
         type            cyclicAMI;
         value           uniform 0.00341;
     }
+
     fan
     {
         type            kqRWallFunction;
         value           uniform 0.00341;
     }
+
     door
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.05;
         value           uniform 0.00341;
     }
+
     outlet
     {
         type            zeroGradient;
     }
+
     room
     {
         type            kqRWallFunction;
         value           uniform 0.00341;
     }
+
     desk
     {
         type            kqRWallFunction;

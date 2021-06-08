@@ -21,12 +21,13 @@ ddtSchemes
 
 gradSchemes
 {
-    default         leastSquares; // Gauss linear;
+    default         leastSquares;
 }
 
 divSchemes
 {
     default         none;
+
     div(phi,U)      Gauss DEShybrid
         linear                    // scheme 1
         linearUpwind grad(U)      // scheme 2
@@ -37,11 +38,12 @@ divSchemes
         0                         // Minimum sigma limit (0-1)
         1                         // Maximum sigma limit (0-1)
         1; // 1.0e-03;                  // Limiter of B function, typically 1e-03
-//    div(phi,U)      Gauss LUST grad(U);// linear;
+
     div(phi,k)      Gauss limitedLinear 0.1;
     div(phi,B)      Gauss limitedLinear 0.1;
     div(B)          Gauss linear;
     div(phi,nuTilda) Gauss limitedLinear 0.1;
+
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,8 +33,6 @@ solvers
 
     "(U|nuTilda)"
     {
-        //solver          smoothSolver;
-        //smoother        symGaussSeidel;
         solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       0;

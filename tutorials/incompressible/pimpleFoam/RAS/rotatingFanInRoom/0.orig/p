@@ -25,36 +25,43 @@ boundaryField
         type            cyclicAMI;
         value           uniform 0;
     }
+
     AMI2
     {
         type            cyclicAMI;
         value           uniform 0;
     }
+
     fan
     {
         type            fixedFluxPressure;
         value           uniform 0;
     }
+
     door
     {
         type            fixedFluxPressure;
         value           uniform 0;
     }
+
     outlet
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     room
     {
         type            fixedFluxPressure;
         value           uniform 0;
     }
+
     desk
     {
         type            fixedFluxPressure;
         value           uniform 0;
     }
 }
+
 
 // ************************************************************************* //

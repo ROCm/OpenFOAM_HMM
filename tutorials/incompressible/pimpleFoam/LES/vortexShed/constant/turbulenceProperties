@@ -10,19 +10,22 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType LES;
+simulationType          LES;
 
 LES
 {
     LESModel            SpalartAllmarasDDES;
+
     turbulence          on;
+
     printCoeffs         on;
+
     delta               vanDriest;
+
     vanDriestCoeffs
     {
         delta           cubeRootVol;

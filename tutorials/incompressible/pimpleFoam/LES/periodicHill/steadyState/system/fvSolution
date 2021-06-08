@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,7 +24,6 @@ solvers
         relTol          0.05;
     }
 
-
     "(U|k|nuTilda)"
     {
         solver          PBiCG;
@@ -34,7 +32,6 @@ solvers
         relTol          0.1;
     }
 }
-
 
 SIMPLE
 {

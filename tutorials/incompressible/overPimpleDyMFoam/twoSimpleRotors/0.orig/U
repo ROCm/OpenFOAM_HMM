@@ -39,6 +39,7 @@ boundaryField
        type            uniformFixedValue;
        uniformValue    (0 0 0);
    }
+
    inlet
    {
        type            uniformFixedValue;
@@ -50,5 +51,6 @@ boundaryField
         type            overset;
     }
 }
+
 
 // ************************************************************************* //

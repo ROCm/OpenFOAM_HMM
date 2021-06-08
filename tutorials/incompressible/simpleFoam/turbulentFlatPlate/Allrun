@@ -1,14 +1,21 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-if notTest "$@"
-then
-    models="
+# settings
+
+    # operand setups
+    setups="
     kOmegaSST
+    kEpsilon
     "
 
+    # flag to enable computations in parallel mode
+    parallel=true
+
+    # operand setups for the wall-normal height of the first-cell centre
     declare -A grading_vs_yp
     #level 5 gradings
     grading_vs_yp[0.05]=50000
@@ -29,58 +36,173 @@ then
     #grading_vs_yp[50]=90
     #grading_vs_yp[100]=35
 
-    \cp constant/turbulenceProperties.orig constant/turbulenceProperties
 
-    for model in $models
+#------------------------------------------------------------------------------
+
+#######################################
+# Extract a value (Eg, from boundaryField/bump/value)
+# Arguments:
+#    $1 = dictEntry
+#    $2 = inputFile
+#    $3 = outputFile
+# Outputs:
+#    Writes to 'outputFile'
+# Notes:
+#    Only retains values between, but not including the ( ) delimiters.
+#    For example,
+#----
+#    value           nonuniform List<scalar>
+#    110
+#    (
+#    0.0041520092
+#    0.012577691
+#    0.021250264
+#    0.030176962
+#    )
+#    ;
+#######################################
+extractVal()
+{
+    if [ -f "$2" ]
+    then
+        foamDictionary -entry "$1" -value "$2" | \
+            sed -n '/(/,/)/{ s/[()]//g; /^ *$/d; p}' \
+            > "$3"
+    else
+        # Or some other tag?
+        echo "Not such file: $2" 1>&2
+        echo "0" > "$3"
+    fi
+}
+
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        endTime=$(foamListTimes -latestTime)
+
+        # Create datasets for benchmark comparisons
+        extractVal boundaryField.bottomWall.value "$endTime/Cx" Cx.$$
+        extractVal boundaryField.bottomWall.value "$endTime/wallShearStress" tau.$$
+        extractVal boundaryField.bottomWall.value "$endTime/yPlus" yPlus.$$
+
+        echo "# ccx tau_xx tau_yy tau_zz y+" > profiles.dat
+        paste -d ' ' Cx.$$ tau.$$ yPlus.$$ >> profiles.dat
+        rm -f Cx.$$ tau.$$ yPlus.$$
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        mv -f profiles.dat "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
+
+for i in "${!grading_vs_yp[@]}"
+do
+
+    yp=$i
+    grading=${grading_vs_yp[$yp]}
+
+    sed "s/GRADING/$grading/g" \
+        setups.orig/common/system/blockMeshDict.template > \
+        setups.orig/common/system/blockMeshDict
+
+    for setup in $setups
     do
-        echo "Processing model: $model"
 
-        foamDictionary -entry RAS.RASModel -set "$model" \
-            constant/turbulenceProperties > /dev/null
+        echo ""
+        echo "# Computations for the setup and y+: $setup - $yp"
+        echo ""
 
-        for i in "${!grading_vs_yp[@]}"
-        do
-            yp=$i
-            grading=${grading_vs_yp[$yp]}
+        dirSetup="setups.orig/$setup"
 
-            echo "Mesh: y+ $yp"
+        if [ ! -d "$dirSetup" ]
+        then
+            echo "Setup directory: $dirSetup" \
+                "could not be found - skipping execution" 1>&2
+            exit 1
+        fi
 
-            \rm -rf 0 [1-9]*
-            \cp -rf 0.${model} 0
+        cp -rfL "$dirSetup/0.orig" .
+        cp -rfL "$dirSetup/constant" .
+        cp -rfL "$dirSetup/system" .
+        cp -rf 0.orig/ 0/
 
-            sed "s/GRADING/$grading/g" system/blockMeshDict.template > system/blockMeshDict
+        if [ ! -d constant/polyMesh ]
+        then
 
-            runApplication -s ${model}_${yp} blockMesh
+            runApplication blockMesh
 
-            runApplication -s ${model}_${yp} simpleFoam
+            runApplication renumberMesh -overwrite -constant
 
-            UInf=$(foamDictionary -entry internalField 0/U | sed 's/^.*(\s*\([^ ]*\).*/\1/g')
-            nuInf=$(foamDictionary -entry nu constant/transportProperties | sed 's/^.*\s\(.*\);/\1/g')
+            runApplication checkMesh -allTopology -allGeometry -constant
 
-            timeDir=$(foamListTimes -latestTime)
+        fi
 
-            echo "UInf = $UInf"
+        if [ "$parallel" = true ]
+        then
 
-            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/Cx | \
-                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
-            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/wallShearStress | \
-                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
-            foamDictionary -entry boundaryField.bottomWall.value -value $timeDir/yPlus | \
-                sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > yp.$$
+            runApplication decomposePar
 
-            echo "# ccx tau_xx tau_yy tau_zz" > tauw_${model}_${yp}.dat
-            paste -d ' ' Cx.$$ tau.$$ >> tauw_${model}_${yp}.dat
-            echo "# ccx y+" > yplus_${model}_${yp}.dat
-            paste -d ' ' Cx.$$ yp.$$ >> yplus_${model}_${yp}.dat
-            \rm -f Cx.$$ tau.$$ yp.$$
+            runParallel $(getApplication)
 
-            ./plot $UInf $nuInf $model $yp
+            runApplication reconstructPar
 
-            # Optionally store the results
-            #mv $timeDir ${model}_${yp}.${timeDir}
-        done
-        mv postProcessing postProcessing-${model}
+        else
+
+            runApplication $(getApplication)
+
+        fi
+
+        collect "$setup/$yp"
+
     done
-fi
 
-# -----------------------------------------------------------------------------
+    rm -rf 0.orig
+    rm -rf constant
+    rm -rf system
+
+done
+
+
+#-----------------------------------------------------------------------------

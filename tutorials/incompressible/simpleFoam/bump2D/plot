@@ -3,121 +3,163 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Turbulence closure models
-models=('kOmegaSST' 'SpalartAllmaras' 'kEpsilonPhitF')
+# settings
 
-# Note: CFL3D data available from:
-# https://turbmodels.larc.nasa.gov/bump_sa.html
-# The CFL3D-SpalartAllmaras datasets of Cf and Cp:
-# Cf = https://turbmodels.larc.nasa.gov/Bump/SA/cf_bump.dat
-# Cp = https://turbmodels.larc.nasa.gov/Bump/SA/cp_bump.dat
+    # operand setups
+    setups="
+    kOmegaSST
+    SpalartAllmaras
+    kEpsilonPhitF
+    "
+
+    # reference velocity scale
+    Uref="69.44"
+
+    # Note: CFL3D data available from:
+    # https://turbmodels.larc.nasa.gov/bump_sa.html
+    # The CFL3D-SpalartAllmaras datasets of Cf and Cp:
+    # Cf = https://turbmodels.larc.nasa.gov/Bump/SA/cf_bump.dat
+    # Cp = https://turbmodels.larc.nasa.gov/Bump/SA/cp_bump.dat
+
 
 #------------------------------------------------------------------------------
 
-plotCf() {
-    declare -a resultSet=("${!1}")
-    declare -a modelSet=("${!2}")
+plot_x_vs_Cf() {
 
-    graphNameCf="bump2D_cf.png"
-    echo "Creating skin friction coefficient graph to $graphNameCf"
-    gnuplot<<PLT_CF
+    Uref="$1"
+    shift 1
+    setups=$@
+
+    n=0
+    for setup in $setups
+    do
+        sampleFiles[$n]="results/$setup/profiles.dat"
+        n=$(($n+1))
+    done
+
+    image="plots/x_vs_Cf.png"
+
+    gnuplot<<PLT_X_CF
     set terminal pngcairo font "helvetica,20" size 1000, 1000
-    set xrange [0:1.5]
-    set yrange [0:0.008]
     set grid
     set key bottom right
-    set xlabel "x"
-    set ylabel "C_f" rotate by 0
-    set output "$graphNameCf"
-
-    results="${resultSet[*]}"
-    models="${modelSet[*]}"
-    Uref = 69.44
-
     set lmargin 10
     set rmargin 1.5
     set bmargin 3.2
+    set xrange [0:1.5]
+    set yrange [0:0.008]
+    set xlabel "x"
+    set ylabel "C_f"
+    set output "$image"
+
+    # OpenFOAM
+        models="${setups[*]}"
+        samples="${sampleFiles[*]}"
+        Uref="$Uref"
 
 #    plot \
 #        "cf_bump_cfl3d_sa.dat" every 10 u 1:2 t "CFL3D" \
 #        w p ps 3 pt 6 lw 2 lc rgb "red", \
-#        for [i=1:words(results)] word(results, i) \
+#        for [i=1:words(samples)] word(samples, i) \
 #        u 1:(sqrt(\$2*\$2+\$3*\$3+\$4*\$4)/(0.5*Uref*Uref)) \
-#        t word(models, i) with lines
+#        t word(models, i) w l
 
     plot \
-        for [i=1:words(results)] word(results, i) \
+        for [i=1:words(samples)] word(samples, i) \
         u 1:(sqrt(\$2*\$2+\$3*\$3+\$4*\$4)/(0.5*Uref*Uref)) \
-        t word(models, i) with lines
-
-PLT_CF
+        t word(models, i) w l
+PLT_X_CF
 }
 
 
-plotCp() {
-    declare -a resultSet=("${!1}")
-    declare -a modelSet=("${!2}")
+plot_x_vs_Cp() {
 
-    graphNameCp="bump2D_cp.png"
-    echo "Creating pressure coefficient graph to $graphNameCp"
-    gnuplot<<PLT_CP
+    Uref="$1"
+    shift 1
+    setups=$@
+
+    n=0
+    for setup in $setups
+    do
+        sampleFiles[$n]="results/$setup/profiles.dat"
+        n=$(($n+1))
+    done
+
+    image="plots/x_vs_Cp.png"
+
+    gnuplot<<PLT_X_CP
     set terminal pngcairo font "helvetica,20" size 1000, 1000
-    set xrange [0:1.5]
-    set yrange [0.4:-0.8]
     set grid
     set key bottom right
-    set xlabel "x"
-    set ylabel "C_p" rotate by 0
-    set output "$graphNameCp"
-
-    results="${resultSet[@]}"
-    models="${modelSet[@]}"
-    Uref = 69.44
-
     set lmargin 10
     set rmargin 1.5
     set bmargin 3.2
+    set xrange [0:1.5]
+    set yrange [0.4:-0.8]
+    set xlabel "x"
+    set ylabel "C_p"
+    set output "$image"
+
+    # OpenFOAM
+        models="${setups[*]}"
+        samples="${sampleFiles[*]}"
+        Uref="$Uref"
 
 #    plot \
 #        "cp_bump_cfl3d_sa.dat" every 10 u 1:2 t "CFL3D" \
 #        w p ps 3 pt 6 lw 2 lc rgb "red", \
-#        for [i=1:words(results)] word(results, i) \
-#        u (\$1):(\$5) t word(models, i) with lines
+#        for [i=1:words(samples)] word(samples, i) \
+#        u (\$1):(\$5) t word(models, i) w l
 
     plot \
-        for [i=1:words(results)] word(results, i) \
-        u (\$1):(\$5) t word(models, i) with lines
-
-PLT_CP
+        for [i=1:words(samples)] word(samples, i) \
+        u (\$1):(\$5) t word(models, i) w l
+PLT_X_CP
 }
 
 
+#------------------------------------------------------------------------------
+
+# Requires gnuplot
+command -v gnuplot >/dev/null || {
+    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Requires awk
+command -v awk >/dev/null || {
+    echo "FOAM FATAL ERROR: awk not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+# Check "results" directory
+[ -d "results" ] || {
+    echo "FOAM FATAL ERROR: No results directory found - skipping graph creation" 1>&2
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+
 if notTest "$@"
 then
-    # Create validation plots
 
-    # Require gnuplot
-    command -v gnuplot >/dev/null || {
-        echo "gnuplot not found - skipping graph creation" 1>&2
-        exit 1
-    }
+    dirPlots="plots/$setup"
+    [ -d "$dirPlots" ] || mkdir -p "$dirPlots"
 
-    # Require awk
-    command -v awk >/dev/null || {
-        echo "awk not found - skipping graph creation" 1>&2
-        exit 1
-    }
+    echo ""
+    echo "# Plots for the skin friction coefficient"
+    echo ""
 
-    modelResults=()
-    n=0
-    for model in "${models[@]}"
-    do
-        modelResults[$n]="${model}/profiles.dat"
-        n=$(($n+1))
-    done
+    plot_x_vs_Cf "$Uref" $setups
 
-    plotCp modelResults[@] models[@]
-    plotCf modelResults[@] models[@]
+    echo ""
+    echo "# Plots for the pressure coefficient"
+    echo ""
+
+    plot_x_vs_Cp "$Uref" $setups
+
 fi
+
 
 # ------------------------------------------------------------------------------

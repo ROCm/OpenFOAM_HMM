@@ -4,16 +4,68 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-models="
-Maxwell
-Stokes
-"
+# setups
 
-endTime=2
-if notTest "$@"
-then
-    endTime=25
-fi
+    # operand setups
+    setups="
+    Maxwell
+    Stokes
+    "
+
+    # flag to enable computations in parallel mode
+    parallel=true
+
+
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
 
 if ! canCompile
 then
@@ -21,47 +73,62 @@ then
     exit 0
 fi
 
+
 #------------------------------------------------------------------------------
 
-# Compute the case in 'serial' mode, and collect the data
-#
-# $1 = endTime
-# $* = models
-# ----
-serialRun() {
-    endTime=$1
-    shift 1
-    models=$*
+for setup in $setups
+do
 
-    sed "s|END_TIME|$endTime|g" system/controlDict.template \
-        > system/controlDict
-    resultDir="results"
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
 
-    runApplication blockMesh
-    wmake validation/WatersKing
+    dirSetup="setups.orig/$setup"
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
 
-    for model in $models
-    do
-        sed "s|LAMINAR_MODEL|$model|g" constant/turbulenceProperties.template \
-            > constant/turbulenceProperties
+    if [ ! -d constant/polyMesh ]
+    then
 
-        # Compute numerical data
+        runApplication blockMesh
+
+        runApplication renumberMesh -overwrite -constant
+
+        runApplication checkMesh -allTopology -allGeometry -constant
+    fi
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel $(getApplication)
+
+        runApplication reconstructPar
+
+    else
+
         runApplication $(getApplication)
+
+    fi
+
+    if notTest "$@"
+    then
+        # postprocessing
         tail -n +4 postProcessing/probes/0/U  | \
-            tr -s " " | tr -d '(' | cut -d " " -f2-3 > "${model}.txt"
+            tr -s " " | tr -d '(' | cut -d " " -f2-3 > \
+            postProcessing/probes/0/Unp
+    fi
 
-        # Collect numerical data
-        modelDir="$resultDir/$model"
-        [ -d "$modelDir" ] || mkdir -p "$modelDir"
-        mv -f postProcessing log.* "$modelDir"
-        cleanTimeDirectories
-    done
+    collect "$setup"
 
-    runApplication WatersKing
-}
+done
 
-#------------------------------------------------------------------------------
+( cd validation/WatersKing && wmake )
 
-serialRun $endTime $models
+runApplication WatersKing
+
 
 #------------------------------------------------------------------------------

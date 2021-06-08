@@ -10,18 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  LES;
+simulationType      LES;
 
 LES
 {
     LESModel        SpalartAllmarasIDDES;
+
     printCoeffs     no;
+
     turbulence      yes;
+
     delta           IDDESDelta;
 
     IDDESDeltaCoeffs
@@ -32,5 +34,6 @@ LES
         }
     }
 }
+
 
 // ************************************************************************* //

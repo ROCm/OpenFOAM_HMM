@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      topoSetDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 actions
@@ -59,5 +58,6 @@ actions
         cos     0.3;    // Tolerance (max cos of angle)
     }
 );
+
 
 // ************************************************************************* //

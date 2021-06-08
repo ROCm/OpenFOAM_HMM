@@ -25,34 +25,41 @@ boundaryField
         type            cyclicAMI;
         value           uniform 1e-5;
     }
+
     AMI2
     {
         type            cyclicAMI;
         value           uniform 1e-5;
     }
+
     fan
     {
         type            nutkWallFunction;
         value           uniform 1e-5;
     }
+
     door
     {
         type            zeroGradient;
     }
+
     outlet
     {
         type            zeroGradient;
     }
+
     room
     {
         type            nutkWallFunction;
         value           uniform 1e-5;
     }
+
     desk
     {
         type            nutkWallFunction;
         value           uniform 1e-5;
     }
 }
+
 
 // ************************************************************************* //

@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    "p|pa"
+    "(p|pa)"
     {
         solver          GAMG;
         smoother        GaussSeidel;
@@ -37,7 +37,7 @@ solvers
         $p;
     }
 
-    "U|Ua|nuTilda|nuaTilda|yWall|da"
+    "(U|Ua|nuTilda|nuaTilda|yWall|da)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
@@ -74,5 +74,6 @@ cache
 {
     grad(U);
 }
+
 
 // ************************************************************************* //

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      nuTilda;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,30 +25,36 @@ boundaryField
         type            fixedValue;
         value           uniform 0.05;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 0.05;
         value           uniform 0.05;
     }
+
     lowerWall
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     "motorBike_.*"
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     upperWall
     {
         type            symmetryPlane;
     }
+
     "(front|back)"
     {
         type            symmetryPlane;
     }
+
     "proc.*"
     {
         type            processor;

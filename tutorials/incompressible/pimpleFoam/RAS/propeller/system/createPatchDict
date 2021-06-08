@@ -50,7 +50,6 @@ patches
         patches (innerCylinderSmall_slave);
     }
 
-
     {
         name inlet;
         patchInfo
@@ -70,5 +69,6 @@ patches
         set outletFaces;
     }
 );
+
 
 // ************************************************************************* //

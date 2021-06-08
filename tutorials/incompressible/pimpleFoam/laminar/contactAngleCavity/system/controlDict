@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,10 +51,11 @@ functions
 {
     pointHistory
     {
-        type pointHistory;
+        type            pointHistory;
         refHistoryPoint (0 0.01 0);
-        fileName leftPoint.txt;
+        fileName        leftPoint.txt;
     }
 }
+
 
 // ************************************************************************* //

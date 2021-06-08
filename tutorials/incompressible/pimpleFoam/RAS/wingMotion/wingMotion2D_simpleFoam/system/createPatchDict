@@ -12,8 +12,8 @@ FoamFile
     class       dictionary;
     object      createPatchDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 pointSync false;
 
 patches
@@ -51,5 +51,6 @@ patches
         patches (symBack);
     }
 );
+
 
 // ************************************************************************* //

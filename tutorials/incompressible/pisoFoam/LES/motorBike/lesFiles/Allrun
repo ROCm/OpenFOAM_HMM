@@ -4,13 +4,13 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 # Set-up the LES case
-\cp ../lesFiles/fvS* ../lesFiles/controlDict system/
-\cp ../lesFiles/turbulenceProperties constant/
+cp -f ../lesFiles/fvS* ../lesFiles/controlDict system/
+cp -f ../lesFiles/turbulenceProperties constant/
 
 # restart from iteration 500
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0
-\ls -d processor* | xargs -I {} \mv ./{}/500 ./{}/0
-\ls -d processor* | xargs -I {} \rm -rf ./{}/0/uniform
+ls -d processor* | xargs -I {} rm -rf ./{}/0
+ls -d processor* | xargs -I {} mv -f ./{}/500 ./{}/0
+ls -d processor* | xargs -I {} rm -rf ./{}/0/uniform
 
 runParallel pisoFoam
 

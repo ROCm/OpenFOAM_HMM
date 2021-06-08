@@ -3,7 +3,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
-rm -rf constant/boundaryData *.png
+cleanCase0
+
+rm -rf constant/boundaryData
+rm -f *.png
 
 # -----------------------------------------------------------------------------

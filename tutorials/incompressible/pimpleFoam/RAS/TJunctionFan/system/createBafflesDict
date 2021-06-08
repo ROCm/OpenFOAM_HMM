@@ -19,7 +19,6 @@ FoamFile
 // faces.
 internalFacesOnly true;
 
-
 // Baffles to create.
 baffles
 {
@@ -72,8 +71,6 @@ baffles
             }
         }
     }
-
-
 
     cyclicFaces
     {

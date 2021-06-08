@@ -9,8 +9,6 @@ canCompile || exit 0    # Dynamic code
 
 runApplication decomposePar
 
-runParallel renumberMesh -overwrite
-
 cp -f system/decomposeParDict system/coarseMesh
 
 runApplication -s coarseMesh \

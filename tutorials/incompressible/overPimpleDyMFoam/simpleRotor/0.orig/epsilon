@@ -28,23 +28,11 @@ boundaryField
         value           $internalField;
     }
 
-//    left1
-//    {
-//        type            turbulentMixingLengthDissipationRateInlet;
-//        mixingLength    0.01;       // 1cm - half channel height
-//        value           $internalField;
-//    }
-//
-//    right1
-//    {
-//        type            calculated;
-//        value           $internalField;
-//    }
-
     overset
     {
         type            overset;
     }
 }
+
 
 // ************************************************************************* //

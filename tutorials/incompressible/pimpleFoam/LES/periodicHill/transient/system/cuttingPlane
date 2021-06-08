@@ -10,39 +10,39 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      cuttingPlane;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 functions
 {
-cuttingPlane
-{
-    type            surfaces;
-    libs            (sampling);
-    writeControl    writeTime;
-
-    surfaceFormat   vtk;
-    fields          ( p U );
-
-    interpolationScheme cellPoint;
-
-    surfaces
+    cuttingPlane
     {
-        yNormal
+        type            surfaces;
+        libs            (sampling);
+        writeControl    writeTime;
+
+        surfaceFormat   vtk;
+        fields          ( p U );
+
+        interpolationScheme cellPoint;
+
+        surfaces
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
+            yNormal
             {
-                point   (0 0 0.063);
-                normal  (0 0 1);
+                type            cuttingPlane;
+                planeType       pointAndNormal;
+                pointAndNormalDict
+                {
+                    point   (0 0 0.063);
+                    normal  (0 0 1);
+                }
+                interpolate     true;
             }
-            interpolate     true;
         }
     }
 }
-}
+
 
 // ************************************************************************* //

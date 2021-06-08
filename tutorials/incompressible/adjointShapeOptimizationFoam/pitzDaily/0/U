@@ -28,7 +28,6 @@ boundaryField
 
     outlet
     {
-        //type            zeroGradient;
         type            inletOutlet;
         inletValue      uniform (0 0 0);
     }
@@ -48,5 +47,6 @@ boundaryField
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

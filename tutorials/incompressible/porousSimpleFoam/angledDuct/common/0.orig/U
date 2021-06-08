@@ -24,24 +24,29 @@ boundaryField
     {
         type            noSlip;
     }
+
     back
     {
         type            noSlip;
     }
+
     walls
     {
         type            noSlip;
     }
+
     porosityWall
     {
         type            slip;
         value           $internalField;
     }
+
     inlet
     {
         type            flowRateInletVelocity;
         volumetricFlowRate  constant 0.1;
     }
+
     outlet
     {
         type            inletOutlet;
@@ -49,5 +54,6 @@ boundaryField
         value           $internalField;
     }
 }
+
 
 // ************************************************************************* //

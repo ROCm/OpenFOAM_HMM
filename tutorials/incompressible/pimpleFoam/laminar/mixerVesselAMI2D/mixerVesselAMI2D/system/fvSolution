@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -22,7 +21,6 @@ solvers
         solver          GAMG;
         smoother        GaussSeidel;
         cacheAgglomeration no;
-
         tolerance        0.02;
         relTol           0;
     }
@@ -83,5 +81,6 @@ relaxationFactors
         "U.*"           1;
     }
 }
+
 
 // ************************************************************************* //

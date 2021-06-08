@@ -11,6 +11,6 @@ runApplication decomposePar
 
 runParallel createBoxTurb
 
-runParallel pimpleFoam
+runParallel $(getApplication)
 
 # ------------------------------------------------------------------------------

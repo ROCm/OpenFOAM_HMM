@@ -1,0 +1,124 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# setups
+
+    # operand setups
+    setups="
+    kEpsilon-nutkWallFunction
+    LaunderSharmaKE-nutkWallFunction
+    "
+
+    # operand exponents of kinematic viscosity values
+    nuExponents="2 3 4 5 6 7 8"
+
+
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        mv -f log.* "$dirResult"
+        mv -f graphs/ "$dirResult"
+        mv -f logs/ "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    if [ ! -d constant/polyMesh ]
+    then
+        runApplication blockMesh
+        runApplication renumberMesh -overwrite -constant
+        runApplication checkMesh -allTopology -allGeometry -constant
+    fi
+
+    echo "# yPlus vs uPlus" > yPlus_vs_uPlus.xy
+
+    for exponent in $nuExponents
+    do
+
+        echo "    Setting nu to 1e-$exponent"
+
+        sed "s|EXPONENT|$exponent|g" constant/transportProperties.template \
+            > constant/transportProperties
+
+        [ -d 0 ] || restore0Dir
+
+        runApplication $(getApplication)
+
+        runApplication foamLog log.boundaryFoam
+
+        if [ -e logs/yPlus_0 ]
+        then
+            yPlus=$(awk < logs/yPlus_0 'END{print $2}')
+            uPlus=$(awk < logs/uPlus_0 'END{print $2}')
+
+            echo "$yPlus $uPlus" >> yPlus_vs_uPlus.xy
+        fi
+
+        collect "$setup/$exponent"
+
+    done
+
+    mv -f yPlus_vs_uPlus.xy results/"$setup"/
+
+done
+
+
+#------------------------------------------------------------------------------

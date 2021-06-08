@@ -28,23 +28,11 @@ boundaryField
         value           uniform 0;
     }
 
-//    left1
-//    {
-//        type            turbulentIntensityKineticEnergyInlet;
-//        intensity       0.05;       // 5% turbulent intensity
-//        value           $internalField;
-//    }
-//
-//    right1
-//    {
-//        type            calculated;
-//        value           $internalField;
-//    }
-
     overset
     {
         type            overset;
     }
 }
+
 
 // ************************************************************************* //

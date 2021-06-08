@@ -26,7 +26,7 @@ gradSchemes
     limited         cellLimited Gauss linear 1;
     grad(U)         $limited;
     grad(k)         $limited;
-    grad(epsilon)     $limited;
+    grad(epsilon)   $limited;
 }
 
 divSchemes
@@ -59,7 +59,8 @@ snGradSchemes
 
 wallDist
 {
-    method meshWave;
+    method          meshWave;
 }
+
 
 // ************************************************************************* //

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,13 +28,17 @@ gradSchemes
 divSchemes
 {
     default         none;
+
     div(phi,Urel)   bounded Gauss linearUpwind limited;
-    div(phi,k)      bounded Gauss upwind;
-    div(phi,epsilon) bounded Gauss upwind;
-    div(phi,omega)  bounded Gauss upwind;
-    div(phi,R)      bounded Gauss upwind;
+
+    turbulence      bounded Gauss upwind;
+    div(phi,k)      $turbulence;
+    div(phi,epsilon) $turbulence;
+    div(phi,omega)  $turbulence;
+    div(phi,nuTilda) $turbulence;
+    div(phi,R)      $turbulence;
     div(R)          Gauss linear;
-    div(phi,nuTilda) bounded Gauss upwind;
+
     div((nuEff*dev2(T(grad(Urel))))) Gauss linear;
 }
 
@@ -56,7 +59,7 @@ snGradSchemes
 
 wallDist
 {
-    method meshWave;
+    method          meshWave;
 }
 
 

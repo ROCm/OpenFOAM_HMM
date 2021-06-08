@@ -9,7 +9,7 @@ decompDict="-decomposeParDict system/decomposeParDict.20"
 # unset decompDict
 
 # copy motorbike surface from resources directory
-\cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
+cp -f "$FOAM_TUTORIALS"/resources/geometry/motorBike.obj.gz constant/triSurface/
 runApplication surfaceFeatureExtract
 
 runApplication blockMesh

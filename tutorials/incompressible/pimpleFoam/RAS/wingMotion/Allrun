@@ -7,7 +7,14 @@ cd "${0%/*}" || exit                                # Run from this directory
 (
     cd wingMotion_snappyHexMesh || exit
 
+    mkdir -p constant/triSurface
+
+    cp -rf \
+        "$FOAM_TUTORIALS"/resources/geometry/wing_5degrees.obj.gz \
+        constant/triSurface/
+
     runApplication blockMesh
+
     runApplication snappyHexMesh -overwrite
 )
 
@@ -16,8 +23,11 @@ cd "${0%/*}" || exit                                # Run from this directory
     cd wingMotion2D_simpleFoam || exit
 
     runApplication extrudeMesh
+
     runApplication createPatch -overwrite
+
     restore0Dir
+
     runApplication simpleFoam
 )
 
@@ -27,12 +37,21 @@ cd "${0%/*}" || exit                                # Run from this directory
     cd wingMotion2D_pimpleFoam || exit
 
     rm -rf constant/polyMesh
-    \cp -r ../wingMotion2D_simpleFoam/constant/polyMesh constant
+
+    cp -rf \
+        ../wingMotion2D_simpleFoam/constant/polyMesh \
+        constant
+
     restore0Dir
+
     runApplication mapFields ../wingMotion2D_simpleFoam -sourceTime latestTime -consistent
-    \mv 0/pointDisplacement.unmapped 0/pointDisplacement
+
+    mv -f 0/pointDisplacement.unmapped 0/pointDisplacement
+
     runApplication decomposePar
+
     runParallel $(getApplication)
+
     runApplication reconstructPar
 )
 

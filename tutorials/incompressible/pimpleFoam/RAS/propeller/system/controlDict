@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,13 +25,10 @@ stopAt          endTime;
 endTime         0.1;
 
 deltaT          1e-5;
-writeControl    adjustable;
-writeInterval   0.001;
 
-////- For testing with moveDynamicMesh
-//deltaT          0.01;
-//writeControl    timeStep;
-//writeInterval   1;
+writeControl    adjustable;
+
+writeInterval   0.001;
 
 purgeWrite      0;
 
@@ -59,5 +55,6 @@ functions
     #include "forces"
     #include "AMIWeights"
 }
+
 
 // ************************************************************************* //

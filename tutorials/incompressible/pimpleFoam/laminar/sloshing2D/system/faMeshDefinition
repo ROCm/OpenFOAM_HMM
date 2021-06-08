@@ -24,12 +24,14 @@ boundary
         ownerPolyPatch      top;
         neighbourPolyPatch  left;
     }
+
     right
     {
         type                patch;
         ownerPolyPatch      top;
         neighbourPolyPatch  right;
     }
+
     frontAndBack
     {
         type                empty;

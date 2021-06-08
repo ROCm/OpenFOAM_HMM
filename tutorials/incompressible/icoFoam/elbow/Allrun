@@ -3,9 +3,15 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-runApplication fluentMeshToFoam elbow.msh
+restore0Dir
+
+runApplication fluentMeshToFoam \
+    ${FOAM_TUTORIALS:?}/resources/geometry/elbow.msh
+
 runApplication $(getApplication)
+
 runApplication foamMeshToFluent
+
 runApplication foamDataToFluent
 
 #------------------------------------------------------------------------------

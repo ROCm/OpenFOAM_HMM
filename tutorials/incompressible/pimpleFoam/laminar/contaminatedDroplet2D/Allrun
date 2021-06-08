@@ -9,9 +9,12 @@ then
     exit 0
 fi
 
+restore0Dir
+
 m4 < ./system/blockMeshDict.m4 > ./system/blockMeshDict
 
 runApplication blockMesh
+
 runApplication makeFaMesh
 
 (cd makePerturbation && wmake)
