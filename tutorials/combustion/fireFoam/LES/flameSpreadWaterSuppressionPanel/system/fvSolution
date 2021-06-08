@@ -10,10 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -47,7 +45,6 @@ solvers
         tolerance           1e-6;
         relTol              0;
         smoother            GaussSeidel;
-        //nCellsInCoarsestLevel 1;
     };
 
     ph_rgh

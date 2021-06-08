@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      createPatchDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // This application/dictionary controls:
@@ -76,4 +75,6 @@ patches
         set inletFace;
     }
 );
+
+
 // ************************************************************************* //

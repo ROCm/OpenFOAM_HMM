@@ -5,13 +5,11 @@
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      radiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,5 +23,6 @@ absorptionEmissionModel none;
 scatterModel    none;
 
 sootModel none;
+
 
 // ************************************************************************* //

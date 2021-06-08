@@ -39,7 +39,6 @@ solvers
         tolerance       0;
         relTol          0;
     };
-
 }
 
 SIMPLE

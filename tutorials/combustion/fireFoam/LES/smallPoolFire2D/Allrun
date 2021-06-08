@@ -3,11 +3,13 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-runApplication blockMesh
-runApplication topoSet
-runApplication createPatch -overwrite
+restore0Dir
 
-cp 0/ph_rgh.orig 0/ph_rgh
+runApplication blockMesh
+
+runApplication topoSet
+
+runApplication createPatch -overwrite
 
 runApplication $(getApplication)
 

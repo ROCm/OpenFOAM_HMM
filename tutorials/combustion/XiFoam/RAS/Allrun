@@ -38,7 +38,7 @@ then
         #     cp -r ../moriyoshiHomogeneous/0.005 .
 
         lastTimeStep=$(foamListTimes -case ../moriyoshiHomogeneous -latestTime)
-        cp -r ../moriyoshiHomogeneous/$lastTimeStep .
+        cp -rf ../moriyoshiHomogeneous/"$lastTimeStep" .
 
         setControlDict
         runApplication $(getApplication)
@@ -52,10 +52,13 @@ then
         cd moriyoshiHomogeneousHydrogen || exit
 
         setCombustionProperties
-        mv constant/thermophysicalProperties \
+
+        mv -f constant/thermophysicalProperties \
            constant/thermophysicalProperties.propane
-        mv constant/thermophysicalProperties.hydrogen \
+
+        mv -f constant/thermophysicalProperties.hydrogen \
            constant/thermophysicalProperties
+
         runApplication $(getApplication)
     )
 fi

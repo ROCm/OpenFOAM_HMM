@@ -8,9 +8,8 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       volScalarField;
-    location    "0";
     object      alphat;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,11 +22,30 @@ internalField   uniform 0;
 
 boundaryField
 {
-    back  { type    wedge; }
-    front { $back; }
-    liner { $:wall.alphat; }
-    cylinderHead { $liner; }
-    piston { $liner; }
+    back
+    {
+        type            wedge;
+    }
+
+    front
+    {
+        $back;
+    }
+
+    liner
+    {
+        $:wall.alphat;
+    }
+
+    cylinderHead
+    {
+        $liner;
+    }
+
+    piston
+    {
+        $liner;
+    }
 }
 
 

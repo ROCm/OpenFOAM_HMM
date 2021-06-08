@@ -10,10 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -33,7 +31,6 @@ solvers
         relTol              0.01;
         smoother            GaussSeidel;
         cacheAgglomeration  true;
-        //nCellsInCoarsestLevel   10;
         nCellsInCoarsestLevel   1;
         agglomerator    faceAreaPair;
         mergeLevels     1;
@@ -46,7 +43,6 @@ solvers
         relTol              0;
         smoother            GaussSeidel;
         cacheAgglomeration  true;
-        //nCellsInCoarsestLevel 10;
         nCellsInCoarsestLevel 1;
         agglomerator     faceAreaPair;
         mergeLevels      1;
@@ -84,7 +80,6 @@ solvers
         relTol          0;
     };
 
-    //hs
     h
     {
         solver          PBiCGStab;
@@ -108,7 +103,6 @@ solvers
         tolerance       1e-06;
         relTol          0;
     }
-
 }
 
 PIMPLE

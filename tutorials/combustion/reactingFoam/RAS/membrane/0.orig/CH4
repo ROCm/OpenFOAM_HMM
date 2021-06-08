@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      CH4;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "include"
+#include        "include"
 
 dimensions      [0 0 0 0 0 0 0];
 
@@ -28,27 +27,32 @@ boundaryField
         type            fixedValue;
         value           uniform $:sleeve.CH4;
     }
+
     inletPipe
     {
         type            fixedValue;
         value           uniform $:pipe.CH4;
     }
+
     outletSleeve
     {
         type            inletOutlet;
         inletValue      uniform $:sleeve.CH4;
         value           uniform $:sleeve.CH4;
     }
+
     outletPipe
     {
         type            inletOutlet;
         inletValue      uniform $:pipe.CH4;
         value           uniform $:pipe.CH4;
     }
+
     wall
     {
         type            zeroGradient;
     }
+
     membraneSleeve
     {
         type            semiPermeableBaffleMassFraction;
@@ -56,6 +60,7 @@ boundaryField
         c               0.1;
         value           uniform $:sleeve.CH4;
     }
+
     membranePipe
     {
         type            semiPermeableBaffleMassFraction;

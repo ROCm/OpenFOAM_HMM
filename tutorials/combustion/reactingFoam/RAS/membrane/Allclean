@@ -5,6 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -f constant/triSurface/membrane-*.stl.gz
+rm -rf constant/triSurface
 
 #------------------------------------------------------------------------------

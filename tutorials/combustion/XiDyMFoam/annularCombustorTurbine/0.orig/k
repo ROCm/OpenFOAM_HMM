@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,16 +28,19 @@ boundaryField
         intensity       0.05;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     wall
     {
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

@@ -12,7 +12,6 @@ FoamFile
     class       dictionary;
     object      refineMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Cells to refine; name of cell set
@@ -61,5 +60,6 @@ geometricCut    false;
 
 // Write meshes from intermediate steps
 writeMesh       false;
+
 
 // ************************************************************************* //

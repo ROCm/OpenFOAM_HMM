@@ -21,12 +21,18 @@ method          structured;
 structuredCoeffs
 {
     method      simple;
-    patches     (region0_to_panelRegion_wallPanel region0_to_panelRegion_internalWallPanel_top region0_to_panelRegion_internalWallPanel_bottom);
+    patches
+    (
+        region0_to_panelRegion_wallPanel
+        region0_to_panelRegion_internalWallPanel_top
+        region0_to_panelRegion_internalWallPanel_bottom
+    );
 
     coeffs
     {
         n       (2 1 4);
     }
 }
+
 
 // ************************************************************************* //

@@ -3,7 +3,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-./Allrun.mesh
+./Allrun.pre
 
 restore0Dir
 
@@ -11,6 +11,6 @@ runApplication decomposePar -force
 
 runParallel potentialFoam -pName pPotential -initialiseUBCs
 
-runParallel XiDyMFoam
+runParallel $(getApplication)
 
 #------------------------------------------------------------------------------

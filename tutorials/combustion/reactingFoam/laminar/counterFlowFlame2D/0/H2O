@@ -25,18 +25,20 @@ boundaryField
         type            fixedValue;
         value           uniform 0;
     }
+
     air
     {
         type            fixedValue;
         value           uniform 0;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
-
     }
+
     frontAndBack
     {
         type            empty;

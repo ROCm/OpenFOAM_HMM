@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -30,14 +29,16 @@ divSchemes
     default         none;
 
     div(phi,U)      Gauss linearUpwind grad(U);
+
     div(phi,e)      Gauss linearUpwind grad(e);
+    div(phi,K)      Gauss linear;
 
     div(phiv,p)     Gauss linear;
-    div(phi,K)      Gauss linear;
     div(meshPhi,p)  Gauss linear;
 
-    div(phi,k)      Gauss upwind;
-    div(phi,epsilon) Gauss upwind;
+    turbulence      Gauss upwind;
+    div(phi,k)      $turbulence;
+    div(phi,epsilon) $turbulence;
 
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
@@ -54,7 +55,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default corrected;
+    default         corrected;
 }
 
 fluxRequired
@@ -62,5 +63,6 @@ fluxRequired
     default         no;
     p;
 }
+
 
 // ************************************************************************* //

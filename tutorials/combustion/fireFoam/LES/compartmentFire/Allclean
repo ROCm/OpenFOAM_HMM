@@ -3,10 +3,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
+cleanCase0
 
 rm -rf constant/panelRegion/polyMesh
-rm -f constant/polyMesh/boundary
 rm -f validation/*.eps
 
 #------------------------------------------------------------------------------

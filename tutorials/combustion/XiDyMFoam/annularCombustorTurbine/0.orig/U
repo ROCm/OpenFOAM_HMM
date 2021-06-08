@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -33,17 +32,20 @@ boundaryField
         rpm             12732; // ut=40,r=3e-2,omega=ut/r,rpm=omega*60/(2*pi)
         value           uniform (0 0 0);
     }
+
     outlet
     {
         type            pressureInletOutletVelocity;
         inletValue      (0 0 0);
         value           $internalField;
     }
+
     wall
     {
         type            movingWallVelocity;
         value           uniform (0 0 0);
     }
 }
+
 
 // ************************************************************************* //

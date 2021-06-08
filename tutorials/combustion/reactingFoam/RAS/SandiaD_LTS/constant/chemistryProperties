@@ -1,16 +1,16 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  com                                   |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 FoamFile
 {
     version         2;
     format          ascii;
     class           dictionary;
-    location        "constant";
     object          chemistryProperties;
 }
 
@@ -20,7 +20,7 @@ chemistryType
     method          TDAC;
 }
 
-chemistry       on;
+chemistry       off;
 
 importantSpecies
 {

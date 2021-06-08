@@ -3,9 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
+cleanCase0
 
-rm -f 0/ph_rgh
 rm -rf constant/filmRegion/polyMesh
 rm -rf constant/pyrolysisRegion/polyMesh
 rm -rf system/pyrolysisRegion/filmRegion

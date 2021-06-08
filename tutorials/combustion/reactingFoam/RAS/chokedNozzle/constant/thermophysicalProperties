@@ -10,14 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 thermoType
 {
-
     type            hePsiThermo;
     mixture         reactingMixture;
     transport       sutherland;
@@ -34,5 +32,6 @@ foamChemistryFile "<constant>/reactionsGRI";
 foamChemistryThermoFile "<constant>/thermo.compressibleGasGRI";
 
 dpdt false;
+
 
 // ************************************************************************* //

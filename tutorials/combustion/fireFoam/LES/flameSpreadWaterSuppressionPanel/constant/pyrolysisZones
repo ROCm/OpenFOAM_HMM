@@ -8,9 +8,8 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
-    location    "constant";
     object      pyrolysisZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -32,7 +31,7 @@ pyrolysis
 
         radFluxName     qr;
 
-        moveMesh        false; // true;
+        moveMesh        false;
         minimumDelta    1e-6;
 
         useChemistrySolvers    true;

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      Ydefault;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,21 +25,25 @@ boundaryField
         type            fixedValue;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     wall
     {
         type            zeroGradient;
     }
+
     membraneSleeve
     {
         type            semiPermeableBaffleMassFraction;
         value           $internalField;
     }
+
     membranePipe
     {
         type            semiPermeableBaffleMassFraction;

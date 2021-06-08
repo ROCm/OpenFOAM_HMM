@@ -10,20 +10,14 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//thermoType  hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>;
 
 thermoType
 {
     type            heheuPsiThermo;
     mixture         inhomogeneousMixture;
-    //mixture         sprayHomogeneousMixtureDisp;
-    //mixture         sprayInhomogeneousMixture;
-    //mixture         inhomogeneousMixture;
     transport       sutherland;
     thermo          janaf;
     equationOfState perfectGas;
@@ -35,7 +29,6 @@ inertSpecie     AIR;
 
 liquids
 {
-    //liquidComponents ( H2OPS );
     H2OPS
     {
         defaultCoeffs   yes;
@@ -48,7 +41,6 @@ liquids
 
 solids
 {
-    //solidComponents ( );
 }
 
 stoichiometricAirFuelMassRatio 17.1667;

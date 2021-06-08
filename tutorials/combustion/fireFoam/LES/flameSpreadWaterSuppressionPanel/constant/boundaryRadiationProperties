@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      boundaryRadiationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -31,5 +30,6 @@ region0_to_pyrolysisRegion_coupledWall
         type    solidAbsorption;
     }
 }
+
 
 // ************************************************************************* //

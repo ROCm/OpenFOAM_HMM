@@ -3,10 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
+cleanCase0
 
-rm -f 0/ph_rgh
-rm -f 0/polyMesh/cellMap
 rm -rf constant/panelRegion/polyMesh
 
 #------------------------------------------------------------------------------
