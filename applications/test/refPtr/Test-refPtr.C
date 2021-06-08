@@ -85,6 +85,12 @@ int main()
         ptr.reset(new scalarField(5, scalar(15)));
         tfld3.reset(std::move(ptr));
         printInfo(tfld3, true);
+
+
+        ptr.reset(new scalarField(2, scalar(1)));
+        Info<< nl << "const-ref from pointer: " << name(ptr.get()) << nl;
+        tfld3.cref(ptr.get());
+        printInfo(tfld3, true);
     }
 
     Info<< "\nEnd" << endl;

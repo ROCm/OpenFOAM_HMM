@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -341,11 +341,29 @@ inline void Foam::tmp<T>::cref(const T& obj) noexcept
 
 
 template<class T>
+inline void Foam::tmp<T>::cref(const T* p) noexcept
+{
+    clear();
+    ptr_ = const_cast<T*>(p);
+    type_ = (ptr_ ? CREF : PTR);
+}
+
+
+template<class T>
 inline void Foam::tmp<T>::ref(T& obj) noexcept
 {
     clear();
     ptr_ = &obj;
     type_ = REF;
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::ref(T* p) noexcept
+{
+    clear();
+    ptr_ = p;
+    type_ = (ptr_ ? REF : PTR);
 }
 
 

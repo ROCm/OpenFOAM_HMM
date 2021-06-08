@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -110,6 +110,12 @@ int main()
             Info<< "Reset to some other tmp content : ";
             printInfo(tfld2);
         }
+
+        std::unique_ptr<scalarField> ptr(new scalarField(2, scalar(1)));
+
+        Info<< nl << "const-ref from pointer: " << name(ptr.get()) << nl;
+        tfld2.cref(ptr.get());
+        printInfo(tfld2);
     }
 
     Info<< "\nEnd" << endl;

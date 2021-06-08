@@ -215,11 +215,19 @@ public:
         //- Clear existing and transfer ownership.
         inline void reset(refPtr<T>&& other) noexcept;
 
-        //- Delete managed temporary object and set to (const) reference
+        //- Clear existing and set (const) reference
         inline void cref(const T& obj) noexcept;
 
-        //- Delete managed temporary object and set to (non-const) reference
+        //- Clear existing and set (const) reference to pointer content.
+        //  A null pointer is permitted (treated as a managed pointer).
+        inline void cref(const T* p) noexcept;
+
+        //- Clear existing and set (non-const) reference
         inline void ref(T& obj) noexcept;
+
+        //- Clear existing and set (non-const) reference to pointer content.
+        //  A null pointer is permitted (treated as a managed pointer).
+        inline void ref(T* p) noexcept;
 
         //- Swaps the managed object with other.
         inline void swap(refPtr<T>& other) noexcept;

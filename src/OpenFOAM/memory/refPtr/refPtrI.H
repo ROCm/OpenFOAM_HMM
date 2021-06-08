@@ -301,11 +301,29 @@ inline void Foam::refPtr<T>::cref(const T& obj) noexcept
 
 
 template<class T>
+inline void Foam::refPtr<T>::cref(const T* p) noexcept
+{
+    clear();
+    ptr_ = const_cast<T*>(p);
+    type_ = (ptr_ ? CREF : PTR);
+}
+
+
+template<class T>
 inline void Foam::refPtr<T>::ref(T& obj) noexcept
 {
     clear();
     ptr_ = &obj;
     type_ = REF;
+}
+
+
+template<class T>
+inline void Foam::refPtr<T>::ref(T* p) noexcept
+{
+    clear();
+    ptr_ = p;
+    type_ = (ptr_ ? REF : PTR);
 }
 
 
