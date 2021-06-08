@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -59,7 +59,7 @@ options:
   -show-api | -version  Print META-INFO api value and exit
   -show-patch           Print META-INFO patch value and exit
   -show-prefix          Print project directory and exit
-  -test-tutorial        Forward arguments to tutorials/AutoTest
+  -test-tutorial        Forward arguments to bin/foamTestTutorial
   -init=FILE            Alternative initialization file (expert option)
   -verbose              Set FOAM_VERBOSE=true (interactive only)
   -help                 Print the usage
@@ -126,7 +126,7 @@ do
         exit $?
         ;;
 
-    -test-tutorial)  # Run tutorials/AutoTest
+    -test-tutorial)  # Run bin/foamTestTutorial
         optTestTut=true
         ;;
 
@@ -294,7 +294,7 @@ if [ -n "$optTestTut" ]
 then
 
     sourceBashrc
-    exec "$WM_PROJECT_DIR/tutorials/AutoTest" "$@"
+    exec "$WM_PROJECT_DIR"/bin/foamTestTutorial "$@"
     exit $? # Safety
 fi
 

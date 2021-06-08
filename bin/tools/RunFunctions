@@ -20,7 +20,10 @@
 #------------------------------------------------------------------------------
 
 # The normal locations
-[ -n "$FOAM_TUTORIALS" ] || export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
+[ -n "$FOAM_TUTORIALS" ] || export FOAM_TUTORIALS="$WM_PROJECT_DIR"/tutorials
+
+# Basic sanity checks
+[ -d "$FOAM_TUTORIALS" ] || echo "No OpenFOAM tutorials? : $FOAM_TUTORIALS" 1>&2
 
 
 #------------------------------------------------------------------------------

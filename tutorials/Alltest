@@ -7,11 +7,10 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     Alltest
@@ -25,10 +24,7 @@
 #------------------------------------------------------------------------------
 cd "${0%/*}" || exit  # Run from this directory
 
-usage()
-{
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
 usage: ${0##*/} [OPTION]
@@ -39,14 +35,14 @@ options:
   -default      Sets up a default scheme on all schemes
   -git          Use git to retrieve the tutorials
   -no-git       Do not use git to retrieve the tutorials
-  -root dir     Root directory to start tests from (non-git only)
+  -root=DIR     Root directory to start tests from (non-git only)
   -help         Print the usage
 
 Quickly tests the tutorials and writes out the scheme/solver information.
 Detects and uses 'git' to obtain a fresh set of files when possible.
 
 USAGE
-    exit 1
+    exit 0 # A clean exit
 }
 
 # Report error and exit
@@ -74,12 +70,13 @@ unset optForce
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
-        usage
+    -h* | -help*)   printHelp ;;
+    -f | -force)   optForce=true ;;
+
+    -root=*)
+        rootDir="${1#*=}"
         ;;
-    -f | -force)
-        optForce=true
-        ;;
+
     -r | -root)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         rootDir="$2"
@@ -141,10 +138,27 @@ snGradSchemes { default corrected; }
 EOF
 }
 
+#
+# Modify case controlDicts to run only one time step
+#
+modifyCaseControlDict()
+{
+    for dict in $(find . -name "controlDict*" -type f)
+    do
+        cp -f "${dict}" "${dict}.orig"
+        sed \
+            -e 's/\(startFrom[ \t]*\)\([A-Za-z]*\);/\1 latestTime;/' \
+            -e 's/\(stopAt[ \t]*\)\([A-Za-z]*\);/\1 nextWrite;/' \
+            -e 's/\(writeControl[ \t]*\)\([A-Za-z]*\);/\1 timeStep;/' \
+            -e 's/\(writeInterval[ \t]*\)\([-.0-9A-Za-z]*\);/\1 '"$optRunLimit"';/' \
+            "${dict}.orig" > "${dict}"
+    done
+}
 
-#
+
+#------------------------------------------------------------------------------
+
 # Locate the user or project controlDict to adjust
-#
 unset ETC_CONTROL_DICT
 if [ "$adjustDebugSwitches" = true ]
 then
@@ -194,7 +208,7 @@ then
     if [ "$optForce" = true ]
     then
         echo "Removing old directory: $TEST_RUN_DIR" 1>&2
-        rm -rf $TEST_RUN_DIR
+        rm -rf "$TEST_RUN_DIR"
     else
         echo "Directory already exists: $TEST_RUN_DIR" 1>&2
         echo "    use -force to remove" 1>&2
@@ -273,17 +287,7 @@ fi
 
 echo "Modifying the case controlDicts to run only one time step" 1>&2
 echo 1>&2
-
-for CD in $(find . -name "controlDict*" -type f)
-do
-    cp -f "${CD}" "${CD}.orig"
-    sed \
-        -e 's/\(startFrom[ \t]*\)\([a-zA-Z]*\);/\1 latestTime;/g' \
-        -e 's/\(stopAt[ \t]*\)\([a-zA-Z]*\);/\1 nextWrite;/g' \
-        -e 's/\(writeControl[ \t]*\)\([a-zA-Z]*\);/\1 timeStep;/g' \
-        -e 's/\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);/\1 1;/g' \
-        "${CD}.orig" > "${CD}"
-done
+modifyCaseControlDict
 
 if [ "$useDefaultSchemes" = true ]
 then
