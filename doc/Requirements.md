@@ -56,32 +56,26 @@ sudo apt-get install build-essential autoconf autotools-dev cmake gawk gnuplot
 sudo apt-get install flex libfl-dev libreadline-dev zlib1g-dev openmpi-bin libopenmpi-dev mpi-default-bin mpi-default-dev
 sudo apt-get install libgmp-dev libmpfr-dev libmpc-dev
 ```
-If you intend to use system components, you can also install the following:
-```
-apt-get install libscotch-dev libptscotch-dev libfftw3-dev libboost-system-dev libboost-thread-dev libcgal-dev
-```
-
-Additional libraries will be required if compiling ParaView from
-source, however it is recommended to skipped this initially since
-it generally represent the main compilation difficulty.
-In many cases, a system installation of paraview or a
-[precompiled binary][download ParaView]
-will be much easier.
-
-Some libraries can be installed from the operating system, or
-compiled from the ThirdParty directory.
-The default configuration for OpenFOAM assumes OpenMPI from the system
-and ThirdParty installations for most others (boost, CGAL, FFTW,
-Kahip, Scotch). This is generally the most portable configuration
-across various Linux distributions, but it may be desirable to use
-more system libraries on Ubuntu.
 
 To inspect the available system versions, use the `apt-cache show`
 command. For example,
 ```
-sudo apt-cache show libboost-dev
-sudo apt-cache show libfftw3-dev
-...
+sudo apt-cache show libopenmpi-dev
+```
+
+| Program   | Ubuntu    | Program version |
+|-----------|-----------|-----------------|
+| gcc       | 20.04     | 9.3.0           |
+| openmpi   | 20.04     | 4.0.3           |
+| cmake     | 20.04     | 3.16.3          |
+| flex      | 20.04     | 2.6.4           |
+| m4        | 20.04     | 1.4.18          |
+
+
+
+If you intend to use system components, you can also install the following:
+```
+apt-get install libfftw3-dev libscotch-dev libptscotch-dev libboost-system-dev libboost-thread-dev libcgal-dev
 ```
 
 | Program   | apt-cache show  | Ubuntu  | Version |
@@ -92,13 +86,13 @@ sudo apt-cache show libfftw3-dev
 | scotch    | libscotch-dev   | 20.04   | 6.0.9   |
 
 
-| Program   | Ubuntu    | Program version |
-|-----------|-----------|-----------------|
-| gcc       | 20.04     | 9.3.0           |
-| openmpi   | 20.04     | 4.0.3           |
-| cmake     | 20.04     | 3.16.3          |
-| flex      | 20.04     | 2.6.4           |
-| m4        | 20.04     | 1.4.18          |
+Some libraries can be installed from the operating system, or
+compiled from the ThirdParty directory.
+The default configuration for OpenFOAM assumes OpenMPI from the system
+and ThirdParty installations for most others (boost, CGAL, FFTW,
+Kahip, Scotch). This is generally the most portable configuration
+across various Linux distributions, but it may be desirable to use
+more system libraries on Ubuntu.
 
 
 ### openSUSE (eg, Leap-15.2)
@@ -116,6 +110,10 @@ If you intend to use system components, you can also install the following:
 sudo zypper install fftw3-devel libboost_system-devel libboost_thread-devel
 ```
 but note that scotch and cgal are only available via the science repository.
+For boost, you may need to specify a specific version. For example,
+```
+sudo zypper install fftw3-devel libboost_system1_75_0-devel libboost_thread1_75_0-devel
+```
 
 This installs
 
@@ -181,26 +179,40 @@ export LD_PRELOAD="libmpi.so"
 
 ### Additional libraries
 
-When compiled ParaView from source additional dependencies will be
+When compiled [ParaView][page ParaView] from source additional dependencies will be
 required.
 A partial list is given in the [ThirdParty requirements][link third-require].
-**Please help us with keeping that information up-to-date and accurate.**
+
+However it is ***recommended*** to skipped this initially since
+it generally represents the main compilation difficulty encountered.
+In many cases, a system installation of paraview or a
+[precompiled binary][download ParaView]
+will be much easier and likely
+[fully adequate for your needs][FAQ ParaView].
+
+Since any ParaView/VTK dependencies are isolated within the
+visualization module, it is always possible to compile plugins for
+different ParaView versions as well as different VTK/Mesa combinations
+at any later stage _without_ recompiling OpenFOAM itself.
+
 
 <!-- Links -->
 
-[page ParaView]:  http://www.paraview.org/
+[page ParaView]: http://www.paraview.org/
 [download ParaView]: https://www.paraview.org/download/
+[FAQ ParaView]: https://discourse.paraview.org/t/i-want-to-visualize-my-openfoam-simulation-results-with-paraview-but-im-confused-which-version-should-i-use
 
 
 <!-- OpenFOAM -->
 
 [link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
-[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
+
+[wiki-config]: https://develop.openfoam.com/Development/openfoam/-/wikis/configuring
 
 ---
 Copyright 2019-2021 OpenCFD Ltd

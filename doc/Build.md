@@ -3,13 +3,13 @@
 Prior to building, ensure that the [system requirements][link openfoam-require]
 are satisfied (including any special [cross-compiling][wiki-cross-compile]
 considerations), and source the correct OpenFOAM environment.
-For example, for the OpenFOAM-v2006 version:
+For example, for the OpenFOAM-v2106 version:
 ```
-source <installation path>/OpenFOAM-v2006/etc/bashrc
+source <installation path>/OpenFOAM-v2106/etc/bashrc
 ```
-e.g. if installed under the `~/OpenFOAM` directory
+e.g. if installed under the `~/openfoam` directory
 ```
-source ~/OpenFOAM/OpenFOAM-v2006/etc/bashrc
+source ~/openfoam/OpenFOAM-v2106/etc/bashrc
 ```
 
 
@@ -26,7 +26,7 @@ file.
 
 If you need to change the default versions for third-party libraries,
 or use system libraries for some components, please some additional
-information about the [config structure][link openfoam-config].
+information about the [config structure][wiki-config].
 
 ## Compile OpenFOAM
 
@@ -86,34 +86,37 @@ you haven't missed any error messages.
 ```
 foamInstallationTest
 ```
-- Create the user `run` directory:
+- test any given tutorial case. For example,
 ```
-mkdir -p $FOAM_RUN
+foamTestTutorial -full incompressible/simpleFoam/pitzDaily
 ```
-- Test the installation with a simple tutorial:
+- Note: the tutorial test can also be done manually:
 ```
+# Create the user "run" directory:
+mkdir -p "$FOAM_RUN"
+# Change to the user "run" directory:
 run
-cp -r $FOAM_TUTORIALS/incompressible/simpleFoam/pitzDaily ./
-cd pitzDaily
-blockMesh
-simpleFoam
+# Copy tutorial
+cp -r "$FOAM_TUTORIALS"/incompressible/simpleFoam/pitzDaily ./
+# Run the tutorial
+( cd pitzDaily && blockMesh && simpleFoam )
 ```
 
 ### ParaView
 
 OpenFOAM ships with ParaView sources for post-processing OpenFOAM
-field results. However, the paraview version distributed with
+field results. However, it will [often be sufficient][FAQ ParaView]
+to use the paraview version distributed with
 the operating system or a [binary package][download ParaView]
-will often be sufficient, and avoids additional compilation complexity.
+and avoid additional compilation complexity.
 
 If you do wish to compile ParaView from source, it is recommended
 that you do so ***after*** completing an initial compilation of OpenFOAM.
 This gets the process started much more quickly. At a later stage,
-OpenFOAM can be updated to compile with paraview. Only the affected
-applications will be compiled (eg, the blockMesh reader module) and the
-balance of the OpenFOAM installation will not affected.
+the OpenFOAM visualization module can be compiled for a particular
+ParaView version _without_ recompiling OpenFOAM itself.
 
-If you decide to compiling in two passes, you only need to execute the
+If you decide to compile in two passes, you only need to execute the
 top-level `Allwmake` a second time. Do **not** use `wclean` to force a
 complete rebuild! This is unnecessary.
 
@@ -124,8 +127,9 @@ More details in the [ThirdParty build guide][link third-build].
 
 <!-- Links -->
 
-[page ParaView]:  http://www.paraview.org/
+[page ParaView]: http://www.paraview.org/
 [download ParaView]: https://www.paraview.org/download/
+[FAQ ParaView]: https://discourse.paraview.org/t/i-want-to-visualize-my-openfoam-simulation-results-with-paraview-but-im-confused-which-version-should-i-use
 
 
 <!-- OpenFOAM -->
@@ -135,13 +139,14 @@ More details in the [ThirdParty build guide][link third-build].
 
 [link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
 [link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
-[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
-[wiki-cross-compile]: https://develop.openfoam.com/Development/openfoam/-/wikis/guides/build/cross-compile-mingw
 [link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
+[wiki-cross-compile]: https://develop.openfoam.com/Development/openfoam/-/wikis/building/cross-compile-mingw
+[wiki-config]: https://develop.openfoam.com/Development/openfoam/-/wikis/configuring
+
 ---
-Copyright 2019-2020 OpenCFD Ltd
+Copyright 2019-2021 OpenCFD Ltd

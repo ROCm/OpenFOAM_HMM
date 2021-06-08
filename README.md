@@ -11,7 +11,7 @@ individual and group contributors, integrations
 [governance guided activities](https://www.openfoam.com/governance/).
 
 
-## Copyright
+## License
 
 OpenFOAM is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -27,10 +27,11 @@ may redistribute files.
 OpenCFD Ltd grants use of its OpenFOAM trademark by Third Parties on a
 licence basis. ESI Group and OpenFOAM Foundation Ltd are currently
 permitted to use the Name and agreed Domain Name. For information on
-trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
+trademark use, please refer to the
+[trademark policy guidelines][link trademark].
 
 Please [contact OpenCFD](http://www.openfoam.com/contact) if you have
-any questions on the use of the OpenFOAM trademark.
+any questions about the use of the OpenFOAM trademark.
 
 Violations of the Trademark are monitored, and will be duly prosecuted.
 
@@ -39,9 +40,9 @@ Violations of the Trademark are monitored, and will be duly prosecuted.
 
 If OpenFOAM has already been compiled on your system, simply source
 the appropriate `etc/bashrc` or `etc/cshrc` file and get started.
-For example, for the OpenFOAM-v1912 version:
+For example, for the OpenFOAM-v2106 version:
 ```
-source /installation/path/OpenFOAM-v1912/etc/bashrc
+source /installation/path/OpenFOAM-v2106/etc/bashrc
 ```
 
 ## Compiling OpenFOAM
@@ -55,6 +56,11 @@ guides:
 | [ThirdParty][repo third] | [readme][link third-readme] | [system requirements][link third-require] | [build][link third-build] |
 
 
+If you need to modify the versions or locations of ThirdParty
+software, please read how the
+[OpenFOAM configuration][wiki-config] is structured.
+
+
 ## How do I know which version I am currently using?
 
 The value of the `$WM_PROJECT_DIR` or even `$WM_PROJECT_VERSION` are
@@ -63,19 +69,19 @@ not guaranteed to have any correspondence to the OpenFOAM release
 information is embedded into each application. For example, as
 displayed from `blockMesh -help`:
 ```
-Using: OpenFOAM-v1812.local (1812) - visit www.openfoam.com
-Build: 65d6551ff7-20190530 (patch=190531)
+Using: OpenFOAM-com (2012) - visit www.openfoam.com
+Build: b830beb5ea-20210429 (patch=210414)
 Arch:  LSB;label=32;scalar=64
 ```
 This output contains all of the more interesting information that we need:
 
 | item                  | value         |
 |-----------------------|---------------|
-| version               | v1812.local   |
-| api                   | 1812          |
-| commit                | 65d6551ff7    |
-| author date           | 20190530      |
-| patch-level           | (20)190531    |
+| version               | com  (eg, local development branch) |
+| api                   | 2012          |
+| commit                | b830beb5ea    |
+| author date           | 20210429      |
+| patch-level           | (20)210414    |
 | label/scalar size     | 32/64 bits    |
 
 The Arch information may also include the `solveScalar` size
@@ -90,19 +96,19 @@ when OpenFOAM has not yet been compiled:
 ```
 $ wmake -build-info
 make
-    api = 1812
-    patch = 190531
+    api = 2012
+    patch = 210414
     branch = master
-    build = 65d6551ff7-20190530
+    build = 308af39136-20210426
 ```
 Similar information is available with `foamEtcFile`, using the
 `-show-api` or `-show-patch` options. For example,
 ```
 $ foamEtcFile -show-api
-1812
+2012
 
 $ foamEtcFile -show-patch
-190531
+210414
 ```
 This output will generally be the easiest to parse for scripts.
 The `$FOAM_API` convenience environment variable may not reflect the
@@ -121,8 +127,8 @@ These 3rd-party sources are normally located in a directory parallel
 to the OpenFOAM directory. For example,
 ```
 /path/parent
-|-- OpenFOAM-v1912
-\-- ThirdParty-v1912
+|-- OpenFOAM-v2106
+\-- ThirdParty-v2106
 ```
 There are, however, many cases where this simple convention is inadequate:
 
@@ -130,7 +136,7 @@ There are, however, many cases where this simple convention is inadequate:
   operating system or cluster installation provides it)
 
 * When we have changed the OpenFOAM directory name to some arbitrary
-  directory name, e.g. openfoam-sandbox1912, etc..
+  directory name, e.g. openfoam-sandbox2106, etc..
 
 * When we would like any additional 3rd party software to be located
   inside of the OpenFOAM directory to ensure that the installation is
@@ -150,17 +156,14 @@ when locating the ThirdParty directory with the following precedence:
 2. PREFIX/ThirdParty-VERSION
    * this corresponds to the traditional approach
 3. PREFIX/ThirdParty-vAPI
-   * allows for an updated value of VERSION, *eg*, `v1912-myCustom`,
+   * allows for an updated value of VERSION, *eg*, `v2106-myCustom`,
      without requiring a renamed ThirdParty. The API value would still
-     be `1912` and the original `ThirdParty-v1912/` would be found.
+     be `2106` and the original `ThirdParty-v2106/` would be found.
 4. PREFIX/ThirdParty-API
-   * this is the same as the previous example, but using an unadorned
-     API value. This also makes sense if the chosen version name also
-     uses the unadorned API value in its naming, *eg*,
-     `1912-patch190131`, `1912.19W03`
+   * same as the previous example, but using an unadorned API value.
 5. PREFIX/ThirdParty-common
-   * permits maximum reuse for various versions, for experienced user
-     who are aware of potential version incompatibilities
+   * permits maximum reuse for various versions, for experienced
+     users who are aware of potential version incompatibilities
 
 If none of these directories are found to be suitable, it reverts to
 using PROJECT/ThirdParty as a dummy location (even if the directory
@@ -184,17 +187,20 @@ ThirdParty directory will contain either an `Allwmake` file or a
 
 <!-- OpenFOAM -->
 
+[link trademark]: https://www.openfoam.com/opencfd-limited-trade-mark-policy
+
 [repo openfoam]: https://develop.openfoam.com/Development/openfoam/
 [repo third]: https://develop.openfoam.com/Development/ThirdParty-common/
 
 [link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
 [link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
-[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
+
+[wiki-config]: https://develop.openfoam.com/Development/openfoam/-/wikis/configuring
 
 
 ## Useful Links
@@ -203,8 +209,8 @@ ThirdParty directory will contain either an `Allwmake` file or a
 - [Documentation](http://www.openfoam.com/documentation)
 - [Reporting bugs/issues/feature requests](http://www.openfoam.com/code/bug-reporting.php)
 - [Issue tracker](https://develop.openfoam.com/Development/openfoam/-/issues)
-- [Code wiki](https://develop.openfoam.com/Development/openfoam/-/wikis/) and [general wiki](http://wiki.openfoam.com/)
-- [Community](http://www.openfoam.com/community/), [Governance](http://www.openfoam.com/governance/)
+- [Code wiki](https://develop.openfoam.com/Development/openfoam/-/wikis/) and [General wiki](http://wiki.openfoam.com/)
+- [Governance](http://www.openfoam.com/governance/), [Governance Projects](https://www.openfoam.com/governance/projects)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
-Copyright 2016-2020 OpenCFD Ltd
+Copyright 2016-2021 OpenCFD Ltd

@@ -3,8 +3,9 @@
 Meta-information is generally for OpenFOAM internal use only.
 
 The format, content and meaning may be changed at anytime without
-notice. If any of these are changed, these are some of places that
-will need to be updated accordingly:
+prior notice.
+If any of these are changed, these are some of places that will need
+to be updated accordingly:
 
   - bin/foamEtcFile
   - bin/tools/foamConfigurePaths
@@ -38,7 +39,7 @@ Format: `date +%y%m`
 
 - 4-digit year-month (YYMM) integer corresponding to the major
   release or in unusual cases an intermediate release.
-  Example, `1712` for the Dec-2017 release.
+  Example, `2106` for the June-2021 release.
 
 
 #### patch
@@ -78,9 +79,9 @@ the saved information needs synchronization. The command
 
 ### Notes
 
-The saved information is split into two separate files. The `api-info`
-contains more permanent information, whereas the `build-info` is more
-transient in nature.
+The saved information is split into two separate files.
+The `api-info` file contains more permanent information,
+whereas the `build-info` is more transient in nature.
 
 ----
-2020-06-23
+2021-06-09

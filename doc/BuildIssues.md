@@ -1,11 +1,11 @@
-## Known Build Issues (OpenFOAM-v2012)
+## Known Build Issues (v2012, v2106)
 
 ### Windows cross-compilation
 
 Compilation of adios, kahip, metis, ptscotch, boost/cgal do not work.
 
 
-## Known Build Issues (OpenFOAM-v2006)
+## Known Build Issues (v2006)
 
 ### Windows cross-compilation
 
@@ -17,11 +17,11 @@ Compilation of kahip and ptscotch do not work.
 
 ### Thermo problems with Clang
 
-Previous versions (1906, 1912) experienced some Clang builds issues
+Previous versions (v1906, v1912) experienced some Clang builds issues
 with thermophysical libraries. These are resolved with clang-10.
 
 
-## Known Build Issues (OpenFOAM-v1912)
+## Known Build Issues (v1912)
 
 ### ParaView, ParaView-Catalyst
 
@@ -62,7 +62,7 @@ Windows. Compile with the `-k` option to skip over these applications
 for now.
 
 
-## Known Build Issues (OpenFOAM-v1906)
+## Known Build Issues (v1906)
 
 ### Thermo problems with Clang
 
@@ -179,12 +179,13 @@ and attempt to install a `paraview~qt` version instead.
 
 [link openfoam-readme]: https://develop.openfoam.com/Development/openfoam/blob/develop/README.md
 [link openfoam-issues]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/BuildIssues.md
-[link openfoam-config]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/openfoam/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-common/blob/develop/Requirements.md
 
+[wiki-config]: https://develop.openfoam.com/Development/openfoam/-/wikis/configuring
+
 ---
-Copyright 2019-2020 OpenCFD Ltd
+Copyright 2019-2021 OpenCFD Ltd
