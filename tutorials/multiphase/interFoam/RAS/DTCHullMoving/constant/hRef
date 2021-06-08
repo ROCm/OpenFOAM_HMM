@@ -10,12 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       uniformDimensionedScalarField;
-    location    "constant";
     object      hRef;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 0 0 0 0 0];
 value           0.244;
+
 
 // ************************************************************************* //

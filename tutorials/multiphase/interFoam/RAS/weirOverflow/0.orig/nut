@@ -25,16 +25,19 @@ boundaryField
         type            calculated;
         value           uniform 0;
     }
+
     outlet
     {
         type            calculated;
         value           uniform 0;
     }
+
     lowerWall
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
+
     atmosphere
     {
         type            calculated;

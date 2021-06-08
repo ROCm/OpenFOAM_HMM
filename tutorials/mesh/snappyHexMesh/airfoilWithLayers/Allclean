@@ -4,6 +4,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cleanCase0
-rm -rf constant/extendedFeatureEdgeMesh
+
+mv -f system/fvSchemes.bck system/fvSchemes
+rm -rf constant
 
 #------------------------------------------------------------------------------

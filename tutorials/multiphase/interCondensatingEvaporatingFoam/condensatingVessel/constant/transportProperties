@@ -14,8 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (liquid vapour); // FC-72
-
+phases          (liquid vapour); // FC-72
 
 sigma           0;
 
@@ -24,7 +23,6 @@ liquid
     transportModel  Newtonian;
     nu              2.64e-7;
     rho             1583.4;
-
 
     Cp              1.1072e3;
     Cv              1.1072e3;   // assume Cp for liquid
@@ -38,7 +36,6 @@ vapour
     nu              5e-7;
     rho             14.9;
 
-
     Cp              895.2;      // FC72 vapour
     Cv              870.4;      // Cv = Cp - R/w
     kappa           0.01;       // FC72 vapour
@@ -46,5 +43,6 @@ vapour
 }
 
 Prt             0.7;
+
 
 // ************************************************************************* //

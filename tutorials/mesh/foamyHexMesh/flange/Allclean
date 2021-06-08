@@ -5,17 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -f constant/triSurface/flange.stl.gz
-
-rm -rf constant/extendedFeatureEdgeMesh
-rm -f constant/ccx constant/ccy constant/ccz
-rm -f constant/internalDelaunayVertices constant/targetCellSize
-
-(
-    cd constant/backgroundMeshDecomposition/polyMesh 2>/dev/null && \
-    rm -f faces neighbour owner points
-)
-
+rm -rf constant/
 rm -f *.obj
 
 #------------------------------------------------------------------------------

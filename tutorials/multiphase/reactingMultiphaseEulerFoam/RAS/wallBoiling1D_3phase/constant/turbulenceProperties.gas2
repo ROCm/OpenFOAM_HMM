@@ -10,19 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties.air;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  laminar;//RAS;
+simulationType      laminar;
 
 RAS
 {
-    RASModel kEpsilon;
+    RASModel        kEpsilon;
 
     turbulence      on;
+
     printCoeffs     on;
 }
+
 
 // ************************************************************************* //

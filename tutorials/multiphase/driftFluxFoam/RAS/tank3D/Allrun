@@ -4,6 +4,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 cp -rf constant/polyMesh.orig constant/polyMesh
+
 restore0Dir
 
 runApplication $(getApplication)

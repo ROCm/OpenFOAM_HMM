@@ -10,12 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (sludge water);
+phases          (sludge water);
 
 sludge
 {
@@ -53,5 +52,6 @@ relativeVelocityModel simple;
     a1              0.1;
     residualAlpha   0;
 }
+
 
 // ************************************************************************* //

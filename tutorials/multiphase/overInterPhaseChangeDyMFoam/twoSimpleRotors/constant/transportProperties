@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water vapour);
+phases          (water vapour);
 
 phaseChangeTwoPhaseMixture SchnerrSauer;
 

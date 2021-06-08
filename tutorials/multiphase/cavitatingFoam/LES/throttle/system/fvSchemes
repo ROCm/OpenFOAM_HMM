@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -28,6 +27,7 @@ interpolationSchemes
 divSchemes
 {
     default         none;
+
     div(phi,rho)    Gauss vanLeer;
     div(rhoPhi,U)   Gauss LUST grad(U);
     div(phi,k)      Gauss LUST grad(k);
@@ -48,5 +48,6 @@ snGradSchemes
 {
     default         corrected;
 }
+
 
 // ************************************************************************* //

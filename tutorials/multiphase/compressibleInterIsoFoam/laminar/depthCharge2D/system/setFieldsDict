@@ -10,14 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 defaultFieldValues
 (
-//    volScalarFieldValue alpha.water 1
     volScalarFieldValue p_rgh 1e5
     volScalarFieldValue p 1e5
     volScalarFieldValue T 300
@@ -32,20 +30,11 @@ regions
 
         fieldValues
         (
-            //volScalarFieldValue alpha.water 0
             volScalarFieldValue p_rgh 1e6
             volScalarFieldValue p 1e6
             volScalarFieldValue T 578
         );
     }
-   /* boxToCell
-    {
-        box (-10 1 -1) (10 10 1);
-        fieldValues
-        (
-            volScalarFieldValue alpha.water 0
-        );
-    }*/
 );
 
 

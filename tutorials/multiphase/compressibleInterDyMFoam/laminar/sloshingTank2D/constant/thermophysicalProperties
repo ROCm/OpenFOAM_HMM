@@ -10,15 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (water air);
+phases          (water air);
 
 pMin            1000;
 
 sigma           0;
+
 
 // ************************************************************************* //

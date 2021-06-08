@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      interfacialProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,5 +25,6 @@ dragPhase           blended;
 
 residualSlip        1e-2;
 minInterfaceAlpha   1e-3;
+
 
 // ************************************************************************* //

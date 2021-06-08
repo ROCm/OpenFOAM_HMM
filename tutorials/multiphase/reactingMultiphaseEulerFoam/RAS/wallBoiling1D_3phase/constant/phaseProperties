@@ -10,14 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type    thermalPhaseChangeMultiphaseSystem;
+type            thermalPhaseChangeMultiphaseSystem;
 
-phases (gas gas2 liquid);
+phases          (gas gas2 liquid);
 
 phaseChange on;
 

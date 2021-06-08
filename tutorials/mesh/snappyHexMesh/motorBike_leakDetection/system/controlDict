@@ -22,8 +22,7 @@ DebugSwitches
     //shortestPath 1;
 }
 
-
-application     simpleFoam;
+application     snappyHexMesh;
 
 startFrom       startTime;
 

@@ -27,10 +27,11 @@ boundaryField
         type            zeroGradient;
     }
 
-     overset
+    overset
     {
         type            overset;
     }
 }
+
 
 // ************************************************************************* //

@@ -10,18 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties.air;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+simulationType      RAS;
 
 RAS
 {
-    RASModel mixtureKEpsilon; // continuousGasKEpsilon;
+    RASModel        mixtureKEpsilon; // continuousGasKEpsilon;
 
     turbulence      on;
+
     printCoeffs     on;
 
     // mixtureKEpsilonCoeffs
@@ -30,5 +30,6 @@ RAS
     //     C3  1;
     // }
 }
+
 
 // ************************************************************************* //

@@ -5,11 +5,16 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 canCompile || exit 0    # Dynamic code
 
-runApplication blockMesh
-runApplication topoSet
-runApplication subsetMesh -overwrite c0 -patch floatingObject
 restore0Dir
+
+runApplication blockMesh
+
+runApplication topoSet
+
+runApplication subsetMesh -overwrite c0 -patch floatingObject
+
 runApplication setFields
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

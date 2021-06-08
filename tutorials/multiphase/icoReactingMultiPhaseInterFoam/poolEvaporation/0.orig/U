@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       volVectorField;
     object      U.air;
 }
@@ -25,27 +25,32 @@ boundaryField
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     right
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     bottom
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
+
     top
     {
         type            pressureInletOutletVelocity;
         value           uniform (0 0 0);
         inletValue      uniform (0 0 0);
     }
+
     frontAndBack
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 }
+
 
 // ************************************************************************* //

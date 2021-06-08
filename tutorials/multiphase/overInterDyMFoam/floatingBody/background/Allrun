@@ -6,6 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 canCompile || exit 0    # Dynamic code
 
 runApplication blockMesh
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

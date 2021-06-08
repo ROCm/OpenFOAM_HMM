@@ -5,8 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase
 
-rm -rf constant/extendedFeatureEdgeMesh
-rm -rf constant/triSurface/unit_cube.eMesh
-rm -rf MeshedSurface*.obj
+rm -rf constant
+rm -f MeshedSurface*.obj
 
 #------------------------------------------------------------------------------

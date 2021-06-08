@@ -3,8 +3,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-cleanCase
+cleanCase0
 
-(cd constant/triSurface && rm -f box_12_*.obj box.obj box_trans.obj)
+rm -rf constant
 
 #------------------------------------------------------------------------------

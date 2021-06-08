@@ -3,6 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+mkdir -p constant/triSurface
+
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/box_12.obj.gz \
+    constant/triSurface
+
 runApplication blockMesh
 
 # Create fine surface
@@ -43,10 +49,8 @@ runApplication surfaceTransformPoints \
     constant/triSurface/box.obj constant/triSurface/box_trans.obj
 
 
-# Run non-parallel
 runApplication snappyHexMesh
 
-# Run parallel
 runApplication decomposePar
 
 runParallel -s parallel snappyHexMesh

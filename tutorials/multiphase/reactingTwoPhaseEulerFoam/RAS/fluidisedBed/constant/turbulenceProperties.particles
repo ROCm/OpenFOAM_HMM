@@ -10,18 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      turbulenceProperties.particles;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+simulationType      RAS;
 
 RAS
 {
-    RASModel kineticTheory;
+    RASModel        kineticTheory;
 
     turbulence      on;
+
     printCoeffs     on;
 
     kineticTheoryCoeffs

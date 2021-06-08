@@ -5,7 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
-# apply the initial fields
 restore0Dir
 
 runApplication decomposePar

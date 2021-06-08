@@ -8,12 +8,12 @@ loseCases="damBreakFine"
 
 for caseName in $keepCases
 do
-    (cd $caseName && foamCleanTutorials)
+    (cd "$caseName" && foamCleanTutorials)
 done
 
 for caseName in $loseCases
 do
-    removeCase $caseName
+    removeCase "$caseName"
 done
 
 #------------------------------------------------------------------------------

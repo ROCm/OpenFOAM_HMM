@@ -5,11 +5,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 restore0Dir
 
-application=$(getApplication)
-
 runApplication blockMesh
 
-runApplication $application
+runApplication $(getApplication)
 
 if notTest "$@"
 then
@@ -19,7 +17,7 @@ then
     foamDictionary 0.5/T.liquid -entry boundaryField.wall2.q -set 'uniform 500000'
     foamDictionary 0.5/T.liquid -entry boundaryField.wall1.q -set 'uniform 500000'
     foamDictionary 0.5/U.liquid -entry boundaryField.inlet.type -set 'fixedValue'
-    runApplication -a $application
+    runApplication -a $(getApplication)
 fi
 
 #------------------------------------------------------------------------------

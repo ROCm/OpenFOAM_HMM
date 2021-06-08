@@ -27,11 +27,13 @@ boundaryField
         type            uniformFixedValue;
         uniformValue    (0 0 0);
     }
+
     inlet
     {
         type            uniformFixedValue;
         uniformValue    (0 0 0);
     }
+
     outlet
     {
         type            uniformFixedValue;
@@ -50,6 +52,7 @@ boundaryField
         type            cellMotion;
         value           uniform (0 0 0);
     }
+
     AMI_dualWing_slave
     {
         patchType       cyclicAMI;
@@ -57,5 +60,6 @@ boundaryField
         value           uniform (0 0 0);
     }
 }
+
 
 // ************************************************************************* //

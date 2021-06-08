@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,7 +40,6 @@ regions
         fieldValues
         (
             volScalarFieldValue alpha.liquid    1
-
             volScalarFieldValue O2.liquid       0.01
             volScalarFieldValue water.liquid    0.99
         );
@@ -65,20 +63,17 @@ regions
         );
     }
 
-
     boxToCell
     {
         box (0 0.5 0) (0.5 1.1 1);
         fieldValues
         (
             volScalarFieldValue alpha.gas       1
-
             volScalarFieldValue vapour.gas      0.3
             volScalarFieldValue CO2.gas         0.2
             volScalarFieldValue air.gas         0.5
         );
     }
-
 );
 
 

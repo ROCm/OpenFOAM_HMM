@@ -5,18 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -rf constant/triSurface/blob.stl.gz
-
-rm -rf constant/cellAlignments
-rm -rf constant/targetCellSize
-rm -rf constant/internalDelaunayVertices
-
-(
-    cd constant/backgroundMeshDecomposition/polyMesh 2>/dev/null || exit
-    rm -f boundary faces neighbour owner points
-)
-
-rm -rf snapToSurface?.obj
-rm -rf tetsToSnapTo.obj
+rm -rf constant/
 
 #------------------------------------------------------------------------------

@@ -3,6 +3,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+mkdir -p constant/triSurface
+
+cp -f \
+    "$FOAM_TUTORIALS"/resources/geometry/simpleShapes/* \
+    constant/triSurface/
+
 runApplication -s cone \
     surfaceOrient constant/triSurface/cone.stl \
                   -inside '(0 -0.5 0)' \
@@ -23,6 +29,5 @@ runApplication -s collapseFaceSet \
 
 runApplication -s collapseFaces \
     collapseEdges -latestTime -collapseFaces
-
 
 #------------------------------------------------------------------------------

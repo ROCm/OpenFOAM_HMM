@@ -4,11 +4,13 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication blockMesh
+
 runApplication extrudeMesh
 
 restore0Dir
 
 runApplication setFields
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

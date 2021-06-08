@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermodynamicProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,5 +25,6 @@ psil            5e-07;
 pSat            4500;
 
 rhoMin          0.001;
+
 
 // ************************************************************************* //

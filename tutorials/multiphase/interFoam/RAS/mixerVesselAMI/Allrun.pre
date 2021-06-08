@@ -3,14 +3,15 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-mkdir -p constant/triSurface
+mkdir -p constant
 
 # copy STL files from resources folder
-cp -f $FOAM_TUTORIALS/resources/geometry/mixerVesselAMI/* constant/triSurface/.
+cp -rf \
+    "$FOAM_TUTORIALS"/resources/geometry/mixerVesselAMI \
+    constant/triSurface
 
 rm -rf 0
 
-# Meshing
 runApplication blockMesh
 
 runApplication surfaceFeatureExtract

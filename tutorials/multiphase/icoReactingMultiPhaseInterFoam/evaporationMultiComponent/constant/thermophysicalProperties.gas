@@ -46,7 +46,7 @@ vapour
     }
     thermodynamics
     {
-        Hf          0;//-1.338e7; //[J/kg]
+        Hf          0;
         Cp          1900;
     }
     transport

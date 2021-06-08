@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,5 +42,6 @@ mixture // air at room temperature (293 K)
         Pr          0.71;
     }
 }
+
 
 // ************************************************************************* //

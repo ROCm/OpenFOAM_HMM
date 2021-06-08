@@ -1,7 +1,8 @@
 #!/bin/sh
 cd "${0%/*}" || exit                        # Run from this directory
+#------------------------------------------------------------------------------
 
-cp rawSurfaces/*.stl .
+cp -f rawSurfaces/*.stl.gz .
 
 # Vessel surface
 surfaceAdd outlet.stl vessel.stl vessel.stl
@@ -23,9 +24,9 @@ surfaceOrient -inside shaft.stl "(0 0.1 1)" shaft.stl
 surfaceSplitByTopology stirrer.stl stirrer.stl
 surfaceOrient -inside stirrer.stl "(0 0.1 1)" stirrer.stl
 
-mv stirrer_bafflePart_0.stl stirrer_baffles.stl
+mv -f stirrer_bafflePart_0.stl stirrer_baffles.stl
 
 surfaceCheck stirrer_baffles.stl
-mv stirrer_baffles_0.obj stirrer_baffles_plate.obj
+mv -f stirrer_baffles_0.obj stirrer_baffles_plate.obj
 
 #------------------------------------------------------------------------------

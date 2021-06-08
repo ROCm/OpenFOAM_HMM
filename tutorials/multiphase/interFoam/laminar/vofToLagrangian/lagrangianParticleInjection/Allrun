@@ -34,8 +34,8 @@ copyLagrangianData()
     if [ -d $dir ]
     then
         echo "Copying lagrangian data from $ldir to 0 directory"
-        \cp -r $ldir 0
-        mkdir 0/uniform && \cp -r $udir 0/uniform
+        cp -rf $ldir 0
+        mkdir 0/uniform && cp -rf $udir 0/uniform
     else
         echo "Error: unable to find Lagrangian data in case $ldir"
         exit 1

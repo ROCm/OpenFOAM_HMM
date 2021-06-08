@@ -4,8 +4,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 runApplication blockMesh
+
 restore0Dir
+
 runApplication setFields
+
 runApplication $(getApplication)
 
 #------------------------------------------------------------------------------
