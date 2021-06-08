@@ -38,6 +38,9 @@ License
 #include "cellSet.H"
 #include "meshTools.H"
 #include "OBJstream.H"
+#include "syncTools.H"
+
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -88,6 +91,7 @@ Foam::isoAdvection::isoAdvection
         dimensionedScalar(dimVol/dimTime, Zero)
     ),
     advectionTime_(0),
+    timeIndex_(-1),
 
     // Tolerances and solution controls
     nAlphaBounds_(dict_.getOrDefault<label>("nAlphaBounds", 3)),
@@ -126,27 +130,68 @@ Foam::isoAdvection::isoAdvection
         mesh_.cells();
 
         // Get boundary mesh and resize the list for parallel comms
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        surfaceCellFacesOnProcPatches_.resize(patches.size());
-
-        // Append all processor patch labels to the list
-        forAll(patches, patchi)
-        {
-            if
-            (
-                isA<processorPolyPatch>(patches[patchi])
-             && patches[patchi].size() > 0
-            )
-            {
-                procPatchLabels_.append(patchi);
-            }
-        }
+        setProcessorPatches();
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::isoAdvection::setProcessorPatches()
+{
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    surfaceCellFacesOnProcPatches_.clear();
+    surfaceCellFacesOnProcPatches_.resize(patches.size());
+
+    // Append all processor patch labels to the list
+    procPatchLabels_.clear();
+    forAll(patches, patchi)
+    {
+        if
+        (
+            isA<processorPolyPatch>(patches[patchi])
+         && !patches[patchi].empty()
+        )
+        {
+            procPatchLabels_.append(patchi);
+        }
+    }
+}
+
+
+void Foam::isoAdvection::extendMarkedCells
+(
+    bitSet& markedCell
+) const
+{
+    // Mark faces using any marked cell
+    bitSet markedFace(mesh_.nFaces());
+
+    for (const label celli : markedCell)
+    {
+        markedFace.set(mesh_.cells()[celli]);  // set multiple faces
+    }
+
+    syncTools::syncFaceList(mesh_, markedFace, orEqOp<unsigned int>());
+
+    // Update cells using any markedFace
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
+    {
+        if (markedFace.test(facei))
+        {
+            markedCell.set(mesh_.faceOwner()[facei]);
+            markedCell.set(mesh_.faceNeighbour()[facei]);
+        }
+    }
+    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
+    {
+        if (markedFace.test(facei))
+        {
+            markedCell.set(mesh_.faceOwner()[facei]);
+        }
+    }
+}
+
 
 void Foam::isoAdvection::timeIntegratedFlux()
 {
@@ -196,8 +241,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
 
             // Cell is cut
             const point x0 = surf_->centre()[celli];
-            vector n0 = -surf_->normal()[celli];
-            n0 /= (mag(n0));
+            const vector n0(normalised(-surf_->normal()[celli]));
 
             // Get the speed of the isoface by interpolating velocity and
             // dotting it with isoface unit normal
@@ -212,10 +256,8 @@ void Foam::isoAdvection::timeIntegratedFlux()
             // Note: looping over all cell faces - in reduced-D, some of
             //       these faces will be on empty patches
             const cell& celliFaces = cellFaces[celli];
-            forAll(celliFaces, fi)
+            for (const label facei : celliFaces)
             {
-                const label facei = celliFaces[fi];
-
                 if (mesh_.isInternalFace(facei))
                 {
                     bool isDownwindFace = false;
@@ -279,7 +321,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
         const label patchi = boundaryMesh.patchID()[facei - nInternalFaces];
         const label start = boundaryMesh[patchi].start();
 
-        if (phib[patchi].size())
+        if (!phib[patchi].empty())
         {
             const label patchFacei = facei - start;
             const scalar phiP = phib[patchi][patchFacei];
@@ -332,10 +374,9 @@ void Foam::isoAdvection::setDownwindFaces
     downwindFaces.clear();
 
     // Check all faces of the cell
-    forAll(c, fi)
+    for (const label facei: c)
     {
         // Get face and corresponding flux
-        const label facei = c[fi];
         const scalar phi = faceValue(phi_, facei);
 
         if (own[facei] == celli)
@@ -369,9 +410,8 @@ Foam::scalar Foam::isoAdvection::netFlux
     // Get mesh data
     const labelList& own = mesh_.faceOwner();
 
-    forAll(c, fi)
+    for (const label facei : c)
     {
-        const label facei = c[fi];
         const scalar dVff = faceValue(dVf, facei);
 
         if (own[facei] == celli)
@@ -403,10 +443,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send
-        forAll(procPatchLabels_, i)
+        for (const label patchi : procPatchLabels_)
         {
-            const label patchi = procPatchLabels_[i];
-
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patches[patchi]);
 
@@ -429,10 +467,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
 
 
         // Receive and combine
-        forAll(procPatchLabels_, patchLabeli)
+        for (const label patchi : procPatchLabels_)
         {
-            const label patchi = procPatchLabels_[patchLabeli];
-
             const processorPolyPatch& procPatch =
                 refCast<const processorPolyPatch>(patches[patchi]);
 
@@ -466,7 +502,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
             {
                 const label facei = faceIDs[i];
                 localFlux[facei] = - nbrdVfs[i];
-                if (debug && mag(localFlux[facei] + nbrdVfs[i]) > 10*SMALL)
+                if (debug && mag(localFlux[facei] + nbrdVfs[i]) > ROOTVSMALL)
                 {
                     Pout<< "localFlux[facei] = " << localFlux[facei]
                         << " and nbrdVfs[i] = " << nbrdVfs[i]
@@ -505,15 +541,13 @@ void Foam::isoAdvection::checkIfOnProcPatch(const label facei)
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
         const label patchi = pbm.patchID()[facei - mesh_.nInternalFaces()];
 
-        if (isA<processorPolyPatch>(pbm[patchi]) && pbm[patchi].size())
+        if (isA<processorPolyPatch>(pbm[patchi]) && !pbm[patchi].empty())
         {
             const label patchFacei = pbm[patchi].whichFace(facei);
             surfaceCellFacesOnProcPatches_[patchi].append(patchFacei);
         }
     }
 }
-
-
 
 
 void Foam::isoAdvection::applyBruteForceBounding()
@@ -568,6 +602,7 @@ void Foam::isoAdvection::writeSurfaceCells() const
     }
 }
 
+
 void Foam::isoAdvection::writeIsoFaces
 (
     const DynamicList<List<point>>& faces
@@ -603,10 +638,8 @@ void Foam::isoAdvection::writeIsoFaces
                 const DynamicList<List<point>>& procFacePts =
                     allProcFaces[proci];
 
-                forAll(procFacePts, i)
+                for (const List<point>& facePts : procFacePts)
                 {
-                    const List<point>& facePts = procFacePts[i];
-
                     if (facePts.size() != f.size())
                     {
                         f = face(identity(facePts.size()));
@@ -625,10 +658,8 @@ void Foam::isoAdvection::writeIsoFaces
             << os.name() << nl << endl;
 
         face f;
-        forAll(faces, i)
+        for (const List<point>& facePts : faces)
         {
-            const List<point>& facePts = faces[i];
-
             if (facePts.size() != f.size())
             {
                 f = face(identity(facePts.size()));

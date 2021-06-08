@@ -115,6 +115,8 @@ class isoAdvection
         //- Time spent performing interface advection
         scalar advectionTime_;
 
+        //- store timeIndex
+        label timeIndex_;
 
         // Switches and tolerances. Tolerances need to go into toleranceSwitches
 
@@ -179,6 +181,11 @@ class isoAdvection
 
         // Advection functions
 
+            //- Extend markedCell with cell-face-cell.
+            void extendMarkedCells(bitSet& markedCell) const;
+
+            void setProcessorPatches();
+
             //- For each face calculate volumetric face transport during dt
             void timeIntegratedFlux();
 
@@ -202,7 +209,7 @@ class isoAdvection
             template < class SpType, class SuType >
             void boundFlux
             (
-                const scalarField& alpha1,
+                const bitSet& nextToInterface,
                 surfaceScalarField& dVfcorrectionValues,
                 DynamicLabelList& correctedFaces,
                 const SpType& Sp,
@@ -274,6 +281,8 @@ class isoAdvection
             //  list of surface cell faces on processor patches
             void checkIfOnProcPatch(const label facei);
 
+            //- Apply the bounding based on user inputs
+            void applyBruteForceBounding();
 
 public:
 
@@ -303,25 +312,22 @@ public:
         template < class SpType, class SuType >
         void advect(const SpType& Sp, const SuType& Su);
 
-        //- Apply the bounding based on user inputs
-        void applyBruteForceBounding();
-
         // Access functions
 
             //- Return reconstructionSchemes
-            reconstructionSchemes& surf()
+            reconstructionSchemes& surf() noexcept
             {
                 return surf_();
             }
 
             //- Return alpha field
-            const volScalarField& alpha() const
+            const volScalarField& alpha() const noexcept
             {
                 return alpha1_;
             }
 
             //- Return the controls dictionary
-            const dictionary& dict() const
+            const dictionary& dict() const noexcept
             {
                 return dict_;
             }
@@ -365,13 +371,13 @@ public:
             }
 
             //- reference to alphaPhi
-            const surfaceScalarField& alphaPhi() const
+            const surfaceScalarField& alphaPhi() const noexcept
             {
                 return alphaPhi_;
             }
 
             //- time spend in the advection step
-            scalar advectionTime() const
+            scalar advectionTime() const noexcept
             {
                 return advectionTime_;
             }

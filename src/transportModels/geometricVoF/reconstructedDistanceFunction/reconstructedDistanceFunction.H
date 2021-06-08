@@ -108,12 +108,12 @@ public:
             surfaceVectorField::Boundary& nHatb
         );
 
-        const volScalarField& cellDistLevel() const
+        const volScalarField& cellDistLevel() const noexcept
         {
             return cellDistLevel_;
         }
 
-        const boolList& nextToInterface() const
+        const boolList& nextToInterface() const noexcept
         {
             return nextToInterface_;
         }

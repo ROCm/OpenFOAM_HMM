@@ -43,7 +43,7 @@ namespace Foam
 Foam::autoPtr<Foam::indirectPrimitivePatch>
 Foam::zoneCellStencils::nonEmptyFacesPatch() const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const polyBoundaryMesh& patches = meshRef_.boundaryMesh();
 
     label nNonEmpty = 0;
 
@@ -74,10 +74,10 @@ Foam::zoneCellStencils::nonEmptyFacesPatch() const
     (
         IndirectList<face>
         (
-            mesh_.faces(),
+            meshRef_.faces(),
             nonEmptyFaces
         ),
-        mesh_.points()
+        meshRef_.points()
     );
 }
 
@@ -85,7 +85,7 @@ Foam::zoneCellStencils::nonEmptyFacesPatch() const
 Foam::autoPtr<Foam::indirectPrimitivePatch>
 Foam::zoneCellStencils::allCoupledFacesPatch() const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const polyBoundaryMesh& patches = meshRef_.boundaryMesh();
 
     label nCoupled = 0;
 
@@ -116,19 +116,19 @@ Foam::zoneCellStencils::allCoupledFacesPatch() const
     (
         IndirectList<face>
         (
-            mesh_.faces(),
+            meshRef_.faces(),
             coupledFaces
         ),
-        mesh_.points()
+        meshRef_.points()
     );
 }
 
 
 void Foam::zoneCellStencils::validBoundaryFaces(boolList& isValidBFace) const
 {
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const polyBoundaryMesh& patches = meshRef_.boundaryMesh();
 
-    isValidBFace.setSize(mesh_.nBoundaryFaces());
+    isValidBFace.setSize(meshRef_.nBoundaryFaces());
 
     isValidBFace = true;
 
@@ -136,7 +136,7 @@ void Foam::zoneCellStencils::validBoundaryFaces(boolList& isValidBFace) const
     {
         if (pp.coupled() || isA<emptyPolyPatch>(pp))
         {
-            label bFacei = pp.start()-mesh_.nInternalFaces();
+            label bFacei = pp.start() - meshRef_.nInternalFaces();
             forAll(pp, i)
             {
                 isValidBFace[bFacei++] = false;
@@ -190,22 +190,20 @@ void Foam::zoneCellStencils::insertFaceCells
     labelHashSet& globals
 ) const
 {
-    const labelList& own = mesh_.faceOwner();
-    const labelList& nei = mesh_.faceNeighbour();
+    const labelList& own = meshRef_.faceOwner();
+    const labelList& nei = meshRef_.faceNeighbour();
 
-    forAll(faceLabels, i)
+    for (const label facei : faceLabels)
     {
-        label facei = faceLabels[i];
-
-        label globalOwn = globalNumbering().toGlobal(own[facei]);
+        const label globalOwn = globalNumbering().toGlobal(own[facei]);
         if (globalOwn != exclude0 && globalOwn != exclude1)
         {
             globals.insert(globalOwn);
         }
 
-        if (mesh_.isInternalFace(facei))
+        if (meshRef_.isInternalFace(facei))
         {
-            label globalNei = globalNumbering().toGlobal(nei[facei]);
+            const label globalNei = globalNumbering().toGlobal(nei[facei]);
             if (globalNei != exclude0 && globalNei != exclude1)
             {
                 globals.insert(globalNei);
@@ -213,13 +211,14 @@ void Foam::zoneCellStencils::insertFaceCells
         }
         else
         {
-            const label bFacei = facei-mesh_.nInternalFaces();
+            const label bFacei = facei - meshRef_.nInternalFaces();
 
             if (isValidBFace[bFacei])
             {
                 label globalI = globalNumbering().toGlobal
                 (
-                    mesh_.nCells() + bFacei
+                    meshRef_.nCells()
+                  + bFacei
                 );
 
                 if (globalI != exclude0 && globalI != exclude1)
@@ -258,25 +257,12 @@ Foam::labelList Foam::zoneCellStencils::calcFaceCells
 
 Foam::zoneCellStencils::zoneCellStencils(const fvMesh& mesh)
 :
-    MeshObject<fvMesh, Foam::UpdateableMeshObject, zoneCellStencils>(mesh),
     labelListList(mesh.nCells()),
+    meshRef_(mesh),
     needComm_(),
-    globalNumbering_(mesh_.nCells() + mesh_.nBoundaryFaces())
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::zoneCellStencils::updateMesh(const mapPolyMesh& mpm)
+    globalNumbering_(meshRef_.nCells() + meshRef_.nBoundaryFaces())
 {
-    if (mesh_.topoChanging())
-    {
-        globalNumbering_ =
-            globalIndex(mesh_.nCells() + mesh_.nBoundaryFaces());
 
-        static_cast<labelListList&>(*this) = labelListList(mesh_.nCells());
-        needComm_.clear();
-    }
 }
 
 

@@ -91,10 +91,11 @@ Foam::zoneDistribute::coupledFacesPatch() const
 
 Foam::zoneDistribute::zoneDistribute(const fvMesh& mesh)
 :
-    MeshObject<fvMesh, Foam::UpdateableMeshObject, zoneDistribute>(mesh),
-    stencil_(mesh),
+    MeshObject<fvMesh, Foam::TopologicalMeshObject, zoneDistribute>(mesh),
     coupledBoundaryPoints_(coupledFacesPatch()().meshPoints()),
-    send_(Pstream::nProcs())
+    send_(Pstream::nProcs()),
+    stencil_(zoneCPCStencil::New(mesh)),
+    gblIdx_(stencil_.globalNumbering())
 {
 }
 
@@ -103,15 +104,11 @@ Foam::zoneDistribute::zoneDistribute(const fvMesh& mesh)
 
 Foam::zoneDistribute& Foam::zoneDistribute::New(const fvMesh& mesh)
 {
-    zoneDistribute* ptr = mesh.thisDb().getObjectPtr<zoneDistribute>
-    (
-        zoneDistribute::typeName
-    );
+    auto* ptr = mesh.thisDb().getObjectPtr<zoneDistribute>("zoneDistribute");
 
     if (!ptr)
     {
         ptr = new zoneDistribute(mesh);
-
         regIOobject::store(ptr);
     }
 
@@ -123,24 +120,22 @@ Foam::zoneDistribute& Foam::zoneDistribute::New(const fvMesh& mesh)
 
 void Foam::zoneDistribute::updateStencil(const boolList& zone)
 {
-    stencil_.updateStencil(zone);
+    zoneCPCStencil::New(mesh_).updateStencil(zone);
 }
 
 
-void Foam::zoneDistribute::setUpCommforZone
-(
-    const boolList& zone,
-    bool updateStencil
-)
+void Foam::zoneDistribute::setUpCommforZone(const boolList& zone,bool updateStencil)
 {
+    zoneCPCStencil& stencil = zoneCPCStencil::New(mesh_);
+
     if (updateStencil)
     {
-        stencil_.updateStencil(zone);
+        stencil.updateStencil(zone);
     }
 
-    const labelHashSet comms = stencil_.needsComm();
+    const labelHashSet comms = stencil.needsComm();
 
-    List<labelHashSet> needed_(Pstream::nProcs());
+    List<labelHashSet> needed(Pstream::nProcs());
 
     if (Pstream::parRun())
     {
@@ -150,11 +145,10 @@ void Foam::zoneDistribute::setUpCommforZone
             {
                 for (const label gblIdx : stencil_[celli])
                 {
-                    if (!globalNumbering().isLocal(gblIdx))
+                    if (!gblIdx_.isLocal(gblIdx))
                     {
-                        const label procID =
-                            globalNumbering().whichProcID(gblIdx);
-                        needed_[procID].insert(gblIdx);
+                        const label procID = gblIdx_.whichProcID (gblIdx);
+                        needed[procID].insert(gblIdx);
                     }
                 }
             }
@@ -170,7 +164,7 @@ void Foam::zoneDistribute::setUpCommforZone
                 // Put data into send buffer
                 UOPstream toDomain(domain, pBufs);
 
-                toDomain << needed_[domain];
+                toDomain << needed[domain];
             }
         }
 
@@ -193,13 +187,6 @@ void Foam::zoneDistribute::setUpCommforZone
 }
 
 
-void Foam::zoneDistribute::updateMesh(const mapPolyMesh& mpm)
-{
-    if (mesh_.topoChanging())
-    {
-        coupledBoundaryPoints_ = coupledFacesPatch()().meshPoints();
-    }
-}
 
 
 // ************************************************************************* //

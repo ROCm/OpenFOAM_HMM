@@ -118,9 +118,6 @@ class plicRDF
         //- Calculates the RDF function
         reconstructedDistanceFunction RDF_;
 
-        //- Provides stencil and map
-        zoneDistribute& exchangeFields_;
-
         //- surfaceIterator finds the plane centre for specified VOF value
         surfaceIteratorPLIC sIterPLIC_;
 

@@ -120,7 +120,7 @@ void Foam::isoAdvection::limitFluxes
 {
     DebugInFunction << endl;
 
-    const scalar aTol = 1.0e-12;          // Note: tolerances
+    const scalar aTol = 100*SMALL;          // Note: tolerances
     scalar maxAlphaMinus1 = gMax(alpha1_) - 1;      // max(alphaNew - 1);
     scalar minAlpha = gMin(alpha1_);           // min(alphaNew);
     const label nOvershoots = 20;         // sum(pos0(alphaNew - 1 - aTol));
@@ -134,6 +134,10 @@ void Foam::isoAdvection::limitFluxes
 
     surfaceScalarField dVfcorrectionValues("dVfcorrectionValues", dVf_*0.0);
 
+    bitSet needBounding(mesh_.nCells(),false);
+    needBounding.set(surfCells_);
+
+    extendMarkedCells(needBounding);
 
     // Loop number of bounding steps
     for (label n = 0; n < nAlphaBounds_; n++)
@@ -143,8 +147,8 @@ void Foam::isoAdvection::limitFluxes
             DebugInfo << "boundAlpha... " << endl;
 
             DynamicList<label> correctedFaces(3*nOvershoots);
-            dVfcorrectionValues = dimensionedScalar(dimVolume, Zero);
-            boundFlux(alpha1In_, dVfcorrectionValues, correctedFaces,Sp,Su);
+            dVfcorrectionValues = dimensionedScalar("0",dimVolume,0.0);
+            boundFlux(needBounding, dVfcorrectionValues, correctedFaces,Sp,Su);
 
             correctedFaces.append
             (
@@ -152,25 +156,24 @@ void Foam::isoAdvection::limitFluxes
             );
 
             labelHashSet alreadyUpdated;
-            forAll(correctedFaces, fi)
+            for (const label facei : correctedFaces)
             {
-                label facei = correctedFaces[fi];
                 if (alreadyUpdated.insert(facei))
                 {
                     checkIfOnProcPatch(facei);
                     const label own = owner[facei];
 
-                    alpha1_[own] +=
-                        -faceValue(dVfcorrectionValues, facei)/mesh_.V()[own];
+                    alpha1_[own] -=
+                        faceValue(dVfcorrectionValues, facei)/mesh_.V()[own];
                     if (mesh_.isInternalFace(facei))
                     {
                         const label nei = neighbour[facei];
-                        alpha1_[nei] -=
-                            -faceValue(dVfcorrectionValues, facei)/mesh_.V()[nei];
+                        alpha1_[nei] +=
+                            faceValue(dVfcorrectionValues, facei)/mesh_.V()[nei];
                     }
 
                     // Change to treat boundaries consistently
-                    scalar corrVf =
+                    const scalar corrVf =
                         faceValue(dVf_, facei)
                       + faceValue(dVfcorrectionValues, facei);
 
@@ -212,7 +215,7 @@ void Foam::isoAdvection::limitFluxes
 template<class SpType, class SuType>
 void Foam::isoAdvection::boundFlux
 (
-    const scalarField& alpha1,
+    const bitSet& nextToInterface,
     surfaceScalarField& dVfcorrectionValues,
     DynamicList<label>& correctedFaces,
     const SpType& Sp,
@@ -223,7 +226,7 @@ void Foam::isoAdvection::boundFlux
     scalar rDeltaT = 1/mesh_.time().deltaTValue();
 
     correctedFaces.clear();
-    scalar aTol = 10*SMALL; // Note: tolerances
+    const scalar aTol = 100*SMALL; // Note: tolerances
 
     const scalarField& meshV = mesh_.cellVolumes();
     const scalar dt = mesh_.time().deltaTValue();
@@ -235,13 +238,15 @@ void Foam::isoAdvection::boundFlux
     const volScalarField& alphaOld = alpha1_.oldTime();
 
     // Loop through alpha cell centred field
-    forAll(alpha1, celli)
+    for (label celli: nextToInterface)
     {
-        if (alpha1[celli] < -aTol || alpha1[celli] > 1 + aTol)
+        if (alpha1_[celli] < -aTol || alpha1_[celli] > 1 + aTol)
         {
             const scalar Vi = meshV[celli];
-            scalar alphaOvershoot = pos0(alpha1[celli]-1)*(alpha1[celli]-1)
-                + neg0(alpha1[celli])*alpha1[celli];
+            scalar alphaOvershoot =
+                pos0(alpha1_[celli] - 1)*(alpha1_[celli] - 1)
+              + neg0(alpha1_[celli])*alpha1_[celli];
+
             scalar fluidToPassOn = alphaOvershoot*Vi;
             label nFacesToPassFluidThrough = 1;
 
@@ -251,7 +256,7 @@ void Foam::isoAdvection::boundFlux
             // not filled and to which dVf < phi*dt
             for (label iter=0; iter<10; iter++)
             {
-                if(mag(alphaOvershoot) < aTol || nFacesToPassFluidThrough == 0)
+                if (mag(alphaOvershoot) < aTol || nFacesToPassFluidThrough == 0)
                 {
                     break;
                 }
@@ -271,9 +276,8 @@ void Foam::isoAdvection::boundFlux
                 scalar dVftot = 0;
                 nFacesToPassFluidThrough = 0;
 
-                forAll(downwindFaces, fi)
+                for (const label facei : downwindFaces)
                 {
-                    const label facei = downwindFaces[fi];
                     const scalar phif = faceValue(phi_, facei);
 
                     const scalar dVff =
@@ -343,7 +347,7 @@ void Foam::isoAdvection::boundFlux
 
                 scalar alpha1New =
                 (
-                    alphaOld[celli]*rDeltaT  + Su[celli]
+                    alphaOld[celli]*rDeltaT + Su[celli]
                   - netFlux(dVf_, celli)/Vi*rDeltaT
                   - netFlux(dVfcorrectionValues, celli)/Vi*rDeltaT
                 )
@@ -351,7 +355,7 @@ void Foam::isoAdvection::boundFlux
                 (rDeltaT - Sp[celli]);
 
                 alphaOvershoot =
-                    pos0(alpha1New-1)*(alpha1New-1)
+                    pos0(alpha1New - 1)*(alpha1New - 1)
                   + neg0(alpha1New)*alpha1New;
 
                 fluidToPassOn = alphaOvershoot*Vi;
@@ -372,12 +376,24 @@ void Foam::isoAdvection::advect(const SpType& Sp, const SuType& Su)
 {
     DebugInFunction << endl;
 
+    if (mesh_.topoChanging())
+    {
+        setProcessorPatches();
+    }
+
     scalar advectionStartTime = mesh_.time().elapsedCpuTime();
 
-    scalar rDeltaT = 1/mesh_.time().deltaTValue();
+    const scalar rDeltaT = 1/mesh_.time().deltaTValue();
 
     // reconstruct the interface
     surf_->reconstruct();
+
+    if (timeIndex_ < mesh_.time().timeIndex())
+    {
+        timeIndex_= mesh_.time().timeIndex();
+        surf_->normal().oldTime() = surf_->normal();
+        surf_->centre().oldTime() = surf_->centre();
+    }
 
     // Initialising dVf with upwind values
     // i.e. phi[facei]*alpha1[upwindCell[facei]]*dt

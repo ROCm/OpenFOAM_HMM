@@ -58,15 +58,19 @@ namespace Foam
 
 class zoneCellStencils
 :
-    public MeshObject<fvMesh, UpdateableMeshObject, zoneCellStencils>,
     public labelListList
 {
 protected:
 
-    // Protected Members
+    // Protected Data
 
+        //- const reference to fvMesh
+        const fvMesh& meshRef_;
+
+        //- cells requiring processor communciation
         labelHashSet needComm_;
 
+        //- Global numbering for cells and boundary faces
         globalIndex globalNumbering_;
 
 
@@ -114,6 +118,12 @@ protected:
         ) = 0;
 
 
+        //- No copy construct
+        zoneCellStencils(const zoneCellStencils&) = delete;
+
+        //- No copy assignment
+        void operator=(const zoneCellStencils&) = delete;
+
 public:
 
         // Declare name of the class and its debug switch
@@ -125,12 +135,15 @@ public:
         //- Construct from all cells and boundary faces
         explicit zoneCellStencils(const fvMesh&);
 
-
-    // Member Functions
-
         //- Calculates per cell the neighbour data
         //  (= cell or boundary in global numbering).
         //  First element is always cell itself!
+        //- Destructor
+        virtual ~zoneCellStencils() = default;
+
+
+    // Member Functions
+
         void updateStencil
         (
             const boolList& zone
@@ -139,23 +152,20 @@ public:
             calculateStencil(zone,*this);
         }
 
-        const labelHashSet& needsComm()
+        const labelHashSet& needsComm() noexcept
         {
             return needComm_;
         }
 
-        //- Global numbering for cells and boundary faces
-        const globalIndex& globalNumbering() const
+        const polyMesh& mesh() const noexcept
         {
-             return globalNumbering_;
+            return meshRef_;
         }
 
-        virtual void updateMesh(const mapPolyMesh& mpm);
-
-        virtual bool movePoints()
+        //- Global numbering for cells and boundary faces
+        const globalIndex& globalNumbering() const noexcept
         {
-            // Do nothing
-            return false;
+             return globalNumbering_;
         }
 };
 
