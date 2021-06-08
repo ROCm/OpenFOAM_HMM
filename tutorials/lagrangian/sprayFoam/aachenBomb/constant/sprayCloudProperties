@@ -232,6 +232,21 @@ cloudFunctions
     {
         type    WeberNumber;
     }
+
+    ReynoldsNumber1
+    {
+        type    ReynoldsNumber;
+    }
+
+    NusseltNumber1
+    {
+        type    NusseltNumber;
+    }
+
+    HeatTransferCoeff1
+    {
+        type    HeatTransferCoeff;
+    }
 }
 
 

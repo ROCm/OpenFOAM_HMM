@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,73 +25,86 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "HeatTransferModel.H"
+#include "ThermoReynoldsNumber.H"
+#include "ThermoCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
-:
-    CloudSubModelBase<CloudType>(owner),
-    BirdCorrection_(false)
-{}
-
-
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel
+Foam::ThermoReynoldsNumber<CloudType>::ThermoReynoldsNumber
 (
     const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const word& modelName
 )
 :
-    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    BirdCorrection_(this->coeffDict().template get<Switch>("BirdCorrection"))
+    CloudFunctionObject<CloudType>(dict, owner, modelName, typeName)
 {}
 
 
 template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel
+Foam::ThermoReynoldsNumber<CloudType>::ThermoReynoldsNumber
 (
-    const HeatTransferModel<CloudType>& htm
+    const ThermoReynoldsNumber<CloudType>& re
 )
 :
-    CloudSubModelBase<CloudType>(htm),
-    BirdCorrection_(htm.BirdCorrection_)
+    CloudFunctionObject<CloudType>(re)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::HeatTransferModel<CloudType>::htc
+void Foam::ThermoReynoldsNumber<CloudType>::postEvolve
 (
-    const scalar dp,
-    const scalar Re,
-    const scalar Pr,
-    const scalar kappa,
-    const scalar NCpW
-) const
+    const typename parcelType::trackingData& td
+)
 {
-    const scalar Nu = this->Nu(Re, Pr);
+    auto& c = this->owner();
 
-    scalar htc = Nu*kappa/dp;
-
-    if (BirdCorrection_ && (mag(htc) > ROOTVSMALL) && (mag(NCpW) > ROOTVSMALL))
+    if (!c.template foundObject<IOField<scalar>>("Re"))
     {
-        const scalar phit = min(NCpW/htc, 50);
-        if (phit > 0.001)
-        {
-            htc *= phit/(exp(phit) - 1.0);
-        }
+        auto* RePtr =
+            new IOField<scalar>
+            (
+                IOobject
+                (
+                    "Re",
+                    c.time().timeName(),
+                    c,
+                    IOobject::NO_READ
+                )
+            );
+
+        RePtr->store();
     }
 
-    return htc;
+    auto& Re = c.template lookupObjectRef<IOField<scalar>>("Re");
+    Re.setSize(c.size());
+
+    typename parcelType::trackingData& nctd =
+        const_cast<typename parcelType::trackingData&>(td);
+
+    label parceli = 0;
+    forAllConstIters(c, parcelIter)
+    {
+        const parcelType& p = parcelIter();
+
+        scalar Ts, rhos, mus, Pr, kappas;
+        p.template calcSurfaceValues<CloudType>
+        (
+            c, nctd, p.T(), Ts, rhos, mus, Pr, kappas
+        );
+
+        Re[parceli++] = p.Re(rhos, p.U(), td.Uc(), p.d(), mus);
+    }
+
+
+    if (c.size() && c.time().writeTime())
+    {
+        Re.write();
+    }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "HeatTransferModelNew.C"
 
 // ************************************************************************* //

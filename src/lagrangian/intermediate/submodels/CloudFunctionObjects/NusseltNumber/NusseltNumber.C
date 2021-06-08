@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,73 +25,90 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "HeatTransferModel.H"
+#include "NusseltNumber.H"
+#include "ThermoCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
-:
-    CloudSubModelBase<CloudType>(owner),
-    BirdCorrection_(false)
-{}
-
-
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel
+Foam::NusseltNumber<CloudType>::NusseltNumber
 (
     const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const word& modelName
 )
 :
-    CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    BirdCorrection_(this->coeffDict().template get<Switch>("BirdCorrection"))
+    CloudFunctionObject<CloudType>(dict, owner, modelName, typeName)
 {}
 
 
 template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel
+Foam::NusseltNumber<CloudType>::NusseltNumber
 (
-    const HeatTransferModel<CloudType>& htm
+    const NusseltNumber<CloudType>& nu
 )
 :
-    CloudSubModelBase<CloudType>(htm),
-    BirdCorrection_(htm.BirdCorrection_)
+    CloudFunctionObject<CloudType>(nu)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::HeatTransferModel<CloudType>::htc
+void Foam::NusseltNumber<CloudType>::postEvolve
 (
-    const scalar dp,
-    const scalar Re,
-    const scalar Pr,
-    const scalar kappa,
-    const scalar NCpW
-) const
+    const typename parcelType::trackingData& td
+)
 {
-    const scalar Nu = this->Nu(Re, Pr);
+    auto& c = this->owner();
+    const auto& tc =
+        static_cast<const ThermoCloud<KinematicCloud<Cloud<parcelType>>>&>(c);
 
-    scalar htc = Nu*kappa/dp;
-
-    if (BirdCorrection_ && (mag(htc) > ROOTVSMALL) && (mag(NCpW) > ROOTVSMALL))
+    if (!c.template foundObject<IOField<scalar>>("Nu"))
     {
-        const scalar phit = min(NCpW/htc, 50);
-        if (phit > 0.001)
-        {
-            htc *= phit/(exp(phit) - 1.0);
-        }
+        auto* NuPtr =
+            new IOField<scalar>
+            (
+                IOobject
+                (
+                    "Nu",
+                    c.time().timeName(),
+                    c,
+                    IOobject::NO_READ
+                )
+            );
+
+        NuPtr->store();
     }
 
-    return htc;
+    auto& Nu = c.template lookupObjectRef<IOField<scalar>>("Nu");
+    Nu.setSize(c.size());
+
+    const auto& heatTransfer = tc.heatTransfer();
+    typename parcelType::trackingData& nctd =
+        const_cast<typename parcelType::trackingData&>(td);
+
+    label parceli = 0;
+    forAllConstIters(c, parcelIter)
+    {
+        const parcelType& p = parcelIter();
+
+        scalar Ts, rhos, mus, Pr, kappas;
+        p.template calcSurfaceValues<CloudType>
+        (
+            c, nctd, p.T(), Ts, rhos, mus, Pr, kappas
+        );
+        const scalar Re = p.Re(rhos, p.U(), td.Uc(), p.d(), mus);
+
+        Nu[parceli++] = heatTransfer.Nu(Re, Pr);
+    }
+
+
+    if (c.size() && c.time().writeTime())
+    {
+        Nu.write();
+    }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "HeatTransferModelNew.C"
 
 // ************************************************************************* //

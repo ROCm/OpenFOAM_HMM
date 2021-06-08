@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,77 @@ Group
     grpLagrangianIntermediateHeatTransferSubModels
 
 Description
-    Templated heat transfer model class
+    Templated class to calculate the fluid-particle heat transfer
+    coefficients based on a specified Nusselt-number model.
+
+    \f[
+        h = \frac{\mathrm{Nu} \, \kappa}{d_p}
+    \f]
+    where
+
+    \vartable
+        h            | Convective heat transfer coefficient of the flow
+        \mathrm{Nu}  | Nusselt number
+        \kappa       | Thermal conductivity of carrier in the film
+        d_p          | Particle diameter
+    \endvartable
+
+    Optionally, Bird-Stewart-Lightfoot correction can be applied
+    to correct the heat transfer coefficient for evaporation:
+
+    \f[
+        h_{corr} = h \, \frac{\beta}{ \exp(\beta) + 1 }
+    \f]
+    with
+
+    \f[
+        \beta = \frac{N \, C_p \, W}{h}
+    \f]
+    where
+
+    \vartable
+        \beta   | Correction factor
+        N       | Molar flux
+        C_p     | Specific heat capacity
+        W       | Molecular weight
+    \endvartable
+
+    Reference:
+    \verbatim
+        Bird, R. B., Stewart, W. E., & Lightfoot, E. N. (1960).
+        Transport phenomena.
+        John Wiley & Sons., New York.
+        DOI:10.1002/aic.690070245
+    \endverbatim
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        heatTransferModel    <model>;
+
+        <model>Coeffs
+        {
+            BirdCorrection   true;
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property           | Description                | Type | Reqd   | Deflt
+      heatTransferModel  | Type name: \<model\>       | word | yes    | -
+      \<model\>Coeffs    | Model properties           | dict | cndtnl | -
+      BirdCorrection     | Flag to apply Bird-Stewart-Lightfoot's <!--
+      --> correction to the heat transfer coefficient | bool | cndtnl | -
+    \endtable
+
+    Options for the \c \<model\> entry:
+    \verbatim
+      RanzMarshall   | Ranz-Marshall correlation for Nusselt number
+      none           | No active model
+    \endverbatim
 
 SourceFiles
     HeatTransferModel.C
@@ -63,7 +133,7 @@ class HeatTransferModel
 {
     // Private Data
 
-        //- Apply Bird's correction to the htc
+        //- Flag to apply Bird-Stewart-Lightfoot's correction to the htc
         const Switch BirdCorrection_;
 
 
@@ -86,6 +156,12 @@ public:
     );
 
 
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const HeatTransferModel<CloudType>&) = delete;
+
+
     // Constructors
 
         //- Construct null from owner
@@ -99,7 +175,7 @@ public:
             const word& type
         );
 
-        //- Construct copy
+        //- Copy construct
         HeatTransferModel(const HeatTransferModel<CloudType>& htm);
 
         //- Construct and return a clone
@@ -107,7 +183,7 @@ public:
 
 
     //- Destructor
-    virtual ~HeatTransferModel();
+    virtual ~HeatTransferModel() = default;
 
 
     //- Selector
@@ -121,7 +197,7 @@ public:
     // Member Functions
 
         //- The Bird HTC correction flag
-        bool BirdCorrection() const
+        bool BirdCorrection() const noexcept
         {
             return BirdCorrection_;
         }
@@ -129,7 +205,7 @@ public:
 
         // Evaluation
 
-            //- Nusselt number
+            //- Return Nusselt number
             virtual scalar Nu
             (
                 const scalar Re,

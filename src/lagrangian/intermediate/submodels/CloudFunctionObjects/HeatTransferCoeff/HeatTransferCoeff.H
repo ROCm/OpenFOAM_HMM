@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,39 +24,50 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoHeatTransfer
+    Foam::HeatTransferCoeff
 
 Group
-    grpLagrangianIntermediateHeatTransferSubModels
+    grpLagrangianIntermediateFunctionObjects
 
 Description
-    Nusselt-number model providing an interface to the
-    properties of \c HeatTransferModel without any active model.
+    Calculates and writes particle heat transfer coefficient field on the cloud.
+
+    Operands:
+    \table
+      Operand        | Type         | Location
+      input          | -            | -
+      output file    | -            | -
+      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/htc
+    \endtable
 
 Usage
-    Minimal example by using \c constant/\<CloudProperties\>:
+    Minimal example by using \c constant/<CloudProperties>:
     \verbatim
-    subModels
+    cloudFunctionObjects
     {
-        heatTransferModel    none;
+        HeatTransferCoeff1
+        {
+            // Mandatory entries
+            type             HeatTransferCoeff;
+        }
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property           | Description              | Type | Reqd | Deflt
-      heatTransferModel  | Type name: none          | word | yes  | -
+      Property     | Description                   | Type   | Reqd | Deflt
+      type         | Type name: HeatTransferCoeff  | word   | yes  | -
     \endtable
 
 SourceFiles
-    NoHeatTransfer.C
+    HeatTransferCoeff.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoHeatTransfer_H
-#define NoHeatTransfer_H
+#ifndef HeatTransferCoeff_H
+#define HeatTransferCoeff_H
 
-#include "HeatTransferModel.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,70 +75,65 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class NoHeatTransfer Declaration
+                       Class HeatTransferCoeff Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoHeatTransfer
+class HeatTransferCoeff
 :
-    public HeatTransferModel<CloudType>
+    public CloudFunctionObject<CloudType>
 {
+    // Private Data
+
+        // Typedefs
+
+            //- Convenience typedef for parcel type
+            typedef typename CloudType::parcelType parcelType;
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("HeatTransferCoeff");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const NoHeatTransfer&) = delete;
+        void operator=(const HeatTransferCoeff<CloudType>&) = delete;
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoHeatTransfer(const dictionary&, CloudType& owner);
+        HeatTransferCoeff
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Copy construct
-        NoHeatTransfer(const NoHeatTransfer<CloudType>& im);
+        HeatTransferCoeff(const HeatTransferCoeff<CloudType>& vf);
 
         //- Construct and return a clone
-        virtual autoPtr<HeatTransferModel<CloudType>> clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType>> clone() const
         {
-            return autoPtr<HeatTransferModel<CloudType>>
+            return autoPtr<CloudFunctionObject<CloudType>>
             (
-                new NoHeatTransfer<CloudType>(*this)
+                new HeatTransferCoeff<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoHeatTransfer() = default;
+    virtual ~HeatTransferCoeff() = default;
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const
-        {
-            return false;
-        }
-
-
-        // Evaluation
-
-            //- Return Nusselt number
-            virtual scalar Nu(const scalar Re, const scalar Pr) const
-            {
-                return 0.0;
-            }
-
-            //- Return Prandtl number
-            virtual scalar Pr() const
-            {
-                return 1.0;
-            }
+        //- Post-evolve hook
+        virtual void postEvolve(const typename parcelType::trackingData& td);
 };
 
 
@@ -139,7 +144,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "NoHeatTransfer.C"
+    #include "HeatTransferCoeff.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

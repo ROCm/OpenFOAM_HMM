@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,39 +24,67 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoHeatTransfer
+    Foam::KinematicReynoldsNumber
 
 Group
-    grpLagrangianIntermediateHeatTransferSubModels
+    grpLagrangianIntermediateFunctionObjects
 
 Description
-    Nusselt-number model providing an interface to the
-    properties of \c HeatTransferModel without any active model.
+    Calculates and writes particle Reynolds number field on the cloud.
+    The normalisation factors are calculated without thermal effects.
+
+    \f[
+        \mathrm{Re}_p =
+            \frac{\rho_c \, | \mathbf{u}_\mathrm{rel} | \, d_p}{\mu_c}
+    \f]
+
+    \vartable
+        \mathrm{Re}_p  | Particle Reynolds number
+        d_p            | Particle diameter
+        \rho_c         | Density of carrier
+        \mu_c          | Dynamic viscosity of carrier
+        \mathbf{u}_\mathrm{rel} | Relative velocity between particle and carrier
+    \endvartable
+
+    Operands:
+    \table
+      Operand        | Type         | Location
+      input          | -            | -
+      output file    | -            | -
+      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/kinematicRe
+    \endtable
 
 Usage
     Minimal example by using \c constant/\<CloudProperties\>:
     \verbatim
-    subModels
+    cloudFunctions
     {
-        heatTransferModel    none;
+        KinematicReynoldsNumber1
+        {
+            // Mandatory entries
+            type             KinematicReynoldsNumber;
+        }
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property           | Description              | Type | Reqd | Deflt
-      heatTransferModel  | Type name: none          | word | yes  | -
+      Property     | Description                        | Type   | Reqd | Deflt
+      type         | Type name: KinematicReynoldsNumber | word   | yes  | -
     \endtable
 
+See also
+  - Foam::ThermoReynoldsNumber
+
 SourceFiles
-    NoHeatTransfer.C
+    KinematicReynoldsNumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoHeatTransfer_H
-#define NoHeatTransfer_H
+#ifndef KinematicReynoldsNumber_H
+#define KinematicReynoldsNumber_H
 
-#include "HeatTransferModel.H"
+#include "CloudFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,70 +92,65 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class NoHeatTransfer Declaration
+                    Class KinematicReynoldsNumber Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoHeatTransfer
+class KinematicReynoldsNumber
 :
-    public HeatTransferModel<CloudType>
+    public CloudFunctionObject<CloudType>
 {
+    // Private Data
+
+        // Typedefs
+
+            //- Convenience typedef for parcel type
+            typedef typename CloudType::parcelType parcelType;
+
+
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("ReynoldsNumber");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const NoHeatTransfer&) = delete;
+        void operator=(const KinematicReynoldsNumber<CloudType>&) = delete;
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoHeatTransfer(const dictionary&, CloudType& owner);
+        KinematicReynoldsNumber
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Copy construct
-        NoHeatTransfer(const NoHeatTransfer<CloudType>& im);
+        KinematicReynoldsNumber(const KinematicReynoldsNumber<CloudType>& vf);
 
         //- Construct and return a clone
-        virtual autoPtr<HeatTransferModel<CloudType>> clone() const
+        virtual autoPtr<CloudFunctionObject<CloudType>> clone() const
         {
-            return autoPtr<HeatTransferModel<CloudType>>
+            return autoPtr<CloudFunctionObject<CloudType>>
             (
-                new NoHeatTransfer<CloudType>(*this)
+                new KinematicReynoldsNumber<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoHeatTransfer() = default;
+    virtual ~KinematicReynoldsNumber() = default;
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const
-        {
-            return false;
-        }
-
-
-        // Evaluation
-
-            //- Return Nusselt number
-            virtual scalar Nu(const scalar Re, const scalar Pr) const
-            {
-                return 0.0;
-            }
-
-            //- Return Prandtl number
-            virtual scalar Pr() const
-            {
-                return 1.0;
-            }
+        //- Post-evolve hook
+        virtual void postEvolve(const typename parcelType::trackingData& td);
 };
 
 
@@ -139,7 +161,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "NoHeatTransfer.C"
+    #include "KinematicReynoldsNumber.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

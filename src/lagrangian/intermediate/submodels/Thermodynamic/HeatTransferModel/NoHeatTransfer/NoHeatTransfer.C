@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,40 +49,6 @@ Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
 :
     HeatTransferModel<CloudType>(htm.owner_)
 {}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoHeatTransfer<CloudType>::~NoHeatTransfer()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoHeatTransfer<CloudType>::active() const
-{
-    return false;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Nu
-(
-    const scalar,
-    const scalar
-) const
-{
-    return 0.0;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::NoHeatTransfer<CloudType>::Pr() const
-{
-    return 1.0;
-}
 
 
 // ************************************************************************* //
