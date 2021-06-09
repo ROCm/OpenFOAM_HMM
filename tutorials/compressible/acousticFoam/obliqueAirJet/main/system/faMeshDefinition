@@ -21,7 +21,6 @@ boundary
     sealing
     {
         type                patch;
-        ownerPolyPatch      window;
         neighbourPolyPatch  fixedWall;
     }
 }

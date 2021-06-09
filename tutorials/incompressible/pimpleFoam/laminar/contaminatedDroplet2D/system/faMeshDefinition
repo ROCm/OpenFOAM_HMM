@@ -21,7 +21,6 @@ boundary
     frontAndBack
     {
         type                empty;
-        ownerPolyPatch      freeSurface;
         neighbourPolyPatch  frontAndBack;
     }
 }

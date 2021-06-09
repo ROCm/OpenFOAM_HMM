@@ -64,35 +64,41 @@ namespace Foam
 static labelList selectPatchFaces
 (
     const polyBoundaryMesh& pbm,
-    const wordList& polyPatchNames
+    const wordRes& polyPatchNames
 )
 {
-    labelHashSet patchIDs;
+    //- Return the set of patch IDs corresponding to the given names
+    //  By default warns if given names are not found.
+    //  Optionally matches to patchGroups as well as patchNames.
+    const labelList patchIDs
+    (
+        pbm.patchSet
+        (
+            polyPatchNames,
+            false,  // warnNotFound
+            true    // useGroups
+        ).sortedToc()
+    );
+
+    if (patchIDs.empty())
+    {
+        FatalErrorInFunction
+            << "No matching patches: " << polyPatchNames << nl
+            << exit(FatalError);
+    }
 
     label nFaceLabels = 0;
-    for (const word& patchName : polyPatchNames)
+    for (const label patchi : patchIDs)
     {
-        const label polyPatchi = pbm.findPatchID(patchName);
-
-        if (polyPatchi < 0)
-        {
-            FatalErrorInFunction
-                << "Patch " << patchName << " not found"
-                << exit(FatalError);
-        }
-
-        if (patchIDs.insert(polyPatchi))
-        {
-            nFaceLabels += pbm[polyPatchi].size();
-        }
+        nFaceLabels += pbm[patchi].size();
     }
 
     labelList faceLabels(nFaceLabels);
 
     nFaceLabels = 0;
-    for (const label polyPatchi : patchIDs.sortedToc())
+    for (const label patchi : patchIDs)
     {
-        for (const label facei : pbm[polyPatchi].range())
+        for (const label facei : pbm[patchi].range())
         {
             faceLabels[nFaceLabels] = facei;
             ++nFaceLabels;
@@ -413,7 +419,7 @@ Foam::faMesh::faMesh
         selectPatchFaces
         (
             pMesh.boundaryMesh(),
-            faMeshDefinition.get<wordList>("polyMeshPatches")
+            faMeshDefinition.get<wordRes>("polyMeshPatches")
         )
     )
 {

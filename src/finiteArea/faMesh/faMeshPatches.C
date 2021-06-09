@@ -697,23 +697,30 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
         patchDef.name_ = dEntry.keyword();
         patchDef.type_ = patchDict.get<word>("type");
 
-        const word ownName(patchDict.get<word>("ownerPolyPatch"));
-        const word neiName(patchDict.get<word>("neighbourPolyPatch"));
+        word patchName;
 
-        patchDef.ownerPolyPatchId_ = pbm.findPatchID(ownName);
-        patchDef.neighPolyPatchId_ = pbm.findPatchID(neiName);
-
-        if (patchDef.ownerPolyPatchId_ < 0)
+        // Optional: ownerPolyPatch
+        if (patchDict.readIfPresent("ownerPolyPatch", patchName))
         {
-            FatalErrorInFunction
-                << "ownerPolyPatch " << ownName << " not found"
-                << exit(FatalError);
+            patchDef.ownerPolyPatchId_ = pbm.findPatchID(patchName);
+            if (patchDef.ownerPolyPatchId_ < 0)
+            {
+                FatalErrorInFunction
+                    << "ownerPolyPatch " << patchName << " not found"
+                    << exit(FatalError);
+            }
         }
-        if (patchDef.neighPolyPatchId_ < 0)
+
+        // Mandatory: neighbourPolyPatch
+        patchDict.readEntry("neighbourPolyPatch", patchName);
         {
-            FatalErrorInFunction
-                << "neighbourPolyPatch " << neiName << " not found"
-                << exit(FatalError);
+            patchDef.neighPolyPatchId_ = pbm.findPatchID(patchName);
+            if (patchDef.neighPolyPatchId_ < 0)
+            {
+                FatalErrorInFunction
+                    << "neighbourPolyPatch " << patchName << " not found"
+                    << exit(FatalError);
+            }
         }
     }
 
@@ -756,20 +763,28 @@ Foam::PtrList<Foam::faPatch> Foam::faMesh::createPatchList
     {
         const patchPairInfo& patchPair = bndEdgePatchPairs[bndEdgei];
 
-        if (patchPair.valid())
-        {
-            // Non-negative, unique pairing
-            // - find corresponding definition
+        // Find first definition with a matching neighbour and
+        // possibly with a matching owner.
 
-            for (label patchi = 0; patchi < faPatchDefs.size(); ++patchi)
+        label bestPatchi = -1;
+
+        for (label patchi = 0; patchi < faPatchDefs.size(); ++patchi)
+        {
+            const int match = faPatchDefs[patchi].matchPatchPair(patchPair);
+            if (match == 3)
             {
-                if (faPatchDefs[patchi].foundPatchPair(patchPair))
-                {
-                    bndEdgeFaPatchIDs[bndEdgei] = patchi;
-                    break;
-                }
+                // Match (owner/neighbour) - done!
+                bestPatchi = patchi;
+                break;
+            }
+            else if (match == 2 && bestPatchi < 0)
+            {
+                // Match (neighbour) - keep looking for exact match
+                bestPatchi = patchi;
             }
         }
+
+        bndEdgeFaPatchIDs[bndEdgei] = bestPatchi;
     }
 
 

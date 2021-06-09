@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faPatchData.H"
-#include "edge.H"
 #include "dictionary.H"
 #include "processorFaPatch.H"
 
@@ -109,21 +108,53 @@ void Foam::faPatchData::assign(const faPatch& fap)
 }
 
 
-bool Foam::faPatchData::foundPatchPair(const edge& patchPair) const
+int Foam::faPatchData::matchPatchPair
+(
+    const labelPair& patchPair
+) const noexcept
 {
-    // Same as edge::compare
-    return
-    (
+    int ret = 0;
+    if (patchPair.first() >= 0 && patchPair.first() == ownerPolyPatchId_)
+    {
+        ret |= 1;
+    }
+    if (patchPair.second() >= 0 && patchPair.second() == neighPolyPatchId_)
+    {
+        ret |= 2;
+    }
+    return ret;
+}
+
+
+int Foam::faPatchData::comparePatchPair
+(
+    const labelPair& patchPair
+) const noexcept
+{
+    // As per edge::compare, with validity check
+
+    if (patchPair.first() >= 0 || patchPair.second() >= 0)
+    {
+        if
         (
             ownerPolyPatchId_ == patchPair.first()
          && neighPolyPatchId_ == patchPair.second()
         )
-     ||
+        {
+            return 1;
+        }
+
+        if
         (
             ownerPolyPatchId_ == patchPair.second()
          && neighPolyPatchId_ == patchPair.first()
         )
-    );
+        {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 

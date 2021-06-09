@@ -22,10 +22,16 @@ referenceLevel      0;
 
 boundaryField
 {
-    inlet
+    inlet1
     {
         type        fixedValue;
         value       uniform 1;
+    }
+
+    inlet2
+    {
+        type        fixedValue;
+        value       uniform 0.9;
     }
 
     outlet

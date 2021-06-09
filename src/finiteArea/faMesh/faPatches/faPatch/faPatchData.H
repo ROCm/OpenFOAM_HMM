@@ -37,6 +37,7 @@ Description
 #define faPatchData_H
 
 #include "labelList.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +45,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class edge;
 class faPatch;
 class dictionary;
 
@@ -116,8 +116,17 @@ public:
             return !owner();
         }
 
-        //- True it matches the owner/neighbour patch pair (any order)
-        bool foundPatchPair(const edge& patchPair) const;
+        //- Ordered match with owner/neighbour patchPair.
+        //  \return
+        //      - 0: matched none
+        //      - 1: matched first only (owner)
+        //      - 2: matched second only (neighbour)
+        //      - 3: matched both (owner/neighbour)
+        //      .
+        int matchPatchPair(const labelPair& patchPair) const noexcept;
+
+        //- Unordered comparison with owner/neighbour patchPair.
+        int comparePatchPair(const labelPair& patchPair) const noexcept;
 };
 
 

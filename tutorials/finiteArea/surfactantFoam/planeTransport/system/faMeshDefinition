@@ -14,29 +14,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-polyMeshPatches  ( top );
+polyMeshPatches  ( "top.*" );
 
 boundary
 {
-    inlet
+    inlet1
     {
         type patch;
-        ownerPolyPatch top;
+        ownerPolyPatch top1;
+        neighbourPolyPatch inlet;
+    }
+
+    inlet2
+    {
+        type patch;
+        ownerPolyPatch top2;
         neighbourPolyPatch inlet;
     }
 
     outlet
     {
         type patch;
-        ownerPolyPatch top;
-        // neighbourPolyPatch outlet;
         neighbourPolyPatch outflow;
     }
 
     bound
     {
         type symmetry;
-        ownerPolyPatch top;
         neighbourPolyPatch bound;
     }
 }

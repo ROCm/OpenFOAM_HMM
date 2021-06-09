@@ -21,35 +21,30 @@ boundary
     inlet
     {
         type                patch;
-        ownerPolyPatch      film;
         neighbourPolyPatch  inlet;
     }
 
     outlet
     {
         type                patch;
-        ownerPolyPatch      film;
         neighbourPolyPatch  outlet;
     }
 
     side
     {
         type                patch;
-        ownerPolyPatch      film;
         neighbourPolyPatch  side;
     }
 
     symmetry
     {
         type                symmetry;
-        ownerPolyPatch      film;
         neighbourPolyPatch  symmetry;
     }
 
     cylinder
     {
         type                patch;
-        ownerPolyPatch      film;
         neighbourPolyPatch  cylinder;
     }
 }
