@@ -10,25 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform (17.55 0 0);
 
 boundaryField
 {
     inlet
     {
-//        type            timeVaryingMappedFixedValue;
-//        offset          (0 0 0);
-//        setAverage      off;
         type            turbulentDFSEMInlet;
         delta           1;
-        nCellPerEddy    3;
         U
         {
             type        mappedFile;
@@ -44,24 +39,27 @@ boundaryField
             type        mappedFile;
             mapMethod   nearest;
         }
+
+        d               1;
+        nCellPerEddy    1;
+        scale           1;
         value           $internalField;
     }
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform (0 0 0);
-        value           uniform (0 0 0);
+        type            advective;
+        value           $internalField;
     }
 
-    sides
-    {
-        type            slip;
-    }
-
-    "(cube|topAndBottom)"
+    "(bottom|top)"
     {
         type            noSlip;
+    }
+
+    "(left|right)"
+    {
+        type            cyclic;
     }
 }
 

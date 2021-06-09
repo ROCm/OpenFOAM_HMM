@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +27,33 @@ Class
     Foam::PatchFunction1Types::MappedFile
 
 Description
-    Patch value mapping from file
+    Patch value mapping from a set of values stored in a file and
+    a set of unstructured points using the following directory structure:
+
+    \verbatim
+        constant/boundaryData/\<patchName\>/points
+        constant/boundaryData/\<patchName\>/\<time\>/\<field\>
+    \endverbatim
 
     Options:
     \table
-        Property | Description                              | Required | Default
-        mapMethod | (nearest/planarInterpolation)    | no | planarInterpolation
-        offset   | Time-varying offset values to interpolated data | no |
-        fieldTable | Name of field data table               | no  | field-name
-        points   | The name of the points file              | no  | points
-        perturb  | Perturbation fraction of bounding box    | no  | 1e-5
-        setAverage | adjust mapped field to maintain average value | no  | false
+      Property  | Description                       | Type  | Reqd | Deflt
+      mapMethod | Mapping method                    | word  | no   <!--
+                -->                                 | planarInterpolation
+      offset    | Time-varying offset values to interpolated data  <!--
+                -->                    | Function1\<Type\>  | no   | -
+      fieldTable | Name of field data table         | word  | no   | field-name
+      points   | Name of the points file            | word  | no   | points
+      perturb  | Perturbation fraction of bounding box | scalar    | no  | 1e-5
+      setAverage | Adjust mapped field to maintain average value   <!--
+                -->                                 | scalar | no  | false
     \endtable
+
+    Options for the \c mapMethod entry:
+    \verbatim
+      nearest               | Use nearest points only (avoids triangulation)
+      planarInterpolation   | Interpolation using 2D Delaunay triangulation
+    \endverbatim
 
 SourceFiles
     MappedFile.C
@@ -228,6 +243,9 @@ public:
 
 
         // I-O
+
+            //- Write coefficient entries in dictionary format
+            void writeEntries(Ostream& os) const;
 
             //- Write in dictionary format
             virtual void writeData(Ostream& os) const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,51 +39,51 @@ Foam::scalar Foam::eddy::epsi(Random& rndGen) const
 }
 
 
-inline Foam::label Foam::eddy::patchFaceI() const
+inline Foam::label Foam::eddy::patchFaceI() const noexcept
 {
     return patchFaceI_;
 }
 
 
-inline const Foam::point& Foam::eddy::position0() const
+inline const Foam::point& Foam::eddy::position0() const noexcept
 {
     return position0_;
 }
 
 
-inline Foam::scalar Foam::eddy::x() const
+inline Foam::scalar Foam::eddy::x() const noexcept
 {
     return x_;
 }
 
 
-inline const Foam::vector& Foam::eddy::sigma() const
+inline const Foam::vector& Foam::eddy::sigma() const noexcept
 {
     return sigma_;
 }
 
 
-inline const Foam::vector& Foam::eddy::alpha() const
+inline const Foam::vector& Foam::eddy::alpha() const noexcept
 {
     return alpha_;
 }
 
 
-inline const Foam::tensor& Foam::eddy::Rpg() const
+inline const Foam::tensor& Foam::eddy::Rpg() const noexcept
 {
     return Rpg_;
+}
+
+
+inline Foam::scalar Foam::eddy::c1() const noexcept
+{
+    return c1_;
 }
 
 
 inline Foam::point Foam::eddy::position(const vector& n) const
 {
     return position0_ + n*x_;
-}
-
-
-inline Foam::scalar Foam::eddy::c1() const
-{
-    return c1_;
 }
 
 

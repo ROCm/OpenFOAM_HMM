@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "turbulentDFSEMInletFvPatchVectorField.H"
-#include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
 #include "OFstream.H"
-#include "globalIndex.H"
-#include "rawIOField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -51,7 +47,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeEddyOBJ() const
         const labelList& boundaryPoints = pp.boundaryPoints();
         const pointField& localPoints = pp.localPoints();
 
-        vector offset = patchNormal_*maxSigmaX_;
+        const vector offset(patchNormal_*maxSigmaX_);
         forAll(boundaryPoints, i)
         {
             point p = localPoints[boundaryPoints[i]];
@@ -65,24 +61,6 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeEddyOBJ() const
             p -= offset;
             os  << "v " << p.x() << " " << p.y() << " " << p.z() << nl;
         }
-
-        // Draw lines between points
-        // Note: need to order to avoid crossing patch
-        //const label nPoint = boundaryPoints.size();
-        //
-        //forAll(boundaryPoints, i)
-        //{
-        //    label i1 = i;
-        //    label i2 = (i + 1) % nPoint;
-        //    os  << "l " << i1 << " " << i2 << nl;
-        //}
-        //
-        //forAll(boundaryPoints, i)
-        //{
-        //    label i1 = i + nPoint;
-        //    label i2 = ((i + 1) % nPoint) + nPoint;
-        //    os  << "l " << i1 << " " << i2 << nl;
-        //}
     }
 
     {
@@ -106,141 +84,31 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
 {
     // Output list of xi vs eta
 
-    // Before interpolation/raw data
-    if (interpolateR_)
+    OFstream os(db().time().path()/"lumley_interpolated.out");
+
+    os  << "# xi" << token::TAB << "eta" << endl;
+
+    const scalar t = db().time().timeOutputValue();
+    const symmTensorField R(R_->value(t)/sqr(Uref_));
+
+    forAll(R, faceI)
     {
-        const fileName valsFile
-        (
-            fileName
-            (
-                this->db().time().globalPath()
-               /this->db().time().constant()
-               /"boundaryData"
-               /this->patch().name()
-               /"0"
-               /"R"
-            )
-        );
+        // Normalised anisotropy tensor
+        const symmTensor devR(dev(R[faceI]/(tr(R[faceI]))));
 
-        IOobject io
-        (
-            valsFile,   // absolute path
-            this->db().time(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false,              // no need to register
-            true                // is global object (currently not used)
-        );
+        // Second tensor invariant
+        const scalar ii = min(0, invariantII(devR));
 
-        const rawIOField<symmTensor> Rexp(io, false);
+        // Third tensor invariant
+        const scalar iii = invariantIII(devR);
 
-        OFstream os(db().time().path()/"lumley_input.out");
-
-        os  << "# xi" << token::TAB << "eta" << endl;
-
-        forAll(Rexp, faceI)
-        {
-            // Normalised anisotropy tensor
-            symmTensor devR = dev(Rexp[faceI]/(tr(Rexp[faceI])));
-
-            // Second tensor invariant
-            scalar ii = min(0, invariantII(devR));
-
-            // Third tensor invariant
-            scalar iii = invariantIII(devR);
-
-            // xi, eta
-            // See Pope - characterization of Reynolds-stress anisotropy
-            scalar xi = cbrt(0.5*iii);
-            scalar eta = sqrt(-ii/3.0);
-            os  << xi << token::TAB << eta << token::TAB
-                << ii << token::TAB << iii << endl;
-        }
+        // xi, eta
+        // See Pope - characterization of Reynolds-stress anisotropy
+        const scalar xi = cbrt(0.5*iii);
+        const scalar eta = sqrt(-ii/3.0);
+        os  << xi << token::TAB << eta << token::TAB
+            << ii << token::TAB << iii << endl;
     }
-
-    // After interpolation
-    {
-        OFstream os(db().time().path()/"lumley_interpolated.out");
-
-        os  << "# xi" << token::TAB << "eta" << endl;
-
-        forAll(R_, faceI)
-        {
-            // Normalised anisotropy tensor
-            symmTensor devR = dev(R_[faceI]/(tr(R_[faceI])));
-
-            // Second tensor invariant
-            scalar ii = min(0, invariantII(devR));
-
-            // Third tensor invariant
-            scalar iii = invariantIII(devR);
-
-            // xi, eta
-            // See Pope - characterization of Reynolds-stress anisotropy
-            scalar xi = cbrt(0.5*iii);
-            scalar eta = sqrt(-ii/3.0);
-            os  << xi << token::TAB << eta << token::TAB
-                << ii << token::TAB << iii << endl;
-        }
-    }
-}
-
-
-const Foam::pointToPointPlanarInterpolation&
-Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
-{
-    // Initialise interpolation (2D planar interpolation by triangulation)
-    if (!mapperPtr_)
-    {
-        const fileName samplePointsFile
-        (
-            this->db().time().globalPath()
-           /this->db().time().constant()
-           /"boundaryData"
-           /this->patch().name()
-           /"points"
-        );
-
-        IOobject io
-        (
-            samplePointsFile,   // absolute path
-            this->db().time(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false,              // no need to register
-            true                // is global object (currently not used)
-        );
-
-        // Read data
-        const rawIOField<point> samplePoints(io, false);
-
-
-        DebugInFunction
-            << " Read " << samplePoints.size() << " sample points from "
-            << samplePointsFile << endl;
-
-
-        // tbd: run-time selection
-        bool nearestOnly =
-        (
-           !mapMethod_.empty()
-         && mapMethod_ != "planarInterpolation"
-        );
-
-        // Allocate the interpolator
-        mapperPtr_.reset
-        (
-            new pointToPointPlanarInterpolation
-            (
-                samplePoints,
-                this->patch().patch().faceCentres(),
-                perturb_,
-                nearestOnly
-            )
-        );
-    }
-
-    return *mapperPtr_;
 }
 
 
@@ -252,7 +120,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
     patchNormal_ = -gAverage(nf);
 
     // Check that patch is planar
-    scalar error = max(magSqr(patchNormal_ + nf));
+    const scalar error = max(magSqr(patchNormal_ + nf));
 
     if (error > SMALL)
     {
@@ -293,9 +161,9 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
         }
     }
 
-    forAll(sumTriMagSf_, i)
+    for (auto& s : sumTriMagSf_)
     {
-        sumTriMagSf_[i] = 0.0;
+        s = 0.0;
     }
 
     sumTriMagSf_[Pstream::myProcNo() + 1] = sum(triMagSf);
@@ -303,7 +171,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
     Pstream::listCombineGather(sumTriMagSf_, maxEqOp<scalar>());
     Pstream::listCombineScatter(sumTriMagSf_);
 
-    for (label i = 1; i < triMagSf.size(); i++)
+    for (label i = 1; i < triMagSf.size(); ++i)
     {
         triMagSf[i] += triMagSf[i-1];
     }
@@ -314,7 +182,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialisePatch()
     triCumulativeMagSf_.transfer(triMagSf);
 
     // Convert sumTriMagSf_ into cumulative sum of areas per proc
-    for (label i = 1; i < sumTriMagSf_.size(); i++)
+    for (label i = 1; i < sumTriMagSf_.size(); ++i)
     {
         sumTriMagSf_[i] += sumTriMagSf_[i-1];
     }
@@ -336,7 +204,9 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddyBox()
 {
     const scalarField& magSf = patch().magSf();
 
-    //const scalarField cellDx(Foam::sqrt(magSf));
+    const scalarField L(L_->value(db().time().timeOutputValue())/Lref_);
+
+    // (PCF:Eq. 14)
     const scalarField cellDx(max(Foam::sqrt(magSf), 2/patch().deltaCoeffs()));
 
     // Inialise eddy box extents
@@ -344,13 +214,10 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddyBox()
     {
         scalar& s = sigmax_[faceI];
 
-        // Length scale in x direction (based on eq. 14)
-        s = mag(L_[faceI]);
-        s = min(s, kappa_*delta_);
-
-        // Allow eddies to be smaller than the mesh scale as suggested by
-        // the reference?
-        // s = min(s, nCellPerEddy_*cellDx[faceI]);
+        // Average length scale (SST:Eq. 24)
+        // Personal communication regarding (PCR:Eq. 14)
+        //  - the min operator in Eq. 14 is a typo, and should be a max operator
+        s = min(mag(L[faceI]), kappa_*delta_);
         s = max(s, nCellPerEddy_*cellDx[faceI]);
     }
 
@@ -383,7 +250,8 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
 
     if (global)
     {
-        scalar areaFraction = rndGen_.globalPosition<scalar>(0, patchArea_);
+        const scalar areaFraction =
+            rndGen_.globalPosition<scalar>(0, patchArea_);
 
         // Determine which processor to use
         label procI = 0;
@@ -400,7 +268,7 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
         {
             // Find corresponding decomposed face triangle
             label triI = 0;
-            scalar offset = sumTriMagSf_[procI];
+            const scalar offset = sumTriMagSf_[procI];
             forAllReverse(triCumulativeMagSf_, i)
             {
                 if (areaFraction > triCumulativeMagSf_[i] + offset)
@@ -423,8 +291,8 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
     {
         // Find corresponding decomposed face triangle on local processor
         label triI = 0;
-        scalar maxAreaLimit = triCumulativeMagSf_.last();
-        scalar areaFraction = rndGen_.position<scalar>(0, maxAreaLimit);
+        const scalar maxAreaLimit = triCumulativeMagSf_.last();
+        const scalar areaFraction = rndGen_.position<scalar>(0, maxAreaLimit);
 
         forAllReverse(triCumulativeMagSf_, i)
         {
@@ -450,6 +318,9 @@ Foam::pointIndexHit Foam::turbulentDFSEMInletFvPatchVectorField::setNewPosition
 
 void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddies()
 {
+    const scalar t = db().time().timeOutputValue();
+    const symmTensorField R(R_->value(t)/sqr(Uref_));
+
     DynamicList<eddy> eddies(size());
 
     // Initialise eddy properties
@@ -465,18 +336,18 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddies()
         {
             // Get new parallel consistent position
             pointIndexHit pos(setNewPosition(true));
-            label faceI = pos.index();
+            const label patchFaceI = pos.index();
 
             // Note: only 1 processor will pick up this face
-            if (faceI != -1)
+            if (patchFaceI != -1)
             {
                 eddy e
                 (
-                    faceI,
+                    patchFaceI,
                     pos.hitPoint(),
                     rndGen_.position<scalar>(-maxSigmaX_, maxSigmaX_),
-                    sigmax_[faceI],
-                    R_[faceI],
+                    sigmax_[patchFaceI],
+                    R[patchFaceI],
                     rndGen_
                 );
 
@@ -526,16 +397,21 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::initialiseEddies()
         WarningInFunction
             << "Patch: " << patch().patch().name()
             << " on field " << internalField().name()
-            << ": No eddies seeded - please check your set-up" << endl;
+            << ": No eddies seeded - please check your set-up"
+            << endl;
     }
 }
 
 
 void Foam::turbulentDFSEMInletFvPatchVectorField::convectEddies
 (
+    const vector& UBulk,
     const scalar deltaT
 )
 {
+    const scalar t = db().time().timeOutputValue();
+    const symmTensorField R(R_->value(t)/sqr(Uref_));
+
     // Note: all operations applied to local processor only
 
     label nRecycled = 0;
@@ -543,7 +419,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::convectEddies
     forAll(eddies_, eddyI)
     {
         eddy& e = eddies_[eddyI];
-        e.move(deltaT*(UMean_ & patchNormal_));
+        e.move(deltaT*(UBulk & patchNormal_));
 
         const scalar position0 = e.x();
 
@@ -555,17 +431,17 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::convectEddies
 
             while (search && iter++ < seedIterMax_)
             {
-               // Spawn new eddy with new random properties (intensity etc)
-               pointIndexHit pos(setNewPosition(false));
-               label faceI = pos.index();
+                // Spawn new eddy with new random properties (intensity etc)
+                pointIndexHit pos(setNewPosition(false));
+                const label patchFaceI = pos.index();
 
-               e = eddy
+                e = eddy
                     (
-                        faceI,
+                        patchFaceI,
                         pos.hitPoint(),
                         position0 - floor(position0/maxSigmaX_)*maxSigmaX_,
-                        sigmax_[faceI],
-                        R_[faceI],
+                        sigmax_[patchFaceI],
+                        R[patchFaceI],
                         rndGen_
                     );
 
@@ -583,27 +459,28 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::convectEddies
 
     if (debug && nRecycled > 0)
     {
-        Info<< "Patch: " << patch().patch().name() << " recycled "
-            << nRecycled << " eddies" << endl;
+        Info<< "Patch: " << patch().patch().name()
+            << " recycled " << nRecycled << " eddies"
+            << endl;
     }
 }
 
 
-Foam::vector Foam::turbulentDFSEMInletFvPatchVectorField::uDashEddy
+Foam::vector Foam::turbulentDFSEMInletFvPatchVectorField::uPrimeEddy
 (
     const List<eddy>& eddies,
     const point& patchFaceCf
 ) const
 {
-    vector uDash(Zero);
+    vector uPrime(Zero);
 
     forAll(eddies, k)
     {
         const eddy& e = eddies[k];
-        uDash += e.uDash(patchFaceCf, patchNormal_);
+        uPrime += e.uPrime(patchFaceCf, patchNormal_);
     }
 
-    return uDash;
+    return uPrime;
 }
 
 
@@ -629,8 +506,8 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
         const eddy& e = eddies_[i];
 
         // Eddy bounds
-        point x = e.position(patchNormal_);
-        boundBox ebb = e.bounds();
+        const point x(e.position(patchNormal_));
+        boundBox ebb(e.bounds());
         ebb.min() += x;
         ebb.max() += x;
 
@@ -678,10 +555,10 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
         if (procI != Pstream::myProcNo())
         {
             // What I need to receive is what other processor is sending to me
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
+            const label nRecv = sendSizes[procI][Pstream::myProcNo()];
             constructMap[procI].setSize(nRecv);
 
-            for (label i = 0; i < nRecv; i++)
+            for (label i = 0; i < nRecv; ++i)
             {
                 constructMap[procI][i] = segmentI++;
             }
@@ -738,37 +615,33 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    delta_(Zero),
-    d_(Zero),
-    kappa_(Zero),
-
-    perturb_(1e-5),
-    mapMethod_("nearestCell"),
-    mapperPtr_(nullptr),
-    interpolateR_(false),
-    interpolateL_(false),
-    interpolateU_(false),
-    R_(),
-    L_(),
-    U_(),
-    UMean_(Zero),
+    U_(nullptr),
+    R_(nullptr),
+    L_(nullptr),
+    delta_(1.0),
+    d_(1.0),
+    kappa_(0.41),
+    Uref_(1.0),
+    Lref_(1.0),
+    scale_(1.0),
+    m_(0.5),
+    nCellPerEddy_(5),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
+    patchNormal_(Zero),
+    patchBounds_(boundBox::invertedBox),
 
     eddies_(Zero),
-    nCellPerEddy_(5),
-    patchNormal_(Zero),
     v0_(Zero),
     rndGen_(Pstream::myProcNo()),
     sigmax_(size(), Zero),
     maxSigmaX_(Zero),
-    nEddy_(Zero),
+    nEddy_(0),
     curTimeIndex_(-1),
-    patchBounds_(boundBox::invertedBox),
     singleProc_(false),
     writeEddies_(false)
 {}
@@ -784,37 +657,33 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
+    U_(ptf.U_.clone(patch().patch())),
+    R_(ptf.R_.clone(patch().patch())),
+    L_(ptf.L_.clone(patch().patch())),
     delta_(ptf.delta_),
     d_(ptf.d_),
     kappa_(ptf.kappa_),
-
-    perturb_(ptf.perturb_),
-    mapMethod_(ptf.mapMethod_),
-    mapperPtr_(nullptr),
-    interpolateR_(ptf.interpolateR_),
-    interpolateL_(ptf.interpolateL_),
-    interpolateU_(ptf.interpolateU_),
-    R_(ptf.R_, mapper),
-    L_(ptf.L_, mapper),
-    U_(ptf.U_, mapper),
-    UMean_(ptf.UMean_),
+    Uref_(ptf.Uref_),
+    Lref_(ptf.Lref_),
+    scale_(ptf.scale_),
+    m_(ptf.m_),
+    nCellPerEddy_(ptf.nCellPerEddy_),
 
     patchArea_(ptf.patchArea_),
     triFace_(ptf.triFace_),
     triToFace_(ptf.triToFace_),
     triCumulativeMagSf_(ptf.triCumulativeMagSf_),
     sumTriMagSf_(ptf.sumTriMagSf_),
+    patchNormal_(ptf.patchNormal_),
+    patchBounds_(ptf.patchBounds_),
 
     eddies_(ptf.eddies_),
-    nCellPerEddy_(ptf.nCellPerEddy_),
-    patchNormal_(ptf.patchNormal_),
     v0_(ptf.v0_),
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_, mapper),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(Zero),
+    nEddy_(ptf.nEddy_),
     curTimeIndex_(-1),
-    patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
     writeEddies_(ptf.writeEddies_)
 {}
@@ -829,46 +698,42 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    delta_(dict.get<scalar>("delta")),
-    d_(dict.getOrDefault<scalar>("d", 1)),
-    kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
-
-    perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
-    mapMethod_(dict.getOrDefault<word>("mapMethod", "nearestCell")),
-    mapperPtr_(nullptr),
-    interpolateR_(dict.getOrDefault("interpolateR", false)),
-    interpolateL_(dict.getOrDefault("interpolateL", false)),
-    interpolateU_(dict.getOrDefault("interpolateU", false)),
-    R_(interpolateOrRead<symmTensor>("R", dict, interpolateR_)),
-    L_(interpolateOrRead<scalar>("L", dict, interpolateL_)),
-    U_(interpolateOrRead<vector>("U", dict, interpolateU_)),
-    UMean_(Zero),
+    U_(PatchFunction1<vector>::New(patch().patch(), "U", dict)),
+    R_(PatchFunction1<symmTensor>::New(patch().patch(), "R", dict)),
+    L_(PatchFunction1<scalar>::New(patch().patch(), "L", dict)),
+    delta_(dict.getCheck<scalar>("delta", scalarMinMax::ge(0))),
+    d_(dict.getCheckOrDefault<scalar>("d", 1, scalarMinMax::ge(SMALL))),
+    kappa_(dict.getCheckOrDefault<scalar>("kappa", 0.41, scalarMinMax::ge(0))),
+    Uref_(dict.getCheckOrDefault<scalar>("Uref", 1, scalarMinMax::ge(SMALL))),
+    Lref_(dict.getCheckOrDefault<scalar>("Lref", 1, scalarMinMax::ge(SMALL))),
+    scale_(dict.getCheckOrDefault<scalar>("scale", 1, scalarMinMax::ge(0))),
+    m_(dict.getCheckOrDefault<scalar>("m", 0.5, scalarMinMax::ge(0))),
+    nCellPerEddy_(dict.getOrDefault<label>("nCellPerEddy", 5)),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
     sumTriMagSf_(Pstream::nProcs() + 1, Zero),
+    patchNormal_(Zero),
+    patchBounds_(boundBox::invertedBox),
 
     eddies_(),
-    nCellPerEddy_(dict.getOrDefault<label>("nCellPerEddy", 5)),
-    patchNormal_(Zero),
     v0_(Zero),
     rndGen_(),
     sigmax_(size(), Zero),
     maxSigmaX_(Zero),
-    nEddy_(Zero),
+    nEddy_(0),
     curTimeIndex_(-1),
-    patchBounds_(boundBox::invertedBox),
     singleProc_(false),
     writeEddies_(dict.getOrDefault("writeEddies", false))
 {
     eddy::debug = debug;
 
-    checkStresses(R_);
+    const scalar t = db().time().timeOutputValue();
+    const symmTensorField R(R_->value(t)/sqr(Uref_));
 
-    // Set UMean as patch area average value
-    UMean_ = gSum(U_*patch().magSf())/(gSum(patch().magSf()) + ROOTVSMALL);
+    checkStresses(R);
 }
 
 
@@ -879,37 +744,33 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
+    U_(ptf.U_.clone(patch().patch())),
+    R_(ptf.R_.clone(patch().patch())),
+    L_(ptf.L_.clone(patch().patch())),
     delta_(ptf.delta_),
     d_(ptf.d_),
     kappa_(ptf.kappa_),
-
-    perturb_(ptf.perturb_),
-    mapMethod_(ptf.mapMethod_),
-    mapperPtr_(nullptr),
-    interpolateR_(ptf.interpolateR_),
-    interpolateL_(ptf.interpolateL_),
-    interpolateU_(ptf.interpolateU_),
-    R_(ptf.R_),
-    L_(ptf.L_),
-    U_(ptf.U_),
-    UMean_(ptf.UMean_),
+    Uref_(ptf.Uref_),
+    Lref_(ptf.Lref_),
+    scale_(ptf.scale_),
+    m_(ptf.m_),
+    nCellPerEddy_(ptf.nCellPerEddy_),
 
     patchArea_(ptf.patchArea_),
     triFace_(ptf.triFace_),
     triToFace_(ptf.triToFace_),
     triCumulativeMagSf_(ptf.triCumulativeMagSf_),
     sumTriMagSf_(ptf.sumTriMagSf_),
+    patchNormal_(ptf.patchNormal_),
+    patchBounds_(ptf.patchBounds_),
 
     eddies_(ptf.eddies_),
-    nCellPerEddy_(ptf.nCellPerEddy_),
-    patchNormal_(ptf.patchNormal_),
     v0_(ptf.v0_),
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(Zero),
+    nEddy_(ptf.nEddy_),
     curTimeIndex_(-1),
-    patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
     writeEddies_(ptf.writeEddies_)
 {}
@@ -923,37 +784,33 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
+    U_(ptf.U_.clone(patch().patch())),
+    R_(ptf.R_.clone(patch().patch())),
+    L_(ptf.L_.clone(patch().patch())),
     delta_(ptf.delta_),
     d_(ptf.d_),
     kappa_(ptf.kappa_),
-
-    perturb_(ptf.perturb_),
-    mapMethod_(ptf.mapMethod_),
-    mapperPtr_(nullptr),
-    interpolateR_(ptf.interpolateR_),
-    interpolateL_(ptf.interpolateL_),
-    interpolateU_(ptf.interpolateU_),
-    R_(ptf.R_),
-    L_(ptf.L_),
-    U_(ptf.U_),
-    UMean_(ptf.UMean_),
+    Uref_(ptf.Uref_),
+    Lref_(ptf.Lref_),
+    scale_(ptf.scale_),
+    m_(ptf.m_),
+    nCellPerEddy_(ptf.nCellPerEddy_),
 
     patchArea_(ptf.patchArea_),
     triFace_(ptf.triFace_),
     triToFace_(ptf.triToFace_),
     triCumulativeMagSf_(ptf.triCumulativeMagSf_),
     sumTriMagSf_(ptf.sumTriMagSf_),
+    patchNormal_(ptf.patchNormal_),
+    patchBounds_(ptf.patchBounds_),
 
     eddies_(ptf.eddies_),
-    nCellPerEddy_(ptf.nCellPerEddy_),
-    patchNormal_(ptf.patchNormal_),
     v0_(ptf.v0_),
     rndGen_(ptf.rndGen_),
     sigmax_(ptf.sigmax_),
     maxSigmaX_(ptf.maxSigmaX_),
-    nEddy_(Zero),
+    nEddy_(ptf.nEddy_),
     curTimeIndex_(-1),
-    patchBounds_(ptf.patchBounds_),
     singleProc_(ptf.singleProc_),
     writeEddies_(ptf.writeEddies_)
 {}
@@ -981,11 +838,11 @@ bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
                 << exit(FatalError);
         }
 
-        scalar a_xx = sqrt(R.xx());
+        const scalar a_xx = sqrt(R.xx());
 
-        scalar a_xy = R.xy()/a_xx;
+        const scalar a_xy = R.xy()/a_xx;
 
-        scalar a_yy_2 = R.yy() - sqr(a_xy);
+        const scalar a_yy_2 = R.yy() - sqr(a_xy);
 
         if (a_yy_2 < 0)
         {
@@ -996,13 +853,13 @@ bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
                 << exit(FatalError);
         }
 
-        scalar a_yy = Foam::sqrt(a_yy_2);
+        const scalar a_yy = Foam::sqrt(a_yy_2);
 
-        scalar a_xz = R.xz()/a_xx;
+        const scalar a_xz = R.xz()/a_xx;
 
-        scalar a_yz = (R.yz() - a_xy*a_xz)*a_yy;
+        const scalar a_yz = (R.yz() - a_xy*a_xz)/a_yy;
 
-        scalar a_zz_2 = R.zz() - sqr(a_xz) - sqr(a_yz);
+        const scalar a_zz_2 = R.zz() - sqr(a_xz) - sqr(a_yz);
 
         if (a_zz_2 < 0)
         {
@@ -1013,7 +870,7 @@ bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
                 << exit(FatalError);
         }
 
-        scalar a_zz = Foam::sqrt(a_zz_2);
+        const scalar a_zz = Foam::sqrt(a_zz_2);
 
         if (debug)
         {
@@ -1036,11 +893,18 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::autoMap
 {
     fixedValueFvPatchField<vector>::autoMap(m);
 
-    // Clear interpolator
-    mapperPtr_.clear();
-    R_.autoMap(m);
-    L_.autoMap(m);
-    U_.autoMap(m);
+    if (U_)
+    {
+        U_->autoMap(m);
+    }
+    if (R_)
+    {
+        R_->autoMap(m);
+    }
+    if (L_)
+    {
+        L_->autoMap(m);
+    }
 
     sigmax_.autoMap(m);
 }
@@ -1054,15 +918,21 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::rmap
 {
     fixedValueFvPatchField<vector>::rmap(ptf, addr);
 
-    const turbulentDFSEMInletFvPatchVectorField& dfsemptf =
+    const auto& dfsemptf =
         refCast<const turbulentDFSEMInletFvPatchVectorField>(ptf);
 
-    R_.rmap(dfsemptf.R_, addr);
-    L_.rmap(dfsemptf.L_, addr);
-    U_.rmap(dfsemptf.U_, addr);
-
-    // Clear interpolator
-    mapperPtr_.clear();
+    if (U_)
+    {
+        U_->rmap(dfsemptf.U_(), addr);
+    }
+    if (R_)
+    {
+        R_->rmap(dfsemptf.R_(), addr);
+    }
+    if (L_)
+    {
+        L_->rmap(dfsemptf.L_(), addr);
+    }
 
     sigmax_.rmap(dfsemptf.sigmax_, addr);
 }
@@ -1087,38 +957,38 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
 
     if (curTimeIndex_ != db().time().timeIndex())
     {
-        if (debug)
-        {
-            label n = eddies_.size();
-            Info<< "Number of eddies: " << returnReduce(n, sumOp<label>())
-                << endl;
-        }
+        tmp<vectorField> UMean =
+            U_->value(db().time().timeOutputValue())/Uref_;
 
+        // (PCR:p. 522)
+        const vector UBulk
+        (
+            gSum(UMean()*patch().magSf())
+           /(gSum(patch().magSf()) + ROOTVSMALL)
+        );
+
+        // Move eddies using bulk velocity
         const scalar deltaT = db().time().deltaTValue();
+        convectEddies(UBulk, deltaT);
 
-        // Move eddies using mean velocity
-        convectEddies(deltaT);
-
-        // Set velocity
+        // Set mean velocity
         vectorField& U = *this;
-        //U = UMean_;
-        U = U_;
-
-        const pointField& Cf = patch().Cf();
+        U = UMean;
 
         // Apply second part of normalisation coefficient
-        // Note: factor of 2 required to match reference stresses?
-        const scalar FACTOR = 2;
-        const scalar c = FACTOR*Foam::sqrt(10*v0_)/Foam::sqrt(scalar(nEddy_));
+        const scalar c =
+            scale_*Foam::pow(10*v0_, m_)/Foam::sqrt(scalar(nEddy_));
 
         // In parallel, need to collect all eddies that will interact with
         // local faces
+
+        const pointField& Cf = patch().Cf();
 
         if (singleProc_ || !Pstream::parRun())
         {
             forAll(U, faceI)
             {
-                U[faceI] += c*uDashEddy(eddies_, Cf[faceI]);
+                U[faceI] += c*uPrimeEddy(eddies_, Cf[faceI]);
             }
         }
         else
@@ -1126,7 +996,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             // Process local eddy contributions
             forAll(U, faceI)
             {
-                U[faceI] += c*uDashEddy(eddies_, Cf[faceI]);
+                U[faceI] += c*uPrimeEddy(eddies_, Cf[faceI]);
             }
 
             // Add contributions from overlapping eddies
@@ -1139,29 +1009,20 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
 
                 if (eddies.size())
                 {
-                    //Pout<< "Applying " << eddies.size()
-                    //    << " eddies from processor " << procI << endl;
-
                     forAll(U, faceI)
                     {
-                        U[faceI] += c*uDashEddy(eddies, Cf[faceI]);
+                        U[faceI] += c*uPrimeEddy(eddies, Cf[faceI]);
                     }
                 }
             }
         }
 
         // Re-scale to ensure correct flow rate
-        scalar fCorr =
-            gSum((UMean_ & patchNormal_)*patch().magSf())
+        const scalar fCorr =
+            gSum((UBulk & patchNormal_)*patch().magSf())
            /gSum(U & -patch().Sf());
 
         U *= fCorr;
-
-        if (debug)
-        {
-            Info<< "Patch:" << patch().patch().name()
-                << " min/max(U):" << gMin(U) << ", " << gMax(U) << endl;
-        }
 
         curTimeIndex_ = db().time().timeIndex();
 
@@ -1170,9 +1031,22 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             writeEddyOBJ();
         }
 
-        if (debug && db().time().writeTime())
+        if (debug)
         {
-            writeLumleyCoeffs();
+            Info<< "Magnitude of bulk velocity: " << UBulk << endl;
+
+            label n = eddies_.size();
+            Info<< "Number of eddies: " << returnReduce(n, sumOp<label>())
+                << endl;
+
+            Info<< "Patch:" << patch().patch().name()
+                << " min/max(U):" << gMin(U) << ", " << gMax(U)
+                << endl;
+
+            if (db().time().writeTime())
+            {
+                writeLumleyCoeffs();
+            }
         }
     }
 
@@ -1183,38 +1057,28 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
 void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
-    writeEntry("value", os);
     os.writeEntry("delta", delta_);
     os.writeEntryIfDifferent<scalar>("d", 1.0, d_);
     os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
-    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
+    os.writeEntryIfDifferent<scalar>("Uref", 1.0, Uref_);
+    os.writeEntryIfDifferent<scalar>("Lref", 1.0, Lref_);
+    os.writeEntryIfDifferent<scalar>("scale", 1.0, scale_);
+    os.writeEntryIfDifferent<scalar>("m", 0.5, m_);
     os.writeEntryIfDifferent<label>("nCellPerEddy", 5, nCellPerEddy_);
     os.writeEntryIfDifferent("writeEddies", false, writeEddies_);
-
-    if (!interpolateR_)
+    if (U_)
     {
-        R_.writeEntry("R", os);
+        U_->writeData(os);
     }
-
-    if (!interpolateL_)
+    if (R_)
     {
-        L_.writeEntry("L", os);
+        R_->writeData(os);
     }
-
-    if (!interpolateU_)
+    if (L_)
     {
-        U_.writeEntry("U", os);
+        L_->writeData(os);
     }
-
-    if (!mapMethod_.empty())
-    {
-        os.writeEntryIfDifferent<word>
-        (
-            "mapMethod",
-            "nearestCell",
-            mapMethod_
-        );
-    }
+    writeEntry("value", os);
 }
 
 
