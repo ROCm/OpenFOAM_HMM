@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -25,7 +24,7 @@ regions
     cylinderToCell
     {
         p1 (0 0 -5);
-        p2 (0 0 .000);
+        p2 (0 0 0);
         radius 1;
         fieldValues
         (

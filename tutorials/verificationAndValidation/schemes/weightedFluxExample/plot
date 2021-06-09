@@ -39,7 +39,6 @@ plotTemperature() {
     (x<=0)?fu(x):fo(x) w l lc 0 t 'analytical solution', \
     "$graphDir/1/line_T.xy" u 1:2 w p pt 2 ps 2 lt rgb "red" t 'linear interpolation', \
     "$graphDir/2/line_T.xy" u 1:2 w p pt 6 ps 2 lt rgb "green" t 'harmonic interpolation'
-
 GNUPLOT
 }
 
@@ -82,6 +81,7 @@ then
     }
 
     plotTemperature
+
     plotHeatFlux
 fi
 

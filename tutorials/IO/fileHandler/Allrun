@@ -9,10 +9,11 @@ then
     if [ -f system/controlDict.orig ]
     then
         echo "$0: restoring the controlDict from controlDict.orig"
-        mv system/controlDict.orig system/controlDict
+        mv -f system/controlDict.orig system/controlDict
     fi
 fi
 
+restore0Dir
 
 runApplication blockMesh
 
@@ -32,15 +33,15 @@ runParallel -s uncollated $application -fileHandler uncollated
 rm -rf machineA/fileHandler
 mkdir -p machineA/fileHandler
 (   cd machineA/fileHandler && \
-    cp -r ../../processor[0-1] . && \
-    cp -r ../../system . && \
+    cp -rf ../../processor[0-1] . && \
+    cp -rf ../../system . && \
     mkdir -p constant && cp ../../constant/* constant
 )
 #- Note: slave node does not need constant&system since these are global
 rm -rf machineB/fileHandler
 mkdir -p machineB/fileHandler
 (   cd machineB/fileHandler && \
-    cp -r ../../processor[2-3] .
+    cp -rf ../../processor[2-3] .
 )
 #- Run with different roots
 (   d=$PWD && \
@@ -86,8 +87,8 @@ runApplication -s collated decomposePar \
 rm -rf machineA/fileHandler
 mkdir -p machineA/fileHandler
 (   cd machineA/fileHandler && \
-    cp -r ../../processor* . && \
-    cp -r ../../system . && \
+    cp -rf ../../processor* . && \
+    cp -rf ../../system . && \
     mkdir -p constant && cp ../../constant/* constant
 )
 #- Note: slave node does not need constant&system since these are global

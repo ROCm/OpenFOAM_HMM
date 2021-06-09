@@ -1,26 +1,130 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-RASModel="kEpsilon"    # "kOmegaSST"
+# settings
 
-sed -e "s|RAS_MODEL|$RASModel|g" \
-    constant/turbulenceProperties.template \
-  > constant/turbulenceProperties
+    # operand setups (only neutral stability)
+    setups="
+    kEpsilon
+    kOmegaSST
+    "
 
-restore0Dir
+    # flag to enable computations in parallel mode
+    parallel=true
 
-cp -rf constant/polyMesh.orig constant/polyMesh
 
-runApplication mapFields ../precursor -sourceTime latestTime
+#------------------------------------------------------------------------------
 
-runApplication decomposePar -force
+#######################################
+# Collect results and mesh into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
 
-runParallel renumberMesh -overwrite
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
 
-runParallel $(getApplication)
+    collection="$1"
 
-runApplication reconstructPar -latestTime
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+        [ -d constant ] && mv -f constant "$dirResult"
+        [ -d system ] && mv -f system "$dirResult"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+
+    if [ ! -d "$dirSetup" ]
+    then
+        echo "Setup directory: $dirSetup" \
+             "could not be found - skipping execution" 1>&2
+        exit 1
+    fi
+
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    if [ ! -d constant/polyMesh ]
+    then
+
+        runApplication blockMesh
+
+        runApplication topoSet
+
+        runApplication createPatch -overwrite
+
+        runApplication renumberMesh -overwrite -constant
+
+        runApplication checkMesh -allTopology -allGeometry -constant
+
+    fi
+
+    runApplication mapFields \
+        ../precursor/results/"$setup" -sourceTime latestTime
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel $(getApplication)
+
+        runApplication reconstructPar
+
+    else
+
+        runApplication $(getApplication)
+
+    fi
+
+    collect "$setup"
+
+done
+
 
 #------------------------------------------------------------------------------

@@ -4,74 +4,129 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
 #------------------------------------------------------------------------------
 
-./Allrun.pre
+# settings
 
-cp -rf $FOAM_TUTORIALS/resources/dataset/atm-Arnqvist-2015 system/.
+    # operand setups
+    setups="
+    veryStable
+    stable
+    slightlyStable
+    neutral
+    slightlyUnstable
+    unstable
+    "
 
-RASmodel="kEpsilon"    # kOmegaSST
-
-declare -A stabilityStates
-declare -A Lmaxs
-declare -A qPlants
-
-stabilityStates[0]="veryStable"
-stabilityStates[1]="stable"
-stabilityStates[2]="slightlyStable"
-stabilityStates[3]="neutral"
-stabilityStates[4]="slightlyUnstable"
-stabilityStates[5]="unstable"
-
-Lmaxs[0]="5.0"
-Lmaxs[1]="13.0"
-Lmaxs[2]="25.5"
-Lmaxs[3]="41.0"
-Lmaxs[4]="80.75"
-Lmaxs[5]="200.0"
-
-qPlants[0]="-20.0"
-qPlants[1]="-9.0"
-qPlants[2]="-5.0"
-qPlants[3]="0.0"
-qPlants[4]="15.0"
-qPlants[5]="60.0"
+    # flag to enable computations in parallel mode
+    parallel=true
 
 
-for i in "${!stabilityStates[@]}"
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/settings
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        cp -f system/{fv*,controlDict} constant/*Properties "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
 do
-    state=${stabilityStates[$i]}
-    Lmax=${Lmaxs[$i]}
-    qPlant=${qPlants[$i]}
 
-    echo "    # Computations for the atmopsheric stability = $state:"
-    echo "        ## Lmax = $Lmax [m], qPlant = $qPlant [-]"
+    echo ""
+    echo "# Computations for the setup: $setup"
     echo ""
 
-    sed -e "s|RAS_MODEL|$RASmodel|g" \
-        constant/turbulenceProperties.template \
-      > constant/turbulenceProperties
-    sed -e "s|L_MAX|$Lmax|g" constant/fvOptions.template > constant/fvOptions
-    sed -e "s|Q_PLANT|$qPlant|g" 0.orig/qPlant.template > 0/qPlant
-    sed -e "s|Q_PLANT|$qPlant|g" \
-        system/setFieldsDict.template \
-      > system/setFieldsDict
+    dirSetup="setups.orig/$setup"
 
-    runApplication decomposePar
-    runParallel -s parallel renumberMesh -overwrite
-    runParallel -s $i setFields
-    runParallel $(getApplication)
-    runParallel postProcess -funcs \
+    if [ ! -d "$dirSetup" ]
+    then
+        echo "Setup directory: $dirSetup" \
+             "could not be found - skipping execution" 1>&2
+        exit 1
+    fi
+
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    if [ ! -d constant/polyMesh ]
+    then
+
+        runApplication blockMesh
+
+        runApplication renumberMesh -overwrite -constant
+
+        runApplication checkMesh -allTopology -allGeometry -constant
+
+    fi
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel setFields
+
+        runParallel $(getApplication)
+
+        runParallel redistributePar -reconstruct -latestTime
+
+    else
+
+        runApplication setFields
+
+        runApplication $(getApplication)
+
+    fi
+
+    runApplication postProcess -funcs \
         "(minMaxComponents(U) minMaxMagnitude(U))" -latestTime
-    runParallel redistributePar -reconstruct -latestTime
 
-    # Collect results into $resultDir
-    resultDir="results/$state"
-    mkdir -p $resultDir
-    timeDir=$(foamListTimes -latestTime)
-    mv -f $timeDir postProcessing log.* $resultDir
-    cp -rf system/fv* constant/fv* constant/*Properties 0 $resultDir
+    collect "$setup"
 
-    cleanTimeDirectories
-    rm -rf processor*
 done
+
 
 #------------------------------------------------------------------------------

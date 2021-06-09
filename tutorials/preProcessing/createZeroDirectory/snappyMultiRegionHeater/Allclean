@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 cleanCase0
 
 rm -rf constant/extendedFeatureEdgeMesh
-rm -f constant/triSurface/*.eMesh
+rm -rf constant/triSurface
 
 rm -rf VTK
 rm -rf constant/bottomAir/polyMesh

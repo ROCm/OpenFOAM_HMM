@@ -19,7 +19,7 @@ intersectSurfaces()
 #------------------------------------------------------------------------------
 
 cp -rf \
-    "$FOAM_TUTORIALS"/resources/geometry/mixerVessel \
+    "$FOAM_TUTORIALS"/resources/geometry/mixerVesselAMI \
     constant/triSurface/rawSurfaces
 
 rm -rf 0

@@ -5,9 +5,10 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 cleanCase0
 
-rm -f constant/fvOptions
-rm -f constant/turbulenceProperties
-rm -rf system/atm-Koblitz-2013
+rm -rf 0.orig
+rm -rf system
+rm -rf constant
+rm -rf results
 rm -rf plots
 
 #------------------------------------------------------------------------------

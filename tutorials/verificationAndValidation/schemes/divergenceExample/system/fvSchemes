@@ -28,7 +28,7 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,T)      Gauss limitedLinear 0.2;
+    div(phi,T)      Gauss vanLeer;
 }
 
 laplacianSchemes

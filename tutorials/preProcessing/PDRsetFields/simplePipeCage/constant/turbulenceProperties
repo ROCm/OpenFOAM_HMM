@@ -14,11 +14,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RAS;
+simulationType      RAS;
 
 RAS
 {
-    RASModel PDRkEpsilon;
+    RASModel        PDRkEpsilon;
 
     PDRkEpsilonCoeffs
     {
@@ -36,5 +36,6 @@ RAS
 
     printCoeffs     on;
 }
+
 
 // ************************************************************************* //

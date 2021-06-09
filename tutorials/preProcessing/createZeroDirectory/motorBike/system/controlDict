@@ -19,11 +19,11 @@ libs            (incompressibleTurbulenceModels);
 
 application     simpleFoam;
 
-startFrom       startTime; // latestTime;
+startFrom       startTime;
 
 startTime       0;
 
-stopAt          writeNow;   //endTime;
+stopAt          writeNow;
 
 endTime         500;
 

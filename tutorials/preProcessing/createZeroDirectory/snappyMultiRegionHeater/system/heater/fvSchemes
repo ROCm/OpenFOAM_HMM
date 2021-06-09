@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default Euler;
+    default         Euler;
 }
 
 gradSchemes
@@ -31,7 +31,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default             none;
+    default         none;
     laplacian(alpha,h)  Gauss linear limited corrected 0.333;
 }
 
