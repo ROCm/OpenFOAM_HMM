@@ -47,6 +47,7 @@ runTimeModifiable true;
 
 functions
 {
+    // field function objects
     #include "FOfieldAverage"
     #include "FOadd"
     #include "FOblendingFactor"
@@ -94,6 +95,9 @@ functions
     #include "FOwriteCellVolumes"
     #include "FOyPlus"
     #include "FOzeroGradient"
+
+    // utility function objects
+    #include "FOsolverInfo"
 }
 
 

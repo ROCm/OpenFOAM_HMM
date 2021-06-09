@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ void Foam::functionObjects::solverInfo::writeFileHeader
             mesh_.validComponents<Type>()
         );
 
-        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
         {
             if (component(validComponents, cmpt) != -1)
             {

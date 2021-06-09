@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,13 +36,7 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(solverInfo, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        solverInfo,
-        dictionary
-    );
+    addToRunTimeSelectionTable(functionObject, solverInfo, dictionary);
 }
 }
 
@@ -96,7 +90,7 @@ void Foam::functionObjects::solverInfo::createResidualField
 
     if (!mesh_.foundObject<IOField<scalar>>(residualName))
     {
-        IOField<scalar>* fieldPtr =
+        auto* fieldPtr =
             new IOField<scalar>
             (
                 IOobject
@@ -129,8 +123,8 @@ Foam::functionObjects::solverInfo::solverInfo
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
     fieldSet_(mesh_),
-    writeResidualFields_(false),
     residualFieldNames_(),
+    writeResidualFields_(false),
     initialised_(false)
 {
     read(dict);
@@ -147,8 +141,7 @@ bool Foam::functionObjects::solverInfo::read(const dictionary& dict)
 
         fieldSet_.read(dict);
 
-        writeResidualFields_ =
-            dict.getOrDefault("writeResidualFields", false);
+        writeResidualFields_ = dict.getOrDefault("writeResidualFields", false);
 
         residualFieldNames_.clear();
 

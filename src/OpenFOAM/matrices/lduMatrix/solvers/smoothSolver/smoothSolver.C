@@ -140,7 +140,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
             (
                 ConstPrecisionAdaptor<scalar, solveScalar>(residual)(),
                 fieldName_,
-                false
+                true
             );
 
             // Calculate residual magnitude

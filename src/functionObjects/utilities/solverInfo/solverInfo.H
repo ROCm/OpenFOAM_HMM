@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Writes solver information for a list of user-specified fields
+    Writes solver information for a list of user-specified fields.
 
     Information written to file includes:
     - residual fields
@@ -39,39 +39,60 @@ Description
     - initial residual
     - final residual
     - number of solver iterations
-    - convergecnce flag
+    - convergence flag
+
+    Operands:
+    \table
+      Operand      | Type                | Location
+      input        | -                   | -
+      output file  | dat                 <!--
+               --> | postProcessing/\<FO\>/\<time\>/\<file\>(s)
+      output field | volScalarField(s)   <!--
+               --> | \<time\>/initialResiduals:\<outField\>(s)
+    \endtable
 
 Usage
-    Example of function object specification:
+    Minimal example by using \c system/controlDict.functions:
     \verbatim
-    solverInfo
+    solverInfo1
     {
+        // Mandatory entries (unmodifiable)
         type            solverInfo;
         libs            (utilityFunctionObjects);
+
+        // Mandatory entries (runtime modifiable)
+        fields          (<field1> <field2> ... <fieldN>);
+
+        // Optional entries (runtime modifiable)
+        writeResidualFields true;
+
+        // Inherited entries
         ...
-        fields          (U p);
-        writeResidualFields yes;
     }
     \endverbatim
 
-    Where the entries comprise:
+    where the entries mean:
     \table
-        Property     | Description               | Required    | Default value
-        type         | Type name: solverInfo     | yes         |
-        fields       | List of fields to process | yes         |
-        writeResidualFields | Write the residual fields | no          | no
+      Property     | Description                          | Type | Reqd | Deflt
+      type         | Type name: solverInfo                | word | yes  | -
+      libs         | Library name: utilityFunctionObjects | word | yes  | -
+      fields       | Names of operand fields          | wordList | yes  | -
+      writeResidualFields | Flag to write the initial-residual fields <!--
+                   -->                                    | bool | no   | false
     \endtable
 
-    Output data is written to the dir postProcessing/solverInfo/\<timeDir\>/
+    The inherited entries are elaborated in:
+     - \link functionObject.H \endlink
+     - \link writeFile.H \endlink
 
 See also
-    Foam::functionObject
-    Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::writeFile
-    Foam::functionObjects::timeControl
+  - Foam::functionObject
+  - Foam::functionObjects::fvMeshFunctionObject
+  - Foam::functionObjects::writeFile
 
 SourceFiles
     solverInfo.C
+    solverInfoTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -100,16 +121,16 @@ class solverInfo
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Fields to process
+        //- Names of operand fields
         solverFieldSelection fieldSet_;
-
-        //- Flag to write the residual as a vol field
-        bool writeResidualFields_;
 
         //- Names of (result) residual fields
         wordHashSet residualFieldNames_;
+
+        //- Flag to write the initial-residual as a vol field
+        bool writeResidualFields_;
 
         //- Initialisation flag
         bool initialised_;
@@ -136,9 +157,7 @@ protected:
         void updateSolverInfo(const word& fieldName);
 
 
-private:
-
-    // Private member functions
+    // Generated Methods
 
         //- No copy construct
         solverInfo(const solverInfo&) = delete;
@@ -170,13 +189,13 @@ public:
 
     // Member Functions
 
-        //- Read the controls
+        //- Read solverInfo settings
         virtual bool read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Execute solverInfo
         virtual bool execute();
 
-        //- Write the solverInfo
+        //- Write solverInfo results
         virtual bool write();
 };
 

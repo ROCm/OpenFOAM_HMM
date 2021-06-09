@@ -24,6 +24,7 @@ It is likely incomplete...
 - Hrvoje Jasak
 - Alexander Kabat vel Job
 - Thilo Knacke
+- Shannon Leakey
 - Tommaso Lucchini
 - Graham Macpherson
 - Alexey Matveichev

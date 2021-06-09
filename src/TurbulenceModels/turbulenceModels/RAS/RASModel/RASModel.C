@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,12 +66,10 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
         transport,
         propertiesName
     ),
-
     RASDict_(this->subOrEmptyDict("RAS")),
-    turbulence_(RASDict_.get<Switch>("turbulence")),
+    turbulence_(RASDict_.getOrDefault<Switch>("turbulence", true)),
     printCoeffs_(RASDict_.getOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(RASDict_.optionalSubDict(type + "Coeffs")),
-
     kMin_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -82,7 +80,6 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
             SMALL
         )
     ),
-
     epsilonMin_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -93,7 +90,6 @@ Foam::RASModel<BasicTurbulenceModel>::RASModel
             SMALL
         )
     ),
-
     omegaMin_
     (
         dimensioned<scalar>::getOrAddToDict

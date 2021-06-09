@@ -49,8 +49,8 @@ atmBoundaryLayer::atmBoundaryLayer(const Time& time, const polyPatch& pp)
     zDir_(time, "zDir"),
     Uref_(time, "Uref"),
     Zref_(time, "Zref"),
-    z0_(),
-    d_()
+    z0_(nullptr),
+    d_(nullptr)
 {}
 
 
@@ -182,8 +182,14 @@ tmp<scalarField> atmBoundaryLayer::Ustar(const scalarField& z0) const
 
 void atmBoundaryLayer::autoMap(const fvPatchFieldMapper& mapper)
 {
-    z0_->autoMap(mapper);
-    d_->autoMap(mapper);
+    if (z0_)
+    {
+        z0_->autoMap(mapper);
+    }
+    if (d_)
+    {
+        d_->autoMap(mapper);
+    }
 }
 
 
@@ -193,8 +199,14 @@ void atmBoundaryLayer::rmap
     const labelList& addr
 )
 {
-    z0_->rmap(abl.z0_(), addr);
-    d_->rmap(abl.d_(), addr);
+    if (z0_)
+    {
+        z0_->rmap(abl.z0_(), addr);
+    }
+    if (d_)
+    {
+        d_->rmap(abl.d_(), addr);
+    }
 }
 
 
@@ -266,8 +278,14 @@ void atmBoundaryLayer::write(Ostream& os) const
     zDir_.writeData(os);
     Uref_.writeData(os);
     Zref_.writeData(os);
-    z0_->writeData(os) ;
-    d_->writeData(os);
+    if (z0_)
+    {
+        z0_->writeData(os) ;
+    }
+    if (d_)
+    {
+        d_->writeData(os);
+    }
 }
 
 
