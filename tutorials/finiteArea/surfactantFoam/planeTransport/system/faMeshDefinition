@@ -24,6 +24,7 @@ boundary
         ownerPolyPatch top;
         neighbourPolyPatch inlet;
     }
+
     outlet
     {
         type patch;
@@ -31,6 +32,7 @@ boundary
         // neighbourPolyPatch outlet;
         neighbourPolyPatch outflow;
     }
+
     bound
     {
         type symmetry;

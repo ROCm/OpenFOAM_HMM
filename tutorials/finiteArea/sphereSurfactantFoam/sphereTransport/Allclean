@@ -10,5 +10,6 @@ cleanPostProcessing
 cleanFaMesh
 
 rm -rf processor*
+rm -rf 0
 
 #------------------------------------------------------------------------------

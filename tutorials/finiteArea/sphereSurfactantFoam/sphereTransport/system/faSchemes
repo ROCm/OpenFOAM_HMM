@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      faSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,7 +39,7 @@ laplacianSchemes
 
 interpolationSchemes
 {
-    default         linear;
+    default             linear;
 }
 
 snGradSchemes

@@ -10,20 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      faSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    ddt(h,Us) Euler;
-    ddt(h) Euler;
+    ddt(h,Us)           Euler;
+    ddt(h)              Euler;
 }
 
 gradSchemes
 {
-    default Gauss linear;
+    default             Gauss linear;
 }
 
 divSchemes
@@ -35,18 +34,18 @@ divSchemes
 
 laplacianSchemes
 {
-    default none;
-    laplacian(h) Gauss linear corrected;
+    default             none;
+    laplacian(h)        Gauss linear corrected;
 }
 
 interpolationSchemes
 {
-    default linear;
+    default             linear;
 }
 
 snGradSchemes
 {
-    default corrected;
+    default             corrected;
 }
 
 
