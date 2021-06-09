@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -55,6 +55,7 @@ COMPILE_CXX  := $(strip $(CC) $(c++FLAGS))
 # Display information
 #------------------------------------------------------------------------------
 
+# Extract WM_VERSION = OPENFOAM=<digits>
 .PHONY: api
 api:
 	@echo "$(lastword $(subst =, ,$(WM_VERSION)))"

@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -183,7 +183,8 @@ die()
 make="make"
 
 # Print compiler/system information (serial only)
-printInfo() {
+printInfo()
+{
     if [ -f "$WM_DIR"/makefiles/info ]
     then
         make --no-print-directory -f "$WM_DIR"/makefiles/info "$@"
@@ -192,6 +193,7 @@ printInfo() {
         return 1
     fi
 }
+
 
 #------------------------------------------------------------------------------
 
@@ -265,7 +267,7 @@ do
             setModulePrefix "${1#*=}"
             ;;
 
-        -show-api | -show-ext-so | \
+        -show-ext-so | \
         -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch | \
         -show-mpi-compile | -show-mpi-link )
@@ -323,10 +325,10 @@ do
             optUpdate=true
             : "${optAll:=all}" # implies 'all', unless previously set
             ;;
-        -version | --version)
-            printInfo api
-            optShow=true
-            break;
+
+        -show-api | -version | --version)
+            getApiOpenFOAM  # From wmakeFunctions
+            exit "$?"
             ;;
         -*)
             die "unknown option: '$1'"

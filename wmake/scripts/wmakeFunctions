@@ -55,6 +55,28 @@ checkEnv()
 }
 
 
+# (api) from WM_DIR/rules/General/general
+# - extract WM_VERSION = OPENFOAM=<digits>
+getApiOpenFOAM()
+{
+    local rulesFile="$WM_DIR/rules/General/general"
+    local value
+
+    if [ -n "$WM_DIR" ] && [ -f "$rulesFile" ]
+    then
+        value="$(sed -ne 's@^ *WM_VERSION *= *OPENFOAM=\([0-9][0-9]*\).*@\1@p' "$rulesFile" 2>/dev/null)"
+    fi
+
+    if [ -n "$value" ]
+    then
+        echo "$value"
+    else
+        echo "Could not extract OpenFOAM API value" 1>&2
+        return 1
+    fi
+}
+
+
 # Set FOAM_MODULE_PREFIX according to
 # - absolute/relative path
 # - predefined type (u,user | g,group | o,openfoam)
