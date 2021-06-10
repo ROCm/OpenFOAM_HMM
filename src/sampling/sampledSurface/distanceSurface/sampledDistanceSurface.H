@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,10 +59,10 @@ Usage
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
-        topology    | Topology filter (none/largestRegion/nearestPoints/proximity) | no  | none
+        topology    | Topology filter name                  | no  | none
         nearestPoints | Points for point-based segmentation | no  |
         maxDistance | Max search distance for nearestPoints | no  | GREAT
-        relProximity | Max limit of absolute vs normal distance | no  | 1e3
+        absProximity | Max proximity of face centres        | no  | 1e-5
     \endtable
 
 SourceFiles

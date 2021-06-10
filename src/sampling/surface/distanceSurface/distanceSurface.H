@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ Usage
             type        distanceSurface;
             surfaceType triSurfaceMesh;
             surfaceName something.obj;
-            topology    proximity;
+            topology    proximityFaces;
         }
 
         surface2
@@ -77,27 +77,37 @@ Usage
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
-        topology    | Topology filter (none/largestRegion/nearestPoints/proximity) | no  | none
+        topology    | Topology filter name                  | no  | none
         nearestPoints | Points for point-based segmentation | no  |
         maxDistance | Max search distance for nearestPoints | no  | GREAT
         absProximity | Max proximity of face centres        | no  | 1e-5
     \endtable
 
-    Filtering (for zero-distance only)
+    Topology/Filtering (for zero-distance only).
+    These represent different ways to tackle the "ragged edge" problem.
+
+    - \c none :
+        No filtering
+
+    - \c proximityFaces or \c proximity (post-filter):
+        Checks the resulting faces against the original search surface
+        and rejects faces with a distance greater than \c absProximity.
+
+    - \c proxityRegions (post-filter):
+        Checks the distance of the resulting faces against the original
+        search surface. Filters based on the area-weighted distance
+        of each topologically connected region.
+        If the area-weighted distance of a region is greater than
+        \c absProximity, the entire region is rejected.
 
     - \c largestRegion (pre-filter):
         The cut cells are checked for topological connectivity and the
         region with the most number of cut cells is retained.
-        This handles the "ragged" edge problem.
 
     - \c nearestPoints (pre-filter):
         The cut cells split into regions, the regions closest to the
         user-defined points are retained.
         Uses \c maxDistance for additional control.
-
-    - \c proximity (post-filter):
-        Checks the resulting faces against the original search surface
-        and rejects faces with a distance greater than \c absProximity.
     .
 
 Note
@@ -116,6 +126,7 @@ Changed default algorithm from cell to topo (2020-12).
 
 SourceFiles
     distanceSurface.C
+    distanceSurfaceFilter.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -146,7 +157,9 @@ class distanceSurface
             NONE,               //!< No additional filtering
             LARGEST_REGION,     //!< Retain largest region
             NEAREST_POINTS,     //!< Retain regions nearest to the points
-            PROXIMITY           //!< Post-filter for surface proximity
+            PROXIMITY_REGIONS,  //!< Retain regions with good surface proximity
+            PROXIMITY_FACES,    //!< Retain faces with good surface proximity
+            PROXIMITY = PROXIMITY_FACES
         };
 
         //- Names for the topology filter
@@ -262,14 +275,17 @@ protected:
         //- Prepare blockedFaces for region split
         bitSet filterPrepareRegionSplit(const bitSet& ignoreCells) const;
 
-        //- Adjust extracted iso-surface to remove far faces
-        void filterByProximity();
-
         //- Keep region with the most cuts (after region split)
         void filterKeepLargestRegion(bitSet& ignoreCells) const;
 
         //- Keep region(s) closest to the nearest points
         void filterKeepNearestRegions(bitSet& ignoreCells) const;
+
+        //- Remove region(s) that have far faces
+        void filterRegionProximity(bitSet& ignoreCells) const;
+
+        //- Adjust extracted iso-surface to remove far faces
+        void filterFaceProximity();
 
 
 public:
