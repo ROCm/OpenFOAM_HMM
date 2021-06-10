@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "distanceSurface.H"
 #include "regionSplit.H"
 #include "syncTools.H"
+#include "ListOps.H"
 #include "vtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -306,16 +307,148 @@ void Foam::distanceSurface::filterKeepNearestRegions
 }
 
 
-void Foam::distanceSurface::filterByProximity()
+void Foam::distanceSurface::filterRegionProximity
+(
+    bitSet& ignoreCells
+) const
 {
     const searchableSurface& geom = geometryPtr_();
 
-    // Filtering for faces
+    // For face distances
     const pointField& fc = surface_.faceCentres();
 
-    bitSet faceSelection(fc.size());
-    label nTrimmed = 0;
+    // For region split
+    bitSet blockedFaces(filterPrepareRegionSplit(ignoreCells));
 
+    // Split region
+    regionSplit rs(mesh_, blockedFaces);
+    blockedFaces.clearStorage();
+
+    const labelList& regionColour = rs;
+
+    // For each face
+    scalarField faceDistance(fc.size(), GREAT);
+
+    {
+        List<pointIndexHit> nearest;
+        geom.findNearest
+        (
+            fc,
+            // Use initialized field (GREAT) to limit search too
+            faceDistance,
+            nearest
+        );
+        calcAbsoluteDistance(faceDistance, fc, nearest);
+    }
+
+    // Identical number of regions on all processors
+    scalarField areaRegion(rs.nRegions(), Zero);
+    scalarField distRegion(rs.nRegions(), Zero);
+
+    forAll(meshCells_, facei)
+    {
+        const label celli = meshCells_[facei];
+        const label regioni = regionColour[celli];
+
+        const scalar faceArea = surface_[facei].mag(surface_.points());
+        distRegion[regioni] += (faceDistance[facei] * faceArea);
+        areaRegion[regioni] += (faceArea);
+    }
+
+    Pstream::listCombineGather(distRegion, plusEqOp<scalar>());
+    Pstream::listCombineGather(areaRegion, plusEqOp<scalar>());
+
+    if (Pstream::master())
+    {
+        forAll(distRegion, regioni)
+        {
+            distRegion[regioni] /= (areaRegion[regioni] + VSMALL);
+        }
+    }
+
+    Pstream::listCombineScatter(distRegion);
+
+
+    // Define the per-face acceptance based on the region average distance
+
+    bitSet acceptFaces(fc.size());
+    bool prune(false);
+
+    forAll(meshCells_, facei)
+    {
+        const label celli = meshCells_[facei];
+        const label regioni = regionColour[celli];
+
+        // NB: do not filter by individual faces as well since this
+        // has been reported to cause minor holes for surfaces with
+        // high curvature! (2021-06-10)
+
+        if (absProximity_ < distRegion[regioni])
+        {
+            prune = true;
+        }
+        else
+        {
+            acceptFaces.set(facei);
+        }
+    }
+
+    // Heavier debugging
+    if (debug & 4)
+    {
+        const fileName outputName(surfaceName() + "-region-proximity-filter");
+
+        Info<< "Writing debug surface: " << outputName << nl;
+
+        surfaceWriters::vtkWriter writer
+        (
+            surface_.points(),
+            surface_,  // faces
+            outputName
+        );
+
+        writer.write("absolute-distance", faceDistance);
+
+        // Region segmentation
+        labelField faceRegion
+        (
+            ListOps::create<label>
+            (
+                meshCells_,
+                [&](const label celli){ return regionColour[celli]; }
+            )
+        );
+        writer.write("face-region", faceRegion);
+
+        // Region-wise filter state
+        labelField faceFilterState
+        (
+            ListOps::createWithValue<label>(surface_.size(), acceptFaces, 1, 0)
+        );
+        writer.write("filter-state", faceFilterState);
+    }
+
+
+    if (prune)
+    {
+        labelList pointMap, faceMap;
+        meshedSurface filtered
+        (
+            surface_.subsetMesh(acceptFaces, pointMap, faceMap)
+        );
+        surface_.transfer(filtered);
+
+        meshCells_ = UIndirectList<label>(meshCells_, faceMap)();
+    }
+}
+
+
+void Foam::distanceSurface::filterFaceProximity()
+{
+    const searchableSurface& geom = geometryPtr_();
+
+    // For face distances
+    const pointField& fc = surface_.faceCentres();
 
     // For each face
     scalarField faceDistance(fc.size(), GREAT);
@@ -356,23 +489,24 @@ void Foam::distanceSurface::filterByProximity()
 
     // Using the absolute proximity of the face centres is more robust.
 
+    bitSet acceptFaces(fc.size());
+    bool prune(false);
 
     // Consider the absolute proximity of the face centres
     forAll(faceDistance, facei)
     {
-        if (faceDistance[facei] <= absProximity_)
+        if (absProximity_ < faceDistance[facei])
         {
-            faceSelection.set(facei);
-        }
-        else
-        {
-            ++nTrimmed;
-
+            prune = true;
             if (debug & 2)
             {
                 Pout<< "trim reject: "
                     << faceDistance[facei] << nl;
             }
+        }
+        else
+        {
+            acceptFaces.set(facei);
         }
     }
 
@@ -380,14 +514,7 @@ void Foam::distanceSurface::filterByProximity()
     // Heavier debugging
     if (debug & 4)
     {
-        labelField faceFilterStatus(faceSelection.size(), Zero);
-
-        for (const label facei : faceSelection)
-        {
-            faceFilterStatus[facei] = 1;
-        }
-
-        const fileName outputName(surfaceName() + "-proximity-filter");
+        const fileName outputName(surfaceName() + "-face-proximity-filter");
 
         Info<< "Writing debug surface: " << outputName << nl;
 
@@ -400,16 +527,22 @@ void Foam::distanceSurface::filterByProximity()
 
         writer.write("absolute-distance", faceDistance);
         writer.write("normal-distance", faceNormalDistance);
-        writer.write("filter-state", faceFilterStatus);
+
+        // Region-wise filter state
+        labelField faceFilterState
+        (
+            ListOps::createWithValue<label>(surface_.size(), acceptFaces, 1, 0)
+        );
+        writer.write("filter-state", faceFilterState);
     }
 
 
-    if (returnReduce(nTrimmed, sumOp<label>()) != 0)
+    if (prune)
     {
         labelList pointMap, faceMap;
         meshedSurface filtered
         (
-            surface_.subsetMesh(faceSelection, pointMap, faceMap)
+            surface_.subsetMesh(acceptFaces, pointMap, faceMap)
         );
         surface_.transfer(filtered);
 

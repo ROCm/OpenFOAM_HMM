@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,9 @@ Foam::distanceSurface::topoFilterNames_
     { topologyFilterType::NONE, "none" },
     { topologyFilterType::LARGEST_REGION, "largestRegion" },
     { topologyFilterType::NEAREST_POINTS, "nearestPoints" },
-    { topologyFilterType::PROXIMITY, "proximity" },
+    { topologyFilterType::PROXIMITY_REGIONS, "proximityRegions" },
+    { topologyFilterType::PROXIMITY_FACES, "proximityFaces" },
+    { topologyFilterType::PROXIMITY_FACES, "proximity" },
 });
 
 
@@ -76,8 +78,9 @@ static inline void checkAllHits(const UList<pointIndexHit>& nearest)
     if (notHit)
     {
         FatalErrorInFunction
-            << "Had " << notHit << " from " << nearest.size()
-            << " without a point hit" << endl
+            << "Had " << notHit << " faces/cells from "
+            << nearest.size() << " without a point hit." << nl
+            << "May be caused by a severely degenerate input surface" << nl
             << abort(FatalError);
     }
 }
@@ -184,15 +187,18 @@ static inline void calcNormalDistance_filtered
 // the normal at the edge, which creates a zero-crossing
 // extending to infinity.
 //
-// Ad hoc treatment: require that the surface hit
-// point is within a somewhat generous bounding box
-// for the cell
+// Ad hoc treatment: require that the surface hit point is within a
+// somewhat generous bounding box for the cell (+10%)
+//
+// Provisioning for filtering based on the cell points,
+// but its usefulness remains to be seen (2020-12-09)
 template<bool WantPointFilter = false>
 static bitSet simpleGeometricFilter
 (
     bitSet& ignoreCells,
     const List<pointIndexHit>& nearest,
-    const polyMesh& mesh
+    const polyMesh& mesh,
+    const scalar boundBoxInflate = 0.1  // 10% to catch corners
 )
 {
     // A deny filter. Initially false (accept everything)
@@ -215,9 +221,7 @@ static bitSet simpleGeometricFilter
 
         cellBb.clear();
         cellBb.add(mesh.points(), cPoints);
-
-        // Expand slightly to catch corners
-        cellBb.inflate(0.1);
+        cellBb.inflate(boundBoxInflate);
 
         if (!cellBb.contains(pt))
         {
@@ -455,10 +459,30 @@ void Foam::distanceSurface::createGeometry()
         checkAllHits(nearest);
 
         // Geometric pre-filtering when distance == 0
+
+        // NOTE (2021-05-31)
+        // Can skip the prefilter if we use proximity-regions filter anyhow
+        // but it makes the iso algorithm more expensive and doesn't help
+        // unless we start relying on area-based weighting for rejecting regions.
+
         if (filterCells)
         {
-            ignoreCellPoints =
-                simpleGeometricFilter<false>(ignoreCells, nearest, fvmesh);
+            ignoreCellPoints = simpleGeometricFilter<false>
+            (
+                ignoreCells,
+                nearest,
+                fvmesh,
+
+                // Inflate bound box.
+                // - To catch corners: approx. 10%
+                // - Extra generous for PROXIMITY_REGIONS
+                //   (extra weighting for 'bad' faces)
+                (
+                    topologyFilterType::PROXIMITY_REGIONS == topoFilter_
+                  ? 1
+                  : 0.1
+                )
+            );
         }
 
         if (withSignDistance_)
@@ -617,6 +641,8 @@ void Foam::distanceSurface::createGeometry()
             refineBlockedCells(ignoreCells, isoCutter);
             filterKeepNearestRegions(ignoreCells);
         }
+
+        // Note: apply similar filtering for PROXIMITY_REGIONS later instead
     }
 
     // Don't need point filter beyond this point
@@ -627,6 +653,7 @@ void Foam::distanceSurface::createGeometry()
     {
         Pout<< "Writing cell distance:" << cellDistance.objectPath() << endl;
         cellDistance.write();
+
         pointScalarField pDist
         (
             IOobject
@@ -660,6 +687,21 @@ void Foam::distanceSurface::createGeometry()
     );
 
 
+    // Restrict ignored cells to those actually cut
+    if (filterCells && topologyFilterType::PROXIMITY_REGIONS == topoFilter_)
+    {
+        isoSurfaceBase isoCutter
+        (
+            mesh_,
+            cellDistance,
+            pointDistance_,
+            distance_
+        );
+
+        refineBlockedCells(ignoreCells, isoCutter);
+    }
+
+
     // ALGO_POINT still needs cell, point fields (for interpolate)
     // The others can do straight transfer
 
@@ -667,7 +709,8 @@ void Foam::distanceSurface::createGeometry()
     if
     (
         isoParams_.algorithm() != isoSurfaceParams::ALGO_POINT
-     || topologyFilterType::PROXIMITY == topoFilter_
+     || topologyFilterType::PROXIMITY_FACES == topoFilter_
+     || topologyFilterType::PROXIMITY_REGIONS == topoFilter_
     )
     {
         surface_.transfer(static_cast<meshedSurface&>(*isoSurfacePtr_));
@@ -678,9 +721,13 @@ void Foam::distanceSurface::createGeometry()
         pointDistance_.clear();
     }
 
-    if (topologyFilterType::PROXIMITY == topoFilter_)
+    if (topologyFilterType::PROXIMITY_FACES == topoFilter_)
     {
-        filterByProximity();
+        filterFaceProximity();
+    }
+    else if (topologyFilterType::PROXIMITY_REGIONS == topoFilter_)
+    {
+        filterRegionProximity(ignoreCells);
     }
 
     if (debug)
