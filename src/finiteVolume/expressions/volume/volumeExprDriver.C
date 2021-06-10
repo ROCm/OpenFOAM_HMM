@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,23 +81,23 @@ addNamedToRunTimeSelectionTable
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::expressions::volumeExpr::parseDriver::parseDriver
+namespace Foam
+{
+
+static inline const TimeState* lookupTimeState
 (
-    const fvMesh& mesh,
-    bool cacheReadFields
+    const polyMesh& m
 )
-:
-    parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(cacheReadFields),
-    mesh_(mesh),
-    resultType_(),
-    isLogical_(false),
-    fieldGeoType_(NO_DATA),
-    resultDimension_()
-{}
+{
+    return &static_cast<const TimeState&>(m.time());
+}
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
 (
@@ -106,7 +106,7 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict),
+    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
@@ -128,7 +128,9 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
     isLogical_(false),
     fieldGeoType_(NO_DATA),
     resultDimension_()
-{}
+{
+    resetTimeReference(mesh_.time());  // Extra safety
+}
 
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
@@ -150,7 +152,7 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict),
+    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),

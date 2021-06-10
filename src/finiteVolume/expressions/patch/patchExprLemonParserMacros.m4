@@ -6,11 +6,10 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Driver-specific m4/lemon macros for patch expressions.
@@ -30,6 +29,29 @@ dnl
 divert(-1)dnl
 
 use_bool_logic()dnl     # Use boolField directly
+
+
+#------------------------------------------------------------------------------
+# Patch-specific driver rules
+
+#------------------------------------------------------------------------------
+# rule_get_patchfields(out, valType, ident)
+#
+# Description
+#     Production rules to get patch internal field
+#     and patch neighbour field
+#
+# Example
+#     rule_get_patchfields(sfield, Foam::scalar, SCALAR_ID)
+#------------------------------------------------------------------------------
+
+define([rule_get_patchfields],
+[dnl
+rule_driver_unary_named($1, INTERNAL_FIELD, $3, patchInternalField, $2)dnl
+rule_driver_unary_named($1, NEIGHBOUR_FIELD, $3, patchNeighbourField, $2)dnl
+rule_driver_unary_named($1, SN_GRAD, $3, patchNormalField, $2)dnl
+])
+
 
 #-------------------------------------------------------------------------------
 # Driver rules

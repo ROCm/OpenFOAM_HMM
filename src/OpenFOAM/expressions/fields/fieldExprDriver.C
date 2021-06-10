@@ -49,12 +49,6 @@ defineTypeNameAndDebug(parseDriver, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::expressions::fieldExpr::parseDriver::parseDriver()
-:
-    parseDriver(1)
-{}
-
-
 Foam::expressions::fieldExpr::parseDriver::parseDriver
 (
     const label len

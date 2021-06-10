@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "exprDriver.H"
 #include "expressionEntry.H"
 #include "stringOps.H"
+#include "TimeState.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,8 +44,30 @@ namespace expressions
 } // End namespace Foam
 
 
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+int Foam::expressions::exprDriver::getSearchControls(const dictionary& dict)
+{
+    int val = 0;
+
+    if (dict.getOrDefault("searchInMemory", true))
+    {
+        val |= int(searchControls::SEARCH_REGISTRY);
+    }
+    if (dict.getOrDefault("searchFiles", false))
+    {
+        val |= int(searchControls::SEARCH_FILES);
+    }
+    if (dict.getOrDefault("cacheReadFields", false))
+    {
+        val |= int(searchControls::CACHE_READ_FIELDS);
+    }
+
+    return val;
+}
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -78,14 +101,27 @@ static string getEntryString
 } // End namespace Foam
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::expressions::exprDriver::resetTimeReference(const TimeState* ts)
+{
+    timeStatePtr_ = ts;
+}
+
+
+void Foam::expressions::exprDriver::resetTimeReference(const TimeState& ts)
+{
+    timeStatePtr_ = &ts;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::exprDriver::exprDriver
 (
-    bool cacheReadFields,
-    bool searchInMemory,
-    bool searchFiles,
-    const dictionary& dict
+    enum searchControls search,
+    const dictionary& dict,
+    const TimeState* ts
 )
 :
     dict_(dict),
@@ -93,6 +129,7 @@ Foam::expressions::exprDriver::exprDriver
     variableStrings_(),
     variables_(),
     arg1Value_(0),
+    timeStatePtr_(ts),
     stashedTokenId_(0),
 
     // Controls
@@ -106,9 +143,7 @@ Foam::expressions::exprDriver::exprDriver
     (
         dict.getOrDefault("prevIterIsOldTime", false)
     ),
-    cacheReadFields_(cacheReadFields),
-    searchInMemory_(searchInMemory || cacheReadFields),
-    searchFiles_(searchFiles)
+    searchCtrl_(search)
 {}
 
 
@@ -122,6 +157,7 @@ Foam::expressions::exprDriver::exprDriver
     variableStrings_(rhs.variableStrings_),
     variables_(rhs.variables_),
     arg1Value_(rhs.arg1Value_),
+    timeStatePtr_(rhs.timeStatePtr_),
     stashedTokenId_(0),
 
     debugScanner_(rhs.debugScanner_),
@@ -129,23 +165,21 @@ Foam::expressions::exprDriver::exprDriver
     allowShadowing_(rhs.allowShadowing_),
     prevIterIsOldTime_(rhs.prevIterIsOldTime_),
 
-    cacheReadFields_(rhs.cacheReadFields_),
-    searchInMemory_(rhs.searchInMemory_),
-    searchFiles_(rhs.searchFiles_)
+    searchCtrl_(rhs.searchCtrl_)
 {}
 
 
 Foam::expressions::exprDriver::exprDriver
 (
-    const dictionary& dict
+    const dictionary& dict,
+    const TimeState* ts
 )
 :
     exprDriver
     (
-        dict.getOrDefault("cacheReadFields", false),
-        dict.getOrDefault("searchInMemory", true),
-        dict.getOrDefault("searchFiles", false),
-        dict
+        searchControls(exprDriver::getSearchControls(dict)),
+        dict,
+        ts
     )
 {
     readDict(dict);
@@ -153,6 +187,32 @@ Foam::expressions::exprDriver::exprDriver
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::TimeState* Foam::expressions::exprDriver::timeState() const
+{
+    return timeStatePtr_;
+}
+
+
+Foam::scalar Foam::expressions::exprDriver::timeValue() const
+{
+    if (timeStatePtr_)
+    {
+        return timeStatePtr_->value();
+    }
+    return 0;
+}
+
+
+Foam::scalar Foam::expressions::exprDriver::deltaT() const
+{
+    if (timeStatePtr_)
+    {
+        return timeStatePtr_->deltaT().value();
+    }
+    return 0;
+}
+
 
 bool Foam::expressions::exprDriver::readDict
 (
@@ -193,18 +253,6 @@ void Foam::expressions::exprDriver::clearVariables()
 {
     variables_.clear();
     addVariables(variableStrings_, false);
-}
-
-
-void Foam::expressions::exprDriver::setArgument(scalar val)
-{
-    arg1Value_ = val;
-}
-
-
-Foam::scalar Foam::expressions::exprDriver::argValue() const
-{
-    return arg1Value_;
 }
 
 
@@ -383,20 +431,58 @@ void Foam::expressions::exprDriver::setDebugging
 }
 
 
+bool Foam::expressions::exprDriver::setCaching(bool on) noexcept
+{
+    int val(searchCtrl_);
+    bool old = (val & searchControls::CACHE_READ_FIELDS);
+
+    if (!on)
+    {
+        // Off
+        val &= ~(searchControls::CACHE_READ_FIELDS);
+    }
+    else if (!old)
+    {
+        // Toggled on.
+        // Caching read fields implies both registry and disk use
+        val |=
+        (
+            searchControls::SEARCH_REGISTRY
+          | searchControls::SEARCH_FILES
+          | searchControls::CACHE_READ_FIELDS
+        );
+    }
+
+    searchCtrl_ = searchControls(val);
+
+    return old;
+}
+
+
 void Foam::expressions::exprDriver::setSearchBehaviour
 (
-    bool cacheReadFields,
-    bool searchInMemory,
-    bool searchFiles
+    enum searchControls search,
+    const bool caching
 )
 {
-    searchInMemory_ = searchInMemory_ || cacheReadFields_;
+    int val(search);
+    if (caching || (val & searchControls::CACHE_READ_FIELDS))
+    {
+        // Caching read fields implies both registry and disk use
+        val |=
+        (
+            searchControls::SEARCH_REGISTRY
+          | searchControls::SEARCH_FILES
+          | searchControls::CACHE_READ_FIELDS
+        );
+    }
+    searchCtrl_ = searchControls(val);
 
     #ifdef FULLDEBUG
     Info<< "Searching "
-        << " registry:" << searchInMemory_
-        << " disk:" << searchFiles_
-        << " cache-read:" << cacheReadFields_ << nl;
+        << " registry:" << searchRegistry()
+        << " disk:" << searchFiles()
+        << " cache-read:" << cacheReadFields() << nl;
     #endif
 }
 
@@ -406,12 +492,7 @@ void Foam::expressions::exprDriver::setSearchBehaviour
     const exprDriver& rhs
 )
 {
-    setSearchBehaviour
-    (
-        rhs.cacheReadFields_,
-        rhs.searchInMemory_,
-        rhs.searchFiles_
-    );
+    searchCtrl_ = rhs.searchCtrl_;
 }
 
 

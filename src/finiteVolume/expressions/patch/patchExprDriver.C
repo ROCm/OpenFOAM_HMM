@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,14 +69,23 @@ addNamedToRunTimeSelectionTable
 
 namespace Foam
 {
-    static inline const fvPatch& lookupFvPatch
-    (
-        const fvMesh& mesh,
-        const word& patchName
-    )
-    {
-        return mesh.boundary()[patchName];
-    }
+
+static inline const TimeState* lookupTimeState
+(
+    const fvPatch& p
+)
+{
+    return &static_cast<const TimeState&>(p.boundaryMesh().mesh().time());
+}
+
+static inline const fvPatch& lookupFvPatch
+(
+    const fvMesh& mesh,
+    const word& patchName
+)
+{
+    return mesh.boundary()[patchName];
+}
 
 } // End namespace Foam
 
@@ -99,14 +108,6 @@ const Foam::fvPatch& Foam::expressions::patchExpr::parseDriver::getFvPatch
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::expressions::patchExpr::parseDriver::parseDriver(const fvPatch& p)
-:
-    parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(),
-    patch_(p)
-{}
-
-
 Foam::expressions::patchExpr::parseDriver::parseDriver
 (
     const fvPatch& p,
@@ -114,7 +115,7 @@ Foam::expressions::patchExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict),
+    expressions::fvExprDriver(dict, lookupTimeState(p)),
     patch_(p)
 {}
 
@@ -122,11 +123,11 @@ Foam::expressions::patchExpr::parseDriver::parseDriver
 Foam::expressions::patchExpr::parseDriver::parseDriver
 (
     const fvPatch& p,
-    const parseDriver& driver_
+    const parseDriver& rhs
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(driver_),
+    expressions::fvExprDriver(rhs),
     patch_(p)
 {}
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,10 +90,11 @@ Foam::expressions::patchExpr::parseDriver::field_rand
     bool gaussian
 ) const
 {
-    auto tresult = tmp<scalarField>::New(this->size());
-    fill_random(tresult.ref(), seed, gaussian);
+    auto tfld = tmp<scalarField>::New(this->size());
 
-    return tresult;
+    exprDriver::fill_random(tfld.ref(), seed, gaussian);
+
+    return tfld;
 }
 
 

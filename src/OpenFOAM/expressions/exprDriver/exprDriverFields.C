@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "exprDriver.H"
 #include "FieldOps.H"
 #include "Random.H"
+#include "TimeState.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -38,6 +39,18 @@ void Foam::expressions::exprDriver::fill_random
     const bool gaussian
 ) const
 {
+    if (seed <= 0)
+    {
+        if (timeStatePtr_)
+        {
+            seed = (timeStatePtr_->timeIndex() - seed);
+        }
+        else
+        {
+            seed = -seed;
+        }
+    }
+
     if (gaussian)
     {
         Random::gaussianGeneratorOp<scalar> gen(seed);

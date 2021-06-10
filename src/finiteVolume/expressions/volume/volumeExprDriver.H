@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,15 +177,12 @@ public:
 
     // Constructors
 
-        //- Construct for specified mesh
+        //- Construct for specified mesh, with dictionary information
         explicit parseDriver
         (
             const fvMesh& mesh,
-            bool cacheReadFields = false
+            const dictionary& dict = dictionary::null
         );
-
-        //- Construct for specified mesh with given dictionary
-        parseDriver(const fvMesh& mesh, const dictionary& dict);
 
         //- Construct for specified mesh with copy of driver context
         parseDriver(const fvMesh& mesh, const parseDriver& driver);
@@ -195,6 +192,7 @@ public:
 
         //- Construct with patchName and region specified in dictionary
         parseDriver(const dictionary& dict, const fvMesh& mesh);
+
 
         //- Clone
         virtual autoPtr<expressions::fvExprDriver> clone() const

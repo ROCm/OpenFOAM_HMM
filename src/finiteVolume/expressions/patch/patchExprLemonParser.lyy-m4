@@ -121,6 +121,7 @@ svalue (lhs) ::= DEG_TO_RAD LPAREN RPAREN . { lhs = Foam::degToRad(); }
 svalue (lhs) ::= RAD_TO_DEG LPAREN RPAREN . { lhs = Foam::radToDeg(); }
 svalue (lhs) ::= ARG LPAREN RPAREN .  { lhs = driver->argValue(); }
 svalue (lhs) ::= TIME LPAREN RPAREN . { lhs = driver->timeValue(); }
+svalue (lhs) ::= DELTA_T LPAREN RPAREN . { lhs = driver->deltaT(); }
 
 
 /* * * * * * * * * * * * * * * * * Face Fields * * * * * * * * * * * * * * * *\
@@ -147,6 +148,7 @@ evaluate ::= _target_ (a) . { driver->setResult(a); }
 rule_field_from_value(_target_, svalue)
 rule_get_field(_target_, SCALAR_ID)
 rule_get_field(_target_, SSCALAR_ID)
+rule_get_patchfields(_target_, _value_type_, SCALAR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
 rules_inplace_gUnary(_target_)
@@ -188,6 +190,7 @@ evaluate ::= _target_ (a) . { driver->setResult(a); }
 
 rule_get_field(_target_, VECTOR_ID)
 rule_get_field(_target_, SVECTOR_ID)
+rule_get_patchfields(_target_, _value_type_, VECTOR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
 rules_inplace_gUnary(_target_)
@@ -207,6 +210,7 @@ evaluate ::= _target_ (a) . { driver->setResult(a); }
 
 rule_get_field(_target_, SPH_TENSOR_ID)
 rule_get_field(_target_, SSPH_TENSOR_ID)
+rule_get_patchfields(_target_, _value_type_, SPH_TENSOR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
 rules_inplace_gUnary(_target_)
@@ -226,6 +230,7 @@ evaluate ::= _target_ (a) . { driver->setResult(a); }
 
 rule_get_field(_target_, SYM_TENSOR_ID)
 rule_get_field(_target_, SSYM_TENSOR_ID)
+rule_get_patchfields(_target_, _value_type_, SYM_TENSOR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
 rules_inplace_gUnary(_target_)
@@ -246,6 +251,7 @@ tfield (lhs) ::= IDENTITY_TENSOR . { lhs = _new_tfield(Foam::tensor::I); }
 
 rule_get_field(_target_, TENSOR_ID)
 rule_get_field(_target_, STENSOR_ID)
+rule_get_patchfields(_target_, _value_type_, TENSOR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
 rules_inplace_gUnary(_target_)

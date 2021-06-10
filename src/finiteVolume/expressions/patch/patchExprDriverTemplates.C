@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,80 +114,313 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
         return tfield;
     }
 
+    const objectRegistry& obr = this->mesh().thisDb();
+    const label patchIndex = patch_.index();
+
+
+    // Field types
 
     typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sfieldType;
     typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
 
-    const objectRegistry& obr = this->mesh().thisDb();
+    // Local, temporary storage and/or lookup values
+    bool findField = true;
+    tmp<vfieldType> vfield;
+    tmp<sfieldType> sfield;
+    tmp<pfieldType> pfield;
 
-    const vfieldType* vfield = obr.findObject<vfieldType>(name);
-    const sfieldType* sfield = obr.findObject<sfieldType>(name);
-    const pfieldType* pfield = obr.findObject<pfieldType>(name);
+    if (findField)
+    {
+        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
+        findField = !vfield.valid();
+    }
+    if (findField)
+    {
+        sfield = exprDriver::cfindFieldObject<sfieldType>(obr, name);
+        findField = !sfield.valid();
+    }
+    if (findField)
+    {
+        pfield = exprDriver::cfindFieldObject<pfieldType>(obr, name);
+        findField = !pfield.valid();
+    }
 
-    // Local, temporary storage
-    tmp<vfieldType> t_vfield;
-    tmp<sfieldType> t_sfield;
-    tmp<pfieldType> t_pfield;
-
-    if (searchFiles() && !vfield && !sfield && !pfield)
+    if (findField && searchFiles())
     {
         const word fldType = this->getTypeOfField(name);
 
         if (fldType == vfieldType::typeName)
         {
-            t_vfield = this->readAndRegister<vfieldType>(name, mesh());
-            vfield = t_vfield.get();
+            vfield = this->readAndRegister<vfieldType>(name, mesh());
         }
         else if (fldType == sfieldType::typeName)
         {
-            t_sfield = this->readAndRegister<sfieldType>(name, mesh());
-            sfield = t_sfield.get();
+            sfield = this->readAndRegister<sfieldType>(name, mesh());
         }
         else if (fldType == pfieldType::typeName)
         {
-            t_pfield = this->readAndRegister<pfieldType>
+            pfield = this->readAndRegister<pfieldType>
             (
                 name,
                 pointMesh::New(mesh())
             );
-            pfield = t_pfield.get();
         }
-     }
+    }
 
-    const label patchIndex = patch_.index();
 
-    if (vfield)
+    if (vfield.valid())
     {
         return tmp<Field<Type>>::New
         (
-            vfield->boundaryField()[patchIndex]
+            vfield().boundaryField()[patchIndex]
         );
     }
-
-    if (sfield)
+    if (sfield.valid())
     {
         return tmp<Field<Type>>::New
         (
-            sfield->boundaryField()[patchIndex]
+            sfield().boundaryField()[patchIndex]
         );
     }
-
-    if (pfield)
+    if (pfield.valid())
     {
-        return pfield->boundaryField()[patchIndex].patchInternalField();
+        return pfield().boundaryField()[patchIndex].patchInternalField();
     }
 
 
     FatalErrorInFunction
         << "No field '" << name << "' of type "
-        << pTraits<Type>::typeName << nl << nl
+        << pTraits<Type>::typeName << nl << nl;
+
+    FatalError
         << vfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<vfieldType>()) << nl
+        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+
+    FatalError
         << sfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<sfieldType>()) << nl
+        << flatOutput(obr.sortedNames<sfieldType>()) << nl;
+
+    FatalError
         << pfieldType::typeName << " Fields: "
-        << flatOutput(obr.sortedNames<pfieldType>()) << nl
+        << flatOutput(obr.sortedNames<pfieldType>()) << nl;
+
+    FatalError
+        << exit(FatalError);
+
+    return tmp<Field<Type>>::New();
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::expressions::patchExpr::parseDriver::patchInternalField
+(
+    const word& name
+)
+{
+    tmp<Field<Type>> tfield = getVariableIfAvailable<Type>(name);
+
+    if (tfield.valid())
+    {
+        return tfield;
+    }
+
+    const objectRegistry& obr = this->mesh().thisDb();
+    const label patchIndex = patch_.index();
+
+
+    // Field types
+
+    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
+    typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
+
+    // Local, temporary storage and/or lookup values
+    bool findField = true;
+    tmp<vfieldType> vfield;
+    tmp<pfieldType> pfield;
+
+    if (findField)
+    {
+        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
+        findField = !vfield.valid();
+    }
+    if (findField)
+    {
+        pfield = exprDriver::cfindFieldObject<pfieldType>(obr, name);
+        findField = !pfield.valid();
+    }
+
+    if (findField && searchFiles())
+    {
+        const word fldType = this->getTypeOfField(name);
+
+        if (fldType == vfieldType::typeName)
+        {
+            vfield = this->readAndRegister<vfieldType>(name, mesh());
+        }
+        else if (fldType == pfieldType::typeName)
+        {
+            pfield = this->readAndRegister<pfieldType>
+            (
+                name,
+                pointMesh::New(mesh())
+            );
+        }
+    }
+
+
+    if (vfield.valid())
+    {
+        return vfield().boundaryField()[patchIndex].patchInternalField();
+    }
+    if (pfield.valid())
+    {
+        return pfield().boundaryField()[patchIndex].patchInternalField();
+    }
+
+
+    FatalErrorInFunction
+        << "No field '" << name << "' of type "
+        << pTraits<Type>::typeName << nl << nl;
+
+    FatalError
+        << vfieldType::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+
+    FatalError
+        << pfieldType::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<pfieldType>()) << nl;
+
+    FatalError
+        << exit(FatalError);
+
+    return tmp<Field<Type>>::New();
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::expressions::patchExpr::parseDriver::patchNeighbourField
+(
+    const word& name
+)
+{
+    tmp<Field<Type>> tfield = getVariableIfAvailable<Type>(name);
+
+    if (tfield.valid())
+    {
+        return tfield;
+    }
+
+    const objectRegistry& obr = this->mesh().thisDb();
+    const label patchIndex = patch_.index();
+
+
+    // Field types
+
+    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
+
+    // Local, temporary storage and/or lookup values
+    bool findField = true;
+    tmp<vfieldType> vfield;
+
+    if (findField)
+    {
+        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
+        findField = !vfield.valid();
+    }
+
+    if (findField && searchFiles())
+    {
+        const word fldType = this->getTypeOfField(name);
+
+        if (fldType == vfieldType::typeName)
+        {
+            vfield = this->readAndRegister<vfieldType>(name, mesh());
+        }
+    }
+
+
+    if (vfield.valid())
+    {
+        return vfield().boundaryField()[patchIndex].patchNeighbourField();
+    }
+
+
+    FatalErrorInFunction
+        << "No field '" << name << "' of type "
+        << pTraits<Type>::typeName << nl << nl;
+
+    FatalError
+        << vfieldType::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+
+    FatalError
+        << exit(FatalError);
+
+    return tmp<Field<Type>>::New();
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::expressions::patchExpr::parseDriver::patchNormalField
+(
+    const word& name
+)
+{
+    tmp<Field<Type>> tfield = getVariableIfAvailable<Type>(name);
+
+    if (tfield.valid())
+    {
+        return tfield;
+    }
+
+    const objectRegistry& obr = this->mesh().thisDb();
+    const label patchIndex = patch_.index();
+
+
+    // Field types
+
+    typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
+
+    // Local, temporary storage and/or lookup values
+    tmp<vfieldType> vfield;
+    bool findField = true;
+
+    if (findField)
+    {
+        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
+        findField = !vfield.valid();
+    }
+
+    if (findField && searchFiles())
+    {
+        const word fldType = this->getTypeOfField(name);
+
+        if (fldType == vfieldType::typeName)
+        {
+            vfield = this->readAndRegister<vfieldType>(name, mesh());
+        }
+    }
+
+
+    if (vfield.valid())
+    {
+        return vfield().boundaryField()[patchIndex].snGrad();
+    }
+
+
+    FatalErrorInFunction
+        << "No field '" << name << "' of type "
+        << pTraits<Type>::typeName << nl << nl;
+
+    FatalError
+        << vfieldType::typeName << " Fields: "
+        << flatOutput(obr.sortedNames<vfieldType>()) << nl;
+
+    FatalError
         << exit(FatalError);
 
     return tmp<Field<Type>>::New();
@@ -203,7 +436,7 @@ Foam::expressions::patchExpr::parseDriver::faceToPoint
 {
     primitivePatchInterpolation interp(patch_.patch());
 
-    return interp.pointToFaceInterpolate(field);
+    return interp.faceToPointInterpolate(field);
 }
 
 
@@ -216,7 +449,7 @@ Foam::expressions::patchExpr::parseDriver::pointToFace
 {
     primitivePatchInterpolation interp(patch_.patch());
 
-    return interp.faceToPointInterpolate(field);
+    return interp.pointToFaceInterpolate(field);
 }
 
 

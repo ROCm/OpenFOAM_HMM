@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "surfaceMesh.H"
 #include "fvsPatchField.H"
 #include "pointPatchField.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -141,16 +142,16 @@ bool Foam::expressions::fvExprDriver::foundField
     {
         Info<< "fvExprDriver::foundField. Name: " << name
             << " Type: " << Type::typeName
-            << " registry:" << searchInMemory()
+            << " registry:" << searchRegistry()
             << " disk:" << searchFiles() << endl;
     }
 
     // if (std::is_void<Type>::value) ...
 
-    if (searchInMemory())
+    if (searchRegistry())
     {
         const regIOobject* ioptr =
-            this->mesh().findObject<regIOobject>(name);
+            this->mesh().cfindObject<regIOobject>(name);
 
         if (this->mesh().foundObject<Type>(name))
         {
@@ -332,7 +333,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
 
     if
     (
-        searchInMemory()
+        searchRegistry()
      && (origFldPtr = obr.cfindObject<GeomField>(name)) != nullptr
     )
     {
@@ -494,7 +495,7 @@ Foam::autoPtr<T> Foam::expressions::fvExprDriver::getTopoSet
     }
     else
     {
-        const T* ptr = mesh.thisDb().findObject<T>(name);
+        const T* ptr = mesh.thisDb().cfindObject<T>(name);
 
         if (ptr)
         {
@@ -534,7 +535,7 @@ bool Foam::expressions::fvExprDriver::updateSet
     const label oldSize = setPtr->size();
 
     bool updated = false;
-    const polyMesh& mesh = dynamic_cast<const polyMesh&>(setPtr->db());
+    const auto& mesh = dynamicCast<const polyMesh>(setPtr->db());
 
     if (debug)
     {
@@ -582,7 +583,7 @@ bool Foam::expressions::fvExprDriver::updateSet
 
             word sName = name;
 
-            const T* ptr = mesh.thisDb().findObject<T>(name);
+            const T* ptr = mesh.thisDb().template cfindObject<T>(name);
 
             if (ptr)
             {

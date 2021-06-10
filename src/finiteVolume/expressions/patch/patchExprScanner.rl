@@ -186,12 +186,12 @@ static int driverTokenType
 
         switch (lookBehind)
         {
-            case TOK_CSET : good = driver_.isCellSet(ident); break;
-            case TOK_FSET : good = driver_.isFaceSet(ident); break;
-            case TOK_PSET : good = driver_.isPointSet(ident); break;
-            case TOK_CZONE : good = driver_.isCellZone(ident); break;
-            case TOK_FZONE : good = driver_.isFaceZone(ident); break;
-            case TOK_PZONE : good = driver_.isPointZone(ident); break;
+            case TOK_CELL_SET : good = driver_.isCellSet(ident); break;
+            case TOK_FACE_SET : good = driver_.isFaceSet(ident); break;
+            case TOK_POINT_SET : good = driver_.isPointSet(ident); break;
+            case TOK_CELL_ZONE : good = driver_.isCellZone(ident); break;
+            case TOK_FACE_ZONE : good = driver_.isFaceZone(ident); break;
+            case TOK_POINT_ZONE : good = driver_.isPointZone(ident); break;
         }
 
         if (good)
@@ -336,7 +336,7 @@ static int driverTokenType
 
     number => emit_number;
 
-    ## operators
+    ## Operators
     '!'  =>{ EMIT_TOKEN(NOT); };
     '%'  =>{ EMIT_TOKEN(PERCENT); };
     '('  =>{ EMIT_TOKEN(LPAREN); };
@@ -404,6 +404,11 @@ static int driverTokenType
     "weightSum" =>{ EMIT_TOKEN(WEIGHT_SUM); };
     "rand"      =>{ EMIT_TOKEN(RAND); };
 
+    ## Patch-specific
+    "snGrad"    =>{ EMIT_TOKEN(SN_GRAD); };
+    "internalField" =>{ EMIT_TOKEN(INTERNAL_FIELD); };
+    "neighbourField" =>{ EMIT_TOKEN(NEIGHBOUR_FIELD); };
+
     ## Types
     "bool"      =>{ EMIT_TOKEN(BOOL); };
     "vector"    =>{ EMIT_TOKEN(VECTOR); };
@@ -418,6 +423,7 @@ static int driverTokenType
     "tensor::I" =>{ EMIT_TOKEN(IDENTITY_TENSOR); };
     "arg"       =>{ EMIT_TOKEN(ARG); };
     "time"      =>{ EMIT_TOKEN(TIME); };
+    "deltaT"    =>{ EMIT_TOKEN(DELTA_T); };
 
     ## Identifier (field, etc - error if unknown)
     ## Handle 'bare' names and single/double quoted ones

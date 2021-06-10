@@ -33,8 +33,8 @@ Description
     Set boundary values using an expression
 
 Note
-    Based on funkySetBoundaryFields
-    Copyright 2006-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Based on funkySetBoundaryFields from
+    Bernhard Gschaider <bgschaid@hfd-research.com>
 
 \*---------------------------------------------------------------------------*/
 
@@ -248,8 +248,12 @@ int main(int argc, char *argv[])
 
                 expressions::patchExprDriver driver(currDict, mesh);
 
-                // Search on disc
-                driver.setSearchBehaviour(cacheFields, false, true);
+                // Search files only
+                driver.setSearchBehaviour
+                (
+                    expressions::exprDriver::SEARCH_FILES,
+                    cacheFields
+                );
 
                 driver.clearVariables();
                 driver.parse(expr);

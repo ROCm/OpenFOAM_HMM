@@ -57,7 +57,7 @@ union scanToken
     Foam::scalar svalue;
     Foam::word*  name;
 
-    //- Null construct, bit-wise zero for union content
+    //- Default construct, bit-wise zero for union content
     scanToken() : ivalue(0) {}
 };
 
@@ -73,7 +73,7 @@ class scanner
         //- Wrapped lemon parser
         parser* parser_;
 
-        // Ragel code state, action
+        //- Ragel code state, action
         int cs, act;
 
 
@@ -104,7 +104,7 @@ public:
 
     // Constructors
 
-        //- Construct null, optionally setting debugging
+        //- Default construct, optionally setting debugging
         explicit scanner(bool withDebug = false)
         :
             parser_(nullptr),

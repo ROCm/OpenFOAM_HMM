@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline void Foam::expressions::exprDriver::setArgument(scalar val) noexcept
+{
+    arg1Value_ = val;
+}
+
+
+inline Foam::scalar Foam::expressions::exprDriver::argValue() const noexcept
+{
+    return arg1Value_;
+}
+
 
 inline bool Foam::expressions::exprDriver::hasVariable
 (
@@ -101,7 +113,7 @@ inline Type Foam::expressions::exprDriver::evaluateUniform
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline int Foam::expressions::exprDriver::stashedTokenId() const
+inline int Foam::expressions::exprDriver::stashedTokenId() const noexcept
 {
     return stashedTokenId_;
 }
@@ -110,11 +122,41 @@ inline int Foam::expressions::exprDriver::stashedTokenId() const
 inline int Foam::expressions::exprDriver::resetStashedTokenId
 (
     int tokenId
-) const
+) const noexcept
 {
-    const int old = stashedTokenId_;
+    int old = stashedTokenId_;
     stashedTokenId_ = tokenId;
     return old;
+}
+
+
+inline bool Foam::expressions::exprDriver::debugScanner() const noexcept
+{
+    return debugScanner_;
+}
+
+
+inline bool Foam::expressions::exprDriver::debugParser() const noexcept
+{
+    return debugParser_;
+}
+
+
+inline bool Foam::expressions::exprDriver::searchRegistry() const noexcept
+{
+    return (searchCtrl_ & searchControls::SEARCH_REGISTRY);
+}
+
+
+inline bool Foam::expressions::exprDriver::searchFiles() const noexcept
+{
+    return (searchCtrl_ & searchControls::SEARCH_FILES);
+}
+
+
+inline bool Foam::expressions::exprDriver::cacheReadFields() const noexcept
+{
+    return (searchCtrl_ & searchControls::CACHE_READ_FIELDS);
 }
 
 

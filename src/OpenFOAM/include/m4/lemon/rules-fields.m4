@@ -6,11 +6,10 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, distributed under GNU General Public
-#     License GPL-3.0 or later <https://www.gnu.org/licenses/gpl-3.0>
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Field handling m4/lemon macros.
@@ -47,7 +46,8 @@ divert(-1)dnl
 #------------------------------------------------------------------------------
 
 define([declare_field],
-[define([_value_type_]$1, [$3])dnl
+[dnl
+define([_value_type_]$1, [$3])dnl
 define([_new_]$1, [driver->$4<$3>($][1).ptr()])dnl
 define([_get_]$1, [driver->$5<$3>($][1).ptr()])dnl
 %type $1 { $2* }])
@@ -92,11 +92,7 @@ define([rule_get_field],
 #------------------------------------------------------------------------------
 
 define([rule_driver_select],
-[$1 (lhs) ::= $2 LPAREN IDENTIFIER (ident) RPAREN .
-{
-    lhs = driver->$3(make_obj(ident->name)).ptr();
-}]
-)
+[rule_driver_unary_named($1, $2, IDENTIFIER, $3)])
 
 
 #------------------------------------------------------------------------------
@@ -129,13 +125,13 @@ define([rule_field_from_value],
 
 
 #------------------------------------------------------------------------------
-# rule_negate_op(target, valType)
+# rule_negate_op(target)
 #
 # Description
 #     Production rules for field negation
 #
 # Example
-#     rule_negate_op(sfield, Foam::scalar)
+#     rule_negate_op(sfield)
 #------------------------------------------------------------------------------
 
 define([rule_negate_op],
@@ -167,7 +163,8 @@ define([rule_binary_op],
 [$1 (lhs) ::= $2 (a) $4 $3 (b) .
 {
     lhs = (make_tmp(a) $5 make_tmp(b)).ptr();
-}])
+}]
+)
 
 
 #------------------------------------------------------------------------------
@@ -263,7 +260,7 @@ define([rule_const_multiply],
 
 
 #------------------------------------------------------------------------------
-# rule_scalar_divide(out, in1, in2, [valType])
+# rule_scalar_divide(out, in1, in2, [value_type])
 #
 # Description
 #     Production rule for division by scalar operation
@@ -332,8 +329,8 @@ define([rule_scalar_modulo],
 # rule_unary_assign(out, in, tok, function)
 #
 # Description
-#     Production rule for a unary function, using FieldOps::assign for the
-#     implementation.
+#     Production rule for a unary function,
+#     using FieldOps::assign for the implementation.
 #
 # Example
 # rule_unary_assign(sfield, sfield, FLOOR, Foam::floorOp<Foam::scalar>())
@@ -353,8 +350,8 @@ define([rule_unary_assign],
 # rule_binary_assign(out, in1, in2, tok, function)
 #
 # Description
-#     Production rule for a binary function, using FieldOps::assign for the
-#     implementation.
+#     Production rule for a binary function,
+#     using FieldOps::assign for the implementation.
 #
 # Example
 # rule_binary_assign(sfield, sfield, sfield, HYPOT, Foam::hypot)
@@ -374,7 +371,7 @@ define([rule_binary_assign],
 # rule_driver_nullary(out, tok, func)
 #
 # Description
-#     Production rule for driver-specific field reduction
+#     Production rule for driver-specific nullary method.
 #
 # Example
 # rule_driver_nullary(vfield, POS, field_cellCentre)
@@ -393,10 +390,11 @@ define([rule_driver_nullary],
 
 
 #------------------------------------------------------------------------------
-# rule_driver_inplace_unary(inOut, tok, func)
+# rule_driver_inplace_unary(inOut, tok, method)
 #
 # Description
-#     Production rule for driver-specific field reduction
+#     Production rule for a driver-specific unary method
+#     modifying the field inplace.
 #
 # Example
 # rule_driver_inplace_unary(sfield, WEIGHTED_AVERAGE, volAverage)
@@ -416,10 +414,10 @@ define([rule_driver_inplace_unary],
 
 
 #------------------------------------------------------------------------------
-# rule_driver_unary(out, in, tok, func)
+# rule_driver_unary(out, in, tok, method, [value_type])
 #
 # Description
-#     Production rule for driver-specific field reduction
+#     Production rule for a driver-specific unary method
 #
 # Example
 # rule_driver_unary(sfield, psfield, POINT_TO_CELL, pointToCell)
@@ -433,7 +431,42 @@ define([rule_driver_inplace_unary],
 define([rule_driver_unary],
 [$1 (lhs) ::= $3 LPAREN $2 (a) RPAREN .
 {
-    lhs = driver->$4(make_obj(a)).ptr();
+    lhs = driver->$4[]dnl       # The method call
+ifelse($5,[],[],[<$5>])dnl      # Optional template parameter (value_type)
+(make_obj(a)).ptr();
+}]
+)
+
+
+#------------------------------------------------------------------------------
+# rule_driver_unary_named(out, tok, identType, method, [value_type])
+#
+# Description
+#     Production rule for a driver-specific unary method
+#
+# Example
+#     rule_driver_unary_named
+#     (
+#        sfield,
+#        SN_GRAD,
+#        SCALAR_ID,
+#        patchNormalField,
+#        Foam::scalar
+#    )
+#
+# sfield(lhs) ::= SN_GRAD LPAREN SCALAR_ID (ident) RPAREN .
+# {
+#     lhs = driver->patchNormalField<Foam::scalar>(make_obj(ident->name)).ptr();
+# }
+#
+#------------------------------------------------------------------------------
+
+define([rule_driver_unary_named],
+[$1 (lhs) ::= $2 LPAREN $3 (ident) RPAREN .
+{
+    lhs = driver->$4[]dnl       # The method call
+ifelse($5,[],[],[<$5>])dnl      # Optional template parameter (value_type)
+(make_obj(ident->name)).ptr();
 }]
 )
 

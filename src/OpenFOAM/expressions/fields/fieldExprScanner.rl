@@ -212,7 +212,7 @@ static int driverTokenType
 
     number => emit_number;
 
-    ## operators
+    ## Operators
     '!'  =>{ EMIT_TOKEN(NOT); };
     '%'  =>{ EMIT_TOKEN(PERCENT); };
     '('  =>{ EMIT_TOKEN(LPAREN); };
@@ -292,6 +292,7 @@ static int driverTokenType
     "tensor::I" =>{ EMIT_TOKEN(IDENTITY_TENSOR); };
     "arg"       =>{ EMIT_TOKEN(ARG); };
 ##    "time"      =>{ EMIT_TOKEN(TIME); };
+##    "deltaT"    =>{ EMIT_TOKEN(DELTA_T); };
 
     ## Identifier (field, etc - error if unknown)
     ## Handle 'bare' names and single/double quoted ones

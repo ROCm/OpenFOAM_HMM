@@ -33,8 +33,8 @@ Description
     Set values on a selected set of cells/patch-faces via a dictionary.
 
 Note
-    Based on funkySetFields
-    Copyright 2006-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Based on funkySetFields from
+    Bernhard Gschaider <bgschaid@hfd-research.com>
 
 \*---------------------------------------------------------------------------*/
 
@@ -310,11 +310,9 @@ void evaluate
 
     Info<< endl;
 
-    expressions::volumeExprDriver driver
-    (
-        mesh,
-        ctrl.cacheVariables
-    );
+    expressions::volumeExprDriver driver(mesh);
+
+    driver.setCaching(ctrl.cacheVariables);
 
     driver.readDict(dict);
 

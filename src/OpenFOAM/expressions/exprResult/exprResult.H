@@ -388,7 +388,7 @@ public:
         inline bool hasValue() const;
 
         //- Basic type for the field or single value
-        inline const word& valueType() const;
+        inline const word& valueType() const noexcept;
 
         //- True if representing point data,
         //- or test for same value as wantPointData argument

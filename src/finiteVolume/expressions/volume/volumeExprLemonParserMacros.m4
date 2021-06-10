@@ -6,11 +6,10 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Driver-specific m4/lemon macros for volume expressions.
@@ -35,8 +34,8 @@ divert(-1)dnl
 
 define([rules_driver_volume_functions],
 [dnl
-rule_driver_select(_logic_, CSET, field_cellSet)dnl
-rule_driver_select(_logic_, CZONE, field_cellZone)dnl
+rule_driver_select(_logic_, CELL_SET, field_cellSet)dnl
+rule_driver_select(_logic_, CELL_ZONE, field_cellZone)dnl
 dnl
 rule_driver_nullary(_scalar_, CELL_VOLUME, field_cellVolume)dnl
 rule_driver_nullary(_vector_, POS, field_cellCentre)dnl CELL_CENTRE
@@ -57,8 +56,8 @@ dnl
 
 define([rules_driver_surface_functions],
 [dnl
-rule_driver_select(_logic_, FSET, field_faceSet)dnl
-rule_driver_select(_logic_, FZONE, field_faceZone)dnl
+rule_driver_select(_logic_, FACE_SET, field_faceSet)dnl
+rule_driver_select(_logic_, FACE_ZONE, field_faceZone)dnl
 dnl
 rule_driver_nullary(_scalar_, FACE_AREA, field_faceArea)dnl
 rule_driver_nullary(_vector_, FACE_CENTRE, field_faceCentre)dnl
@@ -80,8 +79,8 @@ dnl
 
 define([rules_driver_point_functions],
 [dnl
-rule_driver_select(_logic_, PSET, field_pointSet)dnl
-rule_driver_select(_logic_, PZONE, field_pointZone)dnl
+rule_driver_select(_logic_, POINT_SET, field_pointSet)dnl
+rule_driver_select(_logic_, POINT_ZONE, field_pointZone)dnl
 dnl
 rule_driver_nullary(_vector_, POINTS, field_pointField)dnl
 dnl

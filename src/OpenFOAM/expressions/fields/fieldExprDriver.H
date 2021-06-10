@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ Description
     Functions
     \table
         Function    | Description                      | Number of arguments |
-        rand        | Random field                          | 0/1 |
+        rand        | Random field                     | 0/1 |
     \endtable
 
 Note
@@ -98,11 +98,8 @@ public:
 
     // Constructors
 
-        //- Default construct - uses size = 1
-        parseDriver();
-
-        //- Construct with specified size
-        explicit parseDriver(const label len);
+        //- Default construct (size=1), or with specified size
+        explicit parseDriver(const label len = 1);
 
         //- Construct for specified size with given dictionary
         parseDriver(const label len, const dictionary& dict);

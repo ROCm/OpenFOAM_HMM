@@ -269,12 +269,10 @@ fields/volFields/volFields.C
 fields/surfaceFields/surfaceFields.C
 
 expr = expressions
-$(expr)/base/exprDriverWriter.C
-
 $(expr)/base/fvExprDriver.C
-$(expr)/base/fvExprDriverFields.C
 $(expr)/base/fvExprDriverIO.C
 $(expr)/base/fvExprDriverNew.C
+$(expr)/base/fvExprDriverWriter.C
 
 patchExpr = $(expr)/patch
 $(patchExpr)/patchExpr.C

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "objectRegistry.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class GeoField>
+Foam::tmp<GeoField>
+Foam::expressions::exprDriver::cfindFieldObject
+(
+    const objectRegistry& obr,
+    const word& fldName
+)
+{
+    tmp<GeoField> tfld;
+
+    tfld.cref(obr.cfindObject<GeoField>(fldName));
+
+    return tfld;
+}
+
 
 template<class TableType>
 bool Foam::expressions::exprDriver::readTable

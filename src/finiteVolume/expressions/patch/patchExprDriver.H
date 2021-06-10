@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,9 @@ Description
         faceToPoint | Interpolate face values onto points   | 1 |
         pointToFace | Interpolate point values onto faces   | 1 |
         rand        | Random field                          | 0/1 |
+        snGrad      | Surface normal field                  | 0 |
+        internalField | Internal field next to patch        | 0 |
+        neighbourField | patch field on opposite side of coupled patch | 0 |
     \endtable
 
 Note
@@ -120,14 +123,15 @@ public:
 
     // Constructors
 
-        //- Construct for specified patch
-        explicit parseDriver(const fvPatch& p);
-
-        //- Construct for specified patch with given dictionary
-        parseDriver(const fvPatch& p, const dictionary& dict);
+        //- Construct for specified patch, with dictionary information
+        explicit parseDriver
+        (
+            const fvPatch& p,
+            const dictionary& dict = dictionary::null
+        );
 
         //- Construct for specified patch with copy of driver context
-        parseDriver(const fvPatch& p, const parseDriver& driver_);
+        parseDriver(const fvPatch& p, const parseDriver& driver);
 
         //- Construct with patchName for the given mesh
         parseDriver(const word& patchName, const fvMesh& mesh);
@@ -135,6 +139,7 @@ public:
         //- Construct with "patch" (mandatory) and "region" (optional)
         //- specified in dictionary
         parseDriver(const dictionary& dict, const fvMesh& mesh);
+
 
         //- Clone
         virtual autoPtr<expressions::fvExprDriver> clone() const
@@ -189,9 +194,7 @@ public:
         );
 
 
-    // Field Information
-
-    // Fields
+    // General
 
         //- Set result
         template<class Type>
@@ -206,24 +209,36 @@ public:
         template<class Type>
         tmp<Field<Type>> getVariableIfAvailable(const word& fldName) const;
 
-        //- Retrieve field (vol field)
-        template<class Type>
-        tmp<Field<Type>>
-        getVolField(const word& fldName);
 
-        //- Retrieve field (surface field)
-        template<class Type>
-        tmp<Field<Type>>
-        getSurfaceField(const word& fldName);
-
-        //- Retrieve field (point field)
-        template<class Type>
-        tmp<Field<Type>>
-        getPointField(const word& fldName);
+    // Field Retrieval
 
         //- Return named field
         template<class Type>
         tmp<Field<Type>> getField(const word& fldName);
+
+        //- Retrieve field (vol field)
+        template<class Type>
+        tmp<Field<Type>> getVolField(const word& fldName);
+
+        //- Retrieve field (surface field)
+        template<class Type>
+        tmp<Field<Type>> getSurfaceField(const word& fldName);
+
+        //- Retrieve field (point field)
+        template<class Type>
+        tmp<Field<Type>> getPointField(const word& fldName);
+
+        //- Return internal field next to patch
+        template<class Type>
+        tmp<Field<Type>> patchInternalField(const word& fldName);
+
+        //- Return patchField on the opposite patch of a coupled patch
+        template<class Type>
+        tmp<Field<Type>> patchNeighbourField(const word& fldName);
+
+        //- Return surface normal field (snGrad)
+        template<class Type>
+        tmp<Field<Type>> patchNormalField(const word& fldName);
 
 
     // Field "shape" conversions

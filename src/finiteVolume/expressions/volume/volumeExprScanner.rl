@@ -61,12 +61,12 @@ namespace Foam
 // Special handling for these known (stashed) look-back types
 static const Enum<int> lookBehindTokenEnums
 ({
-    TOKEN_PAIR("cellSet", CSET),
-    TOKEN_PAIR("faceSet", FSET),
-    TOKEN_PAIR("pointSet", PSET),
-    TOKEN_PAIR("cellZone", CZONE),
-    TOKEN_PAIR("faceZone", FZONE),
-    TOKEN_PAIR("pointZone", PZONE),
+    TOKEN_PAIR("cellSet", CELL_SET),
+    TOKEN_PAIR("faceSet", FACE_SET),
+    TOKEN_PAIR("pointSet", POINT_SET),
+    TOKEN_PAIR("cellZone", CELL_ZONE),
+    TOKEN_PAIR("faceZone", FACE_ZONE),
+    TOKEN_PAIR("pointZone", POINT_ZONE),
 });
 
 #define HAS_LOOKBEHIND_TOKENS
@@ -201,12 +201,12 @@ static int driverTokenType
 
         switch (lookBehind)
         {
-            case TOK_CSET : good = driver_.isCellSet(ident); break;
-            case TOK_FSET : good = driver_.isFaceSet(ident); break;
-            case TOK_PSET : good = driver_.isPointSet(ident); break;
-            case TOK_CZONE : good = driver_.isCellZone(ident); break;
-            case TOK_FZONE : good = driver_.isFaceZone(ident); break;
-            case TOK_PZONE : good = driver_.isPointZone(ident); break;
+            case TOK_CELL_SET : good = driver_.isCellSet(ident); break;
+            case TOK_FACE_SET : good = driver_.isFaceSet(ident); break;
+            case TOK_POINT_SET : good = driver_.isPointSet(ident); break;
+            case TOK_CELL_ZONE : good = driver_.isCellZone(ident); break;
+            case TOK_FACE_ZONE : good = driver_.isFaceZone(ident); break;
+            case TOK_POINT_ZONE : good = driver_.isPointZone(ident); break;
         }
 
         if (good)
@@ -365,7 +365,7 @@ static int driverTokenType
 
     number => emit_number;
 
-    ## operators
+    ## Operators
     '!'  =>{ EMIT_TOKEN(NOT); };
     '%'  =>{ EMIT_TOKEN(PERCENT); };
     '('  =>{ EMIT_TOKEN(LPAREN); };
@@ -447,6 +447,7 @@ static int driverTokenType
     "tensor::I" =>{ EMIT_TOKEN(IDENTITY_TENSOR); };
     "arg"       =>{ EMIT_TOKEN(ARG); };
     "time"      =>{ EMIT_TOKEN(TIME); };
+    "deltaT"    =>{ EMIT_TOKEN(DELTA_T); };
 
     ## Identifier (field, etc - error if unknown)
     ## Handle 'bare' names and single/double quoted ones

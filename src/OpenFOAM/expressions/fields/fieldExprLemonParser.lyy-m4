@@ -166,7 +166,8 @@ svalue (lhs) ::= PI LPAREN RPAREN . { lhs = Foam::constant::mathematical::pi; }
 svalue (lhs) ::= DEG_TO_RAD LPAREN RPAREN . { lhs = Foam::degToRad(); }
 svalue (lhs) ::= RAD_TO_DEG LPAREN RPAREN . { lhs = Foam::radToDeg(); }
 svalue (lhs) ::= ARG LPAREN RPAREN . { lhs = driver->argValue(); }
-dnl svalue (lhs) ::= TIME LPAREN RPAREN . { lhs = driver->timeValue(); }
+svalue (lhs) ::= TIME LPAREN RPAREN . { lhs = driver->timeValue(); }
+svalue (lhs) ::= DELTA_T LPAREN RPAREN . { lhs = driver->deltaT(); }
 
 
 /* * * * * * * * * * * * * * * * * * Fields  * * * * * * * * * * * * * * * * *\

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exprDriverWriter.H"
+#include "fvExprDriverWriter.H"
 #include "fvExprDriver.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -36,7 +36,7 @@ namespace Foam
 namespace expressions
 {
 
-    defineTypeName(exprDriverWriter);
+defineTypeName(fvExprDriverWriter);
 
 } // namespace expressions
 } // namespace Foam
@@ -44,7 +44,7 @@ namespace expressions
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::expressions::exprDriverWriter::exprDriverWriter
+Foam::expressions::fvExprDriverWriter::fvExprDriverWriter
 (
     const word& name,
     fvExprDriver& driver
@@ -66,14 +66,14 @@ Foam::expressions::exprDriverWriter::exprDriverWriter
 {
     if (headerOk())
     {
-        readData(readStream("exprDriverWriter", true));
+        readData(readStream("fvExprDriverWriter", true));
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::expressions::exprDriverWriter::readData(Istream& is)
+bool Foam::expressions::fvExprDriverWriter::readData(Istream& is)
 {
     dictionary dict(is);
 
@@ -85,7 +85,7 @@ bool Foam::expressions::exprDriverWriter::readData(Istream& is)
 }
 
 
-bool Foam::expressions::exprDriverWriter::writeData(Ostream& os) const
+bool Foam::expressions::fvExprDriverWriter::writeData(Ostream& os) const
 {
     // driver_.writeDict(os);
 

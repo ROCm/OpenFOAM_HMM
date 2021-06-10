@@ -245,7 +245,9 @@ Foam::expressions::volumeExpr::parseDriver::newVolField
     const Type& val
 ) const
 {
-    return GeometricField<Type,fvPatchField,volMesh>::New
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    return fieldType::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         mesh(),
@@ -261,7 +263,9 @@ Foam::expressions::volumeExpr::parseDriver::newSurfaceField
     const Type& val
 ) const
 {
-    return GeometricField<Type,fvsPatchField,surfaceMesh>::New
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
+
+    return fieldType::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         mesh(),
@@ -277,7 +281,9 @@ Foam::expressions::volumeExpr::parseDriver::newPointField
     const Type& val
 ) const
 {
-    return GeometricField<Type,pointPatchField,pointMesh>::New
+    typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
+
+    return fieldType::New
     (
         word("constant.") + word(pTraits<Type>::typeName),
         pointMesh::New(mesh()),

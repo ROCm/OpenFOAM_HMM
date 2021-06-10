@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvExprDriver.H"
-#include "exprDriverWriter.H"
+#include "fvExprDriverWriter.H"
 #include "expressionEntry.H"
 #include "exprResultGlobals.H"
 
@@ -94,19 +94,12 @@ const Foam::fvMesh* Foam::expressions::fvExprDriver::resetDefaultMesh
 
 Foam::expressions::fvExprDriver::fvExprDriver
 (
-    bool cacheReadFields,
-    bool searchInMemory,
-    bool searchFiles,
-    const dictionary& dict
+    enum exprDriver::searchControls search,
+    const dictionary& dict,
+    const TimeState* ts
 )
 :
-    expressions::exprDriver
-    (
-        cacheReadFields,
-        searchInMemory,
-        searchFiles,
-        dict
-    ),
+    expressions::exprDriver(search, dict, ts),
     globalScopes_(),
     delayedVariables_(),
     storedVariables_(),
@@ -133,16 +126,17 @@ Foam::expressions::fvExprDriver::fvExprDriver
 
 Foam::expressions::fvExprDriver::fvExprDriver
 (
-    const dictionary& dict
+    const dictionary& dict,
+    const TimeState* ts
 )
 :
-    fvExprDriver
-    (
-        dict.getOrDefault("cacheReadFields", false),
-        dict.getOrDefault("searchInMemory", true),
-        dict.getOrDefault("searchFiles", false),
-        dict
-    )
+    expressions::exprDriver(dict, ts),
+    globalScopes_(),
+    delayedVariables_(),
+    storedVariables_(),
+    specialVariablesIndex_(-1),
+    otherMeshName_(),
+    writer_(nullptr)
 {
     readDict(dict);
 }
@@ -168,7 +162,7 @@ bool Foam::expressions::fvExprDriver::readDict
     // {
     //     for (const fileName& libName : plugins)
     //     {
-    //         this->runTime().libs().open
+    //         this->mesh().time().libs().open
     //         (
     //             "libswak" + libName + "FunctionPlugin"  // verbose = true
     //         );
@@ -243,24 +237,6 @@ bool Foam::expressions::fvExprDriver::readDict
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::Time& Foam::expressions::fvExprDriver::runTime() const
-{
-    return this->mesh().time();
-}
-
-
-Foam::word Foam::expressions::fvExprDriver::timeName() const
-{
-    return runTime().timeName();
-}
-
-
-Foam::scalar Foam::expressions::fvExprDriver::timeValue() const
-{
-    return runTime().value();
-}
-
 
 void Foam::expressions::fvExprDriver::updateSpecialVariables(bool force)
 {
@@ -594,7 +570,7 @@ Foam::word Foam::expressions::fvExprDriver::getFieldClassName
     const word& name
 ) const
 {
-    if (searchInMemory())
+    if (searchRegistry())
     {
         const regIOobject* ioptr = this->mesh().findObject<regIOobject>(name);
 

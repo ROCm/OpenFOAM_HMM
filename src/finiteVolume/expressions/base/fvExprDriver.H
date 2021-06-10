@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ Description
 SourceFiles
     fvExprDriverI.H
     fvExprDriver.C
-    fvExprDriverFields.C
     fvExprDriverIO.C
     fvExprDriverNew.C
     fvExprDriverTemplates.C
@@ -79,7 +78,7 @@ namespace expressions
 {
 
 // Forward Declarations
-class exprDriverWriter;
+class fvExprDriverWriter;
 
 /*---------------------------------------------------------------------------*\
                          Class fvExprDriver Declaration
@@ -118,7 +117,7 @@ class fvExprDriver
         word otherMeshName_;
 
         //- Writing and restoring
-        autoPtr<exprDriverWriter> writer_;
+        autoPtr<fvExprDriverWriter> writer_;
 
 
     // Private Member Functions
@@ -268,19 +267,6 @@ protected:
             const MeshRef& meshRef
         );
 
-        //- Create a random field
-        //
-        //  \param field the field to populate
-        //  \param seed the seed value. If zero or negative, use as an offset
-        //      to the current timeIndex
-        //  \param gaussian generate a Gaussian distribution
-        void fill_random
-        (
-            scalarField& field,
-            label seed = 0,
-            const bool gaussian = false
-        ) const;
-
 
     // Sets
 
@@ -325,7 +311,7 @@ protected:
 public:
 
     // Friends
-    friend class exprDriverWriter;
+    friend class fvExprDriverWriter;
 
 
     // Static Member Functions
@@ -374,20 +360,24 @@ public:
 
     // Constructors
 
-        //- Null constructor, and null construct with search preferences
+        //- Default construct, and default construct with search preferences
         explicit fvExprDriver
         (
-            bool cacheReadFields = false,
-            bool searchInMemory = true,
-            bool searchFiles = false,
-            const dictionary& dict = dictionary::null
+            enum exprDriver::searchControls search =
+                exprDriver::searchControls::DEFAULT_SEARCH,
+            const dictionary& dict = dictionary::null,
+            const TimeState* ts = nullptr
         );
 
         //- Copy construct
         fvExprDriver(const fvExprDriver&);
 
         //- Construct from a dictionary
-        explicit fvExprDriver(const dictionary& dict);
+        explicit fvExprDriver
+        (
+            const dictionary& dict,
+            const TimeState* ts = nullptr
+        );
 
 
         //- Return a reference to the selected value driver
@@ -426,18 +416,6 @@ public:
 
         //- The underlying point field size for the expression
         virtual label pointSize() const = 0;
-
-
-    // Globals, Mesh Related
-
-        //- The Time associated with the mesh
-        const Time& runTime() const;
-
-        //- The current time name
-        virtual word timeName() const;
-
-        //- The current time value
-        virtual scalar timeValue() const;
 
 
     // General Controls

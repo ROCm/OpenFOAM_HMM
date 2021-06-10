@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -266,17 +266,11 @@ Foam::expressions::volumeExpr::parseDriver::field_rand
     bool gaussian
 ) const
 {
-    auto tresult = volScalarField::New
-    (
-        "rand",
-        mesh(),
-        dimless
-    );
-    auto& fld = tresult.ref().primitiveFieldRef();
+    auto tfld = volScalarField::New("rand", mesh(), dimless);
 
-    fill_random(fld, seed, gaussian);
+    exprDriver::fill_random(tfld.ref().primitiveFieldRef(), seed, gaussian);
 
-    return tresult;
+    return tfld;
 }
 
 

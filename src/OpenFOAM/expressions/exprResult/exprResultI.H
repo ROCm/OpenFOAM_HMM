@@ -240,7 +240,8 @@ inline bool Foam::expressions::exprResult::hasValue() const
 }
 
 
-inline const Foam::word& Foam::expressions::exprResult::valueType() const
+inline const Foam::word&
+Foam::expressions::exprResult::valueType() const noexcept
 {
     return valType_;
 }

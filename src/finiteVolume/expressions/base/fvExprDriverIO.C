@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2010-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvExprDriver.H"
-#include "exprDriverWriter.H"
+#include "fvExprDriverWriter.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -263,7 +263,7 @@ void Foam::expressions::fvExprDriver::createWriterAndRead(const word& name)
 {
     if (!writer_ && hasDataToWrite())
     {
-        writer_.reset(new exprDriverWriter(name + "_" + this->type(), *this));
+        writer_.reset(new fvExprDriverWriter(name + "_" + this->type(), *this));
     }
 }
 

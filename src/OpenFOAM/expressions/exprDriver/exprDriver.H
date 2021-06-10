@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +68,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
+class TimeState;
+
 namespace expressions
 {
 
@@ -77,6 +81,29 @@ namespace expressions
 
 class exprDriver
 {
+public:
+
+    // Data Types
+
+        //- Search/caching controls
+        enum searchControls
+        {
+            NO_SEARCH = 0,
+            SEARCH_REGISTRY = 1,   //!< Search registry before disk
+            SEARCH_FILES = 2,      //!< Search disk (eg, standalone app)
+            CACHE_READ_FIELDS = 4, //!< Cache fields read from disk
+            DEFAULT_SEARCH = (SEARCH_REGISTRY)
+        };
+
+
+private:
+
+    // Private Member Functions
+
+        //- Get search/caching controls from dictionary entries
+        static int getSearchControls(const dictionary& dict);
+
+
 protected:
 
     // Protected Data
@@ -98,6 +125,9 @@ protected:
         //- Special-purpose scalar reference argument
         scalar arg1Value_;
 
+        //- Reference to the time-state
+        mutable const TimeState* timeStatePtr_;
+
 
     // Controls, tracing etc.
 
@@ -116,17 +146,27 @@ protected:
         //- Use value of previous iteration when oldTime is requested
         bool prevIterIsOldTime_;
 
-        //- Keep fields read from disc in memory
-        bool cacheReadFields_;
-
-        //- Search in registry before looking on disk
-        bool searchInMemory_;
-
-        //- Search on disk (eg, for a standalone application)
-        bool searchFiles_;
+        //- Registry/disk/caching control
+        searchControls searchCtrl_;
 
 
     // Protected Member Functions
+
+        inline bool searchRegistry() const noexcept;
+        inline bool searchFiles() const noexcept;
+        inline bool cacheReadFields() const noexcept;
+
+        //- Reset the time-state reference
+        void resetTimeReference(const TimeState* ts);
+
+        //- Reset the time-state reference
+        void resetTimeReference(const TimeState& ts);
+
+        //- Lookup field object.
+        //  \return const-ref tmp or invalid if not found
+        template<class GeoField>
+        static tmp<GeoField>
+        cfindFieldObject(const objectRegistry& obr, const word& fldName);
 
         //- Read an interpolation table
         template<typename TableType>
@@ -159,7 +199,8 @@ protected:
         //- Fill a random field
         //
         //  \param field the field to populate
-        //  \param seed the seed value.
+        //  \param seed the seed value. If zero or negative, use as an offset
+        //      to the current timeIndex (if a time-state is available)
         //  \param gaussian generate a Gaussian distribution
         void fill_random
         (
@@ -227,20 +268,23 @@ public:
 
     // Constructors
 
-        //- Null constructor, and null construct with search preferences
+        //- Default construct, and default construct with search preferences
         explicit exprDriver
         (
-            bool cacheReadFields = false,
-            bool searchInMemory = true,
-            bool searchFiles = false,
-            const dictionary& dict = dictionary::null
+            enum searchControls search = searchControls::DEFAULT_SEARCH,
+            const dictionary& dict = dictionary::null,
+            const TimeState* ts = nullptr
         );
 
         //- Copy construct
-        exprDriver(const exprDriver&);
+        exprDriver(const exprDriver& rhs);
 
         //- Construct from a dictionary
-        explicit exprDriver(const dictionary& dict);
+        explicit exprDriver
+        (
+            const dictionary& dict,
+            const TimeState* ts = nullptr
+        );
 
 
     //- Destructor
@@ -261,20 +305,30 @@ public:
             return 1;
         }
 
+        //- Reference to the current time-state (can be nullptr)
+        const TimeState* timeState() const;
+
+        //- The current time value
+        virtual scalar timeValue() const;
+
+        //- The current deltaT value
+        virtual scalar deltaT() const;
+
+
         //- The dictionary with all input data/specification
-        const dictionary& dict() const
+        const dictionary& dict() const noexcept
         {
             return dict_;
         }
 
         //- Const access to expression result
-        virtual const exprResult& result() const
+        const exprResult& result() const noexcept
         {
             return result_;
         }
 
         //- Non-const access to expression result
-        virtual exprResult& result()
+        exprResult& result() noexcept
         {
             return result_;
         }
@@ -287,28 +341,28 @@ public:
         tmp<Field<Type>> getResult(bool wantPointData=false);
 
         //- The result type as word - same as result().valueType()
-        virtual word getResultType() const
+        const word& getResultType() const noexcept
         {
             return result_.valueType();
         }
 
 
-    // Globals, Mesh Related
+    // Specials
 
-        //- Set special-purpose scalar reference argument.
+        //- Get special-purpose scalar reference argument.
         //  Typically available as \c arg() in an expression and
-        //  may corrspond to table index, time value etc.
-        scalar argValue() const;
+        //  may correspond to table index, time value etc.
+        inline scalar argValue() const noexcept;
 
 
     // General Controls
 
         //- Get "look-behind" parsing context (internal bookkeeping)
-        inline int stashedTokenId() const;
+        inline int stashedTokenId() const noexcept;
 
         //- Reset "look-behind" parsing context (mutable operation)
         //  \return the previous value
-        inline int resetStashedTokenId(int tokenId=0) const;
+        inline int resetStashedTokenId(int tokenId=0) const noexcept;
 
 
         //- Set the scanner/parser debug
@@ -317,26 +371,26 @@ public:
         //- Set the scanner/parser debug to match the input
         void setDebugging(const exprDriver& rhs);
 
-        //- Set search behaviour
+        //- Toggle CACHE_READ_FIELDS control
+        bool setCaching(bool on) noexcept;
+
+        //- Set search behaviour,
+        //- with additional CACHE_READ_FIELDS toggle on
         void setSearchBehaviour
         (
-            bool cacheReadFields,
-            bool searchInMemory,
-            bool searchFiles
+            enum searchControls search,
+            const bool caching = false
         );
 
         //- Set search behaviour to be identical to rhs
         void setSearchBehaviour(const exprDriver& rhs);
 
         //- Read access to scanner debug
-        bool debugScanner() const { return debugScanner_; }
+        inline bool debugScanner() const noexcept;
 
         //- Read access to parser debug
-        bool debugParser() const { return debugParser_; }
+        inline bool debugParser() const noexcept;
 
-        bool cacheReadFields() const { return cacheReadFields_; }
-        bool searchInMemory() const { return searchInMemory_; }
-        bool searchFiles() const { return searchFiles_; }
         bool prevIterIsOldTime() const { return prevIterIsOldTime_; }
 
 
@@ -348,7 +402,7 @@ public:
         //- Set special-purpose scalar reference argument.
         //  Typically available as \c arg() in an expression and
         //  may corrspond to table index, time value etc.
-        virtual void setArgument(const scalar val);
+        inline void setArgument(const scalar val) noexcept;
 
         //- True if named variable exists
         inline virtual bool hasVariable(const word& name) const;

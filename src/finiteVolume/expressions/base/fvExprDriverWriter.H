@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2011-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +25,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::expressions::exprDriverWriter
+    Foam::expressions::fvExprDriverWriter
 
 Description
     Registered input/output for an expressions::fvExprDriver
 
 SourceFiles
-    exprDriverWriter.C
+    fvExprDriverWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_exprDriverWriter_H
-#define expressions_exprDriverWriter_H
+#ifndef expressions_fvExprDriverWriter_H
+#define expressions_fvExprDriverWriter_H
 
 #include "fvExprDriver.H"
 #include "regIOobject.H"
@@ -49,10 +49,10 @@ namespace expressions
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class exprDriverWriter Declaration
+                     Class fvExprDriverWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class exprDriverWriter
+class fvExprDriverWriter
 :
     public regIOobject
 {
@@ -64,30 +64,30 @@ class exprDriverWriter
 
     // Private Member Functions
 
-        //- No null constructor
-        exprDriverWriter() = delete;
+        //- No default construct
+        fvExprDriverWriter() = delete;
 
         //- No copy construct
-        exprDriverWriter(const exprDriverWriter&) = delete;
+        fvExprDriverWriter(const fvExprDriverWriter&) = delete;
 
         //- No copy assignment
-        void operator=(const exprDriverWriter&) = delete;
+        void operator=(const fvExprDriverWriter&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeNameNoDebug("exprDriverWriter");
+    TypeNameNoDebug("fvExprDriverWriter");
 
 
     // Constructors
 
         //- Construct for named driver
-        exprDriverWriter(const word& name, fvExprDriver& driver);
+        fvExprDriverWriter(const word& name, fvExprDriver& driver);
 
 
     //- Destructor
-    virtual ~exprDriverWriter() = default;
+    virtual ~fvExprDriverWriter() = default;
 
 
     // Member Functions
