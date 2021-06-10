@@ -78,6 +78,7 @@ void Foam::noiseModel::setOctaveBands
 
     // Centre frequencies
     DynamicList<scalar> fc;
+    DynamicList<scalar> missedBins;
 
     // Convert to lower band limit
     fTest /= fRatioL2C;
@@ -91,9 +92,12 @@ void Foam::noiseModel::setOctaveBands
         if (f[i] >= fTest)
         {
             // Advance band if appropriate
+            label stepi = 0;
             while (f[i] > fTest)
             {
+                if (stepi) missedBins.append(fTest/fRatio*fRatioL2C);
                 fTest *= fRatio;
+                ++stepi;
             }
             fTest /= fRatio;
 
@@ -112,6 +116,16 @@ void Foam::noiseModel::setOctaveBands
     }
 
     fBandIDs = bandIDs.sortedToc();
+
+    if (missedBins.size())
+    {
+        label nMiss = missedBins.size();
+        label nTotal = nMiss + fc.size() - 1;
+        WarningInFunction
+            << "Empty bands found: " << nMiss << " of " << nTotal
+            << " with centre frequencies " << flatOutput(missedBins)
+            << endl;
+    }
 
     if (fc.size())
     {
