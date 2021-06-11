@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ Usage
     \param -region \<name\> \n
     Specify an alternative mesh region.
 
-    \param -regions (\<name1\> \<name2\> .. \<namen\>) \n
+    \param -regions (\<name1\> .. \<nameN\>) \n
     Specify alternative mesh regions. The region names will be sorted
     alphabetically and a single composite name will be created
         \<nameX\>_\<nameY\>.._\<nameZ\>
@@ -65,6 +65,7 @@ See also
 
 #include "fvCFD.H"
 #include "externalCoupled.H"
+#include "regionProperties.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,8 +78,19 @@ int main(int argc, char *argv[])
         " with the externalCoupled functionObject."
     );
 
-    #include "addRegionOption.H"
-    #include "addRegionsOption.H"
+    argList::addOption
+    (
+        "region",
+        "name",
+        "Specify alternative mesh region"
+    );
+    argList::addOption
+    (
+        "regions",
+        "(name1 .. nameN)",
+        "Specify alternative mesh regions"
+    );
+
     argList::addArgument("patchGroup");
     argList::addOption
     (
@@ -106,19 +118,22 @@ int main(int argc, char *argv[])
 
 
     PtrList<const fvMesh> meshes(regionNames.size());
-    forAll(regionNames, i)
+    forAll(regionNames, regioni)
     {
-        Info<< "Create mesh " << regionNames[i] << " for time = "
+        const word& regionName = regionNames[regioni];
+
+        Info<< "Create mesh " << regionName
+            << " for time = "
             << runTime.timeName() << nl << endl;
 
         meshes.set
         (
-            i,
+            regioni,
             new fvMesh
             (
                 Foam::IOobject
                 (
-                    regionNames[i],
+                    regionName,
                     runTime.timeName(),
                     runTime,
                     Foam::IOobject::MUST_READ
