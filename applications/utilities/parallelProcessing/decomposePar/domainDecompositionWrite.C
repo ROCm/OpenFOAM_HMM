@@ -52,7 +52,7 @@ void Foam::domainDecomposition::writeVolField
             false
         ),
         this->mesh(),
-        dimensionedScalar("cellDist", dimless, -1),
+        dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     );
 

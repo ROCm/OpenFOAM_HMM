@@ -71,7 +71,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const auto decompFile = args.get<fileName>(1);
-    const bool region     = args.found("region");
     const bool verbose    = args.found("verbose");
 
     // Set time from database
@@ -87,23 +86,17 @@ int main(int argc, char *argv[])
     // Get region names
     #include "getAllRegionOptions.H"
 
-    wordList regionDirs(regionNames);
-    if (regionDirs.size() == 1 && regionDirs[0] == polyMesh::defaultRegion)
-    {
-        regionDirs[0].clear();
-    }
-    else
-    {
-        Info<< "Decomposing regions: "
-            << flatOutput(regionNames) << nl << endl;
-    }
-
     labelList cellToProc;
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir = regionDirs[regioni];
+        // const word& regionDir =
+        // (
+        //     regionName != polyMesh::defaultRegion
+        //   ? regionName
+        //   : word::null
+        // );
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
         Info<< "Create mesh..." << flush;

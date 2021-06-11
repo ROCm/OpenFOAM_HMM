@@ -167,27 +167,33 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    const bool newTimes   = args.found("newTimes");
+    const bool newTimes = args.found("newTimes");
 
     // Get region names
     #include "getAllRegionOptions.H"
 
-    wordList regionDirs(regionNames);
+    // Determine the processor count
+    label nProcs{0};
 
-    if (regionNames.size() == 1)
+    if (regionNames.empty())
     {
-        if (regionNames[0] == polyMesh::defaultRegion)
-        {
-            regionDirs[0].clear();
-        }
-        else
+        FatalErrorInFunction
+            << "No regions specified or detected."
+            << exit(FatalError);
+    }
+    else if (regionNames[0] == polyMesh::defaultRegion)
+    {
+        nProcs = fileHandler().nProcs(args.path());
+    }
+    else
+    {
+        nProcs = fileHandler().nProcs(args.path(), regionNames[0]);
+
+        if (regionNames.size() == 1)
         {
             Info<< "Using region: " << regionNames[0] << nl << endl;
         }
     }
-
-    // Determine the processor count
-    label nProcs = fileHandler().nProcs(args.path(), regionDirs[0]);
 
     if (!nProcs)
     {
@@ -261,16 +267,21 @@ int main(int argc, char *argv[])
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir = regionDirs[regioni];
+        const word& regionDir =
+        (
+            regionName != polyMesh::defaultRegion
+          ? regionName
+          : word::null
+        );
 
-        Info<< "\n\nReconstructing fields for mesh " << regionName << nl
-            << endl;
+        Info<< "\n\nReconstructing fields" << nl
+            << "region=" << regionName << nl << endl;
 
         if
         (
             newTimes
          && regionNames.size() == 1
-         && regionDirs[0].empty()
+         && regionDir.empty()
          && haveAllTimes(masterTimeDirSet, timeDirs)
         )
         {
