@@ -77,8 +77,8 @@ Note
 #include "fvMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "ReadFields.H"
 #include "pointFields.H"
+#include "ReadFields.H"
 #include "regionProperties.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
@@ -95,7 +95,7 @@ void readAndRotateFields
 (
     PtrList<GeoField>& flds,
     const fvMesh& mesh,
-    const tensor& rotT,
+    const dimensionedTensor& rotT,
     const IOobjectList& objects
 )
 {
@@ -103,14 +103,21 @@ void readAndRotateFields
     for (GeoField& fld : flds)
     {
         Info<< "Transforming " << fld.name() << endl;
-        const dimensionedTensor dimT("t", fld.dimensions(), rotT);
-        transform(fld, dimT, fld);
+        transform(fld, rotT, fld);
     }
 }
 
 
-void rotateFields(const word& regionName, const Time& runTime, const tensor& T)
+void rotateFields
+(
+    const word& regionName,
+    const Time& runTime,
+    const tensor& rotT
+)
 {
+    // Need dimensionedTensor for geometric fields
+    const dimensionedTensor T(rotT);
+
     #include "createRegionMesh.H"
 
     // Read objects in time directory

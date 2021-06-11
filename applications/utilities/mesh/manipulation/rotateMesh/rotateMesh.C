@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,30 +41,55 @@ Description
 #include "fvMesh.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "regionProperties.H"
 #include "transformGeometricField.H"
 #include "IOobjectList.H"
 
 using namespace Foam;
 
-template<class GeometricField>
-void RotateFields
+template<class GeoField>
+void ReadAndRotateFields
 (
     const fvMesh& mesh,
     const IOobjectList& objects,
-    const tensor& rotT
+    const dimensionedTensor& rotT
 )
 {
     // Objects of field type
-    IOobjectList fields(objects.lookupClass(GeometricField::typeName));
+    IOobjectList fields(objects.lookupClass<GeoField>());
 
     forAllConstIters(fields, fieldIter)
     {
-        Info<< "    Rotating " << (*fieldIter)->name() << endl;
-
-        GeometricField fld(*fieldIter(), mesh);
-        transform(fld, dimensionedTensor(rotT), fld);
+        GeoField fld(*fieldIter(), mesh);
+        Info<< "    Rotating " << fld.name() << endl;
+        transform(fld, rotT, fld);
         fld.write();
     }
+}
+
+
+void rotateFields
+(
+    const fvMesh& mesh,
+    const Time& runTime,
+    const tensor& rotationT
+)
+{
+    // Need dimensionedTensor for geometric fields
+    const dimensionedTensor rotT(rotationT);
+
+    // Search for list of objects for this time
+    IOobjectList objects(mesh, runTime.timeName());
+
+    ReadAndRotateFields<volVectorField>(mesh, objects, rotT);
+    ReadAndRotateFields<volSphericalTensorField>(mesh, objects, rotT);
+    ReadAndRotateFields<volSymmTensorField>(mesh, objects, rotT);
+    ReadAndRotateFields<volTensorField>(mesh, objects, rotT);
+
+    ReadAndRotateFields<surfaceVectorField>(mesh, objects, rotT);
+    ReadAndRotateFields<surfaceSphericalTensorField>(mesh, objects, rotT);
+    ReadAndRotateFields<surfaceSymmTensorField>(mesh, objects, rotT);
+    ReadAndRotateFields<surfaceTensorField>(mesh, objects, rotT);
 }
 
 
@@ -83,22 +108,44 @@ int main(int argc, char *argv[])
     argList::addArgument("from", "The vector to rotate from");
     argList::addArgument("to",   "The vector to rotate to");
 
+    #include "addAllRegionOptions.H"
     #include "setRootCase.H"
-    #include "createTime.H"
 
     const vector n1(args.get<vector>(1).normalise());
     const vector n2(args.get<vector>(2).normalise());
 
     const tensor rotT(rotationTensor(n1, n2));
 
+    // ------------------------------------------------------------------------
+
+    #include "createTime.H"
+
+    // Handle -allRegions, -regions, -region
+    #include "getAllRegionOptions.H"
+
+    // ------------------------------------------------------------------------
+
+    forAll(regionNames, regioni)
     {
+        const word& regionName = regionNames[regioni];
+        const word& regionDir =
+        (
+            regionName == polyMesh::defaultRegion ? word::null : regionName
+        );
+        const fileName meshDir = regionDir/polyMesh::meshSubDir;
+
+        if (regionNames.size() > 1)
+        {
+            Info<< "region=" << regionName << nl;
+        }
+
         pointIOField points
         (
             IOobject
             (
                 "points",
-                runTime.findInstance(polyMesh::meshSubDir, "points"),
-                polyMesh::meshSubDir,
+                runTime.findInstance(meshDir, "points"),
+                meshDir,
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
@@ -111,36 +158,35 @@ int main(int argc, char *argv[])
         // Set the precision of the points data to 10
         IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
-        Info<< "Writing points into directory " << points.path() << nl << endl;
+        Info<< "Writing points into directory "
+            << runTime.relativePath(points.path()) << nl
+            << endl;
         points.write();
     }
 
-
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    #include "createNamedMesh.H"
+    #include "createNamedMeshes.H"
 
-    forAll(timeDirs, timeI)
+    forAll(timeDirs, timei)
     {
-        runTime.setTime(timeDirs[timeI], timeI);
+        runTime.setTime(timeDirs[timei], timei);
 
         Info<< "Time = " << runTime.timeName() << endl;
 
-        // Search for list of objects for this time
-        IOobjectList objects(mesh, runTime.timeName());
+        forAll(regionNames, regioni)
+        {
+            const word& regionName = regionNames[regioni];
+            if (regionNames.size() > 1)
+            {
+                Info<< "region=" << regionName << nl;
+            }
 
-        RotateFields<volVectorField>(mesh, objects, rotT);
-        RotateFields<volSphericalTensorField>(mesh, objects, rotT);
-        RotateFields<volSymmTensorField>(mesh, objects, rotT);
-        RotateFields<volTensorField>(mesh, objects, rotT);
-
-        RotateFields<surfaceVectorField>(mesh, objects, rotT);
-        RotateFields<surfaceSphericalTensorField>(mesh, objects, rotT);
-        RotateFields<surfaceSymmTensorField>(mesh, objects, rotT);
-        RotateFields<surfaceTensorField>(mesh, objects, rotT);
+            rotateFields(meshes[regioni], runTime, rotT);
+        }
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
