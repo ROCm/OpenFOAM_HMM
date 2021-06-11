@@ -141,6 +141,7 @@ EOF
 #
 # Modify case controlDicts to run only one time step
 #
+optRunLimit="1"
 modifyCaseControlDict()
 {
     for dict in $(find . -name "controlDict*" -type f)
