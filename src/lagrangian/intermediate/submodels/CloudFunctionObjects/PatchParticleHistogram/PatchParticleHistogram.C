@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,18 +115,18 @@ void Foam::PatchParticleHistogram<CloudType>::write()
                 << "# nBin=" << nBins_
                 << "; min="  << min_
                 << "; max="  << max_ << nl
-                << "# d            nParticles            nParticlesCumulative"
+                << "# dEdge1    dEdge2    nParticles    nParticlesCumulative"
                 << endl;
 
             forAll(nParticles, j)
             {
                 patchOutFile
                     << binEdges_[j]
-                    << "-"
+                    << ' '
                     << binEdges_[j + 1]
-                    << " "
+                    << ' '
                     << nParticles[j]
-                    << " "
+                    << ' '
                     << nParticlesCumulative_[i][j]
                     << nl;
             }
