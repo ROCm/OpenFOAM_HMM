@@ -97,6 +97,14 @@ class fvMeshDistribute
         //- Merge wordlists over all processors
         static wordList mergeWordList(const wordList&);
 
+        //- Reorder zones according to names
+        template<class ZoneType, class ZoneMesh>
+        void reorderZones
+        (
+            const wordList& zoneNames,
+            ZoneMesh& zones
+        );
+
 
         // Patch handling
 

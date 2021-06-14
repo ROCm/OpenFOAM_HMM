@@ -30,6 +30,53 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class ZoneType, class ZoneMesh>
+void Foam::fvMeshDistribute::reorderZones
+(
+    const wordList& zoneNames,
+    ZoneMesh& zones
+)
+{
+    zones.clearAddressing();
+
+    // Shift old ones to new position
+    UPtrList<ZoneType> newZonePtrs(zoneNames.size());
+    forAll(zones, zonei)
+    {
+        auto* zonePtr = zones.get(zonei);
+        if (!zonePtr)
+        {
+            FatalErrorInFunction << "Problem with zones " << zones.names()
+                << exit(FatalError);
+        }
+        const label newIndex = zoneNames.find(zonePtr->name());
+        zonePtr->index() = newIndex;
+        newZonePtrs.set(newIndex, zonePtr);
+    }
+
+    // Add empty zones for unknown ones
+    forAll(newZonePtrs, i)
+    {
+        if (!newZonePtrs.get(i))
+        {
+            newZonePtrs.set
+            (
+                i,
+                new ZoneType
+                (
+                    zoneNames[i],
+                    i,
+                    zones
+                )
+            );
+        }
+    }
+
+    // Transfer
+    zones.swap(newZonePtrs);
+}
+
+
 template<class GeoField>
 void Foam::fvMeshDistribute::printIntFieldInfo(const fvMesh& mesh)
 {

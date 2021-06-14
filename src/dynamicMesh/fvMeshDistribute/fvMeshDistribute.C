@@ -201,14 +201,24 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
     List<wordList> allNames(Pstream::nProcs());
     allNames[Pstream::myProcNo()] = procNames;
     Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
 
-    wordHashSet mergedNames;
-    forAll(allNames, proci)
+    // Assume there are few zone names to merge. Use HashSet otherwise (but
+    // maintain ordering)
+    DynamicList<word> mergedNames;
+    if (Pstream::master())
     {
-        mergedNames.insert(allNames[proci]);
+        mergedNames = procNames;
+        for (const wordList& names : allNames)
+        {
+            for (const word& name : names)
+            {
+                mergedNames.appendUniq(name);
+            }
+        }
     }
-    return mergedNames.sortedToc();
+    Pstream::scatter(mergedNames);
+
+    return mergedNames;
 }
 
 
@@ -1932,11 +1942,17 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     }
 
 
-    // Collect any zone names
+    // Collect any zone names over all processors and shuffle zones accordingly
+    // Note that this is not necessary for redistributePar since that already
+    // checks for it. However other use (e.g. mesh generators) might not.
     const wordList pointZoneNames(mergeWordList(mesh_.pointZones().names()));
-    const wordList faceZoneNames(mergeWordList(mesh_.faceZones().names()));
-    const wordList cellZoneNames(mergeWordList(mesh_.cellZones().names()));
+    reorderZones<pointZone>(pointZoneNames, mesh_.pointZones());
 
+    const wordList faceZoneNames(mergeWordList(mesh_.faceZones().names()));
+    reorderZones<faceZone>(faceZoneNames, mesh_.faceZones());
+
+    const wordList cellZoneNames(mergeWordList(mesh_.cellZones().names()));
+    reorderZones<cellZone>(cellZoneNames, mesh_.cellZones());
 
 
     // Local environment of all boundary faces

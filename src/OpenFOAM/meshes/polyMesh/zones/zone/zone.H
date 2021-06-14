@@ -172,6 +172,12 @@ public:
             return index_;
         }
 
+        //- Return the index of this zone in zone list
+        label& index()
+        {
+            return index_;
+        }
+
         //- Return a reference to the look-up map
         const Map<label>& lookupMap() const;
 
