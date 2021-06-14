@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,7 @@ License
 #include "energyJumpFvPatchScalarField.H"
 #include "energyJumpAMIFvPatchScalarField.H"
 
-
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -55,7 +54,7 @@ Foam::wordList Foam::basicThermo::heBoundaryBaseTypes()
 {
     const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
-    wordList hbt(tbf.size(), word::null);
+    wordList hbt(tbf.size());
 
     forAll(tbf, patchi)
     {
@@ -86,7 +85,7 @@ Foam::wordList Foam::basicThermo::heBoundaryTypes()
 {
     const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
-    wordList hbt = tbf.types();
+    wordList hbt(tbf.types());
 
     forAll(tbf, patchi)
     {
@@ -120,17 +119,16 @@ Foam::wordList Foam::basicThermo::heBoundaryTypes()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 (
     const fvMesh& mesh,
-    const word& name,
+    const word& fieldName,
     bool& isOwner
 )
 {
-    volScalarField* ptr =
-        mesh.objectRegistry::getObjectPtr<volScalarField>(name);
+    auto* ptr = mesh.objectRegistry::getObjectPtr<volScalarField>(fieldName);
 
     isOwner = !ptr;
 
@@ -140,7 +138,7 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
         (
             IOobject
             (
-                name,
+                fieldName,
                 mesh.time().timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -156,6 +154,8 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
     return *ptr;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermo::basicThermo
 (
@@ -177,10 +177,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -194,10 +196,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
-{}
+    )
+{
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+}
 
 
 Foam::basicThermo::basicThermo
@@ -222,10 +224,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -239,10 +243,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
-{}
+    )
+{
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+}
 
 
 Foam::basicThermo::basicThermo
@@ -266,10 +270,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, "T", TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -283,10 +289,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
+    )
 {
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+
     if (debug)
     {
         Pout<< "Constructed shared thermo : mesh:" << mesh.name()
@@ -384,7 +390,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << " and " << phasePropertyName(b)
             << ", thermodynamics package provides " << he().name()
             << exit(FatalError);
@@ -409,7 +415,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << ", " << phasePropertyName(b)
             << " and " << phasePropertyName(c)
             << ", thermodynamics package provides " << he().name()
@@ -437,7 +443,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << ", " << phasePropertyName(b)
             << ", " << phasePropertyName(c)
             << " and " << phasePropertyName(d)

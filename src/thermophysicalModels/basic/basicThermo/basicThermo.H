@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,54 +65,55 @@ class basicThermo
 :
     public IOdictionary
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase-name
         const word& phaseName_;
 
+        //- Pressure created and stored by this instance
+        bool pOwner_;
 
-        // Fields
+        //- Temperature created and stored by this instance
+        bool TOwner_;
 
-            //- Pressure [Pa]
-            volScalarField& p_;
+        //- Include dpdt term in the enthalpy equation?
+        bool dpdt_;
 
-            bool pOwner_;
 
-            //- Temperature [K]
-            volScalarField& T_;
+    // Fields
 
-            bool TOwner_;
+        //- Pressure [Pa]
+        volScalarField& p_;
 
-            //- Laminar thermal diffusivity [kg/m/s]
-            volScalarField alpha_;
+        //- Temperature [K]
+        volScalarField& T_;
 
-        //- Should the dpdt term be included in the enthalpy equation
-        Switch dpdt_;
+        //- Laminar thermal diffusivity [kg/m/s]
+        volScalarField alpha_;
 
 
     // Protected Member Functions
 
-        //- Construct as copy (not implemented)
-        basicThermo(const basicThermo&);
-
-        //- Look up or construct field
+        //- Look up field from registry or construct and store
         static volScalarField& lookupOrConstruct
         (
             const fvMesh& mesh,
-            const word&,
-            bool& isOwner
+            const word& fieldName,
+            bool& isOwner  //!< Stored to registry by this instance
         );
 
         //- Return the enthalpy/internal energy field boundary types
-        //  by interrogating the temperature field boundary types
+        //- by interrogating the temperature field boundary types
         wordList heBoundaryTypes();
 
         //- Return the enthalpy/internal energy field boundary base types
-        //  by interrogating the temperature field boundary types
+        //- by interrogating the temperature field boundary types
         wordList heBoundaryBaseTypes();
+
+        //- No copy construct
+        basicThermo(const basicThermo&) = delete;
 
 
 public:
@@ -161,7 +162,7 @@ public:
         );
 
         //- Construct from mesh, phase name and explicit naming of the
-        //  dictionary (so it can be shared amongst phases).
+        //- dictionary (so it can be shared amongst phases).
         basicThermo
         (
             const fvMesh&,
@@ -228,7 +229,7 @@ public:
     virtual ~basicThermo();
 
 
-    // Member functions
+    // Member Functions
 
         static const word dictName;
 
@@ -243,7 +244,7 @@ public:
 
         word phasePropertyName(const word& name) const
         {
-            return basicThermo::phasePropertyName(name, phaseName_);
+            return IOobject::groupName(name, phaseName_);
         }
 
         static const basicThermo& lookupThermo(const fvPatchScalarField& pf);
@@ -307,14 +308,14 @@ public:
         //  i.e. rho = const
         virtual bool isochoric() const = 0;
 
-        //- Should the dpdt term be included in the enthalpy equation
-        Switch dpdt() const
+        //- True if dpdt term should be included in enthalpy equation
+        bool dpdt() const noexcept
         {
             return dpdt_;
         }
 
-        //- Should T be updated
-        Switch updateT() const
+        //- True if T should be updated
+        bool updateT() const noexcept
         {
             return TOwner_;
         }
