@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +42,8 @@ Usage
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
         jump         | current jump value      | yes         |
+        relax        | under-relaxation factor | no          |
+        minJump      | Minimum jump value      | no          |
     \endtable
 
     Example of the boundary condition specification:
@@ -86,12 +89,23 @@ class fixedJumpFvPatchField
     public jumpCyclicFvPatchField<Type>
 {
 
-protected:
-
-    // Protected data
+    // Private data
 
         //- "jump" field
         Field<Type> jump_;
+
+        //- "jump" field at old time level
+        Field<Type> jump0_;
+
+        //- Minimum allowable jump value
+        Type minJump_;
+
+
+        //- Under-relaxation factor
+        scalar relaxFactor_;
+
+        //- Time index
+        label timeIndex_;
 
 
 public:
@@ -165,8 +179,23 @@ public:
 
         // Access
 
+            //- Set the jump field
+            virtual void setJump(const Field<Type>& jump);
+
+            //- Set the jump field (uniform value)
+            virtual void setJump(const Type& jump);
+
             //- Return the "jump" across the patch
             virtual tmp<Field<Type>> jump() const;
+
+            //- Return the old time "jump" across the patch
+            virtual tmp<Field<Type>> jump0() const;
+
+            //- Return the under-relaxation factor
+            virtual scalar relaxFactor() const;
+
+            //- Return the relaxed "jump" across the patch
+            virtual void relax();
 
 
         // Mapping functions

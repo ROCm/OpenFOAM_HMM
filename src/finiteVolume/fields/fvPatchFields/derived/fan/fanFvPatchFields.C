@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,12 +74,14 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
                 deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0
             );
 
-            this->jump_ = pdFan;
+            this->setJump(pdFan);
         }
         else
         {
-            this->jump_ = this->jumpTable_->value(Un);
+            this->setJump(jumpTable_->value(Un));
         }
+
+        this->relax();
     }
 }
 
@@ -94,7 +96,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     const dictionary& dict
 )
 :
-    uniformJumpFvPatchField<scalar>(p, iF),
+    uniformJumpFvPatchField<scalar>(p, iF, dict),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     uniformJump_(dict.getOrDefault("uniformJump", false)),

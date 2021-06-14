@@ -104,7 +104,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
         // Calculate the tangential velocity
         const vectorField tangentialVelocity(magTangU*tanDir);
 
-        this->jump_ = tangentialVelocity;
+        this->setJump(tangentialVelocity);
     }
 }
 

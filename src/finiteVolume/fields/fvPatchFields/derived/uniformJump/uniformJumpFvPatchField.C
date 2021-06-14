@@ -63,7 +63,7 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
+    fixedJumpFvPatchField<Type>(p, iF, dict),
     jumpTable_()
 {
     if (this->cyclicPatch().owner())
@@ -120,7 +120,7 @@ void Foam::uniformJumpFvPatchField<Type>::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        this->jump_ = jumpTable_->value(this->db().time().value());
+        this->setJump(jumpTable_->value(this->db().time().value()));
     }
 
     fixedJumpFvPatchField<Type>::updateCoeffs();
