@@ -70,6 +70,7 @@ ThirdParty)
 
     case "$WM_COMPILER" in
     Gcc)    gcc_version="$default_gcc_version" ;;
+    Gcc111*) gcc_version=gcc-11.1.1 ;;
     Gcc103*) gcc_version=gcc-10.3.0 ;;
     Gcc102*) gcc_version=gcc-10.2.0 ;;
     Gcc101*) gcc_version=gcc-10.1.0 ;;
@@ -100,6 +101,7 @@ ThirdParty)
     Gcc48*) gcc_version=gcc-4.8.5 ;;
 
     Clang)    clang_version="$default_clang_version" ;;
+    Clang120*) clang_version=llvm-12.0.0 ;;
     Clang111*) clang_version=llvm-11.1.0 ;;
     Clang110*) clang_version=llvm-11.0.1 ;;
     Clang100*) clang_version=llvm-10.0.1 ;;

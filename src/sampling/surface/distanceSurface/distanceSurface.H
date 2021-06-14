@@ -93,7 +93,7 @@ Usage
         Checks the resulting faces against the original search surface
         and rejects faces with a distance greater than \c absProximity.
 
-    - \c proxityRegions (post-filter):
+    - \c proximityRegions (post-filter):
         Checks the distance of the resulting faces against the original
         search surface. Filters based on the area-weighted distance
         of each topologically connected region.

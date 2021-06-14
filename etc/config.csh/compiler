@@ -69,6 +69,9 @@ case ThirdParty:
     case Gcc:
         set gcc_version="$default_gcc_version"
         breaksw
+    case Gcc111*:
+        set gcc_version=gcc-11.1.1
+        breaksw
     case Gcc103*:
         set gcc_version=gcc-10.3.0
         breaksw
@@ -155,6 +158,9 @@ case ThirdParty:
 
     case Clang:
         set clang_version="$default_clang_version"
+        breaksw
+    case Clang120*:
+        set clang_version=llvm-12.0.0
         breaksw
     case Clang111*:
         set clang_version=llvm-11.1.0

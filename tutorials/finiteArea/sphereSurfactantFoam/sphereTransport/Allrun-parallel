@@ -5,6 +5,8 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 restore0Dir
 
+#NO blockMesh (pre-meshed geometry and pre-calculated U field)
+
 runApplication makeFaMesh
 
 runApplication decomposePar
