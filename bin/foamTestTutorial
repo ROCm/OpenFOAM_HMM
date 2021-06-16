@@ -151,10 +151,10 @@ modifyCaseControlDict()
     do
         cp -f "${dict}" "${dict}.orig"
         sed \
-            -e 's/\(startFrom[ \t]*\)\([A-Za-z]*\);/\1 latestTime;/' \
-            -e 's/\(stopAt[ \t]*\)\([A-Za-z]*\);/\1 nextWrite;/' \
-            -e 's/\(writeControl[ \t]*\)\([A-Za-z]*\);/\1 timeStep;/' \
-            -e 's/\(writeInterval[ \t]*\)\([-.0-9A-Za-z]*\);/\1 '"$optRunLimit"';/' \
+            -e 's/\(startFrom[ \t]*\)[^ \t;]*;/\1 latestTime;/' \
+            -e 's/\(stopAt[ \t]*\)[^ \t;]*;/\1 nextWrite;/' \
+            -e 's/\(writeControl[ \t]*\)[^ \t;]*;/\1 timeStep;/' \
+            -e 's/\(writeInterval[ \t]*\)[^ \t;]*;/\1 '"${optRunLimit:-1}"';/' \
             "${dict}.orig" > "${dict}"
     done
 }

@@ -1,19 +1,13 @@
 #!/bin/sh
 exec "@PROJECT_DIR@"/etc/openfoam "$@"
 #------------------------------------------------------------------------------
-# =========                 |
-# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-#  \\    /   O peration     |
-#   \\  /    A nd           | www.openfoam.com
-#    \\/     M anipulation  |
-#------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
-#------------------------------------------------------------------------------
-# License
-#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+# OpenFOAM file (www.openfoam.com)
+#
+# Copyright (C) 2020-2021 OpenCFD Ltd.
+# SPDX-License-Identifier: (GPL-3.0+)
 #
 # Description
-#     Forwarding to OpenFOAM etc/openfoam bash session script.
-#     Uses a hard-code directory path (eg, generated with autoconfig).
+#     Forward to OpenFOAM etc/openfoam bash session script.
+#     Uses hard-coded directory path.
 #
 #------------------------------------------------------------------------------

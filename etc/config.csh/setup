@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -105,7 +105,10 @@ while ( $#argv > 0 )
     switch ($argv[1])
     case -*:
         # Stray option (not meant for us here) -> get out
-        break
+        break  # Break while
+        breaksw
+    case =*:
+        # Junk
         breaksw
     case *=:
         # name=       -> unsetenv name

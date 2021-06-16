@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -159,45 +159,6 @@ then
     fi
 
 
-    # Evaluate command-line parameters
-    unset -f _foamEval 2>/dev/null
-    _foamEval()
-    {
-        for i
-        do
-            case "$i" in
-            -*)
-                # Stray option (not meant for us here) -> get out
-                break
-                ;;
-            *=)
-                # name=       -> unset name
-                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                    && echo "unset ${1%=}" 1>&2
-                eval "unset ${1%=}"
-                ;;
-            *=*)
-                # name=value  -> export name=value
-                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                    && echo "export $i" 1>&2
-                eval "export $i"
-                ;;
-            *)
-                # Filename: source it
-                if [ -f "$i" ]
-                then
-                    [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                        && echo "Using: $i" 1>&2
-                    . "$i"
-                else
-                    _foamEtc -silent "$i"
-                fi
-                ;;
-            esac
-        done
-    }
-
-
     #--------------------------------------------------------------------------
     # Avoid any ThirdParty settings that may have 'leaked' into the environment
 
@@ -221,7 +182,7 @@ else
     # Was previously loaded/defined - now unset
 
     unset -f _foamAddPath _foamAddMan _foamAddLib _foamAddLibAuto 2>/dev/null
-    unset -f _foamClean _foamEcho _foamEtc _foamEval 2>/dev/null
+    unset -f _foamClean _foamEcho _foamEtc 2>/dev/null
     unset foamClean
     unset WM_SHELL_FUNCTIONS
 

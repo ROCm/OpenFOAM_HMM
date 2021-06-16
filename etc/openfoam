@@ -31,7 +31,7 @@
 #       -int32  | -DWM_LABEL_SIZE=32
 #       -int64  | -DWM_LABEL_SIZE=64
 #
-#     However, the '-D' options grant more flexibility. For example,
+#     The '-D' options grant even more flexibility. For example,
 #         etc/openfoam -DWM_COMPILER=Clang
 #
 # SeeAlso
@@ -43,26 +43,30 @@ projectDir="$(\cd "$(dirname "${0%/*}")" && \pwd -L)"
 
 #------------------------------------------------------------------------------
 printHelp() {
-    cat<<USAGE
+    cat<<HELP_USAGE
 
-Usage: ${0##*/} [OPTION] [application ...]
+Usage: ${0##*/} [OPTION] [[--] application ...]
 
 options:
-  -c command            Execute shell commands with OpenFOAM environment
-  -Dkey[=value]         Define key/value to pass as a preference
-  -sp                   Single precision
-  -dp                   Double precision
-  -spdp                 Mixed single/double precision
-  -int32 | -int64       The label-size
-  -etc=DIR              Additional project etc/ directory
-  -prefix=DIR           Alternative OpenFOAM project directory
-  -show-api | -version  Print META-INFO api value and exit
-  -show-patch           Print META-INFO patch value and exit
-  -show-prefix          Print project directory and exit
-  -test-tutorial        Forward arguments to bin/foamTestTutorial
-  -init=FILE            Alternative initialization file (expert option)
-  -verbose              Set FOAM_VERBOSE=true (interactive only)
-  -help                 Print the usage
+  -c                Shell commands read from the first non-option argument
+  -Dkey[=value]     Define key/value to pass as a preference
+  -sp               Single precision
+  -dp               Double precision
+  -spdp             Mixed single/double precision
+  -int32            Label-size 32
+  -int64            Label-size 64
+  -etc=DIR          Additional project etc/ directory
+  -prefix=DIR       Alternative OpenFOAM project directory
+  -show-api         Print META-INFO api value and exit
+  -show-patch       Print META-INFO patch value and exit
+  -show-prefix      Print project directory and exit
+  -test-tutorial    Forward arguments to bin/foamTestTutorial
+  -init=FILE        Alternative initialization file (expert option)
+  -version          Same as -show-api
+  -verbose          Set FOAM_VERBOSE=true (interactive only)
+  --                The end of option processing.
+                    An argument of - or / is equivalent to --.
+  -help             Print the usage
 
 Open an interactive bash session with an OpenFOAM environment,
 or run an OpenFOAM application (with arguments) after first sourcing
@@ -76,7 +80,7 @@ For a persistent OpenFOAM environment, the following can be added to your
 
 For more information: www.openfoam.com
 
-USAGE
+HELP_USAGE
     exit 0 # A clean exit
 }
 
@@ -110,7 +114,12 @@ unset optTestTut
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help* | --help*)
+    ('') ;;
+    (- | -- | /)
+        shift
+        break   # Stop option parsing
+        ;;
+    (-h | -help* | --help*)
         printHelp
         ;;
     -show-api | -version | --version)  # Show API and exit
@@ -130,14 +139,8 @@ do
         optTestTut=true
         ;;
 
-    -c)  # Shell command
-        _foamScriptCommand="$2"
-        [ -n "$_foamScriptCommand" ] || {
-            echo "$0: missing or bad command argument: $2" 1>&2
-            exit 1
-        }
-        shift 2
-        break
+    (-c)  # Shell command
+        _foamScriptCommand="-c"
         ;;
 
     -D*)  # Define key/value to pass as preference
@@ -174,11 +177,6 @@ do
 
     -verbose)
         export FOAM_VERBOSE=true
-        ;;
-
-    --)
-        shift
-        break
         ;;
     -*)
         echo "$0: unknown option: '$1'" 1>&2
@@ -217,7 +215,14 @@ fi
 
 unset interactive
 
-if [ "$#" -eq 0 ] && [ -z "$_foamScriptCommand" ] && [ -z "$optTestTut" ]
+if [ -n "$_foamScriptCommand" ]
+then
+    if [ "$#" -eq 0 ]
+    then
+        echo "$0: -c: option requires an argument" 1>&2
+        exit 1
+    fi
+elif [ "$#" -eq 0 ] && [ -z "$optTestTut" ]
 then
     interactive=true
 fi
@@ -283,16 +288,14 @@ sourceBashrc()
 if [ -n "$_foamScriptCommand" ]
 then
     # A shell command
-
     sourceBashrc
-    exec bash -c "$_foamScriptCommand" "$@"
+    exec bash -c "$@"
     exit $? # Safety
 fi
 
-
 if [ -n "$optTestTut" ]
 then
-
+    # Test tutorial(s)
     sourceBashrc
     exec "$WM_PROJECT_DIR"/bin/foamTestTutorial "$@"
     exit $? # Safety

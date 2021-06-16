@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -106,19 +106,64 @@ then
 fi
 
 
-# Capture and evaluate any command-line parameters
-# These can be used to set/unset values, specify additional files etc.
-FOAM_SETTINGS="$@"
+#----------------------------------------------------------------------------
 
-# Evaluate the command-line parameters, which were saved as FOAM_SETTINGS.
-# These can be used to set/unset values, specify additional files etc.
-if [ -z "$FOAM_SETTINGS" ]
+# Capture and evaluate command-line parameters
+# - set/unset values, specify additional files etc.
+# - parameters never start with '-'
+if [ "$#" -gt 0 ] && [ "${1#-}" = "${1}" ]
 then
-    unset FOAM_SETTINGS
+    FOAM_SETTINGS="$@"
+    if [ -n "$FOAM_SETTINGS" ]
+    then
+        export FOAM_SETTINGS
+
+        for foamVar_eval
+        do
+            case "$foamVar_eval" in
+            (-*)
+                # Stray option (not meant for us here) -> get out
+                break
+                ;;
+            (=*)
+                # Junk
+                ;;
+            (*=)
+                # name=       -> unset name
+                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                    && echo "unset ${foamVar_eval%=}" 1>&2
+                eval "unset ${foamVar_eval%=}"
+                ;;
+            (*=*)
+                # name=value  -> export name=value
+                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                    && echo "export $foamVar_eval" 1>&2
+                eval "export $foamVar_eval"
+                ;;
+            (*)
+                # Filename: source it
+                if [ -f "$foamVar_eval" ]
+                then
+                    [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                        && echo "Using: $foamVar_eval" 1>&2
+                    . "$foamVar_eval"
+                elif [ -n "$foamVar_eval" ]
+                then
+                    _foamEtc -silent "$foamVar_eval"
+                fi
+                ;;
+            esac
+        done
+    else
+        unset FOAM_SETTINGS
+    fi
 else
-    export FOAM_SETTINGS
-    _foamEval "$@"
+    unset FOAM_SETTINGS
 fi
+unset foamVar_eval
+
+
+#----------------------------------------------------------------------------
 
 # Verify FOAM_CONFIG_ETC (from calling environment or from prefs)
 if [ -n "$FOAM_CONFIG_ETC" ]
