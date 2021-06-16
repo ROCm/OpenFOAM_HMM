@@ -45,7 +45,7 @@ namespace functionObjects
 namespace fieldValues
 {
     defineTypeNameAndDebug(surfaceFieldValue, 0);
-    addToRunTimeSelectionTable(fieldValue, surfaceFieldValue, dictionary);
+    addToRunTimeSelectionTable(fieldValue, surfaceFieldValue, runTime);
     addToRunTimeSelectionTable(functionObject, surfaceFieldValue, dictionary);
 }
 }

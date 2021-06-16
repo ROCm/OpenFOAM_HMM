@@ -16,9 +16,9 @@ fieldMinMax/fieldMinMax.C
 
 fieldValues/fieldValue/fieldValue.C
 fieldValues/fieldValue/fieldValueNew.C
-fieldValues/fieldValueDelta/fieldValueDelta.C
 fieldValues/volFieldValue/volFieldValue.C
 fieldValues/surfaceFieldValue/surfaceFieldValue.C
+fieldValues/multiFieldValue/multiFieldValue.C
 
 heatTransferCoeff/heatTransferCoeff.C
 heatTransferCoeff/heatTransferCoeffModels/heatTransferCoeffModel/heatTransferCoeffModel.C
