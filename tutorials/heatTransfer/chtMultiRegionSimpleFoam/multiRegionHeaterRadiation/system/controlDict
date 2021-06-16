@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  v2106                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -43,6 +43,25 @@ timeFormat      general;
 timePrecision   6;
 
 runTimeModifiable true;
+
+functions
+{
+    multiRegion
+    {
+        type    multiRegion;
+        libs    (utilityFunctionObjects);
+
+        // regions ( ".*Air" );
+
+        function
+        {
+            // Actual object specification
+            type    fieldMinMax;
+            libs    (fieldFunctionObjects);
+            fields  (T);
+        }
+    }
+}
 
 
 // ************************************************************************* //

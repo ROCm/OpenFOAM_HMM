@@ -10,6 +10,8 @@ ensightWrite/ensightWriteUpdate.C
 vtkWrite/vtkWrite.C
 vtkWrite/vtkWriteUpdate.C
 
+multiRegion/multiRegion.C
+
 removeRegisteredObject/removeRegisteredObject.C
 
 parProfiling/parProfiling.C
