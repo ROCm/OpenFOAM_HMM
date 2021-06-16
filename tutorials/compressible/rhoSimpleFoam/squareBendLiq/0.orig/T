@@ -36,6 +36,21 @@ boundaryField
     {
         type            fixedValue;
         value           uniform 350;
+
+        // For general testing purposes:
+        type            exprFixedValue;
+
+        variables
+        (
+            "Tcrit = 500"
+            "par1 = mag(internalField(U))/snGrad(T)"
+        );
+
+        valueExpr
+        #{
+            Tcrit
+          + par1*internalField(T) * max((Tcrit-T)/(Tcrit)*deltaT()/time(),0)
+        #};
     }
 }
 
