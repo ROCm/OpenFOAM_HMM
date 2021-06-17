@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011 OpenFOAM Foundation
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -16,8 +16,8 @@
 #     foamCleanTutorials
 #
 # Description
-#     Run either Allwclean, Allclean or default cleanCase in current directory
-#     and all its subdirectories.
+#     Recursively clean an OpenFOAM case directory,
+#     using Allclean, Allwclean (when present) or regular cleanCase.
 #
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions  # Tutorial clean functions
@@ -34,17 +34,24 @@ printHelp() {
 Usage: ${0##*/} [OPTION]
        ${0##*/} [OPTION] directory
 options:
-  -0                use cleanCase0 instead of cleanCase
-  -case <dir>       specify starting directory, default is cwd
-  -self             avoid Allclean script (prevent infinite recursion)
-  -help             print the usage
+  -0            Perform cleanCase, remove 0/ unconditionally
+  -auto         Perform cleanCase, remove 0/ if 0.orig/ exists [default]
+  -no-auto      Perform cleanCase only
+  -case=DIR     Specify starting directory, default is cwd
+  -self         Avoid Allclean script (prevent infinite recursion)
+  -help         Print the usage
 
-Recursively clean an OpenFOAM case directory.
-By default uses Allclean, Allwclean when present.
-The -skipFirst option is the same as -self.
+Recursively clean an OpenFOAM case directory, using Allclean or Allwclean
+when present.
+
+In the default 'auto' mode, it will use cleanCase and will automatically
+remove the 0/ directory if a corresponding 0.orig directory exists.
+
+Equivalent options:
+  | -case=DIR  | -case DIR |
 
 USAGE
-   exit 0  # clean exit
+   exit 0  # A clean exit
 }
 
 # Report error and exit
@@ -63,15 +70,43 @@ die()
 #------------------------------------------------------------------------------
 
 # Parse options
-unset skipSelf clean0
+unset skipSelf
+cleanType=auto
+
 if [ "$#" -gt 0 ]
 then
     case "$1" in
-    -h | -help*)
+    (- | --)
+        shift
+        break   # Stop option parsing
+        ;;
+    (-h | -help* | --help*)
         printHelp
         ;;
+    -auto)
+        cleanType="auto"
+        ;;
+    -no-auto)
+        cleanType="noauto"
+        ;;
     -0)
-        clean0=true
+        cleanType="0"
+        ;;
+
+    ## long-option (internal dispatch form)
+    --clean=0 | --clean=auto | --clean=noauto)
+        cleanType="${1#*=}"
+        ;;
+    --clean=*)
+        echo "$0: unknown setting: $1" 1>&2
+        ;;
+
+    -case=*)
+        caseName="${1#*=}"
+        cd "$caseName" 2>/dev/null || {
+            echo "${0##*}: No such directory $caseName" 1>&2
+            exit 2
+        }
         ;;
     -case)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -84,10 +119,6 @@ then
     -self* | -skipFirst)
         skipSelf=true
         ;;
-    --)
-        shift
-        break
-        ;;
     *)
         cd "$1" 2>/dev/null || {
             echo "${0##*}: No such directory $1" 1>&2
@@ -95,46 +126,48 @@ then
         }
         ;;
     esac
+    shift
 fi
 
 
-unset exitCode
+# Use specialized script(s), but not on self
 if [ -z "$skipSelf" ]
 then
-    # Use specialized script(s)
-    if [ -f Allwclean ]
+    if [ -f ./Allwclean ]
     then
         ./Allwclean
-        exitCode="$?"
-    elif [ -f Allclean ]
+        exit "$?"
+    elif [ -f ./Allclean ]
     then
         ./Allclean
-        exitCode="$?"
+        exit "$?"
     fi
 fi
 
+if [ -d system ]
+then
+    # Tutorial case
+    cleanCase
+    case "$cleanType" in
+    (auto)
+        [ -d 0.orig ] && rm -rf 0 ;;
+    (0)
+        rm -rf 0 ;;
+    esac
 
-if [ -n "$exitCode" ]
-then
-    exit "$exitCode"
-elif [ -d system ]
-then
-    # Normal case
-    if [ "$clean0" = true ]
-    then
-        cleanCase0
-    else
-        cleanCase
-    fi
 elif [ -d Make ]
 then
-    # Normal application
+    # Application
     cleanApplication
+
 else
     # Recurse into subdirectories
     for caseName in *
     do
-        ( cd "$caseName" 2>/dev/null && "$thisScript" )
+    (
+        cd "$caseName" 2>/dev/null \
+     && "$thisScript" ${cleanType:+--clean=$cleanType}
+    )
     done
 fi
 

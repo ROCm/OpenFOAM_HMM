@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -16,7 +16,7 @@
 #     foamRunTutorials
 #
 # Description
-#     Recursively run Allrun/Alltest or blockMesh+application,
+#     Recursively run Allrun/Alltest or blockMesh and application,
 #     starting with the current directory or the specified -case directory.
 #
 #     For tutorials that are known to run poorly, an Allrun-optional
@@ -40,17 +40,22 @@ printHelp() {
 
 Usage: ${0##*/} [OPTION]
 options:
-  -case <dir>       specify starting directory, default is cwd
-  -self             avoid Allrun, Alltest script (prevent infinite recursion)
-  -test             prefer Alltest script, pass -test argument to scripts
-  -help             print the usage
+  -case=DIR     Specify starting directory, default is cwd
+  -serial       Prefer Allrun-serial if available
+  -parallel     Prefer Allrun-parallel if available
+  -test         Prefer Alltest script, pass -test argument to scripts
+  -self         Avoid initial Allrun, Alltest scripts
+                (prevent infinite recursion)
+  -help         Print the usage
 
-Recursively run Allrun/Alltest or blockMesh+application,
-starting with the current directory or the specified -case directory.
-The -skipFirst option is the same as -self.
+Recursively run Allrun/Alltest (or blockMesh + application)
+starting from the current directory or the specified -case directory.
+
+Equivalent options:
+  | -case=DIR  | -case DIR |
 
 USAGE
-   exit 0  # clean exit
+   exit 0  # A clean exit
 }
 
 # Report error and exit
@@ -69,13 +74,43 @@ die()
 #------------------------------------------------------------------------------
 
 # Parse options
-unset passArgs runTests skipSelf
+unset passArgs runTests runType skipSelf
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help*)
+    (- | --)
+        shift
+        break   # Stop option parsing
+        ;;
+    (-h* | -help* | --help*)
         printHelp
+        ;;
+
+    ## Prefer serial or parallel
+    -serial | -parallel)
+        runType="${1#*-}"
+        ;;
+
+    -test)
+        passArgs="-test"
+        runTests=true
+        ;;
+
+    ## long-option (internal dispatch form)
+    --run=serial | --run=parallel)
+        runType="${1#*=}"
+        ;;
+    --run=*)
+        echo "$0: unknown setting: $1" 1>&2
+        ;;
+
+    -case=*)
+        caseName="${1#*=}"
+        cd "$caseName" 2>/dev/null || {
+            echo "${0##*}: No such directory $caseName" 1>&2
+            exit 2
+        }
         ;;
     -case)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -85,18 +120,10 @@ do
             exit 2
         }
         ;;
-    -test)
-        passArgs="-test"
-        runTests=true
-        ;;
 
     # Avoid infinite recursion when invoked from an Allrun/Alltest script
     -self* | -skipFirst)
         skipSelf=true
-        ;;
-    --)
-        shift
-        break
         ;;
     *)
         break
@@ -106,34 +133,43 @@ do
 done
 
 
-unset exitCode
+# Use specialized script(s), but not on self
 if [ -z "$skipSelf" ]
 then
     # Use specialized script(s)
     if [ "$runTests" = true ] && [ -f Alltest ]
     then
         ./Alltest $passArgs $*
-        exitCode="$?"
-    elif [ -f Allrun ]
-    then
-        ./Allrun $passArgs $*
-        exitCode="$?"
+        exit "$?"
     elif [ -f Allrun-optional ]
     then
         echo "Skipped optional case $PWD"
-        exitCode=0
+        exit 0
+    fi
+
+    # Prefer -serial or -parallel when available?
+    if [ -n "$runType" ]
+    then
+        if [ -f ./"Allrun-${runType}" ]
+        then
+            ./"Allrun-${runType}" $passArgs $*
+            exit "$?"
+        fi
+    fi
+    if [ -f ./Allrun ]
+    then
+        ./Allrun $passArgs $*
+        exit "$?"
     fi
 fi
 
 
-if [ -n "$exitCode" ]
-then
-    exit "$exitCode"
-elif [ -d system ]
+if [ -d system ]
 then
     # Run normal case with blockMesh and the application
     runApplication blockMesh
     runApplication $(getApplication)
+
 else
     # Loop over sub-directories and compile any applications
     for caseName in *
@@ -143,12 +179,14 @@ else
             ( compileApplication "$caseName" )
         fi
     done
-    FOAM_TARGETS=$(for d in *; do [ -d "$d" ] && echo "$d"; done | xargs)
+
+    subdirs=$(for d in *; do [ -d "$d" ] && echo "$d"; done | xargs)
 
     # Run all cases which have not already been run
-    $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs \
-          FOAM_TARGETS="$FOAM_TARGETS" \
-          FOAM_APP="$thisScript" FOAM_ARGS="$passArgs $*"
+    "$make" -k -f "${WM_PROJECT_DIR:?}"/bin/tools/MakefileDirs \
+          FOAM_TARGETS="$subdirs" \
+          FOAM_APP="$thisScript" \
+          FOAM_ARGS="$passArgs ${runType:+--run=$runType} $*"
 fi
 
 #------------------------------------------------------------------------------
