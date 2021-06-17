@@ -260,7 +260,11 @@ void Foam::rigidBodyMeshMotion::solve()
             ramp*t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
 
-    vector oldPos = model_.cCofR(bodyIdCofG_);
+    vector oldPos(vector::uniform(GREAT));
+    if (bodyIdCofG_ != -1)
+    {
+        oldPos = model_.cCofR(bodyIdCofG_);
+    }
 
     if (test_)
     {
