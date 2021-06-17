@@ -1036,6 +1036,8 @@ void Foam::argList::parse
                 Info<< " patch=" << foamVersion::patch.c_str();
             }
 
+            Info<< " version=" << foamVersion::version.c_str();
+
             Info<< nl
                 << "Arch   : " << foamVersion::buildArch << nl
                 << "Exec   : " << commandLine_.c_str() << nl
