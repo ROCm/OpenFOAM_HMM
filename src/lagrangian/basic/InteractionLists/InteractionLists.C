@@ -1162,7 +1162,7 @@ void Foam::InteractionLists<ParticleType>::sendReferredData
     if (mesh_.changing())
     {
         WarningInFunction
-            << "Mesh changing, rebuilding InteractionLists form scratch."
+            << "Mesh changing, rebuilding InteractionLists from scratch."
             << endl;
 
         buildInteractionLists();
