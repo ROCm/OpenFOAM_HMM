@@ -34,8 +34,15 @@ blocks
 edges
 ();
 
-patches
-();
-
+// Synthesise 'defaultFaces' as type patch instead of 'empty' to avoid
+// warnings from decomposePar with hierarchical
+boundary
+(
+    defaultFaces
+    {
+        type    patch;
+        faces   ();
+    }
+);
 
 // ************************************************************************* //
