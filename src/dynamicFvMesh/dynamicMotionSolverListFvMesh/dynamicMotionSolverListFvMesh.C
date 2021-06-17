@@ -114,7 +114,7 @@ bool Foam::dynamicMotionSolverListFvMesh::init(const bool doInit)
                 motionSolvers_.set
                 (
                     i++,
-                    motionSolver::New(*this,  IOsolverDict)
+                    motionSolver::New(*this, IOsolverDict)
                 );
             }
         }
