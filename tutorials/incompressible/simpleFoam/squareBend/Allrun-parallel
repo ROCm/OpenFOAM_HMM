@@ -1,10 +1,12 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-cleanCase0
-rm -f constant/polyMesh/boundary
-rm -f constant/polyMesh/zoneID
+./Allrun.pre
+
+runApplication decomposePar
+
+runParallel $(getApplication)
 
 #------------------------------------------------------------------------------

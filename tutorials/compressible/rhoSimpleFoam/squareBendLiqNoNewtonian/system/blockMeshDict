@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  v2106                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -34,9 +34,9 @@ xin     #eval{ $xin / 5 };
 xout    #eval{ $xout / 5 };
 zmax    #eval{ $zmax / 5 };
 
-nxin    #eval{ round($nxin / 5) };
-nxout   #eval{ round($nxout / 5) };
-nz      #eval{ round($nz / 5) };
+nxin    #eval{ round ($nxin / 5) };
+nxout   #eval{ round ($nxout / 5) };
+nz      #eval{ round ($nz / 5) };
 #endif
 
 zmin    #eval{ -$zmax };

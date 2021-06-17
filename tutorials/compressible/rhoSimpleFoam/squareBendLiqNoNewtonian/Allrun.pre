@@ -1,10 +1,12 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-cleanCase0
+restore0Dir
 
-rm -rf constant/triSurface
+runApplication blockMesh
+
+runApplication topoSet
 
 #------------------------------------------------------------------------------
