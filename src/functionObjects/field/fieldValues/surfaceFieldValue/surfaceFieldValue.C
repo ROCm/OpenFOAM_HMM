@@ -1250,7 +1250,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 
 
     // Process the fields
-    if (vectorWeights.size())
+    if (returnReduce(!vectorWeights.empty(), orOp<bool>()))
     {
         if (scalarWeights.size())
         {
