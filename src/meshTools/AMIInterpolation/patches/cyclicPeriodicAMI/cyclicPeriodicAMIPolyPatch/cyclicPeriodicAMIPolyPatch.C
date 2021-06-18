@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cyclicPeriodicAMIPolyPatch.H"
-#include "partialFaceAreaWeightAMI.H"
 #include "addToRunTimeSelectionTable.H"
 
 // For debugging
@@ -560,14 +559,16 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
         bm,
         patchType,
         transform,
-        partialFaceAreaWeightAMI::typeName
+        faceAreaWeightAMI::typeName
     ),
     periodicPatchName_(word::null),
     periodicPatchID_(-1),
     nTransforms_(0),
     nSectors_(0),
     maxIter_(36)
-{}
+{
+    AMIPtr_->setRequireMatch(false);
+}
 
 
 Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
@@ -586,14 +587,16 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
         index,
         bm,
         patchType,
-        partialFaceAreaWeightAMI::typeName
+        faceAreaWeightAMI::typeName
     ),
     periodicPatchName_(dict.lookup("periodicPatch")),
     periodicPatchID_(-1),
     nTransforms_(dict.getOrDefault<label>("nTransforms", 0)),
     nSectors_(dict.getOrDefault<label>("nSectors", 0)),
     maxIter_(dict.getOrDefault<label>("maxIter", 36))
-{}
+{
+    AMIPtr_->setRequireMatch(false);
+}
 
 
 Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
@@ -608,7 +611,9 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
-{}
+{
+    AMIPtr_->setRequireMatch(false);
+}
 
 
 Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
@@ -627,7 +632,9 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
-{}
+{
+    AMIPtr_->setRequireMatch(false);
+}
 
 
 Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
@@ -645,7 +652,9 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
-{}
+{
+    AMIPtr_->setRequireMatch(false);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

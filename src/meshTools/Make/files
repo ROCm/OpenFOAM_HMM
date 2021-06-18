@@ -269,13 +269,16 @@ $(AMI)/AMIInterpolation/AMIInterpolationNew.C
 $(AMI)/AMIInterpolation/advancingFrontAMI/advancingFrontAMI.C
 $(AMI)/AMIInterpolation/advancingFrontAMI/advancingFrontAMIParallelOps.C
 $(AMI)/AMIInterpolation/faceAreaWeightAMI/faceAreaWeightAMI.C
-$(AMI)/AMIInterpolation/partialFaceAreaWeightAMI/partialFaceAreaWeightAMI.C
 $(AMI)/AMIInterpolation/nearestFaceAMI/nearestFaceAMI.C
 $(AMI)/faceAreaIntersect/faceAreaIntersect.C
 $(AMI)/GAMG/interfaces/cyclicAMIGAMGInterface/cyclicAMIGAMGInterface.C
 $(AMI)/GAMG/interfaceFields/cyclicAMIGAMGInterfaceField/cyclicAMIGAMGInterfaceField.C
 $(AMI)/GAMG/interfaces/cyclicACMIGAMGInterface/cyclicACMIGAMGInterface.C
 $(AMI)/GAMG/interfaceFields/cyclicACMIGAMGInterfaceField/cyclicACMIGAMGInterfaceField.C
+
+$(AMI)/triangle2D/triangle2D.C
+$(AMI)/AMIInterpolation/faceAreaWeightAMI2D/faceAreaWeightAMI2D.C
+
 
 AMICycPatches=$(AMI)/patches/cyclicAMI
 $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C

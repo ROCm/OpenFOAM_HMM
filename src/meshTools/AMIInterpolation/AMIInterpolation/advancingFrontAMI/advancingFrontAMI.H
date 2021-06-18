@@ -199,6 +199,9 @@ protected:
                 List<scalar>& magSf
             ) const;
 
+            //- Correction for non-conformal interpolations, e.g. for ACMI
+            virtual void nonConformalCorrection();
+
 
 public:
 
@@ -249,10 +252,6 @@ public:
         //- Labels of faces that are not overlapped by any target faces
         //  Note: this should be empty for correct functioning
         inline const labelList& srcNonOverlap() const;
-
-        //- Flag to indicate that interpolation patches are conformal, i.e.
-        //- should fully cover each other
-        virtual bool conformal() const;
 };
 
 

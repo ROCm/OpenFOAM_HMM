@@ -1246,7 +1246,7 @@ void Foam::AMIInterpolation::write(Ostream& os) const
 
     if (reverseTarget_)
     {
-        os.writeEntry("flipNormals", reverseTarget_);
+        os.writeEntry("reverseTarget", reverseTarget_);
     }
 
     if (lowWeightCorrection_ > 0)

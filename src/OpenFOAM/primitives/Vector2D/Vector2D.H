@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,13 +116,18 @@ public:
         //- Access to the vector y component
         inline Cmpt& y();
 
-
         //- Normalise the vector by its magnitude
         inline Vector2D<Cmpt>& normalise();
 
-
         //- Perp dot product (dot product with perpendicular vector)
         inline scalar perp(const Vector2D<Cmpt>& b) const;
+
+        //- Return true if vector is within tol
+        inline bool isClose
+        (
+            const Vector2D<Cmpt>& b,
+            const scalar tol = 1e-10
+        ) const;
 };
 
 
