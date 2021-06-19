@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,58 +59,102 @@ Foam::faceZoneToCell::faceActionNames_
 ({
     { faceAction::MASTER, "master" },
     { faceAction::SLAVE, "slave" },
+    //TBD: { faceAction::BOTH, "attached" },
 });
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
+void Foam::faceZoneToCell::combine
+(
+    topoSet& set,
+    const labelUList& zoneIDs,
+    const bool add,
+    const bool verbosity
+) const
 {
-    bool hasMatched = false;
+    const label nZones = mesh_.faceZones().size();
 
-    for (const faceZone& zone : mesh_.faceZones())
+    if (zoneIDs.empty() || !nZones)
     {
-        if (selectedZones_.match(zone.name()))
-        {
-            hasMatched = true;
-
-            const labelList& cellLabels =
-            (
-                option_ == MASTER
-              ? zone.masterCells()
-              : zone.slaveCells()
-            );
-
-            if (verbose_)
-            {
-                Info<< "    Found matching zone " << zone.name()
-                    << " with " << cellLabels.size() << " cells on "
-                    << faceActionNames_[option_] << " side" << endl;
-            }
-
-            for (const label celli : cellLabels)
-            {
-                // Only do active cells
-                if (celli >= 0 && celli < mesh_.nCells())
-                {
-                    addOrDelete(set, celli, add);
-                }
-            }
-        }
+        return;  // Nothing to do
     }
 
-    if (!hasMatched)
+    for (const label zonei : zoneIDs)
     {
-        WarningInFunction
-            << "Cannot find any faceZone matching "
-            << flatOutput(selectedZones_) << nl
-            << "Valid names: " << flatOutput(mesh_.faceZones().names())
-            << endl;
+        if (zonei < 0 || zonei >= nZones)
+        {
+            continue;
+        }
+
+        const auto& zone = mesh_.faceZones()[zonei];
+
+        const labelList& cellLabels =
+        (
+            option_ == MASTER
+          ? zone.masterCells()
+          : zone.slaveCells()
+        );
+
+        if (verbosity)
+        {
+            Info<< "    Using matching zone " << zone.name()
+                << " with " << cellLabels.size() << " cells on "
+                << faceActionNames_[option_] << " side" << endl;
+        }
+
+        // NOTE could also handle both sides directly if required
+
+        for (const label celli : cellLabels)
+        {
+            // Only do active cells
+            if (celli >= 0 && celli < mesh_.nCells())
+            {
+                addOrDelete(set, celli, add);
+            }
+        }
     }
 }
 
 
+void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
+{
+    if (zoneMatcher_.empty())
+    {
+        return;  // Nothing to do
+    }
+
+    const labelList matched(mesh_.faceZones().indices(zoneMatcher_));
+
+    if (matched.empty())
+    {
+        WarningInFunction
+            << "Cannot find any faceZone matching "
+            << flatOutput(zoneMatcher_) << nl
+            << "Valid names are " << flatOutput(mesh_.faceZones().names())
+            << endl;
+
+        return;  // Nothing to do
+    }
+
+    combine(set, matched, add, verbose_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faceZoneToCell::faceZoneToCell
+(
+    const polyMesh& mesh,
+    const wordRes& zoneSelector,
+    const faceAction option
+)
+:
+    topoSetCellSource(mesh),
+    zoneMatcher_(zoneSelector),
+    option_(option)
+{}
+
 
 Foam::faceZoneToCell::faceZoneToCell
 (
@@ -120,7 +164,7 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetCellSource(mesh),
-    selectedZones_(one{}, zoneName),
+    zoneMatcher_(one{}, zoneName),
     option_(option)
 {}
 
@@ -132,14 +176,14 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetCellSource(mesh),
-    selectedZones_(),
+    zoneMatcher_(),
     option_(faceActionNames_.get("option", dict))
 {
     // Look for 'zones' and 'zone', but accept 'name' as well
-    if (!dict.readIfPresent("zones", selectedZones_))
+    if (!dict.readIfPresent("zones", zoneMatcher_))
     {
-        selectedZones_.resize(1);
-        selectedZones_.first() =
+        zoneMatcher_.resize(1);
+        zoneMatcher_.first() =
             dict.getCompat<wordRe>("zone", {{"name", 1806}});
     }
 }
@@ -152,12 +196,31 @@ Foam::faceZoneToCell::faceZoneToCell
 )
 :
     topoSetCellSource(mesh),
-    selectedZones_(one{}, wordRe(checkIs(is))),
+    zoneMatcher_(one{}, wordRe(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::wordRes& Foam::faceZoneToCell::zones() const noexcept
+{
+    return zoneMatcher_;
+}
+
+
+void Foam::faceZoneToCell::zones(const wordRes& zonesSelector)
+{
+    zoneMatcher_ = zonesSelector;
+}
+
+
+void Foam::faceZoneToCell::zones(const wordRe& zoneName)
+{
+    zoneMatcher_.resize(1);
+    zoneMatcher_.first() = zoneName;
+}
+
 
 void Foam::faceZoneToCell::applyToSet
 (
@@ -167,22 +230,22 @@ void Foam::faceZoneToCell::applyToSet
 {
     if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        if (verbose_)
+        if (verbose_ && !zoneMatcher_.empty())
         {
             Info<< "    Adding all " << faceActionNames_[option_]
                 << " cells of face zones "
-                << flatOutput(selectedZones_) << " ..." << endl;
+                << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 
         combine(set, true);
     }
     else if (action == topoSetSource::SUBTRACT)
     {
-        if (verbose_)
+        if (verbose_ && !zoneMatcher_.empty())
         {
             Info<< "    Removing all " << faceActionNames_[option_]
                 << " cells of face zones "
-                << flatOutput(selectedZones_) << " ..." << endl;
+                << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 
         combine(set, false);

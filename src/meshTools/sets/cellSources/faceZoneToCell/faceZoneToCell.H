@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,8 +93,8 @@ Usage
     Options for the conditional mandatory entries:
     \verbatim
       Entry    | Description                    | Type     | Req'd  | Dflt
-      zones    | Names of input faceZones       | wordList | cond'l | -
-      zone     | Name of input faceZone         | word     | cond'l | -
+      zones    | Names of input faceZones       | wordRes  | cond'l | -
+      zone     | Name of input faceZone         | wordRe   | cond'l | -
     \verbatim
 
 Note
@@ -149,13 +149,21 @@ private:
         static addToUsageTable usage_;
 
         //- Matcher for face zones
-        wordRes selectedZones_;
+        wordRes zoneMatcher_;
 
         //- Selection type
         faceAction option_;
 
 
     // Private Member Functions
+
+        void combine
+        (
+            topoSet& set,
+            const labelUList& zoneIDs,
+            const bool add,
+            const bool verbosity
+        ) const;
 
         void combine(topoSet& set, const bool add) const;
 
@@ -168,7 +176,15 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from mesh, zones selector and selection option
+        faceZoneToCell
+        (
+            const polyMesh& mesh,
+            const wordRes& zoneSelector,
+            const faceAction option
+        );
+
+        //- Construct from mesh, single zone selector and selection option
         faceZoneToCell
         (
             const polyMesh& mesh,
@@ -188,6 +204,16 @@ public:
 
 
     // Member Functions
+
+        //- Return the current zones selector
+        const wordRes& zones() const noexcept;
+
+        //- Define the zones selector
+        void zones(const wordRes& zoneSelector);
+
+        //- Define the zones selector with a single zone selector
+        void zones(const wordRe& zoneName);
+
 
         virtual void applyToSet
         (
