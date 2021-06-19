@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +56,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class dictionary;
 class polyMesh;
 class bitSet;
 class topoSet;
@@ -151,7 +152,7 @@ protected:
         //- Reference to the mesh
         const polyMesh& mesh_;
 
-        //- Verbosity (default: true)
+        //- Output verbosity (default: true)
         bool verbose_;
 
 
@@ -294,8 +295,12 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        explicit topoSetSource(const polyMesh& mesh);
+        //- Construct from mesh, with preferred verbosity
+        explicit topoSetSource(const polyMesh& mesh, bool verbose = true);
+
+        //- Construct from mesh, use "verbose" entry if present
+        topoSetSource(const polyMesh& mesh, const dictionary& dict);
+
 
         //- Clone (disallowed)
         autoPtr<topoSetSource> clone() const
@@ -331,22 +336,28 @@ public:
     // Member Functions
 
         //- Reference to the mesh
-        const polyMesh& mesh() const
+        const polyMesh& mesh() const noexcept
         {
             return mesh_;
         }
 
-        //- Return the current verbosity
-        bool verbose() const
+        //- Get output verbosity
+        bool verbose() const noexcept
         {
             return verbose_;
         }
 
-        //- Set the current verbosity
-        void verbose(bool on)
+        //- Enable/disable verbose output
+        //  \return old value
+        bool verbose(bool on) noexcept
         {
+            bool old(verbose_);
             verbose_ = on;
+            return old;
         }
+
+        //- Use "verbose" entry (if present) to enable/disable verbose output
+        void verbose(const dictionary& dict);
 
 
     // Member Functions

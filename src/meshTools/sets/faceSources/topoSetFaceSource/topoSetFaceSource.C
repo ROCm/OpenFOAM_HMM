@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,16 @@ namespace Foam
 Foam::topoSetFaceSource::topoSetFaceSource(const polyMesh& mesh)
 :
     topoSetSource(mesh)
+{}
+
+
+Foam::topoSetFaceSource::topoSetFaceSource
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    topoSetSource(mesh, dict)
 {}
 
 

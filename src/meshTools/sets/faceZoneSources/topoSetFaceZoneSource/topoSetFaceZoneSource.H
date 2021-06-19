@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,8 +92,12 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from mesh
         explicit topoSetFaceZoneSource(const polyMesh& mesh);
+
+        //- Construct from mesh, use "verbose" entry if present
+        topoSetFaceZoneSource(const polyMesh& mesh, const dictionary& dict);
+
 
         //- Clone (disallowed)
         autoPtr<topoSetFaceZoneSource> clone() const

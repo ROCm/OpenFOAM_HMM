@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "topoSetSource.H"
+#include "dictionary.H"
 #include "polyMesh.H"
 #include "bitSet.H"
 #include "topoSet.H"
@@ -228,11 +229,40 @@ void Foam::topoSetSource::addOrDelete
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::topoSetSource::topoSetSource(const polyMesh& mesh)
+Foam::topoSetSource::topoSetSource
+(
+    const polyMesh& mesh,
+    bool verbose
+)
 :
     mesh_(mesh),
-    verbose_(true)
+    verbose_(verbose)
 {}
+
+
+Foam::topoSetSource::topoSetSource
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    topoSetSource(mesh)
+{
+    verbose(dict);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::topoSetSource::verbose(const dictionary& dict)
+{
+    bool flag(verbose_);
+
+    if (dict.readIfPresent("verbose", flag))
+    {
+        verbose_ = flag;
+    }
+}
 
 
 // ************************************************************************* //
