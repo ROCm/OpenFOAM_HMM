@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,11 @@ Foam::topoSetSource::addToUsageTable Foam::haloToCell::usage_
 
 void Foam::haloToCell::combine(topoSet& set, const bool add) const
 {
+    if (steps_ < 1)
+    {
+        return;  // Nothing to do
+    }
+
     const cellList& cells = mesh_.cells();
     const labelList& faceOwn = mesh_.faceOwner();
     const labelList& faceNei = mesh_.faceNeighbour();
@@ -153,10 +158,11 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
             current -= updates;
         }
 
-        if (updates.none())
-        {
-            break;
-        }
+        // Could have early exit, but needs to be parallel-synchronized
+        // if (returnReduce(updates.none(), andOp<bool>()))
+        // {
+        //     break;
+        // }
 
         addOrDelete(set, updates, add);
     }
@@ -168,11 +174,11 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
 Foam::haloToCell::haloToCell
 (
     const polyMesh& mesh,
-    const label steps
+    const label nsteps
 )
 :
     topoSetCellSource(mesh),
-    steps_(max(steps, 1))
+    steps_(nsteps)
 {}
 
 
@@ -197,6 +203,20 @@ Foam::haloToCell::haloToCell
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::haloToCell::steps() const noexcept
+{
+    return steps_;
+}
+
+
+Foam::label Foam::haloToCell::steps(const label nsteps) noexcept
+{
+    label old(steps_);
+    steps_ = nsteps;
+    return old;
+}
+
 
 void Foam::haloToCell::applyToSet
 (

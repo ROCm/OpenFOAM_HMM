@@ -59,7 +59,7 @@ Usage
       type       | Type name: cellSet                  | word |  yes  | -
       action     | Action applied on cells - see below | word |  yes  | -
       source     | Source name: nbrToCell              | word |  yes  | -
-      neighbours  | Maximum number of neighbour cells  | label | yes  | -
+      neighbours | Maximum number of neighbour cells   | label | yes  | -
     \endtable
 
     Options for the \c action entry:

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +68,11 @@ Foam::topoSetSource::addToUsageTable Foam::nbrToCell::usage_
 
 void Foam::nbrToCell::combine(topoSet& set, const bool add) const
 {
+    if (minNbrs_ < 1)
+    {
+        return;  // Nothing to do
+    }
+
     const cellList& cells = mesh().cells();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +125,7 @@ public:
     // Constructors
 
         //- Construct from components
-        explicit haloToCell(const polyMesh& mesh, const label steps=1);
+        explicit haloToCell(const polyMesh& mesh, const label nsteps=1);
 
         //- Construct from dictionary
         haloToCell(const polyMesh& mesh, const dictionary& dict);
@@ -139,6 +139,13 @@ public:
 
 
     // Member Functions
+
+        //- The number of steps to grow/shrink
+        label steps() const noexcept;
+
+        //- Set number of steps to grow/shrink, return the old value
+        label steps(const label nsteps) noexcept;
+
 
         virtual void applyToSet
         (
