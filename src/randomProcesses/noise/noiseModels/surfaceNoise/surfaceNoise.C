@@ -304,6 +304,7 @@ scalar surfaceNoise::writeSurfaceData
                     false  // serial - already merged
                 );
 
+                writerPtr_->nFields(1); // Legacy VTK
                 writerPtr_->write(title, allData);
 
                 writerPtr_->endTime();
@@ -341,6 +342,7 @@ scalar surfaceNoise::writeSurfaceData
                 false  // serial - already merged
             );
 
+            writerPtr_->nFields(1); // Legacy VTK
             writerPtr_->write(title, data);
 
             writerPtr_->endTime();

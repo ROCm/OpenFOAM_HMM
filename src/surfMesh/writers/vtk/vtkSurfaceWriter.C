@@ -289,6 +289,22 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::writeTemplate
 
     if (Pstream::master() || !parallel_)
     {
+        if (!nFields_ && writer_->legacy())
+        {
+            // Emit error message, but attempt to recover anyhow
+            nFields_ = 1;
+
+            FatalErrorInFunction
+                << "Using VTK legacy format, but did not define nFields!"
+                << nl
+                << "Assuming nFields=1 (may be incorrect) and continuing..."
+                << nl
+                << "    Field " << fieldName << " to " << outputFile << nl;
+
+            Info<< FatalError;
+            Info<< endl;
+        }
+
         if (this->isPointData())
         {
             writer_->beginPointData(nFields_);
