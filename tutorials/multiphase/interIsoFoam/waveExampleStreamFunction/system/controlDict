@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,7 +52,6 @@ maxAlphaCo      0.5;
 
 maxDeltaT       0.5;
 
-
 functions
 {
     line
@@ -61,8 +59,7 @@ functions
         type            sets;
         libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
-        writeInterval   1;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;
@@ -108,7 +105,6 @@ functions
                 end     ( 7.5 0.005 1.0 );
                 nPoints 1001;
             }
-
             line6
             {
                 type    uniform;

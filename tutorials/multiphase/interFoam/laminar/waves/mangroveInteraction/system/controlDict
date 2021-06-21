@@ -60,10 +60,20 @@ functions
         type            sets;
         libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;
+        fixedLocations  false;
+
+        fields
+        (
+            p
+            p_rgh
+            U
+            alpha.water
+        );
+
         sets
         (
             s1
@@ -146,13 +156,6 @@ functions
                 end     ( 4.77 0.275 0.5 );
                 nPoints 101;
             }
-        );
-
-        fixedLocations  false;
-
-        fields
-        (
-            p p_rgh U alpha.water
         );
     }
 }

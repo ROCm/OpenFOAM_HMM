@@ -57,7 +57,7 @@ functions
         type            surfaces;
         surfaceFormat   boundaryData;
         writeControl    timeStep;
-        writeInterval   10;
+        writeInterval   100;
         interpolationScheme cell;
         fields
         (

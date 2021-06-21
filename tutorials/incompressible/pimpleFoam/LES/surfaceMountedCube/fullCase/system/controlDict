@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs (turbulenceModelSchemes);
+libs            (turbulenceModelSchemes);
 
 application     pimpleFoam;
 
@@ -54,6 +54,7 @@ functions
         libs            (fieldFunctionObjects);
         fields          (U p);
     }
+
     DESField
     {
         // Mandatory entries

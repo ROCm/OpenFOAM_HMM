@@ -11,7 +11,7 @@
 // Timing
 _visualization
 {
-    writeControl    writeTime;
+    writeControl    onEnd;
 
     // enabled         true;
 

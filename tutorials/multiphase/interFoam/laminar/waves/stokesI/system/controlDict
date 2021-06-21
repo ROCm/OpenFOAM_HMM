@@ -52,7 +52,6 @@ maxAlphaCo      0.65;
 
 maxDeltaT       0.05;
 
-
 functions
 {
     line
@@ -60,11 +59,18 @@ functions
         type            sets;
         libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
-        writeInterval   1;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;
+        fixedLocations  false;
+
+        fields
+        (
+            U
+            alpha.water
+        );
+
         sets
         (
             line1
@@ -107,7 +113,6 @@ functions
                 end     ( 7.5 0.02 0.75 );
                 nPoints 1001;
             }
-
             line6
             {
                 type    uniform;
@@ -132,12 +137,6 @@ functions
                 end     ( 14.0 0.005 0.75 );
                 nPoints 1001;
             }
-        );
-
-        fixedLocations  false;
-        fields
-        (
-            U alpha.water
         );
     }
 }

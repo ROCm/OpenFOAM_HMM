@@ -99,7 +99,7 @@ functions
     {
         type            surfaces;
         libs            (sampling);
-        writeControl    writeTime;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
 

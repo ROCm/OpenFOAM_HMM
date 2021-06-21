@@ -2,11 +2,10 @@
 
 sampleIso
 {
-    type    surfaces;
-    libs    (sampling);
-
-    writeControl    writeTime;
+    type            surfaces;
+    libs            (sampling);
     surfaceFormat   vtk;
+    writeControl    writeTime;
     fields          (U k epsilon nut);
 
     surfaces

@@ -16,7 +16,7 @@ FoamFile
 
 type            sets;
 libs            (sampling);
-writeControl    writeTime;
+writeControl    onEnd;
 interpolationScheme cellPoint;
 setFormat       raw;
 

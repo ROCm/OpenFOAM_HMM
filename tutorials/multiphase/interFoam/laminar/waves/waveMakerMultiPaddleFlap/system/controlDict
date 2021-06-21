@@ -52,7 +52,6 @@ maxAlphaCo      0.65;
 
 maxDeltaT       0.05;
 
-
 functions
 {
     line
@@ -60,7 +59,7 @@ functions
         type            sets;
         libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;

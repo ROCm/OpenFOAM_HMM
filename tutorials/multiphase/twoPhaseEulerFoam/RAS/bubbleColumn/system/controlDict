@@ -116,10 +116,8 @@ functions
         log             true;
         timeStart       0;
         timeEnd         1000;
-        executeControl  timeStep;
-        executeInterval 1;
-        writeControl    writeTime;
-        writeInterval   -1;
+        executeControl  onEnd;
+        writeControl    onEnd;
     }
 }
 

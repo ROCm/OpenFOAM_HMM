@@ -59,7 +59,7 @@ functions
         type            sets;
         libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;

@@ -10,7 +10,7 @@ _sampler
     libs                    (sampling);
     setFormat               raw;
     interpolationScheme     cell;
-    writeControl            writeTime;
+    writeControl            onEnd;
     enabled                 false;
 
     sets
