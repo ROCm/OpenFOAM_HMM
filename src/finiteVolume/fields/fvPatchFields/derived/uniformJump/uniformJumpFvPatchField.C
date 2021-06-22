@@ -60,27 +60,31 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF, dict),
+    fixedJumpFvPatchField<Type>(p, iF, dict, false), // Pass no valueRequired
     jumpTable_()
 {
-    if (this->cyclicPatch().owner())
+    if (valueRequired)
     {
-        jumpTable_ = Function1<Type>::New("jumpTable", dict);
-    }
+        if (this->cyclicPatch().owner())
+        {
+            jumpTable_ = Function1<Type>::New("jumpTable", dict);
+        }
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::commsTypes::blocking);
+        if (dict.found("value"))
+        {
+            fvPatchField<Type>::operator=
+            (
+                Field<Type>("value", dict, p.size())
+            );
+        }
+        else
+        {
+            this->evaluate(Pstream::commsTypes::blocking);
+        }
     }
 }
 

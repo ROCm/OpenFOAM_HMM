@@ -59,10 +59,11 @@ Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    cyclicFvPatchField<Type>(p, iF, dict)
+    cyclicFvPatchField<Type>(p, iF, dict, false) // Pass no valueRequired
 {
     // Call this evaluation in derived classes
     //this->evaluate(Pstream::commsTypes::blocking);

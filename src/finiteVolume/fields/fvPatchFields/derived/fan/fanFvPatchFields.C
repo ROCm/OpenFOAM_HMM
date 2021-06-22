@@ -86,49 +86,6 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<>
-Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    uniformJumpFvPatchField<scalar>(p, iF, dict),
-    phiName_(dict.getOrDefault<word>("phi", "phi")),
-    rhoName_(dict.getOrDefault<word>("rho", "rho")),
-    uniformJump_(dict.getOrDefault("uniformJump", false)),
-    nonDimensional_(dict.getOrDefault("nonDimensional", false)),
-    rpm_(0),
-    dm_(0)
-{
-    if (nonDimensional_)
-    {
-        dict.readEntry("rpm", rpm_);
-        dict.readEntry("dm", dm_);
-    }
-
-    if (this->cyclicPatch().owner())
-    {
-        this->jumpTable_ = Function1<scalar>::New("jumpTable", dict);
-    }
-
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::commsTypes::blocking);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
