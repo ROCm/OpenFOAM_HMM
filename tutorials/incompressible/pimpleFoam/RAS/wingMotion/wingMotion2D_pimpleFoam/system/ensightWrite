@@ -18,7 +18,7 @@ ensightWrite
 
     overwrite   true;
 
-    writeControl writeTime;
+    writeControl onEnd;
 
     consecutive false;
 }

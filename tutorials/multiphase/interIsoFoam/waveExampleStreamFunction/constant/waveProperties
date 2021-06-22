@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      waveProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -27,7 +26,7 @@ inlet
 
     waveAngle       0.0;
 
-    rampTime        3.017;//6.034;
+    rampTime        3.017;
 
     activeAbsorption yes;
 
@@ -64,7 +63,6 @@ inlet
         2.7580059e-004
         2.2810557e-004
     );
-
 }
 
 outlet

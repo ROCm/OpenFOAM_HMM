@@ -80,8 +80,8 @@ functions
         log             true;
         timeStart       100;
         timeEnd         1000;
-        executeControl  timeStep;
-        executeInterval 1;
+        executeControl  runTime;
+        executeInterval 10;
     }
 
     curlePoint
@@ -108,8 +108,8 @@ functions
         log             true;
         timeStart       100;
         timeEnd         1000;
-        executeControl  timeStep;
-        executeInterval 1;
+        executeControl  runTime;
+        executeInterval 10;
     }
 
     cuttingPlane

@@ -55,11 +55,10 @@ functions
 
     minMax
     {
-        type    fieldMinMax;
-        libs    (fieldFunctionObjects);
-
-        writeControl    writeTime;
+        type            fieldMinMax;
+        libs            (fieldFunctionObjects);
         fields          (U);
+        writeControl    writeTime;
     }
 }
 

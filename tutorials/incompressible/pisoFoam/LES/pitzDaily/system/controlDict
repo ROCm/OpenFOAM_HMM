@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -69,7 +68,6 @@ functions
             (0.1524 0.0253 0)
             (0.1778 0.0253 0)
         );
-
     }
 
     fieldAverage1
@@ -101,7 +99,7 @@ functions
     {
         type            surfaces;
         libs            (sampling);
-        writeControl    writeTime;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
 

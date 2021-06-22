@@ -57,10 +57,9 @@ functions
     lineMOVING
     {
         type            sets;
-        libs (sampling);
+        libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
-        outputInterval  1;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;
@@ -68,21 +67,20 @@ functions
         (
             line1
             {
-                type uniform;
-                axis distance;
+                type    uniform;
+                axis    distance;
                 start   ( 1.33 0.004 0.0 );
                 end     ( 1.33 0.004 0.6 );
                 nPoints 101;
             }
             line2
             {
-                type uniform;
-                axis distance;
+                type    uniform;
+                axis    distance;
                 start   ( 3.33 0.004 0.0 );
                 end     ( 3.33 0.004 0.6 );
                 nPoints 101;
             }
-
         );
 
         fixedLocations  false;
@@ -95,10 +93,9 @@ functions
     lineFIXED
     {
         type            sets;
-        libs (sampling);
+        libs            (sampling);
         enabled         true;
-        writeControl    writeTime;
-        outputInterval  1;
+        writeControl    onEnd;
 
         interpolationScheme cellPoint;
         setFormat       raw;
@@ -106,16 +103,16 @@ functions
         (
             line3
             {
-                type uniform;
-                axis distance;
+                type    uniform;
+                axis    distance;
                 start   ( 5.33 0.004 0.0 );
                 end     ( 5.33 0.004 0.6 );
                 nPoints 101;
             }
             line4
             {
-                type uniform;
-                axis distance;
+                type    uniform;
+                axis    distance;
                 start   ( 5.66 0.004 0.0 );
                 end     ( 5.66 0.004 0.6 );
                 nPoints 101;
