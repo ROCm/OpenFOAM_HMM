@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,15 +53,15 @@ Usage
         // Mandatory (inherited) entry (runtime modifiable)
         field           \<field\>;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                        | Type | Req'd | Dflt
-      type         | Type name: add                     | word |  yes  | -
+      Property     | Description                        | Type | Reqd  | Deflt
+      type         | Type name: div                     | word |  yes  | -
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
       field        | Name of the operand field          | word |  yes  | -
     \endtable
@@ -69,6 +69,7 @@ Usage
     The inherited entries are elaborated in:
      - \link functionObject.H \endlink
      - \link fieldExpression.H \endlink
+     - \link zoneSubSet.H \endlink
 
     Minimal example by using the \c postProcess utility:
     \verbatim
@@ -76,8 +77,10 @@ Usage
     \endverbatim
 
 Note
-    To execute \c div function object on an input \<field\>, a numerical scheme
+  - To execute \c div function object on an input \<field\>, a numerical scheme
     should be defined for \c div(\<field\>) in \c system/fvSchemes.divSchemes.
+  - Optionally the user can specify \c cellZones to create a sub-mesh for the
+    \c div calculation.
 
 See also
     - Foam::functionObject
@@ -121,6 +124,10 @@ class div
         //- Calculate the divergence field and return true if successful
         virtual bool calc();
 
+        //- Helper function for writing submesh fields
+        template<class Type>
+        bool writeField();
+
 
 public:
 
@@ -147,6 +154,12 @@ public:
 
     //- Destructor
     virtual ~div() = default;
+
+
+    // Member Functions
+
+        //- Write the result field
+        virtual bool write();
 };
 
 

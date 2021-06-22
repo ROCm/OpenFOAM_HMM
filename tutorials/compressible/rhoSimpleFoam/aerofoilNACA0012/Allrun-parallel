@@ -5,8 +5,14 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
-runApplication topoSet
+runParallel -s decompose \
+    redistributePar -decompose -overwrite -withZero
 
-runApplication $(getApplication)
+runParallel topoSet
+
+runParallel $(getApplication)
+
+runParallel -s reconstruct \
+    redistributePar -reconstruct -overwrite
 
 #------------------------------------------------------------------------------

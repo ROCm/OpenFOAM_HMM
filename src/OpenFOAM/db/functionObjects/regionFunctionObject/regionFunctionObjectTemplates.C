@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,16 +122,20 @@ bool Foam::functionObjects::regionFunctionObject::store
         return false;
     }
 
-    if (fieldName.size() && foundObject<ObjectType>(fieldName))
-    {
-        const ObjectType& field = lookupObject<ObjectType>(fieldName);
+    ObjectType* fieldptr;
 
+    if
+    (
+        !fieldName.empty()
+     && (fieldptr = getObjectPtr<ObjectType>(fieldName)) != nullptr
+    )
+    {
         // If there is a result field already registered, assign to the new
         // result field. Otherwise transfer ownership of the new result field to
         // the object registry
-        if (&field != &tfield())
+        if (fieldptr != &tfield())
         {
-            const_cast<ObjectType&>(field) = tfield;
+            (*fieldptr) = tfield;
         }
         else
         {
@@ -150,6 +154,33 @@ bool Foam::functionObjects::regionFunctionObject::store
         }
 
         obr().objectRegistry::store(tfield.ptr());
+    }
+
+    return true;
+}
+
+
+template<class ObjectType>
+bool Foam::functionObjects::regionFunctionObject::storeInDb
+(
+    const word& fieldName,
+    const tmp<ObjectType>& tfield,
+    const objectRegistry& obr
+)
+{
+    ObjectType* fieldptr;
+    if
+    (
+        !fieldName.empty()
+     && (fieldptr = obr.getObjectPtr<ObjectType>(fieldName)) != nullptr
+    )
+    {
+        (*fieldptr) = tfield;
+    }
+    else
+    {
+        tfield.ref().rename(fieldName);
+        obr.objectRegistry::store(tfield.ptr());
     }
 
     return true;

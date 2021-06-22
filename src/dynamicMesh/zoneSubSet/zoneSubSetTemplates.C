@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,61 +25,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "div.H"
-#include "volFields.H"
-#include "surfaceFields.H"
-#include "addToRunTimeSelectionTable.H"
+#include "volFieldsFwd.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::Detail::zoneSubSet::mapToZone
+(
+    const GeometricField<Type, fvPatchField, volMesh>& subVolField
+) const
 {
-namespace functionObjects
-{
-    defineTypeNameAndDebug(div, 0);
-    addToRunTimeSelectionTable(functionObject, div, dictionary);
-}
-}
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-bool Foam::functionObjects::div::calc()
-{
-    return
+    // The full-mesh field, with zero for non-zoned areas
+    auto tcellZonesField = volFieldType::New
     (
-        calcDiv<surfaceScalarField>()
-     || calcDiv<volVectorField>()
+        subVolField.name(),
+        subsetter_.baseMesh(),
+        dimensioned<Type>(subVolField.dimensions())
     );
-}
+    auto& cellZonesField = tcellZonesField.ref();
 
 
-bool Foam::functionObjects::div::write()
-{
-    if (zoneSubSetPtr_)
+    // Map field in global mesh on original zones
+    // - without any halo cells
+
+    const labelList& cellMap = subsetter_.cellMap();
+
+    forAll(cellMap, subCelli)
     {
-        return
-        (
-            writeField<scalar>()
-         || writeField<vector>()
-        );
+        const label celli = cellMap[subCelli];
+
+        if (!haloCells_.test(celli))
+        {
+            cellZonesField[celli] = subVolField[subCelli];
+        }
     }
 
-    return writeObject(resultName_);
+    return tcellZonesField;
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::div::div
-(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict
-)
-:
-    fieldExpression(name, runTime, dict)
-{}
 
 
 // ************************************************************************* //

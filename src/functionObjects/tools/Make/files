@@ -1,0 +1,3 @@
+zoneSubSet/zoneSubSet.C
+
+LIB = $(FOAM_LIBBIN)/libfunctionObjectsTools
