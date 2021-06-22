@@ -28,6 +28,7 @@ License
 #include "haloToCell.H"
 #include "polyMesh.H"
 #include "cellSet.H"
+#include "topoBitSet.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -82,9 +83,16 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
     // The starting set of cells
     bitSet current(cells.size());
 
-    for (const label celli : set)
+    if (isA<topoBitSet>(set))
     {
-        current.set(celli);
+        current |= refCast<const topoBitSet>(set).addressing();
+    }
+    else
+    {
+        for (const label celli : set)
+        {
+            current.set(celli);
+        }
     }
 
     // The perimeter faces of the cell set
