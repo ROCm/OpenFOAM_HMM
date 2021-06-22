@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,18 @@ License
 #include "cellZone.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::fvMeshSubsetProxy::clearOut()
+{
+    subsetter_.clear();
+    type_ = subsetType::NONE;
+    name_.clear();
+    names_.clear();
+    selectedCells_.clearStorage();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fvMeshSubsetProxy::fvMeshSubsetProxy(fvMesh& baseMesh)
@@ -37,16 +49,11 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy(fvMesh& baseMesh)
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     exposedPatchId_(-1),
-    type_(NONE),
+    type_(subsetType::NONE),
     name_(),
     names_(),
     selectedCells_()
-{
-    if (useSubMesh())
-    {
-        correct();
-    }
-}
+{}
 
 
 Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
@@ -60,26 +67,23 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     exposedPatchId_(exposedPatchId),
-    type_(selectionName.empty() ? NONE : type),
+    type_(selectionName.empty() ? subsetType::NONE : type),
     name_(),
     names_(),
     selectedCells_()
 {
-    if (type_ == ZONES)
+    if (type_ == subsetType::ZONES)
     {
         // Populate wordRes for ZONES
         names_.resize(1);
         names_.first() = selectionName;
     }
-    else if (type_ != NONE)
+    else if (type_ == subsetType::SET || type_ == subsetType::ZONE)
     {
         name_ = selectionName;
     }
 
-    if (useSubMesh())
-    {
-        correct();
-    }
+    correct();
 }
 
 
@@ -93,15 +97,12 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     exposedPatchId_(exposedPatchId),
-    type_(ZONES),
+    type_(subsetType::ZONES),
     name_(),
     names_(zoneNames),
     selectedCells_()
 {
-    if (useSubMesh())
-    {
-        correct();
-    }
+    correct();
 }
 
 
@@ -115,23 +116,33 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     baseMesh_(baseMesh),
     subsetter_(baseMesh),
     exposedPatchId_(exposedPatchId),
-    type_(ZONES),
+    type_(subsetType::ZONES),
     name_(),
     names_(std::move(zoneNames)),
     selectedCells_()
 {
-    if (useSubMesh())
-    {
-        correct();
-    }
+    correct();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::fvMeshSubsetProxy::resetZones(const wordRes& zoneNames)
+{
+    fvMeshSubsetProxy::clearOut();
+
+    if (!zoneNames.empty())
+    {
+        type_ = subsetType::ZONES;
+        names_ = zoneNames;
+        correct();
+    }
+}
+
+
 bool Foam::fvMeshSubsetProxy::correct(bool verbose)
 {
-    if (type_ == NONE)
+    if (type_ == subsetType::NONE)
     {
         subsetter_.clear();
         selectedCells_.clearStorage();
@@ -142,7 +153,7 @@ bool Foam::fvMeshSubsetProxy::correct(bool verbose)
 
     bitSet selectedCells;
 
-    if (type_ == SET)
+    if (type_ == subsetType::SET)
     {
         if (verbose)
         {
@@ -157,7 +168,7 @@ bool Foam::fvMeshSubsetProxy::correct(bool verbose)
             selectedCells.set(idx);
         }
     }
-    else if (type_ == ZONE)
+    else if (type_ == subsetType::ZONE)
     {
         if (verbose)
         {
@@ -167,7 +178,7 @@ bool Foam::fvMeshSubsetProxy::correct(bool verbose)
         selectedCells.resize(nCells);
         selectedCells.set(baseMesh_.cellZones()[name_]);
     }
-    else if (type_ == ZONES)
+    else if (type_ == subsetType::ZONES)
     {
         if (verbose)
         {

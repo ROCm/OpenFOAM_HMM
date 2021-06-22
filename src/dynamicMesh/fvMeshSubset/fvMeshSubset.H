@@ -73,7 +73,7 @@ namespace Foam
 
 class fvMeshSubset
 {
-    // Private data
+    // Private Data
 
         //- Mesh to subset from
         const fvMesh& baseMesh_;
@@ -214,13 +214,13 @@ public:
     // Access
 
         //- Original mesh
-        inline const fvMesh& baseMesh() const;
+        inline const fvMesh& baseMesh() const noexcept;
 
         //- Return baseMesh or subMesh, depending on the current state.
-        inline const fvMesh& mesh() const;
+        inline const fvMesh& mesh() const noexcept;
 
         //- Have subMesh?
-        inline bool hasSubMesh() const;
+        inline bool hasSubMesh() const noexcept;
 
         //- Return reference to subset mesh
         inline const fvMesh& subMesh() const;
@@ -491,7 +491,6 @@ public:
                 syncCouples
             );
         }
-
 };
 
 

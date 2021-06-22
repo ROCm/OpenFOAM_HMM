@@ -27,19 +27,19 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::fvMesh& Foam::fvMeshSubset::baseMesh() const
+inline const Foam::fvMesh& Foam::fvMeshSubset::baseMesh() const noexcept
 {
     return baseMesh_;
 }
 
 
-inline const Foam::fvMesh& Foam::fvMeshSubset::mesh() const
+inline const Foam::fvMesh& Foam::fvMeshSubset::mesh() const noexcept
 {
     return fvMeshSubsetPtr_ ? *fvMeshSubsetPtr_ : baseMesh_;
 }
 
 
-inline bool Foam::fvMeshSubset::hasSubMesh() const
+inline bool Foam::fvMeshSubset::hasSubMesh() const noexcept
 {
     return bool(fvMeshSubsetPtr_);
 }

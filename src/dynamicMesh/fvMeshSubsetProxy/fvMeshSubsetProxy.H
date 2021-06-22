@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,6 +97,9 @@ private:
 
     // Private Member Functions
 
+        //- Clear, set to NONE
+        void clearOut();
+
         //- No copy construct
         fvMeshSubsetProxy(const fvMeshSubsetProxy&) = delete;
 
@@ -142,21 +145,27 @@ public:
     // Access
 
         //- The entire base mesh
-        inline const fvMesh& baseMesh() const
+        const fvMesh& baseMesh() const noexcept
         {
             return baseMesh_;
         }
 
         //- The mesh subsetter
-        inline const fvMeshSubset& subsetter() const
+        const fvMeshSubset& subsetter() const noexcept
         {
             return subsetter_;
         }
 
-        //- Check if a sub-mesh is being used
-        inline bool useSubMesh() const
+        //- The mesh subsetter
+        fvMeshSubset& subsetter() noexcept
         {
-            return type_ != NONE;
+            return subsetter_;
+        }
+
+        //- True if sub-mesh should be used
+        bool useSubMesh() const noexcept
+        {
+            return type_ != subsetType::NONE;
         }
 
         //- Access either base-mesh or sub-mesh
@@ -171,19 +180,22 @@ public:
         }
 
         //- The associated (set or zone) name if any.
-        inline const word& name() const
+        const word& name() const noexcept
         {
             return name_;
         }
 
         //- The current cell selection, when subsetting is active
-        inline const bitSet& selectedCells() const
+        const bitSet& selectedCells() const noexcept
         {
             return selectedCells_;
         }
 
 
     // Edit
+
+        //- Define the zones selection, subset the mesh accordingly
+        void resetZones(const wordRes& zoneNames);
 
         //- Update of mesh subset.
         //  Return true if the subset changed from previous call.
