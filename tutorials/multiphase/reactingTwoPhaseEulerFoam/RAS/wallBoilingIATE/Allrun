@@ -12,8 +12,8 @@ runApplication $(getApplication)
 if notTest "$@"
 then
     cp -f system/controlDict system/controlDict.orig
-    foamDictionary system/controlDict -entry endTime -set 5
-    foamDictionary 2/T.liquid -entry boundaryField/wall2/q -set 'uniform 1e5'
+    foamDictionary system/controlDict -entry endTime -set 7
+    foamDictionary 2/T.liquid -entry boundaryField/wall2/q -set 'uniform 5e4'
     runApplication -a $(getApplication)
 fi
 
