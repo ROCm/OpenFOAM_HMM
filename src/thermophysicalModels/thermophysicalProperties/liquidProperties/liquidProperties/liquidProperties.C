@@ -117,9 +117,14 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 {
     DebugInFunction << "Constructing liquidProperties" << nl;
 
-    const word liquidType(dict.dictName());
+    // Can either specify "type", or simply use the dictionary name
+    // as being the liquid type name
 
-    if (dict.found("defaultCoeffs"))
+    word liquidType(dict.dictName());
+
+    const bool hadExplicitType = dict.readIfPresent("type", liquidType);
+
+    if (dict.found("defaultCoeffs") && !hadExplicitType)
     {
         // Backward-compatibility
 
