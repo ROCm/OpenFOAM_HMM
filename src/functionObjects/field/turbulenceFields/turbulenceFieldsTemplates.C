@@ -99,7 +99,7 @@ Foam::functionObjects::turbulenceFields::L
     const Model& model
 ) const
 {
-    // Assume k and epsilon are available
+    // (P:Eq. 10.37)
     const scalar Cmu = 0.09;
     const dimensionedScalar eps0(sqr(dimVelocity)/dimTime, SMALL);
 
@@ -118,9 +118,10 @@ Foam::functionObjects::turbulenceFields::I
     const Model& model
 ) const
 {
-    // Assume k is available
+    // (P:p. 183)
+    // root-mean-square of velocity fluctuations - isotropic turbulence
     const volScalarField uPrime(sqrt((2.0/3.0)*model.k()));
-    const dimensionedScalar U0("U0", dimVelocity, SMALL);
+    const dimensionedScalar U0(dimVelocity, SMALL);
 
     return tmp<volScalarField>::New
     (
