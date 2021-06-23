@@ -129,43 +129,46 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 
 bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
-
-    if (dict.found("field"))
+    if (fvMeshFunctionObject::read(dict))
     {
-        fieldSet_.insert(dict.get<word>("field"));
-    }
-    else
-    {
-        fieldSet_.insert(dict.get<wordList>("fields"));
-    }
-
-    Info<< type() << " " << name() << ": ";
-    if (fieldSet_.size())
-    {
-        Info<< "storing fields:" << nl;
-        for (const word& f : fieldSet_)
+        if (dict.found("field"))
         {
-            Info<< "    " << modelName_ << ':' << f << nl;
+            fieldSet_.insert(dict.get<word>("field"));
         }
-        Info<< endl;
-    }
-    else
-    {
-        Info<< "no fields requested to be stored" << nl << endl;
+        else
+        {
+            fieldSet_.insert(dict.get<wordList>("fields"));
+        }
+
+        Info<< type() << " " << name() << ": ";
+        if (fieldSet_.size())
+        {
+            Info<< "storing fields:" << nl;
+            for (const word& f : fieldSet_)
+            {
+                Info<< "    " << modelName_ << ':' << f << nl;
+            }
+            Info<< endl;
+        }
+        else
+        {
+            Info<< "no fields requested to be stored" << nl << endl;
+        }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 
 bool Foam::functionObjects::turbulenceFields::execute()
 {
-    bool comp = compressible();
+    const bool comp = compressible();
 
     if (comp)
     {
-        const compressible::turbulenceModel& model =
+        const auto& model =
             obr_.lookupObject<compressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
@@ -242,7 +245,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
     }
     else
     {
-        const incompressible::turbulenceModel& model =
+        const auto& model =
             obr_.lookupObject<incompressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
@@ -316,9 +319,11 @@ bool Foam::functionObjects::turbulenceFields::write()
 {
     for (const word& f : fieldSet_)
     {
-        const word fieldName = modelName_ + ':' + f;
-        writeObject(fieldName);
+        const word scopedName(modelName_ + ':' + f);
+
+        writeObject(scopedName);
     }
+    Info<< endl;
 
     return true;
 }

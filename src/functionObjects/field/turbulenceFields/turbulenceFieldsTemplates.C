@@ -39,7 +39,7 @@ void Foam::functionObjects::turbulenceFields::processField
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
-    const word scopedName = modelName_ + ':' + fieldName;
+    const word scopedName(modelName_ + ':' + fieldName);
 
     FieldType* fldPtr = obr_.getObjectPtr<FieldType>(scopedName);
 
@@ -99,17 +99,14 @@ Foam::functionObjects::turbulenceFields::L
     const Model& model
 ) const
 {
-    const scalar Cmu = 0.09;
-
     // Assume k and epsilon are available
-    const volScalarField k(model.k());
-    const volScalarField epsilon(model.epsilon());
-    const dimensionedScalar eps0("eps0", epsilon.dimensions(), SMALL);
+    const scalar Cmu = 0.09;
+    const dimensionedScalar eps0(sqr(dimVelocity)/dimTime, SMALL);
 
     return tmp<volScalarField>::New
     (
         "L.tmp",
-        pow(Cmu, 0.75)*pow(k, 1.5)/(epsilon + eps0)
+        pow(Cmu, 0.75)*pow(model.k(), 1.5)/(model.epsilon() + eps0)
     );
 }
 
