@@ -38,6 +38,17 @@ namespace Foam
     defineTypeNameAndDebug(faceAreaWeightAMI, 0);
     addToRunTimeSelectionTable(AMIInterpolation, faceAreaWeightAMI, dict);
     addToRunTimeSelectionTable(AMIInterpolation, faceAreaWeightAMI, component);
+
+    // Backwards compatibility for pre v2106 versions
+    // - partialFaceAreaWeightAMI deprecated in v2106
+    addNamedToRunTimeSelectionTable
+    (
+        AMIInterpolation,
+        faceAreaWeightAMI,
+        dict,
+        partialFaceAreaWeightAMI
+    );
+
 }
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
