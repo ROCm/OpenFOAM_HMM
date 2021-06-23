@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,6 @@ class regionFunctionObject
 :
     public stateFunctionObject
 {
-
 protected:
 
     // Protected Member Data
@@ -145,6 +144,15 @@ protected:
             word& fieldName,
             const tmp<ObjectType>& tfield,
             bool cacheable = false
+        );
+
+        //- Store the field in an optional objectRegistry under the given name
+        template<class ObjectType>
+        bool storeInDb
+        (
+            const word& fieldName,
+            const tmp<ObjectType>& tfield,
+            const objectRegistry& obr
         );
 
         //- Write field if present in the (sub) objectRegistry

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,14 +54,14 @@ Usage
         U           <UName>;
         phi         <phiName>;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                        | Type | Req'd | Dflt
+      Property     | Description                        | Type | Reqd  | Deflt
       type         | Type name: momentumError           | word |  yes  | -
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
       p            | Name of pressure field             | word |  no   | p
@@ -71,8 +71,13 @@ Usage
 
     The inherited entries are elaborated in:
      - \link functionObject.H \endlink
+     - \link zoneSubSet.H \endlink
 
     Usage by the \c postProcess utility is not available.
+
+Note
+  - Optionally the user can specify \c cellZones to create a sub-mesh for the
+    \c momentumError calculation.
 
 See also
     - Foam::functionObject
@@ -89,6 +94,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "volFieldsFwd.H"
+#include "zoneSubSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -120,10 +126,13 @@ protected:
             //- Name of flux field
             word phiName_;
 
+            //- Sub-set mesh
+            autoPtr<Detail::zoneSubSet> zoneSubSetPtr_;
+
 
     // Protected Member Functions
 
-         //- Return the effective viscous stress (laminar + turbulent).
+        //- Return the effective viscous stress (laminar + turbulent).
         tmp<volVectorField> divDevRhoReff();
 
 

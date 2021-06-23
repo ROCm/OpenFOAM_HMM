@@ -27,6 +27,7 @@ gradSchemes
     grad(U)         $limited;
     grad(k)         $limited;
     grad(omega)     $limited;
+    grad(subsetU)   $limited;
 }
 
 divSchemes

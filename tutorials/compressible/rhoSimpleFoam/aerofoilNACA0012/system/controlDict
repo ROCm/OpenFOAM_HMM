@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2012                                 |
+|  \\    /   O peration     | Version:  v2106                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,7 +16,7 @@ FoamFile
 
 application     rhoSimpleFoam;
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 
@@ -34,7 +34,7 @@ purgeWrite      0;
 
 writeFormat     ascii;
 
-writePrecision   8;
+writePrecision  8;
 
 writeCompression off;
 
@@ -48,6 +48,33 @@ functions
 {
     #includeFunc MachNo
     #includeFunc solverInfo
+
+    readFields1
+    {
+        type        readFields;
+        libs        (fieldFunctionObjects);
+        fields      (phi);
+        readOnStart true;
+    }
+
+    contErr
+    {
+        type            div;
+        libs            (fieldFunctionObjects);
+        field           phi;
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+
+    momErr
+    {
+        type            momentumError;
+        libs            (fieldFunctionObjects);
+        cellZones       (z1);
+        nLayers         2;
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
 }
 
 

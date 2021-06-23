@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,48 @@ License
 template<class FieldType>
 bool Foam::functionObjects::div::calcDiv()
 {
-    if (foundObject<FieldType>(fieldName_, false))
+    const auto* fieldptr = cfindObject<FieldType>(fieldName_);
+
+    if (!fieldptr)
     {
-        return store
+        return false;
+    }
+
+    if (zoneSubSetPtr_)
+    {
+        const fvMeshSubset& subsetter = zoneSubSetPtr_->subsetter();
+
+        return storeInDb
         (
             resultName_,
-            fvc::div(lookupObject<FieldType>(fieldName_))
+            fvc::div(subsetter.interpolate(*fieldptr, false)),
+            subsetter.subMesh().thisDb()
         );
+    }
+
+
+    return store
+    (
+        resultName_,
+        fvc::div(*fieldptr)
+    );
+}
+
+
+template<class Type>
+bool Foam::functionObjects::div::writeField()
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
+    const fvMesh& subMesh = zoneSubSetPtr_->subsetter().subMesh();
+    const auto* fieldptr = subMesh.findObject<volFieldType>(resultName_);
+
+    if (fieldptr)
+    {
+        tmp<volFieldType> tfield = zoneSubSetPtr_->mapToZone<Type>(*fieldptr);
+        tfield().write();
+
+        return true;
     }
 
     return false;

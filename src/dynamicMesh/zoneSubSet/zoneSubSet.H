@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +24,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::fieldExpression
-
-Group
-    grpFieldFunctionObjects
+    Foam::zoneSubSet
 
 Description
-    Intermediate class for handling field expression function objects
-    (e.g. \c blendingFactor etc.) whereinto a single field is input.
+    Intermediate tool for handling \c cellZones
+    for function objects (e.g. \c momentumError)
+    wherein the sub-mesh option is available.
 
 Usage
     Minimal example by using \c system/controlDict.functions:
@@ -43,8 +40,6 @@ Usage
         ...
 
         // Inherited entries
-        field             <field>;
-        result            <fieldResult>;
         cellZones         ( <cellZone1> <cellZone2> ... <cellZoneN> );
         nLayers           <label>;
     }
@@ -53,130 +48,157 @@ Usage
     where the entries mean:
     \table
       Property  | Description                             | Type  | Reqd | Deflt
-      field     | Name of the operand field               | word  | yes  | -
-      result    | Name of the output field  | word | no   | \<FO\>(\<field\>)
       cellZones | Names of cellZones                    | wordRes | no   | -
       nLayers   | Number of cell layers around cellZones  | label | no   | 0
     \endtable
 
 See also
-    - Foam::functionObject
-    - Foam::functionObjects::fvMeshFunctionObject
-    - ExtendedCodeGuide::functionObjects::field::fieldExpression
+  - Foam::functionObjects::momentumError
+  - Foam::functionObjects::div
 
 SourceFiles
-    fieldExpression.C
-    fieldExpressionTemplates.C
+    zoneSubSet.C
+    zoneSubSetTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_fieldExpression_H
-#define functionObjects_fieldExpression_H
+#ifndef zoneSubSet_H
+#define zoneSubSet_H
 
-#include "fvMeshFunctionObject.H"
-#include "volFieldsFwd.H"
-#include "zoneSubSet.H"
+#include "fvMeshSubset.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace functionObjects
+namespace Detail
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class fieldExpression Declaration
+                           Class zoneSubSet Declaration
 \*---------------------------------------------------------------------------*/
 
-class fieldExpression
-:
-    public fvMeshFunctionObject
+class zoneSubSet
 {
-protected:
+    // Private Data
 
-    // Protected Data
+        //- Subsetting engine
+        fvMeshSubset subsetter_;
 
-        //- Name of field to process
-        word fieldName_;
+        //- Matcher for zones
+        wordRes zoneMatcher_;
 
-        //- Name of result field
-        word resultName_;
+        //- Number of layers around zones
+        label nLayers_;
 
-        //- Sub-set mesh
-        autoPtr<Detail::zoneSubSet> zoneSubSetPtr_;
+        //- The halo cells
+        bitSet haloCells_;
 
 
-    // Protected Member Functions
+    // Private Members Functions
 
-        //- Calculate the components of the field and return true if successful
-        virtual bool calc() = 0;
+        //- Initialise the sub-mesh
+        bool correct();
 
-        //- Set the name of result field
-        void setResultName(const word& typeName, const word& defaultArg);
+        //- No copy construct
+        zoneSubSet(const zoneSubSet&) = delete;
 
-        //- Return true if required objects are found
-        template<class Type>
-        bool foundObject(const word& name, const bool verbose = true) const;
+        //- No copy assignment
+        void operator=(const zoneSubSet&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("fieldExpression");
+    TypeName("zoneSubSet");
 
 
     // Constructors
 
-        //- Construct from Time and dictionary
-        fieldExpression
+        //- Construct from components
+        zoneSubSet
         (
-            const word& name,
-            const Time& runTime,
-            const dictionary& dict,
-            const word& fieldName = word::null,
-            const word& resultName = word::null
+            const fvMesh& mesh,
+            const wordRes& zoneSelector,
+            const label nZoneLayers = 0
         );
 
-        //- No copy construct
-        fieldExpression(const fieldExpression&) = delete;
-
-        //- No copy assignment
-        void operator=(const fieldExpression&) = delete;
+        //- Construct from mesh and dictionary
+        zoneSubSet
+        (
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~fieldExpression() = default;
+    virtual ~zoneSubSet() = default;
 
 
     // Member Functions
 
-        //- Read the fieldExpression data
-        virtual bool read(const dictionary& dict);
+    // Access
 
-        //- Calculate the result field
-        virtual bool execute();
+        //- The entire base mesh
+        const fvMesh& baseMesh() const noexcept
+        {
+            return subsetter_.baseMesh();
+        }
 
-        //- Write the result field
-        virtual bool write();
+        //- The mesh subsetter
+        const fvMeshSubset& subsetter() const
+        {
+            return subsetter_;
+        }
 
-        //- Clear the result field from the objectRegistry
-        virtual bool clear();
+        //- The mesh subsetter
+        fvMeshSubset& subsetter()
+        {
+            return subsetter_;
+        }
+
+        //- True if sub-mesh is expected to be used
+        bool useSubMesh() const noexcept
+        {
+            return !zoneMatcher_.empty();
+        }
+
+        //- Return the current zones selector
+        const wordRes& zones() const noexcept
+        {
+            return zoneMatcher_;
+        }
+
+        //- Return number of layers around cell zones
+        label nLayers() const noexcept
+        {
+            return nLayers_;
+        }
+
+
+    // Fields
+
+        //- Map from the sub-mesh to original cell zones
+        template<class Type>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> mapToZone
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& subVolField
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace functionObjects
+} // End namespace Detail
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "fieldExpressionTemplates.C"
+    #include "zoneSubSetTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

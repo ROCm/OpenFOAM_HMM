@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,16 +90,28 @@ Foam::functionObjects::fieldExpression::fieldExpression
 
 bool Foam::functionObjects::fieldExpression::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
-
-    if (fieldName_.empty() || dict.found("field"))
+    if (fvMeshFunctionObject::read(dict))
     {
-        dict.readEntry("field", fieldName_);
+        if (fieldName_.empty() || dict.found("field"))
+        {
+            dict.readEntry("field", fieldName_);
+        }
+
+        dict.readIfPresent("result", resultName_);
+
+        if (dict.found("cellZones"))
+        {
+            zoneSubSetPtr_.reset(new Detail::zoneSubSet(mesh_, dict));
+        }
+        else
+        {
+            zoneSubSetPtr_.reset(nullptr);
+        }
+
+        return true;
     }
 
-    dict.readIfPresent("result", resultName_);
-
-    return true;
+    return false;
 }
 
 
