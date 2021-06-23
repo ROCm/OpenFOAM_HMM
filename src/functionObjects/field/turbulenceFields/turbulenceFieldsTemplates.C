@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,42 +77,17 @@ void Foam::functionObjects::turbulenceFields::processField
 
 template<class Model>
 Foam::tmp<Foam::volScalarField>
-Foam::functionObjects::turbulenceFields::omega
-(
-    const Model& model
-) const
-{
-    const scalar Cmu = 0.09;
-
-    // Assume k and epsilon are available
-    const volScalarField k(model.k());
-    const volScalarField epsilon(model.epsilon());
-
-    return tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            "omega.tmp",
-            k.mesh().time().timeName(),
-            k.mesh()
-        ),
-        epsilon/(Cmu*k),
-        epsilon.boundaryField().types()
-    );
-}
-
-
-template<class Model>
-Foam::tmp<Foam::volScalarField>
 Foam::functionObjects::turbulenceFields::nuTilda
 (
     const Model& model
 ) const
 {
+    const dimensionedScalar omega0(dimless/dimTime, SMALL);
+
     return tmp<volScalarField>::New
     (
         "nuTilda.tmp",
-        model.k()/omega(model)
+        model.k()/(model.omega() + omega0)
     );
 }
 

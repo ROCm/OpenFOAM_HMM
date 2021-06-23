@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 }
                 case cfOmega:
                 {
-                    processField<scalar>(f, omega(model));
+                    processField<scalar>(f, model.omega());
                     break;
                 }
                 case cfNuTilda:
@@ -261,7 +261,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 }
                 case ifOmega:
                 {
-                    processField<scalar>(f, omega(model));
+                    processField<scalar>(f, model.omega());
                     break;
                 }
                 case ifNuTilda:

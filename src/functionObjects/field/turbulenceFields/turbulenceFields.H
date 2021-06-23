@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,6 +187,7 @@ public:
         //- Turbulence closure model name
         static const word modelName_;
 
+
 protected:
 
     // Protected Data
@@ -207,10 +208,6 @@ protected:
             const word& fieldName,
             const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvalue
         );
-
-        //- Return omega calculated from k and epsilon
-        template<class Model>
-        tmp<volScalarField> omega(const Model& model) const;
 
         //- Return nuTilda calculated from k and omega
         template<class Model>
