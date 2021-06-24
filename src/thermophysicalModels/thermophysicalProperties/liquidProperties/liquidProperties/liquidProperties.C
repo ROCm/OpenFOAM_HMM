@@ -72,16 +72,16 @@ Foam::liquidProperties::liquidProperties
 Foam::liquidProperties::liquidProperties(const dictionary& dict)
 :
     thermophysicalProperties(dict),
-    Tc_(dict.get<label>("Tc")),
-    Pc_(dict.get<label>("Pc")),
-    Vc_(dict.get<label>("Vc")),
-    Zc_(dict.get<label>("Zc")),
-    Tt_(dict.get<label>("Tt")),
-    Pt_(dict.get<label>("Pt")),
-    Tb_(dict.get<label>("Tb")),
-    dipm_(dict.get<label>("dipm")),
-    omega_(dict.get<label>("omega")),
-    delta_(dict.get<label>("delta"))
+    Tc_(dict.get<scalar>("Tc")),
+    Pc_(dict.get<scalar>("Pc")),
+    Vc_(dict.get<scalar>("Vc")),
+    Zc_(dict.get<scalar>("Zc")),
+    Tt_(dict.get<scalar>("Tt")),
+    Pt_(dict.get<scalar>("Pt")),
+    Tb_(dict.get<scalar>("Tb")),
+    dipm_(dict.get<scalar>("dipm")),
+    omega_(dict.get<scalar>("omega")),
+    delta_(dict.get<scalar>("delta"))
 {}
 
 
