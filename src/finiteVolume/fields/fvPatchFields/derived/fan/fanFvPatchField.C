@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const dictionary& dict
 )
 :
-    uniformJumpFvPatchField<Type>(p, iF, dict),
+    uniformJumpFvPatchField<Type>(p, iF, dict, false), // Pass no valueRequired
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     uniformJump_(dict.getOrDefault("uniformJump", false)),
@@ -75,10 +75,28 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     rpm_(0),
     dm_(0)
 {
+    // Note that we've not read jumpTable_ etc
     if (nonDimensional_)
     {
         dict.readEntry("rpm", rpm_);
         dict.readEntry("dm", dm_);
+    }
+
+    if (this->cyclicPatch().owner())
+    {
+        this->jumpTable_ = Function1<Type>::New("jumpTable", dict);
+    }
+
+    if (dict.found("value"))
+    {
+        fvPatchField<Type>::operator=
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate(Pstream::commsTypes::blocking);
     }
 }
 
