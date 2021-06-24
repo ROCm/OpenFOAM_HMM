@@ -69,10 +69,11 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool valueRequired
 )
 :
-    jumpCyclicFvPatchField<Type>(p, iF, dict),
+    jumpCyclicFvPatchField<Type>(p, iF, dict, false), // Pass no valueRequired
     jump_(p.size(), Zero),
     jump0_(p.size(), Zero),
     minJump_(dict.getOrDefault<Type>("minJump", pTraits<Type>::min)),
@@ -81,7 +82,10 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 {
     if (this->cyclicPatch().owner())
     {
-        jump_ = Field<Type>("jump", dict, p.size());
+        if (valueRequired)
+        {
+            jump_ = Field<Type>("jump", dict, p.size());
+        }
 
         if (dict.found("jump0"))
         {
@@ -89,16 +93,19 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
         }
     }
 
-    if (dict.found("value"))
+    if (valueRequired)
     {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::commsTypes::blocking);
+        if (dict.found("value"))
+        {
+            fvPatchField<Type>::operator=
+            (
+                Field<Type>("value", dict, p.size())
+            );
+        }
+        else
+        {
+            this->evaluate(Pstream::commsTypes::blocking);
+        }
     }
 }
 

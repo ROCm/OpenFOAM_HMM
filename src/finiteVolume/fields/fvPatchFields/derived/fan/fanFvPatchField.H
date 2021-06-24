@@ -240,14 +240,6 @@ public:
 template<>
 void fanFvPatchField<scalar>::calcFanJump();
 
-template<>
-fanFvPatchField<scalar>::fanFvPatchField
-(
-    const fvPatch&,
-    const DimensionedField<scalar, volMesh>&,
-    const dictionary&
-);
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
