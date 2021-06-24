@@ -120,7 +120,7 @@ Foam::functionObjects::momentumError::divDevRhoReff()
                 - fvc::div
                 (
                     tnuEff()*dev2(T(fvc::grad(tU()))),
-                    "div(((nuEff)*dev2(T(grad(U)))))"
+                    "div((nuEff*dev2(T(grad(U)))))"
                 )
                 - fvc::laplacian(tnuEff(), tU(), "laplacian(nuEff,U)")
             );
