@@ -1,6 +1,6 @@
 # Contributors to OpenFOAM
 
-The following is an list of known contributors to OpenFOAM.
+The following is a list of known contributors to OpenFOAM.
 It is likely incomplete...
 
 ## Contributors (alphabetical by surname)

@@ -40,7 +40,7 @@ License
 
 \section layout OpenFOAM Directory Structure
 
-    OpenFOAM comprises of four main directories:
+    OpenFOAM comprises four main directories:
     - \b src: the core OpenFOAM libraries
     - \b applications: solvers and utilities
     - \b tutorials: test-cases that demonstrate a wide-range of OpenFOAM
