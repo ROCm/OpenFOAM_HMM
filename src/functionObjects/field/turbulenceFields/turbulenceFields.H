@@ -35,8 +35,8 @@ Description
     output during calculations, and stores/writes them on the mesh database
     for further manipulation.
 
-    Fields are stored as copies of the original, with the prefix
-    "turbulenceModel:", e.g.:
+    Fields are stored as copies of the original with a user-defined prefix
+    e.g. a prefix of \c turbulenceModel yields the following for field \c R:
 
     \verbatim
       turbulenceModel:R
@@ -79,6 +79,9 @@ Usage
             // Option-2
             field       R;
 
+        // Optional entries (runtime modifiable)
+        prefix          <word>;
+
         // Inherited entries
         ...
     }
@@ -91,6 +94,7 @@ Usage
       libs         | Library name: fieldFunctionObjects    | word | yes  | -
       fields       | Names of fields to store (see below)  | wordList | yes | -
       field        | Name of a field to store (see below)  | word | yes  | -
+      prefix  | Name of output-field prefix | word | no | turbulenceProperties
     \endtable
 
     where \c fields can include:
@@ -212,6 +216,9 @@ protected:
 
         //- Flag to track initialisation
         bool initialised_;
+
+        //- Name of output-field prefix
+        word prefix_;
 
         //- Fields to load
         wordHashSet fieldSet_;

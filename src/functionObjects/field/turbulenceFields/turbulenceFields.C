@@ -94,12 +94,12 @@ void Foam::functionObjects::turbulenceFields::initialise()
 {
     for (const word& f : fieldSet_)
     {
-        const word scopedName(modelName_ + ':' + f);
+        const word localName(IOobject::scopedName(prefix_, f));
 
-        if (obr_.found(scopedName))
+        if (obr_.found(localName))
         {
             WarningInFunction
-                << "Cannot store turbulence field " << scopedName
+                << "Cannot store turbulence field " << localName
                 << " since an object with that name already exists"
                 << nl << endl;
 
@@ -141,6 +141,7 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 :
     fvMeshFunctionObject(name, runTime, dict),
     initialised_(false),
+    prefix_(dict.getOrDefault<word>("prefix", "turbulenceProperties")),
     fieldSet_()
 {
     read(dict);
@@ -153,6 +154,8 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict))
     {
+        dict.readIfPresent("prefix", prefix_);
+
         if (dict.found("field"))
         {
             fieldSet_.insert(dict.get<word>("field"));
@@ -168,7 +171,7 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
             Info<< "storing fields:" << nl;
             for (const word& f : fieldSet_)
             {
-                Info<< "    " << modelName_ << ':' << f << nl;
+                Info<< "    " << IOobject::scopedName(prefix_, f) << nl;
             }
             Info<< endl;
         }
@@ -348,9 +351,9 @@ bool Foam::functionObjects::turbulenceFields::write()
 {
     for (const word& f : fieldSet_)
     {
-        const word scopedName(modelName_ + ':' + f);
+        const word localName(IOobject::scopedName(prefix_, f));
 
-        writeObject(scopedName);
+        writeObject(localName);
     }
     Info<< endl;
 

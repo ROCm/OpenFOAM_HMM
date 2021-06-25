@@ -39,9 +39,9 @@ void Foam::functionObjects::turbulenceFields::processField
 {
     typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
-    const word scopedName(modelName_ + ':' + fieldName);
+    const word localName(IOobject::scopedName(prefix_, fieldName));
 
-    FieldType* fldPtr = obr_.getObjectPtr<FieldType>(scopedName);
+    FieldType* fldPtr = obr_.getObjectPtr<FieldType>(localName);
 
     if (fldPtr)
     {
@@ -55,7 +55,7 @@ void Foam::functionObjects::turbulenceFields::processField
             (
                 IOobject
                 (
-                    scopedName,
+                    localName,
                     obr_.time().timeName(),
                     obr_,
                     IOobject::READ_IF_PRESENT,
