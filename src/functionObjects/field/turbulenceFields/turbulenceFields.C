@@ -90,6 +90,27 @@ const Foam::word Foam::functionObjects::turbulenceFields::modelName_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::functionObjects::turbulenceFields::initialise()
+{
+    for (const word& f : fieldSet_)
+    {
+        const word scopedName(modelName_ + ':' + f);
+
+        if (obr_.found(scopedName))
+        {
+            WarningInFunction
+                << "Cannot store turbulence field " << scopedName
+                << " since an object with that name already exists"
+                << nl << endl;
+
+            fieldSet_.unset(f);
+        }
+    }
+
+    initialised_ = true;
+}
+
+
 bool Foam::functionObjects::turbulenceFields::compressible()
 {
     if (obr_.foundObject<compressible::turbulenceModel>(modelName_))
@@ -119,6 +140,7 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    initialised_(false),
     fieldSet_()
 {
     read(dict);
@@ -155,6 +177,8 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
             Info<< "no fields requested to be stored" << nl << endl;
         }
 
+        initialised_ = false;
+
         return true;
     }
 
@@ -164,6 +188,11 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 
 bool Foam::functionObjects::turbulenceFields::execute()
 {
+    if (!initialised_)
+    {
+        initialise();
+    }
+
     const bool comp = compressible();
 
     if (comp)

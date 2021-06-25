@@ -47,13 +47,6 @@ void Foam::functionObjects::turbulenceFields::processField
     {
         (*fldPtr) == tvalue();
     }
-    else if (obr_.found(scopedName))
-    {
-        WarningInFunction
-            << "Cannot store turbulence field " << scopedName
-            << " since an object with that name already exists"
-            << nl << endl;
-    }
     else
     {
         obr_.store

@@ -210,11 +210,17 @@ protected:
 
     // Protected Data
 
+        //- Flag to track initialisation
+        bool initialised_;
+
         //- Fields to load
         wordHashSet fieldSet_;
 
 
     // Protected Member Functions
+
+        //- Unset duplicate fields already registered by other function objects
+        void initialise();
 
         //- Return true if compressible turbulence model is identified
         bool compressible();
