@@ -33,6 +33,8 @@ Description
 #include "IOstreams.H"
 #include "argList.H"
 #include "ITstream.H"
+#include "ListOps.H"
+#include "flipOp.H"
 
 using namespace Foam;
 
@@ -109,7 +111,7 @@ void doTest
         << nl
         << "====" << nl << endl;
 
-    ITstream its(name, input);
+    ITstream its(input);
     Info<< "got " << its.size() << " tokens - index at "
         << its.tokenIndex() << endl;
 
@@ -164,7 +166,15 @@ int main(int argc, char *argv[])
 
     string stringInput("( string     ;    input \"string\" to tokenize )");
 
-    List<char> listInput(stringInput.cbegin(), stringInput.cend());
+    List<char> listInput
+    (
+        ListOps::create<char>
+        (
+            stringInput.cbegin(),
+            stringInput.cend(),
+            Foam::noOp{}
+        )
+    );
 
     doTest("empty", "", true, true);
 

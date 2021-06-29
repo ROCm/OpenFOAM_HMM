@@ -60,6 +60,8 @@ int main()
     );
 
     Info<< "End\n" << endl;
+
+    return 0;
 }
 
 

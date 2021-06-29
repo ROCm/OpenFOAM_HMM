@@ -94,6 +94,8 @@ int main()
     }
 
     Info<< "\nEnd" << endl;
+
+    return 0;
 }
 
 

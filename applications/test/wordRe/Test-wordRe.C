@@ -91,7 +91,7 @@ void exptl_reading(Istream& is, wordRes& list)
 
 bool testReadList_wordRes(const std::string& input)
 {
-    ITstream is("input", input);
+    ITstream is(input);
     wordRes list;
 
     exptl_reading(is, list);

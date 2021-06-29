@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,9 +187,7 @@ int main(int argc, char *argv[])
     Sout.precision(16);
 
     const scalar SMALLS(1e-6);
-    const vector SMALLV(SMALLS, SMALLS, SMALLS);
     const scalar GREATS(1e6);
-    const vector GREATV(GREATS, GREATS, GREATS);
 
     // scalarField summation
     {
@@ -203,9 +201,9 @@ int main(int argc, char *argv[])
     }
     // vectorField summation
     {
-        vectorField vfield(10, SMALLV);
+        vectorField vfield(10, vector::uniform(SMALLS));
 
-        vfield[8] = GREATV;
+        vfield[8] = vector::uniform(GREATS);
         vfield[9] = -vfield[8];
         Info<< "vectorField:" << vfield.size() << nl
             << "    sum      :" << sum(vfield) << nl
@@ -213,9 +211,9 @@ int main(int argc, char *argv[])
     }
     // sphericalTensorField summation
     {
-        sphericalTensorField tfield(10, SMALLS);
+        sphericalTensorField tfield(10, sphericalTensor(SMALLS));
 
-        tfield[8] = GREATS;
+        tfield[8] = sphericalTensor(GREATS);
         tfield[9] = -tfield[8];
         Info<< "sphericalTensorField:" << tfield.size() << nl
             << "    sum      :" << sum(tfield) << nl
@@ -241,7 +239,6 @@ int main(int argc, char *argv[])
             << "    sum      :" << sum(tfield) << nl
             << "    corrected:" << mySum(tfield) << endl;
     }
-
 
 
     return 0;

@@ -72,7 +72,7 @@ void testDivide(const List<Tuple2<T, scalar>>& list)
 
 void testModulo(const List<Tuple2<scalar, scalar>>& list)
 {
-    const scalarModuloOp<> bop;
+    const scalarModuloOp<scalar> bop;
 
     for (const auto& pair : list)
     {

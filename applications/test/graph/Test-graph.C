@@ -68,6 +68,8 @@ int main()
     phi.write("phi", "xmgr");
 
     Info<< "End\n" << endl;
+
+    return 0;
 }
 
 

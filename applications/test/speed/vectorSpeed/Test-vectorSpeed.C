@@ -36,4 +36,6 @@ int main()
 
         Snull<< vf4[1] << endl << endl;
     }
+
+    return 0;
 }

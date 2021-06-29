@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,12 @@ License
 
 #include "HashTable.H"
 #include "List.H"
-#include "SortableList.H"
 #include "DynamicList.H"
 #include "FlatOutput.H"
 #include "IOstreams.H"
 #include "StringStream.H"
+#include "ListOps.H"
+#include "flipOp.H"
 
 using namespace Foam;
 
@@ -209,12 +210,16 @@ int main()
             << "/" << table1.keys().size()
             << nl;
 
-        SortableList<word> sortKeys
-        // DynamicList<word> sortKeys
+        List<word> sortKeys
         (
-            table1.keys().begin(),
-            table1.keys().end()
+            ListOps::create<word>
+            (
+                table1.keys().begin(),
+                table1.keys().end(),
+                noOp{}
+            )
         );
+        sort(sortKeys);
         Info<<"sortKeys: " << flatOutput(sortKeys) << nl;
     }
 

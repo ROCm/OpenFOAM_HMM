@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
     Info<< fvc::div(U);
 
     Info<< "End\n" << endl;
+
+    return 0;
 }
 
 

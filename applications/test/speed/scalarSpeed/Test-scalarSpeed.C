@@ -189,4 +189,6 @@ int main()
 
         Snull<< sf4[1] << endl << endl;
     }
+
+    return 0;
 }
