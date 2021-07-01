@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -449,11 +449,11 @@ const Type& Foam::objectRegistry::lookupObject
 
         FatalErrorInFunction
             << nl
-            << "    lookup of " << name << " from objectRegistry "
+            << "    bad lookup of " << name << " (objectRegistry "
             << this->name()
-            << " successful\n    but it is not a " << Type::typeName
-            << ", it is a " << (*iter)->type()
-            << abort(FatalError);
+            << ")\n    expected a " << Type::typeName
+            << ", found a " << (*iter)->type() << nl
+            << exit(FatalError);
     }
     else if (recursive && this->parentNotTime())
     {
@@ -462,12 +462,12 @@ const Type& Foam::objectRegistry::lookupObject
 
     FatalErrorInFunction
         << nl
-        << "    request for " << Type::typeName
-        << " " << name << " from objectRegistry " << this->name()
-        << " failed\n    available objects of type " << Type::typeName
-        << " are" << nl
-        << names<Type>()
-        << abort(FatalError);
+        << "    failed lookup of " << name << " (objectRegistry "
+        << this->name()
+        << ")\n    available objects of type " << Type::typeName
+        << ':' << nl
+        << names<Type>() << nl
+        << exit(FatalError);
 
     return NullObjectRef<Type>();
 }
