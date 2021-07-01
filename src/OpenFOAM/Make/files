@@ -2,6 +2,7 @@ global/foamConfig.Cver
 global/globals.C
 /* global/constants/constants.C in globals.C */
 /* global/constants/dimensionedConstants.C in globals.C */
+/* global/JobInfo/JobInfo.C in globals.C */
 global/argList/argList.C
 global/argList/argListHelp.C
 global/clock/clock.C

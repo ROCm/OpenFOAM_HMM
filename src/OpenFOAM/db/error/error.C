@@ -199,32 +199,37 @@ Foam::error::operator Foam::dictionary() const
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::error::exitOrAbort(const int errNo, const bool isAbort)
+void Foam::error::exiting(const int errNo, const bool isAbort)
 {
-    if (!throwing_ && JobInfo::constructed)
+    if (throwing_)
+    {
+        if (!isAbort)
+        {
+            // Make a copy of the error to throw
+            error errorException(*this);
+
+            // Reset the message buffer for the next error message
+            messageStreamPtr_->reset();
+
+            throw errorException;
+            return;
+        }
+    }
+    else if (JobInfo::constructed)
     {
         jobInfo.add("FatalError", operator dictionary());
-        if (isAbort || error::useAbort())
-        {
-            jobInfo.abort();
-        }
-        else
-        {
-            jobInfo.exit();
-        }
+        JobInfo::shutdown(isAbort || error::useAbort());
     }
 
-    if (throwing_ && !isAbort)
-    {
-        // Make a copy of the error to throw
-        error errorException(*this);
+    simpleExit(errNo, isAbort);
+}
 
-        // Reset the message buffer for the next error message
-        messageStreamPtr_->reset();
 
-        throw errorException;
-    }
-    else if (error::useAbort())
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::error::simpleExit(const int errNo, const bool isAbort)
+{
+    if (error::useAbort())
     {
         Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
@@ -287,13 +292,13 @@ void Foam::error::clear() const
 
 void Foam::error::exit(const int errNo)
 {
-    exitOrAbort(errNo, false);
+    exiting(errNo, false);
 }
 
 
 void Foam::error::abort()
 {
-    exitOrAbort(1, true);
+    exiting(1, true);
 }
 
 
@@ -345,7 +350,6 @@ void Foam::error::write(Ostream& os, const bool includeTitle) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const error& err)
 {
     err.write(os);
-
     return os;
 }
 

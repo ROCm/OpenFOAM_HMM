@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,13 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    #if 0
+    argList::addBoolOption("no-throw", "Use error, no exceptions");
+    argList::addBoolOption("ioerror", "Use IOerror instead");
+
     argList::noBanner();
     argList args(argc, argv);
 
+    #if 0
     if (true)
     {
         InfoErr<< "Called with " << (args.size()-1) << " args\n";
@@ -49,7 +52,13 @@ int main(int argc, char *argv[])
     }
     #endif
 
-    FatalError.throwExceptions();
+    const bool useIOerr = args.found("ioerror");
+
+    if (!args.found("no-throw"))
+    {
+        FatalIOError.throwExceptions();
+        FatalError.throwExceptions();
+    }
 
     try
     {
@@ -60,17 +69,34 @@ int main(int argc, char *argv[])
 
         IOWarningInFunction(dict) << "warning 3" << endl;
 
-        FatalErrorInFunction
-            << "This is an error from 1" << nl
-            << "Explanation to follow:" << endl;
+        if (useIOerr)
+        {
+            FatalIOErrorInFunction(dict)
+                << "This is an error from 1" << nl
+                << "Explanation to follow:" << endl;
 
-        FatalErrorInFunction
-            << "Error 2"
-            << exit(FatalError);
+            FatalIOError
+                << "Error 2"
+                << exit(FatalIOError);
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "This is an error from 1" << nl
+                << "Explanation to follow:" << endl;
+
+            FatalError
+                << "Error 2"
+                << exit(FatalError);
+        }
+    }
+    catch (const Foam::IOerror& err)
+    {
+        Serr<< "Caught IO error " << err << nl << endl;
     }
     catch (const Foam::error& err)
     {
-        Serr<< "Caught Foam error " << err << nl << endl;
+        Serr<< "Caught error " << err << nl << endl;
     }
 
     try
@@ -79,9 +105,13 @@ int main(int argc, char *argv[])
             << "Error# 3"
             << exit(FatalError);
     }
+    catch (const Foam::IOerror& err)
+    {
+        Serr<< "Caught IO error " << err << nl << endl;
+    }
     catch (const Foam::error& err)
     {
-        Serr<< "Caught Foam error " << err << nl << endl;
+        Serr<< "Caught error " << err << nl << endl;
     }
 
     return 0;

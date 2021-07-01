@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ void Foam::sigInt::sigHandler(int)
 {
     resetHandler("SIGINT", SIGINT);
 
-    jobInfo.signalEnd();        // Update jobInfo file
+    JobInfo::shutdown();        // From running -> finished
     ::raise(SIGINT);            // Throw signal (to old handler)
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,9 +159,7 @@ Foam::IOerror::operator Foam::dictionary() const
 {
     dictionary errDict(error::operator dictionary());
 
-    errDict.remove("type");
-    errDict.add("type", word("Foam::IOerror"));
-
+    errDict.add("type", word("Foam::IOerror"), true);  // overwrite
     errDict.add("ioFileName", ioFileName());
     errDict.add("ioStartLineNumber", ioStartLineNumber());
     errDict.add("ioEndLineNumber", ioEndLineNumber());
@@ -172,75 +170,29 @@ Foam::IOerror::operator Foam::dictionary() const
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::IOerror::exitOrAbort(const int errNo, const bool isAbort)
+void Foam::IOerror::exiting(const int errNo, const bool isAbort)
 {
-    if (!throwing_ && JobInfo::constructed)
+    if (throwing_)
+    {
+        if (!isAbort)
+        {
+            // Make a copy of the error to throw
+            IOerror errorException(*this);
+
+            // Reset the message buffer for the next error message
+            messageStreamPtr_->reset();
+
+            throw errorException;
+            return;
+        }
+    }
+    else if (JobInfo::constructed)
     {
         jobInfo.add("FatalIOError", operator dictionary());
-        if (isAbort || error::useAbort())
-        {
-            jobInfo.abort();
-        }
-        else
-        {
-            jobInfo.exit();
-        }
+        JobInfo::shutdown(isAbort || error::useAbort());
     }
 
-    if (throwing_ && !isAbort)
-    {
-        // Make a copy of the error to throw
-        IOerror errorException(*this);
-
-        // Reset the message buffer for the next error message
-        messageStreamPtr_->reset();
-
-        throw errorException;
-    }
-    else if (error::useAbort())
-    {
-        Perr<< nl << *this << nl
-            << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
-        error::printStack(Perr);
-        std::abort();
-    }
-    else if (Pstream::parRun())
-    {
-        if (isAbort)
-        {
-            Perr<< nl << *this << nl
-                << "\nFOAM parallel run aborting\n" << endl;
-            error::printStack(Perr);
-            Pstream::abort();
-        }
-        else
-        {
-            Perr<< nl << *this << nl
-                << "\nFOAM parallel run exiting\n" << endl;
-            Pstream::exit(errNo);
-        }
-    }
-    else
-    {
-        if (isAbort)
-        {
-            Perr<< nl << *this << nl
-                << "\nFOAM aborting\n" << endl;
-            error::printStack(Perr);
-
-            #ifdef _WIN32
-            std::exit(1);  // Prefer exit() to avoid unnecessary warnings
-            #else
-            std::abort();
-            #endif
-        }
-        else
-        {
-            Perr<< nl << *this << nl
-                << "\nFOAM exiting\n" << endl;
-            std::exit(errNo);
-        }
-    }
+    simpleExit(errNo, isAbort);
 }
 
 
@@ -248,13 +200,13 @@ void Foam::IOerror::exitOrAbort(const int errNo, const bool isAbort)
 
 void Foam::IOerror::exit(const int)
 {
-    exitOrAbort(1, false);
+    exiting(1, false);
 }
 
 
 void Foam::IOerror::abort()
 {
-    exitOrAbort(1, true);
+    exiting(1, true);
 }
 
 
@@ -323,7 +275,6 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& err)
 {
     err.write(os);
-
     return os;
 }
 

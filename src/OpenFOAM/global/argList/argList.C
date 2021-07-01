@@ -486,7 +486,7 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
 
 void Foam::argList::noJobInfo()
 {
-    JobInfo::writeJobInfo = false;
+    JobInfo::disable();
 }
 
 
@@ -1063,12 +1063,9 @@ void Foam::argList::parse
         jobInfo.add("startDate", dateString);
         jobInfo.add("startTime", timeString);
         jobInfo.add("userName", userName());
+
+        jobInfo.add("foamApi", foamVersion::api);
         jobInfo.add("foamVersion", word(foamVersion::version));
-        jobInfo.add("code", executable_);
-        jobInfo.add("argList", commandLine_);
-        jobInfo.add("currentDir", cwd());
-        jobInfo.add("PPID", ppid());
-        jobInfo.add("PGID", pgid());
 
         // Add build information - only use the first word
         {
@@ -1080,6 +1077,12 @@ void Foam::argList::parse
             }
             jobInfo.add("foamBuild", build);
         }
+
+        jobInfo.add("code", executable_);
+        jobInfo.add("argList", commandLine_);
+        jobInfo.add("currentDir", cwd());
+        jobInfo.add("PPID", ppid());
+        jobInfo.add("PGID", pgid());
 
         // Load additional libraries (verbosity according to banner setting)
         libs().open(bannerEnabled());
@@ -1635,7 +1638,7 @@ void Foam::argList::parse
 
 Foam::argList::~argList()
 {
-    jobInfo.end();
+    jobInfo.stop();     // Normal job termination
 
     // Delete file handler to flush any remaining IO
     Foam::fileHandler(nullptr);

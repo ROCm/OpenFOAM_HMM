@@ -127,25 +127,27 @@ public:
         explicit messageStream(const dictionary& dict);
 
 
-    // Member functions
+    // Member Functions
 
         //- The title of this error type
-        const string& title() const
+        const string& title() const noexcept
         {
             return title_;
         }
 
         //- The maximum number of errors before program termination
-        int maxErrors() const
+        int maxErrors() const noexcept
         {
             return maxErrors_;
         }
 
-        //- Non-const access to the maximum number of errors before
-        //- program termination to enable user to reset it
-        int& maxErrors()
+        //- Set the maximum number of errors before program termination
+        //  \return the previous value for maxErrors
+        int maxErrors(int nErrors) noexcept
         {
-            return maxErrors_;
+            int old = maxErrors_;
+            maxErrors_ = nErrors;
+            return old;
         }
 
         //- Convert to OSstream

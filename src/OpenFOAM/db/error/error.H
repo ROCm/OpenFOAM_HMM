@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,8 +75,8 @@ class error
 {
     // Private Member Functions
 
-        //- Common code for exit or abort
-        void exitOrAbort(const int errNo, const bool isAbort);
+        //- Exit or abort code, with exception and jobinfo handling
+        void exiting(const int errNo, const bool isAbort);
 
 
 protected:
@@ -88,6 +88,12 @@ protected:
         label sourceFileLineNumber_;
         bool throwing_;
         std::unique_ptr<OStringStream> messageStreamPtr_;
+
+
+    // Protected Member Functions
+
+        //- Exit or abort, without throwing or job control handling
+        void simpleExit(const int errNo, const bool isAbort);
 
 
 public:
@@ -126,48 +132,34 @@ public:
         //- Clear any messages
         void clear() const;
 
-        const string& functionName() const
+        const string& functionName() const noexcept
         {
             return functionName_;
         }
 
-        const string& sourceFileName() const
+        const string& sourceFileName() const noexcept
         {
             return sourceFileName_;
         }
 
-        label sourceFileLineNumber() const
+        label sourceFileLineNumber() const noexcept
         {
             return sourceFileLineNumber_;
         }
 
-        //- Return the current exception throwing (on or off)
-        bool throwing() const
+        //- Return the current exception throwing state (on or off)
+        bool throwing() const noexcept
         {
             return throwing_;
         }
 
-        //- Activate/deactivate exception throwing
+        //- Specify exception throwing (default is activate)
         //  \return the previous throwing state
-        inline bool throwExceptions(bool doThrow)
+        bool throwExceptions(bool doThrow = true) noexcept
         {
-            const bool prev = throwing_;
+            bool old = throwing_;
             throwing_ = doThrow;
-            return prev;
-        }
-
-        //- Activate exception throwing
-        //  \return the previous throwing state
-        inline bool throwExceptions()
-        {
-            return throwExceptions(true);
-        }
-
-        //- Deactivate exception throwing
-        //  \return the previous throwing state
-        inline bool dontThrowExceptions()
-        {
-            return throwExceptions(false);
+            return old;
         }
 
         //- Define basic print message
@@ -204,7 +196,7 @@ public:
         //- Convert to OSstream
         operator OSstream&();
 
-        //- Create and return a dictionary representation of the error
+        //- Return a dictionary representation of the error
         operator dictionary() const;
 
 
@@ -228,6 +220,16 @@ public:
 
         //- Print error message
         void write(Ostream& os, const bool includeTitle = true) const;
+
+
+    // Housekeeping
+
+        //- Deactivate exception throwing
+        //  \return the previous throwing state
+        bool dontThrowExceptions() noexcept
+        {
+            return throwExceptions(false);
+        }
 };
 
 
@@ -249,8 +251,8 @@ class IOerror
 
     // Private Member Functions
 
-        //- Common code for exit or abort
-        void exitOrAbort(const int errNo, const bool isAbort);
+        //- Exit or abort code, with exception and jobinfo handling
+        void exiting(const int errNo, const bool isAbort);
 
 
 public:
@@ -270,17 +272,17 @@ public:
 
     // Member Functions
 
-        const string& ioFileName() const
+        const string& ioFileName() const noexcept
         {
             return ioFileName_;
         }
 
-        label ioStartLineNumber() const
+        label ioStartLineNumber() const noexcept
         {
             return ioStartLineNumber_;
         }
 
-        label ioEndLineNumber() const
+        label ioEndLineNumber() const noexcept
         {
             return ioEndLineNumber_;
         }
@@ -329,7 +331,7 @@ public:
             const string& msg
         );
 
-        //- Create and return a dictionary representation of the error
+        //- Return a dictionary representation of the error
         operator dictionary() const;
 
 
