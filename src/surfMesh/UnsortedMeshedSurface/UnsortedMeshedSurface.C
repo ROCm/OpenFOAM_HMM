@@ -280,7 +280,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 :
     UnsortedMeshedSurface<Face>()
 {
-    read(is);
+    readIstream(is);
 }
 
 
