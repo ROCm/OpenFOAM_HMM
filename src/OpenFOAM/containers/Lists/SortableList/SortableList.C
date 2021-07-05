@@ -94,20 +94,6 @@ inline Foam::SortableList<T>::SortableList(List<T>&& values)
 
 
 template<class T>
-template<class InputIterator>
-inline Foam::SortableList<T>::SortableList
-(
-    InputIterator begIter,
-    InputIterator endIter
-)
-:
-    List<T>(begIter, endIter)
-{
-    sort();
-}
-
-
-template<class T>
 inline Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
 :
     List<T>(values)
