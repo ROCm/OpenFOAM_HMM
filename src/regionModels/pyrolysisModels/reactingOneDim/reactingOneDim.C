@@ -203,7 +203,7 @@ void reactingOneDim::updateFields()
     }
 
     //Note: Commented out as the sensible gas energy is included in energy eq.
-    //updatePhiGas();
+    updatePhiGas();
 }
 
 
