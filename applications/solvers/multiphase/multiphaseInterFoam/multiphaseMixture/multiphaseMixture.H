@@ -57,6 +57,9 @@ SourceFiles
 namespace Foam
 {
 
+// Class forward declarations
+class alphaContactAngleFvPatchScalarField;
+
 /*---------------------------------------------------------------------------*\
                       Class multiphaseMixture Declaration
 \*---------------------------------------------------------------------------*/
@@ -165,6 +168,15 @@ private:
 
         void correctContactAngle
         (
+            const phase& alpha1,
+            const phase& alpha2,
+            surfaceVectorField::Boundary& nHatb
+        ) const;
+
+        void correctBoundaryContactAngle
+        (
+            const alphaContactAngleFvPatchScalarField& acap,
+            label patchi,
             const phase& alpha1,
             const phase& alpha2,
             surfaceVectorField::Boundary& nHatb
