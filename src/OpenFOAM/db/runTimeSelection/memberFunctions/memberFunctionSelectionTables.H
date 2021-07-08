@@ -46,8 +46,12 @@ Description
     typedef returnType (*memberFunction##argNames##MemberFunctionPtr)argList;  \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable<memberFunction##argNames##MemberFunctionPtr, word>       \
-        memberFunction##argNames##MemberFunctionTable;                         \
+    typedef HashTable                                                          \
+    <                                                                          \
+        memberFunction##argNames##MemberFunctionPtr,                           \
+        ::Foam::word,                                                          \
+        ::Foam::string::hasher                                                 \
+    > memberFunction##argNames##MemberFunctionTable;                           \
                                                                                \
     /* Construct from argList function pointer table pointer */                \
     static memberFunction##argNames##MemberFunctionTable*                      \
@@ -61,7 +65,7 @@ Description
                                                                                \
         explicit add##memberFunction##argNames##MemberFunctionToTable          \
         (                                                                      \
-            const word& lookup = baseType##Type::typeName                      \
+            const ::Foam::word& lookup = baseType##Type::typeName              \
         )                                                                      \
         {                                                                      \
             construct##memberFunction##argNames##MemberFunctionTables();       \
