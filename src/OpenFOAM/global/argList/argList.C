@@ -194,21 +194,6 @@ Foam::argList::initValidTables dummyInitValidTables;
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace
-{
-
-// Should issue warning if there is +ve versioning (+ve version number)
-// and the this version number is older than the current OpenFOAM version
-// as conveyed by the OPENFOAM compiler define.
-
-static inline constexpr bool shouldWarnVersion(const int version)
-{
-    return (version > 0 && version < OPENFOAM);
-}
-
-} // End anonymous namespace
-
-
 namespace Foam
 {
 
@@ -553,22 +538,22 @@ Foam::word Foam::argList::optionCompat(const word& optName)
 
         if (fnd.found())
         {
-            const auto& iter = *fnd;
+            const auto& alt = fnd.val();
 
-            if (shouldWarnVersion(iter.second))
+            if (error::warnAboutAge(alt.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Found [v" << iter.second << "] '"
+                    << "    Found [v" << alt.second << "] '"
                     << optName << "' instead of '-"
-                    << iter.first << "' option"
+                    << alt.first << "' option"
                     << nl
                     << std::endl;
 
-                error::warnAboutAge("option", iter.second);
+                error::warnAboutAge("option", alt.second);
             }
 
-            return "-" + iter.first;
+            return "-" + alt.first;
         }
     }
 
@@ -587,23 +572,23 @@ int Foam::argList::optionIgnore(const word& optName)
 
         if (fnd.found())
         {
-            const auto& iter = *fnd;
+            const auto& alt = fnd.val();
 
             // Number to skip (including the option itself)
             // '-option ARG' or '-option'
-            const int nskip = (iter.first ? 2 : 1);
+            const int nskip = (alt.first ? 2 : 1);
 
-            if (shouldWarnVersion(iter.second))
+            if (error::warnAboutAge(alt.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Ignoring [v" << iter.second << "] '-"
+                    << "    Ignoring [v" << alt.second << "] '-"
                     << optName << (nskip > 1 ? " ARG" : "")
                     << "' option"
                     << nl
                     << std::endl;
 
-                error::warnAboutAge("option", iter.second);
+                error::warnAboutAge("option", alt.second);
             }
 
             return nskip;

@@ -116,12 +116,18 @@ public:
 
     // Static Functions
 
+        //- Test if an age warning should be emitted.
+        //  \param version is the old version (YYMM) for determining the
+        //      age in months compared to the current OpenFOAM version
+        //      as conveyed by the \c foamVersion::api value.
+        static bool warnAboutAge(const int version) noexcept;
+
         //- Emit warning on stderr about something being old.
         //  \param what description for the warning
         //  \param version is the old version (YYMM) for determining the
         //      age in months compared to the current OpenFOAM version
         //      as conveyed by the \c foamVersion::api value.
-        static void warnAboutAge(const char* what, const int version);
+        static bool warnAboutAge(const char* what, const int version);
 
 
     // Member Functions

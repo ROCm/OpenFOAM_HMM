@@ -272,6 +272,7 @@ namespace Detail
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Previously excluded (via token.H)
 #ifdef NoRepository
     #include "HashTable.C"
 #endif

@@ -943,7 +943,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifndef NoHashTableC
+#ifndef NoHashTableC  // Excluded from token.H
 #ifdef NoRepository
     #include "HashTable.C"
 #endif

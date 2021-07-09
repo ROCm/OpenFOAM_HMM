@@ -38,21 +38,23 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::error::warnAboutAge(const char* what, const int version)
+bool Foam::error::warnAboutAge(const int version) noexcept
 {
-    if (version <= 0)
-    {
-        // No warning for 0 (unversioned) or -ve values (silent versioning)
-    }
-    else if (version < 1000)
-    {
-        // Warning for things that predate the YYMM versioning
-        // (eg, 240 for version 2.4)
-        std::cerr
-            << "    This " << what << " is very old.\n"
-            << std::endl;
-    }
-    else if (version < foamVersion::api)
+    // No warning for 0 (unversioned) or -ve values (silent versioning)
+    return ((version > 0) && (version < foamVersion::api));
+}
+
+
+bool Foam::error::warnAboutAge(const char* what, const int version)
+{
+    // No warning for 0 (unversioned) or -ve values (silent versioning)
+    const bool old = ((version > 0) && (version < foamVersion::api));
+
+    // Note:
+    // No warning for (version >= foamVersion::api), which
+    // can be used to denote future expiry dates of transition features.
+
+    if (old)
     {
         const int months =
         (
@@ -61,12 +63,22 @@ void Foam::error::warnAboutAge(const char* what, const int version)
           - (12 * (version/100)  + (version % 100))
         );
 
-        std::cerr
-            << "    This " << what << " is " << months << " months old.\n"
-            << std::endl;
+        if (version < 1000)
+        {
+            // For things that predate YYMM versioning (eg, 240 for version 2.4)
+            std::cerr
+                << "    This " << what << " is very old.\n"
+                << std::endl;
+        }
+        else
+        {
+            std::cerr
+                << "    This " << what << " is " << months << " months old.\n"
+                << std::endl;
+        }
     }
-    // No warning for (foamVersion::api < version).
-    // We use this to denote future expiry dates of transition features.
+
+    return old;
 }
 
 
