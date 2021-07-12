@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,19 +42,6 @@ namespace regionModels
 defineTypeNameAndDebug(thermalShellModel, 0);
 
 defineRunTimeSelectionTable(thermalShellModel, dictionary);
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-bool thermalShellModel::read(const dictionary& dict)
-{
-    if (regionFaModel::read(dict))
-    {
-        return true;
-    }
-
-    return false;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -93,24 +80,6 @@ thermalShellModel::thermalShellModel
 
 void thermalShellModel::preEvolveRegion()
 {}
-
-
-const Foam::volScalarField& thermalShellModel::Tp() const
-{
-    return Tp_;
-}
-
-
-const Foam::areaScalarField& thermalShellModel::T() const
-{
-    return T_;
-}
-
-
-Foam::fa::options& thermalShellModel::faOptions()
-{
-     return faOptions_;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
