@@ -43,15 +43,54 @@ defineTypeNameAndDebug(thermalShell, 0);
 
 addToRunTimeSelectionTable(thermalShellModel, thermalShell, dictionary);
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool thermalShell::read(const dictionary& dict)
+bool thermalShell::init(const dictionary& dict)
 {
+    if (thickness_ > 0)
+    {
+        h_ = dimensionedScalar("thickness", dimLength, thickness_);
+    }
+
     this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
 
     return true;
 }
 
+
+tmp<areaScalarField> thermalShell::qr()
+{
+    IOobject io
+    (
+        "tqr",
+        primaryMesh().time().timeName(),
+        primaryMesh()
+    );
+
+    auto taqr =
+        tmp<areaScalarField>::New
+        (
+            io,
+            regionMesh(),
+            dimensionedScalar(dimPower/dimArea, Zero)
+        );
+
+    if (qrName_ != "none")
+    {
+        auto& aqr = taqr.ref();
+
+        const auto qr = primaryMesh().lookupObject<volScalarField>(qrName_);
+
+        const volScalarField::Boundary& vqr = qr.boundaryField();
+
+        aqr.primitiveFieldRef() = vsm().mapToSurface<scalar>(vqr);
+    }
+
+    return taqr;
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void thermalShell::solveEnergy()
 {
@@ -68,7 +107,7 @@ void thermalShell::solveEnergy()
       - fam::laplacian(kappa()*h_, T_)
      ==
         qs_
-      //+ q(T_) handled by faOption contactHeatFlux
+      + qr()
       + faOptions()(h_, rhoCph, T_)
     );
 
@@ -118,17 +157,15 @@ thermalShell::thermalShell
             IOobject::AUTO_WRITE
         ),
         regionMesh()
-    )
+    ),
+    qrName_(dict.getOrDefault<word>("qr", "none")),
+    thickness_(dict.getOrDefault<scalar>("thickness", 0))
 {
-    init();
+    init(dict);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-void thermalShell::init()
-{}
-
 
 void thermalShell::preEvolveRegion()
 {}
