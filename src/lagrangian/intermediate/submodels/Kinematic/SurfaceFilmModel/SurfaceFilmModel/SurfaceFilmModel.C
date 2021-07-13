@@ -27,8 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SurfaceFilmModel.H"
-#include "surfaceFilmRegionModel.H"
 #include "mathematicalConstants.H"
+#include "surfaceFilmRegionModel.H"
+#include "liquidFilmBase.H"
 
 using namespace Foam::constant;
 
@@ -103,6 +104,64 @@ Foam::SurfaceFilmModel<CloudType>::~SurfaceFilmModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+template<class CloudTrackType>
+void Foam::SurfaceFilmModel<CloudType>::injectParticles
+(
+    const label primaryPatchi,
+    const labelList& injectorCellsPatch,
+    CloudTrackType& cloud
+)
+{
+    const fvMesh& mesh = this->owner().mesh();
+    const vectorField& Cf = mesh.C().boundaryField()[primaryPatchi];
+    const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchi];
+    const scalarField& magSf =
+        mesh.magSf().boundaryField()[primaryPatchi];
+
+    forAll(injectorCellsPatch, j)
+    {
+        if (diameterParcelPatch_[j] > 0)
+        {
+            const label celli = injectorCellsPatch[j];
+
+            const scalar offset =
+                max
+                (
+                    diameterParcelPatch_[j],
+                    deltaFilmPatch_[primaryPatchi][j]
+                );
+            const point pos = Cf[j] - 1.1*offset*Sf[j]/magSf[j];
+
+            // Create a new parcel
+            parcelType* pPtr =
+                new parcelType(this->owner().pMesh(), pos, celli);
+
+            // Check/set new parcel thermo properties
+            cloud.setParcelThermoProperties(*pPtr, 0.0);
+
+            setParcelProperties(*pPtr, j);
+
+            if (pPtr->nParticle() > 0.001)
+            {
+                // Check new parcel properties
+//                cloud.checkParcelProperties(*pPtr, 0.0, true);
+                cloud.checkParcelProperties(*pPtr, 0.0, false);
+
+                // Add the new parcel to the cloud
+                cloud.addParticle(pPtr);
+
+                nParcelsInjected_++;
+            }
+            else
+            {
+                // TODO: cache mass and re-distribute?
+                delete pPtr;
+            }
+        }
+    }
+}
+
+template<class CloudType>
 template<class TrackCloudType>
 void Foam::SurfaceFilmModel<CloudType>::inject(TrackCloudType& cloud)
 {
@@ -111,78 +170,63 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackCloudType& cloud)
         return;
     }
 
+    const fvMesh& mesh = this->owner().mesh();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
     // Retrieve the film model from the owner database
-    const regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel =
-        this->owner().mesh().time().objectRegistry::template lookupObject
+    const regionModels::surfaceFilmModels::surfaceFilmRegionModel* filmModel =
+        mesh.time().objectRegistry::template findObject
         <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
         (
             "surfaceFilmProperties"
         );
 
-    if (!filmModel.active())
+    // Check the singleLayer type of films
+    if (filmModel && filmModel->active())
     {
-        return;
+
+        const labelList& filmPatches = filmModel->intCoupledPatchIDs();
+        const labelList& primaryPatches = filmModel->primaryPatchIDs();
+
+        forAll(filmPatches, i)
+        {
+            const label filmPatchi = filmPatches[i];
+            const label primaryPatchi = primaryPatches[i];
+
+            const labelList& injectorCellsPatch = pbm[primaryPatchi].faceCells();
+
+            cacheFilmFields(filmPatchi, primaryPatchi, *filmModel);
+
+            injectParticles(primaryPatchi, injectorCellsPatch, cloud);
+        }
     }
 
-    const labelList& filmPatches = filmModel.intCoupledPatchIDs();
-    const labelList& primaryPatches = filmModel.primaryPatchIDs();
+    // Check finite area films
+    wordList names =
+        mesh.time().objectRegistry::template
+            sortedNames<regionModels::regionFaModel>();
 
-    const fvMesh& mesh = this->owner().mesh();
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    forAll(filmPatches, i)
+    forAll (names, i)
     {
-        const label filmPatchi = filmPatches[i];
-        const label primaryPatchi = primaryPatches[i];
+        const regionModels::regionFaModel* regionFa =
+            mesh.time().objectRegistry::template cfindObject
+            <
+                regionModels::regionFaModel
+            >(names[i]);
 
-        const labelList& injectorCellsPatch = pbm[primaryPatchi].faceCells();
-
-        cacheFilmFields(filmPatchi, primaryPatchi, filmModel);
-
-        const vectorField& Cf = mesh.C().boundaryField()[primaryPatchi];
-        const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchi];
-        const scalarField& magSf = mesh.magSf().boundaryField()[primaryPatchi];
-
-        forAll(injectorCellsPatch, j)
+        // Check that it is a type areaFilm
+        if (regionFa && isA<areaFilm>(*regionFa))
         {
-            if (diameterParcelPatch_[j] > 0)
-            {
-                const label celli = injectorCellsPatch[j];
+            areaFilm& film =
+                const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
 
-                const scalar offset =
-                    max
-                    (
-                        diameterParcelPatch_[j],
-                        deltaFilmPatch_[primaryPatchi][j]
-                    );
-                const point pos = Cf[j] - 1.1*offset*Sf[j]/magSf[j];
+            const label patchId = regionFa->patchID();
 
-                // Create a new parcel
-                parcelType* pPtr =
-                    new parcelType(this->owner().pMesh(), pos, celli);
+            const labelList& injectorCellsPatch = pbm[patchId].faceCells();
 
-                // Check/set new parcel thermo properties
-                cloud.setParcelThermoProperties(*pPtr, 0.0);
+            cacheFilmFields(patchId, film);
 
-                setParcelProperties(*pPtr, j);
-
-                if (pPtr->nParticle() > 0.001)
-                {
-                    // Check new parcel properties
-    //                cloud.checkParcelProperties(*pPtr, 0.0, true);
-                    cloud.checkParcelProperties(*pPtr, 0.0, false);
-
-                    // Add the new parcel to the cloud
-                    cloud.addParticle(pPtr);
-
-                    nParcelsInjected_++;
-                }
-                else
-                {
-                    // TODO: cache mass and re-distribute?
-                    delete pPtr;
-                }
-            }
+            injectParticles(patchId, injectorCellsPatch, cloud);
         }
     }
 }
@@ -212,6 +256,35 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
     deltaFilmPatch_[primaryPatchi] =
         filmModel.delta().boundaryField()[filmPatchi];
     filmModel.toPrimary(filmPatchi, deltaFilmPatch_[primaryPatchi]);
+}
+
+
+template<class CloudType>
+void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
+(
+    const label filmPatchi,
+    const regionModels::areaSurfaceFilmModels::liquidFilmBase& filmModel
+)
+{
+    // WIP: the finite area film does not support splashing so far
+    //massParcelPatch_ = filmModel.cloudMassTrans().boundaryField()[filmPatchi];
+    //filmModel.toPrimary(filmPatchi, massParcelPatch_);
+    massParcelPatch_.setSize(filmModel.Uf().size(), Zero);
+    diameterParcelPatch_.setSize(filmModel.Uf().size(), Zero);
+    //    filmModel.cloudDiameterTrans().boundaryField()[filmPatchi];
+    //filmModel.toPrimary(filmPatchi, diameterParcelPatch_, maxEqOp<scalar>());
+    const volSurfaceMapping& map = filmModel.region().vsm();
+
+    UFilmPatch_.setSize(filmModel.Uf().size(), Zero);
+    map.mapToField(filmModel.Uf(), UFilmPatch_);
+    //filmModel.toPrimary(filmPatchi, UFilmPatch_);
+
+    rhoFilmPatch_.setSize(UFilmPatch_.size(), Zero);
+    map.mapToField(filmModel.rho(), rhoFilmPatch_);
+    //filmModel.toPrimary(filmPatchi, rhoFilmPatch_);
+
+    deltaFilmPatch_[filmPatchi].setSize(UFilmPatch_.size(), Zero);
+    map.mapToField(filmModel.h(), deltaFilmPatch_[filmPatchi]);
 }
 
 

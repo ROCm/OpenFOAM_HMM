@@ -60,6 +60,15 @@ namespace regionModels
     }
 }
 
+namespace regionModels
+{
+    namespace areaSurfaceFilmModels
+    {
+        class liquidFilmBase;
+    }
+}
+
+
 /*---------------------------------------------------------------------------*\
                       Class SurfaceFilmModel Declaration
 \*---------------------------------------------------------------------------*/
@@ -75,6 +84,9 @@ protected:
 
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
+
+        typedef typename
+            regionModels::areaSurfaceFilmModels::liquidFilmBase areaFilm;
 
         //- Gravitational acceleration constant
         const dimensionedVector& g_;
@@ -94,13 +106,13 @@ protected:
             scalarList diameterParcelPatch_;
 
             //- Film velocity / patch face
-            List<vector> UFilmPatch_;
+            Field<vector> UFilmPatch_;
 
             //- Film density / patch face
-            scalarList rhoFilmPatch_;
+            scalarField rhoFilmPatch_;
 
             //- Film height of all film patches / patch face
-            scalarListList deltaFilmPatch_;
+            Field<scalarField> deltaFilmPatch_;
 
 
         // Counters
@@ -120,6 +132,22 @@ protected:
             const label filmPatchi,
             const label primaryPatchi,
             const regionModels::surfaceFilmModels::surfaceFilmRegionModel&
+        );
+
+        //- Cache the finite area film fields in preparation for injection
+        virtual void cacheFilmFields
+        (
+            const label primaryPatchi,
+            const regionModels::areaSurfaceFilmModels::liquidFilmBase&
+        );
+
+        //- Inject particles in cloud
+        template<class TrackCloudType>
+        void injectParticles
+        (
+            const label primaryPatchi,
+            const labelList& injectorCellsPatch,
+            TrackCloudType& cloud
         );
 
         //- Set the individual parcel properties

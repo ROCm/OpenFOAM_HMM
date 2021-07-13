@@ -61,6 +61,22 @@ SourceFiles
 namespace Foam
 {
 
+//Forward declaration of classes
+namespace regionModels
+{
+    namespace surfaceFilmModels
+    {
+        class surfaceFilmRegionModel;
+    }
+}
+namespace regionModels
+{
+    namespace areaSurfaceFilmModels
+    {
+        class liquidFilmBase;
+    }
+}
+
 /*---------------------------------------------------------------------------*\
                       Class ThermoSurfaceFilm Declaration
 \*---------------------------------------------------------------------------*/
@@ -102,20 +118,26 @@ protected:
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
 
+        typedef typename
+            regionModels::areaSurfaceFilmModels::liquidFilmBase areaFilm;
+
         //- Reference to the cloud random number generator
         Random& rndGen_;
 
         //- Reference to the cloud thermo package
         const SLGThermo& thermo_;
 
+        //- Pointer to filmModel
+        regionModels::surfaceFilmModels::surfaceFilmRegionModel* filmModel_;
+
 
         // Cached injector fields per film patch
 
             //- Film temperature / patch face
-            scalarList TFilmPatch_;
+            scalarField TFilmPatch_;
 
             //- Film specific heat capacity / patch face
-            scalarList CpFilmPatch_;
+            scalarField CpFilmPatch_;
 
 
         // Interaction model data
@@ -173,7 +195,18 @@ protected:
             //- Absorb parcel into film
             void absorbInteraction
             (
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                const parcelType& p,
+                const polyPatch& pp,
+                const label facei,
+                const scalar mass,
+                bool& keepParticle
+            );
+
+            //- Absorb parcel into area film
+            void absorbInteraction
+            (
+                areaFilm&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -193,7 +226,7 @@ protected:
             //- Parcel interaction with dry surface
             void drySplashInteraction
             (
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -203,7 +236,7 @@ protected:
             //- Parcel interaction with wetted surface
             void wetSplashInteraction
             (
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
                 parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -213,7 +246,7 @@ protected:
             //- Bai parcel splash interaction model
             void splashInteraction
             (
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -224,17 +257,23 @@ protected:
                 bool& keepParticle
             );
 
+            virtual void cacheFilmFields
+            (
+                const label primaryPatchi,
+                const areaFilm&
+            );
 
         // Injection from sheet (ejection) helper functions
 
-            //- Cache the film fields in preparation for injection
+             //- Cache the film fields in preparation for injection
             virtual void cacheFilmFields
             (
                 const label filmPatchi,
                 const label primaryPatchi,
                 const regionModels::surfaceFilmModels::surfaceFilmRegionModel&
-                    filmModel
             );
+
+
 
             //- Set the individual parcel properties
             virtual void setParcelProperties

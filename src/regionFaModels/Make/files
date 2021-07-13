@@ -13,4 +13,15 @@ KirchhoffShell/KirchhoffShell.C
 derivedFvPatchFields/thermalShell/thermalShellFvPatchScalarField.C
 derivedFvPatchFields/vibrationShell/vibrationShellFvPatchScalarField.C
 
+liquidFilm/liquidFilmBase.C
+liquidFilm/liquidFilmBaseNew.C
+liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.C
+liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModelNew.C
+liquidFilm/subModels/kinematic/filmTurbulenceModel/laminar/laminar.C
+liquidFilm/liquidFilmModel/liquidFilmModel.C
+liquidFilm/kinematicThinFilm/kinematicThinFilm.C
+derivedFvPatchFields/filmShell/velocityFilmShellFvPatchVectorField.C
+
+functionObjects/setTimeStep/setTimeStepFaRegionsFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libregionFaModels
