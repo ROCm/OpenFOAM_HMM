@@ -93,7 +93,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
     Info<< "Selecting chemistry solver " << chemistryTypeDictNew << endl;
 
-    auto* cstrTable = ChemistryModel::thermoConstructorTablePtr_;
+    const auto& cnstrTable = *(ChemistryModel::thermoConstructorTablePtr_);
 
     const word chemSolverCompThermoName
     (
@@ -102,7 +102,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
       + thermo.thermoName() + ">>"
     );
 
-    auto cstrIter = cstrTable->cfind(chemSolverCompThermoName);
+    auto cstrIter = cnstrTable.cfind(chemSolverCompThermoName);
 
     if (!cstrIter.found())
     {
@@ -142,7 +142,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             })
         );
 
-        for (const word& validName : cstrTable->sortedToc())
+        for (const word& validName : cnstrTable.sortedToc())
         {
             validCmpts.append
             (

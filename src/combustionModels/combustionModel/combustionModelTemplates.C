@@ -73,9 +73,6 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
             << "combustion model " << combModelName << "." << endl;
     }
 
-    typedef typename CombustionModel::dictionaryConstructorTable cstrTableType;
-    cstrTableType* cstrTable = CombustionModel::dictionaryConstructorTablePtr_;
-
     const word compCombModelName
     (
         combModelName + '<' + CombustionModel::reactionThermo::typeName + '>'
@@ -87,9 +84,12 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
       + thermo.thermoName() + '>'
     );
 
-    auto compCstrIter = cstrTable->cfind(compCombModelName);
 
-    auto thermoCstrIter = cstrTable->cfind(thermoCombModelName);
+    const auto& cnstrTable = *(CombustionModel::dictionaryConstructorTablePtr_);
+
+    auto compCstrIter = cnstrTable.cfind(compCombModelName);
+
+    auto thermoCstrIter = cnstrTable.cfind(thermoCombModelName);
 
     if (!compCstrIter.found() && !thermoCstrIter.found())
     {
@@ -129,7 +129,7 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
             })
         );
 
-        for (const word& validName : cstrTable->sortedToc())
+        for (const word& validName : cnstrTable.sortedToc())
         {
             wordList cmpts(basicThermo::splitThermoName(validName, 2));
 
@@ -163,7 +163,7 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
         (
             combustionModel::typeName,
             combModelName,
-            *cstrTable
+            cnstrTable
         )
             << "All " << validCmpts2[0][0] << '/' << validCmpts2[0][1]
             << " combinations are:" << nl << nl;

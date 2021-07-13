@@ -28,6 +28,7 @@ License
 
 #include "phaseChangeTwoPhaseMixture.H"
 #include "incompressibleTwoPhaseMixture.H"
+#include "surfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

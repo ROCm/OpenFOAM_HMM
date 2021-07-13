@@ -33,6 +33,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Table.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #define makePatchFunction1s(Type)                                              \
     makePatchFunction1(Type);                                                  \
     makePatchFunction1Type(ConstantField, Type);                               \
@@ -124,42 +126,30 @@ namespace Foam
     ////  This does not work because we cannot guarantee that the Function1
     ////  static initialisation has happened already.
     //template<class Type>
-    //class addToUniform
+    //struct addToUniform
     //{
-    //public:
     //    addToUniform()
     //    {
     //        // Get the Function1 table
-    //        typedef typename Function1<Type>::dictionaryConstructorTable
-    //            F1Type;
     //        Function1<Type>::constructdictionaryConstructorTables();
-    //        const F1Type& F1Table =
+    //        const auto& F1Table =
     //            *Function1<Type>::dictionaryConstructorTablePtr_;
     //
     //        // Get the PatchFunction1 table
-    //        typedef typename PatchFunction1<Type>::dictionaryConstructorTable
-    //            PF1Type;
-    //
     //        PatchFunction1<Type>::constructdictionaryConstructorTables();
-    //        PF1Type& PF1Table =
+    //        auto& PF1Table =
     //            *PatchFunction1<Type>::dictionaryConstructorTablePtr_;
     //
     //        // Get the UniformValueField constructor
-    //        auto cstrIter =
-    //            PatchFunction1<Type>::dictionaryConstructorTablePtr_->cfind
-    //            (
-    //                PatchFunction1Types::UniformValueField<Type>::typeName
-    //            );
+    //        auto cstrIter = PF1Table.cfind
+    //        (
+    //            PatchFunction1Types::UniformValueField<Type>::typeName
+    //        );
     //
     //        // Add the UniformValueField under the Function1 name
     //        forAllConstIters(F1Table, iter)
     //        {
-    //            //bool ok =
     //            PF1Table.insert(iter.key(), cstrIter());
-    //            //if (!ok)
-    //            //{
-    //            //    std::cout<< "** problem" << std::endl;
-    //            //}
     //        }
     //    }
     //};
