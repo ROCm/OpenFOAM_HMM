@@ -55,6 +55,7 @@ SourceFiles
 #define ThermoSurfaceFilm_H
 
 #include "SurfaceFilmModel.H"
+#include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,6 +122,9 @@ protected:
         typedef typename
             regionModels::areaSurfaceFilmModels::liquidFilmBase areaFilm;
 
+        typedef typename
+            regionModels::surfaceFilmModels::surfaceFilmRegionModel regionFilm;
+
         //- Reference to the cloud random number generator
         Random& rndGen_;
 
@@ -128,8 +132,10 @@ protected:
         const SLGThermo& thermo_;
 
         //- Pointer to filmModel
-        regionModels::surfaceFilmModels::surfaceFilmRegionModel* filmModel_;
+        regionFilm* filmModel_;
 
+        //- UPointers to area films
+        UPtrList<areaFilm> areaFilms_;
 
         // Cached injector fields per film patch
 
@@ -189,24 +195,17 @@ protected:
             const vector& nf
         ) const;
 
+        //- Init films pointers
+        void init();
+
 
         // Interaction models
 
             //- Absorb parcel into film
+            template<class filmType>
             void absorbInteraction
             (
-                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
-                const parcelType& p,
-                const polyPatch& pp,
-                const label facei,
-                const scalar mass,
-                bool& keepParticle
-            );
-
-            //- Absorb parcel into area film
-            void absorbInteraction
-            (
-                areaFilm&,
+                filmType&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -224,9 +223,10 @@ protected:
             ) const;
 
             //- Parcel interaction with dry surface
+            template<class filmType>
             void drySplashInteraction
             (
-                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                filmType&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -234,9 +234,10 @@ protected:
             );
 
             //- Parcel interaction with wetted surface
+            template<class filmType>
             void wetSplashInteraction
             (
-                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                filmType&,
                 parcelType& p,
                 const polyPatch& pp,
                 const label facei,
@@ -244,9 +245,10 @@ protected:
             );
 
             //- Bai parcel splash interaction model
+            template<class filmType>
             void splashInteraction
             (
-                //regionModels::surfaceFilmModels::surfaceFilmRegionModel&,
+                filmType&,
                 const parcelType& p,
                 const polyPatch& pp,
                 const label facei,

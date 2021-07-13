@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "laminar.H"
-#include "addToRunTimeSelectionTable.H"
-
+#include "injectionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,71 +38,62 @@ namespace areaSurfaceFilmModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(filmTurbulenceModel, laminar, dictionary);
+defineTypeNameAndDebug(injectionModel, 0);
+defineRunTimeSelectionTable(injectionModel, dictionary);
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void injectionModel::addToInjectedMass(const scalar dMass)
+{
+    injectedMass_ += dMass;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-laminar::laminar
+injectionModel::injectionModel(liquidFilmBase& film)
+:
+    filmSubModelBase(film),
+    injectedMass_(0.0)
+{}
+
+
+injectionModel::injectionModel
 (
+    const word& modelType,
     liquidFilmBase& film,
     const dictionary& dict
 )
 :
-    filmTurbulenceModel(type(), film, dict),
-    Cf_(dict_.get<scalar>("Cf"))
+    filmSubModelBase(film, dict, typeName, modelType),
+    injectedMass_(0.0)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-laminar::~laminar()
+injectionModel::~injectionModel()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<areaScalarField> laminar::mut() const
+void injectionModel::correct()
 {
-    auto tmut =
-        tmp<areaScalarField>::New
-        (
-            IOobject
-            (
-                "mut",
-                film().primaryMesh().time().timeName(),
-                film().primaryMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            film().regionMesh(),
-            dimensionedScalar(dimMass/dimLength/dimTime)
-        );
-
-    return tmut;
+    if (writeTime())
+    {
+        scalar injectedMass0 = getModelProperty<scalar>("injectedMass");
+        injectedMass0 += returnReduce(injectedMass_, sumOp<scalar>());
+        setModelProperty<scalar>("injectedMass", injectedMass0);
+        injectedMass_ = 0.0;
+    }
 }
 
 
-void laminar::correct()
-{}
-
-
-tmp<faVectorMatrix> laminar::Su(areaVectorField& U) const
+scalar injectionModel::injectedMassTotal() const
 {
-    // local references to film fields
-    tmp<areaVectorField> Uw = film_.Uw();
-    tmp<areaVectorField> Up = film_.Up();
-
-    // employ simple coeff-based model
-    const dimensionedScalar Cf("Cf", dimVelocity, Cf_);
-
-    tmp<areaScalarField> wf = Cw();
-
-    return
-    (
-       - fam::Sp(Cf, U) + Cf*Up()     // surface contribution
-       - fam::Sp(wf(), U) + wf()*Uw() // wall contribution
-    );
+    const scalar injectedMass0 = getModelProperty<scalar>("injectedMass");
+    return injectedMass0 + returnReduce(injectedMass_, sumOp<scalar>());
 }
 
 

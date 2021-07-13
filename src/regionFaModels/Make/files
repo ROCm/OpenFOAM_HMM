@@ -15,9 +15,25 @@ derivedFvPatchFields/vibrationShell/vibrationShellFvPatchScalarField.C
 
 liquidFilm/liquidFilmBase.C
 liquidFilm/liquidFilmBaseNew.C
+
+/* Sub-Model */
+
 liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.C
 liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModelNew.C
 liquidFilm/subModels/kinematic/filmTurbulenceModel/laminar/laminar.C
+
+liquidFilm/subModels/kinematic/injectionModel/injectionModelList/injectionModelList.C
+
+liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModel.C
+liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModelNew.C
+
+liquidFilm/subModels/kinematic/injectionModel/curvatureSeparation/curvatureSeparation.C
+
+liquidFilm/subModels/filmSubModelBase.C
+
+liquidFilm/liquidFilmBase.C
+liquidFilm/liquidFilmBaseNew.C
+
 liquidFilm/liquidFilmModel/liquidFilmModel.C
 liquidFilm/kinematicThinFilm/kinematicThinFilm.C
 derivedFvPatchFields/filmShell/velocityFilmShellFvPatchVectorField.C

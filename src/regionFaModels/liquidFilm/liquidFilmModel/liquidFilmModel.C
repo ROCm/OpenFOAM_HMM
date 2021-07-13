@@ -31,6 +31,7 @@ License
 #include "gravityMeshObject.H"
 #include "volFields.H"
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -61,6 +62,7 @@ void liquidFilmModel::correctThermoFields()
         rho_[faceI] = thermo_.rho(pRef_, Tf_[faceI], X);
         mu_[faceI] = thermo_.mu(pRef_, Tf_[faceI], X);
         sigma_[faceI] = thermo_.sigma(pRef_, Tf_[faceI], X);
+        Cp_[faceI] = thermo_.Cp(pRef_, Tf_[faceI], X);
     }
 
     forAll (regionMesh().boundary(), patchI)
@@ -70,14 +72,19 @@ void liquidFilmModel::correctThermoFields()
         scalarField& patchRho = rho_.boundaryFieldRef()[patchI];
         scalarField& patchmu = mu_.boundaryFieldRef()[patchI];
         scalarField& patchsigma = sigma_.boundaryFieldRef()[patchI];
+        scalarField& patchCp = Cp_.boundaryFieldRef()[patchI];
 
         forAll(patchRho, edgeI)
         {
             patchRho[edgeI] = thermo_.rho(pRef_, patchTf[edgeI], X);
             patchmu[edgeI] = thermo_.mu(pRef_, patchTf[edgeI], X);
             patchsigma[edgeI] = thermo_.sigma(pRef_, patchTf[edgeI], X);
+            patchCp[edgeI] = thermo_.Cp(pRef_, patchTf[edgeI], X);
         }
     }
+
+    //Initialize pf_
+    pf_ = rho_*gn_*h_ - sigma_*fac::laplacian(h_);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -119,6 +126,32 @@ liquidFilmModel::liquidFilmModel
         regionMesh(),
         dimensionedScalar(dimViscosity, Zero)
     ),
+    Tf_
+    (
+        IOobject
+        (
+            "Tf_" + regionName_,
+            primaryMesh().time().timeName(),
+            primaryMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar(dimTemperature, Zero)
+    ),
+    Cp_
+    (
+        IOobject
+        (
+            "Cp_" + regionName_,
+            primaryMesh().time().timeName(),
+            primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar(dimEnergy/dimTemperature, Zero)
+    ),
     sigma_
     (
         IOobject
@@ -151,7 +184,9 @@ liquidFilmModel::liquidFilmModel
         (
             "rhoSp",
             primaryMesh().time().timeName(),
-            primaryMesh()
+            primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         regionMesh(),
         dimensionedScalar(dimVelocity, Zero)
@@ -178,8 +213,49 @@ liquidFilmModel::liquidFilmModel
         regionMesh(),
         dimensionedScalar(dimPressure, Zero)
     ),
-    turbulence_(filmTurbulenceModel::New(*this, dict))
+    cloudMassTrans_
+    (
+        IOobject
+        (
+            "cloudMassTrans",
+            primaryMesh().time().timeName(),
+            primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        primaryMesh(),
+        dimensionedScalar(dimMass, Zero),
+        calculatedFvPatchField<scalar>::typeName
+    ),
+
+    cloudDiameterTrans_
+    (
+        IOobject
+        (
+            "cloudDiameterTrans",
+            primaryMesh().time().timeName(),
+            primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        primaryMesh(),
+        dimensionedScalar(dimLength, Zero),
+        calculatedFvPatchField<scalar>::typeName
+    ),
+
+    turbulence_(filmTurbulenceModel::New(*this, dict)),
+
+    availableMass_(regionMesh().faces().size(), Zero),
+
+    injection_(*this, dict),
+
+    forces_(*this, dict)
 {
+
+    if (dict.found("T0"))
+    {
+        Tf_ = dimensionedScalar("T0", dimTemperature, dict);
+    }
     correctThermoFields();
 }
 
@@ -208,8 +284,39 @@ const areaScalarField& liquidFilmModel::sigma() const
      return sigma_;
 }
 
+
+const areaScalarField& liquidFilmModel::Tf() const
+{
+     return Tf_;
+}
+
+
+const areaScalarField& liquidFilmModel::Cp() const
+{
+     return Cp_;
+}
+
+const volScalarField& liquidFilmModel::cloudMassTrans() const
+{
+    return cloudMassTrans_;
+}
+
+const volScalarField& liquidFilmModel::cloudDiameterTrans() const
+{
+    return cloudDiameterTrans_;
+}
+
+
+
 void liquidFilmModel::preEvolveRegion()
 {
+    liquidFilmBase::preEvolveRegion();
+
+
+
+    cloudMassTrans_ == dimensionedScalar(dimMass, Zero);
+    cloudDiameterTrans_ == dimensionedScalar(dimLength, Zero);
+
     const scalar deltaT = primaryMesh().time().deltaTValue();
     const scalarField rAreaDeltaT = 1/deltaT/regionMesh().S().field();
 
@@ -219,6 +326,7 @@ void liquidFilmModel::preEvolveRegion()
     // [kg.m/s]
     USp_.primitiveFieldRef() =
         vsm().mapToSurface(momentumSource_.boundaryField()[patchID()]);
+
     pnSp_.primitiveFieldRef() =
         vsm().mapToSurface(pnSource_.boundaryField()[patchID()]);
 
@@ -227,13 +335,38 @@ void liquidFilmModel::preEvolveRegion()
     rhoSp_.primitiveFieldRef() *= rAreaDeltaT/rho_;
     USp_.primitiveFieldRef() *= rAreaDeltaT/rho_;
     pnSp_.primitiveFieldRef() *= rAreaDeltaT/rho_;
+
+    rhoSp_.relax();
+    pnSp_.relax();
+    USp_.relax();
 }
 
 void liquidFilmModel::postEvolveRegion()
 {
-    massSource_ == dimensionedScalar(massSource_.dimensions(), Zero);
-    momentumSource_ == dimensionedVector(momentumSource_.dimensions(), Zero);
-    pnSource_ == dimensionedScalar(pnSource_.dimensions(), Zero);
+    availableMass_ = (h() - h0_)*rho()*regionMesh().S();
+    injection_.correct(availableMass_, cloudMassTrans_, cloudDiameterTrans_);
+    liquidFilmBase::postEvolveRegion();
+}
+
+
+void liquidFilmModel::info()
+{
+    Info<< "\nSurface film: " << type() << " on patch: " << patchID() << endl;
+
+    const DimensionedField<scalar, areaMesh>& sf = regionMesh().S();
+
+    Info<< indent << "min/max(mag(Uf))    = " << gMin(mag(Uf_.field())) << ", "
+        << gMax(mag(Uf_.field())) << nl
+        << indent << "min/max(delta)     = " << gMin(h_.field()) << ", " << gMax(h_.field()) << nl
+        << indent << "coverage           = "
+        << gSum(alpha()().field()*mag(sf.field()))/gSum(mag(sf.field())) <<  nl
+        << indent << "total mass         = "
+        << gSum(availableMass_) << nl;
+
+
+    Info<< indent << CourantNumber() << endl;
+
+    injection_.info(Info);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

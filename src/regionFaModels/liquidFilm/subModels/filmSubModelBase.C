@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "laminar.H"
-#include "addToRunTimeSelectionTable.H"
-
+#include "filmSubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,73 +36,68 @@ namespace regionModels
 namespace areaSurfaceFilmModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(laminar, 0);
-addToRunTimeSelectionTable(filmTurbulenceModel, laminar, dictionary);
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-laminar::laminar
+filmSubModelBase::filmSubModelBase(liquidFilmBase& film)
+:
+    subModelBase(film.outputProperties()),
+    filmModel_(film)
+{}
+
+
+filmSubModelBase::filmSubModelBase
 (
     liquidFilmBase& film,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& baseName,
+    const word& modelType,
+    const word& dictExt
 )
 :
-    filmTurbulenceModel(type(), film, dict),
-    Cf_(dict_.get<scalar>("Cf"))
+    subModelBase
+    (
+        film.outputProperties(),
+        dict,
+        baseName,
+        modelType,
+        dictExt
+    ),
+    filmModel_(film)
+{}
+
+
+filmSubModelBase::filmSubModelBase
+(
+    const word& modelName,
+    liquidFilmBase& film,
+    const dictionary& dict,
+    const word& baseName,
+    const word& modelType
+)
+:
+    subModelBase
+    (
+        modelName,
+        film.outputProperties(),
+        dict,
+        baseName,
+        modelType
+    ),
+    filmModel_(film)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-laminar::~laminar()
+filmSubModelBase::~filmSubModelBase()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<areaScalarField> laminar::mut() const
+bool filmSubModelBase::writeTime() const
 {
-    auto tmut =
-        tmp<areaScalarField>::New
-        (
-            IOobject
-            (
-                "mut",
-                film().primaryMesh().time().timeName(),
-                film().primaryMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            film().regionMesh(),
-            dimensionedScalar(dimMass/dimLength/dimTime)
-        );
-
-    return tmut;
-}
-
-
-void laminar::correct()
-{}
-
-
-tmp<faVectorMatrix> laminar::Su(areaVectorField& U) const
-{
-    // local references to film fields
-    tmp<areaVectorField> Uw = film_.Uw();
-    tmp<areaVectorField> Up = film_.Up();
-
-    // employ simple coeff-based model
-    const dimensionedScalar Cf("Cf", dimVelocity, Cf_);
-
-    tmp<areaScalarField> wf = Cw();
-
-    return
-    (
-       - fam::Sp(Cf, U) + Cf*Up()     // surface contribution
-       - fam::Sp(wf(), U) + wf()*Uw() // wall contribution
-    );
+    return active() && filmModel_.time().writeTime();
 }
 
 

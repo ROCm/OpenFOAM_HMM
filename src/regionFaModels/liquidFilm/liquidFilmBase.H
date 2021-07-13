@@ -41,9 +41,9 @@ SourceFiles
 #include "autoPtr.H"
 #include "areaFieldsFwd.H"
 #include "volFieldsFwd.H"
+#include "uniformDimensionedFields.H"
 #include "regionFaModel.H"
 #include "faOptions.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +53,6 @@ namespace regionModels
 {
 namespace areaSurfaceFilmModels
 {
-
 
 /*---------------------------------------------------------------------------*\
                          Class liquidFilmBase Declaration
@@ -92,14 +91,18 @@ protected:
             //- Number of PISO-like correctors
             label nCorr_;
 
-            //- Number of non-orthogonal correctors
-            label nNonOrthCorr_;
+            //- Number of film thickness correctors
+            label nFilmCorr_;
 
             //- Cumulative continuity error
             scalar cumulativeContErr_;
 
-            //- Small delta
+            //- Smallest numerical thickness
             dimensionedScalar h0_;
+
+            //- Delta wet for sub-models
+            dimensionedScalar deltaWet_;
+
 
         //- Name of the velocity field
         word UName_;
@@ -131,14 +134,14 @@ protected:
             //- Film height flux
             edgeScalarField phi2s_;
 
-            //- Film temperature
-            areaScalarField Tf_;
-
             //- Normal gravity field
             areaScalarField gn_;
 
+            //- Gravity
+            uniformDimensionedVectorField g_;
 
-            // Mass exchanage fields
+
+            // Mass exchanage fields from the primary region (lagragian)
 
                 //- Mass
                 volScalarField massSource_;
@@ -156,8 +159,10 @@ protected:
                 scalar addedMassTotal_;
 
 
+
         //- Pointer to faOptions
         Foam::fa::options& faOptions_;
+
 
 
     // Protected Member Functions
@@ -235,6 +240,10 @@ public:
             //- Map primary static pressure
             tmp<areaScalarField> pg() const;
 
+            //- Wet indicator using h0
+            tmp<areaScalarField> alpha() const;
+
+
         // Access functions
 
             //- Return faOptions
@@ -243,20 +252,49 @@ public:
             //- Access const reference Uf
             const areaVectorField& Uf() const;
 
-            //- Access const reference Tf
-            const areaScalarField& Tf() const;
-
             //- Access const reference gn
             const areaScalarField& gn() const;
 
+            //- Gravity
+            const uniformDimensionedVectorField& g() const;
+
             //- Access const reference h
             const areaScalarField& h() const;
+
+            //- Access to momentum flux
+            const edgeScalarField& phif() const;
+
+            //- Access continuity flux
+            const edgeScalarField& phi2s() const;
+
 
             //- Return h0
             const dimensionedScalar& h0() const;
 
             //- Access to this region
             const regionFaModel& region() const;
+
+
+            // Transfer fields - to the primary region (lagragian injection)
+
+                //- Return mass transfer source - Eulerian phase only
+                //virtual tmp<volScalarField> primaryMassTrans() const = 0;
+
+                //- Return the film mass available for transfer to cloud
+                virtual const volScalarField& cloudMassTrans() const = 0;
+
+                //- Return the parcel diameters originating from film to cloud
+                virtual const volScalarField& cloudDiameterTrans() const = 0;
+
+
+
+        // Evolution
+
+            //- Pre-evolve film
+            virtual void preEvolveRegion();
+
+            //- Post-evolve film
+            virtual void postEvolveRegion();
 
 
         // Thermo variables
@@ -270,9 +308,14 @@ public:
             //- Access const reference sigma
             virtual const areaScalarField& sigma() const = 0;
 
+            //- Access const reference Tf
+            virtual const areaScalarField& Tf() const = 0;
+
+            //- Access const reference Cp
+            virtual const areaScalarField& Cp() const = 0;
+
 
         // External hook to add sources and mass exchange variables
-
 
 
             //- Add sources
@@ -285,7 +328,6 @@ public:
                 const scalar pressureSource,   // [kg.m/s] (normal momentum)
                 const scalar energySource = 0  // [J]
             );
-
 };
 
 

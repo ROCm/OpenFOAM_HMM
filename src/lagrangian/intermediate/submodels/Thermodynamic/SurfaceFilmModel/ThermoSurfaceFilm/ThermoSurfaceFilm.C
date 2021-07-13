@@ -131,57 +131,51 @@ Foam::vector Foam::ThermoSurfaceFilm<CloudType>::splashDirection
 
 
 template<class CloudType>
-void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
-(
-    const parcelType& p,
-    const polyPatch& pp,
-    const label facei,
-    const scalar mass,
-    bool& keepParticle
-)
+void Foam::ThermoSurfaceFilm<CloudType>::init()
 {
-    if (debug)
-    {
-        Info<< "Parcel " << p.origId() << " absorbInteraction" << endl;
-    }
+    const fvMesh& mesh = this->owner().mesh();
 
-    // Patch face normal
-    const vector& nf = pp.faceNormals()[facei];
-
-    // Patch velocity
-    const vector& Up = this->owner().U().boundaryField()[pp.index()][facei];
-
-    // Relative parcel velocity
-    const vector Urel = p.U() - Up;
-
-    // Parcel normal velocity
-    const vector Un = nf*(Urel & nf);
-
-    // Parcel tangential velocity
-    const vector Ut = Urel - Un;
-
-    if (filmModel_)
-    {
-        filmModel_->addSources
+    // set up filmModel pointer
+    filmModel_ =
+        const_cast<regionFilm*>
         (
-            pp.index(),
-            facei,
-            mass,                           // mass
-            mass*Ut,                        // tangential momentum
-            mass*mag(Un),                   // impingement pressure
-            mass*p.hs()                     // energy
+            mesh.time().objectRegistry::template findObject
+            <
+                regionFilm
+            >
+            (
+                "surfaceFilmProperties"
+            )
         );
 
-        this->nParcelsTransferred()++;
+    // set up areaFilms
+    const wordList names =
+        mesh.time().objectRegistry::template
+            sortedNames<regionModels::regionFaModel>();
 
-        keepParticle = false;
+    forAll(names, i)
+    {
+        const regionModels::regionFaModel* regionFa =
+            mesh.time().objectRegistry::template findObject
+            <
+                regionModels::regionFaModel
+            >(names[i]);
+
+        if (regionFa && isA<areaFilm>(*regionFa))
+        {
+            areaFilm& film =
+                const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
+            areaFilms_.append(&film);
+        }
     }
 }
 
+
 template<class CloudType>
+template<class filmType>
 void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
 (
-    areaFilm& filmModel,
+    filmType& film,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -189,7 +183,6 @@ void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
     bool& keepParticle
 )
 {
-
     if (debug)
     {
         Info<< "Parcel " << p.origId() << " absorbInteraction" << endl;
@@ -209,21 +202,22 @@ void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
 
     // Parcel tangential velocity
     const vector Ut = Urel - Un;
-DebugVar(mass)
-    filmModel.addSources
+
+    film.addSources
     (
         pp.index(),
         facei,
-        mass,                           // mass
-        mass*Ut,                        // tangential momentum
-        mass*mag(Un),                   // impingement pressure
-        mass*p.hs()                     // energy
+        mass,                             // mass
+        mass*Ut,                          // tangential momentum
+        mass*mag(Un),                     // impingement pressure
+        mass*p.hs()                       // energy
     );
 
     this->nParcelsTransferred()++;
 
-    keepParticle = false;
+    this->totalMassTransferred() += mass;
 
+    keepParticle = false;
 }
 
 
@@ -258,9 +252,10 @@ void Foam::ThermoSurfaceFilm<CloudType>::bounceInteraction
 
 
 template<class CloudType>
+template<class filmType>
 void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 (
-    //regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
+    filmType& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -301,22 +296,24 @@ void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 
     if (We < Wec) // Adhesion - assume absorb
     {
-        absorbInteraction(p, pp, facei, m, keepParticle);
+        absorbInteraction<filmType>
+            (filmModel, p, pp, facei, m, keepParticle);
     }
     else // Splash
     {
         // Ratio of incident mass to splashing mass
         const scalar mRatio = 0.2 + 0.6*rndGen_.sample01<scalar>();
-        splashInteraction
-            (p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
+        splashInteraction<filmType>
+            (filmModel, p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
     }
 }
 
 
 template<class CloudType>
+template<class filmType>
 void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 (
-    //regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
+    filmType& filmModel,
     parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -359,7 +356,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 
     if (We < 2) // Adhesion - assume absorb
     {
-        absorbInteraction(p, pp, facei, m, keepParticle);
+        absorbInteraction<filmType>
+            (filmModel, p, pp, facei, m, keepParticle);
     }
     else if ((We >= 2) && (We < 20)) // Bounce
     {
@@ -377,23 +375,25 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
     }
     else if ((We >= 20) && (We < Wec)) // Spread - assume absorb
     {
-        absorbInteraction(p, pp, facei, m, keepParticle);
+        absorbInteraction<filmType>
+            (filmModel, p, pp, facei, m, keepParticle);
     }
     else    // Splash
     {
         // Ratio of incident mass to splashing mass
         // splash mass can be > incident mass due to film entrainment
         const scalar mRatio = 0.2 + 0.9*rndGen_.sample01<scalar>();
-        splashInteraction
-            (p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
+        splashInteraction<filmType>
+            (filmModel, p, pp, facei, mRatio, We, Wec, sigma, keepParticle);
     }
 }
 
 
 template<class CloudType>
+template<class filmType>
 void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
 (
-    //regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
+    filmType& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -466,7 +466,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     // Switch to absorb if insufficient energy for splash
     if (EKs <= 0)
     {
-        absorbInteraction(p, pp, facei, m, keepParticle);
+        absorbInteraction<filmType>
+            (filmModel, p, pp, facei, m, keepParticle);
         return;
     }
 
@@ -521,7 +522,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     // Transfer remaining part of parcel to film 0 - splashMass can be -ve
     // if entraining from the film
     const scalar mDash = m - mSplash;
-    absorbInteraction(p, pp, facei, mDash, keepParticle);
+    absorbInteraction<filmType>
+        (filmModel, p, pp, facei, mDash, keepParticle);
 }
 
 
@@ -541,6 +543,7 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
         owner.db().objectRegistry::template lookupObject<SLGThermo>("SLGThermo")
     ),
     filmModel_(nullptr),
+    areaFilms_(0),
     TFilmPatch_(0),
     CpFilmPatch_(0),
     interactionType_
@@ -570,17 +573,7 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
         this->coeffDict().readEntry("Cf", Cf_);
     }
 
-    filmModel_ =
-        const_cast<regionModels::surfaceFilmModels::surfaceFilmRegionModel*>
-        (
-            this->owner().mesh().time().objectRegistry::template findObject
-            <
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel
-            >
-            (
-                "surfaceFilmProperties"
-            )
-        );
+    init();
 }
 
 
@@ -594,6 +587,7 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     rndGen_(sfm.rndGen_),
     thermo_(sfm.thermo_),
     filmModel_(nullptr),
+    areaFilms_(0),
     TFilmPatch_(sfm.TFilmPatch_),
     CpFilmPatch_(sfm.CpFilmPatch_),
     interactionType_(sfm.interactionType_),
@@ -605,17 +599,7 @@ Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
     Cf_(sfm.Cf_),
     nParcelsSplashed_(sfm.nParcelsSplashed_)
 {
-     filmModel_ =
-        const_cast<regionModels::surfaceFilmModels::surfaceFilmRegionModel*>
-        (
-            this->owner().mesh().time().objectRegistry::template findObject
-            <
-                regionModels::surfaceFilmModels::surfaceFilmRegionModel
-            >
-            (
-                "surfaceFilmProperties"
-            )
-        );
+    init();
 }
 
 
@@ -636,9 +620,9 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
     bool& keepParticle
 )
 {
-    const fvMesh& mesh = this->owner().mesh();
-
     const label patchi = pp.index();
+
+    bool bInteraction(false);
 
     // Check the singleLayer film models
     if (filmModel_ && filmModel_->isRegionPatch(patchi))
@@ -656,7 +640,9 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
             case itAbsorb:
             {
                 const scalar m = p.nParticle()*p.mass();
-                absorbInteraction(p, pp, facei, m, keepParticle);
+
+                absorbInteraction<regionFilm>
+                    (*filmModel_, p, pp, facei, m, keepParticle);
 
                 break;
             }
@@ -666,11 +652,13 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 
                 if (dry)
                 {
-                    drySplashInteraction(p, pp, facei, keepParticle);
+                    drySplashInteraction<regionFilm>
+                        (*filmModel_, p, pp, facei, keepParticle);
                 }
                 else
                 {
-                    wetSplashInteraction( p, pp, facei, keepParticle);
+                    wetSplashInteraction<regionFilm>
+                        (*filmModel_, p, pp, facei, keepParticle);
                 }
 
                 break;
@@ -684,59 +672,66 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
         }
 
         // Transfer parcel/parcel interactions complete
-        return true;
+        bInteraction = true;
     }
-    else
+
+
+    for (areaFilm& film : areaFilms_)
     {
-
-        // Check the finite area films
-        wordList names =
-            mesh.time().objectRegistry::template
-                sortedNames<regionModels::regionFaModel>();
-
-        forAll(names, i)
+        if (patchi == film.patchID())
         {
-            const regionModels::regionFaModel* regionFa =
-                mesh.time().objectRegistry::template findObject
-                <
-                    regionModels::regionFaModel
-                >(names[i]);
+            const label facei = pp.whichFace(p.face());
 
-            // Check that regionFa is a areaFilm
-            if (regionFa && isA<areaFilm>(*regionFa))
+            switch (interactionType_)
             {
-                areaFilm& film =
-                    const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
-
-                const label facei = pp.whichFace(p.face());
-
-                switch (interactionType_)
+                // It only supports absorp model
+                case itAbsorb:
                 {
-                    // It only supports absorp model
-                    case itAbsorb:
-                    {
-                        const scalar m = p.nParticle()*p.mass();
-                        absorbInteraction
-                        (
-                            film, p, pp, facei, m, keepParticle
-                        );
-                        break;
-                    }
-                    default:
-                    {
-                        FatalErrorInFunction
-                            << "Unknown interaction type enumeration"
-                            << abort(FatalError);
-                    }
+                    const scalar m = p.nParticle()*p.mass();
+
+                    absorbInteraction<areaFilm>
+                    (
+                        film, p, pp, facei, m, keepParticle
+                    );
+                    break;
                 }
-                // Transfer parcel/parcel interactions complete
-                return true;
+                case itBounce:
+                {
+                    bounceInteraction(p, pp, facei, keepParticle);
+
+                    break;
+                }
+                case itSplashBai:
+                {
+                    bool dry = film.h()[facei] < deltaWet_;
+
+                    if (dry)
+                    {
+                        drySplashInteraction<areaFilm>
+                            (film, p, pp, facei, keepParticle);
+                    }
+                    else
+                    {
+                        wetSplashInteraction<areaFilm>
+                            (film, p, pp, facei, keepParticle);
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    FatalErrorInFunction
+                        << "Unknown interaction type enumeration"
+                        << abort(FatalError);
+                }
             }
+            // Transfer parcel/parcel interactions complete
+            bInteraction = true;
         }
     }
 
     // Parcel not interacting with film
-    return false;
+    return bInteraction;
 }
 
 
@@ -779,7 +774,8 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 
     TFilmPatch_.setSize(filmModel.Tf().size(), Zero);
     map.mapToField(filmModel.Tf(), TFilmPatch_);
-    //map.mapToField(filmModel.Cp(), CpFilmPatch_);
+    CpFilmPatch_.setSize(filmModel.Tf().size(), Zero);
+    map.mapToField(filmModel.Cp(), CpFilmPatch_);
 }
 
 

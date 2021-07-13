@@ -24,21 +24,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModels::areaSurfaceFilmModels::laminar
+    Foam::regionModels::surfaceFilmModels::injectionModelList
 
 Description
-    Film laminar turbulence model.
+    List container for film injection models
 
 SourceFiles
-    laminar.C
+    injectionModelList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionFaModels_surfaceFilmModels_laminar_H
-#define regionFaModels_surfaceFilmModels_laminar_H
+#ifndef injectionModelList_H
+#define injectionModelList_H
 
-#include "liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.H"
-#include "faCFD.H"
+#include "PtrList.H"
+#include "injectionModel.H"
+#include "filmSubModelBase.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,56 +52,65 @@ namespace areaSurfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class laminar Declaration
+                    Class injectionModelList Declaration
 \*---------------------------------------------------------------------------*/
 
-class laminar
+class injectionModelList
 :
-    public filmTurbulenceModel
+    public PtrList<injectionModel>,
+    public filmSubModelBase
 {
     // Private Data
 
-        //- Surface roughness coefficient
-        scalar Cf_;
+        //- List of mass injected per patch
+        scalar massInjected_;
 
 
     // Private Member Functions
 
         //- No copy construct
-        laminar(const laminar&) = delete;
+        injectionModelList(const injectionModelList&) = delete;
 
         //- No copy assignment
-        void operator=(const laminar&) = delete;
+        void operator=(const injectionModelList&) = delete;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("laminar");
-
-
     // Constructors
 
-        //- Construct from surface film model
-        laminar(liquidFilmBase& film, const dictionary& dict);
+        //- Construct null
+        injectionModelList(liquidFilmBase& film);
+
+        //- Construct from type name, dictionary and surface film model
+        injectionModelList
+        (
+            liquidFilmBase& film,
+            const dictionary& dict
+        );
 
 
     //- Destructor
-    virtual ~laminar();
+    virtual ~injectionModelList();
 
 
     // Member Functions
 
         // Evolution
 
-            //- Return the film turbulence viscosity
-            virtual tmp<areaScalarField> mut() const;
+            //- Correct
+            virtual void correct
+            (
+                scalarField& availableMass,
+                volScalarField& massToInject,
+                volScalarField& diameterToInject
+            );
 
-            //- Correct/update the model
-            virtual void correct();
 
-            //- Return the source for the film momentum equation
-            virtual tmp<faVectorMatrix> Su(areaVectorField& U) const;
+        // I-O
+
+            //- Provide some info
+            virtual void info(Ostream& os);
 };
 
 

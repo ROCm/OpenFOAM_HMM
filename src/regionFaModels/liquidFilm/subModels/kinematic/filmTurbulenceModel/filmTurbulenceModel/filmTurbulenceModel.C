@@ -106,7 +106,7 @@ tmp<areaScalarField> filmTurbulenceModel::Cw() const
             const scalarField& mu = film_.mu().primitiveField();
             const scalarField& h = film_.h().primitiveField();
             const scalar h0 = film_.h0().value();
-            Cw.primitiveFieldRef() = mu/((1.0/3.0)*(h + h0));
+            Cw.primitiveFieldRef() = 3*mu/(h + h0);
             Cw.min(5000.0);
             break;
         }
@@ -141,7 +141,7 @@ tmp<areaScalarField> filmTurbulenceModel::Cw() const
             const scalar h0 = film_.h0().value();
 
             Cw.primitiveFieldRef() =
-                sqr(n)*mag(g.value())*mag(Uf)/cbrt(h+ h0);
+                sqr(n)*mag(g.value())*mag(Uf)/cbrt(h+h0);
             break;
         }
         default:

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,56 +25,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SurfaceFilmModel.H"
+#include "injectionModel.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-const Foam::dimensionedVector& Foam::SurfaceFilmModel<CloudType>::g() const
+namespace Foam
 {
-    return g_;
+namespace regionModels
+{
+namespace areaSurfaceFilmModels
+{
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+autoPtr<injectionModel> injectionModel::New
+(
+    liquidFilmBase& model,
+    const dictionary& dict,
+    const word& modelType
+)
+{
+    Info<< "        " << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalIOErrorInLookup
+        (
+            dict,
+            "injectionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
+    }
+
+    return autoPtr<injectionModel>(cstrIter()(model, dict));
 }
 
 
-template<class CloudType>
-Foam::label& Foam::SurfaceFilmModel<CloudType>::nParcelsTransferred()
-{
-    return nParcelsTransferred_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-template<class CloudType>
-Foam::label Foam::SurfaceFilmModel<CloudType>::nParcelsTransferred() const
-{
-    return nParcelsTransferred_;
-}
-
-
-template<class CloudType>
-Foam::label& Foam::SurfaceFilmModel<CloudType>::nParcelsInjected()
-{
-    return nParcelsInjected_;
-}
-
-
-template<class CloudType>
-Foam::label Foam::SurfaceFilmModel<CloudType>::nParcelsInjected() const
-{
-    return nParcelsInjected_;
-}
-
-template<class CloudType>
-Foam::scalar& Foam::SurfaceFilmModel<CloudType>::totalMassTransferred()
-{
-    return totalMassTransferred_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::SurfaceFilmModel<CloudType>::totalMassTransferred() const
-{
-    return totalMassTransferred_;
-}
-
+} // End namespace areaSurfaceFilmModels
+} // End namespace regionModels
+} // End namespace Foam
 
 // ************************************************************************* //

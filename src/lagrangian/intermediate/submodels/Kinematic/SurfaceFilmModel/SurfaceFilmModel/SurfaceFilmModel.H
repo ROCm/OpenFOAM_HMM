@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +46,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "CloudSubModelBase.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,14 +98,20 @@ protected:
         //  type
         label ejectedParcelType_;
 
+        //- Injection offset position
+        scalar injectionOffset_;
+
+        //- Minimum diameter particle injection
+        scalar minDiameter_;
+
 
         // Cached injector fields per film patch
 
             //- Parcel mass / patch face
-            scalarList massParcelPatch_;
+            scalarField massParcelPatch_;
 
             //- Parcel diameter / patch face
-            scalarList diameterParcelPatch_;
+            scalarField diameterParcelPatch_;
 
             //- Film velocity / patch face
             Field<vector> UFilmPatch_;
@@ -124,6 +132,12 @@ protected:
             label nParcelsInjected_;
 
 
+        // Total mass info
+
+            //- Total mass transferred to the film
+            scalar totalMassTransferred_;
+
+
     // Protected functions
 
         //- Cache the film fields in preparation for injection
@@ -138,7 +152,7 @@ protected:
         virtual void cacheFilmFields
         (
             const label primaryPatchi,
-            const regionModels::areaSurfaceFilmModels::liquidFilmBase&
+            const areaFilm&
         );
 
         //- Inject particles in cloud
@@ -231,6 +245,12 @@ public:
             //- Return non-const access to the number of parcels injected from
             //  the film model
             inline label& nParcelsInjected();
+
+            //- Return non-const total mass transferred
+            inline scalar& totalMassTransferred();
+
+            //- Return consr access to mass transferred
+            inline scalar totalMassTransferred() const;
 
 
         // Member Functions

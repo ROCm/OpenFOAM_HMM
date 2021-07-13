@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,21 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModels::areaSurfaceFilmModels::laminar
+    Foam::regionModels::surfaceFilmModels::filmSubModelBase
 
 Description
-    Film laminar turbulence model.
+    Base class for surface film sub-models
 
 SourceFiles
-    laminar.C
+    filmSubModelBaseI.H
+    filmSubModelBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionFaModels_surfaceFilmModels_laminar_H
-#define regionFaModels_surfaceFilmModels_laminar_H
+#ifndef filmSubModelBase_H
+#define filmSubModelBase_H
 
-#include "liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.H"
-#include "faCFD.H"
+#include "liquidFilmBase.H"
+#include "subModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,56 +51,68 @@ namespace areaSurfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class laminar Declaration
+                      Class filmSubModelBase Declaration
 \*---------------------------------------------------------------------------*/
 
-class laminar
+class filmSubModelBase
 :
-    public filmTurbulenceModel
+    public subModelBase
 {
-    // Private Data
+protected:
 
-        //- Surface roughness coefficient
-        scalar Cf_;
+    // Protected Data
 
-
-    // Private Member Functions
-
-        //- No copy construct
-        laminar(const laminar&) = delete;
-
-        //- No copy assignment
-        void operator=(const laminar&) = delete;
+        //- Reference to the film surface film model
+        liquidFilmBase& filmModel_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("laminar");
-
-
     // Constructors
 
-        //- Construct from surface film model
-        laminar(liquidFilmBase& film, const dictionary& dict);
+        //- Construct null
+        filmSubModelBase(liquidFilmBase& film);
+
+        //- Construct from film film without name
+        filmSubModelBase
+        (
+            liquidFilmBase& film,
+            const dictionary& dict,
+            const word& baseName,
+            const word& modelType,
+            const word& dictExt = "Coeffs"
+        );
+
+        //- Construct from film film with name
+        filmSubModelBase
+        (
+            const word& modelName,
+            liquidFilmBase& film,
+            const dictionary& dict,
+            const word& baseName,
+            const word& modelType
+        );
 
 
     //- Destructor
-    virtual ~laminar();
+    virtual ~filmSubModelBase();
 
 
     // Member Functions
 
-        // Evolution
+        // Access
 
-            //- Return the film turbulence viscosity
-            virtual tmp<areaScalarField> mut() const;
+            //- Flag to indicate when to write a property
+            virtual bool writeTime() const;
 
-            //- Correct/update the model
-            virtual void correct();
+            //- Return const access to the film surface film model
+            inline const liquidFilmBase& film() const;
 
-            //- Return the source for the film momentum equation
-            virtual tmp<faVectorMatrix> Su(areaVectorField& U) const;
+            //- Return the reference to the film surface film model
+            inline liquidFilmBase& film();
+
+            template<class FilmType>
+            inline const FilmType& filmType() const;
 };
 
 
@@ -108,6 +121,16 @@ public:
 } // End namespace areaSurfaceFilmModels
 } // End namespace regionModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "filmSubModelBaseI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "filmSubModelBaseTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

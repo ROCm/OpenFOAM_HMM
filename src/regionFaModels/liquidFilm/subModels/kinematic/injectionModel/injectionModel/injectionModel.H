@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,26 +24,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModels::areaSurfaceFilmModels::filmTurbulenceModel
+    Foam::regionModels::areaSurfaceFilmModels::injectionModel
 
 Description
-    Base class for film turbulence models
+    Base class for film injection models, handling mass transfer from the
+    film.
 
 SourceFiles
-    filmTurbulenceModel.C
-    filmTurbulenceModelNew.C
+    injectionModel.C
+    injectionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionFaModels_filmTurbulenceModel_H
-#define regionFaModels_filmTurbulenceModel_H
+#ifndef injectionModel_H
+#define injectionModel_H
 
-#include "areaFieldsFwd.H"
+#include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"
-#include "faMatrices.H"
-#include "liquidFilmBase.H"
-#include "fvMesh.H"
-#include "Enum.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,55 +53,43 @@ namespace areaSurfaceFilmModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class filmTurbulenceModel Declaration
+                      Class injectionModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class filmTurbulenceModel
+class injectionModel
+:
+    public filmSubModelBase
 {
+    // Private Data
+
+        //- Injected mass
+        scalar injectedMass_;
+
+
     // Private Member Functions
 
         //- No copy construct
-        filmTurbulenceModel(const filmTurbulenceModel&) = delete;
+        injectionModel(const injectionModel&) = delete;
 
         //- No copy assignment
-        void operator=(const filmTurbulenceModel&) = delete;
-
-
-public:
-
-    // Public Enumerations
-
-        //- Options for the friction models
-        enum frictionMethodType
-        {
-            mquadraticProfile,
-            mlinearProfile,
-            mDarcyWeisbach,
-            mManningStrickler
-        };
+        void operator=(const injectionModel&) = delete;
 
 
 protected:
 
-    // Protected Data
+    // Protected Member Functions
 
-        //- Reference to liquidFilmBase
-        const liquidFilmBase& film_;
+        //- Add to injected mass
+        void addToInjectedMass(const scalar dMass);
 
-        //- Names for friction models
-        static const Enum<frictionMethodType> frictionMethodTypeNames_;
-
-        //- Model dictionary
-        const dictionary dict_;
-
-        //- Method used
-        const frictionMethodType method_;
+        //- Correct
+        void correct();
 
 
 public:
 
     //- Runtime type information
-    TypeName("filmTurbulenceModel");
+    TypeName("injectionModel");
 
 
     // Declare runtime constructor selection table
@@ -111,7 +97,7 @@ public:
          declareRunTimeSelectionTable
          (
              autoPtr,
-             filmTurbulenceModel,
+             injectionModel,
              dictionary,
              (
                 liquidFilmBase& film,
@@ -123,8 +109,11 @@ public:
 
     // Constructors
 
+        //- Construct null
+        injectionModel(liquidFilmBase& film);
+
         //- Construct from type name, dictionary and surface film model
-        filmTurbulenceModel
+        injectionModel
         (
             const word& modelType,
             liquidFilmBase& film,
@@ -135,38 +124,35 @@ public:
     // Selectors
 
         //- Return a reference to the selected injection model
-        static autoPtr<filmTurbulenceModel> New
+        static autoPtr<injectionModel> New
         (
             liquidFilmBase& film,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& mdoelType
         );
 
 
     //- Destructor
-    virtual ~filmTurbulenceModel();
+    virtual ~injectionModel();
 
 
     // Member Functions
 
-        // Access
+        //- Correct
+        virtual void correct
+        (
+            scalarField& availableMass,
+            scalarField& massToInject,
+            scalarField& diameterToInject
+        ) = 0;
 
-            //- Return film
-            const liquidFilmBase& film() const;
+        //- Return the total mass injected
+        virtual scalar injectedMassTotal() const;
 
-
-        // Evolution
-
-            //- Return the wall film surface friction
-            virtual tmp<areaScalarField> Cw() const;
-
-            //- Return the film turbulence viscosity
-            virtual tmp<areaScalarField> mut() const = 0;
-
-            //- Correct/update the model
-            virtual void correct() = 0;
-
-            //- Return the source for the film momentum equation
-            virtual tmp<faVectorMatrix> Su(areaVectorField& U) const = 0;
+        //- Accumulate the total mass injected for the patches into the
+        //- scalarField provided
+        virtual void patchInjectedMassTotals(scalar& patchMasses) const
+        {}
 };
 
 
