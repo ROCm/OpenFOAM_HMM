@@ -46,15 +46,15 @@ Description
     typedef returnType (*memberFunction##argNames##MemberFunctionPtr)argList;  \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable                                                          \
+    typedef ::Foam::HashTable                                                  \
     <                                                                          \
         memberFunction##argNames##MemberFunctionPtr,                           \
         ::Foam::word,                                                          \
         ::Foam::string::hasher                                                 \
-    > memberFunction##argNames##MemberFunctionTable;                           \
+    > memberFunction##argNames##MemberFunctionTableType;                       \
                                                                                \
     /* Construct from argList function pointer table pointer */                \
-    static memberFunction##argNames##MemberFunctionTable*                      \
+    static memberFunction##argNames##MemberFunctionTableType*                  \
         memberFunction##argNames##MemberFunctionTablePtr_;                     \
                                                                                \
     /* Class to add constructor from argList to table */                       \
@@ -101,7 +101,7 @@ Description
         {                                                                      \
             constructed = true;                                                \
             baseType::memberFunction##argNames##MemberFunctionTablePtr_        \
-                = new baseType::memberFunction##argNames##MemberFunctionTable; \
+            = new baseType::memberFunction##argNames##MemberFunctionTableType; \
         }                                                                      \
     }
 
@@ -127,7 +127,7 @@ Description
 #define defineMemberFunctionSelectionTablePtr(baseType,memberFunction,argNames)\
                                                                                \
     /* Define the memberFunction table */                                      \
-    baseType::memberFunction##argNames##MemberFunctionTable*                   \
+    baseType::memberFunction##argNames##MemberFunctionTableType*               \
         baseType::memberFunction##argNames##MemberFunctionTablePtr_(nullptr)
 
 
@@ -176,7 +176,7 @@ Description
             constructed = true;                                                \
             baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_  \
                 = new baseType<Targ>::memberFunction##argNames##               \
-                  MemberFunctionTable;                                         \
+                  MemberFunctionTableType;                                     \
         }                                                                      \
     }
 
@@ -206,7 +206,7 @@ Description
     baseType,memberFunction,argNames,Targ)                                     \
                                                                                \
     /* Define the memberFunction table */                                      \
-    baseType<Targ>::memberFunction##argNames##MemberFunctionTable*             \
+    baseType<Targ>::memberFunction##argNames##MemberFunctionTableType*         \
         baseType<Targ>::memberFunction##argNames##                             \
         MemberFunctionTablePtr_(nullptr)
 

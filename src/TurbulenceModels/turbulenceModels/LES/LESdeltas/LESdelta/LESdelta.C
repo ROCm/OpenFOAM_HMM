@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     const word& name,
     const turbulenceModel& turbulence,
     const dictionary& dict,
-    const dictionaryConstructorTable& additionalConstructors,
+    const dictionaryConstructorTableType& additionalConstructors,
     const word& lookupName
 )
 {
@@ -107,17 +107,14 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 
-    // First any additional ones
+    // Additional ones first
+    auto cstrIter = additionalConstructors.cfind(deltaType);
+
+    // Regular ones
+    if (!cstrIter.found())
     {
-        auto cstrIter = additionalConstructors.cfind(deltaType);
-
-        if (cstrIter.found())
-        {
-            return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
-        }
+        cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
     }
-
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
 
     if (!cstrIter.found())
     {
@@ -126,9 +123,16 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
             dict,
             "LESdelta",
             deltaType,
-            additionalConstructors
-        )
-            << " and " << dictionaryConstructorTablePtr_->sortedToc()
+            *dictionaryConstructorTablePtr_
+        );
+
+        if (additionalConstructors.size())
+        {
+            FatalIOError
+                << " and " << additionalConstructors.sortedToc() << nl;
+        }
+
+        FatalIOError
             << exit(FatalIOError);
     }
 
