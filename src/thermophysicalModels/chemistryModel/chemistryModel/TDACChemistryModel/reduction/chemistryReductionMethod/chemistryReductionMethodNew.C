@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,23 +51,26 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
       + '<' + CompType::typeName + ',' + ThermoType::typeName() + '>'
     );
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodTypeName);
+    const auto& cnstrTable = *(dictionaryConstructorTablePtr_);
+
+    auto cstrIter = cnstrTable.cfind(methodTypeName);
 
     if (!cstrIter.found())
     {
+        const wordList names(cnstrTable.sortedToc());
+
         constexpr const int nCmpt = 7;
 
-        wordList thisCmpts;
-        thisCmpts.append(word::null);
-        thisCmpts.append(CompType::typeName);
-        thisCmpts.append
-        (
-            basicThermo::splitThermoName(ThermoType::typeName(), 5)
-        );
+        /// DynamicList<word> thisCmpts(6);
+        /// thisCmpts.append(CompType::typeName);
+        /// thisCmpts.append
+        /// (
+        ///     basicThermo::splitThermoName(ThermoType::typeName(), 5)
+        /// );
+        ///
+        /// DynamicList<word> validNames;
 
-        wordList validNames;
-
-        List<wordList> validCmpts;
+        DynamicList<wordList> validCmpts;
         validCmpts.append
         (
             // Header
@@ -83,42 +86,38 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
             })
         );
 
-        for
-        (
-            const word& validName
-          : dictionaryConstructorTablePtr_->sortedToc()
-        )
+        for (const word& validName : names)
         {
-            validCmpts.append
-            (
-                basicThermo::splitThermoName(validName, nCmpt)
-            );
-            const wordList& cmpts = validCmpts.last();
+            wordList cmpts(basicThermo::splitThermoName(validName, nCmpt));
 
-            bool isValid = true;
-            for (label i = 1; i < cmpts.size() && isValid; ++i)
+            if (!cmpts.empty())
             {
-                isValid = isValid && cmpts[i] == thisCmpts[i];
-            }
-
-            if (isValid)
-            {
-                validNames.append(cmpts[0]);
+                /// if (thisCmpts == SubList<word>(cmpts, 6, 1))
+                /// {
+                ///     validNames.append(cmpts[0]);
+                /// }
+                validCmpts.append(std::move(cmpts));
             }
         }
-
 
         FatalErrorInLookup
         (
             typeName_(),
             methodName,
-            *dictionaryConstructorTablePtr_
-        )
-            << "All " << validCmpts[0][0] << '/' << validCmpts[0][1]
-            << "/thermoPhysics combinations:" << nl << nl;
+            cnstrTable
+        );
 
-        // Table of available packages (as constituent parts)
-        printTable(validCmpts, FatalErrorInFunction)
+        if (validCmpts.size() > 1)
+        {
+            FatalError
+                << "All " << validCmpts[0][0] << '/' << validCmpts[0][1]
+                << "/thermoPhysics combinations:" << nl << nl;
+
+            // Table of available packages (as constituent parts)
+            printTable(validCmpts, FatalError) << nl;
+        }
+
+        FatalError
             << exit(FatalError);
     }
 
