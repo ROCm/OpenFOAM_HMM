@@ -60,6 +60,16 @@ Note
         baseType##Table_##lookupName##_(#lookupName)
 
 
+//- Add lookup alias for runTime member selection.
+#define addAliasToMemberFunctionSelectionTable\
+(baseType,thisType,funcName,argNames,lookup,other,ver)                         \
+                                                                               \
+    /* Add thisType funcName to the table, find by lookup name */              \
+    baseType::addAlias##funcName##argNames##MemberFunctionToTable<thisType>    \
+        add##thisType##funcName##argNames##MemberFunctionTo##baseType##Table_  \
+        ##lookup##_##other##_(#lookup,#other,ver)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Add to hash-table of functions with typeName as the key.
@@ -84,6 +94,19 @@ Note
         baseType##Table_##lookupName##_(#lookupName)
 
 
+//- Add lookup alias for runTime member selection.
+#define addAliasTemplateToMemberFunctionSelectionTable\
+(baseType,thisType,Targ,funcName,argNames,lookup,other,ver)                    \
+                                                                               \
+    /* Add thisType funcName to the table, find by lookup name */              \
+    baseType::addAlias##funcName##argNames##MemberFunctionToTable              \
+        <thisType<Targ>>                                                       \
+        add##thisType##Targ##funcName##argNames##MemberFunctionTo##baseType    \
+        ##lookup##_##other##_(#lookup,#other,ver)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 //- Add to hash-table of functions with typeName as the key.
 //  Use when baseType requires the Targ template argument as well
 #define addTemplatedToMemberFunctionSelectionTable\
@@ -105,6 +128,16 @@ Note
         <thisType<Targ>>                                                       \
         add##thisType##Targ##funcName##argNames##MemberFunctionTo## \
         baseType##Targ##Table_##lookupName##_(#lookupName)
+
+//- Add lookup alias for runTime member selection.
+#define addAliasTemplatedToMemberFunctionSelectionTable\
+(baseType,thisType,Targ,funcName,argNames,lookup,other,ver)                    \
+                                                                               \
+    /* Add thisType funcName to the table, find by lookup name */              \
+    baseType<Targ>::addAlias##funcName##argNames##MemberFunctionToTable        \
+        <thisType<Targ>>                                                       \
+        add##thisType##Targ##funcName##argNames##MemberFunctionTo##baseType##  \
+        Targ##Table_##lookup##_##other##_(#lookup,#other,ver)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

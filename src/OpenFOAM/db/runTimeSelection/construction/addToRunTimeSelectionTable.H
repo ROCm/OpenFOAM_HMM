@@ -76,6 +76,16 @@ Note
         baseType##Table_##lookupName##_(#lookupName)
 
 
+//- Add lookup alias for runTime selection
+#define addAliasToRunTimeSelectionTable\
+(baseType,thisType,argNames,lookup,other,ver)                                  \
+                                                                               \
+    /* Add thisType constructor function to the table, find by lookup */       \
+    baseType::addAlias##argNames##ConstructorToTable<thisType>                 \
+        add##thisType##argNames##ConstructorTo##baseType##Table_               \
+        ##lookup##_##other##_(#lookup,#other,ver)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Add to construction table with typeName as the key.
@@ -99,6 +109,16 @@ Note
         baseType##Table_##lookupName##_(#lookupName)
 
 
+//- Add lookup alias for for runTime selection
+#define addAliasTemplateToRunTimeSelectionTable\
+(baseType,thisType,Targ,argNames,lookup,other,ver)                             \
+                                                                               \
+    /* Add thisType constructor function to the table, find by lookup */       \
+    baseType::addAlias##argNames##ConstructorToTable<thisType<Targ>>           \
+        add##thisType##Targs##argNames##ConstructorTo##baseType##Table_        \
+        ##lookup##_##other##_(#lookup,#other,ver)
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Add to construction table with typeName as the key.
@@ -120,6 +140,17 @@ Note
     baseType<Targ>::add##argNames##ConstructorToTable<thisType<Targ>>          \
         add##thisType##Targ##argNames##ConstructorTo## \
         baseType##Targ##Table_##lookupName##_(#lookupName)
+
+
+//- Add lookup alias for for runTime selection
+//  Use when baseType requires the Targ template argument as well
+#define addAliasTemplatedToRunTimeSelectionTable\
+(baseType,thisType,Targ,argNames,lookup,other,ver)                             \
+                                                                               \
+    /* Add the thisType constructor function to the table, find by lookup */   \
+    baseType<Targ>::add##argNames##ConstructorToTable<thisType<Targ>>          \
+        add##thisType##Targ##argNames##ConstructorTo##baseType##Targ## \
+        Table_##lookup##_##other##_(#lookup,#other,ver)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

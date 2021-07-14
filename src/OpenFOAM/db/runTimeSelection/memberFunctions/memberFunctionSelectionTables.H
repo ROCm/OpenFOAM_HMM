@@ -118,6 +118,22 @@ Note
         void operator=                                                         \
             (const addRemovable##funcName##argNames##MemberFunctionToTable&)   \
             = delete;                                                          \
+    };                                                                         \
+                                                                               \
+    /* Helper to add alias for funcName to table */                            \
+    template<class baseType##Type>                                             \
+    struct addAlias##funcName##argNames##MemberFunctionToTable                 \
+    {                                                                          \
+        explicit addAlias##funcName##argNames##MemberFunctionToTable           \
+        (                                                                      \
+            const ::Foam::word& k,                                             \
+            const ::Foam::word& alias,                                         \
+            const int ver                                                      \
+        )                                                                      \
+        {                                                                      \
+            funcName##argNames##MemberFunctionCompatTable()                    \
+                .set(alias, std::pair<::Foam::word,int>(k,ver));               \
+        }                                                                      \
     };
 
 
@@ -130,7 +146,7 @@ Note
 //- Define run-time selection table
 #define defineMemberFunctionSelectionTable(baseType,funcName,argNames)         \
                                                                                \
-    declareRunTimeSelectionTableBase(                                          \
+    defineRunTimeSelectionTableBase(                                           \
         baseType,baseType::funcName##argNames##MemberFunction,)
 
 
@@ -138,7 +154,7 @@ Note
 //  use when baseType doesn't need a template argument (eg, is a typedef)
 #define defineTemplateMemberFunctionSelectionTable(baseType,funcName,argNames) \
                                                                                \
-    declareRunTimeSelectionTableBase(                                          \
+    defineRunTimeSelectionTableBase(                                           \
         baseType,baseType::funcName##argNames##MemberFunction,template<>)
 
 
@@ -147,7 +163,7 @@ Note
 #define defineTemplatedMemberFunctionSelectionTable\
 (baseType,funcName,argNames,Targ)                                              \
                                                                                \
-    declareRunTimeSelectionTableBase(                                          \
+    defineRunTimeSelectionTableBase(                                           \
         baseType,baseType<Targ>::funcName##argNames##MemberFunction,template<>)
 
 

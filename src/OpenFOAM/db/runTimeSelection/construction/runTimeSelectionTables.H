@@ -40,6 +40,9 @@ Description
 #ifndef runTimeSelectionTables_H
 #define runTimeSelectionTables_H
 
+#include <memory>   // For std::unique_ptr
+#include <utility>  // For std::pair
+
 #include "autoPtr.H"
 #include "HashTable.H"
 
@@ -61,11 +64,28 @@ Description
         ::Foam::string::hasher                                                 \
     > prefix##TableType;                                                       \
                                                                                \
+    /* Lookup aliases for constructors */                                      \
+    typedef ::Foam::HashTable                                                  \
+    <                                                                          \
+        std::pair<::Foam::word,int>,                                           \
+        ::Foam::word,                                                          \
+        ::Foam::string::hasher                                                 \
+    > prefix##CompatTableType;                                                 \
+                                                                               \
     /* Table singleton (storage) */                                            \
     static prefix##TableType* prefix##TablePtr_;                               \
                                                                                \
+    /* Lookup aliases singleton (storage) */                                   \
+    static std::unique_ptr<prefix##CompatTableType> prefix##CompatTablePtr_;   \
+                                                                               \
+    /* Aliases singleton (access) */                                           \
+    static prefix##CompatTableType& prefix##CompatTable();                     \
+                                                                               \
     /* Table construct/destruct helper */                                      \
-    static void prefix##TablePtr_construct(bool load)
+    static void prefix##TablePtr_construct(bool load);                         \
+                                                                               \
+    /* Lookup function pointer from singleton, nullptr if not found */         \
+    static prefix##Ptr prefix##Table(const ::Foam::word& k)
 
 
 // Not used directly: storage and helper methods for runtime tables
@@ -73,6 +93,20 @@ Description
                                                                                \
     /* Define table singleton (storage) */                                     \
     Tspecialize prefix##TableType* prefix##TablePtr_(nullptr);                 \
+                                                                               \
+    /* Define aliases singleton (storage) */                                   \
+    Tspecialize                                                                \
+    std::unique_ptr<prefix##CompatTableType> prefix##CompatTablePtr_(nullptr); \
+                                                                               \
+    /* Define table singleton (access) for aliases */                          \
+    Tspecialize prefix##CompatTableType& prefix##CompatTable()                 \
+    {                                                                          \
+        if (!prefix##CompatTablePtr_)                                          \
+        {                                                                      \
+            prefix##CompatTablePtr_.reset(new prefix##CompatTableType(16));    \
+        }                                                                      \
+        return *(prefix##CompatTablePtr_);                                     \
+    }                                                                          \
                                                                                \
     /* Table construct/destruct helper */                                      \
     Tspecialize void prefix##TablePtr_construct(bool load)                     \
@@ -90,8 +124,42 @@ Description
         {                                                                      \
             delete prefix##TablePtr_;                                          \
             prefix##TablePtr_ = nullptr;                                       \
+            prefix##CompatTablePtr_.reset(nullptr);                            \
             constructed = false;                                               \
         }                                                                      \
+    }                                                                          \
+                                                                               \
+    /* Define lookup function pointer (singleton) */                           \
+    Tspecialize prefix##Ptr prefix##Table(const ::Foam::word& k)               \
+    {                                                                          \
+        if (prefix##TablePtr_)                                                 \
+        {                                                                      \
+            const auto& tbl = *prefix##TablePtr_;                              \
+            auto iter = tbl.cfind(k);                                          \
+            if (!iter.found() && prefix##CompatTablePtr_)                      \
+            {                                                                  \
+                const auto altIter = prefix##CompatTablePtr_->cfind(k);        \
+                if (altIter.found())                                           \
+                {                                                              \
+                    const auto& alt = altIter.val();  /* <word,int> */         \
+                    iter = tbl.cfind(alt.first);                               \
+                    if (::Foam::error::warnAboutAge(alt.second))               \
+                    {                                                          \
+                        std::cerr                                              \
+                            << "Using [v" << alt.second << "] '" << k          \
+                            << "' instead of '" << alt.first                   \
+                            << " in runtime selection table: "                 \
+                            << #baseType << '\n' << std::endl;                 \
+                        ::Foam::error::warnAboutAge("lookup", alt.second);     \
+                    }                                                          \
+                }                                                              \
+            }                                                                  \
+            if (iter.found())                                                  \
+            {                                                                  \
+                return iter.val();                                             \
+            }                                                                  \
+        }                                                                      \
+        return nullptr;                                                        \
     }
 
 
@@ -108,6 +176,22 @@ Description
                                                                                \
     declareRunTimeSelectionTableBase(                                          \
         ptrWrapper<baseType>, argNames##Constructor, argList);                 \
+                                                                               \
+    /* Helper to add compatibility/alias for runtime selection table */        \
+    template<class baseType##Type>                                             \
+    struct addAlias##argNames##ConstructorToTable                              \
+    {                                                                          \
+        explicit addAlias##argNames##ConstructorToTable                        \
+        (                                                                      \
+            const ::Foam::word& k,                                             \
+            const ::Foam::word& alias,                                         \
+            const int ver                                                      \
+        )                                                                      \
+        {                                                                      \
+            argNames##ConstructorCompatTable()                                 \
+                .set(alias, std::pair<::Foam::word,int>(k,ver));               \
+        }                                                                      \
+    };                                                                         \
                                                                                \
     /* Helper to add constructor from argList to table */                      \
     template<class baseType##Type>                                             \
@@ -190,6 +274,22 @@ Description
                                                                                \
     declareRunTimeSelectionTableBase(                                          \
         ptrWrapper<baseType>,argNames##Constructor,argList);                   \
+                                                                               \
+    /* Helper to add compatibility/alias for runtime selection table */        \
+    template<class baseType##Type>                                             \
+    struct addAlias##argNames##ConstructorToTable                              \
+    {                                                                          \
+        explicit addAlias##argNames##ConstructorToTable                        \
+        (                                                                      \
+            const ::Foam::word& k,                                             \
+            const ::Foam::word& alias,                                         \
+            const int ver                                                      \
+        )                                                                      \
+        {                                                                      \
+            argNames##ConstructorCompatTable()                                 \
+                .set(alias, std::pair<::Foam::word,int>(k,ver));               \
+        }                                                                      \
+    };                                                                         \
                                                                                \
     /* Helper to add constructor from argList to table */                      \
     template<class baseType##Type>                                             \
