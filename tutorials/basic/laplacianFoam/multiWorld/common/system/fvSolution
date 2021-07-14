@@ -10,40 +10,24 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      thermophysicalProperties;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType
+solvers
 {
-    type            hePsiThermo;
-    mixture         pureMixture;
-    transport       const;
-    thermo          hConst;
-    equationOfState perfectGas;
-    specie          specie;
-    energy          sensibleEnthalpy;
+    T
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0;
+    }
 }
 
-// Note: these are the properties for a "normalised" inviscid gas
-//       for which the speed of sound is 1 m/s at a temperature of 1K
-//       and gamma = 7/5
-mixture
+SIMPLE
 {
-    specie
-    {
-        molWeight       11640.3;
-    }
-    thermodynamics
-    {
-        Cp              2.5;
-        Hf              0;
-    }
-    transport
-    {
-        mu              0;
-        Pr              1;
-    }
+    nNonOrthogonalCorrectors 2;
 }
 
 

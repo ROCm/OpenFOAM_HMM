@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         |2011 OpenFOAM: The Open Source CFD Toolbox
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |

@@ -3,27 +3,13 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# Run serial
-./Allrun.pre
-mpirun -app ./mpirun_left_right.schema
-
-# Run with database
-mv -f log.run_left* log.run_right*
-
+# Create meshes and initial fields
 for subcase in left right
 do
 (
     cd "$subcase" || exit
-    foamListTimes -rm
-    restore0Dir
-    foamDictionary 0/T -entry boundaryField.coupled.sampleDatabase -add true
+    runApplication blockMesh && restore0Dir
 )
 done
-
-mpirun -app ./mpirun_left_right.schema
-
-## Run parallel
-## ./Allrun.pre-parallel
-## mpirun -app ./mpirun.schema
 
 #------------------------------------------------------------------------------

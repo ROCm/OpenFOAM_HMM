@@ -4,11 +4,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 #------------------------------------------------------------------------------
 
 # Run serial
-(cd left && runApplication blockMesh)
-(cd right && runApplication blockMesh)
+./Allrun.pre
 mpirun -app ./mpirun_left_right.schema
 
 ## Run parallel
+# ./Allrun.pre-parallel
 #(cd left && runApplication blockMesh)
 #(cd left && runApplication decomposePar)
 #(cd right && runApplication blockMesh)

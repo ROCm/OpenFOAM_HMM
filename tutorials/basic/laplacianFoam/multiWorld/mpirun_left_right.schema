@@ -1,2 +1,2 @@
--np 1 ./run_left.sh
--np 1 ./run_right.sh
+-np 1 ./run_world.sh left
+-np 1 ./run_world.sh right

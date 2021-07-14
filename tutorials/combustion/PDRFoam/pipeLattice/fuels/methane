@@ -79,8 +79,6 @@ SCOPECoeffs
 
 thermophysicalProperties
 {
-    thermoType  hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>;
-
     stoichiometricAirFuelMassRatio  17.1667;
 
     fuel
