@@ -97,7 +97,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "SortableList.H"
 #include "argList.H"
 #include "regionSplit.H"
 #include "fvMeshSubset.H"

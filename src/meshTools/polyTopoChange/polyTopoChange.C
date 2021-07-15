@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyTopoChange.H"
-#include "SortableList.H"
 #include "polyMesh.H"
 #include "polyAddPoint.H"
 #include "polyModifyPoint.H"

@@ -29,7 +29,6 @@ License
 #define steadyParticleTracksTemplates_H
 
 #include "OFstream.H"
-#include "SortableList.H"
 #include "IOobjectList.H"
 #include "PtrList.H"
 #include "Field.H"

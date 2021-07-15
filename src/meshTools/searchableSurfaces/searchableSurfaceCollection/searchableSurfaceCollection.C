@@ -28,7 +28,6 @@ License
 
 #include "searchableSurfaceCollection.H"
 #include "addToRunTimeSelectionTable.H"
-#include "SortableList.H"
 #include "Time.H"
 #include "ListOps.H"
 

@@ -28,7 +28,6 @@ License
 
 #include "cellToCellStencil.H"
 #include "syncTools.H"
-#include "SortableList.H"
 #include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

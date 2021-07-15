@@ -28,7 +28,6 @@ License
 #include "extendedCellToFaceStencil.H"
 #include "globalIndex.H"
 #include "syncTools.H"
-#include "SortableList.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 

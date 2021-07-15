@@ -53,7 +53,6 @@ SourceFiles
 #include "Time.H"
 #include "polyMesh.H"
 #include "plane.H"
-#include "SortableList.H"
 #include "meshTools.H"
 #include "dynamicIndexedOctree.H"
 #include "dynamicTreeDataPoint.H"

@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellToFaceStencil.H"
-#include "SortableList.H"
 #include "emptyPolyPatch.H"
 #include "syncTools.H"
 #include "dummyTransform.H"

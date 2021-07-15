@@ -38,7 +38,6 @@ License
 #include "faMeshLduAddressing.H"
 #include "wedgeFaPatch.H"
 #include "faPatchData.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

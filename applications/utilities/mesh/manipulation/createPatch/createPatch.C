@@ -47,7 +47,6 @@ Description
 #include "argList.H"
 #include "polyMesh.H"
 #include "Time.H"
-#include "SortableList.H"
 #include "OFstream.H"
 #include "meshTools.H"
 #include "faceSet.H"
@@ -703,25 +702,21 @@ int main(int argc, char *argv[])
         {
             const word setName(dict.get<word>("set"));
 
-            faceSet faces(mesh, setName);
+            faceSet set(mesh, setName);
 
-            Info<< "Read " << returnReduce(faces.size(), sumOp<label>())
-                << " faces from faceSet " << faces.name() << endl;
+            Info<< "Read " << returnReduce(set.size(), sumOp<label>())
+                << " faces from faceSet " << set.name() << endl;
 
             // Sort (since faceSet contains faces in arbitrary order)
-            labelList faceLabels(faces.toc());
+            labelList faceLabels(set.sortedToc());
 
-            SortableList<label> patchFaces(faceLabels);
-
-            forAll(patchFaces, i)
+            for (const label facei : faceLabels)
             {
-                label facei = patchFaces[i];
-
                 if (mesh.isInternalFace(facei))
                 {
                     FatalErrorInFunction
                         << "Face " << facei << " specified in set "
-                        << faces.name()
+                        << set.name()
                         << " is not an external face of the mesh." << endl
                         << "This application can only repatch existing boundary"
                         << " faces." << exit(FatalError);
