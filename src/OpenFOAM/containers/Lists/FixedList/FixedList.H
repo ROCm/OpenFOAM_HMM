@@ -152,7 +152,7 @@ public:
         //- Construct and initialize all entries to zero
         inline explicit FixedList(const Foam::zero);
 
-        //- Copy construct from C-array
+        //- Copy construct from C-array (deprecated)
         inline explicit FixedList(const T list[N]);
 
         //- Copy construct
@@ -162,25 +162,28 @@ public:
         //- list elements
         inline FixedList(FixedList<T, N>&& list);
 
-        //- Construct given begin/end iterators
-        //  Uses std::distance when verifying the size.
-        template<class InputIterator>
-        inline FixedList(InputIterator begIter, InputIterator endIter);
-
-        //- Construct from an initializer list
+        //- Construct from an initializer list. Runtime size check
         inline FixedList(std::initializer_list<T> list);
 
-        //- Construct from UList
+        //- Construct from UList. Runtime size check
         inline explicit FixedList(const UList<T>& list);
 
-        //- Copy construct from a subset of the input
+        //- Copy construct from a subset of the input. No size check
+        template<unsigned AnyNum>
+        inline FixedList
+        (
+            const FixedList<T, AnyNum>& list,
+            const FixedList<label, N>& indices
+        );
+
+        //- Copy construct from a subset of the input. No size check
         inline FixedList
         (
             const UList<T>& list,
             const FixedList<label, N>& indices
         );
 
-        //- Construct from SLList
+        //- Construct from SLList. Runtime size check
         inline explicit FixedList(const SLList<T>& list);
 
         //- Construct from Istream
