@@ -93,11 +93,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Calculate yPlus
-        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
-
         //- Calculate the turbulent viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Calculate yPlus
+        tmp<scalarField> calcYPlus(const scalarField& magUp) const;
 
         //- Write local wall function variables
         void writeLocalEntries(Ostream&) const;

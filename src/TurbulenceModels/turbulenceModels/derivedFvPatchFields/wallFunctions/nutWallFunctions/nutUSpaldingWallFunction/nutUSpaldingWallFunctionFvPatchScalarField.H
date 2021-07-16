@@ -134,11 +134,11 @@ protected:
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate the friction velocity
-        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+        tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
         //- Calculate the friction velocity and number of iterations for
         //- convergence
-        virtual tmp<scalarField> calcUTau
+        tmp<scalarField> calcUTau
         (
             const scalarField& magGradU,
             const label maxIter,

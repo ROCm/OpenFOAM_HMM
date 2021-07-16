@@ -110,7 +110,7 @@ protected:
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate wall u+ from table
-        virtual tmp<scalarField> calcUPlus(const scalarField& Rey) const;
+        tmp<scalarField> calcUPlus(const scalarField& Rey) const;
 
         //- Write local wall function variables
         void writeLocalEntries(Ostream&) const;

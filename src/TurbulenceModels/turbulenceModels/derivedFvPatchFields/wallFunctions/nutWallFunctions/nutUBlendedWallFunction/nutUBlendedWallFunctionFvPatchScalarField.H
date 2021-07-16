@@ -129,7 +129,7 @@ protected:
         virtual tmp<scalarField> calcNut() const;
 
         //- Calculate the friction velocity
-        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+        tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
         //- Write local wall function variables
         void writeLocalEntries(Ostream&) const;
