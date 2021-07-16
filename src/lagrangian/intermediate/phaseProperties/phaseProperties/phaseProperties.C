@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,11 +86,11 @@ void Foam::phaseProperties::reorder(const wordList& specieNames)
 
         if (!found)
         {
-            FatalErrorInFunction
+            WarningInFunction
                 << "Could not find specie " << names0[i]
                 << " in list " <<  names_
                 << " for phase " << phaseTypeNames[phase_]
-                << exit(FatalError);
+                << nl;
         }
     }
 }
@@ -114,11 +115,11 @@ void Foam::phaseProperties::setCarrierIds
         }
         if (carrierIds_[i] == -1)
         {
-            FatalErrorInFunction
+            WarningInFunction
                 << "Could not find carrier specie " << names_[i]
                 << " in species list" <<  nl
                 << "Available species are: " << nl << carrierNames << nl
-                << exit(FatalError);
+                << nl;
         }
     }
 }

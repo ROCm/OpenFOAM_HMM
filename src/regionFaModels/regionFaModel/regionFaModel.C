@@ -41,6 +41,9 @@ namespace regionModels
 }
 }
 
+const Foam::word
+Foam::regionModels::regionFaModel::regionFaModelName("regionFaModel");
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 void Foam::regionModels::regionFaModel::constructMeshObjects()
@@ -60,12 +63,31 @@ void Foam::regionModels::regionFaModel::initialise()
     }
 
     vsmPtr_.reset(new volSurfaceMapping(regionMeshPtr_()));
+
+    if (!outputPropertiesPtr_)
+    {
+        const fileName uniformPath(word("uniform")/regionFaModelName);
+
+        outputPropertiesPtr_.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    regionName_ + "OutputProperties",
+                    time_.timeName(),
+                    uniformPath/regionName_,
+                    primaryMesh_,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+    }
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-bool Foam::regionModels::regionFaModel::read(const dictionary& dict)
+bool Foam::regionModels::regionFaModel::init(const dictionary& dict)
 {
     if (active_)
     {
@@ -102,6 +124,17 @@ Foam::regionModels::regionFaModel::regionFaModel
     bool readFields
 )
 :
+    IOdictionary
+    (
+        IOobject
+        (
+            IOobject::groupName(regionFaModelName, patch.name()),
+            patch.boundaryMesh().mesh().time().constant(),
+            patch.boundaryMesh().mesh().time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
     primaryMesh_(patch.boundaryMesh().mesh()),
     patch_(patch),
     time_(patch.boundaryMesh().mesh().time()),
@@ -110,19 +143,17 @@ Foam::regionModels::regionFaModel::regionFaModel
     modelName_(modelName),
     regionMeshPtr_(nullptr),
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
+    outputPropertiesPtr_(nullptr),
     vsmPtr_(nullptr),
     patchID_(patch.index()),
     regionName_(dict.lookup("region"))
 {
-    if (active_)
-    {
-        constructMeshObjects();
-        initialise();
+    constructMeshObjects();
+    initialise();
 
-        if (readFields)
-        {
-            read(dict);
-        }
+    if (readFields)
+    {
+        init(dict);
     }
 }
 
@@ -165,8 +196,9 @@ void Foam::regionModels::regionFaModel::postEvolveRegion()
 {}
 
 
-void Foam::regionModels::regionFaModel::info()
-{}
-
+Foam::scalar Foam::regionModels::regionFaModel::CourantNumber() const
+{
+    return 0;
+}
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ SourceFiles
 #define volSurfaceMapping_H
 
 #include "faMesh.H"
+#include "volMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +86,7 @@ public:
 
     // Member Functions
 
-        //- Map droplet cloud sources to surface
+        //- Map Boundary field to surface
         template<class Type>
         tmp<Field<Type>> mapToSurface
         (
@@ -93,6 +94,9 @@ public:
             GeometricField<Type, fvPatchField, volMesh>::Boundary& df
         ) const;
 
+        //- Map vol Field to surface Field
+        template<class Type>
+        tmp<Field<Type>> mapToSurface(const Field<Type>& f) const;
 
         //- Map patch internal field to surface
         template<class Type>
@@ -118,12 +122,21 @@ public:
             typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
         ) const;
 
-        //- Map surface field to field assumes Field
-        //- faces in the same order as Boundary
+        //- Map surface field to field
+        //  Assumes Field faces in the same order as Boundary
         template<class Type>
         void mapToField
         (
             const GeometricField<Type, faPatchField, areaMesh>& af,
+            Field<Type>& f
+        ) const;
+
+        //- Map surface field to volume field
+        //  Assumes Field faces in the same order as Boundary
+        template<class Type>
+        void mapToField
+        (
+            const Field<Type>& af,
             Field<Type>& f
         ) const;
 };

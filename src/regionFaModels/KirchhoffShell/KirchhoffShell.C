@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,14 +44,15 @@ defineTypeNameAndDebug(KirchhoffShell, 0);
 
 addToRunTimeSelectionTable(vibrationShellModel, KirchhoffShell, dictionary);
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool KirchhoffShell::read(const dictionary& dict)
+bool KirchhoffShell::init(const dictionary& dict)
 {
     this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return true;
 }
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void KirchhoffShell::solveDisplacement()
 {
@@ -249,15 +250,10 @@ KirchhoffShell::KirchhoffShell
         dimensionedScalar(inv(pow3(dimLength)), Zero)
     )
 {
-    init();
+    init(dict);
 }
 
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-void KirchhoffShell::init()
-{}
-
 
 void KirchhoffShell::preEvolveRegion()
 {}
@@ -306,10 +302,8 @@ const tmp<areaScalarField> KirchhoffShell::rho() const
     );
 }
 
-
 void KirchhoffShell::info()
 {}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
