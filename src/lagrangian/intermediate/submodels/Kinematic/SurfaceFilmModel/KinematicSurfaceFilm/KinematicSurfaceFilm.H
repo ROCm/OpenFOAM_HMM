@@ -192,8 +192,11 @@ protected:
             const vector& nf
         ) const;
 
-        //- Initialise pointers of films
+        //- Initialise thermo
         void init(bool binitThermo);
+
+        //- Initialise pointers of films
+        void initFilmModels();
 
 
         // Injection from sheet (ejection) helper functions

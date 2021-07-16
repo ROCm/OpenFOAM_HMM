@@ -130,47 +130,56 @@ Foam::vector Foam::KinematicSurfaceFilm<CloudType>::splashDirection
 
 
 template<class CloudType>
-void Foam::KinematicSurfaceFilm<CloudType>::init(bool binitThermo)
+void Foam::KinematicSurfaceFilm<CloudType>::initFilmModels()
 {
     const fvMesh& mesh = this->owner().mesh();
 
     // set up filmModel pointer
-    filmModel_ =
-        const_cast<regionFilm*>
-        (
-            mesh.time().objectRegistry::template findObject
-            <
-                regionFilm
-            >
-            (
-                "surfaceFilmProperties"
-            )
-        );
-
-
-    // set up areaFilms
-    const wordList names =
-        mesh.time().objectRegistry::template
-            sortedNames<regionModels::regionFaModel>();
-
-    forAll(names, i)
+    if (!filmModel_)
     {
-        const regionModels::regionFaModel* regionFa =
-            mesh.time().objectRegistry::template findObject
-            <
-                regionModels::regionFaModel
-            >(names[i]);
-
-        if (regionFa && isA<areaFilm>(*regionFa))
-        {
-            areaFilm& film =
-                const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
-            areaFilms_.append(&film);
-        }
+        filmModel_ =
+            const_cast<regionFilm*>
+            (
+                mesh.time().objectRegistry::template findObject
+                <
+                    regionFilm
+                >
+                (
+                    "surfaceFilmProperties"
+                )
+            );
     }
 
-    // Initiate thermo ref for filmModel
-    if (filmModel_ && binitThermo)
+    if (areaFilms_.size() == 0)
+    {
+        // set up areaFilms
+        const wordList names =
+            mesh.time().objectRegistry::template
+                sortedNames<regionModels::regionFaModel>();
+
+        forAll(names, i)
+        {
+            const regionModels::regionFaModel* regionFa =
+                mesh.time().objectRegistry::template findObject
+                <
+                    regionModels::regionFaModel
+                >(names[i]);
+
+            if (regionFa && isA<areaFilm>(*regionFa))
+            {
+                areaFilm& film =
+                    const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
+                areaFilms_.append(&film);
+            }
+        }
+    }
+}
+
+
+template<class CloudType>
+void Foam::KinematicSurfaceFilm<CloudType>::init(bool binitThermo)
+{
+    if (binitThermo)
     {
         this->coeffDict().readEntry("pRef", pRef_);
         this->coeffDict().readEntry("TRef", TRef_);
@@ -569,9 +578,8 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
         this->coeffDict().readEntry("Adry", Adry_);
         this->coeffDict().readEntry("Awet", Awet_);
         this->coeffDict().readEntry("Cf", Cf_);
+        init(initThermo);
     }
-
-    init(initThermo);
 }
 
 
@@ -596,7 +604,10 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
     Cf_(sfm.Cf_),
     nParcelsSplashed_(sfm.nParcelsSplashed_)
 {
-    init(initThermo);
+    if (interactionType_ == itSplashBai)
+    {
+        init(initThermo);
+    }
 }
 
 
@@ -614,59 +625,64 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
 
     bool bInteraction(false);
 
+    initFilmModels();
+
     // Check the singleLayer film models
-    if (filmModel_ && filmModel_->isRegionPatch(patchi))
+    if (filmModel_)
     {
-        const label facei = pp.whichFace(p.face());
-
-        switch (interactionType_)
+        if (filmModel_->isRegionPatch(patchi))
         {
-            case itBounce:
+            const label facei = pp.whichFace(p.face());
+
+            switch (interactionType_)
             {
-                bounceInteraction(p, pp, facei, keepParticle);
-
-                break;
-            }
-            case itAbsorb:
-            {
-                const scalar m = p.nParticle()*p.mass();
-
-                absorbInteraction<regionFilm>
-                    (*filmModel_, p, pp, facei, m, keepParticle);
-
-                break;
-            }
-            case itSplashBai:
-            {
-                bool dry = this->deltaFilmPatch_[patchi][facei] < deltaWet_;
-
-                const scalarField X(thermo_->size(), 1);
-                const scalar mu = thermo_->mu(pRef_, TRef_, X);
-                const scalar sigma = thermo_->sigma(pRef_, TRef_, X);
-
-                if (dry)
+                case itBounce:
                 {
-                    drySplashInteraction<regionFilm>
-                        (*filmModel_, sigma, mu, p, pp, facei, keepParticle);
-                }
-                else
-                {
-                    wetSplashInteraction<regionFilm>
-                        (*filmModel_, sigma, mu, p, pp, facei, keepParticle);
-                }
+                    bounceInteraction(p, pp, facei, keepParticle);
 
-                break;
+                    break;
+                }
+                case itAbsorb:
+                {
+                    const scalar m = p.nParticle()*p.mass();
+
+                    absorbInteraction<regionFilm>
+                        (*filmModel_, p, pp, facei, m, keepParticle);
+
+                    break;
+                }
+                case itSplashBai:
+                {
+                    bool dry = this->deltaFilmPatch_[patchi][facei] < deltaWet_;
+
+                    const scalarField X(thermo_->size(), 1);
+                    const scalar mu = thermo_->mu(pRef_, TRef_, X);
+                    const scalar sigma = thermo_->sigma(pRef_, TRef_, X);
+
+                    if (dry)
+                    {
+                        drySplashInteraction<regionFilm>
+                            (*filmModel_, sigma, mu, p, pp, facei, keepParticle);
+                    }
+                    else
+                    {
+                        wetSplashInteraction<regionFilm>
+                            (*filmModel_, sigma, mu, p, pp, facei, keepParticle);
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    FatalErrorInFunction
+                        << "Unknown interaction type enumeration"
+                        << abort(FatalError);
+                }
             }
-            default:
-            {
-                FatalErrorInFunction
-                    << "Unknown interaction type enumeration"
-                    << abort(FatalError);
-            }
+
+            // Transfer parcel/parcel interactions complete
+            bInteraction = true;
         }
-
-        // Transfer parcel/parcel interactions complete
-        bInteraction = true;
     }
 
 

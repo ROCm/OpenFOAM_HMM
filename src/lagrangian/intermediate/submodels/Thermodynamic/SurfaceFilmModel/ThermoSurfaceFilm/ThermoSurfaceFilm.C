@@ -72,68 +72,72 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 {
     const label patchi = pp.index();
 
+    this->initFilmModels();
+
     bool bInteraction(false);
 
     // Check the singleLayer film models
-    if (this->filmModel_ && this->filmModel_->isRegionPatch(patchi))
+    if (this->filmModel_)
     {
-        const label facei = pp.whichFace(p.face());
-
-        switch (this->interactionType_)
+        if (this->filmModel_->isRegionPatch(patchi))
         {
-            case KinematicSurfaceFilm<CloudType>::itBounce:
+            const label facei = pp.whichFace(p.face());
+
+            switch (this->interactionType_)
             {
-                this->bounceInteraction(p, pp, facei, keepParticle);
-
-                break;
-            }
-            case KinematicSurfaceFilm<CloudType>::itAbsorb:
-            {
-                const scalar m = p.nParticle()*p.mass();
-
-                this->absorbInteraction //<regionFilm>
-                    (*(this->filmModel_), p, pp, facei, m, keepParticle);
-
-                break;
-            }
-            case KinematicSurfaceFilm<CloudType>::itSplashBai:
-            {
-                // Local pressure
-                const scalar pc = thermo_.thermo().p()[p.cell()];
-                const liquidProperties& liq = thermo_.liquids().properties()[0];
-                const scalar sigma = liq.sigma(pc, p.T());
-                const scalar mu = liq.mu(pc, p.T());
-
-                bool dry = this->deltaFilmPatch_[patchi][facei] < this->deltaWet_;
-
-                if (dry)
+                case KinematicSurfaceFilm<CloudType>::itBounce:
                 {
-                    this->drySplashInteraction //<CloudType, regionFilm>
-                        (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
-                }
-                else
-                {
-                    this->wetSplashInteraction //<regionFilm>
-                        (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
-                }
+                    this->bounceInteraction(p, pp, facei, keepParticle);
 
-                break;
+                    break;
+                }
+                case KinematicSurfaceFilm<CloudType>::itAbsorb:
+                {
+                    const scalar m = p.nParticle()*p.mass();
+
+                    this->absorbInteraction //<regionFilm>
+                        (*(this->filmModel_), p, pp, facei, m, keepParticle);
+
+                    break;
+                }
+                case KinematicSurfaceFilm<CloudType>::itSplashBai:
+                {
+                    // Local pressure
+                    const scalar pc = thermo_.thermo().p()[p.cell()];
+                    const liquidProperties& liq = thermo_.liquids().properties()[0];
+                    const scalar sigma = liq.sigma(pc, p.T());
+                    const scalar mu = liq.mu(pc, p.T());
+
+                    bool dry = this->deltaFilmPatch_[patchi][facei] < this->deltaWet_;
+
+                    if (dry)
+                    {
+                        this->drySplashInteraction //<CloudType, regionFilm>
+                            (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
+                    }
+                    else
+                    {
+                        this->wetSplashInteraction //<regionFilm>
+                            (*(this->filmModel_), sigma, mu, p, pp, facei, keepParticle);
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    FatalErrorInFunction
+                        << "Unknown interaction type enumeration"
+                        << abort(FatalError);
+                }
             }
-            default:
-            {
-                FatalErrorInFunction
-                    << "Unknown interaction type enumeration"
-                    << abort(FatalError);
-            }
+
+            // Transfer parcel/parcel interactions complete
+            bInteraction = true;
         }
-
-        // Transfer parcel/parcel interactions complete
-        bInteraction = true;
     }
 
     for (areaFilm& film : this->areaFilms_)
     {
-
         if (patchi == film.patchID())
         {
             const label facei = pp.whichFace(p.face());

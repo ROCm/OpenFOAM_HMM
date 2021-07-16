@@ -272,9 +272,8 @@ scalar liquidFilmBase::CourantNumber() const
     reduce(CoNum, maxOp<scalar>());
     reduce(velMag, maxOp<scalar>());
 
-    Info<< "Film Courant Number: "
-        << " max: " << CoNum
-        << " Film velocity magnitude: (h)" << velMag << endl;
+    Info<< "Max film Courant Number: " << CoNum
+        << " Film velocity magnitude: " << velMag << endl;
 
     return CoNum;
 }
