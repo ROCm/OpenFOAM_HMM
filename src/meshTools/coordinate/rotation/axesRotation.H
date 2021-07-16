@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ Description
     or (e3/e1). Any nonorthogonality is absorbed into the second vector.
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type        axes;
         e1          (1 0 0);
@@ -122,14 +122,11 @@ public:
 
     // Constructors
 
-        //- Construct null - an identity transform
+        //- Default construct - an identity transform
         axes();
 
         //- Copy construct
         axes(const axes& crot);
-
-        //- Move construct
-        axes(axes&& crot);
 
         //- Construct from two axes
         axes(const vector& axis1, const vector& axis2, axisOrder order=E3_E1);

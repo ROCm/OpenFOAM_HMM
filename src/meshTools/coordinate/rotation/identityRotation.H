@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ Description
     An identity coordinateRotation.
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type    none;
     }
@@ -73,13 +73,19 @@ public:
     TypeNameNoDebug("none");
 
 
-    // Constructors
+    // Generated Methods
 
-        //- Construct null
-        identity();
+        //- Default construct
+        identity() = default;
 
         //- Copy construct
-        identity(const identity& unused);
+        identity(const identity&) = default;
+
+        //- Copy assignment
+        identity& operator=(const identity&) = default;
+
+
+    // Constructors
 
         //- Construct from dictionary
         explicit identity(const dictionary& unused);
@@ -110,7 +116,6 @@ public:
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const;
-
 };
 
 

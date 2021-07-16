@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,6 +73,9 @@ public:
 
     // Constructors
 
+        //- Default construct - an identity transform
+        cylindrical() = default;
+
         //- Copy construct
         cylindrical(const cylindrical& crot);
 
@@ -110,8 +113,8 @@ public:
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const;
-
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

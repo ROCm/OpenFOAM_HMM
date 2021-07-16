@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Description
     https://en.wikipedia.org/wiki/Euler_angles
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type    euler;
         angles  (0 0 180);
@@ -109,7 +109,7 @@ public:
 
     // Constructors
 
-        //- Construct null - an identity transform
+        //- Default construct - an identity transform
         euler();
 
         //- Copy construct
@@ -165,14 +165,12 @@ public:
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const;
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace coordinateRotations
-
 
 //- Compatibility typedef 1806
 typedef coordinateRotations::euler EulerCoordinateRotation;

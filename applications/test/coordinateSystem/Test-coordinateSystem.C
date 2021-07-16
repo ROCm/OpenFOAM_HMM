@@ -35,6 +35,7 @@ Description
 #include "Time.H"
 #include "coordinateSystems.H"
 #include "identityRotation.H"
+#include "cartesianCS.H"
 #include "indirectCS.H"
 #include "Fstream.H"
 #include "IOstreams.H"
@@ -58,13 +59,14 @@ void basicTests(const coordinateSystem& cs)
 {
     cs.writeEntry(cs.name(), Info);
 
-    if (isA<coordSystem::indirect>(cs))
+    if (const auto* cartptr = isA<coordSystem::cartesian>(cs))
     {
-        Info<< "indirect from:" << nl;
-        dynamicCast<const coordSystem::indirect>(cs).cs()
-            .writeEntry(cs.name(), Info);
+        if (!cartptr->active())
+        {
+            Info<< "inactive cartesian = " << (*cartptr)
+                << " with: " << (*cartptr).R() << nl;
+        }
     }
-
 
     Info<< "rotation: " << cs.R() << nl;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ Description
     User specification of a coordinate rotation.
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type    axes
         e1      (1 0 0);
@@ -61,8 +61,9 @@ SourceFiles
 #ifndef coordinateRotation_H
 #define coordinateRotation_H
 
-#include "vectorField.H"
-#include "tensorField.H"
+#include "autoPtr.H"
+#include "vector.H"
+#include "tensor.H"
 #include "dictionary.H"
 #include "runTimeSelectionTables.H"
 
@@ -137,7 +138,6 @@ public:
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const = 0;
-
 };
 
 

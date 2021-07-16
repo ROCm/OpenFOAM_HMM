@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -211,18 +211,9 @@ Foam::coordinateRotations::axes::axes()
 
 Foam::coordinateRotations::axes::axes(const axes& crot)
 :
-    coordinateRotation(crot),
+    coordinateRotation(),
     axis1_(crot.axis1_),
     axis2_(crot.axis2_),
-    order_(crot.order_)
-{}
-
-
-Foam::coordinateRotations::axes::axes(axes&& crot)
-:
-    coordinateRotation(std::move(crot)),
-    axis1_(std::move(crot.axis1_)),
-    axis2_(std::move(crot.axis2_)),
     order_(crot.order_)
 {}
 
@@ -259,8 +250,8 @@ Foam::coordinateRotations::axes::axes(const dictionary& dict)
 
 void Foam::coordinateRotations::axes::clear()
 {
-    axis1_ = vector(0,0,1);  // e3 = global Z
-    axis2_ = vector(1,0,0);  // e1 = global X
+    axis1_ = vector(0,0,1);  // primary axis (e3, global Z)
+    axis2_ = vector(1,0,0);  // secondary axis (e1, global X)
     order_ = E3_E1;
 }
 

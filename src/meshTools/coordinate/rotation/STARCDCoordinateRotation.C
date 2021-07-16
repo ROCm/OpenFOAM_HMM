@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ Foam::coordinateRotations::starcd::starcd()
 
 Foam::coordinateRotations::starcd::starcd(const starcd& crot)
 :
-    coordinateRotation(crot),
+    coordinateRotation(),
     angles_(crot.angles_),
     degrees_(crot.degrees_)
 {}
@@ -139,7 +139,7 @@ Foam::coordinateRotations::starcd::starcd
 Foam::coordinateRotations::starcd::starcd(const dictionary& dict)
 :
     coordinateRotation(),
-    angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
+    angles_(dict.get<vector>("angles")),
     degrees_(dict.getOrDefault("degrees", true))
 {}
 

@@ -163,7 +163,6 @@ public:
 //- Compatibility typedef 1806
 typedef coordSystem::cartesian cartesianCS;
 
-
 } // End namespace Foam
 
 
