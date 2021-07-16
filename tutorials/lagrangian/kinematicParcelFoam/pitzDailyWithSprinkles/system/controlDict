@@ -22,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         1; // increase it by 13 if need be
+endTime         13;
 
 deltaT          0.005;
 

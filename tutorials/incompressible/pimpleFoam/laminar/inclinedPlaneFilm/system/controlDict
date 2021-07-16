@@ -22,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.5; // please increase it to 2.5 or more, if need be.
+endTime         2.5;
 
 deltaT          0.0002;
 

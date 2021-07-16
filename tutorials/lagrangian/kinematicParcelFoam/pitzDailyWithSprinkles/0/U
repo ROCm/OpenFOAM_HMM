@@ -46,7 +46,7 @@ boundaryField
         infoOutput      true;
         U               U;
         pRef            1e5; // Reference pressure for thermo
-        T0              300;
+        T0              300; // Reference temperature for thermo
 
         thermo
         {

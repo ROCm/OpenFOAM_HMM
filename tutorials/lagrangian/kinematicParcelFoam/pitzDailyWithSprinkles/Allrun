@@ -5,12 +5,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 runApplication blockMesh
 
-runParallel -s decompose redistributePar -decompose
+runApplication makeFaMesh
 
-runParallel makeFaMesh
+runApplication decomposePar
 
 runParallel $(getApplication)
 
-runParallel -s reconstruct redistributePar -reconstruct
+runApplication reconstructPar
 
 #------------------------------------------------------------------------------
