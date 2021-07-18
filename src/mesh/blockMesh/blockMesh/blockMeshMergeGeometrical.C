@@ -39,7 +39,7 @@ void Foam::blockMesh::calcGeometricalMerge()
         Info<< "Creating block offsets" << endl;
     }
 
-    blockOffsets_.setSize(blocks.size());
+    blockOffsets_.resize(blocks.size());
 
     nPoints_ = 0;
     nCells_  = 0;
@@ -58,21 +58,28 @@ void Foam::blockMesh::calcGeometricalMerge()
         Info<< "Creating merge list (geometric search).." << flush;
     }
 
-    // set unused to -1
-    mergeList_.setSize(nPoints_);
+    // Set unused to -1
+    mergeList_.resize(nPoints_);
     mergeList_ = -1;
 
 
-    const pointField& blockPoints = topology().points();
-    const cellList& blockCells = topology().cells();
-    const faceList& blockFaces = topology().faces();
-    const labelList& faceOwnerBlocks = topology().faceOwner();
+    // Block mesh topology
+    const polyMesh& topoMesh = topology();
+
+    const pointField& blockPoints = topoMesh.points();
+    const cellList& blockCells = topoMesh.cells();
+    const faceList& blockFaces = topoMesh.faces();
+    const labelList& faceOwnerBlocks = topoMesh.faceOwner();
+    const labelList& faceNeighbourBlocks = topoMesh.faceNeighbour();
+
+    const faceList::subList blockinternalFaces
+    (
+        blockFaces,
+        topoMesh.nInternalFaces()
+    );
 
     // For efficiency, create merge pairs in the first pass
     labelListListList glueMergePairs(blockFaces.size());
-
-    const labelList& faceNeighbourBlocks = topology().faceNeighbour();
-
 
     forAll(blockFaces, blockFaceLabel)
     {
@@ -179,7 +186,7 @@ void Foam::blockMesh::calcGeometricalMerge()
         sqrMergeTol /= 10.0;
 
 
-        if (topology().isInternalFace(blockFaceLabel))
+        if (topoMesh.isInternalFace(blockFaceLabel))
         {
         label blockNlabel = faceNeighbourBlocks[blockFaceLabel];
         const pointField& blockNpoints = blocks[blockNlabel].points();
@@ -305,12 +312,6 @@ void Foam::blockMesh::calcGeometricalMerge()
         }
     }
 
-
-    const faceList::subList blockinternalFaces
-    (
-        blockFaces,
-        topology().nInternalFaces()
-    );
 
     bool changedPointMerge = false;
     label nPasses = 0;

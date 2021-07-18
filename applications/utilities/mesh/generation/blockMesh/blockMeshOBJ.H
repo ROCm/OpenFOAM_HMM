@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -16,7 +16,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    const polyMesh& topoMesh = blocks.topology();
+    refPtr<polyMesh> topoMeshPtr(blocks.topology(true));
+    const polyMesh& topoMesh = topoMeshPtr();
 
     // Write mesh as edges
     {

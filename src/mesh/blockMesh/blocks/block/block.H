@@ -215,14 +215,14 @@ public:
     // Access
 
         //- The points for filling the block
-        inline const pointField& points() const;
+        inline const pointField& points() const noexcept;
 
         //- The hex cells for filling the block
         inline const List<hexCell>& cells() const;
 
         //- The boundary patch faces for the block
         inline const FixedList<List<FixedList<label, 4>>, 6>&
-        boundaryPatches() const;
+        boundaryPatches() const noexcept;
 
 
     // Mesh Components

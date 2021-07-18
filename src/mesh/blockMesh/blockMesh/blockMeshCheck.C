@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,20 +106,37 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     }
 
     // Check curved-face/block-face correspondence
-    forAll(faces_, cfi)
+    for (const blockFace& cface : faces_)
     {
+        const face& cf = cface.vertices();
+
         bool found = false;
 
-        forAll(faces, fi)
+        if (cf.size() == 2)
         {
-            found = faces_[cfi].compare(faces[fi]) != 0;
-            if (found) break;
+            const label bi = cf[0];
+            const label fi = cf[1];
+
+            found =
+            (
+                bi >= 0 && bi < blocks.size()
+             && fi >= 0 && fi < blocks[bi].blockShape().nFaces()
+            );
+        }
+
+        if (!found)
+        {
+            for (const face& bf : faces)
+            {
+                found = cface.compare(bf) != 0;
+                if (found) break;
+            }
         }
 
         if (!found)
         {
             Info<< "    Curved face ";
-            faces_[cfi].write(Info, dict);
+            cface.write(Info, dict);
             Info<< "    does not correspond to a block face." << endl;
             ok = false;
         }

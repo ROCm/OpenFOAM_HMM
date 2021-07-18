@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,67 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+bool Foam::blockDescriptor::assignGradings
+(
+    const UList<gradingDescriptors>& ratios
+)
+{
+    bool ok = true;
+
+    switch (ratios.size())
+    {
+        case 0:
+        {
+            expand_.resize(12);
+            expand_ = gradingDescriptors();
+            break;
+        }
+        case 1:
+        {
+            // Identical in x/y/z-directions
+            expand_.resize(12);
+            expand_ = ratios[0];
+            break;
+        }
+        case 3:
+        {
+            expand_.resize(12);
+
+            // x-direction
+            expand_[0]  = ratios[0];
+            expand_[1]  = ratios[0];
+            expand_[2]  = ratios[0];
+            expand_[3]  = ratios[0];
+
+            // y-direction
+            expand_[4]  = ratios[1];
+            expand_[5]  = ratios[1];
+            expand_[6]  = ratios[1];
+            expand_[7]  = ratios[1];
+
+            // z-direction
+            expand_[8]  = ratios[2];
+            expand_[9]  = ratios[2];
+            expand_[10] = ratios[2];
+            expand_[11] = ratios[2];
+            break;
+        }
+        case 12:
+        {
+            expand_ = ratios;
+            break;
+        }
+        default:
+        {
+            ok = false;
+            break;
+        }
+    }
+
+    return ok;
+}
+
+
 void Foam::blockDescriptor::check(const Istream& is)
 {
     for (const label pointi : blockShape_)
@@ -38,8 +99,8 @@ void Foam::blockDescriptor::check(const Istream& is)
         if (pointi < 0 || pointi >= vertices_.size())
         {
             FatalIOErrorInFunction(is)
-                << "Point label " << pointi
-                << " out of range 0.." << vertices_.size() - 1
+                << "Point label (" << pointi
+                << ") out of range 0.." << vertices_.size() - 1
                 << " in block " << *this
                 << exit(FatalIOError);
         }
@@ -100,7 +161,7 @@ void Foam::blockDescriptor::check(const Istream& is)
 }
 
 
-void Foam::blockDescriptor::findCurvedFaces()
+void Foam::blockDescriptor::findCurvedFaces(const label blockIndex)
 {
     const faceList shapeFaces(blockShape().faces());
 
@@ -108,17 +169,21 @@ void Foam::blockDescriptor::findCurvedFaces()
     {
         forAll(blockFaces_, facei)
         {
+            const face& f = blockFaces_[facei].vertices();
+
+            // Accept (<block> <face>) face description
             if
             (
-                face::sameVertices
                 (
-                    blockFaces_[facei].vertices(),
-                    shapeFaces[shapeFacei]
+                    f.size() == 2
+                 && f[0] == blockIndex
+                 && f[1] == shapeFacei
                 )
+             || face::sameVertices(f, shapeFaces[shapeFacei])
             )
             {
                 curvedFaces_[shapeFacei] = facei;
-                nCurvedFaces_++;
+                ++nCurvedFaces_;
                 break;
             }
         }
@@ -144,19 +209,15 @@ Foam::blockDescriptor::blockDescriptor
     blockEdges_(edges),
     blockFaces_(faces),
     blockShape_(bshape),
-    expand_(expand),
+    expand_(),
     zoneName_(zoneName),
     curvedFaces_(-1),
     nCurvedFaces_(0)
 {
-    if (expand_.empty())
-    {
-        expand_.resize(12, gradingDescriptors());
-    }
-    else if (expand_.size() != 12)
+    if (!assignGradings(expand))
     {
         FatalErrorInFunction
-            << "Unknown definition of expansion ratios"
+            << "Unknown definition of expansion ratios: " << expand
             << exit(FatalError);
     }
 
@@ -167,7 +228,7 @@ Foam::blockDescriptor::blockDescriptor
 Foam::blockDescriptor::blockDescriptor
 (
     const dictionary& dict,
-    const label index,
+    const label blockIndex,
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
@@ -178,7 +239,8 @@ Foam::blockDescriptor::blockDescriptor
     vertices_(vertices),
     blockEdges_(edges),
     blockFaces_(faces),
-    expand_(12, gradingDescriptors()),
+    blockShape_(),
+    expand_(),
     zoneName_(),
     curvedFaces_(-1),
     nCurvedFaces_(0)
@@ -218,7 +280,7 @@ Foam::blockDescriptor::blockDescriptor
         else
         {
             FatalIOErrorInFunction(is)
-                << "incorrect token while reading n, expected '(', found "
+                << "Incorrect token while reading n, expected '(', found "
                 << t.info()
                 << exit(FatalIOError);
         }
@@ -226,6 +288,10 @@ Foam::blockDescriptor::blockDescriptor
     else
     {
         // Old-style: read three labels
+        IOWarningInFunction(is)
+            << "Encountered old-style specification of mesh divisions"
+            << endl;
+
         is  >> ijkMesh::sizes().x()
             >> ijkMesh::sizes().y()
             >> ijkMesh::sizes().z();
@@ -237,47 +303,18 @@ Foam::blockDescriptor::blockDescriptor
         is.putBack(t);
     }
 
-    List<gradingDescriptors> expRatios(is);
+    List<gradingDescriptors> expand(is);
 
-    if (expRatios.size() == 1)
+    if (!assignGradings(expand))
     {
-        // Identical in x/y/z-directions
-        expand_ = expRatios[0];
-    }
-    else if (expRatios.size() == 3)
-    {
-        // x-direction
-        expand_[0]  = expRatios[0];
-        expand_[1]  = expRatios[0];
-        expand_[2]  = expRatios[0];
-        expand_[3]  = expRatios[0];
-
-        // y-direction
-        expand_[4]  = expRatios[1];
-        expand_[5]  = expRatios[1];
-        expand_[6]  = expRatios[1];
-        expand_[7]  = expRatios[1];
-
-        // z-direction
-        expand_[8]  = expRatios[2];
-        expand_[9]  = expRatios[2];
-        expand_[10] = expRatios[2];
-        expand_[11] = expRatios[2];
-    }
-    else if (expRatios.size() == 12)
-    {
-        expand_ = expRatios;
-    }
-    else
-    {
-        FatalIOErrorInFunction(is)
-            << "Unknown definition of expansion ratios: " << expRatios
-            << exit(FatalIOError);
+        FatalErrorInFunction
+            << "Unknown definition of expansion ratios: " << expand
+            << exit(FatalError);
     }
 
     check(is);
 
-    findCurvedFaces();
+    findCurvedFaces(blockIndex);
 }
 
 
@@ -403,7 +440,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
     }
 
     os  << ' '  << bd.density()
-        << " simpleGrading (";
+        << " grading (";
 
 
     const List<gradingDescriptors>& expand = bd.grading();
@@ -445,8 +482,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
         }
     }
 
-
-    os  << ")";
+    os  << ')';
 
     return os;
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockMesh.H"
+#include "transform.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,6 +48,182 @@ Foam::blockMesh::strategyNames_
 });
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Process dictionary entry with single scalar or vector quantity
+// - return 0 if scaling is not needed. Eg, Not found or is unity
+// - return 1 for uniform scaling
+// - return 3 for non-uniform scaling
+
+int readScaling(const entry *eptr, vector& scale)
+{
+    int nCmpt = 0;
+
+    if (!eptr)
+    {
+        return nCmpt;
+    }
+
+    ITstream& is = eptr->stream();
+
+    if (is.peek().isNumber())
+    {
+        // scalar value
+        scalar val;
+        is >> val;
+
+        if ((val > 0) && !equal(val, 1))
+        {
+            // Uniform scaling
+            nCmpt = 1;
+            scale = vector::uniform(val);
+        }
+    }
+    else
+    {
+        // vector value
+        is >> scale;
+
+        bool nonUnity = false;
+        for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
+        {
+            if (scale[cmpt] <= 0)
+            {
+                scale[cmpt] = 1;
+            }
+            else if (!equal(scale[cmpt], 1))
+            {
+                nonUnity = true;
+            }
+        }
+
+        if (nonUnity)
+        {
+            if (equal(scale.x(), scale.y()) && equal(scale.x(), scale.z()))
+            {
+                // Uniform scaling
+                nCmpt = 1;
+            }
+            else
+            {
+                nCmpt = 3;
+            }
+        }
+    }
+
+    eptr->checkITstream(is);
+
+    return nCmpt;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::blockMesh::readPointTransforms(const dictionary& dict)
+{
+    transformType_ = transformTypes::NO_TRANSFORM;
+
+    // Optional cartesian coordinate system transform, since JUL-2021
+    if (const dictionary* dictptr = dict.findDict("transform"))
+    {
+        transform_ = coordSystem::cartesian(*dictptr);
+
+        constexpr scalar tol = VSMALL;
+
+        // Check for non-zero origin
+        const vector& o = transform_.origin();
+        if
+        (
+            (mag(o.x()) > tol)
+         || (mag(o.y()) > tol)
+         || (mag(o.z()) > tol)
+        )
+        {
+            transformType_ |= transformTypes::TRANSLATION;
+        }
+
+        // Check for non-identity rotation
+        const tensor& r = transform_.R();
+        if
+        (
+            (mag(r.xx() - 1) > tol)
+         || (mag(r.xy()) > tol)
+         || (mag(r.xz()) > tol)
+
+         || (mag(r.yx()) > tol)
+         || (mag(r.yy() - 1) > tol)
+         || (mag(r.yz()) > tol)
+
+         || (mag(r.zx()) > tol)
+         || (mag(r.zy()) > tol)
+         || (mag(r.zz() - 1) > tol)
+        )
+        {
+            transformType_ |= transformTypes::ROTATION;
+        }
+    }
+    else
+    {
+        transform_.clear();
+    }
+
+
+    // Optional 'prescale' factor.
+    {
+        prescaling_ = vector::uniform(1);
+
+        const int scaleType = readScaling
+        (
+            dict.findEntry("prescale", keyType::LITERAL),
+            prescaling_
+        );
+
+        if (scaleType == 1)
+        {
+            transformType_ |= transformTypes::PRESCALING;
+        }
+        else if (scaleType == 3)
+        {
+            transformType_ |= transformTypes::PRESCALING3;
+        }
+    }
+
+
+    // Optional 'scale' factor. Was 'convertToMeters' until OCT-2008
+    {
+        scaling_ = vector::uniform(1);
+
+        const int scaleType = readScaling
+        (
+            // Mark as changed from 2010 onwards
+            dict.findCompat
+            (
+                "scale",
+                {{"convertToMeters", 1012}},
+                keyType::LITERAL
+            ),
+            scaling_
+        );
+
+        if (scaleType == 1)
+        {
+            transformType_ |= transformTypes::SCALING;
+        }
+        else if (scaleType == 3)
+        {
+            transformType_ |= transformTypes::SCALING3;
+        }
+    }
+
+    return bool(transformType_);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::blockMesh::blockMesh
@@ -62,6 +239,8 @@ Foam::blockMesh::blockMesh
     (
         meshDict_.getOrDefault("checkFaceCorrespondence", true)
     ),
+    mergeStrategy_(strategy),
+    transformType_(transformTypes::NO_TRANSFORM),
     geometry_
     (
         IOobject
@@ -78,25 +257,27 @@ Foam::blockMesh::blockMesh
       : dictionary(),
         true
     ),
-    scaleFactor_(1),
     blockVertices_
     (
         meshDict_.lookup("vertices"),
         blockVertex::iNew(meshDict_, geometry_)
     ),
     vertices_(Foam::vertices(blockVertices_)),
+    prescaling_(vector::uniform(1)),
+    scaling_(vector::uniform(1)),
+    transform_(),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
     // Command-line option has precedence over dictionary setting
 
-    if (strategy == mergeStrategy::DEFAULT_MERGE)
+    if (mergeStrategy_ == mergeStrategy::DEFAULT_MERGE)
     {
-        strategyNames_.readIfPresent("mergeType", meshDict_, strategy);
+        strategyNames_.readIfPresent("mergeType", meshDict_, mergeStrategy_);
 
         // Warn about fairly obscure old "fastMerge" option?
     }
 
-    if (strategy == mergeStrategy::MERGE_POINTS)
+    if (mergeStrategy_ == mergeStrategy::MERGE_POINTS)
     {
         // MERGE_POINTS
         calcGeometricalMerge();
@@ -131,45 +312,42 @@ bool Foam::blockMesh::verbose(const bool on) noexcept
 }
 
 
-const Foam::pointField& Foam::blockMesh::vertices() const
+const Foam::pointField& Foam::blockMesh::vertices() const noexcept
 {
     return vertices_;
 }
 
 
-const Foam::polyMesh& Foam::blockMesh::topology() const
+Foam::tmp<Foam::pointField>
+Foam::blockMesh::vertices(bool applyTransform) const
 {
-    if (!topologyPtr_)
+    if (applyTransform && hasPointTransforms())
     {
-        FatalErrorInFunction
-            << "topologyPtr_ not allocated"
-            << exit(FatalError);
+        auto tpts = tmp<pointField>::New(vertices_);
+
+        inplacePointTransforms(tpts.ref());
+
+        return tpts;
     }
 
-    return *topologyPtr_;
+    return vertices_;
 }
 
 
 Foam::PtrList<Foam::dictionary> Foam::blockMesh::patchDicts() const
 {
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
+    const polyPatchList& topoPatches = topology().boundaryMesh();
 
-    PtrList<dictionary> patchDicts(patchTopologies.size());
+    PtrList<dictionary> patchDicts(topoPatches.size());
 
-    forAll(patchTopologies, patchi)
+    forAll(topoPatches, patchi)
     {
         OStringStream os;
-        patchTopologies[patchi].write(os);
+        topoPatches[patchi].write(os);
         IStringStream is(os.str());
         patchDicts.set(patchi, new dictionary(is));
     }
     return patchDicts;
-}
-
-
-Foam::scalar Foam::blockMesh::scaleFactor() const
-{
-    return scaleFactor_;
 }
 
 
@@ -239,6 +417,102 @@ Foam::label Foam::blockMesh::numZonedBlocks() const
     }
 
     return count;
+}
+
+
+bool Foam::blockMesh::hasPointTransforms() const noexcept
+{
+    return bool(transformType_);
+}
+
+
+bool Foam::blockMesh::inplacePointTransforms(pointField& pts) const
+{
+    if (!transformType_)
+    {
+        return false;
+    }
+
+    if (transformType_ & transformTypes::PRESCALING)
+    {
+        for (point& p : pts)
+        {
+            p *= prescaling_.x();
+        }
+    }
+    else if (transformType_ & transformTypes::PRESCALING3)
+    {
+        for (point& p : pts)
+        {
+            p = cmptMultiply(p, prescaling_);
+        }
+    }
+
+    if (transformType_ & transformTypes::ROTATION)
+    {
+        const tensor rot(transform_.R());
+
+        if (transformType_ & transformTypes::TRANSLATION)
+        {
+            const point origin(transform_.origin());
+
+            for (point& p : pts)
+            {
+                p = Foam::transform(rot, p) + origin;
+            }
+        }
+        else
+        {
+            for (point& p : pts)
+            {
+                p = Foam::transform(rot, p);
+            }
+        }
+    }
+    else if (transformType_ & transformTypes::TRANSLATION)
+    {
+        const point origin(transform_.origin());
+
+        for (point& p : pts)
+        {
+            p += origin;
+        }
+    }
+
+    if (transformType_ & transformTypes::SCALING)
+    {
+        for (point& p : pts)
+        {
+            p *= scaling_.x();
+        }
+    }
+    else if (transformType_ & transformTypes::SCALING3)
+    {
+        for (point& p : pts)
+        {
+            p = cmptMultiply(p, scaling_);
+        }
+    }
+
+    return true;
+}
+
+
+Foam::tmp<Foam::pointField>
+Foam::blockMesh::globalPosition(const pointField& localPoints) const
+{
+    if (hasPointTransforms())
+    {
+        auto tpts = tmp<pointField>::New(localPoints);
+
+        inplacePointTransforms(tpts.ref());
+
+        return tpts;
+    }
+    else
+    {
+        return localPoints;
+    }
 }
 
 

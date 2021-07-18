@@ -109,22 +109,26 @@ class blockDescriptor
 
     // Private Member Functions
 
+        //- Assign edge grading.
+        //  \return false for unsupported specification
+        bool assignGradings(const UList<gradingDescriptors>& ratios);
+
         //- Check block has outward-pointing faces
         void check(const Istream& is);
 
-        //- Calculate the points and weights for the specified edge.
-        //  Return the number of curved edges
-        label edgePointsWeights
+        //- Calculate the points and weights for the specified hex edge.
+        //  Return the number of curved edges (0-1)
+        int calcEdgePointsWeights
         (
-            pointField (&edgePoints)[12],
-            scalarList (&edgeWeights)[12],
-            const label edgei,
+            pointField& edgePoints,
+            scalarList& edgeWeights,
             const label start,
             const label end,
-            const label dim
+            const label nDiv,
+            const gradingDescriptors& expand
         ) const;
 
-        void findCurvedFaces();
+        void findCurvedFaces(const label blockIndex = -1);
 
 public:
 
@@ -156,7 +160,7 @@ public:
         blockDescriptor
         (
             const dictionary& dict,
-            const label index,
+            const label blockIndex,
             const pointField& vertices,
             const blockEdgeList& edges,
             const blockFaceList& faces,
@@ -167,28 +171,28 @@ public:
     // Member Functions
 
         //- Reference to point field defining the block mesh
-        inline const pointField& vertices() const;
+        inline const pointField& vertices() const noexcept;
 
         //- Return reference to the list of curved faces
-        inline const blockFaceList& blockFaces() const;
+        inline const blockFaceList& blockFaces() const noexcept;
 
         //- Return the block shape
-        inline const cellShape& blockShape() const;
+        inline const cellShape& blockShape() const noexcept;
 
         //- Return the mesh density (number of cells) in the i,j,k directions
-        inline const labelVector& density() const;
+        inline const labelVector& density() const noexcept;
 
         //- Expansion ratios in all directions
-        const List<gradingDescriptors>& grading() const;
+        inline const List<gradingDescriptors>& grading() const noexcept;
 
         //- Return the (optional) zone name
-        inline const word& zoneName() const;
+        inline const word& zoneName() const noexcept;
 
         //- Curved-face labels for each block-face (-1 for flat faces)
-        inline const FixedList<label, 6>& curvedFaces() const;
+        inline const FixedList<label, 6>& curvedFaces() const noexcept;
 
         //- Number of curved faces in this block
-        inline label nCurvedFaces() const;
+        inline label nCurvedFaces() const noexcept;
 
         //- Return block point for local label i
         inline const point& blockPoint(const label i) const;
@@ -209,11 +213,32 @@ public:
         inline bool edge(const label i, const label j, const label k) const;
 
         //- Calculate the points and weights for all edges.
-        //  Return the number of curved edges
-        label edgesPointsWeights
+        //  \return the number of curved edges (0-12)
+        int edgesPointsWeights
         (
-            pointField (&edgePoints)[12],
-            scalarList (&edgeWeights)[12]
+            pointField (&edgesPoints)[12],
+            scalarList (&edgesWeights)[12]
+        ) const;
+
+        //- Calculate points and weights for specified edge,
+        //- using the specified number of divisions and grading
+        //  \return True if the edge is curved
+        bool edgePointsWeights
+        (
+            const label edgei,
+            pointField& edgePoints,
+            scalarList& edgeWeights,
+            const label nDiv,
+            const gradingDescriptors& gd = gradingDescriptors()
+        ) const;
+
+        //- Calculate points and weights for specified edge.
+        //  \return True if the edge is curved
+        bool edgePointsWeights
+        (
+            const label edgei,
+            pointField& edgePoints,
+            scalarList& edgeWeights
         ) const;
 
         //- Return true if point i,j,k addresses a block flat face or edge
@@ -235,7 +260,7 @@ public:
         static void write(Ostream&, const label blocki, const dictionary&);
 
         //- Return info proxy
-        inline InfoProxy<blockDescriptor> info() const
+        InfoProxy<blockDescriptor> info() const
         {
             return *this;
         }

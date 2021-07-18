@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::block::points() const
+inline const Foam::pointField& Foam::block::points() const noexcept
 {
     return points_;
 }
@@ -46,7 +46,7 @@ inline const Foam::List<Foam::hexCell>& Foam::block::cells() const
 
 
 inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
-Foam::block::boundaryPatches() const
+Foam::block::boundaryPatches() const noexcept
 {
     return blockPatches_;
 }

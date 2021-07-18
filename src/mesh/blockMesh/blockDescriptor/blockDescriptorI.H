@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,51 +28,55 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::blockDescriptor::vertices() const
+inline const Foam::pointField&
+Foam::blockDescriptor::vertices() const noexcept
 {
     return vertices_;
 }
 
 
-inline const Foam::blockFaceList& Foam::blockDescriptor::blockFaces() const
+inline const Foam::blockFaceList&
+Foam::blockDescriptor::blockFaces() const noexcept
 {
     return blockFaces_;
 }
 
 
-inline const Foam::cellShape& Foam::blockDescriptor::blockShape() const
+inline const Foam::cellShape&
+Foam::blockDescriptor::blockShape() const noexcept
 {
     return blockShape_;
 }
 
 
-inline const Foam::labelVector& Foam::blockDescriptor::density() const
+inline const Foam::labelVector&
+Foam::blockDescriptor::density() const noexcept
 {
     return ijkMesh::sizes();
 }
 
 
 inline const Foam::List<Foam::gradingDescriptors>&
-Foam::blockDescriptor::grading() const
+Foam::blockDescriptor::grading() const noexcept
 {
     return expand_;
 }
 
 
-inline const Foam::word& Foam::blockDescriptor::zoneName() const
+inline const Foam::word& Foam::blockDescriptor::zoneName() const noexcept
 {
     return zoneName_;
 }
 
 
 inline const Foam::FixedList<Foam::label, 6>&
-Foam::blockDescriptor::curvedFaces() const
+Foam::blockDescriptor::curvedFaces() const noexcept
 {
     return curvedFaces_;
 }
 
 
-inline Foam::label Foam::blockDescriptor::nCurvedFaces() const
+inline Foam::label Foam::blockDescriptor::nCurvedFaces() const noexcept
 {
     return nCurvedFaces_;
 }
@@ -154,8 +158,10 @@ inline bool Foam::blockDescriptor::flatFaceOrEdge
 {
     if (i == 0 && curvedFaces_[0] == -1) return true;
     if (i == sizes().x() && curvedFaces_[1] == -1) return true;
+
     if (j == 0 && curvedFaces_[2] == -1) return true;
     if (j == sizes().y() && curvedFaces_[3] == -1) return true;
+
     if (k == 0 && curvedFaces_[4] == -1) return true;
     if (k == sizes().z() && curvedFaces_[5] == -1) return true;
 

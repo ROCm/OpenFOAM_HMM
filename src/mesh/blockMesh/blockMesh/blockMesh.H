@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,9 @@ Description
     Dictionary controls
     \table
         Property    | Description                           | Required | Default
-        scale       | Point scaling                         | no  | 1.0
+        prescale    | Point scaling before transform        | no  | 1.0
+        scale       | Point scaling after transform         | no  | 1.0
+        transform   | Point transform (origin, rotation)    | no  |
         vertices    |                                       | yes |
         blocks      |                                       | yes |
         edges       |                                       | no  |
@@ -48,6 +50,9 @@ Description
     \endtable
 
 Note
+    The \c prescale and \c scale can be a single scalar or a vector of
+    values.
+
     The vertices, cells and patches for filling the blocks are demand-driven.
 
 SourceFiles
@@ -65,6 +70,7 @@ SourceFiles
 #include "Enum.H"
 #include "block.H"
 #include "PtrList.H"
+#include "cartesianCS.H"
 #include "searchableSurfaces.H"
 #include "polyMesh.H"
 #include "IOdictionary.H"
@@ -112,6 +118,21 @@ private:
         static const Enum<mergeStrategy> strategyNames_;
 
 
+    // Data Types
+
+        //- Point transformations. Internal usage
+        enum transformTypes : unsigned
+        {
+            NO_TRANSFORM = 0,   //!< No transformations
+            ROTATION = 0x1,     //!< Local coordinate system rotation
+            TRANSLATION = 0x2,  //!< Local coordinate system translation
+            PRESCALING = 0x4,   //!< Uniform scale before rotate/translate
+            PRESCALING3 = 0x8,  //!< Non-uniform scale before rotate/translate
+            SCALING = 0x10,     //!< Uniform scale after rotate/translate
+            SCALING3 = 0x20     //!< Non-uniform scale after rotate/translate
+        };
+
+
     // Private Data
 
         //- Reference to mesh dictionary
@@ -120,14 +141,17 @@ private:
         //- Output verbosity
         bool verbose_;
 
-        //- Switch checking face consistency (defaults to true)
+        //- Check face consistency (defaults to true)
         bool checkFaceCorrespondence_;
+
+        //- The mesh merging strategy
+        mergeStrategy mergeStrategy_;
+
+        //- Types of point transformations requested
+        unsigned transformType_;
 
         //- Optional searchable geometry to project face-points to
         searchableSurfaces geometry_;
-
-        //- The scaling factor to convert to metres
-        scalar scaleFactor_;
 
         //- The list of block vertices
         blockVertexList blockVertices_;
@@ -141,6 +165,15 @@ private:
         //- The list of curved faces
         blockFaceList faces_;
 
+        //- The scaling factor before rotate/translate
+        vector prescaling_;
+
+        //- The scaling factor after rotate/translate
+        vector scaling_;
+
+        //- Local coordinate system transformation
+        coordSystem::cartesian transform_;
+
         //- The blocks themselves (the topology) as a polyMesh
         autoPtr<polyMesh> topologyPtr_;
 
@@ -150,11 +183,11 @@ private:
         //- The sum of all cells in each block
         label nCells_;
 
-        //- The point offset added to each block
-        labelList blockOffsets_;
-
         //- The merge points information
         labelList mergeList_;
+
+        //- The point offset added to each block. Offsets into mergeList_
+        labelList blockOffsets_;
 
         mutable pointField points_;
 
@@ -165,14 +198,9 @@ private:
 
     // Private Member Functions
 
-        template<class Source>
-        void checkPatchLabels
-        (
-            const Source& source,
-            const word& patchName,
-            const pointField& points,
-            faceList& patchShapes
-        ) const;
+        //- Get scaling and/or coordinate transforms
+        //  \return True if scaling and/or transformations are needed
+        bool readPointTransforms(const dictionary& dict);
 
         void readPatches
         (
@@ -191,7 +219,8 @@ private:
             PtrList<dictionary>& patchDicts
         );
 
-        void createCellShapes(cellShapeList& tmpBlockCells);
+        //- Topology blocks as cell shapes
+        cellShapeList getBlockShapes() const;
 
         autoPtr<polyMesh> createTopology
         (
@@ -253,63 +282,87 @@ public:
 
     // Member Functions
 
-        // Access
+    // General Access, Description
 
-            //- Access to input dictionary
-            const dictionary& meshDict() const
-            {
-                return meshDict_;
-            }
+        //- Access to input dictionary
+        const dictionary& meshDict() const noexcept
+        {
+            return meshDict_;
+        }
 
-            //- Optional searchable geometry to project face-points to
-            const searchableSurfaces& geometry() const
-            {
-                return geometry_;
-            }
+        //- Optional searchable geometry to project face-points to
+        const searchableSurfaces& geometry() const noexcept
+        {
+            return geometry_;
+        }
 
-            //- True if the blockMesh topology exists
-            bool valid() const noexcept;
+        //- The curved edges
+        const blockEdgeList& edges() const noexcept
+        {
+            return edges_;
+        }
 
-            //- Reference to point field defining the blockMesh.
-            //  These points are \b not scaled by scaleFactor
-            const pointField& vertices() const;
+        //- The curved faces
+        const blockFaceList& faces() const noexcept
+        {
+            return faces_;
+        }
 
-            //- Return the blockMesh topology as a polyMesh
-            const polyMesh& topology() const;
+        //- True if the blockMesh topology exists
+        bool valid() const noexcept;
 
-            //- Return the curved edges
-            const blockEdgeList& edges() const
-            {
-                return edges_;
-            }
+        //- Return the patch names
+        wordList patchNames() const;
 
-            //- Return the curved faces
-            const blockFaceList& faces() const
-            {
-                return faces_;
-            }
+        //- Number of blocks with specified zones
+        label numZonedBlocks() const;
 
-            //- The scaling factor used to convert to metres
-            scalar scaleFactor() const;
 
-            //- The points for the entire mesh.
-            //  These points \b are scaled by scaleFactor
-            const pointField& points() const;
+    // Point Transformations
 
-            //- Return cell shapes list
-            const cellShapeList& cells() const;
+        //- True if scaling and/or transformations are needed
+        bool hasPointTransforms() const noexcept;
 
-            //- Return the patch face lists
-            const faceListList& patches() const;
+        //- Apply coordinate transforms and scaling
+        bool inplacePointTransforms(pointField& pts) const;
 
-            //- Get patch information from the topology mesh
-            PtrList<dictionary> patchDicts() const;
+        //- Apply coordinate transforms and scaling
+        tmp<pointField> globalPosition(const pointField& localPoints) const;
 
-            //- Return patch names
-            wordList patchNames() const;
 
-            //- Number of blocks with specified zones
-            label numZonedBlocks() const;
+    // Block Topology
+
+        //- Reference to point field defining the blocks,
+        //- these points are \b unscaled and \b non-transformed
+        const pointField& vertices() const noexcept;
+
+        //- Point field defining the blocks,
+        //- optionally transformed and scaled
+        tmp<pointField> vertices(bool applyTransform) const;
+
+        //- The blockMesh topology as a polyMesh
+        //- \b unscaled and \b non-transformed
+        const polyMesh& topology() const;
+
+        //- The blockMesh topology as a polyMesh
+        //- optionally transformed and scaled
+        refPtr<polyMesh> topology(bool applyTransform) const;
+
+
+    // Detailed Mesh
+
+        //- The points for the entire mesh.
+        //- These points \b are scaled and transformed
+        const pointField& points() const;
+
+        //- Return cell shapes list
+        const cellShapeList& cells() const;
+
+        //- Return the patch face lists
+        const faceListList& patches() const;
+
+        //- Patch information from the topology mesh
+        PtrList<dictionary> patchDicts() const;
 
 
     // Verbosity
@@ -326,6 +379,16 @@ public:
 
         //- Create polyMesh, with cell zones
         autoPtr<polyMesh> mesh(const IOobject& io) const;
+
+
+    // Housekeeping
+
+        //- Old (v2106 and earlier) uniform scaling factor
+        //  \deprecated use inplacePointTransforms or globalPosition instead
+        scalar scaleFactor() const
+        {
+            return scaling_.x();
+        }
 };
 
 

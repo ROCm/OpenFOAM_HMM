@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -19,7 +19,9 @@ Description
     // Non-legacy and ASCII (mesh is small, want readable output)
     const vtk::outputOptions writeOpts = vtk::formatType::INLINE_ASCII;
 
-    const polyMesh& topoMesh = blocks.topology();
+    refPtr<polyMesh> topoMeshPtr(blocks.topology(true));
+    const polyMesh& topoMesh = topoMeshPtr();
+
     const vtk::vtuCells topoCells(topoMesh, writeOpts);
 
     vtk::internalMeshWriter writer

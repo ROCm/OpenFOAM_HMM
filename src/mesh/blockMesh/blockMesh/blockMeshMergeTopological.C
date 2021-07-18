@@ -313,7 +313,7 @@ void Foam::blockMesh::calcTopologicalMerge()
         Info<< "Creating block offsets" << endl;
     }
 
-    blockOffsets_.setSize(blocks.size());
+    blockOffsets_.resize(blocks.size());
 
     nPoints_ = 0;
     nCells_  = 0;
@@ -335,11 +335,13 @@ void Foam::blockMesh::calcTopologicalMerge()
     mergeList_.setSize(nPoints_, -1);
 
     // Block mesh topology
-    const pointField& topoPoints = topology().points();
-    const cellList& topoCells = topology().cells();
-    const faceList& topoFaces = topology().faces();
-    const labelList& topoFaceOwn = topology().faceOwner();
-    const labelList& topoFaceNei = topology().faceNeighbour();
+    const polyMesh& topoMesh = topology();
+
+    const pointField& topoPoints = topoMesh.points();
+    const cellList& topoCells = topoMesh.cells();
+    const faceList& topoFaces = topoMesh.faces();
+    const labelList& topoFaceOwn = topoMesh.faceOwner();
+    const labelList& topoFaceNei = topoMesh.faceNeighbour();
 
     // Topological merging is only necessary for internal block faces
     // Note edge and face collapse may apply to boundary faces
@@ -347,7 +349,7 @@ void Foam::blockMesh::calcTopologicalMerge()
     const faceList::subList topoInternalFaces
     (
         topoFaces,
-        topology().nInternalFaces()
+        topoMesh.nInternalFaces()
     );
 
     List<Pair<label>> mergeBlockP(topoInternalFaces.size());

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,23 +30,28 @@ License
 #include "lineEdge.H"
 #include "lineDivide.H"
 
+// * * * * * * * * * * * * * * Local Data Members  * * * * * * * * * * * * * //
+
+// Warning.
+// Ordering of edges needs to be the same as hex cell shape model
+static const int hexEdge0[12] = { 0, 3, 7, 4,  0, 1, 5, 4,  0, 1, 2, 3 };
+static const int hexEdge1[12] = { 1, 2, 6, 5,  3, 2, 6, 7,  4, 5, 6, 7 };
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::blockDescriptor::edgePointsWeights
+int Foam::blockDescriptor::calcEdgePointsWeights
 (
-    pointField (&edgePoints)[12],
-    scalarList (&edgeWeights)[12],
-    const label edgei,
+    pointField& edgePoints,
+    scalarList& edgeWeights,
     const label start,
     const label end,
-    const label nDiv
+    const label nDiv,
+    const gradingDescriptors& expand
 ) const
 {
     // Set reference to the list of labels defining the block
     const labelList& blockLabels = blockShape_;
-
-    // Get list of points for this block
-    const pointField blockPoints = blockShape_.points(vertices_);
 
     // Set the edge points/weights
     // The edge is a straight-line if it is not in the list of blockEdges
@@ -55,55 +60,57 @@ Foam::label Foam::blockDescriptor::edgePointsWeights
     {
         const int cmp = cedge.compare(blockLabels[start], blockLabels[end]);
 
-        if (cmp)
+        if (cmp > 0)
         {
-            if (cmp > 0)
+            // Curve has the same orientation
+
+            // Divide the line
+            const lineDivide divEdge(cedge, nDiv, expand);
+
+            edgePoints  = divEdge.points();
+            edgeWeights = divEdge.lambdaDivisions();
+
+            return 1;  // Found curved-edge: done
+        }
+        else if (cmp < 0)
+        {
+            // Curve has the opposite orientation
+
+            // Divide the line
+            const lineDivide divEdge(cedge, nDiv, expand.inv());
+
+            const pointField& p = divEdge.points();
+            const scalarList& d = divEdge.lambdaDivisions();
+
+            edgePoints.resize(p.size());
+            edgeWeights.resize(d.size());
+
+            // Copy in reverse order
+            const label pn = (p.size() - 1);
+            forAll(p, pi)
             {
-                // Curve has the same orientation
-
-                // Divide the line
-                const lineDivide divEdge(cedge, nDiv, expand_[edgei]);
-
-                edgePoints[edgei]  = divEdge.points();
-                edgeWeights[edgei] = divEdge.lambdaDivisions();
-            }
-            else
-            {
-                // Curve has the opposite orientation
-
-                // Divide the line
-                const lineDivide divEdge(cedge, nDiv, expand_[edgei].inv());
-
-                const pointField& p = divEdge.points();
-                const scalarList& d = divEdge.lambdaDivisions();
-
-                edgePoints[edgei].setSize(p.size());
-                edgeWeights[edgei].setSize(d.size());
-
-                label pn = p.size() - 1;
-                forAll(p, pi)
-                {
-                    edgePoints[edgei][pi]  = p[pn - pi];
-                    edgeWeights[edgei][pi] = 1 - d[pn - pi];
-                }
+                edgePoints[pi]  = p[pn - pi];
+                edgeWeights[pi] = 1 - d[pn - pi];
             }
 
-            // Found curved-edge: done
-            return 1;
+            return 1;  // Found curved-edge: done
         }
     }
 
-
     // Not curved-edge: divide the edge as a straight line
+
+    // Get list of points for this block
+    const pointField blockPoints(blockShape_.points(vertices_));
+
     lineDivide divEdge
     (
         blockEdges::lineEdge(blockPoints, start, end),
         nDiv,
-        expand_[edgei]
+        expand
     );
 
-    edgePoints[edgei]  = divEdge.points();
-    edgeWeights[edgei] = divEdge.lambdaDivisions();
+    edgePoints = divEdge.points();
+    edgeWeights = divEdge.lambdaDivisions();
 
     return 0;
 }
@@ -111,37 +118,89 @@ Foam::label Foam::blockDescriptor::edgePointsWeights
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::blockDescriptor::edgesPointsWeights
+int Foam::blockDescriptor::edgesPointsWeights
 (
-    pointField (&edgePoints)[12],
-    scalarList (&edgeWeights)[12]
+    pointField (&edgesPoints)[12],
+    scalarList (&edgesWeights)[12]
 ) const
 {
-    const label ni = sizes().x();
-    const label nj = sizes().y();
-    const label nk = sizes().z();
+    int nCurved = 0;
 
-    label nCurvedEdges = 0;
+    for (label edgei = 0; edgei < 12; ++edgei)
+    {
+        nCurved += calcEdgePointsWeights
+        (
+            edgesPoints[edgei],
+            edgesWeights[edgei],
+            hexEdge0[edgei],
+            hexEdge1[edgei],
 
-    // X-direction
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 0,  0, 1, ni);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 1,  3, 2, ni);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 2,  7, 6, ni);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 3,  4, 5, ni);
+            sizes()[edgei/4],   // 12 edges -> 3 components (x,y,z)
+            expand_[edgei]
+        );
+    }
 
-    // Y-direction
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 4,  0, 3, nj);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 5,  1, 2, nj);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 6,  5, 6, nj);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 7,  4, 7, nj);
+    return nCurved;
+}
 
-    // Z-direction
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 8,  0, 4, nk);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 9,  1, 5, nk);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 10, 2, 6, nk);
-    nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 11, 3, 7, nk);
 
-    return nCurvedEdges;
+bool Foam::blockDescriptor::edgePointsWeights
+(
+    const label edgei,
+    pointField& edgePoints,
+    scalarList& edgeWeights,
+    const label nDiv,
+    const gradingDescriptors& gd
+) const
+{
+    if (edgei < 0 || edgei >= 12)
+    {
+        FatalErrorInFunction
+            << "Edge label " << edgei
+            << " out of range 0..11"
+            << exit(FatalError);
+    }
+
+    const int nCurved = calcEdgePointsWeights
+    (
+        edgePoints,
+        edgeWeights,
+        hexEdge0[edgei],
+        hexEdge1[edgei],
+        nDiv,
+        gd
+    );
+
+    return nCurved;
+}
+
+
+bool Foam::blockDescriptor::edgePointsWeights
+(
+    const label edgei,
+    pointField& edgePoints,
+    scalarList& edgeWeights
+) const
+{
+    if (edgei < 0 || edgei >= 12)
+    {
+        FatalErrorInFunction
+            << "Edge label " << edgei
+            << " out of range 0..11"
+            << exit(FatalError);
+    }
+
+    const int nCurved = calcEdgePointsWeights
+    (
+        edgePoints,
+        edgeWeights,
+        hexEdge0[edgei],
+        hexEdge1[edgei],
+        sizes()[edgei/4],   // 12 edges -> 3 components (x,y,z)
+        expand_[edgei]
+    );
+
+    return nCurved;
 }
 
 

@@ -65,7 +65,7 @@ void Foam::block::createPoints()
     // List of edge point and weighting factors
     pointField p[12];
     scalarList w[12];
-    label nCurvedEdges = edgesPointsWeights(p, w);
+    const int nCurvedEdges = edgesPointsWeights(p, w);
 
     points_.resize(nPoints());
 
