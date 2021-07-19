@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +66,10 @@ Usage
         // Option-3
         min (<minX> <minY> <minZ>);
         max (<maxX> <maxY> <maxZ>);
+
+        // Option-4
+        min  (<minX> <minY> <minZ>);
+        span (<sizeX> <sizeY> <sizeZ>);
     }
     \endverbatim
 
@@ -89,14 +93,15 @@ Usage
     \verbatim
       Entry    | Description                    | Type       | Req'd  | Dflt
       boxes    | Multiple bounding boxes        | vectorList | cond'l | -
-      box      | A single bounding box          | vector     | cond'l | -
-      min      | Minimum point for a single box | vector     | cond'l | -
-      max      | Maximum point for a single box | vector     | cond'l | -
+      box      | A single bounding box          | vectors    | cond'l | -
+      min      | Minimum point (single box)     | vector     | cond'l | -
+      max      | Maximum point (single box)     | vector     | cond'l | -
+      span     | Box width (single box)         | vector     | cond'l | -
     \verbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the
-    highest to the lowest is \c boxes, \c box or a \c min-max pair
+    highest to the lowest is \c boxes, \c box, \c min-max or \c min-span pair
     (compatibility with \c searchableBox).
 
 See also
