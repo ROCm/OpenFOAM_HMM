@@ -108,7 +108,9 @@ void KirchhoffShell::solveDisplacement()
 
         wEqn.solve();
 
-        Info<< "w min/max   = " << min(w_) << ", " << max(w_) << endl;
+        Info<< "ws_vibrationShell: "
+            << "min = " << min(w_).value() << ", "
+            << "max = " << max(w_).value() << endl;
 
         if (wSubCycle.index() >= wSubCycle.nSubCycles())
         {
