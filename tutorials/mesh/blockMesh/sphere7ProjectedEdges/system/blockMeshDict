@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -124,12 +124,12 @@ edges
 faces
 (
     // Outer blocks
-    project ( 8 12 15 11) sphere  // x-min
-    project ( 9 10 14 13) sphere  // x-max
-    project ( 8  9 13 12) sphere  // y-min
-    project (11 15 14 10) sphere  // y-max
-    project ( 8 11 10  9) sphere  // z-min
-    project (12 13 14 15) sphere  // z-max
+    project (1 0) sphere  // block 1: x-min
+    project (2 1) sphere  // block 2: x-max
+    project (3 2) sphere  // block 3: y-min
+    project (4 3) sphere  // block 4: y-max
+    project (5 4) sphere  // block 5: z-min
+    project (6 5) sphere  // block 6: z-max
 );
 
 boundary
@@ -139,12 +139,12 @@ boundary
         type wall;
         faces
         (
-            ( 8 12 15 11)  // x-min
-            ( 9 10 14 13)  // x-max
-            ( 8  9 13 12)  // y-min
-            (11 15 14 10)  // y-max
-            ( 8 11 10  9)  // z-min
-            (12 13 14 15)  // z-max
+            (1 0)  // block 1: x-min
+            (2 1)  // block 2: x-max
+            (3 2)  // block 3: y-min
+            (4 3)  // block 4: y-max
+            (5 4)  // block 5: z-min
+            (6 5)  // block 6: z-max
         );
     }
 );
