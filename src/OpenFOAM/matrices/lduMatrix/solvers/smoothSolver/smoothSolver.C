@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,7 +149,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
             solverPerf.finalResidual() = solverPerf.initialResidual();
         }
 
-        if (lduMatrix::debug >= 2)
+        if ((log_ >= 2) || (lduMatrix::debug >= 2))
         {
             Info.masterStream(matrix().mesh().comm())
                 << "   Normalisation factor = " << normFactor << endl;
@@ -160,7 +160,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
         if
         (
             minIter_ > 0
-         || !solverPerf.checkConvergence(tolerance_, relTol_)
+         || !solverPerf.checkConvergence(tolerance_, relTol_, log_)
         )
         {
             addProfiling(solve, "lduMatrix::smoother." + fieldName_);
@@ -203,7 +203,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
             (
                 (
                     (solverPerf.nIterations() += nSweeps_) < maxIter_
-                && !solverPerf.checkConvergence(tolerance_, relTol_)
+                && !solverPerf.checkConvergence(tolerance_, relTol_, log_)
                 )
              || solverPerf.nIterations() < minIter_
             );

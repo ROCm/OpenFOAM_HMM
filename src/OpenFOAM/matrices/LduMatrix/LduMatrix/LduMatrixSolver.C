@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::solver
 
     maxIter_(defaultMaxIter_),
     minIter_(0),
+    log_(1),
     tolerance_(1e-6*pTraits<Type>::one),
     relTol_(Zero)
 {
@@ -145,6 +146,7 @@ void Foam::LduMatrix<Type, DType, LUType>::solver::readControls()
 {
     readControl(controlDict_, maxIter_, "maxIter");
     readControl(controlDict_, minIter_, "minIter");
+    readControl(controlDict_, log_, "log");
     readControl(controlDict_, tolerance_, "tolerance");
     readControl(controlDict_, relTol_, "relTol");
 }

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +111,7 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
             solverPerf.finalResidual() = solverPerf.initialResidual();
         }
 
-        if (LduMatrix<Type, DType, LUType>::debug >= 2)
+        if ((this->log_ >= 2) || (LduMatrix<Type, DType, LUType>::debug >= 2))
         {
             Info<< "   Normalisation factor = " << normFactor << endl;
         }
@@ -120,7 +121,12 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
         if
         (
             this->minIter_ > 0
-         || !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+         || !solverPerf.checkConvergence
+            (
+                this->tolerance_,
+                this->relTol_,
+                this->log_
+            )
         )
         {
             autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>
@@ -150,7 +156,12 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
             (
                 (
                     (nIter += nSweeps_) < this->maxIter_
-                && !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+                && !solverPerf.checkConvergence
+                    (
+                        this->tolerance_,
+                        this->relTol_,
+                        this->log_
+                    )
                 )
              || nIter < this->minIter_
             );

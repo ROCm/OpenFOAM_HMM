@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -218,7 +219,8 @@ public:
         bool checkConvergence
         (
             const Type& tolerance,
-            const Type& relTolerance
+            const Type& relTolerance,
+            const label log
         );
 
         //- Singularity test

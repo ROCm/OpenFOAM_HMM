@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
     // --- Calculate normalisation factor
     const solveScalar normFactor = this->normFactor(psi, source, yA, pA);
 
-    if (lduMatrix::debug >= 2)
+    if ((log_ >= 2) || (lduMatrix::debug >= 2))
     {
         Info<< "   Normalisation factor = " << normFactor << endl;
     }
@@ -125,7 +125,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
     if
     (
         minIter_ > 0
-     || !solverPerf.checkConvergence(tolerance_, relTol_)
+     || !solverPerf.checkConvergence(tolerance_, relTol_, log_)
     )
     {
         solveScalarField AyA(nCells);
@@ -219,7 +219,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             if
             (
                 solverPerf.nIterations() >= minIter_
-             && solverPerf.checkConvergence(tolerance_, relTol_)
+             && solverPerf.checkConvergence(tolerance_, relTol_, log_)
             )
             {
                 for (label cell=0; cell<nCells; cell++)
@@ -258,7 +258,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
         (
             (
               ++solverPerf.nIterations() < maxIter_
-            && !solverPerf.checkConvergence(tolerance_, relTol_)
+            && !solverPerf.checkConvergence(tolerance_, relTol_, log_)
             )
          || solverPerf.nIterations() < minIter_
         );

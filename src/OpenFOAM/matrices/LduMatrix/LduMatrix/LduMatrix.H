@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,6 +133,9 @@ public:
 
             //- Minimum number of iterations in the solver
             label minIter_;
+
+            //- Level of verbosity in the solver output statements
+            label log_;
 
             //- Final convergence tolerance
             Type tolerance_;
