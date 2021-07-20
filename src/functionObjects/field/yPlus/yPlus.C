@@ -175,6 +175,14 @@ bool Foam::functionObjects::yPlus::execute()
         WarningInFunction
             << "Unable to find turbulence model in the "
             << "database: yPlus will not be calculated" << endl;
+
+        if (postProcess)
+        {
+            WarningInFunction
+                << "Please try to use the solver option -postProcess, e.g.:"
+                << " <solver> -postProcess -func yPlus" << endl;
+        }
+
         return false;
     }
 
