@@ -491,6 +491,8 @@ procFacesGAMGProcAgglomeration = $(GAMGProcAgglomerations)/procFacesGAMGProcAggl
 $(procFacesGAMGProcAgglomeration)/procFacesGAMGProcAgglomeration.C
 
 
+meshes/ijkMesh/ijkMesh.C
+
 meshes/lduMesh/lduMesh.C
 meshes/lduMesh/lduPrimitiveMesh.C
 
@@ -524,6 +526,9 @@ cell = $(meshShapes)/cell
 $(cell)/cell.C
 $(cell)/oppositeCellFace.C
 $(cell)/cellIOList.C
+
+hexCell = $(meshShapes)/hexCell
+$(hexCell)/hexCell.C
 
 tetCell = $(meshShapes)/tetCell
 $(tetCell)/tetCell.C

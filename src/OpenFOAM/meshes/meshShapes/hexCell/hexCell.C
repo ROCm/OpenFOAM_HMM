@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,57 +25,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "tetCell.H"
+#include "hexCell.H"
 #include "cellShape.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// Warning.
+// Warning:
 // Ordering of faces needs to be the same for
-// a tetrahedron class, a tetrahedron cell shape model and a tetCell
+// a hexahedral cell shape model and a hexCell
 
-const Foam::label Foam::tetCell::modelFaces_[4][3] =
+const Foam::label Foam::hexCell::modelFaces_[6][4] =
 {
-    {1, 2, 3},
-    {0, 3, 2},
-    {0, 1, 3},
-    {0, 2, 1},
+    {0, 4, 7, 3},  // x-min
+    {1, 2, 6, 5},  // x-max
+    {0, 1, 5, 4},  // y-min
+    {3, 7, 6, 2},  // y-max
+    {0, 3, 2, 1},  // z-min
+    {4, 5, 6, 7}   // z-max
 };
 
 
-// Warning.
+// Warning:
 // Ordering of edges needs to be the same for
-// a tetrahedron class, a tetrahedron cell shape model and a tetCell
+// a hexahedral cell shape model and a hexCell
 
-const Foam::label Foam::tetCell::modelEdges_[6][2] =
+const Foam::label Foam::hexCell::modelEdges_[12][2] =
 {
-    {0, 1},
-    {0, 2},
-    {0, 3},
-    {3, 1},
+    {0, 1},  // x-direction
+    {3, 2},
+    {7, 6},
+    {4, 5},
+    {0, 3},  // y-direction
     {1, 2},
-    {3, 2}
+    {5, 6},
+    {4, 7},
+    {0, 4},  // z-direction
+    {1, 5},
+    {2, 6},
+    {3, 7}
 };
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-const Foam::faceList& Foam::tetCell::modelFaces()
+const Foam::faceList& Foam::hexCell::modelFaces()
 {
     static std::unique_ptr<Foam::faceList> ptr(nullptr);
 
     if (!ptr)
     {
-        ptr.reset(new Foam::faceList(4));
+        ptr.reset(new Foam::faceList(6));
 
-        for (label facei = 0; facei < 4; ++facei)
+        for (label facei = 0; facei < 6; ++facei)
         {
             auto& f = (*ptr)[facei];
 
-            f.resize(3);
+            f.resize(4);
             f[0] = modelFaces_[facei][0];
             f[1] = modelFaces_[facei][1];
             f[2] = modelFaces_[facei][2];
+            f[3] = modelFaces_[facei][3];
         }
     }
 
@@ -84,15 +92,15 @@ const Foam::faceList& Foam::tetCell::modelFaces()
 }
 
 
-const Foam::edgeList& Foam::tetCell::modelEdges()
+const Foam::edgeList& Foam::hexCell::modelEdges()
 {
     static std::unique_ptr<Foam::edgeList> ptr(nullptr);
 
     if (!ptr)
     {
-        ptr.reset(new Foam::edgeList(6));
+        ptr.reset(new Foam::edgeList(12));
 
-        for (label edgei = 0; edgei < 6; ++edgei)
+        for (label edgei = 0; edgei < 12; ++edgei)
         {
             auto& e = (*ptr)[edgei];
 
@@ -105,29 +113,32 @@ const Foam::edgeList& Foam::tetCell::modelEdges()
 }
 
 
-/// Foam::faceList Foam::tetCell::faces() const
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+/// Foam::faceList Foam::hexCell::faces() const
 /// {
-///     Foam::faceList result(4);
+///     Foam::faceList result(6);
 ///
-///     for (label facei = 0; facei < 4; ++facei)
+///     for (label facei = 0; facei < 6; ++facei)
 ///     {
 ///         auto& f = result[facei];
 ///
-///         f.resize(3);
+///         f.resize(4);
 ///         f[0] = (*this)[modelFaces_[facei][0]];
 ///         f[1] = (*this)[modelFaces_[facei][1]];
 ///         f[2] = (*this)[modelFaces_[facei][2]];
+///         f[3] = (*this)[modelFaces_[facei][3]];
 ///     }
 ///
 ///     return result;
 /// }
 ///
 ///
-/// Foam::edgeList Foam::tetCell::edges() const
+/// Foam::edgeList Foam::hexCell::edges() const
 /// {
-///     Foam::edgeList result(6);
+///     Foam::edgeList result(12);
 ///
-///     for (label edgei = 0; edgei < 6; ++edgei)
+///     for (label edgei = 0; edgei < 12; ++edgei)
 ///     {
 ///         auto& e = result[edgei];
 ///
@@ -139,24 +150,16 @@ const Foam::edgeList& Foam::tetCell::modelEdges()
 /// }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::cellShape Foam::tetCell::shape() const
+Foam::cellShape Foam::hexCell::shape(const bool doCollapse) const
 {
     static const cellModel* modelPtr(nullptr);
 
     if (!modelPtr)
     {
-        modelPtr = cellModel::ptr(cellModel::TET);
+        modelPtr = cellModel::ptr(cellModel::HEX);
     }
 
-    return cellShape(*modelPtr, *this);
-}
-
-
-Foam::cellShape Foam::tetCell::tetCellShape() const
-{
-    return this->shape();
+    return cellShape(*modelPtr, *this, doCollapse);
 }
 
 

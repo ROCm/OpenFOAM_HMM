@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,32 +22,34 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
 \*---------------------------------------------------------------------------*/
+
+#include "ijkMesh.H"
+#include "hexCell.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::block::points() const
+Foam::hexCell
+Foam::ijkMesh::vertLabels(const label i, const label j, const label k) const
 {
-    return points_;
+    hexCell verts;
+
+    verts[0] = pointLabel(i,   j,   k);
+    verts[1] = pointLabel(i+1, j,   k);
+    verts[2] = pointLabel(i+1, j+1, k);
+    verts[3] = pointLabel(i,   j+1, k);
+    verts[4] = pointLabel(i,   j,   k+1);
+    verts[5] = pointLabel(i+1, j,   k+1);
+    verts[6] = pointLabel(i+1, j+1, k+1);
+    verts[7] = pointLabel(i,   j+1, k+1);
+
+    return verts;
 }
 
 
-inline const Foam::List<Foam::hexCell>& Foam::block::cells() const
+Foam::hexCell Foam::ijkMesh::vertLabels(const labelVector& ijk) const
 {
-    if (blockCells_.empty())
-    {
-        const_cast<block&>(*this).createCells();
-    }
-
-    return blockCells_;
-}
-
-
-inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
-Foam::block::boundaryPatches() const
-{
-    return blockPatches_;
+    return vertLabels(ijk.x(), ijk.y(), ijk.z());
 }
 
 

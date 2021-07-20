@@ -113,7 +113,7 @@ void Foam::blockMesh::createCells() const
 
     forAll(blocks, blocki)
     {
-        const List<FixedList<label, 8>>& blockCells = blocks[blocki].cells();
+        const auto& blockCells = blocks[blocki].cells();
 
         forAll(blockCells, blockCelli)
         {

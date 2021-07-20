@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,30 +24,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tetCell
+    Foam::hexCell
 
 Description
-    A tetrahedral cell primitive.
+    A hexahedral cell primitive.
 
     It is important that the face/edge ordering is identical for
-    a tetrahedron class,
-    a tetrahedron cell shape model and a tetCell
+    a hexahedral cell shape model and a hexCell
 
 SourceFiles
-    tetCell.C
-    tetCellI.H
+    hexCell.C
+    hexCellI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetCell_H
-#define tetCell_H
+#ifndef hexCell_H
+#define hexCell_H
 
 #include "FixedList.H"
-#include "triFace.H"
 #include "faceList.H"
 #include "edgeList.H"
 #include "pointField.H"
-#include "tetPointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,20 +55,20 @@ namespace Foam
 class cellShape;
 
 /*---------------------------------------------------------------------------*\
-                           Class tetCell Declaration
+                           Class hexCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class tetCell
+class hexCell
 :
-    public FixedList<label, 4>
+    public FixedList<label, 8>
 {
     // Static Data Members
 
-        //- The model faces for TET
-        static const label modelFaces_[4][3];
+        //- The model faces for HEX
+        static const label modelFaces_[6][4];
 
-        //- The model edges for TET
-        static const label modelEdges_[6][2];
+        //- The model edges for HEX
+        static const label modelEdges_[12][2];
 
 
 public:
@@ -80,60 +76,51 @@ public:
     // Constructors
 
         //- Default construct, with invalid point labels (-1)
-        inline tetCell();
+        inline hexCell();
 
-        //- Construct from four point labels
-        inline tetCell
-        (
-            const label a,
-            const label b,
-            const label c,
-            const label d
-        );
+        //- Construct from an initializer list of eight point labels
+        inline explicit hexCell(std::initializer_list<label> list);
 
-        //- Construct from an initializer list of four point labels
-        inline explicit tetCell(std::initializer_list<label> list);
-
-        //- Construct from FixedList of four point labels
-        inline tetCell(const FixedList<label, 4>& list);
+        //- Construct from FixedList of eight point labels
+        inline hexCell(const FixedList<label, 8>& list);
 
         //- Copy construct from a subset of point labels
-        inline tetCell
+        inline hexCell
         (
             const labelUList& list,
-            const FixedList<label, 4>& indices
+            const FixedList<label, 8>& indices
         );
 
         //- Copy construct from a subset of point labels
         template<unsigned AnyNum>
-        inline tetCell
+        inline hexCell
         (
             const FixedList<label, AnyNum>& list,
-            const FixedList<label, 4>& indices
+            const FixedList<label, 8>& indices
         );
 
         //- Construct from Istream
-        inline explicit tetCell(Istream& is);
+        inline explicit hexCell(Istream& is);
 
 
     // Member Functions
 
-        //- Number of points for TET
+        //- Number of points for HEX
         static constexpr label nPoints() noexcept
         {
-            return 4;
+            return 8;
         }
 
-        //- Number of edges for TET
+        //- Number of edges for HEX
         static constexpr label nEdges() noexcept
         {
-            return 6;
+            return 12;
         }
 
-        //- Number of faces for TET
+        //- Number of faces for HEX
         static constexpr label nFaces() noexcept
         {
-            return 4;
+            return 6;
         }
 
         //- Return the model faces
@@ -144,17 +131,7 @@ public:
 
 
         //- Return i-th face
-        inline Foam::triFace face(const label facei) const;
-
-        //- Return first face adjacent to the given edge
-        inline label edgeFace(const label edgei) const;
-
-        //- Return face adjacent to the given face sharing the same edge
-        inline label edgeAdjacentFace
-        (
-            const label edgei,
-            const label facei
-        ) const;
+        inline Foam::face face(const label facei) const;
 
         //- Return i-th edge
         inline Foam::edge edge(const label edgei) const;
@@ -168,30 +145,18 @@ public:
 
     // Operations
 
-        //- Return TET shape cell
-        cellShape shape() const;
-
-        //- Return the tetrahedron
-        inline tetPointRef tet(const UList<point>& meshPoints) const;
-
-
-    // Housekeeping
-
-        //- Identical to edge()
-        Foam::edge tetEdge(label edgei) const { return this->edge(edgei); }
-
-        //- Identical to shape()
-        cellShape tetCellShape() const;
+        //- Return HEX shape cell
+        cellShape shape(const bool doCollapse = false) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//- Contiguous data for tetCell
-template<> struct is_contiguous<tetCell> : std::true_type {};
+//- Contiguous data for hexCell
+template<> struct is_contiguous<hexCell> : std::true_type {};
 
-//- Contiguous label data for tetCell
-template<> struct is_contiguous_label<tetCell> : std::true_type {};
+//- Contiguous label data for hexCell
+template<> struct is_contiguous_label<hexCell> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -200,7 +165,7 @@ template<> struct is_contiguous_label<tetCell> : std::true_type {};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "tetCellI.H"
+#include "hexCellI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

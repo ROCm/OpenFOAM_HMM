@@ -81,7 +81,7 @@ public:
 
     // Constructors
 
-        //- Default construct
+        //- Default construct. Empty shape, no cell model.
         inline constexpr cellShape() noexcept;
 
         //- Copy construct from components
@@ -109,7 +109,7 @@ public:
             const bool doCollapse = false
         );
 
-        //- Copy construct from components, using lookup cellModel by name
+        //- Copy construct from components, lookup cellModel by name
         inline cellShape
         (
             const word& modelName,
@@ -130,7 +130,7 @@ public:
         inline const cellModel& model() const;
 
         //- Number of points
-        inline label nPoints() const;
+        inline label nPoints() const noexcept;
 
         //- Number of edges
         inline label nEdges() const;
@@ -181,6 +181,15 @@ public:
         (
             const cellModel& model,
             const labelUList& labels,
+            const bool doCollapse = false
+        );
+
+        //- Reset from components
+        template<unsigned N>
+        inline void reset
+        (
+            const cellModel& model,
+            const FixedList<label, N>& labels,
             const bool doCollapse = false
         );
 

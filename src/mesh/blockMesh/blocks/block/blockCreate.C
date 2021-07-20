@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,15 +365,7 @@ void Foam::block::createCells()
         {
             for (label i=0; i<ni; ++i)
             {
-                blockCells_[celli][0] = pointLabel(i,   j,   k);
-                blockCells_[celli][1] = pointLabel(i+1, j,   k);
-                blockCells_[celli][2] = pointLabel(i+1, j+1, k);
-                blockCells_[celli][3] = pointLabel(i,   j+1, k);
-                blockCells_[celli][4] = pointLabel(i,   j,   k+1);
-                blockCells_[celli][5] = pointLabel(i+1, j,   k+1);
-                blockCells_[celli][6] = pointLabel(i+1, j+1, k+1);
-                blockCells_[celli][7] = pointLabel(i,   j+1, k+1);
-
+                blockCells_[celli] = vertLabels(i, j, k);
                 ++celli;
             }
         }
@@ -556,6 +548,34 @@ void Foam::block::createBoundary()
     blockPatches_[patchi].resize(countz);
     addBoundaryFaces(patchi, blockPatches_[patchi].begin());
     ++patchi;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::cellShapeList Foam::block::shapes() const
+{
+    const label ni = density().x();
+    const label nj = density().y();
+    const label nk = density().z();
+
+    cellShapeList theCells(nCells());  // (ni*nj*nk)
+
+    label celli = 0;
+
+    for (label k=0; k<nk; ++k)
+    {
+        for (label j=0; j<nj; ++j)
+        {
+            for (label i=0; i<ni; ++i)
+            {
+                theCells[celli] = vertLabels(i, j, k).shape();
+                ++celli;
+            }
+        }
+    }
+
+    return theCells;
 }
 
 

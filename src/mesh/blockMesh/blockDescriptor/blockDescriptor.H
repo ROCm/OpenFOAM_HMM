@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,7 +139,7 @@ public:
 
     // Constructors
 
-        //- Construct from components. Optional cellSet/zone name.
+        //- Construct from components. Optional zone name.
         blockDescriptor
         (
             const cellShape& bshape,
@@ -147,7 +147,8 @@ public:
             const blockEdgeList& edges,
             const blockFaceList& faces,
             const labelVector& density,
-            const UList<gradingDescriptors>& expand,
+            const UList<gradingDescriptors>& expand
+                = UList<gradingDescriptors>::null(),
             const word& zoneName = word::null
         );
 

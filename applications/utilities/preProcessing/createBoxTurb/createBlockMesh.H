@@ -8,7 +8,7 @@ pointField points;
 
     block b
     (
-        cellShape(hex, identity(8), false),
+        cellShape(hex, identity(8)),
         pointField
         (
             {
@@ -24,18 +24,11 @@ pointField points;
         ),
         blockEdgeList(),
         blockFaceList(),
-        N,
-        List<gradingDescriptors>(12)
+        N
     );
 
     Info<< "Creating cells" << endl;
-
-    List<FixedList<label, 8>> bCells(b.cells());
-    cellShapes.setSize(bCells.size());
-    forAll(cellShapes, celli)
-    {
-        cellShapes[celli].reset(hex, labelList(bCells[celli]), false);
-    }
+    cellShapes = b.shapes();
 
     Info<< "Creating boundary faces" << endl;
 

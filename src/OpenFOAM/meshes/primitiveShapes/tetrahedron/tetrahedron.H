@@ -184,7 +184,7 @@ public:
         //- Construct from four points in the list of points
         inline tetrahedron
         (
-            const UList<Point>&,
+            const UList<Point>& points,
             const FixedList<label, 4>& indices
         );
 
@@ -207,6 +207,7 @@ public:
 
             //- Return i-th face
             inline triPointRef tri(const label facei) const;
+
 
         // Properties
 

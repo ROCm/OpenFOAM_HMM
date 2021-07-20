@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,6 +71,17 @@ inline Foam::tetCell::tetCell
 {}
 
 
+template<unsigned AnyNum>
+inline Foam::tetCell::tetCell
+(
+    const FixedList<label, AnyNum>& list,
+    const FixedList<label, 4>& indices
+)
+:
+    FixedList<label, 4>(list, indices)
+{}
+
+
 inline Foam::tetCell::tetCell(Istream& is)
 :
     FixedList<label, 4>(is)
@@ -81,26 +92,20 @@ inline Foam::tetCell::tetCell(Istream& is)
 
 inline Foam::triFace Foam::tetCell::face(const label facei) const
 {
-    // Warning. Ordering of faces needs to be the same for a tetrahedron
-    // class, a tetrahedron cell shape model and a tetCell
-    static const label a[4] = {1, 0, 0, 0};
-    static const label b[4] = {2, 3, 1, 2};
-    static const label c[4] = {3, 2, 3, 1};
-
     #ifdef FULLDEBUG
     if (facei < 0 || facei >= 4)
     {
         FatalErrorInFunction
-            << "index out of range 0 -> 3. facei = " << facei
+            << "Face index (" << facei << ") out of range 0..3\n"
             << abort(FatalError);
     }
     #endif
 
-    return triFace
+    return Foam::triFace
     (
-        operator[](a[facei]),
-        operator[](b[facei]),
-        operator[](c[facei])
+        (*this)[modelFaces_[facei][0]],
+        (*this)[modelFaces_[facei][1]],
+        (*this)[modelFaces_[facei][2]]
     );
 }
 
@@ -115,7 +120,7 @@ inline Foam::label Foam::tetCell::edgeFace(const label edgei) const
     if (edgei < 0 || edgei >= 6)
     {
         FatalErrorInFunction
-            << "edge index out of range 0 -> 5. edgei = " << edgei
+            << "Edge index (" << edgei << ") out of range 0..5\n"
             << abort(FatalError);
     }
     #endif
@@ -146,14 +151,14 @@ inline Foam::label Foam::tetCell::edgeAdjacentFace
     if (facei < 0 || facei >= 4)
     {
         FatalErrorInFunction
-            << "face index out of range 0 -> 3. facei = " << facei
+            << "Face index (" << facei << ") out of range 0..3\n"
             << abort(FatalError);
     }
 
     if (edgei < 0 || edgei >= 6)
     {
         FatalErrorInFunction
-            << "edge index out of range 0 -> 5. edgei = " << edgei
+            << "Edge index (" << edgei << ") out of range 0..5\n"
             << abort(FatalError);
     }
     #endif
@@ -162,48 +167,47 @@ inline Foam::label Foam::tetCell::edgeAdjacentFace
 }
 
 
-inline Foam::edge Foam::tetCell::tetEdge(const label edgei) const
+inline Foam::edge Foam::tetCell::edge(const label edgei) const
 {
-    // Warning. Ordering of edges needs to be the same for a tetrahedron
-    // class, a tetrahedron cell shape model and a tetCell
-    static const label pt0[] = {0, 0, 0, 3, 1, 3};
-    static const label pt1[] = {1, 2, 3, 1, 2, 2};
-
     #ifdef FULLDEBUG
     if (edgei < 0 || edgei >= 6)
     {
         FatalErrorInFunction
-            << "index out of range 0 -> 5. edgei = " << edgei
+            << "Edge index (" << edgei << ") out of range 0..5\n"
             << abort(FatalError);
     }
     #endif
 
-    return Foam::edge(operator[](pt0[edgei]), operator[](pt1[edgei]));
-}
-
-
-inline Foam::edge Foam::tetCell::edge(const label edgei) const
-{
-    return tetEdge(edgei);
+    return Foam::edge
+    (
+        (*this)[modelEdges_[edgei][0]],
+        (*this)[modelEdges_[edgei][1]]
+    );
 }
 
 
 inline Foam::edge Foam::tetCell::reverseEdge(const label edgei) const
 {
     // Reverse edge. Using a copy is cheaper than inplace flip
-    return tetEdge(edgei).reverseEdge();
+    return this->edge(edgei).reverseEdge();
 }
 
 
-inline Foam::tetPointRef Foam::tetCell::tet(const UList<point>& points) const
+inline Foam::pointField Foam::tetCell::points
+(
+    const UList<point>& meshPoints
+) const
 {
-    return tetPointRef
-    (
-        points[operator[](0)],
-        points[operator[](1)],
-        points[operator[](2)],
-        points[operator[](3)]
-    );
+    return pointField(List<point>(meshPoints, *this));
+}
+
+
+inline Foam::tetPointRef Foam::tetCell::tet
+(
+    const UList<point>& meshPoints
+) const
+{
+    return tetPointRef(meshPoints, *this);
 }
 
 
