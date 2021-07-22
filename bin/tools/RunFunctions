@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2020 OpenCFD Ltd.
+#     Copyright (C) 2015-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -455,12 +455,16 @@ cloneParallelCase()
 #
 restore0Dir()
 {
+    if [ ! -d 0.orig ]
+    then
+        echo "No 0.orig/ to restore..." 1>&2
+        return 0
+    fi
+
     case "$1" in
     -processor | -processors)
-        echo "Restore 0/ from 0.orig/ for processor directories"
-        [ -d 0.orig ] || echo "    Warning: no 0.orig/ found"
+        echo "Restore 0/ from 0.orig/  [processor directories]"
 
-        # do nonetheless
         \ls -d processor* | xargs -I {} \rm -rf ./{}/0
         \ls -d processor* | xargs -I {} \cp -r 0.orig ./{}/0 > /dev/null 2>&1
 
@@ -483,13 +487,8 @@ restore0Dir()
 
     *)
         echo "Restore 0/ from 0.orig/"
-        if [ -d 0.orig ]
-        then
-            \rm -rf 0
-            \cp -r 0.orig 0 2>/dev/null
-        else
-            echo "    Warning: no 0.orig/ found"
-        fi
+        \rm -rf 0
+        \cp -r 0.orig 0 2>/dev/null
         ;;
     esac
 }

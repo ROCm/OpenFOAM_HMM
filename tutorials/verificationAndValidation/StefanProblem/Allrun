@@ -53,6 +53,7 @@ collect() {
         echo "      # Cleaning up the case"
 
         cleanTimeDirectories
+        cleanAuxiliary
         cleanPostProcessing
 
     else

@@ -25,12 +25,18 @@ cleanTimeDirectories()
     zeros=""
     while [ ${#zeros} -lt 8 ]
     do
-        timeDir="0.${zeros}[1-9]*"
-        rm -rf ./${timeDir} ./-${timeDir}
+        rm -rf ./"0.$zeros"[1-9]* ./"-0.$zeros"[1-9]*
         zeros="0$zeros"
     done
+    rm -rf ./[1-9]* ./-[1-9]*
+}
+
+
+# Various files (logs, paraview, etc)
+cleanAuxiliary()
+{
     rm -rf \
-        ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* \
+        ./log ./log.* ./log-* ./logSummary.* \
         ./.fxLock ./*.xml ./ParaView* ./paraFoam* \
         ./*.blockMesh ./*.foam ./*.OpenFOAM \
         ./.setSet
@@ -102,10 +108,11 @@ cleanPostProcessing()
 cleanCase()
 {
     cleanTimeDirectories
-    cleanPostProcessing
     cleanAdiosOutput
+    cleanAuxiliary
     cleanDynamicCode
     cleanOptimisation
+    cleanPostProcessing
 
     rm -rf processor*
     rm -rf TDAC
