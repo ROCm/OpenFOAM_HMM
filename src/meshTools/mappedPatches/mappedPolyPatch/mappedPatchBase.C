@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "ListListOps.H"
 #include "meshSearchMeshObject.H"
+#include "multiWorldConnectionsObject.H"
 #include "meshTools.H"
 #include "OFstream.H"
 #include "Random.H"
@@ -48,7 +49,7 @@ License
 #include "faceAreaWeightAMI.H"
 #include "OTstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -119,53 +120,31 @@ Foam::autoPtr<Foam::fileName> Foam::mappedPatchBase::readDatabase
 }
 
 
-Foam::label Foam::mappedPatchBase::communicator
-(
-    const word& sampleWorld
-)
+bool Foam::mappedPatchBase::addWorldConnection()
 {
-    // Start off with local world
-    label comm = UPstream::worldComm;
-
-    if (!sampleWorld.empty() && Pstream::parRun())
+    if (sameWorld())
     {
-        if (!UPstream::allWorlds().found(sampleWorld))
-        {
-            FatalErrorInFunction << "Cannot find sampleWorld " << sampleWorld
-                << " in set of worlds " << UPstream::allWorlds()
-                << exit(FatalError);
-        }
-
-        const labelList& worldIDs = UPstream::worldIDs();
-
-        DynamicList<label> subRanks(worldIDs.size());
-        forAll(worldIDs, proci)
-        {
-            const label worldi = worldIDs[proci];
-            if
-            (
-                worldi == UPstream::myWorldID()
-             || UPstream::allWorlds()[worldi] == sampleWorld
-            )
-            {
-                subRanks.append(proci);
-            }
-        }
-
-        // Allocate new communicator with parent 0 (= world)
-        comm = UPstream::allocateCommunicator(0, subRanks, true);
-
-        if (debug)
-        {
-            Pout<< "mappedPatchBase::communicator :"
-                << " myWorld:" << UPstream::myWorld()
-                << " sampleWorld:" << sampleWorld
-                << " using subRanks:" << subRanks
-                << " new comm:" << comm << endl;
-        }
+        return true;
     }
 
-    return comm;
+    const Time& runTime = patch_.boundaryMesh().mesh().time();
+    return const_cast<multiWorldConnections&>
+    (
+        multiWorldConnections::New(runTime)
+    ).addConnectionByName(sampleWorld_);
+}
+
+
+Foam::label Foam::mappedPatchBase::getWorldCommunicator() const
+{
+    if (sameWorld())
+    {
+        return UPstream::worldComm;
+    }
+
+    const Time& runTime = patch_.boundaryMesh().mesh().time();
+    return
+        multiWorldConnections::New(runTime).getCommByName(sampleWorld_);
 }
 
 
@@ -180,8 +159,8 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::facePoints
     (void)mesh.tetBasePtIs();
 
     // Initialise to face-centre
-    tmp<pointField> tfacePoints(new pointField(patch_.size()));
-    pointField& facePoints = tfacePoints.ref();
+    auto tfacePoints = tmp<pointField>::New(patch_.size());
+    auto& facePoints = tfacePoints.ref();
 
     forAll(pp, facei)
     {
@@ -208,18 +187,30 @@ void Foam::mappedPatchBase::collectSamples
     pointField& patchFc             // Per sample: originating centre
 ) const
 {
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
+    DebugInFunction << nl;
 
-    const label myRank = Pstream::myProcNo(comm_);
-    const label nProcs = Pstream::nProcs(comm_);
+    const label myComm = getCommunicator();  // Get or create
+    const label myRank = Pstream::myProcNo(myComm);
+    const label nProcs = Pstream::nProcs(myComm);
+
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
+
+    if (debug & 2)
+    {
+        Perr<< "patch: " << patch_.name()
+            << "[rank=" << myRank << " procs=" << nProcs
+            << " comm=" << myComm << "] collect samples" << endl;
+    }
 
     // Collect all sample points and the faces they come from.
     {
         List<pointField> globalFc(nProcs);
         globalFc[myRank] = facePoints;
-        Pstream::gatherList(globalFc, Pstream::msgType(), comm_);
-        Pstream::scatterList(globalFc, Pstream::msgType(), comm_);
+
+        Pstream::gatherList(globalFc, Pstream::msgType(), myComm);
+        Pstream::scatterList(globalFc, Pstream::msgType(), myComm);
+
         // Rework into straight list
         patchFc = ListListOps::combine<pointField>
         (
@@ -231,8 +222,8 @@ void Foam::mappedPatchBase::collectSamples
     {
         List<pointField> globalSamples(nProcs);
         globalSamples[myRank] = samplePoints(facePoints);
-        Pstream::gatherList(globalSamples, Pstream::msgType(), comm_);
-        Pstream::scatterList(globalSamples, Pstream::msgType(), comm_);
+        Pstream::gatherList(globalSamples, Pstream::msgType(), myComm);
+        Pstream::scatterList(globalSamples, Pstream::msgType(), myComm);
         // Rework into straight list
         samples = ListListOps::combine<pointField>
         (
@@ -245,8 +236,8 @@ void Foam::mappedPatchBase::collectSamples
         labelListList globalFaces(nProcs);
         globalFaces[myRank] = identity(patch_.size());
         // Distribute to all processors
-        Pstream::gatherList(globalFaces, Pstream::msgType(), comm_);
-        Pstream::scatterList(globalFaces, Pstream::msgType(), comm_);
+        Pstream::gatherList(globalFaces, Pstream::msgType(), myComm);
+        Pstream::scatterList(globalFaces, Pstream::msgType(), myComm);
 
         patchFaces = ListListOps::combine<labelList>
         (
@@ -258,13 +249,13 @@ void Foam::mappedPatchBase::collectSamples
     {
         labelList procToWorldIndex(nProcs);
         procToWorldIndex[myRank] = mySampleWorld;
-        Pstream::gatherList(procToWorldIndex, Pstream::msgType(), comm_);
-        Pstream::scatterList(procToWorldIndex, Pstream::msgType(), comm_);
+        Pstream::gatherList(procToWorldIndex, Pstream::msgType(), myComm);
+        Pstream::scatterList(procToWorldIndex, Pstream::msgType(), myComm);
 
         labelList nPerProc(nProcs);
         nPerProc[myRank] = patch_.size();
-        Pstream::gatherList(nPerProc, Pstream::msgType(), comm_);
-        Pstream::scatterList(nPerProc, Pstream::msgType(), comm_);
+        Pstream::gatherList(nPerProc, Pstream::msgType(), myComm);
+        Pstream::scatterList(nPerProc, Pstream::msgType(), myComm);
 
         patchFaceWorlds.setSize(patchFaces.size());
         patchFaceProcs.setSize(patchFaces.size());
@@ -280,7 +271,8 @@ void Foam::mappedPatchBase::collectSamples
             }
         }
     }
-    Pstream::warnComm = oldComm;
+
+    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -296,9 +288,12 @@ void Foam::mappedPatchBase::findLocalSamples
     List<nearInfoWorld>& nearest
 ) const
 {
-    // Find the local cell containing the samples
+    DebugInFunction << nl;
 
-    const label myRank = Pstream::myProcNo(comm_);
+    const label myComm = getCommunicator();  // Get or create
+
+    // Find the local cell containing the samples
+    const label myRank = Pstream::myProcNo(myComm);
 
     // Lookup the correct region
     const polyMesh& mesh = lookupMesh(sampleRegion);
@@ -601,31 +596,31 @@ void Foam::mappedPatchBase::findSamples
     pointField& sampleLocations
 ) const
 {
+    DebugInFunction << nl;
+
     // Find the processor/cell containing the samples. Does not account
     // for samples being found in two processors.
 
+    const label myComm = getCommunicator();  // Get or create
+    const label myRank = Pstream::myProcNo(myComm);
+    const label nProcs = Pstream::nProcs(myComm);
 
-    const label myRank = Pstream::myProcNo(comm_);
-    const label nProcs = Pstream::nProcs(comm_);
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
 
     wordList samplePatches(nProcs);
     {
-        const label oldComm(Pstream::warnComm);
-        Pstream::warnComm = comm_;
         samplePatches[myRank] = samplePatch_;
-        Pstream::gatherList(samplePatches, Pstream::msgType(), comm_);
-        Pstream::scatterList(samplePatches, Pstream::msgType(), comm_);
-        Pstream::warnComm = oldComm;
+        Pstream::gatherList(samplePatches, Pstream::msgType(), myComm);
+        Pstream::scatterList(samplePatches, Pstream::msgType(), myComm);
     }
     wordList sampleRegions(nProcs);
     {
-        const label oldComm(Pstream::warnComm);
-        Pstream::warnComm = comm_;
         sampleRegions[myRank] = sampleRegion_;
-        Pstream::gatherList(sampleRegions, Pstream::msgType(), comm_);
-        Pstream::scatterList(sampleRegions, Pstream::msgType(), comm_);
-        Pstream::warnComm = oldComm;
+        Pstream::gatherList(sampleRegions, Pstream::msgType(), myComm);
+        Pstream::scatterList(sampleRegions, Pstream::msgType(), myComm);
     }
+
 
     // Find all the info for nearest
     List<nearInfoWorld> nearest(samples.size());
@@ -680,8 +675,6 @@ void Foam::mappedPatchBase::findSamples
         }
     }
 
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
 
     // Find nearest. Combine on master.
     Pstream::listCombineGather
@@ -689,13 +682,13 @@ void Foam::mappedPatchBase::findSamples
         nearest,
         nearestWorldEqOp(),
         Pstream::msgType(),
-        comm_
+        myComm
     );
-    Pstream::listCombineScatter(nearest, Pstream::msgType(), comm_);
+    Pstream::listCombineScatter(nearest, Pstream::msgType(), myComm);
 
     //if (debug)
     //{
-    //    Pout<< "** AFter combining:" << endl;
+    //    Pout<< "** After combining:" << endl;
     //    forAll(nearest, samplei)
     //    {
     //        Pout<< "  sample:" << samples[samplei]
@@ -735,7 +728,7 @@ void Foam::mappedPatchBase::findSamples
         }
     }
 
-    Pstream::warnComm = oldComm;
+    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -747,6 +740,10 @@ void Foam::mappedPatchBase::calcMapping() const
         FatalErrorInFunction
             << "Mapping already calculated" << exit(FatalError);
     }
+
+    DebugInFunction << nl;
+
+    const label myComm = getCommunicator();  // Get or create
 
     //// Make sure if running in database that there is a syncObjects FO
     //if (sampleDatabase() && !sameWorld())
@@ -806,11 +803,11 @@ void Foam::mappedPatchBase::calcMapping() const
                 << " on the same patch, on the same region"
                 << " will find the faces themselves which does not make sense"
                 << " for anything but testing." << endl
-                << "patch_:" << patch_.name() << endl
-                << "sampleRegion_:" << sampleRegion() << endl
-                << "mode_:" << sampleModeNames_[mode_] << endl
-                << "samplePatch_:" << samplePatch() << endl
-                << "offsetMode_:" << offsetModeNames_[offsetMode_] << endl;
+                << "patch:" << patch_.name() << endl
+                << "sampleRegion:" << sampleRegion() << endl
+                << "mode:" << sampleModeNames_[mode_] << endl
+                << "samplePatch:" << samplePatch() << endl
+                << "offsetMode:" << offsetModeNames_[offsetMode_] << endl;
         }
     }
 
@@ -877,7 +874,7 @@ void Foam::mappedPatchBase::calcMapping() const
                 nNotFound++;
             }
         }
-        reduce(nNotFound, sumOp<label>(), Pstream::msgType(), comm_);
+        reduce(nNotFound, sumOp<label>(), Pstream::msgType(), myComm);
 
         if (nNotFound > 0)
         {
@@ -937,7 +934,7 @@ void Foam::mappedPatchBase::calcMapping() const
     // - cell/face sample is in (so source when mapping)
     //   sampleIndices, sampleProcs.
 
-    if (Pstream::master(comm_))
+    if (Pstream::master(myComm))
     {
         forAll(samples, i)
         {
@@ -954,7 +951,7 @@ void Foam::mappedPatchBase::calcMapping() const
     }
 
 
-    if (debug && Pstream::master(comm_))
+    if (debug && Pstream::master(myComm))
     {
         //forAll(samples, i)
         //{
@@ -993,7 +990,7 @@ void Foam::mappedPatchBase::calcMapping() const
     }
 
     // Determine schedule.
-    mapPtr_.reset(new mapDistribute(sampleProcs, patchFaceProcs, comm_));
+    mapPtr_.reset(new mapDistribute(sampleProcs, patchFaceProcs, myComm));
 
     // Rework the schedule from indices into samples to cell data to send,
     // face data to receive.
@@ -1104,6 +1101,13 @@ void Foam::mappedPatchBase::calcAMI() const
         return;
     }
 
+    DebugInFunction << nl;
+
+    const label myComm = getCommunicator();  // Get or create
+
+    const label oldWorldComm(Pstream::worldComm);
+    const label oldWarnComm(Pstream::warnComm);
+
     // Check if running locally
     if (sampleWorld_.empty() || sameWorld())
     {
@@ -1136,17 +1140,15 @@ void Foam::mappedPatchBase::calcAMI() const
         }
 
         // Construct/apply AMI interpolation to determine addressing and
-        // weights. Make sure to use optional inter-world communicator.
+        // weights.
 
-        const label oldWorldComm = Pstream::worldComm;
-        Pstream::worldComm = comm_;
-
-        const label oldComm(Pstream::warnComm);
-        Pstream::warnComm = UPstream::worldComm;
+        // Change to use inter-world communicator
+        Pstream::worldComm = myComm;
+        Pstream::warnComm = Pstream::worldComm;
 
         AMIPtr_->calculate(patch_, nbrPatch0, surfPtr());
 
-        Pstream::warnComm = oldComm;
+        Pstream::warnComm = oldWarnComm;
         Pstream::worldComm = oldWorldComm;
     }
     else
@@ -1163,11 +1165,8 @@ void Foam::mappedPatchBase::calcAMI() const
         );
 
         // Change to use inter-world communicator
-        const label oldWorldComm = Pstream::worldComm;
-        Pstream::worldComm = comm_;
-
-        const label oldComm(Pstream::warnComm);
-        Pstream::warnComm = UPstream::worldComm;
+        Pstream::worldComm = myComm;
+        Pstream::warnComm = Pstream::worldComm;
 
         if (masterWorld())
         {
@@ -1186,7 +1185,7 @@ void Foam::mappedPatchBase::calcAMI() const
         // Now the AMI addressing/weights will be from src side (on masterWorld
         // processors) to tgt side (on other processors)
 
-        Pstream::warnComm = oldComm;
+        Pstream::warnComm = oldWarnComm;
         Pstream::worldComm = oldWorldComm;
     }
 }
@@ -1216,28 +1215,26 @@ const Foam::objectRegistry& Foam::mappedPatchBase::subRegistry
 Foam::mappedPatchBase::mappedPatchBase(const polyPatch& pp)
 :
     patch_(pp),
-    sampleWorld_(word::null),
+    sampleWorld_(),
     sampleRegion_(patch_.boundaryMesh().mesh().name()),
     mode_(NEARESTPATCHFACE),
-    samplePatch_(word::null),
+    samplePatch_(),
     coupleGroup_(),
     sampleDatabasePtr_(),
     offsetMode_(UNIFORM),
     offset_(Zero),
     offsets_(pp.size(), offset_),
     distance_(0),
-    comm_(communicator(sampleWorld_)),
-    sameRegion_
-    (
-        sampleWorld_.empty()
-     && sampleRegion_ == patch_.boundaryMesh().mesh().name()
-    ),
+    communicator_(-1),  // Demand-driven (cached value)
+    sameRegion_(true),
     mapPtr_(nullptr),
     AMIReverse_(false),
     AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
-{}
+{
+    // NOTE: same region, no sample-world. Thus no world-world communication
+}
 
 
 Foam::mappedPatchBase::mappedPatchBase
@@ -1249,29 +1246,17 @@ Foam::mappedPatchBase::mappedPatchBase
     const vectorField& offsets
 )
 :
-    patch_(pp),
-    sampleWorld_(word::null),
-    sampleRegion_(sampleRegion),
-    mode_(mode),
-    samplePatch_(samplePatch),
-    coupleGroup_(),
-    sampleDatabasePtr_(),
-    offsetMode_(NONUNIFORM),
-    offset_(Zero),
-    offsets_(offsets),
-    distance_(0),
-    comm_(communicator(sampleWorld_)),
-    sameRegion_
+    mappedPatchBase
     (
-        sampleWorld_.empty()
-     && sampleRegion_ == patch_.boundaryMesh().mesh().name()
-    ),
-    mapPtr_(nullptr),
-    AMIReverse_(false),
-    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
-    surfPtr_(nullptr),
-    surfDict_(fileName("surface"))
-{}
+        pp,
+        sampleRegion,
+        mode,
+        samplePatch,
+        scalar(0)
+    )
+{
+    mappedPatchBase::setOffset(offsets);
+}
 
 
 Foam::mappedPatchBase::mappedPatchBase
@@ -1280,32 +1265,20 @@ Foam::mappedPatchBase::mappedPatchBase
     const word& sampleRegion,
     const sampleMode mode,
     const word& samplePatch,
-    const vector& offset
+    const vector& uniformOffset
 )
 :
-    patch_(pp),
-    sampleWorld_(word::null),
-    sampleRegion_(sampleRegion),
-    mode_(mode),
-    samplePatch_(samplePatch),
-    coupleGroup_(),
-    sampleDatabasePtr_(),
-    offsetMode_(UNIFORM),
-    offset_(offset),
-    offsets_(0),
-    distance_(0),
-    comm_(communicator(sampleWorld_)),
-    sameRegion_
+    mappedPatchBase
     (
-        sampleWorld_.empty()
-     && sampleRegion_ == patch_.boundaryMesh().mesh().name()
-    ),
-    mapPtr_(nullptr),
-    AMIReverse_(false),
-    AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
-    surfPtr_(nullptr),
-    surfDict_(fileName("surface"))
-{}
+        pp,
+        sampleRegion,
+        mode,
+        samplePatch,
+        scalar(0)
+    )
+{
+    mappedPatchBase::setOffset(uniformOffset);
+}
 
 
 Foam::mappedPatchBase::mappedPatchBase
@@ -1314,11 +1287,11 @@ Foam::mappedPatchBase::mappedPatchBase
     const word& sampleRegion,
     const sampleMode mode,
     const word& samplePatch,
-    const scalar distance
+    const scalar normalDistance
 )
 :
     patch_(pp),
-    sampleWorld_(word::null),
+    sampleWorld_(),
     sampleRegion_(sampleRegion),
     mode_(mode),
     samplePatch_(samplePatch),
@@ -1327,8 +1300,8 @@ Foam::mappedPatchBase::mappedPatchBase
     offsetMode_(NORMAL),
     offset_(Zero),
     offsets_(0),
-    distance_(distance),
-    comm_(communicator(sampleWorld_)),
+    distance_(normalDistance),
+    communicator_(-1),  // Demand-driven (cached value)
     sameRegion_
     (
         sampleWorld_.empty()
@@ -1339,7 +1312,9 @@ Foam::mappedPatchBase::mappedPatchBase
     AMIPtr_(new faceAreaWeightAMI(true, AMIReverse_)),
     surfPtr_(nullptr),
     surfDict_(fileName("surface"))
-{}
+{
+    addWorldConnection();
+}
 
 
 Foam::mappedPatchBase::mappedPatchBase
@@ -1358,8 +1333,8 @@ Foam::mappedPatchBase::mappedPatchBase
     offsetMode_(UNIFORM),
     offset_(Zero),
     offsets_(0),
-    distance_(0.0),
-    comm_(communicator(sampleWorld_)),
+    distance_(0),
+    communicator_(-1),  // Demand-driven (cached value)
     sameRegion_
     (
         sampleWorld_.empty()
@@ -1379,6 +1354,8 @@ Foam::mappedPatchBase::mappedPatchBase
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
+    addWorldConnection();
+
     if (!coupleGroup_.valid())
     {
         if (sampleWorld_.empty() && sampleRegion_.empty())
@@ -1448,8 +1425,8 @@ Foam::mappedPatchBase::mappedPatchBase
     offsetMode_(UNIFORM),
     offset_(Zero),
     offsets_(0),
-    distance_(0.0),
-    comm_(communicator(sampleWorld_)),
+    distance_(0),
+    communicator_(-1),  // Demand-driven (cached value)
     sameRegion_
     (
         sampleWorld_.empty()
@@ -1469,6 +1446,8 @@ Foam::mappedPatchBase::mappedPatchBase
     surfPtr_(nullptr),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
+    addWorldConnection();
+
     if (mode != NEARESTPATCHFACE && mode != NEARESTPATCHFACEAMI)
     {
         FatalIOErrorInFunction(dict)
@@ -1478,7 +1457,6 @@ Foam::mappedPatchBase::mappedPatchBase
             << sampleModeNames_[NEARESTPATCHFACEAMI]
             << exit(FatalIOError);
     }
-
 
     if (!coupleGroup_.valid())
     {
@@ -1514,7 +1492,7 @@ Foam::mappedPatchBase::mappedPatchBase
     offset_(mpb.offset_),
     offsets_(mpb.offsets_),
     distance_(mpb.distance_),
-    comm_(mpb.comm_),
+    communicator_(mpb.communicator_),
     sameRegion_(mpb.sameRegion_),
     mapPtr_(nullptr),
     AMIReverse_(mpb.AMIReverse_),
@@ -1552,7 +1530,7 @@ Foam::mappedPatchBase::mappedPatchBase
       : vectorField()
     ),
     distance_(mpb.distance_),
-    comm_(mpb.comm_),
+    communicator_(mpb.communicator_),
     sameRegion_(mpb.sameRegion_),
     mapPtr_(nullptr),
     AMIReverse_(mpb.AMIReverse_),
@@ -1572,13 +1550,43 @@ Foam::mappedPatchBase::~mappedPatchBase()
 
 void Foam::mappedPatchBase::clearOut()
 {
-    mapPtr_.clear();
-    surfPtr_.clear();
+    mapPtr_.reset(nullptr);
+    surfPtr_.reset(nullptr);
     AMIPtr_->upToDate() = false;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::mappedPatchBase::setOffset(const scalar normalDist)
+{
+    clearOut();
+    offsetMode_ = offsetMode::NORMAL;
+    offset_ = Zero;
+    offsets_.clear();
+    distance_ = normalDist;
+}
+
+
+void Foam::mappedPatchBase::setOffset(const vector& uniformOffset)
+{
+    clearOut();
+    offsetMode_ = offsetMode::UNIFORM;
+    offset_ = uniformOffset;
+    offsets_.clear();
+    distance_ = Zero;
+}
+
+
+void Foam::mappedPatchBase::setOffset(const vectorField& offsets)
+{
+    clearOut();
+    offsetMode_ = offsetMode::NONUNIFORM;
+    offset_ = Zero;
+    offsets_ = offsets;
+    distance_ = Zero;
+}
+
 
 const Foam::polyMesh& Foam::mappedPatchBase::lookupMesh
 (
@@ -1653,8 +1661,8 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::samplePoints
     const pointField& fc
 ) const
 {
-    tmp<pointField> tfld(new pointField(fc));
-    pointField& fld = tfld.ref();
+    auto tfld = tmp<pointField>::New(fc);
+    auto& fld = tfld.ref();
 
     switch (offsetMode_)
     {
@@ -1725,7 +1733,7 @@ Foam::pointIndexHit Foam::mappedPatchBase::facePoint
                 return pointIndexHit(true, fc, 0);
             }
 
-            label celli = mesh.faceOwner()[facei];
+            const label celli = mesh.faceOwner()[facei];
             const point& cc = mesh.cellCentres()[celli];
             vector d = fc-cc;
 
@@ -1918,7 +1926,7 @@ void Foam::mappedPatchBase::write(Ostream& os) const
 
     if (sampleDatabasePtr_)
     {
-        os.writeEntry("sampleDatabase", sampleDatabasePtr_.valid());
+        os.writeEntry("sampleDatabase", Switch::name(true));
         // Write database path if differing
         os.writeEntryIfDifferent<fileName>
         (
