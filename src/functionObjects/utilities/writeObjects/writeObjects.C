@@ -60,6 +60,22 @@ Foam::functionObjects::writeObjects::writeOptionNames_
     { writeOption::ANY_WRITE, "anyWrite" },
 });
 
+const Foam::objectRegistry& setRegistry
+(
+    const Foam::Time& runTime,
+    const Foam::dictionary& dict
+)
+{
+    const Foam::word regionName =
+        dict.getOrDefault("region", Foam::polyMesh::defaultRegion);
+
+    if (regionName == "__TIME__")
+    {
+        return runTime;
+    }
+
+    return runTime.lookupObject<Foam::objectRegistry>(regionName);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -71,13 +87,7 @@ Foam::functionObjects::writeObjects::writeObjects
 )
 :
     functionObject(name),
-    obr_
-    (
-        runTime.lookupObject<objectRegistry>
-        (
-            dict.getOrDefault("region", polyMesh::defaultRegion)
-        )
-    ),
+    obr_(setRegistry(runTime, dict)),
     writeOption_(ANY_WRITE),
     objectNames_()
 {
