@@ -5,7 +5,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 restore0Dir
 
-m4 system/blockMeshDict.m4 > system/blockMeshDict
 runApplication blockMesh
 
 runApplication $(getApplication)
