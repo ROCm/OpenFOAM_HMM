@@ -94,7 +94,7 @@ movingWallVelocityFvPatchVectorField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField>
-Foam::movingWallVelocityFvPatchVectorField::Uwall() const
+Foam::movingWallVelocityFvPatchVectorField::Uwall()
 {
     const fvMesh& mesh = internalField().mesh();
     const fvPatch& p = patch();
@@ -112,10 +112,13 @@ Foam::movingWallVelocityFvPatchVectorField::Uwall() const
 
     const vectorField Up((pp.faceCentres() - oldFc)/deltaT);
 
-    const auto& U = static_cast<const volVectorField&>(internalField());
+    const volVectorField& U =
+        static_cast<const volVectorField&>(internalField());
 
-    tmp<scalarField> phip =
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U));
+    scalarField phip
+    (
+        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+    );
 
     const vectorField n(p.nf());
     const scalarField& magSf = p.magSf();
@@ -136,7 +139,8 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
 
     if (mesh.moving())
     {
-        vectorField::operator=(Uwall()());
+        const vectorField uwall(Uwall());
+        vectorField::operator=(uwall);
     }
 
     fixedValueFvPatchVectorField::updateCoeffs();
