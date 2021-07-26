@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "optMeshMovementBezier.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

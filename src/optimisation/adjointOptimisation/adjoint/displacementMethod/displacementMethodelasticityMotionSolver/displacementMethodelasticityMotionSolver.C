@@ -29,6 +29,7 @@ License
 
 #include "displacementMethodelasticityMotionSolver.H"
 #include "elasticityMotionSolver.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

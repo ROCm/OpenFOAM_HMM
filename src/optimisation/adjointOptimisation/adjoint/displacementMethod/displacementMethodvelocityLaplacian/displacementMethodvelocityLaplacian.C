@@ -29,6 +29,7 @@ License
 
 #include "displacementMethodvelocityLaplacian.H"
 #include "velocityLaplacianFvMotionSolver.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

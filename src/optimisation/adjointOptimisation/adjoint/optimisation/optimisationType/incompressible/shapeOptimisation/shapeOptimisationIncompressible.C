@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "shapeOptimisationIncompressible.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
