@@ -142,7 +142,7 @@ public:
     // Member Functions
 
         //- Return wall velocity field
-        tmp<vectorField> Uwall();
+        tmp<vectorField> Uwall() const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

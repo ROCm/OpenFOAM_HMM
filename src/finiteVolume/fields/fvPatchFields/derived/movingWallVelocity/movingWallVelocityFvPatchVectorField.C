@@ -94,7 +94,7 @@ movingWallVelocityFvPatchVectorField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField>
-Foam::movingWallVelocityFvPatchVectorField::Uwall()
+Foam::movingWallVelocityFvPatchVectorField::Uwall() const
 {
     const fvMesh& mesh = internalField().mesh();
     const fvPatch& p = patch();
