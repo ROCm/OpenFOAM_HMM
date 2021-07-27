@@ -55,29 +55,34 @@ void Foam::mappedPatchFieldBase<Type>::storeField
     const objectRegistry& obr,
     const word& region,
     const word& patch,
+    const label myComm,
     const labelListList& procToMap,
     const word& fieldName,
     const Field<T>& fld
 ) const
 {
     // Store my data onto database
-    //const label myRank = Pstream::myProcNo(0);  // comm_
-    const label nProcs = Pstream::nProcs(0);    // comm_
 
-    for (label domain = 0; domain < nProcs; domain++)
+    const auto& procIDs = UPstream::procID(myComm);
+
+    forAll(procToMap, ranki)
     {
-        const labelList& map = procToMap[domain];
+        const labelList& map = procToMap[ranki];
+        const label proci = procIDs[ranki];
 
         if (map.size())
         {
             const Field<T> subFld(fld, map);
 
-            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            auto& subObr = const_cast<objectRegistry&>
             (
-                obr,
-                mapper_.sendPath(domain)
-              / region
-              / patch
+                mappedPatchBase::subRegistry
+                (
+                    obr,
+                    mapper_.sendPath(proci)
+                  / region
+                  / patch
+                )
             );
 
             if (fvPatchField<Type>::debug)
@@ -88,12 +93,7 @@ void Foam::mappedPatchFieldBase<Type>::storeField
                     << " as:" << subObr.objectPath() << endl;
             }
 
-            mappedPatchBase::storeField
-            (
-                const_cast<objectRegistry&>(subObr),
-                fieldName,
-                subFld
-            );
+            mappedPatchBase::storeField(subObr, fieldName, subFld);
         }
     }
 }
@@ -107,27 +107,32 @@ bool Foam::mappedPatchFieldBase<Type>::retrieveField
     const objectRegistry& obr,
     const word& region,
     const word& patch,
+    const label myComm,
     const labelListList& procToMap,
     const word& fieldName,
     Field<T>& fld
 ) const
 {
-    // Store my data onto database
-    const label nProcs = Pstream::nProcs(0);    // comm_
+    const auto& procIDs = UPstream::procID(myComm);
 
     bool ok = true;
 
-    for (label domain = 0; domain < nProcs; domain++)
+    forAll(procToMap, ranki)
     {
-        const labelList& map = procToMap[domain];
+        const labelList& map = procToMap[ranki];
+        const label proci = procIDs[ranki];
+
         if (map.size())
         {
-            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            auto& subObr = const_cast<objectRegistry&>
             (
-                obr,
-                mapper_.receivePath(domain)
-              / region
-              / patch
+                mappedPatchBase::subRegistry
+                (
+                    obr,
+                    mapper_.receivePath(proci)
+                  / region
+                  / patch
+                )
             );
 
             const IOField<T>* subFldPtr = subObr.getObjectPtr<IOField<T>>
@@ -174,12 +179,7 @@ bool Foam::mappedPatchFieldBase<Type>::retrieveField
                 // detect it if necessary.
                 const Field<T> dummyFld(0);
 
-                mappedPatchBase::storeField
-                (
-                    const_cast<objectRegistry&>(subObr),
-                    fieldName,
-                    dummyFld
-                );
+                mappedPatchBase::storeField(subObr, fieldName, dummyFld);
 
                 ok = false;
             }
@@ -207,6 +207,8 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
     const Field<T>& fld
 ) const
 {
+    // Old code. Likely not quite correct...
+
     // Store my data onto database
     const label nProcs = Pstream::nProcs(0);    // comm_
 
@@ -215,12 +217,15 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
         const labelList& constructMap = map[domain];
         if (constructMap.size())
         {
-            const objectRegistry& subObr = mappedPatchBase::subRegistry
+            auto& subObr = const_cast<objectRegistry&>
             (
-                obr,
-                mapper_.receivePath(domain)
-              / region
-              / patch
+                mappedPatchBase::subRegistry
+                (
+                    obr,
+                    mapper_.receivePath(domain)
+                  / region
+                  / patch
+                )
             );
 
             const Field<T> receiveFld(fld, constructMap);
@@ -235,12 +240,7 @@ void Foam::mappedPatchFieldBase<Type>::initRetrieveField
                     << " as:" << subObr.objectPath() << endl;
             }
 
-            mappedPatchBase::storeField
-            (
-                const_cast<objectRegistry&>(subObr),
-                fieldName,
-                receiveFld
-            );
+            mappedPatchBase::storeField(subObr, fieldName, receiveFld);
         }
     }
 }
@@ -251,6 +251,7 @@ template<class T>
 bool Foam::mappedPatchFieldBase<Type>::storeAndRetrieveField
 (
     const word& fieldName,
+    const label myComm,
     const labelListList& subMap,
     const label constructSize,
     const labelListList& constructMap,
@@ -264,6 +265,7 @@ bool Foam::mappedPatchFieldBase<Type>::storeAndRetrieveField
         patchField_.internalField().time(),
         patchField_.patch().boundaryMesh().mesh().name(),
         patchField_.patch().name(),
+        myComm,
         subMap,
         fieldName,
         fld
@@ -276,6 +278,7 @@ bool Foam::mappedPatchFieldBase<Type>::storeAndRetrieveField
         patchField_.internalField().time(),
         mapper_.sampleRegion(),
         mapper_.samplePatch(),
+        myComm,
         constructMap,
         fieldName,
         work
@@ -525,6 +528,8 @@ void Foam::mappedPatchFieldBase<Type>::distribute
 {
     if (mapper_.sampleDatabase())
     {
+        const label myComm = mapper_.getCommunicator();  // Get or create
+
         if (mapper_.mode() != mappedPatchBase::NEARESTPATCHFACEAMI)
         {
             // Store my data on send buffers
@@ -533,6 +538,7 @@ void Foam::mappedPatchFieldBase<Type>::distribute
                 patchField_.internalField().time(),
                 patchField_.patch().boundaryMesh().mesh().name(),
                 patchField_.patch().name(),
+                myComm,
                 mapper_.map().subMap(),
                 fieldName,
                 fld
@@ -545,6 +551,7 @@ void Foam::mappedPatchFieldBase<Type>::distribute
                 patchField_.internalField().time(),
                 mapper_.sampleRegion(),
                 mapper_.samplePatch(),
+                myComm,
                 mapper_.map().constructMap(),
                 fieldName,
                 fld
@@ -566,6 +573,7 @@ void Foam::mappedPatchFieldBase<Type>::distribute
                 storeAndRetrieveField
                 (
                     fieldName,
+                    myComm,
                     AMI.srcMap().subMap(),
                     AMI.tgtMap().constructSize(),
                     AMI.tgtMap().constructMap(),
@@ -581,6 +589,7 @@ void Foam::mappedPatchFieldBase<Type>::distribute
                 storeAndRetrieveField
                 (
                     fieldName,
+                    myComm,
                     AMI.tgtMap().subMap(),
                     AMI.srcMap().constructSize(),
                     AMI.srcMap().constructMap(),
