@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ namespace Foam
 
 void Foam::wallDist::constructn() const
 {
-    n_ = tmp<volVectorField>
+    n_.reset
     (
         new volVectorField
         (
@@ -77,49 +77,8 @@ Foam::wallDist::wallDist
     const word& patchTypeName
 )
 :
-    MeshObject<fvMesh, Foam::UpdateableMeshObject, wallDist>(mesh),
-    patchIDs_(patchIDs),
-    patchTypeName_(patchTypeName),
-    dict_
-    (
-        static_cast<const fvSchemes&>(mesh).subOrEmptyDict
-        (
-            patchTypeName_ & "Dist"
-        )
-    ),
-    pdm_
-    (
-        patchDistMethod::New
-        (
-            dict_,
-            mesh,
-            patchIDs_
-        )
-    ),
-    y_
-    (
-        IOobject
-        (
-            "y" & patchTypeName_,
-            mesh.time().timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
-        patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
-    ),
-    nRequired_(dict_.getOrDefault("nRequired", false)),
-    n_(volVectorField::null()),
-    updateInterval_(dict_.getOrDefault<label>("updateInterval", 1)),
-    requireUpdate_(true)
-{
-    if (nRequired_)
-    {
-        constructn();
-    }
-
-    movePoints();
-}
+    wallDist(mesh, word::null, patchIDs, patchTypeName)
+{}
 
 
 Foam::wallDist::wallDist
@@ -162,9 +121,9 @@ Foam::wallDist::wallDist
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
         patchDistMethod::patchTypes<scalar>(mesh, patchIDs_)
     ),
-    nRequired_(dict_.getOrDefault("nRequired", false)),
     n_(volVectorField::null()),
     updateInterval_(dict_.getOrDefault<label>("updateInterval", 1)),
+    nRequired_(dict_.getOrDefault("nRequired", false)),
     requireUpdate_(true)
 {
     if (nRequired_)

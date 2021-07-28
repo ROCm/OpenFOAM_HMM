@@ -94,14 +94,14 @@ class wallDist
         //- Distance-to-wall field
         mutable volScalarField y_;
 
-        //- Flag to indicate if the distance-to-wall field is required
-        mutable bool nRequired_;
-
         //- Normal-to-wall field
         mutable tmp<volVectorField> n_;
 
         //- Update wall distance every updateInterval_ steps
         const label updateInterval_;
+
+        //- Flag to indicate if the distance-to-wall field is required
+        mutable bool nRequired_;
 
         //- Flag to indicate whether the wall distance requires updating
         bool requireUpdate_;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,36 +52,8 @@ Foam::patchDistMethod::patchDistMethod
 
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
-(
-    const dictionary& dict,
-    const fvMesh& mesh,
-    const labelHashSet& patchIDs
-)
-{
-    const word modelType(dict.get<word>("method"));
-
-    Info<< "Selecting patchDistMethod " << modelType << endl;
-
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
-
-    if (!cstrIter.found())
-    {
-        FatalIOErrorInLookup
-        (
-            dict,
-            "patchDistMethod",
-            modelType,
-            *dictionaryConstructorTablePtr_
-        ) << exit(FatalIOError);
-    }
-
-    return cstrIter()(dict, mesh, patchIDs);
-}
-
-
-
-Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
+Foam::autoPtr<Foam::patchDistMethod>
+Foam::patchDistMethod::New
 (
     const dictionary& dict,
     const fvMesh& mesh,
@@ -89,7 +61,14 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const word& defaultPatchDistMethod
 )
 {
-    const word modelType(dict.getOrDefault("method", defaultPatchDistMethod));
+    word modelType(defaultPatchDistMethod);
+    dict.readEntry
+    (
+        "method",
+        modelType,
+        keyType::REGEX,
+        modelType.empty()  // Mandatory if no default was provided
+    );
 
     Info<< "Selecting patchDistMethod " << modelType << endl;
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
