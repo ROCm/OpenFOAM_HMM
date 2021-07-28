@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,73 +91,73 @@ Foam::PatchFunction1Types::ConstantField<Type>::getValue
 
     Field<Type> fld;
 
-    if (len)
+    if (!eptr || !eptr->isStream())
     {
-        if (!eptr || !eptr->isStream())
-        {
-            FatalIOErrorInFunction(dict)
-                << "Null or invalid entry" << nl
-                << exit(FatalIOError);
-        }
-        ITstream& is = eptr->stream();
+        FatalIOErrorInFunction(dict)
+            << "Null or invalid entry" << nl
+            << exit(FatalIOError);
+    }
+    ITstream& is = eptr->stream();
 
-        if (is.peek().isWord())
-        {
-            const word contentType(is);
+    if (is.peek().isWord())
+    {
+        const word contentType(is);
 
-            if (contentType == "uniform" || contentType == "constant")
-            {
-                is >> uniformValue;
-                fld.resize(len);
-                fld = uniformValue;
-            }
-            else if (contentType == "nonuniform")
-            {
-                isUniform = false;
-                is >> static_cast<List<Type>&>(fld);
-                const label lenRead = fld.size();
-                if (len != lenRead)
-                {
-                    if
-                    (
-                        len < lenRead
-                     && FieldBase::allowConstructFromLargerSize
-                    )
-                    {
-                        #ifdef FULLDEBUG
-                        IOWarningInFunction(dict)
-                            << "Sizes do not match. Truncating " << lenRead
-                            << " entries to " << len << endl;
-                        #endif
-
-                        // Truncate the data
-                        fld.resize(len);
-                    }
-                    else
-                    {
-                        FatalIOErrorInFunction(dict)
-                            << "size " << lenRead
-                            << " is not equal to the expected length " << len
-                            << exit(FatalIOError);
-                    }
-                }
-            }
-            else
-            {
-                isUniform = false;
-                FatalIOErrorInFunction(dict)
-                    << "Expected keyword 'uniform', 'nonuniform' or 'constant'"
-                    << ", found " << contentType
-                    << exit(FatalIOError);
-            }
-        }
-        else
+        if (contentType == "constant" || contentType == "uniform")
         {
-            // Uniform (constant) field
             is >> uniformValue;
             fld.resize(len);
             fld = uniformValue;
         }
+        else if (contentType == "nonuniform")
+        {
+            if (len)
+            {
+                isUniform = false;
+            }
+
+            is >> static_cast<List<Type>&>(fld);
+            const label lenRead = fld.size();
+            if (len != lenRead)
+            {
+                if
+                (
+                    len < lenRead
+                 && FieldBase::allowConstructFromLargerSize
+                )
+                {
+                    #ifdef FULLDEBUG
+                    IOWarningInFunction(dict)
+                        << "Sizes do not match. Truncating " << lenRead
+                        << " entries to " << len << endl;
+                    #endif
+
+                    // Truncate the data
+                    fld.resize(len);
+                }
+                else
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "size " << lenRead
+                        << " is not equal to the expected length " << len
+                        << exit(FatalIOError);
+                }
+            }
+        }
+        else
+        {
+            FatalIOErrorInFunction(dict)
+                << "Expected keyword 'constant', 'uniform', or 'nonuniform'"
+                << ", found " << contentType
+                << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        // Uniform (constant) field
+        is >> uniformValue;
+        fld.resize(len);
+        fld = uniformValue;
     }
 
     return fld;
