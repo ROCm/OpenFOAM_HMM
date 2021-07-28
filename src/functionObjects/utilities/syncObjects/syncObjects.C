@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(syncObjects, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,
@@ -48,9 +47,6 @@ namespace functionObjects
     );
 }
 }
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -63,14 +59,7 @@ Foam::functionObjects::syncObjects::syncObjects
 )
 :
     functionObject(name),
-    obr_
-    (
-        //runTime.lookupObject<objectRegistry>
-        //(
-        //    dict.lookupOrDefault("region", polyMesh::defaultRegion)
-        //)
-        runTime
-    )
+    obr_(runTime)
 {
     read(dict);
 }
@@ -121,9 +110,12 @@ void Foam::functionObjects::syncObjects::sync()
         dictionary sendDataDict;
         mappedPatchBase::writeDict(sendObr, sendDataDict);
 
-        //Pout<< "** to processor " << proci
-        //    << " sendObr:" << sendObr.objectPath()
-        //    << " sending dictionary:" << sendDataDict << endl;
+        if (debug & 2)
+        {
+            Pout<< "** to processor " << proci
+                << " sendObr:" << sendObr.objectPath()
+                << " sending dictionary:" << sendDataDict << endl;
+        }
         UOPstream os(proci, pBufs);
         os << sendDataDict;
     }
@@ -139,14 +131,14 @@ void Foam::functionObjects::syncObjects::sync()
             obr_,
             mappedPatchBase::receivePath(root_, proci)
         );
-        //Pout<< "** from processor " << proci
-        //        << " receiveObr:" << receiveObr.objectPath()
-        //    << " receiving dictionary" << endl;
         UIPstream is(proci, pBufs);
         const dictionary fromProcDict(is);
-        //Pout<< "** from processor " << proci
-        //    << " received dictionary:" << fromProcDict << endl;
-
+        if (debug & 2)
+        {
+            Pout<< "** from processor " << proci
+                << " receiveObr:" << receiveObr.objectPath()
+                << " received dictionary:" << fromProcDict << endl;
+        }
         mappedPatchBase::readDict
         (
             fromProcDict,

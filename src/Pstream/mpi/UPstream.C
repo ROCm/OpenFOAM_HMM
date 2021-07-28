@@ -1091,11 +1091,12 @@ void Foam::UPstream::allocatePstreamCommunicator
            &PstreamGlobals::MPIGroups_[index]
         );
 
-        // Create new communicator
-        MPI_Comm_create
+        // Create new communicator for this group
+        MPI_Comm_create_group
         (
             PstreamGlobals::MPICommunicators_[parentIndex],
             PstreamGlobals::MPIGroups_[index],
+            Pstream::msgType(),
            &PstreamGlobals::MPICommunicators_[index]
         );
 

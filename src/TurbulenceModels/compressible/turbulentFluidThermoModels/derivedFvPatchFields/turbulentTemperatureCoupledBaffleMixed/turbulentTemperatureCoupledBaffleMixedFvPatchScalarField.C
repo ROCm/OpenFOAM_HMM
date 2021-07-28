@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,17 +150,19 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         valueFraction() = 1.0;
     }
 
-    // Store patch value as initial guess when running in database mode
-    mappedPatchFieldBase<scalar>::initRetrieveField
-    (
-        this->internalField().name(),
-        *this
-    );
-    mappedPatchFieldBase<scalar>::initRetrieveField
-    (
-        this->internalField().name() + "_weights",
-        this->patch().deltaCoeffs()
-    );
+// This blocks (crashes) with more than two worlds!
+//
+///    // Store patch value as initial guess when running in database mode
+///    mappedPatchFieldBase<scalar>::initRetrieveField
+///    (
+///        this->internalField().name(),
+///        *this
+///    );
+///    mappedPatchFieldBase<scalar>::initRetrieveField
+///    (
+///        this->internalField().name() + "_weights",
+///        this->patch().deltaCoeffs()
+///    );
 }
 
 

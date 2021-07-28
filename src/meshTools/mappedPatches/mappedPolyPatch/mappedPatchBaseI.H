@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,14 +26,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline const Foam::mappedPatchBase::sampleMode&
-Foam::mappedPatchBase::mode() const
+inline Foam::mappedPatchBase::sampleMode
+Foam::mappedPatchBase::mode() const noexcept
 {
     return mode_;
 }
 
 
-inline const Foam::word& Foam::mappedPatchBase::sampleWorld() const
+inline const Foam::word& Foam::mappedPatchBase::sampleWorld() const noexcept
 {
     return sampleWorld_;
 }
@@ -132,29 +132,48 @@ inline Foam::label Foam::mappedPatchBase::sampleSize() const
 }
 
 
-inline const Foam::vector& Foam::mappedPatchBase::offset() const
+inline const Foam::vector& Foam::mappedPatchBase::offset() const noexcept
 {
     return offset_;
 }
 
 
-inline const Foam::vectorField& Foam::mappedPatchBase::offsets() const
+inline const Foam::vectorField& Foam::mappedPatchBase::offsets() const noexcept
 {
     return offsets_;
 }
 
 
+inline Foam::label Foam::mappedPatchBase::getCommunicator() const
+{
+    // Cached communicator, or a get a new one
+    if (communicator_ == -1)
+    {
+        const_cast<label&>(communicator_) = getWorldCommunicator();
+    }
+    return communicator_;
+}
+
+
 inline Foam::label Foam::mappedPatchBase::comm() const
 {
-    return comm_;
+    // Cached communicator, or a get a new one
+    if (communicator_ == -1)
+    {
+        const_cast<label&>(communicator_) = getWorldCommunicator();
+    }
+    return communicator_;
 }
 
 
 inline bool Foam::mappedPatchBase::sameWorld() const
 {
     return
+    (
         UPstream::allWorlds().size() == 1
-     || UPstream::myWorld() == sampleWorld_;
+     || sampleWorld_.empty()
+     || UPstream::myWorld() == sampleWorld_
+    );
 }
 
 
@@ -164,18 +183,14 @@ inline bool Foam::mappedPatchBase::masterWorld() const
     {
         return true;
     }
-    else
-    {
-        // Use ordering in allWorlds
-        const label myWorld = UPstream::myWorldID();
-        const label mySampleWorld =
-            UPstream::allWorlds().find(sampleWorld_);
-        return myWorld < mySampleWorld;
-    }
+
+    // Use ordering in allWorlds
+    const label otherWorldId = UPstream::allWorlds().find(sampleWorld_);
+    return (otherWorldId < 0 || (UPstream::myWorldID() < otherWorldId));
 }
 
 
-inline bool Foam::mappedPatchBase::sameRegion() const
+inline bool Foam::mappedPatchBase::sameRegion() const noexcept
 {
     return sameRegion_;
 }

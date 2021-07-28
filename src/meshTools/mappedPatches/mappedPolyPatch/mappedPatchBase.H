@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,6 @@ class mapDistribute;
 
 class mappedPatchBase
 {
-
 public:
 
     // Type enumerations
@@ -150,7 +149,6 @@ public:
 
     class nearestEqOp
     {
-
     public:
 
         void operator()(nearInfo& x, const nearInfo& y) const
@@ -171,7 +169,6 @@ public:
 
     class maxProcEqOp
     {
-
     public:
 
         void operator()(nearInfo& x, const nearInfo& y) const
@@ -197,7 +194,6 @@ public:
 
     class nearestWorldEqOp
     {
-
     public:
 
         void operator()(nearInfoWorld& x, const nearInfoWorld& y) const
@@ -225,7 +221,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Patch to sample
         const polyPatch& patch_;
@@ -261,7 +257,7 @@ protected:
         scalar distance_;
 
         //- Communicator
-        label comm_;
+        label communicator_;
 
         //- Same region
         mutable bool sameRegion_;
@@ -294,8 +290,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Optionally allocate a world-local communicator
-        static label communicator(const word& sampleWorld);
+        //- Add a world-world connection
+        bool addWorldConnection();
+
+        //- Get the communicator for the world-world connection
+        label getWorldCommunicator() const;
 
         //- Lookup mesh
         const polyMesh& lookupMesh(const word& region) const;
@@ -309,11 +308,11 @@ protected:
 
 
         //- Get the points from face-centre-decomposition face centres
-        //  and project them onto the face-diagonal-decomposition triangles.
+        //- and project them onto the face-diagonal-decomposition triangles.
         tmp<pointField> facePoints(const polyPatch&) const;
 
         //- Collect single list of samples and originating processor+face +
-        //  wanted world
+        //- wanted world
         void collectSamples
         (
             const label mySampleWorld,  // My wanted sampling world
@@ -362,7 +361,7 @@ protected:
         void calcAMI() const;
 
 
-        // Database handling
+        // Database Handling
 
             //- Read optional database name from dictionary
             static autoPtr<fileName> readDatabase(const dictionary& dict);
@@ -422,7 +421,7 @@ public:
             const word& sampleRegion,
             const sampleMode sampleMode,
             const word& samplePatch,
-            const vector& offset
+            const vector& uniformOffset
         );
 
         //- Construct from offsetMode=normal and distance
@@ -432,7 +431,7 @@ public:
             const word& sampleRegion,
             const sampleMode sampleMode,
             const word& samplePatch,
-            const scalar distance
+            const scalar normalDistance
         );
 
         //- Construct from dictionary
@@ -459,17 +458,29 @@ public:
     virtual ~mappedPatchBase();
 
 
-    // Member functions
+    // Member Functions
+
+        // Edit
 
         void clearOut();
+
+        //- Change to normal offset with given distance
+        void setOffset(const scalar normalDist);
+
+        //- Change to uniform offset with value
+        void setOffset(const vector& uniformOffset);
+
+        //- Change to non-uniform offsets
+        void setOffset(const vectorField& offsets);
+
 
         // Access
 
             //- What to sample
-            inline const sampleMode& mode() const;
+            inline sampleMode mode() const noexcept;
 
             //- World to sample
-            inline const word& sampleWorld() const;
+            inline const word& sampleWorld() const noexcept;
 
             //- Region to sample
             inline const word& sampleRegion() const;
@@ -484,12 +495,15 @@ public:
             inline label sampleSize() const;
 
             //- Offset vector (from patch faces to destination mesh objects)
-            inline const vector& offset() const;
+            inline const vector& offset() const noexcept;
 
-            //- Offset vector (from patch faces to destination mesh objects)
-            inline const vectorField& offsets() const;
+            //- Offset vectors (from patch faces to destination mesh objects)
+            inline const vectorField& offsets() const noexcept;
 
-            //- Communicator
+            //- Get the communicator (worldComm or world-to-world)
+            inline label getCommunicator() const;
+
+            //- Identical to getCommunicator()
             inline label comm() const;
 
             //- Is sample world the local world?
@@ -499,7 +513,7 @@ public:
             inline bool masterWorld() const;
 
             //- Cached sampleRegion != mesh.name()
-            inline bool sameRegion() const;
+            inline bool sameRegion() const noexcept;
 
             //- Return reference to the parallel distribution map
             inline const mapDistribute& map() const;
@@ -547,7 +561,7 @@ public:
 
             inline bool sampleDatabase() const
             {
-                return sampleDatabasePtr_.valid();
+                return bool(sampleDatabasePtr_);
             }
 
             //- Helper: return path to store data to be sent to processor i
@@ -615,7 +629,7 @@ public:
         // I/O
 
             //- Write as a dictionary
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 };
 
 

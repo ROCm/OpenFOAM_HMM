@@ -298,6 +298,8 @@ $(ACMICycPatches)/cyclicACMIPointPatchField/cyclicACMIPointPatchFields.C
 PeriodicAMICycPatches=$(AMI)/patches/cyclicPeriodicAMI
 $(PeriodicAMICycPatches)/cyclicPeriodicAMIPolyPatch/cyclicPeriodicAMIPolyPatch.C
 
+multiWorld/multiWorldConnectionsObject.C
+
 mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C
 mappedPatches/mappedPolyPatch/mappedWallPolyPatch.C
