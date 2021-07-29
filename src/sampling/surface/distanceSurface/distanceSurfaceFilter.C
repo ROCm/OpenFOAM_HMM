@@ -429,6 +429,27 @@ void Foam::distanceSurface::filterRegionProximity
     }
 
 
+    // If filtering with region proximity results in zero faces,
+    // revert to face-only proximity filter
+    if (returnReduce(acceptFaces.none(), andOp<bool>()))
+    {
+        acceptFaces.reset();
+        prune = false;
+
+        // Consider the absolute proximity of the face centres
+        forAll(faceDistance, facei)
+        {
+            if (absProximity_ < faceDistance[facei])
+            {
+                prune = true;
+            }
+            else
+            {
+                acceptFaces.set(facei);
+            }
+        }
+    }
+
     if (prune)
     {
         labelList pointMap, faceMap;

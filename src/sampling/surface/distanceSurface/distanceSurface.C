@@ -279,6 +279,7 @@ Foam::distanceSurface::distanceSurface
      || (distance_ < 0)
      || dict.getOrDefault<bool>("signed", true)
     ),
+
     isoParams_
     (
         dict,
@@ -374,6 +375,7 @@ Foam::distanceSurface::distanceSurface
      || (distance_ < 0)
      || useSignedDistance
     ),
+
     isoParams_(params),
     topoFilter_(topologyFilterType::NONE),
     nearestPoints_(),
