@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,64 +27,68 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
+inline Foam::solidIsothermalReactionRate::solidIsothermalReactionRate
 (
-    const scalar A,
-    const scalar Ta,
-    const scalar Tcrit
+    const scalar C,
+    const scalar Cp,
+    const scalar Tpc,
+    const scalar Elat
 )
 :
-    A_(A),
-    Ta_(Ta),
-    Tcrit_(Tcrit)
+    C_(C),
+    Cp_(Cp),
+    Tpc_(Tpc),
+    Elat_(Elat)
 {}
 
 
-inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
+inline Foam::solidIsothermalReactionRate::solidIsothermalReactionRate
 (
     const speciesTable&,
     const dictionary& dict
 )
 :
-    A_(dict.get<scalar>("A")),
-    Ta_(dict.get<scalar>("Ta")),
-    Tcrit_(dict.get<scalar>("Tcrit"))
+    C_(dict.get<scalar>("C")),
+    Cp_(dict.get<scalar>("Cp")),
+    Tpc_(dict.get<scalar>("Tpc")),
+    Elat_(dict.getCheck<scalar>("Elat", scalarMinMax::ge(SMALL)))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::solidArrheniusReactionRate::operator()
+inline Foam::scalar Foam::solidIsothermalReactionRate::operator()
 (
     const scalar,
     const scalar T,
     const scalarField&
 ) const
 {
-    if (T < Tcrit_)
+    if (T < Tpc_)
     {
         return 0;
     }
 
-    return A_*exp(-Ta_/T);
+    return -C_*Cp_*(T - Tpc_)/Elat_;
 }
 
 
-inline void Foam::solidArrheniusReactionRate::write(Ostream& os) const
+inline void Foam::solidIsothermalReactionRate::write(Ostream& os) const
 {
-    os.writeEntry("A", A_);
-    os.writeEntry("Ta", Ta_);
-    os.writeEntry("Tcrit", Tcrit_);
+    os.writeEntry("C", C_);
+    os.writeEntry("Cp", Cp_);
+    os.writeEntry("Tpc", Tpc_);
+    os.writeEntry("Elat", Elat_);
 }
 
 
 inline Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const solidArrheniusReactionRate& arr
+    const solidIsothermalReactionRate& iso
 )
 {
-    arr.write(os);
+    iso.write(os);
     return os;
 }
 
