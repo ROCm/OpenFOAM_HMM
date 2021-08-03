@@ -326,6 +326,38 @@ public:
 
     // Member Functions
 
+        // Implicit treatment functions
+
+            //- Return number of new internal of this polyPatch faces
+            virtual void newInternalProcFaces(label&, label&) const;
+
+
+            //- Return nbrCells
+            virtual const labelUList& nbrCells() const
+            {
+                return neighbPatch().faceCells();
+            }
+
+            //- Return nbr patch ID
+            virtual label neighbPolyPatchID() const
+            {
+                return neighbPatch().index();
+            }
+
+            //- Return collocated faces map
+            virtual refPtr<labelListList> mapCollocatedFaces() const
+            {
+                const labelListList& sourceFaces = AMI().srcAddress();
+                return refPtr<labelListList>(new labelListList(sourceFaces));
+            }
+
+            //- Return implicit master
+            virtual bool masterImplicit() const
+            {
+                return owner();
+            }
+
+
         // Access
 
             //- Tolerance used e.g. for area calculations/limits
@@ -418,7 +450,8 @@ public:
                     const label facei
                 ) const;
 
-                //- Transform a patch-based direction from this side to nbr side
+                //- Transform a patch-based direction from this side to
+                //  nbr side
                 virtual void reverseTransformDirection
                 (
                     vector& d,

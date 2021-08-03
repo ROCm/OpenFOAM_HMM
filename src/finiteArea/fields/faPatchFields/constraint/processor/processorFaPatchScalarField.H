@@ -51,6 +51,8 @@ void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField&,
     const scalarField& coeffs,
     const direction,
@@ -63,6 +65,8 @@ void processorFaPatchField<scalar>::updateInterfaceMatrix
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField&,
     const scalarField& coeffs,
     const direction,

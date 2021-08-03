@@ -97,6 +97,15 @@ public:
 
     // Member functions
 
+//         // Implicit treatment functions
+//
+//             //- Return number of new internal sub-faces and new proc faces
+//             virtual void newInternalProcFaces(label&, label&) const;
+//
+//             //- Return collocated faces
+//             virtual refPtr<labelListList> mapCollocatedFaces() const;
+
+
         // Access
 
             //- Return local reference cast into the cyclic patch
@@ -169,9 +178,9 @@ public:
                 );
             }
 
-            //- Return true if this patch is coupled. This is equivalent
-            //- to the coupledPolyPatch::coupled() if parallel running or
-            //- both sides present, false otherwise
+            //- Return true if this patch is coupled.
+            //  This is equivalent to coupledPolyPatch::coupled()
+            //  if parallel running or both sides present, false otherwise
             virtual bool coupled() const;
 
             //- Return delta (P to N) vectors across coupled patch
@@ -214,12 +223,21 @@ public:
                 const labelUList& internalData
             ) const;
 
+            //- Return the values of the given internal data adjacent to
+            //- the interface as a field using a mapping faceCell
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData,
+                const labelUList& faceCells
+            ) const;
+
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
                 const labelUList& internalData
             ) const;
+
 };
 
 

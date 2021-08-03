@@ -16,13 +16,21 @@
 
         fvOptions.constrain(hEqn);
 
-        hEqn.solve();
+        if (coupled)
+        {
+            fvMatrixAssemblyPtr->addFvMatrix(hEqn);
+        }
+        else
+        {
+            Info<< "\nSolving for solid region "
+                << solidRegions[i].name() << endl;
 
-        fvOptions.correct(h);
+            hEqn.solve();
+            fvOptions.correct(h);
+            thermo.correct();
+
+            Info<< "Min/max T:" << min(thermo.T()).value() << ' '
+                << max(thermo.T()).value() << endl;
+        }
     }
-
-    thermo.correct();
-
-    Info<< "Min/max T:" << min(thermo.T()).value() << ' '
-        << max(thermo.T()).value() << endl;
 }

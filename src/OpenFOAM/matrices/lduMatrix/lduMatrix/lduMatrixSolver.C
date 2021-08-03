@@ -204,13 +204,13 @@ Foam::solveScalarField::cmptType Foam::lduMatrix::solver::normFactor
     // --- Calculate A dot reference value of psi
     matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
 
-    tmpField *= gAverage(psi, matrix_.lduMesh_.comm());
+    tmpField *= gAverage(psi, matrix_.mesh().comm());
 
     return
         gSum
         (
             (mag(Apsi - tmpField) + mag(source - tmpField))(),
-            matrix_.lduMesh_.comm()
+            matrix_.mesh().comm()
         )
       + solverPerformance::small_;
 

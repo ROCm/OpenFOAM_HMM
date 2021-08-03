@@ -524,6 +524,9 @@ public:
                 const bool forceUpdate = false
             ) const;
 
+            //- Is it owner
+            inline bool owner() const;
+
             //- Return a pointer to the AMI projection surface
             const autoPtr<Foam::searchableSurface>& surfPtr() const;
 
@@ -551,6 +554,7 @@ public:
                 const label facei,
                 const polyMesh::cellDecomposition
             );
+
 
         // For database storage
 

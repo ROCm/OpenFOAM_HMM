@@ -12,8 +12,10 @@
 
             #include "UEqn.H"
             #include "EEqn.H"
-            #include "pEqn.H"
-
-            turb.correct();
+            if (!coupled)
+            {
+                #include "pEqn.H"
+                turb.correct();
+            }
         }
     }

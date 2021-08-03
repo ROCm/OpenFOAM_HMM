@@ -166,7 +166,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
 Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
 (
-    const Pstream::commsTypes,
+    const Pstream::commsTypes commsType,
     const labelUList& iF
 ) const
 {

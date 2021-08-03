@@ -21,6 +21,8 @@ PtrList<dimensionedScalar> rhoMin(fluidRegions.size());
 PtrList<IOMRFZoneList> MRFfluid(fluidRegions.size());
 PtrList<fv::options> fluidFvOptions(fluidRegions.size());
 
+PtrList<fvVectorMatrix> UEqFluid(fluidRegions.size());
+
 const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
 
 // Populate fluid field pointer lists
@@ -220,6 +222,12 @@ forAll(fluidRegions, i)
     (
         i,
         new fv::options(fluidRegions[i])
+    );
+
+    UEqFluid.set
+    (
+        i,
+        new fvVectorMatrix(UFluid[i], dimForce)
     );
 
     turbulence[i].validate();

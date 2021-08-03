@@ -31,6 +31,7 @@ License
 #include "volFields.H"
 #include "basicThermo.H"
 
+#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,6 +47,7 @@ mixedEnergyFvPatchScalarField
     valueFraction() = 0.0;
     refValue() = 0.0;
     refGrad() = 0.0;
+    source() = 0.0;
 }
 
 
@@ -103,7 +105,6 @@ void Foam::mixedEnergyFvPatchScalarField::updateCoeffs()
     {
         return;
     }
-
     const basicThermo& thermo = basicThermo::lookupThermo(*this);
     const label patchi = patch().index();
 
@@ -128,6 +129,64 @@ void Foam::mixedEnergyFvPatchScalarField::updateCoeffs()
     mixedFvPatchScalarField::updateCoeffs();
 }
 
+
+void Foam::mixedEnergyFvPatchScalarField::manipulateMatrix
+(
+    fvMatrix<scalar>& matrix,
+    const label mat,
+    const direction cmpt
+)
+{
+    const basicThermo& thermo = basicThermo::lookupThermo(*this);
+
+    label index = this->patch().index();
+
+    const label globalPatchID =
+        matrix.lduMeshAssembly().patchLocalToGlobalMap()[mat][index];
+
+    const mixedFvPatchField<scalar>& fPatch =
+        refCast<const mixedFvPatchField>(thermo.T().boundaryField()[index]);
+
+    const Field<scalar> intCoeffsCmpt
+    (
+        matrix.internalCoeffs()[globalPatchID].component(cmpt)
+    );
+
+    const scalarField sourceCorr(fPatch.source());
+
+    const labelUList& u = matrix.lduAddr().upperAddr();
+    const labelUList& l = matrix.lduAddr().lowerAddr();
+
+    const labelList& faceMap =
+        matrix.lduMeshAssembly().faceBoundMap()[mat][index];
+
+    forAll(faceMap, j)
+    {
+        label globalFaceI = faceMap[j];
+
+        if (globalFaceI != -1)
+        {
+            const scalar intCorr = -intCoeffsCmpt[j];
+            const scalar srcCorr = -sourceCorr[j];
+
+            if (this->patch().patch().masterImplicit())
+            {
+                matrix.diag()[u[globalFaceI]] -= intCorr;
+                if (matrix.asymmetric())
+                {
+                    matrix.lower()[globalFaceI] += intCorr;
+                }
+                matrix.source()[u[globalFaceI]] += srcCorr;
+            }
+            else
+            {
+                matrix.diag()[l[globalFaceI]] -= intCorr;
+                matrix.upper()[globalFaceI] += intCorr;
+                matrix.source()[l[globalFaceI]] += srcCorr;
+            }
+        }
+    }
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -233,5 +233,4 @@ inline const Foam::mapDistribute& Foam::AMIInterpolation::tgtMap() const
     return *tgtMapPtr_;
 }
 
-
 // ************************************************************************* //

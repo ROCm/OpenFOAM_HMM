@@ -48,8 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// Forward declarations
 class lduMatrix;
 
 /*---------------------------------------------------------------------------*\
@@ -101,6 +100,8 @@ public:
             (
                 Field<Type>&,
                 const bool add,
+                const lduAddressing&,
+                const label interfacei,
                 const Field<Type>&,
                 const scalarField&,
                 const Pstream::commsTypes commsType
@@ -115,6 +116,8 @@ public:
             (
                 Field<Type>&,
                 const bool add,
+                const lduAddressing&,
+                const label interfacei,
                 const Field<Type>&,
                 const scalarField&,
                 const Pstream::commsTypes commsType

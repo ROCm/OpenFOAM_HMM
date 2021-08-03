@@ -57,24 +57,17 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
 class fvPatchFieldMapper;
 class volMesh;
 
+template<class Type> class fvPatchField;
+template<class Type> class calculatedFvPatchField;
+template<class Type> class fvMatrix;
 
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class fvPatchField;
-
-template<class Type>
-class calculatedFvPatchField;
-
-template<class Type>
-class fvMatrix;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
@@ -109,6 +102,9 @@ class fvPatchField
         //  to be applied to constraint patches by providing the constraint
         //  patch type as 'patchType'
         word patchType_;
+
+        //- Use implicit formulation
+        bool useImplicit_;
 
 
 public:
@@ -306,7 +302,22 @@ public:
     virtual ~fvPatchField<Type>() = default;
 
 
-    // Member functions
+    // Member Functions
+
+        // Implicit Functions
+
+            //- Use implicit formulation for coupled patches only
+            bool useImplicit() const
+            {
+                return useImplicit_;
+            }
+
+            //- Non-const access to useImplicit
+            bool& useImplicit()
+            {
+                return useImplicit_;
+            }
+
 
         // Attributes
 
@@ -381,7 +392,6 @@ public:
             {
                 return manipulatedMatrix_;
             }
-
 
         // Mapping functions
 
@@ -525,6 +535,14 @@ public:
             (
                 fvMatrix<Type>& matrix,
                 const scalarField& weights
+            );
+
+            //- Manipulate fvMatrix
+            virtual void manipulateMatrix
+            (
+                fvMatrix<Type>& matrix,
+                const label iMatrix,
+                const direction cmp
             );
 
 

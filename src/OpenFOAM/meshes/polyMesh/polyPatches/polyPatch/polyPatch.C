@@ -252,6 +252,18 @@ Foam::polyPatch::polyPatch(const polyPatch& p)
 {}
 
 
+Foam::polyPatch::polyPatch
+(
+    const polyPatch& p,
+    const labelList& faceCells
+)
+:
+    polyPatch(p)
+{
+    faceCellsPtr_ = new labelList::subList(faceCells, faceCells.size());
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::polyPatch::~polyPatch()

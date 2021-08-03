@@ -11,6 +11,7 @@ else
     phiHbyA += MRF.zeroFilter(fvc::interpolate(rAU));
 }
 
+
 MRF.makeRelative(phiHbyA);
 
 if (p.needReference())

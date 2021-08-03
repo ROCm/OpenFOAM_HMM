@@ -348,7 +348,7 @@ void kinematicSingleLayer::solveThickness
 (
     const volScalarField& pu,
     const volScalarField& pp,
-    const fvVectorMatrix& UEqn
+    fvVectorMatrix& UEqn
 )
 {
     DebugInFunction << endl;
@@ -893,13 +893,14 @@ void kinematicSingleLayer::evolveRegion()
         tmp<volScalarField> tpu(this->pu());
 
         // Solve for momentum for U_
-        tmp<fvVectorMatrix> UEqn = solveMomentum(tpu(), tpp());
+        tmp<fvVectorMatrix> tUEqn = solveMomentum(tpu(), tpp());
+        fvVectorMatrix& UEqn = tUEqn.ref();
 
         // Film thickness correction loop
         for (int corr=1; corr<=nCorr_; corr++)
         {
             // Solve thickness for delta_
-            solveThickness(tpu(), tpp(), UEqn());
+            solveThickness(tpu(), tpp(), UEqn);
         }
     }
 

@@ -82,6 +82,8 @@ void Foam::heThermo<BasicThermo, MixtureType>::init
             T.boundaryField()[patchi],
             patchi
         );
+
+        heBf[patchi].useImplicit() = T.boundaryField()[patchi].useImplicit();
     }
 
     this->heBoundaryCorrection(he);

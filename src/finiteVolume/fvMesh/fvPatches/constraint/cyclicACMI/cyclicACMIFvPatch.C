@@ -168,6 +168,68 @@ Foam::cyclicACMIFvPatch::cyclicACMIFvPatch
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+// void Foam::cyclicACMIFvPatch::newInternalProcFaces
+// (
+//     label& newFaces,
+//     label& newProcFaces
+// ) const
+// {
+//     const List<labelList>& addSourceFaces =
+//         cyclicACMIPolyPatch_.AMI().srcAddress();
+//
+//     const scalarField& fMask = cyclicACMIPolyPatch_.srcMask();
+//
+//     // Add new faces as many weights for AMI
+//     forAll (addSourceFaces, faceI)
+//     {
+//         if (fMask[faceI] > cyclicACMIPolyPatch_.tolerance_)
+//         {
+//             const labelList& nbrFaceIs = addSourceFaces[faceI];
+//
+//             forAll (nbrFaceIs, j)
+//             {
+//                 label nbrFaceI = nbrFaceIs[j];
+//
+//                 if (nbrFaceI < neighbPatch().size())
+//                 {
+//                     // local faces
+//                     newFaces++;
+//                 }
+//                 else
+//                 {
+//                     // Proc faces
+//                     newProcFaces++;
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+// Foam::refPtr<Foam::labelListList>
+// Foam::cyclicACMIFvPatch::mapCollocatedFaces() const
+// {
+//     const scalarField& fMask = cyclicACMIPolyPatch_.srcMask();
+//     const labelListList& srcFaces = cyclicACMIPolyPatch_.AMI().srcAddress();
+//     labelListList dOverFaces;
+//
+//     dOverFaces.setSize(srcFaces.size());
+//     forAll (dOverFaces, faceI)
+//     {
+//         if (fMask[faceI] > cyclicACMIPolyPatch_.tolerance_)
+//         {
+//             dOverFaces[faceI].setSize(srcFaces[faceI].size());
+//
+//             forAll (dOverFaces[faceI], subFaceI)
+//             {
+//                 dOverFaces[faceI][subFaceI] = srcFaces[faceI][subFaceI];
+//             }
+//         }
+//     }
+//     return refPtr<labelListList>(new labelListList(dOverFaces));
+// }
+
+
 bool Foam::cyclicACMIFvPatch::coupled() const
 {
     return Pstream::parRun() || (this->size() && neighbFvPatch().size());
@@ -224,6 +286,16 @@ Foam::tmp<Foam::labelField> Foam::cyclicACMIFvPatch::interfaceInternalField
 ) const
 {
     return patchInternalField(internalData);
+}
+
+
+Foam::tmp<Foam::labelField> Foam::cyclicACMIFvPatch::interfaceInternalField
+(
+    const labelUList& internalData,
+    const labelUList& faceCells
+) const
+{
+    return patchInternalField(internalData, faceCells);
 }
 
 
@@ -343,6 +415,5 @@ void Foam::cyclicACMIFvPatch::movePoints()
         cyclicACMIPolyPatch_.setUpToDate(areaTime_);
     }
 }
-
 
 // ************************************************************************* //

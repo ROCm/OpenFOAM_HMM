@@ -197,9 +197,23 @@ Foam::calculatedProcessorGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    tmp<Field<label>> tfld(receive<label>(commsType, this->size()));
+    tmp<labelField> tfld(receive<label>(commsType, this->size()));
 
     return tfld;
+}
+
+
+Foam::tmp<Foam::labelField>
+Foam::calculatedProcessorGAMGInterface::internalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const labelUList& iF,
+    const labelUList& faceCells
+) const
+{
+    NotImplemented;
+
+    return tmp<labelField>::New(this->size(), Zero);
 }
 
 
