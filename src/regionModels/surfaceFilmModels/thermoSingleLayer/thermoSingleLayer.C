@@ -625,7 +625,8 @@ void thermoSingleLayer::evolveRegion()
         tmp<volScalarField> tpp(this->pp());
 
         // Solve for momentum for U_
-        tmp<fvVectorMatrix> UEqn = solveMomentum(tpu(), tpp());
+        tmp<fvVectorMatrix> tUEqn = solveMomentum(tpu(), tpp());
+        fvVectorMatrix& UEqn = tUEqn.ref();
 
         // Solve energy for hs_ - also updates thermo
         solveEnergy();
@@ -634,7 +635,7 @@ void thermoSingleLayer::evolveRegion()
         for (int corr=1; corr<=nCorr_; corr++)
         {
             // Solve thickness for delta_
-            solveThickness(tpu(), tpp(), UEqn());
+            solveThickness(tpu(), tpp(), UEqn);
         }
     }
 

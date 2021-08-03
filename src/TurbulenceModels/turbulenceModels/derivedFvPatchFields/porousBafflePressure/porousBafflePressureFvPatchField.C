@@ -130,8 +130,7 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
         return;
     }
 
-    const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     const fvsPatchField<scalar>& phip =
         patch().patchField<surfaceScalarField, scalar>(phi);

@@ -191,13 +191,24 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
 }
 
 
+void Foam::processorGAMGInterface::initInternalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const labelUList& iF,
+    const labelUList& faceCells
+) const
+{
+    send(commsType, interfaceInternalField(iF, faceCells)());
+}
+
+
 Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList& iF
 ) const
 {
-    tmp<Field<label>> tfld(receive<label>(commsType, this->size()));
+    tmp<labelField> tfld(receive<label>(commsType, this->size()));
 
     return tfld;
 }

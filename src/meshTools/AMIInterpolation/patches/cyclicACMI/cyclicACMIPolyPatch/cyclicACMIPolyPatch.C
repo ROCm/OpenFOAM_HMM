@@ -740,6 +740,65 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::cyclicACMIPolyPatch::newInternalProcFaces
+(
+    label& newFaces,
+    label& newProcFaces
+) const
+{
+    const List<labelList>& addSourceFaces = AMI().srcAddress();
+    const scalarField& fMask = srcMask();
+
+    // Add new faces as many weights for AMI
+    forAll (addSourceFaces, faceI)
+    {
+        if (fMask[faceI] > tolerance_)
+        {
+            const labelList& nbrFaceIs = addSourceFaces[faceI];
+
+            forAll (nbrFaceIs, j)
+            {
+                label nbrFaceI = nbrFaceIs[j];
+
+                if (nbrFaceI < neighbPatch().size())
+                {
+                    // local faces
+                    newFaces++;
+                }
+                else
+                {
+                    // Proc faces
+                    newProcFaces++;
+                }
+            }
+        }
+    }
+}
+
+
+Foam::refPtr<Foam::labelListList> Foam::cyclicACMIPolyPatch::mapCollocatedFaces() const
+{
+    const scalarField& fMask = srcMask();
+    const labelListList& srcFaces = AMI().srcAddress();
+    labelListList dOverFaces;
+
+    dOverFaces.setSize(srcFaces.size());
+    forAll (dOverFaces, faceI)
+    {
+        if (fMask[faceI] > tolerance_)
+        {
+            dOverFaces[faceI].setSize(srcFaces[faceI].size());
+
+            forAll (dOverFaces[faceI], subFaceI)
+            {
+                dOverFaces[faceI][subFaceI] = srcFaces[faceI][subFaceI];
+            }
+        }
+    }
+    return refPtr<labelListList>(new labelListList(dOverFaces));
+}
+
+
 const Foam::cyclicACMIPolyPatch& Foam::cyclicACMIPolyPatch::neighbPatch() const
 {
     const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];

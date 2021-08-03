@@ -193,6 +193,8 @@ public:
             (
                 solveScalarField& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction,
@@ -204,6 +206,8 @@ public:
             (
                 Field<Type>& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const Field<Type>&,
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType

@@ -214,6 +214,8 @@ public:
             (
                 solveScalarField& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
@@ -225,6 +227,8 @@ public:
             (
                 solveScalarField& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
@@ -236,6 +240,8 @@ public:
             (
                 Field<Type>& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const Field<Type>& psiInternal,
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType
@@ -246,10 +252,13 @@ public:
             (
                 Field<Type>& result,
                 const bool add,
+                const lduAddressing& lduAddr,
+                const label patchId,
                 const Field<Type>& psiInternal,
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType
             ) const;
+            
 
 
         //- Processor coupled interface functions

@@ -3,6 +3,7 @@ EXE_INC = \
     -I./fluid \
     -I./solid \
     -I../solid \
+    -I./../include \
     -I$(LIB_SRC)/finiteVolume/cfdTools \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -35,3 +36,4 @@ EXE_LIBS = \
     -lregionModels \
     -lsampling \
     -lregionFaModels
+

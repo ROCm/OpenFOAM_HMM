@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,8 @@ SourceFiles
 #include "dimensionedTypes.H"
 #include "zero.H"
 #include "className.H"
+#include "lduPrimitiveMeshAssembly.H"
+#include "lduMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,6 +110,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> operator&
 );
 
 
+
 /*---------------------------------------------------------------------------*\
                            Class fvMatrix Declaration
 \*---------------------------------------------------------------------------*/
@@ -123,6 +126,18 @@ class fvMatrix
         //- Const reference to field
         //  Converted into a non-const reference at the point of solution.
         const GeometricField<Type, fvPatchField, volMesh>& psi_;
+
+        //- Originating fvMatrices when assembling matrices. Empty if not used.
+        PtrList<fvMatrix<Type>> subMatrices_;
+
+        //- Is the fvMatrix using implicit formulation
+        bool useImplicit_;
+
+        //- Name of the lduAssembly
+        word lduAssemblyName_;
+
+        //- Number of fvMatrices added to this
+        label nMatrix_;
 
         //- Dimension set
         dimensionSet dimensions_;
@@ -147,6 +162,7 @@ protected:
 
     //- Declare friendship with the fvSolver class
     friend class fvSolver;
+
 
     // Protected Member Functions
 
@@ -183,6 +199,12 @@ protected:
             const tmp<Field<Type2>>& tpf,
             Field<Type2>& intf
         ) const;
+
+
+        // Implicit helper functions
+
+            //- Name the implicit assembly addressing
+            label checkImplicit(const label fieldI = 0);
 
 
         // Matrix completion functionality
@@ -285,10 +307,121 @@ public:
 
         // Access
 
-            const GeometricField<Type, fvPatchField, volMesh>& psi() const
-            {
-                return psi_;
-            }
+            // Coupling
+
+                label nMatrices() const
+                {
+                    return (nMatrix_ == 0 ? 1 : nMatrix_);
+                }
+
+                const fvMatrix<Type>& matrix(const label i) const
+                {
+                    return (nMatrix_ == 0 ? *this : subMatrices_[i]);
+                }
+
+                fvMatrix<Type>& matrix(const label i)
+                {
+                    return (nMatrix_ == 0 ? *this : subMatrices_[i]);
+                }
+
+                label globalPatchID
+                (
+                    const label fieldi,
+                    const label patchi
+                ) const
+                {
+                    if (!lduMeshPtr())
+                    {
+                        return patchi;
+                    }
+                    else
+                    {
+                        return lduMeshPtr()->patchMap()[fieldi][patchi];
+                    }
+                }
+
+                //- Transfer lower, upper, diag and source to this fvMatrix
+                void transferFvMatrixCoeffs();
+
+                //- Create or update ldu assembly
+                void createOrUpdateLduPrimitiveAssembly();
+
+                //- Access to lduPrimitiveMeshAssembly
+                lduPrimitiveMeshAssembly* lduMeshPtr();
+
+                //- Const Access to lduPrimitiveMeshAssembly
+                const lduPrimitiveMeshAssembly* lduMeshPtr() const;
+
+                //- Manipulate matrix
+                void manipulateMatrix(direction cmp);
+
+                //- Manipulate boundary/internal coeffs for coupling
+                void setBounAndInterCoeffs();
+
+                //- Set interfaces
+                void setInterfaces
+                (
+                    lduInterfaceFieldPtrsList&,
+                    PtrDynList<lduInterfaceField>& newInterfaces
+                );
+
+                //- Add internal and boundary contribution to local patches
+                void mapContributions
+                (
+                    label fieldi,
+                    const FieldField<Field, Type>& fluxContrib,
+                    FieldField<Field, Type>& contrib,
+                    bool internal
+                ) const;
+
+                //- Return optional lduAdressing
+                const lduPrimitiveMeshAssembly& lduMeshAssembly()
+                {
+                    return *lduMeshPtr();
+                }
+
+                //- Return psi
+                const GeometricField<Type, fvPatchField, volMesh>& psi
+                (
+                    const label i = 0
+                ) const
+                {
+                    return
+                    (
+                        (i == 0 && nMatrix_ == 0) ? psi_ : matrix(i).psi()
+                    );
+                }
+
+
+                GeometricField<Type, fvPatchField, volMesh>& psi
+                (
+                    const label i = 0
+                )
+                {
+                    return
+                    (
+                        (i == 0 && nMatrix_ == 0)
+                      ? const_cast
+                        <
+                            GeometricField<Type, fvPatchField, volMesh>&
+                        >(psi_)
+                      : const_cast
+                        <
+                            GeometricField<Type, fvPatchField, volMesh>&
+                        >
+                        (
+                            matrix(i).psi()
+                        )
+                    );
+                }
+
+                //- Clear multiple fvMatrices
+                void clear()
+                {
+                    subMatrices_.clear();
+                    nMatrix_ = 0;
+                }
+
 
             const dimensionSet& dimensions() const
             {
@@ -332,7 +465,6 @@ public:
             {
                 return boundaryCoeffs_;
             }
-
 
             //- Declare return type of the faceFluxCorrectionPtr() function
             typedef GeometricField<Type, fvsPatchField, surfaceMesh>
@@ -404,6 +536,9 @@ public:
                 const direction cmpt,
                 const scalar value
             );
+
+            //- Add fvMatrix
+            void addFvMatrix(fvMatrix<Type>& matrix);
 
             //- Relax matrix (for steady-state solution).
             //  alpha = 1 : diagonally equal

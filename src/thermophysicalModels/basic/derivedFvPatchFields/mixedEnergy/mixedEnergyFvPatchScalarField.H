@@ -142,6 +142,14 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
+            //- Manipulate matrix
+            virtual void manipulateMatrix
+            (
+                fvMatrix<scalar>& m,
+                const label iMatrix,
+                const direction cmpt
+            );
 };
 
 

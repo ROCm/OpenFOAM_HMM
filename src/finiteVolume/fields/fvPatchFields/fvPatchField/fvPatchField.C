@@ -46,7 +46,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(word::null)
+    patchType_(word::null),
+    useImplicit_(false)
 {}
 
 
@@ -63,7 +64,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(word::null)
+    patchType_(word::null),
+    useImplicit_(false)
 {}
 
 
@@ -80,7 +82,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(patchType)
+    patchType_(patchType),
+    useImplicit_(false)
 {}
 
 
@@ -97,7 +100,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(word::null)
+    patchType_(word::null),
+    useImplicit_(false)
 {}
 
 
@@ -115,7 +119,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(dict.getOrDefault<word>("patchType", word::null))
+    patchType_(dict.getOrDefault<word>("patchType", word::null)),
+    useImplicit_(dict.getOrDefault<bool>("useImplicit", false))
 {
     if (valueRequired)
     {
@@ -150,7 +155,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(ptf.patchType_)
+    patchType_(ptf.patchType_),
+    useImplicit_(ptf.useImplicit_)
 {
     // For unmapped faces set to internal field value (zero-gradient)
     if (notNull(iF) && mapper.hasUnmapped())
@@ -172,7 +178,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(ptf.internalField_),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(ptf.patchType_)
+    patchType_(ptf.patchType_),
+    useImplicit_(ptf.useImplicit_)
 {}
 
 
@@ -188,7 +195,8 @@ Foam::fvPatchField<Type>::fvPatchField
     internalField_(iF),
     updated_(false),
     manipulatedMatrix_(false),
-    patchType_(ptf.patchType_)
+    patchType_(ptf.patchType_),
+    useImplicit_(ptf.useImplicit_)
 {}
 
 
@@ -361,9 +369,22 @@ void Foam::fvPatchField<Type>::manipulateMatrix
 
 
 template<class Type>
+void Foam::fvPatchField<Type>::manipulateMatrix
+(
+    fvMatrix<Type>& matrix,
+    const label iMatrix,
+    const direction cmp
+)
+{
+    manipulatedMatrix_ = true;
+}
+
+
+template<class Type>
 void Foam::fvPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
+    os.writeEntryIfDifferent<bool>("useImplicit", false, useImplicit_);
 
     if (patchType_.size())
     {
@@ -585,6 +606,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvPatchField<Type>& ptf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "fvPatchFieldNew.C"
+#include "fvPatchFieldNew.C"
 
 // ************************************************************************* //

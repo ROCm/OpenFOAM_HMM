@@ -357,6 +357,15 @@ public:
             template<class Type>
             tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
 
+            //- Return given internal field next to patch as patch field
+            //  providing addressing
+            template<class Type>
+            tmp<Foam::Field<Type>> patchInternalField
+            (
+                const UList<Type>& f,
+                const labelUList& edgeFaces
+            ) const;
+
             //- Return the corresponding patchField of the named field
             template<class GeometricField, class Type>
             const typename GeometricField::Patch& patchField

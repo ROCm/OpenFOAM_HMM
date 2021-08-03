@@ -23,8 +23,7 @@ oversetAdjustPhi/oversetAdjustPhi.C
 
 regionsToCell/regionsToCell.C
 
-lduPrimitiveProcessorInterface/lduPrimitiveProcessorInterface.C
-lduPrimitiveProcessorInterface/calculatedProcessorFvPatchFields.C
+
 lduPrimitiveProcessorInterface/GAMG/calculatedProcessorGAMGInterface.C
 lduPrimitiveProcessorInterface/GAMG/calculatedProcessorGAMGInterfaceField.C
 

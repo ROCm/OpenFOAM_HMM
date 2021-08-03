@@ -22,6 +22,8 @@
     IOMRFZoneList& MRF = MRFfluid[i];
     fv::options& fvOptions = fluidFvOptions[i];
 
+    fvVectorMatrix& UEqn = UEqFluid[i];
+
     const dimensionedScalar initialMass
     (
         "initialMass",

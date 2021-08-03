@@ -162,7 +162,7 @@ public:
         // I/O
 
             //- Write to stream
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 };
 
 

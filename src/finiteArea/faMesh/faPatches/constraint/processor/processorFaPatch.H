@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -264,10 +265,18 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData
+            ) const;
+
+            //- Return the values of the given internal data adjacent to
+            //- the interface as a field using edgeFaces
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData,
+                const labelUList& edgeFaces
             ) const;
 
             //- Initialise interface data transfer
@@ -298,8 +307,16 @@ public:
                 const labelUList& internalData
             ) const;
 
+            //- Return neighbour field using mapping
+            virtual tmp<labelField> internalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const labelUList& internalData,
+                const labelUList& edgeCells
+            ) const;
+
             //- Write the patch data as a dictionary
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 };
 
 

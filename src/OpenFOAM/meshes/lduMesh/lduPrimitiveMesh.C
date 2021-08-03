@@ -41,22 +41,23 @@ namespace Foam
     //- Less operator for pairs of \<processor\>\<index\>
     class procLess
     {
-        const labelPairList& lst_;
+        const labelPairList& list_;
 
     public:
 
-        procLess(const labelPairList& lst)
+        procLess(const labelPairList& list)
         :
-            lst_(lst)
+            list_(list)
         {}
 
         bool operator()(const label a, const label b)
         {
-            return lst_[a].first() < lst_[b].first();
+            return list_[a].first() < list_[b].first();
         }
     };
 
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -85,7 +86,7 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
         }
     }
 
-    for (label facei=1; facei < l.size(); facei++)
+    for (label facei=1; facei < l.size(); ++facei)
     {
         if (l[facei-1] > l[facei])
         {
@@ -110,6 +111,132 @@ void Foam::lduPrimitiveMesh::checkUpperTriangular
             }
         }
     }
+}
+
+
+Foam::labelListList Foam::lduPrimitiveMesh::globalCellCells
+(
+    const lduMesh& mesh,
+    const globalIndex& globalNumbering
+)
+{
+    const lduAddressing& addr = mesh.lduAddr();
+    lduInterfacePtrsList interfaces = mesh.interfaces();
+
+    const labelList globalIndices
+    (
+        identity
+        (
+            addr.size(),
+            globalNumbering.localStart(UPstream::myProcNo(mesh.comm()))
+        )
+    );
+
+    // Get the interface cells
+    PtrList<labelList> nbrGlobalCells(interfaces.size());
+    {
+        // Initialise transfer of restrict addressing on the interface
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                interfaces[inti].initInternalFieldTransfer
+                (
+                    Pstream::commsTypes::nonBlocking,
+                    globalIndices
+                );
+            }
+        }
+
+        if (Pstream::parRun())
+        {
+            Pstream::waitRequests();
+        }
+
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                nbrGlobalCells.set
+                (
+                    inti,
+                    new labelList
+                    (
+                        interfaces[inti].internalFieldTransfer
+                        (
+                            Pstream::commsTypes::nonBlocking,
+                            globalIndices
+                        )
+                    )
+                );
+            }
+        }
+    }
+
+
+    // Scan the neighbour list to find out how many times the cell
+    // appears as a neighbour of the face. Done this way to avoid guessing
+    // and resizing list
+    labelList nNbrs(addr.size(), Zero);
+
+    const labelUList& nbr = addr.upperAddr();
+    const labelUList& own = addr.lowerAddr();
+
+    {
+        forAll(nbr, facei)
+        {
+            nNbrs[nbr[facei]]++;
+            nNbrs[own[facei]]++;
+        }
+
+        forAll(interfaces, inti)
+        {
+            if (interfaces.set(inti))
+            {
+                for (const label celli : interfaces[inti].faceCells())
+                {
+                    nNbrs[celli]++;
+                }
+            }
+        }
+    }
+
+
+    // Create cell-cells addressing
+    labelListList cellCells(addr.size());
+
+    forAll(cellCells, celli)
+    {
+        cellCells[celli].setSize(nNbrs[celli], -1);
+    }
+
+    // Reset the list of number of neighbours to zero
+    nNbrs = 0;
+
+    // Scatter the neighbour faces
+    forAll(nbr, facei)
+    {
+        const label c0 = own[facei];
+        const label c1 = nbr[facei];
+
+        cellCells[c0][nNbrs[c0]++] = globalIndices[c1];
+        cellCells[c1][nNbrs[c1]++] = globalIndices[c0];
+    }
+    forAll(interfaces, inti)
+    {
+        if (interfaces.set(inti))
+        {
+            const labelUList& faceCells = interfaces[inti].faceCells();
+
+            forAll(faceCells, facei)
+            {
+                const label c0 = faceCells[facei];
+                cellCells[c0][nNbrs[c0]++] = nbrGlobalCells[inti][facei];
+            }
+        }
+    }
+
+    return cellCells;
 }
 
 
@@ -164,7 +291,7 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
     labelList cellToFaces(offsets.last());
     forAll(upper, facei)
     {
-        label celli = lower[facei];
+        const label celli = lower[facei];
         cellToFaces[nNbrs[celli]++] = facei;
     }
 
@@ -172,17 +299,19 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
 
     labelList oldToNew(lower.size());
 
-    labelList order;
-    labelList nbr;
+    DynamicList<label> order;
+    DynamicList<label> nbr;
 
     label newFacei = 0;
 
-    for (label celli = 0; celli < nCells; celli++)
+    for (label celli = 0; celli < nCells; ++celli)
     {
-        label startOfCell = offsets[celli];
-        label nNbr = offsets[celli+1] - startOfCell;
+        const label startOfCell = offsets[celli];
+        const label nNbr = offsets[celli+1] - startOfCell;
 
-        nbr.setSize(nNbr);
+        nbr.resize(nNbr);
+        order.resize(nNbr);
+
         forAll(nbr, i)
         {
             nbr[i] = upper[cellToFaces[offsets[celli]+i]];
@@ -216,7 +345,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     comm_(comm)
 {}
 
-
 void Foam::lduPrimitiveMesh::addInterfaces
 (
     lduInterfacePtrsList& interfaces,
@@ -240,6 +368,16 @@ void Foam::lduPrimitiveMesh::addInterfaces
 
 Foam::lduPrimitiveMesh::lduPrimitiveMesh
 (
+    const label nCells
+)
+:
+    lduAddressing(nCells),
+    comm_(0)
+{}
+
+
+Foam::lduPrimitiveMesh::lduPrimitiveMesh
+(
     const label nCells,
     labelList& l,
     labelList& u,
@@ -251,7 +389,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     lduAddressing(nCells),
     lowerAddr_(l, true),
     upperAddr_(u, true),
-    primitiveInterfaces_(0),
+    primitiveInterfaces_(),
     patchSchedule_(ps),
     comm_(comm)
 {
@@ -286,10 +424,6 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 )
 :
     lduAddressing(myMesh.lduAddr().size() + totalSize(otherMeshes)),
-    lowerAddr_(0),
-    upperAddr_(0),
-    interfaces_(0),
-    patchSchedule_(0),
     comm_(comm)
 {
     const label currentComm = myMesh.comm();
@@ -338,7 +472,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // Cells get added in order.
     cellOffsets.setSize(nMeshes+1);
     cellOffsets[0] = 0;
-    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
+    for (label procMeshI = 0; procMeshI < nMeshes; ++procMeshI)
     {
         const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
 
@@ -351,7 +485,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // Faces initially get added in order, sorted later
     labelList internalFaceOffsets(nMeshes+1);
     internalFaceOffsets[0] = 0;
-    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
+    for (label procMeshI = 0; procMeshI < nMeshes; ++procMeshI)
     {
         const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
 
@@ -380,7 +514,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     label nOtherInterfaces = 0;
     labelList nCoupledFaces(nMeshes, Zero);
 
-    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
+    for (label procMeshI = 0; procMeshI < nMeshes; ++procMeshI)
     {
         const lduInterfacePtrsList interfaces =
             mesh(myMesh, otherMeshes, procMeshI).interfaces();
@@ -539,7 +673,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     faceOffsets.setSize(nMeshes+1);
     faceOffsets[0] = 0;
     faceMap.setSize(nMeshes);
-    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
+    for (label procMeshI = 0; procMeshI < nMeshes; ++procMeshI)
     {
         const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
         label nInternal = procMesh.lduAddr().lowerAddr().size();
@@ -566,7 +700,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     // Old internal faces and resolved coupled interfaces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
+    for (label procMeshI = 0; procMeshI < nMeshes; ++procMeshI)
     {
         const lduMesh& procMesh = mesh(myMesh, otherMeshes, procMeshI);
 
@@ -961,7 +1095,7 @@ void Foam::lduPrimitiveMesh::gather
         otherMeshes.setSize(procIDs.size()-1);
 
         // Slave meshes
-        for (label i = 1; i < procIDs.size(); i++)
+        for (label i = 1; i < procIDs.size(); ++i)
         {
             //Pout<< "on master :"
             //    << " receiving from slave " << procIDs[i] << endl;

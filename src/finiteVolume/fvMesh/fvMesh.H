@@ -67,6 +67,8 @@ SourceFiles
 #include "className.H"
 #include "SolverPerformance.H"
 
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -309,10 +311,7 @@ public:
 
             //- Return a list of pointers for each patch
             //  with only those pointing to interfaces being set
-            virtual lduInterfacePtrsList interfaces() const
-            {
-                return boundary().interfaces();
-            }
+            virtual lduInterfacePtrsList interfaces() const;
 
             //- Return communicator used for parallel communication
             virtual label comm() const

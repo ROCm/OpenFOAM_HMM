@@ -117,6 +117,17 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         scalar contactRes_;
 
 
+    // Private member functions
+
+        //- Calculate coefficients for assembly matrix
+        tmp<Field<scalar>> coeffs
+        (
+            fvMatrix<scalar>& matrix,
+            const Field<scalar>&,
+            const label
+        ) const;
+
+
 public:
 
     //- Runtime type information
@@ -193,13 +204,22 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
+        //- Manipulate matrix
+        virtual void manipulateMatrix
+        (
+            fvMatrix<scalar>& m,
+            const label iMatrix,
+            const direction cmpt
+        );
+
+
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

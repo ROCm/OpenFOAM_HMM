@@ -26,8 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "fvMatrix.H"
 #include "cyclicFvPatchField.H"
 #include "transformField.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -174,27 +176,36 @@ Foam::cyclicFvPatchField<Type>::neighbourPatchField() const
 }
 
 
+
 template<class Type>
 void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
-    const Pstream::commsTypes
+    const Pstream::commsTypes commsType
 ) const
 {
     const labelUList& nbrFaceCells =
-        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
+        lduAddr.patchAddr
+        (
+            this->cyclicPatch().neighbPatchID()
+        );
 
     solveScalarField pnf(psiInternal, nbrFaceCells);
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
+
+    const labelUList& faceCells = lduAddr.patchAddr(patchId);
+
     // Multiply the field by coefficients and add into the result
-    this->addToInternalField(result, !add, coeffs, pnf);
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 }
 
 
@@ -203,21 +214,28 @@ void Foam::cyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes
 ) const
 {
-    const labelUList& nbrFaceCells =
-        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
+    const labelList& nbrFaceCells =
+        lduAddr.patchAddr
+        (
+            this->cyclicPatch().neighbPatchID()
+        );
 
     Field<Type> pnf(psiInternal, nbrFaceCells);
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf);
 
+    const labelUList& faceCells = lduAddr.patchAddr(patchId);
+
     // Multiply the field by coefficients and add into the result
-    this->addToInternalField(result, !add, coeffs, pnf);
+    this->addToInternalField(result, !add, faceCells, coeffs, pnf);
 }
 
 
@@ -227,5 +245,82 @@ void Foam::cyclicFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
 }
 
+
+template<class Type>
+void Foam::cyclicFvPatchField<Type>::manipulateMatrix
+(
+    fvMatrix<Type>& matrix,
+    const label mat,
+    const direction cmpt
+)
+{
+    if (this->cyclicPatch().owner())
+    {
+        label index = this->patch().index();
+
+        const label globalPatchID =
+            matrix.lduMeshAssembly().patchLocalToGlobalMap()[mat][index];
+
+        const Field<scalar> intCoeffsCmpt
+        (
+            matrix.internalCoeffs()[globalPatchID].component(cmpt)
+        );
+
+        const Field<scalar> boundCoeffsCmpt
+        (
+            matrix.boundaryCoeffs()[globalPatchID].component(cmpt)
+        );
+
+        const labelUList& u = matrix.lduAddr().upperAddr();
+        const labelUList& l = matrix.lduAddr().lowerAddr();
+
+        const labelList& faceMap =
+            matrix.lduMeshAssembly().faceBoundMap()[mat][index];
+
+        forAll (faceMap, faceI)
+        {
+            label globalFaceI = faceMap[faceI];
+
+            const scalar boundCorr = -boundCoeffsCmpt[faceI];
+            const scalar intCorr = -intCoeffsCmpt[faceI];
+
+            matrix.upper()[globalFaceI] += boundCorr;
+            matrix.diag()[u[globalFaceI]] -= boundCorr;
+            matrix.diag()[l[globalFaceI]] -= intCorr;
+
+            if (matrix.asymmetric())
+            {
+                matrix.lower()[globalFaceI] += intCorr;
+            }
+        }
+
+        if (matrix.psi(mat).mesh().fluxRequired(this->internalField().name()))
+        {
+            matrix.internalCoeffs().set
+            (
+                globalPatchID, intCoeffsCmpt*pTraits<Type>::one
+            );
+            matrix.boundaryCoeffs().set
+            (
+                globalPatchID, boundCoeffsCmpt*pTraits<Type>::one
+            );
+
+            const label nbrPathID = this->cyclicPatch().neighbPatchID();
+
+            const label nbrGlobalPatchID =
+                matrix.lduMeshAssembly().patchLocalToGlobalMap()[mat][nbrPathID];
+
+            matrix.internalCoeffs().set
+            (
+                nbrGlobalPatchID, intCoeffsCmpt*pTraits<Type>::one
+
+            );
+            matrix.boundaryCoeffs().set
+            (
+                nbrGlobalPatchID, boundCoeffsCmpt*pTraits<Type>::one
+            );
+        }
+    }
+}
 
 // ************************************************************************* //

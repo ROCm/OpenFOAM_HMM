@@ -129,7 +129,7 @@ Foam::cyclicFaPatchField<Type>::patchNeighbourField() const
     tmp<Field<Type>> tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf.ref();
 
-    label sizeby2 = this->size()/2;
+    const label sizeby2 = this->size()/2;
 
     if (doTransform())
     {
@@ -164,6 +164,8 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -172,7 +174,7 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 {
     solveScalarField pnf(this->size());
 
-    label sizeby2 = this->size()/2;
+    const label sizeby2 = this->size()/2;
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
     for (label facei = 0; facei < sizeby2; ++facei)
@@ -207,6 +209,8 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes commsType
@@ -214,7 +218,7 @@ void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 {
     Field<Type> pnf(this->size());
 
-    label sizeby2 = this->size()/2;
+    const label sizeby2 = this->size()/2;
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
     for (label facei = 0; facei < sizeby2; ++facei)

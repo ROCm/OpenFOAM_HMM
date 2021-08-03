@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,14 +114,7 @@ public:
         //- Return true if running parallel
         virtual bool coupled() const
         {
-            if (Pstream::parRun())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return Pstream::parRun();
         }
 
         const processorPolyPatch& procPolyPatch() const
@@ -153,10 +147,18 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData
+            ) const;
+
+            //- Return the values of the given internal data adjacent to
+            //- the interface as a field using a mapping faceCell
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData,
+                const labelUList& faceCells
             ) const;
 
             //- Inherit initInternalFieldTransfer from coupledFvPatch
@@ -169,12 +171,21 @@ public:
                 const labelUList& internalData
             ) const;
 
+            //- Initialise neighbour field transfer using faceCells map
+            virtual void initInternalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const labelUList& iF,
+                const labelUList& faceCells
+            ) const;
+
             //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
                 const labelUList& internalData
             ) const;
+
 };
 
 

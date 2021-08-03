@@ -142,6 +142,7 @@ $(constraintFvPatchFields)/jumpCyclicAMI/jumpCyclicAMIFvPatchFields.C
 $(constraintFvPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
+$(constraintFvPatchFields)/calculatedProcessor/calculatedProcessorFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
 $(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
@@ -515,5 +516,10 @@ $(fvOptions)/fvOption.C
 $(fvOptions)/fvOptionIO.C
 $(fvOptions)/fvOptionList.C
 $(fvOptions)/fvOptions.C
+
+lduPrimitiveMeshAssembly/AssemblyFvPatches.C
+lduPrimitiveMeshAssembly/lduPrimitiveMeshAssembly.C
+lduPrimitiveMeshAssembly/assemblyFaceAreaPairGAMGAgglomeration/assemblyFaceAreaPairGAMGAgglomeration.C
+
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

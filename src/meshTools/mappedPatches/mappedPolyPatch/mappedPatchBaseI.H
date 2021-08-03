@@ -74,7 +74,7 @@ inline const Foam::word& Foam::mappedPatchBase::samplePatch() const
             FatalErrorInFunction
                 << "Supply either a patchName or a coupleGroup"
                 << " for patch " << patch_.name()
-                << " in region " << patch_.boundaryMesh().mesh().name()
+                << " in region " << patch_.boundaryMesh().mesh().name() << nl
                 << exit(FatalError);
         }
 
@@ -235,6 +235,12 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
     calcAMI();
 
     return *AMIPtr_;
+}
+
+
+inline bool Foam::mappedPatchBase::owner() const
+{
+    return (patch_.boundaryMesh().mesh().name() < sampleRegion());
 }
 
 

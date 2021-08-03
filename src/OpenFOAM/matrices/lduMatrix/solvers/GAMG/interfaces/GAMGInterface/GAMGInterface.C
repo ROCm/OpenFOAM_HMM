@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,13 +78,23 @@ Foam::tmp<Foam::labelField> Foam::GAMGInterface::interfaceInternalField
 }
 
 
+Foam::tmp<Foam::labelField> Foam::GAMGInterface::interfaceInternalField
+(
+    const labelUList& internalData,
+    const labelUList& faceCells
+) const
+{
+    return interfaceInternalField<label>(internalData, faceCells);
+}
+
+
 Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
 (
     const scalarField& fineCoeffs
 ) const
 {
-    tmp<scalarField> tcoarseCoeffs(new scalarField(size(), Zero));
-    scalarField& coarseCoeffs = tcoarseCoeffs.ref();
+    auto tcoarseCoeffs = tmp<scalarField>::New(size(), Zero);
+    auto& coarseCoeffs = tcoarseCoeffs.ref();
 
     if (fineCoeffs.size() != faceRestrictAddressing_.size())
     {

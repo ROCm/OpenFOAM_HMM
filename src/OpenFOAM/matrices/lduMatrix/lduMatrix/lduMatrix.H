@@ -86,7 +86,8 @@ class lduMatrix
     // private data
 
         //- LDU mesh reference
-        const lduMesh& lduMesh_;
+        //const lduMesh& lduMesh_;
+        std::reference_wrapper<const lduMesh> lduMesh_;
 
         //- Coefficients (not including interfaces)
         scalarField *lowerPtr_, *diagPtr_, *upperPtr_;
@@ -569,10 +570,16 @@ public:
                 return lduMesh_;
             }
 
+            //- Set the LDU mesh containing the addressing is obtained
+            void setLduMesh(const lduMesh& m)
+            {
+                lduMesh_ = m;
+            }
+
             //- Return the LDU addressing
             const lduAddressing& lduAddr() const
             {
-                return lduMesh_.lduAddr();
+                return mesh().lduAddr();
             }
 
             //- Return the patch evaluation schedule

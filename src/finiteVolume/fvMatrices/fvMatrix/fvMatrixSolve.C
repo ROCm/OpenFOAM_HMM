@@ -116,6 +116,12 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
     const dictionary& solverControls
 )
 {
+    if (useImplicit_)
+    {
+        FatalErrorInFunction
+            << "Implicit option is not allowed for type: " << Type::typeName
+            << exit(FatalError);
+    }
     if (debug)
     {
         Info.masterStream(this->mesh().comm())

@@ -325,7 +325,7 @@ void Foam::lduMatrix::setResidualField
     const bool initial
 ) const
 {
-    if (!lduMesh_.hasDb())
+    if (!mesh().hasDb())
     {
         return;
     }
@@ -341,12 +341,12 @@ void Foam::lduMatrix::setResidualField
     }
 
     scalarIOField* residualPtr =
-        lduMesh_.thisDb().getObjectPtr<scalarIOField>(lookupName);
+        mesh().thisDb().getObjectPtr<scalarIOField>(lookupName);
 
     if (residualPtr)
     {
         const IOdictionary* dataPtr =
-            lduMesh_.thisDb().findObject<IOdictionary>("data");
+            mesh().thisDb().findObject<IOdictionary>("data");
 
         if (dataPtr)
         {
