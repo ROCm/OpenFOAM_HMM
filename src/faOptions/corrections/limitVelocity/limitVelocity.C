@@ -96,7 +96,7 @@ void Foam::fa::limitVelocity::correct(areaVectorField& U)
     }
 
     // Handle boundaries in the case of 'all'
-    if (!cellSetOption::useSubMesh())
+    if (!faceSetOption::useSubMesh())
     {
         for (faPatchVectorField& Up : U.boundaryFieldRef())
         {
