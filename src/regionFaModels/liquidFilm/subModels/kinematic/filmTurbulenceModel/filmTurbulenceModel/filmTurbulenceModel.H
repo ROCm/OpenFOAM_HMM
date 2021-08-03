@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,7 +143,7 @@ public:
 
 
     //- Destructor
-    virtual ~filmTurbulenceModel();
+    virtual ~filmTurbulenceModel() = default;
 
 
     // Member Functions
@@ -154,7 +154,7 @@ public:
             const liquidFilmBase& film() const;
 
 
-        // Evolution
+        // Evaluation
 
             //- Return the wall film surface friction
             virtual tmp<areaScalarField> Cw() const;

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,7 @@ filmTurbulenceModel::frictionMethodTypeNames_
     { frictionMethodType::mManningStrickler, "ManningStrickler" }
 };
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 filmTurbulenceModel::filmTurbulenceModel
@@ -66,12 +67,6 @@ filmTurbulenceModel::filmTurbulenceModel
     film_(film),
     dict_(dict.subDict(modelType + "Coeffs")),
     method_(frictionMethodTypeNames_.get("friction", dict_))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-filmTurbulenceModel::~filmTurbulenceModel()
 {}
 
 
@@ -99,34 +94,45 @@ tmp<areaScalarField> filmTurbulenceModel::Cw() const
         );
     auto& Cw = tCw.ref();
 
+
     switch (method_)
     {
         case mquadraticProfile:
         {
             const scalarField& mu = film_.mu().primitiveField();
             const scalarField& h = film_.h().primitiveField();
+            const scalarField& rho = film_.rho().primitiveField();
+
             const scalar h0 = film_.h0().value();
-            Cw.primitiveFieldRef() = 3*mu/(h + h0);
+
+            Cw.primitiveFieldRef() = 3*mu/((h + h0)*rho);
             Cw.min(5000.0);
+
             break;
         }
         case mlinearProfile:
         {
             const scalarField& mu = film_.mu().primitiveField();
             const scalarField& h = film_.h().primitiveField();
+            const scalarField& rho = film_.rho().primitiveField();
+
             const scalar h0 = film_.h0().value();
-            Cw.primitiveFieldRef() = 2*mu/(h + h0);
+
+            Cw.primitiveFieldRef() = 2*mu/((h + h0)*rho);
+
             break;
         }
         case mDarcyWeisbach:
         {
             const uniformDimensionedVectorField& g =
                 meshObjects::gravity::New(film_.primaryMesh().time());
-
             const vectorField& Uf = film_.Uf().primitiveField();
+            const scalarField& rho = film_.rho().primitiveField();
 
-            scalar Cf = dict_.get<scalar>("Cf");
-            Cw.primitiveFieldRef() = Cf*mag(g.value())*mag(Uf);
+            const scalar Cf = dict_.get<scalar>("DarcyWeisbach");
+
+            Cw.primitiveFieldRef() = Cf*mag(g.value())*mag(Uf)/rho;
+
             break;
         }
         case mManningStrickler:
@@ -134,14 +140,15 @@ tmp<areaScalarField> filmTurbulenceModel::Cw() const
             const uniformDimensionedVectorField& g =
                 meshObjects::gravity::New(film_.primaryMesh().time());
 
-            const scalar n = dict_.get<scalar>("n");
-
             const vectorField& Uf = film_.Uf().primitiveField();
             const scalarField& h = film_.h().primitiveField();
             const scalar h0 = film_.h0().value();
 
+            const scalar n = dict_.get<scalar>("n");
+
             Cw.primitiveFieldRef() =
-                sqr(n)*mag(g.value())*mag(Uf)/cbrt(h+h0);
+                sqr(n)*mag(g.value())*mag(Uf)/cbrt(h + h0);
+
             break;
         }
         default:
