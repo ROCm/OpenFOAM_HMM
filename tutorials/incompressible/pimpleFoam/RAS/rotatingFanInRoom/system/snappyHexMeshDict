@@ -71,7 +71,7 @@ castellatedMeshControls
         // AMI{ mode inside; levels ((1E15 3));}
     }
 
-    locationInMesh (0.1 0.0 0.01);
+    locationInMesh (0.1001 0.001 0.0101);
     allowFreeStandingZoneFaces false;
 }
 

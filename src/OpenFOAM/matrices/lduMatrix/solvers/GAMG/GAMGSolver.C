@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -208,8 +209,7 @@ Foam::GAMGSolver::GAMGSolver
         }
     }
 
-
-    if (debug & 2)
+    if ((log_ >= 2) || (debug & 2))
     {
         for
         (
@@ -368,7 +368,7 @@ void Foam::GAMGSolver::readControls()
     controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
     controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
 
-    if (debug)
+    if ((log_ >= 2) || debug)
     {
         Info<< "GAMGSolver settings :"
             << " cacheAgglomeration:" << cacheAgglomeration_

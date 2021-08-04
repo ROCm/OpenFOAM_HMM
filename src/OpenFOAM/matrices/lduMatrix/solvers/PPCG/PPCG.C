@@ -107,7 +107,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     solveScalarField p(nCells);
     const solveScalar normFactor = this->normFactor(psi, source, w, p);
 
-    if (lduMatrix::debug >= 2)
+    if ((log_ >= 2) || (lduMatrix::debug >= 2))
     {
         Info<< "   Normalisation factor = " << normFactor << endl;
     }
@@ -190,7 +190,7 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
         if
         (
             (minIter_ <= 0 || solverPerf.nIterations() >= minIter_)
-         && solverPerf.checkConvergence(tolerance_, relTol_)
+         && solverPerf.checkConvergence(tolerance_, relTol_, log_)
         )
         {
             break;

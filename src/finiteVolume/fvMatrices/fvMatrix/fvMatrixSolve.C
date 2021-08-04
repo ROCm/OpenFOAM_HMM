@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,7 +222,14 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        if (SolverPerformance<Type>::debug)
+        const label log =
+            solverControls.getOrDefault<label>
+            (
+                "log",
+                SolverPerformance<Type>::debug
+            );
+
+        if (log)
         {
             solverPerf.print(Info.masterStream(this->mesh().comm()));
         }
@@ -289,7 +296,14 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
         coupledMatrixSolver->solve(psi)
     );
 
-    if (SolverPerformance<Type>::debug)
+    const label log =
+        solverControls.getOrDefault<label>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
+
+    if (log)
     {
         solverPerf.print(Info.masterStream(this->mesh().comm()));
     }

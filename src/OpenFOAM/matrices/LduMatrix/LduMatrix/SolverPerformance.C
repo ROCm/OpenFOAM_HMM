@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +63,11 @@ template<class Type>
 bool Foam::SolverPerformance<Type>::checkConvergence
 (
     const Type& Tolerance,
-    const Type& RelTolerance
+    const Type& RelTolerance,
+    const label log
 )
 {
-    if (debug >= 2)
+    if ((log >= 2) || (debug >= 2))
     {
         Info<< solverName_
             << ":  Iteration " << nIterations_
