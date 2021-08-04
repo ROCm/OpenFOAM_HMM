@@ -14,22 +14,34 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-scale   0.001;
+scale           0.001;
+
+depth           6.2;    // depth in the empty direction
+width           300;    // width of the wide part of the hopper
+gap             30;     // width of the gap
+totalHeight     500;    // height of the hopper including the angled part
+bottomAngle     30;     // angle of the bottom with respect to the ground
+
+minX            #eval{ 0.5*$width - 0.5*$gap };
+maxX            #eval{ 0.5*$width + 0.5*$gap };
+
+// height of the angled part based on the bottom angle
+htilted         #eval{ $minX*tan(degToRad($bottomAngle)) };
 
 vertices
 (
-    (0 77.9423 6.2)
-    (135 0 6.2)
-    (165 0 6.2)
-    (300 77.9423 6.2)
-    (300 500 6.2)
-    (0 500 6.2)
-    (0 77.9423 0)
-    (135 0 0)
-    (165 0 0)
-    (300 77.9423 0)
-    (300 500 0)
-    (0 500 0)
+    (0       $htilted        $depth)
+    ($minX   0               $depth)
+    ($maxX   0               $depth)
+    ($width  $htilted        $depth)
+    ($width  $totalHeight    $depth)
+    (0       $totalHeight    $depth)
+    (0       $htilted             0)
+    ($minX   0                    0)
+    ($maxX   0                    0)
+    ($width  $htilted             0)
+    ($width  $totalHeight         0)
+    (0       $totalHeight         0)
 );
 
 blocks

@@ -879,17 +879,15 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
         // algorithms at the final output computations (K:p. 43)
         {
             const label nSnap = z.m()/2;
+            timeName0_ =
+                mesh_.time().timeName(mesh_.time().startTime().value());
 
             if (nSnap == 0)
             {
                 empty_ = true;
             }
 
-            scalarField snapshot0(nSnap);
-            std::copy(z.cbegin(), z.cbegin() + nSnap, snapshot0.begin());
-            timeName0_ = mesh_.time().timeName();
-
-            IOField<scalar>
+            IOField<scalar> snapshot0
             (
                 IOobject
                 (
@@ -897,10 +895,21 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
                     timeName0_,
                     mesh_,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
-                snapshot0
-            ).write();
+                nSnap
+            );
+
+            std::copy(z.cbegin(), z.cbegin() + nSnap, snapshot0.begin());
+
+            const IOstreamOption streamOpt
+            (
+                mesh_.time().writeFormat(),
+                mesh_.time().writeCompression()
+            );
+
+            fileHandler().writeObject(snapshot0, streamOpt, true);
         }
 
         Q_ = z/norm;
