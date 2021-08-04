@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,6 +90,27 @@ const Foam::word Foam::functionObjects::turbulenceFields::modelName_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::functionObjects::turbulenceFields::initialise()
+{
+    for (const word& f : fieldSet_)
+    {
+        const word localName(IOobject::scopedName(prefix_, f));
+
+        if (obr_.found(localName))
+        {
+            WarningInFunction
+                << "Cannot store turbulence field " << localName
+                << " since an object with that name already exists"
+                << nl << endl;
+
+            fieldSet_.unset(f);
+        }
+    }
+
+    initialised_ = true;
+}
+
+
 bool Foam::functionObjects::turbulenceFields::compressible()
 {
     if (obr_.foundObject<compressible::turbulenceModel>(modelName_))
@@ -119,6 +140,8 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    initialised_(false),
+    prefix_(dict.getOrDefault<word>("prefix", "turbulenceProperties")),
     fieldSet_()
 {
     read(dict);
@@ -129,43 +152,55 @@ Foam::functionObjects::turbulenceFields::turbulenceFields
 
 bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
+    if (fvMeshFunctionObject::read(dict))
+    {
+        dict.readIfPresent("prefix", prefix_);
 
-    if (dict.found("field"))
-    {
-        fieldSet_.insert(dict.get<word>("field"));
-    }
-    else
-    {
-        fieldSet_.insert(dict.get<wordList>("fields"));
-    }
-
-    Info<< type() << " " << name() << ": ";
-    if (fieldSet_.size())
-    {
-        Info<< "storing fields:" << nl;
-        for (const word& f : fieldSet_)
+        if (dict.found("field"))
         {
-            Info<< "    " << modelName_ << ':' << f << nl;
+            fieldSet_.insert(dict.get<word>("field"));
         }
-        Info<< endl;
-    }
-    else
-    {
-        Info<< "no fields requested to be stored" << nl << endl;
+        else
+        {
+            fieldSet_.insert(dict.get<wordList>("fields"));
+        }
+
+        Info<< type() << " " << name() << ": ";
+        if (fieldSet_.size())
+        {
+            Info<< "storing fields:" << nl;
+            for (const word& f : fieldSet_)
+            {
+                Info<< "    " << IOobject::scopedName(prefix_, f) << nl;
+            }
+            Info<< endl;
+        }
+        else
+        {
+            Info<< "no fields requested to be stored" << nl << endl;
+        }
+
+        initialised_ = false;
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 
 bool Foam::functionObjects::turbulenceFields::execute()
 {
-    bool comp = compressible();
+    if (!initialised_)
+    {
+        initialise();
+    }
+
+    const bool comp = compressible();
 
     if (comp)
     {
-        const compressible::turbulenceModel& model =
+        const auto& model =
             obr_.lookupObject<compressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
@@ -184,7 +219,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 }
                 case cfOmega:
                 {
-                    processField<scalar>(f, omega(model));
+                    processField<scalar>(f, model.omega());
                     break;
                 }
                 case cfNuTilda:
@@ -242,7 +277,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
     }
     else
     {
-        const incompressible::turbulenceModel& model =
+        const auto& model =
             obr_.lookupObject<incompressible::turbulenceModel>(modelName_);
 
         for (const word& f : fieldSet_)
@@ -261,7 +296,7 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 }
                 case ifOmega:
                 {
-                    processField<scalar>(f, omega(model));
+                    processField<scalar>(f, model.omega());
                     break;
                 }
                 case ifNuTilda:
@@ -316,9 +351,11 @@ bool Foam::functionObjects::turbulenceFields::write()
 {
     for (const word& f : fieldSet_)
     {
-        const word fieldName = modelName_ + ':' + f;
-        writeObject(fieldName);
+        const word localName(IOobject::scopedName(prefix_, f));
+
+        writeObject(localName);
     }
+    Info<< endl;
 
     return true;
 }

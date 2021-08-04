@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ Description
     output during calculations, and stores/writes them on the mesh database
     for further manipulation.
 
-    Fields are stored as copies of the original, with the prefix
-    "turbulenceModel:", e.g.:
+    Fields are stored as copies of the original with a user-defined prefix
+    e.g. a prefix of \c turbulenceModel yields the following for field \c R:
 
     \verbatim
       turbulenceModel:R
@@ -52,6 +52,15 @@ Description
 
     where \c \<Type\>=Scalar/SymmTensor.
 
+    References:
+    \verbatim
+        Estimation expressions for L (tag:P), Eq. 10.37:
+            Pope, S. B. (2000).
+            Turbulent flows.
+            Cambridge, UK: Cambridge Univ. Press
+            DOI:10.1017/CBO9780511840531
+    \endverbatim
+
 Usage
     Minimal example by using \c system/controlDict.functions:
     \verbatim
@@ -62,22 +71,30 @@ Usage
         libs        (fieldFunctionObjects);
 
         // Mandatory entries (runtime modifiable)
-        // Either field or fields entries
-        fields      (R devRhoReff);
-        field       R;
 
-        // Optional (inherited) entries
+            // Either of the below
+            // Option-1
+            fields      (R devRhoReff);
+
+            // Option-2
+            field       R;
+
+        // Optional entries (runtime modifiable)
+        prefix          <word>;
+
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                           | Type | Req'd | Dflt
-      type         | Type name: turbulenceFields           | word |  yes  | -
-      libs         | Library name: fieldFunctionObjects    | word |  yes  | -
+      Property     | Description                           | Type | Reqd | Deflt
+      type         | Type name: turbulenceFields           | word | yes  | -
+      libs         | Library name: fieldFunctionObjects    | word | yes  | -
       fields       | Names of fields to store (see below)  | wordList | yes | -
-      field        | Name of a field to store (see below)  | word | yes | -
+      field        | Name of a field to store (see below)  | word | yes  | -
+      prefix  | Name of output-field prefix | word | no | turbulenceProperties
     \endtable
 
     where \c fields can include:
@@ -107,10 +124,15 @@ Usage
         <solver> -postProcess -func turbulenceFields
     \endverbatim
 
+Note
+  - Multiphase applications are not supported.
+  - The governing expression of \c nuTilda is
+    an approximation based on a dimensional analysis.
+
 See also
-    - Foam::functionObject
-    - Foam::functionObjects::fvMeshFunctionObject
-    - ExtendedCodeGuide::functionObjects::field::turbulenceFields
+  - Foam::functionObject
+  - Foam::functionObjects::fvMeshFunctionObject
+  - ExtendedCodeGuide::functionObjects::field::turbulenceFields
 
 SourceFiles
     turbulenceFields.C
@@ -153,8 +175,8 @@ public:
             cfEpsilon,      //!< "Turbulent kinetic energy dissipation rate"
             cfOmega,        //!< "Specific dissipation rate"
             cfNuTilda,      //!< "Modified turbulent viscosity"
-            cfMut,          //!< "Turbulent viscosity"
-            cfMuEff,        //!< "Effective turbulent viscosity"
+            cfMut,          //!< "Turbulent dynamic viscosity"
+            cfMuEff,        //!< "Effective turbulent dynamic viscosity"
             cfAlphat,       //!< "Turbulence thermal diffusivity"
             cfAlphaEff,     //!< "Effective turbulence thermal diffusivity"
             cfR,            //!< "Reynolds stress tensor"
@@ -184,18 +206,28 @@ public:
         //- Names for incompressibleField turbulence fields
         static const Enum<incompressibleField> incompressibleFieldNames_;
 
-        //- Turbulence closure model name
+        //- Name of the turbulence properties dictionary
         static const word modelName_;
+
 
 protected:
 
     // Protected Data
+
+        //- Flag to track initialisation
+        bool initialised_;
+
+        //- Name of output-field prefix
+        word prefix_;
 
         //- Fields to load
         wordHashSet fieldSet_;
 
 
     // Protected Member Functions
+
+        //- Unset duplicate fields already registered by other function objects
+        void initialise();
 
         //- Return true if compressible turbulence model is identified
         bool compressible();
@@ -207,10 +239,6 @@ protected:
             const word& fieldName,
             const tmp<GeometricField<Type, fvPatchField, volMesh>>& tvalue
         );
-
-        //- Return omega calculated from k and epsilon
-        template<class Model>
-        tmp<volScalarField> omega(const Model& model) const;
 
         //- Return nuTilda calculated from k and omega
         template<class Model>
