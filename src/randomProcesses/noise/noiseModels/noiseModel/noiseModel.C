@@ -137,6 +137,26 @@ void Foam::noiseModel::setOctaveBands
 }
 
 
+namespace Foam
+{
+    tmp<scalarField> safeLog10(const scalarField& fld)
+    {
+        auto tresult = tmp<scalarField>::New(fld.size(), Zero);
+        auto& result = tresult.ref();
+
+        forAll(result, i)
+        {
+            if (fld[i] > 0)
+            {
+                result[i] = log10(fld[i]);
+            }
+        }
+
+        return tresult;
+    }
+}
+
+
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 void Foam::noiseModel::readWriteOption
@@ -688,7 +708,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::PSD
     const scalarField& PSDf
 ) const
 {
-    return 10*log10(PSDf/sqr(2e-5));
+    return 10*safeLog10(PSDf/sqr(2e-5));
 }
 
 
@@ -698,7 +718,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
     const scalar f
 ) const
 {
-    tmp<scalarField> tspl(10*log10(Prms2/sqr(2e-5)));
+    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(2e-5)));
     scalarField& spl = tspl.ref();
 
     switch (SPLweighting_)
@@ -745,7 +765,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
     const scalarField& f
 ) const
 {
-    tmp<scalarField> tspl(10*log10(Prms2/sqr(2e-5)));
+    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(2e-5)));
     scalarField& spl = tspl.ref();
 
     switch (SPLweighting_)
