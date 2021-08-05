@@ -104,6 +104,7 @@ bool Maxwell<BasicTurbulenceModel>::read()
     return false;
 }
 
+
 template<class BasicTurbulenceModel>
 tmp<Foam::volSymmTensorField>
 Maxwell<BasicTurbulenceModel>::R() const
@@ -111,9 +112,18 @@ Maxwell<BasicTurbulenceModel>::R() const
     return sigma_;
 }
 
+
 template<class BasicTurbulenceModel>
 tmp<Foam::volSymmTensorField>
 Maxwell<BasicTurbulenceModel>::devRhoReff() const
+{
+    return devRhoReff(this->U_);
+}
+
+
+template<class BasicTurbulenceModel>
+tmp<Foam::volSymmTensorField>
+Maxwell<BasicTurbulenceModel>::devRhoReff(const volVectorField& U) const
 {
     return tmp<volSymmTensorField>
     (
@@ -129,7 +139,7 @@ Maxwell<BasicTurbulenceModel>::devRhoReff() const
             ),
             this->alpha_*this->rho_*sigma_
           - (this->alpha_*this->rho_*this->nu())
-           *dev(twoSymm(fvc::grad(this->U_)))
+           *dev(twoSymm(fvc::grad(U)))
         )
     );
 }

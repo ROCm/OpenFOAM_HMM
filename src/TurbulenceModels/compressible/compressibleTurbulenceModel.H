@@ -123,6 +123,13 @@ public:
         //- Return the effective stress tensor including the laminar stress
         virtual tmp<volSymmTensorField> devRhoReff() const = 0;
 
+        //- Return the effective stress tensor including
+        //- the laminar stress based on a given velocity field
+        virtual tmp<volSymmTensorField> devRhoReff
+        (
+            const volVectorField& U
+        ) const = 0;
+
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const = 0;
 

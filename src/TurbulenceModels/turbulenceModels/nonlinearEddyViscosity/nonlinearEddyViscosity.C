@@ -89,11 +89,23 @@ template<class BasicTurbulenceModel>
 Foam::tmp<Foam::volSymmTensorField>
 Foam::nonlinearEddyViscosity<BasicTurbulenceModel>::devRhoReff() const
 {
+    return devRhoReff(this->U_);
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volSymmTensorField>
+Foam::nonlinearEddyViscosity<BasicTurbulenceModel>::devRhoReff
+(
+    const volVectorField& U
+) const
+{
     tmp<volSymmTensorField> tdevRhoReff
     (
-        eddyViscosity<BasicTurbulenceModel>::devRhoReff()
+        eddyViscosity<BasicTurbulenceModel>::devRhoReff(U)
     );
     tdevRhoReff.ref() += this->rho_*nonlinearStress_;
+
     return tdevRhoReff;
 }
 
