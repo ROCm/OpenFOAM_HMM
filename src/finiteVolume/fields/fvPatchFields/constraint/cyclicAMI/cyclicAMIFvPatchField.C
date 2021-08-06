@@ -210,20 +210,20 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 
     solveScalarField pnf(psiInternal, nbrFaceCells);
 
+    const labelUList& faceCells = lduAddr.patchAddr(patchId);
+
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
     if (cyclicAMIPatch_.applyLowWeightCorrection())
     {
-        solveScalarField pif(psiInternal, cyclicAMIPatch_.faceCells());
+        solveScalarField pif(psiInternal, faceCells);
         pnf = cyclicAMIPatch_.interpolate(pnf, pif);
     }
     else
     {
         pnf = cyclicAMIPatch_.interpolate(pnf);
     }
-
-    const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
     // Multiply the field by coefficients and add into the result
     this->addToInternalField(result, !add, faceCells, coeffs, pnf);

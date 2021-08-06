@@ -313,10 +313,21 @@ Foam::label Foam::fvMatrix<Type>::checkImplicit(const label fieldI)
     {
         if (bpsi[patchI].useImplicit())
         {
+            if (debug)
+            {
+                Pout<< "fvMatrix<Type>::checkImplicit "
+                    << " fieldi:" << fieldI
+                    << " field:" << this->psi(fieldI).name()
+                    << " on mesh:"
+                    << this->psi(fieldI).mesh().name()
+                    << " patch:" << bpsi[patchI].patch().name()
+                    << endl;
+            }
+
             id += (label(2) << patchI);
         }
     }
-    if (id > 0)
+    if (id >= 0)
     {
         lduAssemblyName_ = word("lduAssembly") + name(id);
         useImplicit_ = true;
