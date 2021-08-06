@@ -100,9 +100,14 @@ int main(int argc, char *argv[])
             {
                 #include "setRegionFluidFields.H"
                 #include "readSolidMultiRegionSIMPLEControls.H"
-                #include "pEqn.H"
-                turb.correct();
+                if (!frozenFlow)
+                {
+                    #include "pEqn.H"
+                    turb.correct();
+                }
             }
+
+            fvMatrixAssemblyPtr->clear();
         }
 
         // Additional loops for energy solution only
@@ -138,18 +143,9 @@ int main(int argc, char *argv[])
                     fvMatrixAssemblyPtr->solve();
                     #include "correctThermos.H"
 
-                    forAll(fluidRegions, i)
-                    {
-                        #include "setRegionFluidFields.H"
-                        turb.correct();
-                    }
+                    fvMatrixAssemblyPtr->clear();
                 }
             }
-        }
-
-        if (coupled)
-        {
-            fvMatrixAssemblyPtr->clear();
         }
 
         runTime.write();

@@ -134,18 +134,24 @@ int main(int argc, char *argv[])
                 {
                     #include "setRegionFluidFields.H"
                     #include "readFluidMultiRegionPIMPLEControls.H"
-                    Info<< "\nSolving for fluid region "
-                        << fluidRegions[i].name() << endl;
-                    // --- PISO loop
-                    for (int corr=0; corr<nCorr; corr++)
+                    if (!frozenFlow)
                     {
-                        #include "pEqn.H"
+                        Info<< "\nSolving for fluid region "
+                            << fluidRegions[i].name() << endl;
+                        // --- PISO loop
+                        for (int corr=0; corr<nCorr; corr++)
+                        {
+                            #include "pEqn.H"
+                        }
+                        turbulence.correct();
                     }
-                    turbulence.correct();
+
                     rho = thermo.rho();
                     Info<< "Min/max T:" << min(thermo.T()).value() << ' '
                         << max(thermo.T()).value() << endl;
                 }
+
+                fvMatrixAssemblyPtr->clear();
             }
 
             // Additional loops for energy solution only
@@ -187,14 +193,11 @@ int main(int argc, char *argv[])
                             #include "setRegionFluidFields.H"
                             rho = thermo.rho();
                         }
+
+                        fvMatrixAssemblyPtr->clear();
                     }
                 }
             }
-        }
-
-        if (coupled)
-        {
-            fvMatrixAssemblyPtr->clear();
         }
 
         runTime.write();
