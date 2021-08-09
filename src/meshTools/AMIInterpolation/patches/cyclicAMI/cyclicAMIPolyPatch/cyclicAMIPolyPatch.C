@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ License
 #include "OFstream.H"
 #include "meshTools.H"
 #include "addToRunTimeSelectionTable.H"
+#include "cyclicPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -283,6 +284,54 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
             << "    separation = " << separation() << nl
             << "    collocated = " << collocated() << nl << endl;
     }
+}
+
+
+Foam::autoPtr<Foam::coordSystem::cylindrical>
+Foam::cyclicAMIPolyPatch::cylindricalCS() const
+{
+    autoPtr<coordSystem::cylindrical> csPtr;
+
+    const label periodicID = periodicPatchID();
+    if (periodicID != -1)
+    {
+        // Get the periodic patch
+        const coupledPolyPatch& perPp
+        (
+            refCast<const coupledPolyPatch>
+            (
+                boundaryMesh()[periodicID]
+            )
+        );
+        if (!perPp.parallel())
+        {
+            vector axis(Zero);
+            point axisPoint(Zero);
+            if (isA<cyclicPolyPatch>(perPp))
+            {
+                axis =
+                    refCast<const cyclicPolyPatch>(perPp).rotationAxis();
+                axisPoint =
+                    refCast<const cyclicPolyPatch>(perPp).rotationCentre();
+            }
+            else if (isA<cyclicAMIPolyPatch>(perPp))
+            {
+                axis =
+                    refCast<const cyclicAMIPolyPatch>(perPp).rotationAxis();
+                axisPoint =
+                    refCast<const cyclicAMIPolyPatch>(perPp).rotationCentre();
+            }
+            else
+            {
+                FatalErrorInFunction << "On patch " << name()
+                    << " have unsupported periodicPatch " << perPp.name()
+                    << exit(FatalError);
+            }
+
+            csPtr.set(new coordSystem::cylindrical(axisPoint, axis));
+        }
+    }
+    return csPtr;
 }
 
 
@@ -574,6 +623,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
     separationVector_(Zero),
+    periodicPatchName_(word::null),
+    periodicPatchID_(-1),
     AMIPtr_(AMIInterpolation::New(defaultAMIMethod)),
     surfDict_(fileName("surface")),
     surfPtr_(nullptr),
@@ -610,6 +661,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(false),
     rotationAngle_(0.0),
     separationVector_(Zero),
+    periodicPatchName_(dict.getOrDefault<word>("periodicPatch", word::null)),
+    periodicPatchID_(-1),
     AMIPtr_
     (
         AMIInterpolation::New
@@ -715,6 +768,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
+    periodicPatchName_(pp.periodicPatchName_),
+    periodicPatchID_(-1),
     AMIPtr_(pp.AMIPtr_->clone()),
     surfDict_(pp.surfDict_),
     surfPtr_(nullptr),
@@ -751,6 +806,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
+    periodicPatchName_(pp.periodicPatchName_),
+    periodicPatchID_(-1),
     AMIPtr_(pp.AMIPtr_->clone()),
     surfDict_(pp.surfDict_),
     surfPtr_(nullptr),
@@ -794,6 +851,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationAngleDefined_(pp.rotationAngleDefined_),
     rotationAngle_(pp.rotationAngle_),
     separationVector_(pp.separationVector_),
+    periodicPatchName_(pp.periodicPatchName_),
+    periodicPatchID_(-1),
     AMIPtr_(pp.AMIPtr_->clone()),
     surfDict_(pp.surfDict_),
     surfPtr_(nullptr),
@@ -873,6 +932,32 @@ Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
     }
 
     return nbrPatchID_;
+}
+
+
+Foam::label Foam::cyclicAMIPolyPatch::periodicPatchID() const
+{
+    if (periodicPatchName_ == word::null)
+    {
+        return -1;
+    }
+    else
+    {
+        if (periodicPatchID_ == -1)
+        {
+            periodicPatchID_ = boundaryMesh().findPatchID(periodicPatchName_);
+
+            if (periodicPatchID_ == -1)
+            {
+                FatalErrorInFunction
+                    << "Illegal neighbourPatch name " << periodicPatchName_
+                    << nl << "Valid patch names are "
+                    << this->boundaryMesh().names()
+                    << exit(FatalError);
+            }
+        }
+        return periodicPatchID_;
+    }
 }
 
 
@@ -1173,6 +1258,11 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         {
             // No additional info to write
         }
+    }
+
+    if (periodicPatchName_ != word::null)
+    {
+        os.writeEntry("periodicPatch", periodicPatchName_);
     }
 
     AMIPtr_->write(os);

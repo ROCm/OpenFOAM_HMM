@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
+Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolateUntransformed
 (
     const Field<Type>& fld,
     const UList<Type>& defaultValues
@@ -41,6 +42,103 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
     else
     {
         return neighbPatch().AMI().interpolateToTarget(fld, defaultValues);
+    }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
+(
+    const Field<Type>& fld,
+    const UList<Type>& defaultValues
+) const
+{
+    if (pTraits<Type>::rank == 0)
+    {
+        return interpolateUntransformed(fld, defaultValues);
+    }
+    else
+    {
+        autoPtr<coordSystem::cylindrical> cs(cylindricalCS());
+        if (!cs.valid())
+        {
+            return interpolateUntransformed(fld, defaultValues);
+        }
+        else
+        {
+            const cyclicAMIPolyPatch& nbrPp = this->neighbPatch();
+
+            if (debug)
+            {
+                Pout<< "cyclicAMIPolyPatch::interpolate :"
+                    << " patch:" << this->name()
+                    << " size:" << this->size()
+                    << " nbrPatch:" << nbrPp.name()
+                    << " size:" << nbrPp.size()
+                    << endl;
+            }
+
+            if (fld.size() != nbrPp.size())
+            {
+                FatalErrorInFunction
+                    << "Patch:" << this->name()
+                    << " size:" << this->size()
+                    << " neighbour patch:" << nbrPp.name()
+                    << " size:" << nbrPp.size()
+                    << " fld size:" << fld.size()
+                    << exit(FatalError);
+            }
+
+
+            auto tlocalFld(tmp<Field<Type>>::New(fld.size()));
+            Field<Type>& localFld = tlocalFld.ref();
+            List<Type> localDeflt(defaultValues.size());
+
+            // Transform to cylindrical coords
+            {
+                tmp<tensorField> nbrT(cs().R(nbrPp.faceCentres()));
+                localFld = Foam::invTransform(nbrT(), fld);
+                if (defaultValues.size() == fld.size())
+                {
+                    // We get in UList (why? Copied from cyclicAMI). Convert to
+                    // Field so we can use transformField routines.
+                    const SubField<Type> defaultSubFld(defaultValues);
+                    const Field<Type>& defaultFld(defaultSubFld);
+                    localDeflt = Foam::invTransform(nbrT, defaultFld);
+                }
+            }
+
+            if (debug&2)
+            {
+                const vectorField::subField nbrFc(nbrPp.faceCentres());
+
+                Pout<< "On patch:" << this->name()
+                    << " size:" << this->size()
+                    << " fc:" << gAverage(this->faceCentres())
+                    << " getting remote data from:" << nbrPp.name()
+                    << " size:" << nbrPp.size()
+                    << " fc:" << gAverage(nbrFc)
+                    << endl;
+
+                forAll(fld, i)
+                {
+                    Pout<< "At:" << nbrFc[i] << nl
+                        << "    cart:" << fld[i] << nl
+                        << "    cyli:" << localFld[i] << nl
+                        << endl;
+                }
+            }
+
+            const vectorField::subField fc(this->faceCentres());
+
+            // Do the actual interpolation and interpolate back to cartesian
+            // coords
+            return Foam::transform
+            (
+                cs().R(fc),
+                interpolateUntransformed(localFld, localDeflt)
+            );
+        }
     }
 }
 
@@ -65,25 +163,78 @@ void Foam::cyclicAMIPolyPatch::interpolate
     const UList<Type>& defaultValues
 ) const
 {
-    if (owner())
+    //- Commented out for now since called with non-primitives (e.g. wallPoint
+    //  from FaceCellWave) - these are missing the pTraits<Type>::rank and
+    //  Foam::transform
+    /*
+    autoPtr<coordSystem::cylindrical> cs(cylindricalCS());
+
+    if (cs.valid() && pTraits<Type>::rank > 0)
     {
-        AMI().interpolateToSource
-        (
-            fld,
-            cop,
-            result,
-            defaultValues
-        );
+        const cyclicAMIPolyPatch& nbrPp = this->neighbPatch();
+
+        tmp<tensorField> nbrT(cs().R(nbrPp.faceCentres()));
+
+        result = Foam::invTransform(nbrT, result);
+        List<Type> localDeflt(defaultValues.size());
+        if (defaultValues.size() == nbrT().size())
+        {
+            // We get in UList (why? Copied from cyclicAMI). Convert to
+            // Field so we can use transformField routines.
+            const SubField<Type> defaultSubFld(defaultValues);
+            const Field<Type>& defaultFld(defaultSubFld);
+            localDeflt = Foam::invTransform(nbrT, defaultFld);
+        }
+
+        // Do actual AMI interpolation
+        if (owner())
+        {
+            AMI().interpolateToSource
+            (
+                fld,
+                cop,
+                result,
+                localDeflt
+            );
+        }
+        else
+        {
+            neighbPatch().AMI().interpolateToTarget
+            (
+                fld,
+                cop,
+                result,
+                localDeflt
+            );
+        }
+
+        // Transform back. Result is now at *this
+        const vectorField::subField fc(this->faceCentres());
+        result = Foam::transform(cs().R(fc), result);
     }
     else
+    */
     {
-        neighbPatch().AMI().interpolateToTarget
-        (
-            fld,
-            cop,
-            result,
-            defaultValues
-        );
+        if (owner())
+        {
+            AMI().interpolateToSource
+            (
+                fld,
+                cop,
+                result,
+                defaultValues
+            );
+        }
+        else
+        {
+            neighbPatch().AMI().interpolateToTarget
+            (
+                fld,
+                cop,
+                result,
+                defaultValues
+            );
+        }
     }
 }
 
