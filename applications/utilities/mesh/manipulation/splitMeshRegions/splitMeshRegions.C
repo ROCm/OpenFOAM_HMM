@@ -50,11 +50,14 @@ Description
 
     Note:
 
-    - multiple cellZones can be combined into a single cellZone (cluster)
-    for further analysis using the 'combineZones' option:
+    - multiple cellZones can be combined into a single region (cluster)
+    for further analysis using the 'addZones' or 'combineZones' option:
+        -addZones '((allSolids zoneA "zoneB.*")(allFluids none otherZone))'
+    or
         -combineZones '((zoneA "zoneB.*")(none otherZone))
     This can be combined with e.g. 'cellZones' or 'cellZonesOnly'. The
-    corresponding region name will be the names of the cellZones combined e.g.
+    addZones option supplies the destination region name as first element in
+    the list. The combineZones option synthesises the region name e.g. 
         zoneA_zoneB0_zoneB1
 
     - cellZonesOnly does not do a walk and uses the cellZones only. Use
@@ -1204,8 +1207,10 @@ word makeRegionName
     }
     else
     {
-        // Synthesize name from appended cellZone names
+        // Zone indices are in cellZone order ...
         word regionName(czs[zoneIDs[0]].name());
+
+        // Synthesize name from appended cellZone names
         for (label i = 1; i < zoneIDs.size(); i++)
         {
             regionName += "_" + czs[zoneIDs[i]].name();
@@ -1218,6 +1223,7 @@ word makeRegionName
 void makeClusters
 (
     const List<wordRes>& zoneClusters,
+    const wordList& zoneClusterNames,
     const cellZoneMesh& cellZones,
     wordList& clusterNames,
     labelListList& clusterToZones,
@@ -1238,7 +1244,17 @@ void makeClusters
         {
             const labelList zoneIDs(cellZones.indices(zoneClusters[clusteri]));
             UIndirectList<label>(zoneToCluster, zoneIDs) = clusteri;
-            clusterNames.append(makeRegionName(cellZones, clusteri, zoneIDs));
+            clusterNames.append
+            (
+                zoneClusterNames[clusteri].size()
+              ? zoneClusterNames[clusteri]
+              : makeRegionName
+                (
+                    cellZones,
+                    clusteri,
+                    zoneIDs
+                )
+            );
             clusterToZones.append(std::move(zoneIDs));
         }
 
@@ -1366,12 +1382,15 @@ void matchRegions
     // Allocate region names for unmatched regions.
     forAll(regionNames, regionI)
     {
-        regionNames[regionI] = makeRegionName
-        (
-            cellZones,
-            regionI,
-            regionToZones[regionI]
-        );
+        if (regionNames[regionI].empty())
+        {
+            regionNames[regionI] = makeRegionName
+            (
+                cellZones,
+                regionI,
+                regionToZones[regionI]
+            );
+        }
     }
 }
 
@@ -1461,6 +1480,12 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "addZones",
+        "lists of zones",
+        "Combine zones in follow-on analysis"
+    );
+    argList::addOption
+    (
         "blockedFaces",
         "faceSet",
         "Specify additional region boundaries that walking does not cross"
@@ -1524,6 +1549,7 @@ int main(int argc, char *argv[])
     const bool useCellZonesOnly = args.found("cellZonesOnly");
     const bool useCellZonesFile = args.found("cellZonesFileOnly");
     const bool combineZones     = args.found("combineZones");
+    const bool addZones         = args.found("addZones");
     const bool overwrite        = args.found("overwrite");
     const bool detectOnly       = args.found("detectOnly");
     const bool sloppyCellZones  = args.found("sloppyCellZones");
@@ -1574,9 +1600,36 @@ int main(int argc, char *argv[])
     mesh.cellZones().checkParallelSync(true);
 
     List<wordRes> zoneClusters;
+    wordList zoneClusterNames;
     if (combineZones)
     {
+        if (addZones)
+        {
+            FatalErrorInFunction
+                << "Cannot specify both combineZones and addZones"
+                << exit(FatalError);
+        }
         zoneClusters = args.get<List<wordRes>>("combineZones");
+        zoneClusterNames.setSize(zoneClusters.size());
+    }
+    else if (addZones)
+    {
+        zoneClusters = args.get<List<wordRes>>("addZones");
+        zoneClusterNames.setSize(zoneClusters.size());
+        forAll(zoneClusters, clusteri)
+        {
+            // Pop of front - is name
+
+            wordRes& wrs = zoneClusters[clusteri];
+
+            zoneClusterNames[clusteri] = wrs[0];
+
+            for (label i = 1; i < wrs.size(); i++)
+            {
+                wrs[i-1] = wrs[i];
+            }
+            wrs.setSize(wrs.size()-1);
+        }
     }
 
 
@@ -1607,6 +1660,7 @@ int main(int argc, char *argv[])
         makeClusters
         (
             zoneClusters,
+            zoneClusterNames,
             mesh.cellZones(),
             clusterNames,
             clusterToZones,
@@ -1672,6 +1726,7 @@ int main(int argc, char *argv[])
         makeClusters
         (
             zoneClusters,
+            zoneClusterNames,
             newCellZones,
             clusterNames,
             clusterToZones,
@@ -1743,6 +1798,7 @@ int main(int argc, char *argv[])
         makeClusters
         (
             zoneClusters,
+            zoneClusterNames,
             mesh.cellZones(),
             clusterNames,
             clusterToZones,
