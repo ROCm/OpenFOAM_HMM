@@ -108,10 +108,6 @@ void KirchhoffShell::solveDisplacement()
 
         wEqn.solve();
 
-        Info<< "ws_vibrationShell: "
-            << "min = " << min(w_).value() << ", "
-            << "max = " << max(w_).value() << endl;
-
         if (wSubCycle.index() >= wSubCycle.nSubCycles())
         {
             // Cache oldTimes inside the sub-cycling
@@ -124,6 +120,10 @@ void KirchhoffShell::solveDisplacement()
             a_ = fac::d2dt2(w_);
         }
     }
+
+    Info<< "ws_vibrationShell: "
+        << "min = " << min(w_).value() << ", "
+        << "max = " << max(w_).value() << endl;
 
     // Restore old time in main time
     w_.oldTime() = w0;
