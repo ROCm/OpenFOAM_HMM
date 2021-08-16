@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,13 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
     DebugInFunction
         << "solving faMatrix<Type>"
         << endl;
+
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
 
     auto& psi =
         const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
@@ -141,7 +148,7 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        if (SolverPerformance<Type>::debug)
+        if (logLevel)
         {
             solverPerf.print(Info);
         }

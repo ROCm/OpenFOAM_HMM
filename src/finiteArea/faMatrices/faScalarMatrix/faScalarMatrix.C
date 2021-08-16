@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,14 @@ Foam::solverPerformance Foam::faMatrix<Foam::scalar>::solve
         << "solving faMatrix<scalar>"
         << endl;
 
-    GeometricField<scalar, faPatchField, areaMesh>& psi =
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            solverPerformance::debug
+        );
+
+    auto& psi =
         const_cast<GeometricField<scalar, faPatchField, areaMesh>&>(psi_);
 
     scalarField saveDiag(diag());
@@ -82,7 +89,7 @@ Foam::solverPerformance Foam::faMatrix<Foam::scalar>::solve
         solverControls
     )->solve(psi.ref(), totalSource);
 
-    if (solverPerformance::debug)
+    if (logLevel)
     {
         solverPerf.print(Info);
     }
