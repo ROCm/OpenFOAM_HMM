@@ -6,10 +6,6 @@ if (pimple.ddtCorr())
 {
     phiHbyA += MRF.zeroFilter(fvc::interpolate(rAU)*fvc::ddtCorr(U, phi, Uf));
 }
-else
-{
-    phiHbyA += MRF.zeroFilter(fvc::interpolate(rAU));
-}
 
 
 MRF.makeRelative(phiHbyA);
