@@ -419,8 +419,6 @@ void Foam::ParticleCollector<CloudType>::write()
         massTotal_[facei] += mass_[facei];
     }
 
-    const label proci = Pstream::myProcNo();
-
     Info<< type() << " output:" << nl;
 
     Field<scalar> faceMassTotal(mass_.size(), Zero);
@@ -434,15 +432,11 @@ void Foam::ParticleCollector<CloudType>::write()
     scalar sumAverageMFR = 0.0;
     forAll(faces_, facei)
     {
-        scalarList allProcMass(Pstream::nProcs());
-        allProcMass[proci] = massTotal_[facei];
-        Pstream::gatherList(allProcMass);
-        faceMassTotal[facei] += sum(allProcMass);
+        faceMassTotal[facei] +=
+            returnReduce(massTotal_[facei], sumOp<scalar>());
 
-        scalarList allProcMassFlowRate(Pstream::nProcs());
-        allProcMassFlowRate[proci] = massFlowRate_[facei];
-        Pstream::gatherList(allProcMassFlowRate);
-        faceMassFlowRate[facei] += sum(allProcMassFlowRate);
+        faceMassFlowRate[facei] +=
+            returnReduce(massFlowRate_[facei], sumOp<scalar>());
 
         sumTotalMass += faceMassTotal[facei];
         sumAverageMFR += faceMassFlowRate[facei];
