@@ -70,6 +70,15 @@ Foam::LESModel<BasicTurbulenceModel>::LESModel
     turbulence_(LESDict_.getOrDefault<Switch>("turbulence", true)),
     printCoeffs_(LESDict_.getOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(LESDict_.optionalSubDict(type + "Coeffs")),
+    Ce_
+    (
+        dimensioned<scalar>::getOrAddToDict
+        (
+            "Ce",
+            LESDict_,
+            1.048
+        )
+    ),
     kMin_
     (
         dimensioned<scalar>::getOrAddToDict
@@ -188,12 +197,51 @@ bool Foam::LESModel<BasicTurbulenceModel>::read()
 
         delta_().read(LESDict_);
 
+        Ce_.readIfPresent(LESDict_);
+
         kMin_.readIfPresent(LESDict_);
 
         return true;
     }
 
     return false;
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::LESModel<BasicTurbulenceModel>::epsilon() const
+{
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        this->Ce()*pow(this->k(), 1.5)/this->delta()
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::LESModel<BasicTurbulenceModel>::omega() const
+{
+    const scalar betaStar = 0.09;
+    const dimensionedScalar k0(sqr(dimLength/dimTime), SMALL);
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        this->epsilon()/(betaStar*(this->k() + k0))
+    );
 }
 
 

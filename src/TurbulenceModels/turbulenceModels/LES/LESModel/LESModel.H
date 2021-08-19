@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,10 +61,9 @@ class LESModel
 :
     public BasicTurbulenceModel
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- LES coefficients dictionary
         dictionary LESDict_;
@@ -76,6 +76,9 @@ protected:
 
         //- Model coefficients dictionary
         dictionary coeffDict_;
+
+        //- Empirical model constant
+        dimensionedScalar Ce_;
 
         //- Lower limit of k
         dimensionedScalar kMin_;
@@ -182,6 +185,12 @@ public:
                 return coeffDict_;
             }
 
+            // Return the empirical model constant
+            const dimensionedScalar& Ce() const noexcept
+            {
+                return Ce_;
+            }
+
             //- Return the lower allowable limit for k (default: SMALL)
             const dimensionedScalar& kMin() const
             {
@@ -219,6 +228,12 @@ public:
         {
             return this->nut(patchi) + this->nu(patchi);
         }
+
+        //- Return the turbulence kinetic energy dissipation rate
+        virtual tmp<volScalarField> epsilon() const;
+
+        //- Return the specific dissipation rate
+        virtual tmp<volScalarField> omega() const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
