@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,19 +125,6 @@ public:
 
         //- Return the effective viscosity on patch
         virtual tmp<scalarField> nuEff(const label patchi) const;
-
-        //- Return the turbulence kinetic energy, i.e. 0 for Stokes flow
-        virtual tmp<volScalarField> k() const;
-
-        //- Return the turbulence kinetic energy dissipation rate,
-        //- i.e. 0 for Stokes flow
-        virtual tmp<volScalarField> epsilon() const;
-
-        //- Return the specific dissipation rate, i.e. 0 for Stokes flow
-        virtual tmp<volScalarField> omega() const;
-
-        //- Return the Reynolds stress tensor, i.e. 0 for Stokes flow
-        virtual tmp<volSymmTensorField> R() const;
 
         //- Correct the Stokes viscosity
         virtual void correct();
