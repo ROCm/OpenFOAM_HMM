@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +82,12 @@ protected:
         //- Reference to the random number generator
         Random& rndGen_;
 
+        //- Minimum of the distribution
+        scalar minValue_;
+
+        //- Maximum of the distribution
+        scalar maxValue_;
+
 
     // Protected Member Functions
 
@@ -142,11 +149,11 @@ public:
         //- Sample the distributionModel
         virtual scalar sample() const = 0;
 
-        //- Return the minimum value
-        virtual scalar minValue() const = 0;
+        //- Return the minimum of the distribution
+        virtual scalar minValue() const;
 
-        //- Return the maximum value
-        virtual scalar maxValue() const = 0;
+        //- Return the maximum of the distribution
+        virtual scalar maxValue() const;
 
         //- Return the maximum value
         virtual scalar meanValue() const = 0;

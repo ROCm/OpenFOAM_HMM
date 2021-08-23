@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2020 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +49,6 @@ Foam::distributionModels::RosinRammler::RosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
     d_(distributionModelDict_.get<scalar>("d")),
     n_(distributionModelDict_.get<scalar>("n"))
 {
@@ -60,8 +59,6 @@ Foam::distributionModels::RosinRammler::RosinRammler
 Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
     d_(p.d_),
     n_(p.n_)
 {}
@@ -81,18 +78,6 @@ Foam::scalar Foam::distributionModels::RosinRammler::sample() const
     const scalar K = 1 - exp(- pow(maxValue_/d_, n_) + minValueByDPowN);
     const scalar y = rndGen_.sample01<scalar>();
     return d_*pow(minValueByDPowN - log(1 - K*y), 1/n_);
-}
-
-
-Foam::scalar Foam::distributionModels::RosinRammler::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::RosinRammler::maxValue() const
-{
-    return maxValue_;
 }
 
 

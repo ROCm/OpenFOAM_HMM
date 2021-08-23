@@ -50,8 +50,6 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
     d_(distributionModelDict_.get<scalar>("d")),
     n_(distributionModelDict_.get<scalar>("n"))
 {
@@ -65,8 +63,6 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
     d_(p.d_),
     n_(p.n_)
 {}
@@ -94,18 +90,6 @@ Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
     } while (d < minValue_ || d > maxValue_);
 
     return d;
-}
-
-
-Foam::scalar Foam::distributionModels::massRosinRammler::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::massRosinRammler::maxValue() const
-{
-    return maxValue_;
 }
 
 

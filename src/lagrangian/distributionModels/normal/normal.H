@@ -63,13 +63,6 @@ class normal
 {
     // Private Data
 
-        //- Distribution minimum
-        scalar minValue_;
-
-        //- Distribution maximum
-        scalar maxValue_;
-
-
         // Model coefficients
 
             scalar expectation_;
@@ -107,12 +100,6 @@ public:
 
         //- Sample the distributionModel
         virtual scalar sample() const;
-
-        //- Return the minimum value
-        virtual scalar minValue() const;
-
-        //- Return the maximum value
-        virtual scalar maxValue() const;
 
         //- Return the mean value
         virtual scalar meanValue() const;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,12 +73,6 @@ class massRosinRammler
 {
     // Private data
 
-        //- Distribution minimum
-        scalar minValue_;
-
-        //- Distribution maximum
-        scalar maxValue_;
-
         //- Characteristic droplet size
         scalar d_;
 
@@ -115,12 +110,6 @@ public:
 
         //- Sample the distributionModel
         virtual scalar sample() const;
-
-        //- Return the minimum value
-        virtual scalar minValue() const;
-
-        //- Return the maximum value
-        virtual scalar maxValue() const;
 
         //- Return the mean value
         virtual scalar meanValue() const;

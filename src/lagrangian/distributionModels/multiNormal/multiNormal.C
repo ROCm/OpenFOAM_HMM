@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +49,6 @@ Foam::distributionModels::multiNormal::multiNormal
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
     range_(maxValue_ - minValue_),
     expectation_(distributionModelDict_.lookup("expectation")),
     variance_(distributionModelDict_.lookup("variance")),
@@ -86,8 +85,6 @@ Foam::distributionModels::multiNormal::multiNormal
 Foam::distributionModels::multiNormal::multiNormal(const multiNormal& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
     range_(p.range_),
     expectation_(p.expectation_),
     variance_(p.variance_),
@@ -132,18 +129,6 @@ Foam::scalar Foam::distributionModels::multiNormal::sample() const
     }
 
     return x;
-}
-
-
-Foam::scalar Foam::distributionModels::multiNormal::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::multiNormal::maxValue() const
-{
-    return maxValue_;
 }
 
 

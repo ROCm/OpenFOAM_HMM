@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,14 +90,10 @@ Foam::distributionModels::binned::binned
     xy_(distributionModelDict_.lookup("distribution")),
     meanValue_(0)
 {
-    if (maxValue() < minValue())
-    {
-        FatalErrorInFunction
-            << "Maximum value is smaller than the minimum value:"
-            << "    maxValue = " << maxValue()
-            << ", minValue = " << minValue()
-            << exit(FatalError);
-    }
+    minValue_ = xy_[0][0];
+    maxValue_ = xy_[xy_.size()-1][0];
+
+    check();
 
     initialise();
 }
@@ -114,16 +110,16 @@ Foam::distributionModels::binned::binned
     xy_(),
     meanValue_(0)
 {
-    scalar minValue = GREAT;
-    scalar maxValue = -GREAT;
+    minValue_ = GREAT;
+    maxValue_ = -GREAT;
     forAll(sampleData, i)
     {
-        minValue = min(minValue, sampleData[i]);
-        maxValue = max(maxValue, sampleData[i]);
+        minValue_ = min(minValue_, sampleData[i]);
+        maxValue_ = max(maxValue_, sampleData[i]);
     }
 
-    const label bin0 = floor(minValue/binWidth);
-    const label bin1 = ceil(maxValue/binWidth);
+    const label bin0 = floor(minValue_/binWidth);
+    const label bin1 = ceil(maxValue_/binWidth);
     const label nBin = bin1 - bin0;
 
     if (nBin == 0)
@@ -197,18 +193,6 @@ Foam::scalar Foam::distributionModels::binned::sample() const
         }
     }
 
-    return xy_.last()[0];
-}
-
-
-Foam::scalar Foam::distributionModels::binned::minValue() const
-{
-    return xy_.first()[0];
-}
-
-
-Foam::scalar Foam::distributionModels::binned::maxValue() const
-{
     return xy_.last()[0];
 }
 

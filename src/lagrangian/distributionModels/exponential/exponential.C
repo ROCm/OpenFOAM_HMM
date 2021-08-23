@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +49,6 @@ Foam::distributionModels::exponential::exponential
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
     lambda_(distributionModelDict_.get<scalar>("lambda"))
 {
     check();
@@ -59,8 +58,6 @@ Foam::distributionModels::exponential::exponential
 Foam::distributionModels::exponential::exponential(const exponential& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
     lambda_(p.lambda_)
 {}
 
@@ -78,18 +75,6 @@ Foam::scalar Foam::distributionModels::exponential::sample() const
     scalar y = rndGen_.sample01<scalar>();
     scalar K = exp(-lambda_*maxValue_) - exp(-lambda_*minValue_);
     return -(1.0/lambda_)*log(exp(-lambda_*minValue_) + y*K);
-}
-
-
-Foam::scalar Foam::distributionModels::exponential::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::exponential::maxValue() const
-{
-    return maxValue_;
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,15 +55,6 @@ class uniform
 :
     public distributionModel
 {
-    // Private data
-
-        //- Distribution minimum
-        scalar minValue_;
-
-        //- Distribution maximum
-        scalar maxValue_;
-
-
 public:
 
     //- Runtime type information
@@ -92,12 +84,6 @@ public:
 
         //- Sample the distributionModel
         virtual scalar sample() const;
-
-        //- Return the minimum value
-        virtual scalar minValue() const;
-
-        //- Return the maximum value
-        virtual scalar maxValue() const;
 
         //- Return the mean value
         virtual scalar meanValue() const;

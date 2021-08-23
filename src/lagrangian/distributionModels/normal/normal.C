@@ -50,35 +50,17 @@ Foam::distributionModels::normal::normal
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
     expectation_(distributionModelDict_.get<scalar>("expectation")),
     variance_(distributionModelDict_.get<scalar>("variance")),
     a_(0.147)
 {
-    if (minValue_ < 0)
-    {
-        FatalErrorInFunction
-            << "Minimum value must be greater than zero. "
-            << "Supplied minValue = " << minValue_
-            << abort(FatalError);
-    }
-
-    if (maxValue_ < minValue_)
-    {
-        FatalErrorInFunction
-            << "Maximum value is smaller than the minimum value:"
-            << "    maxValue = " << maxValue_ << ", minValue = " << minValue_
-            << abort(FatalError);
-    }
+    check();
 }
 
 
 Foam::distributionModels::normal::normal(const normal& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
     expectation_(p.expectation_),
     variance_(p.variance_),
     a_(p.a_)
@@ -108,18 +90,6 @@ Foam::scalar Foam::distributionModels::normal::sample() const
     x = min(max(x, minValue_), maxValue_);
 
     return x;
-}
-
-
-Foam::scalar Foam::distributionModels::normal::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::normal::maxValue() const
-{
-    return maxValue_;
 }
 
 

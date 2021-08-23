@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,6 +89,9 @@ Foam::distributionModels::general::general
     meanValue_(0.0),
     integral_()
 {
+    minValue_ = xy_[0][0];
+    maxValue_ = xy_[nEntries_-1][0];
+
     check();
 
     initialise();
@@ -107,16 +110,16 @@ Foam::distributionModels::general::general
     meanValue_(0.0),
     integral_()
 {
-    scalar minValue = GREAT;
-    scalar maxValue = -GREAT;
+    minValue_ = GREAT;
+    maxValue_ = -GREAT;
     forAll(sampleData, i)
     {
-        minValue = min(minValue, sampleData[i]);
-        maxValue = max(maxValue, sampleData[i]);
+        minValue_ = min(minValue_, sampleData[i]);
+        maxValue_ = max(maxValue_, sampleData[i]);
     }
 
-    label bin0 = floor(minValue/binWidth);
-    label bin1 = ceil(maxValue/binWidth);
+    label bin0 = floor(minValue_/binWidth);
+    label bin1 = ceil(maxValue_/binWidth);
     label nEntries = bin1 - bin0;
 
     if (nEntries == 0)
@@ -208,18 +211,6 @@ Foam::scalar Foam::distributionModels::general::sample() const
     }
 
     return x;
-}
-
-
-Foam::scalar Foam::distributionModels::general::minValue() const
-{
-    return xy_.first()[0];
-}
-
-
-Foam::scalar Foam::distributionModels::general::maxValue() const
-{
-    return xy_.last()[0];
 }
 
 
