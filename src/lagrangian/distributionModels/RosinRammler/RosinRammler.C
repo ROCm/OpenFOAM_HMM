@@ -52,6 +52,26 @@ Foam::distributionModels::RosinRammler::RosinRammler
     d_(distributionModelDict_.get<scalar>("d")),
     n_(distributionModelDict_.get<scalar>("n"))
 {
+    const word parcelBasisType =
+        dict.getOrDefault<word>("parcelBasisType", "none");
+
+    if (parcelBasisType == "mass")
+    {
+        WarningInFunction
+            << "Selected parcel basis type: " << parcelBasisType << nl
+            << "    Please consider to use massRosinRammler distribution model"
+            << endl;
+    }
+
+    if (d_ < VSMALL || n_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Scale/Shape parameter cannot be equal to or less than zero:"
+            << "    d = " << d_
+            << "    n = " << n_
+            << exit(FatalError);
+    }
+
     check();
 }
 

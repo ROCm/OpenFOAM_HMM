@@ -54,6 +54,14 @@ Foam::distributionModels::normal::normal
     variance_(distributionModelDict_.get<scalar>("variance")),
     a_(0.147)
 {
+    if (mag(variance_) == 0)
+    {
+        FatalErrorInFunction
+            << "Standard deviation cannot be zero." << nl
+            << "    variance = " << variance_ << nl
+            << exit(FatalError);
+    }
+
     check();
 }
 

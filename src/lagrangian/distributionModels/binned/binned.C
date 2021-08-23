@@ -58,6 +58,16 @@ void Foam::distributionModels::binned::initialise()
 
     // Normalise
     scalar sumProb = xy_.last()[1];
+
+    if (sumProb < VSMALL)
+    {
+        FatalErrorInFunction
+            << type() << "distribution: "
+            << "The sum of elements in the second column cannot be zero." << nl
+            << "sum = " << sumProb
+            << exit(FatalError);
+    }
+
     forAll(xy_, bini)
     {
         xy_[bini][1] /= sumProb;

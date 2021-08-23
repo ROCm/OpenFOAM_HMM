@@ -51,6 +51,14 @@ Foam::distributionModels::exponential::exponential
     distributionModel(typeName, dict, rndGen),
     lambda_(distributionModelDict_.get<scalar>("lambda"))
 {
+    if (lambda_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Rate parameter cannot be equal to or less than zero:" << nl
+            << "    lambda = " << lambda_
+            << exit(FatalError);
+    }
+
     check();
 }
 

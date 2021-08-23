@@ -49,7 +49,15 @@ Foam::distributionModels::fixedValue::fixedValue
 :
     distributionModel(typeName, dict, rndGen),
     value_(distributionModelDict_.get<scalar>("value"))
-{}
+{
+    if (value_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Fixed value cannot be equal to or less than zero:" << nl
+            << "    value = " << value_
+            << exit(FatalError);
+    }
+}
 
 
 Foam::distributionModels::fixedValue::fixedValue(const fixedValue& p)

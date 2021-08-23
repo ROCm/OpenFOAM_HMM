@@ -53,6 +53,15 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
     d_(distributionModelDict_.get<scalar>("d")),
     n_(distributionModelDict_.get<scalar>("n"))
 {
+    if (d_ < VSMALL || n_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Scale/Shape parameter cannot be equal to or less than zero:"
+            << "    d = " << d_
+            << "    n = " << n_
+            << exit(FatalError);
+    }
+
     check();
 }
 
