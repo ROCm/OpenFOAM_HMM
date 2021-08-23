@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,9 @@ public:
     {
         CALCULATED = 0,     // normal operation
         INTERPOLATED = 1,   // interpolated
-        HOLE = 2            // hole
+        HOLE = 2,           // hole
+        SPECIAL = 3,        // hole that is donor
+        POROUS = 4          // tag for special treatment due to lack of donors
     };
 
 
@@ -91,11 +93,11 @@ protected:
         //- Set of fields that should not be interpolated
         wordHashSet nonInterpolatedFields_;
 
+        //- Dictionary of motion control parameters
+        const dictionary dict_;
+
 
     // Protected Member Functions
-
-        //- Count occurrences (in parallel)
-        static labelList count(const label size, const labelUList& lst);
 
         //- Helper: create volScalarField for postprocessing.
         template<class Type>
@@ -105,6 +107,9 @@ protected:
             const word& name,
             const UList<Type>&
         );
+
+        //- Helper: strip off trailing _0
+        static word baseName(const word& name);
 
 
 private:
@@ -213,6 +218,9 @@ public:
             return zoneID(mesh_);
         }
 
+        //- Count occurrences (in parallel)
+        static labelList count(const label size, const labelUList& lst);
+
         //- Helper: create cell-cell addressing in global numbering
         static void globalCellCells
         (
@@ -223,8 +231,89 @@ public:
             labelListList& cellCells,
             pointListList& cellCellCentres
         );
+
+        //- Interpolation of acceptor cells from donor cells
+        template<class T>
+        static void interpolate
+        (
+            Field<T>& psi,
+            const fvMesh& mesh,
+            const cellCellStencil& overlap,
+            const List<scalarList>& wghts
+        );
+
+        //- Explicit interpolation of acceptor cells from donor cells. Looks
+        //- up cellCellStencil.
+        template<class T>
+        void interpolate(const fvMesh& mesh, Field<T>& psi) const;
+
+        //- Explicit interpolation of acceptor cells from donor cells with
+        //- boundary condition handling
+        template<class GeoField>
+        void interpolate(GeoField& psi) const;
+
+        //- Explicit interpolation of all registered fields. No boundary
+        //- conditions. Excludes selected fields (and their old-time fields)
+        template<class GeoField>
+        void interpolate
+        (
+            const fvMesh& mesh,
+            const wordHashSet& suppressed
+        ) const;
+
+        //- Version of correctBoundaryConditions that excludes 'overset' bcs
+        template<class GeoField, class SuppressBC>
+        static void correctBoundaryConditions(GeoField& psi);
+
+        //- Return info proxy.
+        //- Used to print stencil information to a stream
+        InfoProxy<cellCellStencil> info() const
+        {
+            return *this;
+        }
+
+        //- Surround holes with layer(s) of interpolated cells
+        void walkFront
+        (
+            const globalIndex& globalCells,
+            const label layerRelax,
+            const labelListList& allStencil,
+            labelList& allCellTypes,
+            scalarField& allWeight,
+            const scalarList& compactCellVol,
+            const labelListList& compactStencil,
+            const labelList& zoneID,
+            const label holeLayers,
+            const label useLayer
+        ) const;
+
+        //- Set up front using allCellTypes
+        void setUpFront
+        (
+            const labelList& allCellTypes,
+            bitSet& isFront
+
+        ) const;
+
+        //- Set up front on overset patches
+        void setUpFrontOnOversetPatch
+        (
+            const labelList& allCellTypes,
+            bitSet& isFront
+        ) const;
+
+        //- Seed faces of cell with wantedFraction (if higher than current)
+        void seedCell
+        (
+            const label cellI,
+            const scalar wantedFraction,
+            bitSet& isFront,
+            scalarField& fraction
+        ) const;
 };
 
+template<>
+Ostream& operator<<(Ostream& os, const InfoProxy<cellCellStencil>& ic);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

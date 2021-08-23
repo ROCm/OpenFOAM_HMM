@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,14 +49,11 @@ Description
 #include "turbulentTransportModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
-#include "CorrectPhi.H"
 #include "fvcSmooth.H"
 #include "cellCellStencilObject.H"
 #include "localMin.H"
-#include "interpolationCellPoint.H"
-#include "transform.H"
-#include "fvMeshSubset.H"
 #include "oversetAdjustPhi.H"
+#include "oversetPatchPhiErr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,8 +73,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
-    pimpleControl pimple(mesh);
-    #include "createTimeControls.H"
+
     #include "createDyMControls.H"
     #include "createFields.H"
     #include "createAlphaFluxes.H"
@@ -97,11 +93,8 @@ int main(int argc, char *argv[])
         dimensionedScalar("rAUf", dimTime/rho.dimensions(), 1.0)
     );
 
-    if (correctPhi)
-    {
-        #include "correctPhi.H"
-    }
     #include "createUf.H"
+    #include "createControls.H"
 
     #include "setCellMask.H"
     #include "setInterpolatedCells.H"
@@ -119,7 +112,8 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readControls.H"
+        #include "readDyMControls.H"
+        #include "readOversetDyMControls.H"
 
         if (LTS)
         {
@@ -158,49 +152,16 @@ int main(int argc, char *argv[])
                         talphaPhi1Corr0.clear();
                     }
 
-                    gh = (g & mesh.C()) - ghRef;
-                    ghf = (g & mesh.Cf()) - ghRef;
-
                     // Update cellMask field for blocking out hole cells
                     #include "setCellMask.H"
                     #include "setInterpolatedCells.H"
+                    #include "correctPhiFaceMask.H"
 
-                    const surfaceScalarField faceMaskOld
-                    (
-                        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
-                    );
+                    gh = (g & mesh.C()) - ghRef;
+                    ghf = (g & mesh.Cf()) - ghRef;
 
-                    // Zero Uf on old faceMask (H-I)
-                    Uf *= faceMaskOld;
-
-                    const surfaceVectorField Uint(fvc::interpolate(U));
-                    // Update Uf and phi on new C-I faces
-                    Uf += (1-faceMaskOld)*Uint;
-
-                    // Update Uf boundary
-                    forAll(Uf.boundaryField(), patchI)
-                    {
-                        Uf.boundaryFieldRef()[patchI] =
-                            Uint.boundaryField()[patchI];
-                    }
-
-                    phi = mesh.Sf() & Uf;
-
-                    // Correct phi on individual regions
-                    if (correctPhi)
-                    {
-                         #include "correctPhi.H"
-                    }
 
                     mixture.correct();
-
-                    // Zero phi on current H-I
-                    const surfaceScalarField faceMask
-                    (
-                        localMin<scalar>(mesh).interpolate(cellMask)
-                    );
-                    phi *= faceMask;
-                    U   *= cellMask;
 
                     // Make the flux relative to the mesh motion
                     fvc::makeRelative(phi, U);
@@ -213,14 +174,14 @@ int main(int argc, char *argv[])
                 }
             }
 
+            if (adjustFringe)
+            {
+                oversetAdjustPhi(phi, U, zoneIdMass);
+            }
 
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
 
-            const surfaceScalarField faceMask
-            (
-                localMin<scalar>(mesh).interpolate(cellMask)
-            );
             rhoPhi *= faceMask;
 
             mixture.correct();

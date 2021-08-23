@@ -69,6 +69,8 @@ mesh.setFluxRequired(p.name());
 
 // Mask field for zeroing out contributions on hole cells
 #include "createCellMask.H"
+// Create bool field with interpolated cells
+#include "createInterpolatedCells.H"
 
 Info<< "Creating turbulence model\n" << endl;
 autoPtr<compressible::turbulenceModel> turbulence

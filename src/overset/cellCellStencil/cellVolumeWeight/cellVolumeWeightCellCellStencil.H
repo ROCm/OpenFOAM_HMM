@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,15 +90,11 @@ protected:
         //- Amount of interpolation
         volScalarField cellInterpolationWeight_;
 
+        //- Allow interpolared as donors
+        const bool allowInterpolatedDonors_;
 
    // Protected Member Functions
 
-        void walkFront
-        (
-            const scalar layerRelax,
-            labelList& allCellTypes,
-            scalarField& allWeight
-        ) const;
 
         //- Find cells next to cells of type PATCH
         void findHoles

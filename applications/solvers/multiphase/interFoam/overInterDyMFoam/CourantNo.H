@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,10 @@ scalar meanCoNum = 0.0;
 
 if (mesh.nInternalFaces())
 {
-    surfaceScalarField phiMask(localMin<scalar>(mesh).interpolate(cellMask));
+    surfaceScalarField phiMask
+    (
+        localMin<scalar>(mesh).interpolate(cellMask + interpolatedCells)
+    );
 
     scalarField sumPhi
     (

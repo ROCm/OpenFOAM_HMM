@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "volFields.H"
 #include "syncTools.H"
 #include "globalIndex.H"
+#include "oversetFvPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,6 +49,8 @@ Foam::cellCellStencil::cellTypeNames_
     { cellType::CALCULATED, "calculated" },
     { cellType::INTERPOLATED, "interpolated" },
     { cellType::HOLE, "hole" },
+    { cellType::SPECIAL, "special" },
+    { cellType::POROUS, "porous" },
 });
 
 
@@ -96,6 +99,17 @@ Foam::cellCellStencil::~cellCellStencil()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::word Foam::cellCellStencil::baseName(const word& name)
+{
+    if (name.ends_with("_0"))
+    {
+        return baseName(name.substr(0, name.size() - 2));
+    }
+
+    return name;
+}
+
+
 const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
 {
     if (!mesh.foundObject<labelIOList>("zoneID"))
@@ -128,9 +142,9 @@ const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
             ),
             mesh
         );
-        forAll(volZoneID, cellI)
+        forAll(volZoneID, celli)
         {
-            zoneID[cellI] = label(volZoneID[cellI]);
+            zoneID[celli] = label(volZoneID[celli]);
         }
 
         zoneIDPtr->store();
@@ -296,5 +310,512 @@ void Foam::cellCellStencil::globalCellCells
     }
 }
 
+void Foam::cellCellStencil::seedCell
+(
+    const label celli,
+    const scalar wantedFraction,
+    bitSet& isFront,
+    scalarField& fraction
+) const
+{
+    const cell& cFaces = mesh_.cells()[celli];
+    forAll(cFaces, i)
+    {
+        const label nbrFacei = cFaces[i];
+        if (fraction[nbrFacei] < wantedFraction)
+        {
+            fraction[nbrFacei] = wantedFraction;
+            isFront.set(nbrFacei);
+        }
+    }
+}
+
+
+void Foam::cellCellStencil::setUpFront
+(
+    const labelList& allCellTypes,
+    bitSet& isFront
+) const
+{
+    const labelList& own = mesh_.faceOwner();
+    const labelList& nei = mesh_.faceNeighbour();
+
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
+    {
+        const label ownType = allCellTypes[own[facei]];
+        const label neiType = allCellTypes[nei[facei]];
+        if
+        (
+            (ownType == HOLE && neiType != HOLE)
+         || (ownType != HOLE && neiType == HOLE)
+        )
+        {
+            isFront.set(facei);
+        }
+    }
+
+    labelList nbrCellTypes;
+    syncTools::swapBoundaryCellList(mesh_, allCellTypes, nbrCellTypes);
+
+    for
+    (
+        label facei = mesh_.nInternalFaces();
+        facei < mesh_.nFaces();
+        facei++
+    )
+    {
+        const label ownType = allCellTypes[own[facei]];
+        const label neiType = nbrCellTypes[facei-mesh_.nInternalFaces()];
+
+        if
+        (
+            (ownType == HOLE && neiType != HOLE)
+         || (ownType != HOLE && neiType == HOLE)
+        )
+        {
+            isFront.set(facei);
+        }
+    }
+}
+
+
+void Foam::cellCellStencil::setUpFrontOnOversetPatch
+(
+    const labelList& allCellTypes,
+    bitSet& isFront
+) const
+{
+    const fvBoundaryMesh& fvm = mesh_.boundary();
+    // 'overset' patches
+    forAll(fvm, patchi)
+    {
+        if (isA<oversetFvPatch>(fvm[patchi]))
+        {
+            const labelList& fc = fvm[patchi].faceCells();
+            forAll(fc, i)
+            {
+                const label celli = fc[i];
+                if (allCellTypes[celli] == INTERPOLATED)
+                {
+                    // Note that acceptors might have been marked hole if
+                    // there are no donors in which case we do not want to
+                    // walk this out. This is an extreme situation.
+                    isFront.set(fvm[patchi].start()+i);
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::cellCellStencil::walkFront
+(
+    const globalIndex& globalCells,
+    const label layerRelax,
+    const labelListList& allStencil,
+    labelList& allCellTypes,
+    scalarField& allWeight,
+    const scalarList& compactCellVol,
+    const labelListList& compactStencil,
+    const labelList& zoneID,
+    const label holeLayers,
+    const label useLayer
+) const
+{
+    if (useLayer > holeLayers)
+    {
+        FatalErrorInFunction<< "useLayer: " << useLayer
+            << " is larger than : " <<  holeLayers
+            << abort(FatalError);
+    }
+
+    if (useLayer == 0)
+    {
+        FatalErrorInFunction<< "useLayer: " << useLayer
+            << " can not be zero."
+            << abort(FatalError);
+    }
+
+    // Current front
+    bitSet isFront(mesh_.nFaces());
+
+    // List of cellTYpes
+    DynamicList<labelList> dataSet;
+    // List of cellTypes for increasing layers
+    DynamicList<scalarField> dAlllWeight;
+    // List of average volumen ration interpolated/donor
+    DynamicList<scalar> daverageVolRatio;
+
+    // Counting holes of different layers
+    DynamicList<label> dHoles;
+
+    const scalarField& V = mesh_.V();
+
+    // Current layer
+    labelField nLayer(allCellTypes.size(), 0);
+
+    for (label currLayer = 1; currLayer < holeLayers+1; ++currLayer)
+    {
+        // Set up original front
+        isFront = false;
+
+        setUpFront(allCellTypes, isFront);
+
+        labelList allCellTypesWork(allCellTypes);
+
+        bitSet isFrontWork(isFront);
+        label nCurrLayer = currLayer;
+
+        while (nCurrLayer > 1 && returnReduce(isFrontWork.any(), orOp<bool>()))
+        {
+            bitSet newIsFront(mesh_.nFaces());
+            forAll(isFrontWork, facei)
+            {
+                if (isFrontWork.test(facei))
+                {
+                    const label own = mesh_.faceOwner()[facei];
+
+                    if (allCellTypesWork[own] != HOLE)
+                    {
+                        allCellTypesWork[own] = HOLE;
+                        newIsFront.set(mesh_.cells()[own]);
+                    }
+
+                    if (mesh_.isInternalFace(facei))
+                    {
+                        const label nei = mesh_.faceNeighbour()[facei];
+                        if (allCellTypesWork[nei] != HOLE)
+                        {
+                            allCellTypesWork[nei] = HOLE;
+                            newIsFront.set(mesh_.cells()[nei]);
+                        }
+                    }
+                }
+            }
+            syncTools::syncFaceList(mesh_, newIsFront, orEqOp<unsigned int>());
+
+            isFrontWork.transfer(newIsFront);
+
+            nCurrLayer--;
+        }
+
+
+        if ((debug&2) && (mesh_.time().outputTime()))
+        {
+            tmp<volScalarField> tfld
+            (
+                createField
+                (
+                    mesh_,
+                    "allCellTypesWork_Holes" + name(currLayer),
+                    allCellTypesWork
+                )
+            );
+            tfld().write();
+        }
+
+        if (currLayer == 1)
+        {
+            setUpFrontOnOversetPatch(allCellTypes, isFront);
+        }
+
+        if (currLayer > 1)
+        {
+            isFront = false;
+            setUpFrontOnOversetPatch(allCellTypesWork, isFront);
+            setUpFront(allCellTypesWork, isFront);
+        }
+
+        // Current interpolation fraction
+        scalarField fraction(mesh_.nFaces(), Zero);
+
+        // Ratio between Inter/donor
+        scalarField volRatio(allCellTypes.size(), Zero);
+
+        forAll(isFront, facei)
+        {
+            if (isFront.test(facei))
+            {
+                fraction[facei] = 1.0;
+            }
+        }
+
+        scalarField allWeightWork(allCellTypes.size(), Zero);
+        bitSet nHoles(allCellTypes.size());
+
+        while (returnReduce(isFront.any(), orOp<bool>()))
+        {
+            // Interpolate cells on front
+            bitSet newIsFront(mesh_.nFaces());
+            scalarField newFraction(fraction);
+
+            forAll(isFront, facei)
+            {
+                if (isFront.test(facei))
+                {
+                    const label own = mesh_.faceOwner()[facei];
+
+                    if (allCellTypesWork[own] != HOLE)
+                    {
+                        if (allWeightWork[own] < fraction[facei])
+                        {
+                            // Cell wants to become interpolated (if sufficient
+                            // stencil, otherwise becomes hole)
+                            if (allStencil[own].size())
+                            {
+                                nLayer[own] = currLayer;
+
+                                allWeightWork[own] = fraction[facei];
+                                allCellTypesWork[own] = INTERPOLATED;
+
+                                const label donorId = compactStencil[own][0];
+
+                                volRatio[own] = V[own]/compactCellVol[donorId];
+
+                                seedCell
+                                (
+                                    own,
+                                    fraction[facei]-layerRelax,
+                                    newIsFront,
+                                    newFraction
+                                );
+
+                                nHoles[own] = true;
+                            }
+                            else
+                            {
+                                allWeightWork[own] = 0.0;
+                                allCellTypesWork[own] = HOLE;
+                                // Add faces of cell as new front
+                                seedCell
+                                (
+                                    own,
+                                    1.0,
+                                    newIsFront,
+                                    newFraction
+                                );
+                            }
+                        }
+                    }
+                    if (mesh_.isInternalFace(facei))
+                    {
+                        label nei = mesh_.faceNeighbour()[facei];
+                        if (allCellTypesWork[nei] != HOLE)
+                        {
+                            if (allWeightWork[nei] < fraction[facei])
+                            {
+                                if (allStencil[nei].size())
+                                {
+                                    nLayer[nei] = currLayer;
+
+                                    allWeightWork[nei] = fraction[facei];
+                                    allCellTypesWork[nei] = INTERPOLATED;
+
+                                    const label donorId =  compactStencil[nei][0];
+
+                                    volRatio[nei] = V[nei]/compactCellVol[donorId];
+
+                                    seedCell
+                                    (
+                                        nei,
+                                        fraction[facei]-layerRelax,
+                                        newIsFront,
+                                        newFraction
+                                    );
+                                }
+                                else
+                                {
+                                    allWeightWork[nei] = 0.0;
+                                    allCellTypesWork[nei] = HOLE;
+                                    nHoles[nei] = true;
+                                    seedCell
+                                    (
+                                        nei,
+                                        1.0,
+                                        newIsFront,
+                                        newFraction
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            syncTools::syncFaceList(mesh_, newIsFront, orEqOp<unsigned int>());
+            syncTools::syncFaceList(mesh_, newFraction, maxEqOp<scalar>());
+
+            isFront.transfer(newIsFront);
+            fraction.transfer(newFraction);
+        }
+
+        if ((debug&2) && (mesh_.time().outputTime()))
+        {
+            tmp<volScalarField> tfld
+            (
+                createField
+                (
+                    mesh_,
+                    "allCellTypesWork_Layers" + name(currLayer),
+                    allCellTypesWork
+                )
+            );
+            tfld().write();
+        }
+
+        dAlllWeight.append(allWeightWork);
+        dataSet.append(allCellTypesWork);
+
+        // Counting interpolated cells
+        label count = 1;
+        forAll (volRatio, i)
+        {
+            if (volRatio[i] > 0)
+            {
+                count++;
+            }
+        }
+        label nCount(count);
+        reduce(nCount, sumOp<label>());
+
+        const scalar aveVol = mag(gSum(volRatio));
+
+        daverageVolRatio.append(aveVol/nCount);
+
+        // Check holes number. A sudden increase occurs when the walk leaks
+        // out from the obstacle
+        label nTotalHoles(nHoles.count());
+        reduce(nTotalHoles, sumOp<label>());
+        dHoles.append(nTotalHoles);
+
+        // Check the increase between this layer and the last one
+        // if over 50% breaks the layer loop.
+        if
+        (
+            (currLayer > 1)
+          & (nTotalHoles > 2.0*dHoles[currLayer - 1])
+        )
+        {
+            break;
+        }
+    }
+
+
+    if ((debug&2) && (mesh_.time().outputTime()))
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "walkFront_layers", nLayer)
+        );
+        tfld().write();
+    }
+
+    // Try to find the best averageVolRatio the further from the initial set
+    // As this one is next to HOLES
+    scalarList averageVolRatio;
+    averageVolRatio.transfer(daverageVolRatio);
+    label minVolId = findMin(averageVolRatio);
+
+    if (useLayer > -1)
+    {
+        Info<< nl << " Number of layers : " << averageVolRatio.size() << nl
+            << " Average volumetric ratio : " << averageVolRatio << nl
+            << " Number of holes cells : " << dHoles << nl
+            << " Using layer : " << useLayer <<  nl << endl;
+    }
+
+    if (useLayer != -1)
+    {
+        minVolId = useLayer - 1;
+    }
+
+    allCellTypes.transfer(dataSet[minVolId]);
+    allWeight.transfer(dAlllWeight[minVolId]);
+}
+
+
+// * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
+
+template<>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<cellCellStencil>& ic
+)
+{
+    const cellCellStencil& e = ic.t_;
+
+    const labelUList& cellTypes = e.cellTypes();
+    const labelUList& interpolationCells = e.interpolationCells();
+    const labelListList& cellStencil = e.cellStencil();
+
+    labelList nCells(cellCellStencil::count(4, cellTypes));
+
+    label nInvalidInterpolated = 0;
+    label nLocal = 0;
+    label nMixed = 0;
+    label nRemote = 0;
+    forAll(interpolationCells, i)
+    {
+        label celli = interpolationCells[i];
+        const labelList& slots = cellStencil[celli];
+
+        if (slots.empty())
+        {
+            nInvalidInterpolated++;
+        }
+
+        bool hasLocal = false;
+        bool hasRemote = false;
+
+        forAll(slots, sloti)
+        {
+            if (slots[sloti] >= cellTypes.size())
+            {
+                hasRemote = true;
+            }
+            else
+            {
+                hasLocal = true;
+            }
+        }
+
+        if (hasRemote)
+        {
+            if (!hasLocal)
+            {
+                nRemote++;
+            }
+            else
+            {
+                nMixed++;
+            }
+        }
+        else if (hasLocal)
+        {
+            nLocal++;
+        }
+    }
+    reduce(nLocal, sumOp<label>());
+    reduce(nMixed, sumOp<label>());
+    reduce(nRemote, sumOp<label>());
+    reduce(nInvalidInterpolated, sumOp<label>());
+
+    Info<< "Overset analysis : nCells : "
+        << returnReduce(cellTypes.size(), sumOp<label>()) << nl
+        << incrIndent
+        << indent << "calculated   : " << nCells[cellCellStencil::CALCULATED]
+        << nl
+        << indent << "interpolated : " << nCells[cellCellStencil::INTERPOLATED]
+        << " (interpolated from local:" << nLocal
+        << "  mixed local/remote:" << nMixed
+        << "  remote:" << nRemote
+        << "  special:" << nInvalidInterpolated << ")" << nl
+        << indent << "hole         : " << nCells[cellCellStencil::HOLE] << nl
+        << indent << "special      : " << nCells[cellCellStencil::SPECIAL] << nl
+        << decrIndent << endl;
+
+    return os;
+}
 
 // ************************************************************************* //

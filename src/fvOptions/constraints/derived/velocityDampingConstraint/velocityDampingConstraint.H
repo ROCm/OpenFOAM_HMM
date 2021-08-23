@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,7 @@ Usage
 
         // Optional entries (runtime modifiable)
         UNames          (<Uname1> <Uname2> ... <UnameN>);
+        C               <scalar>;
 
         // Conditional optional entries (runtime modifiable)
 
@@ -80,6 +81,7 @@ Usage
       UMax      | Maximum velocity magnitude            | scalar | yes   | -
       UNames    | Names of operand velocity fields      | wordList | no  | -
       U         | Name of operand velocity field        | word   | cndtnl | U
+      C         | Model factor                          | scalar | no    | 1
     \endtable
 
     The inherited entries are elaborated in:
@@ -126,6 +128,9 @@ protected:
 
         //- Maximum velocity magnitude
         scalar UMax_;
+
+        //- Model factor
+        scalar C_;
 
 
     // Protected Member Functions

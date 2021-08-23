@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd
+    Copyright (C) 2017-2022 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,7 +149,6 @@ int main(int argc, char *argv[])
 
     mesh.update();
 
-    surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
 
     // Since solver contains no time loop it would never execute
     // function objects so do it ourselves

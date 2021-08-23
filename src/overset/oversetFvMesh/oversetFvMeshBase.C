@@ -25,28 +25,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynamicOversetFvMesh.H"
+#include "oversetFvMeshBase.H"
 #include "addToRunTimeSelectionTable.H"
 #include "cellCellStencilObject.H"
 #include "zeroGradientFvPatchFields.H"
 #include "lduPrimitiveProcessorInterface.H"
 #include "globalIndex.H"
+#include "GAMGAgglomeration.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(dynamicOversetFvMesh, 0);
-    addToRunTimeSelectionTable(dynamicFvMesh, dynamicOversetFvMesh, IOobject);
-    addToRunTimeSelectionTable(dynamicFvMesh, dynamicOversetFvMesh, doInit);
+    defineTypeNameAndDebug(oversetFvMeshBase, 0);
 }
 
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::dynamicOversetFvMesh::updateAddressing() const
+bool Foam::oversetFvMeshBase::updateAddressing() const
 {
-    const cellCellStencilObject& overlap = Stencil::New(*this);
+    const cellCellStencilObject& overlap = Stencil::New(mesh_);
 
     // The (processor-local part of the) stencil determines the local
     // faces to add to the matrix. tbd: parallel
@@ -54,7 +53,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 
     // Get the base addressing
     //const lduAddressing& baseAddr = dynamicMotionSolverFvMesh::lduAddr();
-    const lduAddressing& baseAddr = dynamicFvMesh::lduAddr();
+    const lduAddressing& baseAddr = mesh_.fvMesh::lduAddr();
 
     // Add to the base addressing
     labelList lowerAddr;
@@ -89,12 +88,11 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 
     if (debug)
     {
-        Pout<< "dynamicOversetFvMesh::update() : extended addressing from"
+        Pout<< "oversetFvMeshBase::update() : extended addressing from"
             << " nFaces:" << baseAddr.lowerAddr().size()
             << " to nFaces:" << lowerAddr.size()
             << " nExtraFaces:" << nExtraFaces << endl;
     }
-
 
     // Now for the tricky bits. We want to hand out processor faces according
     // to the localFaceCells/remoteFaceCells. Ultimately we need
@@ -161,7 +159,6 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
     // E.g. if proc1 needs some data from proc2 and proc2 needs some data from
     //      proc1. We first want the pair : proc1 receive and proc2 send
     //      and then the pair : proc1 send, proc2 receive
-
 
     labelList procToInterface(Pstream::nProcs(), -1);
 
@@ -266,32 +263,31 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
         {
             if (interface != -1)
             {
-                interface = procToInterface[interface]+boundary().size();
+                interface = procToInterface[interface]+mesh_.boundary().size();
             }
         }
     }
 
-
     // Get addressing and interfaces of all interfaces
-
 
     UPtrList<const labelUList> patchAddr;
     {
-        const fvBoundaryMesh& fvp = boundary();
+        const fvBoundaryMesh& fvp = mesh_.boundary();
 
         patchAddr.setSize(fvp.size() + remoteStencilInterfaces_.size());
 
         //allInterfaces_ = dynamicMotionSolverFvMesh::interfaces();
-        allInterfaces_ = dynamicFvMesh::interfaces();
+        allInterfaces_ = mesh_.fvMesh::interfaces();
         allInterfaces_.setSize(patchAddr.size());
 
         forAll(fvp, patchi)
         {
             patchAddr.set(patchi, &fvp[patchi].faceCells());
         }
+
         forAll(remoteStencilInterfaces_, i)
         {
-            const label patchi = fvp.size()+i;
+            label patchi = fvp.size()+i;
             const lduPrimitiveProcessorInterface& pp =
                 remoteStencilInterfaces_[i];
 
@@ -305,6 +301,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
             allInterfaces_.set(patchi, &pp);
         }
     }
+
     const lduSchedule ps
     (
         lduPrimitiveMesh::nonBlockingSchedule<processorLduInterface>
@@ -317,7 +314,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
     (
         new fvMeshPrimitiveLduAddressing
         (
-            nCells(),
+            mesh_.nCells(),
             std::move(lowerAddr),
             std::move(upperAddr),
             patchAddr,
@@ -336,22 +333,22 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
             << " upper:" << addr.upperAddr().size() << endl;
 
         // Using lduAddressing::patch
-        forAll(patchAddr, patchI)
+        forAll(patchAddr, patchi)
         {
-            Pout<< "    " << patchI << "\tpatchAddr:"
-                << addr.patchAddr(patchI).size()
+            Pout<< "    " << patchi << "\tpatchAddr:"
+                << addr.patchAddr(patchi).size()
                 << endl;
         }
 
         // Using interfaces
-        const lduInterfacePtrsList& iFaces = allInterfaces_;
+        const lduInterfacePtrsList& iFaces = mesh_.interfaces();
         Pout<< "Adapted interFaces:" << iFaces.size() << endl;
-        forAll(iFaces, patchI)
+        forAll(iFaces, patchi)
         {
-            if (iFaces.set(patchI))
+            if (iFaces.set(patchi))
             {
-                Pout<< "    " << patchI << "\tinterface:"
-                    << iFaces[patchI].type() << endl;
+                Pout<< "    " << patchi << "\tinterface:"
+                    << iFaces[patchi].type() << endl;
             }
         }
     }
@@ -360,7 +357,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 }
 
 
-Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
+Foam::scalar Foam::oversetFvMeshBase::cellAverage
 (
     const labelList& types,
     const labelList& nbrTypes,
@@ -370,16 +367,16 @@ Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
     bitSet& isFront
 ) const
 {
-    const labelList& own = faceOwner();
-    const labelList& nei = faceNeighbour();
-    const cell& cFaces = cells()[celli];
+    const labelList& own = mesh_.faceOwner();
+    const labelList& nei = mesh_.faceNeighbour();
+    const cell& cFaces = mesh_.cells()[celli];
 
     scalar avg = 0.0;
     label n = 0;
     label nFront = 0;
     for (const label facei : cFaces)
     {
-        if (isInternalFace(facei))
+        if (mesh_.isInternalFace(facei))
         {
             label nbrCelli = (own[facei] == celli ? nei[facei] : own[facei]);
             if (norm[nbrCelli] == -GREAT)
@@ -399,7 +396,7 @@ Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
         }
         else
         {
-            if (nbrNorm[facei-nInternalFaces()] == -GREAT)
+            if (nbrNorm[facei-mesh_.nInternalFaces()] == -GREAT)
             {
                 if (isFront.set(facei))
                 {
@@ -408,7 +405,7 @@ Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
             }
             else
             {
-                avg += nbrNorm[facei-nInternalFaces()];
+                avg += nbrNorm[facei-mesh_.nInternalFaces()];
                 n++;
             }
         }
@@ -425,13 +422,13 @@ Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
 }
 
 
-void Foam::dynamicOversetFvMesh::writeAgglomeration
+void Foam::oversetFvMeshBase::writeAgglomeration
 (
     const GAMGAgglomeration& agglom
 ) const
 {
-    labelList cellToCoarse(identity(nCells()));
-    labelListList coarseToCell(invertOneToMany(nCells(), cellToCoarse));
+    labelList cellToCoarse(identity(mesh_.nCells()));
+    labelListList coarseToCell(invertOneToMany(mesh_.nCells(), cellToCoarse));
 
     // Write initial agglomeration
     {
@@ -440,13 +437,13 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
             IOobject
             (
                 "agglomeration",
-                this->time().timeName(),
-                *this,
+                mesh_.time().timeName(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            *this,
+            mesh_,
             dimensionedScalar(dimless, Zero)
         );
         scalarField& fld = scalarAgglomeration.primitiveFieldRef();
@@ -463,7 +460,7 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
         scalarAgglomeration.write();
 
         Info<< "Writing initial cell distribution to "
-            << this->time().timeName() << endl;
+            << mesh_.time().timeName() << endl;
     }
 
 
@@ -495,13 +492,13 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
                 IOobject
                 (
                     "agglomeration_" + Foam::name(level),
-                    this->time().timeName(),
-                    *this,
+                    mesh_.time().timeName(),
+                    mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     false
                 ),
-                *this,
+                mesh_,
                 dimensionedScalar(dimless, Zero)
             );
             scalarField& fld = scalarAgglomeration.primitiveFieldRef();
@@ -526,52 +523,30 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicOversetFvMesh::dynamicOversetFvMesh
-(
-    const IOobject& io,
-    const bool doInit
-)
+Foam::oversetFvMeshBase::oversetFvMeshBase(const fvMesh& mesh, bool doInit)
 :
-    dynamicMotionSolverListFvMesh(io, doInit)
+    mesh_(mesh),
+    active_(false)
 {
-    if (doInit)
-    {
-        init(false);    // do not initialise lower levels
-    }
-}
-
-
-bool Foam::dynamicOversetFvMesh::init(const bool doInit)
-{
-    if (doInit)
-    {
-        dynamicMotionSolverListFvMesh::init(doInit);
-    }
-
-    active_ = false;
-
     // Load stencil (but do not update)
-    (void)Stencil::New(*this, false);
-
-    // Assume something changed
-    return true;
+    (void)Stencil::New(mesh_, false);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dynamicOversetFvMesh::~dynamicOversetFvMesh()
+Foam::oversetFvMeshBase::~oversetFvMeshBase()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
+const Foam::lduAddressing& Foam::oversetFvMeshBase::lduAddr() const
 {
     if (!active_)
     {
         //return dynamicMotionSolverFvMesh::lduAddr();
-        return dynamicFvMesh::lduAddr();
+        return mesh_.fvMesh::lduAddr();
     }
     if (!lduPtr_)
     {
@@ -582,12 +557,11 @@ const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
 }
 
 
-Foam::lduInterfacePtrsList Foam::dynamicOversetFvMesh::interfaces() const
+Foam::lduInterfacePtrsList Foam::oversetFvMeshBase::interfaces() const
 {
     if (!active_)
     {
-        //return dynamicMotionSolverFvMesh::interfaces();
-        return dynamicFvMesh::interfaces();
+        return mesh_.fvMesh::interfaces();
     }
     if (!lduPtr_)
     {
@@ -599,7 +573,7 @@ Foam::lduInterfacePtrsList Foam::dynamicOversetFvMesh::interfaces() const
 
 
 const Foam::fvMeshPrimitiveLduAddressing&
-Foam::dynamicOversetFvMesh::primitiveLduAddr() const
+Foam::oversetFvMeshBase::primitiveLduAddr() const
 {
     if (!lduPtr_)
     {
@@ -611,10 +585,8 @@ Foam::dynamicOversetFvMesh::primitiveLduAddr() const
 }
 
 
-bool Foam::dynamicOversetFvMesh::update()
+bool Foam::oversetFvMeshBase::update()
 {
-    //if (dynamicMotionSolverFvMesh::update())
-    if (dynamicMotionSolverListFvMesh::update())
     {
         // Calculate the local extra faces for the interpolation. Note: could
         // let demand-driven lduAddr() trigger it but just to make sure.
@@ -631,55 +603,43 @@ bool Foam::dynamicOversetFvMesh::update()
 }
 
 
-Foam::word Foam::dynamicOversetFvMesh::baseName(const word& name)
+bool Foam::oversetFvMeshBase::interpolateFields()
 {
-    if (name.ends_with("_0"))
-    {
-        return baseName(name.substr(0, name.size()-2));
-    }
+    const cellCellStencilObject& overlap = Stencil::New(mesh_);
 
-    return name;
-}
-
-
-bool Foam::dynamicOversetFvMesh::interpolateFields()
-{
     // Add the stencil suppression list
-    wordHashSet suppressed(Stencil::New(*this).nonInterpolatedFields());
+    wordHashSet suppressed(overlap.nonInterpolatedFields());
 
     // Use whatever the solver has set up as suppression list
     const dictionary* dictPtr
     (
-        this->schemesDict().findDict("oversetInterpolationSuppressed")
+        mesh_.schemesDict().findDict("oversetInterpolationSuppressed")
     );
     if (dictPtr)
     {
         suppressed.insert(dictPtr->toc());
     }
 
-    interpolate<volScalarField>(suppressed);
-    interpolate<volVectorField>(suppressed);
-    interpolate<volSphericalTensorField>(suppressed);
-    interpolate<volSymmTensorField>(suppressed);
-    interpolate<volTensorField>(suppressed);
+    overlap.interpolate<volScalarField>(mesh_, suppressed);
+    overlap.interpolate<volVectorField>(mesh_, suppressed);
+    overlap.interpolate<volSphericalTensorField>(mesh_, suppressed);
+    overlap.interpolate<volSymmTensorField>(mesh_, suppressed);
+    overlap.interpolate<volTensorField>(mesh_, suppressed);
 
     return true;
 }
 
 
-
-bool Foam::dynamicOversetFvMesh::writeObject
+bool Foam::oversetFvMeshBase::writeObject
 (
     IOstreamOption streamOpt,
     const bool valid
 ) const
 {
-    //bool ok = dynamicMotionSolverFvMesh::writeObject(streamOpt, valid);
-    bool ok = dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid);
-
     // For postprocessing : write cellTypes and zoneID
+    bool ok = false;
     {
-        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const cellCellStencilObject& overlap = Stencil::New(mesh_);
 
         const labelUList& cellTypes = overlap.cellTypes();
 
@@ -688,13 +648,13 @@ bool Foam::dynamicOversetFvMesh::writeObject
             IOobject
             (
                 "cellTypes",
-                this->time().timeName(),
-                *this,
+                mesh_.time().timeName(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            *this,
+            mesh_,
             dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
@@ -712,18 +672,18 @@ bool Foam::dynamicOversetFvMesh::writeObject
             IOobject
             (
                 "zoneID",
-                this->time().timeName(),
-                *this,
+                mesh_.time().timeName(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            *this,
+            mesh_,
             dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 
-        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const cellCellStencilObject& overlap = Stencil::New(mesh_);
         const labelIOList& zoneID = overlap.zoneID();
 
         forAll(zoneID, cellI)
@@ -735,7 +695,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
     }
     if (debug)
     {
-        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const cellCellStencilObject& overlap = Stencil::New(mesh_);
         const labelIOList& zoneID = overlap.zoneID();
         const labelListList& cellStencil = overlap.cellStencil();
 
@@ -744,7 +704,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
         overlap.cellInterpolationMap().distribute(donorZoneID);
 
         // Get remote cellCentres
-        pointField cc(C());
+        pointField cc(mesh_.C());
         overlap.cellInterpolationMap().distribute(cc);
 
         volScalarField volDonorZoneID
@@ -752,13 +712,13 @@ bool Foam::dynamicOversetFvMesh::writeObject
             IOobject
             (
                 "donorZoneID",
-                this->time().timeName(),
-                *this,
+                mesh_.time().timeName(),
+                mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            *this,
+            mesh_,
             dimensionedScalar("minOne", dimless, scalar(-1)),
             zeroGradientFvPatchScalarField::typeName
         );
@@ -774,7 +734,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
                     if (donorZoneID[stencil[i]] != volDonorZoneID[cellI])
                     {
                         WarningInFunction << "Mixed donor meshes for cell "
-                            << cellI << " at " << C()[cellI]
+                            << cellI << " at " << mesh_.C()[cellI]
                             << " donors:" << UIndirectList<point>(cc, stencil)
                             << endl;
                         volDonorZoneID[cellI] = -2;
@@ -784,7 +744,15 @@ bool Foam::dynamicOversetFvMesh::writeObject
         }
         //- Do not correctBoundaryConditions since re-interpolates!
         //volDonorZoneID.correctBoundaryConditions();
-        volDonorZoneID.writeObject(streamOpt, valid);
+        cellCellStencil::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >
+        (
+            volDonorZoneID
+        );
+        ok = volDonorZoneID.writeObject(streamOpt, valid);
     }
 
     return ok;
