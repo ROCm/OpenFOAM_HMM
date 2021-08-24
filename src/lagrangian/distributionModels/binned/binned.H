@@ -27,8 +27,57 @@ Class
     Foam::distributionModels::binned
 
 Description
-    A binned distribution model where the random sample is taken from a
-    discrete set of bins
+    Particle-size distribution model wherein random samples are
+    drawn from a given discrete set of (\c bin, \c probability) pairs,
+    where in terms of its meaning, \c bins correspond to particle sizes
+    and \c probabilities correspond to (relative) probability of occurrences.
+
+    The second column (i.e. \c probability) are normalised by the sum of all
+    its values, resulting in a normalised column in the domain of [0,1].
+    To generate a sample, first a sample drawn from the uniform probability
+    density function on the unit interval (i.e. \c u), and then, the \c bin
+    corresponding to the first \c probability larger than \c u is fetched
+    as the particle size to be further processed.
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        binned;
+                    binnedDistribution
+                    {
+                        distribution
+                        (
+                            (<bin1>    <probability1>)
+                            (<bin2>    <probability2>)
+                            ...
+                            (<binN>    <probabilityN>)
+                        );
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: binned                 | word | yes  | -
+      binnedDistribution | Distribution settings       | dict | yes  | -
+      distribution | \<bin\>-\<probability\> pairs     | dict | yes  | -
+      \<bin\>      | Particle size                     | scalar | yes | -
+      \<probability\> | Probability of occurrence      | scalar | yes | -
+    \endtable
 
 SourceFiles
     binned.C

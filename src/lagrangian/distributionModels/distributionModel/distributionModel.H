@@ -24,15 +24,21 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::distributionModels
+
+Description
+    A namespace for various probability distribution model implementations.
+
 Class
     Foam::distributionModel
 
 Description
-    A library of runtime-selectable distribution models.
+    A library of runtime-selectable doubly-truncated probability distribution
+    models. Returns random samples based on given distribution parameters.
 
-    Returns a sampled value given the expectation (nu) and variance (sigma^2)
-
-    Current distribution models include:
+    Available distribution models include:
+    - binned
     - exponential
     - fixedValue
     - general
@@ -41,11 +47,6 @@ Description
     - Rosin-Rammler
     - Mass-based Rosin-Rammler
     - uniform
-
-    The distributionModel is tabulated in equidistant nPoints, in an interval.
-    These values are integrated to obtain the cumulated distribution model,
-    which is then used to change the distribution from unifrom to
-    the actual distributionModel.
 
 SourceFiles
     distributionModel.C

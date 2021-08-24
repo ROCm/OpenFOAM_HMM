@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,39 @@ Class
     Foam::distributionModels::fixedValue
 
 Description
-    Returns a fixed value
+    Particle-size distribution model wherein samples are given fixed values.
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        fixedValue;
+                    fixedValueDistribution
+                    {
+                        value   <value>;
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: fixedValue             | word | yes  | -
+      fixedValueDistribution | Distribution settings   | dict | yes  | -
+      value        | Fixed value for size              | scalar | yes | -
+    \endtable
 
 SourceFiles
     fixedValue.C

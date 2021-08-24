@@ -28,7 +28,66 @@ Class
     Foam::distributionModels::general
 
 Description
-    general distribution model
+    Particle-size distribution model wherein random samples are
+    drawn from a given arbitrary probability density function
+    or cumulative distribution function. Input distributions are
+    specified as pairs of (size, probability) (i.e. (point, value) ).
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        general;
+                    generalDistribution
+                    {
+                        cumulative      false;
+
+                        distribution
+                        (
+                            (<size1>    <probability1>)
+                            (<size2>    <probability2>)
+                            ...
+                            (<sizeN>    <probabilityN>)
+                        );
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: general                | word | yes  | -
+      generalDistribution | Distribution settings      | dict | yes  | -
+      distribution | \<size\>-\<probability\> pairs    | dict | yes  | -
+      \<size\>     | Particle size                     | scalar | yes | -
+      \<probability\> | Volume fraction/probability    | scalar | yes | -
+      cumulative   | Flag to determine if input distribution is specified <!--
+                   --> as cumulative or as density     | bool | no   | false
+    \endtable
+
+Note
+  - An example for a pair within \c distribution subdictionary
+  can be given as follows: "(1e-07 1.3)" means 1.3\% of particles
+  are modelled with a particle diameter of "1e-7" [m], and so on.
+  - Variation between input pairs is assumed to be linear.
+  - Elements in the second column (i.e. probability) are normalised.
+  - Elements in the second column for cumulative distribution
+  functions must start from zero and must be non-decreasing (i.e. monotonic).
+  - Elements in the first column (i.e. size) must be specified
+  in an ascending order.
+  - Input pairs cannot contain any negative element.
 
 SourceFiles
     general.C
