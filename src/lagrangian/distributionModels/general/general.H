@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2011-2019 OpenFOAM Foundation
     Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -79,12 +79,17 @@ class general
         //- List of (x, y=f(x)) pairs
         List<pair> xy_;
 
+        //- Number of entries in the xy_ list
+        label nEntries_;
+
         //- Mean of the distribution
         scalar meanValue_;
 
         //- Values of cumulative distribution function
         List<scalar> integral_;
 
+        //- Flag to determine if input is specified as cumulative or as density
+        bool cumulative_;
 
 
     // Private Member Functions
