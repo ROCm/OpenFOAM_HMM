@@ -27,6 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "multiNormal.H"
+#include "mathematicalConstants.H"
+#include "MathFunctions.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -127,33 +130,45 @@ Foam::distributionModels::multiNormal::multiNormal(const multiNormal& p)
 
 Foam::scalar Foam::distributionModels::multiNormal::sample() const
 {
-    scalar y = 0;
-    scalar x = 0;
-    label n = mu_.size();
-    bool success = false;
+    const scalar u = rndGen_.sample01<scalar>();
 
-    while (!success)
+    for (label i = 0; i < weight_.size(); ++i)
     {
-        x = minValue_ + range_*rndGen_.sample01<scalar>();
-        y = rndGen_.sample01<scalar>();
-        scalar p = 0.0;
-
-        for (label i=0; i<n; i++)
+        if (weight_[i] > u)
         {
-            scalar nu = mu_[i];
-            scalar sigma = sigma_[i];
-            scalar s = weight_[i];
-            scalar v = (x - nu)/sigma;
-            p += s*exp(-0.5*v*v);
-        }
-
-        if (y<p)
-        {
-            success = true;
+            return sample(mu_[i], sigma_[i]);
         }
     }
 
-    return x;
+    const label last = weight_.size() - 1;
+
+    return sample(mu_[last], sigma_[last]);
+}
+
+
+Foam::scalar Foam::distributionModels::multiNormal::sample
+(
+    const scalar mu,
+    const scalar sigma
+) const
+{
+    const scalar a = (minValue_ - mu)/sigma;
+    const scalar b = (maxValue_ - mu)/sigma;
+
+    const scalar aPhi = 0.5*(1.0 + erf(a/Foam::sqrt(2.0)));
+    const scalar bPhi = 0.5*(1.0 + erf(b/Foam::sqrt(2.0)));
+
+    const scalar u = rndGen_.sample01<scalar>();
+    const scalar p = u*(bPhi - aPhi) + aPhi;
+
+    // (B:p. 20-24)
+    const scalar x =
+        mu + sigma*Foam::sqrt(2.0)*Math::erfInv(2.0*p - 1.0);
+
+    // Note: numerical approximation of the inverse function yields slight
+    //       inaccuracies
+
+    return min(max(x, minValue_), maxValue_);
 }
 
 

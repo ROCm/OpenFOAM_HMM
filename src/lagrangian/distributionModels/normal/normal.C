@@ -27,8 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "normal.H"
-#include "addToRunTimeSelectionTable.H"
+#include "mathematicalConstants.H"
 #include "MathFunctions.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -91,19 +92,23 @@ Foam::distributionModels::normal::normal(const normal& p)
 
 Foam::scalar Foam::distributionModels::normal::sample() const
 {
+    const scalar a = (minValue_ - mu_)/sigma_;
+    const scalar b = (maxValue_ - mu_)/sigma_;
 
-    scalar a = erf((minValue_ - mu_)/sigma_);
-    scalar b = erf((maxValue_ - mu_)/sigma_);
+    const scalar aPhi = 0.5*(scalar(1) + erf(a/Foam::sqrt(scalar(2))));
+    const scalar bPhi = 0.5*(scalar(1) + erf(b/Foam::sqrt(scalar(2))));
 
-    scalar y = rndGen_.sample01<scalar>();
-    scalar x = Math::erfInv(y*(b - a) + a)*sigma_ + mu_;
+    const scalar u = rndGen_.sample01<scalar>();
+    const scalar p = u*(bPhi - aPhi) + aPhi;
+
+    // (B:p. 20-24)
+    const scalar x =
+        mu_ + sigma_*Foam::sqrt(scalar(2))*Math::erfInv(scalar(2)*p - scalar(1));
 
     // Note: numerical approximation of the inverse function yields slight
     //       inaccuracies
 
-    x = min(max(x, minValue_), maxValue_);
-
-    return x;
+    return min(max(x, minValue_), maxValue_);
 }
 
 

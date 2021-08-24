@@ -88,10 +88,11 @@ Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 
 Foam::scalar Foam::distributionModels::RosinRammler::sample() const
 {
-    const scalar minValueByDPowN = pow(minValue_/lambda_, n_);
-    const scalar K = 1 - exp(- pow(maxValue_/lambda_, n_) + minValueByDPowN);
-    const scalar y = rndGen_.sample01<scalar>();
-    return lambda_*pow(minValueByDPowN - log(1 - K*y), 1/n_);
+    const scalar u = rndGen_.sample01<scalar>();
+    const scalar qMin = pow(minValue_/lambda_, n_);
+    const scalar qMax = pow(maxValue_/lambda_, n_);
+    const scalar r = scalar(1) - exp(-qMax + qMin);
+    return lambda_*pow(qMin - log(scalar(1) - u*r), scalar(1)/n_);
 }
 
 

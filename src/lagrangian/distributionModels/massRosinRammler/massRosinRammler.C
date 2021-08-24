@@ -81,16 +81,19 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 
 Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
 {
-    scalar d;
-
-    // Re-sample if the calculated d is out of the physical range
+    scalar d = 0;
     do
     {
-        const scalar a = 3/n_ + 1;
-        const scalar P = rndGen_.sample01<scalar>();
-        const scalar x = Math::invIncGamma(a, P);
-        d = lambda_*pow(x, 1/n_);
-    } while (d < minValue_ || d > maxValue_);
+        // (YHD:Inverse of Eq. 10)
+        const scalar a = scalar(3)/n_ + scalar(1);
+        const scalar cdfA = Math::incGamma_P(a, pow(minValue_/lambda_, n_) );
+        const scalar cdfB = Math::incGamma_P(a, pow(maxValue_/lambda_, n_) );
+
+        const scalar u = rndGen_.position<scalar>(cdfA, cdfB);
+        const scalar x = Math::invIncGamma(a, u);
+        d = lambda_*pow(x, scalar(1)/n_);
+
+    } while (std::isnan(d));
 
     return d;
 }

@@ -106,6 +106,9 @@ public:
         //- Sample the distribution
         virtual scalar sample() const;
 
+        //- Sample the normal distribution
+        scalar sample(const scalar mu, const scalar sigma) const;
+
         //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
