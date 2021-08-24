@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "RosinRammler.H"
+#include "MathFunctions.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -98,7 +99,14 @@ Foam::scalar Foam::distributionModels::RosinRammler::sample() const
 
 Foam::scalar Foam::distributionModels::RosinRammler::meanValue() const
 {
-    return lambda_;
+    // (C:Eq. 5)
+    const scalar a = scalar(1)/lambda_ + scalar(1);
+    const scalar qMax = pow(maxValue_/n_, lambda_);
+    const scalar qMin = pow(minValue_/n_, lambda_);
+    const scalar gMax = Math::incGamma_P(a, qMax);
+    const scalar gMin = Math::incGamma_P(a, qMin);
+
+    return n_/(exp(-qMin) - exp(-qMax))*(gMax - gMin);
 }
 
 

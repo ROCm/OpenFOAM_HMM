@@ -101,7 +101,8 @@ Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
 
 Foam::scalar Foam::distributionModels::massRosinRammler::meanValue() const
 {
-    return lambda_;
+    // (YHD:Eqs. 11-12)
+    return lambda_*tgamma(scalar(1)/n_ + scalar(1));
 }
 
 

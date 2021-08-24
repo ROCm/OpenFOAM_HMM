@@ -114,7 +114,23 @@ Foam::scalar Foam::distributionModels::normal::sample() const
 
 Foam::scalar Foam::distributionModels::normal::meanValue() const
 {
-    return mu_;
+    const scalar a = (minValue_ - mu_)/sigma_;
+    const scalar b = (maxValue_ - mu_)/sigma_;
+
+    // (B:p. 2)
+    const scalar aphi =
+        scalar(1)/Foam::sqrt(scalar(2)*constant::mathematical::pi)
+       *exp(-0.5*sqr(a));
+    const scalar bphi =
+        scalar(1)/Foam::sqrt(scalar(2)*constant::mathematical::pi)
+       *exp(-0.5*sqr(b));
+
+    // (B:p. 4)
+    const scalar aPhi = 0.5*(scalar(1) + erf(a/Foam::sqrt(scalar(2))));
+    const scalar bPhi = 0.5*(scalar(1) + erf(b/Foam::sqrt(scalar(2))));
+
+    // (B:p. 25)
+    return mu_ - sigma_*(bphi - aphi)/(bPhi - aPhi + VSMALL);
 }
 
 
