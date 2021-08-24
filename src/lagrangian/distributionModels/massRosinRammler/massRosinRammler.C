@@ -50,14 +50,14 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    d_(distributionModelDict_.get<scalar>("d")),
+    lambda_(distributionModelDict_.getCompat<scalar>("lambda", {{"d", 2112}})),
     n_(distributionModelDict_.get<scalar>("n"))
 {
-    if (d_ < VSMALL || n_ < VSMALL)
+    if (lambda_ < VSMALL || n_ < VSMALL)
     {
         FatalErrorInFunction
             << "Scale/Shape parameter cannot be equal to or less than zero:"
-            << "    d = " << d_
+            << "    lambda = " << lambda_
             << "    n = " << n_
             << exit(FatalError);
     }
@@ -72,7 +72,7 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(p),
-    d_(p.d_),
+    lambda_(p.lambda_),
     n_(p.n_)
 {}
 
@@ -89,7 +89,7 @@ Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
         const scalar a = 3/n_ + 1;
         const scalar P = rndGen_.sample01<scalar>();
         const scalar x = Math::invIncGamma(a, P);
-        d = d_*pow(x, 1/n_);
+        d = lambda_*pow(x, 1/n_);
     } while (d < minValue_ || d > maxValue_);
 
     return d;
@@ -98,7 +98,7 @@ Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
 
 Foam::scalar Foam::distributionModels::massRosinRammler::meanValue() const
 {
-    return d_;
+    return lambda_;
 }
 
 

@@ -62,15 +62,15 @@ class multiNormal
 {
     // Private Data
 
-        //- Distribution range
-        scalar range_;
+        //- List of means of the parent general normal distributions
+        List<scalar> mu_;
 
+        //- List of standard deviations of
+        //- the parent general normal distributions
+        List<scalar> sigma_;
 
-        // Model coefficients
-
-            List<scalar> expectation_;
-            List<scalar> variance_;
-            List<scalar> strength_;
+        //- List of weights of a given distribution in the mixture
+        List<scalar> weight_;
 
 
 public:

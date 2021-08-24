@@ -63,12 +63,11 @@ class normal
 {
     // Private Data
 
-        // Model coefficients
+        //- Mean of the parent general normal distribution
+        scalar mu_;
 
-            scalar expectation_;
-            scalar variance_;
-
-            scalar a_;
+        //- Standard deviation of the parent general normal distribution
+        scalar sigma_;
 
 
 public:

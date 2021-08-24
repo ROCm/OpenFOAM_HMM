@@ -50,15 +50,28 @@ Foam::distributionModels::normal::normal
 )
 :
     distributionModel(typeName, dict, rndGen),
-    expectation_(distributionModelDict_.get<scalar>("expectation")),
-    variance_(distributionModelDict_.get<scalar>("variance")),
-    a_(0.147)
+    mu_
+    (
+        distributionModelDict_.getCompat<scalar>
+        (
+            "mu",
+            {{"expectation", 2112}}
+        )
+    ),
+    sigma_
+    (
+        distributionModelDict_.getCompat<scalar>
+        (
+            "sigma",
+            {{"variance", 2112}}
+        )
+    )
 {
-    if (mag(variance_) == 0)
+    if (mag(sigma_) == 0)
     {
         FatalErrorInFunction
             << "Standard deviation cannot be zero." << nl
-            << "    variance = " << variance_ << nl
+            << "    sigma = " << sigma_ << nl
             << exit(FatalError);
     }
 
@@ -69,9 +82,8 @@ Foam::distributionModels::normal::normal
 Foam::distributionModels::normal::normal(const normal& p)
 :
     distributionModel(p),
-    expectation_(p.expectation_),
-    variance_(p.variance_),
-    a_(p.a_)
+    mu_(p.mu_),
+    sigma_(p.sigma_)
 {}
 
 
@@ -80,11 +92,11 @@ Foam::distributionModels::normal::normal(const normal& p)
 Foam::scalar Foam::distributionModels::normal::sample() const
 {
 
-    scalar a = erf((minValue_ - expectation_)/variance_);
-    scalar b = erf((maxValue_ - expectation_)/variance_);
+    scalar a = erf((minValue_ - mu_)/sigma_);
+    scalar b = erf((maxValue_ - mu_)/sigma_);
 
     scalar y = rndGen_.sample01<scalar>();
-    scalar x = Math::erfInv(y*(b - a) + a)*variance_ + expectation_;
+    scalar x = Math::erfInv(y*(b - a) + a)*sigma_ + mu_;
 
     // Note: numerical approximation of the inverse function yields slight
     //       inaccuracies
@@ -97,7 +109,7 @@ Foam::scalar Foam::distributionModels::normal::sample() const
 
 Foam::scalar Foam::distributionModels::normal::meanValue() const
 {
-    return expectation_;
+    return mu_;
 }
 
 

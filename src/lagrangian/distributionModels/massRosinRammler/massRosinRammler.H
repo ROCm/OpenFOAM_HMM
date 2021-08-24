@@ -74,7 +74,7 @@ class massRosinRammler
     // Private Data
 
         //- Scale parameter
-        scalar d_;
+        scalar lambda_;
 
         //- Shape parameter
         scalar n_;

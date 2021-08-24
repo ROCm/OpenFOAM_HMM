@@ -49,7 +49,7 @@ Foam::distributionModels::RosinRammler::RosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    d_(distributionModelDict_.get<scalar>("d")),
+    lambda_(distributionModelDict_.getCompat<scalar>("lambda", {{"d", 2112}})),
     n_(distributionModelDict_.get<scalar>("n"))
 {
     const word parcelBasisType =
@@ -63,11 +63,11 @@ Foam::distributionModels::RosinRammler::RosinRammler
             << endl;
     }
 
-    if (d_ < VSMALL || n_ < VSMALL)
+    if (lambda_ < VSMALL || n_ < VSMALL)
     {
         FatalErrorInFunction
             << "Scale/Shape parameter cannot be equal to or less than zero:"
-            << "    d = " << d_
+            << "    lambda = " << lambda_
             << "    n = " << n_
             << exit(FatalError);
     }
@@ -79,7 +79,7 @@ Foam::distributionModels::RosinRammler::RosinRammler
 Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 :
     distributionModel(p),
-    d_(p.d_),
+    lambda_(p.lambda_),
     n_(p.n_)
 {}
 
@@ -88,16 +88,16 @@ Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 
 Foam::scalar Foam::distributionModels::RosinRammler::sample() const
 {
-    const scalar minValueByDPowN = pow(minValue_/d_, n_);
-    const scalar K = 1 - exp(- pow(maxValue_/d_, n_) + minValueByDPowN);
+    const scalar minValueByDPowN = pow(minValue_/lambda_, n_);
+    const scalar K = 1 - exp(- pow(maxValue_/lambda_, n_) + minValueByDPowN);
     const scalar y = rndGen_.sample01<scalar>();
-    return d_*pow(minValueByDPowN - log(1 - K*y), 1/n_);
+    return lambda_*pow(minValueByDPowN - log(1 - K*y), 1/n_);
 }
 
 
 Foam::scalar Foam::distributionModels::RosinRammler::meanValue() const
 {
-    return d_;
+    return lambda_;
 }
 
 

@@ -63,13 +63,11 @@ class RosinRammler
 {
     // Private Data
 
-        // Model coefficients
+        //- Scale parameter
+        scalar lambda_;
 
-            //- Scale parameter
-            scalar d_;
-
-            //- Shape parameter
-            scalar n_;
+        //- Shape parameter
+        scalar n_;
 
 
 public:
