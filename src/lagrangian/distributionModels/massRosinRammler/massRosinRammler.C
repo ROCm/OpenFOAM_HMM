@@ -77,12 +77,6 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::massRosinRammler::~massRosinRammler()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::massRosinRammler::sample() const

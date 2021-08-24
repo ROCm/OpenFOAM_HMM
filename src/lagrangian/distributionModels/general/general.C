@@ -162,55 +162,45 @@ Foam::distributionModels::general::general(const general& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::general::~general()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::general::sample() const
 {
-    scalar y = rndGen_.sample01<scalar>();
+    const scalar u = rndGen_.sample01<scalar>();
 
-    // Find the interval where y is in the table
+    // Find the interval where u is in the table
     label n = 1;
-    while (integral_[n] <= y)
+    while (integral_[n] <= u)
     {
         n++;
     }
 
-    scalar k = (xy_[n][1] - xy_[n-1][1])/(xy_[n][0] - xy_[n-1][0]);
-    scalar d = xy_[n-1][1] - k*xy_[n-1][0];
+    const scalar k = (xy_[n][1] - xy_[n-1][1])/(xy_[n][0] - xy_[n-1][0]);
+    const scalar d = xy_[n-1][1] - k*xy_[n-1][0];
 
-    scalar alpha = y + xy_[n-1][0]*(0.5*k*xy_[n-1][0] + d) - integral_[n-1];
-    scalar x = 0.0;
+    const scalar alpha =
+        u + xy_[n-1][0]*(0.5*k*xy_[n-1][0] + d) - integral_[n-1];
 
     // If k is small it is a linear equation, otherwise it is of second order
     if (mag(k) > SMALL)
     {
-        scalar p = 2.0*d/k;
-        scalar q = -2.0*alpha/k;
-        scalar sqrtEr = sqrt(0.25*p*p - q);
+        const scalar p = 2.0*d/k;
+        const scalar q = -2.0*alpha/k;
+        const scalar sqrtEr = sqrt(0.25*p*p - q);
 
-        scalar x1 = -0.5*p + sqrtEr;
-        scalar x2 = -0.5*p - sqrtEr;
+        const scalar x1 = -0.5*p + sqrtEr;
+        const scalar x2 = -0.5*p - sqrtEr;
         if ((x1 >= xy_[n-1][0]) && (x1 <= xy_[n][0]))
         {
-            x = x1;
+            return x1;
         }
         else
         {
-            x = x2;
+            return x2;
         }
     }
-    else
-    {
-        x = alpha/d;
-    }
 
-    return x;
+    return alpha/d;
 }
 
 
@@ -269,11 +259,11 @@ void Foam::distributionModels::general::readDict(const dictionary& dict)
 Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::distributionModels::general::x() const
 {
-    tmp<Field<scalar>> tx(new Field<scalar>(xy_.size()));
-    scalarField& xi = tx.ref();
+    auto tx = tmp<scalarField>::New(xy_.size());
+    auto& x = tx.ref();
     forAll(xy_, i)
     {
-        xi[i] = xy_[i][0];
+        x[i] = xy_[i][0];
     }
 
     return tx;
@@ -283,11 +273,11 @@ Foam::distributionModels::general::x() const
 Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::distributionModels::general::y() const
 {
-    tmp<Field<scalar>> ty(new Field<scalar>(xy_.size()));
-    scalarField& yi = ty.ref();
+    auto ty = tmp<scalarField>::New(xy_.size());
+    auto& y = ty.ref();
     forAll(xy_, i)
     {
-        yi[i] = xy_[i][1];
+        y[i] = xy_[i][1];
     }
 
     return ty;

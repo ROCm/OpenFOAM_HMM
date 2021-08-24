@@ -55,11 +55,10 @@ class exponential
 :
     public distributionModel
 {
-    // Private data
+    // Private Data
 
-        // Model coefficients
-
-            scalar lambda_;
+        //- Rate parameter
+        scalar lambda_;
 
 
 public:
@@ -73,7 +72,7 @@ public:
         //- Construct from components
         exponential(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         exponential(const exponential& p);
 
         //- Construct and return a clone
@@ -82,17 +81,20 @@ public:
             return autoPtr<distributionModel>(new exponential(*this));
         }
 
+        //- No copy assignment
+        void operator=(const exponential&) = delete;
+
 
     //- Destructor
-    virtual ~exponential();
+    virtual ~exponential() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

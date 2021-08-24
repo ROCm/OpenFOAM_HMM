@@ -82,7 +82,7 @@ public:
         //- Construct from components
         normal(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         normal(const normal& p);
 
         //- Construct and return a clone
@@ -91,17 +91,20 @@ public:
             return autoPtr<distributionModel>(new normal(*this));
         }
 
+        //- No copy assignment
+        void operator=(const normal&) = delete;
+
 
     //- Destructor
-    virtual ~normal();
+    virtual ~normal() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

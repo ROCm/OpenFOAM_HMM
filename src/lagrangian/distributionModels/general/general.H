@@ -65,26 +65,29 @@ namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class general Declaration
+                          Class general Declaration
 \*---------------------------------------------------------------------------*/
 
 class general
 :
     public distributionModel
 {
-    // Private data
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    // Private Data
 
-        // List of (bin probability)
+        //- List of (x, y=f(x)) pairs
         List<pair> xy_;
 
+        //- Mean of the distribution
         scalar meanValue_;
 
+        //- Values of cumulative distribution function
         List<scalar> integral_;
 
 
-    // Private member functions
+
+    // Private Member Functions
 
         //- Initialise the distribution parameters
         void initialise();
@@ -102,6 +105,7 @@ public:
         general(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
+        //  Allows negative entries
         general
         (
             const UList<scalar>& sampleData,
@@ -109,7 +113,7 @@ public:
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         general(const general& p);
 
         //- Construct and return a clone
@@ -118,23 +122,26 @@ public:
             return autoPtr<distributionModel>(new general(*this));
         }
 
+        //- No copy assignment
+        void operator=(const general&) = delete;
+
 
     //- Destructor
-    virtual ~general();
+    virtual ~general() = default;
 
 
     // Member Functions
 
         //- Bin boundaries
-        virtual tmp<Field<scalar>> x() const;
+        virtual tmp<scalarField> x() const;
 
         //- Probabilities
-        virtual tmp<Field<scalar>> y() const;
+        virtual tmp<scalarField> y() const;
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the arithmetic mean of the distribution data
         virtual scalar meanValue() const;
 
         //- Write data to stream

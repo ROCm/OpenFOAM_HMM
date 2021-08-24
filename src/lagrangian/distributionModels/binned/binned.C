@@ -32,11 +32,11 @@ License
 
 namespace Foam
 {
-    namespace distributionModels
-    {
-        defineTypeNameAndDebug(binned, 0);
-        addToRunTimeSelectionTable(distributionModel, binned, dictionary);
-    }
+namespace distributionModels
+{
+    defineTypeNameAndDebug(binned, 0);
+    addToRunTimeSelectionTable(distributionModel, binned, dictionary);
+}
 }
 
 
@@ -183,27 +183,21 @@ Foam::distributionModels::binned::binned(const binned& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::binned::~binned()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::binned::sample() const
 {
-    scalar y = rndGen_.sample01<scalar>();
+    const scalar u = rndGen_.sample01<scalar>();
 
     for (label i = 0; i < xy_.size() - 1; ++i)
     {
-        if (xy_[i][1] > y)
+        if (xy_[i][1] > u)
         {
             return xy_[i][0];
         }
     }
 
-    return xy_.last()[0];
+    return maxValue_;
 }
 
 

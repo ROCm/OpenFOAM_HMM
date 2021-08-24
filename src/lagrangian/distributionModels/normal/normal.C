@@ -75,12 +75,6 @@ Foam::distributionModels::normal::normal(const normal& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::normal::~normal()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::normal::sample() const

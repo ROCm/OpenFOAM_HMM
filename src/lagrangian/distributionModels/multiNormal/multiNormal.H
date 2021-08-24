@@ -60,7 +60,7 @@ class multiNormal
 :
     public distributionModel
 {
-    // Private data
+    // Private Data
 
         //- Distribution range
         scalar range_;
@@ -84,7 +84,7 @@ public:
         //- Construct from components
         multiNormal(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         multiNormal(const multiNormal& p);
 
         //- Construct and return a clone
@@ -93,17 +93,20 @@ public:
             return autoPtr<distributionModel>(new multiNormal(*this));
         }
 
+        //- No copy assignment
+        void operator=(const multiNormal&) = delete;
+
 
     //- Destructor
-    virtual ~multiNormal();
+    virtual ~multiNormal() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

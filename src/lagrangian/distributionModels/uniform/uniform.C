@@ -60,12 +60,6 @@ Foam::distributionModels::uniform::uniform(const uniform& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::uniform::~uniform()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::uniform::sample() const

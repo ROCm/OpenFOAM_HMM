@@ -71,13 +71,12 @@ class massRosinRammler
 :
     public distributionModel
 {
-    // Private data
+    // Private Data
 
-        //- Characteristic droplet size
+        //- Scale parameter
         scalar d_;
 
-        //- Empirical dimensionless constant to specify the distribution width,
-        //  sometimes referred to as the dispersion coefficient
+        //- Shape parameter
         scalar n_;
 
 
@@ -92,7 +91,7 @@ public:
         //- Construct from components
         massRosinRammler(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         massRosinRammler(const massRosinRammler& p);
 
         //- Construct and return a clone
@@ -101,17 +100,20 @@ public:
             return autoPtr<distributionModel>(new massRosinRammler(*this));
         }
 
+        //- No copy assignment
+        void operator=(const massRosinRammler&) = delete;
+
 
     //- Destructor
-    virtual ~massRosinRammler();
+    virtual ~massRosinRammler() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

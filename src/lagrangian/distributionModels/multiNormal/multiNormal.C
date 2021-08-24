@@ -92,12 +92,6 @@ Foam::distributionModels::multiNormal::multiNormal(const multiNormal& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::multiNormal::~multiNormal()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::multiNormal::sample() const

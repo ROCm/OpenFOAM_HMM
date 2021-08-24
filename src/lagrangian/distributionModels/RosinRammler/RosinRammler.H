@@ -83,7 +83,7 @@ public:
         //- Construct from components
         RosinRammler(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         RosinRammler(const RosinRammler& p);
 
         //- Construct and return a clone
@@ -92,17 +92,20 @@ public:
             return autoPtr<distributionModel>(new RosinRammler(*this));
         }
 
+        //- No copy assignment
+        void operator=(const RosinRammler&) = delete;
+
 
     //- Destructor
-    virtual ~RosinRammler();
+    virtual ~RosinRammler() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

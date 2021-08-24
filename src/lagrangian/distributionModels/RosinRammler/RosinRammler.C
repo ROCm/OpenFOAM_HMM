@@ -84,12 +84,6 @@ Foam::distributionModels::RosinRammler::RosinRammler(const RosinRammler& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::RosinRammler::~RosinRammler()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::RosinRammler::sample() const

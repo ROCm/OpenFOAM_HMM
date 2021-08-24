@@ -66,7 +66,7 @@ public:
         //- Construct from components
         uniform(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         uniform(const uniform& p);
 
         //- Construct and return a clone
@@ -75,17 +75,20 @@ public:
             return autoPtr<distributionModel>(new uniform(*this));
         }
 
+        //- No copy assignment
+        void operator=(const uniform&) = delete;
+
 
     //- Destructor
-    virtual ~uniform();
+    virtual ~uniform() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

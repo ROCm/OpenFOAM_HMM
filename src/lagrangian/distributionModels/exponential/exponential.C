@@ -70,25 +70,20 @@ Foam::distributionModels::exponential::exponential(const exponential& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::exponential::~exponential()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::scalar Foam::distributionModels::exponential::sample() const
 {
-    scalar y = rndGen_.sample01<scalar>();
-    scalar K = exp(-lambda_*maxValue_) - exp(-lambda_*minValue_);
-    return -(1.0/lambda_)*log(exp(-lambda_*minValue_) + y*K);
+    const scalar u = rndGen_.sample01<scalar>();
+    const scalar qMin = exp(-lambda_*minValue_);
+    const scalar qMax = exp(-lambda_*maxValue_);
+    return -(scalar(1)/lambda_)*log(qMin + u*(qMax - qMin));
 }
 
 
 Foam::scalar Foam::distributionModels::exponential::meanValue() const
 {
-    return 1.0/lambda_;
+    return scalar(1)/lambda_;
 }
 
 

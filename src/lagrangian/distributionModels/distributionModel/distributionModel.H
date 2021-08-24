@@ -71,10 +71,9 @@ namespace Foam
 
 class distributionModel
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Coefficients dictionary
         const dictionary distributionModelDict_;
@@ -125,7 +124,7 @@ public:
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         distributionModel(const distributionModel& p);
 
         //- Construct and return a clone
@@ -141,12 +140,12 @@ public:
 
 
     //- Destructor
-    virtual ~distributionModel();
+    virtual ~distributionModel() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const = 0;
 
         //- Return the minimum of the distribution
@@ -155,7 +154,8 @@ public:
         //- Return the maximum of the distribution
         virtual scalar maxValue() const;
 
-        //- Return the maximum value
+        //- Return the theoretical mean of the distribution, or
+        //- the arithmetic mean of the distribution data
         virtual scalar meanValue() const = 0;
 };
 

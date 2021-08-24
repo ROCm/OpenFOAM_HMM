@@ -70,18 +70,18 @@ class binned
 :
     public distributionModel
 {
-    // Private data
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    // Private Data
 
-        // List of (bin probability)
+        // List of (bin probability) pairs
         List<pair> xy_;
 
-        //- Distribution mean value
+        //- Mean of the distribution
         scalar meanValue_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Initialise the distribution parameters
         void initialise();
@@ -101,6 +101,7 @@ public:
         binned(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
+        //  Allows negative entries
         binned
         (
             const UList<scalar>& sampleData,
@@ -108,7 +109,7 @@ public:
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         binned(const binned& p);
 
         //- Construct and return a clone
@@ -117,17 +118,20 @@ public:
             return autoPtr<distributionModel>(new binned(*this));
         }
 
+        //- No copy assignment
+        void operator=(const binned&) = delete;
+
 
     //- Destructor
-    virtual ~binned();
+    virtual ~binned() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the mean value
+        //- Return the arithmetic mean of the distribution data
         virtual scalar meanValue() const;
 
         //- Write data to stream
