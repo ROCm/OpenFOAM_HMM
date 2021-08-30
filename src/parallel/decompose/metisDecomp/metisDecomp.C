@@ -81,7 +81,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
     const dictionary* coeffsDictPtr = decompDict_.findDict("metisCoeffs");
 
-    idx_t numCells = xadj.size()-1;
+    idx_t numCells = max(0, (xadj.size()-1));
 
     // Decomposition options
     List<idx_t> options(METIS_NOPTIONS);
@@ -89,7 +89,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
     // Processor weights initialised with no size, only used if specified in
     // a file
-    Field<real_t> processorWeights;
+    Field<real_t> procWeights;
 
     // Cell weights (so on the vertices of the dual)
     List<idx_t> cellWeights;
@@ -164,18 +164,17 @@ Foam::label Foam::metisDecomp::decomposeSerial
                 << nl << endl;
         }
 
-        if (coeffDict.readIfPresent("processorWeights", processorWeights))
+        if (coeffDict.readIfPresent("processorWeights", procWeights))
         {
-            processorWeights /= sum(processorWeights);
-
-            if (processorWeights.size() != nDomains_)
+            if (procWeights.size() != nDomains_)
             {
-                FatalErrorInFunction
-                    << "Number of processor weights "
-                    << processorWeights.size()
-                    << " does not equal number of domains " << nDomains_
-                    << exit(FatalError);
+                FatalIOErrorInFunction(coeffDict)
+                    << "processorWeights (" << procWeights.size()
+                    << ") != number of domains (" << nDomains_ << ")" << nl
+                    << exit(FatalIOError);
             }
+
+            procWeights /= sum(procWeights);
         }
     }
 
@@ -189,6 +188,26 @@ Foam::label Foam::metisDecomp::decomposeSerial
     // Output: cell -> processor addressing
     decomp.resize(numCells);
     PrecisionAdaptor<idx_t, label, List> decomp_param(decomp, false);
+
+    // Avoid potential nullptr issues with zero-sized arrays
+    labelList adjncy_dummy, xadj_dummy, decomp_dummy;
+    if (!numCells)
+    {
+        adjncy_dummy.resize(1, 0);
+        adjncy_param.set(adjncy_dummy);
+
+        xadj_dummy.resize(2, 0);
+        xadj_param.set(xadj_dummy);
+
+        decomp_dummy.resize(1, 0);
+        decomp_param.clear();  // Avoid propagating spurious values
+        decomp_param.set(decomp_dummy);
+    }
+
+
+    //
+    // Decompose
+    //
 
     // Output: number of cut edges
     idx_t edgeCut = 0;
@@ -205,7 +224,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
             &nProcs,                    // nParts
-            processorWeights.data(),    // tpwgts
+            procWeights.data(),         // tpwgts
             nullptr,                    // ubvec: processor imbalance (default)
             options.data(),
             &edgeCut,
@@ -224,7 +243,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
             &nProcs,                    // nParts
-            processorWeights.data(),    // tpwgts
+            procWeights.data(),         // tpwgts
             nullptr,                    // ubvec: processor imbalance (default)
             options.data(),
             &edgeCut,

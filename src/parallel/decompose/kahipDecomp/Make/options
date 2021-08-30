@@ -7,5 +7,6 @@ EXE_INC = \
  * openmp link dependency.
  */
 LIB_LIBS = \
-    -ldecompositionMethods \
-    -L$(KAHIP_LIB_DIR) $(LINK_OPENMP) -lkahip
+    -L$(FOAM_LIBBIN) -ldecompositionMethods \
+    -L$(KAHIP_LIB_DIR) $(LINK_OPENMP) \
+    -lkahip$(KAHIP_LIBNAME_SUFFIX)

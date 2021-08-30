@@ -18,8 +18,8 @@ LIB_LIBS = \
     -L$(FOAM_LIBBIN) -ldecompositionMethods \
     -L$(PTSCOTCH_LIB_DIR) \
     -L$(SCOTCH_LIB_DIR) \
-    -lscotch \
-    -lptscotch
+    -lscotch$(SCOTCH_LIBNAME_SUFFIX) \
+    -lptscotch$(SCOTCH_LIBNAME_SUFFIX)
 
 /* errexit, except for windows compile (already in library) */
 ifeq (,$(findstring windows,$(WM_OSTYPE)))

@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -27,6 +27,7 @@
 #     KAHIP_ARCH_PATH
 #     KAHIP_INC_DIR
 #     KAHIP_LIB_DIR
+#     KAHIP_LIBNAME_SUFFIX [optional]
 #
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
@@ -37,7 +38,7 @@
 no_kahip()
 {
     unset HAVE_KAHIP KAHIP_ARCH_PATH KAHIP_INC_DIR KAHIP_LIB_DIR
-    unset KAHIP_VERSION
+    unset KAHIP_VERSION KAHIP_LIBNAME_SUFFIX
 }
 
 
@@ -48,6 +49,10 @@ echo_kahip()
     echo "root=\"$KAHIP_ARCH_PATH\""
     echo "include=\"$KAHIP_INC_DIR\""
     echo "library=\"$KAHIP_LIB_DIR\""
+    if [ -n "$KAHIP_LIBNAME_SUFFIX" ]
+    then
+        echo "libsuffix=\"$KAHIP_LIBNAME_SUFFIX\""
+    fi
 }
 
 
@@ -100,9 +105,9 @@ search_kahip()
     # ----------------------------------
 
     # kahip itself is 32-bit int, but our interface handles some
-    # 64-bit conversion (mesh size).
+    # 64-bit conversion.
 
-    echo "kahip (label=32) - $prefix"
+    echo "kahip (int32) - $prefix"
     export HAVE_KAHIP=true
     export KAHIP_ARCH_PATH="$prefix"
     export KAHIP_INC_DIR="${header%/*}"     # Basename
@@ -153,8 +158,10 @@ no_kahip
 
 # Test/query
 case "$1" in
--test)
+-test | -debug-test)
+    [ "$1" = "-debug-test" ] && set -x
     have_kahip
+    [ "$1" = "-debug-test" ] && set +x
     echo_kahip
     ;;
 -query)

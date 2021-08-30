@@ -3,5 +3,6 @@ EXE_INC = \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -ldecompositionMethods \
-    -L$(METIS_LIB_DIR) -lmetis
+    -L$(FOAM_LIBBIN) -ldecompositionMethods \
+    -L$(METIS_LIB_DIR) \
+    -lmetis$(METIS_LIBNAME_SUFFIX)
