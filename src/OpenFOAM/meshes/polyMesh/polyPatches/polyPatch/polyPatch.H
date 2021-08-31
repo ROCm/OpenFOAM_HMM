@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyBoundaryMesh;
 class polyPatch;
 class polyTopoChange;
@@ -71,7 +71,7 @@ class polyPatch
     public patchIdentifier,
     public primitivePatch
 {
-    // Private data
+    // Private Data
 
         //- Start label of this patch in the polyMesh face list
         label start_;
@@ -79,14 +79,11 @@ class polyPatch
         //- Reference to boundary mesh
         const polyBoundaryMesh& boundaryMesh_;
 
+        //- Demand-driven: face-cell addressing
+        mutable labelList::subList* faceCellsPtr_;
 
-        // Demand-driven private data
-
-            //- face-cell addressing
-            mutable labelList::subList* faceCellsPtr_;
-
-            //- Global edge addressing
-            mutable labelList* mePtr_;
+        //- Demand-driven: global edge addressing
+        mutable labelList* mePtr_;
 
 
 protected:
@@ -247,8 +244,8 @@ public:
             return autoPtr<polyPatch>::New(*this, bm);
         }
 
-        //- Construct and return a clone, resetting the face list
-        //  and boundary mesh
+        //- Construct and return a clone,
+        //- resetting the face list and boundary mesh
         virtual autoPtr<polyPatch> clone
         (
             const polyBoundaryMesh& bm,
@@ -260,8 +257,8 @@ public:
             return autoPtr<polyPatch>::New(*this, bm, index, newSize, newStart);
         }
 
-        //- Construct and return a clone, resetting the face list
-        //  and boundary mesh
+        //- Construct and return a clone,
+        //- resetting the face list and boundary mesh
         virtual autoPtr<polyPatch> clone
         (
             const polyBoundaryMesh& bm,
@@ -488,7 +485,7 @@ public:
         }
 
 
-    // Member operators
+    // Member Operators
 
         //- Assignment
         void operator=(const polyPatch&);

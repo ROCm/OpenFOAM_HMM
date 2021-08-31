@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::patchIdentifier
+    Foam::zoneIdentifier
 
 Description
-    Identifies a patch by name and index, with optional physical type
+    Identifies a mesh zone by name and index, with optional physical type
     and group information.
 
+SeeAlso
+    patchIdentifier
+
 SourceFiles
-    patchIdentifier.C
+    zoneIdentifier.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchIdentifier_H
-#define patchIdentifier_H
+#ifndef zoneIdentifier_H
+#define zoneIdentifier_H
 
 #include "wordList.H"
 
@@ -50,63 +52,49 @@ namespace Foam
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                       Class patchIdentifier Declaration
+                       Class zoneIdentifier Declaration
 \*---------------------------------------------------------------------------*/
 
-class patchIdentifier
+class zoneIdentifier
 {
     // Private Data
 
-        //- Patch name
+        //- Zone name
         word name_;
 
-        //- Patch index in boundary
+        //- Zone index in mesh
         label index_;
 
-        //- Patch physical type (optional)
+        //- Zone type (optional)
         word physicalType_;
 
-        //- Groups to which the patch belongs (optional)
+        //- Groups to which the zone belongs (optional)
         wordList inGroups_;
 
 public:
 
-    // Static Member Functions
-
-        //- Default patch name: "patch" or "patchN"
-        static word defaultName(const label n = -1)
-        {
-            return
-            (
-                n < 0
-              ? word("patch", false)
-              : word("patch" + std::to_string(n), false)
-            );
-        }
-
-
     // Generated Methods
 
         //- Copy construct
-        patchIdentifier(const patchIdentifier&) = default;
+        zoneIdentifier(const zoneIdentifier&) = default;
 
         //- Copy assignment
-        patchIdentifier& operator=(const patchIdentifier&) = default;
+        zoneIdentifier& operator=(const zoneIdentifier&) = default;
 
         //- Destructor
-        virtual ~patchIdentifier() = default;
+        virtual ~zoneIdentifier() = default;
 
 
     // Constructors
 
         //- Default construct. Uses name="", index=0
-        patchIdentifier();
+        zoneIdentifier();
 
         //- Construct from mandatory components
-        patchIdentifier(const word& name, const label index);
+        zoneIdentifier(const word& name, const label index);
 
         //- Construct from components
-        patchIdentifier
+        zoneIdentifier
         (
             const word& name,
             const label index,
@@ -115,7 +103,7 @@ public:
         );
 
         //- Construct from dictionary
-        patchIdentifier
+        zoneIdentifier
         (
             const word& name,
             const dictionary& dict,
@@ -123,58 +111,58 @@ public:
         );
 
         //- Copy construct, resetting the index
-        patchIdentifier
+        zoneIdentifier
         (
-            const patchIdentifier& ident,
+            const zoneIdentifier& ident,
             const label index
         );
 
 
     // Member Functions
 
-        //- The patch name
+        //- The zone name
         const word& name() const noexcept
         {
             return name_;
         }
 
-        //- Modifiable patch name
+        //- Modifiable zone name
         word& name() noexcept
         {
             return name_;
         }
 
-        //- The index of this patch in the boundaryMesh
+        //- The index of this zone in the zone list
         label index() const noexcept
         {
             return index_;
         }
 
-        //- Modifiable index of this patch in the boundaryMesh
+        //- Modifiable index of this zone in the zone list
         label& index() noexcept
         {
             return index_;
         }
 
-        //- The (optional) physical type of the patch
+        //- The (optional) type of the zone
         const word& physicalType() const noexcept
         {
             return physicalType_;
         }
 
-        //- Modifiable (optional) physical type of the patch
+        //- Modifiable (optional) type of the zone
         word& physicalType() noexcept
         {
             return physicalType_;
         }
 
-        //- The (optional) groups that the patch belongs to
+        //- The (optional) groups that the zone belongs to
         const wordList& inGroups() const noexcept
         {
             return inGroups_;
         }
 
-        //- Modifiable (optional) groups that the patch belongs to
+        //- Modifiable (optional) groups that the zone belongs to
         wordList& inGroups() noexcept
         {
             return inGroups_;
@@ -196,7 +184,7 @@ public:
 
 //- Write (physicalType, inGroups) dictionary entries
 //- (without surrounding braces)
-Ostream& operator<<(Ostream& os, const patchIdentifier& ident);
+Ostream& operator<<(Ostream& os, const zoneIdentifier& p);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

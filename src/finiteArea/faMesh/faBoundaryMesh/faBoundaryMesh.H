@@ -56,6 +56,7 @@ namespace Foam
 // Forward Declarations
 class faMesh;
 class faBoundaryMesh;
+class wordRes;
 Ostream& operator<<(Ostream&, const faBoundaryMesh&);
 
 /*---------------------------------------------------------------------------*\
@@ -71,6 +72,18 @@ class faBoundaryMesh
 
         //- Reference to mesh
         const faMesh& mesh_;
+
+        //- Demand-driven: list of patch ids per group
+        /// mutable autoPtr<HashTable<labelList>> groupIDsPtr_;
+
+
+    // Private Member Functions
+
+        //- Some patches have inGroup entries
+        /// bool hasGroupIDs() const;
+
+        //- Calculate group name to patch ids lookup
+        /// void calcGroupIDs() const;
 
         //- No copy construct
         faBoundaryMesh(const faBoundaryMesh&) = delete;
@@ -150,13 +163,22 @@ public:
         labelRange range() const;
 
 
-        //- Return patch indices for all matches.
-        //  A no-op (returns -1) for an empty key
-        //  \note Matching patchGroups currently not supported
+        //- Return (sorted) patch indices for all matches.
+        //  [FUTURE] Optionally matches patch groups.
+        //  A no-op (returns empty list) for an empty matcher
         labelList indices
         (
             const wordRe& matcher,
-            const bool useGroups = false  /* ignored */
+            const bool useGroups = true  //!< currently ignored
+        ) const;
+
+        //- Return (sorted) patch indices for all matches.
+        //  [FUTURE] Optionally matches patch groups.
+        //  A no-op (returns empty list) for an empty matcher
+        labelList indices
+        (
+            const wordRes& matcher,
+            const bool useGroups = true  //!< currently ignored
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
@@ -206,7 +228,7 @@ public:
 
         //- Identical to the indices() method (AUG-2018)
         FOAM_DEPRECATED_FOR(2018-08, "indices() method")
-        labelList findIndices(const wordRe& key, bool useGroups=false) const
+        labelList findIndices(const wordRe& key, bool useGroups=true) const
         {
             return indices(key, useGroups);
         }

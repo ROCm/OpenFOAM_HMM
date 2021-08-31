@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "IOstream.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -133,12 +132,6 @@ Foam::label Foam::cellZone::whichCell(const label globalCellID) const
 }
 
 
-const Foam::cellZoneMesh& Foam::cellZone::zoneMesh() const
-{
-    return zoneMesh_;
-}
-
-
 bool Foam::cellZone::checkDefinition(const bool report) const
 {
     return zone::checkDefinition(zoneMesh_.mesh().nCells(), report);
@@ -147,12 +140,13 @@ bool Foam::cellZone::checkDefinition(const bool report) const
 
 void Foam::cellZone::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
+    os.beginBlock(name());
 
+    os.writeEntry("type", type());
+    zoneIdentifier::write(os);
     writeEntry(this->labelsName, os);
 
-    os  << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 

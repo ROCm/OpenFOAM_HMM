@@ -69,8 +69,8 @@ Ostream& operator<<(Ostream&, const faPatch&);
 
 class faPatch
 :
-    public labelList,
-    public patchIdentifier
+    public patchIdentifier,
+    public labelList
 {
     // Private Data
 

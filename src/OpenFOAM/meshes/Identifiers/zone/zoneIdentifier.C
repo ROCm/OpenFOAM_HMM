@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,19 +25,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchIdentifier.H"
+#include "zoneIdentifier.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::patchIdentifier::patchIdentifier()
+Foam::zoneIdentifier::zoneIdentifier()
 :
     name_(),
     index_(0)
 {}
 
 
-Foam::patchIdentifier::patchIdentifier
+Foam::zoneIdentifier::zoneIdentifier
 (
     const word& name,
     const label index
@@ -49,7 +48,7 @@ Foam::patchIdentifier::patchIdentifier
 {}
 
 
-Foam::patchIdentifier::patchIdentifier
+Foam::zoneIdentifier::zoneIdentifier
 (
     const word& name,
     const label index,
@@ -64,23 +63,23 @@ Foam::patchIdentifier::patchIdentifier
 {}
 
 
-Foam::patchIdentifier::patchIdentifier
+Foam::zoneIdentifier::zoneIdentifier
 (
     const word& name,
     const dictionary& dict,
     const label index
 )
 :
-    patchIdentifier(name, index)
+    zoneIdentifier(name, index)
 {
     dict.readIfPresent("physicalType", physicalType_);
     dict.readIfPresent("inGroups", inGroups_);
 }
 
 
-Foam::patchIdentifier::patchIdentifier
+Foam::zoneIdentifier::zoneIdentifier
 (
-    const patchIdentifier& ident,
+    const zoneIdentifier& ident,
     const label index
 )
 :
@@ -93,7 +92,7 @@ Foam::patchIdentifier::patchIdentifier
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::patchIdentifier::write(Ostream& os) const
+void Foam::zoneIdentifier::write(Ostream& os) const
 {
     if (!physicalType_.empty())
     {
@@ -111,7 +110,7 @@ void Foam::patchIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& ident)
+Foam::Ostream& Foam::operator<<(Ostream& os, const zoneIdentifier& ident)
 {
     ident.write(os);
     os.check(FUNCTION_NAME);

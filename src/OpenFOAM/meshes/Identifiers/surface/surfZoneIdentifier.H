@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,8 @@ Class
     Foam::surfZoneIdentifier
 
 Description
-    Identifies a surface patch/zone by name, patch index and geometricType.
+    Identifies a surface patch/zone by name and index,
+    with optional geometric type.
 
 SeeAlso
     patchIdentifier
@@ -43,7 +44,6 @@ SourceFiles
 
 #include "word.H"
 #include "label.H"
-#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,14 +61,14 @@ class surfZoneIdentifier
 {
     // Private Data
 
-        //- Name of zone
+        //- Patch/zone name
         word name_;
 
-        //- Index of zone in surface mesh
+        //- Patch/zone index in meshed surface
         label index_;
 
-        //- Type name of zone
-        mutable word geometricType_;
+        //- Patch/zone type (optional)
+        word geometricType_;
 
 public:
 
@@ -103,7 +103,7 @@ public:
 
     // Constructors
 
-        //- Default construct, with index zero
+        //- Default construct. Uses name="", index=0
         surfZoneIdentifier();
 
         //- Construct null with specified index
@@ -131,7 +131,7 @@ public:
         //- Copy construct, resetting the index
         surfZoneIdentifier
         (
-            const surfZoneIdentifier& p,
+            const surfZoneIdentifier& ident,
             const label index
         );
 

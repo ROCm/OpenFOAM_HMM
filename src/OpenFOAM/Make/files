@@ -549,6 +549,7 @@ meshes/Identifiers/patch/patchIdentifier.C
 meshes/Identifiers/patch/coupleGroupIdentifier.C
 meshes/Identifiers/surface/geometricSurfacePatch.C
 meshes/Identifiers/surface/surfZoneIdentifier.C
+meshes/Identifiers/zone/zoneIdentifier.C
 
 meshes/MeshObject/meshObject.C
 

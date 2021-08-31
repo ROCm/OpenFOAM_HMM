@@ -38,6 +38,31 @@ namespace Foam
     defineTypeNameAndDebug(faBoundaryMesh, 0);
 }
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// bool Foam::faBoundaryMesh::hasGroupIDs() const
+// {
+//     /// if (groupIDsPtr_)
+//     /// {
+//     ///     // Use existing cache
+//     ///     return !groupIDsPtr_->empty();
+//     /// }
+//
+//     const faPatchList& patches = *this;
+//
+//     for (const faPatch& p : patches)
+//     {
+//         if (!p.inGroups().empty())
+//         {
+//             return true;
+//         }
+//     }
+//
+//     return false;
+// }
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::faBoundaryMesh::faBoundaryMesh
@@ -237,7 +262,7 @@ Foam::labelRange Foam::faBoundaryMesh::range() const
 Foam::labelList Foam::faBoundaryMesh::indices
 (
     const wordRe& matcher,
-    const bool useGroups  // ignored
+    const bool useGroups  /* ignored */
 ) const
 {
     if (matcher.empty())
@@ -263,6 +288,25 @@ Foam::labelList Foam::faBoundaryMesh::indices
     }
 
     return labelList();
+}
+
+
+Foam::labelList Foam::faBoundaryMesh::indices
+(
+    const wordRes& matcher,
+    const bool useGroups  /* ignored */
+) const
+{
+    if (matcher.empty())
+    {
+        return labelList();
+    }
+    else if (matcher.size() == 1)
+    {
+        return this->indices(matcher.first(), useGroups);
+    }
+
+    return PtrListOps::findMatching(*this, matcher);
 }
 
 

@@ -71,6 +71,16 @@ Foam::labelList Foam::pointBoundaryMesh::indices
 }
 
 
+Foam::labelList Foam::pointBoundaryMesh::indices
+(
+    const wordRes& matcher,
+    const bool useGroups
+) const
+{
+    return mesh()().boundaryMesh().indices(matcher, useGroups);
+}
+
+
 Foam::label Foam::pointBoundaryMesh::findPatchID(const word& patchName) const
 {
     return mesh()().boundaryMesh().findPatchID(patchName);

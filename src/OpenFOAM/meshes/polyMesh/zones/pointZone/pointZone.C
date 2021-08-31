@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ License
 #include "pointZoneMesh.H"
 #include "polyMesh.H"
 #include "primitiveMesh.H"
-#include "demandDrivenData.H"
 #include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -127,12 +126,6 @@ Foam::pointZone::pointZone
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::pointZoneMesh& Foam::pointZone::zoneMesh() const
-{
-    return zoneMesh_;
-}
-
-
 Foam::label Foam::pointZone::whichPoint(const label globalPointID) const
 {
     return zone::localID(globalPointID);
@@ -149,7 +142,7 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
 {
     const polyMesh& mesh = zoneMesh().mesh();
 
-    labelList maxZone(mesh.nPoints(), -1);
+    labelList maxZone(mesh.nPoints(), label(-1));
     labelList minZone(mesh.nPoints(), labelMax);
 
     const labelList& addr = *this;
@@ -162,7 +155,7 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
     syncTools::syncPointList(mesh, maxZone, maxEqOp<label>(), label(-1));
     syncTools::syncPointList(mesh, minZone, minEqOp<label>(), labelMax);
 
-    bool error = false;
+    bool hasError = false;
 
     forAll(maxZone, pointi)
     {
@@ -176,7 +169,8 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
          && (maxZone[pointi] != minZone[pointi])
         )
         {
-            if (report && !error)
+            hasError = true;
+            if (report)
             {
                 Info<< " ***Problem with pointZone " << index()
                     << " named " << name()
@@ -190,22 +184,23 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
                     << "(suppressing further warnings)"
                     << endl;
             }
-            error = true;
+            break;  // Only report once
         }
     }
 
-    return error;
+    return hasError;
 }
 
 
 void Foam::pointZone::writeDict(Ostream& os) const
 {
-    os  << nl << name_ << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
+    os.beginBlock(name());
 
+    os.writeEntry("type", type());
+    zoneIdentifier::write(os);
     writeEntry(this->labelsName, os);
 
-    os  << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 

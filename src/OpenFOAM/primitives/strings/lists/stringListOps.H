@@ -53,6 +53,16 @@ SourceFiles
 
 namespace Foam
 {
+    //- Find first list item that matches, -1 on failure
+    template<class UnaryMatchPredicate, class StringType>
+    label firstMatchingString
+    (
+        const UnaryMatchPredicate& matcher,
+        const UList<StringType>& input,
+        const bool invert=false
+    );
+
+
     //- Extract list indices for all matches.
     //  The unary match predicate has the following signature:
     //  \code

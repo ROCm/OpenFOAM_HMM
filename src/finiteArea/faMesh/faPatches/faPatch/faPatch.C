@@ -66,8 +66,8 @@ Foam::faPatch::faPatch
     const label ngbPolyPatchIndex
 )
 :
-    labelList(edgeLabels),
     patchIdentifier(name, index),
+    labelList(edgeLabels),
     nbrPolyPatchId_(ngbPolyPatchIndex),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
@@ -84,8 +84,8 @@ Foam::faPatch::faPatch
     const faBoundaryMesh& bm
 )
 :
-    labelList(dict.get<labelList>("edgeLabels")),
     patchIdentifier(name, dict, index),
+    labelList(dict.get<labelList>("edgeLabels")),
     nbrPolyPatchId_(dict.get<label>("ngbPolyPatchIndex")),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
@@ -96,8 +96,8 @@ Foam::faPatch::faPatch
 
 Foam::faPatch::faPatch(const faPatch& p, const faBoundaryMesh& bm)
 :
-    labelList(p),
     patchIdentifier(p, p.index()),
+    labelList(p),
     nbrPolyPatchId_(p.nbrPolyPatchId_),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),

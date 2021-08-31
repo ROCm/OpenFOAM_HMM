@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class cellZone;
 Ostream& operator<<(Ostream& os, const cellZone& zn);
 
@@ -64,15 +64,13 @@ class cellZone
 :
     public zone
 {
-protected:
-
-    // Protected data
+    // Private Data
 
         //- Reference to zone list
         const cellZoneMesh& zoneMesh_;
 
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- No copy construct
         cellZone(const cellZone&) = delete;
@@ -83,6 +81,7 @@ public:
     // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
+        //- ("cellLabels")
         static const char * const labelsName;
 
 
@@ -110,7 +109,12 @@ public:
     // Constructors
 
         //- Construct an empty zone
-        cellZone(const word& name, const label index, const cellZoneMesh& zm);
+        cellZone
+        (
+            const word& name,
+            const label index,
+            const cellZoneMesh& zm
+        );
 
         //- Construct from components
         cellZone
@@ -198,11 +202,14 @@ public:
 
     // Member Functions
 
+        //- Return reference to the zone mesh
+        const cellZoneMesh& zoneMesh() const noexcept
+        {
+            return zoneMesh_;
+        }
+
         //- Helper function to re-direct to zone::localID(...)
         label whichCell(const label globalCellID) const;
-
-        //- Return zoneMesh reference
-        const cellZoneMesh& zoneMesh() const;
 
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
@@ -220,7 +227,7 @@ public:
 
     // Member Operators
 
-        //- Assign to zone, clearing demand-driven data
+        //- Assign addressing, clearing demand-driven data
         void operator=(const cellZone& zn);
 
         //- Assign addressing, clearing demand-driven data

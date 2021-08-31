@@ -52,6 +52,7 @@ namespace Foam
 // Forward Declarations
 class polyMesh;
 class wordRe;
+class wordRes;
 
 Ostream& operator<<(Ostream& os, const polyBoundaryMesh& pbm);
 
@@ -73,8 +74,8 @@ class polyBoundaryMesh
         //- Demand-driven: list of patch ids per face.
         mutable autoPtr<labelList> patchIDPtr_;
 
-        //- Demand-driven:
-        mutable autoPtr<HashTable<labelList>> groupPatchIDsPtr_;
+        //- Demand-driven: list of patch ids per group
+        mutable autoPtr<HashTable<labelList>> groupIDsPtr_;
 
         //- Demand-driven: edges of neighbouring patches
         mutable autoPtr<List<labelPairList>> neighbourEdgesPtr_;
@@ -84,6 +85,12 @@ class polyBoundaryMesh
 
         //- Calculate geometry for the patches (transformation tensors etc.)
         void calcGeometry();
+
+        //- Some patches have inGroup entries
+        bool hasGroupIDs() const;
+
+        //- Calculate group name to patch ids lookup
+        void calcGroupIDs() const;
 
         //- No copy construct
         polyBoundaryMesh(const polyBoundaryMesh&) = delete;
@@ -196,15 +203,23 @@ public:
         labelRange range(const label patchi) const;
 
 
-        //- Return patch indices for all matches.
-        //  Optionally matches patchGroups
-        //  A no-op (returns empty list) for an empty key
+        //- Return (sorted) patch indices for all matches.
+        //  Optionally matches patch groups.
+        //  A no-op (returns empty list) for an empty matcher
         labelList indices
         (
             const wordRe& matcher,
             const bool useGroups = true
         ) const;
 
+        //- Return (sorted) patch indices for all matches.
+        //  Optionally matches patch groups.
+        //  A no-op (returns empty list) for an empty matcher
+        labelList indices
+        (
+            const wordRes& matcher,
+            const bool useGroups = true
+        ) const;
 
         //- Return patch index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty key

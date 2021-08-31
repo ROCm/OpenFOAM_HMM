@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class mapPolyMesh;
 class faceZone;
 Ostream& operator<<(Ostream& os, const faceZone& zn);
@@ -67,46 +67,32 @@ class faceZone
 :
     public zone
 {
-    // Private Member Functions
-
-        //- Set flip-map to uniform value
-        void setFlipMap(const bool val);
-
-        //- No copy construct
-        faceZone(const faceZone&) = delete;
-
-        //- No copy assignment
-        void operator=(const faceZone&) = delete;
-
-
-protected:
-
-    // Protected Data
+    // Private Data
 
         //- Flip map for all faces in the zone.
-        //  Use true if the face needs flipping for the correct orientation.
+        //  True if the face needs flipping for the correct orientation.
         boolList flipMap_;
 
         //- Reference to zone list
         const faceZoneMesh& zoneMesh_;
 
-
-      // Demand-driven data
-
-        //- Primitive patch made out of correctly flipped faces
+        //- Demand-driven: Primitive patch of correctly flipped faces
         mutable primitiveFacePatch* patchPtr_;
 
-        //- Master cell layer
+        //- Demand-driven: Master cell layer
         mutable labelList* masterCellsPtr_;
 
-        //- Slave cell layer
+        //- Demand-driven: Slave cell layer
         mutable labelList* slaveCellsPtr_;
 
-        //- Global edge addressing
+        //- Demand-driven: Global edge addressing
         mutable labelList* mePtr_;
 
 
-    // Protected Member Functions
+    // Private Member Functions
+
+        //- Set flip-map to uniform value
+        void setFlipMap(const bool val);
 
         //- Build primitive patch
         void calcFaceZonePatch() const;
@@ -118,11 +104,19 @@ protected:
         void checkAddressing() const;
 
 
+        //- No copy construct
+        faceZone(const faceZone&) = delete;
+
+        //- No copy assignment
+        void operator=(const faceZone&) = delete;
+
+
 public:
 
     // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
+        //- ("faceLabels")
         static const char * const labelsName;
 
 
@@ -150,7 +144,12 @@ public:
     // Constructors
 
         //- Construct an empty zone
-        faceZone(const word& name, const label index, const faceZoneMesh& zm);
+        faceZone
+        (
+            const word& name,
+            const label index,
+            const faceZoneMesh& zm
+        );
 
         //- Construct from components with uniform flip map value
         faceZone
@@ -265,11 +264,14 @@ public:
 
     // Member Functions
 
-        //- Return zoneMesh reference
-        const faceZoneMesh& zoneMesh() const;
+        //- Return reference to the zone mesh
+        const faceZoneMesh& zoneMesh() const noexcept
+        {
+            return zoneMesh_;
+        }
 
         //- Return face flip map
-        const boolList& flipMap() const
+        const boolList& flipMap() const noexcept
         {
             return flipMap_;
         }
@@ -281,7 +283,7 @@ public:
         const primitiveFacePatch& operator()() const;
 
 
-      // Addressing into mesh
+    // Addressing into mesh
 
         //- Return labels of master cells (cells next to the master face
         //- zone in the prescribed direction)

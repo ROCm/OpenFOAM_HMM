@@ -41,6 +41,7 @@ SourceFiles
 #include "regIOobject.H"
 #include "pointField.H"
 #include "Map.H"
+#include "HashSet.H"
 #include "PtrList.H"
 #include "bitSet.H"
 #include "wordRes.H"
@@ -72,8 +73,11 @@ class ZoneMesh
         //- Reference to mesh
         const MeshType& mesh_;
 
-        //- Map of zone labels for given element
-        mutable Map<label>* zoneMapPtr_;
+        //- Demand-driven: map of zone labels for given element
+        mutable autoPtr<Map<label>> zoneMapPtr_;
+
+        //- Demand-driven: list of zone ids per group
+        mutable autoPtr<HashTable<labelList>> groupIDsPtr_;
 
 
     // Private Member Functions
@@ -83,6 +87,12 @@ class ZoneMesh
 
         //- Create zone map
         void calcZoneMap() const;
+
+        //- Some zones have inGroup entries
+        bool hasGroupIDs() const;
+
+        //- Calculate group name to zone ids lookup
+        void calcGroupIDs() const;
 
         //- No copy construct
         ZoneMesh(const ZoneMesh&) = delete;
@@ -165,13 +175,23 @@ public:
         wordList sortedNames(const wordRes& matcher) const;
 
 
-        //- Return zone indices for all matches
+        //- Return (sorted) zone indices for all matches
+        //  Optionally matches zone groups.
         //  A no-op (returns empty list) for an empty matcher
-        labelList indices(const wordRe& matcher) const;
+        labelList indices
+        (
+            const wordRe& matcher,
+            const bool useGroups = true
+        ) const;
 
-        //- Return zone indices for all matches
+        //- Return (sorted) zone indices for all matches
+        //  Optionally matches zone groups.
         //  A no-op (returns empty list) for an empty matcher
-        labelList indices(const wordRes& matcher) const;
+        labelList indices
+        (
+            const wordRes& matcher,
+            const bool useGroups = true
+        ) const;
 
         //- Zone index for the first match, return -1 if not found
         //  A no-op (returns -1) for an empty key
@@ -204,15 +224,30 @@ public:
         //- specification as a bitSet.
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
+        //  Optionally matches zoneGroups.
         //  A no-op (returns empty bitSet) for an empty matcher
-        bitSet selection(const wordRe& matcher) const;
+        bitSet selection
+        (
+            const wordRe& matcher,
+            const bool useGroups = true
+        ) const;
 
         //- Return all elements (cells, faces, points) that match the zone
         //- specification as a bitSet.
         //  The bitSet is empty (zero-size) if there are no elements matched
         //  anywhere.
         //  A no-op (returns empty bitSet) for an empty matcher
-        bitSet selection(const wordRes& matcher) const;
+        bitSet selection
+        (
+            const wordRes& matcher,
+            const bool useGroups = true
+        ) const;
+
+        //- The zone indices per zone group
+        const HashTable<labelList>& groupZoneIDs() const;
+
+        //- Set/add group with zones
+        void setGroup(const word& groupName, const labelUList& zoneIDs);
 
 
         //- Clear addressing

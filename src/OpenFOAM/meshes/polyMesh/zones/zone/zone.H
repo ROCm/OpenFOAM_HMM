@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,9 @@ SourceFiles
 #ifndef zone_H
 #define zone_H
 
+#include "zoneIdentifier.H"
 #include "labelList.H"
 #include "typeInfo.H"
-#include "dictionary.H"
 #include "Map.H"
 #include "pointFieldFwd.H"
 
@@ -52,9 +52,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class zone;
+class dictionary;
 Ostream& operator<<(Ostream& os, const zone& zn);
 
 /*---------------------------------------------------------------------------*\
@@ -63,35 +63,13 @@ Ostream& operator<<(Ostream& os, const zone& zn);
 
 class zone
 :
+    public zoneIdentifier,
     public labelList
 {
-    // Private Member Functions
+    // Private Data
 
-        //- No copy construct
-        zone(const zone&) = delete;
-
-
-protected:
-
-    // Protected data
-
-        //- Name of zone
-        word name_;
-
-        //- Index of zone
-        label index_;
-
-
-      // Demand-driven private data
-
-        //- Map of labels in zone for fast location lookup
+        //- Demand-driven: map of labels in zone for fast location lookup
         mutable Map<label>* lookupMapPtr_;
-
-
-    // Protected Member Functions
-
-        //- Construct the look-up map
-        void calcLookupMap() const;
 
 
 public:
@@ -101,6 +79,9 @@ public:
 
 
     // Constructors
+
+        //- Default construct
+        zone();
 
         //- Construct an empty zone
         zone(const word& name, const label index);
@@ -155,31 +136,12 @@ public:
 
     // Member Functions
 
-        //- Return name
-        const word& name() const
-        {
-            return name_;
-        }
-
-        //- Map storing the local index for every global index.  Used to find
-        //  the index of the item in the zone from the known global index. If
-        //  the item is not in the zone, returns -1
-        label localID(const label globalID) const;
-
-        //- Return the index of this zone in zone list
-        label index() const
-        {
-            return index_;
-        }
-
-        //- Return the index of this zone in zone list
-        label& index()
-        {
-            return index_;
-        }
-
         //- Return a reference to the look-up map
         const Map<label>& lookupMap() const;
+
+        //- Lookup local address in zone for given global index.
+        //  \return the local address, or -1 if the item is not in the zone
+        label localID(const label globalID) const;
 
         //- Clear addressing
         virtual void clearAddressing();

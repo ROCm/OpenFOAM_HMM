@@ -66,9 +66,6 @@ static labelList selectPatchFaces
     const wordRes& polyPatchNames
 )
 {
-    //- Return the set of patch IDs corresponding to the given names
-    //  By default warns if given names are not found.
-    //  Optionally matches to patchGroups as well as patchNames.
     const labelList patchIDs
     (
         pbm.patchSet

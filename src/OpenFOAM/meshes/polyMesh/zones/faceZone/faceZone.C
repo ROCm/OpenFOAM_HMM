@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ void Foam::faceZone::setFlipMap(const bool val)
     {
         // Avoid copying old values on resize
         flipMap_.clear();
-        flipMap_.setSize(this->size(), val);
+        flipMap_.resize(this->size(), val);
     }
 }
 
@@ -166,28 +166,27 @@ void Foam::faceZone::calcCellLayers() const
 
 void Foam::faceZone::checkAddressing() const
 {
-    if (size() != flipMap_.size())
+    const labelList& addr = *this;
+
+    if (addr.size() != flipMap_.size())
     {
         FatalErrorInFunction
-            << "Size of addressing: " << size()
+            << "Size of addressing: " << addr.size()
             << " size of flip map: " << flipMap_.size()
             << abort(FatalError);
     }
 
-    const labelList& mf = *this;
-
     // Note: nFaces, nCells might not be set yet on mesh so use owner size
     const label nFaces = zoneMesh().mesh().faceOwner().size();
 
-    bool hasWarned = false;
-    forAll(mf, i)
+    for (const label facei : addr)
     {
-        if (!hasWarned && (mf[i] < 0 || mf[i] >= nFaces))
+        if (facei < 0 || facei >= nFaces)
         {
             WarningInFunction
-                << "Illegal face index " << mf[i] << " outside range 0.."
-                << nFaces-1 << endl;
-            hasWarned = true;
+                << "Illegal face index " << facei
+                << " outside range 0.." << nFaces-1 << endl;
+            break;  // Only report once
         }
     }
 }
@@ -229,7 +228,7 @@ Foam::faceZone::faceZone
     slaveCellsPtr_(nullptr),
     mePtr_(nullptr)
 {
-    flipMap_.setSize(size(), flipMapValue);
+    flipMap_.resize(size(), flipMapValue);
     checkAddressing();
 }
 
@@ -251,7 +250,7 @@ Foam::faceZone::faceZone
     slaveCellsPtr_(nullptr),
     mePtr_(nullptr)
 {
-    flipMap_.setSize(size(), flipMapValue);
+    flipMap_.resize(size(), flipMapValue);
     checkAddressing();
 }
 
@@ -370,12 +369,6 @@ Foam::faceZone::~faceZone()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::faceZoneMesh& Foam::faceZone::zoneMesh() const
-{
-    return zoneMesh_;
-}
-
-
 Foam::label Foam::faceZone::whichFace(const label globalFaceID) const
 {
     return zone::localID(globalFaceID);
@@ -491,11 +484,12 @@ void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
     boolList newFlipMap(flipMap_.size());
     label nFaces = 0;
 
+    const labelList& addr = *this;
     const labelList& faceMap = mpm.reverseFaceMap();
 
-    forAll(*this, i)
+    forAll(addr, i)
     {
-        const label facei = operator[](i);
+        const label facei = addr[i];
 
         if (faceMap[facei] >= 0)
         {
@@ -531,11 +525,14 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     {
+        const labelList& addr = *this;
+
         boolList neiZoneFace(mesh.nBoundaryFaces(), false);
         boolList neiZoneFlip(mesh.nBoundaryFaces(), false);
-        forAll(*this, i)
+
+        forAll(addr, i)
         {
-            const label facei = operator[](i);
+            const label facei = addr[i];
 
             if (!mesh.isInternalFace(facei))
             {
@@ -548,9 +545,9 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
         boolList myZoneFlip(neiZoneFlip);
         syncTools::swapBoundaryFaceList(mesh, neiZoneFlip);
 
-        forAll(*this, i)
+        forAll(addr, i)
         {
-            const label facei = operator[](i);
+            const label facei = addr[i];
             const label patchi = bm.whichPatch(facei);
 
             if (patchi != -1 && bm[patchi].coupled())
@@ -626,13 +623,14 @@ void Foam::faceZone::write(Ostream& os) const
 
 void Foam::faceZone::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl;
+    os.beginBlock(name());
 
+    os.writeEntry("type", type());
+    zoneIdentifier::write(os);
     writeEntry(this->labelsName, os);
     flipMap().writeEntry("flipMap", os);
 
-    os  << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 

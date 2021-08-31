@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ namespace Foam
 // Forward Declarations
 class fvMesh;
 class polyBoundaryMesh;
+class wordRes;
 
 /*---------------------------------------------------------------------------*\
                        Class fvBoundaryMesh Declaration
@@ -109,9 +110,13 @@ public:
         //- with only those pointing to interfaces being set
         lduInterfacePtrsList interfaces() const;
 
-        //- Return patch indices for all matches.
+        //- Return (sorted) patch indices for all matches.
         //  A no-op (returns empty list) for an empty matcher
         labelList indices(const wordRe& matcher, const bool useGroups) const;
+
+        //- Return (sorted) patch indices for all matches.
+        //  A no-op (returns empty list) for an empty matcher
+        labelList indices(const wordRes& matcher, const bool useGroups) const;
 
         //- Find patch index given a name
         //  A no-op (returns -1) for an empty patchName

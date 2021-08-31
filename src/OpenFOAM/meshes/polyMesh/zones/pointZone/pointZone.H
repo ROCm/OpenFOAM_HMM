@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class pointZone;
 Ostream& operator<<(Ostream& os, const pointZone& zn);
 
@@ -67,15 +67,13 @@ class pointZone
 :
     public zone
 {
-protected:
-
-    // Protected Data
+    // Private Data
 
         //- Reference to zone list
         const pointZoneMesh& zoneMesh_;
 
 
-    // Protected Member Functions
+    // Private Member Functions
 
         //- No copy construct
         pointZone(const pointZone&) = delete;
@@ -86,6 +84,7 @@ public:
     // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
+        //- ("pointLabels")
         static const char * const labelsName;
 
 
@@ -113,7 +112,12 @@ public:
     // Constructors
 
         //- Construct an empty zone
-        pointZone(const word& name, const label index, const pointZoneMesh& zm);
+        pointZone
+        (
+            const word& name,
+            const label index,
+            const pointZoneMesh& zm
+        );
 
         //- Construct from components
         pointZone
@@ -170,7 +174,7 @@ public:
         }
 
         //- Construct and return a clone, resetting the point list
-        //  and zone mesh
+        //- and zone mesh
         virtual autoPtr<pointZone> clone
         (
             const pointZoneMesh& zm,
@@ -201,8 +205,11 @@ public:
 
     // Member Functions
 
-        //- Return zoneMesh reference
-        const pointZoneMesh& zoneMesh() const;
+        //- Return reference to the zone mesh
+        const pointZoneMesh& zoneMesh() const noexcept
+        {
+            return zoneMesh_;
+        }
 
         //- Helper function to re-direct to zone::localID(...)
         label whichPoint(const label globalPointID) const;
@@ -224,7 +231,7 @@ public:
 
     // Member Operators
 
-        //- Assign to zone, clearing demand-driven data
+        //- Assign addressing, clearing demand-driven data
         void operator=(const pointZone& zn);
 
         //- Assign addressing, clearing demand-driven data

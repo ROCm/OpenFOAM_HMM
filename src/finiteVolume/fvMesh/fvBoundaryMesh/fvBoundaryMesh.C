@@ -83,6 +83,16 @@ Foam::labelList Foam::fvBoundaryMesh::indices
 }
 
 
+Foam::labelList Foam::fvBoundaryMesh::indices
+(
+    const wordRes& matcher,
+    const bool useGroups
+) const
+{
+    return mesh().boundaryMesh().indices(matcher, useGroups);
+}
+
+
 Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
 {
     if (patchName.empty())
