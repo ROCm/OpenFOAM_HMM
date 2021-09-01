@@ -29,15 +29,17 @@ then
     runParallel snappyHexMesh -overwrite -fileHandler collated
 
     ## Remove any include files from the field dictionaries
-    (   mkdir -p processors/0 && \
+    (   mkdir -p processors2/0 && \
         cd 0 && \
         for f in *; do [ -f "$f" ] && \
-        foamDictionary "$f" > "../processors/0/$f"; done \
+        foamDictionary "$f" > "../processors2/0/$f"; done \
     )
 
     runParallel $(getApplication) -fileHandler collated
 
-    runApplication reconstructParMesh -constant
+    ## Run reconstructParMesh with collated as well since writes
+    ##     constant/polyMesh/cellProcAddressing
+    runApplication reconstructParMesh -constant -fileHandler collated
 
     runApplication reconstructPar
 
