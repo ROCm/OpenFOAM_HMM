@@ -656,6 +656,9 @@ int main(int argc, char *argv[])
 
     polyTopoChange meshMod(mesh);
 
+    // Mark all repatched faces. This makes sure that the faces to repatch
+    // do not overlap
+    bitSet isRepatchedBoundary(mesh.nBoundaryFaces());
 
     for (const dictionary& dict : patchSources)
     {
@@ -695,6 +698,15 @@ int main(int argc, char *argv[])
                         destPatchi,
                         meshMod
                     );
+
+                    if (!isRepatchedBoundary.set(pp.offset()+i))
+                    {
+                        FatalErrorInFunction
+                            << "Face " << pp.start() + i << " from patch "
+                            << pp.name() << " is already marked to be moved"
+                            << " to patch " << meshMod.region()[pp.start() + i]
+                            << exit(FatalError);
+                    }
                 }
             }
         }
@@ -720,6 +732,15 @@ int main(int argc, char *argv[])
                         << " is not an external face of the mesh." << endl
                         << "This application can only repatch existing boundary"
                         << " faces." << exit(FatalError);
+                }
+
+                if (!isRepatchedBoundary.set(facei-mesh.nInternalFaces()))
+                {
+                    FatalErrorInFunction
+                        << "Face " << facei << " from set "
+                        << set.name() << " is already marked to be moved"
+                        << " to patch " << meshMod.region()[facei]
+                        << exit(FatalError);
                 }
 
                 changePatchID
