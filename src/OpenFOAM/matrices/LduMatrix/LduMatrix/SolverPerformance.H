@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Type>
 class SolverPerformance;
@@ -84,7 +84,7 @@ class SolverPerformance
     // Label type corresponding to Type
     typedef typename pTraits<Type>::labelType labelType;
 
-    // Private data
+    // Private Data
 
         word        solverName_;
         word        fieldName_;
@@ -97,7 +97,7 @@ class SolverPerformance
 
 public:
 
-    // Static data
+    // Static Data
 
         // Declare name of the class and its debug switch
         ClassName("SolverPerformance");
@@ -145,69 +145,69 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- Return solver name
-        const word& solverName() const
+        const word& solverName() const noexcept
         {
             return solverName_;
         }
 
         //- Return solver name
-        word& solverName()
+        word& solverName() noexcept
         {
             return solverName_;
         }
 
 
         //- Return field name
-        const word& fieldName() const
+        const word& fieldName() const noexcept
         {
             return fieldName_;
         }
 
 
         //- Return initial residual
-        const Type& initialResidual() const
+        const Type& initialResidual() const noexcept
         {
             return initialResidual_;
         }
 
         //- Return initial residual
-        Type& initialResidual()
+        Type& initialResidual() noexcept
         {
             return initialResidual_;
         }
 
 
         //- Return final residual
-        const Type& finalResidual() const
+        const Type& finalResidual() const noexcept
         {
             return finalResidual_;
         }
 
         //- Return final residual
-        Type& finalResidual()
+        Type& finalResidual() noexcept
         {
             return finalResidual_;
         }
 
 
         //- Return number of iterations
-        const labelType& nIterations() const
+        const labelType& nIterations() const noexcept
         {
             return nIterations_;
         }
 
         //- Return number of iterations
-        labelType& nIterations()
+        labelType& nIterations() noexcept
         {
             return nIterations_;
         }
 
 
         //- Has the solver converged?
-        bool converged() const
+        bool converged() const noexcept
         {
             return converged_;
         }
@@ -220,7 +220,7 @@ public:
         (
             const Type& tolerance,
             const Type& relTolerance,
-            const label log
+            const int logLevel = 0
         );
 
         //- Singularity test

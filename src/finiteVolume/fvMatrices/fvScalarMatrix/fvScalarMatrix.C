@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,9 +118,18 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     const dictionary& solverControls
 )
 {
-    GeometricField<scalar, fvPatchField, volMesh>& psi =
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            solverPerformance::debug
+        );
+
+    auto& psi =
         const_cast<GeometricField<scalar, fvPatchField, volMesh>&>
-        (fvMat_.psi());
+        (
+            fvMat_.psi()
+        );
 
     scalarField saveDiag(fvMat_.diag());
     fvMat_.addBoundaryDiag(fvMat_.diag(), 0);
@@ -137,10 +146,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
         totalSource
     );
 
-    const label log =
-        solverControls.getOrDefault<label>("log", solverPerformance::debug);
-
-    if (log)
+    if (logLevel)
     {
         solverPerf.print(Info.masterStream(fvMat_.mesh().comm()));
     }
@@ -169,6 +175,13 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
                "solving fvMatrix<scalar>"
             << endl;
     }
+
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            solverPerformance::debug
+        );
 
     scalarField saveLower;
     scalarField saveUpper;
@@ -214,10 +227,13 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
     tmp<scalarField> tpsi;
     if (!useImplicit_)
     {
-        GeometricField<scalar, fvPatchField, volMesh>& psi =
-           const_cast<GeometricField<scalar, fvPatchField, volMesh>&>(psi_);
-
-        tpsi = tmp<scalarField>(psi.primitiveFieldRef());
+        tpsi.ref
+        (
+            const_cast<GeometricField<scalar, fvPatchField, volMesh>&>
+            (
+                psi_
+            ).primitiveFieldRef()
+        );
     }
     else
     {
@@ -235,7 +251,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
             }
         }
     }
-    scalarField& psi = tpsi.constCast();
+    scalarField& psi = tpsi.ref();
 
     // Solver call
     solverPerformance solverPerf = lduMatrix::solver::New
@@ -267,10 +283,7 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
         }
     }
 
-    const label log =
-        solverControls.getOrDefault<label>("log", solverPerformance::debug);
-
-    if (log)
+    if (logLevel)
     {
         solverPerf.print(Info.masterStream(mesh().comm()));
     }

@@ -67,7 +67,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class Type, class DType, class LUType>
 class LduMatrix;
@@ -87,7 +87,7 @@ Ostream& operator<<
 template<class Type, class DType, class LUType>
 class LduMatrix
 {
-    // private data
+    // Private Data
 
         //- LDU mesh reference
         const lduMesh& lduMesh_;
@@ -117,7 +117,10 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
+
+            //- Default maximum number of iterations in the solver
+            static const label defaultMaxIter_ = 1000;
 
             word fieldName_;
             const LduMatrix<Type, DType, LUType>& matrix_;
@@ -125,17 +128,14 @@ public:
             //- Dictionary of controls
             dictionary controlDict_;
 
-            //- Default maximum number of iterations in the solver
-            static const label defaultMaxIter_ = 1000;
-
-            //- Maximum number of iterations in the solver
-            label maxIter_;
+            //- Level of verbosity in the solver output statements
+            int log_;
 
             //- Minimum number of iterations in the solver
             label minIter_;
 
-            //- Level of verbosity in the solver output statements
-            label log_;
+            //- Maximum number of iterations in the solver
+            label maxIter_;
 
             //- Final convergence tolerance
             Type tolerance_;
@@ -146,18 +146,19 @@ public:
 
         // Protected Member Functions
 
-            //- Read a control parameter from controlDict
-            template<class T>
-            inline void readControl
-            (
-                const dictionary& controlDict,
-                T& control,
-                const word& controlName
-            );
-
-
             //- Read the control parameters from the controlDict_
             virtual void readControls();
+
+
+        // Housekeeping
+
+            //- Deprecated(2021-09) Read control parameter from dictionary
+            //  \deprecated(2021-09) - use dictionary methods directly
+            template<class T>
+            void readControl(const dictionary& dict, T& val, const word& key)
+            {
+                dict.readIfPresent(key, val);
+            }
 
 
     public:
@@ -229,19 +230,17 @@ public:
             virtual ~solver() = default;
 
 
-        // Member functions
+        // Member Functions
 
-            // Access
+            const word& fieldName() const noexcept
+            {
+                return fieldName_;
+            }
 
-                const word& fieldName() const
-                {
-                    return fieldName_;
-                }
-
-                const LduMatrix<Type, DType, LUType>& matrix() const
-                {
-                    return matrix_;
-                }
+            const LduMatrix<Type, DType, LUType>& matrix() const noexcept
+            {
+                return matrix_;
+            }
 
 
             //- Read and reset the solver parameters from the given dictionary
@@ -268,7 +267,7 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
 
             word fieldName_;
             const LduMatrix<Type, DType, LUType>& matrix_;
@@ -338,19 +337,17 @@ public:
             virtual ~smoother() = default;
 
 
-        // Member functions
+        // Member Functions
 
-            // Access
+            const word& fieldName() const noexcept
+            {
+                return fieldName_;
+            }
 
-                const word& fieldName() const
-                {
-                    return fieldName_;
-                }
-
-                const LduMatrix<Type, DType, LUType>& matrix() const
-                {
-                    return matrix_;
-                }
+            const LduMatrix<Type, DType, LUType>& matrix() const noexcept
+            {
+                return matrix_;
+            }
 
 
             //- Smooth the solution for a given number of sweeps
@@ -367,7 +364,7 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
 
             //- Reference to the base-solver this preconditioner is used with
             const solver& solver_;
@@ -460,7 +457,7 @@ public:
     };
 
 
-    // Static data
+    // Static Data
 
         // Declare name of the class and its debug switch
         ClassName("LduMatrix");
@@ -802,7 +799,6 @@ LduMatrix<Type, DType, LUType>::solver::                                       \
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "LduMatrixI.H"
     #include "LduMatrix.C"
 #endif
 

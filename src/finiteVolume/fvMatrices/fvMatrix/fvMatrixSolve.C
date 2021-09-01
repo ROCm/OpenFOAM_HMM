@@ -79,13 +79,10 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregatedOrCoupled
             << endl;
     }
 
-    label maxIter = -1;
-    if (solverControls.readIfPresent("maxIter", maxIter))
+    // Do not solve if maxIter == 0
+    if (solverControls.getOrDefault<label>("maxIter", -1) == 0)
     {
-        if (maxIter == 0)
-        {
-            return SolverPerformance<Type>();
-        }
+        return SolverPerformance<Type>();
     }
 
     word type(solverControls.getOrDefault<word>("type", "segregated"));
@@ -122,6 +119,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
             << "Implicit option is not allowed for type: " << Type::typeName
             << exit(FatalError);
     }
+
     if (debug)
     {
         Info.masterStream(this->mesh().comm())
@@ -130,6 +128,13 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
                "solving fvMatrix<Type>"
             << endl;
     }
+
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
 
     auto& psi =
         const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
@@ -222,14 +227,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        const label log =
-            solverControls.getOrDefault<label>
-            (
-                "log",
-                SolverPerformance<Type>::debug
-            );
-
-        if (log)
+        if (logLevel)
         {
             solverPerf.print(Info.masterStream(this->mesh().comm()));
         }
@@ -264,6 +262,13 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
             << endl;
     }
 
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
+
     auto& psi =
         const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 
@@ -296,14 +301,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
         coupledMatrixSolver->solve(psi)
     );
 
-    const label log =
-        solverControls.getOrDefault<label>
-        (
-            "log",
-            SolverPerformance<Type>::debug
-        );
-
-    if (log)
+    if (logLevel)
     {
         solverPerf.print(Info.masterStream(this->mesh().comm()));
     }

@@ -69,7 +69,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 class lduMatrix;
 
@@ -83,7 +83,7 @@ Ostream& operator<<(Ostream&, const InfoProxy<lduMatrix>&);
 
 class lduMatrix
 {
-    // private data
+    // Private Data
 
         //- LDU mesh reference
         //const lduMesh& lduMesh_;
@@ -100,7 +100,10 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
+
+            //- Default maximum number of iterations in the solver
+            static const label defaultMaxIter_;
 
             word fieldName_;
             const lduMatrix& matrix_;
@@ -111,17 +114,14 @@ public:
             //- Dictionary of controls
             dictionary controlDict_;
 
-            //- Default maximum number of iterations in the solver
-            static const label defaultMaxIter_;
-
-            //- Maximum number of iterations in the solver
-            label maxIter_;
+            //- Level of verbosity in the solver output statements
+            int log_;
 
             //- Minimum number of iterations in the solver
             label minIter_;
 
-            //- Level of verbosity in the solver output statements
-            label log_;
+            //- Maximum number of iterations in the solver
+            label maxIter_;
 
             //- Final convergence tolerance
             scalar tolerance_;
@@ -224,34 +224,32 @@ public:
         virtual ~solver() = default;
 
 
-        // Member functions
+        // Member Functions
 
-            // Access
+            const word& fieldName() const noexcept
+            {
+                return fieldName_;
+            }
 
-                const word& fieldName() const
-                {
-                    return fieldName_;
-                }
+            const lduMatrix& matrix() const noexcept
+            {
+                return matrix_;
+            }
 
-                const lduMatrix& matrix() const
-                {
-                    return matrix_;
-                }
+            const FieldField<Field, scalar>& interfaceBouCoeffs() const noexcept
+            {
+                return interfaceBouCoeffs_;
+            }
 
-                 const FieldField<Field, scalar>& interfaceBouCoeffs() const
-                 {
-                     return interfaceBouCoeffs_;
-                 }
+            const FieldField<Field, scalar>& interfaceIntCoeffs() const noexcept
+            {
+                return interfaceIntCoeffs_;
+            }
 
-                 const FieldField<Field, scalar>& interfaceIntCoeffs() const
-                 {
-                     return interfaceIntCoeffs_;
-                 }
-
-                 const lduInterfaceFieldPtrsList& interfaces() const
-                 {
-                     return interfaces_;
-                 }
+            const lduInterfaceFieldPtrsList& interfaces() const noexcept
+            {
+                return interfaces_;
+            }
 
 
             //- Read and reset the solver parameters from the given stream
@@ -291,7 +289,7 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
 
             word fieldName_;
             const lduMatrix& matrix_;
@@ -384,34 +382,32 @@ public:
         virtual ~smoother() = default;
 
 
-        // Member functions
+        // Member Functions
 
-            // Access
+            const word& fieldName() const noexcept
+            {
+                return fieldName_;
+            }
 
-                const word& fieldName() const
-                {
-                    return fieldName_;
-                }
+            const lduMatrix& matrix() const noexcept
+            {
+                return matrix_;
+            }
 
-                const lduMatrix& matrix() const
-                {
-                    return matrix_;
-                }
+            const FieldField<Field, scalar>& interfaceBouCoeffs() const noexcept
+            {
+                return interfaceBouCoeffs_;
+            }
 
-                 const FieldField<Field, scalar>& interfaceBouCoeffs() const
-                 {
-                     return interfaceBouCoeffs_;
-                 }
+            const FieldField<Field, scalar>& interfaceIntCoeffs() const noexcept
+            {
+                return interfaceIntCoeffs_;
+            }
 
-                 const FieldField<Field, scalar>& interfaceIntCoeffs() const
-                 {
-                     return interfaceIntCoeffs_;
-                 }
-
-                 const lduInterfaceFieldPtrsList& interfaces() const
-                 {
-                     return interfaces_;
-                 }
+            const lduInterfaceFieldPtrsList& interfaces() const noexcept
+            {
+                return interfaces_;
+            }
 
 
             //- Smooth the solution for a given number of sweeps
@@ -439,7 +435,7 @@ public:
     {
     protected:
 
-        // Protected data
+        // Protected Data
 
             //- Reference to the base-solver this preconditioner is used with
             const solver& solver_;
@@ -506,7 +502,7 @@ public:
         virtual ~preconditioner() = default;
 
 
-        // Member functions
+        // Member Functions
 
             //- Read and reset the preconditioner parameters
             //- from the given stream
@@ -536,7 +532,7 @@ public:
     };
 
 
-    // Static data
+    // Static Data
 
         // Declare name of the class and its debug switch
         ClassName("lduMatrix");
@@ -563,7 +559,7 @@ public:
     ~lduMatrix();
 
 
-    // Member functions
+    // Member Functions
 
         // Access to addressing
 
