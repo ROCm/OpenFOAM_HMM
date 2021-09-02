@@ -341,6 +341,8 @@ void Foam::uniformSet::calcSamples
             if (dist > smallDist)
             {
                 // hitpoint is past tracking position
+                bPoint = bHits[bHitI].hitPoint();
+                bFacei = bHits[bHitI].index();
                 foundValidB = true;
                 break;
             }
