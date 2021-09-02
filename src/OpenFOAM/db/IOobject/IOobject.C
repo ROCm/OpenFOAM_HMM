@@ -542,6 +542,29 @@ Foam::fileName Foam::IOobject::path
 }
 
 
+Foam::fileName Foam::IOobject::objectRelPath() const
+{
+    // A file is 'outside' of the case if it has been specified using an
+    // absolute path
+
+    const auto first = instance().find('/');
+
+    if
+    (
+        first == 0
+        #ifdef _WIN32
+     || (first == 2 && instance()[1] == ':')  // Eg, d:/path
+        #endif
+    )
+    {
+        // Absolute path (starts with '/' or 'd:/')
+        return instance()/name();
+    }
+
+    return instance()/db_.dbDir()/local()/name();
+}
+
+
 Foam::fileName Foam::IOobject::localFilePath
 (
     const word& typeName,

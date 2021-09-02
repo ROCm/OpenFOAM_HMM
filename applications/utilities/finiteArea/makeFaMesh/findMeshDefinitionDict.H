@@ -11,7 +11,7 @@ License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Search for the appropriate faMeshDefinition dictionary....
+    Search for the appropriate faMeshDefinition dictionary...
 
 \*---------------------------------------------------------------------------*/
 
@@ -86,7 +86,7 @@ autoPtr<IOdictionary> meshDictPtr;
     }
 
     Info<< "Creating faMesh from definition: "
-        << runTime.relativePath(meshDictIO.objectPath()) << endl;
+        << meshDictIO.objectRelPath() << endl;
 
     meshDictPtr = autoPtr<IOdictionary>::New(meshDictIO);
 }

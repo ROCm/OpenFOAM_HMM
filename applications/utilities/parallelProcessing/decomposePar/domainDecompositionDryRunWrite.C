@@ -64,7 +64,7 @@ void Foam::domainDecompositionDryRun::writeVolField
     cellDist.write();
 
     Info<< nl << "Wrote decomposition to "
-        << this->mesh().time().relativePath(cellDist.objectPath())
+        << cellDist.objectRelPath()
         << " (volScalarField) for visualization."
         << endl;
 }

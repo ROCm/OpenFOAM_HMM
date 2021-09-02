@@ -539,6 +539,9 @@ public:
         //- The complete path + object name
         inline fileName objectPath() const;
 
+        //- The object path relative to the root
+        fileName objectRelPath() const;
+
         //- Helper for filePath that searches locally.
         //  When search is false, simply use the current instance,
         //  otherwise search previous instances.

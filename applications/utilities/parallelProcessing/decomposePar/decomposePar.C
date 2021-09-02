@@ -647,7 +647,7 @@ int main(int argc, char *argv[])
                 cellDecomposition.write();
 
                 Info<< nl << "Wrote decomposition to "
-                    << runTime.relativePath(cellDecomposition.objectPath())
+                    << cellDecomposition.objectRelPath()
                     << " for use in manual decomposition." << endl;
             }
 
