@@ -1203,7 +1203,13 @@ void Foam::argList::parse
             {
                 source = "-roots";
                 parRunControl_.distributed(true);
-                if (roots.size() != 1)
+                if (roots.empty())
+                {
+                    FatalErrorInFunction
+                        << "The -roots option must contain values"
+                        << exit(FatalError);
+                }
+                if (roots.size() > 1)
                 {
                     dictNProcs = roots.size()+1;
                 }
@@ -1211,17 +1217,27 @@ void Foam::argList::parse
             else if (options_.found("hostRoots"))
             {
                 source = "-hostRoots";
-                roots.resize(Pstream::nProcs()-1, fileName::null);
+                parRunControl_.distributed(true);
+
                 ITstream is(this->lookup("hostRoots"));
 
                 List<Tuple2<wordRe, fileName>> hostRoots(is);
                 checkITstream(is, "hostRoots");
 
+                if (hostRoots.empty())
+                {
+                    FatalErrorInFunction
+                        << "The -hostRoots option must contain values"
+                        << exit(FatalError);
+                }
+
+                // Match machine names to roots
+                roots.resize(Pstream::nProcs()-1, fileName::null);
                 for (const auto& hostRoot : hostRoots)
                 {
                     labelList matched
                     (
-                        findStrings(hostRoot.first(), hostMachine)
+                        findMatchingStrings(hostRoot.first(), hostMachine)
                     );
                     for (const label matchi : matched)
                     {
@@ -1251,7 +1267,7 @@ void Foam::argList::parse
                     }
                 }
 
-                if (roots.size() != 1)
+                if (roots.size() > 1)
                 {
                     dictNProcs = roots.size()+1;
                 }
@@ -1288,6 +1304,13 @@ void Foam::argList::parse
                         nDomainsMandatory = true;
                         parRunControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
+
+                        if (roots.empty())
+                        {
+                            DetailInfo
+                                << "WARNING: running distributed"
+                                << " but did not specify roots!" << nl;
+                        }
                     }
 
                     // Get numberOfSubdomains if it exists.
@@ -1306,7 +1329,7 @@ void Foam::argList::parse
                     {
                         // Optional if using default location
                         DetailInfo
-                            << "Warning: running without decomposeParDict "
+                            << "WARNING: running without decomposeParDict "
                             << this->relativePath(source) << nl;
                     }
                     else
@@ -1391,8 +1414,8 @@ void Foam::argList::parse
                 {
                     options_.set("case", roots[subproci-1]/globalCase_);
 
-                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
-                    toSubproc << args_ << options_ << roots.size();
+                    OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                    toProc << args_ << options_ << parRunControl_.distributed();
                 }
                 options_.erase("case");
 
@@ -1439,24 +1462,24 @@ void Foam::argList::parse
                 // Distribute the master's argument list (unaltered)
                 for (const int subproci : Pstream::subProcs())
                 {
-                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
-                    toSubproc << args_ << options_ << roots.size();
+                    OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                    toProc << args_ << options_ << parRunControl_.distributed();
                 }
             }
         }
         else
         {
             // Collect the master's argument list
-            label nroots;
+            bool isDistributed;
 
             IPstream fromMaster
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_ >> nroots;
+            fromMaster >> args_ >> options_ >> isDistributed;
 
-            parRunControl_.distributed(nroots);
+            parRunControl_.distributed(isDistributed);
 
             // Establish rootPath_/globalCase_/case_ for sub-process
             setCasePaths();
