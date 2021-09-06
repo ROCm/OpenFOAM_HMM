@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,66 @@ Class
     Foam::distributionModels::general
 
 Description
-    general distribution model
+    Particle-size distribution model wherein random samples are
+    drawn from a given arbitrary probability density function
+    or cumulative distribution function. Input distributions are
+    specified as pairs of (size, probability) (i.e. (point, value) ).
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        general;
+                    generalDistribution
+                    {
+                        cumulative      false;
+
+                        distribution
+                        (
+                            (<size1>    <probability1>)
+                            (<size2>    <probability2>)
+                            ...
+                            (<sizeN>    <probabilityN>)
+                        );
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: general                | word | yes  | -
+      generalDistribution | Distribution settings      | dict | yes  | -
+      distribution | \<size\>-\<probability\> pairs    | dict | yes  | -
+      \<size\>     | Particle size                     | scalar | yes | -
+      \<probability\> | Volume fraction/probability    | scalar | yes | -
+      cumulative   | Flag to determine if input distribution is specified <!--
+                   --> as cumulative or as density     | bool | no   | false
+    \endtable
+
+Note
+  - An example for a pair within \c distribution subdictionary
+  can be given as follows: "(1e-07 1.3)" means 1.3\% of particles
+  are modelled with a particle diameter of "1e-7" [m], and so on.
+  - Variation between input pairs is assumed to be linear.
+  - Elements in the second column (i.e. probability) are normalised.
+  - Elements in the second column for cumulative distribution
+  functions must start from zero and must be non-decreasing (i.e. monotonic).
+  - Elements in the first column (i.e. size) must be specified
+  in an ascending order.
+  - Input pairs cannot contain any negative element.
 
 SourceFiles
     general.C
@@ -65,26 +124,34 @@ namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class general Declaration
+                          Class general Declaration
 \*---------------------------------------------------------------------------*/
 
 class general
 :
     public distributionModel
 {
-    // Private data
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    // Private Data
 
-        // List of (bin probability)
+        //- List of (x, y=f(x)) pairs
         List<pair> xy_;
 
+        //- Number of entries in the xy_ list
+        label nEntries_;
+
+        //- Mean of the distribution
         scalar meanValue_;
 
+        //- Values of cumulative distribution function
         List<scalar> integral_;
 
+        //- Flag to determine if input is specified as cumulative or as density
+        bool cumulative_;
 
-    // Private member functions
+
+    // Private Member Functions
 
         //- Initialise the distribution parameters
         void initialise();
@@ -102,6 +169,7 @@ public:
         general(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
+        //  Allows negative entries
         general
         (
             const UList<scalar>& sampleData,
@@ -109,7 +177,7 @@ public:
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         general(const general& p);
 
         //- Construct and return a clone
@@ -118,29 +186,26 @@ public:
             return autoPtr<distributionModel>(new general(*this));
         }
 
+        //- No copy assignment
+        void operator=(const general&) = delete;
+
 
     //- Destructor
-    virtual ~general();
+    virtual ~general() = default;
 
 
     // Member Functions
 
         //- Bin boundaries
-        virtual tmp<Field<scalar>> x() const;
+        virtual tmp<scalarField> x() const;
 
         //- Probabilities
-        virtual tmp<Field<scalar>> y() const;
+        virtual tmp<scalarField> y() const;
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the minimum value
-        virtual scalar minValue() const;
-
-        //- Return the maximum value
-        virtual scalar maxValue() const;
-
-        //- Return the mean value
+        //- Return the arithmetic mean of the distribution data
         virtual scalar meanValue() const;
 
         //- Write data to stream

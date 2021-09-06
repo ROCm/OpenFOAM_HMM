@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,39 @@ Class
     Foam::distributionModels::fixedValue
 
 Description
-    Returns a fixed value
+    Particle-size distribution model wherein samples are given fixed values.
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        fixedValue;
+                    fixedValueDistribution
+                    {
+                        value   <value>;
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: fixedValue             | word | yes  | -
+      fixedValueDistribution | Distribution settings   | dict | yes  | -
+      value        | Fixed value for size              | scalar | yes | -
+    \endtable
 
 SourceFiles
     fixedValue.C
@@ -53,9 +86,9 @@ class fixedValue
 :
     public distributionModel
 {
-    // Private data
+    // Private Data
 
-        //- Fixed value
+        //- Fixed value for size
         scalar value_;
 
 
@@ -70,7 +103,7 @@ public:
         //- Construct from components
         fixedValue(const dictionary& dict, Random& rndGen);
 
-        //- Construct copy
+        //- Copy construct
         fixedValue(const fixedValue& p);
 
         //- Construct and return a clone
@@ -79,23 +112,26 @@ public:
             return autoPtr<distributionModel>(new fixedValue(*this));
         }
 
+        //- No copy assignment
+        void operator=(const fixedValue&) = delete;
+
 
     //- Destructor
-    virtual ~fixedValue();
+    virtual ~fixedValue() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the minimum value
+        //- Return the minimum of the distribution
         virtual scalar minValue() const;
 
-        //- Return the maximum value
+        //- Return the maximum of the distribution
         virtual scalar maxValue() const;
 
-        //- Return the mean value
+        //- Return the theoretical mean of the distribution
         virtual scalar meanValue() const;
 };
 

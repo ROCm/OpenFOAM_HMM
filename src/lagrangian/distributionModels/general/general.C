@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,13 +47,14 @@ void Foam::distributionModels::general::initialise()
 {
     static scalar eps = ROOTVSMALL;
 
-    const label nEntries = xy_.size();
+    integral_.setSize(nEntries_);
 
-    integral_.setSize(nEntries);
+    // Fill out the integral table (x, P(x<=0)) and calculate mean
+    // For density function: P(x<=0) = int f(x) and mean = int x*f(x)
+    // For cumulative function: mean = int 1-P(x<=0) = maxValue_ - int P(x<=0)
+    integral_[0] = 0;
 
-    // Normalize the cumulative distribution
-    integral_[0] = 0.0;
-    for (label i = 1; i < nEntries; i++)
+    for (label i = 1; i < nEntries_; ++i)
     {
         scalar k = (xy_[i][1] - xy_[i-1][1])/(xy_[i][0] - xy_[i-1][0] + eps);
         scalar d = xy_[i-1][1] - k*xy_[i-1][0];
@@ -61,18 +62,32 @@ void Foam::distributionModels::general::initialise()
         scalar y0 = xy_[i-1][0]*(0.5*k*xy_[i-1][0] + d);
         scalar area = y1 - y0;
 
-        integral_[i] = area + integral_[i-1];
+        if (cumulative_)
+        {
+            integral_[i] = xy_[i][1];
+            meanValue_ += area;
+        }
+        else
+        {
+            integral_[i] = area + integral_[i-1];
+
+            y1 = sqr(xy_[i][0])*(1.0/3.0*k*xy_[i][0] + 0.5*d);
+            y0 = sqr(xy_[i-1][0])*(1.0/3.0*k*xy_[i-1][0] + 0.5*d);
+            meanValue_ += y1 - y0;
+        }
     }
 
+    // normalize the distribution
     scalar sumArea = integral_.last();
 
-    meanValue_ = sumArea/(maxValue() - minValue() + eps);
-
-    for (label i=0; i < nEntries; i++)
+    for (label i = 0; i < nEntries_; ++i)
     {
         xy_[i][1] /= sumArea + eps;
         integral_[i] /= sumArea + eps;
     }
+
+    meanValue_ /= sumArea;
+    meanValue_ = cumulative_ ? (maxValue_ - meanValue_ + eps) : meanValue_;
 }
 
 
@@ -86,10 +101,63 @@ Foam::distributionModels::general::general
 :
     distributionModel(typeName, dict, rndGen),
     xy_(distributionModelDict_.lookup("distribution")),
-    meanValue_(0.0),
-    integral_()
+    nEntries_(xy_.size()),
+    meanValue_(0),
+    integral_(nEntries_),
+    cumulative_(distributionModelDict_.getOrDefault("cumulative", false))
 {
+    minValue_ = xy_[0][0];
+    maxValue_ = xy_[nEntries_-1][0];
+
     check();
+
+    // Additional sanity checks
+    if (cumulative_ && xy_[0][1] != 0)
+    {
+        FatalErrorInFunction
+            << type() << "distribution: "
+            << "Elements in the second column for cumulative "
+            << "distribution functions must start from zero." << nl
+            << "First element = " << xy_[0][1]
+            << exit(FatalError);
+    }
+
+    for (label i = 0; i < nEntries_; ++i)
+    {
+        if (i > 0 && xy_[i][0] <= xy_[i-1][0])
+        {
+            FatalErrorInFunction
+                << type() << "distribution: "
+                << "Elements in the first column must "
+                << "be specified in an ascending order." << nl
+                << "Please see the row i = " << i << nl
+                << "xy[i-1] = " << xy_[i-1] << nl
+                << "xy[i] = " << xy_[i]
+                << exit(FatalError);
+        }
+
+        if (xy_[i][0] < 0 || xy_[i][1] < 0)
+        {
+            FatalErrorInFunction
+                << type() << "distribution: "
+                << "Input pairs cannot contain any negative element." << nl
+                << "Please see the row i = " << i << nl
+                << "xy[i] = " << xy_[i]
+                << exit(FatalError);
+        }
+
+        if (cumulative_ && i > 0 && xy_[i][1] < xy_[i-1][1])
+        {
+            FatalErrorInFunction
+                << type() << "distribution: "
+                << "Elements in the second column for cumulative "
+                << "distribution functions must be non-decreasing." << nl
+                << "Please see the row i = " << i << nl
+                << "xy[i-1] = " << xy_[i-1] << nl
+                << "xy[i] = " << xy_[i]
+                << exit(FatalError);
+        }
+    }
 
     initialise();
 }
@@ -104,22 +172,24 @@ Foam::distributionModels::general::general
 :
     distributionModel(typeName, dictionary::null, rndGen),
     xy_(),
-    meanValue_(0.0),
-    integral_()
+    nEntries_(0),
+    meanValue_(0),
+    integral_(),
+    cumulative_(false)
 {
-    scalar minValue = GREAT;
-    scalar maxValue = -GREAT;
+    minValue_ = GREAT;
+    maxValue_ = -GREAT;
     forAll(sampleData, i)
     {
-        minValue = min(minValue, sampleData[i]);
-        maxValue = max(maxValue, sampleData[i]);
+        minValue_ = min(minValue_, sampleData[i]);
+        maxValue_ = max(maxValue_, sampleData[i]);
     }
 
-    label bin0 = floor(minValue/binWidth);
-    label bin1 = ceil(maxValue/binWidth);
-    label nEntries = bin1 - bin0;
+    label bin0 = floor(minValue_/binWidth);
+    label bin1 = ceil(maxValue_/binWidth);
+    nEntries_ = bin1 - bin0;
 
-    if (nEntries == 0)
+    if (nEntries_ == 0)
     {
         WarningInFunction
             << "Data cannot be binned - zero bins generated" << nl
@@ -130,10 +200,10 @@ Foam::distributionModels::general::general
         return;
     }
 
-    xy_.setSize(nEntries);
+    xy_.setSize(nEntries_);
 
     // Populate bin boundaries and initialise occurrences
-    for (label bini = 0; bini < nEntries; ++bini)
+    for (label bini = 0; bini < nEntries_; ++bini)
     {
         xy_[bini][0] = (bin0 + bini)*binWidth;
         xy_[bini][1] = 0;
@@ -154,14 +224,10 @@ Foam::distributionModels::general::general(const general& p)
 :
     distributionModel(p),
     xy_(p.xy_),
+    nEntries_(p.nEntries_),
     meanValue_(p.meanValue_),
-    integral_(p.integral_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::general::~general()
+    integral_(p.integral_),
+    cumulative_(p.cumulative_)
 {}
 
 
@@ -169,57 +235,46 @@ Foam::distributionModels::general::~general()
 
 Foam::scalar Foam::distributionModels::general::sample() const
 {
-    scalar y = rndGen_.sample01<scalar>();
+    const scalar u = rndGen_.sample01<scalar>();
 
-    // Find the interval where y is in the table
+    // Find the interval where u is in the table
     label n = 1;
-    while (integral_[n] <= y)
+    while (integral_[n] <= u)
     {
         n++;
     }
 
-    scalar k = (xy_[n][1] - xy_[n-1][1])/(xy_[n][0] - xy_[n-1][0]);
-    scalar d = xy_[n-1][1] - k*xy_[n-1][0];
+    const scalar k = (xy_[n][1] - xy_[n-1][1])/(xy_[n][0] - xy_[n-1][0]);
+    const scalar d = xy_[n-1][1] - k*xy_[n-1][0];
 
-    scalar alpha = y + xy_[n-1][0]*(0.5*k*xy_[n-1][0] + d) - integral_[n-1];
-    scalar x = 0.0;
+    if (cumulative_)
+    {
+        return (u - d)/k;
+    }
+
+    const scalar alpha =
+        u + xy_[n-1][0]*(0.5*k*xy_[n-1][0] + d) - integral_[n-1];
 
     // If k is small it is a linear equation, otherwise it is of second order
     if (mag(k) > SMALL)
     {
-        scalar p = 2.0*d/k;
-        scalar q = -2.0*alpha/k;
-        scalar sqrtEr = sqrt(0.25*p*p - q);
+        const scalar p = 2.0*d/k;
+        const scalar q = -2.0*alpha/k;
+        const scalar sqrtEr = sqrt(0.25*p*p - q);
 
-        scalar x1 = -0.5*p + sqrtEr;
-        scalar x2 = -0.5*p - sqrtEr;
+        const scalar x1 = -0.5*p + sqrtEr;
+        const scalar x2 = -0.5*p - sqrtEr;
         if ((x1 >= xy_[n-1][0]) && (x1 <= xy_[n][0]))
         {
-            x = x1;
+            return x1;
         }
         else
         {
-            x = x2;
+            return x2;
         }
     }
-    else
-    {
-        x = alpha/d;
-    }
 
-    return x;
-}
-
-
-Foam::scalar Foam::distributionModels::general::minValue() const
-{
-    return xy_.first()[0];
-}
-
-
-Foam::scalar Foam::distributionModels::general::maxValue() const
-{
-    return xy_.last()[0];
+    return alpha/d;
 }
 
 
@@ -278,11 +333,11 @@ void Foam::distributionModels::general::readDict(const dictionary& dict)
 Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::distributionModels::general::x() const
 {
-    tmp<Field<scalar>> tx(new Field<scalar>(xy_.size()));
-    scalarField& xi = tx.ref();
+    auto tx = tmp<scalarField>::New(xy_.size());
+    auto& x = tx.ref();
     forAll(xy_, i)
     {
-        xi[i] = xy_[i][0];
+        x[i] = xy_[i][0];
     }
 
     return tx;
@@ -292,11 +347,11 @@ Foam::distributionModels::general::x() const
 Foam::tmp<Foam::Field<Foam::scalar>>
 Foam::distributionModels::general::y() const
 {
-    tmp<Field<scalar>> ty(new Field<scalar>(xy_.size()));
-    scalarField& yi = ty.ref();
+    auto ty = tmp<scalarField>::New(xy_.size());
+    auto& y = ty.ref();
     forAll(xy_, i)
     {
-        yi[i] = xy_[i][1];
+        y[i] = xy_[i][1];
     }
 
     return ty;

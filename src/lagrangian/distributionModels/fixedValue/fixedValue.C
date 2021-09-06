@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,19 +50,21 @@ Foam::distributionModels::fixedValue::fixedValue
 :
     distributionModel(typeName, dict, rndGen),
     value_(distributionModelDict_.get<scalar>("value"))
-{}
+{
+    if (value_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Fixed value cannot be equal to or less than zero:" << nl
+            << "    value = " << value_
+            << exit(FatalError);
+    }
+}
 
 
 Foam::distributionModels::fixedValue::fixedValue(const fixedValue& p)
 :
     distributionModel(p),
     value_(p.value_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::fixedValue::~fixedValue()
 {}
 
 
