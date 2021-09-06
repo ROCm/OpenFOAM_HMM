@@ -379,28 +379,17 @@ endsw
 
 
 #------------------------------------------------------------------------------
-# Final
 
-# A real (non-dummy) MPI
-if ( "$FOAM_MPI" != dummy ) then
-    if ($?FOAM_VERBOSE && $?prompt) then
-        echo "Using mpi type : $WM_MPLIB"
-        echo "      FOAM_MPI : $FOAM_MPI"
-        if ( "${MPI_ARCH_PATH}" == "" ) then
-            echo "        prefix : unset"
-        else
-            echo "        prefix : $MPI_ARCH_PATH"
-        endif
+# Report
+if ($?FOAM_VERBOSE && $?prompt) then
+    echo "Using mpi type : $WM_MPLIB"
+    echo "      FOAM_MPI : $FOAM_MPI"
+    if ( "${MPI_ARCH_PATH}" == "" ) then
+        echo "        prefix : unset"
+    else
+        echo "        prefix : $MPI_ARCH_PATH"
     endif
-
-    # OpenFOAM library interface to (non-dummy) MPI
-    if ( $?FOAM_EXT_LIBBIN ) then
-        # External libraries (can be unset)
-        _foamAddLib "${FOAM_EXT_LIBBIN}/${FOAM_MPI}"
-    endif
-    _foamAddLib "${FOAM_LIBBIN}/${FOAM_MPI}"
 endif
-
 
 # Cleanup
 unset _foamMpiPrefixDir _foamMpiWarning _foamMpiVersion

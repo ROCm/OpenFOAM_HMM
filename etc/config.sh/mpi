@@ -434,29 +434,13 @@ esac
 # Ensure MPI_ARCH_PATH is marked for export
 [ -n "$MPI_ARCH_PATH" ] && export MPI_ARCH_PATH
 
-
-# A real (non-dummy) MPI
-if [ "$FOAM_MPI" != dummy ]
+# Report
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
-    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
-    then
-        echo "Using mpi type : $WM_MPLIB" 1>&2
-        echo "      FOAM_MPI : $FOAM_MPI" 1>&2
-        echo "        prefix : ${MPI_ARCH_PATH:-unset}" 1>&2
-    fi
-
-    # OpenFOAM library interface to (non-dummy) MPI
-    if command -v _foamAddLib >/dev/null
-    then
-        if [ -n "$FOAM_EXT_LIBBIN" ]
-        then
-            # External libraries (can be unset)
-            _foamAddLib "$FOAM_EXT_LIBBIN/$FOAM_MPI"
-        fi
-        _foamAddLib "$FOAM_LIBBIN/$FOAM_MPI"
-    fi
+    echo "Using mpi type : $WM_MPLIB" 1>&2
+    echo "      FOAM_MPI : $FOAM_MPI" 1>&2
+    echo "        prefix : ${MPI_ARCH_PATH:-[unset]}" 1>&2
 fi
-
 
 # Cleanup
 unset _foamMpiPrefixDir _foamMpiVersion _foamMpiWarning

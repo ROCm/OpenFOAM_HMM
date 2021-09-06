@@ -181,19 +181,17 @@ else
 fi
 
 
-# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Clean standard environment variables
+
 export PATH MANPATH LD_LIBRARY_PATH
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean LD_LIBRARY_PATH "$foamOldDirs"
 
-# Setup for OpenFOAM compilation etc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc -config  settings
+#------------------------------------------------------------------------------
+# Base setup (OpenFOAM compilation), MPI and third-party packages
 
-# Setup for third-party packages
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamEtc -config  settings
 _foamEtc -config  mpi
 _foamEtc -config  paraview -- "$@"  # Pass through for evaluation
 _foamEtc -config  vtk
@@ -201,6 +199,30 @@ _foamEtc -config  adios2
 _foamEtc -config  CGAL
 _foamEtc -config  scotch
 _foamEtc -config  FFTW
+
+
+# Finalize library paths
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+# ThirdParty serial and mpi-specific libraries
+if [ -n "$FOAM_EXT_LIBBIN" ]
+then
+    _foamAddLib "$FOAM_EXT_LIBBIN"
+    if [ "${FOAM_MPI:-dummy}" != dummy ]
+    then
+        _foamAddLib "$FOAM_EXT_LIBBIN/$FOAM_MPI"
+    fi
+fi
+
+# OpenFOAM serial and mpi-specific libraries
+_foamAddLib "$FOAM_LIBBIN"
+if [ "${FOAM_MPI:-dummy}" != dummy ]
+then
+    _foamAddLib "$FOAM_LIBBIN/$FOAM_MPI"
+fi
+
+# OpenFOAM user, group libraries
+_foamAddLib  "$FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN"
 
 if [ -d "$WM_PROJECT_DIR/doc/man1" ]
 then
@@ -215,8 +237,9 @@ then
 fi
 
 
-# Clean environment paths again. Only remove duplicates
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
+
+# Remove duplicates from environment paths
 export PATH MANPATH LD_LIBRARY_PATH
 
 _foamClean PATH
@@ -228,7 +251,6 @@ if [ -n "$MANPATH" ]
 then
     MANPATH="${MANPATH}:"
 fi
-
 
 # Cleanup temporary information
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

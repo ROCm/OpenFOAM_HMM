@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -178,13 +178,9 @@ _foamAddLib  "$FOAM_LIBBIN/dummy"
 if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
     export FOAM_EXT_LIBBIN="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib"
-    _foamAddLib "$FOAM_EXT_LIBBIN"
 else
     unset FOAM_EXT_LIBBIN
 fi
-
-# OpenFOAM libraries (user, group, standard)
-_foamAddLib  "$FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN"
 
 
 #------------------------------------------------------------------------------

@@ -133,6 +133,9 @@ while ( $#argv > 0 )
     shift
 end
 
+
+#----------------------------------------------------------------------------
+
 # Verify FOAM_CONFIG_ETC (from calling environment or from prefs)
 if ( $?FOAM_CONFIG_ETC ) then
     if ( "$FOAM_CONFIG_ETC" == "etc" || "$FOAM_CONFIG_ETC" == "$WM_PROJECT_DIR/etc" ) then
@@ -143,8 +146,8 @@ endif
 
 
 # Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Prevent local variables from shadowing setenv variables
+# - avoid local variables shadowing setenv variables
+
 unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
@@ -153,18 +156,41 @@ _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
 _foamClean LD_LIBRARY_PATH "$foamOldDirs"
 
-# Setup for OpenFOAM compilation etc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc -config  settings
 
-# Setup for third-party packages
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
+# Base setup (OpenFOAM compilation), MPI and third-party packages
+
+_foamEtc -config  settings
 _foamEtc -config  mpi
 _foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
 _foamEtc -config  vtk
 _foamEtc -config  adios2
 _foamEtc -config  CGAL
 _foamEtc -config  FFTW
+
+if (! $?FOAM_MPI ) then
+    setenv FOAM_MPI dummy  # Fallback value
+endif
+
+# Finalize library paths
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+# ThirdParty serial and mpi-specific libraries
+if ( $?FOAM_EXT_LIBBIN ) then
+    _foamAddLib "${FOAM_EXT_LIBBIN}"
+    if ( "$FOAM_MPI" != dummy ) then
+        _foamAddLib "${FOAM_EXT_LIBBIN}/${FOAM_MPI}"
+    endif
+endif
+
+# OpenFOAM serial and mpi-specific libraries
+_foamAddLib  "$FOAM_LIBBIN"
+if ( "$FOAM_MPI" != dummy ) then
+    _foamAddLib "${FOAM_LIBBIN}/${FOAM_MPI}"
+endif
+
+# OpenFOAM user, group libraries
+_foamAddLib  "${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}"
 
 if ( -d "$WM_PROJECT_DIR/doc/man1" ) then
     _foamAddMan "$WM_PROJECT_DIR/doc"
@@ -177,8 +203,9 @@ if ($?prompt) then
 endif
 
 
-# Clean environment paths again. Only remove duplicates
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
+
+# Remove duplicates from environment paths
 
 _foamClean PATH
 _foamClean MANPATH
