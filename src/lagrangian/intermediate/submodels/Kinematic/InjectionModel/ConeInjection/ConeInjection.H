@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,6 +108,8 @@ class ConeInjection
         //- Number of parcels per injector already injected
         mutable label nInjected_;
 
+        //- Order to process the injectors
+        labelList injectorOrder_;
 
         // Tangential vectors to the direction vector
 

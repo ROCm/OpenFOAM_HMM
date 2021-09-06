@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,6 +97,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         )
     ),
     nInjected_(this->parcelsAddedTotal()),
+    injectorOrder_(identity(positionAxis_.size())),
     tanVec1_(),
     tanVec2_()
 {
@@ -154,6 +155,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     thetaOuter_(im.thetaOuter_),
     sizeDistribution_(im.sizeDistribution_.clone()),
     nInjected_(im.nInjected_),
+    injectorOrder_(im.injectorOrder_),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_)
 {}
@@ -260,8 +262,10 @@ void Foam::ConeInjection<CloudType>::setPositionAndCell
     label& tetPti
 )
 {
-    const label i = parcelI % positionAxis_.size();
+    Random& rnd = this->owner().rndGen();
+    rnd.shuffle(injectorOrder_);
 
+    const label i = injectorOrder_[parcelI % positionAxis_.size()];
     position = positionAxis_[i].first();
     cellOwner = injectorCells_[i];
     tetFacei = injectorTetFaces_[i];
@@ -280,9 +284,9 @@ void Foam::ConeInjection<CloudType>::setProperties
 {
     Random& rnd = this->owner().rndGen();
 
-    // Set particle velocity
-    const label i = parcelI % positionAxis_.size();
+    const label i = injectorOrder_[parcelI % positionAxis_.size()];
 
+    // Set direction vectors for position i
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_.value(t);
     scalar to = thetaOuter_.value(t);
@@ -297,6 +301,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     dirVec += normal;
     dirVec.normalise();
 
+    // Set particle velocity
     parcel.U() = Umag_.value(t)*dirVec;
 
     // Set particle diameter
