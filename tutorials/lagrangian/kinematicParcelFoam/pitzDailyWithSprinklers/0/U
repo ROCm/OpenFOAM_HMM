@@ -57,6 +57,7 @@ boundaryField
 
         laminarCoeffs
         {
+            shearStress     simple;
             friction        ManningStrickler; // Wall friction model
             n               0.005;  // Manning number
             Cf              0;      // Gas friction
