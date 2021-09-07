@@ -78,7 +78,7 @@ void Foam::distributionModels::general::initialise()
     }
 
     // normalize the distribution
-    scalar sumArea = integral_.last();
+    const scalar sumArea = integral_.last();
 
     for (label i = 0; i < nEntries_; ++i)
     {
@@ -86,8 +86,8 @@ void Foam::distributionModels::general::initialise()
         integral_[i] /= sumArea + eps;
     }
 
-    meanValue_ /= sumArea;
-    meanValue_ = cumulative_ ? (maxValue_ - meanValue_ + eps) : meanValue_;
+    meanValue_ /= sumArea + eps;
+    meanValue_ = cumulative_ ? (maxValue_ - meanValue_) : meanValue_;
 }
 
 
