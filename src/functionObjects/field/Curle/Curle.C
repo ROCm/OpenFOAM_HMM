@@ -213,11 +213,11 @@ bool Foam::functionObjects::Curle::execute()
 
         forAll(observerPositions_, pointi)
         {
-            const vectorField r(Cfp - observerPositions_[pointi]);
+            const vectorField r(observerPositions_[pointi] - Cfp);
             const scalarField invMagR(1/(mag(r) + ROOTVSMALL));
 
             pDash[pointi] +=
-                sum((pp*sqr(invMagR) + invMagR/c0_*dpdtp)*(Sfp & r));
+                sum((pp*sqr(invMagR) + invMagR/c0_*dpdtp)*(Sfp & (r*invMagR)));
         }
     }
 

@@ -1,3 +1,10 @@
+## Getting the code
+
+Links to all code packs are available on https://dl.openfoam.com. For OpenFOAM-v2106:
+
+- Source: https://dl.openfoam.com/source/v2106/OpenFOAM-v2106.tgz
+- ThirdParty: https://dl.openfoam.com/source/v2106/ThirdParty-v2106.tgz
+
 ## OpenFOAM&reg; Quick Build Guide
 
 Prior to building, ensure that the [system requirements][link openfoam-require]

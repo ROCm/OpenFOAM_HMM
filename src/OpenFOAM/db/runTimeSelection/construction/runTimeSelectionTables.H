@@ -52,8 +52,12 @@ Description
     typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;              \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable<argNames##ConstructorPtr, word>                          \
-        argNames##ConstructorTable;                                            \
+    typedef HashTable                                                          \
+    <                                                                          \
+        argNames##ConstructorPtr,                                              \
+        ::Foam::word,                                                          \
+        ::Foam::string::hasher                                                 \
+    > argNames##ConstructorTable;                                              \
                                                                                \
     /* Construct from argList function pointer table pointer */                \
     static argNames##ConstructorTable* argNames##ConstructorTablePtr_;         \
@@ -77,7 +81,7 @@ Description
                                                                                \
         explicit add##argNames##ConstructorToTable                             \
         (                                                                      \
-            const word& lookup = baseType##Type::typeName                      \
+            const ::Foam::word& lookup = baseType##Type::typeName              \
         )                                                                      \
         {                                                                      \
             construct##argNames##ConstructorTables();                          \
@@ -109,7 +113,7 @@ Description
     {                                                                          \
     public:                                                                    \
                                                                                \
-        const word name;  /* Lookup name for later removal */                  \
+        const ::Foam::word name;  /* Lookup name for later removal */          \
                                                                                \
         static autoPtr<baseType> New argList                                   \
         {                                                                      \
@@ -118,7 +122,7 @@ Description
                                                                                \
         explicit addRemovable##argNames##ConstructorToTable                    \
         (                                                                      \
-            const word& lookup = baseType##Type::typeName                      \
+            const ::Foam::word& lookup = baseType##Type::typeName              \
         )                                                                      \
         :                                                                      \
             name(lookup)                                                       \
@@ -152,8 +156,12 @@ Description
     typedef autoPtr<baseType> (*argNames##ConstructorPtr)argList;              \
                                                                                \
     /* Construct from argList function table type */                           \
-    typedef HashTable<argNames##ConstructorPtr, word>                          \
-        argNames##ConstructorTable;                                            \
+    typedef HashTable                                                          \
+    <                                                                          \
+        argNames##ConstructorPtr,                                              \
+        ::Foam::word,                                                          \
+        ::Foam::string::hasher                                                 \
+    > argNames##ConstructorTable;                                              \
                                                                                \
     /* Construct from argList function pointer table pointer */                \
     static argNames##ConstructorTable* argNames##ConstructorTablePtr_;         \
@@ -177,7 +185,7 @@ Description
                                                                                \
         explicit add##argNames##ConstructorToTable                             \
         (                                                                      \
-            const word& lookup = baseType##Type::typeName                      \
+            const ::Foam::word& lookup = baseType##Type::typeName              \
         )                                                                      \
         {                                                                      \
             construct##argNames##ConstructorTables();                          \
@@ -215,7 +223,7 @@ Description
     {                                                                          \
     public:                                                                    \
                                                                                \
-        const word name;  /* Lookup name for later removal */                  \
+        const ::Foam::word name;  /* Lookup name for later removal */          \
                                                                                \
         static autoPtr<baseType> New##baseType argList                         \
         {                                                                      \
@@ -224,7 +232,7 @@ Description
                                                                                \
         explicit addRemovable##argNames##ConstructorToTable                    \
         (                                                                      \
-            const word& lookup = baseType##Type::typeName                      \
+            const ::Foam::word& lookup = baseType##Type::typeName              \
         )                                                                      \
         :                                                                      \
             name(lookup)                                                       \

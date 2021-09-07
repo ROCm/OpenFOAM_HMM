@@ -48,15 +48,16 @@ Foam::Istream& Foam::operator>>(Istream& is, word& val)
     {
         val = tok.wordToken();
     }
-    else if (tok.isQuotedString())
+    else if (tok.isQuotedString() || tok.isVariable())
     {
-        // Try a bit harder and convert string to word
-        val = tok.stringToken();
-        const auto oldLen = val.length();
-        string::stripInvalid<word>(val);
+        // Try a bit harder, convert some string types to word
+        // - accept "quoted" or $tag, but not verbatim/expression
+
+        const auto& str = tok.stringToken();
+        val = word::validate(str);
 
         // Flag empty strings and bad chars as an error
-        if (val.empty() || val.length() != oldLen)
+        if (val.empty() || val.length() != str.length())
         {
             FatalIOErrorInFunction(is)
                 << "Empty word or non-word characters "

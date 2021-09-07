@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,6 +108,57 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::surfaceWriters::boundaryDataWriter::serialWriteGeometry
+(
+    const regIOobject& iopts,
+    const meshedSurf& surf
+)
+{
+    const pointField& points = surf.points();
+    const faceList& faces = surf.faces();
+
+    if (verbose_)
+    {
+        if (this->isPointData())
+        {
+            Info<< "Writing points: " << iopts.objectPath() << endl;
+        }
+        else
+        {
+            Info<< "Writing face centres: " << iopts.objectPath() << endl;
+        }
+    }
+
+    // Like regIOobject::writeObject without instance() adaptation
+    // since this would write to e.g. 0/ instead of postProcessing/
+
+    OFstream osGeom(iopts.objectPath(), streamOpt_);
+
+    if (header_)
+    {
+        iopts.writeHeader(osGeom);
+    }
+
+    if (this->isPointData())
+    {
+        // Just like writeData, but without copying beforehand
+        osGeom << points;
+    }
+    else
+    {
+        primitivePatch pp(SubList<face>(faces), points);
+
+        // Just like writeData, but without copying beforehand
+        osGeom << pp.faceCentres();
+    }
+
+    if (header_)
+    {
+        iopts.writeEndDivider(osGeom);
+    }
+}
+
+
 Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
 {
     checkOpen();
@@ -129,6 +180,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
             mkDir(surfaceDir);
         }
 
+        // Write sample locations
         pointIOField iopts
         (
             IOobject
@@ -140,30 +192,9 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
                 false
             )
         );
+        iopts.note() = (this->isPointData() ? "point data" : "face data");
 
-        if (verbose_)
-        {
-            Info<< "Writing points: " << iopts.objectPath() << endl;
-        }
-
-
-        // Like regIOobject::writeObject without instance() adaptation
-        // since this would write to e.g. 0/ instead of postProcessing/
-
-        OFstream osGeom(iopts.objectPath(), streamOpt_);
-
-        if (header_)
-        {
-            iopts.writeHeader(osGeom);
-        }
-
-        // Just like writeData, but without copying beforehand
-        osGeom << surf.points();
-
-        if (header_)
-        {
-            iopts.writeEndDivider(osGeom);
-        }
+        serialWriteGeometry(iopts, surf);
     }
 
     wroteGeom_ = true;
@@ -212,66 +243,28 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
 
     if (Pstream::master() || !parallel_)
     {
-        const pointField& points = surf.points();
-        const faceList& faces = surf.faces();
-
         if (!isDir(outputFile.path()))
         {
             mkDir(outputFile.path());
         }
 
-        pointIOField iopts
-        (
-            IOobject
+        // Write sample locations
+        {
+            pointIOField iopts
             (
-                surfaceDir/"points",
-                *dummyTimePtr,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
+                IOobject
+                (
+                    surfaceDir/"points",
+                    *dummyTimePtr,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
+            iopts.note() = (this->isPointData() ? "point data" : "face data");
 
-        if (verbose_)
-        {
-            if (this->isPointData())
-            {
-                Info<< "Writing points: " << iopts.objectPath() << endl;
-            }
-            else
-            {
-                Info<< "Writing face centres: " << iopts.objectPath() << endl;
-            }
+            serialWriteGeometry(iopts, surf);
         }
-
-        // Like regIOobject::writeObject without instance() adaptation
-        // since this would write to e.g. 0/ instead of postProcessing/
-
-        OFstream osGeom(iopts.objectPath(), streamOpt_);
-
-        if (header_)
-        {
-            iopts.writeHeader(osGeom);
-        }
-
-        if (this->isPointData())
-        {
-            // Just like writeData, but without copying beforehand
-            osGeom << points;
-        }
-        else
-        {
-            primitivePatch pp(SubList<face>(faces), points);
-
-            // Just like writeData, but without copying beforehand
-            osGeom << pp.faceCentres();
-        }
-
-        if (header_)
-        {
-            iopts.writeEndDivider(osGeom);
-        }
-
 
         // Write field
         {
@@ -286,6 +279,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
                     false
                 )
             );
+            iofld.note() = (this->isPointData() ? "point data" : "face data");
 
             OFstream osField(iofld.objectPath(), streamOpt_);
 
