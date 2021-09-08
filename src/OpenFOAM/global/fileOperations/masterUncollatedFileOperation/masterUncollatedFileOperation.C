@@ -1138,6 +1138,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePath
 
     if (Pstream::master(comm_))
     {
+        const bool oldParRun(Pstream::parRun(false));
+
         // All masters search locally. Note that global objects might
         // fail (except on master). This gets handled later on (in PARENTOBJECT)
         objPath =
@@ -1151,6 +1153,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePath
                 procsDir,
                 newInstancePath
             );
+
+        Pstream::parRun(oldParRun);
 
         if (debug)
         {
@@ -1278,6 +1282,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::dirPath
 
     if (Pstream::master(comm_))
     {
+        const bool oldParRun(Pstream::parRun(false));
+
         objPath = filePathInfo
         (
             checkGlobal,
@@ -1288,6 +1294,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::dirPath
             procsDir,
             newInstancePath
         );
+
+        Pstream::parRun(oldParRun);
     }
 
     {
@@ -1459,10 +1467,12 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
     // if (Pstream::master(comm_))
     if (Pstream::master(UPstream::worldComm))
     {
+        const bool oldParRun(Pstream::parRun(false));
         if (exists(pDirs, io))
         {
             foundInstance = io.instance();
         }
+        Pstream::parRun(oldParRun);
     }
 
     // Do parallel early exit to avoid calling time.times()
@@ -1488,6 +1498,8 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
     // if (Pstream::master(comm_))
     if (Pstream::master(UPstream::worldComm))
     {
+        const bool oldParRun(Pstream::parRun(false));
+
         label instanceI;
 
         for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
@@ -1608,6 +1620,7 @@ Foam::fileOperations::masterUncollatedFileOperation::findInstance
                 foundInstance = time.constant();
             }
         }
+        Pstream::parRun(oldParRun);
     }
 
     // Pstream::scatter(foundInstance, Pstream::msgType(), comm_);
