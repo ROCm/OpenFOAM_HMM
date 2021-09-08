@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,8 @@ Description
         format      | ascii or binary format                | no  | binary
         legacy      | Legacy VTK output                     | no  | false
         precision   | Write precision in ascii         | no | same as IOstream
-        fieldScale  | output field scaling (dictionary)     | no    | empty
+        fieldScale  | Output field scaling (dictionary)     | no  | empty
+        normal      | Write face area-normal in output      | no  | false
     \endtable
 
     For example,
@@ -109,6 +110,9 @@ class vtkWriter
 
         //- ASCII write precision
         unsigned precision_;
+
+        //- Output face area normal
+        const bool writeNormal_;
 
         //- Output field scaling
         const dictionary fieldScale_;
