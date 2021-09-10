@@ -131,7 +131,7 @@ const Foam::word& Foam::interfaceCompositionModel::variable() const
 }
 
 
-bool Foam::interfaceCompositionModel::includeDivU()
+bool Foam::interfaceCompositionModel::includeDivU() const noexcept
 {
     return true;
 }
