@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,11 +116,16 @@ yPlus() const
         )
     );
     const scalarField& y = turbModel.y()[patchi];
+
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
 
-    return y*sqrt(nuw*mag(Uw.snGrad()))/nuw;
+    tmp<scalarField> tnuEff = turbModel.nuEff(patchi);
+    const scalarField& nuEff = tnuEff();
+
+    return y*sqrt(nuEff*mag(Uw.snGrad()))/nuw;
 }
 
 
