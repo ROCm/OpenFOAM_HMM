@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -327,13 +327,11 @@ extern messageStream SeriousError;
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 #define InfoInFunction InfoIn(FUNCTION_NAME)
 
-//- Report an information message using Foam::Pout
-//  for functionName in file __FILE__ at line __LINE__
+//- Report using Foam::Pout with functionName: prefix
 #define PoutIn(functionName)                                                   \
-    ::Foam::Pout((functionName), __FILE__, __LINE__)
+    ::Foam::Pout << (functionName) << ':'
 
-//- Report an information message using Foam::Pout
-//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+//- Report using Foam::Pout with FUNCTION_NAME prefix
 #define PoutInFunction PoutIn(FUNCTION_NAME)
 
 //- Write to Foam::Info if the Foam::infoDetailLevel is +ve non-zero (default)
