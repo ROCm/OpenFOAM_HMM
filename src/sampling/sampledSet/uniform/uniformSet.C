@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +40,6 @@ namespace Foam
     defineTypeNameAndDebug(uniformSet, 0);
     addToRunTimeSelectionTable(sampledSet, uniformSet, word);
 }
-
-const Foam::scalar Foam::uniformSet::tol = 1e-3;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -93,7 +92,7 @@ bool Foam::uniformSet::trackToBoundary
 {
     // distance vector between sampling points
     const vector offset = (end_ - start_)/(nPoints_ - 1);
-    const vector smallVec = tol*offset;
+    const vector smallVec(tol_*offset);
     const scalar smallDist = mag(smallVec);
 
     point trackPt = singleParticle.position();
@@ -207,7 +206,7 @@ void Foam::uniformSet::calcSamples
 
     const vector offset = (end_ - start_)/(nPoints_ - 1);
     const vector normOffset = offset/mag(offset);
-    const vector smallVec = tol*offset;
+    const vector smallVec(tol_*offset);
     const scalar smallDist = mag(smallVec);
 
     // Force calculation of cloud addressing on all processors
@@ -429,6 +428,7 @@ Foam::uniformSet::uniformSet
     sampledSet(name, mesh, searchEngine, axis),
     start_(start),
     end_(end),
+    tol_(1e-3),
     nPoints_(nPoints)
 {
     genSamples();
@@ -446,6 +446,7 @@ Foam::uniformSet::uniformSet
     sampledSet(name, mesh, searchEngine, dict),
     start_(dict.get<point>("start")),
     end_(dict.get<point>("end")),
+    tol_(dict.getCheckOrDefault<scalar>("tol", 1e-3, scalarMinMax::ge(0))),
     nPoints_(dict.get<label>("nPoints"))
 {
     genSamples();

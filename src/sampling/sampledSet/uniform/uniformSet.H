@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +64,7 @@ class uniformSet
 :
     public sampledSet
 {
-    // Private data
+    // Private Data
 
         //- Starting point
         point start_;
@@ -71,8 +72,13 @@ class uniformSet
         //- End point
         point end_;
 
+        //- Relative tolerance when comparing points
+        //- relative to difference between start_ and end_
+        scalar tol_;
+
         //- Number of points
         label nPoints_;
+
 
     // Private Member Functions
 
@@ -123,13 +129,6 @@ public:
 
     //- Runtime type information
     TypeName("uniform");
-
-
-    // Static data
-
-        //- Tolerance when comparing points relative to difference between
-        //  start_ and end_
-        static const scalar tol;
 
 
     // Constructors
