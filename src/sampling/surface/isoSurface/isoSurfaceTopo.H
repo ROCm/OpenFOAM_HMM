@@ -50,6 +50,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class cellShape;
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -62,63 +63,103 @@ class isoSurfaceTopo
 {
     // Private Data
 
-        //- Corrected version of tetBasePtIs
-        labelList tetBasePtIs_;
-
-        //- Per point: originating mesh vertex/cc. See encoding above
+        //- Per point: originating mesh vertex/cell centre combination.
+        //  Vertices less than nPoints are mesh vertices,
+        //  duplicate vertices indicate a snapped point
         edgeList pointToVerts_;
 
-        //- For every point the originating face in mesh
-        labelList pointToFace_;
 
-        //- The cell cut type
-        List<cutType> cellCutType_;
+    // Private Classes
+
+        //- Handling, bookkeeping for tet cuts
+        class tetCutAddressing
+        {
+            // Bookkeeping hashes used during construction
+            EdgeMap<label> vertsToPointLookup_;
+            Map<label> snapVertsLookup_;
+
+            // Filter information for face diagonals
+            DynamicList<label> pointToFace_;
+            DynamicList<bool> pointFromDiag_;
+
+            // Final output
+            DynamicList<edge> pointToVerts_;
+            DynamicList<label> cutPoints_;
+
+            //- List of cut (decomposed) cell tets. Debug use only.
+            DynamicList<cellShape> debugCutTets_;
+
+            bool debugCutTetsOn_;
+
+
+        public:
+
+        // Constructors
+
+            //- Construct with reserved sizes
+            tetCutAddressing
+            (
+                const label nCutCells,
+                const bool useSnap,
+                const bool useDebugCuts = false
+            );
+
+
+        // Member Functions
+
+            //- Effective number of faces
+            label nFaces() const { return cutPoints_.size()/3; }
+
+            DynamicList<label>& pointToFace() { return pointToFace_; }
+            DynamicList<bool>& pointFromDiag() { return pointFromDiag_; }
+
+            DynamicList<edge>& pointToVerts() { return pointToVerts_; }
+            DynamicList<label>& cutPoints() { return cutPoints_; }
+            DynamicList<cellShape>& debugCutTets() { return debugCutTets_; }
+
+            //- Number of debug cut tets
+            label nDebugTets() const { return debugCutTets_.size(); }
+
+            //- Debugging cut tets active
+            bool debugCutTetsOn() const { return debugCutTetsOn_; }
+
+            void clearDebug();
+            void clearDiagonal();
+            void clearHashes();
+
+            //- Generate single point on edge
+            label generatePoint
+            (
+                label facei,          //!< Originating mesh face for cut-point
+                bool edgeIsDiagonal,  //!< Edge on face diagonal
+
+                // 0: no snap, 1: snap first, 2: snap second
+                const int snapEnd,
+
+                const edge& vertices
+            );
+
+            //- Generate triangles from tet cut
+            bool generatePoints
+            (
+                const label facei,
+                const int tetCutIndex,  //!< Encoded tet cut + tet snapping
+                const tetCell& tetLabels,
+                const FixedList<bool, 6>& edgeIsDiagonal
+            );
+        };
 
 
     // Private Member Functions
 
-        //- Generate single point on edge
-        label generatePoint
-        (
-            const label facei,
-            const bool edgeIsDiag,
-            const edge& vertices,
-
-            DynamicList<edge>& pointToVerts,
-            DynamicList<label>& pointToFace,
-            DynamicList<bool>& pointFromDiag,
-            EdgeMap<label>& vertsToPoint
-        ) const;
-
-        //- Generate triangles from tet
-        void generateTriPoints
-        (
-            const label facei,
-            const int tetCutIndex,  //!< Encoded tet cuts. getTetCutIndex()
-            const tetCell& tetLabels,
-            const FixedList<bool, 6>& edgeIsDiag,
-
-            DynamicList<edge>& pointToVerts,
-            DynamicList<label>& pointToFace,
-            DynamicList<bool>& pointFromDiag,
-
-            EdgeMap<label>& vertsToPoint,
-            DynamicList<label>& verts
-        ) const;
-
-        //- Generate triangles from cell
+        //- Generate triangle points from cell
         void generateTriPoints
         (
             const label celli,
             const bool isTet,
+            const labelList& tetBasePtIs,
 
-            DynamicList<edge>& pointToVerts,
-            DynamicList<label>& pointToFace,
-            DynamicList<bool>& pointFromDiag,
-
-            EdgeMap<label>& vertsToPoint,
-            DynamicList<label>& verts,
-            DynamicList<label>& faceLabels
+            tetCutAddressing& tetCutAddr
         ) const;
 
 
@@ -165,12 +206,12 @@ protected:
 
     // Sampling
 
-        //- Interpolates cCoords,pCoords.
+        //- Interpolates cellData and pointData fields
         template<class Type>
         tmp<Field<Type>> interpolateTemplate
         (
-            const Field<Type>& cCoords,
-            const Field<Type>& pCoords
+            const Field<Type>& cellData,
+            const Field<Type>& pointData
         ) const;
 
 public:
@@ -205,14 +246,10 @@ public:
 
     // Member Functions
 
-        //- For every point originating face (pyramid) in mesh
-        const labelList& pointToFace() const
-        {
-            return pointToFace_;
-        }
-
-        //- Per point: originating mesh vertex/cc. See encoding above
-        const edgeList& pointToVerts() const
+        //- Per point: originating mesh vertex/cell centre combination.
+        //  Vertices less than nPoints are mesh vertices (encoding above),
+        //  duplicate vertices indicate a snapped point
+        const edgeList& pointToVerts() const noexcept
         {
             return pointToVerts_;
         }

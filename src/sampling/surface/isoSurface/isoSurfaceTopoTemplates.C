@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::isoSurfaceTopo::interpolateTemplate
 (
-    const Field<Type>& cellCoords,
-    const Field<Type>& pointCoords
+    const Field<Type>& cellData,
+    const Field<Type>& pointData
 ) const
 {
     auto tfld = tmp<Field<Type>>::New(pointToVerts_.size());
@@ -41,41 +41,50 @@ Foam::isoSurfaceTopo::interpolateTemplate
 
     forAll(pointToVerts_, i)
     {
+        const edge& verts = pointToVerts_[i];
+        Type& val = fld[i];
+
         scalar s0;
-        Type p0;
+        Type v0;
         {
-            label idx = pointToVerts_[i].first();
+            label idx = verts.first();
             if (idx < mesh_.nPoints())
             {
                 // Point index
                 s0 = pVals_[idx];
-                p0 = pointCoords[idx];
+                v0 = pointData[idx];
             }
             else
             {
                 // Cell index
                 idx -= mesh_.nPoints();
                 s0 = cVals_[idx];
-                p0 = cellCoords[idx];
+                v0 = cellData[idx];
             }
         }
 
         scalar s1;
-        Type p1;
+        Type v1;
         {
-            label idx = pointToVerts_[i].second();
-            if (idx < mesh_.nPoints())
+            label idx = verts.second();
+            if (idx == verts.first())
+            {
+                // Duplicate index (ie, snapped)
+                val = v0;
+                continue;
+            }
+            else if (idx < mesh_.nPoints())
             {
                 // Point index
                 s1 = pVals_[idx];
-                p1 = pointCoords[idx];
+                v1 = pointData[idx];
             }
             else
             {
                 // Cell index
                 idx -= mesh_.nPoints();
                 s1 = cVals_[idx];
-                p1 = cellCoords[idx];
+                v1 = cellData[idx];
             }
         }
 
@@ -83,11 +92,11 @@ Foam::isoSurfaceTopo::interpolateTemplate
         if (mag(d) > VSMALL)
         {
             const scalar s = (iso_-s0)/d;
-            fld[i] = s*p1+(1.0-s)*p0;
+            val = s*v1+(1.0-s)*v0;
         }
         else
         {
-            fld[i] = 0.5*(p0+p1);
+            val = 0.5*(v0+v1);
         }
     }
 
