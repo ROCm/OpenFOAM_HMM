@@ -561,8 +561,6 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
         transform,
         faceAreaWeightAMI::typeName
     ),
-    periodicPatchName_(word::null),
-    periodicPatchID_(-1),
     nTransforms_(0),
     nSectors_(0),
     maxIter_(36)
@@ -589,8 +587,6 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
         patchType,
         faceAreaWeightAMI::typeName
     ),
-    periodicPatchName_(dict.lookup("periodicPatch")),
-    periodicPatchID_(-1),
     nTransforms_(dict.getOrDefault<label>("nTransforms", 0)),
     nSectors_(dict.getOrDefault<label>("nSectors", 0)),
     maxIter_(dict.getOrDefault<label>("maxIter", 36))
@@ -606,8 +602,6 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
 )
 :
     cyclicAMIPolyPatch(pp, bm),
-    periodicPatchName_(pp.periodicPatchName_),
-    periodicPatchID_(-1),
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
@@ -627,8 +621,6 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
 )
 :
     cyclicAMIPolyPatch(pp, bm, index, newSize, newStart, nbrPatchName),
-    periodicPatchName_(pp.periodicPatchName_),
-    periodicPatchID_(-1),
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
@@ -647,8 +639,6 @@ Foam::cyclicPeriodicAMIPolyPatch::cyclicPeriodicAMIPolyPatch
 )
 :
     cyclicAMIPolyPatch(pp, bm, index, mapAddressing, newStart),
-    periodicPatchName_(pp.periodicPatchName_),
-    periodicPatchID_(-1),
     nTransforms_(pp.nTransforms_),
     nSectors_(pp.nSectors_),
     maxIter_(pp.maxIter_)
@@ -665,44 +655,10 @@ Foam::cyclicPeriodicAMIPolyPatch::~cyclicPeriodicAMIPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::cyclicPeriodicAMIPolyPatch::periodicPatchID() const
-{
-    if (periodicPatchName_ == word::null)
-    {
-        periodicPatchID_ = -1;
-
-        return periodicPatchID_;
-    }
-
-    if (periodicPatchID_ == -1)
-    {
-        periodicPatchID_ = this->boundaryMesh().findPatchID(periodicPatchName_);
-
-        if (periodicPatchID_ == -1)
-        {
-            FatalErrorInFunction
-                << "Illegal periodicPatch name " << periodicPatchName_
-                << nl << "Valid patch names are "
-                << this->boundaryMesh().names()
-                << exit(FatalError);
-        }
-
-        // Check that it is a coupled patch
-        refCast<const coupledPolyPatch>
-        (
-            this->boundaryMesh()[periodicPatchID_]
-        );
-    }
-
-    return periodicPatchID_;
-}
-
-
 void Foam::cyclicPeriodicAMIPolyPatch::write(Ostream& os) const
 {
     cyclicAMIPolyPatch::write(os);
 
-    os.writeEntry("periodicPatch", periodicPatchName_);
     os.writeEntryIfDifferent<label>("nTransforms", 0, nTransforms_);
     os.writeEntryIfDifferent<label>("nSectors", 0, nSectors_);
     os.writeEntryIfDifferent<label>("maxIter", 36, maxIter_);
