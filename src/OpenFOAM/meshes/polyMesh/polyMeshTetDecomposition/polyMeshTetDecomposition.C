@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,45 @@ Foam::scalar Foam::polyMeshTetDecomposition::minQuality
 }
 
 
+Foam::scalar Foam::polyMeshTetDecomposition::minQuality
+(
+    const polyMesh& mesh,
+    const label facei,
+    const label faceBasePtI
+)
+{
+    const scalar ownQuality =
+        minQuality
+        (
+            mesh,
+            mesh.cellCentres()[mesh.faceOwner()[facei]],
+            facei,
+            true,
+            faceBasePtI
+        );
+
+    if (mesh.isInternalFace(facei))
+    {
+        const scalar neiQuality =
+            minQuality
+            (
+                mesh,
+                mesh.cellCentres()[mesh.faceNeighbour()[facei]],
+                facei,
+                false,
+                faceBasePtI
+            );
+
+        if (neiQuality < ownQuality)
+        {
+            return neiQuality;
+        }
+    }
+
+    return ownQuality;
+}
+
+
 Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
 (
     const polyMesh& mesh,
@@ -112,10 +151,10 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
 
     forAll(f, faceBasePtI)
     {
-        scalar minQ = minQuality(mesh, oCc, fI, true, faceBasePtI);
-        minQ = min(minQ, minQuality(mesh, nCc, fI, false, faceBasePtI));
+        scalar ownQuality = minQuality(mesh, oCc, fI, true, faceBasePtI);
+        scalar neiQuality = minQuality(mesh, nCc, fI, false, faceBasePtI);
 
-        if (minQ > tol)
+        if (min(ownQuality, neiQuality) > tol)
         {
             return faceBasePtI;
         }
@@ -591,6 +630,159 @@ Foam::tetIndices Foam::polyMeshTetDecomposition::findTet
     }
 
     return tetContainingPt;
+}
+
+
+Foam::labelList Foam::polyMeshTetDecomposition::adjustTetBasePtIs
+(
+    const polyMesh& mesh,
+    const bool report
+)
+{
+    // Determine points used by two faces on the same cell
+    const cellList& cells = mesh.cells();
+    const faceList& faces = mesh.faces();
+    const labelList& faceOwn = mesh.faceOwner();
+    const labelList& faceNei = mesh.faceNeighbour();
+
+
+    // Get face triangulation base point
+    labelList tetBasePtIs(mesh.tetBasePtIs());
+
+
+    // Pre-filter: mark all cells with illegal base points
+    bitSet problemCells(cells.size());
+
+    forAll(tetBasePtIs, facei)
+    {
+        if (tetBasePtIs[facei] == -1)
+        {
+            problemCells.set(faceOwn[facei]);
+
+            if (mesh.isInternalFace(facei))
+            {
+                problemCells.set(faceNei[facei]);
+            }
+        }
+    }
+
+
+    // Mark all points that are shared by just two faces within an adjacent
+    // problem cell as problematic
+    bitSet problemPoints(mesh.points().size());
+
+    {
+        // Number of times a point occurs in a cell.
+        // Used to detect dangling vertices (count = 2)
+        Map<label> pointCount;
+
+        // Analyse problem cells for points shared by two faces only
+        for (const label celli : problemCells)
+        {
+            pointCount.clear();
+
+            for (const label facei : cells[celli])
+            {
+                for (const label pointi : faces[facei])
+                {
+                    ++pointCount(pointi);
+                }
+            }
+
+            forAllConstIters(pointCount, iter)
+            {
+                if (iter.val() == 1)
+                {
+                    FatalErrorInFunction
+                        << "point:" << iter.key()
+                        << " at:" << mesh.points()[iter.key()]
+                        << " only used by one face" << nl
+                        << exit(FatalError);
+                }
+                else if (iter.val() == 2)
+                {
+                    problemPoints.set(iter.key());
+                }
+            }
+        }
+    }
+
+
+    // For all faces which form a part of a problem-cell, check if the base
+    // point is adjacent to any problem points. If it is, re-calculate the base
+    // point so that it is not.
+    label nAdapted = 0;
+    forAll(tetBasePtIs, facei)
+    {
+        if
+        (
+            problemCells.test(faceOwn[facei])
+         || (mesh.isInternalFace(facei) && problemCells.test(faceNei[facei]))
+        )
+        {
+            const face& f = faces[facei];
+
+            // Check if either of the points adjacent to the base point is a
+            // problem point. If not, the existing base point can be retained.
+            const label fp0 = tetBasePtIs[facei] < 0 ? 0 : tetBasePtIs[facei];
+
+            if
+            (
+                !problemPoints.test(f.rcValue(fp0))
+             && !problemPoints.test(f.fcValue(fp0))
+            )
+            {
+                continue;
+            }
+
+            // A new base point is required. Pick the point that results in the
+            // least-worst tet and which is not adjacent to any problem points.
+            scalar maxQ = -GREAT;
+            label maxFp = -1;
+            forAll(f, fp)
+            {
+                if
+                (
+                    !problemPoints.test(f.rcValue(fp))
+                 && !problemPoints.test(f.fcValue(fp))
+                )
+                {
+                    const scalar q = minQuality(mesh, facei, fp);
+                    if (q > maxQ)
+                    {
+                        maxQ = q;
+                        maxFp = fp;
+                    }
+                }
+            }
+
+            if (maxFp != -1)
+            {
+                // Success! Set the new base point
+                tetBasePtIs[facei] = maxFp;
+            }
+            else
+            {
+                // No point was found on face that would not result in some
+                // duplicate triangle. Do what? Continue and hope? Spit an
+                // error? Silently or noisily reduce the filtering level?
+
+                tetBasePtIs[facei] = 0;
+            }
+
+            ++nAdapted;
+        }
+    }
+
+    syncTools::syncFaceList(mesh, tetBasePtIs, maxEqOp<label>());
+
+    if (report && returnReduce(nAdapted, sumOp<label>()))
+    {
+        Pout<< "Adapted starting point of triangulation on "
+            << nAdapted << " faces." << endl;
+    }
+
+    return tetBasePtIs;
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,14 +76,6 @@ class isoSurfaceTopo
 
 
     // Private Member Functions
-
-        scalar minTetQ
-        (
-            const label facei,
-            const label faceBasePtI
-        ) const;
-
-        void fixTetBasePtIs();
 
         //- Generate single point on edge
         label generatePoint
