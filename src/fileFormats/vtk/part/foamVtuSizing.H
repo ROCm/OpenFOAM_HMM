@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ Description
 
     These are the storage entries normally associate with each output-type:
     \table
-        legacy output
+        legacy output (vtk DataFile Version 2.0)
         \c types    | vtk cell type (1-255)
         \c cells    | nLabels and unique vertex labels used by the cell, or
                     | [nLabels nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
@@ -118,6 +118,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class cellShape;
 class polyMesh;
 
 namespace vtk
@@ -134,7 +135,7 @@ public:
     // Public Data
 
     //- Types of content that the storage may represent
-    enum contentType
+    enum contentType : char
     {
         LEGACY,     //!< Legacy VTK content
         XML,        //!< XML (VTU) content
@@ -143,13 +144,21 @@ public:
     };
 
     //- The possible storage 'slots' that can be used
-    enum slotType
+    enum slotType : char
     {
         CELLS,         //!< Cell connectivity (ALL)
         CELLS_OFFSETS, //!< Cell end-offsets (XML), locations (INTERNAL1)
                        //!< or begin/end offsets (INTERNAL2)
         FACES,         //!< Face-stream (XML, INTERNAL)
         FACES_OFFSETS  //!< Faces end-offsets (XML) or locations (INTERNAL1)
+    };
+
+    //- How the mesh cells have been selected or defined
+    enum selectionModeType : char
+    {
+        FULL_MESH,
+        SUBSET_MESH,
+        SHAPE_MESH
     };
 
 
@@ -159,6 +168,9 @@ private:
 
         //- Polyhedral decomposition requested
         bool decompose_;
+
+        //- How the mesh cells have been selected or defined
+        selectionModeType selectionMode_;
 
         //- Number of cells in the mesh
         label nCells_;
@@ -199,8 +211,35 @@ private:
         //- set-size for cellMap and additionalIds
         void presizeMaps(foamVtkMeshMaps& maps) const;
 
+        //- Verify list sizes
+        static void checkSizes
+        (
+            const vtk::vtuSizing& sizing,
+
+            const label cellTypes_size,
+            const label vertLabels_size,
+            const label vertOffset_size,
+            const label faceLabels_size,
+            const label faceOffset_size,
+
+            const enum contentType output,
+
+            const label cellMap_size,
+            const label addPointsIds_size
+        );
+
+        //- Adjust cell/face offsets
+        template<class LabelType>
+        static void adjustOffsets
+        (
+            UList<LabelType>& vertOffset,
+            UList<LabelType>& faceOffset,
+            const enum contentType output,
+            const bool hasFaceStream
+        );
+
         //- Populate lists. For (legacy | xml | internal) VTK representations
-        template<class LabelType, class LabelType2>
+        template<class LabelType>
         static void populateArrays
         (
             const polyMesh& mesh,
@@ -211,9 +250,51 @@ private:
             UList<LabelType>& faceLabels,
             UList<LabelType>& faceOffset,
             const enum contentType output,
-            UList<LabelType2>& cellMap,
-            UList<LabelType2>& addPointsIds
+            labelUList& cellMap,
+            labelUList& addPointsIds
         );
+
+        //- Populate lists - Primitive mesh shapes only!!
+        template<class LabelType>
+        static void populateArrays
+        (
+            const UList<cellShape>& shapes,
+            const vtk::vtuSizing& sizing,
+            UList<uint8_t>& cellTypes,
+            UList<LabelType>& vertLabels,
+            UList<LabelType>& vertOffset,
+            UList<LabelType>& faceLabels,    // unused
+            UList<LabelType>& faceOffset,    // unused
+            const enum contentType output,
+            labelUList& cellMap,
+            labelUList& addPointsIds  // unused
+        );
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Reset list for primitive shapes only (ADVANCED USAGE)
+        void populateShapesLegacy
+        (
+            const UList<cellShape>& shapes,
+            UList<uint8_t>& cellTypes,
+            labelUList& connectivity,
+            foamVtkMeshMaps& maps
+        ) const;
+
+        //- Reset list for primitive shapes only (ADVANCED USAGE)
+        void populateShapesXml
+        (
+            const UList<cellShape>& shapes,
+            UList<uint8_t>& cellTypes,
+            labelUList& connectivity,
+            labelUList& offsets,
+            labelUList& faces,
+            labelUList& facesOffsets,
+            foamVtkMeshMaps& maps
+        ) const;
 
 
 public:
@@ -240,6 +321,20 @@ public:
         //  Optionally with polyhedral decomposition.
         void reset(const polyMesh& mesh, const bool decompose=false);
 
+        //- Reset sizing by analyzing a subset of the mesh.
+        //  A labelUList::null() selection corresponds to the entire mesh.
+        //  Polyhedral decomposition is disabled for subsets.
+        void reset
+        (
+            const polyMesh& mesh,
+            const labelUList& subsetCellsIds,
+            const bool decompose = false
+        );
+
+        //- Reset sizing using primitive shapes only (ADVANCED USAGE)
+        //  Effectively removes any polyhedrals!
+        void resetShapes(const UList<cellShape>& shapes);
+
         //- Reset all sizes to zero.
         void clear() noexcept;
 
@@ -247,44 +342,56 @@ public:
     // Access
 
         //- Query the decompose flag (normally off)
-        inline bool decompose() const;
+        inline bool decompose() const noexcept;
+
+        //- Query how the mesh cells have been selected or defined
+        inline selectionModeType selectionMode() const noexcept;
 
         //- Number of cells for the mesh
-        inline label nCells() const;
+        inline label nCells() const noexcept;
 
         //- Number of points for the mesh
-        inline label nPoints() const;
+        inline label nPoints() const noexcept;
 
         //- Number of vertex labels for the mesh
-        inline label nVertLabels() const;
+        inline label nVertLabels() const noexcept;
 
         //- Number of polyhedral face labels for the mesh
-        inline label nFaceLabels() const;
+        inline label nFaceLabels() const noexcept;
 
         //- Number of polyhedral cells for the mesh
-        inline label nCellsPoly() const;
+        inline label nCellsPoly() const noexcept;
 
         //- Number of vertex labels for polyhedral cells of the mesh
-        inline label nVertPoly() const;
+        inline label nVertPoly() const noexcept;
 
         //- Number of additional (decomposed) cells for the mesh
-        inline label nAddCells() const;
+        inline label nAddCells() const noexcept;
 
         //- Number of additional (decomposed) points for the mesh
-        inline label nAddPoints() const;
+        inline label nAddPoints() const noexcept;
 
         //- Number of additional (decomposed) vertices for the mesh
-        inline label nAddVerts() const;
+        inline label nAddVerts() const noexcept;
 
 
         //- Number of field cells = nCells + nAddCells
-        inline label nFieldCells() const;
+        inline label nFieldCells() const noexcept;
 
         //- Number of field points = nPoints + nAddPoints
-        inline label nFieldPoints() const;
+        inline label nFieldPoints() const noexcept;
 
 
-    // Derived sizes
+    // Edit
+
+        //- Alter number of mesh points (ADVANCED USAGE)
+        void setNumPoints(label n) noexcept { nPoints_ = n; }
+
+        //- Alter number of additional (cell-centre) points (ADVANCED USAGE)
+        void setNumAddPoints(label n) noexcept { nAddPoints_ = n; }
+
+
+    // Derived Sizes
 
         //- Return the required size for the storage slot
         label sizeOf
