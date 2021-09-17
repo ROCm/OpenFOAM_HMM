@@ -149,7 +149,7 @@ void Foam::vtk::patchWriter::write
             << exit(FatalError);
     }
 
-    label nFaces = nLocalFaces_;
+    label nFaces = nLocalPolys_;
 
     if (parallel_)
     {

@@ -25,24 +25,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtk::polyWriter::writeUniform
+void Foam::vtk::polyWriter::writeUniformValue
 (
+    const label nCellValues,
     const word& fieldName,
     const Type& val
 )
 {
+    label nValues(0);
+
     if (isState(outputState::CELL_DATA))
     {
         ++nCellData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+        nValues = nCellValues;
     }
     else if (isState(outputState::POINT_DATA))
     {
         ++nPointData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+        nValues = nLocalPoints_;
     }
     else
     {
@@ -54,9 +57,15 @@ void Foam::vtk::polyWriter::writeUniform
         )
             << " for uniform field " << fieldName << nl << endl
             << exit(FatalError);
+
+        return;
     }
+
+    vtk::fileWriter::writeUniform<Type>(fieldName, val, nValues);
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::vtk::polyWriter::write
@@ -66,18 +75,18 @@ void Foam::vtk::polyWriter::write
 )
 {
     // Could check sizes:
-    //     nValues == nLocalFaces (CELL_DATA)
-    //     nValues == nLocalPoints (POINT_DATA)
+    // CELL_DATA:   nValues == (nLocalPolys | nLocalLines)
+    // POINT_DATA:  nValues == nLocalPoints
+
+    // const label nValues = field.size();
 
     if (isState(outputState::CELL_DATA))
     {
         ++nCellData_;
-        vtk::fileWriter::writeBasicField<Type>(fieldName, field);
     }
     else if (isState(outputState::POINT_DATA))
     {
         ++nPointData_;
-        vtk::fileWriter::writeBasicField<Type>(fieldName, field);
     }
     else
     {
@@ -89,7 +98,10 @@ void Foam::vtk::polyWriter::write
         )
             << " for field " << fieldName << nl << endl
             << exit(FatalError);
+        return;
     }
+
+    vtk::fileWriter::writeBasicField<Type>(fieldName, field);
 }
 
 

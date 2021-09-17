@@ -107,10 +107,10 @@ protected:
         //- The output file name
         fileName outputFile_;
 
-        //- The VTK formatter in use (master process)
+        //- The VTK formatter in use (only valid on master process)
         autoPtr<vtk::formatter> format_;
 
-        //- The backend ostream in use (master process)
+        //- The backend ostream in use (only opened on master process)
         std::ofstream os_;
 
 
@@ -123,16 +123,16 @@ protected:
         Ostream& reportBadState(Ostream&, outputState, outputState) const;
 
         //- The backend ostream in use
-        inline std::ofstream& os();
+        inline std::ofstream& os() noexcept;
 
         //- The VTK formatter in use
         inline vtk::formatter& format();
 
-        //- True if the output state corresponds to the test state.
-        inline bool isState(outputState test) const;
+        //- True if output state corresponds to the test state.
+        inline bool isState(outputState test) const noexcept;
 
-        //- True if the output state does not correspond to the test state.
-        inline bool notState(outputState test) const;
+        //- True if output state does not correspond to the test state.
+        inline bool notState(outputState test) const noexcept;
 
         //- Start of a field or DataArray output (legacy or non-legacy).
         template<class Type>
@@ -150,26 +150,6 @@ protected:
 
         //- End of a POINTS DataArray
         void endPoints();
-
-
-        //- Write uniform field content.
-        //  No context checking (eg, file-open, CellData, PointData, etc)
-        template<class Type>
-        void writeUniform
-        (
-            const word& fieldName,
-            const Type& val,
-            const label nValues
-        );
-
-        //- Write basic (primitive) field content
-        //  No context checking (eg, file-open, CellData, PointData, etc)
-        template<class Type>
-        void writeBasicField
-        (
-            const word& fieldName,
-            const UList<Type>& field
-        );
 
         //- Trigger change state to Piece. Resets nCellData_, nPointData_.
         bool enter_Piece();
@@ -193,6 +173,34 @@ protected:
         //- Emit file footer (end data, end piece, end file)
         bool exit_File();
 
+
+    // Field writing
+
+        //- Write uniform field content.
+        //  No context checking (eg, file-open, CellData, PointData, etc)
+        //  The value and count can be different on each processor
+        template<class Type>
+        void writeUniform
+        (
+            const word& fieldName,
+            const Type& val,
+            const label nValues
+        );
+
+        //- Write basic (primitive) field content
+        //  No context checking (eg, file-open, CellData, PointData, etc)
+        template<class Type>
+        void writeBasicField
+        (
+            const word& fieldName,
+            const UList<Type>& field
+        );
+
+        //- Write nValues of processor ids as CellData (no-op in serial)
+        bool writeProcIDs(const label nValues);
+
+
+    // Other
 
         //- No copy construct
         fileWriter(const fileWriter&) = delete;

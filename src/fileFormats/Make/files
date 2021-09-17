@@ -59,6 +59,7 @@ vtk/part/foamVtuCells.C
 vtk/part/foamVtuSizing.C
 
 vtk/read/vtkUnstructuredReader.C
+vtk/write/foamVtkLineWriter.C
 vtk/write/foamVtkPolyWriter.C
 vtk/write/foamVtkSurfaceWriter.C
 

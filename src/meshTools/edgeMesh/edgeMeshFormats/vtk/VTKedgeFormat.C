@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,50 +28,9 @@ License
 
 #include "VTKedgeFormat.H"
 #include "Fstream.H"
-#include "clock.H"
-#include "vtkUnstructuredReader.H"
 #include "Time.H"
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::fileFormats::VTKedgeFormat::writeHeader
-(
-    Ostream& os,
-    const pointField& pointLst
-)
-{
-    // Write header
-    os  << "# vtk DataFile Version 2.0" << nl
-        << "featureEdgeMesh written " << clock::dateTime().c_str() << nl
-        << "ASCII" << nl
-        << nl
-        << "DATASET POLYDATA" << nl;
-
-    // Write vertex coords
-    os  << "POINTS " << pointLst.size() << " double" << nl;
-    for (const point& pt : pointLst)
-    {
-        os  << float(pt.x()) << ' '
-            << float(pt.y()) << ' '
-            << float(pt.z()) << nl;
-    }
-}
-
-
-void Foam::fileFormats::VTKedgeFormat::writeEdges
-(
-    Ostream& os,
-    const UList<edge>& edgeLst
-)
-{
-    os  << "LINES " << edgeLst.size() << ' ' << 3*edgeLst.size() << nl;
-
-    for (const edge& e : edgeLst)
-    {
-        os  << "2 " << e[0] << ' ' << e[1] << nl;
-    }
-}
-
+#include "foamVtkLineWriter.H"
+#include "vtkUnstructuredReader.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -122,19 +81,21 @@ bool Foam::fileFormats::VTKedgeFormat::read
     storedPoints().transfer(reader.points());
 
     label nEdges = 0;
-    forAll(reader.lines(), lineI)
+    for (const auto& lineVerts : reader.lines())
     {
-        nEdges += reader.lines()[lineI].size()-1;
+        if (lineVerts.size() > 1)
+        {
+            nEdges += (lineVerts.size()-1);
+        }
     }
-    storedEdges().setSize(nEdges);
+    storedEdges().resize(nEdges);
 
     nEdges = 0;
-    forAll(reader.lines(), lineI)
+    for (const auto& lineVerts : reader.lines())
     {
-        const labelList& verts = reader.lines()[lineI];
-        for (label i = 1; i < verts.size(); i++)
+        for (label i = 1; i < lineVerts.size(); ++i)
         {
-            storedEdges()[nEdges++] = edge(verts[i-1], verts[i]);
+            storedEdges()[nEdges++] = edge(lineVerts[i-1], lineVerts[i]);
         }
     }
 
@@ -148,16 +109,20 @@ void Foam::fileFormats::VTKedgeFormat::write
     const edgeMesh& eMesh
 )
 {
-    OFstream os(filename);
-    if (!os.good())
-    {
-        FatalErrorInFunction
-            << "Cannot open file for writing " << filename
-            << exit(FatalError);
-    }
+    // NB: restrict output to legacy ascii so that we are still able
+    // to read it with vtkUnstructuredReader
 
-    writeHeader(os, eMesh.points());
-    writeEdges(os, eMesh.edges());
+    vtk::lineWriter writer
+    (
+        eMesh.points(),
+        eMesh.edges(),
+        vtk::formatType::LEGACY_ASCII,
+        filename,
+        false  // non-parallel write (edgeMesh already serialized)
+    );
+
+    writer.beginFile("OpenFOAM edgeMesh");
+    writer.writeGeometry();
 }
 
 

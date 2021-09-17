@@ -45,15 +45,23 @@ void Foam::vtk::internalMeshWriter::beginPiece()
 
     if (parallel_)
     {
+        if (debug > 1)
+        {
+            PoutInFunction
+                << ": nPoints=" << numberOfPoints_
+                << " nCells=" << numberOfCells_ << nl;
+        }
+
         reduce(numberOfPoints_, sumOp<label>());
         reduce(numberOfCells_,  sumOp<label>());
     }
 
+    DebugInFunction
+        << "nPoints=" << numberOfPoints_
+        << " nCells=" << numberOfCells_ << nl;
+
     // Nothing else to do for legacy
     if (legacy()) return;
-
-    DebugInFunction
-        << "nPoints=" << numberOfPoints_ << " nCells=" << numberOfCells_ << nl;
 
     if (format_)
     {
@@ -178,7 +186,10 @@ void Foam::vtk::internalMeshWriter::writeCellsLegacy(const label pointOffset)
 }
 
 
-void Foam::vtk::internalMeshWriter::writeCellsConnectivity(const label pointOffset)
+void Foam::vtk::internalMeshWriter::writeCellsConnectivity
+(
+    const label pointOffset
+)
 {
     //
     // 'connectivity'
@@ -316,7 +327,10 @@ void Foam::vtk::internalMeshWriter::writeCellsConnectivity(const label pointOffs
 }
 
 
-void Foam::vtk::internalMeshWriter::writeCellsFaces(const label pointOffset)
+void Foam::vtk::internalMeshWriter::writeCellsFaces
+(
+    const label pointOffset
+)
 {
     label nFaceLabels = vtuCells_.faceLabels().size();
 
@@ -628,39 +642,7 @@ bool Foam::vtk::internalMeshWriter::writeProcIDs()
         return false;
     }
 
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-    }
-    else
-    {
-        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
-            << " for procID field" << nl << endl
-            << exit(FatalError);
-    }
-
-    const globalIndex procMaps(vtuCells_.nFieldCells());
-
-    this->beginDataArray<label>("procID", procMaps.size());
-
-    bool good = false;
-
-    if (Pstream::master())
-    {
-        // Per-processor ids
-        for (const int proci : Pstream::allProcs())
-        {
-            vtk::write(format(), label(proci), procMaps.localSize(proci));
-        }
-
-        good = true;
-    }
-
-    this->endDataArray();
-
-
-    // MPI barrier
-    return returnReduce(good, orOp<bool>());
+    return vtk::fileWriter::writeProcIDs(vtuCells_.nFieldCells());
 }
 
 

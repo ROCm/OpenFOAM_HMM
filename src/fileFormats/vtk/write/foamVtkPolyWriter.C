@@ -29,7 +29,72 @@ License
 #include "foamVtkOutput.H"
 #include "globalIndex.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// The connectivity count for a list of edges
+static inline label countConnectivity(const edgeList& edges)
+{
+    return 2 * edges.size();  // An edge always has two ends
+}
+
+
+// The connectivity count for a list of faces
+static label countConnectivity(const faceList& faces)
+{
+    label nConnectivity = 0;
+
+    for (const face& f : faces)
+    {
+        nConnectivity += f.size();
+    }
+
+    return nConnectivity;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::vtk::polyWriter::beginPiece
+(
+    const pointField& points,
+    const edgeList& edges
+)
+{
+    // Basic sizes
+    nLocalPoints_ = points.size();
+    nLocalLines_  = edges.size();
+    nLocalPolys_  = 0;
+
+    numberOfPoints_ = nLocalPoints_;
+    numberOfCells_  = nLocalLines_;
+
+    if (parallel_)
+    {
+        reduce(numberOfPoints_, sumOp<label>());
+        reduce(numberOfCells_,  sumOp<label>());
+    }
+
+
+    // Nothing else to do for legacy
+    if (legacy()) return;
+
+    if (format_)
+    {
+        format().tag
+        (
+            vtk::fileTag::PIECE,
+            vtk::fileAttr::NUMBER_OF_POINTS, numberOfPoints_,
+            vtk::fileAttr::NUMBER_OF_LINES,  numberOfCells_
+            // AND: vtk::fileAttr::NUMBER_OF_POLYS,  0
+        );
+    }
+}
+
 
 void Foam::vtk::polyWriter::beginPiece
 (
@@ -39,16 +104,11 @@ void Foam::vtk::polyWriter::beginPiece
 {
     // Basic sizes
     nLocalPoints_ = points.size();
-    nLocalFaces_  = faces.size();
-    nLocalVerts_  = 0;
-
-    for (const face& f : faces)
-    {
-        nLocalVerts_ += f.size();
-    }
+    nLocalLines_  = 0;
+    nLocalPolys_  = faces.size();
 
     numberOfPoints_ = nLocalPoints_;
-    numberOfCells_  = nLocalFaces_;
+    numberOfCells_  = nLocalPolys_;
 
     if (parallel_)
     {
@@ -67,6 +127,7 @@ void Foam::vtk::polyWriter::beginPiece
             vtk::fileTag::PIECE,
             vtk::fileAttr::NUMBER_OF_POINTS, numberOfPoints_,
             vtk::fileAttr::NUMBER_OF_POLYS,  numberOfCells_
+            // AND: vtk::fileAttr::NUMBER_OF_LINES,  0
         );
     }
 }
@@ -79,48 +140,219 @@ void Foam::vtk::polyWriter::writePoints
 {
     this->beginPoints(numberOfPoints_);
 
-    if (parallel_ ? Pstream::master() : true)
+    if (parallel_)
     {
-        {
-            vtk::writeList(format(), points);
-        }
+        vtk::writeListParallel(format_.ref(), points);
     }
+    else
+    {
+        vtk::writeList(format(), points);
+
+    }
+
+    this->endPoints();
+}
+
+
+void Foam::vtk::polyWriter::writeLinesLegacy
+(
+    const edgeList& edges,
+    const label pointOffset
+)
+{
+    // Connectivity count without additional storage (done internally)
+    const label nLocalConns = countConnectivity(edges);
+
+    label nLines = nLocalLines_;
+    label nConns = nLocalConns;
 
     if (parallel_)
     {
-        if (Pstream::master())
+        reduce(nLines, sumOp<label>());
+        reduce(nConns, sumOp<label>());
+    }
+
+    if (nLines != numberOfCells_)
+    {
+        FatalErrorInFunction
+            << "Expecting " << numberOfCells_
+            << " edges, but found " << nLines
+            << exit(FatalError);
+    }
+
+    legacy::beginLines(os_, nLines, nConns);
+
+    labelList vertLabels(nLocalLines_ + nLocalConns);
+
+    {
+        // Legacy: size + connectivity together
+        // [nPts, id1, id2, ..., nPts, id1, id2, ...]
+
+        auto iter = vertLabels.begin();
+
+        const label off = pointOffset;
+
+        for (const edge& e : edges)
         {
-            pointField recv;
+            *iter = e.size();   // The size prefix (always 2 for an edge)
+            ++iter;
 
-            // Receive each point field and write
-            for (const int subproci : Pstream::subProcs())
-            {
-                IPstream fromProc(Pstream::commsTypes::blocking, subproci);
+            *iter = off + e.first();    // Vertex labels
+            ++iter;
 
-                {
-                    fromProc >> recv;
-
-                    vtk::writeList(format(), recv);
-                }
-            }
-        }
-        else
-        {
-            // Send
-            OPstream toProc
-            (
-                Pstream::commsTypes::blocking,
-                Pstream::masterNo()
-            );
-
-            {
-                toProc << points;
-            }
+            *iter = off + e.second();
+            ++iter;
         }
     }
 
 
-    this->endPoints();
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), vertLabels);
+    }
+    else
+    {
+        vtk::writeList(format(), vertLabels);
+    }
+
+    if (format_)
+    {
+        format().flush();
+    }
+}
+
+
+void Foam::vtk::polyWriter::writeLines
+(
+    const edgeList& edges,
+    const label pointOffset
+)
+{
+    // Connectivity count without additional storage (done internally)
+    const label nLocalConns = countConnectivity(edges);
+
+    if (format_)
+    {
+        format().tag(vtk::fileTag::LINES);
+    }
+
+    //
+    // 'connectivity'
+    //
+    {
+        labelList vertLabels(nLocalConns);
+
+        label nConns = nLocalConns;
+
+        if (parallel_)
+        {
+            reduce(nConns, sumOp<label>());
+        }
+
+        if (format_)
+        {
+            const uint64_t payLoad = vtk::sizeofData<label>(nConns);
+
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
+            format().writeSize(payLoad * sizeof(label));
+        }
+
+        {
+            // XML: connectivity only
+            // [id1, id2, ..., id1, id2, ...]
+
+            auto iter = vertLabels.begin();
+
+            const label off = pointOffset;
+
+            for (const edge& e : edges)
+            {
+                // Edge vertex labels
+                *iter = off + e.first();
+                ++iter;
+
+                *iter = off + e.second();
+                ++iter;
+            }
+        }
+
+
+        if (parallel_)
+        {
+            vtk::writeListParallel(format_.ref(), vertLabels);
+        }
+        else
+        {
+            vtk::writeList(format(), vertLabels);
+        }
+
+        if (format_)
+        {
+            format().flush();
+            format().endDataArray();
+        }
+    }
+
+
+    //
+    // 'offsets'  (connectivity offsets)
+    //
+    {
+        labelList vertOffsets(nLocalLines_);
+        label nOffs = vertOffsets.size();
+
+        if (parallel_)
+        {
+            reduce(nOffs, sumOp<label>());
+        }
+
+        if (format_)
+        {
+            const uint64_t payLoad = vtk::sizeofData<label>(nOffs);
+
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
+            format().writeSize(payLoad);
+        }
+
+
+        // processor-local connectivity offsets
+        label off =
+        (
+            parallel_ ? globalIndex(nLocalConns).localStart() : 0
+        );
+
+
+        auto iter = vertOffsets.begin();
+
+        for (const edge& e : edges)
+        {
+            off += e.size();   // End offset
+            *iter = off;
+            ++iter;
+        }
+
+
+        if (parallel_)
+        {
+            vtk::writeListParallel(format_.ref(), vertOffsets);
+        }
+        else
+        {
+            vtk::writeList(format_.ref(), vertOffsets);
+        }
+
+
+        if (format_)
+        {
+            format().flush();
+            format().endDataArray();
+        }
+    }
+
+    if (format_)
+    {
+        format().endTag(vtk::fileTag::LINES);
+    }
 }
 
 
@@ -131,27 +363,28 @@ void Foam::vtk::polyWriter::writePolysLegacy
 )
 {
     // Connectivity count without additional storage (done internally)
+    const label nLocalConns = countConnectivity(faces);
 
-    label nFaces = nLocalFaces_;
-    label nVerts = nLocalVerts_;
+    label nPolys = nLocalPolys_;
+    label nConns = nLocalConns;
 
     if (parallel_)
     {
-        reduce(nFaces, sumOp<label>());
-        reduce(nVerts, sumOp<label>());
+        reduce(nPolys, sumOp<label>());
+        reduce(nConns, sumOp<label>());
     }
 
-    if (nFaces != numberOfCells_)
+    if (nPolys != numberOfCells_)
     {
         FatalErrorInFunction
             << "Expecting " << numberOfCells_
-            << " faces, but found " << nFaces
+            << " faces, but found " << nPolys
             << exit(FatalError);
     }
 
-    legacy::beginPolys(os_, nFaces, nVerts);
+    legacy::beginPolys(os_, nPolys, nConns);
 
-    labelList vertLabels(nLocalFaces_ + nLocalVerts_);
+    labelList vertLabels(nLocalPolys_ + nLocalConns);
 
     {
         // Legacy: size + connectivity together
@@ -159,21 +392,18 @@ void Foam::vtk::polyWriter::writePolysLegacy
 
         auto iter = vertLabels.begin();
 
-        label off = pointOffset;
+        const label off = pointOffset;
 
+        for (const face& f : faces)
         {
-            for (const face& f : faces)
-            {
-                *iter = f.size();       // The size prefix
-                ++iter;
+            *iter = f.size();       // The size prefix
+            ++iter;
 
-                for (const label pfi : f)
-                {
-                    *iter = pfi + off;  // Face vertex label
-                    ++iter;
-                }
+            for (const label id : f)
+            {
+                *iter = id + off;   // Vertex label
+                ++iter;
             }
-            // off += points.size();
         }
     }
 
@@ -200,6 +430,9 @@ void Foam::vtk::polyWriter::writePolys
     const label pointOffset
 )
 {
+    // Connectivity count without additional storage (done internally)
+    const label nLocalConns = countConnectivity(faces);
+
     if (format_)
     {
         format().tag(vtk::fileTag::POLYS);
@@ -209,18 +442,18 @@ void Foam::vtk::polyWriter::writePolys
     // 'connectivity'
     //
     {
-        labelList vertLabels(nLocalVerts_);
+        labelList vertLabels(nLocalConns);
 
-        label nVerts = nLocalVerts_;
+        label nConns = nLocalConns;
 
         if (parallel_)
         {
-            reduce(nVerts, sumOp<label>());
+            reduce(nConns, sumOp<label>());
         }
 
         if (format_)
         {
-            const uint64_t payLoad = vtk::sizeofData<label>(nVerts);
+            const uint64_t payLoad = vtk::sizeofData<label>(nConns);
 
             format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad * sizeof(label));
@@ -234,16 +467,13 @@ void Foam::vtk::polyWriter::writePolys
 
             label off = pointOffset;
 
+            for (const face& f : faces)
             {
-                for (const face& f : faces)
+                for (const label id : f)
                 {
-                    for (const label pfi : f)
-                    {
-                        *iter = pfi + off;  // Face vertex label
-                        ++iter;
-                    }
+                    *iter = id + off;  // Face vertex label
+                    ++iter;
                 }
-                // off += points.size();
             }
         }
 
@@ -269,7 +499,7 @@ void Foam::vtk::polyWriter::writePolys
     // 'offsets'  (connectivity offsets)
     //
     {
-        labelList vertOffsets(nLocalFaces_);
+        labelList vertOffsets(nLocalPolys_);
         label nOffs = vertOffsets.size();
 
         if (parallel_)
@@ -289,19 +519,17 @@ void Foam::vtk::polyWriter::writePolys
         // processor-local connectivity offsets
         label off =
         (
-            parallel_ ? globalIndex(nLocalVerts_).localStart() : 0
+            parallel_ ? globalIndex(nLocalConns).localStart() : 0
         );
 
 
         auto iter = vertOffsets.begin();
 
+        for (const face& f : faces)
         {
-            for (const face& f : faces)
-            {
-                off += f.size();   // End offset
-                *iter = off;
-                ++iter;
-            }
+            off += f.size();  // End offset
+            *iter = off;
+            ++iter;
         }
 
 
@@ -340,8 +568,8 @@ Foam::vtk::polyWriter::polyWriter
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
-    nLocalFaces_(0),
-    nLocalVerts_(0)
+    nLocalLines_(0),
+    nLocalPolys_(0)
 {
     // We do not currently support append mode
     opts_.append(false);
@@ -384,6 +612,36 @@ bool Foam::vtk::polyWriter::writeGeometry()
         << abort(FatalError);
 
     return false;
+}
+
+
+bool Foam::vtk::polyWriter::writeLineGeometry
+(
+    const pointField& points,
+    const edgeList& edges
+)
+{
+    enter_Piece();
+
+    beginPiece(points, edges);
+
+    writePoints(points);
+
+    const label pointOffset =
+    (
+        parallel_ ? globalIndex(nLocalPoints_).localStart() : 0
+    );
+
+    if (legacy())
+    {
+        writeLinesLegacy(edges, pointOffset);
+    }
+    else
+    {
+        writeLines(edges, pointOffset);
+    }
+
+    return true;
 }
 
 

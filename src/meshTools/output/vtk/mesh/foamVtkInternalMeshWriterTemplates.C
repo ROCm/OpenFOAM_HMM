@@ -37,15 +37,17 @@ void Foam::vtk::internalMeshWriter::writeUniform
     const Type& val
 )
 {
+    label nValues(0);
+
     if (isState(outputState::CELL_DATA))
     {
         ++nCellData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+        nValues = vtuCells_.nFieldCells();
     }
     else if (isState(outputState::POINT_DATA))
     {
         ++nPointData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+        nValues = vtuCells_.nFieldPoints();
     }
     else
     {
@@ -54,9 +56,14 @@ void Foam::vtk::internalMeshWriter::writeUniform
             FatalErrorInFunction,
             outputState::CELL_DATA,
             outputState::POINT_DATA
-        )   << " for field " << fieldName << nl << endl
+        )
+            << " for uniform field " << fieldName << nl << endl
             << exit(FatalError);
+
+        return;
     }
+
+    vtk::fileWriter::writeUniform<Type>(fieldName, val, nValues);
 }
 
 
@@ -89,6 +96,39 @@ void Foam::vtk::internalMeshWriter::writeCellData
     else
     {
         vtk::writeList(format(), field, cellMap);
+    }
+
+    this->endDataArray();
+}
+
+
+template<class Type>
+void Foam::vtk::internalMeshWriter::writePointData
+(
+    const word& fieldName,
+    const UList<Type>& field
+)
+{
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
+            << " for field " << fieldName << nl << endl
+            << exit(FatalError);
+    }
+
+    this->beginDataArray<Type>(fieldName, numberOfPoints_);
+
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), field);
+    }
+    else
+    {
+        vtk::writeList(format(), field);
     }
 
     this->endDataArray();
