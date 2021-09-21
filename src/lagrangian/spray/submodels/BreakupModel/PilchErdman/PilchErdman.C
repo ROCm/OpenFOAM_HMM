@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +117,7 @@ bool Foam::PilchErdman<CloudType>::update
             else if (We > 45)
             {
                 // bag-and-stamen breakup  - eq (10)
-                taubBar = 14.1*pow(We - 12.0, 0.25);
+                taubBar = 14.1*pow(We - 12.0, -0.25);
             }
             else if (We > 18)
             {
