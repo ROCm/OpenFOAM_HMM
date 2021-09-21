@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,16 +37,20 @@ const Foam::word Foam::functionObjects::stateFunctionObject::resultsName_ =
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-const Foam::IOdictionary&
+const Foam::functionObjects::properties&
 Foam::functionObjects::stateFunctionObject::stateDict() const
 {
-    return time_.functionObjects().stateDict();
+    return time_.functionObjects().propsDict();
 }
 
 
-Foam::IOdictionary& Foam::functionObjects::stateFunctionObject::stateDict()
+Foam::functionObjects::properties&
+Foam::functionObjects::stateFunctionObject::stateDict()
 {
-    return const_cast<IOdictionary&>(time_.functionObjects().stateDict());
+    return const_cast<functionObjects::properties&>
+    (
+        time_.functionObjects().propsDict()
+    );
 }
 
 
@@ -66,14 +70,7 @@ Foam::functionObjects::stateFunctionObject::stateFunctionObject
 
 Foam::dictionary& Foam::functionObjects::stateFunctionObject::propertyDict()
 {
-    IOdictionary& stateDict = this->stateDict();
-
-    if (!stateDict.found(name()))
-    {
-        stateDict.add(name(), dictionary());
-    }
-
-    return stateDict.subDict(name());
+    return stateDict().getObjectDict(name());
 }
 
 
@@ -82,26 +79,13 @@ bool Foam::functionObjects::stateFunctionObject::setTrigger
     const label triggeri
 )
 {
-    IOdictionary& stateDict = this->stateDict();
-
-    label oldTriggeri =
-        stateDict.getOrDefault<label>("triggerIndex", labelMin);
-
-    if (triggeri > oldTriggeri)
-    {
-        stateDict.set("triggerIndex", triggeri);
-        return true;
-    }
-
-    return false;
+    return stateDict().setTrigger(triggeri);
 }
 
 
 Foam::label Foam::functionObjects::stateFunctionObject::getTrigger() const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    return stateDict.getOrDefault<label>("triggerIndex", labelMin);
+    return stateDict().getTrigger();
 }
 
 
@@ -110,15 +94,7 @@ bool Foam::functionObjects::stateFunctionObject::foundProperty
     const word& entryName
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(name()))
-    {
-        const dictionary& baseDict = stateDict.subDict(name());
-        return baseDict.found(entryName);
-    }
-
-    return false;
+    return stateDict().foundObjectProperty(name(), entryName);
 }
 
 
@@ -128,7 +104,7 @@ bool Foam::functionObjects::stateFunctionObject::getDict
     dictionary& dict
 ) const
 {
-    return getObjectDict(name(), entryName, dict);
+    return stateDict().getObjectDict(name(), entryName, dict);
 }
 
 
@@ -139,19 +115,7 @@ bool Foam::functionObjects::stateFunctionObject::getObjectDict
     dictionary& dict
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(objectName))
-    {
-        const dictionary& baseDict = stateDict.subDict(objectName);
-        if (baseDict.found(entryName) && baseDict.isDict(entryName))
-        {
-            dict = baseDict.subDict(entryName);
-            return true;
-        }
-    }
-
-    return false;
+    return stateDict().getObjectDict(objectName, entryName, dict);
 }
 
 
@@ -160,7 +124,7 @@ Foam::word Foam::functionObjects::stateFunctionObject::resultType
     const word& entryName
 ) const
 {
-    return objectResultType(name(), entryName);
+    return stateDict().objectResultType(name(), entryName);
 }
 
 
@@ -170,79 +134,33 @@ Foam::word Foam::functionObjects::stateFunctionObject::objectResultType
     const word& entryName
 ) const
 {
-    word result = word::null;
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(resultsName_))
-    {
-        const dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-        if (resultsDict.found(objectName))
-        {
-            const dictionary& objectDict = resultsDict.subDict(objectName);
-
-            for (const entry& dEntry : objectDict)
-            {
-                const dictionary& dict = dEntry.dict();
-
-                if (dict.found(entryName))
-                {
-                    return dict.dictName();
-                }
-            }
-        }
-    }
-
-    return result;
+    return stateDict().objectResultType(objectName, entryName);
 }
 
 
-Foam::List<Foam::word>
+Foam::wordList
 Foam::functionObjects::stateFunctionObject::objectResultEntries() const
 {
-    return objectResultEntries(name());
+    return stateDict().objectResultEntries(name());
 }
 
 
-Foam::List<Foam::word>
+Foam::wordList
 Foam::functionObjects::stateFunctionObject::objectResultEntries
 (
     const word& objectName
 ) const
 {
-    DynamicList<word> result(2);
-
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(resultsName_))
-    {
-        const dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-        if (resultsDict.found(objectName))
-        {
-            const dictionary& objectDict = resultsDict.subDict(objectName);
-
-            for (const entry& dEntry : objectDict)
-            {
-                const dictionary& dict = dEntry.dict();
-
-                result.append(dict.toc());
-            }
-        }
-    }
-
-    wordList entries;
-    entries.transfer(result);
-
-    return entries;
+    return stateDict().objectResultEntries(objectName);
 }
+
 
 void Foam::functionObjects::stateFunctionObject::writeResultEntries
 (
     Ostream& os
 ) const
 {
-    writeResultEntries(name(), os);
+    return stateDict().writeResultEntries(name(), os);
 }
 
 
@@ -252,29 +170,7 @@ void Foam::functionObjects::stateFunctionObject::writeResultEntries
     Ostream& os
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(resultsName_))
-    {
-        const dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-        if (resultsDict.found(objectName))
-        {
-            const dictionary& objectDict = resultsDict.subDict(objectName);
-
-            for (const word& dataFormat : objectDict.sortedToc())
-            {
-                os  << "    Type: " << dataFormat << nl;
-
-                const dictionary& resultDict = objectDict.subDict(dataFormat);
-
-                for (const word& result : resultDict.sortedToc())
-                {
-                    os << "        " << result << nl;
-                }
-            }
-        }
-    }
+    return stateDict().writeResultEntries(objectName, os);
 }
 
 
@@ -283,21 +179,7 @@ void Foam::functionObjects::stateFunctionObject::writeAllResultEntries
     Ostream& os
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(resultsName_))
-    {
-        const dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-        const wordList allObjectNames = resultsDict.sortedToc();
-
-        for (const word& objectName : allObjectNames)
-        {
-            os  << "Object: " << objectName << endl;
-
-            writeResultEntries(objectName, os);
-        }
-    }
+    return stateDict().writeAllResultEntries(os);
 }
 
 

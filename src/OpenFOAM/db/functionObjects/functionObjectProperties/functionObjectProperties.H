@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,51 +24,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::stateFunctionObject
+    Foam::functionObjects::properties
 
 Description
-    Base class for function objects, adding functionality to read/write state
-    information (data required for smooth restart behaviour) and results
-    to/from the state dictionary
+    Storage for function object properties, derived from IOdictionary.
+    Provides functionality to read/write state information (data required for
+    smooth restart behaviour) and results to/from the state dictionary
 
-    Note: cannot access the state dictionary until after construction of the
-    function objects, since the owner container functionObjectList is owned
-    by time, and time owns the state dictionary  i.e. need to wait for time
-    to be fully constructed.
+    Note: cannot be accessed until after construction of thefunction objects,
+    since the owner container functionObjectList is owned by time, and time owns
+    [this] i.e. need to wait for time to be fully constructed.
 
 See also
     Foam::functionObject
 
 SourceFiles
-    stateFunctionObject.C
-    stateFunctionObjectTemplates.C
+    functionObjectProperties.C
+    functionObjectPropertiesTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_stateFunctionObject_H
-#define functionObjects_stateFunctionObject_H
+#ifndef functionObjects_properties_H
+#define functionObjects_properties_H
 
-#include "timeFunctionObject.H"
-#include "functionObjectProperties.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class IOdictionary;
-
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class stateFunctionObject Declaration
+                         Class properties Declaration
 \*---------------------------------------------------------------------------*/
 
-class stateFunctionObject
+class properties
 :
-    public functionObjects::timeFunctionObject
+    public IOdictionary
 {
     // Private Member Data
 
@@ -81,18 +74,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Return a const reference to the state dictionary
-        const functionObjects::properties& stateDict() const;
-
-        //- Return non-const access to the state dictionary
-        functionObjects::properties& stateDict();
-
-
         //- No copy construct
-        stateFunctionObject(const stateFunctionObject&) = delete;
+        properties(const properties&) = delete;
 
         //- No copy assignment
-        void operator=(const stateFunctionObject&) = delete;
+        void operator=(const properties&) = delete;
 
 
 public:
@@ -100,36 +86,42 @@ public:
     // Constructors
 
         //- Construct from components
-        stateFunctionObject(const word& name, const Time& runTime);
+        explicit properties(const IOobject& io);
 
 
     //- Destructor
-    virtual ~stateFunctionObject() = default;
+    virtual ~properties() = default;
 
 
     // Member Functions
 
+        //- Return list of object names
+        wordList objectNames() const;
+
+        //- Return true if the object with objectName exists
+        bool hasObjectDict(const word& objectName) const;
+
         //- Return access to the property dictionary
-        dictionary& propertyDict();
+        dictionary& propertyDict(const word& objectName);
 
 
         // Properties
 
+            //- Get dictionary for named object. Creates one if required
+            dictionary& getObjectDict(const word& objectName);
+
             //- Return true if the property exists
-            bool foundProperty(const word& entryName) const;
+            bool foundObjectProperty
+            (
+                const word& objectName,
+                const word& entryName
+            ) const;
 
             //- Get the current trigger index
             label getTrigger() const;
 
             //- Set the current trigger index
             bool setTrigger(const label triggeri);
-
-            //- Set dictionary, return true if set
-            bool getDict
-            (
-                const word& entryName,
-                dictionary& dict
-            ) const;
 
             //- Set dictionary from named object, return true if set
             bool getObjectDict
@@ -138,22 +130,6 @@ public:
                 const word& entryName,
                 dictionary& dict
             ) const;
-
-            //- Retrieve generic property
-            template<class Type>
-            Type getProperty
-            (
-                const word& entryName,
-                const Type& defaultValue = Type(Zero)
-            ) const;
-
-            //- Set generic property, return true if set
-            template<class Type>
-            bool getProperty(const word& entryName, Type& value) const;
-
-            //- Add generic property
-            template<class Type>
-            void setProperty(const word& entryName, const Type& value);
 
             //- Retrieve generic property from named object
             template<class Type>
@@ -185,14 +161,6 @@ public:
 
         // Results
 
-            //- Add result
-            template<class Type>
-            void setResult
-            (
-                const word& entryName,
-                const Type& value
-            );
-
             //- Add result from named object
             template<class Type>
             void setObjectResult
@@ -201,14 +169,6 @@ public:
                 const word& entryName,
                 const Type& value
             );
-
-            //- Retrieve result
-            template<class Type>
-            Type getResult
-            (
-                const word& entryName,
-                const Type& defaultValue = Type(Zero)
-            ) const;
 
             //- Retrieve result from named object
             template<class Type>
@@ -228,8 +188,19 @@ public:
                 Type& value
             ) const;
 
-            //- Retrieve the result type
-            word resultType(const word& entryName) const;
+            //- Return true if the object with objectName exists in results
+            bool hasResultObject(const word& objectName) const;
+
+            //- Return list of objects with results
+            wordList objectResultNames() const;
+
+            //- Return true if the object with objectName exists and has
+            //- entryName in its results
+            bool hasResultObjectEntry
+            (
+                const word& objectName,
+                const word& entryName
+            ) const;
 
             //- Return the type of result
             word objectResultType
@@ -237,9 +208,6 @@ public:
                 const word& objectName,
                 const word& entryName
             ) const;
-
-            //- Retrieve the result entries
-            wordList objectResultEntries() const;
 
             //- Return result entries for named object
             wordList objectResultEntries(const word& objectName) const;
@@ -263,7 +231,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "stateFunctionObjectTemplates.C"
+    #include "functionObjectPropertiesTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

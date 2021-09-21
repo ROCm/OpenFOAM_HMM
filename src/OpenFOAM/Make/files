@@ -354,6 +354,7 @@ $(dll)/codedBase/codedBase.C
 funcObjs = db/functionObjects
 
 $(funcObjs)/functionObject/functionObject.C
+$(funcObjs)/functionObjectProperties/functionObjectProperties.C
 $(funcObjs)/functionObjectList/functionObjectList.C
 $(funcObjs)/stateFunctionObject/stateFunctionObject.C
 $(funcObjs)/timeFunctionObject/timeFunctionObject.C
