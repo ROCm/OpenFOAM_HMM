@@ -84,8 +84,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Time;
-template<class Type> class Function1;
 template<class Type> Ostream& operator<<(Ostream&, const Function1<Type>&);
 
 /*---------------------------------------------------------------------------*\
@@ -142,10 +140,19 @@ public:
     // Constructors
 
         //- Construct from entry name
-        explicit Function1(const word& entryName);
+        explicit Function1
+        (
+            const word& entryName,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct from entry name and dictionary (unused)
-        Function1(const word& entryName, const dictionary& dict);
+        Function1
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit Function1(const Function1<Type>& rhs);

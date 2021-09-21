@@ -34,16 +34,25 @@ License
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Function1<Type>::Function1(const word& entryName)
+Foam::Function1<Type>::Function1
+(
+    const word& entryName,
+    const objectRegistry* obrPtr
+)
 :
-    function1Base(entryName)
+    function1Base(entryName, obrPtr)
 {}
 
 
 template<class Type>
-Foam::Function1<Type>::Function1(const word& entryName, const dictionary& dict)
+Foam::Function1<Type>::Function1
+(
+    const word& entryName,
+    const dictionary& dict,
+    const objectRegistry* obrPtr
+)
 :
-    function1Base(entryName, dict)
+    function1Base(entryName, dict, obrPtr)
 {}
 
 
@@ -65,8 +74,7 @@ Type Foam::Function1<Type>::value(const scalar x) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::Function1<Type>::value
+Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::value
 (
     const scalarField& x
 ) const
@@ -85,8 +93,7 @@ Type Foam::Function1<Type>::integrate(const scalar x1, const scalar x2) const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::Function1<Type>::integrate
+Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::integrate
 (
     const scalarField& x1,
     const scalarField& x2

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,36 +26,111 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "function1Base.H"
+#include "objectRegistry.H"
 #include "Time.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+const Foam::objectRegistry* Foam::function1Base::whichDb
+(
+    const bool useTime
+) const noexcept
+{
+    if (obrPtr_ && useTime)
+    {
+        return &(obrPtr_->time());
+    }
+
+    return obrPtr_;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-Foam::function1Base::function1Base(const word& entryName)
+Foam::function1Base::function1Base
+(
+    const word& entryName,
+    const objectRegistry* obrPtr
+)
 :
     refCount(),
-    name_(entryName)
+    name_(entryName),
+    obrPtr_(obrPtr)
 {}
 
 
 Foam::function1Base::function1Base
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
     refCount(),
-    name_(entryName)
+    name_(entryName),
+    obrPtr_(obrPtr)
 {}
 
 
 Foam::function1Base::function1Base(const function1Base& rhs)
 :
     refCount(),
-    name_(rhs.name_)
+    name_(rhs.name_),
+    obrPtr_(rhs.obrPtr_)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+// NOTE : do not delete obrPtr_ (no ownership)
+Foam::function1Base::~function1Base()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::objectRegistry& Foam::function1Base::obr() const
+{
+    if (!obrPtr_)
+    {
+        FatalErrorInFunction
+            << "Object registry not set"
+            << abort(FatalError);
+    }
+    return *obrPtr_;
+}
+
+
+const Foam::Time& Foam::function1Base::time() const
+{
+    if (!obrPtr_)
+    {
+        FatalErrorInFunction
+            << "Object registry not set"
+            << abort(FatalError);
+    }
+
+    return obrPtr_->time();
+}
+
+
+bool Foam::function1Base::isTime() const noexcept
+{
+    return (obrPtr_ && obrPtr_->isTimeDb());
+}
+
+
+void Foam::function1Base::resetDb(const objectRegistry* obrPtr) noexcept
+{
+    obrPtr_ = obrPtr;
+}
+
+
+void Foam::function1Base::resetDb(const objectRegistry& db) noexcept
+{
+    obrPtr_ = &db;
+}
+
 
 void Foam::function1Base::convertTimeBase(const Time& t)
 {}
