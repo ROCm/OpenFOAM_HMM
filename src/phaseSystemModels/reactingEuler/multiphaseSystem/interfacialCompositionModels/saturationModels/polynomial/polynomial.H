@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polynomial_H
-#define polynomial_H
+#ifndef saturationModels_polynomial_H
+#define saturationModels_polynomial_H
 
 #include "saturationModel.H"
 #include "Polynomial.H"
