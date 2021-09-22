@@ -1,13 +1,7 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-if notTest "$@"
-then
-    foamRunTutorials -skipFirst
-else
-    echo "--- Skipping testing of tutorials in : $PWD" 1>&2
-fi
+echo "--- Skipping testing of tutorials in : $PWD" 1>&2
 
 #------------------------------------------------------------------------------
