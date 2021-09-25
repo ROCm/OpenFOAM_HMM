@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,8 +74,18 @@ Foam::LESModels::maxDeltaxyzCubeRootLESDelta::maxDeltaxyzCubeRootLESDelta
 )
 :
     LESdelta(name, turbulence),
-    maxDeltaxyz_(name, turbulence, dict.subDict(typeName + "Coeffs")),
-    cubeRootVolDelta_(name, turbulence, dict.subDict(typeName + "Coeffs"))
+    maxDeltaxyz_
+    (
+        name + "maxDeltaxyz",
+        turbulence,
+        dict.subDict(typeName + "Coeffs")
+    ),
+    cubeRootVolDelta_
+    (
+        name + "cubeRootVolDelta",
+        turbulence,
+        dict.subDict(typeName + "Coeffs")
+    )
 {
     calcDelta();
 }
