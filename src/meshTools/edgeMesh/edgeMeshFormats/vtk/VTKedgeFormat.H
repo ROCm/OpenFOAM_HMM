@@ -54,37 +54,12 @@ class VTKedgeFormat
 :
     public edgeMesh
 {
-    // Private Member Functions
-
-        //- No copy construct
-        VTKedgeFormat(const VTKedgeFormat&) = delete;
-
-        //- No copy assignment
-        void operator=(const VTKedgeFormat&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Write header information with points
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&
-        );
-
-        //- Write edges
-        static void writeEdges(Ostream&, const UList<edge>&);
-
-
 public:
-
 
     // Constructors
 
-        //- Construct from file name
-        VTKedgeFormat(const fileName&);
+        //- Read construct from file name
+        explicit VTKedgeFormat(const fileName& filename);
 
 
     // Selectors
@@ -103,12 +78,12 @@ public:
     // Member Functions
 
         //- Write surface mesh components by proxy
-        static void write(const fileName&, const edgeMesh&);
+        static void write(const fileName& name, const edgeMesh&);
 
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& name);
 
-        //- Write object file
+        //- Write object to file
         virtual void write(const fileName& name) const
         {
             write(name, *this);

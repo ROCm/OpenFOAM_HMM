@@ -51,6 +51,7 @@ SourceFiles
 
 #include "foamVtkFileWriter.H"
 #include "pointField.H"
+#include "edgeList.H"
 #include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,29 +76,52 @@ protected:
         //- The number of field points for the current Piece
         label numberOfPoints_;
 
-        //- The number of field cells (faces) for the current Piece
+        //- The number of field cells (edges or faces) for the current Piece
         label numberOfCells_;
 
         //- Local number of points
         label nLocalPoints_;
 
-        //- Local number of faces
-        label nLocalFaces_;
+        //- Local number of lines (edges)
+        label nLocalLines_;
 
-        //- Local face vertices (connectivity) count. Sum of face sizes.
-        label nLocalVerts_;
+        //- Local number of polys (faces)
+        label nLocalPolys_;
 
+
+    // Protected Member Functions
+
+        //- Write a uniform field of Cell (Poly or Line) or Point values
+        template<class Type>
+        void writeUniformValue
+        (
+            const label nCellValues,  // Could be Poly or Line!
+            const word& fieldName,
+            const Type& val
+        );
 
 private:
 
     // Private Member Functions
 
-        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- Determine sizes (nLocalPoints_, nLocalLines_),
+        //- and begin piece
+        void beginPiece(const pointField& points, const edgeList& edges);
+
+        //- Determine sizes (nLocalPoints_, nLocalPolys_),
         //- and begin piece
         void beginPiece(const pointField& points, const faceList& faces);
 
         //- Write points
         void writePoints(const pointField& points);
+
+        //- Write lines, legacy format
+        //  \param pointOffset processor-local point offset
+        void writeLinesLegacy(const edgeList& edges, const label pointOffset);
+
+        //- Write lines
+        //  \param pointOffset processor-local point offset
+        void writeLines(const edgeList& edges, const label pointOffset);
 
         //- Write faces, legacy format
         //  \param pointOffset processor-local point offset
@@ -163,6 +187,16 @@ public:
         //  their own geomety, but use writePolyGeometry() directly
         virtual bool writeGeometry();
 
+        //- Low-level write edge/point topology.
+        //- Normally used by writeGeometry() in a derived class
+        //  Also writes the file header if not previously written.
+        //  \note Must be called prior to writing CellData or PointData
+        bool writeLineGeometry
+        (
+            const pointField& points,
+            const edgeList& edges
+        );
+
         //- Low-level write face/point topology.
         //- Normally used by writeGeometry() in a derived class
         //  Also writes the file header if not previously written.
@@ -194,11 +228,7 @@ public:
 
     // Write
 
-        //- Write a uniform field of Cell (Face) or Point values
-        template<class Type>
-        void writeUniform(const word& fieldName, const Type& val);
-
-        //- Write a list of Cell (Face) or Point values
+        //- Write a list of Cell (Poly or Line) or Point values
         template<class Type>
         void write(const word& fieldName, const UList<Type>& field);
 };

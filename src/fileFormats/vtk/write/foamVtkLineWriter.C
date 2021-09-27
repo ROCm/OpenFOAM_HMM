@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,49 +25,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkSurfaceWriter.H"
+#include "foamVtkLineWriter.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtk::surfaceWriter::surfaceWriter
+Foam::vtk::lineWriter::lineWriter
 (
     const pointField& points,
-    const faceList& faces,
+    const edgeList& edges,
     const vtk::outputOptions opts
 )
 :
     vtk::polyWriter(opts),
 
     points_(std::cref<pointField>(points)),
-    faces_(std::cref<faceList>(faces)),
+    edges_(std::cref<edgeList>(edges)),
     instant_()
 {}
 
 
-Foam::vtk::surfaceWriter::surfaceWriter
+Foam::vtk::lineWriter::lineWriter
 (
     const pointField& points,
-    const faceList& faces,
+    const edgeList& edges,
     const fileName& file,
     bool parallel
 )
 :
-    surfaceWriter(points, faces)
+    lineWriter(points, edges)
 {
     open(file, parallel);
 }
 
 
-Foam::vtk::surfaceWriter::surfaceWriter
+Foam::vtk::lineWriter::lineWriter
 (
     const pointField& points,
-    const faceList& faces,
+    const edgeList& edges,
     const vtk::outputOptions opts,
     const fileName& file,
     bool parallel
 )
 :
-    surfaceWriter(points, faces, opts)
+    lineWriter(points, edges, opts)
 {
     open(file, parallel);
 }
@@ -75,13 +75,13 @@ Foam::vtk::surfaceWriter::surfaceWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtk::surfaceWriter::setTime(const instant& inst)
+void Foam::vtk::lineWriter::setTime(const instant& inst)
 {
     instant_ = inst;
 }
 
 
-bool Foam::vtk::surfaceWriter::beginFile(std::string title)
+bool Foam::vtk::lineWriter::beginFile(std::string title)
 {
     if (title.size())
     {
@@ -97,17 +97,17 @@ bool Foam::vtk::surfaceWriter::beginFile(std::string title)
     }
 
     // Provide default title
-    return vtk::fileWriter::beginFile("surface");
+    return vtk::fileWriter::beginFile("edges");
 }
 
 
-bool Foam::vtk::surfaceWriter::writeGeometry()
+bool Foam::vtk::lineWriter::writeGeometry()
 {
-    return writePolyGeometry(points_.get(), faces_.get());
+    return writeLineGeometry(points_.get(), edges_.get());
 }
 
 
-void Foam::vtk::surfaceWriter::writeTimeValue()
+void Foam::vtk::lineWriter::writeTimeValue()
 {
     if (!instant_.name().empty())
     {
@@ -116,22 +116,22 @@ void Foam::vtk::surfaceWriter::writeTimeValue()
 }
 
 
-void Foam::vtk::surfaceWriter::piece
+void Foam::vtk::lineWriter::piece
 (
     const pointField& points,
-    const faceList& faces
+    const edgeList& edges
 )
 {
     endPiece();
 
     points_ = std::cref<pointField>(points);
-    faces_ = std::cref<faceList>(faces);
+    edges_ = std::cref<edgeList>(edges);
 }
 
 
-bool Foam::vtk::surfaceWriter::writeProcIDs()
+bool Foam::vtk::lineWriter::writeProcIDs()
 {
-    return vtk::fileWriter::writeProcIDs(nLocalPolys_);
+    return vtk::fileWriter::writeProcIDs(nLocalLines_);
 }
 
 

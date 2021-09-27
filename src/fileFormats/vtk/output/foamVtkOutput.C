@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ License
 #include "globalIndex.H"
 #include "instant.H"
 #include "Fstream.H"
-#include "Pstream.H"
+#include "PstreamBuffers.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
@@ -99,7 +99,7 @@ void Foam::vtk::writeIdentity
     label start
 )
 {
-    // No nComponents for label, so use fmt.write() directly
+    // No nComponents for label, can use fmt.write() directly
     for (label i=0; i < len; ++i)
     {
         fmt.write(start);
@@ -114,46 +114,10 @@ void Foam::vtk::writeList
     const UList<uint8_t>& values
 )
 {
-    // No nComponents for char, so use fmt.write() directly
+    // No nComponents for char, can use fmt.write() directly
     for (const uint8_t val : values)
     {
         fmt.write(val);
-    }
-}
-
-
-void Foam::vtk::writeListParallel
-(
-    vtk::formatter& fmt,
-    const UList<uint8_t>& values
-)
-{
-    if (Pstream::master())
-    {
-        vtk::writeList(fmt, values);
-
-        List<uint8_t> recv;
-
-        // Receive and write
-        for (const int slave : Pstream::subProcs())
-        {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
-        }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        toMaster << values;
     }
 }
 
@@ -165,44 +129,54 @@ void Foam::vtk::writeListParallel
     const globalIndex& procOffset
 )
 {
+    // List sizes
+    const globalIndex sizes(values.size());
+
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
+    {
+        UOPstream os(Pstream::masterNo(), pBufs);
+        os.write
+        (
+            reinterpret_cast<const char*>(values.cdata()),
+            values.size_bytes()
+        );
+    }
+
+    pBufs.finishedSends();
+
     if (Pstream::master())
     {
+        // Master data
+
         // Write with offset
         const label offsetId = procOffset.offset(0);
-
         for (const label val : values)
         {
             vtk::write(fmt, val + offsetId);
         }
 
-        labelList recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            List<label> recv(sizes.localSize(proci));
 
-            fromSlave >> recv;
-
-            const label offsetId = procOffset.offset(slave);
+            UIPstream is(proci, pBufs);
+            is.read
+            (
+                reinterpret_cast<char*>(recv.data()),
+                recv.size_bytes()
+            );
 
             // Write with offset
+            const label offsetId = procOffset.offset(proci);
             for (const label val : recv)
             {
                 vtk::write(fmt, val + offsetId);
             }
         }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        toMaster << values;
     }
 }
 
@@ -218,6 +192,9 @@ void Foam::vtk::legacy::fileHeader
 {
     // Line 1:
     os  << "# vtk DataFile Version 2.0" << nl;
+
+    // OR
+    // os  << "# vtk DataFile Version 5.1" << nl;
 
     // Line 2: title
 

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-inline std::ofstream& Foam::vtk::fileWriter::os()
+inline std::ofstream& Foam::vtk::fileWriter::os() noexcept
 {
     return os_;
 }
@@ -39,13 +39,13 @@ inline Foam::vtk::formatter& Foam::vtk::fileWriter::format()
 }
 
 
-inline bool Foam::vtk::fileWriter::isState(outputState test) const
+inline bool Foam::vtk::fileWriter::isState(outputState test) const noexcept
 {
     return (test == state_);
 }
 
 
-inline bool Foam::vtk::fileWriter::notState(outputState test) const
+inline bool Foam::vtk::fileWriter::notState(outputState test) const noexcept
 {
     return (test != state_);
 }

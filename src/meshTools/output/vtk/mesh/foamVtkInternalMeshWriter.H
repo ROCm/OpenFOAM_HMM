@@ -225,6 +225,10 @@ public:
         //- Write primitive field of CellData
         template<class Type>
         void writeCellData(const word& fieldName, const UList<Type>& field);
+
+        //- Write primitive field of PointData
+        template<class Type>
+        void writePointData(const word& fieldName, const UList<Type>& field);
 };
 
 

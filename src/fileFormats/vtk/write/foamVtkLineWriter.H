@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::vtk::surfaceWriter
+    Foam::vtk::lineWriter
 
 Description
-    Write faces/points (optionally with fields)
+    Write edge/points (optionally with fields)
     as a vtp file or a legacy vtk file.
 
     The file output states are managed by the Foam::vtk::fileWriter class.
@@ -41,12 +41,12 @@ Note
     may be addressed using ghost points.
 
 SourceFiles
-    foamVtkSurfaceWriter.C
+    foamVtkLineWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_vtk_surfaceWriter_H
-#define Foam_vtk_surfaceWriter_H
+#ifndef Foam_vtk_lineWriter_H
+#define Foam_vtk_lineWriter_H
 
 #include "foamVtkPolyWriter.H"
 #include "instant.H"
@@ -60,10 +60,10 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class vtk::surfaceWriter Declaration
+                       Class vtk::lineWriter Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfaceWriter
+class lineWriter
 :
     public vtk::polyWriter
 {
@@ -72,8 +72,8 @@ class surfaceWriter
         //- Reference to the points
         std::reference_wrapper<const pointField> points_;
 
-        //- Reference to the faces
-        std::reference_wrapper<const faceList> faces_;
+        //- Reference to the edges
+        std::reference_wrapper<const edgeList> edges_;
 
         //- Time name/value
         instant instant_;
@@ -82,10 +82,10 @@ class surfaceWriter
     // Private Member Functions
 
         //- No copy construct
-        surfaceWriter(const surfaceWriter&) = delete;
+        lineWriter(const lineWriter&) = delete;
 
         //- No copy assignment
-        void operator=(const surfaceWriter&) = delete;
+        void operator=(const lineWriter&) = delete;
 
 
 public:
@@ -93,30 +93,30 @@ public:
     // Constructors
 
         //- Construct from components (default format INLINE_BASE64)
-        surfaceWriter
+        lineWriter
         (
             const pointField& pts,
-            const faceList& faces,
+            const edgeList& edges,
             const vtk::outputOptions opts = vtk::formatType::INLINE_BASE64
         );
 
         //- Construct from components (default format INLINE_BASE64),
         //- and open the file for writing.
         //  The file name is with/without an extension.
-        surfaceWriter
+        lineWriter
         (
             const pointField& pts,
-            const faceList& faces,
+            const edgeList& edges,
             const fileName& file,
             bool parallel = Pstream::parRun()
         );
 
         //- Construct from components and open the file for writing.
         //  The file name is with/without an extension.
-        surfaceWriter
+        lineWriter
         (
             const pointField& pts,
-            const faceList& faces,
+            const edgeList& edges,
             const vtk::outputOptions opts,
             const fileName& file,
             bool parallel = Pstream::parRun()
@@ -124,7 +124,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceWriter() = default;
+    virtual ~lineWriter() = default;
 
 
     // Member Functions
@@ -151,19 +151,19 @@ public:
         //- Write the currently set time as "TimeValue" FieldData
         void writeTimeValue();
 
-        //- Reset point/face references to begin a new piece
-        void piece(const pointField& points, const faceList& faces);
+        //- Reset point/edge references to begin a new piece
+        void piece(const pointField& points, const edgeList& edges);
 
 
-        //- Write processor ids for each poly as CellData
+        //- Write processor ids for each line as CellData
         //- (no-op in serial)
         bool writeProcIDs();
 
-        //- Write a uniform field of Cell (Poly) or Point values
+        //- Write a uniform field of Cell (Line) or Point values
         template<class Type>
         void writeUniform(const word& fieldName, const Type& val)
         {
-            polyWriter::writeUniformValue<Type>(nLocalPolys_, fieldName, val);
+            polyWriter::writeUniformValue<Type>(nLocalLines_, fieldName, val);
         }
 };
 

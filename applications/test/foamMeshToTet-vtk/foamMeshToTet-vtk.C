@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,47 +23,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    foamMeshToTet-vtk
+
+Description
+    Write tet-decomposed OpenFOAM mesh in VTK format.
+    For diagnostic purposes.
+
 \*---------------------------------------------------------------------------*/
 
-#include "foamVtkPatchMeshWriter.H"
-#include "foamVtkOutput.H"
+#include "argList.H"
+#include "timeSelector.H"
+#include "Time.H"
+#include "polyMesh.H"
+
+namespace Foam
+{
+    void writeVTKtetMesh(const fileName& output, const polyMesh& mesh);
+}
+
+using namespace Foam;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::vtk::patchMeshWriter::writeUniform
-(
-    const word& fieldName,
-    const Type& val
-)
+int main(int argc, char *argv[])
 {
-    label nValues(0);
+    argList::addNote
+    (
+        "Write tet-decomposed OpenFOAM mesh in VTK"
+    );
+    argList::noParallel();
+    timeSelector::addOptions();
 
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-        nValues = nLocalPolys_;
-    }
-    else if (isState(outputState::POINT_DATA))
-    {
-        ++nPointData_;
-        nValues = nLocalPoints_;
-    }
-    else
-    {
-        reportBadState
-        (
-            FatalErrorInFunction,
-            outputState::CELL_DATA,
-            outputState::POINT_DATA
-        )
-            << " for uniform field " << fieldName << nl << endl
-            << exit(FatalError);
+    #include "setRootCase.H"
+    #include "createTime.H"
 
-        return;
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+    fileName exportName = "tetmesh";
+    if (args.found("case"))
+    {
+        exportName += '-' + args.globalCaseName();
     }
 
-    vtk::fileWriter::writeUniform<Type>(fieldName, val, nValues);
+    #include "createPolyMesh.H"
+
+    forAll(timeDirs, timei)
+    {
+        runTime.setTime(timeDirs[timei], timei);
+
+        polyMesh::readUpdateState state = mesh.readUpdate();
+
+        if (!timei || state != polyMesh::UNCHANGED)
+        {
+            fileName meshName(exportName);
+            if (state != polyMesh::UNCHANGED)
+            {
+                meshName += '_' + runTime.timeName();
+            }
+
+            writeVTKtetMesh(meshName, mesh);
+        }
+    }
+
+    Info<< "\nEnd\n" << endl;
+
+    return 0;
 }
 
 

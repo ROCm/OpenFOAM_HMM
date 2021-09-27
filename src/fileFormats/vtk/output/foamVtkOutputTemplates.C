@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#include "globalIndex.H"
+#include "PstreamBuffers.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -123,38 +124,103 @@ void Foam::vtk::writeLists
 
 
 template<class Type>
+void Foam::vtk::writeValueParallel
+(
+    vtk::formatter& fmt,
+    const Type& val,
+    const label count
+)
+{
+    if (Pstream::master())
+    {
+        vtk::write(fmt, val, count);
+
+        label subCount;
+        Type subValue;
+
+        // Receive each [size, value] tuple
+        for (const int proci : Pstream::subProcs())
+        {
+            IPstream is(Pstream::commsTypes::blocking, proci);
+            is >> subCount >> subValue;
+
+            vtk::write(fmt, subValue, subCount);
+        }
+    }
+    else
+    {
+        OPstream os
+        (
+            Pstream::commsTypes::blocking,
+            Pstream::masterNo()
+        );
+
+        // Send [size, value] tuple
+        os << count << val;
+    }
+}
+
+
+template<class Type>
 void Foam::vtk::writeListParallel
 (
     vtk::formatter& fmt,
     const UList<Type>& values
 )
 {
-    if (Pstream::master())
+    // List sizes
+    const globalIndex sizes(values.size());
+
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
     {
-        vtk::writeList(fmt, values);
-
-        List<Type> recv;
-
-        // Receive and write
-        for (const int slave : Pstream::subProcs())
+        UOPstream os(Pstream::masterNo(), pBufs);
+        if (is_contiguous<Type>::value)
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            os.write
+            (
+                reinterpret_cast<const char*>(values.cdata()),
+                values.size_bytes()
+            );
+        }
+        else
+        {
+            os << values;
         }
     }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
 
-        toMaster << values;
+    pBufs.finishedSends();
+
+    if (Pstream::master())
+    {
+        // Write master data
+        vtk::writeList(fmt, values);
+
+        // Receive and write
+        for (const int proci : Pstream::subProcs())
+        {
+            UIPstream is(proci, pBufs);
+
+            {
+                List<Type> recv(sizes.localSize(proci));
+
+                if (is_contiguous<Type>::value)
+                {
+                    is.read
+                    (
+                        reinterpret_cast<char*>(recv.data()),
+                        recv.size_bytes()
+                    );
+                }
+                else
+                {
+                    is >> recv;
+                }
+                vtk::writeList(fmt, recv);
+            }
+        }
     }
 }
 
@@ -167,32 +233,38 @@ void Foam::vtk::writeListParallel
     const labelUList& addressing
 )
 {
+    UIndirectList<Type> send(values, addressing);
+
+    // List sizes
+    const globalIndex sizes(send.size());
+
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
+    {
+        UOPstream os(Pstream::masterNo(), pBufs);
+        os << send;
+    }
+
+    pBufs.finishedSends();
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values, addressing);
 
-        List<Type> recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            UIPstream is(proci, pBufs);
 
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            {
+                List<Type> recv;
+                is >> recv;
+                vtk::writeList(fmt, recv);
+            }
         }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        toMaster << List<Type>(values, addressing);
     }
 }
 
@@ -205,32 +277,66 @@ void Foam::vtk::writeListParallel
     const bitSet& selected
 )
 {
-    if (Pstream::master())
+    List<Type> send;
+    if (!Pstream::master())
     {
-        vtk::writeList(fmt, values, selected);
+        send = subset(selected, values);
+    }
 
-        List<Type> recv;
+    // List sizes.
+    // NOTE okay to skip proc0 since we only need sizes (not offsets)
+    const globalIndex sizes(send.size());
 
-        // Receive and write
-        for (const int slave : Pstream::subProcs())
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
+    {
+        UOPstream os(Pstream::masterNo(), pBufs);
+        if (is_contiguous<Type>::value)
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            os.write
+            (
+                reinterpret_cast<const char*>(send.cdata()),
+                send.size_bytes()
+            );
+        }
+        else
+        {
+            os << send;
         }
     }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
 
-        toMaster << subset(selected, values);
+    pBufs.finishedSends();
+
+    if (Pstream::master())
+    {
+        // Write master data
+        vtk::writeList(fmt, values, selected);
+
+        // Receive and write
+        for (const int proci : Pstream::subProcs())
+        {
+            UIPstream is(proci, pBufs);
+
+            {
+                List<Type> recv(sizes.localSize(proci));
+
+                if (is_contiguous<Type>::value)
+                {
+                    is.read
+                    (
+                        reinterpret_cast<char*>(recv.data()),
+                        recv.size_bytes()
+                    );
+                }
+                else
+                {
+                    is >> recv;
+                }
+                vtk::writeList(fmt, recv);
+            }
+        }
     }
 }
 
@@ -243,34 +349,90 @@ void Foam::vtk::writeListsParallel
     const UList<Type>& values2
 )
 {
+    // List sizes
+    const globalIndex sizes1(values1.size());
+    const globalIndex sizes2(values2.size());
+
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
+    {
+        UOPstream os(Pstream::masterNo(), pBufs);
+        if (is_contiguous<Type>::value)
+        {
+            os.write
+            (
+                reinterpret_cast<const char*>(values1.cdata()),
+                values1.size_bytes()
+            );
+            os.write
+            (
+                reinterpret_cast<const char*>(values2.cdata()),
+                values2.size_bytes()
+            );
+        }
+        else
+        {
+            os << values1 << values2;
+        }
+    }
+
+    pBufs.finishedSends();
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values1);
         vtk::writeList(fmt, values2);
 
-        List<Type> recv1, recv2;
-
-        // Receive and write
-        for (const int slave : Pstream::subProcs())
-        {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv1 >> recv2;
-
-            vtk::writeList(fmt, recv1);
-            vtk::writeList(fmt, recv2);
-        }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
+        // Reserve max receive size
+        DynamicList<Type> recv
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            max(sizes1.maxNonLocalSize(), sizes2.maxNonLocalSize())
         );
 
-        toMaster << values1 << values2;
+        // Receive and write
+        for (const int proci : Pstream::subProcs())
+        {
+            UIPstream is(proci, pBufs);
+
+            // values1
+            {
+                List<Type> recv(sizes1.localSize(proci));
+                if (is_contiguous<Type>::value)
+                {
+                    is.read
+                    (
+                        reinterpret_cast<char*>(recv.data()),
+                        recv.size_bytes()
+                    );
+                }
+                else
+                {
+                    is >> recv;
+                }
+                vtk::writeList(fmt, recv);
+            }
+
+            // values2
+            {
+                List<Type> recv(sizes2.localSize(proci));
+                if (is_contiguous<Type>::value)
+                {
+                    is.read
+                    (
+                        reinterpret_cast<char*>(recv.data()),
+                        recv.size_bytes()
+                    );
+                }
+                else
+                {
+                    is >> recv;
+                }
+                vtk::writeList(fmt, recv);
+            }
+        }
     }
 }
 
@@ -284,34 +446,44 @@ void Foam::vtk::writeListsParallel
     const labelUList& addressing
 )
 {
+    UIndirectList<Type> send2(values2, addressing);
+
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+    // Send to master
+    if (!Pstream::master())
+    {
+        UOPstream os(Pstream::masterNo(), pBufs);
+        os << values1 << send2;
+    }
+
+    pBufs.finishedSends();
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values1);
         vtk::writeList(fmt, values2, addressing);
 
-        List<Type> recv1, recv2;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        for (const int proci : Pstream::subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            UIPstream is(proci, pBufs);
 
-            fromSlave >> recv1 >> recv2;
+            // values1
+            {
+                List<Type> recv;
+                is >> recv;
+                vtk::writeList(fmt, recv);
+            }
 
-            vtk::writeList(fmt, recv1);
-            vtk::writeList(fmt, recv2);
+            // values2 (send2)
+            {
+                List<Type> recv;
+                is >> recv;
+                vtk::writeList(fmt, recv);
+            }
         }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        toMaster << values1 << List<Type>(values2, addressing);
     }
 }
 

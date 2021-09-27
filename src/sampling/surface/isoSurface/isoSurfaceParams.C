@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,10 +52,12 @@ const Foam::Enum
 Foam::isoSurfaceParams::filterNames
 ({
     { filterType::NONE, "none" },
-    { filterType::CELL, "cell" },
-    { filterType::DIAGCELL, "diagcell" },
     { filterType::PARTIAL, "partial" },
     { filterType::FULL, "full" },
+    { filterType::CLEAN, "clean" },
+
+    { filterType::CELL, "cell" },
+    { filterType::DIAGCELL, "diagcell" },
 });
 
 
@@ -137,6 +139,7 @@ Foam::isoSurfaceParams::isoSurfaceParams
 :
     algo_(algo),
     filter_(filter),
+    snap_(true),
     mergeTol_(1e-6),
     clipBounds_(boundBox::invertedBox)
 {}
@@ -152,6 +155,7 @@ Foam::isoSurfaceParams::isoSurfaceParams
 {
     algo_ = getAlgorithmType(dict, algo_);
     filter_ = getFilterType(dict, filter_);
+    snap_ = dict.getOrDefault("snap", true);
     dict.readIfPresent("mergeTol", mergeTol_);
     dict.readIfPresent("bounds", clipBounds_);
 }

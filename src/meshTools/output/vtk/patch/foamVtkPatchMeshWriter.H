@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,8 +82,8 @@ protected:
         //- Local number of points
         label nLocalPoints_;
 
-        //- Local number of faces
-        label nLocalFaces_;
+        //- Local number of polys (faces)
+        label nLocalPolys_;
 
         //- Local face vertices (connectivity) count. Sum of face sizes.
         label nLocalVerts_;
@@ -97,7 +97,7 @@ protected:
 
     // Private Member Functions
 
-        //- Determine sizes (nLocalPoints_, nLocalFaces_, nLocalVerts_),
+        //- Determine sizes (nLocalPoints_, nLocalPolys_),
         //- and begin piece.
         void beginPiece();
 
@@ -172,7 +172,7 @@ public:
         }
 
         //- The patch IDs
-        inline const labelList& patchIDs() const
+        const labelList& patchIDs() const noexcept
         {
             return patchIDs_;
         }

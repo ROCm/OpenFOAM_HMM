@@ -29,13 +29,16 @@ License
 #include "isoSurfaceTopo.H"
 #include "polyMesh.H"
 #include "volFields.H"
+#include "edgeHashes.H"
 #include "tetCell.H"
-#include "tetMatcher.H"
 #include "tetPointRef.H"
 #include "DynamicField.H"
 #include "syncTools.H"
 #include "uindirectPrimitivePatch.H"
 #include "polyMeshTetDecomposition.H"
+#include "foamVtkInternalMeshWriter.H"
+#include "foamVtkLineWriter.H"
+#include "foamVtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,434 +54,606 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// Get/set snapIndex (0, 1 or 2) at given position
+// 0 = no snap
+// 1 = snap to first edge end
+// 2 = snap to second edge end
+// NB: 4 lower bits left free for regular tet-cut information
 
-Foam::label Foam::isoSurfaceTopo::generatePoint
+#undef  SNAP_END_VALUE
+#undef  SNAP_END_ENCODE
+#define SNAP_END_ENCODE(pos, val)   (((val) << (4 + 2 * pos)))
+#define SNAP_END_VALUE(pos, val)    (((val) >> (4 + 2 * pos)) & 0x3)
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Check for tet values above/below given (iso) value
+// Result encoded as an integer, with possible snapping information too
+inline static int getTetCutIndex
 (
-    const label facei,
-    const bool edgeIsDiag,
-    const edge& vertices,
+    scalar p0,
+    scalar p1,
+    scalar p2,
+    scalar p3,
+    const scalar val,
+    const bool doSnap
+) noexcept
+{
+    int cutIndex
+    (
+        (p0 < val ? 1 : 0)  // point 0
+      | (p1 < val ? 2 : 0)  // point 1
+      | (p2 < val ? 4 : 0)  // point 2
+      | (p3 < val ? 8 : 0)  // point 3
+    );
 
-    DynamicList<edge>& pointToVerts,
-    DynamicList<label>& pointToFace,
-    DynamicList<bool>& pointFromDiag,
-    EdgeMap<label>& vertsToPoint
-) const
+    if (doSnap && cutIndex && cutIndex != 0xF)
+    {
+        // Not all below or all
+
+        // Calculate distances (for snapping)
+        p0 -= val; if (cutIndex & 1) p0 *= -1;
+        p1 -= val; if (cutIndex & 2) p1 *= -1;
+        p2 -= val; if (cutIndex & 4) p2 *= -1;
+        p3 -= val; if (cutIndex & 8) p3 *= -1;
+
+        // Add snap index into regular edge cut index
+        // Snap to end if less than approx 1% of the distance.
+        // - only valid if there is also a corresponding sign change
+        #undef  ADD_SNAP_INDEX
+        #define ADD_SNAP_INDEX(pos, d1, d2, idx1, idx2)                \
+        switch (cutIndex & (idx1 | idx2))                              \
+        {                                                              \
+            case idx1 : /* first below, second above */                \
+            case idx2 : /* first above, second below */                \
+                cutIndex |= SNAP_END_ENCODE                            \
+                (                                                      \
+                    pos,                                               \
+                    ((d1 * 100 < d2) ? 1 : (d2 * 100 < d1) ? 2 : 0)    \
+                );                                                     \
+                break;                                                 \
+        }
+
+        ADD_SNAP_INDEX(0, p0, p1, 1, 2);    // Edge 0: 0 -> 1
+        ADD_SNAP_INDEX(1, p0, p2, 1, 4);    // Edge 1: 0 -> 2
+        ADD_SNAP_INDEX(2, p0, p3, 1, 8);    // Edge 2: 0 -> 3
+        ADD_SNAP_INDEX(3, p3, p1, 8, 2);    // Edge 3: 3 -> 1
+        ADD_SNAP_INDEX(4, p1, p2, 2, 4);    // Edge 4: 1 -> 2
+        ADD_SNAP_INDEX(5, p3, p2, 8, 4);    // Edge 5: 3 -> 2
+        #undef ADD_SNAP_INDEX
+    }
+
+    return cutIndex;
+}
+
+
+// Append three labels to list.
+// Filter out degenerate (eg, snapped) tris. Flip face as requested
+inline static void appendTriLabels
+(
+    DynamicList<label>& verts,
+    const label a,
+    const label b,
+    const label c,
+    const bool flip  // Flip normals
+)
+{
+    if (a != b && b != c && c != a)
+    {
+        verts.append(a);
+        if (flip)
+        {
+            verts.append(c);
+            verts.append(b);
+        }
+        else
+        {
+            verts.append(b);
+            verts.append(c);
+        }
+    }
+}
+
+
+// Return point reference to mesh points or cell-centres
+inline static const point& getMeshPointRef
+(
+    const polyMesh& mesh,
+    const label pointi
+)
+{
+    return
+    (
+        pointi < mesh.nPoints()
+      ? mesh.points()[pointi]
+      : mesh.cellCentres()[pointi - mesh.nPoints()]
+    );
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::isoSurfaceTopo::tetCutAddressing::tetCutAddressing
+(
+    const label nCutCells,
+    const bool useSnap,
+    const bool useDebugCuts
+)
+:
+    vertsToPointLookup_(12*nCutCells),
+    snapVertsLookup_(0),
+
+    pointToFace_(10*nCutCells),
+    pointFromDiag_(10*nCutCells),
+
+    pointToVerts_(10*nCutCells),
+    cutPoints_(12*nCutCells),
+
+    debugCutTets_(),
+    debugCutTetsOn_(useDebugCuts)
+{
+    // Per cell: 5 pyramids cut, each generating 2 triangles
+
+    // Per cell: number of intersected edges:
+    //          - four faces cut so 4 mesh edges + 4 face-diagonal edges
+    //          - 4 of the pyramid edges
+
+    if (useSnap)
+    {
+        // Some, but not all, cells may have point snapping
+        snapVertsLookup_.resize(4*nCutCells);
+    }
+    if (debugCutTetsOn_)
+    {
+        debugCutTets_.reserve(6*nCutCells);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::isoSurfaceTopo::tetCutAddressing::clearDebug()
+{
+    debugCutTets_.clearStorage();
+}
+
+
+void Foam::isoSurfaceTopo::tetCutAddressing::clearDiagonal()
+{
+    pointToFace_.clearStorage();
+    pointFromDiag_.clearStorage();
+}
+
+
+void Foam::isoSurfaceTopo::tetCutAddressing::clearHashes()
+{
+    vertsToPointLookup_.clear();
+    snapVertsLookup_.clear();
+}
+
+
+Foam::label Foam::isoSurfaceTopo::tetCutAddressing::generatePoint
+(
+    label facei,
+    bool edgeIsDiagonal,
+    const int snapEnd,
+    const edge& vertices
+)
 {
     // Generate new point, unless it already exists for edge
+    // or corresponds to a snapped point (from another edge)
 
-    label pointi = vertsToPoint.lookup(vertices, -1);
+    label pointi = vertsToPointLookup_.lookup(vertices, -1);
     if (pointi == -1)
     {
-        pointi = pointToVerts.size();
+        bool addNewPoint(true);
 
-        pointToVerts.append(vertices);
-        pointToFace.append(facei);
-        pointFromDiag.append(edgeIsDiag);
-        vertsToPoint.insert(vertices, pointi);
+        const label snapPointi =
+        (
+            (snapEnd == 1) ? vertices.first()
+          : (snapEnd == 2) ? vertices.second()
+          : -1
+        );
+
+        if (snapPointi == -1)
+        {
+            // No snapped point
+            pointi = pointToVerts_.size();
+            pointToVerts_.append(vertices);
+        }
+        else
+        {
+            // Snapped point. No corresponding face or diagonal
+            facei = -1;
+            edgeIsDiagonal = false;
+
+            pointi = snapVertsLookup_.lookup(snapPointi, -1);
+            addNewPoint = (pointi == -1);
+            if (addNewPoint)
+            {
+                pointi = pointToVerts_.size();
+                snapVertsLookup_.insert(snapPointi, pointi);
+                pointToVerts_.append(edge(snapPointi, snapPointi));
+            }
+        }
+
+        if (addNewPoint)
+        {
+            pointToFace_.append(facei);
+            pointFromDiag_.append(edgeIsDiagonal);
+        }
+
+        vertsToPointLookup_.insert(vertices, pointi);
     }
 
     return pointi;
 }
 
 
-void Foam::isoSurfaceTopo::generateTriPoints
+bool Foam::isoSurfaceTopo::tetCutAddressing::generatePoints
 (
     const label facei,
     const int tetCutIndex,
     const tetCell& tetLabels,
-    const FixedList<bool, 6>& edgeIsDiag,// Per tet edge whether is face diag
 
-    DynamicList<edge>& pointToVerts,
-    DynamicList<label>& pointToFace,
-    DynamicList<bool>& pointFromDiag,
-
-    EdgeMap<label>& vertsToPoint,
-    DynamicList<label>& verts       // Every three verts is new triangle
-) const
+    // Per tet edge whether is face diag etc
+    const FixedList<bool, 6>& edgeIsDiagonal
+)
 {
+    bool flip(false);
+    const label nCutPointsOld(cutPoints_.size());
+
     // Form the vertices of the triangles for each case
-    switch (tetCutIndex)
+    switch (tetCutIndex & 0x0F)
     {
         case 0x00:
         case 0x0F:
         break;
 
-        case 0x01:
-        case 0x0E:
+        // Cut point 0
+        case 0x0E: flip = true; [[fallthrough]];    // Point 0 above cut
+        case 0x01:                                  // Point 0 below cut
         {
-            verts.append
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[0],
-                    tetLabels.edge(0),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[0],
+                    SNAP_END_VALUE(0, tetCutIndex),
+                    tetLabels.edge(0)  // 0 -> 1
                 )
             );
-            verts.append
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[1],
-                    tetLabels.edge(1),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[1],
+                    SNAP_END_VALUE(1, tetCutIndex),
+                    tetLabels.edge(1)  // 0 -> 2
                 )
             );
-            verts.append
+            const label cutC
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[2],
-                    tetLabels.edge(2),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[2],
+                    SNAP_END_VALUE(2, tetCutIndex),
+                    tetLabels.edge(2)  // 0 -> 3
                 )
             );
 
-            if (tetCutIndex == 0x0E)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
         }
         break;
 
-        case 0x02:
-        case 0x0D:
+        // Cut point 1
+        case 0x0D: flip = true; [[fallthrough]];    // Point 1 above cut
+        case 0x02:                                  // Point 1 below cut
         {
-            verts.append
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[0],
-                    tetLabels.reverseEdge(0),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[0],
+                    SNAP_END_VALUE(0, tetCutIndex),
+                    tetLabels.edge(0)  // 0 -> 1
                 )
             );
-            verts.append
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[3],
-                    tetLabels.reverseEdge(3),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[3],
+                    SNAP_END_VALUE(3, tetCutIndex),
+                    tetLabels.edge(3)  // 3 -> 1
                 )
             );
-            verts.append
+            const label cutC
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[4],
-                    tetLabels.edge(4),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[4],
+                    SNAP_END_VALUE(4, tetCutIndex),
+                    tetLabels.edge(4)  // 1 -> 2
                 )
             );
 
-            if (tetCutIndex == 0x0D)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
         }
         break;
 
-        case 0x03:
-        case 0x0C:
+        // Cut point 0/1 | 2/3
+        case 0x0C: flip = true; [[fallthrough]];    // Point 0/1 above cut
+        case 0x03:                                  // Point 0/1 below cut
         {
-            const label p0p2
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[1],
-                    tetLabels.edge(1),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[1],
+                    SNAP_END_VALUE(1, tetCutIndex),
+                    tetLabels.edge(1)  // 0 -> 2
                 )
             );
-            const label p1p3
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[3],
-                    tetLabels.reverseEdge(3),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[2],
+                    SNAP_END_VALUE(2, tetCutIndex),
+                    tetLabels.edge(2)  // 0 -> 3
+                )
+            );
+            const label cutC
+            (
+                generatePoint
+                (
+                    facei,
+                    edgeIsDiagonal[3],
+                    SNAP_END_VALUE(3, tetCutIndex),
+                    tetLabels.edge(3)  // 3 -> 1
+                )
+            );
+            const label cutD
+            (
+                generatePoint
+                (
+                    facei,
+                    edgeIsDiagonal[4],
+                    SNAP_END_VALUE(4, tetCutIndex),
+                    tetLabels.edge(4)  // 1 -> 2
                 )
             );
 
-            verts.append
-            (
-                generatePoint
-                (
-                    facei,
-                    edgeIsDiag[2],
-                    tetLabels.edge(2),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
-                )
-            );
-            verts.append(p1p3);
-            verts.append(p0p2);
-            verts.append(p1p3);
-            verts.append
-            (
-                generatePoint
-                (
-                    facei,
-                    edgeIsDiag[4],
-                    tetLabels.edge(4),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
-                )
-            );
-            verts.append(p0p2);
-
-            if (tetCutIndex == 0x0C)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-5], verts[sz-4]);
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
+            appendTriLabels(cutPoints_, cutA, cutC, cutD, flip);
         }
         break;
 
-        case 0x04:
-        case 0x0B:
+        // Cut point 2
+        case 0x0B: flip = true; [[fallthrough]];    // Point 2 above cut
+        case 0x04:                                  // Point 2 below cut
         {
-            verts.append
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[1],
-                    tetLabels.reverseEdge(1),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[1],
+                    SNAP_END_VALUE(1, tetCutIndex),
+                    tetLabels.edge(1)  // 0 -> 2
                 )
             );
-            verts.append
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[4],
-                    tetLabels.reverseEdge(4),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[4],
+                    SNAP_END_VALUE(4, tetCutIndex),
+                    tetLabels.edge(4)  // 1 -> 2
                 )
             );
-            verts.append
+            const label cutC
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[5],
-                    tetLabels.reverseEdge(5),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[5],
+                    SNAP_END_VALUE(5, tetCutIndex),
+                    tetLabels.edge(5)  // 3 -> 2
                 )
             );
 
-            if (tetCutIndex == 0x0B)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
         }
         break;
 
-        case 0x05:
-        case 0x0A:
+        // Cut point 0/2 | 1/3
+        case 0x0A: flip = true; [[fallthrough]];    // Point 0/2 above cut
+        case 0x05:                                  // Point 0/2 below cut
         {
-            const label p0p1
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[0],
-                    tetLabels.edge(0),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[0],
+                    SNAP_END_VALUE(0, tetCutIndex),
+                    tetLabels.edge(0)  // 0 -> 1
                 )
             );
-            const label p2p3
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[5],
-                    tetLabels.reverseEdge(5),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[4],
+                    SNAP_END_VALUE(4, tetCutIndex),
+                    tetLabels.edge(4)  // 1 -> 2
+                )
+            );
+            const label cutC
+            (
+                generatePoint
+                (
+                    facei,
+                    edgeIsDiagonal[5],
+                    SNAP_END_VALUE(5, tetCutIndex),
+                    tetLabels.edge(5)  // 3 -> 2
+                )
+            );
+            const label cutD
+            (
+                generatePoint
+                (
+                    facei,
+                    edgeIsDiagonal[2],
+                    SNAP_END_VALUE(2, tetCutIndex),
+                    tetLabels.edge(2)  // 0 -> 3
                 )
             );
 
-            verts.append(p0p1);
-            verts.append(p2p3);
-            verts.append
-            (
-                generatePoint
-                (
-                    facei,
-                    edgeIsDiag[2],
-                    tetLabels.edge(2),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
-                )
-            );
-            verts.append(p0p1);
-            verts.append
-            (
-                generatePoint
-                (
-                    facei,
-                    edgeIsDiag[4],
-                    tetLabels.edge(4),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
-                )
-            );
-            verts.append(p2p3);
-
-            if (tetCutIndex == 0x0A)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-5], verts[sz-4]);
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
+            appendTriLabels(cutPoints_, cutA, cutC, cutD, flip);
         }
         break;
 
-        case 0x06:
-        case 0x09:
+        // Cut point 1/2 | 0/3
+        case 0x09: flip = true; [[fallthrough]];    // Point 1/2 above cut
+        case 0x06:                                  // Point 1/2 below cut
         {
-            const label p0p1
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[0],
-                    tetLabels.edge(0),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[0],
+                    SNAP_END_VALUE(0, tetCutIndex),
+                    tetLabels.edge(0)  // 0 -> 1
                 )
             );
-            const label p2p3
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[5],
-                    tetLabels.reverseEdge(5),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[3],
+                    SNAP_END_VALUE(3, tetCutIndex),
+                    tetLabels.edge(3)  // 3 -> 1
                 )
             );
-
-            verts.append(p0p1);
-            verts.append
+            const label cutC
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[3],
-                    tetLabels.reverseEdge(3),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[5],
+                    SNAP_END_VALUE(5, tetCutIndex),
+                    tetLabels.edge(5)  // 3 -> 2
                 )
             );
-            verts.append(p2p3);
-            verts.append(p0p1);
-            verts.append(p2p3);
-            verts.append
+            const label cutD
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[1],
-                    tetLabels.edge(1),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[1],
+                    SNAP_END_VALUE(1, tetCutIndex),
+                    tetLabels.edge(1)  // 0 -> 2
                 )
             );
 
-            if (tetCutIndex == 0x09)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-5], verts[sz-4]);
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
+            appendTriLabels(cutPoints_, cutA, cutC, cutD, flip);
         }
         break;
 
-        case 0x08:
-        case 0x07:
+        // Cut point 3
+        case 0x07: flip = true; [[fallthrough]];    // Point 3 above cut
+        case 0x08:                                  // Point 3 below cut
         {
-            verts.append
+            const label cutA
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[2],
-                    tetLabels.reverseEdge(2),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[2],
+                    SNAP_END_VALUE(2, tetCutIndex),
+                    tetLabels.edge(2)  // 0 -> 3
                 )
             );
-            verts.append
+            const label cutB
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[5],
-                    tetLabels.reverseEdge(5),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[5],
+                    SNAP_END_VALUE(5, tetCutIndex),
+                    tetLabels.edge(5)  // 3 -> 2
                 )
             );
-            verts.append
+            const label cutC
             (
                 generatePoint
                 (
                     facei,
-                    edgeIsDiag[3],
-                    tetLabels.edge(3),
-                    pointToVerts, pointToFace, pointFromDiag, vertsToPoint
+                    edgeIsDiagonal[3],
+                    SNAP_END_VALUE(3, tetCutIndex),
+                    tetLabels.edge(3)  // 3 -> 1
                 )
             );
-            if (tetCutIndex == 0x07)
-            {
-                // Flip normals
-                const label sz = verts.size();
-                std::swap(verts[sz-2], verts[sz-1]);
-            }
+
+            appendTriLabels(cutPoints_, cutA, cutB, cutC, flip);
         }
         break;
     }
+
+    const bool added(nCutPointsOld != cutPoints_.size());
+
+    if (added && debugCutTetsOn_)
+    {
+        debugCutTets_.append(tetLabels.shape());
+    }
+
+    return added;
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Requires mesh_, tetBasePtIs
 void Foam::isoSurfaceTopo::generateTriPoints
 (
     const label celli,
     const bool isTet,
-
-    DynamicList<edge>& pointToVerts,
-    DynamicList<label>& pointToFace,
-    DynamicList<bool>& pointFromDiag,
-
-    EdgeMap<label>& vertsToPoint,
-    DynamicList<label>& verts,
-    DynamicList<label>& faceLabels
+    const labelList& tetBasePtIs,
+    tetCutAddressing& tetCutAddr
 ) const
 {
     const faceList& faces = mesh_.faces();
     const labelList& faceOwner = mesh_.faceOwner();
     const cell& cFaces = mesh_.cells()[celli];
+    const bool doSnap = this->snap();
 
     if (isTet)
     {
         // For tets don't do cell-centre decomposition, just use the
         // tet points and values
-
-        const label startTrii = verts.size();
 
         const label facei = cFaces[0];
         const face& f0 = faces[facei];
@@ -486,17 +661,17 @@ void Foam::isoSurfaceTopo::generateTriPoints
         // Get the other point from f1. Tbd: check if not duplicate face
         // (ACMI / ignoreBoundaryFaces_).
         const face& f1 = faces[cFaces[1]];
-        label oppositeI = -1;
+        label apexi = -1;
         forAll(f1, fp)
         {
-            oppositeI = f1[fp];
-            if (!f0.found(oppositeI))
+            apexi = f1[fp];
+            if (!f0.found(apexi))
             {
                 break;
             }
         }
 
-        label p0 = f0[0];
+        const label p0 = f0[0];
         label p1 = f0[1];
         label p2 = f0[2];
 
@@ -505,31 +680,27 @@ void Foam::isoSurfaceTopo::generateTriPoints
             std::swap(p1, p2);
         }
 
-        generateTriPoints
+        const tetCell tetLabels(p0, p1, p2, apexi);
+        const int tetCutIndex
         (
-            facei,
             getTetCutIndex
             (
                 pVals_[p0],
                 pVals_[p1],
                 pVals_[p2],
-                pVals_[oppositeI],
-                iso_
-            ),
-            tetCell(p0, p1, p2, oppositeI),
-            FixedList<bool, 6>(false),  // edgeIsDiag = false
-
-            pointToVerts,
-            pointToFace,
-            pointFromDiag,
-            vertsToPoint,
-            verts       // Every three verts is new triangle
+                pVals_[apexi],
+                iso_,
+                doSnap
+            )
         );
 
-        for (label nTris = (verts.size()-startTrii)/3; nTris; --nTris)
-        {
-            faceLabels.append(facei);
-        }
+        tetCutAddr.generatePoints
+        (
+            facei,
+            tetCutIndex,
+            tetLabels,
+            FixedList<bool, 6>(false)  // Not face diagonal
+        );
     }
     else
     {
@@ -544,11 +715,9 @@ void Foam::isoSurfaceTopo::generateTriPoints
                 continue;
             }
 
-            const label startTrii = verts.size();
-
             const face& f = faces[facei];
 
-            label fp0 = tetBasePtIs_[facei];
+            label fp0 = tetBasePtIs[facei];
 
             // Fallback
             if (fp0 < 0)
@@ -556,55 +725,48 @@ void Foam::isoSurfaceTopo::generateTriPoints
                 fp0 = 0;
             }
 
+            const label p0 = f[fp0];
             label fp = f.fcIndex(fp0);
             for (label i = 2; i < f.size(); ++i)
             {
-                const label nextFp = f.fcIndex(fp);
-
-                FixedList<bool, 6> edgeIsDiag(false);
-
-                label p0 = f[fp0];
                 label p1 = f[fp];
-                label p2 = f[nextFp];
+                fp = f.fcIndex(fp);
+                label p2 = f[fp];
+
+                FixedList<bool, 6> edgeIsDiagonal(false);
                 if (faceOwner[facei] == celli)
                 {
                     std::swap(p1, p2);
-                    if (i != 2) edgeIsDiag[1] = true;
-                    if (i != f.size()-1) edgeIsDiag[0] = true;
+                    if (i != 2) edgeIsDiagonal[1] = true;
+                    if (i != f.size()-1) edgeIsDiagonal[0] = true;
                 }
                 else
                 {
-                    if (i != 2) edgeIsDiag[0] = true;
-                    if (i != f.size()-1) edgeIsDiag[1] = true;
+                    if (i != 2) edgeIsDiagonal[0] = true;
+                    if (i != f.size()-1) edgeIsDiagonal[1] = true;
                 }
 
-                generateTriPoints
+                const tetCell tetLabels(p0, p1, p2, mesh_.nPoints()+celli);
+                const int tetCutIndex
                 (
-                    facei,
                     getTetCutIndex
                     (
                         pVals_[p0],
                         pVals_[p1],
                         pVals_[p2],
                         cVals_[celli],
-                        iso_
-                    ),
-                    tetCell(p0, p1, p2, mesh_.nPoints()+celli),
-                    edgeIsDiag,
-
-                    pointToVerts,
-                    pointToFace,
-                    pointFromDiag,
-                    vertsToPoint,
-                    verts       // Every three verts is new triangle
+                        iso_,
+                        doSnap
+                    )
                 );
 
-                fp = nextFp;
-            }
-
-            for (label nTris = (verts.size()-startTrii)/3; nTris; --nTris)
-            {
-                faceLabels.append(facei);
+                tetCutAddr.generatePoints
+                (
+                    facei,
+                    tetCutIndex,
+                    tetLabels,
+                    edgeIsDiagonal
+                );
             }
         }
     }
@@ -708,11 +870,11 @@ void Foam::isoSurfaceTopo::removeInsidePoints
 
     const pointField& points = s.points();
 
-    DynamicList<face> compactFaces(s.size()/8);
+    DynamicList<face> compactFaces(s.size()/4);
 
     for (label celli = 0; celli < start.size()-1; ++celli)
     {
-        // All triangles for the current cell
+        // Triangles for the current cell
 
         const label nTris = start[celli+1]-start[celli];
 
@@ -730,7 +892,6 @@ void Foam::isoSurfaceTopo::removeInsidePoints
                 pp,
                 pointFromDiag,
                 pointToFace,
-                //protectedFace,
                 celli,
 
                 compactFaces,
@@ -791,9 +952,11 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     const bitSet& ignoreCells
 )
 :
-    isoSurfaceBase(mesh, cellValues, pointValues, iso, params),
-    cellCutType_(mesh.nCells(), cutType::UNVISITED)
+    isoSurfaceBase(mesh, cellValues, pointValues, iso, params)
 {
+    // The cell cut type
+    List<cutType> cellCutType_(mesh.nCells(), cutType::UNVISITED);
+
     if (debug)
     {
         Pout<< "isoSurfaceTopo:" << nl
@@ -819,9 +982,11 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     nBlockedCells +=
         blockCells(cellCutType_, params.getClipBounds(), volumeType::OUTSIDE);
 
-
-    // Adjust tet base points to improve tet quality
-    tetBasePtIs_ = polyMeshTetDecomposition::adjustTetBasePtIs(mesh_, debug);
+    // Adjusted tet base points to improve tet quality
+    labelList tetBasePtIs
+    (
+        polyMeshTetDecomposition::adjustTetBasePtIs(mesh_, debug)
+    );
 
 
     // Determine cell cuts
@@ -851,7 +1016,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                 false
             ),
             fvmesh,
-            dimensionedScalar(dimless, Zero)
+            dimensionedScalar(dimless)
         );
 
         auto& debugFld = debugField.primitiveFieldRef();
@@ -861,68 +1026,133 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             debugFld[celli] = cellCutType_[celli];
         }
 
-        Pout<< "Writing cut types:"
-            << debugField.objectPath() << endl;
-
+        Info<< "Writing cut types: " << debugField.objectRelPath() << nl;
         debugField.write();
     }
 
+    // Additional debugging
+    if (debug & 8)
+    {
+        const word timeDesc
+        (
+            word::printf("%08d", mesh_.time().timeIndex())
+        );
 
-    // Per cell: 5 pyramids cut, each generating 2 triangles
-    //  - pointToVerts : from generated iso point to originating mesh verts
-    DynamicList<edge> pointToVerts(10*nCutCells);
-    //  - pointToFace : from generated iso point to originating mesh face
-    DynamicList<label> pointToFace(10*nCutCells);
-    //  - pointFromDiag : if generated iso point is on face diagonal
-    DynamicList<bool> pointFromDiag(10*nCutCells);
+        // Write debug cuts cells in VTK format
+        {
+            constexpr uint8_t realCut(cutType::CUT | cutType::TETCUT);
+            labelList debugCutCells(nCutCells, Zero);
 
-    // Per cell: number of intersected edges:
-    //          - four faces cut so 4 mesh edges + 4 face-diagonal edges
-    //          - 4 of the pyramid edges
-    EdgeMap<label> vertsToPoint(12*nCutCells);
-    DynamicList<label> verts(12*nCutCells);
-    // Per cell: 5 pyramids cut (since only one pyramid not cut)
-    DynamicList<label> faceLabels(5*nCutCells);
-    DynamicList<label> cellLabels(5*nCutCells);
+            label nout = 0;
+            forAll(cellCutType_, celli)
+            {
+                if ((cellCutType_[celli] & realCut) != 0)
+                {
+                    debugCutCells[nout] = celli;
+                    ++nout;
+                    if (nout >= nCutCells) break;
+                }
+            }
 
+            // The mesh subset cut
+            vtk::vtuCells vtuCells;
+            vtuCells.reset(mesh_, debugCutCells);
+
+            vtk::internalMeshWriter writer
+            (
+                mesh_,
+                vtuCells,
+                fileName
+                (
+                    mesh_.time().globalPath()
+                  / ("isoSurfaceTopo." + timeDesc + "-cutCells")
+                )
+            );
+
+            writer.writeGeometry();
+
+            // Cell qualities
+            writer.beginCellData();
+            writer.writeProcIDs();
+            writer.writeCellData("cutField", cVals_);
+
+            // Point qualities
+            writer.beginPointData();
+            writer.writePointData("cutField", pVals_);
+
+            Info<< "isoSurfaceTopo : (debug) wrote "
+                << returnReduce(nCutCells, sumOp<label>())
+                << " cut cells: "
+                << writer.output().name() << nl;
+        }
+    }
+
+
+    tetCutAddressing tetCutAddr
+    (
+        nCutCells,
+        this->snap(),
+        (debug & 8)  // Enable debug tets
+    );
 
     labelList startTri(mesh_.nCells()+1, Zero);
-
     for (label celli = 0; celli < mesh_.nCells(); ++celli)
     {
-        startTri[celli] = faceLabels.size();
+        startTri[celli] = tetCutAddr.nFaces();
         if ((cellCutType_[celli] & cutType::ANYCUT) != 0)
         {
             generateTriPoints
             (
                 celli,
-
                 // Same as tetMatcher::test(mesh_, celli),
-                bool(cellCutType_[celli] & cutType::TETCUT),  // isTet
+                bool(cellCutType_[celli] & cutType::TETCUT),
 
-                pointToVerts,
-                pointToFace,
-                pointFromDiag,
-
-                vertsToPoint,
-                verts,
-                faceLabels
+                tetBasePtIs,
+                tetCutAddr
             );
-
-            for (label i = startTri[celli]; i < faceLabels.size(); ++i)
-            {
-                cellLabels.append(celli);
-            }
         }
     }
-    startTri[mesh_.nCells()] = faceLabels.size();
+    startTri.last() = tetCutAddr.nFaces();
+
+    // Information not needed anymore:
+    tetBasePtIs.clear();
+    tetCutAddr.clearHashes();
 
 
-    pointToVerts_.transfer(pointToVerts);
-    meshCells_.transfer(cellLabels);
-    pointToFace_.transfer(pointToFace);
+    // From list of vertices -> triangular faces
+    faceList allTriFaces(startTri.last());
+    {
+        auto& verts = tetCutAddr.cutPoints();
 
-    pointField allPoints
+        label verti = 0;
+        for (face& f : allTriFaces)
+        {
+            f.resize(3);
+            f[0] = verts[verti++];
+            f[1] = verts[verti++];
+            f[2] = verts[verti++];
+        }
+        verts.clearStorage();  // Not needed anymore
+    }
+
+
+    // The cells cut by the triangular faces
+    meshCells_.resize(startTri.last());
+    for (label celli = 0; celli < startTri.size()-1; ++celli)
+    {
+        // All triangles for the current cell
+        labelList::subList
+        (
+            meshCells_,
+            (startTri[celli+1] - startTri[celli]),
+            startTri[celli]
+        ) = celli;
+    }
+
+
+    pointToVerts_.transfer(tetCutAddr.pointToVerts());
+
+    pointField allTriPoints
     (
         this->interpolateTemplate
         (
@@ -933,36 +1163,15 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
 
     // Assign to MeshedSurface
-    faceList allTris(faceLabels.size());
-    label verti = 0;
-    for (face& allTri : allTris)
-    {
-        allTri.resize(3);
-        allTri[0] = verts[verti++];
-        allTri[1] = verts[verti++];
-        allTri[2] = verts[verti++];
-    }
-
-
-    surfZoneList allZones(one{}, surfZone("allFaces", allTris.size()));
 
     Mesh::clear();
     Mesh updated
     (
-        std::move(allPoints),
-        std::move(allTris),
-        std::move(allZones)
+        std::move(allTriPoints),
+        std::move(allTriFaces),
+        surfZoneList(one{}, surfZone("allFaces", allTriFaces.size()))
     );
     Mesh::transfer(updated);
-
-    // Now:
-    // - generated faces and points are assigned to *this
-    // - per point we know:
-    //  - pointOnDiag: whether it is on a face-diagonal edge
-    //  - pointToFace_: from what pyramid (cell+face) it was produced
-    //    (note that the pyramid faces are shared between multiple mesh faces)
-    //  - pointToVerts_ : originating mesh vertex or cell centre
-
 
     if (debug)
     {
@@ -971,6 +1180,16 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             << Mesh::points().size() << " points" << endl;
     }
 
+
+    // Now:
+    // - generated faces and points are assigned to *this
+    // - per point we know:
+    //  - pointOnDiag: whether it is on a face-diagonal edge
+    //  - pointToFace: from what pyramid (cell+face) it was produced
+    //    (note that the pyramid faces are shared between multiple mesh faces)
+    //  - pointToVerts_ : originating mesh vertex or cell centre
+
+    // Basic filtering
 
     if (params.filter() != filterType::NONE)
     {
@@ -982,21 +1201,20 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         removeInsidePoints
         (
             *this,
-            (params.filter() == filterType::DIAGCELL ? true : false),
-
-            pointFromDiag,
-            pointToFace_,
+            // Filter face diagonal
+            (
+                params.filter() == filterType::DIAGCELL
+             || params.filter() == filterType::NONMANIFOLD
+            ),
+            tetCutAddr.pointFromDiag(),
+            tetCutAddr.pointToFace(),
             startTri,
             pointCompactMap,
             compactCellIDs
         );
 
         pointToVerts_ = UIndirectList<edge>(pointToVerts_, pointCompactMap)();
-        pointToFace_ = UIndirectList<label>(pointToFace_, pointCompactMap)();
         meshCells_.transfer(compactCellIDs);
-
-        pointCompactMap.clearStorage();
-        compactCellIDs.clearStorage();
 
         if (debug)
         {
@@ -1008,32 +1226,34 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         }
     }
 
-    // Not required after this stage
-    pointFromDiag.clearStorage();
+    // Diagonal filter information not needed anymore
+    tetCutAddr.clearDiagonal();
 
 
-    if (params.filter() == filterType::DIAGCELL)
+    // For more advanced filtering (eg, removal of open edges)
+    // need the boundary and other 'protected' points
+
+    bitSet isProtectedPoint;
+    if
+    (
+        (params.filter() == filterType::NONMANIFOLD)
+     || tetCutAddr.debugCutTetsOn()
+    )
     {
-        // We remove verts on face diagonals. This is in fact just
-        // straightening the edges of the face through the cell. This can
-        // close off 'pockets' of triangles and create open or
-        // multiply-connected triangles
+        // Mark points on mesh outside as 'protected'
+        // - never erode these edges
 
-        // Solved by eroding open-edges
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        isProtectedPoint.resize(mesh_.nPoints());
 
-        // Mark points on mesh outside.
-        bitSet isBoundaryPoint(mesh.nPoints());
         for
         (
-            label facei = mesh.nInternalFaces();
-            facei < mesh.nFaces();
+            label facei = mesh_.nInternalFaces();
+            facei < mesh_.nFaces();
             ++facei
         )
         {
-            isBoundaryPoint.set(mesh.faces()[facei]);
+            isProtectedPoint.set(mesh_.faces()[facei]);
         }
-
 
         // Include faces that would be exposed from mesh subset
         if (nBlockedCells)
@@ -1051,11 +1271,226 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                  != (cellCutType_[faceNei[facei]] == cutType::BLOCKED)
                 )
                 {
-                    isBoundaryPoint.set(mesh.faces()[facei]);
+                    isProtectedPoint.set(mesh_.faces()[facei]);
                 }
             }
         }
+    }
 
+    // Initial cell cut information not needed anymore
+    cellCutType_.clear();
+
+
+    // Additional debugging
+    if (tetCutAddr.debugCutTetsOn())
+    {
+        const word timeDesc
+        (
+            word::printf("%08d", mesh_.time().timeIndex())
+        );
+
+        // Write debug cut tets in VTK format
+        {
+            const auto& debugCuts = tetCutAddr.debugCutTets();
+
+            // The TET shapes, using the mesh_ points information
+            vtk::vtuCells vtuCells;
+            vtuCells.resetShapes(debugCuts);
+
+            // Use all points and all cell-centres
+            vtuCells.setNumPoints(mesh_.nPoints());
+            vtuCells.addPointCellLabels(identity(mesh_.nCells()));
+
+            vtk::internalMeshWriter writer
+            (
+                mesh_,
+                vtuCells,
+                fileName
+                (
+                    mesh_.time().globalPath()
+                  / ("isoSurfaceTopo." + timeDesc + "-cutTets")
+                )
+            );
+
+            writer.writeGeometry();
+
+            writer.beginCellData();
+            writer.writeProcIDs();
+
+            // Quality of the cut tets
+            {
+                Field<scalar> cutTetQuality(debugCuts.size());
+                forAll(cutTetQuality, teti)
+                {
+                    cutTetQuality[teti] = tetPointRef
+                    (
+                        getMeshPointRef(mesh_, debugCuts[teti][0]),
+                        getMeshPointRef(mesh_, debugCuts[teti][1]),
+                        getMeshPointRef(mesh_, debugCuts[teti][2]),
+                        getMeshPointRef(mesh_, debugCuts[teti][3])
+                    ).quality();
+                }
+                writer.writeCellData("tetQuality", cutTetQuality);
+            }
+
+            if (this->snap())
+            {
+                labelList snapped(vtuCells.nFieldPoints(), Zero);
+
+                for (const edge& verts : pointToVerts_)
+                {
+                    if (verts.first() == verts.second())
+                    {
+                        // Duplicate index (ie, snapped)
+                        snapped[verts.first()] = 1;
+                    }
+                }
+
+                writer.beginPointData();
+                writer.writePointData("snapped", snapped);
+            }
+
+            Info<< "isoSurfaceTopo : (debug) wrote "
+                << returnReduce(debugCuts.size(), sumOp<label>())
+                << " cut tets: "
+                << writer.output().name() << nl;
+        }
+
+        // Determining open edges. Same logic as used later...
+
+        labelHashSet openEdgeIds(0);
+
+        {
+            const Mesh& s = *this;
+
+            const labelList& mp = s.meshPoints();
+            const edgeList& surfEdges = s.edges();
+            const labelListList& edgeFaces = s.edgeFaces();
+            openEdgeIds.resize(2*s.size());
+
+            forAll(edgeFaces, edgei)
+            {
+                const labelList& eFaces = edgeFaces[edgei];
+                if (eFaces.size() == 1)
+                {
+                    // Open edge (not originating from a boundary face)
+
+                    const edge& e = surfEdges[edgei];
+                    const edge& verts0 = pointToVerts_[mp[e.first()]];
+                    const edge& verts1 = pointToVerts_[mp[e.second()]];
+
+                    if
+                    (
+                        isProtectedPoint.test(verts0.first())
+                     && isProtectedPoint.test(verts0.second())
+                     && isProtectedPoint.test(verts1.first())
+                     && isProtectedPoint.test(verts1.second())
+                    )
+                    {
+                        // Open edge on boundary face. Keep
+                    }
+                    else
+                    {
+                        // Open edge
+                        openEdgeIds.insert(edgei);
+                    }
+                }
+            }
+
+            const label nOpenEdges
+            (
+                returnReduce(openEdgeIds.size(), sumOp<label>())
+            );
+
+            if (nOpenEdges)
+            {
+                const edgeList debugEdges
+                (
+                    surfEdges,
+                    openEdgeIds.sortedToc()
+                );
+
+                vtk::lineWriter writer
+                (
+                    s.points(),
+                    debugEdges,
+                    fileName
+                    (
+                        mesh_.time().globalPath()
+                      / ("isoSurfaceTopo." + timeDesc + "-openEdges")
+                    )
+                );
+
+                writer.writeGeometry();
+
+                writer.beginCellData();
+                writer.writeProcIDs();
+
+                Info<< "isoSurfaceTopo : (debug) wrote "
+                    << nOpenEdges << " open edges: "
+                    << writer.output().name() << nl;
+            }
+            else
+            {
+                Info<< "isoSurfaceTopo : no open edges" << nl;
+            }
+        }
+
+        // Write debug surface with snaps
+        if (this->snap())
+        {
+            const Mesh& s = *this;
+
+            vtk::surfaceWriter writer
+            (
+                s.points(),
+                s,
+                fileName
+                (
+                    mesh_.time().globalPath()
+                  / ("isoSurfaceTopo." + timeDesc + "-surface")
+                )
+            );
+
+            writer.writeGeometry();
+
+            writer.beginCellData();
+            writer.writeProcIDs();
+
+            {
+                labelList snapped(s.nPoints(), Zero);
+                forAll(pointToVerts_, i)
+                {
+                    const edge& verts =pointToVerts_[i];
+                    if (verts.first() == verts.second())
+                    {
+                        // Duplicate index (ie, snapped)
+                        snapped[i] = 1;
+                    }
+                }
+
+                writer.beginPointData();
+                writer.write("snapped", snapped);
+            }
+
+            Info<< "isoSurfaceTopo : (debug) wrote "
+                << returnReduce(s.size(), sumOp<label>())
+                << " faces : "
+                << writer.output().name() << nl;
+        }
+    }
+    tetCutAddr.clearDebug();
+
+
+    if (params.filter() == filterType::NONMANIFOLD)
+    {
+        // We remove verts on face diagonals. This is in fact just
+        // straightening the edges of the face through the cell. This can
+        // close off 'pockets' of triangles and create open or
+        // multiply-connected triangles
+
+        // Solved by eroding open-edges
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         // The list of surface faces that should be retained after erosion
         Mesh& surf = *this;
@@ -1086,19 +1521,18 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                 const labelList& eFaces = edgeFaces[edgei];
                 if (eFaces.size() == 1)
                 {
-                    // Open edge. Check that vertices do not originate
-                    // from a boundary face
-                    const edge& e = surfEdges[edgei];
+                    // Open edge (not originating from a boundary face)
 
+                    const edge& e = surfEdges[edgei];
                     const edge& verts0 = pointToVerts_[mp[e.first()]];
                     const edge& verts1 = pointToVerts_[mp[e.second()]];
 
                     if
                     (
-                        isBoundaryPoint.test(verts0.first())
-                     && isBoundaryPoint.test(verts0.second())
-                     && isBoundaryPoint.test(verts1.first())
-                     && isBoundaryPoint.test(verts1.second())
+                        isProtectedPoint.test(verts0.first())
+                     && isProtectedPoint.test(verts0.second())
+                     && isProtectedPoint.test(verts1.first())
+                     && isProtectedPoint.test(verts1.second())
                     )
                     {
                         // Open edge on boundary face. Keep
@@ -1160,7 +1594,6 @@ void Foam::isoSurfaceTopo::inplaceSubsetMesh(const bitSet& include)
     meshCells_ = UIndirectList<label>(meshCells_, faceMap)();
 
     pointToVerts_ = UIndirectList<edge>(pointToVerts_, pointMap)();
-    pointToFace_ = UIndirectList<label>(pointToFace_, pointMap)();
 }
 
 

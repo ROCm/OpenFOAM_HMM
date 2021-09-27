@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,30 +89,23 @@ Foam::vtk::vtuCells::vtuCells
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtk::vtuCells::clear()
+void Foam::vtk::vtuCells::resize_all()
 {
-    vtuSizing::clear();
-    cellTypes_.clear();
-    vertLabels_.clear();
-    vertOffset_.clear();
-    faceLabels_.clear();
-    faceOffset_.clear();
-
-    maps_.clear();
-}
-
-
-void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
-{
-    // vtuSizing::reset() called prior to this method
-
     cellTypes_.resize(nFieldCells());
     vertLabels_.resize(sizeOf(output_, slotType::CELLS));
     vertOffset_.resize(sizeOf(output_, slotType::CELLS_OFFSETS));
     faceLabels_.resize(sizeOf(output_, slotType::FACES));
     faceOffset_.resize(sizeOf(output_, slotType::FACES_OFFSETS));
+}
+
+
+void Foam::vtk::vtuCells::populateOutput(const polyMesh& mesh)
+{
+    // Already called
+    // - vtuSizing::reset
+    // - resize_all();
 
     switch (output_)
     {
@@ -163,10 +156,103 @@ void Foam::vtk::vtuCells::repopulate(const polyMesh& mesh)
 }
 
 
+void Foam::vtk::vtuCells::populateOutput(const UList<cellShape>& shapes)
+{
+    if (output_ != contentType::LEGACY && output_ != contentType::XML)
+    {
+        WarningInFunction
+            << "Internal formats not supported for shape cells - using XML"
+            << nl << nl;
+
+        output_ = contentType::XML;
+    }
+
+    vtuSizing::resetShapes(shapes);
+
+    maps_.clear();
+    resize_all();
+    // Done in populate routine:
+    /// maps_.cellMap() = identity(vtuSizing::nCells());
+
+    switch (output_)
+    {
+        case contentType::LEGACY:
+        {
+            populateShapesLegacy
+            (
+                shapes,
+                cellTypes_,
+                vertLabels_,
+                maps_
+            );
+            break;
+        }
+
+        case contentType::XML:
+        {
+            populateShapesXml
+            (
+                shapes,
+                cellTypes_,
+                vertLabels_,
+                vertOffset_,
+                faceLabels_,
+                faceOffset_,
+                maps_
+            );
+            break;
+        }
+
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled VTK format " << int(output_) << nl
+                << exit(FatalError);
+            break;
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::vtk::vtuCells::clear()
+{
+    vtuSizing::clear();
+    cellTypes_.clear();
+    vertLabels_.clear();
+    vertOffset_.clear();
+    faceLabels_.clear();
+    faceOffset_.clear();
+
+    maps_.clear();
+}
+
+
 void Foam::vtk::vtuCells::reset(const polyMesh& mesh)
 {
     vtuSizing::reset(mesh, decomposeRequest_);
-    repopulate(mesh);
+    resize_all();
+
+    populateOutput(mesh);
+}
+
+
+void Foam::vtk::vtuCells::reset
+(
+    const polyMesh& mesh,
+    const labelUList& subsetCellsIds
+)
+{
+    vtuSizing::reset(mesh, subsetCellsIds, decomposeRequest_);
+    resize_all();
+
+    if (selectionMode() == selectionModeType::SUBSET_MESH)
+    {
+        maps_.cellMap() = subsetCellsIds;
+    }
+
+    populateOutput(mesh);
 }
 
 
@@ -181,6 +267,75 @@ void Foam::vtk::vtuCells::reset
     decomposeRequest_ = decompose;
 
     reset(mesh);
+}
+
+
+void Foam::vtk::vtuCells::resetShapes
+(
+    const UList<cellShape>& shapes
+)
+{
+    if (output_ != contentType::LEGACY && output_ != contentType::XML)
+    {
+        WarningInFunction
+            << "VTK internal format is not supported for shape cells"
+            << " switching to xml" << nl << nl;
+
+        output_ = contentType::XML;
+    }
+
+    decomposeRequest_ = false;
+
+    vtuSizing::resetShapes(shapes);
+
+    maps_.clear();
+    resize_all();
+    maps_.cellMap() = identity(vtuSizing::nCells());
+
+    switch (output_)
+    {
+        case contentType::LEGACY:
+        {
+            populateShapesLegacy
+            (
+                shapes,
+                cellTypes_,
+                vertLabels_,
+                maps_
+            );
+            break;
+        }
+
+        case contentType::XML:
+        {
+            populateShapesXml
+            (
+                shapes,
+                cellTypes_,
+                vertLabels_,
+                vertOffset_,
+                faceLabels_,
+                faceOffset_,
+                maps_
+            );
+            break;
+        }
+
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled VTK format " << int(output_) << nl
+                << exit(FatalError);
+            break;
+        }
+    }
+}
+
+
+void Foam::vtk::vtuCells::addPointCellLabels(const labelUList& cellIds)
+{
+    maps_.additionalIds() = cellIds;
+    setNumAddPoints(maps_.additionalIds().size());
 }
 
 

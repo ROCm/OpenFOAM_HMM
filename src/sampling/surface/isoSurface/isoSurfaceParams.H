@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,21 @@ Description
         isoMethod   | Algorithm (cell/topo/point/default)   | no  | default
         regularise  | Face simplification (enum or bool)    | no  | true
         mergeTol    | Point merge tolerance (cell/point)    | no  | 1e-6
+        snap        | Point snapping (topo)                 | no  | true
         bounds      | Optional clip bounds                  | no  | inverted
     \endtable
 
     The default algorithm denotes the use of the current \em standard
     algorithm.
+
+Filtering types (for topological iso-surface)
+    - \c none : leave tet cuts untouched
+    - \c partial , \c cell : Combine intra-cell faces
+    - \c full , \c diagcell : Perform \c partial and remove face-diagonal
+      points
+    - \c clean : Perform \c full and eliminate open edges as well.
+      (<b>May cause excessive erosion!</b>)
+    .
 
 SourceFiles
     isoSurfaceParams.C
@@ -85,8 +95,12 @@ public:
             NONE = 0,   //!< No filtering
             CELL,       //!< Remove pyramid edge points
             DIAGCELL,   //!< Remove pyramid edge points, face-diagonals
+            NONMANIFOLD, //!< Remove pyramid edge points, face-diagonals
+                         //!< and non-manifold faces
+
             PARTIAL = CELL,     //!< Same as CELL
             FULL = DIAGCELL,    //!< Same as DIAGCELL
+            CLEAN = NONMANIFOLD //!< Same as NONMANIFOLD
         };
 
 
@@ -99,6 +113,9 @@ private:
 
         //- Filtering for iso-surface faces/points
         filterType filter_;
+
+        //- Point snapping enabled
+        bool snap_;
 
         //- Merge tolerance for cell/point (default: 1e-6)
         scalar mergeTol_;
@@ -184,6 +201,18 @@ public:
         void filter(filterType fltr) noexcept
         {
             filter_ = fltr;
+        }
+
+        //- Get point snapping flag
+        bool snap() const noexcept
+        {
+            return snap_;
+        }
+
+        //- Set point snapping flag
+        void snap(bool on) noexcept
+        {
+            snap_ = on;
         }
 
         //- Get current merge tolerance

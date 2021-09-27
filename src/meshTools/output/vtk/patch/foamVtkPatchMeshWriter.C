@@ -38,14 +38,15 @@ void Foam::vtk::patchMeshWriter::beginPiece()
     // Basic sizes
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    nLocalPoints_ = nLocalFaces_ = nLocalVerts_ = 0;
+    nLocalPoints_ = nLocalPolys_ = 0;
+    nLocalVerts_ = 0;
 
     for (const label patchId : patchIDs_)
     {
         const polyPatch& pp = patches[patchId];
 
         nLocalPoints_ += pp.nPoints();
-        nLocalFaces_  += pp.size();
+        nLocalPolys_  += pp.size();
 
         for (const face& f : pp)
         {
@@ -54,7 +55,7 @@ void Foam::vtk::patchMeshWriter::beginPiece()
     }
 
     numberOfPoints_ = nLocalPoints_;
-    numberOfCells_ = nLocalFaces_;
+    numberOfCells_ = nLocalPolys_;
 
     if (parallel_)
     {
@@ -148,26 +149,26 @@ void Foam::vtk::patchMeshWriter::writePolysLegacy(const label pointOffset)
 
     // Connectivity count without additional storage (done internally)
 
-    label nFaces = nLocalFaces_;
+    label nPolys = nLocalPolys_;
     label nVerts = nLocalVerts_;
 
     if (parallel_)
     {
-        reduce(nFaces, sumOp<label>());
+        reduce(nPolys, sumOp<label>());
         reduce(nVerts, sumOp<label>());
     }
 
-    if (nFaces != numberOfCells_)
+    if (nPolys != numberOfCells_)
     {
         FatalErrorInFunction
             << "Expecting " << numberOfCells_
-            << " faces, but found " << nFaces
+            << " faces, but found " << nPolys
             << exit(FatalError);
     }
 
-    legacy::beginPolys(os_, nFaces, nVerts);
+    legacy::beginPolys(os_, nPolys, nVerts);
 
-    labelList vertLabels(nLocalFaces_ + nLocalVerts_);
+    labelList vertLabels(nLocalPolys_ + nLocalVerts_);
 
     {
         // Legacy: size + connectivity together
@@ -186,9 +187,9 @@ void Foam::vtk::patchMeshWriter::writePolysLegacy(const label pointOffset)
                 *iter = f.size();       // The size prefix
                 ++iter;
 
-                for (const label pfi : f)
+                for (const label id : f)
                 {
-                    *iter = pfi + off;  // Face vertex label
+                    *iter = id + off;   // Face vertex label
                     ++iter;
                 }
             }
@@ -258,9 +259,9 @@ void Foam::vtk::patchMeshWriter::writePolys(const label pointOffset)
 
                 for (const face& f : pp.localFaces())
                 {
-                    for (const label pfi : f)
+                    for (const label id : f)
                     {
-                        *iter = pfi + off;  // Face vertex label
+                        *iter = id + off;   // Face vertex label
                         ++iter;
                     }
                 }
@@ -290,7 +291,7 @@ void Foam::vtk::patchMeshWriter::writePolys(const label pointOffset)
     // 'offsets'  (connectivity offsets)
     //
     {
-        labelList vertOffsets(nLocalFaces_);
+        labelList vertOffsets(nLocalPolys_);
         label nOffs = vertOffsets.size();
 
         if (parallel_)
@@ -367,7 +368,7 @@ Foam::vtk::patchMeshWriter::patchMeshWriter
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
-    nLocalFaces_(0),
+    nLocalPolys_(0),
     nLocalVerts_(0),
 
     mesh_(mesh),
@@ -512,15 +513,15 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    label nFaces = nLocalFaces_;
+    label nPolys = nLocalPolys_;
 
     if (parallel_)
     {
-        reduce(nFaces, sumOp<label>());
+        reduce(nPolys, sumOp<label>());
     }
 
 
-    this->beginDataArray<label>("patchID", nFaces);
+    this->beginDataArray<label>("patchID", nPolys);
 
     if (parallel_ ? Pstream::master() : true)
     {
@@ -584,66 +585,7 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
 
 bool Foam::vtk::patchMeshWriter::writeProcIDs()
 {
-    // This is different than for internalWriter.
-    // Here we allow procIDs whenever running in parallel, even if the
-    // output is serial. This allow diagnosis of processor patches.
-
-    if (!Pstream::parRun())
-    {
-        // Skip in non-parallel
-        return false;
-    }
-
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-    }
-    else
-    {
-        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
-            << " for patchID field" << nl << endl
-            << exit(FatalError);
-    }
-
-    label nFaces = nLocalFaces_;
-
-    if (parallel_)
-    {
-        reduce(nFaces, sumOp<label>());
-    }
-
-
-    this->beginDataArray<label>("procID", nFaces);
-
-    bool good = false;
-
-    if (parallel_)
-    {
-        globalIndex procSizes(nLocalFaces_);
-
-        if (Pstream::master())
-        {
-            // Per-processor ids
-            for (const int proci : Pstream::allProcs())
-            {
-                vtk::write(format(), label(proci), procSizes.localSize(proci));
-            }
-
-            good = true;
-        }
-    }
-    else
-    {
-        vtk::write(format(), label(Pstream::myProcNo()), nLocalFaces_);
-
-        good = true;
-    }
-
-
-    this->endDataArray();
-
-    // MPI barrier
-    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
+    return vtk::fileWriter::writeProcIDs(nLocalPolys_);
 }
 
 
@@ -668,15 +610,15 @@ bool Foam::vtk::patchMeshWriter::writeNeighIDs()
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    label nFaces = nLocalFaces_;
+    label nPolys = nLocalPolys_;
 
     if (parallel_)
     {
-        reduce(nFaces, sumOp<label>());
+        reduce(nPolys, sumOp<label>());
     }
 
 
-    this->beginDataArray<label>("neighID", nFaces);
+    this->beginDataArray<label>("neighID", nPolys);
 
     bool good = false;
 
