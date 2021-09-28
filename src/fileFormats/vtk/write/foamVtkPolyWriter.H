@@ -228,9 +228,17 @@ public:
 
     // Write
 
-        //- Write a list of Cell (Poly or Line) or Point values
+        //- Write primitive field of CellData (Poly or Line) or PointData values
         template<class Type>
         void write(const word& fieldName, const UList<Type>& field);
+
+        //- Write primitive field of CellData
+        template<class Type>
+        void writeCellData(const word& fieldName, const UList<Type>& field);
+
+        //- Write primitive field of PointData
+        template<class Type>
+        void writePointData(const word& fieldName, const UList<Type>& field);
 };
 
 

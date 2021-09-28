@@ -43,8 +43,6 @@ Note
     Parallel output is combined into a single Piece without point merging,
     which is similar to using multi-piece data sets, but allows more
     convenient creation as a streaming process.
-    In the future, the duplicate points at processor connections
-    may be addressed using ghost points.
 
 \*---------------------------------------------------------------------------*/
 
@@ -158,17 +156,13 @@ public:
 
     // Write Fields
 
-        //- Write primitive field of CellData
-        template<class Type>
-        void writeCellData(const word& fieldName, const UList<Type>& field);
+        //- Write processor ids for each poly as CellData
+        bool writeProcIDs()
+        {
+            return vtk::polyWriter::writeProcIDs(nLocalPolys_);
+        }
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "foamVtkGenericPatchWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

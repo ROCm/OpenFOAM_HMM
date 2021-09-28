@@ -75,10 +75,9 @@ void Foam::vtk::polyWriter::write
 )
 {
     // Could check sizes:
+    // const label nValues = field.size();
     // CELL_DATA:   nValues == (nLocalPolys | nLocalLines)
     // POINT_DATA:  nValues == nLocalPoints
-
-    // const label nValues = field.size();
 
     if (isState(outputState::CELL_DATA))
     {
@@ -96,6 +95,60 @@ void Foam::vtk::polyWriter::write
             outputState::CELL_DATA,
             outputState::POINT_DATA
         )
+            << " for field " << fieldName << nl << endl
+            << exit(FatalError);
+        return;
+    }
+
+    vtk::fileWriter::writeBasicField<Type>(fieldName, field);
+}
+
+
+template<class Type>
+void Foam::vtk::polyWriter::writeCellData
+(
+    const word& fieldName,
+    const UList<Type>& field
+)
+{
+    // Could check sizes:
+    // const label nValues = field.size();
+    // CELL_DATA:   nValues == (nLocalPolys | nLocalLines)
+
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for field " << fieldName << nl << endl
+            << exit(FatalError);
+        return;
+    }
+
+    vtk::fileWriter::writeBasicField<Type>(fieldName, field);
+}
+
+
+template<class Type>
+void Foam::vtk::polyWriter::writePointData
+(
+    const word& fieldName,
+    const UList<Type>& field
+)
+{
+    // Could check sizes:
+    // const label nValues = field.size();
+    // POINT_DATA:  nValues == nLocalPoints
+
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::POINT_DATA)
             << " for field " << fieldName << nl << endl
             << exit(FatalError);
         return;
