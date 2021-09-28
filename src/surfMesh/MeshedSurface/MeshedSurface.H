@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,8 +159,10 @@ protected:
         //  No general form, only specializations.
         void transcribe(MeshedSurface<face>& surf);
 
-        //- Basic sanity check on zones
-        void checkZones();
+        //- Sanity check/resizing on zones.
+        //  Adjust zones so that they cover the number of faces
+        //  The last zone will be extended as needed
+        void checkZones(const bool verbose = true);
 
         //- Non-const access to global points
         pointField& storedPoints()
@@ -495,6 +497,14 @@ public:
 
         //- Remove invalid faces
         virtual void cleanup(const bool verbose);
+
+        //- Remove unused points and renumber faces in local visit order
+        //
+        //  \param[out] pointMap from new to old points (optional)
+        virtual void compactPoints
+        (
+            labelList& pointMap = const_cast<labelList&>(labelList::null())
+        );
 
         virtual bool stitchFaces
         (

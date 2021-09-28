@@ -58,7 +58,7 @@ public:
 
     // Constructors
 
-        //- Construct null. Use swap or transfer to manage content
+        //- Default construct. Use swap or transfer to manage content
         ModifiableMeshedSurface()
         :
             MeshedSurface<Face>()

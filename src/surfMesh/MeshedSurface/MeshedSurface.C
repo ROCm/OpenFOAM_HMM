@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,7 +278,9 @@ Foam::MeshedSurface<Face>::MeshedSurface
     MeshReference(faceLst, pointLst), // Copy construct
     faceIds_(),
     zones_(zoneLst)
-{}
+{
+    this->checkZones(false);  // Non-verbose fix zones
+}
 
 
 template<class Face>
@@ -292,7 +294,9 @@ Foam::MeshedSurface<Face>::MeshedSurface
     MeshReference(faceLst, pointLst, true), // Move construct
     faceIds_(),
     zones_(zoneLst)
-{}
+{
+    this->checkZones(false);  // Non-verbose fix zones
+}
 
 
 template<class Face>
@@ -607,7 +611,7 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
     MeshReference::clearGeom();  // Changes areas, normals etc.
 
-    // Adapt for new point position
+    // Adapt for new point positions
     MeshReference::movePoints(newPoints);
 
     // Copy new points
@@ -618,17 +622,16 @@ void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 template<class Face>
 void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
 {
-    // Avoid bad scaling
-    if (scaleFactor > 0 && scaleFactor != 1.0)
+    // Avoid bad or no scaling
+    if (scaleFactor > SMALL && !equal(scaleFactor, 1))
     {
-        MeshReference::clearGeom();  // Changes areas, normals etc.
+        // Remove all geometry dependent data
+        this->clearTopology();
 
-        pointField newPoints(scaleFactor*this->points());
+        // Adapt for new point positions
+        MeshReference::movePoints(pointField());
 
-        // Adapt for new point position
-        MeshReference::movePoints(newPoints);
-
-        storedPoints() = std::move(newPoints);
+        this->storedPoints() *= scaleFactor;
     }
 }
 
@@ -642,6 +645,46 @@ void Foam::MeshedSurface<Face>::cleanup(const bool verbose)
 
     checkFaces(verbose);
     this->checkTopology(verbose);
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::compactPoints(labelList& pointMap)
+{
+    this->clearOut();   // Topology changes
+
+    // Remove unused points while walking and renumbering faces
+    // in visit order - walk order as per localFaces()
+
+    labelList oldToCompact(this->points().size(), -1);
+    DynamicList<label> compactPointMap(oldToCompact.size());
+
+    for (auto& f : this->storedFaces())
+    {
+        for (label& pointi : f)
+        {
+            label compacti = oldToCompact[pointi];
+            if (compacti == -1)
+            {
+                compacti = compactPointMap.size();
+                oldToCompact[pointi] = compacti;
+                compactPointMap.append(pointi);
+            }
+            pointi = compacti;
+        }
+    }
+
+    pointField newPoints
+    (
+        UIndirectList<point>(this->points(), compactPointMap)
+    );
+
+    this->swapPoints(newPoints);
+
+    if (notNull(pointMap))
+    {
+        pointMap.transfer(compactPointMap);
+    }
 }
 
 
@@ -1345,7 +1388,7 @@ void Foam::MeshedSurface<Face>::transfer
     (
         std::move(surf.storedPoints()),
         std::move(faceLst),
-        std::move(zoneLst)
+        zoneLst
     );
 
     surf.clear();
@@ -1370,13 +1413,16 @@ void Foam::MeshedSurface<Face>::swapFaces(List<Face>& faces)
     this->storedFaceIds().clear();  // Likely to be invalid
 
     this->storedFaces().swap(faces);
+
+    this->checkZones(false);  // Non-verbose fix zones
 }
 
 
 template<class Face>
 void Foam::MeshedSurface<Face>::swapPoints(pointField& points)
 {
-    MeshReference::clearOut();  // Topology changes
+    // Adapt for new point positions
+    MeshReference::movePoints(points);
 
     this->storedPoints().swap(points);
 }

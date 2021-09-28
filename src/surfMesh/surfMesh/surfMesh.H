@@ -241,19 +241,19 @@ public:
         }
 
         //- Return face area vectors (normals)
-        inline const vectorField& Sf() const
+        const vectorField& Sf() const
         {
             return MeshReference::faceAreas();
         }
 
         //- Return face area magnitudes
-        inline const scalarField& magSf() const
+        const scalarField& magSf() const
         {
             return MeshReference::magFaceAreas();
         }
 
         //- Face centres
-        inline const vectorField& Cf() const
+        const vectorField& Cf() const
         {
             return MeshReference::faceCentres();
         }
@@ -272,7 +272,7 @@ public:
         void removeZones();
 
         //- Check the surface zone definitions
-        void checkZones();
+        void checkZones(const bool verbose=true);
 
 
     // Modification
