@@ -861,14 +861,13 @@ void Foam::isoSurfaceTopo::removeInsidePoints
     const labelUList& start,                // Per cell the starting triangle
 
     // outputs
-    DynamicList<label>& pointCompactMap,    // Per returned point the original
     DynamicList<label>& compactCellIDs      // Per returned tri the cellID
 )
 {
-    pointCompactMap.clear();
-    compactCellIDs.clear();
-
     const pointField& points = s.points();
+
+    compactCellIDs.clear();
+    compactCellIDs.reserve(s.size()/4);
 
     DynamicList<face> compactFaces(s.size()/4);
 
@@ -900,43 +899,7 @@ void Foam::isoSurfaceTopo::removeInsidePoints
         }
     }
 
-
-    // Compact out unused points
-    labelList oldToCompact(points.size(), -1);
-    pointCompactMap.clear();  // Extra safety (paranoid)
-
-    for (face& f : compactFaces)
-    {
-        forAll(f, fp)
-        {
-            label pointi = f[fp];
-            label compacti = oldToCompact[pointi];
-            if (compacti == -1)
-            {
-                compacti = pointCompactMap.size();
-                oldToCompact[pointi] = compacti;
-                pointCompactMap.append(pointi);
-            }
-            f[fp] = compacti;
-        }
-    }
-
-    pointField compactPoints
-    (
-        UIndirectList<point>(s.points(), pointCompactMap)
-    );
-
-    surfZoneList newZones(s.surfZones());
-
-    s.clear();
-    Mesh updated
-    (
-        std::move(compactPoints),
-        std::move(compactFaces),
-        s.surfZones()
-    );
-
-    s.transfer(updated);
+    s.swapFaces(compactFaces);  // Use new faces
 }
 
 
@@ -956,6 +919,9 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 {
     // The cell cut type
     List<cutType> cellCutType_(mesh.nCells(), cutType::UNVISITED);
+
+    // Time description (for debug output)
+    const word timeDesc(word::printf("%08d", mesh_.time().timeIndex()));
 
     if (debug)
     {
@@ -1033,11 +999,6 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     // Additional debugging
     if (debug & 8)
     {
-        const word timeDesc
-        (
-            word::printf("%08d", mesh_.time().timeIndex())
-        );
-
         // Write debug cuts cells in VTK format
         {
             constexpr uint8_t realCut(cutType::CUT | cutType::TETCUT);
@@ -1071,12 +1032,12 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
             writer.writeGeometry();
 
-            // Cell qualities
+            // CellData
             writer.beginCellData();
             writer.writeProcIDs();
             writer.writeCellData("cutField", cVals_);
 
-            // Point qualities
+            // PointData
             writer.beginPointData();
             writer.writePointData("cutField", pVals_);
 
@@ -1163,21 +1124,73 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
 
     // Assign to MeshedSurface
-
-    Mesh::clear();
-    Mesh updated
+    static_cast<Mesh&>(*this) = Mesh
     (
         std::move(allTriPoints),
         std::move(allTriFaces),
-        surfZoneList(one{}, surfZone("allFaces", allTriFaces.size()))
+        surfZoneList()  // zones not required (one zone)
     );
-    Mesh::transfer(updated);
 
     if (debug)
     {
         Pout<< "isoSurfaceTopo : generated "
-            << Mesh::size() << " faces "
+            << Mesh::size() << " triangles "
             << Mesh::points().size() << " points" << endl;
+    }
+
+    // Write debug triangulated surface
+    if ((debug & 8) && (params.filter() != filterType::NONE))
+    {
+        const Mesh& s = *this;
+
+        vtk::surfaceWriter writer
+        (
+            s.points(),
+            s,
+            fileName
+            (
+                mesh_.time().globalPath()
+              / ("isoSurfaceTopo." + timeDesc + "-triangles")
+            )
+        );
+
+        writer.writeGeometry();
+
+        // CellData
+        writer.beginCellData();
+        writer.writeProcIDs();
+        writer.write("cellID", meshCells_);
+
+        // PointData
+        writer.beginPointData();
+        {
+            // NB: may have non-compact surface points
+            // --> use points().size() not nPoints()!
+
+            labelList pointStatus(s.points().size(), Zero);
+
+            forAll(pointToVerts_, i)
+            {
+                const edge& verts = pointToVerts_[i];
+                if (verts.first() == verts.second())
+                {
+                    // Duplicate index (ie, snapped)
+                    pointStatus[i] = 1;
+                }
+                if (tetCutAddr.pointFromDiag().test(i))
+                {
+                    // Point on triangulation diagonal
+                    pointStatus[i] = -1;
+                }
+            }
+
+            writer.write("point-status", pointStatus);
+        }
+
+        Info<< "isoSurfaceTopo : (debug) wrote "
+            << returnReduce(s.size(), sumOp<label>())
+            << " triangles : "
+            << writer.output().name() << nl;
     }
 
 
@@ -1189,14 +1202,27 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     //    (note that the pyramid faces are shared between multiple mesh faces)
     //  - pointToVerts_ : originating mesh vertex or cell centre
 
-    // Basic filtering
-
-    if (params.filter() != filterType::NONE)
+    if (params.filter() == filterType::NONE)
     {
-        // Triangulate outside (filter edges to cell centres and optionally
-        // face diagonals)
-        DynamicList<label> pointCompactMap(size()); // Back to original point
-        DynamicList<label> compactCellIDs(size());  // Per tri the cell
+        // Compact out unused (snapped) points
+        if (this->snap())
+        {
+            Mesh& s = *this;
+
+            labelList pointMap;          // Back to original point
+            s.compactPoints(pointMap);   // Compact out unused points
+            pointToVerts_ = UIndirectList<edge>(pointToVerts_, pointMap)();
+        }
+    }
+    else
+    {
+        // Initial filtering
+
+        Mesh& s = *this;
+
+        // Triangulate outside
+        // (filter edges to cell centres and optionally face diagonals)
+        DynamicList<label> compactCellIDs;  // Per tri the cell
 
         removeInsidePoints
         (
@@ -1209,17 +1235,19 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             tetCutAddr.pointFromDiag(),
             tetCutAddr.pointToFace(),
             startTri,
-            pointCompactMap,
             compactCellIDs
         );
 
-        pointToVerts_ = UIndirectList<edge>(pointToVerts_, pointCompactMap)();
+        labelList pointMap;          // Back to original point
+        s.compactPoints(pointMap);   // Compact out unused points
+
+        pointToVerts_ = UIndirectList<edge>(pointToVerts_, pointMap)();
         meshCells_.transfer(compactCellIDs);
 
         if (debug)
         {
             Pout<< "isoSurfaceTopo :"
-                " after removing cell centre and face-diag triangles "
+                " after removing cell centre and face-diag triangles: "
                 << Mesh::size() << " faces "
                 << Mesh::points().size() << " points"
                 << endl;
@@ -1284,11 +1312,6 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     // Additional debugging
     if (tetCutAddr.debugCutTetsOn())
     {
-        const word timeDesc
-        (
-            word::printf("%08d", mesh_.time().timeIndex())
-        );
-
         // Write debug cut tets in VTK format
         {
             const auto& debugCuts = tetCutAddr.debugCutTets();
@@ -1314,6 +1337,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
             writer.writeGeometry();
 
+            // CellData
             writer.beginCellData();
             writer.writeProcIDs();
 
@@ -1333,21 +1357,23 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                 writer.writeCellData("tetQuality", cutTetQuality);
             }
 
+            // PointData
             if (this->snap())
             {
-                labelList snapped(vtuCells.nFieldPoints(), Zero);
+                writer.beginPointData();
+
+                labelList pointStatus(vtuCells.nFieldPoints(), Zero);
 
                 for (const edge& verts : pointToVerts_)
                 {
                     if (verts.first() == verts.second())
                     {
                         // Duplicate index (ie, snapped)
-                        snapped[verts.first()] = 1;
+                        pointStatus[verts.first()] = 1;
                     }
                 }
 
-                writer.beginPointData();
-                writer.writePointData("snapped", snapped);
+                writer.writePointData("point-status", pointStatus);
             }
 
             Info<< "isoSurfaceTopo : (debug) wrote "
@@ -1423,6 +1449,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
                 writer.writeGeometry();
 
+                // CellData
                 writer.beginCellData();
                 writer.writeProcIDs();
 
@@ -1454,23 +1481,30 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
 
             writer.writeGeometry();
 
+            // CellData
             writer.beginCellData();
             writer.writeProcIDs();
+            writer.write("cellID", meshCells_);
 
+            // PointData
+            writer.beginPointData();
             {
-                labelList snapped(s.nPoints(), Zero);
+                // NB: may have non-compact surface points
+                // --> use points().size() not nPoints()!
+
+                labelList pointStatus(s.points().size(), Zero);
+
                 forAll(pointToVerts_, i)
                 {
-                    const edge& verts =pointToVerts_[i];
+                    const edge& verts = pointToVerts_[i];
                     if (verts.first() == verts.second())
                     {
                         // Duplicate index (ie, snapped)
-                        snapped[i] = 1;
+                        pointStatus[i] = 1;
                     }
                 }
 
-                writer.beginPointData();
-                writer.write("snapped", snapped);
+                writer.write("point-status", pointStatus);
             }
 
             Info<< "isoSurfaceTopo : (debug) wrote "

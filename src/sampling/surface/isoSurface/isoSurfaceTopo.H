@@ -189,8 +189,7 @@ class isoSurfaceTopo
                 const labelUList& start,            // Per cell:starting tri
 
                 // Outputs
-                DynamicList<label>& pointCompactMap, // Per point the original
-                DynamicList<label>& compactCellIDs   // Per face the cellID
+                DynamicList<label>& compactCellIDs  // Per face the cellID
             );
 
 
