@@ -56,7 +56,7 @@ class fvMeshLduAddressing
     // Private data
 
         //- Lower as a subList of allOwner
-        labelList::subList lowerAddr_;
+        const labelList::subList lowerAddr_;
 
         //- Upper as a reference to neighbour
         const labelList& upperAddr_;

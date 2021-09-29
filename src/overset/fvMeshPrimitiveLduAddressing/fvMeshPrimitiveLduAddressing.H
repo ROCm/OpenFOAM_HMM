@@ -62,16 +62,16 @@ class fvMeshPrimitiveLduAddressing
     // Private data
 
         //- Lower (face to owner addressing)
-        labelList lowerAddr_;
+        const labelList lowerAddr_;
 
         //- Upper (face to neighbour addressing)
-        labelList upperAddr_;
+        const labelList upperAddr_;
 
         //- Patch addressing as a list of sublists
         List<const labelUList*> patchAddr_;
 
         //- Patch field evaluation schedule
-        const lduSchedule& patchSchedule_;
+        const lduSchedule patchSchedule_;
 
 
     // Private Member Functions
