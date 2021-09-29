@@ -397,14 +397,15 @@ public:
             //  If the point is not found, return -1
             label whichPoint(const label gp) const;
 
-            //- Return local edge in terms of the mesh points in patch.
+            //- From patch edge to global edge using meshPoints.
             edge meshEdge(const label edgei) const;
 
-            //- Return local edge in terms of the mesh points in patch.
+            //- From patch edge to global edge using meshPoints.
             edge meshEdge(const edge& e) const;
 
             //- Search for edge (local point labels) and return its
             //- index in the edge list or -1 if not found.
+            //  Ignores invalid or out-of-range edges
             label findEdge(const edge& e) const;
 
             //- Return labels of patch edges in the global edge list using
@@ -465,6 +466,15 @@ public:
             bool hasFaceCentres() const { return bool(faceCentresPtr_); }
             bool hasFaceNormals() const { return bool(faceNormalsPtr_); }
             bool hasPointNormals() const { return bool(pointNormalsPtr_); }
+
+            bool hasBoundaryPoints() const { return bool(boundaryPointsPtr_); }
+            bool hasFaceFaces() const { return bool(faceFacesPtr_); }
+            bool hasEdgeFaces() const { return bool(edgeFacesPtr_); }
+            bool hasFaceEdges() const { return bool(faceEdgesPtr_); }
+            bool hasPointEdges() const { return bool(pointEdgesPtr_); }
+            bool hasPointFaces() const { return bool(pointFacesPtr_); }
+
+            bool hasMeshPointMap() const { return bool(meshPointMapPtr_); }
 
 
         // Other patch operations
