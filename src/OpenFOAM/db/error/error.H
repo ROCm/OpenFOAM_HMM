@@ -225,7 +225,7 @@ public:
         void abort();
 
         //- Print error message
-        void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool includeTitle = true) const;
 
 
     // Housekeeping
@@ -348,7 +348,7 @@ public:
         void abort();
 
         //- Print error message
-        void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool includeTitle = true) const;
 };
 
 
