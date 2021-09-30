@@ -101,9 +101,10 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "noFields",
+        "no-fields",  // noFields
         "Skip reconstructing fields"
     );
+    argList::addOptionCompat("no-fields", {"noFields", 2106});
     argList::addOption
     (
         "lagrangianFields",
@@ -115,15 +116,18 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "noLagrangian",
+        "no-lagrangian",  // noLagrangian
         "Skip reconstructing lagrangian positions and fields"
     );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 2106});
 
     argList::addBoolOption
     (
-        "noSets",
+        "no-sets",
         "Skip reconstructing cellSets, faceSets, pointSets"
     );
+    argList::addOptionCompat("no-sets", {"noSets", 2106});
+
     argList::addBoolOption
     (
         "newTimes",
@@ -134,32 +138,54 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
 
+    const bool doFields = !args.found("no-fields");
     wordRes selectedFields;
-    args.readListIfPresent<wordRe>("fields", selectedFields);
 
-    const bool doFields = !args.found("noFields");
-
-    if (!doFields)
+    if (doFields)
     {
-        Info<< "Skipping reconstructing fields"
+        args.readListIfPresent<wordRe>("fields", selectedFields);
+    }
+    else
+    {
+        Info<< "Skipping reconstructing fields";
+        if (args.found("fields"))
+        {
+            Info<< ". Ignore -fields option";
+        }
+        Info<< nl << endl;
+    }
+
+
+    const bool doFiniteArea = !args.found("no-finite-area");
+    if (!doFiniteArea)
+    {
+        Info<< "Skipping reconstructing finiteArea mesh/fields"
             << nl << endl;
     }
 
+
+    const bool doLagrangian = !args.found("no-lagrangian");
     wordRes selectedLagrangianFields;
-    args.readListIfPresent<wordRe>
-    (
-        "lagrangianFields", selectedLagrangianFields
-    );
 
-    const bool doLagrangian = !args.found("noLagrangian");
-
-    if (!doLagrangian)
+    if (doLagrangian)
     {
-        Info<< "Skipping reconstructing lagrangian positions and fields"
-            << nl << endl;
+        args.readListIfPresent<wordRe>
+        (
+            "lagrangianFields", selectedLagrangianFields
+        );
+    }
+    else
+    {
+        Info<< "Skipping reconstructing lagrangian positions/fields";
+        if (args.found("lagrangianFields"))
+        {
+            Info<< ". Ignore -lagrangianFields option";
+        }
+        Info<< nl << endl;
     }
 
-    const bool doReconstructSets = !args.found("noSets");
+
+    const bool doReconstructSets = !args.found("no-sets");
 
     if (!doReconstructSets)
     {
@@ -692,7 +718,10 @@ int main(int argc, char *argv[])
 
             // If there are any FA fields, reconstruct them
 
-            if
+            if (!doFiniteArea)
+            {
+            }
+            else if
             (
                 objects.lookupClass(areaScalarField::typeName).size()
              || objects.lookupClass(areaVectorField::typeName).size()

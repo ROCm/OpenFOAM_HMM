@@ -353,6 +353,20 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "no-finite-area",
+        "Suppress finiteArea mesh/field decomposition",
+        true  // Advanced option
+    );
+
+    argList::addBoolOption
+    (
+        "no-lagrangian",
+        "Suppress lagrangian (cloud) decomposition",
+        true  // Advanced option
+    );
+
+    argList::addBoolOption
+    (
         "cellDist",
         "Write cell distribution as a labelList - for use with 'manual' "
         "decomposition method and as a volScalarField for visualization."
@@ -372,11 +386,14 @@ int main(int argc, char *argv[])
         "fields",
         "Use existing geometry decomposition and convert fields only"
     );
+
     argList::addBoolOption
     (
-        "noSets",
+        "no-sets",
         "Skip decomposing cellSets, faceSets, pointSets"
     );
+    argList::addOptionCompat("no-sets", {"noSets", 2106});
+
     argList::addBoolOption
     (
         "force",
@@ -400,8 +417,12 @@ int main(int argc, char *argv[])
     // Most of these are ignored for dry-run (not triggered anywhere)
     const bool copyZero         = args.found("copyZero");
     const bool copyUniform      = args.found("copyUniform");
-    const bool decomposeSets    = !args.found("noSets");
+    const bool decomposeSets    = !args.found("no-sets");
+
     const bool decomposeIfRequired = args.found("ifRequired");
+
+    const bool doFiniteArea = !args.found("no-finite-area");
+    const bool doLagrangian = !args.found("no-lagrangian");
 
     bool decomposeFieldsOnly = args.found("fields");
     bool forceOverwrite      = args.found("force");
@@ -419,6 +440,15 @@ int main(int argc, char *argv[])
     }
     else
     {
+        if (!doFiniteArea)
+        {
+            Info<< "Skip decompose of finiteArea mesh/fields" << nl;
+        }
+        if (!doLagrangian)
+        {
+            Info<< "Skip decompose of lagrangian positions/fields" << nl;
+        }
+
         times = timeSelector::selectIfPresent(runTime, args);
     }
 
@@ -792,14 +822,16 @@ int main(int argc, char *argv[])
                 // Construct the Lagrangian fields
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-                fileNameList cloudDirs
-                (
-                    fileHandler().readDir
+                fileNameList cloudDirs;
+
+                if (doLagrangian)
+                {
+                    cloudDirs = fileHandler().readDir
                     (
                         runTime.timePath()/cloud::prefix,
                         fileName::DIRECTORY
-                    )
-                );
+                    );
+                }
 
                 // Particles
                 PtrList<Cloud<indexedParticle>> lagrangianPositions
@@ -1375,7 +1407,11 @@ int main(int argc, char *argv[])
                 );
 
 
-                if (faMeshBoundaryIOobj.typeHeaderOk<faBoundaryMesh>(true))
+                if
+                (
+                    doFiniteArea
+                 && faMeshBoundaryIOobj.typeHeaderOk<faBoundaryMesh>(true)
+                )
                 {
                     Info<< "\nFinite area mesh decomposition" << endl;
 

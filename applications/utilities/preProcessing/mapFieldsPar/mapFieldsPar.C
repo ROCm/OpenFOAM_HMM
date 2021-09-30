@@ -202,11 +202,13 @@ int main(int argc, char *argv[])
         "Specify single or multiple fields to reconstruct (all by default)."
         " Eg, 'T' or '(p T U \"alpha.*\")'"
     );
+
     argList::addBoolOption
     (
-        "noLagrangian",
+        "no-lagrangian",  // noLagrangian
         "Skip mapping lagrangian positions and fields"
     );
+    argList::addOptionCompat("no-lagrangian", {"noLagrangian", 2106});
 
     argList args(argc, argv);
     #include "foamDlOpenLibs.H"
@@ -291,7 +293,7 @@ int main(int argc, char *argv[])
     // Non-mandatory
     const wordRes selectedFields(args.getList<wordRe>("fields", false));
 
-    const bool noLagrangian = args.found("noLagrangian");
+    const bool noLagrangian = args.found("no-lagrangian");
 
     #include "createTimes.H"
 
