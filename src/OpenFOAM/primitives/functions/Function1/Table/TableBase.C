@@ -78,7 +78,12 @@ Foam::Function1Types::TableBase<Type>::TableBase
     ),
     interpolationScheme_
     (
-        dict.getOrDefault<word>("interpolationScheme", "linear")
+        dict.getOrDefault<word>
+        (
+            "interpolationScheme",
+            "linear",
+            keyType::LITERAL
+        )
     ),
     table_(),
     tableSamplesPtr_(nullptr),
