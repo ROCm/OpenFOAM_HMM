@@ -39,11 +39,15 @@ SourceFiles
 #define solution_H
 
 #include "IOdictionary.H"
+#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+template<class Type> class Function1;
 
 /*---------------------------------------------------------------------------*\
                           Class solution Declaration
@@ -64,14 +68,20 @@ class solution
         //- Dictionary of relaxation factors for all the fields
         dictionary fieldRelaxDict_;
 
+        //- Cache of Function1s in above dictionary
+        mutable HashPtrTable<Function1<scalar>> fieldRelaxCache_;
+
         //- Dictionary of relaxation factors for all the equations
         dictionary eqnRelaxDict_;
 
+        //- Cache of Function1s in above dictionary
+        mutable HashPtrTable<Function1<scalar>> eqnRelaxCache_;
+
         //- Optional default relaxation factor for all the fields
-        scalar fieldRelaxDefault_;
+        autoPtr<Function1<scalar>> fieldRelaxDefault_;
 
         //- Optional default relaxation factor for all the equations
-        scalar eqnRelaxDefault_;
+        autoPtr<Function1<scalar>> eqnRelaxDefault_;
 
         //- Dictionary of solver parameters for all the fields
         dictionary solvers_;
@@ -125,21 +135,16 @@ public:
         {}
 
 
+    //- Destructor
+    virtual ~solution();
+
+
     // Member Functions
 
         // Access
 
             //- Return true if the given field should be cached
             bool cache(const word& name) const;
-
-            //- Helper for printing cache message
-            template<class FieldType>
-            static void cachePrintMessage
-            (
-                const char* message,
-                const word& name,
-                const FieldType& vf
-            );
 
             //- Return true if the relaxation factor is given for the field
             bool relaxField(const word& name) const;
@@ -168,6 +173,18 @@ public:
 
             //- Read the solution dictionary
             bool read();
+
+
+        // Other
+
+            //- Helper for printing cache message
+            template<class FieldType>
+            static void cachePrintMessage
+            (
+                const char* message,
+                const word& name,
+                const FieldType& vf
+            );
 };
 
 
