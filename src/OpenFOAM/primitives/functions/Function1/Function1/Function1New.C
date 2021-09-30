@@ -209,4 +209,104 @@ Foam::Function1<Type>::NewIfPresent
 }
 
 
+template<class Type>
+Foam::refPtr<Foam::Function1<Type>>
+Foam::Function1<Type>::New
+(
+    HashPtrTable<Function1<Type>>& cache,
+
+    const word& entryName,
+    const dictionary& dict,
+    enum keyType::option matchOpt,
+    const bool mandatory
+)
+{
+    // Use the dictionary to find the keyword (allowing wildcards).
+    // Alternative would be to have
+    // a HashTable where the key type uses a wildcard match
+
+
+    refPtr<Function1<Type>> fref;  // return value
+
+    // Try for direct cache hit
+    fref.cref(cache.get(entryName));
+
+    if (fref)
+    {
+        return fref;
+    }
+
+
+    // Lookup from dictionary
+    const entry* eptr = dict.findEntry(entryName, matchOpt);
+
+    if (eptr)
+    {
+        // Use keyword (potentially a wildcard) instead of entry name
+        const auto& kw = eptr->keyword();
+
+        // Try for a cache hit
+        fref.cref(cache.get(kw));
+
+        if (!fref)
+        {
+            // Create new entry
+            auto fauto
+            (
+                Function1<Type>::New
+                (
+                    kw,
+                    eptr,  // Already resolved
+                    dict,
+                    word::null,
+                    mandatory
+                )
+            );
+
+            if (fauto)
+            {
+                // Cache the newly created function
+                fref.cref(fauto.get());
+                cache.set(kw, fauto);
+            }
+        }
+    }
+
+    if (mandatory && !fref)
+    {
+        FatalIOErrorInFunction(dict)
+            << "No match for " << entryName << nl
+            << exit(FatalIOError);
+    }
+
+    return fref;
+}
+
+
+/// template<class Type>
+/// Foam::refPtr<Foam::Function1<Type>>
+/// Foam::Function1<Type>::NewOrDefault
+/// (
+///     HashPtrTable<Function1<Type>>& cache,
+///
+///     const word& entryName,
+///     const dictionary& dict,
+///     const Type& deflt,
+///     enum keyType::option matchOpt
+/// )
+/// {
+///     auto fref
+///     (
+///         Function1<Type>::New(entryName, dict, cache, matchOpt, false)
+///     );
+///
+///     if (!fref)
+///     {
+///         fref.reset(new Function1Types::Constant<Type>("default", deflt));
+///     }
+///
+///     return fref;
+/// }
+
+
 // ************************************************************************* //
