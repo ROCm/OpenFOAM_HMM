@@ -863,7 +863,7 @@ Foam::argList::argList
                     // change registered debug switch
                     DetailInfo << "debug-switch ";
                     debug::debugObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else if (strcmp(optName, "info-switch") == 0)
                 {
@@ -871,7 +871,7 @@ Foam::argList::argList
                     // change registered info switch
                     DetailInfo << "info-switch ";
                     debug::infoObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else if (strcmp(optName, "opt-switch") == 0)
                 {
@@ -879,7 +879,7 @@ Foam::argList::argList
                     // change registered optimisation switch
                     DetailInfo << "opt-switch ";
                     debug::optimisationObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else
                 {

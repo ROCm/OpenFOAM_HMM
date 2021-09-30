@@ -27,8 +27,10 @@ License
 
 #include "simpleObjectRegistry.H"
 #include "dictionary.H"
+#include "ITstream.H"
 #include "StringStream.H"
 #include "int.H"
+#include "floatScalar.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -86,7 +88,7 @@ void Foam::simpleObjectRegistry::setValues
 }
 
 
-void Foam::simpleObjectRegistry::setNamedInt
+void Foam::simpleObjectRegistry::setNamedValue
 (
     std::string name,
     int val,
@@ -98,21 +100,28 @@ void Foam::simpleObjectRegistry::setNamedInt
 
     const bool log = (report && Foam::infoDetailLevel > 0);
 
+    token tok(static_cast<label>(val));
 
     // Handle name=value
     const auto eq = name.find('=');
 
     if (eq != std::string::npos)
     {
-        int intval = 0;
+        std::string strval(name.substr(eq+1));
+        name.erase(eq);  // Truncate the name
 
-        if (readInt(name.substr(eq+1), intval))
+        float fvalue(val);
+
+        if (Foam::readInt(strval, val))
         {
-            val = intval;
+            tok = static_cast<label>(val);
         }
-        // Could warn about bad entry
-
-        name.resize(eq);  // Truncate the name
+        else if (Foam::readFloat(strval, fvalue))
+        {
+            tok = fvalue;
+        }
+        // Treat 'name=' like 'name' (ie, no value parameter)
+        // silently ignore 'name=junk', but could warn
     }
 
 
@@ -121,12 +130,9 @@ void Foam::simpleObjectRegistry::setNamedInt
     if (objPtr)
     {
         // The generic interface requires an Istream.
-        IStringStream is(std::to_string(val));
+        ITstream is("", tokenList(Foam::one{}, tok));
 
-        // Or alternatively?
-        // ITstream is("input", tokenList(1, token(label(val))));
-
-        Log << name.c_str() << '=' << val << nl;
+        Log << name.c_str() << '=' << tok << nl;
 
         const List<simpleRegIOobject*>& objects = *objPtr;
 
