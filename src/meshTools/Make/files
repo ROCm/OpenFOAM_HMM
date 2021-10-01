@@ -4,26 +4,23 @@ $(em)/edgeMesh.C
 $(em)/edgeMeshIO.C
 $(em)/edgeMeshNew.C
 
-edgeMeshFormats = $(em)/edgeMeshFormats
-$(edgeMeshFormats)/edgeMeshFormatsCore.C
+edgeFormats = $(em)/edgeFormats
+$(edgeFormats)/edgeMeshFormatsCore.C
 
-$(edgeMeshFormats)/edgeMesh/edgeMeshFormat.C
-$(edgeMeshFormats)/edgeMesh/edgeMeshFormatRunTime.C
+$(edgeFormats)/edgeMesh/edgeMeshFormat.C
+$(edgeFormats)/edgeMesh/edgeMeshFormatRunTime.C
 
-$(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormat.C
-$(edgeMeshFormats)/extendedFeatureEdgeMesh/extendedFeatureEdgeMeshFormatRunTime.C
+$(edgeFormats)/nastran/NASedgeFormat.C
+$(edgeFormats)/nastran/NASedgeFormatRunTime.C
 
-$(edgeMeshFormats)/nastran/NASedgeFormat.C
-$(edgeMeshFormats)/nastran/NASedgeFormatRunTime.C
+$(edgeFormats)/obj/OBJedgeFormat.C
+$(edgeFormats)/obj/OBJedgeFormatRunTime.C
 
-$(edgeMeshFormats)/obj/OBJedgeFormat.C
-$(edgeMeshFormats)/obj/OBJedgeFormatRunTime.C
+$(edgeFormats)/starcd/STARCDedgeFormat.C
+$(edgeFormats)/starcd/STARCDedgeFormatRunTime.C
 
-$(edgeMeshFormats)/starcd/STARCDedgeFormat.C
-$(edgeMeshFormats)/starcd/STARCDedgeFormatRunTime.C
-
-$(edgeMeshFormats)/vtk/VTKedgeFormat.C
-$(edgeMeshFormats)/vtk/VTKedgeFormatRunTime.C
+$(edgeFormats)/vtk/VTKedgeFormat.C
+$(edgeFormats)/vtk/VTKedgeFormatRunTime.C
 
 
 edgeMeshTools = $(em)/edgeMeshTools
@@ -37,13 +34,15 @@ eem = $(em)/extendedEdgeMesh
 
 $(eem)/extendedEdgeMesh.C
 $(eem)/extendedEdgeMeshNew.C
+$(eem)/extendedEdgeMeshFormat.C
+$(eem)/extendedEdgeMeshFormatRunTime.C
 
-$(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormat.C
-$(eem)/extendedEdgeMeshFormats/extendedEdgeMeshFormat/extendedEdgeMeshFormatRunTime.C
-
-efm = $(eem)/extendedFeatureEdgeMesh
+efm = $(em)/extendedFeatureEdgeMesh
 
 $(efm)/extendedFeatureEdgeMesh.C
+$(efm)/extendedFeatureEdgeMeshFormat.C
+$(efm)/extendedFeatureEdgeMeshFormatRunTime.C
+
 
 cellClassification/cellClassification.C
 cellClassification/cellInfo.C

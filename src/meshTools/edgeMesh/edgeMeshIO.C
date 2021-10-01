@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,9 @@ void Foam::edgeMesh::write
 (
     const fileName& name,
     const word& fileType,
-    const edgeMesh& mesh
+    const edgeMesh& mesh,
+    IOstreamOption streamOpt,
+    const dictionary& options
 )
 {
     DebugInFunction << "Writing to " << name << endl;
@@ -104,17 +106,19 @@ void Foam::edgeMesh::write
         ) << exit(FatalError);
     }
 
-    mfIter()(name, mesh);
+    mfIter()(name, mesh, streamOpt, options);
 }
 
 
 void Foam::edgeMesh::write
 (
     const fileName& name,
-    const edgeMesh& mesh
+    const edgeMesh& mesh,
+    IOstreamOption streamOpt,
+    const dictionary& options
 )
 {
-    write(name, name.ext(), mesh);
+    write(name, name.ext(), mesh, streamOpt, options);
 }
 
 

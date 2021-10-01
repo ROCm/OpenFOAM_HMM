@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,13 @@ License
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-inline Foam::pointField& Foam::edgeMesh::storedPoints()
+inline Foam::pointField& Foam::edgeMesh::storedPoints() noexcept
 {
     return points_;
 }
 
 
-inline Foam::edgeList& Foam::edgeMesh::storedEdges()
+inline Foam::edgeList& Foam::edgeMesh::storedEdges() noexcept
 {
     return edges_;
 }
@@ -96,13 +96,13 @@ inline Foam::edgeMesh::edgeMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::pointField& Foam::edgeMesh::points() const
+inline const Foam::pointField& Foam::edgeMesh::points() const noexcept
 {
     return points_;
 }
 
 
-inline const Foam::edgeList& Foam::edgeMesh::edges() const
+inline const Foam::edgeList& Foam::edgeMesh::edges() const noexcept
 {
     return edges_;
 }

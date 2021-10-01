@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,24 +25,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::OBJedgeFormat
+    Foam::fileFormats::NASedgeFormat
 
 Description
-    Provide a means of reading/writing Alias/Wavefront OBJ format.
+    Nastran edge reader.
 
-    Does not handle negative vertex indices.
+    - Interprets "CBEAM", "CROD" and "PLOTEL" entries as edges.
+    - Handles Nastran short, long formats and comma-separated free format.
+    - Properly handles the Nastran compact floating point notation: \n
+    \verbatim
+        GRID          28        10.20269-.030265-2.358-8
+    \endverbatim
 
 SourceFiles
-    OBJedgeFormat.C
+    NASedgeFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef OBJedgeFormat_H
-#define OBJedgeFormat_H
+#ifndef NASedgeFormat_H
+#define NASedgeFormat_H
 
 #include "edgeMesh.H"
-#include "Fstream.H"
-#include "Ostream.H"
+#include "NASCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,56 +56,47 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class OBJedgeFormat Declaration
+                      Class NASedgeFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class OBJedgeFormat
+class NASedgeFormat
 :
-    public edgeMesh
+    public edgeMesh,
+    public NASCore
 {
     // Private Member Functions
 
         //- No copy construct
-        OBJedgeFormat(const OBJedgeFormat&) = delete;
+        NASedgeFormat(const NASedgeFormat&) = delete;
 
         //- No copy assignment
-        void operator=(const OBJedgeFormat&) = delete;
-
+        void operator=(const NASedgeFormat&) = delete;
 
 public:
 
     // Constructors
 
         //- Construct from file name
-        OBJedgeFormat(const fileName&);
+        explicit NASedgeFormat(const fileName& filename);
 
 
     // Selectors
 
-        //- Read file and return surface
+        //- Read file and return edge mesh
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>::NewFrom<OBJedgeFormat>(name);
+            return autoPtr<edgeMesh>::NewFrom<NASedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~OBJedgeFormat() = default;
+    virtual ~NASedgeFormat() = default;
 
 
     // Member Functions
 
-        //- Write surface mesh components by proxy
-        static void write(const fileName&, const edgeMesh&);
-
-        //- Read from file
-        virtual bool read(const fileName&);
-
-        //- Write object file
-        virtual void write(const fileName& name) const
-        {
-            write(name, *this);
-        }
+        //- Read from a file
+        virtual bool read(const fileName& filename);
 };
 
 

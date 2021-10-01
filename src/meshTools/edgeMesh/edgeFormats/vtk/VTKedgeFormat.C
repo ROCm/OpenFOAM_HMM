@@ -106,17 +106,26 @@ bool Foam::fileFormats::VTKedgeFormat::read
 void Foam::fileFormats::VTKedgeFormat::write
 (
     const fileName& filename,
-    const edgeMesh& eMesh
+    const edgeMesh& eMesh,
+    IOstreamOption,
+    const dictionary& options
 )
 {
     // NB: restrict output to legacy ascii so that we are still able
     // to read it with vtkUnstructuredReader
 
+    vtk::outputOptions opts(vtk::formatType::LEGACY_ASCII);
+
+    opts.precision
+    (
+        options.getOrDefault("precision", IOstream::defaultPrecision())
+    );
+
     vtk::lineWriter writer
     (
         eMesh.points(),
         eMesh.edges(),
-        vtk::formatType::LEGACY_ASCII,
+        opts,
         filename,
         false  // non-parallel write (edgeMesh already serialized)
     );

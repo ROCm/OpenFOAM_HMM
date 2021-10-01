@@ -57,7 +57,6 @@ class featureEdgeMesh
     public regIOobject,
     public edgeMesh
 {
-
 public:
 
     TypeName("featureEdgeMesh");
@@ -66,18 +65,18 @@ public:
     // Constructors
 
         //- Construct (read) given an IOobject
-        featureEdgeMesh(const IOobject&);
+        explicit featureEdgeMesh(const IOobject&);
 
         //- Construct from featureEdgeMesh data
         featureEdgeMesh
         (
-            const IOobject&,
-            const pointField&,
-            const edgeList&
+            const IOobject& io,
+            const pointField& points,
+            const edgeList& edges
         );
 
         //- Construct as copy
-        featureEdgeMesh(const IOobject&, const featureEdgeMesh&);
+        featureEdgeMesh(const IOobject& io, const edgeMesh& em);
 
 
     // IO

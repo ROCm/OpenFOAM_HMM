@@ -225,17 +225,22 @@ bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
 void Foam::fileFormats::OBJedgeFormat::write
 (
     const fileName& filename,
-    const edgeMesh& mesh
+    const edgeMesh& mesh,
+    IOstreamOption streamOpt,
+    const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const pointField& pointLst = mesh.points();
     const edgeList& edgeLst = mesh.edges();
 
-    OFstream os(filename);
+    OFstream os(filename, streamOpt);
     if (!os.good())
     {
         FatalErrorInFunction
-            << "Cannot open file for writing " << filename
+            << "Cannot write file " << filename << nl
             << exit(FatalError);
     }
 

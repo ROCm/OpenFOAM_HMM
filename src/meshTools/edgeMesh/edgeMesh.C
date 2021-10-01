@@ -203,7 +203,7 @@ Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
 void Foam::edgeMesh::scalePoints(const scalar scaleFactor)
 {
     // avoid bad scaling
-    if (scaleFactor > 0 && scaleFactor != 1.0)
+    if (scaleFactor > VSMALL && !equal(scaleFactor, 1))
     {
         points_ *= scaleFactor;
     }

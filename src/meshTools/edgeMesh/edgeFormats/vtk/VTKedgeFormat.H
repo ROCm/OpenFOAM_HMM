@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,25 +25,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::edgeMeshFormat
+    Foam::fileFormats::VTKedgeFormat
 
 Description
-    Provide a means of reading/writing the single-file OpenFOAM edge format.
-
-Note
-   This class provides more methods than the regular edge format interface.
+    Provide a means of writing VTK legacy format.
 
 SourceFiles
-    edgeMeshFormat.C
+    VTKedgeFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeMeshFormat_H
-#define edgeMeshFormat_H
+#ifndef VTKedgeFormat_H
+#define VTKedgeFormat_H
 
 #include "edgeMesh.H"
-#include "Ostream.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,84 +48,60 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class edgeMeshFormat Declaration
+                     Class VTKedgeFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class edgeMeshFormat
+class VTKedgeFormat
 :
     public edgeMesh
 {
-    // Private Member Functions
-
-        //- No copy construct
-        edgeMeshFormat(const edgeMeshFormat&) = delete;
-
-        //- No copy assignment
-        void operator=(const edgeMeshFormat&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Write header information
-        static void writeHeader
-        (
-            Ostream&,
-            const pointField&,
-            const edgeList&
-        );
-
-
 public:
 
     // Constructors
 
-        //- Construct from file name
-        edgeMeshFormat(const fileName&);
+        //- Read construct from file name
+        explicit VTKedgeFormat(const fileName& filename);
 
 
     // Selectors
 
-        //- Read file and return edgeMesh
+        //- Read file and return surface
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>::NewFrom<edgeMeshFormat>(name);
+            return autoPtr<edgeMesh>::NewFrom<VTKedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~edgeMeshFormat() = default;
+    virtual ~VTKedgeFormat() = default;
+
+
+    // Static Functions
+
+        //- Write edge mesh to file
+        static void write
+        (
+            const fileName& filename,
+            const edgeMesh& mesh,
+            IOstreamOption /*ignored*/ = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        );
 
 
     // Member Functions
 
-        //- Read edgeMesh components from stream
-        static bool read
-        (
-            Istream&,
-            pointField&,
-            edgeList&
-        );
-
-        //- Write edgeMesh components to stream
-        static Ostream& write
-        (
-            Ostream&,
-            const pointField&,
-            const edgeList&
-        );
-
-        //- Write edgeMesh with a mimicked IOobject header
-        static void write(const fileName&, const edgeMesh&);
-
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& name);
 
-        //- Write object
-        virtual void write(const fileName& name) const
+        //- Write to file
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, *this);
+            write(name, *this, streamOpt, options);
         }
 };
 

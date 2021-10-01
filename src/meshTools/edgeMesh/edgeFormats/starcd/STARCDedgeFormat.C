@@ -37,12 +37,11 @@ License
 inline void Foam::fileFormats::STARCDedgeFormat::writeLines
 (
     Ostream& os,
-    const edgeList& edges
+    const edgeList& edges,
+    label starCellId
 )
 {
-    writeHeader(os, STARCDCore::HEADER_CEL);
-
-    label starCellId = 1;  // 1-based cellId
+    starCellId = max(1, starCellId);   // Enforce 1-based cellId
 
     for (const edge& e : edges)
     {
@@ -235,26 +234,33 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 void Foam::fileFormats::STARCDedgeFormat::write
 (
     const fileName& filename,
-    const edgeMesh& mesh
+    const edgeMesh& mesh,
+    IOstreamOption streamOpt,
+    const dictionary&
 )
 {
+    // ASCII only, allow output compression
+    streamOpt.format(IOstream::ASCII);
+
     const pointField& pointLst = mesh.points();
     const edgeList& edgeLst = mesh.edges();
 
     fileName baseName = filename.lessExt();
 
-    writePoints
-    (
-        OFstream(starFileName(baseName, STARCDCore::VRT_FILE))(),
-        pointLst
-    );
-    writeLines
-    (
-        OFstream(starFileName(baseName, STARCDCore::CEL_FILE))(),
-        edgeLst
-    );
+    // The .vrt file
+    {
+        OFstream os(starFileName(baseName, STARCDCore::VRT_FILE), streamOpt);
+        writePoints(os, pointLst);
+    }
 
-    // Write a simple .inp file
+    // The .cel file
+    {
+        OFstream os(starFileName(baseName, STARCDCore::CEL_FILE), streamOpt);
+        writeHeader(os, STARCDCore::HEADER_CEL);
+        writeLines(os, edgeLst);
+    }
+
+    // Write a simple .inp file. Never compressed
     writeCase
     (
         OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,28 +25,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::NASedgeFormat
+    Foam::fileFormats::edgeMeshFormat
 
 Description
-    Nastran edge reader.
+    Provide a means of reading/writing the single-file OpenFOAM edge format.
 
-    - Interprets "CBEAM", "CROD" and "PLOTEL" entries as edges.
-    - Handles Nastran short, long formats and comma-separated free format.
-    - Properly handles the Nastran compact floating point notation: \n
-    \verbatim
-        GRID          28        10.20269-.030265-2.358-8
-    \endverbatim
+Note
+   This class provides more methods than the regular edge format interface.
 
 SourceFiles
-    NASedgeFormat.C
+    edgeMeshFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NASedgeFormat_H
-#define NASedgeFormat_H
+#ifndef edgeMeshFormat_H
+#define edgeMeshFormat_H
 
 #include "edgeMesh.H"
-#include "NASCore.H"
+#include "Ostream.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,48 +53,99 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class NASedgeFormat Declaration
+                      Class edgeMeshFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class NASedgeFormat
+class edgeMeshFormat
 :
-    public edgeMesh,
-    public NASCore
+    public edgeMesh
 {
     // Private Member Functions
 
         //- No copy construct
-        NASedgeFormat(const NASedgeFormat&) = delete;
+        edgeMeshFormat(const edgeMeshFormat&) = delete;
 
         //- No copy assignment
-        void operator=(const NASedgeFormat&) = delete;
+        void operator=(const edgeMeshFormat&) = delete;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Write header information
+        static void writeHeader
+        (
+            Ostream&,
+            const pointField&,
+            const edgeList&
+        );
+
 
 public:
 
     // Constructors
 
         //- Construct from file name
-        NASedgeFormat(const fileName& filename);
+        explicit edgeMeshFormat(const fileName&);
 
 
     // Selectors
 
-        //- Read file and return edge mesh
+        //- Read file and return edgeMesh
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>::NewFrom<NASedgeFormat>(name);
+            return autoPtr<edgeMesh>::NewFrom<edgeMeshFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~NASedgeFormat() = default;
+    virtual ~edgeMeshFormat() = default;
+
+
+    // Static Member Functions
+
+        //- Read edgeMesh components from stream
+        static bool read
+        (
+            Istream&,
+            pointField&,
+            edgeList&
+        );
+
+        //- Write edgeMesh components to stream
+        static Ostream& write
+        (
+            Ostream&,
+            const pointField&,
+            const edgeList&
+        );
+
+        //- Write edge mesh to file with a mimicked IOobject header
+        static void write
+        (
+            const fileName& filename,
+            const edgeMesh& mesh,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        );
 
 
     // Member Functions
 
-        //- Read from a file
-        virtual bool read(const fileName& filename);
+        //- Read from file
+        virtual bool read(const fileName& name);
 
+        //- Write edge mesh to file
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, *this, streamOpt, options);
+        }
 };
 
 

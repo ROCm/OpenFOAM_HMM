@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,28 +25,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::STARCDedgeFormat
+    Foam::fileFormats::OBJedgeFormat
 
 Description
-    Read/write the lines from PROSTAR vrt/cel files.
+    Provide a means of reading/writing Alias/Wavefront OBJ format.
 
-Note
-    Uses the extension \a .inp (input) to denote the format.
-
-See also
-    Foam::meshReaders::STARCD
+    Does not handle negative vertex indices.
 
 SourceFiles
-    STARCDedgeFormat.C
+    OBJedgeFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDedgeFormat_H
-#define STARCDedgeFormat_H
+#ifndef OBJedgeFormat_H
+#define OBJedgeFormat_H
 
 #include "edgeMesh.H"
-#include "STARCDCore.H"
-
 #include "Fstream.H"
 #include "Ostream.H"
 
@@ -58,36 +52,20 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class STARCDedgeFormat Declaration
+                        Class OBJedgeFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDedgeFormat
+class OBJedgeFormat
 :
-    public edgeMesh,
-    protected STARCDCore
+    public edgeMesh
 {
     // Private Member Functions
 
-        static inline void writeLines(Ostream&, const edgeList&);
-
-
         //- No copy construct
-        STARCDedgeFormat(const STARCDedgeFormat&) = delete;
+        OBJedgeFormat(const OBJedgeFormat&) = delete;
 
         //- No copy assignment
-        void operator=(const STARCDedgeFormat&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-    static void writeCase
-    (
-        Ostream& os,
-        const pointField& pointLst,
-        const label nEdges
-    );
+        void operator=(const OBJedgeFormat&) = delete;
 
 
 public:
@@ -95,34 +73,48 @@ public:
     // Constructors
 
         //- Construct from file name
-        explicit STARCDedgeFormat(const fileName& filename);
+        OBJedgeFormat(const fileName&);
 
 
     // Selectors
 
-        //- Read file and return edgeMesh
+        //- Read file and return surface
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>::NewFrom<STARCDedgeFormat>(name);
+            return autoPtr<edgeMesh>::NewFrom<OBJedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~STARCDedgeFormat() = default;
+    virtual ~OBJedgeFormat() = default;
 
 
     // Member Functions
 
-        //- Write edge mesh
-        static void write(const fileName& name, const edgeMesh& mesh);
+        //- Write edge mesh to file
+        static void write
+        (
+            const fileName& filename,
+            const edgeMesh& mesh,
+            IOstreamOption /*ignored*/ = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        );
+
+
+    // Member Functions
 
         //- Read from file
         virtual bool read(const fileName& name);
 
-        //- Write object
-        virtual void write(const fileName& name) const
+        //- Write to file
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, *this);
+            write(name, *this, streamOpt, options);
         }
 };
 
@@ -131,7 +123,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

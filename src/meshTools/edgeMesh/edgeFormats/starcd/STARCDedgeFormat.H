@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,20 +25,30 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::VTKedgeFormat
+    Foam::fileFormats::STARCDedgeFormat
 
 Description
-    Provide a means of writing VTK legacy format.
+    Read/write the lines from PROSTAR vrt/cel files.
+
+Note
+    Uses the extension \a .inp (input) to denote the format.
+
+See also
+    Foam::meshReaders::STARCD
 
 SourceFiles
-    VTKedgeFormat.C
+    STARCDedgeFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VTKedgeFormat_H
-#define VTKedgeFormat_H
+#ifndef STARCDedgeFormat_H
+#define STARCDedgeFormat_H
 
 #include "edgeMesh.H"
+#include "STARCDCore.H"
+
+#include "Fstream.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,46 +58,90 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class VTKedgeFormat Declaration
+                      Class STARCDedgeFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class VTKedgeFormat
+class STARCDedgeFormat
 :
-    public edgeMesh
+    public edgeMesh,
+    protected STARCDCore
 {
+    // Private Member Functions
+
+        static inline void writeLines
+        (
+            Ostream& os,
+            const edgeList& edges,
+            label starCellId = 1  // 1-based cellId
+        );
+
+
+        //- No copy construct
+        STARCDedgeFormat(const STARCDedgeFormat&) = delete;
+
+        //- No copy assignment
+        void operator=(const STARCDedgeFormat&) = delete;
+
+
+protected:
+
+    // Protected Member Functions
+
+    static void writeCase
+    (
+        Ostream& os,
+        const pointField& pointLst,
+        const label nEdges
+    );
+
+
 public:
 
     // Constructors
 
-        //- Read construct from file name
-        explicit VTKedgeFormat(const fileName& filename);
+        //- Construct from file name
+        explicit STARCDedgeFormat(const fileName& filename);
 
 
     // Selectors
 
-        //- Read file and return surface
+        //- Read file and return edgeMesh
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>::NewFrom<VTKedgeFormat>(name);
+            return autoPtr<edgeMesh>::NewFrom<STARCDedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~VTKedgeFormat() = default;
+    virtual ~STARCDedgeFormat() = default;
+
+
+    // Static Functions
+
+        //- Write edge mesh to file
+        static void write
+        (
+            const fileName& filename,
+            const edgeMesh& mesh,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        );
 
 
     // Member Functions
 
-        //- Write surface mesh components by proxy
-        static void write(const fileName& name, const edgeMesh&);
-
         //- Read from file
         virtual bool read(const fileName& name);
 
-        //- Write object to file
-        virtual void write(const fileName& name) const
+        //- Write to file
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, *this);
+            write(name, *this, streamOpt, options);
         }
 };
 
@@ -95,6 +150,7 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

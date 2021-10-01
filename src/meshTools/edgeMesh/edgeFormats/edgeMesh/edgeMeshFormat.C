@@ -141,7 +141,9 @@ Foam::Ostream& Foam::fileFormats::edgeMeshFormat::write
 void Foam::fileFormats::edgeMeshFormat::write
 (
     const fileName& filename,
-    const edgeMesh& mesh
+    const edgeMesh& mesh,
+    IOstreamOption streamOpt,
+    const dictionary& options
 )
 {
     // Use dummy Time for objectRegistry
@@ -158,8 +160,8 @@ void Foam::fileFormats::edgeMeshFormat::write
     );
     io.note() = "written " + clock::dateTime();
 
-    // Note: always write ascii
-    autoPtr<OFstream> osPtr(new OFstream(filename));
+    // Write in serial only
+    autoPtr<OFstream> osPtr(new OFstream(filename, streamOpt));
 
     if (!osPtr().good())
     {
