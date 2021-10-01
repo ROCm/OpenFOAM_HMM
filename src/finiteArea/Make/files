@@ -2,6 +2,7 @@ faMesh/faGlobalMeshData/faGlobalMeshData.C
 faMesh/faMesh.C
 faMesh/faMeshDemandDrivenData.C
 faMesh/faMeshPatches.C
+faMesh/faMeshTopology.C
 faMesh/faMeshUpdate.C
 faMesh/faBoundaryMesh/faBoundaryMesh.C
 

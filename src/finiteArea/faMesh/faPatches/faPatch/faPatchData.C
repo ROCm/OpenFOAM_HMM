@@ -28,6 +28,7 @@ License
 #include "faPatchData.H"
 #include "dictionary.H"
 #include "processorFaPatch.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -105,6 +106,24 @@ void Foam::faPatchData::assign(const faPatch& fap)
         ownerProcId_ = fapp->myProcNo();
         neighProcId_ = fapp->neighbProcNo();
     }
+}
+
+
+bool Foam::faPatchData::assign_coupled(int ownProci, int neiProci)
+{
+    clear();
+
+    if (ownProci == neiProci)
+    {
+        return false;
+    }
+
+    name_ = processorPolyPatch::newName(ownProci, neiProci);
+    type_ = processorFaPatch::typeName;
+    ownerProcId_ = ownProci;
+    neighProcId_ = neiProci;
+
+    return true;
 }
 
 

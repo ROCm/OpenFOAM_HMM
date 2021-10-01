@@ -231,6 +231,7 @@ public:
             return static_cast<const labelList&>(*this);
         }
 
+        //- Define new list of edges
         void edgeLabels(const UList<label>& newEdgeLabels);
 
         //- Number of patch points
@@ -245,8 +246,11 @@ public:
             return labelList::size();
         }
 
-        //- Return neighbour polyPatch index
-        label ngbPolyPatchIndex() const noexcept;
+        //- The neighbour polyPatch index
+        label ngbPolyPatchIndex() const noexcept
+        {
+            return nbrPolyPatchId_;
+        }
 
         //- Return boundaryMesh reference
         const faBoundaryMesh& boundaryMesh() const noexcept;
@@ -282,6 +286,21 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
+
+
+    // Topological information
+
+        //- List of proc/face for the boundary edge neighbours
+        //- in locally reordered edge numbering.
+        List<labelPair> boundaryConnections() const;
+
+        //- Boundary edge neighbour processors
+        //- (does not include own proc)
+        labelList boundaryProcs() const;
+
+        //- List of proc/size for the boundary edge neighbour processors
+        //- (does not include own proc)
+        List<labelPair> boundaryProcSizes() const;
 
 
         // Access functions for geometrical data

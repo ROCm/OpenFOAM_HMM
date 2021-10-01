@@ -116,12 +116,6 @@ Foam::faPatch::~faPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::faPatch::ngbPolyPatchIndex() const noexcept
-{
-    return nbrPolyPatchId_;
-}
-
-
 const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
@@ -131,6 +125,76 @@ const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 Foam::label Foam::faPatch::start() const
 {
     return boundaryMesh().mesh().patchStarts()[index()];
+}
+
+
+Foam::List<Foam::labelPair> Foam::faPatch::boundaryConnections() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    List<labelPair> output(this->nEdges());
+
+    // Like an IndirectList but removing the nInternalEdges offset
+    label count = 0;
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        output[count] = connections[bndEdgei];
+        ++count;
+    }
+
+    return output;
+}
+
+
+Foam::labelList Foam::faPatch::boundaryProcs() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    labelHashSet procsUsed(2*Pstream::nProcs());
+
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        const label proci = connections[bndEdgei].first();
+        procsUsed.insert(proci);
+    }
+    procsUsed.erase(-1);  // placeholder value
+    procsUsed.erase(Pstream::myProcNo());
+
+    return procsUsed.sortedToc();
+}
+
+
+Foam::List<Foam::labelPair> Foam::faPatch::boundaryProcSizes() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    Map<label> procCount(2*Pstream::nProcs());
+
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        const label proci = connections[bndEdgei].first();
+        ++procCount(proci);
+    }
+    procCount.erase(-1);  // placeholder value
+    procCount.erase(Pstream::myProcNo());
+
+    // Flatten as list
+    List<labelPair> output(procCount.size());
+    label count = 0;
+    for (const label proci : procCount.sortedToc())
+    {
+        output[count].first() = proci;
+        output[count].second() = procCount[proci];  // size
+        ++count;
+    }
+
+    return output;
 }
 
 

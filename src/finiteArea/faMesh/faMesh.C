@@ -111,15 +111,15 @@ static labelList selectPatchFaces
 
 void Foam::faMesh::initPatch() const
 {
-    if (patchPtr_)
-    {
-        delete patchPtr_;
-    }
-    patchPtr_ = new uindirectPrimitivePatch
+    patchPtr_.reset
     (
-        UIndirectList<face>(mesh().faces(), faceLabels_),
-        mesh().points()
+        new uindirectPrimitivePatch
+        (
+            UIndirectList<face>(mesh().faces(), faceLabels_),
+            mesh().points()
+        )
     );
+    bndConnectPtr_.reset(nullptr);
 }
 
 
@@ -172,8 +172,9 @@ void Foam::faMesh::clearGeomNotAreas() const
 {
     DebugInFunction << "Clearing geometry" << endl;
 
+    patchPtr_.reset(nullptr);
+    bndConnectPtr_.reset(nullptr);
     deleteDemandDrivenData(SPtr_);
-    deleteDemandDrivenData(patchPtr_);
     deleteDemandDrivenData(patchStartsPtr_);
     deleteDemandDrivenData(LePtr_);
     deleteDemandDrivenData(magLePtr_);
@@ -256,6 +257,7 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     ),
     comm_(Pstream::worldComm),
     patchPtr_(nullptr),
+    bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
     SPtr_(nullptr),
@@ -349,6 +351,7 @@ Foam::faMesh::faMesh
     ),
     comm_(Pstream::worldComm),
     patchPtr_(nullptr),
+    bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
     SPtr_(nullptr),
