@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ class fvMeshPrimitiveLduAddressing
 :
     public lduAddressing
 {
-    // Private data
+    // Private Data
 
         //- Lower (face to owner addressing)
         const labelList lowerAddr_;
@@ -68,7 +68,7 @@ class fvMeshPrimitiveLduAddressing
         const labelList upperAddr_;
 
         //- Patch addressing as a list of sublists
-        List<const labelUList*> patchAddr_;
+        const UPtrList<const labelUList> patchAddr_;
 
         //- Patch field evaluation schedule
         const lduSchedule patchSchedule_;
@@ -91,7 +91,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        fvMeshPrimitiveLduAddressing(const fvMesh& mesh);
+        explicit fvMeshPrimitiveLduAddressing(const fvMesh& mesh);
 
         //- Construct from components
         fvMeshPrimitiveLduAddressing
@@ -99,7 +99,7 @@ public:
             const label nCells,
             labelList&& lowerAddr,
             labelList&& upperAddr,
-            const List<const labelUList*>& interfaces,
+            const UPtrList<const labelUList>& patchAddr,
             const lduSchedule& ps
         );
 
@@ -111,31 +111,32 @@ public:
     // Member Functions
 
         //- Return lower addressing (i.e. lower label = upper triangle)
-        virtual const labelUList& lowerAddr() const
+        virtual const labelUList& lowerAddr() const noexcept
         {
             return lowerAddr_;
         }
 
         //- Return upper addressing (i.e. upper label)
-        virtual const labelUList& upperAddr() const
+        virtual const labelUList& upperAddr() const noexcept
         {
             return upperAddr_;
         }
 
-        //- Return patch addressing
-        virtual const labelUList& patchAddr(const label i) const
+        //- Return patch addressing for given patch
+        virtual const labelUList& patchAddr(const label patchi) const
         {
-            return *patchAddr_[i];
+            return patchAddr_[patchi];
         }
 
-        // Return patch field evaluation schedule
-        virtual const lduSchedule& patchSchedule() const
+        //- Return patch field evaluation schedule
+        virtual const lduSchedule& patchSchedule() const noexcept
         {
             return patchSchedule_;
         }
 
         //- Given additional addressing (in the form of additional neighbour
-        //  cells, i.e. like cellCells)
+        //- cells, i.e. like cellCells)
+        //
         //  - add any additional faces
         //  - sort in upper-triangular order
         //  - construct cell-faces equivalent of given nbrCells
@@ -159,8 +160,8 @@ public:
             labelListList& remoteFaceCells
         );
 
-        //- Return off-diagonal index given owner and neighbour label. Return
-        //  -1 if not found
+        //- Return off-diagonal index given owner and neighbour label.
+        //  \return -1 if not found
         static label triIndex(const lduAddressing&, const label, const label);
 };
 

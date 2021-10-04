@@ -114,7 +114,7 @@ namespace Foam
 
 class lduAddressing
 {
-    // Private data
+    // Private Data
 
         //- Number of equations
         label size_;
@@ -186,7 +186,7 @@ public:
             const label patchNo
         ) const = 0;
 
-        // Return patch field evaluation schedule
+        //- Return patch field evaluation schedule
         virtual const lduSchedule& patchSchedule() const = 0;
 
         //- Clear additional addressing

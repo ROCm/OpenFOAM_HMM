@@ -91,8 +91,8 @@ public:
 
     // Constructors
 
-        //- Construct with zero size
-        fvBoundaryMesh(const fvMesh&);
+        //- Construct zero size with mesh reference
+        explicit fvBoundaryMesh(const fvMesh&);
 
         //- Construct from polyBoundaryMesh
         fvBoundaryMesh(const fvMesh&, const polyBoundaryMesh&);
@@ -101,10 +101,13 @@ public:
     // Member Functions
 
         //- Return the mesh reference
-        const fvMesh& mesh() const
+        const fvMesh& mesh() const noexcept
         {
             return mesh_;
         }
+
+        //- Return a list of faceCells for each patch
+        UPtrList<const labelUList> faceCells() const;
 
         //- Return a list of pointers for each patch
         //- with only those pointing to interfaces being set

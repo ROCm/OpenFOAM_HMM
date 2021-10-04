@@ -142,23 +142,39 @@ void Foam::faBoundaryMesh::calcGeometry()
 }
 
 
+Foam::UPtrList<const Foam::labelUList>
+Foam::faBoundaryMesh::edgeFaces() const
+{
+    const faPatchList& patches = *this;
+
+    UPtrList<const labelUList> list(patches.size());
+
+    forAll(list, patchi)
+    {
+        list.set(patchi, &patches[patchi].edgeFaces());
+    }
+
+    return list;
+}
+
+
 Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 {
-    lduInterfacePtrsList interfaces(size());
+    const faPatchList& patches = *this;
 
-    forAll(interfaces, patchi)
+    lduInterfacePtrsList list(patches.size());
+
+    forAll(list, patchi)
     {
-        if (isA<lduInterface>(this->operator[](patchi)))
+        const lduInterface* lduPtr = isA<lduInterface>(patches[patchi]);
+
+        if (lduPtr)
         {
-            interfaces.set
-            (
-                patchi,
-                &refCast<const lduInterface>(this->operator[](patchi))
-            );
+            list.set(patchi, lduPtr);
         }
     }
 
-    return interfaces;
+    return list;
 }
 
 

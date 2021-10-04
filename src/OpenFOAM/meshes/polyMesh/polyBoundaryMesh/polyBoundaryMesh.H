@@ -155,6 +155,9 @@ public:
             return mesh_;
         }
 
+        //- Return a list of faceCells for each patch
+        UPtrList<const labelUList> faceCells() const;
+
         //- Per patch the edges on the neighbouring patch.
         //  Is for every external edge the neighbouring patch and
         //  neighbouring (external) patch edge label. Note that edge indices

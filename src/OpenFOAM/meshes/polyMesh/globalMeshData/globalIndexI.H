@@ -73,6 +73,13 @@ inline bool Foam::globalIndex::empty() const
 }
 
 
+inline Foam::label Foam::globalIndex::nProcs() const noexcept
+{
+    const label len = (offsets_.size() - 1);
+    return (len < 1) ? 0 : len;
+}
+
+
 inline const Foam::labelList& Foam::globalIndex::offsets() const noexcept
 {
     return offsets_;
@@ -82,6 +89,16 @@ inline const Foam::labelList& Foam::globalIndex::offsets() const noexcept
 inline Foam::labelList& Foam::globalIndex::offsets() noexcept
 {
     return offsets_;
+}
+
+
+inline const Foam::labelUList Foam::globalIndex::localStarts() const
+{
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1) return labelUList::null();
+
+    return labelList::subList(offsets_, len);
 }
 
 

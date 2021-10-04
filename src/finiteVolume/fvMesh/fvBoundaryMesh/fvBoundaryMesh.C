@@ -29,7 +29,6 @@ License
 #include "fvBoundaryMesh.H"
 #include "fvMesh.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::fvBoundaryMesh::addPatches(const polyBoundaryMesh& basicBdry)
@@ -131,23 +130,39 @@ void Foam::fvBoundaryMesh::movePoints()
 }
 
 
+Foam::UPtrList<const Foam::labelUList>
+Foam::fvBoundaryMesh::faceCells() const
+{
+    const fvPatchList& patches = *this;
+
+    UPtrList<const labelUList> list(patches.size());
+
+    forAll(list, patchi)
+    {
+        list.set(patchi, &patches[patchi].faceCells());
+    }
+
+    return list;
+}
+
+
 Foam::lduInterfacePtrsList Foam::fvBoundaryMesh::interfaces() const
 {
-    lduInterfacePtrsList interfaces(size());
+    const fvPatchList& patches = *this;
 
-    forAll(interfaces, patchi)
+    lduInterfacePtrsList list(patches.size());
+
+    forAll(list, patchi)
     {
-        if (isA<lduInterface>(this->operator[](patchi)))
+        const lduInterface* lduPtr = isA<lduInterface>(patches[patchi]);
+
+        if (lduPtr)
         {
-            interfaces.set
-            (
-                patchi,
-               &refCast<const lduInterface>(this->operator[](patchi))
-            );
+            list.set(patchi, lduPtr);
         }
     }
 
-    return interfaces;
+    return list;
 }
 
 

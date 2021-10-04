@@ -311,7 +311,6 @@ public:
 
     // Member Functions
 
-
         // Implicit treatment functions
 
             //- Return number of new internal of this polyPatch faces
@@ -324,7 +323,7 @@ public:
             virtual const labelUList& nbrCells() const
             {
                 NotImplemented
-                return faceCells();
+                return labelUList::null();
             }
 
             //- Return nbr patchID
@@ -338,8 +337,7 @@ public:
             virtual refPtr<labelListList> mapCollocatedFaces() const
             {
                 NotImplemented;
-                refPtr<labelListList> tMap(new labelListList(size()));
-                return tMap;
+                return nullptr;
             }
 
             //- Return implicit master

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,14 +47,9 @@ Foam::fvMeshPrimitiveLduAddressing::fvMeshPrimitiveLduAddressing
         )
     ),
     upperAddr_(mesh.faceNeighbour()),
-    patchAddr_(mesh.boundary().size()),
+    patchAddr_(mesh.boundary().faceCells()),
     patchSchedule_(mesh.globalData().patchSchedule())
-{
-    forAll(mesh.boundary(), patchi)
-    {
-        patchAddr_[patchi] = &mesh.boundary()[patchi].faceCells();
-    }
-}
+{}
 
 
 Foam::fvMeshPrimitiveLduAddressing::fvMeshPrimitiveLduAddressing
@@ -62,7 +57,7 @@ Foam::fvMeshPrimitiveLduAddressing::fvMeshPrimitiveLduAddressing
     const label nCells,
     labelList&& lowerAddr,
     labelList&& upperAddr,
-    const List<const labelUList*>& patchAddr,
+    const UPtrList<const labelUList>& patchAddr,
     const lduSchedule& ps
 )
 :
@@ -83,17 +78,15 @@ Foam::label Foam::fvMeshPrimitiveLduAddressing::triIndex
     const label b
 )
 {
-    label own = min(a, b);
+    const label own = min(a, b);
+    const label nbr = max(a, b);
 
-    label nbr = max(a, b);
-
-    label startLabel = addr.ownerStartAddr()[own];
-
-    label endLabel = addr.ownerStartAddr()[own + 1];
+    const label begLabel = addr.ownerStartAddr()[own];
+    const label endLabel = addr.ownerStartAddr()[own + 1];
 
     const labelUList& neighbour = addr.upperAddr();
 
-    for (label i = startLabel; i < endLabel; i++)
+    for (label i = begLabel; i < endLabel; ++i)
     {
         if (neighbour[i] == nbr)
         {

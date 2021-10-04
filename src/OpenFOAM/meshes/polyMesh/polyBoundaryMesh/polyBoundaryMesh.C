@@ -307,6 +307,22 @@ void Foam::polyBoundaryMesh::calcGeometry()
 }
 
 
+Foam::UPtrList<const Foam::labelUList>
+Foam::polyBoundaryMesh::faceCells() const
+{
+    const polyPatchList& patches = *this;
+
+    UPtrList<const labelUList> list(patches.size());
+
+    forAll(patches, patchi)
+    {
+        list.set(patchi, &patches[patchi].faceCells());
+    }
+
+    return list;
+}
+
+
 const Foam::List<Foam::labelPairList>&
 Foam::polyBoundaryMesh::neighbourEdges() const
 {

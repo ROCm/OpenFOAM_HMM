@@ -123,11 +123,17 @@ public:
         //- Check for default constructed or global sum == 0
         inline bool empty() const;
 
+        //- The number of processors covered by the offsets
+        inline label nProcs() const noexcept;
+
         //- Global sum of localSizes
         inline label size() const;
 
         //- The local sizes
         labelList sizes() const;
+
+        //- The local starts
+        inline const labelUList localStarts() const;
 
         //- Global max of localSizes
         inline label maxSize() const;

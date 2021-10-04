@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,16 +58,16 @@ class faMeshLduAddressing
 :
     public lduAddressing
 {
-    // Private data
+    // Private Data
 
         //- Lower as a subList of allOwner
-        labelList::subList lowerAddr_;
+        const labelList::subList lowerAddr_;
 
         //- Upper as a reference to neighbour
         const labelList& upperAddr_;
 
         //- Patch addressing as a list of sublists
-        List<const labelUList*> patchAddr_;
+        const UPtrList<const labelUList> patchAddr_;
 
         //- Patch field evaluation schedule
         const lduSchedule& patchSchedule_;
@@ -99,14 +99,10 @@ public:
                 )
             ),
             upperAddr_(mesh.edgeNeighbour()),
-            patchAddr_(mesh.boundary().size()),
+            patchAddr_(mesh.boundary().edgeFaces()),
             patchSchedule_(mesh.globalData().patchSchedule())
-        {
-            forAll(mesh.boundary(), patchI)
-            {
-                patchAddr_[patchI] = &mesh.boundary()[patchI].edgeFaces();
-            }
-        }
+        {}
+
 
     //- Destructor
     virtual ~faMeshLduAddressing() = default;
@@ -115,31 +111,31 @@ public:
     // Member Functions
 
         //- Return number of interfaces
-        virtual label nPatches() const
+        virtual label nPatches() const noexcept
         {
             return patchAddr_.size();
         }
 
         //- Return lower addressing (i.e. lower label = upper triangle)
-        virtual const labelUList& lowerAddr() const
+        virtual const labelUList& lowerAddr() const noexcept
         {
             return lowerAddr_;
         }
 
         //- Return upper addressing (i.e. upper label)
-        virtual const labelUList& upperAddr() const
+        virtual const labelUList& upperAddr() const noexcept
         {
             return upperAddr_;
         }
 
         //- Return patch addressing
-        virtual const labelUList& patchAddr(const label i) const
+        virtual const labelUList& patchAddr(const label patchi) const
         {
-            return *patchAddr_[i];
+            return patchAddr_[patchi];
         }
 
-        // Return patch field evaluation schedule
-        virtual const lduSchedule& patchSchedule() const
+        //- Return patch field evaluation schedule
+        virtual const lduSchedule& patchSchedule() const noexcept
         {
             return patchSchedule_;
         }
