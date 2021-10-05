@@ -104,6 +104,7 @@ class Function1
             const entry* eptr,       // Eg, dict.findEntry(entryName)
             const dictionary& dict,
             const word& redirectType,
+            const objectRegistry* obrPtr,
             const bool mandatory
         );
 
@@ -131,9 +132,10 @@ public:
         dictionary,
         (
             const word& entryName,
-            const dictionary& dict
+            const dictionary& dict,
+            const objectRegistry* obrPtr
         ),
-        (entryName, dict)
+        (entryName, dict, obrPtr)
     );
 
 
@@ -146,7 +148,8 @@ public:
             const objectRegistry* obrPtr = nullptr
         );
 
-        //- Construct from entry name and dictionary (unused)
+        //- Construct from entry name, (unused) dictionary
+        //- and optional registry
         Function1
         (
             const word& entryName,
@@ -169,6 +172,7 @@ public:
             const word& entryName,
             const dictionary& dict,
             const word& redirectType,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -179,6 +183,7 @@ public:
             std::initializer_list<std::pair<const char*,int>> compat,
             const dictionary& dict,
             const word& redirectType = word::null,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -187,6 +192,7 @@ public:
         (
             const word& entryName,
             const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -195,7 +201,8 @@ public:
         (
             const word& entryName,
             const dictionary& dict,
-            const word& redirectType = word::null
+            const word& redirectType = word::null,
+            const objectRegistry* obrPtr = nullptr
         );
 
 
@@ -209,6 +216,7 @@ public:
             const word& entryName,
             const dictionary& dict,
             enum keyType::option matchOpt = keyType::LITERAL,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -221,7 +229,8 @@ public:
         ///     const word& entryName,
         ///     const dictionary& dict,
         ///     const Type& deflt,
-        ///     enum keyType::option matchOpt = keyType::LITERAL
+        ///     enum keyType::option matchOpt = keyType::LITERAL,
+        ///     const objectRegistry* obrPtr = nullptr
         /// );
 
 
@@ -286,7 +295,12 @@ public:
     // Constructors
 
         //- Construct from entry name and dictionary
-        FieldFunction1(const word& entryName, const dictionary& dict);
+        FieldFunction1
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,9 +31,13 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Function1Types::OneConstant<Type>::OneConstant(const word& entryName)
+Foam::Function1Types::OneConstant<Type>::OneConstant
+(
+    const word& entryName,
+    const objectRegistry* obrPtr
+)
 :
-    Function1<Type>(entryName)
+    Function1<Type>(entryName, obrPtr)
 {}
 
 
@@ -40,10 +45,11 @@ template<class Type>
 Foam::Function1Types::OneConstant<Type>::OneConstant
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict)
+    Function1<Type>(entryName, dict, obrPtr)
 {}
 
 

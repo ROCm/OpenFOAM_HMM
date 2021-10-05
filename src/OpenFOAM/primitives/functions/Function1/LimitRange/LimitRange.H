@@ -135,8 +135,13 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        LimitRange(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        LimitRange
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit LimitRange(const LimitRange<Type>& rhs);

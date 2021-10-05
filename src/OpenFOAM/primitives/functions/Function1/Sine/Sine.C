@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,11 @@ template<class Type>
 Foam::Function1Types::Sine<Type>::Sine
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict),
+    Function1<Type>(entryName, dict, obrPtr),
     t0_(dict.getOrDefault<scalar>("t0", 0)),
     amplitude_(Function1<scalar>::NewIfPresent("amplitude", dict)),
     period_(Function1<scalar>::NewIfPresent("period", dict)),

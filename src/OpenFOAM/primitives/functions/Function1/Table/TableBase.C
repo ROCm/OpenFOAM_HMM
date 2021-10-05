@@ -62,10 +62,11 @@ template<class Type>
 Foam::Function1Types::TableBase<Type>::TableBase
 (
     const word& name,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(name, dict),
+    Function1<Type>(name, dict, obrPtr),
     bounding_
     (
         bounds::repeatableBoundingNames.getOrDefault
@@ -100,13 +101,6 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
     table_(tbl.table_),
     tableSamplesPtr_(nullptr),
     interpolatorPtr_(nullptr)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::TableBase<Type>::~TableBase()
 {}
 
 

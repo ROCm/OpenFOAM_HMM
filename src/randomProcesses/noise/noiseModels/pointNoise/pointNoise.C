@@ -253,7 +253,7 @@ void pointNoise::calculate()
             fName = argList::envGlobalPath()/fName;
         }
 
-        Function1Types::CSV<scalar> data("pressure", dict_, fName);
+        Function1Types::CSV<scalar> data("pressure", dict_, nullptr, fName);
         processData(filei, data);
     }
 }

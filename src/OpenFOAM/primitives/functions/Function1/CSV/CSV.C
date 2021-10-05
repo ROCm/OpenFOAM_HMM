@@ -210,10 +210,11 @@ Foam::Function1Types::CSV<Type>::CSV
 (
     const word& entryName,
     const dictionary& dict,
+    const objectRegistry* obrPtr,
     const fileName& fName
 )
 :
-    TableBase<Type>(entryName, dict),
+    TableBase<Type>(entryName, dict, obrPtr),
     nHeaderLine_(dict.get<label>("nHeaderLine")),
     refColumn_(dict.get<label>("refColumn")),
     componentColumns_(getComponentColumns("componentColumns", dict)),

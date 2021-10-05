@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,10 +33,11 @@ template<class Type>
 Foam::Function1Types::Function1Expression<Type>::Function1Expression
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict),
+    Function1<Type>(entryName, dict, obrPtr),
     dict_(dict),
     valueExpr_(),
     driver_(1, dict_)
@@ -88,6 +89,8 @@ Type Foam::Function1Types::Function1Expression<Type>::value
 
     driver_.setArgument(x);
 
+    driver_.resetDb(this->whichDb());
+
     driver_.parse(this->valueExpr_);
 
     expressions::exprResult result(driver_.result());
@@ -98,7 +101,9 @@ Type Foam::Function1Types::Function1Expression<Type>::value
     if (!result.hasValue() || !result.size() || !result.isType<Type>())
     {
         FatalErrorInFunction
-            << "Could not evaluate: " << this->valueExpr_
+            << "Could not evaluate: " << this->valueExpr_ << nl
+            << "Result size:" << result.size()
+            << " type:" << result.valueType() << nl
             << exit(FatalError);
     }
 
@@ -124,7 +129,7 @@ void Foam::Function1Types::Function1Expression<Type>::writeData
     Ostream& os
 ) const
 {
-    // Function1-from-subdict so out dictionary contains
+    // Function1-from-subdict so output dictionary contains
     // only the relevant entries.
     dict_.writeEntry(this->name(), os);
 }

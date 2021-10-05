@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +40,11 @@ void Foam::Function1Types::ramp::read(const dictionary& coeffs)
 Foam::Function1Types::ramp::ramp
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<scalar>(entryName, dict)
+    Function1<scalar>(entryName, dict, obrPtr)
 {
     read(dict);
 }

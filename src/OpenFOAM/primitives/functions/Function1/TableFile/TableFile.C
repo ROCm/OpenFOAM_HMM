@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,11 @@ template<class Type>
 Foam::Function1Types::TableFile<Type>::TableFile
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    TableBase<Type>(entryName, dict),
+    TableBase<Type>(entryName, dict, obrPtr),
     fName_()
 {
     dict.readEntry("file", fName_);

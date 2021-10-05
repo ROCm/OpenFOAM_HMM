@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +75,20 @@ public:
 
     // Constructors
 
-        //- Construct from entry name
-        explicit OneConstant(const word& entryName);
+        //- Construct from entry name and optional registry
+        explicit OneConstant
+        (
+            const word& entryName,
+            const objectRegistry* obrPtr = nullptr
+        );
 
-        //- Construct from entry name and dictionary
-        OneConstant(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        OneConstant
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const

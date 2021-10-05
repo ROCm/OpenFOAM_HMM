@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,8 +181,13 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        Sine(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        Sine
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit Sine(const Sine<Type>& rhs);

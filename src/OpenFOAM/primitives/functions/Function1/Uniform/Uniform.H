@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,15 +38,12 @@ Description
         <entryName>    uniform  <value>
     \endverbatim
 
-SourceFiles
-    Uniform.C
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Function1Types_Uniform_H
 #define Function1Types_Uniform_H
 
-#include "Function1.H"
+#include "Constant.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,8 +78,16 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        Uniform(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        Uniform
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        )
+        :
+            Constant<Type>(entryName, dict, obrPtr)
+        {}
 };
 
 
@@ -90,12 +95,6 @@ public:
 
 } // End namespace Function1Types
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "Uniform.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

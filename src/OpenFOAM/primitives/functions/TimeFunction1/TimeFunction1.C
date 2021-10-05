@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ Foam::TimeFunction1<Type>::TimeFunction1
 :
     time_(runTime),
     name_(entryName),
-    entry_(Function1<Type>::New(entryName, dict))
+    entry_(Function1<Type>::New(entryName, dict, &runTime))
 {
     entry_->convertTimeBase(runTime);
 }
@@ -81,7 +81,7 @@ Foam::TimeFunction1<Type>::TimeFunction1
 template<class Type>
 void Foam::TimeFunction1<Type>::reset(const dictionary& dict)
 {
-    entry_ = Function1<Type>::New(name_, dict);
+    entry_ = Function1<Type>::New(name_, dict, &time_);
     entry_->convertTimeBase(time_);
 }
 

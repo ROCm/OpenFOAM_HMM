@@ -38,6 +38,7 @@ Foam::Function1<Type>::New
     const entry* eptr,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -86,7 +87,12 @@ Foam::Function1<Type>::New
 
             return autoPtr<Function1<Type>>
             (
-                new Function1Types::Constant<Type>(entryName, constValue)
+                new Function1Types::Constant<Type>
+                (
+                    entryName,
+                    constValue,
+                    obrPtr
+                )
             );
         }
 
@@ -135,7 +141,7 @@ Foam::Function1<Type>::New
             << exit(FatalIOError);
     }
 
-    return ctorPtr(entryName, *coeffs);
+    return ctorPtr(entryName, *coeffs, obrPtr);
 }
 
 
@@ -146,6 +152,7 @@ Foam::Function1<Type>::New
     const word& entryName,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -155,6 +162,7 @@ Foam::Function1<Type>::New
         dict.findEntry(entryName, keyType::LITERAL),
         dict,
         redirectType,
+        obrPtr,
         mandatory
     );
 }
@@ -168,6 +176,7 @@ Foam::Function1<Type>::NewCompat
     std::initializer_list<std::pair<const char*,int>> compat,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -177,6 +186,7 @@ Foam::Function1<Type>::NewCompat
         dict.findCompat(entryName, compat, keyType::LITERAL),
         dict,
         redirectType,
+        obrPtr,
         mandatory
     );
 }
@@ -188,10 +198,11 @@ Foam::Function1<Type>::New
 (
     const word& entryName,
     const dictionary& dict,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
-    return Function1<Type>::New(entryName, dict, word::null, mandatory);
+    return Function1<Type>::New(entryName, dict, word::null, obrPtr, mandatory);
 }
 
 
@@ -201,11 +212,12 @@ Foam::Function1<Type>::NewIfPresent
 (
     const word& entryName,
     const dictionary& dict,
-    const word& redirectType
+    const word& redirectType,
+    const objectRegistry* obrPtr
 )
 {
     // mandatory = false
-    return Function1<Type>::New(entryName, dict, redirectType, false);
+    return Function1<Type>::New(entryName, dict, redirectType, obrPtr, false);
 }
 
 
@@ -218,6 +230,7 @@ Foam::Function1<Type>::New
     const word& entryName,
     const dictionary& dict,
     enum keyType::option matchOpt,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -259,6 +272,7 @@ Foam::Function1<Type>::New
                     eptr,  // Already resolved
                     dict,
                     word::null,
+                    obrPtr,
                     mandatory
                 )
             );
@@ -292,12 +306,13 @@ Foam::Function1<Type>::New
 ///     const word& entryName,
 ///     const dictionary& dict,
 ///     const Type& deflt,
-///     enum keyType::option matchOpt
+///     enum keyType::option matchOpt,
+///     const objectRegistry* obrPtr
 /// )
 /// {
 ///     auto fref
 ///     (
-///         Function1<Type>::New(entryName, dict, cache, matchOpt, false)
+///         Function1<Type>::New(entryName, dict, cache, matchOpt, obrPtr,false)
 ///     );
 ///
 ///     if (!fref)
@@ -307,6 +322,5 @@ Foam::Function1<Type>::New
 ///
 ///     return fref;
 /// }
-
 
 // ************************************************************************* //

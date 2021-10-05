@@ -126,10 +126,11 @@ template<class Function1Type>
 Foam::FieldFunction1<Function1Type>::FieldFunction1
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1Type(entryName, dict)
+    Function1Type(entryName, dict, obrPtr)
 {}
 
 
