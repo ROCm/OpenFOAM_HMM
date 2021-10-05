@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,13 +58,6 @@ Foam::PilchErdman<CloudType>::PilchErdman(const PilchErdman<CloudType>& bum)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PilchErdman<CloudType>::~PilchErdman()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -93,13 +87,13 @@ bool Foam::PilchErdman<CloudType>::update
 )
 {
     // Weber number - eq (1)
-    scalar We = rhoc*sqr(Urmag)*d/sigma;
+    const scalar We = rhoc*sqr(Urmag)*d/sigma;
 
     // Ohnesorge number - eq (2)
-    scalar Oh = mu/sqrt(rho*d*sigma);
+    const scalar Oh = mu/sqrt(rho*d*sigma);
 
     // Critical Weber number - eq (5)
-    scalar Wec = 12.0*(1.0 + 1.077*pow(Oh, 1.6));
+    const scalar Wec = 12.0*(1.0 + 1.077*pow(Oh, 1.6));
 
     if (We > Wec)
     {
@@ -116,7 +110,7 @@ bool Foam::PilchErdman<CloudType>::update
             else if (We > 45)
             {
                 // bag-and-stamen breakup  - eq (10)
-                taubBar = 14.1*pow(We - 12.0, 0.25);
+                taubBar = 14.1*pow(We - 12.0, -0.25);
             }
             else if (We > 18)
             {
@@ -135,15 +129,14 @@ bool Foam::PilchErdman<CloudType>::update
             }
         }
 
-        scalar rho12 = sqrt(rhoc/rho);
+        const scalar rho12 = sqrt(rhoc/rho);
 
         // velocity of fragmenting drop - eq (20)
-        scalar Vd = Urmag*rho12*(B1_*taubBar + B2_*sqr(taubBar));
+        const scalar Vd = Urmag*rho12*(B1_*taubBar + B2_*sqr(taubBar));
 
         // maximum stable diameter - eq (33)
-        scalar Vd1 = sqr(1.0 - Vd/Urmag);
-        Vd1 = max(Vd1, SMALL);
-        scalar dStable = Wec*sigma/(Vd1*rhoc*sqr(Urmag));
+        const scalar Vd1 = max(sqr(1.0 - Vd/Urmag), SMALL);
+        const scalar dStable = Wec*sigma/(Vd1*rhoc*sqr(Urmag));
 
         if (d < dStable)
         {
@@ -153,13 +146,13 @@ bool Foam::PilchErdman<CloudType>::update
         }
         else
         {
-            scalar semiMass = nParticle*pow3(d);
+            const scalar semiMass = nParticle*pow3(d);
 
             // invert eq (3) to create a dimensional break-up time
-            scalar taub = taubBar*d/(Urmag*rho12);
+            const scalar taub = taubBar*d/(Urmag*rho12);
 
             // update droplet diameter according to the rate eq (implicitly)
-            scalar frac = dt/taub;
+            const scalar frac = dt/taub;
             d = (d + frac*dStable)/(1.0 + frac);
 
             // correct the number of particles to conserve mass

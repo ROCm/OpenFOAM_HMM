@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,33 +31,42 @@ Group
     grpLagrangianIntermediateBreakupSubModels
 
 Description
-    Particle secondary breakup model, based on the reference:
+    Particle secondary breakup model based on
+    Pilch-Erdman total droplet breakup model.
 
+    Reference:
     \verbatim
-    Pilch, M. and Erdman, C.A.
-    "Use of breakup time data and velocity history data
-     to predict the maximum size of stable fragments for acceleration
-     induced breakup of a liquid drop."
-    Int. J. Multiphase Flows 13 (1987), 741-757
+        Pilch, M., & Erdman, C. A. (1987).
+        Use of breakup time data and velocity history data
+        to predict the maximum size of stable fragments for
+        acceleration-induced breakup of a liquid drop.
+        International journal of multiphase flow, 13(6), 741-757.
+        DOI:10.1016/0301-9322(87)90063-2
     \endverbatim
 
     The droplet fragment velocity is described by the equation:
 
     \f[
-        V_d = V sqrt(epsilon)(B1 T + B2 T^2)
+        V_d = V \sqrt(\epsilon)(B_1 T + B_2 T^2)
     \f]
 
+    where
+    \vartable
+        V_d      | Fragment velocity
+        V        | Magnitude of the relative velocity
+        \epsilon | Density ratio (rho_carrier/rho_droplet)
+        T        | characteristic break-up time
+        B_1      | Model coefficient
+        B_2      | Model coefficient
+    \endvartable
     Where:
-        V_d     : fragment velocity
-        V       : magnitude of the relative velocity
-        epsilon : density ratio (rho_carrier/rho_droplet)
-        T       : characteristic break-up time
-        B1, B2  : model input coefficients
 
     The authors suggest that:
         compressible flow   : B1 = 0.75*1.0; B2 = 3*0.116
         incompressible flow : B1 = 0.75*0.5; B2 = 3*0.0758
 
+SourceFiles
+    PilchErdman.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,11 +89,12 @@ class PilchErdman
 :
     public BreakupModel<CloudType>
 {
-private:
+    // Private Data
 
-    // Private data
-
+        //- Model coefficient
         scalar B1_;
+
+        //- Model coefficient
         scalar B2_;
 
 
@@ -110,9 +121,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const PilchErdman<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~PilchErdman();
+    virtual ~PilchErdman() = default;
 
 
     // Member Functions
