@@ -92,20 +92,11 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
 
             auto tlocalFld(tmp<Field<Type>>::New(fld.size()));
             Field<Type>& localFld = tlocalFld.ref();
-            List<Type> localDeflt(defaultValues.size());
 
             // Transform to cylindrical coords
             {
                 tmp<tensorField> nbrT(cs().R(nbrPp.faceCentres()));
                 localFld = Foam::invTransform(nbrT(), fld);
-                if (defaultValues.size() == fld.size())
-                {
-                    // We get in UList (why? Copied from cyclicAMI). Convert to
-                    // Field so we can use transformField routines.
-                    const SubField<Type> defaultSubFld(defaultValues);
-                    const Field<Type>& defaultFld(defaultSubFld);
-                    localDeflt = Foam::invTransform(nbrT, defaultFld);
-                }
             }
 
             if (debug&2)
@@ -129,13 +120,26 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
                 }
             }
 
-            const vectorField::subField fc(this->faceCentres());
+
+            const tmp<tensorField> T(cs().R(this->faceCentres()));
+
+            List<Type> localDeflt(defaultValues.size());
+            if (defaultValues.size() == size())
+            {
+                // Transform default values into cylindrical coords (using
+                // *this faceCentres)
+                // We get in UList (why? Copied from cyclicAMI). Convert to
+                // Field so we can use transformField routines.
+                const SubField<Type> defaultSubFld(defaultValues);
+                const Field<Type>& defaultFld(defaultSubFld);
+                localDeflt = Foam::invTransform(T(), defaultFld);
+            }
 
             // Do the actual interpolation and interpolate back to cartesian
             // coords
             return Foam::transform
             (
-                cs().R(fc),
+                T,
                 interpolateUntransformed(localFld, localDeflt)
             );
         }
