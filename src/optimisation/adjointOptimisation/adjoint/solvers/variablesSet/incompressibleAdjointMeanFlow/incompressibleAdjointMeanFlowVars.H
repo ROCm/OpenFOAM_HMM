@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -158,22 +158,22 @@ public:
             // conditions should use these fields to execute a solver iteration
 
                 //- Return const reference to pressure
-                const volScalarField& paInst() const;
+                inline const volScalarField& paInst() const;
 
                 //- Return reference to pressure
-                volScalarField& paInst();
+                inline volScalarField& paInst();
 
                 //- Return const reference to velocity
-                const volVectorField& UaInst() const;
+                inline const volVectorField& UaInst() const;
 
                 //- Return reference to velocity
-                volVectorField& UaInst();
+                inline volVectorField& UaInst();
 
                 //- Return const reference to volume flux
-                const surfaceScalarField& phiaInst() const;
+                inline const surfaceScalarField& phiaInst() const;
 
                 //- Return reference to volume flux
-                surfaceScalarField& phiaInst();
+                inline surfaceScalarField& phiaInst();
 
             //- Return computeMeanFields bool
             bool computeMeanFields() const;
@@ -189,6 +189,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "incompressibleAdjointMeanFlowVarsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

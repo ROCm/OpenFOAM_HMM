@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -89,11 +89,10 @@ boundaryAdjointContributionIncompressible
 tmp<vectorField> boundaryAdjointContributionIncompressible::velocitySource()
 {
     // Objective function contribution
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
     tmp<vectorField> tsource =
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdv
         );
     vectorField& source = tsource.ref();
@@ -110,11 +109,10 @@ tmp<vectorField> boundaryAdjointContributionIncompressible::velocitySource()
 tmp<scalarField> boundaryAdjointContributionIncompressible::pressureSource()
 {
     // Objective function contribution
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
     tmp<scalarField> tsource =
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdvn
         );
 
@@ -126,10 +124,7 @@ tmp<scalarField> boundaryAdjointContributionIncompressible::pressureSource()
     const vectorField& adjointTurbulenceContr =
         adjointRAS().adjointMomentumBCSource()[patch_.index()];
 
-    tmp<vectorField> tnf = patch_.nf();
-    const vectorField& nf = tnf();
-
-    source += adjointTurbulenceContr & nf;
+    source += adjointTurbulenceContr & patch_.nf();
 
     return (tsource);
 }
@@ -139,11 +134,10 @@ tmp<vectorField>
 boundaryAdjointContributionIncompressible::tangentVelocitySource()
 {
     // Objective function contribution
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
     tmp<vectorField> tsource =
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdvt
         );
 
@@ -167,59 +161,51 @@ boundaryAdjointContributionIncompressible::tangentVelocitySource()
 tmp<vectorField>
 boundaryAdjointContributionIncompressible::normalVelocitySource()
 {
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
-    tmp<vectorField> tsource =
+    return
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdp
         );
 
-    return (tsource);
 }
 
 
 tmp<scalarField> boundaryAdjointContributionIncompressible::energySource()
 {
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
-    tmp<scalarField> tsource =
+    return
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdT
         );
 
-    return (tsource);
 }
 
 
 tmp<scalarField>
 boundaryAdjointContributionIncompressible::adjointTMVariable1Source()
 {
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
-    tmp<scalarField> tsource =
+    return
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdTMvar1
         );
 
-    return (tsource);
 }
 
 
 tmp<scalarField>
 boundaryAdjointContributionIncompressible::adjointTMVariable2Source()
 {
-    PtrList<objective>& objectives = objectiveManager_.getObjectiveFunctions();
-    tmp<scalarField> tsource =
+    return
         sumContributions
         (
-            objectives,
+            objectiveManager_.getObjectiveFunctions(),
             &objectiveIncompressible::boundarydJdTMvar2
         );
 
-    return (tsource);
 }
 
 
@@ -249,15 +235,8 @@ boundaryAdjointContributionIncompressible::dJdGradU()
 
 tmp<scalarField> boundaryAdjointContributionIncompressible::momentumDiffusion()
 {
-    tmp<scalarField> tnuEff(new scalarField(patch_.size(), Zero));
-    scalarField& nuEff = tnuEff.ref();
 
-    const autoPtr<incompressibleAdjoint::adjointRASModel>&
-        adjointTurbulenceModel = adjointVars().adjointTurbulence();
-
-    nuEff = adjointTurbulenceModel().nuEff()().boundaryField()[patch_.index()];
-
-    return tnuEff;
+    return adjointVars().adjointTurbulence()().nuEff(patch_.index());
 }
 
 
@@ -296,64 +275,40 @@ tmp<scalarField> boundaryAdjointContributionIncompressible::thermalDiffusion()
 
 tmp<scalarField> boundaryAdjointContributionIncompressible::wallDistance()
 {
-    tmp<scalarField> twallDist(new scalarField(patch_.size(), Zero));
-    scalarField& wallDist = twallDist.ref();
-
-    wallDist = primalVars_.turbulence()->y()[patch_.index()];
-
-    return twallDist;
+    return primalVars_.turbulence()->y()[patch_.index()];
 }
 
 
 tmp<scalarField>
 boundaryAdjointContributionIncompressible::TMVariable1Diffusion()
 {
-    const autoPtr<incompressibleAdjoint::adjointRASModel>& adjointRAS =
-        adjointVars().adjointTurbulence();
+    return
+        adjointVars().adjointTurbulence()->diffusionCoeffVar1(patch_.index());
 
-    tmp<scalarField> tdiffCoeff =
-        adjointRAS().diffusionCoeffVar1(patch_.index());
-
-    return tdiffCoeff;
 }
 
 
 tmp<scalarField>
 boundaryAdjointContributionIncompressible::TMVariable2Diffusion()
 {
-    const autoPtr<incompressibleAdjoint::adjointRASModel>& adjointRAS =
-        adjointVars().adjointTurbulence();
-
-    tmp<scalarField> tdiffCoeff =
-        adjointRAS().diffusionCoeffVar2(patch_.index());
-
-    return tdiffCoeff;
+    return
+        adjointVars().adjointTurbulence()->diffusionCoeffVar2(patch_.index());
 }
 
 
 tmp<scalarField> boundaryAdjointContributionIncompressible::TMVariable1()
 {
-    const autoPtr<incompressible::RASModelVariables>& RASVariables =
-        primalVars_.RASModelVariables();
-    tmp<scalarField> tboundField(new scalarField(patch_.size(), Zero));
-    scalarField& boundField = tboundField.ref();
-
-    boundField = RASVariables().TMVar1().boundaryField()[patch_.index()];
-
-    return tboundField;
+    return
+        primalVars_.RASModelVariables()->TMVar1().
+            boundaryField()[patch_.index()];
 }
 
 
 tmp<scalarField> boundaryAdjointContributionIncompressible::TMVariable2()
 {
-    const autoPtr<incompressible::RASModelVariables>& RASVariables =
-        primalVars_.RASModelVariables();
-    tmp<scalarField> tboundField(new scalarField(patch_.size(), Zero));
-    scalarField& boundField = tboundField.ref();
-
-    boundField = RASVariables().TMVar2().boundaryField()[patch_.index()];
-
-    return tboundField;
+    return
+        primalVars_.RASModelVariables()->TMVar2().
+            boundaryField()[patch_.index()];
 }
 
 

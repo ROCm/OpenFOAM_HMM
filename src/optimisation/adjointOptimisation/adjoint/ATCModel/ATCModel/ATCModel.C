@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -256,6 +256,12 @@ bool ATCModel::writeData(Ostream&) const
 {
     // Does nothing
     return true;
+}
+
+
+void ATCModel::updatePrimalBasedQuantities()
+{
+    // Does nothing in base
 }
 
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -163,6 +163,8 @@ void Foam::incompressibleAdjointSolver::updatePrimalBasedQuantities()
     if (vars_)
     {
         getAdjointVars().adjointTurbulence()->setChangedPrimalSolution();
+        ATCModel_().updatePrimalBasedQuantities();
+        getAdjointVars().updatePrimalBasedQuantities();
     }
 }
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ATCstandard Declaration
+                         Class ATCstandard Declaration
 \*---------------------------------------------------------------------------*/
 
 class ATCstandard
@@ -57,6 +57,12 @@ class ATCstandard
     public ATCModel
 {
 private:
+
+    // Private data
+
+        //- The gradU used in the computation of the standard ATC
+        //  Cached to avoid costly recomputation in each adjoint iteration
+        volTensorField gradU_;
 
     // Private Member Functions
 
@@ -96,6 +102,9 @@ public:
 
         //- Get the FI sensitivity derivatives term coming from the ATC
         virtual tmp<volTensorField> getFISensitivityTerm() const;
+
+        //- Update quantities related with the primal fields
+        virtual void updatePrimalBasedQuantities();
 };
 
 

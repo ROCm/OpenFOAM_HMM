@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2020, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2020, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -69,10 +69,6 @@ protected:
         scalar Aref_;
         scalar rhoInf_;
         scalar UInf_;
-
-        autoPtr<volVectorField> stressXPtr_;
-        autoPtr<volVectorField> stressYPtr_;
-        autoPtr<volVectorField> stressZPtr_;
 
 
 public:

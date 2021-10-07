@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -153,6 +153,7 @@ Foam::objectiveManager& Foam::adjointSolver::getObjectiveManager()
 
 void Foam::adjointSolver::postLoop()
 {
+    addProfiling(adjointSolver, "adjointSolver::postLoop");
     computeObjectiveSensitivities();
     // The solver dictionary has been already written after the termination
     // of the adjoint loop. Force re-writing it to include the sensitivities

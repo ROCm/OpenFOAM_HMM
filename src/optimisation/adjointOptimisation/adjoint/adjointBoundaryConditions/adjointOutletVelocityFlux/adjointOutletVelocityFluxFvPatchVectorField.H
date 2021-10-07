@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -63,10 +63,6 @@ class adjointOutletVelocityFluxFvPatchVectorField
     public fixedValueFvPatchVectorField,
     public adjointVectorBoundaryCondition
 {
-    // Private Member Functions
-
-        tmp<tensorField> computeLocalGrad();
-
 
 public:
 

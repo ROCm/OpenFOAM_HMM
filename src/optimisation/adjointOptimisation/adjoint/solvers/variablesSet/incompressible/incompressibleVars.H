@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -182,42 +182,44 @@ public:
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                 //- Return const reference to pressure
-                const volScalarField& pInst() const;
+                inline const volScalarField& pInst() const;
 
                 //- Return reference to pressure
-                volScalarField& pInst();
+                inline volScalarField& pInst();
 
                 //- Return const reference to velocity
-                const volVectorField& UInst() const;
+                inline const volVectorField& UInst() const;
 
                 //- Return reference to velocity
-                volVectorField& UInst();
+                inline volVectorField& UInst();
 
                 //- Return const reference to volume flux
-                const surfaceScalarField& phiInst() const;
+                inline const surfaceScalarField& phiInst() const;
 
                 //- Return reference to volume flux
-                surfaceScalarField& phiInst();
+                inline surfaceScalarField& phiInst();
 
 
             //- Return const reference to transport model
-            const singlePhaseTransportModel& laminarTransport() const;
+            inline const singlePhaseTransportModel& laminarTransport() const;
 
             //- Return reference to transport model
-            singlePhaseTransportModel& laminarTransport();
+            inline singlePhaseTransportModel& laminarTransport();
 
             //- Return const reference to the turbulence model
-            const autoPtr<incompressible::turbulenceModel>& turbulence() const;
+            inline const autoPtr<incompressible::turbulenceModel>&
+                turbulence() const;
 
             //- Return  reference to the turbulence model
-            autoPtr<incompressible::turbulenceModel>& turbulence();
+            inline autoPtr<incompressible::turbulenceModel>& turbulence();
 
             //- Return const reference to the turbulence model variables
-            const autoPtr<incompressible::RASModelVariables>&
+            inline const autoPtr<incompressible::RASModelVariables>&
                 RASModelVariables() const;
 
             //- Return reference to the turbulence model variables
-            autoPtr<incompressible::RASModelVariables>& RASModelVariables();
+            inline autoPtr<incompressible::RASModelVariables>&
+                RASModelVariables();
 
             //- Restore field values to the initial ones
             void restoreInitValues();
@@ -257,6 +259,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "incompressibleVarsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

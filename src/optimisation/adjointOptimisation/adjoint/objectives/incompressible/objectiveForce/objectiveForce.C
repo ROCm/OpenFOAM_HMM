@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -70,28 +70,7 @@ objectiveForce::objectiveForce
     forceDirection_(dict.get<vector>("direction")),
     Aref_(dict.get<scalar>("Aref")),
     rhoInf_(dict.get<scalar>("rhoInf")),
-    UInf_(dict.get<scalar>("UInf")),
-    stressXPtr_
-    (
-        Foam::createZeroFieldPtr<vector>
-        (
-            mesh_, "stressX", dimLength/sqr(dimTime)
-        )
-    ),
-    stressYPtr_
-    (
-        Foam::createZeroFieldPtr<vector>
-        (
-            mesh_, "stressY", dimLength/sqr(dimTime)
-        )
-    ),
-    stressZPtr_
-    (
-        Foam::createZeroFieldPtr<vector>
-        (
-            mesh_, "stressZ", dimLength/sqr(dimTime)
-        )
-    )
+    UInf_(dict.get<scalar>("UInf"))
 {
     // Sanity check and print info
     if (forcePatches_.empty())
@@ -135,16 +114,9 @@ scalar objectiveForce::J()
 
     for (const label patchI : forcePatches_)
     {
-        pressureForce += gSum
-        (
-            mesh_.Sf().boundaryField()[patchI] * p.boundaryField()[patchI]
-        );
-        // Viscous term calculated using the full tensor derivative
-        viscousForce += gSum
-        (
-            devReff.boundaryField()[patchI]
-          & mesh_.Sf().boundaryField()[patchI]
-        );
+        const vectorField& Sf = mesh_.Sf().boundaryField()[patchI];
+        pressureForce += gSum(Sf*p.boundaryField()[patchI]);
+        viscousForce += gSum(devReff.boundaryField()[patchI] & Sf);
     }
 
     cumulativeForce = pressureForce + viscousForce;
@@ -178,8 +150,8 @@ void objectiveForce::update_dSdbMultiplier()
     // Compute contributions with mean fields, if present
     const volScalarField& p = vars_.p();
     const volVectorField& U = vars_.U();
-    const autoPtr<incompressible::RASModelVariables>&
-        turbVars = vars_.RASModelVariables();
+    const autoPtr<incompressible::RASModelVariables>& turbVars =
+        vars_.RASModelVariables();
     const singlePhaseTransportModel& lamTransp = vars_.laminarTransport();
 
     tmp<volSymmTensorField> tdevReff = turbVars->devReff(lamTransp, U);
@@ -208,11 +180,16 @@ void objectiveForce::update_dxdbMultiplier()
         turbVars = vars_.RASModelVariables();
     const singlePhaseTransportModel& lamTransp = vars_.laminarTransport();
 
-    //tmp<volSymmTensorField> tdevReff = turbVars->devReff(lamTransp, U);
-    //const volSymmTensorField& devReff = tdevReff();
-
-    volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
-    volTensorField gradU(fvc::grad(U));
+    // We only need to modify the boundaryField of gradU locally.
+    // If grad(U) is cached then
+    // a. The .ref() call fails since the tmp is initialised from a
+    //    const ref
+    // b. we would be changing grad(U) for all other places in the code
+    //    that need it
+    // So, always allocate new memory and avoid registering the new field
+    tmp<volTensorField> tgradU =
+        volTensorField::New("gradULocal", fvc::grad(U));
+    volTensorField& gradU = tgradU.ref();
     volTensorField::Boundary& gradUbf = gradU.boundaryFieldRef();
 
     // Explicitly correct the boundary gradient to get rid of
@@ -222,49 +199,42 @@ void objectiveForce::update_dxdbMultiplier()
         const fvPatch& patch = mesh_.boundary()[patchI];
         if (isA<wallFvPatch>(patch))
         {
-            tmp<vectorField> nf = patch.nf();
-            gradUbf[patchI] = nf*U.boundaryField()[patchI].snGrad();
+            tmp<vectorField> tnf = patch.nf();
+            gradUbf[patchI] = tnf*U.boundaryField()[patchI].snGrad();
         }
     }
 
-    volTensorField stress(nuEff*(gradU + T(gradU)));
-
-    stressXPtr_().replace(0, stress.component(0));
-    stressXPtr_().replace(1, stress.component(1));
-    stressXPtr_().replace(2, stress.component(2));
-
-    stressYPtr_().replace(0, stress.component(3));
-    stressYPtr_().replace(1, stress.component(4));
-    stressYPtr_().replace(2, stress.component(5));
-
-    stressZPtr_().replace(0, stress.component(6));
-    stressZPtr_().replace(1, stress.component(7));
-    stressZPtr_().replace(2, stress.component(8));
-
-    volTensorField gradStressX(fvc::grad(stressXPtr_()));
-    volTensorField gradStressY(fvc::grad(stressYPtr_()));
-    volTensorField gradStressZ(fvc::grad(stressZPtr_()));
-
-    // the notorious second-order derivative at the wall. Use with caution!
-    volVectorField gradp(fvc::grad(p));
-
+    // Term coming from gradp
+    tmp<volVectorField> tgradp(fvc::grad(p));
+    const volVectorField& gradp = tgradp.cref();
     for (const label patchI : forcePatches_)
     {
-        const fvPatch& patch = mesh_.boundary()[patchI];
-        tmp<vectorField> tnf = patch.nf();
-        const vectorField& nf = tnf();
         bdxdbMultPtr_()[patchI] =
-        (
-            (
-                (
-                   -(forceDirection_.x() * gradStressX.boundaryField()[patchI])
-                   -(forceDirection_.y() * gradStressY.boundaryField()[patchI])
-                   -(forceDirection_.z() * gradStressZ.boundaryField()[patchI])
-                ) & nf
-            )
-            + (forceDirection_ & nf)*gradp.boundaryField()[patchI]
-        )
-        /denom();
+            (forceDirection_ & mesh_.boundary()[patchI].nf())
+           *gradp.boundaryField()[patchI]/denom();
+    }
+    tgradp.clear();
+
+    // Term coming from stresses
+    tmp<volScalarField> tnuEff = lamTransp.nu() + turbVars->nutRef();
+    tmp<volSymmTensorField> tstress = tnuEff*twoSymm(tgradU);
+    const volSymmTensorField& stress = tstress.cref();
+    autoPtr<volVectorField> ptemp
+        (Foam::createZeroFieldPtr<vector>( mesh_, "temp", sqr(dimVelocity)));
+    volVectorField& temp = ptemp.ref();
+
+    for (label idir = 0; idir < pTraits<vector>::nComponents; ++idir)
+    {
+        unzipRow(stress, idir, temp);
+        volTensorField gradStressDir(fvc::grad(temp));
+        for (const label patchI : forcePatches_)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchI];
+            tmp<vectorField> tnf = patch.nf();
+            bdxdbMultPtr_()[patchI] -=
+                forceDirection_.component(idir)
+               *(gradStressDir.boundaryField()[patchI] & tnf)/denom();
+        }
     }
 }
 
@@ -278,17 +248,17 @@ void objectiveForce::update_boundarydJdnut()
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
         tmp<vectorField> tnf = patch.nf();
-        const vectorField& nf = tnf();
         bdJdnutPtr_()[patchI] =
-           -((devGradU.boundaryField()[patchI] & forceDirection_) & nf)/denom();
+          - ((devGradU.boundaryField()[patchI] & forceDirection_) & tnf)
+           /denom();
     }
 }
 
 
 void objectiveForce::update_boundarydJdGradU()
 {
-    const autoPtr<incompressible::RASModelVariables>&
-        turbVars = vars_.RASModelVariables();
+    const autoPtr<incompressible::RASModelVariables>& turbVars =
+        vars_.RASModelVariables();
     const singlePhaseTransportModel& lamTransp = vars_.laminarTransport();
     volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
     for (const label patchI : forcePatches_)

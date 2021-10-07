@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2021 PCOpt/NTUA
-    Copyright (C) 2013-2021 FOSS GP
+    Copyright (C) 2007-2022 PCOpt/NTUA
+    Copyright (C) 2013-2022 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -76,9 +76,9 @@ adjointMeshMovementSolver::adjointMeshMovementSolver
         (
             word
             (
-                adjointSensitivity.adjointVars().useSolverNameForFields() ?
-                "ma" + adjointSensitivity.adjointSolver().solverName() :
-                "ma"
+                adjointSensitivity.adjointVars().useSolverNameForFields()
+              ? "ma" + adjointSensitivity.adjointSolver().solverName()
+              : "ma"
             ),
             mesh.time().timeName(),
             mesh,

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -73,19 +73,48 @@ adjointBoundaryCondition<Type>::computePatchGrad(word name)
     word schemeData(is);
     */
 
-    tmp<surfaceInterpolationScheme<Type2>> tinterpScheme
-    (
-        surfaceInterpolationScheme<Type2>::New
-        (
-            mesh,
-            mesh.interpolationScheme("interpolate(" + name + ")")
-        )
-    );
+    // If there are many patches calling this function, the computation of
+    // the surface field might be a significant computational
+    // burden. Cache the interpolated field and fetch from the registry when
+    // possible.
+    const word surfFieldName("interpolated" + name + "ForBoundaryGrad");
+    typedef GeometricField<Type2, fvsPatchField, surfaceMesh> surfFieldType;
+    surfFieldType* surfFieldPtr =
+        mesh.objectRegistry::template getObjectPtr<surfFieldType>(surfFieldName);
 
-    GeometricField<Type2, fvsPatchField, surfaceMesh> surfField
-    (
-        tinterpScheme().interpolate(field)
-    );
+    if (!surfFieldPtr)
+    {
+        solution::cachePrintMessage("Calculating and caching", name, field);
+
+        surfFieldPtr =
+            surfaceInterpolationScheme<Type2>::New
+            (
+                mesh, mesh.interpolationScheme("interpolate(" + name + ")")
+            )().interpolate(field).ptr();
+        surfFieldPtr->rename(surfFieldName);
+        regIOobject::store(surfFieldPtr);
+    }
+    else
+    {
+        if (surfFieldPtr->upToDate(field))
+        {
+            solution::cachePrintMessage("Reusing", name, field);
+        }
+        else
+        {
+            solution::cachePrintMessage("Updating", name, field);
+            delete surfFieldPtr;
+
+            surfFieldPtr =
+                surfaceInterpolationScheme<Type2>::New
+                (
+                    mesh, mesh.interpolationScheme("interpolate(" + name + ")")
+                )().interpolate(field).ptr();
+            surfFieldPtr->rename(surfFieldName);
+            regIOobject::store(surfFieldPtr);
+        }
+    }
+    surfFieldType& surfField = *surfFieldPtr;
 
     // Auxiliary fields
     const surfaceVectorField& Sf = mesh.Sf();
@@ -268,6 +297,13 @@ const ATCModel& adjointBoundaryCondition<Type>::getATC() const
     return
         patch_.boundaryMesh().mesh().template
             lookupObject<ATCModel>("ATCModel" + adjointSolverName_);
+}
+
+
+template<class Type>
+void adjointBoundaryCondition<Type>::updatePrimalBasedQuantities()
+{
+    // Does nothing in base
 }
 
 

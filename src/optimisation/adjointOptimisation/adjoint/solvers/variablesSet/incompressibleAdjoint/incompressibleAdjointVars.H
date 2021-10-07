@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -104,11 +104,11 @@ public:
         // Access
 
             //- Return const reference to the adjointRASModel
-            const autoPtr<incompressibleAdjoint::adjointRASModel>&
+            inline const autoPtr<incompressibleAdjoint::adjointRASModel>&
                 adjointTurbulence() const;
 
             //- Return non-const reference to the adjointRASModel
-            autoPtr<incompressibleAdjoint::adjointRASModel>&
+            inline autoPtr<incompressibleAdjoint::adjointRASModel>&
                 adjointTurbulence();
 
             //- Reset mean fields to zero
@@ -119,12 +119,20 @@ public:
 
             //- Nullify all adjoint fields
             virtual void nullify();
+
+            //- Update primal based quantities of the adjoint boundary
+            //  conditions
+            virtual void updatePrimalBasedQuantities();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "incompressibleAdjointVarsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2021 PCOpt/NTUA
-    Copyright (C) 2013-2021 FOSS GP
+    Copyright (C) 2007-2022 PCOpt/NTUA
+    Copyright (C) 2013-2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -156,13 +156,22 @@ public:
     // Member Functions
 
         //- Get primal variables
-        const incompressibleVars& primalVars() const;
+        inline const incompressibleVars& primalVars() const
+        {
+            return primalVars_;
+        }
 
         //- Get adjoint variables
-        const incompressibleAdjointVars& adjointVars() const;
+        inline const incompressibleAdjointVars& adjointVars() const
+        {
+            return adjointVars_;
+        }
 
         //- Get adjoint solver
-        const incompressibleAdjointSolver& adjointSolver() const;
+        inline const incompressibleAdjointSolver& adjointSolver() const
+        {
+            return adjointSolver_;
+        }
 
         //- Accumulate sensitivity integrands
         //  Corresponds to the flow and adjoint part of the sensitivities

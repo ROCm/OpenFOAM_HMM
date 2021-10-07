@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2019, 2022 PCOpt/NTUA
+    Copyright (C) 2013-2019, 2022 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -67,10 +67,6 @@ class objectiveMoment
         scalar rhoInf_;
         scalar UInf_;
         scalar invDenom_;
-
-        autoPtr<volVectorField> stressXPtr_;
-        autoPtr<volVectorField> stressYPtr_;
-        autoPtr<volVectorField> stressZPtr_;
 
         // Store this in order to computed only once per objective call
         volSymmTensorField devReff_;

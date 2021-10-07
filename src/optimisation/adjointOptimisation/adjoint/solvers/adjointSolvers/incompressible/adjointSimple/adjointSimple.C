@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -206,6 +206,7 @@ void Foam::adjointSimple::preIter()
 
 void Foam::adjointSimple::mainIter()
 {
+    addProfiling(adjointSimple, "adjointSimple::mainIter");
     // Grab primal references
     const surfaceScalarField& phi = primalVars_.phi();
     // Grab adjoint references
@@ -340,6 +341,7 @@ void Foam::adjointSimple::postIter()
 
 void Foam::adjointSimple::solve()
 {
+    addProfiling(adjointSimple, "adjointSimple::solve");
     if (active_)
     {
         preLoop();

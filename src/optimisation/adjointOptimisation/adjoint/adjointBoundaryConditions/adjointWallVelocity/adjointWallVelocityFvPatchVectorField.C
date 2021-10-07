@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -105,6 +105,11 @@ void Foam::adjointWallVelocityFvPatchVectorField::manipulateMatrix
     fvMatrix<vector>& matrix
 )
 {
+    addProfiling
+    (
+        adjointWallVelocityFvPatchVectorField,
+        "adjointWallVelocityFvPatchVectorField::manipulateMatrix"
+    );
     // Grab ref to the diagonal matrix
     vectorField& source = matrix.source();
 

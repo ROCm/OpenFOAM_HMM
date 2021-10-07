@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "incompressibleAdjointVars.H"
+#include "adjointBoundaryCondition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,20 +66,6 @@ incompressibleAdjointVars::incompressibleAdjointVars
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const autoPtr<incompressibleAdjoint::adjointRASModel>&
-incompressibleAdjointVars::adjointTurbulence() const
-{
-    return adjointTurbulence_;
-}
-
-
-autoPtr<incompressibleAdjoint::adjointRASModel>&
-incompressibleAdjointVars::adjointTurbulence()
-{
-    return adjointTurbulence_;
-}
-
 
 void incompressibleAdjointVars::resetMeanFields()
 {
@@ -120,6 +107,33 @@ void incompressibleAdjointVars::nullify()
 {
     incompressibleAdjointMeanFlowVars::nullify();
     adjointTurbulence_->nullify();
+}
+
+
+void incompressibleAdjointVars::updatePrimalBasedQuantities()
+{
+    /*
+    // WIP
+    for (fvPatchVectorField& pf : UaInst().boundaryFieldRef())
+    {
+        if (isA<adjointBoundaryCondition<vector>>(pf))
+        {
+            adjointBoundaryCondition<vector>& adjointBC =
+                refCast<adjointBoundaryCondition<vector>>(pf);
+            adjointBC.updatePrimalBasedQuantities();
+        }
+    }
+
+    for (fvPatchScalarField& pf : paInst().boundaryFieldRef())
+    {
+        if (isA<adjointBoundaryCondition<scalar>>(pf))
+        {
+            adjointBoundaryCondition<scalar>& adjointBC =
+                refCast<adjointBoundaryCondition<scalar>>(pf);
+            adjointBC.updatePrimalBasedQuantities();
+        }
+    }
+    */
 }
 
 
