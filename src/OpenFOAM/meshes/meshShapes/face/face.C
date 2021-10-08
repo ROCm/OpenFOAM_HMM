@@ -46,27 +46,13 @@ Foam::face::calcEdgeVectors(const UList<point>& points) const
     auto tedgeVecs = tmp<vectorField>::New(size());
     auto& edgeVecs = tedgeVecs.ref();
 
-    forAll(*this, i)
+    forAll(edgeVecs, i)
     {
         edgeVecs[i] = vector(points[nextLabel(i)] - points[thisLabel(i)]);
         edgeVecs[i].normalise();
     }
 
     return tedgeVecs;
-}
-
-
-Foam::scalar Foam::face::edgeCos
-(
-    const vectorField& edges,
-    const label index
-) const
-{
-    const vector& leftEdge = edges[rcIndex(index)];
-    const vector& rightEdge = edges[index];
-
-    // Note negate on left edge to get correct left-pointing edge.
-    return -(leftEdge & rightEdge);
 }
 
 
@@ -89,6 +75,7 @@ Foam::label Foam::face::mostConcaveAngle
 
         vector edgeNormal = (rightEdge ^ leftEdge);
 
+        // NOTE: is -ve angle since left edge pointing in other direction
         scalar edgeCos = (leftEdge & rightEdge);
         scalar edgeAngle = acos(max(-1.0, min(1.0, edgeCos)));
 

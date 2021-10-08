@@ -82,13 +82,6 @@ class face
             const UList<point>& points
         ) const;
 
-        //- Cos between neighbouring edges
-        scalar edgeCos
-        (
-            const vectorField& edges,
-            const label index
-        ) const;
-
         //- Find index of largest internal angle on face
         label mostConcaveAngle
         (
@@ -339,30 +332,34 @@ public:
         //- Return number of edges
         inline label nEdges() const noexcept;
 
-        //- Return i-th face edge in forward walk order.
-        //- The faceEdge(0) is the edge between [0] and [1]
-        inline Foam::edge faceEdge(const label edgei) const;
-
-        //- Return i-th face edge in forward walk order.
-        //- Identical to faceEdge() but with generic name
+        //- Return i-th face edge (forward walk order).
+        //  The edge 0 is from [0] to [1]
+        //  and edge 1 is from [1] to [2]
         inline Foam::edge edge(const label edgei) const;
 
-        //- Return vector of i-th face edge in forward walk order.
+        //- Return vector of i-th face edge (forward walk order).
+        //  The edge 0 is from [0] to [1]
+        //  and edge 1 is from [1] to [2]
         inline vector edge(const label edgei, const UList<point>& pts) const;
 
         //- Return i-th face edge in reverse walk order.
-        //- The rcEdge(0) is the edge between [0] and [n-1]
+        //  The rcEdge 0 is from [0] to [n-1]
+        //  and rcEdge 1 is from [n-1] to [n-2]
         inline Foam::edge rcEdge(const label edgei) const;
 
         //- Return vector of i-th face edge in reverse walk order.
+        //  The rcEdge 0 is from [0] to [n-1]
+        //  and rcEdge 1 is from [n-1] to [n-2]
         inline vector rcEdge(const label edgei, const UList<point>& pts) const;
 
         //- Return list of edges in forward walk order.
-        //  i.e. edges()[0] is edge between [0] and [1]
+        //  The edge 0 is from [0] to [1]
+        //  and edge 1 is from [1] to [2]
         edgeList edges() const;
 
         //- Return list of edges in reverse walk order.
-        //  i.e. rcEdges()[0] is edge between [0] and [n-1]
+        //  The rcEdge 0 is from [0] to [n-1]
+        //  and rcEdge 1 is from [n-1] to [n-2]
         edgeList rcEdges() const;
 
         //- Test the edge direction on the face
@@ -478,6 +475,12 @@ public:
                 return face::symmhash_code(obj, seed);
             }
         };
+
+
+    // Housekeeping
+
+        //- Identical to edge()
+        Foam::edge faceEdge(label edgei) const { return this->edge(edgei); }
 };
 
 

@@ -224,7 +224,7 @@ inline Foam::label Foam::edge::collapse()
 
 inline Foam::edge Foam::edge::reverseEdge() const
 {
-    return edge(second(), first());
+    return Foam::edge(second(), first());
 }
 
 
