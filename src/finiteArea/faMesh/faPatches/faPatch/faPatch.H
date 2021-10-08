@@ -311,10 +311,8 @@ public:
             //- Return patch point-edge addressing
             const labelListList& pointEdges() const;
 
-            //- Return edge neighbour polyPatch faces
-            labelList ngbPolyPatchFaces() const;
-
             //- Return normals of neighbour polyPatch faces
+            //  Same as faMesh::haloFaceNormals()
             tmp<vectorField> ngbPolyPatchFaceNormals() const;
 
             //- Return normals of neighbour polyPatch joined points

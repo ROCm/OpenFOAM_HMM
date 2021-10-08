@@ -279,8 +279,8 @@ class faMesh
         //- Edge area normals
         mutable edgeVectorField* edgeAreaNormalsPtr_;
 
-        //- Edge area normals
-        mutable vectorField* pointAreaNormalsPtr_;
+        //- Point area normals
+        mutable std::unique_ptr<vectorField> pointAreaNormalsPtr_;
 
         //- Face curvatures
         mutable areaScalarField* faceCurvaturesPtr_;
@@ -308,6 +308,9 @@ class faMesh
 
 
     // Static Private Data
+
+        //- Use the original method for point normals
+        static int origPointAreaMethod_;
 
         //- Use quadrics fit
         static const int quadricsFit_;
@@ -372,10 +375,13 @@ class faMesh
             void calcEdgeAreaNormals() const;
 
             //- Calculate point area normals
-            void calcPointAreaNormals() const;
+            void calcPointAreaNormals_orig(vectorField& result) const;
+
+            //- Calculate point area normals
+            void calcPointAreaNormals(vectorField& result) const;
 
             //- Calculate point area normals by quadrics fit
-            void calcPointAreaNormalsByQuadricsFit() const;
+            void calcPointAreaNormalsByQuadricsFit(vectorField& result) const;
 
             //- Calculate face curvatures
             void calcFaceCurvatures() const;
@@ -446,7 +452,6 @@ class faMesh
             }
             return result;
         }
-
 
 
 public:

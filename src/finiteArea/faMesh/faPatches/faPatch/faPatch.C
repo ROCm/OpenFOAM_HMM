@@ -32,6 +32,7 @@ License
 #include "faMesh.H"
 #include "areaFields.H"
 #include "edgeFields.H"
+#include "edgeHashes.H"
 #include "polyMesh.H"
 #include "demandDrivenData.H"
 
@@ -213,7 +214,7 @@ void Foam::faPatch::calcPointLabels() const
 {
     SLList<label> labels;
 
-    UList<edge> edges = patchSlice(boundaryMesh().mesh().edges());
+    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
 
     forAll(edges, edgeI)
     {
@@ -302,58 +303,6 @@ const Foam::labelListList& Foam::faPatch::pointEdges() const
 }
 
 
-Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
-{
-    if (nbrPolyPatchId_ < 0)
-    {
-        return labelList();
-    }
-
-    labelList ngbFaces(faPatch::size());
-
-    const faMesh& aMesh = boundaryMesh().mesh();
-    const polyMesh& pMesh = aMesh.mesh();
-    const auto& patch = aMesh.patch();
-
-    const labelListList& edgeFaces = pMesh.edgeFaces();
-
-    const labelList meshEdges
-    (
-        patch.meshEdges(pMesh.edges(), pMesh.pointEdges())
-    );
-
-    forAll(ngbFaces, edgeI)
-    {
-        ngbFaces[edgeI] = -1;
-
-        label curEdge = (*this)[edgeI];
-
-        label curPMeshEdge = meshEdges[curEdge];
-
-        forAll(edgeFaces[curPMeshEdge], faceI)
-        {
-            label curFace = edgeFaces[curPMeshEdge][faceI];
-
-            label curPatchID = pMesh.boundaryMesh().whichPatch(curFace);
-
-            if (curPatchID == nbrPolyPatchId_)
-            {
-                ngbFaces[edgeI] = curFace;
-            }
-        }
-
-        if (ngbFaces[edgeI] == -1)
-        {
-            WarningInFunction
-                << "Problem with determination of edge ngb faces!"
-                << endl;
-        }
-    }
-
-    return ngbFaces;
-}
-
-
 Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
 {
     if (nbrPolyPatchId_ < 0)
@@ -361,24 +310,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
         return tmp<vectorField>::New();
     }
 
-    auto tfN = tmp<vectorField>::New();
-    auto& fN = tfN.ref();
-
-    fN.setSize(faPatch::size());
-
-    labelList ngbFaces = ngbPolyPatchFaces();
-
-    const polyMesh& pMesh = boundaryMesh().mesh()();
-
-    const faceList& faces = pMesh.faces();
-    const pointField& points = pMesh.points();
-
-    forAll(fN, faceI)
-    {
-        fN[faceI] = faces[ngbFaces[faceI]].unitNormal(points);
-    }
-
-    return tfN;
+    return boundaryMesh().mesh().haloFaceNormals(this->index());
 }
 
 
@@ -389,24 +321,31 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
         return tmp<vectorField>::New();
     }
 
+    // Unit normals for the neighbour patch faces
+    const vectorField faceNormals
+    (
+        boundaryMesh().mesh().haloFaceNormals(this->index())
+    );
+
     const labelListList& pntEdges = pointEdges();
 
-    auto tpN = tmp<vectorField>::New(pntEdges.size(), Zero);
-    auto& pN = tpN.ref();
+    auto tpointNorm = tmp<vectorField>::New(pntEdges.size());
+    auto& pointNorm = tpointNorm.ref();
 
-    const vectorField faceNormals(ngbPolyPatchFaceNormals());
-
-    forAll(pN, pointI)
+    forAll(pointNorm, pointi)
     {
-        forAll(pntEdges[pointI], edgeI)
+        vector& n = pointNorm[pointi];
+        n = Zero;
+
+        for (const label bndEdgei : pntEdges[pointi])
         {
-            pN[pointI] += faceNormals[pntEdges[pointI][edgeI]];
+            n += faceNormals[bndEdgei];
         }
+
+        n.normalise();
     }
 
-    pN /= mag(pN);
-
-    return tpN;
+    return tpointNorm;
 }
 
 
@@ -444,11 +383,14 @@ const Foam::scalarField& Foam::faPatch::magEdgeLengths() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 {
-    tmp<vectorField> eN(new vectorField(size()));
+    tmp<vectorField> tedgeNorm(edgeLengths());
 
-    eN.ref() = edgeLengths()/magEdgeLengths();
+    for (vector& n : tedgeNorm.ref())
+    {
+        n.normalise();
+    }
 
-    return eN;
+    return tedgeNorm;
 }
 
 

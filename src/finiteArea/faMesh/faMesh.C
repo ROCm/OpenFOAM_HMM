@@ -52,6 +52,8 @@ const Foam::word Foam::faMesh::prefix("finite-area");
 
 Foam::word Foam::faMesh::meshSubDir = "faMesh";
 
+int Foam::faMesh::origPointAreaMethod_ = 0;  // Tuning
+
 const int Foam::faMesh::quadricsFit_ = 0;  // Tuning
 
 
@@ -227,7 +229,7 @@ void Foam::faMesh::clearGeomNotAreas() const
     deleteDemandDrivenData(edgeCentresPtr_);
     deleteDemandDrivenData(faceAreaNormalsPtr_);
     deleteDemandDrivenData(edgeAreaNormalsPtr_);
-    deleteDemandDrivenData(pointAreaNormalsPtr_);
+    pointAreaNormalsPtr_.reset(nullptr);
     deleteDemandDrivenData(faceCurvaturesPtr_);
     deleteDemandDrivenData(edgeTransformTensorsPtr_);
 }
@@ -703,11 +705,20 @@ const Foam::vectorField& Foam::faMesh::pointAreaNormals() const
 {
     if (!pointAreaNormalsPtr_)
     {
-        calcPointAreaNormals();
+        pointAreaNormalsPtr_.reset(new vectorField(nPoints()));
+
+        if (origPointAreaMethod_)
+        {
+            calcPointAreaNormals_orig(*pointAreaNormalsPtr_);
+        }
+        else
+        {
+            calcPointAreaNormals(*pointAreaNormalsPtr_);
+        }
 
         if (quadricsFit_ > 0)
         {
-            calcPointAreaNormalsByQuadricsFit();
+            calcPointAreaNormalsByQuadricsFit(*pointAreaNormalsPtr_);
         }
     }
 
