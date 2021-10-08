@@ -71,6 +71,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class faMeshBoundaryHalo;
 class faMeshLduAddressing;
 class faMeshMapper;
 class faPatchData;
@@ -291,10 +292,19 @@ class faMesh
         mutable boolList* correctPatchPointNormalsPtr_;
 
 
-        // Other mesh-related data
+    // Other mesh-related data
 
         //- Parallel info
         mutable autoPtr<faGlobalMeshData> globalMeshDataPtr_;
+
+        //- Mapping/swapping for boundary edge halo neighbours
+        mutable std::unique_ptr<faMeshBoundaryHalo> haloMapPtr_;
+
+        //- Face centres for boundary edge halo neighbours
+        mutable std::unique_ptr<pointField> haloFaceCentresPtr_;
+
+        //- Face normals for boundary edge halo neighbours
+        mutable std::unique_ptr<vectorField> haloFaceNormalsPtr_;
 
 
     // Static Private Data
@@ -376,6 +386,9 @@ class faMesh
             //- Clear geometry but not the face areas
             void clearGeomNotAreas() const;
 
+            //- Clear boundary halo information
+            void clearHalo() const;
+
             //- Clear geometry
             void clearGeom() const;
 
@@ -384,6 +397,12 @@ class faMesh
 
             //- Clear demand-driven data
             void clearOut() const;
+
+
+    // Halo handling
+
+        //- Calculate halo centres/normals
+        void calcHaloFaceGeometry() const;
 
 
     // Helpers
@@ -402,6 +421,32 @@ class faMesh
             const word& emptyPatchName = "",
             const dictionary* defaultPatchDefinition = nullptr
         ) const;
+
+
+        //- Fatal error if edge labels are out of range
+        void checkBoundaryEdgeLabelRange(const labelUList& edgeLabels) const;
+
+        //- Extract list from contiguous (unordered) boundary data
+        //- to the locally sorted order.
+        template<class T>
+        List<T> boundarySubset
+        (
+            const UList<T>& bndField,
+            const labelUList& edgeLabels
+        ) const
+        {
+            #ifdef FULLDEBUG
+            checkBoundaryEdgeLabelRange(edgeLabels);
+            #endif
+            // Like UIndirectList but with an offset
+            List<T> result(edgeLabels.size());
+            forAll(edgeLabels, i)
+            {
+                result[i] = bndField[edgeLabels[i] - nInternalEdges_];
+            }
+            return result;
+        }
+
 
 
 public:
@@ -606,6 +651,21 @@ public:
             //- List of proc/size for the boundary edge neighbour processors
             //- (does not include own proc)
             List<labelPair> boundaryProcSizes() const;
+
+            //- Mapping/swapping for boundary halo neighbours
+            const faMeshBoundaryHalo& boundaryHaloMap() const;
+
+            //- Face centres of boundary halo neighbours
+            const pointField& haloFaceCentres() const;
+
+            //- Face normals of boundary halo neighbours
+            const vectorField& haloFaceNormals() const;
+
+            //- Face centres of boundary halo neighbours for specified patch
+            tmp<pointField> haloFaceCentres(const label patchi) const;
+
+            //- Face normals of boundary halo neighbours for specified patch
+            tmp<vectorField> haloFaceNormals(const label patchi) const;
 
 
         // Mesh motion and morphing

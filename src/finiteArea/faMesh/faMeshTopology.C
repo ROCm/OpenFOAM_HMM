@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
+#include "faMeshBoundaryHalo.H"
 #include "globalMeshData.H"
 #include "indirectPrimitivePatch.H"
 #include "edgeHashes.H"
@@ -797,6 +798,132 @@ Foam::List<Foam::labelPair> Foam::faMesh::boundaryProcSizes() const
     }
 
     return output;
+}
+
+
+const Foam::faMeshBoundaryHalo& Foam::faMesh::boundaryHaloMap() const
+{
+    if (!haloMapPtr_)
+    {
+        haloMapPtr_.reset(new faMeshBoundaryHalo(*this));
+    }
+
+    return *haloMapPtr_;
+}
+
+
+void Foam::faMesh::calcHaloFaceGeometry() const
+{
+    if (haloFaceCentresPtr_ || haloFaceNormalsPtr_)
+    {
+        FatalErrorInFunction
+            << "Halo centres/normals already calculated"
+            << exit(FatalError);
+    }
+
+    DebugInFunction
+        << "Calculating halo face centres/normals" << endl;
+
+    const faceList& faces = mesh().faces();
+    const pointField& points = mesh().points();
+
+    const faMeshBoundaryHalo& halo = boundaryHaloMap();
+
+    const labelList& inputFaceIds = halo.inputMeshFaces();
+
+    haloFaceCentresPtr_.reset(new pointField);
+    haloFaceNormalsPtr_.reset(new vectorField);
+
+    auto& centres = *haloFaceCentresPtr_;
+    auto& normals = *haloFaceNormalsPtr_;
+
+    centres.resize(inputFaceIds.size());
+    normals.resize(inputFaceIds.size());
+
+    // My values
+    forAll(inputFaceIds, i)
+    {
+        const face& f = faces[inputFaceIds[i]];
+
+        centres[i] = f.centre(points);
+        normals[i] = f.unitNormal(points);
+    }
+
+    // Swap information and resize
+    halo.distributeSparse(centres);
+    halo.distributeSparse(normals);
+}
+
+
+const Foam::pointField& Foam::faMesh::haloFaceCentres() const
+{
+    if (!haloFaceCentresPtr_ || !haloFaceNormalsPtr_)
+    {
+        calcHaloFaceGeometry();
+    }
+
+    return *haloFaceCentresPtr_;
+}
+
+
+const Foam::vectorField& Foam::faMesh::haloFaceNormals() const
+{
+    if (!haloFaceCentresPtr_ || !haloFaceNormalsPtr_)
+    {
+        calcHaloFaceGeometry();
+    }
+
+    return *haloFaceNormalsPtr_;
+}
+
+
+Foam::tmp<Foam::pointField>
+Foam::faMesh::haloFaceCentres(const label patchi) const
+{
+    if (patchi < 0 || patchi >= boundary().size())
+    {
+        FatalErrorInFunction
+            << "Patch " << patchi << " is out-of-range 0.."
+            << (boundary().size()-1) << nl
+            << exit(FatalError);
+    }
+
+    return tmp<pointField>::New
+    (
+        List<point>
+        (
+            boundarySubset
+            (
+                this->haloFaceCentres(),
+                boundary()[patchi].edgeLabels()
+            )
+        )
+    );
+}
+
+
+Foam::tmp<Foam::vectorField>
+Foam::faMesh::haloFaceNormals(const label patchi) const
+{
+    if (patchi < 0 || patchi >= boundary().size())
+    {
+        FatalErrorInFunction
+            << "Patch " << patchi << " is out-of-range 0.."
+            << (boundary().size()-1) << nl
+            << exit(FatalError);
+    }
+
+    return tmp<vectorField>::New
+    (
+        List<vector>
+        (
+            boundarySubset
+            (
+                this->haloFaceNormals(),
+                boundary()[patchi].edgeLabels()
+            )
+        )
+    );
 }
 
 

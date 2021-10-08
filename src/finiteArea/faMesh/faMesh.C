@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
+#include "faMeshBoundaryHalo.H"
 #include "faGlobalMeshData.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -109,6 +110,36 @@ static labelList selectPatchFaces
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::faMesh::checkBoundaryEdgeLabelRange
+(
+    const labelUList& edgeLabels
+) const
+{
+    label nErrors = 0;
+
+    for (const label edgei : edgeLabels)
+    {
+        if (edgei < nInternalEdges_ || edgei >= nEdges_)
+        {
+            if (!nErrors++)
+            {
+                FatalErrorInFunction
+                    << "Boundary edge label out of range "
+                    << nInternalEdges_ << ".." << (nEdges_-1) << nl
+                    << "   ";
+            }
+
+            FatalError<< ' ' << edgei;
+        }
+    }
+
+    if (nErrors)
+    {
+        FatalError << nl << exit(FatalError);
+    }
+}
+
+
 void Foam::faMesh::initPatch() const
 {
     patchPtr_.reset
@@ -120,6 +151,9 @@ void Foam::faMesh::initPatch() const
         )
     );
     bndConnectPtr_.reset(nullptr);
+    haloMapPtr_.reset(nullptr);
+    haloFaceCentresPtr_.reset(nullptr);
+    haloFaceNormalsPtr_.reset(nullptr);
 }
 
 
@@ -168,10 +202,21 @@ void Foam::faMesh::setPrimitiveMeshData()
 }
 
 
+void Foam::faMesh::clearHalo() const
+{
+    DebugInFunction << "Clearing halo information" << endl;
+
+    haloMapPtr_.reset(nullptr);
+    haloFaceCentresPtr_.reset(nullptr);
+    haloFaceNormalsPtr_.reset(nullptr);
+}
+
+
 void Foam::faMesh::clearGeomNotAreas() const
 {
     DebugInFunction << "Clearing geometry" << endl;
 
+    clearHalo();
     patchPtr_.reset(nullptr);
     bndConnectPtr_.reset(nullptr);
     deleteDemandDrivenData(SPtr_);
@@ -274,7 +319,11 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     faceCurvaturesPtr_(nullptr),
     edgeTransformTensorsPtr_(nullptr),
     correctPatchPointNormalsPtr_(nullptr),
-    globalMeshDataPtr_(nullptr)
+    globalMeshDataPtr_(nullptr),
+
+    haloMapPtr_(nullptr),
+    haloFaceCentresPtr_(nullptr),
+    haloFaceNormalsPtr_(nullptr)
 {
     DebugInFunction << "Creating from IOobject" << endl;
 
@@ -368,7 +417,11 @@ Foam::faMesh::faMesh
     faceCurvaturesPtr_(nullptr),
     edgeTransformTensorsPtr_(nullptr),
     correctPatchPointNormalsPtr_(nullptr),
-    globalMeshDataPtr_(nullptr)
+    globalMeshDataPtr_(nullptr),
+
+    haloMapPtr_(nullptr),
+    haloFaceCentresPtr_(nullptr),
+    haloFaceNormalsPtr_(nullptr)
 {}
 
 

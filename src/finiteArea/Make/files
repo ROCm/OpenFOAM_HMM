@@ -4,6 +4,7 @@ faMesh/faMeshDemandDrivenData.C
 faMesh/faMeshPatches.C
 faMesh/faMeshTopology.C
 faMesh/faMeshUpdate.C
+faMesh/faMeshBoundaryHalo.C
 faMesh/faBoundaryMesh/faBoundaryMesh.C
 
 faPatches = faMesh/faPatches
