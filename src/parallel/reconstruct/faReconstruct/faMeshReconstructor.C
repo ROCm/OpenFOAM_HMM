@@ -517,7 +517,13 @@ void Foam::faMeshReconstructor::createMesh()
         );
     }
 
+    // Serial mesh - no parallel communication
+
+    const bool oldParRun = Pstream::parRun(false);
+
     completeMesh.addFaPatches(completePatches);
+
+    Pstream::parRun(oldParRun);  // Restore parallel state
 }
 
 
