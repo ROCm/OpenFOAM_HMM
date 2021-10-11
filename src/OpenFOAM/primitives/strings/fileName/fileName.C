@@ -485,9 +485,16 @@ Foam::word Foam::fileName::component
 {
     const auto parsed = stringOps::split<string>(*this, delim);
 
-    if (cmpt < parsed.size())
+    if (parsed.size())
     {
-        return parsed[cmpt].str();
+        if (cmpt == std::string::npos)
+        {
+            return parsed.last().str();
+        }
+        else if (cmpt < parsed.size())
+        {
+            return parsed[cmpt].str();
+        }
     }
 
     return word();

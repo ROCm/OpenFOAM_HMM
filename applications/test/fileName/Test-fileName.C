@@ -224,7 +224,8 @@ void testDirname(const fileName& input)
         << "   path:" << input.path()
         << "   name:\"" << input.name() << '"'
         << "   ext:\"" << input.ext()  << '"'
-        << "   components: " << flatOutput(input.components()) << nl;
+        << "   components: " << flatOutput(input.components())
+        << "   last: " << input.component(string::npos) << nl;
 }
 
 

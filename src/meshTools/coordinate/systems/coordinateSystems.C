@@ -269,7 +269,7 @@ Foam::coordinateSystems::lookup(const word& name) const
 
 Foam::wordList Foam::coordinateSystems::names() const
 {
-    return PtrListOps::names(*this, predicates::always{});
+    return PtrListOps::names(*this);  // match any/all
 }
 
 

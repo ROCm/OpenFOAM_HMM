@@ -358,7 +358,8 @@ public:
         // \endverbatim
         wordList components(const char delim = '/') const;
 
-        //- Return a single component of the path
+        //- Return a single component of the path or empty if out of range
+        //  The location \c npos returns the last component
         word component(const size_type cmpt, const char delim = '/') const;
 
 

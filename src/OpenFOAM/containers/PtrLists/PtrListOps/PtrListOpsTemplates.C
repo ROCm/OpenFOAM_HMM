@@ -166,6 +166,16 @@ Foam::List<Foam::word> Foam::PtrListOps::names
 }
 
 
+template<class T>
+Foam::List<Foam::word> Foam::PtrListOps::names
+(
+    const UPtrList<T>& list
+)
+{
+    return PtrListOps::names(list, predicates::always());
+}
+
+
 template<class T, class UnaryMatchPredicate>
 Foam::label Foam::PtrListOps::firstMatching
 (
