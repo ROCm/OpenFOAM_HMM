@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +141,7 @@ namespace Foam
     //            *PatchFunction1<Type>::dictionaryConstructorTablePtr_;
     //
     //        // Get the UniformValueField constructor
-    //        auto cstrIter = PF1Table.cfind
+    //        auto ctorIter = PF1Table.cfind
     //        (
     //            PatchFunction1Types::UniformValueField<Type>::typeName
     //        );
@@ -149,7 +149,7 @@ namespace Foam
     //        // Add the UniformValueField under the Function1 name
     //        forAllConstIters(F1Table, iter)
     //        {
-    //            PF1Table.insert(iter.key(), cstrIter());
+    //            PF1Table.insert(iter.key(), ctorIter.val());
     //        }
     //    }
     //};

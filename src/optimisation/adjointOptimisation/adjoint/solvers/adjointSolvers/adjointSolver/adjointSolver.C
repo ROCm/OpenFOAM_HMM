@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,9 +85,9 @@ Foam::autoPtr<Foam::adjointSolver> Foam::adjointSolver::New
 {
     const word solverType(dict.get<word>("type"));
 
-    auto cstrIter = adjointSolverConstructorTablePtr_->cfind(solverType);
+    auto* ctorPtr = adjointSolverConstructorTable(solverType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -100,7 +100,7 @@ Foam::autoPtr<Foam::adjointSolver> Foam::adjointSolver::New
 
     return autoPtr<adjointSolver>
     (
-        cstrIter()(mesh, managerType, dict, primalSolverName)
+        ctorPtr(mesh, managerType, dict, primalSolverName)
     );
 }
 

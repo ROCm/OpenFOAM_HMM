@@ -123,9 +123,9 @@ Foam::Function1<Type>::New
     }
 
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInFunction(dict)
             << "Unknown Function1 type "
@@ -135,7 +135,7 @@ Foam::Function1<Type>::New
             << exit(FatalIOError);
     }
 
-    return cstrIter()(entryName, *coeffs);
+    return ctorPtr(entryName, *coeffs);
 }
 
 

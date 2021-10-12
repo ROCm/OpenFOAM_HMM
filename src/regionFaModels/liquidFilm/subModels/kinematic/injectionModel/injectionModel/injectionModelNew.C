@@ -47,9 +47,9 @@ autoPtr<injectionModel> injectionModel::New
 {
     Info<< "        " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -60,7 +60,7 @@ autoPtr<injectionModel> injectionModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<injectionModel>(cstrIter()(model, dict));
+    return autoPtr<injectionModel>(ctorPtr(model, dict));
 }
 
 

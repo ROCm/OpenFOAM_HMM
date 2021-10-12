@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,9 +46,9 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 {
     const word coupleType(fineInterface.type());
 
-    auto cstrIter = lduInterfaceConstructorTablePtr_->cfind(coupleType);
+    auto* ctorPtr = lduInterfaceConstructorTable(coupleType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -60,7 +60,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 
     return autoPtr<GAMGInterface>
     (
-        cstrIter()
+        ctorPtr
         (
             index,
             coarseInterfaces,
@@ -82,9 +82,9 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     Istream& is
 )
 {
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(coupleType);
+    auto* ctorPtr = IstreamConstructorTable(coupleType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -94,7 +94,7 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<GAMGInterface>(cstrIter()(index, coarseInterfaces, is));
+    return autoPtr<GAMGInterface>(ctorPtr(index, coarseInterfaces, is));
 }
 
 

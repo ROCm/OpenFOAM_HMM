@@ -186,7 +186,7 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
 
     return autoPtr<CombustionModel>
     (
-        ctorIter()(combModelName, thermo, turb, combustionProperties)
+        ctorIter.val()(combModelName, thermo, turb, combustionProperties)
     );
 }
 

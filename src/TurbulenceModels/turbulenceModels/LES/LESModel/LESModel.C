@@ -163,9 +163,9 @@ Foam::LESModel<BasicTurbulenceModel>::New
 
     Info<< "Selecting LES turbulence model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -178,7 +178,7 @@ Foam::LESModel<BasicTurbulenceModel>::New
 
     return autoPtr<LESModel>
     (
-        cstrIter()(alpha, rho, U, alphaRhoPhi, phi, transport, propertiesName)
+        ctorPtr(alpha, rho, U, alphaRhoPhi, phi, transport, propertiesName)
     );
 }
 

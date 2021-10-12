@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,9 @@ Foam::HeterogeneousReactingModel<CloudType>::New
 
     Info<< "Selecting surface reaction model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -56,7 +56,7 @@ Foam::HeterogeneousReactingModel<CloudType>::New
 
     return autoPtr<HeterogeneousReactingModel<CloudType>>
     (
-        cstrIter()(dict, owner)
+        ctorPtr(dict, owner)
     );
 }
 

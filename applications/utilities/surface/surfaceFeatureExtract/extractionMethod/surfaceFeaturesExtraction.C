@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,9 @@ Foam::surfaceFeaturesExtraction::method::New
 {
     const word modelType(dict.get<word>("extractionMethod"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -85,7 +85,7 @@ Foam::surfaceFeaturesExtraction::method::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<method>(cstrIter.val()(dict));
+    return autoPtr<method>(ctorPtr(dict));
 }
 
 

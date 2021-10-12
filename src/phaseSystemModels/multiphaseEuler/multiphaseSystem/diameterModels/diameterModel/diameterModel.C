@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +65,9 @@ Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
         << ": "
         << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -78,7 +78,7 @@ Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()
+    return ctorPtr
     (
         dict.optionalSubDict(modelType + "Coeffs"),
         phase

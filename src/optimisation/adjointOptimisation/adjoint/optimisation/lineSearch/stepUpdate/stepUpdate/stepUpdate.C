@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +63,9 @@ Foam::autoPtr<Foam::stepUpdate> Foam::stepUpdate::New(const dictionary& dict)
 
     Info<< "stepUpdate type : " << type << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = dictionaryConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -76,7 +76,7 @@ Foam::autoPtr<Foam::stepUpdate> Foam::stepUpdate::New(const dictionary& dict)
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<stepUpdate>(cstrIter()(dict));
+    return autoPtr<stepUpdate>(ctorPtr(dict));
 }
 
 

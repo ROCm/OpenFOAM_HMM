@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,14 +94,13 @@ Foam::pointPatchField<Type>::NewCalculatedType
     const pointPatchField<Type2>& pf
 )
 {
-    auto patchTypeCstrIter =
-        pointPatchConstructorTablePtr_->cfind(pf.patch().type());
+    auto* patchTypeCtor = pointPatchConstructorTable(pf.patch().type());
 
-    if (patchTypeCstrIter.found())
+    if (patchTypeCtor)
     {
         return autoPtr<pointPatchField<Type>>
         (
-            patchTypeCstrIter()
+            patchTypeCtor
             (
                 pf.patch(),
                 Field<Type>::null()

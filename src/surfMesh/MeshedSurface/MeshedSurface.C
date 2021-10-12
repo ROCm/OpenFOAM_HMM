@@ -149,9 +149,9 @@ void Foam::MeshedSurface<Face>::write
 
     DebugInFunction << "Writing to " << name << nl;
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
+    auto* mfuncPtr = writefileExtensionMemberFunctionTable(fileType);
 
-    if (!mfIter.found())
+    if (!mfuncPtr)
     {
         // Delegate to proxy if possible
         const wordHashSet delegate(ProxyType::writeTypes());
@@ -172,7 +172,7 @@ void Foam::MeshedSurface<Face>::write
     }
     else
     {
-        mfIter()(name, surf, streamOpt, options);
+        mfuncPtr(name, surf, streamOpt, options);
     }
 }
 

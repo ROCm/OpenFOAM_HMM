@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,9 @@ Foam::autoPtr<Foam::TimeScaleModel> Foam::TimeScaleModel::New
 
     Info<< "Selecting time scale model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -85,7 +85,7 @@ Foam::autoPtr<Foam::TimeScaleModel> Foam::TimeScaleModel::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<TimeScaleModel>(cstrIter()(dict));
+    return autoPtr<TimeScaleModel>(ctorPtr(dict));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,9 +43,9 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
 
     const word patchType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchType);
+    auto* ctorPtr = dictionaryConstructorTable(patchType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<faPatch>(cstrIter()(name, dict, index, bm));
+    return autoPtr<faPatch>(ctorPtr(name, dict, index, bm));
 }
 
 

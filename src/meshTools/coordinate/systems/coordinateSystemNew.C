@@ -92,18 +92,19 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         modelType = coordSystem::cartesian::typeName_();
     }
 
-    auto cstrIter1 = registryConstructorTablePtr_->cfind(modelType);
-
-    if (cstrIter1.found())
     {
-        return autoPtr<coordinateSystem>(cstrIter1()(obr, dict));
+        auto* ctorPtr = registryConstructorTable(modelType);
+        if (ctorPtr)
+        {
+            return autoPtr<coordinateSystem>(ctorPtr(obr, dict));
+        }
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
     // Everything with a registry constructor also has a dictionary
     // constructor, so just need to print those.
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -114,7 +115,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<coordinateSystem>(cstrIter()(dict));
+    return autoPtr<coordinateSystem>(ctorPtr(dict));
 }
 
 
@@ -129,9 +130,9 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         modelType = coordSystem::cartesian::typeName_();
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -142,7 +143,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<coordinateSystem>(cstrIter()(dict));
+    return autoPtr<coordinateSystem>(ctorPtr(dict));
 }
 
 

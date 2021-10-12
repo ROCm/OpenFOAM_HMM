@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,9 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 
     Info<< "Selecting SRFModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<SRFModel>(cstrIter()(Urel));
+    return autoPtr<SRFModel>(ctorPtr(Urel));
 }
 
 

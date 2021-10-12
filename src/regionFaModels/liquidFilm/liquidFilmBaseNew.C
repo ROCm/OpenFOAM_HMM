@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,21 +44,22 @@ autoPtr<liquidFilmBase> liquidFilmBase::New
     const dictionary& dict
 )
 {
-    word modelType = dict.get<word>("liquidFilmModel");
+    const word modelType = dict.get<word>("liquidFilmModel");
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
-        FatalErrorInFunction
-            << "Unknown liquidFilmBase type "
-            << modelType << nl << nl
-            << "Valid liquidFilmBase types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "liquidFilmModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<liquidFilmBase>(cstrIter()(modelType, p, dict));
+    return autoPtr<liquidFilmBase>(ctorPtr(modelType, p, dict));
 }
 
 

@@ -106,9 +106,9 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
     const auto& cnstrTable = *(ChemistryModel::thermoConstructorTablePtr_);
 
-    auto ctorIter = cnstrTable.cfind(chemSolverCompThermoName);
+    auto* ctorPtr = cnstrTable.lookup(chemSolverCompThermoName, nullptr);
 
-    if (!ctorIter.found())
+    if (!ctorPtr)
     {
         const wordList names(cnstrTable.sortedToc());
 
@@ -188,7 +188,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<ChemistryModel>(ctorIter()(thermo));
+    return autoPtr<ChemistryModel>(ctorPtr(thermo));
 }
 
 // ************************************************************************* //

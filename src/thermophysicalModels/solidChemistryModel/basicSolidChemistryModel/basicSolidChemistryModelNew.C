@@ -97,9 +97,9 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
 
     const auto& cnstrTable = *(thermoConstructorTablePtr_);
 
-    auto ctorIter = cnstrTable.cfind(chemistryTypeName);
+    auto* ctorPtr = cnstrTable.lookup(chemistryTypeName, nullptr);
 
-    if (!ctorIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -136,7 +136,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
             << exit(FatalIOError);
     }
 
-    return autoPtr<basicSolidChemistryModel>(ctorIter()(thermo));
+    return autoPtr<basicSolidChemistryModel>(ctorPtr(thermo));
 }
 
 

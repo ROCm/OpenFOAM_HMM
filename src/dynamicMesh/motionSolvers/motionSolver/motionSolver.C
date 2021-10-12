@@ -130,9 +130,9 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
             << exit(FatalError);
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverName);
+    auto* ctorPtr = dictionaryConstructorTable(solverName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -143,7 +143,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<motionSolver>(cstrIter()(mesh, solverDict));
+    return autoPtr<motionSolver>(ctorPtr(mesh, solverDict));
 }
 
 

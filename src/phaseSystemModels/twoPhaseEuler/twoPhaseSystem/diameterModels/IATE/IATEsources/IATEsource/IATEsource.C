@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,9 +54,9 @@ Foam::diameterModels::IATEsource::New
     const dictionary& dict
 )
 {
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = dictionaryConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -67,7 +67,7 @@ Foam::diameterModels::IATEsource::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<IATEsource>(cstrIter()(iate, dict));
+    return autoPtr<IATEsource>(ctorPtr(iate, dict));
 }
 
 

@@ -52,9 +52,9 @@ Foam::chemistryTabulationMethod<CompType, ThermoType>::New
 
     const auto& cnstrTable = *(dictionaryConstructorTablePtr_);
 
-    auto cstrIter = cnstrTable.cfind(methodTypeName);
+    auto* ctorPtr = cnstrTable.lookup(methodTypeName, nullptr);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         const wordList names(cnstrTable.sortedToc());
 
@@ -122,7 +122,7 @@ Foam::chemistryTabulationMethod<CompType, ThermoType>::New
 
     return autoPtr<chemistryTabulationMethod<CompType, ThermoType>>
     (
-        cstrIter()(dict, chemistry)
+        ctorPtr(dict, chemistry)
     );
 }
 

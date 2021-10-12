@@ -100,10 +100,10 @@ bool Foam::functionEntry::execute
         return true;
     }
 
-    auto mfIter =
-        executedictionaryIstreamMemberFunctionTablePtr_->cfind(functionName);
+    auto* mfuncPtr =
+        executedictionaryIstreamMemberFunctionTable(functionName);
 
-    if (!mfIter.found())
+    if (!mfuncPtr)
     {
         FatalErrorInFunction
             << "Unknown functionEntry '" << functionName
@@ -114,7 +114,7 @@ bool Foam::functionEntry::execute
             << exit(FatalError);
     }
 
-    return mfIter()(parentDict, is);
+    return mfuncPtr(parentDict, is);
 }
 
 
@@ -139,13 +139,10 @@ bool Foam::functionEntry::execute
         return true;
     }
 
-    auto mfIter =
-        executeprimitiveEntryIstreamMemberFunctionTablePtr_->cfind
-        (
-            functionName
-        );
+    auto* mfuncPtr =
+        executeprimitiveEntryIstreamMemberFunctionTable(functionName);
 
-    if (!mfIter.found())
+    if (!mfuncPtr)
     {
         FatalErrorInFunction
             << "Unknown functionEntry '" << functionName
@@ -156,7 +153,7 @@ bool Foam::functionEntry::execute
             << exit(FatalError);
     }
 
-    return mfIter()(parentDict, entry, is);
+    return mfuncPtr(parentDict, entry, is);
 }
 
 
