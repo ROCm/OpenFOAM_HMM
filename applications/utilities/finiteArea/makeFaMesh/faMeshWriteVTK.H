@@ -11,35 +11,36 @@ License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    OBJ output of faMesh edges
+    VTK output of faMesh with some geometric or debug fields
 
 \*---------------------------------------------------------------------------*/
 
 {
-    Info<< nl
-        << "Writing edges in obj format" << endl;
-
-    word outputName("finiteArea-edges.obj");
-
-    if (Pstream::parRun())
-    {
-        outputName = word
-        (
-            "finiteArea-edges-proc"
-          + Foam::name(Pstream::myProcNo())
-          + ".obj"
-        );
-    }
-
-    OBJstream os(runTime.globalPath()/outputName);
-
-    os.writeQuoted
+    // finiteArea
+    vtk::uindirectPatchWriter writer
     (
-        ("# " + outputName + "\n"),
-        false
+        aMesh.patch(),
+        // vtk::formatType::INLINE_ASCII,
+        fileName
+        (
+            aMesh.mesh().time().globalPath() / "finiteArea"
+        )
     );
 
-    os.write(aMesh.patch().edges(), aMesh.patch().localPoints());
+    writer.writeGeometry();
+
+    // CellData
+    writer.beginCellData(3);
+    writer.writeProcIDs();
+    writer.write("area", aMesh.S().field());
+    writer.write("normal", aMesh.faceAreaNormals());
+
+    // PointData
+    writer.beginPointData(1);
+    writer.write("normal", aMesh.pointAreaNormals());
+
+    Info<< nl
+        << "Wrote faMesh in vtk format: " << writer.output().name() << nl;
 }
 
 

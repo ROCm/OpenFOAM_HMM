@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,34 +47,33 @@ const Foam::scalar Foam::cyclicFaPatch::matchTol_ = 1e-3;
 
 void Foam::cyclicFaPatch::calcTransforms()
 {
+    const label sizeby2 = this->size()/2;
     if (size() > 0)
     {
-        // const label sizeby2 = this->size()/2;
-        pointField half0Ctrs(size()/2);
-        pointField half1Ctrs(size()/2);
-        for (label i=0; i<size()/2; ++i)
+        pointField half0Ctrs(sizeby2);
+        pointField half1Ctrs(sizeby2);
+        for (label edgei=0; edgei < sizeby2; ++edgei)
         {
-            half0Ctrs[i] = this->edgeCentres()[i];
-            half1Ctrs[i] = this->edgeCentres()[i+size()/2];
+            half0Ctrs[edgei] = this->edgeCentres()[edgei];
+            half1Ctrs[edgei] = this->edgeCentres()[edgei + sizeby2];
         }
 
-        vectorField half0Normals(size()/2);
-        vectorField half1Normals(size()/2);
+        vectorField half0Normals(sizeby2);
+        vectorField half1Normals(sizeby2);
 
         const vectorField eN(edgeNormals()*magEdgeLengths());
 
         scalar maxMatchError = 0;
         label errorEdge = -1;
 
-        for (label edgei = 0; edgei < size()/2; ++edgei)
+        for (label edgei = 0; edgei < sizeby2; ++edgei)
         {
             half0Normals[edgei] = eN[edgei];
-            label nbrEdgei = edgei + size()/2;
-            half1Normals[edgei] = eN[nbrEdgei];
+            half1Normals[edgei] = eN[edgei + sizeby2];
 
             scalar magLe = mag(half0Normals[edgei]);
             scalar nbrMagLe = mag(half1Normals[edgei]);
-            scalar avLe = (magLe + nbrMagLe)/2.0;
+            scalar avLe = 0.5*(magLe + nbrMagLe);
 
             if (magLe < ROOTVSMALL && nbrMagLe < ROOTVSMALL)
             {
@@ -101,10 +100,10 @@ void Foam::cyclicFaPatch::calcTransforms()
         // Check for error in edge matching
         if (maxMatchError > matchTol_)
         {
-            label nbrEdgei = errorEdge + size()/2;
+            label nbrEdgei = errorEdge + sizeby2;
             scalar magLe = mag(half0Normals[errorEdge]);
             scalar nbrMagLe = mag(half1Normals[errorEdge]);
-            scalar avLe = (magLe + nbrMagLe)/2.0;
+            scalar avLe = 0.5*(magLe + nbrMagLe);
 
             FatalErrorInFunction
                 << "edge " << errorEdge
@@ -162,7 +161,7 @@ void Foam::cyclicFaPatch::makeWeights(scalarField& w) const
 
     for (label edgei = 0; edgei < sizeby2; ++edgei)
     {
-        scalar avL = (magL[edgei] + magL[edgei + sizeby2])/2.0;
+        scalar avL = 0.5*(magL[edgei] + magL[edgei + sizeby2]);
 
         if
         (
@@ -191,7 +190,7 @@ void Foam::cyclicFaPatch::makeWeights(scalarField& w) const
     // Check for error in matching
     if (maxMatchError > matchTol_)
     {
-        scalar avL = (magL[errorEdge] + magL[errorEdge + sizeby2])/2.0;
+        scalar avL = 0.5*(magL[errorEdge] + magL[errorEdge + sizeby2]);
 
         FatalErrorInFunction
             << "edge " << errorEdge << " and " << errorEdge + sizeby2
@@ -313,7 +312,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::transfer
 
     const label sizeby2 = this->size()/2;
 
-    for (label edgei=0; edgei<sizeby2; ++edgei)
+    for (label edgei=0; edgei < sizeby2; ++edgei)
     {
         pnf[edgei] = interfaceData[edgei + sizeby2];
         pnf[edgei + sizeby2] = interfaceData[edgei];
@@ -345,7 +344,7 @@ Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::internalFieldTransfer
 
     const label sizeby2 = this->size()/2;
 
-    for (label edgei=0; edgei<sizeby2; ++edgei)
+    for (label edgei=0; edgei < sizeby2; ++edgei)
     {
         pnf[edgei] = iF[edgeCells[edgei + sizeby2]];
         pnf[edgei + sizeby2] = iF[edgeCells[edgei]];

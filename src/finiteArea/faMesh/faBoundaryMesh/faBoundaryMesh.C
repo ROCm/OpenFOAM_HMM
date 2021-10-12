@@ -75,8 +75,15 @@ Foam::faBoundaryMesh::faBoundaryMesh
     regIOobject(io),
     mesh_(mesh)
 {
-    if (readOpt() == IOobject::MUST_READ)
+    if
+    (
+        readOpt() == IOobject::MUST_READ
+     || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
     {
+        // Warn for MUST_READ_IF_MODIFIED
+        warnNoRereading<faBoundaryMesh>();
+
         faPatchList& patches = *this;
 
         // Read faPatch list

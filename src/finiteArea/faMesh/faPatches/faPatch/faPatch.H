@@ -80,17 +80,14 @@ class faPatch
         //- Reference to boundary mesh
         const faBoundaryMesh& boundaryMesh_;
 
+        //- Demand-driven: edge-face addressing
+        mutable labelList::subList* edgeFacesPtr_;
 
-        // Demand-driven private data
+        //- Demand-driven: local points labels
+        mutable labelList* pointLabelsPtr_;
 
-            //- Edge-face addressing
-            mutable labelList::subList* edgeFacesPtr_;
-
-            //- Local points labels
-            mutable labelList* pointLabelsPtr_;
-
-            //- Point-edge addressing
-            mutable labelListList* pointEdgesPtr_;
+        //- Demand-driven: point-edge addressing
+        mutable labelListList* pointEdgesPtr_;
 
 
     // Private Member Functions

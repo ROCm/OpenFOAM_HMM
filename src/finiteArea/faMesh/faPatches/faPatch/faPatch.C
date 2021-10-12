@@ -210,88 +210,6 @@ const Foam::labelList& Foam::faPatch::pointLabels() const
 }
 
 
-void Foam::faPatch::calcPointLabels() const
-{
-    SLList<label> labels;
-
-    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
-
-    forAll(edges, edgeI)
-    {
-        bool existStart = false;
-        bool existEnd = false;
-
-        forAllIters(labels, iter)
-        {
-            if (*iter == edges[edgeI].start())
-            {
-                existStart = true;
-            }
-
-            if (*iter == edges[edgeI].end())
-            {
-                existEnd = true;
-            }
-        }
-
-        if (!existStart)
-        {
-            labels.append(edges[edgeI].start());
-        }
-
-        if (!existEnd)
-        {
-            labels.append(edges[edgeI].end());
-        }
-    }
-
-    pointLabelsPtr_ = new labelList(labels);
-}
-
-
-void Foam::faPatch::calcPointEdges() const
-{
-    const labelList& points = pointLabels();
-
-    const edgeList::subList e = patchSlice(boundaryMesh().mesh().edges());
-
-    // set up storage for pointEdges
-    List<SLList<label>> pointEdgs(points.size());
-
-    forAll(e, edgeI)
-    {
-        const edge& curPoints = e[edgeI];
-
-        forAll(curPoints, pointI)
-        {
-            const label localPointIndex = points.find(curPoints[pointI]);
-
-            pointEdgs[localPointIndex].append(edgeI);
-        }
-    }
-
-    // sort out the list
-    pointEdgesPtr_ = new labelListList(pointEdgs.size());
-    labelListList& pEdges = *pointEdgesPtr_;
-
-    forAll(pointEdgs, pointI)
-    {
-        pEdges[pointI].setSize(pointEdgs[pointI].size());
-
-        label i = 0;
-        for
-        (
-            SLList<label>::iterator curEdgesIter = pointEdgs[pointI].begin();
-            curEdgesIter != pointEdgs[pointI].end();
-            ++curEdgesIter, ++i
-        )
-        {
-            pEdges[pointI][i] = curEdgesIter();
-        }
-    }
-}
-
-
 const Foam::labelListList& Foam::faPatch::pointEdges() const
 {
     if (!pointEdgesPtr_)
@@ -300,6 +218,94 @@ const Foam::labelListList& Foam::faPatch::pointEdges() const
     }
 
     return *pointEdgesPtr_;
+}
+
+
+void Foam::faPatch::calcPointLabels() const
+{
+    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
+
+    // Walk boundary edges.
+    // The edge orientation corresponds to the face orientation
+    // (outwards normal).
+
+    // Note: could combine this with calcPointEdges for more efficiency
+
+    // Map<label> markedPoints(4*edges.size());
+    labelHashSet markedPoints(4*edges.size());
+    DynamicList<label> dynEdgePoints(2*edges.size());
+
+    for (const edge& e : edges)
+    {
+        // if (markedPoints.insert(e.first(), markedPoints.size()))
+        if (markedPoints.insert(e.first()))
+        {
+            dynEdgePoints.append(e.first());
+        }
+        // if (markedPoints.insert(e.second(), markedPoints.size()))
+        if (markedPoints.insert(e.second()))
+        {
+            dynEdgePoints.append(e.second());
+        }
+    }
+
+    // Transfer to plain list (reuse storage)
+    pointLabelsPtr_ = new labelList(std::move(dynEdgePoints));
+    /// const labelList& edgePoints = *pointLabelsPtr_;
+    ///
+    /// // Cannot use invertManyToMany - we have non-local edge numbering
+    ///
+    /// // Intermediate storage for pointEdges.
+    /// // Points on the boundary will normally connect 1 or 2 edges only.
+    /// List<DynamicList<label,2>> dynPointEdges(edgePoints.size());
+    ///
+    /// forAll(edges, edgei)
+    /// {
+    ///     const edge& e = edges[edgei];
+    ///
+    ///     dynPointEdges[markedPoints[e.first()]].append(edgei);
+    ///     dynPointEdges[markedPoints[e.second()]].append(edgei);
+    /// }
+    ///
+    /// // Flatten to regular list
+    /// pointEdgesPtr_ = new labelListList(edgePoints.size());
+    /// auto& pEdges = *pointEdgesPtr_;
+    ///
+    /// forAll(pEdges, pointi)
+    /// {
+    ///     pEdges[pointi] = std::move(dynPointEdges[pointi]);
+    /// }
+}
+
+
+void Foam::faPatch::calcPointEdges() const
+{
+    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
+
+    const labelList& edgePoints = pointLabels();
+
+    // Cannot use invertManyToMany - we have non-local edge numbering
+
+    // Intermediate storage for pointEdges.
+    // Points on the boundary will normally connect 1 or 2 edges only.
+    List<DynamicList<label,2>> dynPointEdges(edgePoints.size());
+
+    forAll(edges, edgei)
+    {
+        const edge& e = edges[edgei];
+
+        dynPointEdges[edgePoints.find(e.first())].append(edgei);
+        dynPointEdges[edgePoints.find(e.second())].append(edgei);
+    }
+
+    // Flatten to regular list
+    pointEdgesPtr_ = new labelListList(edgePoints.size());
+    auto& pEdges = *pointEdgesPtr_;
+
+    forAll(pEdges, pointi)
+    {
+        pEdges[pointi] = std::move(dynPointEdges[pointi]);
+    }
 }
 
 
@@ -383,7 +389,7 @@ const Foam::scalarField& Foam::faPatch::magEdgeLengths() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 {
-    tmp<vectorField> tedgeNorm(edgeLengths());
+    auto tedgeNorm = tmp<vectorField>::New(edgeLengths());
 
     for (vector& n : tedgeNorm.ref())
     {

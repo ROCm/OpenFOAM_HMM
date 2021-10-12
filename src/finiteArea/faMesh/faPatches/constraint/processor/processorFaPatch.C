@@ -80,12 +80,7 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
      || !boundaryMesh().mesh()().globalData().nGlobalPoints()
     )
     {
-        nonGlobalPatchPointsPtr_ = new labelList(nPoints());
-        labelList& ngpp = *nonGlobalPatchPointsPtr_;
-        forAll(ngpp, i)
-        {
-            ngpp[i] = i;
-        }
+        nonGlobalPatchPointsPtr_ = new labelList(identity(nPoints()));
     }
     else
     {
