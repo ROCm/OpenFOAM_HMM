@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,12 +68,8 @@ Foam::functionObjects::reference::reference
 )
 :
     fieldExpression(name, runTime, dict),
-    positionIsSet_(false),
-    celli_(-1),
-    interpolationScheme_("cell"),
-    scale_(1),
     localDict_(dict),
-    position_(Zero)
+    scale_(1)
 {
     read(dict);
 
@@ -96,27 +92,6 @@ bool Foam::functionObjects::reference::read(const dictionary& dict)
         if (dict.readIfPresent("scale", scale_))
         {
             Log << "    scale: " << scale_ << nl;
-        }
-
-        if (dict.readIfPresent("position", position_))
-        {
-            Log << "    sample position: " << position_ << nl;
-
-            positionIsSet_ = true;
-
-            celli_ = mesh_.findCell(position_);
-
-            label celli = returnReduce(celli_, maxOp<label>());
-
-            if (celli == -1)
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Sample cell could not be found at position "
-                    << position_ << exit(FatalIOError);
-            }
-
-            interpolationScheme_ =
-                dict.getOrDefault<word>("interpolationScheme", "cell");
         }
 
         Log << endl;
