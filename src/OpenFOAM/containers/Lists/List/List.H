@@ -305,7 +305,7 @@ public:
 
     // IOstream Operators
 
-        //- Read List from Istream, discarding contents of existing List
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T>
         (
             Istream& is,
@@ -360,6 +360,16 @@ template<class T>
 struct Hash<List<T>> : List<T>::hasher {};
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read List contents from Istream
+template<class T>
+Istream& operator>>(Istream& is, List<T>& list)
+{
+    return list.readList(is);
+}
+
+
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Create identity map of the given length with (map[i] == i)
@@ -379,6 +389,7 @@ labelList identity(const label len, label start=0);
 
 #ifdef NoRepository
     #include "List.C"
+    #include "ListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

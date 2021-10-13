@@ -257,15 +257,21 @@ public:
             //- Return reverse circular value (ie, previous value in the list)
             inline T& rcValue(const label i);
 
-            //- Return a const pointer to the first data element.
-            //  Similar to the STL front() method and the string::data() method
-            //  This can be used (with caution) when interfacing with C code
+            //- Return pointer to the underlying array serving as data storage.
             inline const T* cdata() const noexcept;
 
-            //- Return a pointer to the first data element.
-            //  Similar to the STL front() method and the string::data() method
-            //  This can be used (with caution) when interfacing with C code
+            //- Return pointer to the underlying array serving as data storage.
             inline T* data() noexcept;
+
+            //- Return pointer to the underlying array serving as data storage,
+            //  reinterpreted as byte data
+            //  \note Only meaningful for contiguous data
+            inline const char* cdata_bytes() const noexcept;
+
+            //- Return pointer to the underlying array serving as data storage,
+            //  reinterpreted as byte data
+            //  \note Only meaningful for contiguous data
+            inline char* data_bytes() noexcept;
 
             //- Return the first element of the list
             inline T& first();
@@ -279,12 +285,12 @@ public:
             //- Return the last element of the list
             inline const T& last() const;
 
-            //- Number of contiguous bytes for the List data,
-            //- no runtime check that the type is actually contiguous
+            //- Number of contiguous bytes for the List data.
+            //  \note Only meaningful for contiguous data
             inline std::streamsize size_bytes() const noexcept;
 
             //- Number of contiguous bytes for the List data,
-            //- with runtime check that the type is actually contiguous
+            //- runtime FatalError if type is not contiguous
             std::streamsize byteSize() const;
 
 
@@ -484,8 +490,7 @@ public:
 
     // IOstream Operators
 
-        //- Read List contents from Istream.
-        //  The List must have the proper size before calling
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T>
         (
             Istream& os,
@@ -586,6 +591,14 @@ Ostream& UList<char>::writeList(Ostream& os, const label /*unused*/) const;
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+//- Read List contents from Istream, list must have the proper size!
+template<class T>
+Istream& operator>>(Istream& is, UList<T>& list)
+{
+    return list.readList(is);
+}
+
+
 //- Write List to Ostream, as per UList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
 template<class T>
@@ -594,7 +607,7 @@ Ostream& operator<<(Ostream& os, const UList<T>& list)
     return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
 }
 
-//- Write std::vector to Ostream
+//- Write std::vector to Ostream. ASCII only, no line-breaks
 template<class T>
 Ostream& operator<<(Ostream& os, const std::vector<T>& list);
 
@@ -685,6 +698,7 @@ struct sizeOp
 
 #ifdef NoRepository
     #include "UList.C"
+    #include "UListIO.C"
     #include "stdVectorIO.C"
 #endif
 

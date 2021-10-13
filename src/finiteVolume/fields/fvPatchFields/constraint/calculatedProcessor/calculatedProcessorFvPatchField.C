@@ -144,6 +144,13 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
 {
     if (Pstream::parRun())
     {
+        if (!is_contiguous<Type>::value)
+        {
+            FatalErrorInFunction
+                << "Invalid for non-contiguous data types"
+                << abort(FatalError);
+        }
+
         //this->patchInternalField(sendBuf_);
         // Bypass patchInternalField since uses fvPatch addressing
         {
@@ -163,8 +170,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<char*>(this->data()),
-            this->byteSize(),
+            this->data_bytes(),
+            this->size_bytes(),
             procInterface_.tag(),
             procInterface_.comm()
         );
@@ -174,8 +181,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<const char*>(sendBuf_.cdata()),
-            this->byteSize(),
+            sendBuf_.cdata_bytes(),
+            sendBuf_.size_bytes(),
             procInterface_.tag(),
             procInterface_.comm()
         );
@@ -245,8 +252,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
     (
         Pstream::commsTypes::nonBlocking,
         procInterface_.neighbProcNo(),
-        reinterpret_cast<char*>(scalarReceiveBuf_.data()),
-        scalarReceiveBuf_.byteSize(),
+        scalarReceiveBuf_.data_bytes(),
+        scalarReceiveBuf_.size_bytes(),
         procInterface_.tag(),
         procInterface_.comm()
     );
@@ -257,8 +264,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
     (
         Pstream::commsTypes::nonBlocking,
         procInterface_.neighbProcNo(),
-        reinterpret_cast<const char*>(scalarSendBuf_.cdata()),
-        scalarSendBuf_.byteSize(),
+        scalarSendBuf_.cdata_bytes(),
+        scalarSendBuf_.size_bytes(),
         procInterface_.tag(),
         procInterface_.comm()
     );

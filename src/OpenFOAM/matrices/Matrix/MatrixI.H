@@ -213,6 +213,20 @@ inline Type* Foam::Matrix<Form, Type>::data() noexcept
 
 
 template<class Form, class Type>
+inline const char* Foam::Matrix<Form, Type>::cdata_bytes() const noexcept
+{
+    return reinterpret_cast<const char*>(v_);
+}
+
+
+template<class Form, class Type>
+inline char* Foam::Matrix<Form, Type>::data_bytes() noexcept
+{
+    return reinterpret_cast<char*>(v_);
+}
+
+
+template<class Form, class Type>
 inline std::streamsize Foam::Matrix<Form, Type>::size_bytes() const noexcept
 {
     return mRows_*nCols_*sizeof(Type);

@@ -208,6 +208,20 @@ inline T* Foam::UList<T>::data() noexcept
 
 
 template<class T>
+inline const char* Foam::UList<T>::cdata_bytes() const noexcept
+{
+    return reinterpret_cast<const char*>(v_);
+}
+
+
+template<class T>
+inline char* Foam::UList<T>::data_bytes() noexcept
+{
+    return reinterpret_cast<char*>(v_);
+}
+
+
+template<class T>
 inline std::streamsize Foam::UList<T>::size_bytes() const noexcept
 {
     return std::streamsize(size_)*sizeof(T);

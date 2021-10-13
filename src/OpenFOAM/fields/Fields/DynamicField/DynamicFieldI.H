@@ -245,6 +245,14 @@ inline Foam::label Foam::DynamicField<T, SizeMin>::capacity() const noexcept
 
 
 template<class T, int SizeMin>
+inline std::streamsize
+Foam::DynamicField<T, SizeMin>::capacity_bytes() const noexcept
+{
+    return std::streamsize(capacity_)*sizeof(T);
+}
+
+
+template<class T, int SizeMin>
 inline void Foam::DynamicField<T, SizeMin>::setCapacity
 (
     const label newCapacity
@@ -611,12 +619,13 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::Istream& Foam::operator>>
+inline Foam::Istream& Foam::DynamicField<T, SizeMin>::readList
 (
-    Istream& is,
-    DynamicField<T, SizeMin>& rhs
+    Istream& is
 )
 {
+    DynamicField<T, SizeMin>& rhs = *this;
+
     // Use entire storage - ie, resize(capacity())
     (void) rhs.expandStorage();
 
@@ -624,6 +633,17 @@ inline Foam::Istream& Foam::operator>>
     rhs.capacity_ = rhs.Field<T>::size();
 
     return is;
+}
+
+
+template<class T, int SizeMin>
+inline Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    DynamicField<T, SizeMin>& rhs
+)
+{
+    return rhs.readList(is);
 }
 
 

@@ -167,6 +167,10 @@ public:
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
 
+        //- Number of contiguous bytes of the underlying storage.
+        //  \note Only meaningful for contiguous data
+        inline std::streamsize capacity_bytes() const noexcept;
+
 
     // Sizing
 
@@ -240,6 +244,13 @@ public:
         inline T remove();
 
 
+    // Reading/writing
+
+        //- Read from Istream, discarding existing contents
+        //  Uses a DynamicList::readList internally
+        inline Istream& readList(Istream& is);
+
+
     // Member Operators
 
         //- Return non-const access to an element, resizing list if needed
@@ -270,7 +281,7 @@ public:
 
     // IOstream Operators
 
-        //- Read from Istream, discarding existing contents
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T, SizeMin>
         (
             Istream& is,

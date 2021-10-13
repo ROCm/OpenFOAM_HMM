@@ -84,7 +84,7 @@ void Pstream::gatherList
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<char*>(receivedValues.data()),
+                    receivedValues.data_bytes(),
                     receivedValues.size_bytes(),
                     tag,
                     comm
@@ -160,7 +160,7 @@ void Pstream::gatherList
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<const char*>(sendingValues.cdata()),
+                    sendingValues.cdata_bytes(),
                     sendingValues.size_bytes(),
                     tag,
                     comm
@@ -246,7 +246,7 @@ void Pstream::scatterList
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<char*>(receivedValues.data()),
+                    receivedValues.data_bytes(),
                     receivedValues.size_bytes(),
                     tag,
                     comm
@@ -302,7 +302,7 @@ void Pstream::scatterList
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<const char*>(sendingValues.cdata()),
+                    sendingValues.cdata_bytes(),
                     sendingValues.size_bytes(),
                     tag,
                     comm

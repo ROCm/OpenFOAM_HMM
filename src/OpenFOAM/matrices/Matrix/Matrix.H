@@ -66,6 +66,12 @@ template<class Form, class Type> class Matrix;
 template<class MatrixType> class ConstMatrixBlock;
 template<class MatrixType> class MatrixBlock;
 
+template<class Form, class Type>
+Istream& operator>>(Istream& is, Matrix<Form, Type>& mat);
+
+template<class Form, class Type>
+Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat);
+
 
 /*---------------------------------------------------------------------------*\
                            Class Matrix Declaration
@@ -204,12 +210,23 @@ public:
         //- be used to address into Matrix contents
         inline Type* data() noexcept;
 
+        //- Return pointer to the underlying array serving as data storage,
+        //- reinterpreted as byte data.
+        //  \note Only meaningful for contiguous data
+        inline const char* cdata_bytes() const noexcept;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //- reinterpreted as byte data.
+        //  \note Only meaningful for contiguous data
+        inline char* data_bytes() noexcept;
+
         //- Number of contiguous bytes for the Matrix data,
         //- no runtime check that the type is actually contiguous
+        //  \note Only meaningful for contiguous data
         inline std::streamsize size_bytes() const noexcept;
 
         //- Number of contiguous bytes for the Matrix data,
-        //- with runtime check that the type is actually contiguous
+        //- runtime FatalError if type is not contiguous
         std::streamsize byteSize() const;
 
         //- Return const pointer to data in the specified row
@@ -590,12 +607,20 @@ public:
 
 //- Read Matrix from Istream, discarding contents of existing Matrix.
 template<class Form, class Type>
-Istream& operator>>(Istream& is, Matrix<Form, Type>& mat);
+Istream& operator>>(Istream& is, Matrix<Form, Type>& mat)
+{
+    mat.readMatrix(is);
+    return is;
+}
+
 
 //- Write Matrix to Ostream, as per Matrix::writeMatrix() with
 //- default length, which is given by Detail::ListPolicy::short_length
 template<class Form, class Type>
-Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat);
+Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat)
+{
+    return mat.writeMatrix(os, Detail::ListPolicy::short_length<Type>::value);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -610,6 +635,7 @@ Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat);
 
 #ifdef NoRepository
     #include "Matrix.C"
+    #include "MatrixIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

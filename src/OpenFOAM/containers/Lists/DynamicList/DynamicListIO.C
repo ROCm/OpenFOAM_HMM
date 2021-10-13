@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,37 +25,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "UList.H"
-#include "Ostream.H"
+#include "List.H"
+#include "Istream.H"
 #include "token.H"
-#include <vector>
+#include "SLList.H"
+#include "contiguous.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class T, int SizeMin>
+Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
+:
+    List<T>(),
+    capacity_(0)
+{
+    this->readList(is);
+}
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const std::vector<T>& list)
+template<class T, int SizeMin>
+Foam::Istream& Foam::DynamicList<T, SizeMin>::readList
+(
+    Istream& is
+)
 {
-    auto iter = list.cbegin();
-    const auto last = list.cend();
+    DynamicList<T, SizeMin>& list = *this;
 
-    // Write ascii list contents, no line breaks
+    // Needs rewrite (2021-10)
+    // Use entire storage - ie, resize(capacity())
+    (void) list.expandStorage();
 
-    os << label(list.size()) << token::BEGIN_LIST;
+    static_cast<List<T>&>(list).readList(is);
+    list.capacity_ = list.size();
 
-    if (iter != last)
-    {
-        os << *iter;
-
-        for (++iter; iter != last; ++iter)
-        {
-            os << token::SPACE << *iter;
-        }
-    }
-
-    os << token::END_LIST;
-
-    os.check(FUNCTION_NAME);
-    return os;
+    return is;
 }
 
 

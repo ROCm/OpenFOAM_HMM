@@ -63,7 +63,7 @@ inline Foam::BiIndirectList<T>::BiIndirectList
 (
     const UList<T>& posList,
     const UList<T>& negList,
-    List<label>&& addr
+    labelList&& addr
 )
 :
     posList_(const_cast<UList<T>&>(posList)),
@@ -89,22 +89,22 @@ inline bool Foam::BiIndirectList<T>::empty() const noexcept
 
 
 template<class T>
-inline const Foam::UList<T>& Foam::BiIndirectList<T>::posList() const
+inline const Foam::UList<T>& Foam::BiIndirectList<T>::posList() const noexcept
 {
     return posList_;
 }
 
 
 template<class T>
-inline const Foam::UList<T>& Foam::BiIndirectList<T>::negList() const
+inline const Foam::UList<T>& Foam::BiIndirectList<T>::negList() const noexcept
 {
     return negList_;
 }
 
 
 template<class T>
-inline const Foam::List<Foam::label>& Foam::BiIndirectList<T>::addressing()
- const
+inline const Foam::labelList&
+Foam::BiIndirectList<T>::addressing() const noexcept
 {
     return addressing_;
 }
@@ -123,7 +123,7 @@ inline void Foam::BiIndirectList<T>::resetAddressing
 template<class T>
 inline void Foam::BiIndirectList<T>::resetAddressing
 (
-    List<label>&& addr
+    labelList&& addr
 )
 {
     addressing_.transfer(addr);

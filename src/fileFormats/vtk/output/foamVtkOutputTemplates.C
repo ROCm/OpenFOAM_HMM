@@ -179,11 +179,7 @@ void Foam::vtk::writeListParallel
         UOPstream os(Pstream::masterNo(), pBufs);
         if (is_contiguous<Type>::value)
         {
-            os.write
-            (
-                reinterpret_cast<const char*>(values.cdata()),
-                values.size_bytes()
-            );
+            os.write(values.cdata_bytes(), values.size_bytes());
         }
         else
         {
@@ -208,11 +204,7 @@ void Foam::vtk::writeListParallel
 
                 if (is_contiguous<Type>::value)
                 {
-                    is.read
-                    (
-                        reinterpret_cast<char*>(recv.data()),
-                        recv.size_bytes()
-                    );
+                    is.read(recv.data_bytes(), recv.size_bytes());
                 }
                 else
                 {
@@ -295,11 +287,7 @@ void Foam::vtk::writeListParallel
         UOPstream os(Pstream::masterNo(), pBufs);
         if (is_contiguous<Type>::value)
         {
-            os.write
-            (
-                reinterpret_cast<const char*>(send.cdata()),
-                send.size_bytes()
-            );
+            os.write(send.cdata_bytes(), send.size_bytes());
         }
         else
         {
@@ -324,11 +312,7 @@ void Foam::vtk::writeListParallel
 
                 if (is_contiguous<Type>::value)
                 {
-                    is.read
-                    (
-                        reinterpret_cast<char*>(recv.data()),
-                        recv.size_bytes()
-                    );
+                    is.read(recv.data_bytes(), recv.size_bytes());
                 }
                 else
                 {
@@ -361,16 +345,8 @@ void Foam::vtk::writeListsParallel
         UOPstream os(Pstream::masterNo(), pBufs);
         if (is_contiguous<Type>::value)
         {
-            os.write
-            (
-                reinterpret_cast<const char*>(values1.cdata()),
-                values1.size_bytes()
-            );
-            os.write
-            (
-                reinterpret_cast<const char*>(values2.cdata()),
-                values2.size_bytes()
-            );
+            os.write(values1.cdata_bytes(), values1.size_bytes());
+            os.write(values2.cdata_bytes(), values2.size_bytes());
         }
         else
         {
@@ -402,11 +378,7 @@ void Foam::vtk::writeListsParallel
                 List<Type> recv(sizes1.localSize(proci));
                 if (is_contiguous<Type>::value)
                 {
-                    is.read
-                    (
-                        reinterpret_cast<char*>(recv.data()),
-                        recv.size_bytes()
-                    );
+                    is.read(recv.data_bytes(), recv.size_bytes());
                 }
                 else
                 {
@@ -420,11 +392,7 @@ void Foam::vtk::writeListsParallel
                 List<Type> recv(sizes2.localSize(proci));
                 if (is_contiguous<Type>::value)
                 {
-                    is.read
-                    (
-                        reinterpret_cast<char*>(recv.data()),
-                        recv.size_bytes()
-                    );
+                    is.read(recv.data_bytes(), recv.size_bytes());
                 }
                 else
                 {

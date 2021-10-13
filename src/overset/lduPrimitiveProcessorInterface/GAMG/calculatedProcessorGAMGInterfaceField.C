@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,8 +115,8 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<char*>(scalarReceiveBuf_.data()),
-            scalarReceiveBuf_.byteSize(),
+            scalarReceiveBuf_.data_bytes(),
+            scalarReceiveBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );
@@ -126,8 +126,8 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<const char*>(scalarSendBuf_.cdata()),
-            scalarSendBuf_.byteSize(),
+            scalarSendBuf_.cdata_bytes(),
+            scalarSendBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );

@@ -56,7 +56,8 @@ class BiIndirectList
 
         UList<T>& posList_;
         UList<T>& negList_;
-        List<label> addressing_;
+
+        labelList addressing_;
 
 
 public:
@@ -76,7 +77,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            List<label>&& addr
+            labelList&& addr
         );
 
 
@@ -90,15 +91,16 @@ public:
             //- True if the list is empty (ie, size() is zero).
             inline bool empty() const noexcept;
 
-            inline const UList<T>& posList() const;
-            inline const UList<T>& negList() const;
+            inline const UList<T>& posList() const noexcept;
+            inline const UList<T>& negList() const noexcept;
 
             //- Return the list addressing
-            inline const List<label>& addressing() const;
+            inline const labelList& addressing() const noexcept;
 
             //- Calculate index given whether index is into posList or negList
             inline static label posIndex(const label i);
             inline static label negIndex(const label i);
+
 
         // Edit
 
@@ -106,7 +108,7 @@ public:
             inline void resetAddressing(const labelUList& addr);
 
             //- Move reset addressing
-            inline void resetAddressing(List<label>&& addr);
+            inline void resetAddressing(labelList&& addr);
 
 
         // Member Operators

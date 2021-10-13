@@ -34,7 +34,7 @@ License
 #include "ListPolicy.H"
 #include <algorithm>
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Form, class Type>
 Foam::Matrix<Form, Type>::Matrix(Istream& is)
@@ -43,9 +43,11 @@ Foam::Matrix<Form, Type>::Matrix(Istream& is)
     nCols_(0),
     v_(nullptr)
 {
-    operator>>(is, *this);
+    this->readMatrix(is);
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Form, class Type>
 bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
@@ -77,7 +79,7 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
                 Detail::readContiguous<Type>
                 (
                     is,
-                    reinterpret_cast<char*>(v_),
+                    this->data_bytes(),
                     this->size_bytes()
                 );
 
@@ -159,11 +161,7 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
         if (len)
         {
             // write(...) includes surrounding start/end delimiters
-            os.write
-            (
-                reinterpret_cast<const char*>(mat.cdata()),
-                mat.size_bytes()
-            );
+            os.write(mat.cdata_bytes(), mat.size_bytes());
         }
     }
     else
@@ -237,21 +235,6 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
 
     os.check(FUNCTION_NAME);
     return os;
-}
-
-
-template<class Form, class Type>
-Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& mat)
-{
-    mat.readMatrix(is);
-    return is;
-}
-
-
-template<class Form, class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& mat)
-{
-    return mat.writeMatrix(os, Detail::ListPolicy::short_length<Type>::value);
 }
 
 

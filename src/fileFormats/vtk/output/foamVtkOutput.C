@@ -138,11 +138,7 @@ void Foam::vtk::writeListParallel
     if (!Pstream::master())
     {
         UOPstream os(Pstream::masterNo(), pBufs);
-        os.write
-        (
-            reinterpret_cast<const char*>(values.cdata()),
-            values.size_bytes()
-        );
+        os.write(values.cdata_bytes(), values.size_bytes());
     }
 
     pBufs.finishedSends();
@@ -164,11 +160,7 @@ void Foam::vtk::writeListParallel
             List<label> recv(sizes.localSize(proci));
 
             UIPstream is(proci, pBufs);
-            is.read
-            (
-                reinterpret_cast<char*>(recv.data()),
-                recv.size_bytes()
-            );
+            is.read(recv.data_bytes(), recv.size_bytes());
 
             // Write with offset
             const label offsetId = procOffset.offset(proci);

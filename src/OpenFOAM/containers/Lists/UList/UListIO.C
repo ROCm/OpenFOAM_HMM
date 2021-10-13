@@ -94,11 +94,7 @@ Foam::Ostream& Foam::UList<T>::writeList
         if (len)
         {
             // write(...) includes surrounding start/end delimiters
-            os.write
-            (
-                reinterpret_cast<const char*>(list.cdata()),
-                list.size_bytes()
-            );
+            os.write(list.cdata_bytes(), list.size_bytes());
         }
     }
     else if (len > 1 && is_contiguous<T>::value && list.uniform())
@@ -224,7 +220,7 @@ Foam::Istream& Foam::UList<T>::readList(Istream& is)
                 Detail::readContiguous<T>
                 (
                     is,
-                    reinterpret_cast<char*>(list.data()),
+                    list.data_bytes(),
                     list.size_bytes()
                 );
 
@@ -310,13 +306,6 @@ Foam::Istream& Foam::UList<T>::readList(Istream& is)
     }
 
     return is;
-}
-
-
-template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
-{
-    return list.readList(is);
 }
 
 

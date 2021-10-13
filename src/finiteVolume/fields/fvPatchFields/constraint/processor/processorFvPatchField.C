@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -225,15 +225,22 @@ void Foam::processorFvPatchField<Type>::initEvaluate
          && !Pstream::floatTransfer
         )
         {
-            // Fast path. Receive into *this
+            if (!is_contiguous<Type>::value)
+            {
+                FatalErrorInFunction
+                    << "Invalid for non-contiguous data types"
+                    << abort(FatalError);
+            }
+
+            // Receive straight into *this
             this->setSize(sendBuf_.size());
             outstandingRecvRequest_ = UPstream::nRequests();
             UIPstream::read
             (
                 Pstream::commsTypes::nonBlocking,
                 procPatch_.neighbProcNo(),
-                reinterpret_cast<char*>(this->data()),
-                this->byteSize(),
+                this->data_bytes(),
+                this->size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );
@@ -243,8 +250,8 @@ void Foam::processorFvPatchField<Type>::initEvaluate
             (
                 Pstream::commsTypes::nonBlocking,
                 procPatch_.neighbProcNo(),
-                reinterpret_cast<const char*>(sendBuf_.cdata()),
-                sendBuf_.byteSize(),
+                sendBuf_.cdata_bytes(),
+                sendBuf_.size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );
@@ -353,8 +360,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            reinterpret_cast<char*>(scalarReceiveBuf_.data()),
-            scalarReceiveBuf_.byteSize(),
+            scalarReceiveBuf_.data_bytes(),
+            scalarReceiveBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -364,8 +371,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            reinterpret_cast<const char*>(scalarSendBuf_.cdata()),
-            scalarSendBuf_.byteSize(),
+            scalarSendBuf_.cdata_bytes(),
+            scalarSendBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -503,8 +510,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            reinterpret_cast<char*>(receiveBuf_.data()),
-            receiveBuf_.byteSize(),
+            receiveBuf_.data_bytes(),
+            receiveBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -514,8 +521,8 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            reinterpret_cast<const char*>(sendBuf_.cdata()),
-            sendBuf_.byteSize(),
+            sendBuf_.cdata_bytes(),
+            sendBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );

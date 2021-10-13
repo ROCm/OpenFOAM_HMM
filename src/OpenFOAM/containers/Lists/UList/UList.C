@@ -388,8 +388,4 @@ bool Foam::UList<T>::operator>=(const UList<T>& list) const
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
-
-#include "UListIO.C"
-
 // ************************************************************************* //

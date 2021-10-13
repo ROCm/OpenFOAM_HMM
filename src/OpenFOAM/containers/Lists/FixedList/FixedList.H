@@ -69,6 +69,9 @@ template<class T> class UList;
 template<class T, unsigned N>
 Istream& operator>>(Istream& is, FixedList<T, N>& list);
 
+template<class T, unsigned N>
+Ostream& operator<<(Ostream& os, const FixedList<T, N>& list);
+
 
 /*---------------------------------------------------------------------------*\
                            Class FixedList Declaration
@@ -197,15 +200,22 @@ public:
 
     // Access
 
-        //- Return a const pointer to the first data element.
-        //  Similar to the STL front() method and the string::data() method
-        //  This can be used (with caution) when interfacing with C code
+        //- Return pointer to the underlying array serving as data storage.
         inline const T* cdata() const noexcept;
 
-        //- Return a pointer to the first data element.
-        //  Similar to the STL front() method and the string::data() method
-        //  This can be used (with caution) when interfacing with C code
+        //- Return pointer to the underlying array serving as data storage.
         inline T* data() noexcept;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        inline const char* cdata_bytes() const noexcept;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        inline char* data_bytes() noexcept;
+
 
         //- The first element of the list, position [0]
         inline T& first() noexcept;
@@ -220,12 +230,12 @@ public:
         inline const T& last() const noexcept;
 
         //- Number of contiguous bytes for the list data,
-        //- no runtime check that the type is actually contiguous
+        //  \note Only meaningful for contiguous data
         inline static std::streamsize size_bytes() noexcept;
 
         //- Number of contiguous bytes for the list data,
-        //- with runtime check that the type is actually contiguous
-        std::streamsize byteSize() const;
+        //- runtime FatalError if type is not contiguous
+        static std::streamsize byteSize();
 
         //- Return the forward circular index, i.e. next index
         //- which returns to the first at the end of the list
@@ -448,7 +458,7 @@ public:
 
     // IOstream Operators
 
-        //- Read from Istream, discarding contents of existing List
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T, N>
         (
             Istream& is,
@@ -523,6 +533,14 @@ inline void Swap(FixedList<T, N>& a, FixedList<T, N>& b)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+//- Read List contents from Istream, list must have the proper size!
+template<class T, unsigned N>
+Istream& operator>>(Istream& is, FixedList<T, N>& list)
+{
+    return list.readList(is);
+}
+
+
 //- Write List to Ostream, as per FixedList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
 template<class T, unsigned N>
@@ -545,6 +563,7 @@ Ostream& operator<<(Ostream& os, const FixedList<T, N>& list)
 
 #ifdef NoRepository
     #include "FixedList.C"
+    #include "FixedListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

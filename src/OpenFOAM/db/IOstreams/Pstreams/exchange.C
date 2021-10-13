@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ void Foam::Pstream::exchangeContainer
             (
                 UPstream::commsTypes::nonBlocking,
                 proci,
-                reinterpret_cast<char*>(recvBufs[proci].begin()),
+                recvBufs[proci].data_bytes(),
                 recvSizes[proci]*sizeof(T),
                 tag,
                 comm
@@ -81,8 +81,8 @@ void Foam::Pstream::exchangeContainer
                 (
                     UPstream::commsTypes::nonBlocking,
                     proci,
-                    reinterpret_cast<const char*>(sendBufs[proci].begin()),
-                    sendBufs[proci].size()*sizeof(T),
+                    sendBufs[proci].cdata_bytes(),
+                    sendBufs[proci].size_bytes(),
                     tag,
                     comm
                 )

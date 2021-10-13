@@ -207,22 +207,20 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 }
 
 
-template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
-:
-    List<T>(),
-    capacity_(0)
-{
-    this->readList(is);
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
 inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const noexcept
 {
     return capacity_;
+}
+
+
+template<class T, int SizeMin>
+inline std::streamsize
+Foam::DynamicList<T, SizeMin>::capacity_bytes() const noexcept
+{
+    return std::streamsize(capacity_)*sizeof(T);
 }
 
 
@@ -864,49 +862,6 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 {
     clear();
     transfer(lst);
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class T, int SizeMin>
-inline Foam::Istream& Foam::DynamicList<T, SizeMin>::readList
-(
-    Istream& is
-)
-{
-    DynamicList<T, SizeMin>& list = *this;
-
-    // Use entire storage - ie, resize(capacity())
-    (void) list.expandStorage();
-
-    static_cast<List<T>&>(list).readList(is);
-    list.capacity_ = list.size();
-
-    return is;
-}
-
-
-template<class T, int SizeMin>
-inline Foam::Istream& Foam::operator>>
-(
-    Istream& is,
-    DynamicList<T, SizeMin>& list
-)
-{
-    return list.readList(is);
-}
-
-
-template<class T, int SizeMin>
-inline Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const DynamicList<T, SizeMin>& list
-)
-{
-    os << static_cast<const List<T>&>(list);
-    return os;
 }
 
 

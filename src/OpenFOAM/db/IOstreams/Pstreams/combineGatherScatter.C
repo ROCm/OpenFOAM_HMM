@@ -313,7 +313,7 @@ void Foam::Pstream::listCombineGather
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<char*>(receivedValues.data()),
+                    receivedValues.data_bytes(),
                     receivedValues.size_bytes(),
                     tag,
                     comm
@@ -370,7 +370,7 @@ void Foam::Pstream::listCombineGather
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<const char*>(Values.cdata()),
+                    Values.cdata_bytes(),
                     Values.size_bytes(),
                     tag,
                     comm
@@ -450,7 +450,7 @@ void Foam::Pstream::listCombineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     myComm.above(),
-                    reinterpret_cast<char*>(Values.data()),
+                    Values.data_bytes(),
                     Values.size_bytes(),
                     tag,
                     comm
@@ -492,7 +492,7 @@ void Foam::Pstream::listCombineScatter
                 (
                     UPstream::commsTypes::scheduled,
                     belowID,
-                    reinterpret_cast<const char*>(Values.cdata()),
+                    Values.cdata_bytes(),
                     Values.size_bytes(),
                     tag,
                     comm

@@ -401,6 +401,12 @@ public:
         //- A pointer to the raw storage
         inline unsigned int* data() noexcept;
 
+        //- A const pointer to the raw storage, reinterpreted as byte data
+        inline const char* cdata_bytes() const noexcept;
+
+        //- A pointer to the raw storage, reinterpreted as byte data
+        inline char* data_bytes() noexcept;
+
         //- The number of bytes used in the raw storage
         //- including any unused padding.
         inline std::streamsize size_bytes() const noexcept;

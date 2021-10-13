@@ -275,6 +275,7 @@ public:
 
 #ifdef NoRepository
     #include "CompactListList.C"
+    #include "CompactListListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

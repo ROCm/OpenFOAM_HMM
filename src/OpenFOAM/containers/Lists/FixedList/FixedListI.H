@@ -181,6 +181,22 @@ Foam::FixedList<T, N>::data() noexcept
 
 
 template<class T, unsigned N>
+inline const char*
+Foam::FixedList<T, N>::cdata_bytes() const noexcept
+{
+    return reinterpret_cast<const char*>(v_);
+}
+
+
+template<class T, unsigned N>
+inline char*
+Foam::FixedList<T, N>::data_bytes() noexcept
+{
+    return reinterpret_cast<char*>(v_);
+}
+
+
+template<class T, unsigned N>
 inline std::streamsize Foam::FixedList<T, N>::size_bytes() noexcept
 {
     return N*sizeof(T);

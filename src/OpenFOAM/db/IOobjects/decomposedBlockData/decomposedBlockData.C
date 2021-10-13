@@ -583,9 +583,9 @@ void Foam::decomposedBlockData::gather
 )
 {
     const label nProcs = UPstream::nProcs(comm);
-    datas.setSize(nProcs);
+    datas.resize(nProcs);
 
-    char* data0Ptr = reinterpret_cast<char*>(datas.data());
+    char* data0Ptr = datas.data_bytes();
 
     List<int> recvOffsets;
     List<int> recvSizes;

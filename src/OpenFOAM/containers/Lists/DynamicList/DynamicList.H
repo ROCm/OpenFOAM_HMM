@@ -36,8 +36,9 @@ Description
     SizeMin template parameter dictating a lower bound.
 
 SourceFiles
-    DynamicListI.H
     DynamicList.C
+    DynamicListI.H
+    DynamicListIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,10 +57,10 @@ namespace Foam
 template<class T, int SizeMin> class DynamicList;
 
 template<class T, int SizeMin>
-inline Istream& operator>>(Istream&, DynamicList<T, SizeMin>&);
+Istream& operator>>(Istream& is, DynamicList<T, SizeMin>& list);
 
 template<class T, int SizeMin>
-inline Ostream& operator<<(Ostream&, const DynamicList<T, SizeMin>&);
+Ostream& operator<<(Ostream& os, const DynamicList<T, SizeMin>& list);
 
 
 /*---------------------------------------------------------------------------*\
@@ -155,6 +156,10 @@ public:
 
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
+
+        //- Number of contiguous bytes of the underlying storage.
+        //  \note Only meaningful for contiguous data
+        inline std::streamsize capacity_bytes() const noexcept;
 
 
     // Sizing
@@ -336,12 +341,12 @@ public:
     // Reading/writing
 
         //- Read from Istream, discarding existing contents
-        inline Istream& readList(Istream& is);
+        Istream& readList(Istream& is);
 
 
     // IOstream Operators
 
-        //- Read from Istream, discarding existing contents
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T, SizeMin>
         (
             Istream& is,
@@ -357,6 +362,24 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read List contents from Istream
+template<class T, int SizeMin>
+Istream& operator>>(Istream& is, DynamicList<T, SizeMin>& list)
+{
+    return list.readList(is);
+}
+
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+template<class T, int SizeMin>
+Ostream& operator<<(Ostream& os, const DynamicList<T, SizeMin>& list)
+{
+    return (os << static_cast<const UList<T>&>(list));
+}
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 // Exchange contents of lists - see DynamicList::swap().
@@ -366,6 +389,8 @@ inline void Swap(DynamicList<T, SizeMinA>& a, DynamicList<T, SizeMinB>& b)
     a.swap(b);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Hashing for List data
 template<class T, int SizeMin>
@@ -384,6 +409,7 @@ struct Hash<DynamicList<T, SizeMin>> : List<T>::hasher {};
 
 #ifdef NoRepository
     #include "DynamicList.C"
+    #include "DynamicListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
