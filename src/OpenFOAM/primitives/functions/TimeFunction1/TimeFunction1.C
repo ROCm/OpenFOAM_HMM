@@ -42,7 +42,8 @@ Foam::TimeFunction1<Type>::TimeFunction1
     name_(entryName),
     entry_(Function1<Type>::New(entryName, dict, &runTime))
 {
-    entry_->convertTimeBase(runTime);
+    // Time conversion now handled by Function1 directly
+    // entry_->convertTimeBase(runTime);
 }
 
 

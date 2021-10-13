@@ -107,7 +107,7 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::TableBase<Type>::check() const
+void Foam::Function1Types::TableBase<Type>::initialise()
 {
     if (!table_.size())
     {
@@ -133,6 +133,11 @@ void Foam::Function1Types::TableBase<Type>::check() const
         }
         prevValue = currValue;
         ++i;
+    }
+
+    if (this->isTime())
+    {
+        convertTimeBase(this->time());
     }
 }
 

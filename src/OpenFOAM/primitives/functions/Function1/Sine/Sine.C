@@ -50,6 +50,11 @@ Foam::Function1Types::Sine<Type>::Sine
     {
         frequency_ = Function1<scalar>::New("frequency", dict);
     }
+
+    if (this->isTime())
+    {
+        convertTimeBase(this->time());
+    }
 }
 
 

@@ -119,7 +119,7 @@ public:
     // Member Functions
 
         //- Check the table for size and consistency
-        void check() const;
+        void initialise();
 
         //- Check minimum table bounds
         bool checkMinBounds(const scalar x, scalar& xDash) const;

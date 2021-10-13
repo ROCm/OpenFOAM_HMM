@@ -224,7 +224,7 @@ Foam::Function1Types::CSV<Type>::CSV
 {
     read();
 
-    TableBase<Type>::check();
+    TableBase<Type>::initialise();
 }
 
 

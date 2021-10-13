@@ -85,7 +85,7 @@ Foam::Function1Types::Table<Type>::Table
         dict.readEntry("values", this->table_);
     }
 
-    TableBase<Type>::check();
+    TableBase<Type>::initialise();
 }
 
 

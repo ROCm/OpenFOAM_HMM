@@ -34,6 +34,11 @@ void Foam::Function1Types::ramp::read(const dictionary& coeffs)
 {
     start_ = coeffs.getOrDefault<scalar>("start", 0);
     coeffs.readEntry("duration", duration_);
+
+    if (isTime())
+    {
+        convertTimeBase(time());
+    }
 }
 
 

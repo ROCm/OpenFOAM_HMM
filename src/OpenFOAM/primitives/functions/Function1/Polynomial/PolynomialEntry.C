@@ -56,6 +56,11 @@ void Foam::Function1Types::Polynomial<Type>::checkCoefficients()
             << "Polynomial " << this->name() << " cannot be integrated"
             << endl;
     }
+
+    if (this->isTime())
+    {
+        convertTimeBase(this->time());
+    }
 }
 
 

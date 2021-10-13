@@ -57,7 +57,7 @@ Foam::Function1Types::TableFile<Type>::TableFile
 
     is  >> this->table_;
 
-    TableBase<Type>::check();
+    TableBase<Type>::initialise();
 }
 
 
