@@ -49,3 +49,21 @@ forAll(fluidRegions, i)
         break;
     }
 }
+
+forAll(solidRegions, i)
+{
+    if (coupled && fvMatrixAssemblyPtr.empty())
+    {
+        solidThermo& thermo = thermos[i];
+        Info << "Create fvMatrixAssembly." << endl;
+        fvMatrixAssemblyPtr.reset
+        (
+            new fvMatrix<scalar>
+            (
+                thermo.he(),
+                dimEnergy/dimTime
+            )
+        );
+        break;
+    }
+}
