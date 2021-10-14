@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrName_("undefined-qr"),
     thicknessLayers_(0),
     kappaLayers_(0),
-    contactRes_(0),
     thermalInertia_(false)
 {
     this->refValue() = 0.0;
@@ -89,7 +88,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
-    contactRes_(psf.contactRes_),
     thermalInertia_(psf.thermalInertia_)
 {}
 
@@ -109,7 +107,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrName_(dict.getOrDefault<word>("qr", "none")),
     thicknessLayers_(0),
     kappaLayers_(0),
-    contactRes_(0.0),
     thermalInertia_(dict.getOrDefault<Switch>("thermalInertia", false))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
@@ -126,15 +123,15 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     {
         dict.readEntry("kappaLayers", kappaLayers_);
 
-        if (thicknessLayers_.size() > 0)
-        {
-            // Calculate effective thermal resistance by harmonic averaging
-            forAll(thicknessLayers_, iLayer)
-            {
-                contactRes_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
-            }
-            contactRes_ = 1.0/contactRes_;
-        }
+//         if (thicknessLayers_.size() > 0)
+//         {
+//             // Calculate effective thermal resistance by harmonic averaging
+//             forAll(thicknessLayers_, iLayer)
+//             {
+//                 contactRes_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+//             }
+//             contactRes_ = 1.0/contactRes_;
+//         }
     }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -183,7 +180,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
     kappaLayers_(psf.kappaLayers_),
-    contactRes_(psf.contactRes_),
     thermalInertia_(psf.thermalInertia_)
 {}
 
@@ -225,22 +221,23 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             );
 
     // Swap to obtain full local values of neighbour K*delta
-    scalarField KDeltaNbr;
-    tmp<scalarField> TcNbr(new scalarField(nbrField.size(), Zero));
-    if (contactRes_ == 0.0)
-    {
-        TcNbr.ref() = nbrField.patchInternalField();
-        KDeltaNbr = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
-    }
-    else
-    {
-        TcNbr.ref() = nbrField;
-        KDeltaNbr.setSize(nbrField.size(), contactRes_);
-    }
+    scalarField TcNbr(nbrField.patchInternalField());
+    scalarField KDeltaNbr(nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs());
+
     mpp.distribute(KDeltaNbr);
-    mpp.distribute(TcNbr.ref());
+    mpp.distribute(TcNbr);
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
+
+    if (thicknessLayers_.size() > 0)
+    {
+        KDelta = 1.0/KDelta;
+        forAll(thicknessLayers_, iLayer)
+        {
+            KDelta += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+        }
+        KDelta = 1.0/KDelta;
+    }
 
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
