@@ -143,14 +143,14 @@ export FOAM_USER_LIBBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib"
 
 
 # Prepend wmake to the path - not required for runtime-only environment
-foundDir="$WM_PROJECT_DIR/wmake"
+_foamFoundDir="$WM_PROJECT_DIR/wmake"
 if [ -d "$WM_DIR" ]
 then
-    foundDir="${WM_DIR}"
+    _foamFoundDir="${WM_DIR}"
 fi
-if [ -d "$foundDir" ]
+if [ -d "$_foamFoundDir" ]
 then
-    PATH="$foundDir:$PATH"
+    PATH="$_foamFoundDir:$PATH"
 else
     unset WM_DIR
 fi
@@ -308,7 +308,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir archOption
+unset archOption archDir siteDir _foamFoundDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

@@ -30,7 +30,7 @@
 export FOAM_API=$("$WM_PROJECT_DIR/bin/foamEtcFile" -show-api)
 
 # The installation parent directory
-prefixDir="${WM_PROJECT_DIR%/*}"
+_foamPrefixDir="${WM_PROJECT_DIR%/*}"
 
 # Load shell functions
 unset WM_SHELL_FUNCTIONS
@@ -54,20 +54,20 @@ then
     WM_THIRD_PARTY_DIR="$WM_PROJECT_DIR/ThirdParty"
 else
     _foamEcho "Locating ThirdParty directory"
-    for foundDir in \
-        "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
-        "$prefixDir/ThirdParty-v$FOAM_API" \
-        "$prefixDir/ThirdParty-$FOAM_API" \
-        "$prefixDir/ThirdParty-common" \
+    for _foamFoundDir in \
+        "$_foamPrefixDir/ThirdParty-$WM_PROJECT_VERSION" \
+        "$_foamPrefixDir/ThirdParty-v$FOAM_API" \
+        "$_foamPrefixDir/ThirdParty-$FOAM_API" \
+        "$_foamPrefixDir/ThirdParty-common" \
         ;
     do
-        _foamEcho "... $foundDir"
-        if [ -d "$foundDir" ]
+        _foamEcho "... $_foamFoundDir"
+        if [ -d "$_foamFoundDir" ]
         then
-            if [ -f "$foundDir/Allwmake" ] || \
-               [ -d "$foundDir/platforms" ]
+            if [ -f "$_foamFoundDir/Allwmake" ] || \
+               [ -d "$_foamFoundDir/platforms" ]
             then
-                WM_THIRD_PARTY_DIR="$foundDir"
+                WM_THIRD_PARTY_DIR="$_foamFoundDir"
                 break
             else
                 _foamEcho "    does not have Allwmake or platforms/"
@@ -259,6 +259,6 @@ fi
 . "$WM_PROJECT_DIR/etc/config.sh/functions"
 
 # Variables (done as the last statement for a clean exit code)
-unset cleaned foamOldDirs foundDir prefixDir
+unset cleaned foamOldDirs _foamFoundDir _foamPrefixDir
 
 #------------------------------------------------------------------------------

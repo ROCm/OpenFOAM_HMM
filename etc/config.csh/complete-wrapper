@@ -9,8 +9,7 @@
 #     Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     etc/config.csh/complete-wrapper
@@ -38,14 +37,14 @@ then
 fi
 
 # Preload completion cache
-if [ -f $WM_PROJECT_DIR/etc/config.sh/completion_cache ]
-then  . $WM_PROJECT_DIR/etc/config.sh/completion_cache
+if [ -f "$WM_PROJECT_DIR"/etc/config.sh/completion_cache ]
+then  . "$WM_PROJECT_DIR"/etc/config.sh/completion_cache
 fi
 
 # Use the bash completion function, but retain cache etc.
 _of_complete_tcsh=true
-if [ -f $WM_PROJECT_DIR/etc/config.sh/bash_completion ]
-then  . $WM_PROJECT_DIR/etc/config.sh/bash_completion
+if [ -f "$WM_PROJECT_DIR"/etc/config.sh/bash_completion ]
+then  . "$WM_PROJECT_DIR"/etc/config.sh/bash_completion
 else
     # Could warn about missing file, or treat silently
     echo

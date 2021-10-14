@@ -50,35 +50,31 @@ then
     if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         _foamEcho() { echo "$@" 1>&2; }
-        _foamEtc() {
-            eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh-verbose "$@")";
-        }
+        _foamEtc()  { eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh-verbose "$@")"; }
     else
         _foamEcho() { true; }
-        _foamEtc() {
-            eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh "$@")";
-        }
+        _foamEtc()  { eval "$("$WM_PROJECT_DIR"/bin/foamEtcFile -sh "$@")"; }
     fi
 
     # Prepend PATH
     unset -f _foamAddPath 2>/dev/null
     _foamAddPath()
     {
-        [ -n "$1" ] && export PATH="$1:$PATH"
+        case "$1" in (/?*) export PATH="$1:$PATH" ;; esac
     }
 
     # Prepend MANPATH
     unset -f _foamAddMan 2>/dev/null
     _foamAddMan()
     {
-        [ -n "$1" ] && export MANPATH="$1:$MANPATH"
+        case "$1" in (/?*) export MANPATH="$1:$MANPATH" ;; esac
     }
 
     # Prepend LD_LIBRARY_PATH
     unset -f _foamAddLib 2>/dev/null
     _foamAddLib()
     {
-        [ -n "$1" ] && export LD_LIBRARY_PATH="$1:$LD_LIBRARY_PATH"
+        case "$1" in (/?*) export LD_LIBRARY_PATH="$1:$LD_LIBRARY_PATH" ;; esac
     }
 
     # Prepend to LD_LIBRARY_PATH with additional checking
@@ -118,11 +114,11 @@ then
         fi
 
         # Use fallback. Add without checking existence of the directory
-        foamVar_end=$2
+        foamVar_end="$2"
         if [ -n "$foamVar_end" ]
         then
             case "$foamVar_end" in
-            /*)     # An absolute path
+            (/*)    # Absolute path
                 export LD_LIBRARY_PATH="$foamVar_end:$LD_LIBRARY_PATH"
                 ;;
             (*)     # Relative to prefix
@@ -147,7 +143,7 @@ then
         # Prepend DYLD_LIBRARY_PATH
         _foamAddLib()
         {
-            [ -n "$1" ] && export DYLD_LIBRARY_PATH="$1:$DYLD_LIBRARY_PATH"
+            case "$1" in (/?*) export DYLD_LIBRARY_PATH="$1:$DYLD_LIBRARY_PATH" ;; esac
         }
 
         # Prepend to DYLD_LIBRARY_PATH with additional checking
