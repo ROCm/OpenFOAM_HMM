@@ -31,9 +31,53 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::globalIndex::globalIndex
+(
+    const labelUList& listOffsets
+)
+{
+    if (listOffsets.size() > 1)
+    {
+        offsets_ = listOffsets;
+    }
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    labelList&& listOffsets
+)
+{
+    if (listOffsets.size() > 1)
+    {
+        offsets_.transfer(listOffsets);
+    }
+    else
+    {
+        listOffsets.clear();
+    }
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    const labelUList& offsetsOrSizes,
+    enum globalIndex::accessType accType
+)
+{
+    if (accType == accessType::SIZES)
+    {
+        reset(offsetsOrSizes);
+    }
+    else if (offsetsOrSizes.size() > 1)
+    {
+        // accessType::OFFSETS
+        offsets_ = offsetsOrSizes;
+    }
+}
+
+
 inline Foam::globalIndex::globalIndex(const label localSize)
-:
-    globalIndex()
 {
     reset(localSize);
 }
@@ -46,23 +90,9 @@ inline Foam::globalIndex::globalIndex
     const label comm,
     const bool parallel
 )
-:
-    globalIndex()
 {
     reset(localSize, tag, comm, parallel);
 }
-
-
-inline Foam::globalIndex::globalIndex(const labelUList& offsets)
-:
-    offsets_(offsets)
-{}
-
-
-inline Foam::globalIndex::globalIndex(labelList&& offsets)
-:
-    offsets_(std::move(offsets))
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -76,7 +106,23 @@ inline bool Foam::globalIndex::empty() const
 inline Foam::label Foam::globalIndex::nProcs() const noexcept
 {
     const label len = (offsets_.size() - 1);
-    return (len < 1) ? 0 : len;
+    return (len < 1) ? static_cast<label>(0) : len;
+}
+
+
+inline Foam::labelRange Foam::globalIndex::allProcs() const noexcept
+{
+    // Proc 0 -> nProcs
+    const label len = (offsets_.size() - 1);
+    return (len < 1) ? labelRange() : labelRange(0, len);
+}
+
+
+inline Foam::labelRange Foam::globalIndex::subProcs() const noexcept
+{
+    // Proc 1 -> nProcs
+    const label len = (offsets_.size() - 2);
+    return (len < 1) ? labelRange() : labelRange(1, len);
 }
 
 
@@ -104,7 +150,7 @@ inline const Foam::labelUList Foam::globalIndex::localStarts() const
 
 inline Foam::label Foam::globalIndex::size() const
 {
-    return offsets_.empty() ? 0 : offsets_.last();
+    return offsets_.empty() ? static_cast<label>(0) : offsets_.last();
 }
 
 
@@ -273,6 +319,145 @@ inline Foam::label Foam::globalIndex::whichProcID(const label i) const
     }
 
     return findLower(offsets_, i+1);
+}
+
+
+// * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * * //
+
+inline Foam::globalIndex::const_iterator::
+const_iterator
+(
+    const globalIndex* globalIdx,
+    const label i
+) noexcept
+:
+    parent_(globalIdx),
+    proci_(i)
+{}
+
+
+inline Foam::label Foam::globalIndex::const_iterator::
+proci() const noexcept
+{
+    return proci_;
+}
+
+
+inline Foam::label Foam::globalIndex::const_iterator::
+start() const
+{
+    return (*parent_).localStart(proci_);
+}
+
+
+inline Foam::label Foam::globalIndex::const_iterator::
+size() const
+{
+    return (*parent_).localSize(proci_);
+}
+
+
+inline Foam::labelRange Foam::globalIndex::const_iterator::
+range() const
+{
+    return (*parent_).range(proci_);
+}
+
+
+inline Foam::labelRange Foam::globalIndex::const_iterator::
+operator*() const
+{
+    return this->range();
+}
+
+
+inline Foam::globalIndex::const_iterator&
+Foam::globalIndex::const_iterator::
+operator++()
+{
+    ++proci_;
+    return *this;
+}
+
+
+inline Foam::globalIndex::const_iterator
+Foam::globalIndex::const_iterator::
+operator++(int)
+{
+    const_iterator old(*this);
+    ++proci_;
+    return old;
+}
+
+
+inline Foam::globalIndex::const_iterator&
+Foam::globalIndex::const_iterator::
+operator--()
+{
+    --proci_;
+    return *this;
+}
+
+
+inline Foam::globalIndex::const_iterator
+Foam::globalIndex::const_iterator::
+operator--(int)
+{
+    const_iterator old(*this);
+    --proci_;
+    return old;
+}
+
+
+inline bool
+Foam::globalIndex::const_iterator::
+operator==
+(
+    const const_iterator& iter
+) const noexcept
+{
+    return (proci_ == iter.proci_);
+}
+
+
+inline bool
+Foam::globalIndex::const_iterator::
+operator!=
+(
+    const const_iterator& iter
+) const noexcept
+{
+    return (proci_ != iter.proci_);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline Foam::globalIndex::const_iterator
+Foam::globalIndex::cbegin() const noexcept
+{
+    return const_iterator(this);
+}
+
+
+inline const Foam::globalIndex::const_iterator
+Foam::globalIndex::cend() const noexcept
+{
+    return const_iterator(this, this->nProcs());
+}
+
+
+inline Foam::globalIndex::const_iterator
+Foam::globalIndex::begin() const noexcept
+{
+    return const_iterator(this);
+}
+
+
+inline const Foam::globalIndex::const_iterator
+Foam::globalIndex::end() const noexcept
+{
+    return const_iterator(this, this->nProcs());
 }
 
 

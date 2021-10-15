@@ -28,6 +28,46 @@ License
 
 #include "globalIndex.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class SubListType>
+Foam::labelList
+Foam::globalIndex::calcListOffsets
+(
+    const List<SubListType>& lists,
+    const bool checkOverflow
+)
+{
+    labelList values;
+
+    const label len = lists.size();
+
+    if (len)
+    {
+        values.resize(len+1);
+
+        label start = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            values[i] = start;
+            start += lists[i].size();
+
+            if (checkOverflow && start < values[i])
+            {
+                FatalErrorInFunction
+                    << "Overflow : sum of sizes exceeds labelMax ("
+                    << labelMax << ") after index " << i << nl
+                    << "Please recompile with larger datatype for label." << nl
+                    << exit(FatalError);
+            }
+        }
+        values[len] = start;
+    }
+
+    return values;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Container, class Type>
