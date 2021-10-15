@@ -151,9 +151,10 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         valueFraction() = 1.0;
     }
 
-    if (dict.found("useImplicit"))
+    bool boolVal(false);
+    if (dict.readIfPresent("useImplicit", boolVal))
     {
-        useImplicit() = dict.get<Switch>("useImplicit");
+        this->useImplicit(boolVal);
     }
     if (dict.found("source"))
     {

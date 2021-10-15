@@ -9,7 +9,7 @@ forAll(fluidRegions, i)
     const rhoThermo& thermo = refCast<const rhoThermo>(thermoFluid[i]);
     const auto& bpsi = thermo.T().boundaryField();
 
-    forAll (bpsi, patchI)
+    forAll(bpsi, patchI)
     {
         if (bpsi[patchI].useImplicit())
         {
@@ -23,7 +23,7 @@ forAll(solidRegions, i)
     solidThermo& thermo = thermos[i];
     const auto& bpsi = thermo.T().boundaryField();
 
-    forAll (bpsi, patchI)
+    forAll(bpsi, patchI)
     {
         if (bpsi[patchI].useImplicit())
         {
@@ -37,7 +37,7 @@ forAll(fluidRegions, i)
     const rhoThermo& thermo = refCast<const rhoThermo>(thermoFluid[i]);
     if (coupled)
     {
-        Info << "Create fvMatrixAssembly." << endl;
+        Info<< "Create fvMatrixAssembly." << endl;
         fvMatrixAssemblyPtr.reset
         (
             new fvMatrix<scalar>
@@ -50,12 +50,12 @@ forAll(fluidRegions, i)
     }
 }
 
-forAll(solidRegions, i)
+if (coupled && !fvMatrixAssemblyPtr)
 {
-    if (coupled && fvMatrixAssemblyPtr.empty())
+    forAll(solidRegions, i)
     {
         solidThermo& thermo = thermos[i];
-        Info << "Create fvMatrixAssembly." << endl;
+        Info<< "Create fvMatrixAssembly." << endl;
         fvMatrixAssemblyPtr.reset
         (
             new fvMatrix<scalar>

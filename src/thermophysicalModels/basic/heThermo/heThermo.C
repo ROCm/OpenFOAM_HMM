@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ void Foam::heThermo<BasicThermo, MixtureType>::init
             patchi
         );
 
-        heBf[patchi].useImplicit() = T.boundaryField()[patchi].useImplicit();
+        heBf[patchi].useImplicit(T.boundaryField()[patchi].useImplicit());
     }
 
     this->heBoundaryCorrection(he);

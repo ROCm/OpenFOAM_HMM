@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ class fvPatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch
         const fvPatch& patch_;
@@ -91,20 +91,20 @@ class fvPatchField
         const DimensionedField<Type, volMesh>& internalField_;
 
         //- Update index used so that updateCoeffs is called only once during
-        //  the construction of the matrix
+        //- the construction of the matrix
         bool updated_;
 
         //- Update index used so that manipulateMatrix is called only once
-        //  during the construction of the matrix
+        //- during the construction of the matrix
         bool manipulatedMatrix_;
+
+        //- Use implicit formulation
+        bool useImplicit_;
 
         //- Optional patch type, used to allow specified boundary conditions
         //  to be applied to constraint patches by providing the constraint
         //  patch type as 'patchType'
         word patchType_;
-
-        //- Use implicit formulation
-        bool useImplicit_;
 
 
 public:
@@ -307,15 +307,18 @@ public:
         // Implicit Functions
 
             //- Use implicit formulation for coupled patches only
-            bool useImplicit() const
+            bool useImplicit() const noexcept
             {
                 return useImplicit_;
             }
 
-            //- Non-const access to useImplicit
-            bool& useImplicit()
+            //- Set useImplicit on/off
+            //  \return old value
+            bool useImplicit(bool on) noexcept
             {
-                return useImplicit_;
+                bool old(useImplicit_);
+                useImplicit_ = on;
+                return old;
             }
 
 
@@ -393,7 +396,8 @@ public:
                 return manipulatedMatrix_;
             }
 
-        // Mapping functions
+
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -409,7 +413,7 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation Functions
 
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
@@ -558,7 +562,7 @@ public:
             void check(const fvPatchField<Type>&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&);
 
