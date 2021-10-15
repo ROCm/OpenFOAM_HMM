@@ -375,16 +375,18 @@ public:
         );
 
 
-        // Other
+    // Other
+
+        // Gather
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Offsets needed on master only.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -397,7 +399,7 @@ public:
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
+                const label comm,       //!< communicator
                 const UList<int>& procIDs,
                 const IndirectListBase<Type, Addr>& fld,
                 List<Type>& allFld,
@@ -407,11 +409,11 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Offsets needed on master only.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void gather
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -430,7 +432,8 @@ public:
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
 
             //- Collect data indirectly in processor order on master.
@@ -441,29 +444,18 @@ public:
                 const IndirectListBase<Type, Addr>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::scheduled
+                const Pstream::commsTypes = Pstream::commsTypes::scheduled,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
-
-            //- Collect data in processor order on master.
-            //  Does communication with default communicator and message tag.
-            template<class Type>
-            static void gatherOp
-            (
-                const UList<Type>& fld,
-                List<Type>& allFld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
-            );
-
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
@@ -471,11 +463,11 @@ public:
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void gather
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
@@ -493,8 +485,42 @@ public:
             (
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
+
+            //- Collect \em contiguous data using a MPI_Gatherv call
+            //  \attention The nProcs for globalIndex and communicator
+            //      must match!!
+            template<class Type, class OutputContainer = List<Type>>
+            void mpiGather
+            (
+                const UList<Type>& sendData,
+                OutputContainer& allValues,
+                const label comm = UPstream::worldComm  //!< communicator
+            ) const;
+
+            //- Collect \em contiguous data using a MPI_Gatherv call
+            //  \attention The nProcs for globalIndex and communicator
+            //      must match!!
+            template<class Type, class OutputContainer = List<Type>>
+            OutputContainer mpiGather
+            (
+                const UList<Type>& sendData,
+                const label comm = UPstream::worldComm  //!< communicator
+            ) const;
+
+
+            //- Collect data in processor order on master.
+            //  Does communication with default communicator and message tag.
+            template<class Type>
+            static void gatherOp
+            (
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+            );
 
             //- Inplace collect data in processor order on master
             //  Does communication with default communicator and message tag.
@@ -508,13 +534,15 @@ public:
             );
 
 
+        // Scatter
+
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void scatter
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -522,11 +550,11 @@ public:
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void scatter
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -545,18 +573,22 @@ public:
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
 
-            //- Get (potentially remote) data. Elements required given as
-            //  global indices
+
+        // Scatter
+
+            //- Get (potentially remote) data.
+            //- Elements required given as global indices
             template<class Type, class CombineOp>
             void get
             (
                 List<Type>& allFld,
                 const labelUList& globalIds,
                 const CombineOp& cop,
-                const label comm = Pstream::worldComm,
+                const label comm = UPstream::worldComm,  //!< communicator
                 const int tag = UPstream::msgType()
             ) const;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,6 +179,34 @@ void Foam::UPstream::allToAll
 }
 
 
+void Foam::UPstream::mpiGather
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    std::memmove(recvData, sendData, sendSize);
+}
+
+
+void Foam::UPstream::mpiScatter
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    std::memmove(recvData, sendData, sendSize);
+}
+
+
 void Foam::UPstream::gather
 (
     const char* sendData,
@@ -190,7 +218,7 @@ void Foam::UPstream::gather
     const label communicator
 )
 {
-    memmove(recvData, sendData, sendSize);
+    std::memmove(recvData, sendData, sendSize);
 }
 
 
@@ -205,7 +233,7 @@ void Foam::UPstream::scatter
     const label communicator
 )
 {
-    memmove(recvData, sendData, recvSize);
+    std::memmove(recvData, sendData, recvSize);
 }
 
 

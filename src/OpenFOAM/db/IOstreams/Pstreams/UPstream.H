@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,9 @@ Description
 SourceFiles
     UPstream.C
     UPstreamCommsStruct.C
-    gatherScatter.C
+    UPstreamTemplates.C
     combineGatherScatter.C
+    gatherScatter.C
     gatherScatterList.C
 
 \*---------------------------------------------------------------------------*/
@@ -595,6 +596,28 @@ public:
             const label communicator = worldComm
         );
 
+        //- Receive data from all processors on the master (low-level)
+        static void mpiGather
+        (
+            const char* sendData,
+            int sendSize,
+
+            char* recvData,
+            int recvSize,
+            const label communicator = worldComm
+        );
+
+        //- Send data to all processors from master (low-level)
+        static void mpiScatter
+        (
+            const char* sendData,
+            int sendSize,
+
+            char* recvData,
+            int recvSize,
+            const label communicator = worldComm
+        );
+
         //- Receive data from all processors on the master
         static void gather
         (
@@ -616,6 +639,27 @@ public:
 
             char* recvData,
             int recvSize,
+            const label communicator = worldComm
+        );
+
+
+    // Gather single, contiguous value(s)
+
+        //- Individual values into list locations.
+        //  On master list length == nProcs, otherwise zero length
+        template<class T>
+        static List<T> listGatherValues
+        (
+            const T& localValue,
+            const label communicator = worldComm
+        );
+
+        //- Individual values into list locations.
+        //  On master list length == nProcs, otherwise zero length
+        template<class T>
+        static T listScatterValues
+        (
+            const UList<T>& allValues,
             const label communicator = worldComm
         );
 
@@ -653,6 +697,12 @@ UList<UPstream::commsStruct>::operator[](const label) const;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "UPstreamTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
