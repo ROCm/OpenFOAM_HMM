@@ -2367,7 +2367,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (!isDir(args.rootPath()))
+    if (!Foam::isDir(args.rootPath()))
     {
         FatalErrorInFunction
             << ": cannot open root directory " << args.rootPath()
@@ -2393,7 +2393,7 @@ int main(int argc, char *argv[])
     // want to delay constructing runTime until we've synced all time
     // directories...
     const fileName procDir(fileHandler().filePath(args.path()));
-    if (isDir(procDir))
+    if (Foam::isDir(procDir))
     {
         if (decompose)
         {
@@ -2580,7 +2580,7 @@ int main(int argc, char *argv[])
                 Info<< "Checking for mesh in " << meshPath << nl << endl;
 
                 boolList haveMesh(Pstream::nProcs(), false);
-                haveMesh[Pstream::myProcNo()] = isFile(meshPath);
+                haveMesh[Pstream::myProcNo()] = Foam::isFile(meshPath);
                 Pstream::gatherList(haveMesh);
                 Pstream::scatterList(haveMesh);
                 Info<< "Per processor mesh availability:" << nl
@@ -2888,16 +2888,15 @@ int main(int argc, char *argv[])
                     selectedLagrangianFields
                 );
 
-                // If there are any "uniform" directories copy them from
-                // the master processor
+                // Copy any "uniform" directories from the master processor
                 if (Pstream::master())
                 {
-                    fileName uniformDir0 = runTime.timePath()/"uniform";
-                    if (isDir(uniformDir0))
+                    const fileName uniformDir0(runTime.timePath()/"uniform");
+                    if (Foam::isDir(uniformDir0))
                     {
                         Info<< "Detected additional non-decomposed files in "
                             << uniformDir0 << endl;
-                        cp(uniformDir0, baseRunTime.timePath());
+                        Foam::cp(uniformDir0, baseRunTime.timePath());
                     }
                 }
             }
@@ -2993,7 +2992,7 @@ int main(int argc, char *argv[])
 
 
             boolList haveMesh(Pstream::nProcs(), false);
-            haveMesh[Pstream::myProcNo()] = isFile(meshPath);
+            haveMesh[Pstream::myProcNo()] = Foam::isFile(meshPath);
             Pstream::gatherList(haveMesh);
             Pstream::scatterList(haveMesh);
             Info<< "Per processor mesh availability:" << nl
@@ -3130,17 +3129,13 @@ int main(int argc, char *argv[])
             );
 
 
-            // Copy any uniform data
-            const fileName uniformDir("uniform");
-            if (isDir(baseRunTime.timePath()/uniformDir))
+            // Copy "uniform" data from the base directory
+            const fileName uniformDir0(baseRunTime.timePath()/"uniform");
+            if (Foam::isDir(uniformDir0))
             {
                 Info<< "Detected additional non-decomposed files in "
-                    << baseRunTime.timePath()/uniformDir << endl;
-                cp
-                (
-                    baseRunTime.timePath()/uniformDir,
-                    runTime.timePath()/uniformDir
-                );
+                    << uniformDir0 << endl;
+                Foam::cp(uniformDir0, runTime.timePath());
             }
         }
     }

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -856,10 +856,20 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
     }
     else if (srcType == fileName::DIRECTORY)
     {
-        // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile /= src.components().last();
+            // Both are directories. Could mean copy contents or copy
+            // recursively.  Don't actually know what the user wants,
+            // but assume that if names are identical == copy contents.
+            //
+            // So: "path1/foo" "path2/foo"  copy contents
+            // So: "path1/foo" "path2/bar"  copy directory
+
+            const word srcDirName = src.name();
+            if (destFile.name() != srcDirName)
+            {
+                destFile /= srcDirName;
+            }
         }
 
         // Make sure the destination directory extists.

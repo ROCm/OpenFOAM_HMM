@@ -687,45 +687,66 @@ int main(int argc, char *argv[])
 
         if (copyZero)
         {
-            // Copy the 0 directory into each of the processor directories
-            fileName prevTimePath;
-            for (label proci = 0; proci < mesh.nProcs(); ++proci)
-            {
-                Time processorDb
-                (
-                    Time::controlDictName,
-                    args.rootPath(),
-                    args.caseName()/("processor" + Foam::name(proci))
-                );
-                processorDb.setTime(runTime);
+            // Copy the 0/ directory into each of the processor directories
+            // with fallback of 0.orig/ directory if necessary.
 
-                if (fileHandler().isDir(runTime.timePath()))
+            fileName inputDir(runTime.path()/"0");
+
+            bool canCopy = fileHandler().isDir(inputDir);
+            if (!canCopy)
+            {
+                // Try with "0.orig" instead
+                inputDir.ext("orig");
+                canCopy = fileHandler().isDir(inputDir);
+            }
+
+            if (canCopy)
+            {
+                // Avoid copying into the same directory multiple times
+                // (collated format). Don't need a hash here.
+                fileName prevOutputDir;
+                for (label proci = 0; proci < mesh.nProcs(); ++proci)
                 {
-                    // Get corresponding directory name (to handle processors/)
-                    const fileName timePath
+                    Time processorDb
+                    (
+                        Time::controlDictName,
+                        args.rootPath(),
+                        args.caseName()/("processor" + Foam::name(proci))
+                    );
+                    // processorDb.setTime(runTime);
+
+                    // Get corresponding directory name
+                    // (to handle processors/)
+                    const fileName outputDir
                     (
                         fileHandler().objectPath
                         (
                             IOobject
                             (
-                                "",
-                                processorDb.timeName(),
+                                word::null, // name
+                                "0",        // instance (time == 0)
                                 processorDb
                             ),
                             word::null
                         )
                     );
 
-                    if (timePath != prevTimePath)
+                    if (outputDir != prevOutputDir)
                     {
                         Info<< "Processor " << proci
-                            << ": copying " << runTime.timePath() << nl
-                            << " to " << timePath << endl;
-                        fileHandler().cp(runTime.timePath(), timePath);
+                            << ": copying \""
+                            << inputDir.name() << "/\" to "
+                            << runTime.relativePath(outputDir)
+                            << endl;
 
-                        prevTimePath = timePath;
+                        fileHandler().cp(inputDir, outputDir);
+                        prevOutputDir = outputDir;
                     }
                 }
+            }
+            else
+            {
+                Info<< "No 0/ or 0.orig/ directory to copy" << nl;
             }
         }
         else
