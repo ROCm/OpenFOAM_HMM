@@ -186,7 +186,7 @@ fi
 export PATH MANPATH LD_LIBRARY_PATH
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
-_foamClean LD_LIBRARY_PATH "$foamOldDirs"
+_foamClean -lib "$foamOldDirs"
 
 #------------------------------------------------------------------------------
 # Base setup (OpenFOAM compilation), MPI and third-party packages
@@ -244,7 +244,7 @@ export PATH MANPATH LD_LIBRARY_PATH
 
 _foamClean PATH
 _foamClean MANPATH
-_foamClean LD_LIBRARY_PATH
+_foamClean -lib
 
 # Add trailing ':' for system manpages
 if [ -n "$MANPATH" ]

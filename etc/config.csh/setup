@@ -145,16 +145,19 @@ if ( $?FOAM_CONFIG_ETC ) then
 endif
 
 
-# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
+# Clean standard environment variables (PATH, MANPATH, [DY]LD_LIBRARY_PATH)
 # - avoid local variables shadowing setenv variables
 
 unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
+if ("${_foam_uname_s}" == "Darwin" ) then
+    if (! $?DYLD_LIBRARY_PATH ) setenv DYLD_LIBRARY_PATH
+endif
 
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
-_foamClean LD_LIBRARY_PATH "$foamOldDirs"
+_foamClean -lib "$foamOldDirs"
 
 
 #------------------------------------------------------------------------------
@@ -207,9 +210,9 @@ endif
 
 # Remove duplicates from environment paths
 
-_foamClean PATH
-_foamClean MANPATH
-_foamClean LD_LIBRARY_PATH
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean -lib
 
 # Add trailing ':' for system manpages
 if ( $?MANPATH ) then
@@ -239,6 +242,6 @@ unalias _foamAddLib
 unalias _foamAddLibAuto
 
 # Variables (done as final statement for a clean exit code)
-unset cleaned foamOldDirs _foamFoundDir _foamPrefixDir
+unset cleaned foamOldDirs _foam_uname_s _foamFoundDir _foamPrefixDir
 
 #------------------------------------------------------------------------------

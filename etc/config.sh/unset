@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -154,12 +154,14 @@ unset SCOTCH_ARCH_PATH
 if [ -n "$foamClean" ]
 then
     eval "$($foamClean -sh-env=PATH $foamOldDirs)"
-    eval "$($foamClean -sh-env=LD_LIBRARY_PATH $foamOldDirs)"
     eval "$($foamClean -sh-env=MANPATH $foamOldDirs)"
+    eval "$($foamClean -sh-env=LD_LIBRARY_PATH $foamOldDirs)"
+    eval "$($foamClean -sh-env=DYLD_LIBRARY_PATH $foamOldDirs)"
 fi
 
-[ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
 [ -n "$MANPATH" ] || unset MANPATH
+[ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
+[ -n "$DYLD_LIBRARY_PATH" ] || unset DYLD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases and functions

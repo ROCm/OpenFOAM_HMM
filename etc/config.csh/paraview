@@ -66,8 +66,8 @@ if (! $?WM_COMPILER_LIB_ARCH ) setenv WM_COMPILER_LIB_ARCH
 set archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
 
 # Clean path and library path
-eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=PATH "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
-eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=LD_LIBRARY_PATH "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
+eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-path "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
+eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-lib "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
 
 # Evaluate command-line parameters for ParaView
 while ( $#argv > 0 )
@@ -156,6 +156,7 @@ default:
     if ( -r "$ParaView_DIR" ) then
         setenv PATH "${ParaView_DIR}/bin:${PATH}"
         set pvLibDir="unknown"
+        set pv_libdirs=""
 
         # QT libraries as required, and Qt5_DIR for the root directory.
         # Another possibility: "qtpaths --qt-version"
@@ -168,7 +169,7 @@ default:
             endsw
             foreach libDir ("lib$WM_COMPILER_LIB_ARCH" "lib")
                 if ( -d "${qtDir}/${libDir}" ) then
-                    setenv LD_LIBRARY_PATH "${qtDir}/${libDir}:${LD_LIBRARY_PATH}"
+                    set pv_libdirs="${qtDir}/${libDir}:${pv_libdirs}"
                     break
                 endif
             end
@@ -186,7 +187,7 @@ default:
                     set libDir="$pvLibDir"   # Needs lib/paraview-X.X (not lib)
                     breaksw
                 endsw
-                setenv LD_LIBRARY_PATH "${ParaView_DIR}/${libDir}:${LD_LIBRARY_PATH}"
+                set pv_libdirs="${ParaView_DIR}/${libDir}:${pv_libdirs}"
                 break
             endif
             set pvLibDir="unknown"
@@ -198,6 +199,19 @@ default:
             setenv PV_PLUGIN_PATH "$pv_plugin_dir"
         else
             set pv_plugin_dir="${pv_plugin_dir} (missing)"  # For message
+        endif
+
+
+        # Any extra library directories
+        if ( -n "$pv_libdirs" != "" ) then
+            switch "WM_ARCH" in
+            case darwin*:
+                setenv DYLD_LIBRARY_PATH "${pv_libdirs}:$DYLD_LIBRARY_PATH"
+                breaksw
+            default:
+                setenv LD_LIBRARY_PATH "${pv_libdirs}:$LD_LIBRARY_PATH"
+                breaksw
+            endsw
         endif
 
         if ($?FOAM_VERBOSE && $?prompt) then
@@ -225,6 +239,6 @@ endif
 unsetenv ParaView_VERSION ParaView_QT
 
 unset archDir libDir
-unset pv_api pv_plugin_dir pvLibDir pvPython qtDir
+unset pv_api pv_plugin_dir pv_libdirs pvLibDir pvPython qtDir
 
 #------------------------------------------------------------------------------

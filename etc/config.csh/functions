@@ -19,10 +19,26 @@
 #
 #     Some functionality implemented via bin/tools/lib-dir
 #
+# Defined Variables
+#     foamClean           : path to bin/foamCleanPath
+#     _foam_uname_s       : cache value for `uname -s`
+#
+# Defined Functions (Aliases)
+#     _foamClean     : eval call to foamCleanPath for specific shell
+#     _foamEcho      : silent/non-silent echo
+#     _foamEtc       : resolve etc files (silent or verbose)
+#     _foamAddPath   : prepend to MANPATH
+#     _foamAddMan    : prepend to MANPATH
+#     _foamAddLib    : prepend to [DY]LD_LIBRARY_PATH
+#     _foamAddLibAuto: call to lib-dir for lib64/lib resolved name
+#
 #------------------------------------------------------------------------------
 
 # Cleaning environment variables
 alias _foamClean 'eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=\!*`'
+
+# Cache value for `uname -s`
+set _foam_uname_s=`uname -s`
 
 # Prepend PATH, MANPATH, LD_LIBRARY_PATH
 alias _foamAddPath 'setenv PATH \!*\:${PATH}'
@@ -30,7 +46,7 @@ alias _foamAddMan  'setenv MANPATH \!*\:${MANPATH}'
 
 # Special treatment for Darwin
 # - DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
-if (`uname -s` == "Darwin") then
+if ("${_foam_uname_s}" == "Darwin") then
     alias _foamAddLib  'setenv DYLD_LIBRARY_PATH \!*\:${DYLD_LIBRARY_PATH}'
 else
     alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'

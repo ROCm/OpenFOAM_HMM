@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -153,19 +153,26 @@ unsetenv SCOTCH_ARCH_PATH
 # PATH, LD_LIBRARY_PATH, MANPATH
 
 if ( $?foamClean ) then
-
     eval `$foamClean -csh-env=PATH "$foamOldDirs"`
-
-    if ($?LD_LIBRARY_PATH) then
-        eval `$foamClean -csh-env=LD_LIBRARY_PATH "$foamOldDirs"`
-        if ("${LD_LIBRARY_PATH}" == "") unsetenv LD_LIBRARY_PATH
-    endif
-
     if ($?MANPATH) then
         eval `$foamClean -csh-env=MANPATH "$foamOldDirs"`
-        if ("${MANPATH}" == "") unsetenv MANPATH
     endif
+    if ($?LD_LIBRARY_PATH) then
+        eval `$foamClean -csh-env=LD_LIBRARY_PATH "$foamOldDirs"`
+    endif
+    if ($?DYLD_LIBRARY_PATH) then
+        eval `$foamClean -csh-env=DYLD_LIBRARY_PATH "$foamOldDirs"`
+    endif
+endif
 
+if ($?MANPATH) then
+    if ("${MANPATH}" == "") unsetenv MANPATH
+endif
+if ($?LD_LIBRARY_PATH) then
+    if ("${LD_LIBRARY_PATH}" == "") unsetenv LD_LIBRARY_PATH
+endif
+if ($?DYLD_LIBRARY_PATH) then
+    if ("${DYLD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH
 endif
 
 

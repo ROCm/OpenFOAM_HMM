@@ -20,6 +20,20 @@
 #
 #     Some functionality mirrored by bin/tools/lib-dir
 #
+# Defined Variables
+#     WM_SHELL_FUNCTIONS  : tracking variable
+#     foamClean           : path to bin/foamCleanPath
+#     _foam_uname_s       : cache value for `uname -s`
+#
+# Defined Functions
+#     _foamClean     : eval call to foamCleanPath for specific shell
+#     _foamEcho      : silent/non-silent echo
+#     _foamEtc       : resolve etc files (silent or verbose)
+#     _foamAddPath   : prepend to MANPATH
+#     _foamAddMan    : prepend to MANPATH
+#     _foamAddLib    : prepend to [DY]LD_LIBRARY_PATH
+#     _foamAddLibAuto: prepend to lib64/lib resolved name
+#
 #------------------------------------------------------------------------------
 
 if [ -z "$WM_SHELL_FUNCTIONS" ]
@@ -31,6 +45,9 @@ then
 
     # Cleaning environment variables
     foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
+
+    # Cache value for `uname -s`
+    _foam_uname_s="$(uname -s 2>/dev/null)"
 
     # Cleaning environment variables
     unset -f _foamClean 2>/dev/null
@@ -70,12 +87,25 @@ then
         case "$1" in (/?*) export MANPATH="$1:$MANPATH" ;; esac
     }
 
-    # Prepend LD_LIBRARY_PATH
+    # Prepend LD_LIBRARY_PATH (DYLD_LIBRARY_PATH for Darwin)
     unset -f _foamAddLib 2>/dev/null
-    _foamAddLib()
-    {
-        case "$1" in (/?*) export LD_LIBRARY_PATH="$1:$LD_LIBRARY_PATH" ;; esac
-    }
+    if [ "${_foam_uname_s}" = Darwin ]
+    then
+        _foamAddLib()
+        {
+            case "$1" in (/?*)
+                export DYLD_LIBRARY_PATH="${1}${DYLD_LIBRARY_PATH:+:}${DYLD_LIBRARY_PATH}" ;;
+            esac
+        }
+    else
+        _foamAddLib()
+        {
+            case "$1" in (/?*)
+                export LD_LIBRARY_PATH="${1}${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}" ;;
+            esac
+        }
+    fi
+
 
     # Prepend to LD_LIBRARY_PATH with additional checking
     # $1 = base directory for 'lib' or 'lib64'
@@ -106,7 +136,7 @@ then
             do
                 if [ -d "$foamVar_prefix/$foamVar_end" ]
                 then
-                    export LD_LIBRARY_PATH="$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH"
+                    _foamAddLib "$foamVar_prefix/$foamVar_end"
                     unset foamVar_prefix foamVar_end
                     return 0
                 fi
@@ -119,10 +149,10 @@ then
         then
             case "$foamVar_end" in
             (/*)    # Absolute path
-                export LD_LIBRARY_PATH="$foamVar_end:$LD_LIBRARY_PATH"
+                _foamAddLib "foamVar_end"
                 ;;
             (*)     # Relative to prefix
-                export LD_LIBRARY_PATH="$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH"
+                _foamAddLib "$foamVar_prefix/$foamVar_end"
                 ;;
             esac
             unset foamVar_prefix foamVar_end
@@ -132,27 +162,6 @@ then
         unset foamVar_prefix foamVar_end
         return 1    # Nothing set
     }
-
-
-    # Special treatment for Darwin
-    # - DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
-    if [ "$(uname -s 2>/dev/null)" = Darwin ]
-    then
-        unset -f _foamAddLib _foamAddLibAuto 2>/dev/null
-
-        # Prepend DYLD_LIBRARY_PATH
-        _foamAddLib()
-        {
-            case "$1" in (/?*) export DYLD_LIBRARY_PATH="$1:$DYLD_LIBRARY_PATH" ;; esac
-        }
-
-        # Prepend to DYLD_LIBRARY_PATH with additional checking
-        # - use lib-dir script instead of rewriting
-        _foamAddLibAuto()
-        {
-            eval "$("$WM_PROJECT_DIR"/bin/tools/lib-dir -sh "$@")";
-        }
-    fi
 
 
     #--------------------------------------------------------------------------
@@ -180,6 +189,7 @@ else
     unset -f _foamAddPath _foamAddMan _foamAddLib _foamAddLibAuto 2>/dev/null
     unset -f _foamClean _foamEcho _foamEtc 2>/dev/null
     unset foamClean
+    unset _foam_uname_s
     unset WM_SHELL_FUNCTIONS
 
 fi
