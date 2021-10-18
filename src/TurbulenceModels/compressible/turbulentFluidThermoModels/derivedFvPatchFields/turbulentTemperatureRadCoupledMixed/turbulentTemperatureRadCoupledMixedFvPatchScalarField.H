@@ -83,6 +83,7 @@ SourceFiles
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
 #include "scalarList.H"
+#include "mappedPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,7 +99,8 @@ namespace compressible
 class turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     public mixedFvPatchScalarField,
-    public temperatureCoupledBase
+    public temperatureCoupledBase,
+    public mappedPatchFieldBase<scalar>
 {
 
     // Private Data
@@ -176,6 +178,12 @@ public:
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
+        );
+
+        //- Construct as copy
+        turbulentTemperatureRadCoupledMixedFvPatchScalarField
+        (
+            const turbulentTemperatureRadCoupledMixedFvPatchScalarField&
         );
 
         //- Construct and return a clone

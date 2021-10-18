@@ -32,6 +32,7 @@ License
 #include "volFields.H"
 #include "mappedPatchBase.H"
 #include "basicThermo.H"
+#include "mappedPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +59,11 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         "undefined-K",
         "undefined-alpha"
     ),
+    mappedPatchFieldBase<scalar>
+    (
+        mappedPatchFieldBase<scalar>::mapper(p, iF),
+        *this
+    ),
     TnbrName_("undefined-Tnbr"),
     qrNbrName_("undefined-qrNbr"),
     qrName_("undefined-qr"),
@@ -83,6 +89,12 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(psf, p, iF, mapper),
     temperatureCoupledBase(patch(), psf),
+    mappedPatchFieldBase<scalar>
+    (
+        mappedPatchFieldBase<scalar>::mapper(p, iF),
+        *this,
+        psf
+    ),
     TnbrName_(psf.TnbrName_),
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
@@ -102,6 +114,12 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
+    mappedPatchFieldBase<scalar>
+    (
+        mappedPatchFieldBase<scalar>::mapper(p, iF),
+        *this,
+        dict
+    ),
     TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
     qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
     qrName_(dict.getOrDefault<word>("qr", "none")),
@@ -122,16 +140,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
         dict.readEntry("kappaLayers", kappaLayers_);
-
-//         if (thicknessLayers_.size() > 0)
-//         {
-//             // Calculate effective thermal resistance by harmonic averaging
-//             forAll(thicknessLayers_, iLayer)
-//             {
-//                 contactRes_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
-//             }
-//             contactRes_ = 1.0/contactRes_;
-//         }
     }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -176,6 +184,35 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(psf, iF),
     temperatureCoupledBase(patch(), psf),
+    mappedPatchFieldBase<scalar>
+    (
+        mappedPatchFieldBase<scalar>::mapper(patch(), iF),
+        *this,
+        psf
+    ),
+    TnbrName_(psf.TnbrName_),
+    qrNbrName_(psf.qrNbrName_),
+    qrName_(psf.qrName_),
+    thicknessLayers_(psf.thicknessLayers_),
+    kappaLayers_(psf.kappaLayers_),
+    thermalInertia_(psf.thermalInertia_)
+{}
+
+
+turbulentTemperatureRadCoupledMixedFvPatchScalarField::
+turbulentTemperatureRadCoupledMixedFvPatchScalarField
+(
+    const turbulentTemperatureRadCoupledMixedFvPatchScalarField& psf
+)
+:
+    mixedFvPatchScalarField(psf),
+    temperatureCoupledBase(patch(), psf),
+    mappedPatchFieldBase<scalar>
+    (
+        mappedPatchFieldBase<scalar>::mapper(patch(), psf.internalField()),
+        *this,
+        psf
+    ),
     TnbrName_(psf.TnbrName_),
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
@@ -204,29 +241,14 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     // Get the coupling information from the mappedPatchBase
     const label patchi = patch().index();
     const mappedPatchBase& mpp =
-        refCast<const mappedPatchBase>(patch().patch());
-    const polyMesh& nbrMesh = mpp.sampleMesh();
-    const label samplePatchi = mpp.samplePolyPatch().index();
-    const fvPatch& nbrPatch =
-        refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
+        mappedPatchFieldBase<scalar>::mapper
+        (
+            patch(),
+            this->internalField()
+        );
 
-
-    scalarField Tc(patchInternalField());
-    scalarField& Tp = *this;
-
-    const turbulentTemperatureRadCoupledMixedFvPatchScalarField&
-        nbrField = refCast
-            <const turbulentTemperatureRadCoupledMixedFvPatchScalarField>
-            (
-                nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
-            );
-
-    // Swap to obtain full local values of neighbour K*delta
-    scalarField TcNbr(nbrField.patchInternalField());
-    scalarField KDeltaNbr(nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs());
-
-    mpp.distribute(KDeltaNbr);
-    mpp.distribute(TcNbr);
+    const scalarField Tc(patchInternalField());
+    const scalarField& Tp = *this;
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
 
@@ -240,6 +262,37 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         KDelta = 1.0/KDelta;
     }
 
+
+    scalarField TcNbr;
+    scalarField KDeltaNbr;
+    if (mpp.sameWorld())
+    {
+        const polyMesh& nbrMesh = mpp.sampleMesh();
+        const label samplePatchi = mpp.samplePolyPatch().index();
+        const fvPatch& nbrPatch =
+            refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
+
+        const auto& nbrField = refCast
+                <const turbulentTemperatureRadCoupledMixedFvPatchScalarField>
+                (
+                    nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
+                );
+
+        // Swap to obtain full local values of neighbour K*delta
+        TcNbr = nbrField.patchInternalField();
+        KDeltaNbr = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
+    }
+    else
+    {
+        // Different world so use my region,patch. Distribution below will
+        // do the reordering.
+        TcNbr = patchInternalField();
+        KDeltaNbr = KDelta;
+    }
+    distribute(this->internalField().name() + "_value", TcNbr);
+    distribute(this->internalField().name() + "_weights", KDeltaNbr);
+
+
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
@@ -249,22 +302,46 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     scalarField qrNbr(Tp.size(), Zero);
     if (qrNbrName_ != "none")
     {
-        qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
-        mpp.distribute(qrNbr);
+        if (mpp.sameWorld())
+        {
+            const polyMesh& nbrMesh = mpp.sampleMesh();
+            const label samplePatchi = mpp.samplePolyPatch().index();
+            const fvPatch& nbrPatch =
+                refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
+            qrNbr =
+                nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        }
+        else
+        {
+            qrNbr =
+                patch().lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        }
+        distribute(qrNbrName_, qrNbr);
     }
 
     // inertia therm
+    if (thermalInertia_ && !mpp.sameWorld())
+    {
+        FatalErrorInFunction
+            << "thermalInertia not supported in combination with multi-world"
+            << exit(FatalError);
+    }
     if (thermalInertia_)
     {
         const scalar dt = mesh.time().deltaTValue();
         scalarField mCpDtNbr;
 
         {
+            const polyMesh& nbrMesh = mpp.sampleMesh();
+
             const basicThermo* thermo =
                 nbrMesh.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermo)
             {
+                const label samplePatchi = mpp.samplePolyPatch().index();
+                const fvPatch& nbrPatch =
+                    refCast<const fvMesh>(nbrMesh).boundary()[samplePatchi];
                 const scalarField& ppn =
                     thermo->p().boundaryField()[samplePatchi];
                 const scalarField& Tpn =
@@ -354,8 +431,8 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
             << this->internalField().name() << " <- "
-            << nbrMesh.name() << ':'
-            << nbrPatch.name() << ':'
+            << mpp.sampleRegion() << ':'
+            << mpp.samplePatch() << ':'
             << this->internalField().name() << " :"
             << " heat transfer rate:" << Q
             << " walltemperature "
@@ -415,6 +492,13 @@ beta() const
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(patch().patch());
 
+    if (!mpp.sameWorld())
+    {
+        FatalErrorInFunction
+            << "coupled energy not supported in combination with multi-world"
+            << exit(FatalError);
+    }
+
     const label samplePatchi = mpp.samplePolyPatch().index();
     const polyMesh& nbrMesh = mpp.sampleMesh();
 
@@ -450,9 +534,15 @@ beta() const
 tmp<scalarField> turbulentTemperatureRadCoupledMixedFvPatchScalarField::
 deltaH() const
 {
-
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(patch().patch());
+
+    if (!mpp.sameWorld())
+    {
+        FatalErrorInFunction
+            << "coupled energy not supported in combination with multi-world"
+            << exit(FatalError);
+    }
 
     const polyMesh& nbrMesh = mpp.sampleMesh();
 

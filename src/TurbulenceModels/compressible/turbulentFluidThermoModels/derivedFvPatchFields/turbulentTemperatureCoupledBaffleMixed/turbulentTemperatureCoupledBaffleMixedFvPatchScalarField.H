@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,9 +113,6 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
         //- Conductivity of layers
         scalarList kappaLayers_;
-
-        //- Total contact resistance
-        scalar contactRes_;
 
 
     // Private member functions

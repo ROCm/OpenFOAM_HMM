@@ -64,8 +64,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_("undefined-Tnbr"),
     thicknessLayers_(0),
-    kappaLayers_(0),
-    contactRes_(0)
+    kappaLayers_(0)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -92,8 +91,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_(ptf.TnbrName_),
     thicknessLayers_(ptf.thicknessLayers_),
-    kappaLayers_(ptf.kappaLayers_),
-    contactRes_(ptf.contactRes_)
+    kappaLayers_(ptf.kappaLayers_)
 {}
 
 
@@ -115,8 +113,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_(dict.get<word>("Tnbr")),
     thicknessLayers_(0),
-    kappaLayers_(0),
-    contactRes_(0.0)
+    kappaLayers_(0)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -138,16 +135,6 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
         dict.readEntry("kappaLayers", kappaLayers_);
-
-        if (thicknessLayers_.size() > 0)
-        {
-            // Calculate effective thermal resistance by harmonic averaging
-            forAll(thicknessLayers_, iLayer)
-            {
-                contactRes_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
-            }
-            contactRes_ = 1.0/contactRes_;
-        }
     }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -200,8 +187,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_(wtcsf.TnbrName_),
     thicknessLayers_(wtcsf.thicknessLayers_),
-    kappaLayers_(wtcsf.kappaLayers_),
-    contactRes_(wtcsf.contactRes_)
+    kappaLayers_(wtcsf.kappaLayers_)
 {}
 
 
@@ -221,8 +207,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_(wtcsf.TnbrName_),
     thicknessLayers_(wtcsf.thicknessLayers_),
-    kappaLayers_(wtcsf.kappaLayers_),
-    contactRes_(wtcsf.contactRes_)
+    kappaLayers_(wtcsf.kappaLayers_)
 {}
 
 
@@ -249,12 +234,20 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         );
 
     const tmp<scalarField> myKDelta = kappa(*this)*patch().deltaCoeffs();
-    tmp<scalarField> nbrIntFld;
-    tmp<scalarField> nbrKDelta;
 
-    //Pout<< "updateCoeffs() : mpp.sameWorld():" << mpp.sameWorld() << endl;
+    if (thicknessLayers_.size() > 0)
+    {
+        myKDelta.ref() = 1.0/myKDelta.ref();
+        forAll(thicknessLayers_, iLayer)
+        {
+            myKDelta.ref() += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+        }
+        myKDelta.ref() = 1.0/myKDelta.ref();
+    }
 
 
+    scalarField nbrIntFld;
+    scalarField nbrKDelta;
     if (mpp.sameWorld())
     {
         // Same world so lookup
@@ -275,51 +268,19 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
             )
         );
 
-        if (contactRes_ == 0.0)
-        {
-            // Get neighbour internal data in local order. Does all
-            // comms/reordering already
-            nbrIntFld = this->mappedInternalField();
-            // Calculate neighbour weighting (in neighbouring ordering)
-            nbrKDelta = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
-        }
-        else
-        {
-            // Get neighbour patch values
-            nbrIntFld = new scalarField(nbrField);
-            // Comms/reorder to local
-            distribute(this->internalField().name(), nbrIntFld.ref());
-
-            // Constant neighbour weighting. Reorder/comms below
-            nbrKDelta = new scalarField(nbrField.size(), contactRes_);
-        }
+        // Swap to obtain full local values of neighbour K*delta
+        nbrIntFld = nbrField.patchInternalField();
+        nbrKDelta = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
     }
     else
     {
         // Different world so use my region,patch. Distribution below will
-        // do the reordering
-        if (contactRes_ == 0.0)
-        {
-            nbrIntFld = this->mappedInternalField();
-            nbrKDelta = new scalarField(myKDelta());
-        }
-        else
-        {
-            nbrIntFld = *this;
-            nbrKDelta = new scalarField(this->size(), contactRes_);
-        }
+        // do the reordering.
+        nbrIntFld = patchInternalField();
+        nbrKDelta = myKDelta.ref();
     }
-
-
-    //Pout<< "updateCoeffs() : nbrIntFld:" << flatOutput(nbrIntFld()) << endl;
-    //Pout<< "updateCoeffs() : nbrKDelta BEFORE:" << flatOutput(nbrKDelta())
-    //    << endl;
-
-    distribute(this->internalField().name() + "_weights", nbrKDelta.ref());
-    //Pout<< "updateCoeffs() : nbrKDelta AFTER:" << flatOutput(nbrKDelta())
-    //    << endl;
-    //Pout<< "updateCoeffs() : myKDelta:" << flatOutput(myKDelta())
-    //    << endl;
+    distribute(this->internalField().name() + "_value", nbrIntFld);
+    distribute(this->internalField().name() + "_weights", nbrKDelta);
 
 
     // Both sides agree on
@@ -337,9 +298,9 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     //    - refValue = neighbour value
     //    - mixFraction = nbrKDelta / (nbrKDelta + myKDelta())
 
-    this->refValue() = nbrIntFld();
+    this->refValue() = nbrIntFld;
     this->refGrad() = 0.0;
-    this->valueFraction() = nbrKDelta()/(nbrKDelta() + myKDelta());
+    this->valueFraction() = nbrKDelta/(nbrKDelta + myKDelta());
 
     mixedFvPatchScalarField::updateCoeffs();
 
