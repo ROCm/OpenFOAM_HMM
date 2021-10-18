@@ -684,6 +684,31 @@ makeThermos
     specie
 );
 
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    perfectGas,
+    specie
+);
+
+makeThermos
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
