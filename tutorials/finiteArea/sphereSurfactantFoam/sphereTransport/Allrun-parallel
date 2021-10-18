@@ -3,16 +3,30 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
+fileHandler="-fileHandler collated"
+unset reconstruct
+# reconstruct=true
+convertVTK=true
+
 restore0Dir
 
 #NO blockMesh (pre-meshed geometry and pre-calculated U field)
 
-runApplication makeFaMesh
+runApplication decomposePar $fileHandler -no-finite-area
 
-runApplication decomposePar
+runParallel makeFaMesh $fileHandler
 
-runParallel $(getApplication)
+runParallel $(getApplication) $fileHandler
 
-runApplication reconstructPar
+if [ "$convertVTK" = true ]
+then
+    runParallel foamToVTK $fileHandler -finite-area -no-internal -no-boundary
+fi
+
+case "$reconstruct" in
+    (true)      runApplication reconstructPar $fileHandler ;;
+    (latest*)   runApplication reconstructPar $fileHandler -latestTime ;;
+    (*)         echo "Skipping reconstructPar $fileHandler" ;;
+esac
 
 #------------------------------------------------------------------------------

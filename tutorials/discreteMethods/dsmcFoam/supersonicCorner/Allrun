@@ -13,6 +13,6 @@ runParallel dsmcInitialise
 
 runParallel $(getApplication)
 
-runApplication reconstructPar -noLagrangian
+runApplication reconstructPar -no-lagrangian
 
 #------------------------------------------------------------------------------
