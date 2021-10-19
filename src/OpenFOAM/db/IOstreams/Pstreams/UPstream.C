@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ Foam::label Foam::UPstream::allocateCommunicator
     label index;
     if (!freeComms_.empty())
     {
-        index = freeComms_.pop();
+        index = freeComms_.remove();  // LIFO pop
     }
     else
     {
@@ -114,10 +114,10 @@ Foam::label Foam::UPstream::allocateCommunicator
         index = parentCommunicator_.size();
 
         myProcNo_.append(-1);
-        procIDs_.append(List<int>(0));
+        procIDs_.append(List<int>());
         parentCommunicator_.append(-1);
-        linearCommunication_.append(List<commsStruct>(0));
-        treeCommunication_.append(List<commsStruct>(0));
+        linearCommunication_.append(List<commsStruct>());
+        treeCommunication_.append(List<commsStruct>());
     }
 
     if (debug)
@@ -186,7 +186,7 @@ void Foam::UPstream::freeCommunicator
     linearCommunication_[communicator].clear();
     treeCommunication_[communicator].clear();
 
-    freeComms_.push(communicator);
+    freeComms_.append(communicator);  // LIFO push
 }
 
 
@@ -365,13 +365,13 @@ bool Foam::UPstream::haveThreads_(false);
 int Foam::UPstream::msgType_(1);
 
 
-Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
-
 Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
 
 Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
 
 Foam::DynamicList<Foam::label> Foam::UPstream::parentCommunicator_(10);
+
+Foam::DynamicList<Foam::label> Foam::UPstream::freeComms_;
 
 Foam::wordList Foam::UPstream::allWorlds_(Foam::one{}, "");
 Foam::labelList Foam::UPstream::worldIDs_(Foam::one{}, 0);

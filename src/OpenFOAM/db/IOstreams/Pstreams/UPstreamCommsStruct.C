@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,16 +27,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "UPstream.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::UPstream::commsStruct::commsStruct()
 :
     above_(-1),
-    below_(0),
-    allBelow_(0),
-    allNotBelow_(0)
+    below_(),
+    allBelow_(),
+    allNotBelow_()
 {}
 
 

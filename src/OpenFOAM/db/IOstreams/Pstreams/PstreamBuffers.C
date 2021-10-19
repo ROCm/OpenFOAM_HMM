@@ -28,11 +28,6 @@ License
 
 #include "PstreamBuffers.H"
 
-/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
-
-Foam::DynamicList<char> Foam::PstreamBuffers::nullBuf(0);
-
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::PstreamBuffers::PstreamBuffers
@@ -40,18 +35,16 @@ Foam::PstreamBuffers::PstreamBuffers
     const UPstream::commsTypes commsType,
     const int tag,
     const label comm,
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver
+    IOstreamOption::streamFormat fmt
 )
 :
     commsType_(commsType),
     tag_(tag),
     comm_(comm),
     format_(fmt),
-    version_(ver),
     sendBuf_(UPstream::nProcs(comm)),
     recvBuf_(UPstream::nProcs(comm)),
-    recvBufPos_(UPstream::nProcs(comm), 0),
+    recvBufPos_(UPstream::nProcs(comm), Zero),
     finishedSendsCalled_(false)
 {}
 
@@ -67,9 +60,8 @@ Foam::PstreamBuffers::~PstreamBuffers()
         {
             FatalErrorInFunction
                 << "Message from processor " << proci
-                << " not fully consumed. messageSize:" << recvBuf_[proci].size()
-                << " bytes of which only " << recvBufPos_[proci]
-                << " consumed."
+                << " Only consumed " << recvBufPos_[proci] << " of "
+                << recvBuf_[proci].size() << " bytes" << nl
                 << Foam::abort(FatalError);
         }
     }
@@ -80,6 +72,7 @@ Foam::PstreamBuffers::~PstreamBuffers()
 
 void Foam::PstreamBuffers::finishedSends(const bool block)
 {
+    // Could also check that it is not called twice
     finishedSendsCalled_ = true;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)
@@ -98,6 +91,7 @@ void Foam::PstreamBuffers::finishedSends(const bool block)
 
 void Foam::PstreamBuffers::finishedSends(labelList& recvSizes, const bool block)
 {
+    // Could also check that it is not called twice
     finishedSendsCalled_ = true;
 
     if (commsType_ == UPstream::commsTypes::nonBlocking)

@@ -37,20 +37,19 @@ Foam::UIPstream::UIPstream
 (
     const commsTypes commsType,
     const int fromProcNo,
-    DynamicList<char>& externalBuf,
-    label& externalBufPosition,
+    DynamicList<char>& receiveBuf,
+    label& receiveBufPosition,
     const int tag,
     const label comm,
     const bool clearAtEnd,
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver
+    IOstreamOption::streamFormat fmt
 )
 :
     UPstream(commsType),
-    Istream(fmt, ver),
+    Istream(fmt, IOstreamOption::currentVersion),
     fromProcNo_(fromProcNo),
-    externalBuf_(externalBuf),
-    externalBufPosition_(externalBufPosition),
+    recvBuf_(receiveBuf),
+    recvBufPos_(receiveBufPosition),
     tag_(tag),
     comm_(comm),
     clearAtEnd_(clearAtEnd),
@@ -63,10 +62,10 @@ Foam::UIPstream::UIPstream
 Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 :
     UPstream(buffers.commsType_),
-    Istream(buffers.format_, buffers.version_),
+    Istream(buffers.format_, IOstreamOption::currentVersion),
     fromProcNo_(fromProcNo),
-    externalBuf_(buffers.recvBuf_[fromProcNo]),
-    externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
+    recvBuf_(buffers.recvBuf_[fromProcNo]),
+    recvBufPos_(buffers.recvBufPos_[fromProcNo]),
     tag_(buffers.tag_),
     comm_(buffers.comm_),
     clearAtEnd_(true),

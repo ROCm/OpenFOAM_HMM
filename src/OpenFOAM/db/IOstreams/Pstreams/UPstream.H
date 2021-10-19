@@ -48,7 +48,6 @@ SourceFiles
 #include "string.H"
 #include "Enum.H"
 #include "ListOps.H"
-#include "LIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +66,7 @@ public:
     typedef IntRange<int> rangeType;
 
     //- Types of communications
-    enum class commsTypes
+    enum class commsTypes : char
     {
         blocking,
         scheduled,
@@ -83,7 +82,7 @@ public:
         //- Structure for communicating between processors
         class commsStruct
         {
-            // Private data
+            // Private Data
 
                 //- procID of above processor
                 label above_;
@@ -103,7 +102,7 @@ public:
 
             // Constructors
 
-                //- Construct null
+                //- Default construct. Above == -1
                 commsStruct();
 
                 //- Construct from components
@@ -128,33 +127,30 @@ public:
 
             // Member Functions
 
-                // Access
+                label above() const noexcept
+                {
+                    return above_;
+                }
 
-                    label above() const
-                    {
-                        return above_;
-                    }
+                const labelList& below() const noexcept
+                {
+                    return below_;
+                }
 
-                    const labelList& below() const
-                    {
-                        return below_;
-                    }
+                const labelList& allBelow() const noexcept
+                {
+                    return allBelow_;
+                }
 
-                    const labelList& allBelow() const
-                    {
-                        return allBelow_;
-                    }
-
-                    const labelList& allNotBelow() const
-                    {
-                        return allNotBelow_;
-                    }
+                const labelList& allNotBelow() const noexcept
+                {
+                    return allNotBelow_;
+                }
 
 
-            // Member operators
+            // Member Operators
 
                 bool operator==(const commsStruct&) const;
-
                 bool operator!=(const commsStruct&) const;
 
 
@@ -183,7 +179,7 @@ public:
 
 private:
 
-    // Private Data
+    // Private Static Data
 
         //- By default this is not a parallel run
         static bool parRun_;
@@ -203,9 +199,6 @@ private:
 
         // Communicator specific data
 
-        //- Free communicators
-        static LIFOStack<label> freeComms_;
-
         //- My processor number
         static DynamicList<int> myProcNo_;
 
@@ -214,6 +207,9 @@ private:
 
         //- Parent communicator
         static DynamicList<label> parentCommunicator_;
+
+        //- Free communicators
+        static DynamicList<label> freeComms_;
 
         //- Linear communication schedule
         static DynamicList<List<commsStruct>> linearCommunication_;
@@ -263,6 +259,7 @@ protected:
         //- Communications type of this stream
         commsTypes commsType_;
 
+
 public:
 
     // Declare name of the class and its debug switch
@@ -301,8 +298,8 @@ public:
 
     // Constructors
 
-        //- Construct given optional buffer size
-        UPstream(const commsTypes commsType)
+        //- Construct for given communication type
+        explicit UPstream(const commsTypes commsType)
         :
             commsType_(commsType)
         {}
@@ -356,7 +353,7 @@ public:
                 freeCommunicator(comm_);
             }
 
-            operator label() const
+            operator label() const noexcept
             {
                 return comm_;
             }
@@ -424,21 +421,22 @@ public:
 
         //- Set as parallel run on/off.
         //  \return the previous value
-        static bool parRun(const bool on)
+        static bool parRun(const bool on) noexcept
         {
             bool old(parRun_);
             parRun_ = on;
             return old;
         }
 
-        //- Test if this a parallel run, or allow modify access
-        static bool& parRun()
+        //- Test if this a parallel run
+        //  Modify access is deprecated
+        static bool& parRun() noexcept
         {
             return parRun_;
         }
 
         //- Have support for threads
-        static bool haveThreads()
+        static bool haveThreads() noexcept
         {
             return haveThreads_;
         }
@@ -482,13 +480,13 @@ public:
         // Worlds
 
             //- All worlds
-            static const wordList& allWorlds()
+            static const wordList& allWorlds() noexcept
             {
                 return allWorlds_;
             }
 
             //- worldID (index in allWorlds) of all processes
-            static const labelList& worldIDs()
+            static const labelList& worldIDs() noexcept
             {
                 return worldIDs_;
             }
@@ -539,24 +537,24 @@ public:
         }
 
         //- Message tag of standard messages
-        static int& msgType()
+        static int& msgType() noexcept
         {
             return msgType_;
         }
 
 
         //- Get the communications type of the stream
-        commsTypes commsType() const
+        commsTypes commsType() const noexcept
         {
             return commsType_;
         }
 
         //- Set the communications type of the stream
-        commsTypes commsType(const commsTypes ct)
+        commsTypes commsType(const commsTypes ct) noexcept
         {
-            commsTypes oldCommsType = commsType_;
+            commsTypes old(commsType_);
             commsType_ = ct;
-            return oldCommsType;
+            return old;
         }
 
 

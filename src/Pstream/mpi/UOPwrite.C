@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,9 +81,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_BYTE,
-            toProcNo,   //procID(toProcNo),
+            toProcNo,
             tag,
-            PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
+            PstreamGlobals::MPICommunicators_[communicator]
         );
 
         // Assume these are from scatters ...
@@ -104,9 +104,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_BYTE,
-            toProcNo,   //procID(toProcNo),
+            toProcNo,
             tag,
-            PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
+            PstreamGlobals::MPICommunicators_[communicator]
         );
 
         // Assume these are from scatters ...
@@ -129,9 +129,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_BYTE,
-            toProcNo,   //procID(toProcNo),
+            toProcNo,
             tag,
-            PstreamGlobals::MPICommunicators_[communicator],//MPI_COMM_WORLD,
+            PstreamGlobals::MPICommunicators_[communicator],
             &request
         );
 

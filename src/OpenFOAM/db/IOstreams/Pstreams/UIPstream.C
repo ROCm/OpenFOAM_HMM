@@ -57,14 +57,26 @@ inline static void processFlags(Istream& is, int flagMask)
     }
 }
 
-} // End anonymous namespace
+
+// Return the position with word boundary alignment
+inline static label byteAlign(const label pos, const size_t align)
+{
+    return
+    (
+        (align > 1)
+      ? (align + ((pos - 1) & ~(align - 1)))
+      : pos
+    );
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::UIPstream::checkEof()
 {
-    if (externalBufPosition_ == messageSize_)
+    if (recvBufPos_ == messageSize_)
     {
         setEof();
     }
@@ -73,11 +85,7 @@ inline void Foam::UIPstream::checkEof()
 
 inline void Foam::UIPstream::prepareBuffer(const size_t align)
 {
-    if (align > 1)
-    {
-        externalBufPosition_ =
-            align + ((externalBufPosition_ - 1) & ~(align - 1));
-    }
+    recvBufPos_ = byteAlign(recvBufPos_, align);
 }
 
 
@@ -86,8 +94,8 @@ inline void Foam::UIPstream::readFromBuffer(T& val)
 {
     prepareBuffer(sizeof(T));
 
-    val = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
-    externalBufPosition_ += sizeof(T);
+    val = reinterpret_cast<T&>(recvBuf_[recvBufPos_]);
+    recvBufPos_ += sizeof(T);
     checkEof();
 }
 
@@ -98,7 +106,7 @@ inline void Foam::UIPstream::readFromBuffer
     const size_t count
 )
 {
-    const char* const __restrict__ buf = &externalBuf_[externalBufPosition_];
+    const char* const __restrict__ buf = &recvBuf_[recvBufPos_];
     char* const __restrict__ output = reinterpret_cast<char*>(data);
 
     for (size_t i = 0; i < count; ++i)
@@ -106,12 +114,12 @@ inline void Foam::UIPstream::readFromBuffer
         output[i] = buf[i];
     }
 
-    externalBufPosition_ += count;
+    recvBufPos_ += count;
     checkEof();
 }
 
 
-inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
+inline Foam::Istream& Foam::UIPstream::readString(std::string& str)
 {
     // Use std::string::assign() to copy content, including '\0'.
     // Stripping (when desired) is the responsibility of the sending side.
@@ -121,8 +129,8 @@ inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
 
     if (len)
     {
-        str.assign(&externalBuf_[externalBufPosition_], len);
-        externalBufPosition_ += len;
+        str.assign(&recvBuf_[recvBufPos_], len);
+        recvBufPos_ += len;
         checkEof();
     }
     else
@@ -144,11 +152,11 @@ Foam::UIPstream::~UIPstream()
         {
             Pout<< "UIPstream::~UIPstream() : tag:" << tag_
                 << " fromProcNo:" << fromProcNo_
-                << " clearing externalBuf_ of size "
-                << externalBuf_.size()
+                << " clearing receive buffer of size "
+                << recvBuf_.size()
                 << " messageSize_:" << messageSize_ << endl;
         }
-        externalBuf_.clearStorage();
+        recvBuf_.clearStorage();
     }
 }
 
@@ -232,7 +240,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         case token::tokenType::DIRECTIVE :
         {
             word val;
-            if (readStringFromBuffer(val))
+            if (readString(val))
             {
                 if (token::compound::isCompound(val))
                 {
@@ -258,7 +266,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         case token::tokenType::VERBATIM :
         {
             string val;
-            if (readStringFromBuffer(val))
+            if (readString(val))
             {
                 t = std::move(val);
                 t.setType(token::tokenType(c));
@@ -335,8 +343,8 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 
 Foam::Istream& Foam::UIPstream::read(char& c)
 {
-    c = externalBuf_[externalBufPosition_];
-    ++externalBufPosition_;
+    c = recvBuf_[recvBufPos_];
+    ++recvBufPos_;
     checkEof();
     return *this;
 }
@@ -344,13 +352,13 @@ Foam::Istream& Foam::UIPstream::read(char& c)
 
 Foam::Istream& Foam::UIPstream::read(word& str)
 {
-    return readStringFromBuffer(str);
+    return readString(str);
 }
 
 
 Foam::Istream& Foam::UIPstream::read(string& str)
 {
-    return readStringFromBuffer(str);
+    return readString(str);
 }
 
 
@@ -377,9 +385,14 @@ Foam::Istream& Foam::UIPstream::read(doubleScalar& val)
 
 Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 {
-    beginRawRead();
-    readRaw(data, count);
-    endRawRead();
+    if (count)
+    {
+        // For count == 0, a no-op
+        // - see UOPstream::write(const char*, streamsize)
+        beginRawRead();
+        readRaw(data, count);
+        endRawRead();
+    }
 
     return *this;
 }
@@ -405,7 +418,9 @@ bool Foam::UIPstream::beginRawRead()
             << Foam::abort(FatalError);
     }
 
-    // Alignment = 8, as per read(const char*, streamsize)
+    // Align on word boundary (64-bit)
+    // - as per read(const char*, streamsize)
+    // The check for zero-size will have been done by the caller
     prepareBuffer(8);
 
     return true;
@@ -414,7 +429,7 @@ bool Foam::UIPstream::beginRawRead()
 
 void Foam::UIPstream::rewind()
 {
-    externalBufPosition_ = 0;
+    recvBufPos_ = 0;
 }
 
 

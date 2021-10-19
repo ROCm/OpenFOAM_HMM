@@ -63,9 +63,9 @@ class UIPstream
 
         int fromProcNo_;
 
-        DynamicList<char>& externalBuf_;
+        DynamicList<char>& recvBuf_;
 
-        label& externalBufPosition_;
+        label& recvBufPos_;
 
         const int tag_;
 
@@ -78,45 +78,45 @@ class UIPstream
 
     // Private Member Functions
 
-        //- Check the bufferPosition against messageSize_ for EOF
+        //- Check buffer position against messageSize_ for EOF
         inline void checkEof();
 
-        //- Prepare transfer buffer by adjusting alignment
+        //- Prepare receive buffer by adjusting alignment
         inline void prepareBuffer(const size_t align);
 
-        //- Read a T from the transfer buffer
+        //- Read a T from the receive buffer
         template<class T>
         inline void readFromBuffer(T& val);
 
-        //- Read count bytes of data from the transfer buffer.
+        //- Read count bytes of data from the receive buffer.
         //  Prior data alignment is done by prepareBuffer
         inline void readFromBuffer(void* data, const size_t count);
 
-        //- Read string length and its content.
-        inline Istream& readStringFromBuffer(std::string& str);
+        //- Read string length and string content
+        inline Istream& readString(std::string& str);
 
 
 public:
 
     // Constructors
 
-        //- Construct given process index to read from and optional buffer size,
-        //- read format and IO version
+        //- Construct given process index to read from using the given
+        //- attached receive buffer, optional communication characteristics
+        //- and IO format
         UIPstream
         (
             const commsTypes commsType,
             const int fromProcNo,
-            DynamicList<char>& externalBuf,
-            label& externalBufPosition,
+            DynamicList<char>& receiveBuf,
+            label& receiveBufPosition,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
-            const bool clearAtEnd = false,   // destroy externalBuf if at end
-            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            const bool clearAtEnd = false,   // destroy receiveBuf if at end
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
         //- Construct given buffers
-        UIPstream(const int fromProcNo, PstreamBuffers&);
+        UIPstream(const int fromProcNo, PstreamBuffers& buffers);
 
 
     //- Destructor

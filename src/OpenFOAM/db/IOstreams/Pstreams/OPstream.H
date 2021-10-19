@@ -60,8 +60,8 @@ public:
 
     // Constructors
 
-        //- Construct given process index to send to and optional buffer size,
-        //- write format and IO version
+        //- Construct for given process index to send to
+        //- and optional buffer size, write format
         OPstream
         (
             const commsTypes commsType,
@@ -69,8 +69,7 @@ public:
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
-            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 };
 
