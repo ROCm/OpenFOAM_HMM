@@ -23,12 +23,12 @@ else
     echo "mpirun=$(command -v mpirun || true)"
 fi
 echo
-# Report compiler information
+# Report compiler information. First non-blank line from --version output
 compiler="$(wmake -show-path-cxx 2>/dev/null || true)"
 if [ -x "$compiler" ]
 then
     echo "compiler=$compiler"
-    "$compiler" --version 2>/dev/null | sed -ne '1p'
+    "$compiler" --version 2>/dev/null | sed -e '/^$/d;q'
 else
     echo "compiler=unknown"
 fi

@@ -62,7 +62,7 @@ switch ("$WM_MPLIB")
 # The system openmpi, discover locations via <mpicc>
 case SYSTEMOPENMPI[1-9]:
     # Preserve major version for the naming
-    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's/^.*MPI//'`
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#^.*MPI##'`
     #[fallthrough]
 
 case SYSTEMOPENMPI:
@@ -77,16 +77,17 @@ case SYSTEMOPENMPI:
     endif
 
     # Use <orte-info> (openmpi only command) to query configuration
+    # Parse "path:prefix:<pathname>" type of output
     if ( "$MPI_ARCH_PATH" == "" ) then
         set _foamFoundCmd=`which orte-info`
         if ($status == 0) then
             # prefix
-            set _foamFoundDir=`orte-info --path prefix --parsable | sed -e 's/^.*:prefix://'`
+            set _foamFoundDir=`orte-info --path prefix --parsable | sed -e 's#^path:[^:]*:##'`
             if ( -d "$_foamFoundDir" ) then
                 setenv MPI_ARCH_PATH "${_foamFoundDir}"
 
                 # libdir
-                set _foamFoundDir=`orte-info --path libdir --parsable | sed -e 's/^.*:libdir://'`
+                set _foamFoundDir=`orte-info --path libdir --parsable | sed -e 's#^path:[^:]*:##'`
                 if ( -d "$_foamFoundDir" ) then
                     _foamAddLib "$_foamFoundDir"
                 else if ( "$MPI_ARCH_PATH" != "/usr" ) then
@@ -101,7 +102,7 @@ case SYSTEMOPENMPI:
     if ( "$MPI_ARCH_PATH" == "" ) then
         set _foamFoundCmd=`which mpicc`
         if ($status == 0) then
-            set _foamFoundDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
+            set _foamFoundDir=`mpicc --showme:link | sed -e 's#.*-L\([^ ]*\).*#\1#'`
             setenv MPI_ARCH_PATH "${_foamFoundDir:h}"  # Prefix from libdir
             _foamAddLib "$_foamFoundDir"
         endif
@@ -128,7 +129,7 @@ case SYSTEMOPENMPI:
     # TBD: extra (major) version qualifier on name?
     #-
     ## if ( "$FOAM_MPI" == "sys-openmpi" ) then
-    ##     set _foamMpiVersion=`echo "$MPI_ARCH_PATH" | sed -e 's/^.*mpi//'`
+    ##     set _foamMpiVersion=`echo "$MPI_ARCH_PATH" | sed -e 's#^.*mpi##'`
     ##     switch ("$_foamMpiVersion")
     ##     case [1-9]:
     ##         setenv FOAM_MPI "${FOAM_MPI}${_foamMpiVersion}"

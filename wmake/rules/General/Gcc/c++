@@ -1,3 +1,9 @@
+#------------------------------------------------------------------------------
+# C++14 support with gcc-5 and later, but several systems (as of 2021)
+# are still using gcc-4.8.4 (centos7, suse SLES12, ...)
+#
+# NOTE if your system gcc is new enough can simply use c++14 too.
+#------------------------------------------------------------------------------
 SUFFIXES += .C .cc .cpp .cxx
 
 CC          = g++ -std=c++11

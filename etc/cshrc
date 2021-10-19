@@ -66,8 +66,9 @@ setenv WM_PROJECT_VERSION com
 setenv WM_COMPILER_TYPE system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Clang | Icc | Icx | Cray | Amd | Arm | Pgi | Fujitsu |
+# = Gcc | Clang | Icc | Icx | Amd | Arm | Cray | Fujitsu |
 #   Gcc<digits> | Clang<digits>
+#   [Not well tested: Pgi | Nvidia]
 setenv WM_COMPILER Gcc
 
 # [WM_PRECISION_OPTION] - Floating-point precision:

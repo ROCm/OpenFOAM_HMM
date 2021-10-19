@@ -81,17 +81,19 @@ SYSTEMOPENMPI | SYSTEMOPENMPI[1-9])
         unset MPI_ARCH_PATH
     fi
 
-    # Use <orte-info> (openmpi only command) to query configuration
+    # Use <orte-info> (openmpi only command) to query configuration.
+    # Parse "path:prefix:<pathname>" type of output
     if [ -z "$MPI_ARCH_PATH" ] && _foamFoundCmd="$(command -v orte-info)"
     then
         # prefix
-        _foamFoundDir="$("$_foamFoundCmd" --path prefix --parsable | sed -e 's/^.*:prefix://')"
+        _foamFoundDir="$("$_foamFoundCmd" --path prefix --parsable | sed -e 's#^path:[^:]*:##')"
+
         if [ -d "$_foamFoundDir" ]
         then
             MPI_ARCH_PATH="${_foamFoundDir}"
 
             # libdir
-            _foamFoundDir="$("$_foamFoundCmd" --path libdir --parsable | sed -e 's/^.*:libdir://')"
+            _foamFoundDir="$("$_foamFoundCmd" --path libdir --parsable | sed -e 's#^path:[^:]*:##')"
             if [ -d "$_foamFoundDir" ]
             then
                 _foamAddLib "$_foamFoundDir"
@@ -106,7 +108,7 @@ SYSTEMOPENMPI | SYSTEMOPENMPI[1-9])
     # strip off 'lib' to get the prefix directory
     if [ -z "$MPI_ARCH_PATH" ] && _foamFoundCmd="$(command -v mpicc)"
     then
-        _foamFoundDir="$("$_foamFoundCmd" --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/')"
+        _foamFoundDir="$("$_foamFoundCmd" --showme:link | sed -e 's#.*-L\([^ ]*\).*#\1#')"
 
         MPI_ARCH_PATH="${_foamFoundDir%/*}"  # Prefix from libdir
         _foamAddLib "$_foamFoundDir"

@@ -1,9 +1,12 @@
+#------------------------------------------------------------------------------
+# mingw is gcc, but new enough to support c++14
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Gcc/c++
 
 c++ARCH     = -m64 -pthread
 
-# With gnu++11 (not c++11) to ensure __STRICT_ANSI__ is not defined
-CC          = x86_64-w64-mingw32-g++ -std=gnu++11
+# With gnu++14 (not c++14) to ensure __STRICT_ANSI__ is not defined
+CC          = x86_64-w64-mingw32-g++ -std=gnu++14
 
 include $(RULES)/c++$(WM_COMPILE_OPTION)
 
@@ -34,3 +37,5 @@ LINKEXE     = $(CC) $(c++FLAGS) \
     -Wl,--strip-all \
     -Wl,--force-exe-suffix \
     $(FOAM_EXTRA_LDFLAGS)
+
+#------------------------------------------------------------------------------
