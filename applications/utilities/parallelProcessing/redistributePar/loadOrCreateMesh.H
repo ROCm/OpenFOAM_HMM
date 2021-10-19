@@ -49,7 +49,13 @@ namespace Foam
 //      name     : regionName
 //      instance : exact directory where to find mesh (i.e. does not
 //                 do a findInstance
-autoPtr<fvMesh> loadOrCreateMesh(const IOobject& io);
+autoPtr<fvMesh> loadOrCreateMesh(const bool decompose, const IOobject& io);
+
+//- Remove empty directory. Return true if removed.
+bool removeEmptyDir(const fileName& path);
+
+//- Remove empty directories from bottom up
+void removeEmptyDirs(const fileName& path);
 
 }
 

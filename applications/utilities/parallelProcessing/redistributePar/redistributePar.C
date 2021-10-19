@@ -102,10 +102,177 @@ Usage
 #include "pointFields.H"
 
 #include "cyclicACMIFvPatch.H"
+#include "masterUncollatedFileOperation.H"
+#include "uncollatedFileOperation.H"
+#include "collatedFileOperation.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+const int debug(::Foam::debug::debugSwitch("redistributePar", 0));
+
+void createTimeDirs(const fileName& path)
+{
+    // Get current set of local processor's time directories. Uses
+    // fileHandler
+    const instantList localTimeDirs(Time::findTimes(path, "constant"));
+
+    instantList masterTimeDirs;
+    if (Pstream::master())
+    {
+        //const bool oldParRun = Pstream::parRun(false);
+        //timeDirs = Time::findTimes(path, "constant");
+        //Pstream::parRun(oldParRun);  // Restore parallel state
+        masterTimeDirs = localTimeDirs;
+    }
+    Pstream::scatter(masterTimeDirs);
+    //DebugVar(masterTimeDirs);
+    //DebugVar(localTimeDirs);
+
+    // Sync any cached times (e.g. masterUncollatedFileOperation::times_)
+    // since only master would have done the findTimes
+    for (const instant& t : masterTimeDirs)
+    {
+        if (!localTimeDirs.found(t))
+        {
+            const fileName timePath(path/t.name());
+
+            //Pout<< "Time:" << t << nl
+            //    << "    raw       :" << timePath << nl
+            //    << endl;
+            mkDir(timePath);
+        }
+    }
+
+    // Just to make sure remove all state and re-scan
+    fileHandler().flush();
+    (void)fileHandler().findTimes(path, "constant");
+}
+
+
+void copyUniform
+(
+    const fileOperation& fh,
+    const bool decompose,
+    const bool reconstruct,
+    const word& readTimeName,
+    const objectRegistry& readDb,
+    const objectRegistry& writeDb
+)
+{
+    // Detect uniform/ at original database + time
+    const IOobject readIO("uniform", readTimeName, readDb);
+    const fileName readPath
+    (
+        fh.dirPath
+        (
+            false,          // local directory
+            readIO,
+            false           // do not search in time
+        )
+    );
+    //if (Pstream::master() && !readPath.empty())
+    if (!readPath.empty())
+    {
+        Info<< "Detected additional non-decomposed files in "
+            << readPath << endl;
+
+        // readPath: searching is the same for all file handlers. Typical:
+        //  <case>/0.1/uniform   (parent dir, decompose mode)
+        //  <case>/processor1/0.1/uniform   (redistribute/reconstruct mode)
+        //  <case>/processors2/0.1/uniform  ,,
+        // writePath:
+        //  uncollated : <case>/0.1/uniform (reconstruct mode). Should only
+        //               be done by master
+        //  uncollated : <case>/processorXXX/0.1/uniform. Should be done by all.
+        //  collated   : <case>/processors2/0.1/uniform. Should be done by
+        //               local master only.
+
+        // See what local directory
+        const IOobject writeIO("uniform", writeDb.time().timeName(), writeDb);
+        const fileName writePath
+        (
+            fh.objectPath
+            (
+                writeIO,
+                word::null
+            )
+        );
+        // Do we already have this directory?
+        const fileName currentPath(fh.dirPath(false, writeIO, false));
+
+        if (::debug)
+        {
+            Pout<< "    readPath   :" << readPath << endl;
+            Pout<< "    writePath  :" << writePath << endl;
+            Pout<< "    currentPath:" << currentPath << endl;
+        }
+
+        if (readPath == writePath)
+        {
+            return;
+        }
+
+        if (currentPath.empty())
+        {
+            if (decompose)
+            {
+                // All processors copy to destination
+                fh.cp(readPath, writePath);
+            }
+            else if (reconstruct)
+            {
+                // Only master
+                if (Pstream::master())
+                {
+                    const bool oldParRun = Pstream::parRun(false);
+                    fh.cp(readPath, writePath);
+                    Pstream::parRun(oldParRun);
+                }
+            }
+            else
+            {
+                // Redistribute. If same destination path do only on master,
+                // if different path do on all processors. For now check
+                // if collated file handler only. tbd.
+                if (isA<fileOperations::collatedFileOperation>(fh))
+                {
+                    // Collated
+                    if (Pstream::master())
+                    {
+                        const bool oldParRun = Pstream::parRun(false);
+                        fh.cp(readPath, writePath);
+                        Pstream::parRun(oldParRun);
+                    }
+                }
+                else
+                {
+                    // Assume uncollated
+                    fh.cp(readPath, writePath);
+                }
+            }
+        }
+    }
+}
+
+
+boolList haveFacesFile(const fileName& meshPath)
+{
+    const fileName facesPath(meshPath/"faces");
+    Info<< "Checking for mesh in " << facesPath << nl << endl;
+    boolList haveMesh(Pstream::nProcs(), false);
+    haveMesh[Pstream::myProcNo()] = fileHandler().isFile
+    (
+        fileHandler().filePath(facesPath)
+    );
+    Pstream::gatherList(haveMesh);
+    Pstream::scatterList(haveMesh);
+    Info<< "Per processor mesh availability:" << nl
+        << "    " << flatOutput(haveMesh) << nl << endl;
+    return haveMesh;
+}
+
 
 void setBasicGeometry(fvMesh& mesh)
 {
@@ -316,11 +483,15 @@ void determineDecomposition
             << endl;
     }
 
+    Time& tm = const_cast<Time&>(mesh.time());
+
+    const bool oldProcCase = tm.processorCase();
     if (Pstream::master() && decompose)
     {
         Info<< "Setting caseName to " << baseRunTime.caseName()
             << " to read decomposeParDict" << endl;
-        const_cast<Time&>(mesh.time()).caseName() = baseRunTime.caseName();
+        tm.caseName() = baseRunTime.caseName();
+        tm.processorCase(false);
     }
 
     scalarField cellWeights;
@@ -333,7 +504,7 @@ void determineDecomposition
             IOobject
             (
                 weightName,
-                mesh.time().timeName(),
+                tm.timeName(),
                 mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
@@ -349,7 +520,8 @@ void determineDecomposition
     if (Pstream::master() && decompose)
     {
         Info<< "Restoring caseName to " << proc0CaseName << endl;
-        const_cast<Time&>(mesh.time()).caseName() = proc0CaseName;
+        tm.caseName() = proc0CaseName;
+        tm.processorCase(oldProcCase);
     }
 
     // Dump decomposition to volScalarField
@@ -360,17 +532,19 @@ void determineDecomposition
         {
             if (Pstream::master())
             {
+                const bool oldParRun = Pstream::parRun(false);
+
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to write undecomposed cellDist" << endl;
 
-                Time& tm = const_cast<Time&>(mesh.time());
-
                 tm.caseName() = baseRunTime.caseName();
-                const bool oldProcCase(tm.processorCase(false));
+                tm.processorCase(false);
                 writeDecomposition("cellDist", mesh, decomp);
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
                 tm.caseName() = proc0CaseName;
                 tm.processorCase(oldProcCase);
+
+                Pstream::parRun(oldParRun);
             }
         }
         else
@@ -384,6 +558,7 @@ void determineDecomposition
 // Write addressing if decomposing (1 to many) or reconstructing (many to 1)
 void writeProcAddressing
 (
+    autoPtr<fileOperation>&& writeHandler,
     const fvMesh& mesh,
     const mapDistributePolyMesh& map,
     const bool decompose
@@ -540,10 +715,21 @@ void writeProcAddressing
         );
     }
 
+    autoPtr<fileOperation> defaultHandler;
+    if (writeHandler.valid())
+    {
+        defaultHandler = fileHandler(std::move(writeHandler));
+    }
+
     const bool cellOk = cellMap.write();
     const bool faceOk = faceMap.write();
     const bool pointOk = pointMap.write();
     const bool patchOk = patchMap.write();
+
+    if (defaultHandler.valid())
+    {
+        writeHandler = fileHandler(std::move(defaultHandler));
+    }
 
     if (!cellOk || !faceOk || !pointOk || !patchOk)
     {
@@ -651,11 +837,16 @@ void readFields
             io.writeOpt(IOobject::AUTO_WRITE);
 
             // Load field (but not oldTime)
+            //const bool oldParRun = Pstream::parRun(false);
             readField(io, mesh, i, fields);
+            //Pstream::parRun(oldParRun);
+
             // Create zero sized field and send
             if (subsetterPtr)
             {
-                tmp<GeoField> tsubfld = subsetterPtr->interpolate(fields[i]);
+                const bool oldParRun = Pstream::parRun(false);
+                tmp<GeoField> tsubfld = subsetterPtr().interpolate(fields[i]);
+                Pstream::parRun(oldParRun);
 
                 // Send to all processors that don't have a mesh
                 for (const int procI : Pstream::subProcs())
@@ -815,6 +1006,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 // Inplace redistribute mesh and any fields
 autoPtr<mapDistributePolyMesh> redistributeAndWrite
 (
+    autoPtr<fileOperation>&& writeHandler,
     const Time& baseRunTime,
     const boolList& haveMesh,
     const fileName& meshSubDir,
@@ -830,6 +1022,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 )
 {
     Time& runTime = const_cast<Time&>(mesh.time());
+    const bool oldProcCase = runTime.processorCase();
 
     //// Print some statistics
     //Info<< "Before distribution:" << endl;
@@ -896,14 +1089,17 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = baseRunTime.caseName();
+            runTime.processorCase(false);
         }
         IOobjectList objects(mesh, runTime.timeName());
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = proc0CaseName;
+            runTime.processorCase(oldProcCase);
         }
 
         Info<< "From time " << runTime.timeName()
+            << " mesh:" << mesh.objectRegistry::objectPath()
             << " have objects:" << objects.names() << endl;
 
         // We don't want to map the decomposition (mapping already tested when
@@ -920,6 +1116,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = baseRunTime.caseName();
+            runTime.processorCase(false);
         }
         readFields
         (
@@ -1100,6 +1297,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = proc0CaseName;
+            runTime.processorCase(oldProcCase);
         }
     }
 
@@ -1181,6 +1379,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 << " to write reconstructed mesh and fields." << endl;
             runTime.caseName() = baseRunTime.caseName();
             const bool oldProcCase(runTime.processorCase(false));
+            const bool oldParRun = Pstream::parRun(false);
 
             mesh.write();
             topoSet::removeFiles(mesh);
@@ -1197,6 +1396,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 if (topoSet::debug) DebugVar(fieldFile);
                 rm(fieldFile);
             }
+            Pstream::parRun(oldParRun);
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
@@ -1206,7 +1406,18 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     }
     else
     {
+        autoPtr<fileOperation> defaultHandler;
+        if (writeHandler.valid())
+        {
+            defaultHandler = fileHandler(std::move(writeHandler));
+        }
+
         mesh.write();
+
+        if (defaultHandler.valid())
+        {
+            writeHandler = fileHandler(std::move(defaultHandler));
+        }
         topoSet::removeFiles(mesh);
         for (const word& fieldName : pointFieldNames)
         {
@@ -1230,7 +1441,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         // Decompose (1 -> N) or reconstruct (N -> 1)
         // so {boundary,cell,face,point}ProcAddressing have meaning
-        writeProcAddressing(mesh, map, decompose);
+        writeProcAddressing(std::move(writeHandler), mesh, map, decompose);
     }
     else
     {
@@ -1248,6 +1459,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = baseRunTime.caseName();
+            runTime.processorCase(false);
         }
         IOobject io
         (
@@ -1264,6 +1476,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         if (Pstream::master() && decompose)
         {
             runTime.caseName() = proc0CaseName;
+            runTime.processorCase(oldProcCase);
         }
 
         // Make sure all processors have valid data (since only some will
@@ -1281,6 +1494,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         {
             if (Pstream::master())
             {
+                const bool oldParRun = Pstream::parRun(false);
+
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to write reconstructed refinement data." << endl;
                 runTime.caseName() = baseRunTime.caseName();
@@ -1292,6 +1507,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
                 runTime.caseName() = proc0CaseName;
                 runTime.processorCase(oldProcCase);
+
+                Pstream::parRun(oldParRun);
             }
         }
         else
@@ -1306,6 +1523,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //    if (Pstream::master() && decompose)
     //    {
     //        runTime.caseName() = baseRunTime.caseName();
+    //        runTime.processorCase(false);
     //    }
     //    IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
     //
@@ -1315,6 +1533,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //    if (Pstream::master() && decompose)
     //    {
     //        runTime.caseName() = proc0CaseName;
+    //        runTime.processorCase(oldProcCase);
     //    }
     //
     //    forAll(cellSets, i)
@@ -2303,7 +2522,33 @@ int main(int argc, char *argv[])
     //                than it writes to
     // - reconstruct - reads parallel, write on master only and to parent
     //                 directory
+    autoPtr<fileOperation> writeHandler;
+    if
+    (
+        fileHandler().type()
+     != fileOperations::uncollatedFileOperation::typeName
+    )
+    {
+        // Install 'uncollated' as fileHandler. Save old one in writeHandler.
+        writeHandler = fileHandler(fileOperation::NewUncollated());
+    }
+
+    // Switch off parallel synchronisation of cached time directories
     fileHandler().distributed(true);
+
+    // File handler to be used for writing
+    const fileOperation& fh
+    (
+        writeHandler.valid()
+      ? writeHandler()
+      : fileHandler()
+    );
+
+
+
+    // Make sure to call findTimes on all processors to force caching of
+    // time directories
+    (void)fileHandler().findTimes(args.path(), "constant");
 
 
     #include "foamDlOpenLibs.H"
@@ -2367,7 +2612,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (!Foam::isDir(args.rootPath()))
+    if (!isDir(args.rootPath()))
     {
         FatalErrorInFunction
             << ": cannot open root directory " << args.rootPath()
@@ -2393,12 +2638,12 @@ int main(int argc, char *argv[])
     // want to delay constructing runTime until we've synced all time
     // directories...
     const fileName procDir(fileHandler().filePath(args.path()));
-    if (Foam::isDir(procDir))
+    if (isDir(procDir))
     {
         if (decompose)
         {
-            Info<< "Removing existing processor directories" << endl;
-            rmDir(procDir);
+            Info<< "Removing existing processor directory" << procDir << endl;
+            fileHandler().rmDir(procDir);
         }
     }
     else
@@ -2406,9 +2651,9 @@ int main(int argc, char *argv[])
         // Directory does not exist. If this happens on master -> decompose mode
         if (Pstream::master())
         {
-            decompose = true;
-            Info<< "No processor directories; switching on decompose mode"
-                << nl << endl;
+           decompose = true;
+           Info<< "No processor directories; switching on decompose mode"
+               << nl << endl;
         }
     }
     // If master changed to decompose mode make sure all nodes know about it
@@ -2421,21 +2666,8 @@ int main(int argc, char *argv[])
     // e.g. latestTime will pick up a different time (which causes createTime.H
     // to abort). So for now make sure to have master times on all
     // processors
-    {
-        Info<< "Creating time directories on all processors" << nl << endl;
-        instantList timeDirs;
-        if (Pstream::master())
-        {
-            const bool oldParRun = Pstream::parRun(false);
-            timeDirs = Time::findTimes(args.path(), "constant");
-            Pstream::parRun(oldParRun);  // Restore parallel state
-        }
-        Pstream::scatter(timeDirs);
-        for (const instant& t : timeDirs)
-        {
-            mkDir(args.path()/t.name());
-        }
-    }
+    Info<< "Creating time directories on all processors" << nl << endl;
+    createTimeDirs(args.path());
 
 
     // Construct time
@@ -2447,6 +2679,7 @@ int main(int argc, char *argv[])
 
     // Save local processor0 casename
     const fileName proc0CaseName = runTime.caseName();
+    const bool oldProcCase = runTime.processorCase();
 
 
     // Construct undecomposed Time
@@ -2458,21 +2691,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Creating time directories for undecomposed Time"
             << " on all processors" << nl << endl;
-        instantList timeDirs;
-
-        const fileName basePath(args.globalPath());
-
-        if (Pstream::master())
-        {
-            const bool oldParRun = Pstream::parRun(false);
-            timeDirs = Time::findTimes(basePath, "constant");
-            Pstream::parRun(oldParRun);  // Restore parallel state
-        }
-        Pstream::scatter(timeDirs);
-        for (const instant& t : timeDirs)
-        {
-            mkDir(basePath/t.name());
-        }
+        createTimeDirs(args.globalPath());
     }
 
 
@@ -2561,30 +2780,24 @@ int main(int argc, char *argv[])
 
 
                 // See where the mesh is
-                //const bool oldParRun = Pstream::parRun(false);
                 fileName facesInstance = runTime.findInstance
                 (
                     meshSubDir,
                     "faces",
                     IOobject::READ_IF_PRESENT
                 );
-                //Pstream::parRun(oldParRun);
                 //Pout<< "facesInstance:" << facesInstance << endl;
 
                 Pstream::scatter(facesInstance);
 
-                // Check who has a mesh
-                const fileName meshPath =
-                    runTime.path()/facesInstance/meshSubDir/"faces";
-
-                Info<< "Checking for mesh in " << meshPath << nl << endl;
-
-                boolList haveMesh(Pstream::nProcs(), false);
-                haveMesh[Pstream::myProcNo()] = Foam::isFile(meshPath);
-                Pstream::gatherList(haveMesh);
-                Pstream::scatterList(haveMesh);
-                Info<< "Per processor mesh availability:" << nl
-                    << "    " << flatOutput(haveMesh) << nl << endl;
+                // Check who has a mesh (by checking for 'faces' file)
+                const boolList haveMesh
+                (
+                    haveFacesFile
+                    (
+                        runTime.path()/facesInstance/meshSubDir
+                    )
+                );
 
 
                 // Addressing back to reconstructed mesh as xxxProcAddressing.
@@ -2676,6 +2889,7 @@ int main(int argc, char *argv[])
                     Info<< "loading mesh from " << facesInstance << endl;
                     autoPtr<fvMesh> meshPtr = loadOrCreateMesh
                     (
+                        decompose,
                         IOobject
                         (
                             regionName,
@@ -2694,14 +2908,15 @@ int main(int argc, char *argv[])
                     // Determine decomposition
                     // ~~~~~~~~~~~~~~~~~~~~~~~
 
-                    Info<< "Reconstructing mesh for time "
-                        << facesInstance << endl;
+                    Info<< "Reconstructing mesh for time " << facesInstance
+                        << endl;
 
                     label nDestProcs = 1;
                     labelList finalDecomp = labelList(mesh.nCells(), Zero);
 
                     redistributeAndWrite
                     (
+                        std::move(writeHandler),
                         baseRunTime,
                         haveMesh,
                         meshSubDir,
@@ -2746,12 +2961,14 @@ int main(int argc, char *argv[])
                 ),
                 true            // read on master only
             );
+
             setBasicGeometry(baseMeshPtr());
 
 
             Info<< "Reading local, decomposed mesh" << endl;
             autoPtr<fvMesh> meshPtr = loadOrCreateMesh
             (
+                decompose,
                 IOobject
                 (
                     regionName,
@@ -2761,6 +2978,16 @@ int main(int argc, char *argv[])
                 )
             );
             fvMesh& mesh = meshPtr();
+
+            if (writeHandler.valid() && Pstream::master())
+            {
+                // Remove any left-over empty processor directories created
+                // by loadOrCreateMesh to get around e.g. collated start-up
+                // problems. Should not happen in reconstruct mode ...
+                const bool oldParRun = Pstream::parRun(false);
+                removeEmptyDirs(mesh.time().path());
+                Pstream::parRun(oldParRun);
+            }
 
 
             // Read addressing back to base mesh
@@ -2888,22 +3115,38 @@ int main(int argc, char *argv[])
                     selectedLagrangianFields
                 );
 
-                // Copy any "uniform" directories from the master processor
-                if (Pstream::master())
-                {
-                    const fileName uniformDir0(runTime.timePath()/"uniform");
-                    if (Foam::isDir(uniformDir0))
-                    {
-                        Info<< "Detected additional non-decomposed files in "
-                            << uniformDir0 << endl;
-                        Foam::cp(uniformDir0, baseRunTime.timePath());
-                    }
-                }
+                // If there are any "uniform" directories copy them from
+                // the master processor
+                copyUniform
+                (
+                    fh,
+                    decompose,
+                    reconstruct,
+                    mesh.time().timeName(),
+                    mesh,
+                    baseMeshPtr()
+                );
+                // Non-region specific. Note: should do outside region loop
+                // but would then have to replicate the whole time loop ...
+                copyUniform
+                (
+                    fh,
+                    decompose,
+                    reconstruct,
+                    mesh.time().timeName(),
+                    mesh.time(),                // runTime
+                    baseMeshPtr().time()        // baseRunTime
+                );
             }
         }
     }
     else
     {
+        // decompose or redistribution mode.
+        //  decompose : master : read from parent dir
+        //              slave  : dummy mesh
+        //  redistribute : all read mesh or dummy mesh
+
         // Time coming from processor0 (or undecomposed if no processor0)
         scalar masterTime;
         if (decompose)
@@ -2928,8 +3171,10 @@ int main(int argc, char *argv[])
         Info<< "Setting time to that of master or undecomposed case : "
             << masterTime << endl;
         runTime.setTime(masterTime, 0);
+        baseRunTime.setTime(masterTime, 0);
 
-
+        // Save old time name (since might be incremented)
+        const word oldTimeName(runTime.timeName());
 
         forAll(regionNames, regioni)
         {
@@ -2965,6 +3210,7 @@ int main(int argc, char *argv[])
                     Info<< "Setting caseName to " << baseRunTime.caseName()
                         << " to find undecomposed mesh" << endl;
                     runTime.caseName() = baseRunTime.caseName();
+                    runTime.processorCase(false);
                 }
 
                 const bool oldParRun = Pstream::parRun(false);
@@ -2980,23 +3226,34 @@ int main(int argc, char *argv[])
                 {
                     Info<< "Restoring caseName to " << proc0CaseName << endl;
                     runTime.caseName() = proc0CaseName;
+                    runTime.processorCase(oldProcCase);
                 }
             }
             Pstream::scatter(masterInstDir);
 
             // Check who has a mesh
-            const fileName meshPath =
-                runTime.path()/masterInstDir/meshSubDir/"faces";
+            const fileName meshPath(runTime.path()/masterInstDir/meshSubDir);
+            const boolList haveMesh(haveFacesFile(meshPath));
 
-            Info<< "Checking for mesh in " << meshPath << nl << endl;
+            // Collect objectPath of polyMesh for the current file handler. This
+            // is where the mesh would be written if it didn't exist already.
+            fileNameList meshDir(Pstream::nProcs());
+            {
+                const fileName fName
+                (
+                    fileHandler().objectPath
+                    (
+                        IOobject("faces", masterInstDir/meshSubDir, runTime),
+                        word::null
+                    )
+                );
+                meshDir[Pstream::myProcNo()] = fName.path();
+                Pstream::gatherList(meshDir);
+                Pstream::scatterList(meshDir);
+                //Info<< "Per processor faces dirs:" << nl
+                //    << "    " << meshDir << nl << endl;
+            }
 
-
-            boolList haveMesh(Pstream::nProcs(), false);
-            haveMesh[Pstream::myProcNo()] = Foam::isFile(meshPath);
-            Pstream::gatherList(haveMesh);
-            Pstream::scatterList(haveMesh);
-            Info<< "Per processor mesh availability:" << nl
-                << "    " << flatOutput(haveMesh) << nl << endl;
 
             // Load mesh (or create dummy one)
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3006,10 +3263,13 @@ int main(int argc, char *argv[])
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to read undecomposed mesh" << endl;
                 runTime.caseName() = baseRunTime.caseName();
+                runTime.processorCase(false);
             }
 
             autoPtr<fvMesh> meshPtr = loadOrCreateMesh
             (
+                decompose,
+                //haveMesh[Pstream::myProcNo()],
                 IOobject
                 (
                     regionName,
@@ -3018,15 +3278,49 @@ int main(int argc, char *argv[])
                     Foam::IOobject::MUST_READ
                 )
             );
+            fvMesh& mesh = meshPtr();
+
+            if (writeHandler.valid())
+            {
+                // Remove any left-over empty processor directories created
+                // by loadOrCreateMesh to get around the collated start-up
+                // problems
+                if (Pstream::master())  //fileHandler().comm()))
+                {
+                    const auto myProci = UPstream::myProcNo();  //comm()
+                    const auto& procs = UPstream::procID
+                    (
+                        UPstream::worldComm
+                    );
+                    const bool oldParRun = Pstream::parRun(false);
+                    for (const auto proci : procs)
+                    {
+                        if
+                        (
+                           !haveMesh[proci]
+                         && meshDir[proci] != meshDir[myProci]
+                        )
+                        {
+                            Info<< "Deleting mesh dir:" << meshDir[proci]
+                                << endl;
+                            rmDir(meshDir[proci]);
+                        }
+                    }
+
+                    // Remove empty directory
+                    removeEmptyDirs(mesh.time().path());
+
+                    Pstream::parRun(oldParRun);
+                }
+            }
+
 
             if (Pstream::master() && decompose)
             {
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
                 runTime.caseName() = proc0CaseName;
+                runTime.processorCase(oldProcCase);
             }
-
-            fvMesh& mesh = meshPtr();
-
 
             const label nOldCells = mesh.nCells();
             //Pout<< "Loaded mesh : nCells:" << nOldCells
@@ -3073,6 +3367,7 @@ int main(int argc, char *argv[])
             if (Pstream::master() && decompose)
             {
                 runTime.caseName() = baseRunTime.caseName();
+                runTime.processorCase(false);
             }
             parLagrangianRedistributor::findClouds
             (
@@ -3096,13 +3391,14 @@ int main(int argc, char *argv[])
             if (Pstream::master() && decompose)
             {
                 runTime.caseName() = proc0CaseName;
+                runTime.processorCase(oldProcCase);
             }
-
 
             // Load fields, do all distribution (mesh and fields - but not
             // lagrangian fields; these are done later)
             autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
             (
+                std::move(writeHandler),
                 baseRunTime,
                 haveMesh,
                 meshSubDir,
@@ -3129,15 +3425,33 @@ int main(int argc, char *argv[])
             );
 
 
-            // Copy "uniform" data from the base directory
-            const fileName uniformDir0(baseRunTime.timePath()/"uniform");
-            if (Foam::isDir(uniformDir0))
-            {
-                Info<< "Detected additional non-decomposed files in "
-                    << uniformDir0 << endl;
-                Foam::cp(uniformDir0, runTime.timePath());
-            }
+            // Copy region-specific uniform
+            // (e.g. solid/uniform/cumulativeContErr)
+            copyUniform
+            (
+                fh,
+                decompose,
+                reconstruct,
+                oldTimeName,    // provided read time
+                mesh,           // read location is mesh (but oldTimeName)
+                mesh            // write location is mesh
+            );
         }
+
+        // Copy non-region specific uniform (e.g. uniform/time)
+        copyUniform
+        (
+            fh,
+            decompose,
+            reconstruct,
+            oldTimeName,    // provided read time
+            (               // read location
+                decompose
+              ? baseRunTime
+              : runTime
+            ),
+            runTime         // writing location
+        );
     }
 
 
