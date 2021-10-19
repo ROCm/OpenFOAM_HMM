@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -99,6 +99,24 @@ autoPtr<adjointSensitivity> adjointSensitivity::New
 
 
 // * * * * * * * * * * * * * * *  Member Functions   * * * * * * * * * * * * //
+
+const incompressibleVars& adjointSensitivity::primalVars() const
+{
+    return primalVars_;
+}
+
+
+const incompressibleAdjointVars& adjointSensitivity::adjointVars() const
+{
+    return adjointVars_;
+}
+
+
+const incompressibleAdjointSolver& adjointSensitivity::adjointSolver() const
+{
+    return adjointSolver_;
+}
+
 
 const scalarField& adjointSensitivity::calculateSensitivities()
 {

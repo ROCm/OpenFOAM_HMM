@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2019 PCOpt/NTUA
-    Copyright (C) 2013-2019 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019-2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "adjointMeshMovementSolverIncompressible.H"
+#include "incompressibleAdjointSolver.H"
+#include "fixedValueFvPatchFields.H"
 #include "subCycleTime.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,12 +72,22 @@ adjointMeshMovementSolver::adjointMeshMovementSolver
     tolerance_(-1),
     ma_
     (
-        variablesSet::autoCreateMeshMovementField
+        IOobject
         (
+            word
+            (
+                adjointSensitivity.adjointVars().useSolverNameForFields() ?
+                "ma" + adjointSensitivity.adjointSolver().solverName() :
+                "ma"
+            ),
+            mesh.time().timeName(),
             mesh,
-            "ma",
-            dimensionSet(pow3(dimLength/dimTime))
-        )
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector(pow3(dimLength/dimTime), Zero),
+        fixedValueFvPatchVectorField::typeName
     ),
     source_
     (
@@ -142,7 +154,8 @@ void adjointMeshMovementSolver::solve()
         maEqn.boundaryManipulate(ma_.boundaryFieldRef());
 
         //scalar residual = max(maEqn.solve().initialResidual());
-        scalar residual = mag(maEqn.solve().initialResidual());
+        scalar residual =
+            mag(Foam::solve(maEqn, mesh_.solverDict("ma")).initialResidual());
 
         Info<< "Max ma " << gMax(mag(ma_)()) << endl;
 
