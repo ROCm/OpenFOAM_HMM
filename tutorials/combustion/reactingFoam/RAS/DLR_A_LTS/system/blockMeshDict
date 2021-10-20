@@ -14,6 +14,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+mergeType points;   // Wedge geometry - Merge points instead of topology
+
 scale   0.001;
 
 R1X 3.99619288633;
