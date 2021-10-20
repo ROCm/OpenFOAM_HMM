@@ -63,7 +63,8 @@ Foam::decompositionConstraints::preservePatches::preservePatches
         Info<< type()
             << " : adding constraints to keep owner and (coupled) neighbour"
             << " of faces in patches " << patches_
-            << " on same processor. This only makes sense for cyclics." << endl;
+            << " on same processor. This only makes sense for cyclics"
+            << " and cyclicAMI." << endl;
     }
 }
 
@@ -81,7 +82,8 @@ Foam::decompositionConstraints::preservePatches::preservePatches
         Info<< type()
             << " : adding constraints to keep owner and (coupled) neighbour"
             << " of faces in patches " << patches_
-            << " on same processor. This only makes sense for cyclics." << endl;
+            << " on same processor. This only makes sense for cyclics"
+            << " and cyclicAMI." << endl;
     }
 }
 
@@ -143,58 +145,54 @@ void Foam::decompositionConstraints::preservePatches::apply
 {
     // If the decomposition has not enforced the constraint, do it over here.
 
-    // Synchronise decomposition on patchIDs
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    labelList destProc(mesh.nBoundaryFaces(), labelMax);
-
-    for (const polyPatch& pp : pbm)
-    {
-        const labelUList& faceCells = pp.faceCells();
-
-        forAll(faceCells, i)
-        {
-            label bFaceI = pp.start()+i-mesh.nInternalFaces();
-            destProc[bFaceI] = decomposition[faceCells[i]];
-        }
-    }
-
-    syncTools::syncBoundaryFaceList(mesh, destProc, minEqOp<label>());
-
-
-    // Override if differing
-    // ~~~~~~~~~~~~~~~~~~~~~
 
     const labelList patchIDs(pbm.patchSet(patches_).sortedToc());
 
-    label nChanged = 0;
+    // Synchronise decomposition on patchIDs
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    for (const label patchi : patchIDs)
+    label nChanged;
+
+    do
     {
-        const polyPatch& pp = pbm[patchi];
+        // Extract min coupled boundary data
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        const labelUList& faceCells = pp.faceCells();
+        labelList destProc;
+        getMinBoundaryValue(mesh, decomposition, destProc);
 
-        forAll(faceCells, i)
+
+        // Override (patchIDs only) if differing
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        nChanged = 0;
+        for (const label patchi : patchIDs)
         {
-            const label bFaceI = pp.start()+i-mesh.nInternalFaces();
+            const polyPatch& pp = pbm[patchi];
 
-            if (decomposition[faceCells[i]] != destProc[bFaceI])
+            const labelUList& faceCells = pp.faceCells();
+
+            forAll(faceCells, i)
             {
-                decomposition[faceCells[i]] = destProc[bFaceI];
-                ++nChanged;
+                const label bFacei = pp.offset()+i;
+                if (destProc[bFacei] < decomposition[faceCells[i]])
+                {
+                    decomposition[faceCells[i]] = destProc[bFacei];
+                    ++nChanged;
+                }
             }
         }
-    }
 
-    if (decompositionConstraint::debug & 2)
-    {
         reduce(nChanged, sumOp<label>());
-        Info<< type() << " : changed decomposition on " << nChanged
-            << " cells" << endl;
-    }
+
+        if (decompositionConstraint::debug & 2)
+        {
+            Info<< type() << " : changed decomposition on " << nChanged
+                << " cells" << endl;
+        }
+
+    } while (nChanged > 0);
 }
 
 
