@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,75 +140,64 @@ void Foam::decompositionConstraints::preserveFaceZones::apply
     // If the decomposition has not enforced the constraint do it over
     // here.
 
+    label nChanged;
 
-    // Synchronise decomposition on boundary
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    labelList destProc(mesh.nBoundaryFaces(), labelMax);
-
-    for (const polyPatch& pp : pbm)
+    do
     {
-        label bFacei = pp.start() - mesh.nInternalFaces();
+        // Extract min coupled boundary data
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        const labelUList& faceCells = pp.faceCells();
+        labelList destProc;
+        getMinBoundaryValue(mesh, decomposition, destProc);
 
-        for (const label celli : faceCells)
+
+        // Override if differing
+        // ~~~~~~~~~~~~~~~~~~~~~
+
+        const faceZoneMesh& fZones = mesh.faceZones();
+
+        const labelList zoneIDs(zones_.matching(fZones.names()));
+
+        nChanged = 0;
+        for (const label zonei : zoneIDs)
         {
-            destProc[bFacei] = decomposition[celli];
+            const faceZone& fz = fZones[zonei];
 
-            ++bFacei;
-        }
-    }
-
-    syncTools::syncBoundaryFaceList(mesh, destProc, minEqOp<label>());
-
-
-    // Override if differing
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    const faceZoneMesh& fZones = mesh.faceZones();
-
-    const labelList zoneIDs(zones_.matching(fZones.names()));
-
-    label nChanged = 0;
-
-    for (const label zonei : zoneIDs)
-    {
-        const faceZone& fz = fZones[zonei];
-
-        for (const label facei : fz)
-        {
-            const label own = mesh.faceOwner()[facei];
-
-            if (mesh.isInternalFace(facei))
+            for (const label facei : fz)
             {
-                const label nei = mesh.faceNeighbour()[facei];
-                if (decomposition[own] != decomposition[nei])
+                const label own = mesh.faceOwner()[facei];
+
+                if (mesh.isInternalFace(facei))
                 {
-                    decomposition[nei] = decomposition[own];
-                    ++nChanged;
+                    const label nei = mesh.faceNeighbour()[facei];
+                    if (decomposition[nei] < decomposition[own])
+                    {
+                        decomposition[own] = decomposition[nei];
+                        ++nChanged;
+                    }
                 }
-            }
-            else
-            {
-                const label bFaceI = facei-mesh.nInternalFaces();
-                if (decomposition[own] != destProc[bFaceI])
+                else
                 {
-                    decomposition[own] = destProc[bFaceI];
-                    ++nChanged;
+                    const label bFaceI = facei-mesh.nInternalFaces();
+                    if (destProc[bFaceI] < decomposition[own])
+                    {
+                        decomposition[own] = destProc[bFaceI];
+                        ++nChanged;
+                    }
                 }
             }
         }
-    }
 
-    if (decompositionConstraint::debug & 2)
-    {
         reduce(nChanged, sumOp<label>());
-        Info<< type() << " : changed decomposition on " << nChanged
-            << " cells" << endl;
-    }
+
+        if (decompositionConstraint::debug & 2)
+        {
+            reduce(nChanged, sumOp<label>());
+            Info<< type() << " : changed decomposition on " << nChanged
+                << " cells" << endl;
+        }
+
+    } while (nChanged > 0);
 }
 
 
