@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,6 @@ class SubField
     public refCount,
     public SubList<Type>
 {
-
 public:
 
     //- Component type
@@ -73,6 +72,9 @@ public:
 
 
     // Constructors
+
+        //- Default construct, zero-sized and nullptr
+        SubField() noexcept = default;
 
         //- Copy construct (shallow copy)
         inline SubField(const SubField<Type>& sfield);
@@ -170,6 +172,48 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "SubFieldI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::SubField<Type>
+Foam::Field<Type>::slice(const label pos, label len)
+{
+    if (len < 0)
+    {
+        len = (this->size() - pos);
+    }
+    return SubField<Type>(*this, len, pos);
+}
+
+
+template<class Type>
+const Foam::SubField<Type>
+Foam::Field<Type>::slice(const label pos, label len) const
+{
+    if (len < 0)
+    {
+        len = (this->size() - pos);
+    }
+    return SubField<Type>(*this, len, pos);
+}
+
+
+template<class Type>
+Foam::SubField<Type>
+Foam::Field<Type>::slice(const labelRange& range)
+{
+    return SubField<Type>(*this, range);  // with range checking
+}
+
+
+template<class Type>
+const Foam::SubField<Type>
+Foam::Field<Type>::slice(const labelRange& range) const
+{
+    return SubField<Type>(*this, range);  // with range checking
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

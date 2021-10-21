@@ -79,7 +79,7 @@ inline const Foam::labelList& Foam::ensightCells::cellIds() const
 inline const Foam::labelUList
 Foam::ensightCells::cellIds(const elemType etype) const
 {
-    return addressing()[range(etype)];
+    return addressing().slice(range(etype));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     {
         Info<< "    negative blocks: " << origBlocks.size() << nl;
 
-        for (const PDRobstacle& obs : obstacles[origBlocks])
+        for (const PDRobstacle& obs : obstacles.slice(origBlocks))
         {
             arr.addBlockage(obs, patches, -1);
         }
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
     {
         Info<< "    blocks " << interBlocks.size() << nl;
 
-        for (const PDRobstacle& obs : obstacles[interBlocks])
+        for (const PDRobstacle& obs : obstacles.slice(interBlocks))
         {
             arr.addBlockage(obs, patches, 0);
         }
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
     {
         Info<< "    positive blocks: " << origBlocks.size() << nl;
 
-        for (const PDRobstacle& obs : obstacles[origBlocks])
+        for (const PDRobstacle& obs : obstacles.slice(origBlocks))
         {
             arr.addBlockage(obs, patches, 1);
         }

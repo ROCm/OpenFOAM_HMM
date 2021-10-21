@@ -37,16 +37,17 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class T>
-Foam::labelRange Foam::UList<T>::validateRange(const labelRange& range) const
+Foam::labelRange
+Foam::UList<T>::validateRange(const labelRange& requestedRange) const
 {
-    const labelRange slice = range.subset0(this->size());
+    const labelRange range(requestedRange.subset0(this->size()));
 
     #ifdef FULLDEBUG
-    this->checkStart(slice.start());
-    this->checkSize(slice.start() + slice.size());
+    this->checkStart(range.start());
+    this->checkSize(range.start() + range.size());
     #endif
 
-    return slice;
+    return range;
 }
 
 
@@ -163,24 +164,6 @@ void Foam::UList<T>::deepCopy(const IndirectListBase<T, Addr>& list)
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range)
-{
-    const labelRange slice = validateRange(range);
-
-    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
-}
-
-
-template<class T>
-const Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range) const
-{
-    const labelRange slice = validateRange(range);
-
-    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
-}
-
 
 template<class T>
 void Foam::UList<T>::operator=(const T& val)

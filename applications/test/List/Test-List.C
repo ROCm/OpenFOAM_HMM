@@ -48,7 +48,9 @@ See also
 #include "scalarList.H"
 #include "HashOps.H"
 #include "ListOps.H"
+#include "IndirectList.H"
 #include "SubList.H"
+#include "SliceList.H"
 #include "ListPolicy.H"
 
 #include <list>
@@ -344,7 +346,7 @@ int main(int argc, char *argv[])
         labelList longLabelList = identity(25);
         reverse(longLabelList);
 
-        FixedList<label, 6> fixedLabelList{0,1,2,3,4,5};
+        FixedList<label, 6> fixedLabelList({0,1,2,3,4,5});
         const labelList constLabelList = identity(25);
 
         Info<< "full-list: " << flatOutput(longLabelList) << nl;
@@ -352,6 +354,36 @@ int main(int argc, char *argv[])
         labelRange range1(-15, 25);
         Info<<"sub range:" << range1 << "=";
         Info<< SubList<label>(longLabelList, range1) << nl;
+
+        {
+            // A valid range
+            const labelRange subset(4, 5);
+
+            // Assign some values
+            longLabelList.slice(subset) = identity(subset.size());
+
+            Info<<"assigned identity in range:" << subset
+                << "=> " << flatOutput(longLabelList) << nl;
+
+            labelList someList(identity(24));
+
+            longLabelList.slice(subset) =
+                SliceList<label>(someList, sliceRange(8, subset.size(), 2));
+
+            Info<<"assigned sliced/stride in range:" << subset
+                << "=> " << flatOutput(longLabelList) << nl;
+
+            // Does not work - need a reference, not a temporary
+            // Foam::reverse(longLabelList[subset]);
+
+            {
+                auto sub(longLabelList.slice(subset));
+                Foam::reverse(sub);
+            }
+
+            Info<<"reversed range:" << subset
+                << "=> " << flatOutput(longLabelList) << nl;
+        }
 
         labelRange range2(7, 8);
         Info<<"sub range:" << range2 << "=";
@@ -368,29 +400,29 @@ int main(int argc, char *argv[])
         // > constLabelList[labelRange(23,5)] = 5;
 
         // Check correct overlaps
-        longLabelList[labelRange(-10, 12)] = 200;
-        longLabelList[{18,3}] = 100;
-        longLabelList[{23,3}] = 400;
+        longLabelList.slice(labelRange(-10, 12)) = 200;
+        longLabelList.slice({18,3}) = 100;
+        longLabelList.slice({23,3}) = 400;
         // and complete misses
-        longLabelList[{500,50}] = 100;
+        longLabelList.slice({500,50}) = 100;
 
         // -ve size suppressed by internal 'validateRange' = no-op
-        longLabelList[{5,-5}] = 42;
-        longLabelList[{21,100}] = 42;
+        longLabelList.slice({5,-5}) = 42;
+        longLabelList.slice({21,100}) = 42;
 
         //Good: does not compile
-        //> longLabelList[labelRange(20,50)] = constLabelList;
+        longLabelList.slice(labelRange(20,50)) = constLabelList;
 
         //Good: does not compile
         // longLabelList[labelRange(20,50)] = fixedLabelList;
 
-        Info<< "updated: " << constLabelList[labelRange(23,5)] << nl;
+        Info<< "updated: " << constLabelList.slice(labelRange(23,5)) << nl;
         Info<< "updated: " << flatOutput(longLabelList) << nl;
 
-        //Nope: sort(longLabelList[labelRange(18,5)]);
+        //Nope: sort(longLabelList.slice(labelRange(18,5)));
         {
             // Instead
-            UList<label> sub = longLabelList[labelRange(8)];
+            auto sub = longLabelList.slice(labelRange(8));
             sort(sub);
         }
         Info<< "sub-sorted: " << flatOutput(longLabelList) << nl;

@@ -43,6 +43,7 @@ SourceFiles
 #define SubList_H
 
 #include "List.H"
+#include "FixedList.H"
 #include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,14 +79,21 @@ public:
 
     // Generated Methods
 
-        //- Copy construct
-        SubList(const SubList&) = default;
+        //- Default construct, zero-sized and nullptr
+        SubList() noexcept = default;
+
+        //- Copy construct, shallow copy
+        SubList(const SubList&) noexcept = default;
 
 
     // Constructors
 
         //- Construct from UList, the entire size
         inline explicit SubList(const UList<T>& list);
+
+        //- Construct from FixedList, the entire size
+        template<unsigned N>
+        inline explicit SubList(const FixedList<T, N>& list);
 
         //- Construct from UList and sub-list size, start at 0
         inline SubList
@@ -150,6 +158,48 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "SubListI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::SubList<Type>
+Foam::UList<Type>::slice(const label pos, label len)
+{
+    if (len < 0)
+    {
+        len = (this->size() - pos);
+    }
+    return SubList<Type>(*this, len, pos);
+}
+
+
+template<class Type>
+const Foam::SubList<Type>
+Foam::UList<Type>::slice(const label pos, label len) const
+{
+    if (len < 0)
+    {
+        len = (this->size() - pos);
+    }
+    return SubList<Type>(*this, len, pos);
+}
+
+
+template<class Type>
+Foam::SubList<Type>
+Foam::UList<Type>::slice(const labelRange& range)
+{
+    return SubList<Type>(*this, range);  // with range checking
+}
+
+
+template<class Type>
+const Foam::SubList<Type>
+Foam::UList<Type>::slice(const labelRange& range) const
+{
+    return SubList<Type>(*this, range);  // with range checking
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

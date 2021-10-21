@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class FieldMapper;
 class dictionary;
 
@@ -367,6 +367,21 @@ public:
 
         //- Write the field as a dictionary entry
         void writeEntry(const word& keyword, Ostream& os) const;
+
+
+    // Other Access
+
+        //- Return SubField slice (non-const access) - no range checking
+        SubField<Type> slice(const label pos, label len = -1);
+
+        //- Return SubField slice (const access) - no range checking
+        const SubField<Type> slice(const label pos, label len = -1) const;
+
+        //- Return SubField slice (non-const access) - with range checking
+        SubField<Type> slice(const labelRange& range);
+
+        //- Return SubField slice (const access) - with range checking
+        const SubField<Type> slice(const labelRange& range) const;
 
 
     // Member Operators

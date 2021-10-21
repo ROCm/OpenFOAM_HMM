@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 Shell Research Ltd.
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -405,7 +405,7 @@ scalar block_overlap
 
     // Sort blocks by their x-position (with sortBias)
     labelList blkOrder;
-    sortedOrder(blocks[range], blkOrder);
+    sortedOrder(blocks.slice(range), blkOrder);
 
     DynamicList<PDRobstacle> newBlocks;
 
@@ -510,7 +510,7 @@ scalar block_cylinder_overlap
 
     // Sort blocks and cylinders by their x-position (with sortBias)
     labelList blkOrder;
-    sortedOrder(blocks[range], blkOrder);
+    sortedOrder(blocks.slice(range), blkOrder);
 
     labelList cylOrder;
     sortedOrder(cylinders, cylOrder);

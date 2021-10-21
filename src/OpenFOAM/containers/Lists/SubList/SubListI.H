@@ -34,7 +34,18 @@ inline Foam::SubList<T>::SubList
     const UList<T>& list
 )
 :
-    UList<T>(list.v_, list.size())
+    UList<T>(const_cast<T*>(list.cdata()), list.size())
+{}
+
+
+template<class T>
+template<unsigned N>
+inline Foam::SubList<T>::SubList
+(
+    const FixedList<T, N>& list
+)
+:
+    UList<T>(const_cast<T*>(list.cdata()), static_cast<label>(N))
 {}
 
 
@@ -45,7 +56,7 @@ inline Foam::SubList<T>::SubList
     const label subSize
 )
 :
-    UList<T>(list.v_, subSize)
+    UList<T>(const_cast<T*>(list.cdata()), subSize)
 {
     #ifdef FULLDEBUG
     list.checkSize(subSize);
@@ -61,22 +72,10 @@ inline Foam::SubList<T>::SubList
     const label startIndex
 )
 :
-    UList<T>(&(list.v_[startIndex]), subSize)
+    UList<T>(const_cast<T*>(list.cdata() + startIndex), subSize)
 {
     #ifdef FULLDEBUG
-    // Artificially allow the start of a zero-sized subList to be
-    // one past the end of the original list.
-    if (subSize)
-    {
-        list.checkStart(startIndex);
-        list.checkSize(startIndex + subSize);
-    }
-    else
-    {
-        // Start index needs to fall between 0 and size.  One position
-        // behind the last element is allowed
-        list.checkSize(startIndex);
-    }
+    list.checkRange(startIndex, subSize);
     #endif
 }
 
@@ -88,8 +87,14 @@ inline Foam::SubList<T>::SubList
     const labelRange& range
 )
 :
-    SubList<T>(list.validateRange(range), list)
-{}
+    SubList<T>(range.subset0(list.size()), list)
+{
+    #ifdef FULLDEBUG
+    // The subset0() above always produces valid ranges but want to check
+    // that the input itself was valid
+    list.checkRange(range.start(), range.size());
+    #endif
+}
 
 
 template<class T>

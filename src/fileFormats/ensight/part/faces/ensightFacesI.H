@@ -85,7 +85,7 @@ inline const Foam::labelList& Foam::ensightFaces::faceIds() const noexcept
 inline const Foam::labelUList
 Foam::ensightFaces::faceIds(const elemType etype) const
 {
-    return addressing()[range(etype)];
+    return addressing().slice(range(etype));
 }
 
 
@@ -111,7 +111,7 @@ Foam::ensightFaces::faceOrder() const noexcept
 inline const Foam::labelUList
 Foam::ensightFaces::faceOrder(const elemType etype) const
 {
-    return faceOrder_[range(etype)];
+    return faceOrder_.slice(range(etype));
 }
 
 

@@ -119,8 +119,7 @@ protected:
 
         //- Return a validated (start,size) subset range, which means that it
         //- always addresses a valid section of the list.
-        labelRange validateRange(const labelRange& range) const;
-
+        labelRange validateRange(const labelRange& requestedRange) const;
 
         //- No copy assignment (default: shallow copy)
         //
@@ -230,7 +229,7 @@ public:
         inline constexpr UList() noexcept;
 
         //- Construct from components
-        inline UList(T* __restrict__ v, label size) noexcept;
+        inline UList(T* __restrict__ v, const label len) noexcept;
 
 
     // Member Functions
@@ -302,6 +301,9 @@ public:
         //- Check size is within valid range [0,size]
         inline void checkSize(const label size) const;
 
+        //- Check that start and length define a valid range
+        inline void checkRange(const label start, const label len) const;
+
         //- Check index is within valid range [0,size)
         inline void checkIndex(const label i) const;
 
@@ -347,15 +349,34 @@ public:
 
     // Copy
 
-        //- Copy the pointer held by the given UList
+        //- Copy the pointer and size held by the given UList
         inline void shallowCopy(const UList<T>& list);
 
-        //- Copy elements of the given UList
+        //- Copy elements of the given UList. Sizes must match!
         void deepCopy(const UList<T>& list);
 
-        //- Copy elements of the given indirect list
+        //- Copy elements of the given indirect list. Sizes must match!
         template<class Addr>
         void deepCopy(const IndirectListBase<T, Addr>& list);
+
+
+    // Other Access
+
+        //- Return SubList slice (non-const access) - no range checking
+        SubList<T> slice(const label pos, label len = -1);
+
+        //- Return SubList slice (const access) - no range checking
+        const SubList<T> slice(const label pos, label len = -1) const;
+
+        //- Return SubList slice (non-const access) - with range checking.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        SubList<T> slice(const labelRange& range);
+
+        //- Return SubList slice (const access) - with range checking.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const SubList<T> slice(const labelRange& range) const;
 
 
     // Member Operators
@@ -364,19 +385,9 @@ public:
         inline T& operator[](const label i);
 
         //- Return element of constant UList
-        //  Note that the bool specialization adds lazy evaluation so reading
-        //  an out-of-range element returns false without any ill-effects
+        //  \note bool specialization adds lazy evaluation so reading an
+        //       out-of-range element returns false without ill-effects
         inline const T& operator[](const label i) const;
-
-        //- Return (start,size) subset from UList with non-const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        UList<T> operator[](const labelRange& range);
-
-        //- Return (start,size) subset from UList with const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        const UList<T> operator[](const labelRange& range) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
@@ -659,7 +670,7 @@ struct accessOp
 {
     const T& operator()(const T& obj) const
     {
-        return obj;
+        return obj;  // Default is pass-through
     }
 };
 
@@ -668,7 +679,7 @@ struct accessOp
 template<class T>
 struct emptyOp
 {
-    inline bool operator()(const T& obj) const
+    bool operator()(const T& obj) const
     {
         return obj.empty();
     }
@@ -679,7 +690,7 @@ struct emptyOp
 template<class T>
 struct sizeOp
 {
-    inline label operator()(const T& obj) const
+    label operator()(const T& obj) const
     {
         return obj.size();
     }
