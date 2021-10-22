@@ -187,6 +187,44 @@ bool Foam::RASModel<BasicTurbulenceModel>::read()
     return false;
 }
 
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::RASModel<BasicTurbulenceModel>::epsilon() const
+{
+    const scalar Cmu = 0.09;
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        Cmu*this->k()*this->omega()
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::RASModel<BasicTurbulenceModel>::omega() const
+{
+    const scalar betaStar = 0.09;
+    const dimensionedScalar k0(sqr(dimLength/dimTime), SMALL);
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        this->epsilon()/(betaStar*(this->k() + k0))
+    );
+}
+
 
 template<class BasicTurbulenceModel>
 void Foam::RASModel<BasicTurbulenceModel>::correct()

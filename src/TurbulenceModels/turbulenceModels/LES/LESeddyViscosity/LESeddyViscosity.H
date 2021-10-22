@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,13 +69,6 @@ class LESeddyViscosity
         void operator=(const LESeddyViscosity&) = delete;
 
 
-protected:
-
-    // Protected data
-
-        dimensionedScalar Ce_;
-
-
 public:
 
     typedef typename BasicTurbulenceModel::alphaField alphaField;
@@ -107,12 +100,6 @@ public:
 
         //- Read model coefficients if they have changed
         virtual bool read();
-
-        //- Return sub-grid dissipation rate
-        virtual tmp<volScalarField> epsilon() const;
-
-        //- Return sub-grid specific dissipation rate
-        virtual tmp<volScalarField> omega() const;
 };
 
 

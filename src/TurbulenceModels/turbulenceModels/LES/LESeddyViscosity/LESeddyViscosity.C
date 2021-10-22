@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LESeddyViscosity.H"
-#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,16 +60,6 @@ LESeddyViscosity<BasicTurbulenceModel>::LESeddyViscosity
         phi,
         transport,
         propertiesName
-    ),
-
-    Ce_
-    (
-        dimensioned<scalar>::getOrAddToDict
-        (
-            "Ce",
-            this->coeffDict_,
-            1.048
-        )
     )
 {}
 
@@ -82,63 +71,10 @@ bool LESeddyViscosity<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<LESModel<BasicTurbulenceModel>>::read())
     {
-        Ce_.readIfPresent(this->coeffDict());
-
         return true;
     }
 
     return false;
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::epsilon() const
-{
-    tmp<volScalarField> tk(this->k());
-
-    tmp<volScalarField> tepsilon
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            Ce_*tk()*sqrt(tk())/this->delta(),
-            zeroGradientFvPatchField<scalar>::typeName
-        )
-    );
-    volScalarField& epsilon = tepsilon.ref();
-    epsilon.correctBoundaryConditions();
-
-    return tepsilon;
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> LESeddyViscosity<BasicTurbulenceModel>::omega() const
-{
-    tmp<volScalarField> tk(this->k());
-    tmp<volScalarField> tepsilon(this->epsilon());
-
-    auto tomega = tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_
-        ),
-        tepsilon()/(0.09*tk())
-    );
-    auto& omega = tomega.ref();
-    omega.correctBoundaryConditions();
-
-    return tomega;
 }
 
 
