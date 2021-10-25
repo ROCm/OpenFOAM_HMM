@@ -346,6 +346,36 @@ void Foam::Matrix<Form, Type>::resize(const label m, const label n)
 
 
 template<class Form, class Type>
+void Foam::Matrix<Form, Type>::resize_nocopy(const label mrow, const label ncol)
+{
+    if (mrow == mRows_ && ncol == nCols_)
+    {
+        return;
+    }
+
+    const label oldLen = (mRows_ * nCols_);
+
+    const label newLen = (mrow * ncol);
+
+    if (oldLen == newLen)
+    {
+        // Shallow resize is enough
+        mRows_ = mrow;
+        nCols_ = ncol;
+    }
+    else
+    {
+        this->clear();
+
+        mRows_ = mrow;
+        nCols_ = ncol;
+
+        this->doAlloc();
+    }
+}
+
+
+template<class Form, class Type>
 void Foam::Matrix<Form, Type>::round(const scalar tol)
 {
     for (Type& val : *this)

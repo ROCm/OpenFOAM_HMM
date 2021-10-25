@@ -346,6 +346,16 @@ inline void Foam::FixedList<T, N>::resize(const label n)
     #endif
 }
 
+
+template<class T, unsigned N>
+inline void Foam::FixedList<T, N>::resize_nocopy(const label n)
+{
+    #ifdef FULLDEBUG
+    checkSize(n);
+    #endif
+}
+
+
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::fill(const T& val)
 {

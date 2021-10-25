@@ -114,11 +114,7 @@ public:
 
     // Sizing
 
-        //- Alter the size of the underlying storage.
-        inline void setCapacity(const label newCapacity);
-
         //- Reserve allocation space for at least this size.
-        //  Never shrinks the allocated size, use setCapacity() for that.
         inline void reserve(const label len);
 
         //- Alter the addressed list size.

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,19 @@ Foam::label Foam::Detail::PtrListDetail<T>::findNull() const
     }
 
     return -1;
+}
+
+
+template<class T>
+void Foam::Detail::PtrListDetail<T>::setNull()
+{
+    List<T*>& ptrs = *this;
+    const label len = ptrs.size();
+
+    for (label i=0; i<len; ++i)
+    {
+        ptrs[i] = nullptr;
+    }
 }
 
 

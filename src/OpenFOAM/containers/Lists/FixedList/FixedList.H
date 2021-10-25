@@ -299,6 +299,9 @@ public:
         inline void resize(const label n);
 
         //- Dummy function, to make FixedList consistent with List
+        inline void resize_nocopy(const label n);
+
+        //- Dummy function, to make FixedList consistent with List
         void setSize(const label n) { this->resize(n); }
 
         //- Assign all entries to the given value

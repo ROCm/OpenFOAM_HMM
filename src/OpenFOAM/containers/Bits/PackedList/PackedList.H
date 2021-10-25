@@ -290,7 +290,7 @@ public:
         inline bool empty() const noexcept;
 
         //- The number of elements that can be stored with reallocating
-        inline label capacity() const;
+        inline label capacity() const noexcept;
 
         //- True if all entries have identical values, and list is non-empty
         bool uniform() const;
@@ -353,17 +353,20 @@ public:
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
-        inline void setCapacity(const label nElem);
+        inline void setCapacity(const label numElem);
 
         //- Reset addressable list size, does not shrink the allocated size.
         //  Optionally specify a value for new elements.
-        inline void resize(const label nElem, const unsigned int val = 0u);
+        inline void resize(const label numElem, const unsigned int val = 0u);
+
+        //- Currently identical to resize. Subject to future change (Oct-2021)
+        inline void resize_nocopy(const label numElem);
 
         //- Reserve allocation space for at least this size.
         //  Never shrinks the allocated size.
         //  The list size is adjusted as per DynamicList with
         //  SizeInc=0, SizeMult=2, SizeDiv=1
-        inline void reserve(const label nElem);
+        inline void reserve(const label numElem);
 
         //- Clear the list, i.e. set addressable size to zero.
         //  Does not adjust the underlying storage

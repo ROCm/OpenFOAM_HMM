@@ -357,6 +357,9 @@ public:
         //- Change Matrix dimensions, preserving the elements
         void resize(const label m, const label n);
 
+        //- Change Matrix dimensions \em without preserving existing content
+        void resize_nocopy(const label mrow, const label ncol);
+
         //- Change Matrix dimensions, preserving the elements
         inline void setSize(const label m, const label n);
 
@@ -365,6 +368,7 @@ public:
 
         //- Round elements with magnitude smaller than tol (SMALL) to zero
         void round(const scalar tol = SMALL);
+
 
     // Operations
 

@@ -37,54 +37,57 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T>
-void Foam::List<T>::doResize(const label newSize)
+void Foam::List<T>::doResize(const label len)
 {
-    if (newSize < 0)
+    if (len == this->size_)
     {
-        FatalErrorInFunction
-            << "bad size " << newSize
-            << abort(FatalError);
+        return;
     }
 
-    if (newSize != this->size_)
+    if (len > 0)
     {
-        if (newSize > 0)
+        // With sign-check to avoid spurious -Walloc-size-larger-than
+        T* nv = new T[len];
+
+        const label overlap = min(this->size_, len);
+
+        if (overlap)
         {
-            // With sign-check to avoid spurious -Walloc-size-larger-than
-            T* nv = new T[newSize];
-
-            const label overlap = min(this->size_, newSize);
-
-            if (overlap)
+            #ifdef USEMEMCPY
+            if (is_contiguous<T>::value)
             {
-                #ifdef USEMEMCPY
-                if (is_contiguous<T>::value)
+                std::memcpy
+                (
+                    static_cast<void*>(nv), this->v_, overlap*sizeof(T)
+                );
+            }
+            else
+            #endif
+            {
+                List_ACCESS(T, *this, vp);
+                for (label i = 0; i < overlap; ++i)
                 {
-                    std::memcpy
-                    (
-                        static_cast<void*>(nv), this->v_, overlap*sizeof(T)
-                    );
-                }
-                else
-                #endif
-                {
-                    // No speedup observed for copy assignment on simple types
-                    List_ACCESS(T, *this, vp);
-                    for (label i = 0; i < overlap; ++i)
-                    {
-                        nv[i] = std::move(vp[i]);
-                    }
+                    nv[i] = std::move(vp[i]);
                 }
             }
+        }
 
-            clear();
-            this->size_ = newSize;
-            this->v_ = nv;
-        }
-        else
+        clear();
+        this->size_ = len;
+        this->v_ = nv;
+    }
+    else
+    {
+        // Or only #ifdef FULLDEBUG
+        if (len < 0)
         {
-            clear();
+            FatalErrorInFunction
+                << "bad size " << len
+                << abort(FatalError);
         }
+        // #endif
+
+        clear();
     }
 }
 
@@ -257,7 +260,7 @@ Foam::List<T>::List(List<T>& a, bool reuse)
 {
     if (reuse)
     {
-        // swap content
+        // Steal content
         this->v_ = a.v_;
         a.v_ = nullptr;
         a.size_ = 0;
@@ -435,15 +438,16 @@ Foam::List<T>::~List()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::List<T>::resize(const label newSize, const T& val)
+void Foam::List<T>::resize(const label len, const T& val)
 {
-    const label oldSize = this->size_;
-    this->doResize(newSize);
+    label idx = this->size_;
+    this->doResize(len);
 
     List_ACCESS(T, *this, vp);
-    for (label i = oldSize; i < newSize; ++i)
+    while (idx < len)
     {
-        vp[i] = val;
+        vp[idx] = val;
+        ++idx;
     }
 }
 
@@ -562,7 +566,7 @@ template<class T>
 template<unsigned N>
 void Foam::List<T>::operator=(const FixedList<T, N>& list)
 {
-    reAlloc(label(N));
+    reAlloc(static_cast<label>(N));
 
     T* iter = this->begin();
 

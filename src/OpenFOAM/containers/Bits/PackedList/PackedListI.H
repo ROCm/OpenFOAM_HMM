@@ -388,9 +388,19 @@ inline bool Foam::PackedList<Width>::empty() const noexcept
 
 
 template<unsigned Width>
-inline Foam::label Foam::PackedList<Width>::capacity() const
+inline Foam::label Foam::PackedList<Width>::capacity() const noexcept
 {
     return elem_per_block * blocks_.size();
+}
+
+
+template<unsigned Width>
+inline void Foam::PackedList<Width>::resize_nocopy
+(
+    const label numElem
+)
+{
+    this->resize(numElem);
 }
 
 
@@ -406,7 +416,7 @@ inline void Foam::PackedList<Width>::resize
     const label oldSize = size();
     size_ = newSize;
 
-    if (oldSize < size())
+    if (oldSize < newSize)
     {
         // Fill new elements or newly exposed elements
         if (val)
@@ -438,7 +448,7 @@ inline void Foam::PackedList<Width>::resize
             clear_trailing_bits();
         }
     }
-    else if (size() < oldSize)
+    else if (newSize < oldSize)
     {
         // The list is now shorter than before, so we zero assign the unused
         // blocks and any trailing junk. This costs slightly here, but make

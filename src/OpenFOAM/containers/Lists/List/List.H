@@ -43,8 +43,8 @@ SourceFiles
 #ifndef List_H
 #define List_H
 
-#include "UList.H"
 #include "autoPtr.H"
+#include "UList.H"
 #include "SLListFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -83,14 +83,16 @@ class List
         inline void doAlloc();
 
         //- Reallocate list storage to the given size
+        //  Discards old storage (if any). Does not copy old contents
         inline void reAlloc(const label len);
 
-        //- Copy list of given type.
+        //- Copy all list contents
         template<class List2>
         inline void copyList(const List2& list);
 
-        //- Change allocation size - backend for resize.
-        void doResize(const label newSize);
+        //- Change allocation size of List, retaining old contents.
+        //  Backend for resize
+        void doResize(const label len);
 
         //- Construct given begin/end iterators and number of elements
         //  Since the size is provided, the end iterator is actually ignored.
@@ -206,10 +208,16 @@ public:
 
         //- Adjust allocated size of list.
         //  The boolList version fills new memory with false.
-        inline void resize(const label newLen);
+        inline void resize(const label len);
 
         //- Adjust allocated size of list and set val for new elements
-        void resize(const label newLen, const T& val);
+        void resize(const label len, const T& val);
+
+        //- Adjust allocated size of list \b without necessarily
+        //  retaining old content.
+        //  If no reallocation is required, the contents remain untouched.
+        //  Otherwise the contents will be uninitialized.
+        inline void resize_nocopy(const label len);
 
         //- Alias for resize()
         void setSize(const label n) { this->resize(n); }
@@ -221,15 +229,19 @@ public:
         // Edit
 
             //- Append an element at the end of the list
+            //  If this is frequently required, consider a DynamicList
             inline void append(const T& val);
 
             //- Move append an element at the end of the list
+            //  If this is frequently required, consider a DynamicList
             inline void append(T&& val);
 
             //- Append a List to the end of this list
+            //  If this is frequently required, consider a DynamicList
             inline void append(const UList<T>& list);
 
             //- Append IndirectList contents at the end of this list
+            //  If this is frequently required, consider a DynamicList
             template<class Addr>
             inline void append(const IndirectListBase<T, Addr>& list);
 

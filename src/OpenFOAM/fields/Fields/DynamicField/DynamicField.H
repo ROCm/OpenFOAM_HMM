@@ -39,7 +39,7 @@ SourceFiles
 #define DynamicField_H
 
 #include "Field.H"
-#include <type_traits>
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +77,21 @@ class DynamicField
         //- Copy assignment from another list
         template<class ListType>
         inline void assignDynList(const ListType& list);
+
+        //- Alter the size of the underlying storage
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doCapacity(const bool nocopy, const label len);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doReserve(const bool nocopy, const label len);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doResize(const bool nocopy, const label len);
+
 
 public:
 
@@ -128,6 +143,10 @@ public:
         template<int AnySizeMin>
         inline DynamicField(DynamicField<T, AnySizeMin>&& content);
 
+        //- Move construct from DynamicList
+        template<int AnySizeMin>
+        inline DynamicField(DynamicList<T, AnySizeMin>&& list);
+
         //- Construct by 1 to 1 mapping from the given field
         inline DynamicField
         (
@@ -178,18 +197,44 @@ public:
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
         //  Use this or reserve() in combination with append().
-        inline void setCapacity(const label newCapacity);
+        inline void setCapacity(const label len);
 
-        //- Reserve allocation space for at least this size.
+        //- Alter the size of the underlying storage,
+        //- \em without retaining old content.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  remain otherwise untouched.
+        inline void setCapacity_nocopy(const label len);
+
+        //- Change the value for the list capacity directly (ADVANCED, UNSAFE)
+        //- Does not perform any memory management or resizing.
+        inline void setCapacity_unsafe(const label len) noexcept;
+
+        //- Reserve allocation space for at least this size, allocating new
+        //- space if required and \em retaining old content.
         //  Never shrinks the allocated size, use setCapacity() for that.
         inline void reserve(const label len);
 
-        //- Alter addressable size.
-        //  New space will be allocated if required.
-        inline void resize(const label newLen);
+        //- Reserve allocation space for at least this size, allocating new
+        //- space if required \em without retaining old content.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        inline void reserve_nocopy(const label len);
+
+        //- Alter addressable list size, allocating new space if required
+        //- while \em recovering old content.
+        //  If no reallocation is required, the contents remain untouched.
+        //  Otherwise new entries will be uninitialized.
+        //  Use this to resize the list prior to using the operator[] for
+        //  setting values (as per List usage).
+        inline void resize(const label len);
 
         //- Alter addressable size and fill new space with constant value
-        inline void resize(const label newLen, const T& val);
+        inline void resize(const label len, const T& val);
+
+        //- Alter addressable list size, allocating new space if required
+        //- \em without necessarily recovering old content.
+        //  If no reallocation is required, the contents remain untouched.
+        //  Otherwise all entries will be uninitialized.
+        inline void resize_nocopy(const label len);
 
         //- Alias for resize()
         void setSize(const label n) { this->resize(n); }
@@ -209,6 +254,9 @@ public:
         inline label expandStorage() noexcept;
 
         //- Shrink the allocated space to the number of elements used.
+        inline void shrinkStorage();
+
+        //- Shrink the allocated space to the number of elements used.
         //  Returns a reference to the DynamicField.
         inline DynamicField<T, SizeMin>& shrink();
 
@@ -218,6 +266,10 @@ public:
         //- Swap content, independent of sizing parameter
         template<int AnySizeMin>
         inline void swap(DynamicField<T, AnySizeMin>& other);
+
+        //- Swap content with DynamicList, independent of sizing parameter
+        template<int AnySizeMin>
+        inline void swap(DynamicList<T, AnySizeMin>& other);
 
         //- Transfer the parameter contents into this
         inline void transfer(List<T>& list);
@@ -270,6 +322,10 @@ public:
 
         //- Move assignment
         inline void operator=(List<T>&& list);
+
+        //- Move assignment
+        template<int AnySizeMin>
+        inline void operator=(DynamicList<T, AnySizeMin>&& list);
 
         //- Move assignment
         inline void operator=(DynamicField<T, SizeMin>&& list);
