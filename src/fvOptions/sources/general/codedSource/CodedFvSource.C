@@ -79,8 +79,29 @@ void Foam::fv::CodedSource<Type>::prepare
 
     //dynCode.removeFilterVariable("code");
     dynCode.setFilterVariable("codeCorrect", codeCorrect_);
-    dynCode.setFilterVariable("codeAddSup", codeAddSup_);
     dynCode.setFilterVariable("codeConstrain", codeConstrain_);
+
+    // Missing codeAddSup or codeAddSupRho handled on input,
+    // but also check for empty() and inject "NotImplemented" to avoid
+    // cases where the user has specified or used the wrong one
+    // (ie, compresssible vs incompressible)
+
+    if (codeAddSup_.empty())
+    {
+        dynCode.setFilterVariable("codeAddSup", "NotImplemented");
+    }
+    else
+    {
+        dynCode.setFilterVariable("codeAddSup", codeAddSup_);
+    }
+    if (codeAddSupRho_.empty())
+    {
+        dynCode.setFilterVariable("codeAddSupRho", "NotImplemented");
+    }
+    else
+    {
+        dynCode.setFilterVariable("codeAddSupRho", codeAddSupRho_);
+    }
 
     // Compile filtered C template
     dynCode.addCompileFile(codeTemplateC);
@@ -154,7 +175,18 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
     auto& ctx = codedBase::codeContext();
 
     ctx.readEntry("codeCorrect", codeCorrect_);
-    ctx.readEntry("codeAddSup", codeAddSup_);
+
+    // Need one or both codeAddSup/codeAddSupRho.
+    // - do precheck and let the usual mechanism fail
+
+    const bool mandatory =
+    (
+        !ctx.findEntry("codeAddSup")
+     && !ctx.findEntry("codeAddSupRho")
+    );
+
+    ctx.readEntry("codeAddSup", codeAddSup_, mandatory);
+    ctx.readEntry("codeAddSupRho", codeAddSupRho_, mandatory);
 
     // ctx.readEntry("codeConstrain", codeConstrain_);
     ctx.readEntry  // Compatibility
@@ -233,7 +265,7 @@ void Foam::fv::CodedSource<Type>::addSup
 {
     DebugInfo
         << "fv::CodedSource<" << pTraits<Type>::typeName
-        << ">::addSup for source " << name_ << endl;
+        << ">::addSup(rho) for source " << name_ << endl;
 
     updateLibrary(name_);
     redirectOption().addSup(rho, eqn, fieldi);

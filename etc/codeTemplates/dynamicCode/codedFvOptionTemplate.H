@@ -35,7 +35,14 @@ Description
 
     codeAddSup
     (
-        fvMatrix<Type}>& eqn,
+        fvMatrix<Type>& eqn,
+        const label fieldi
+    )
+
+    codeAddSupRho
+    (
+        const volScalarField& rho,
+        fvMatrix<Type>& eqn,
         const label fieldi
     )
 

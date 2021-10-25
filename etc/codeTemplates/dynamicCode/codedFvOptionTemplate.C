@@ -147,7 +147,7 @@ ${typeName}FvOption${SourceType}::addSup
         Info<< "${typeName}FvOption${SourceType}::addSup()\n";
     }
 
-//{{{ begin code
+//{{{ begin code - warn/fatal if not implemented?
     ${codeAddSup}
 //}}} end code
 }
@@ -163,11 +163,11 @@ ${typeName}FvOption${SourceType}::addSup
 {
     if (${verbose:-false})
     {
-        Info<< "${typeName}FvOption${SourceType}::addSup()\n";
+        Info<< "${typeName}FvOption${SourceType}::addSup(rho)\n";
     }
 
-//{{{ begin code
-    ${codeAddSup}
+//{{{ begin code - warn/fatal if not implemented?
+    ${codeAddSupRho}
 //}}} end code
 }
 
