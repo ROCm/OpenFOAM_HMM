@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,5 +34,8 @@ License
 
 #include "kEpsilonLopesdaCosta.H"
 makeRASModel(kEpsilonLopesdaCosta);
+
+#include "kL.H"
+makeRASModel(kL);
 
 // ************************************************************************* //
