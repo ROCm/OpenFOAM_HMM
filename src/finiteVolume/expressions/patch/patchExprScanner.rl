@@ -57,8 +57,7 @@ namespace Foam
 //- An {int, c_str} enum pairing for field types
 #define FIELD_PAIR(Fld,T)   { TOKEN_OF(T), Fld::typeName.c_str() }
 
-#undef HAS_LOOKBEHIND_TOKENS
-#ifdef HAS_LOOKBEHIND_TOKENS
+#define HAS_LOOKBEHIND_TOKENS
 // Special handling for these known (stashed) look-back types
 static const Enum<int> lookBehindTokenEnums
 ({
@@ -68,7 +67,7 @@ static const Enum<int> lookBehindTokenEnums
     TOKEN_PAIR("pointZone", POINT_ZONE), TOKEN_PAIR("pointSet", POINT_SET),
     #endif
 });
-#endif
+
 
 
 // Special handling of predefined method types. Eg, .x(), .y(), ...
@@ -188,7 +187,7 @@ static int driverTokenType
     const word& ident
 )
 {
-    #if 0
+    #ifdef HAS_LOOKBEHIND_TOKENS
     // Get stashed "look-behind" to decide what type of identifier we expect
     const int lookBehind = driver_.resetStashedTokenId();
 

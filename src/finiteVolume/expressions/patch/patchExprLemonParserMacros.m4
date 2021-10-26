@@ -61,23 +61,19 @@ define([rules_driver_surface_functions],
 [dnl
 _logic_ (lhs) ::= CELL_SET LPAREN identifier (name) RPAREN .dnl
 {dnl
-    driver->reportFatal("Not implemented: " + make_obj(name));
-    lhs = nullptr;dnl
+    lhs = driver->field_cellSet(make_obj(name)).ptr();
 }dnl
 _logic_ (lhs) ::= CELL_ZONE LPAREN identifier (name) RPAREN .dnl
 {dnl
-    driver->reportFatal("Not implemented: " + make_obj(name));
-    lhs = nullptr;dnl
+    lhs = driver->field_cellZone(make_obj(name)).ptr();
 }dnl
 _logic_ (lhs) ::= FACE_SET LPAREN identifier (name) RPAREN .dnl
 {dnl
-    driver->reportFatal("Not implemented: " + make_obj(name));
-    lhs = nullptr;dnl
+    lhs = driver->field_faceSet(make_obj(name)).ptr();
 }dnl
 _logic_ (lhs) ::= FACE_ZONE LPAREN identifier (name) RPAREN .dnl
 {dnl
-    driver->reportFatal("Not implemented: " + make_obj(name));
-    lhs = nullptr;dnl
+    lhs = driver->field_faceZone(make_obj(name)).ptr();
 }dnl
 dnl
 rule_driver_nullary(_scalar_, FACE_AREA, field_faceArea)dnl

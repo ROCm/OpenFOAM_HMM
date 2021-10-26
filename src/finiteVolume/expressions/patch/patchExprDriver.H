@@ -111,6 +111,21 @@ protected:
 
     // Protected Member Functions
 
+        //- Cell selections (as logical)
+        tmp<boolField> field_cellSelection
+        (
+            const word& name,
+            enum topoSetSource::sourceType setType
+        ) const;
+
+        //- Face selections (as logical)
+        tmp<boolField> field_faceSelection
+        (
+            const word& name,
+            enum topoSetSource::sourceType setType
+        ) const;
+
+
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
 
@@ -280,6 +295,20 @@ public:
 
         //- The patch point locations - (swak = pts)
         tmp<vectorField> field_pointField() const;
+
+
+        //- Cell selection (set)
+        inline tmp<boolField> field_cellSet(const word& name) const;
+
+        //- Cell selection (zone)
+        inline tmp<boolField> field_cellZone(const word& name) const;
+
+        //- Face selection (set)
+        inline tmp<boolField> field_faceSet(const word& name) const;
+
+        //- Face selection (zone)
+        inline tmp<boolField> field_faceZone(const word& name) const;
+
 
         //- A uniform random field
         tmp<scalarField> field_rand(label seed=0, bool gaussian=false) const;
