@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 ------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,13 +50,12 @@ bool Foam::functionObjects::log::calc()
     {
         const volScalarField& x = lookupObject<volScalarField>(fieldName_);
 
-        // Cache the current debug setting for dimensionSet
-        const bool dimensionSetDebug = dimensionSet::debug;
-
         // Switch-off dimension checking if requested
+        const bool oldDimChecking = dimensionSet::checking();
+
         if (!checkDimensions_)
         {
-            dimensionSet::debug = 0;
+            dimensionSet::checking(false);
         }
 
         bool stored = store
@@ -68,7 +67,7 @@ bool Foam::functionObjects::log::calc()
         // Reinstate dimension checking
         if (!checkDimensions_)
         {
-            dimensionSet::debug = dimensionSetDebug;
+            dimensionSet::checking(oldDimChecking);
         }
 
         return stored;

@@ -1992,7 +1992,11 @@ void Foam::checkMethod
             << abort(FatalError);
     }
 
-    if (dimensionSet::debug && fvm1.dimensions() != fvm2.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fvm1.dimensions() != fvm2.dimensions()
+    )
     {
         FatalErrorInFunction
             << "incompatible dimensions for operation "
@@ -2013,7 +2017,11 @@ void Foam::checkMethod
     const char* op
 )
 {
-    if (dimensionSet::debug && fvm.dimensions()/dimVolume != df.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fvm.dimensions()/dimVolume != df.dimensions()
+    )
     {
         FatalErrorInFunction
             << endl << "    "
@@ -2033,7 +2041,11 @@ void Foam::checkMethod
     const char* op
 )
 {
-    if (dimensionSet::debug && fvm.dimensions()/dimVolume != dt.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fvm.dimensions()/dimVolume != dt.dimensions()
+    )
     {
         FatalErrorInFunction
             << "incompatible dimensions for operation "

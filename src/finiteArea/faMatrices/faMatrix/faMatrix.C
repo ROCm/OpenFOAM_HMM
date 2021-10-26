@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1049,7 +1049,11 @@ void Foam::checkMethod
             << abort(FatalError);
     }
 
-    if (dimensionSet::debug && fam1.dimensions() != fam2.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fam1.dimensions() != fam2.dimensions()
+    )
     {
         FatalErrorInFunction
             << "incompatible dimensions for operation "
@@ -1070,7 +1074,11 @@ void Foam::checkMethod
     const char* op
 )
 {
-    if (dimensionSet::debug && fam.dimensions()/dimArea != vf.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fam.dimensions()/dimArea != vf.dimensions()
+    )
     {
         FatalErrorInFunction
             <<  "incompatible dimensions for operation "
@@ -1091,7 +1099,11 @@ void Foam::checkMethod
     const char* op
 )
 {
-    if (dimensionSet::debug && fam.dimensions()/dimArea != dt.dimensions())
+    if
+    (
+        dimensionSet::checking()
+     && fam.dimensions()/dimArea != dt.dimensions()
+    )
     {
         FatalErrorInFunction
             << "incompatible dimensions for operation "

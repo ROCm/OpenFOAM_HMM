@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class dimensionSet;
 class dimensionSets;
@@ -97,17 +97,17 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- The array of dimension exponents
         list_type exponents_;
 
 
-    // Private classes
+    // Private Classes
 
         class tokeniser
         {
-            // Private data
+            // Private Data
 
                 Istream& is_;
 
@@ -169,6 +169,24 @@ public:
 
     // Declare name of the class and its debug switch
     ClassName("dimensionSet");
+
+
+    // Static Functions
+
+        //- Turn dimension checking on/off.
+        //  \return the previous value
+        static bool checking(const bool on) noexcept
+        {
+            bool old(debug);
+            debug = static_cast<int>(on);
+            return old;
+        }
+
+        //- True if dimension checking is enabled (the usual default)
+        static bool checking() noexcept
+        {
+            return static_cast<bool>(debug);
+        }
 
 
     // Constructors

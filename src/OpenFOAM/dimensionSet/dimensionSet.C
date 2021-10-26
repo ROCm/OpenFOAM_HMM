@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,7 +202,7 @@ bool Foam::dimensionSet::operator!=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("(a = b)", *this, ds);
     }
@@ -213,7 +213,7 @@ bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("(a += b)", *this, ds);
     }
@@ -224,7 +224,7 @@ bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("(a -= b)", *this, ds);
     }
@@ -253,7 +253,7 @@ bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("min(a, b)", ds1, ds2);
     }
@@ -264,7 +264,7 @@ Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 
 Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("max(a, b)", ds1, ds2);
     }
@@ -275,7 +275,7 @@ Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 
 Foam::dimensionSet Foam::clip(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("clip(a, b)", ds1, ds2);
     }
@@ -325,7 +325,7 @@ Foam::dimensionSet Foam::pow
     const dimensionedScalar& dS
 )
 {
-    if (dimensionSet::debug && !dS.dimensions().dimensionless())
+    if (dimensionSet::checking() && !dS.dimensions().dimensionless())
     {
         FatalErrorInFunction
             << "Exponent of pow is not dimensionless" << endl
@@ -344,7 +344,7 @@ Foam::dimensionSet Foam::pow
 {
     if
     (
-        dimensionSet::debug
+        dimensionSet::checking()
      && !dS.dimensions().dimensionless()
      && !ds.dimensionless()
     )
@@ -483,7 +483,7 @@ Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 {
-    if (dimensionSet::debug && !ds.dimensionless())
+    if (dimensionSet::checking() && !ds.dimensionless())
     {
         FatalErrorInFunction
             << "Argument of trancendental function not dimensionless" << nl
@@ -496,7 +496,7 @@ Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::atan2(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("atan2(a, b)", ds1, ds2);
     }
@@ -507,7 +507,7 @@ Foam::dimensionSet Foam::atan2(const dimensionSet& ds1, const dimensionSet& ds2)
 
 Foam::dimensionSet Foam::hypot(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("hypot(a, b)", ds1, ds2);
     }
@@ -548,7 +548,7 @@ Foam::dimensionSet Foam::operator+
     const dimensionSet& ds2
 )
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("(a + b)", ds1, ds2);
     }
@@ -563,7 +563,7 @@ Foam::dimensionSet Foam::operator-
     const dimensionSet& ds2
 )
 {
-    if (dimensionSet::debug)
+    if (dimensionSet::checking())
     {
         checkDims("(a - b)", ds1, ds2);
     }

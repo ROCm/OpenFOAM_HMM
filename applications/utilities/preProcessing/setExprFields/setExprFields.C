@@ -678,7 +678,7 @@ int main(int argc, char *argv[])
     }
 
     // Disable dimension checking during operations
-    dimensionSet::debug = false;
+    dimensionSet::checking(false);
 
     #include "createNamedMesh.H"
 

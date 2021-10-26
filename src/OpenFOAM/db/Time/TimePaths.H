@@ -197,7 +197,6 @@ public:
 
         //- Search the case for the time closest to the given time
         instant findClosestTime(const scalar t) const;
-
 };
 
 

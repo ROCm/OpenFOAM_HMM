@@ -405,8 +405,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             }
 
             // Switch dimension checking off
-            const int oldDebug = dimensionSet::debug;
-            dimensionSet::debug = 0;
+            const bool oldDimChecking = dimensionSet::checking(false);
 
             // go through ALL old times
             GeomField* fp = &(fld);
@@ -418,7 +417,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             }
 
             // Restore old value of dimension checking
-            dimensionSet::debug = oldDebug;
+            dimensionSet::checking(oldDimChecking);
         }
     }
     else if (mandatory)

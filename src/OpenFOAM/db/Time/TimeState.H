@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,13 +92,13 @@ public:
             inline scalar timeOutputValue() const;
 
             //- Return current time index
-            inline label timeIndex() const;
+            inline label timeIndex() const noexcept;
 
             //- Return time step value
-            inline scalar deltaTValue() const;
+            inline scalar deltaTValue() const noexcept;
 
             //- Return old time step value
-            inline scalar deltaT0Value() const;
+            inline scalar deltaT0Value() const noexcept;
 
             //- Return time step
             inline dimensionedScalar deltaT() const;
@@ -109,12 +109,12 @@ public:
 
         // Check
 
-            //- Return true if this is a write time
-            inline bool writeTime() const;
+            //- True if this is a write time
+            inline bool writeTime() const noexcept;
 
             //- Deprecated(2016-05) return true if this is a write time.
             //  \deprecated(2016-05) - use writeTime() method
-            inline bool outputTime() const { return this->writeTime(); }
+            bool outputTime() const noexcept { return this->writeTime(); }
 };
 
 

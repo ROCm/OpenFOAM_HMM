@@ -100,7 +100,7 @@ inline dimensioned<MinMax<T>> makeDimensionedMinMax
     const dimensioned<T>& maxVal
 )
 {
-    // Dimension check when (dimensionSet::debug)
+    // Dimension check when dimensionSet::checking()
     return dimensioned<MinMax<T>>
     (
         name,
