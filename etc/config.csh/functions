@@ -27,7 +27,7 @@
 #     _foamClean     : eval call to foamCleanPath for specific shell
 #     _foamEcho      : silent/non-silent echo
 #     _foamEtc       : resolve etc files (silent or verbose)
-#     _foamAddPath   : prepend to MANPATH
+#     _foamAddPath   : prepend to PATH
 #     _foamAddMan    : prepend to MANPATH
 #     _foamAddLib    : prepend to [DY]LD_LIBRARY_PATH
 #     _foamAddLibAuto: call to lib-dir for lib64/lib resolved name

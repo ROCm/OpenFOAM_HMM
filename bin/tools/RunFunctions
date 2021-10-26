@@ -25,6 +25,12 @@
 # Basic sanity checks
 [ -d "$FOAM_TUTORIALS" ] || echo "No OpenFOAM tutorials? : $FOAM_TUTORIALS" 1>&2
 
+# Darwin workaround - SIP clearing DYLD_LIBRARY_PATH variable
+if [ -n "$FOAM_DYLD_LIBRARY_PATH" ] && [ -z "$DYLD_LIBRARY_PATH" ]
+then
+    export DYLD_LIBRARY_PATH="$FOAM_DYLD_LIBRARY_PATH"
+fi
+
 
 #------------------------------------------------------------------------------
 

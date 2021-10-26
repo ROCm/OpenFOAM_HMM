@@ -106,10 +106,13 @@ unset FOAM_INST_DIR
 unset MPI_ARCH_PATH
 unset MPI_BUFFER_SIZE
 
-# Undefine OPAL_PREFIX if set to one of the paths on foamOldDirs
-if [ -n "$foamClean" ] && [ -z "$($foamClean -env=OPAL_PREFIX $foamOldDirs)" ]
+# Cleanup mpi prefix values if set to one of the paths on foamOldDirs
+if [ -n "$foamClean" ]
 then
-    unset OPAL_PREFIX
+    # openmpi:
+    [ -z "$($foamClean -env=OPAL_PREFIX $foamOldDirs)" ] && unset OPAL_PREFIX
+    # intelmpi:
+    [ -z "$($foamClean -env=I_MPI_ROOT $foamOldDirs)" ] && unset I_MPI_ROOT
 fi
 
 #------------------------------------------------------------------------------
@@ -162,6 +165,9 @@ fi
 [ -n "$MANPATH" ] || unset MANPATH
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
 [ -n "$DYLD_LIBRARY_PATH" ] || unset DYLD_LIBRARY_PATH
+
+# Remove any shadow env variables
+unset FOAM_DYLD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases and functions
@@ -220,6 +226,6 @@ unset _of_complete_cache_
 #------------------------------------------------------------------------------
 # Intermediate variables (do as last for a clean exit code)
 
-unset cleaned foamClean foamOldDirs
+unset cleaned foamClean foamOldDirs _foamFoundDir
 
 #------------------------------------------------------------------------------

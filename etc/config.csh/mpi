@@ -49,7 +49,7 @@
 unsetenv MPI_HOME
 setenv FOAM_MPI dummy  # Fallback value
 setenv MPI_ARCH_PATH   # Empty, but defined
-set _foamMpiVersion    # Track mpi (major) version as required
+set _foamMpiVersion    # Track mpi version as required
 
 # Location for ThirdParty installations
 set _foamMpiPrefixDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
@@ -59,18 +59,28 @@ set _foamMpiWarning="openfoam (etc/config.csh/mpi) => "  # Prefix for warnings
 
 switch ("$WM_MPLIB")
 
-# The system openmpi, discover locations via <mpicc>
+# ----
+# The system openmpi, discover locations by orte-info, mpicc or orterun
+# Preserve major or full version for the naming
+case sys-openmpi[1-9]:
+case sys-openmpi-[1-9]*:
 case SYSTEMOPENMPI[1-9]:
-    # Preserve major version for the naming
-    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#^.*MPI##'`
-    #[fallthrough]
+case SYSTEMOPENMPI-[1-9]*:
+    # Preserve version or full version for the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#^.*MPI##i'`
+    #[[fallthrough]]
 
+case sys-openmpi:
 case SYSTEMOPENMPI:
     setenv FOAM_MPI "sys-openmpi${_foamMpiVersion}"
+    setenv WM_MPLIB "SYSTEMOPENMPI${_foamMpiVersion}"
+
+    # Undefine OPAL_PREFIX if set to one of the paths on foamOldDirs?
     _foamEtc -config prefs.sys-openmpi  ## Optional adjustments
 
-    # MPI_ARCH_PATH (prefs) if a valid dir, or discover via <mpicc>
+    # MPI_ARCH_PATH (prefs) if a valid dir, or need to discover
     if ( -d "$MPI_ARCH_PATH" ) then
+        _foamAddPath    "$MPI_ARCH_PATH"/bin
         _foamAddLibAuto "$MPI_ARCH_PATH"
     else
         setenv MPI_ARCH_PATH
@@ -139,8 +149,21 @@ case SYSTEMOPENMPI:
     breaksw
 
 
+# ----
+case openmpi:
+case openmpi-[1-9]*:
 case OPENMPI:
+case OPENMPI-[1-9]*:
     setenv FOAM_MPI openmpi-4.0.3
+
+    ## Add version embedded in the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`
+    if ( "$_foamMpiVersion" != "$WM_MPLIB" ) then
+        setenv FOAM_MPI "openmpi-${_foamMpiVersion}"
+        setenv WM_MPLIB "OPENMPI-${_foamMpiVersion}"
+    else
+        setenv WM_MPLIB OPENMPI
+    endif
     _foamEtc -config prefs.openmpi  ## Optional adjustments
 
     # MPI_ARCH_PATH (prefs) if a valid dir, or ThirdParty location
@@ -159,6 +182,7 @@ case OPENMPI:
     breaksw
 
 
+# ----
 # Arbitrary, user-specified mpi implementation
 # - used by spack, which populates appropriate wmake rules
 case USERMPI:
@@ -167,14 +191,18 @@ case USERMPI:
     breaksw
 
 
+# ----
 # EasyBuild handles everything via <mpicc>
 case EASYBUILDMPI:
     setenv FOAM_MPI eb-mpi
     breaksw
 
 
+# ----
+case sys-mpi:
 case SYSTEMMPI:
     setenv FOAM_MPI sys-mpi
+    setenv WM_MPLIB SYSTEMMPI
     _foamEtc -config prefs.sys-mpi  ## Optional adjustments
 
     # MPI_ARCH_PATH (prefs) or MPI_ROOT (inherited), in that order
@@ -215,8 +243,21 @@ case SYSTEMMPI:
     breaksw
 
 
+# ----
+case mpich:
+case mpich-[1-9]*:
 case MPICH:
+case MPICH-[1-9]*:
     setenv FOAM_MPI mpich-3.3
+
+    ## Add version embedded in the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`
+    if ( "$_foamMpiVersion" != "$WM_MPLIB" ) then
+        setenv FOAM_MPI "mpich-${_foamMpiVersion}"
+        setenv WM_MPLIB "MPICH-${_foamMpiVersion}"
+    else
+        setenv WM_MPLIB MPICH
+    endif
     _foamEtc -config prefs.mpich  ## Optional adjustments
 
     # MPI_ARCH_PATH (prefs) if a valid dir, or use ThirdParty location
@@ -233,6 +274,7 @@ case MPICH:
     breaksw
 
 
+# ----
 case MPICH-GM:
     setenv FOAM_MPI mpich-gm
     _foamEtc -config prefs.mpich-gm  ## Optional adjustments
@@ -253,9 +295,22 @@ case MPICH-GM:
     breaksw
 
 
+# ----
 # MVAPICH2, renamed to contain 'MPI' in its name
+case mvapich2:
+case mvapich2-[1-9]*:
 case MVA2MPI:
+case MVA2MPI-[1-9]*:
     setenv FOAM_MPI mvapich2-2.3
+
+    ## Add version embedded in the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`
+    if ( "$_foamMpiVersion" != "$WM_MPLIB" ) then
+        setenv FOAM_MPI "mvapich2-${_foamMpiVersion}"
+        setenv WM_MPLIB "MVA2MPI-${_foamMpiVersion}"
+    else
+        setenv WM_MPLIB MVA2MPI
+    endif
     _foamEtc -config prefs.mvapich2  ## Optional adjustments
 
     # MPI_ARCH_PATH (prefs) if a valid dir, or ThirdParty location
@@ -271,6 +326,7 @@ case MVA2MPI:
     breaksw
 
 
+# ----
 case CRAY-MPICH:
     setenv FOAM_MPI cray-mpich
     if ( ! $?MPICH_DIR ) setenv MPICH_DIR /dummy
@@ -289,6 +345,7 @@ case CRAY-MPICH:
     breaksw
 
 
+# ----
 case HPMPI:
     setenv FOAM_MPI hpmpi
     setenv MPI_HOME /opt/hpmpi
@@ -317,12 +374,14 @@ case HPMPI:
     breaksw
 
 
+# ----
 case MPI:
     setenv FOAM_MPI mpi
     setenv MPI_ARCH_PATH /opt/mpi
     breaksw
 
 
+# ----
 case FJMPI:
     setenv FOAM_MPI fjmpi
     _foamEtc -config prefs.fjmpi  ## Optional adjustments
@@ -346,6 +405,7 @@ case FJMPI:
     breaksw
 
 
+# ----
 case QSMPI:
     setenv FOAM_MPI qsmpi
     setenv MPI_ARCH_PATH /usr/lib/mpi
@@ -355,6 +415,7 @@ case QSMPI:
     breaksw
 
 
+# ----
 case SGIMPI:
     if ( ! $?MPI_ROOT ) setenv MPI_ROOT /dummy
     if ( "${MPI_ROOT:h}/" == "$MPI_ROOT" ) then
@@ -375,8 +436,22 @@ case SGIMPI:
     breaksw
 
 
-case INTELMPI*:
+# ----
+case intelmpi:
+case intelmpi-[1-9]*:
+case INTELMPI:
+case INTELMPI-[1-9]*:
     setenv FOAM_MPI intelmpi
+
+    ## Add version embedded in the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`
+    if ( "$_foamMpiVersion" != "$WM_MPLIB" ) then
+        setenv FOAM_MPI "intelmpi-${_foamMpiVersion}"
+        setenv WM_MPLIB "INTELMPI-${_foamMpiVersion}"
+    else
+        setenv WM_MPLIB INTELMPI
+        set _foamMpiVersion=latest   ## Fallback value
+    endif
     _foamEtc -config prefs.intelmpi  ## Optional adjustments
 
     if ( $?I_MPI_ROOT ) then
@@ -389,10 +464,14 @@ case INTELMPI*:
         # MPI_ARCH_PATH: Set I_MPI_ROOT accordingly
         setenv I_MPI_ROOT "$MPI_ARCH_PATH"
     else
-        # Final effort - check ThirdParty opt/intel locations for 'latest'
+        # Final effort - check ThirdParty opt/intel locations,
+        # default is 'latest' unless otherwise specified
+
+        if ( "$_foamMpiVersion" == "" ) set _foamMpiVersion=latest
+
         foreach _foamFoundDir (\
-            "$WM_THIRD_PARTY_DIR/opt/intel/oneapi/mpi/latest" \
-            "$WM_THIRD_PARTY_DIR/opt/intel/mpi/latest" \
+            "$WM_THIRD_PARTY_DIR/opt/intel/oneapi/mpi/$_foamMpiVersion" \
+            "$WM_THIRD_PARTY_DIR/opt/intel/mpi/$_foamMpiVersion" \
         )
             if ( -d "$_foamFoundDir" ) then
                 setenv MPI_ARCH_PATH "$_foamFoundDir"
@@ -444,8 +523,21 @@ case INTELMPI*:
     breaksw
 
 
+# ----
+case msmpi:
+case msmpi-[1-9]*:
 case MSMPI:
+case MSMPI-[1-9]*:
     setenv FOAM_MPI msmpi
+
+    ## Add version embedded in the naming
+    set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`
+    if ( "$_foamMpiVersion" != "$WM_MPLIB" ) then
+        setenv FOAM_MPI "msmpi-${_foamMpiVersion}"
+        setenv WM_MPLIB "MSMPI-${_foamMpiVersion}"
+    else
+        setenv WM_MPLIB MSMPI
+    endif
     _foamEtc -config prefs.msmpi  ## Optional adjustments
 
     # MPI_ARCH_PATH (prefs) if a valid dir, or ThirdParty location
@@ -473,13 +565,21 @@ endsw
 
 
 #------------------------------------------------------------------------------
+# Final
+
+# Define fallback value for no MPI
+if ( ! $?FOAM_MPI ) then
+    setenv FOAM_MPI dummy
+else if ( "$FOAM_MPI" == "" ) then
+    setenv FOAM_MPI dummy
+endif
 
 # Report
 if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using mpi type : $WM_MPLIB"
     echo "      FOAM_MPI : $FOAM_MPI"
     if ( "${MPI_ARCH_PATH}" == "" ) then
-        echo "        prefix : unset"
+        echo "        prefix : []"
     else
         echo "        prefix : $MPI_ARCH_PATH"
     endif

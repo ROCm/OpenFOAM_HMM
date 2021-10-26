@@ -116,7 +116,14 @@ unsetenv FOAM_INST_DIR
 
 unsetenv MPI_ARCH_PATH
 unsetenv MPI_BUFFER_SIZE
-unsetenv OPAL_PREFIX
+
+# Cleanup mpi prefix values if set to one of the paths on foamOldDirs
+if ( $?foamClean ) then
+    # openmpi:
+    if ( "`$foamClean -env=OPAL_PREFIX $foamOldDirs`" == "" ) unsetenv OPAL_PREFIX
+    # intelmpi:
+    if ( "`$foamClean -env=I_MPI_ROOT $foamOldDirs`" == "" ) unsetenv I_MPI_ROOT
+endif
 
 
 #------------------------------------------------------------------------------
@@ -175,6 +182,8 @@ if ($?DYLD_LIBRARY_PATH) then
     if ("${DYLD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH
 endif
 
+# Remove any shadow env variables
+unsetenv FOAM_DYLD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases
@@ -221,6 +230,6 @@ endif
 #------------------------------------------------------------------------------
 # Intermediate variables (do as last for a clean exit code)
 
-unset cleaned foamClean foamOldDirs
+unset cleaned foamClean foamOldDirs _foamFoundDir
 
 #------------------------------------------------------------------------------
