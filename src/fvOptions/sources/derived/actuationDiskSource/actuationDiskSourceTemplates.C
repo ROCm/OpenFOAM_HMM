@@ -79,7 +79,7 @@ void Foam::fv::actuationDiskSource::calcFroudeMethod
     scalar rhoRef = 0.0;
     label szMonitorCells = monitorCells_.size();
 
-    for (const auto& celli : monitorCells_)
+    for (const label celli : monitorCells_)
     {
         Uref += U[celli];
         rhoRef = rhoRef + rho[celli];
@@ -150,7 +150,7 @@ void Foam::fv::actuationDiskSource::calcVariableScalingMethod
     scalar rhoRef = 0.0;
     label szMonitorCells = monitorCells_.size();
 
-    for (const auto& celli : monitorCells_)
+    for (const label celli : monitorCells_)
     {
         Uref += U[celli];
         rhoRef = rhoRef + rho[celli];
@@ -175,7 +175,7 @@ void Foam::fv::actuationDiskSource::calcVariableScalingMethod
     scalar rhoDisk = 0.0;
     scalar totalV = 0.0;
 
-    for (const auto& celli : cells_)
+    for (const label celli : cells_)
     {
         Udisk += U[celli]*cellsV[celli];
         rhoDisk += rho[celli]*cellsV[celli];

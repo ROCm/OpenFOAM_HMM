@@ -162,8 +162,8 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
     Info<< type() << " " << name_ << " Unlimited Tmax " << Tmax0 << nl
         <<  "Unlimited Tmin " << Tmin0 << endl;
 
-    // handle boundaries in the case of 'all'
-    if (selectionMode_ == smAll)
+    // Handle boundaries in the case of 'all'
+    if (!cellSetOption::useSubMesh())
     {
         volScalarField::Boundary& bf = he.boundaryFieldRef();
 

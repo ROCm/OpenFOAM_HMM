@@ -105,7 +105,7 @@ void Foam::fa::faceSetOption::setArea()
 }
 
 
-void Foam::fa::faceSetOption::setFaceSet()
+void Foam::fa::faceSetOption::setFaceSelection()
 {
     switch (selectionMode_)
     {
@@ -182,18 +182,18 @@ Foam::fa::faceSetOption::faceSetOption
 )
 :
     fa::option(name, modelType, dict, patch),
-    timeStart_(-1.0),
-    duration_(0.0),
+    timeStart_(-1),
+    duration_(0),
     selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
     faceSetName_("none"),
-    A_(0.0)
+    A_(0)
 {
     if (isActive())
     {
         Info<< incrIndent;
         read(dict);
         setSelection(coeffs_);
-        setFaceSet();
+        setFaceSelection();
         setArea();
         Info<< decrIndent;
     }

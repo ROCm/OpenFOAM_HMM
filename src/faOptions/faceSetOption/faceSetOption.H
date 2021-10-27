@@ -132,7 +132,7 @@ protected:
         //- Face selection mode
         selectionModeType selectionMode_;
 
-        //- Name of zone for "faceZone" selectionMode
+        //- Name of "volFaceZone" selection
         word faceSetName_;
 
         //- Set of faces to apply source to
@@ -144,11 +144,11 @@ protected:
 
     // Protected Functions
 
-        //- Set the face selection
+        //- Set face selection name from dictionary input
         void setSelection(const dictionary& dict);
 
-        //- Set the face set based on the user input selection mode
-        void setFaceSet();
+        //- Set face selection based on user input selection mode
+        void setFaceSelection();
 
         //- Recalculate the area
         void setArea();
@@ -181,35 +181,38 @@ public:
         // Access
 
             //- Return const access to the time start
-            inline scalar timeStart() const;
+            inline scalar timeStart() const noexcept;
 
             //- Return const access to the duration
-            inline scalar duration() const;
+            inline scalar duration() const noexcept;
 
             //- Return true if within time limits
-            inline bool inTimeLimits(const scalar time) const;
+            inline bool inTimeLimits(const scalar timeValue) const;
 
             //- Return const access to the face selection mode
-            inline const selectionModeType& selectionMode() const;
+            inline selectionModeType selectionMode() const noexcept;
+
+            //- True if sub-selection should be used
+            inline bool useSubMesh() const noexcept;
 
             //- Return const access to the name of face set for "faceZone"
             //- selectionMode
-            inline const word& faceSetName() const;
+            inline const word& faceSetName() const noexcept;
 
             //- Return const access to the total face area
-            inline scalar A() const;
+            inline scalar A() const noexcept;
 
-            //- Return const access to the face set
-            inline const labelList& faces() const;
+            //- Return const access to the face selection
+            inline const labelList& faces() const noexcept;
 
 
         // Edit
 
-            //- Return access to the time start
-            inline scalar& timeStart();
+            //- Adjust the time start, return the old value
+            inline scalar timeStart(scalar val) noexcept;
 
-            //- Return access to the duration
-            inline scalar& duration();
+            //- Adjust the duration, return the old value
+            inline scalar duration(scalar val) noexcept;
 
 
         // Checks

@@ -76,7 +76,7 @@ addRadialActuationDiskAxialInertialResistance
     scalar rhoRef = 0.0;
     label szMonitorCells = monitorCells_.size();
 
-    for (const auto& celli : monitorCells_)
+    for (const label celli : monitorCells_)
     {
         Uref += U[celli];
         rhoRef = rhoRef + rho[celli];

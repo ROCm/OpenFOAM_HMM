@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
         autoPtr<topoSetSource> source =
             topoSetSource::New(region.keyword(), mesh, region.dict());
 
-        if (source().setType() == topoSetSource::CELLSETSOURCE)
+        if (source().setType() == topoSetSource::CELLSET_SOURCE)
         {
             cellSet selectedCellSet
             (
@@ -461,7 +461,7 @@ int main(int argc, char *argv[])
                 setCellField::iNew(mesh, selectedCellSet.sortedToc())
             );
         }
-        else if (source().setType() == topoSetSource::FACESETSOURCE)
+        else if (source().setType() == topoSetSource::FACESET_SOURCE)
         {
             faceSet selectedFaceSet
             (

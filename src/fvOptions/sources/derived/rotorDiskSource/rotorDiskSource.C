@@ -108,7 +108,6 @@ void Foam::fv::rotorDiskSource::checkData()
                 }
             }
 
-
             break;
         }
         default:

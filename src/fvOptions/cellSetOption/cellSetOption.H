@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,10 +126,10 @@ public:
         //- Enumeration for selection mode types
         enum selectionModeType
         {
-            smPoints,
+            smAll,
             smCellSet,
             smCellZone,
-            smAll
+            smPoints
         };
 
         //- List of selection mode type names
@@ -138,7 +138,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Start time of fvOption
         scalar timeStart_;
@@ -162,13 +162,13 @@ protected:
         scalar V_;
 
 
-    // Protected functions
+    // Protected Functions
 
-        //- Set the cellSet or points selection
+        //- Set cell selection name or points selection from dictionary input
         void setSelection(const dictionary& dict);
 
-        //- Set the cell set based on the user input selection mode
-        void setCellSet();
+        //- Set the cell selection based on user input selection mode
+        void setCellSelection();
 
         //- Recalculate the volume
         void setVol();
@@ -201,35 +201,38 @@ public:
         // Access
 
             //- Return const access to the time start
-            inline scalar timeStart() const;
+            inline scalar timeStart() const noexcept;
 
             //- Return const access to the duration
-            inline scalar duration() const;
+            inline scalar duration() const noexcept;
 
-            //- Return true if within time limits
-            inline bool inTimeLimits(const scalar time) const;
+            //- True if within time limits
+            inline bool inTimeLimits(const scalar timeValue) const;
 
-            //- Return const access to the cell selection mode
-            inline const selectionModeType& selectionMode() const;
+            //- Return the cell selection mode
+            inline selectionModeType selectionMode() const noexcept;
 
-            //- Return const access to the name of cell set for "cellSet"
-            //  selectionMode
-            inline const word& cellSetName() const;
+            //- True if sub-selection should be used
+            inline bool useSubMesh() const noexcept;
+
+            //- Return const access to the name of cell set/zone for
+            //- "cellSet" / "cellZone" selection modes
+            inline const word& cellSetName() const noexcept;
 
             //- Return const access to the total cell volume
-            inline scalar V() const;
+            inline scalar V() const noexcept;
 
-            //- Return const access to the cell set
-            inline const labelList& cells() const;
+            //- Return const access to the cell selection
+            inline const labelList& cells() const noexcept;
 
 
         // Edit
 
-            //- Return access to the time start
-            inline scalar& timeStart();
+            //- Adjust the time start, return the old value
+            inline scalar timeStart(scalar val) noexcept;
 
-            //- Return access to the duration
-            inline scalar& duration();
+            //- Adjust the duration, return the old value
+            inline scalar duration(scalar val) noexcept;
 
 
         // Checks

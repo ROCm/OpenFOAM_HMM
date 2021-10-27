@@ -92,15 +92,11 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
         }
     }
 
-    // handle boundaries in the case of 'all'
-    if (selectionMode_ == smAll)
+    // Handle boundaries in the case of 'all'
+    if (!cellSetOption::useSubMesh())
     {
-        volVectorField::Boundary& Ubf = U.boundaryFieldRef();
-
-        forAll(Ubf, patchi)
+        for (fvPatchVectorField& Up : U.boundaryFieldRef())
         {
-            fvPatchVectorField& Up = Ubf[patchi];
-
             if (!Up.fixesValue())
             {
                 forAll(Up, facei)
