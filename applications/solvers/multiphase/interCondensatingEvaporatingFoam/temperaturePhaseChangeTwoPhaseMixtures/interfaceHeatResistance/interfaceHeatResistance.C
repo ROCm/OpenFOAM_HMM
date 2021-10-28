@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
     Copyright (C) 2020 Henning Scheufler
 -------------------------------------------------------------------------------
 License
@@ -269,14 +269,14 @@ correct()
 
     // interface heat resistance
     mDotc_ = interfaceArea_*R_*max(TSat - T, T0)/L;
-    mDote_ = interfaceArea_*R_*(T - TSat)/L;
+    mDote_ = interfaceArea_*R_*max(T - TSat, T0)/L;
 
+    // Limiting max condensation
     forAll(mDotc_, celli)
     {
         scalar rhobyDt = mixture_.rho1().value()/mesh_.time().deltaTValue();
         scalar maxEvap = mixture_.alpha1()[celli]*rhobyDt; // positive
         scalar maxCond = -mixture_.alpha2()[celli]*rhobyDt; // negative
-        mDote_[celli] = min(max(mDote_[celli], maxCond), maxEvap);
         mDotc_[celli] = min(max(mDotc_[celli], maxCond), maxEvap);
     }
 
@@ -326,14 +326,6 @@ correct()
 void Foam::temperaturePhaseChangeTwoPhaseMixtures::interfaceHeatResistance::
 updateInterface()
 {
-    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
-    const twoPhaseMixtureEThermo& thermo =
-    refCast<const twoPhaseMixtureEThermo>
-    (
-        mesh_.lookupObject<basicThermo>(basicThermo::dictName)
-    );
-
-    const dimensionedScalar& TSat = thermo.TSat();
 
     // interface heat resistance
     // Interpolating alpha1 cell centre values to mesh points (vertices)
@@ -352,30 +344,6 @@ updateInterface()
         {
             interfaceArea_[celli] =
                 mag(cutCell.faceArea())/mesh_.V()[celli];
-        }
-    }
-
-    const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-
-    forAll(pbm, patchi)
-    {
-        if (isA<wallPolyPatch>(pbm[patchi]))
-        {
-            const polyPatch& pp = pbm[patchi];
-            forAll(pp.faceCells(),i)
-            {
-                const label pCelli = pp.faceCells()[i];
-
-                if
-                (
-                    (TSat.value() - T[pCelli]) > 0
-                  && mixture_.alpha1()[pCelli] < 0.9
-                )
-                {
-                    interfaceArea_[pCelli] =
-                        mag(pp.faceAreas()[i])/mesh_.V()[pCelli];
-                }
-            }
         }
     }
 }
