@@ -136,15 +136,23 @@ public:
 
     // Member Functions
 
-        //- Return a reference to the look-up map
+        //- Demand-driven: the look-up map from global to local id
         const Map<label>& lookupMap() const;
 
         //- Lookup local address in zone for given global index.
         //  \return the local address, or -1 if the item is not in the zone
         label localID(const label globalID) const;
 
+
+        //- The addressing used by the zone
+        const labelList& addressing() const noexcept
+        {
+            return static_cast<const labelList&>(*this);
+        }
+
         //- Clear addressing
         virtual void clearAddressing();
+
 
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const = 0;

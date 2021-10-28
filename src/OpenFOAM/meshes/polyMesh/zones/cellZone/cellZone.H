@@ -211,6 +211,7 @@ public:
         //- Helper function to re-direct to zone::localID(...)
         label whichCell(const label globalCellID) const;
 
+
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 

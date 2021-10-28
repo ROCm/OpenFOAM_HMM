@@ -32,12 +32,20 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::vtk::GenericPatchGeoFieldsWriter<PatchType>::getFaceField
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld,
+    const labelUList& faceAddr
 ) const
 {
-    const polyBoundaryMesh& patches = sfld.mesh().boundaryMesh();
+    if (this->patch().size() != faceAddr.size())
+    {
+        FatalErrorInFunction
+            << "Inconsistent sizing: patch has "
+            << this->patch().size() << " faces, addressing has "
+            << faceAddr.size() << " faces!" << nl
+            << Foam::exit(FatalError);
+    }
 
-    const labelList& faceAddr = this->patch().addressing();
+    const polyBoundaryMesh& patches = sfld.mesh().boundaryMesh();
 
     auto tfld = tmp<Field<Type>>::New(faceAddr.size());
     auto iter = tfld.ref().begin();
@@ -69,13 +77,14 @@ template<class PatchType>
 template<class Type>
 void Foam::vtk::GenericPatchGeoFieldsWriter<PatchType>::write
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+    const labelUList& faceAddr
 )
 {
     this->GenericPatchWriter<PatchType>::writeCellData
     (
         field.name(),
-        getFaceField(field)()
+        getFaceField(field, faceAddr)()
     );
 }
 

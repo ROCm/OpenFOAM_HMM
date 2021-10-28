@@ -45,7 +45,6 @@ SourceFiles
 
 #include "zone.H"
 #include "faceZoneMeshFwd.H"
-#include "boolList.H"
 #include "primitiveFacePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -322,6 +321,7 @@ public:
             labelList&& addr,
             const bool flipMapValue
         );
+
 
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;

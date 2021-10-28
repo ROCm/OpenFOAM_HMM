@@ -214,6 +214,7 @@ public:
         //- Helper function to re-direct to zone::localID(...)
         label whichPoint(const label globalPointID) const;
 
+
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 

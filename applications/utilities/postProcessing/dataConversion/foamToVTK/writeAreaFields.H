@@ -28,7 +28,7 @@ InNamespace
 
 Description
     Read finite-area fields from disk
-    and write with vtk::surfaceMeshWriter
+    and write with vtk::uindirectPatchGeoFieldsWriter
 
 SourceFiles
     writeAreaFields.H

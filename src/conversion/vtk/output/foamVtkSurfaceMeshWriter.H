@@ -8,39 +8,20 @@
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Typedef
     Foam::vtk::surfaceMeshWriter
 
 Description
-    Alias for Foam::vtk::indirectPatchGeoFieldsWriter.
-
-    Write vtp file (or legacy vtk) with support for geometric fields.
-
-See Also
-    Foam::vtk::GenericPatchWriter
+    Older typedef for Foam::vtk::indirectPatchGeoFieldsWriter
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_vtk_surfaceMeshWriter_H
 #define Foam_vtk_surfaceMeshWriter_H
 
-#include "foamVtkGenericPatchGeoFieldsWriter.H"
-#include "indirectPrimitivePatch.H"
+#include "foamVtkIndPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,9 +32,7 @@ namespace vtk
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef
-    GenericPatchGeoFieldsWriter<indirectPrimitivePatch>
-    surfaceMeshWriter;
+typedef indirectPatchGeoFieldsWriter surfaceMeshWriter;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
