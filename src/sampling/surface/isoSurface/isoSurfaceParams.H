@@ -69,6 +69,7 @@ namespace Foam
 
 // Forward Declarations
 class dictionary;
+class Ostream;
 
 /*---------------------------------------------------------------------------*\
                      Class isoSurfaceSelector Declaration
@@ -241,6 +242,12 @@ public:
 
         //- Set optional clipping bounding box
         void setClipBounds(const boundBox& bb);
+
+
+    // Information
+
+        //- Print information about the settings
+        void print(Ostream& os) const;
 };
 
 

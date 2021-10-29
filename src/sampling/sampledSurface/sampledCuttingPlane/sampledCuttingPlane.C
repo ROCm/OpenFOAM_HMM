@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -496,7 +496,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
     if (debug)
     {
-        print(Pout);
+        print(Pout, debug);
         Pout<< endl;
     }
 }
@@ -746,13 +746,17 @@ Foam::sampledCuttingPlane::interpolate
 }
 
 
-void Foam::sampledCuttingPlane::print(Ostream& os) const
+void Foam::sampledCuttingPlane::print(Ostream& os, int level) const
 {
     os  << "sampledCuttingPlane: " << name() << " :"
-        << "  plane:" << plane_
-        << "  offsets:" << flatOutput(offsets_)
-        << "  faces:" << faces().size()
-        << "  points:" << points().size();
+        << " plane:" << plane_
+        << " offsets:" << flatOutput(offsets_);
+
+    if (level)
+    {
+        os  << "  faces:" << faces().size()
+            << "  points:" << points().size();
+    }
 }
 
 

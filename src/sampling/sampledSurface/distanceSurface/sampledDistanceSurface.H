@@ -265,7 +265,7 @@ public:
     // Output
 
         //- Print information
-        virtual void print(Ostream& os) const;
+        virtual void print(Ostream& os, int level=0) const;
 };
 
 

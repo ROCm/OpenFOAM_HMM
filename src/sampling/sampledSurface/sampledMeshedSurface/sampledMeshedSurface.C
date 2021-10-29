@@ -772,13 +772,17 @@ Foam::tmp<Foam::tensorField> Foam::sampledMeshedSurface::interpolate
 }
 
 
-void Foam::sampledMeshedSurface::print(Ostream& os) const
+void Foam::sampledMeshedSurface::print(Ostream& os, int level) const
 {
     os  << "meshedSurface: " << name() << " :"
-        << " surface:" << surfaceName_
-        << " faces:"   << faces().size()
-        << " points:"  << points().size()
-        << " zoneids:" << zoneIds().size();
+        << " surface:" << surfaceName_;
+
+    if (level)
+    {
+        os  << " faces:"   << faces().size()
+            << " points:"  << points().size()
+            << " zoneids:" << zoneIds().size();
+    }
 }
 
 

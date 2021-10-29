@@ -1095,6 +1095,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
         }
     }
 
+    if (stSampled == regionType_ && sampledPtr_)
+    {
+        Info<< "    sampled surface: ";
+        sampledPtr_->print(Info, 0);
+        Info<< nl;
+    }
+
     if (writeFields_)
     {
         const word formatName(dict.get<word>("surfaceFormat"));

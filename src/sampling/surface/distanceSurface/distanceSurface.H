@@ -392,7 +392,7 @@ public:
     // Output
 
         //- Print information
-        void print(Ostream& os) const;
+        void print(Ostream& os, int level=0) const;
 };
 
 

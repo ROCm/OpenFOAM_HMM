@@ -180,4 +180,12 @@ void Foam::isoSurfaceParams::setClipBounds(const boundBox& bb)
 }
 
 
+void Foam::isoSurfaceParams::print(Ostream& os) const
+{
+    os  << " isoMethod:" << algorithmNames[algo_]
+        << " regularise:" << filterNames[filter_]
+        << " snap:" << snap_;
+}
+
+
 // ************************************************************************* //

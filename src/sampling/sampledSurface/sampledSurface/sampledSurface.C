@@ -49,7 +49,6 @@ const Foam::wordList Foam::sampledSurface::surfaceFieldTypes
 });
 
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledSurface::clearGeom() const
@@ -219,7 +218,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledSurface::sample
 }
 
 
-void Foam::sampledSurface::print(Ostream& os) const
+void Foam::sampledSurface::print(Ostream& os, int level) const
 {
     os << type();
 }
@@ -229,7 +228,8 @@ void Foam::sampledSurface::print(Ostream& os) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const sampledSurface& s)
 {
-    s.print(os);
+    // Print with more information
+    s.print(os, 1);
     os.check(FUNCTION_NAME);
     return os;
 }

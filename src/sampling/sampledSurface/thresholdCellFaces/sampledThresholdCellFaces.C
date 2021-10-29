@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,14 +286,19 @@ Foam::tmp<Foam::tensorField> Foam::sampledThresholdCellFaces::interpolate
 }
 
 
-void Foam::sampledThresholdCellFaces::print(Ostream& os) const
+void Foam::sampledThresholdCellFaces::print(Ostream& os, int level) const
 {
     os  << "sampledThresholdCellFaces: " << name() << " :"
-        << "  field:" << fieldName_
-        << "  lowerLimit:" << lowerThreshold_
-        << "  upperLimit:" << upperThreshold_;
-        //<< "  faces:" << faces().size()   // possibly no geom yet
-        //<< "  points:" << points().size();
+        << " field:" << fieldName_
+        << " lowerLimit:" << lowerThreshold_
+        << " upperLimit:" << upperThreshold_;
+
+    // Possibly no geom yet...
+    // if (level)
+    // {
+    //     os  << "  faces:" << faces().size()
+    //         << "  points:" << points().size();
+    // }
 }
 
 

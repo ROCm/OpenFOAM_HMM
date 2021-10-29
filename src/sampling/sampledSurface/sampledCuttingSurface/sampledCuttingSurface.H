@@ -261,13 +261,6 @@ public:
         (
             const interpolation<tensor>& interpolator
         ) const;
-
-
-    // Output
-
-//         //- Print information
-//         void print(Ostream& os) const;
-
 };
 
 

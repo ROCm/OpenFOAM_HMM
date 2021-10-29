@@ -734,18 +734,25 @@ void Foam::distanceSurface::createGeometry()
 
     if (debug)
     {
-        print(Pout);
+        print(Pout, debug);
         Pout<< endl;
     }
 }
 
 
-void Foam::distanceSurface::print(Ostream& os) const
+void Foam::distanceSurface::print(Ostream& os, int level) const
 {
-    os  << "  surface:" << surfaceName()
-        << "  distance:" << distance()
-        << "  faces:" << surface().surfFaces().size()
-        << "  points:" << surface().points().size();
+    os  << " surface:" << surfaceName()
+        << " distance:" << distance()
+        << " topology:" << topoFilterNames_[topoFilter_];
+
+    isoParams_.print(os);
+
+    if (level)
+    {
+        os  << "  faces:" << surface().surfFaces().size()
+            << "  points:" << surface().points().size();
+    }
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,10 +203,10 @@ Foam::tmp<Foam::tensorField> Foam::sampledDistanceSurface::interpolate
 }
 
 
-void Foam::sampledDistanceSurface::print(Ostream& os) const
+void Foam::sampledDistanceSurface::print(Ostream& os, int level) const
 {
     os  << "distanceSurface: " << name() << " :";
-    distanceSurface::print(os);
+    distanceSurface::print(os, level);
 }
 
 

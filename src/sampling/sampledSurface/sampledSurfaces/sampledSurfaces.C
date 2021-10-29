@@ -470,8 +470,11 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
             }
             if (actions_[surfi] & ACTION_SURF_MESH)
             {
-                Info<< ", store as surfMesh (deprecated)";
+                Info<< ", store as surfMesh (DEPRECATED)";
             }
+            Info<< nl;
+            Info<< "        ";
+            s.print(Info, 0);
             Info<< nl;
         }
         Info<< nl;

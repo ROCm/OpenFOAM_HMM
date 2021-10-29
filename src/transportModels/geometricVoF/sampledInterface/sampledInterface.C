@@ -267,7 +267,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledInterface::interpolate
 }
 
 
-void Foam::sampledInterface::print(Ostream& os) const
+void Foam::sampledInterface::print(Ostream& os, int level) const
 {
     os  << "sampledInterface: " << name();
 }

@@ -267,8 +267,8 @@ public:
 
     // Output
 
-        //- Write
-        virtual void print(Ostream&) const;
+        //- Print information
+        virtual void print(Ostream& os, int level=0) const;
 };
 
 
