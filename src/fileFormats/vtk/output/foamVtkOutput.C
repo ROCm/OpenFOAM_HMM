@@ -39,7 +39,7 @@ License
 #include "globalIndex.H"
 #include "instant.H"
 #include "Fstream.H"
-#include "PstreamBuffers.H"
+#include "Pstream.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
@@ -129,25 +129,17 @@ void Foam::vtk::writeListParallel
     const globalIndex& procOffset
 )
 {
-    // List sizes
-    const globalIndex sizes(values.size());
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(values.size()),
+        globalIndex::SIZES
+    );
 
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-
-    // Send to master
-    if (!Pstream::master())
-    {
-        UOPstream os(Pstream::masterNo(), pBufs);
-        os.write(values.cdata_bytes(), values.size_bytes());
-    }
-
-    pBufs.finishedSends();
 
     if (Pstream::master())
     {
-        // Master data
-
-        // Write with offset
+        // Write master data - with value offset
         const label offsetId = procOffset.offset(0);
         for (const label val : values)
         {
@@ -155,20 +147,37 @@ void Foam::vtk::writeListParallel
         }
 
         // Receive and write
-        for (const int proci : Pstream::subProcs())
+        DynamicList<label> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            List<label> recv(sizes.localSize(proci));
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
 
-            UIPstream is(proci, pBufs);
-            is.read(recv.data_bytes(), recv.size_bytes());
-
-            // Write with offset
+            // With value offset
             const label offsetId = procOffset.offset(proci);
-            for (const label val : recv)
+            for (const label val : recvData)
             {
                 vtk::write(fmt, val + offsetId);
             }
         }
+    }
+    else
+    {
+        // Send
+        UOPstream::write
+        (
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values.cdata_bytes(),
+            values.size_bytes()
+        );
     }
 }
 
