@@ -27,25 +27,106 @@ License
 
 #include "ensightOutput.H"
 #include "ensightPTraits.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<template<typename> class FieldContainer, class Type>
 void Foam::ensightOutput::Detail::copyComponent
 (
-    scalarField& res,
+    List<scalar>& cmptBuffer,
     const FieldContainer<Type>& input,
     const direction cmpt
 )
 {
-    res.resize(input.size());
+    if (cmptBuffer.size() < input.size())
+    {
+        FatalErrorInFunction
+            << "Component buffer too small: "
+            << cmptBuffer.size() << " < " << input.size() << nl
+            << exit(FatalError);
+    }
 
-    auto iter = res.begin();
+    auto iter = cmptBuffer.begin();
 
     for (const Type& val : input)
     {
         *iter = component(val, cmpt);
         ++iter;
+    }
+}
+
+
+template<template<typename> class FieldContainer, class Type>
+void Foam::ensightOutput::Detail::writeFieldContent
+(
+    ensightFile& os,
+    const FieldContainer<Type>& fld,
+    bool parallel
+)
+{
+    // already checked prior to calling, but extra safety
+    parallel = parallel && Pstream::parRun();
+
+    // Size information (offsets are irrelevant)
+    globalIndex procAddr;
+    if (parallel)
+    {
+        procAddr.reset(UPstream::listGatherValues<label>(fld.size()));
+    }
+    else
+    {
+        // Master size
+        procAddr.reset(labelList(Foam::one{}, fld.size()));
+    }
+
+
+    if (Pstream::master())
+    {
+        DynamicList<scalar> cmptBuffer(procAddr.maxSize());
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        {
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+            // Write master data
+            cmptBuffer.resize_nocopy(procAddr.localSize(0));
+            copyComponent(cmptBuffer, fld, cmpt);
+            os.writeList(cmptBuffer);
+
+            // Receive and write
+            for (const label proci : procAddr.subProcs())
+            {
+                cmptBuffer.resize_nocopy(procAddr.localSize(proci));
+                UIPstream::read
+                (
+                    UPstream::commsTypes::scheduled,
+                    proci,
+                    cmptBuffer.data_bytes(),
+                    cmptBuffer.size_bytes()
+                );
+                os.writeList(cmptBuffer);
+            }
+        }
+    }
+    else if (parallel)
+    {
+        // Send
+        List<scalar> cmptBuffer(fld.size());
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        {
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+            copyComponent(cmptBuffer, fld, cmpt);
+            UOPstream::write
+            (
+                UPstream::commsTypes::scheduled,
+                Pstream::masterNo(),
+                cmptBuffer.cdata_bytes(),
+                cmptBuffer.size_bytes()
+            );
+        }
     }
 }
 
@@ -63,57 +144,13 @@ bool Foam::ensightOutput::Detail::writeCoordinates
 {
     parallel = parallel && Pstream::parRun();
 
-    const IntRange<int> senders =
-    (
-        parallel
-      ? Pstream::subProcs()
-      : IntRange<int>()
-    );
-
-
-    // Using manual copyComponent(...) instead of fld.component() to support
-    // indirect lists etc.
-
-    scalarField send(fld.size());
-
     if (Pstream::master())
     {
         os.beginPart(partId, partName);
         os.beginCoordinates(nPoints);
-
-        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
-        {
-            // Main
-            copyComponent(send, fld, cmpt);
-            os.writeList(send);
-
-            // Others
-            for (const int proci : senders)
-            {
-                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
-                scalarField recv(fromOther);
-
-                os.writeList(recv);
-            }
-        }
     }
-    else if (senders)
-    {
-        // Send from other (parallel)
 
-        for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
-        {
-            copyComponent(send, fld, cmpt);
-
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
-
-            toMaster << send;
-        }
-    }
+    ensightOutput::Detail::writeFieldContent(os, fld, parallel);
 
     return true;
 }
@@ -130,14 +167,6 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
 {
     parallel = parallel && Pstream::parRun();
 
-    const IntRange<int> senders =
-    (
-        parallel
-      ? Pstream::subProcs()
-      : IntRange<int>()
-    );
-
-
     // Preliminary checks
     {
         bool hasField = !fld.empty();
@@ -152,52 +181,12 @@ bool Foam::ensightOutput::Detail::writeFieldComponents
     }
 
 
-    // Using manual copyComponent(...) instead of fld.component() to support
-    // indirect lists etc.
-
-    scalarField send(fld.size());
-
     if (Pstream::master())
     {
         os.writeKeyword(key);
-
-        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-        {
-            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
-
-            // Main
-            copyComponent(send, fld, cmpt);
-            os.writeList(send);
-
-            // Others
-            for (const int proci : senders)
-            {
-                IPstream fromOther(Pstream::commsTypes::scheduled, proci);
-                scalarField recv(fromOther);
-
-                os.writeList(recv);
-            }
-        }
     }
-    else if (senders)
-    {
-        // Send from other (parallel)
 
-        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-        {
-            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
-
-            copyComponent(send, fld, cmpt);
-
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
-
-            toMaster << send;
-        }
-    }
+    ensightOutput::Detail::writeFieldContent(os, fld, parallel);
 
     return true;
 }
@@ -294,6 +283,7 @@ bool Foam::ensightOutput::Detail::writeFaceLocalField
             << exit(FatalError);
     }
 
+
     if (Pstream::master())
     {
         os.beginPart(part.index());
@@ -344,6 +334,7 @@ bool Foam::ensightOutput::writeField
         // No field
         if (!hasField) return false;
     }
+
 
     if (Pstream::master())
     {

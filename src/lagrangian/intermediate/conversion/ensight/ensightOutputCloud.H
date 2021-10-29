@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class fvMesh;
 
 namespace ensightOutput
@@ -62,8 +62,7 @@ bool writeCloudPositions
     const fvMesh& mesh,
     const word& cloudName,
     bool exists,
-    autoPtr<ensightFile>& output,
-    Pstream::commsTypes comm = Pstream::commsTypes::blocking
+    autoPtr<ensightFile>& output
 );
 
 
@@ -72,8 +71,7 @@ template<class Type>
 bool writeCloudField
 (
     const IOField<Type>& field,
-    ensightFile& os,
-    Pstream::commsTypes comm = Pstream::commsTypes::blocking
+    ensightFile& os
 );
 
 
@@ -84,10 +82,32 @@ bool writeCloudField
 (
     const IOobject& io,
     bool exists,
-    autoPtr<ensightFile>& output,
-    Pstream::commsTypes comm = Pstream::commsTypes::blocking
+    autoPtr<ensightFile>& output
 );
 
+
+/*---------------------------------------------------------------------------*\
+                        Namespace ensightOutput::Detail
+\*---------------------------------------------------------------------------*/
+
+namespace Detail
+{
+
+//- Write cloud field data (serial) with rounding and newlines.
+//  \return the current output count
+template<class Type>
+label writeCloudFieldContent
+(
+    ensightFile& os,
+    const UList<Type>& fld,
+    label count = 0     //!< The current output count
+);
+
+
+} // End namespace Detail
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace ensightOutput
 } // End namespace Foam
