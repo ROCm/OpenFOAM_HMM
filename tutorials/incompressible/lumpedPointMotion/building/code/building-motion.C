@@ -408,8 +408,8 @@ int main(int argc, char *argv[])
         autoPtr<Time> runTimePtr;
         autoPtr<lumpedPointIOMovement> movementPtr;
 
-        const bool throwingIOError = FatalIOError.throwExceptions();
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingIO = FatalIOError.throwing(true);
+        const bool oldThrowingEx = FatalError.throwing(true);
 
         try
         {
@@ -426,8 +426,8 @@ int main(int argc, char *argv[])
         }
         Info<< nl << endl;
 
-        FatalError.throwExceptions(throwingError);
-        FatalIOError.throwExceptions(throwingIOError);
+        FatalError.throwing(oldThrowingEx);
+        FatalIOError.throwing(oldThrowingIO);
 
         if (!movementPtr)
         {

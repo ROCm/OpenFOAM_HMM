@@ -140,7 +140,7 @@ if (argList::postProcess(argc, argv))
             }
         }
 
-        FatalIOError.throwExceptions();
+        FatalIOError.throwing(true);
 
         try
         {

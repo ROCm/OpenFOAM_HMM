@@ -159,12 +159,12 @@ public:
             return throwing_;
         }
 
-        //- Specify exception throwing (default is activate)
+        //- Specify exception throwing state (on or off)
         //  \return the previous throwing state
-        bool throwExceptions(bool doThrow = true) noexcept
+        bool throwing(const bool on) noexcept
         {
-            bool old = throwing_;
-            throwing_ = doThrow;
+            bool old(throwing_);
+            throwing_ = on;
             return old;
         }
 
@@ -229,6 +229,13 @@ public:
 
 
     // Housekeeping
+
+        //- Specify exception throwing state (default is \b on)
+        //  \return the previous throwing state
+        bool throwExceptions(const bool on = true) noexcept
+        {
+            return throwing(on);
+        }
 
         //- Deactivate exception throwing
         //  \return the previous throwing state

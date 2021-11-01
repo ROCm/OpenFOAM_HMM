@@ -110,7 +110,7 @@ void generalTests()
     string me("Mark");
 
     // Expect some failures:
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
 
     try
     {
@@ -214,7 +214,7 @@ void generalTests()
         Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 
@@ -224,7 +224,7 @@ void testExpressions(const UList<regexTest>& tests)
     typename RegexType::results_type match;
 
     // Expect some failures:
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
 
     // Report matches:
     for (const auto& testseq : tests)
@@ -282,7 +282,7 @@ void testExpressions(const UList<regexTest>& tests)
         }
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 

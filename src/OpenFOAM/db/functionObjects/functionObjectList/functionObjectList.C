@@ -647,8 +647,8 @@ bool Foam::functionObjectList::execute()
             {
                 // Throw FatalError, FatalIOError as exceptions
 
-                const bool throwingError = FatalError.throwExceptions();
-                const bool throwingIOerr = FatalIOError.throwExceptions();
+                const bool oldThrowingError = FatalError.throwing(true);
+                const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
                 bool hadError = false;
 
@@ -693,8 +693,8 @@ bool Foam::functionObjectList::execute()
                 if (hadError)
                 {
                     // Restore previous state
-                    FatalError.throwExceptions(throwingError);
-                    FatalIOError.throwExceptions(throwingIOerr);
+                    FatalError.throwing(oldThrowingError);
+                    FatalIOError.throwing(oldThrowingIOerr);
                     continue;
                 }
 
@@ -736,8 +736,8 @@ bool Foam::functionObjectList::execute()
                 }
 
                 // Restore previous state
-                FatalError.throwExceptions(throwingError);
-                FatalIOError.throwExceptions(throwingIOerr);
+                FatalError.throwing(oldThrowingError);
+                FatalIOError.throwing(oldThrowingIOerr);
             }
             else
             {
@@ -853,8 +853,8 @@ bool Foam::functionObjectList::end()
             // Ignore failure on end() - not much we can do anyhow
 
             // Throw FatalError, FatalIOError as exceptions
-            const bool throwingError = FatalError.throwExceptions();
-            const bool throwingIOerr = FatalIOError.throwExceptions();
+            const bool oldThrowingError = FatalError.throwing(true);
+            const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
             try
             {
@@ -888,8 +888,8 @@ bool Foam::functionObjectList::end()
             }
 
             // Restore previous state
-            FatalError.throwExceptions(throwingError);
-            FatalIOError.throwExceptions(throwingIOerr);
+            FatalError.throwing(oldThrowingError);
+            FatalIOError.throwing(oldThrowingIOerr);
         }
     }
 
@@ -1083,8 +1083,8 @@ bool Foam::functionObjectList::read()
             if (enabled && !objPtr)
             {
                 // Throw FatalError, FatalIOError as exceptions
-                const bool throwingError = FatalError.throwExceptions();
-                const bool throwingIOerr = FatalIOError.throwExceptions();
+                const bool oldThrowingError = FatalError.throwing(true);
+                const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
                 try
                 {
@@ -1148,8 +1148,8 @@ bool Foam::functionObjectList::read()
                 }
 
                 // Restore previous state
-                FatalError.throwExceptions(throwingError);
-                FatalIOError.throwExceptions(throwingIOerr);
+                FatalError.throwing(oldThrowingError);
+                FatalIOError.throwing(oldThrowingIOerr);
 
                 // Require valid functionObject on all processors
                 if (!returnReduce(bool(objPtr), andOp<bool>()))

@@ -779,7 +779,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Expect a FatalError for findEtcFile() with a bad name:"
             << nl;
 
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         try
         {
@@ -792,7 +792,7 @@ int main(int argc, char *argv[])
             Info<< nl << "findEtcFile() Caught FatalError "
                 << err << nl << endl;
         }
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
     }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2014 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     word utilityName(argv[1]);
     autoPtr<helpType> utility;
 
-    const bool throwing = FatalError.throwExceptions();
+    const bool oldThrowingErr = FatalError.throwing(true);
     try
     {
         utility.reset(helpType::New(utilityName));
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
             << err.message().c_str() << nl
             << exit(FatalError);
     }
-    FatalError.throwExceptions(throwing);
+    FatalError.throwing(oldThrowingErr);
 
     utility().init();
 

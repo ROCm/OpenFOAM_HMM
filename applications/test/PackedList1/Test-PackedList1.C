@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
         Info<< "\ntest operator[] non-const with out-of-range index\n";
 
         // Expect failure
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         try
         {
@@ -190,7 +191,7 @@ int main(int argc, char *argv[])
             Info<< "Failed (expected) " << err << nl << endl;
         }
 
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
         report(list1);
     }
 
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
         Info<< "\ntest operator[] with out-of-range index\n";
 
         // Expect failure
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         try
         {
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
             Info<< "Failed (expected) " << err << nl << endl;
         }
 
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
         report(list1);
     }
 
@@ -268,7 +269,7 @@ int main(int argc, char *argv[])
 
     // Expect failure
     {
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         Info<< "\ntest operator[] assignment with auto-vivify\n";
 
@@ -286,7 +287,7 @@ int main(int argc, char *argv[])
             list1.set(36, list1.max_value);
         }
 
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
         report(list1);
     }
 

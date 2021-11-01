@@ -101,8 +101,8 @@ void doTest(const dictionary& dict)
     Info<< dict.dictName() << dict << nl;
 
     // Could fail?
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOErr = FatalIOError.throwing(true);
 
     try
     {
@@ -120,8 +120,8 @@ void doTest(const dictionary& dict)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOErr);
 }
 
 
@@ -130,8 +130,8 @@ void doTest(const objectRegistry& obr, const dictionary& dict)
     Info<< dict.dictName() << dict << nl;
 
     // Could fail?
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOErr = FatalIOError.throwing(true);
 
     try
     {
@@ -148,8 +148,8 @@ void doTest(const objectRegistry& obr, const dictionary& dict)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOErr);
 }
 
 

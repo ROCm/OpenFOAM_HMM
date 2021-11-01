@@ -105,8 +105,8 @@ void Foam::helpTypes::helpBoundary::fixedValueFieldConditions
 
     // throw exceptions to avoid fatal errors when casting from generic patch
     // type to incompatible patch type
-    FatalIOError.throwExceptions();
-    FatalError.throwExceptions();
+    FatalIOError.throwing(true);
+    FatalError.throwing(true);
 
     bool foundFixed = false;
     forAll(types, i)

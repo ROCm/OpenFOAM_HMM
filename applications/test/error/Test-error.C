@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
 
     if (!args.found("no-throw"))
     {
-        FatalIOError.throwExceptions();
-        FatalError.throwExceptions();
+        FatalIOError.throwing(true);
+        FatalError.throwing(true);
     }
 
     try
