@@ -449,6 +449,16 @@ bool Foam::argList::bannerEnabled()
 }
 
 
+void Foam::argList::addDryRunOption
+(
+    const string& usage,
+    bool advanced
+)
+{
+    addOption("dry-run", "", usage, advanced);
+}
+
+
 void Foam::argList::noFunctionObjects(bool addWithOption)
 {
     removeOption("noFunctionObjects");
@@ -519,9 +529,30 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+Foam::word Foam::argList::envExecutable()
+{
+    return Foam::getEnv("FOAM_EXECUTABLE");
+}
+
+
 Foam::fileName Foam::argList::envGlobalPath()
 {
     return Foam::getEnv("FOAM_CASE");
+}
+
+
+Foam::fileName Foam::argList::envRelativePath
+(
+    const fileName& input,
+    const bool caseTag
+)
+{
+    if (input.isAbsolute())
+    {
+        return input.relative(envGlobalPath(), caseTag);
+    }
+
+    return input;
 }
 
 
@@ -735,6 +766,11 @@ void Foam::argList::setCasePaths()
 
     // Executable name, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", executable_, false);
+
+    if (validOptions.found("dry-run") && options_.found("dry-run"))
+    {
+        runControl_.dryRun(true);
+    }
 }
 
 
@@ -796,7 +832,7 @@ Foam::argList::argList
 
             if (validParOptions.found(optName))
             {
-                parRunControl_.runPar(argc, argv, needsThread);
+                runControl_.runPar(argc, argv, needsThread);
                 break;
             }
         }
@@ -921,7 +957,7 @@ Foam::argList::argList
     bool initialise
 )
 :
-    parRunControl_(args.parRunControl_),
+    runControl_(args.runControl_),
     args_(args.args_),
     options_(options),
     libs_(),
@@ -957,11 +993,7 @@ void Foam::argList::parse
             displayDoc(false);
             quickExit = true;
         }
-        else if
-        (
-            options_.found("doc-source")
-         || options_.found("srcDoc")  // Compat 1706
-        )
+        else if (options_.found("doc-source"))
         {
             displayDoc(true);
             quickExit = true;
@@ -1103,7 +1135,7 @@ void Foam::argList::parse
     const int writeHostsSwitch = Foam::debug::infoSwitch("writeHosts", 1);
 
     // Collect machine/pid, and check that the build is identical
-    if (parRunControl_.parRun())
+    if (runControl_.parRun())
     {
         if (Pstream::master())
         {
@@ -1151,7 +1183,7 @@ void Foam::argList::parse
     fileNameList roots;
 
     // If this actually is a parallel run
-    if (parRunControl_.parRun())
+    if (runControl_.parRun())
     {
         // For the master
         if (Pstream::master())
@@ -1192,7 +1224,7 @@ void Foam::argList::parse
             if (this->readListIfPresent("roots", roots))
             {
                 source = "-roots";
-                parRunControl_.distributed(true);
+                runControl_.distributed(true);
                 if (roots.size() != 1)
                 {
                     dictNProcs = roots.size()+1;
@@ -1276,7 +1308,7 @@ void Foam::argList::parse
                     if (decompDict.getOrDefault("distributed", false))
                     {
                         nDomainsMandatory = true;
-                        parRunControl_.distributed(true);
+                        runControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
                     }
 
@@ -1446,7 +1478,7 @@ void Foam::argList::parse
             );
             fromMaster >> args_ >> options_ >> nroots;
 
-            parRunControl_.distributed(nroots);
+            runControl_.distributed(nroots);
 
             // Establish rootPath_/globalCase_/case_ for sub-process
             setCasePaths();
@@ -1470,7 +1502,7 @@ void Foam::argList::parse
     }
 
     // If needed, adjust fileHandler for distributed roots
-    if (parRunControl_.distributed())
+    if (runControl_.distributed())
     {
         if (fileOperation::fileHandlerPtr_)
         {
@@ -1479,7 +1511,7 @@ void Foam::argList::parse
     }
 
     // Keep/discard sub-process host/root information for reporting:
-    if (Pstream::master() && parRunControl_.parRun())
+    if (Pstream::master() && runControl_.parRun())
     {
         if (!writeHostsSwitch)
         {
@@ -1497,7 +1529,7 @@ void Foam::argList::parse
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << nl;
 
-        if (parRunControl_.parRun())
+        if (runControl_.parRun())
         {
             if (hostProcs.size())
             {

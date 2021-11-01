@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,9 +55,8 @@ int main(int argc, char *argv[])
 
     argList::noFunctionObjects();  // Never use function objects
 
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test initial lumped points state without a mesh"
     );
     argList::addOption
@@ -85,15 +84,13 @@ int main(int argc, char *argv[])
 
     const bool noInterpolate = args.found("no-interpolate");
 
-    const bool dryrun = args.found("dry-run");
-
     // const bool verbose = args.found("verbose");
 
     args.readIfPresent("visual-length", lumpedPointState::visLength);
 
     #include "createTime.H"
 
-    if (dryrun)
+    if (args.dryRun())
     {
         // Create without a mesh
         autoPtr<lumpedPointIOMovement> movement =

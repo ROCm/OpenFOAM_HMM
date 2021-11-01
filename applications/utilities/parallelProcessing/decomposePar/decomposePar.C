@@ -325,9 +325,8 @@ int main(int argc, char *argv[])
 
     #include "addAllRegionOptions.H"
 
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test without writing the decomposition. "
         "Changes -cellDist to only write VTK output."
     );
@@ -410,7 +409,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const bool dryrun           = args.found("dry-run");
+    const bool dryrun           = args.dryRun();
     const bool writeCellDist    = args.found("cellDist");
     const bool verbose          = args.found("verbose");
 

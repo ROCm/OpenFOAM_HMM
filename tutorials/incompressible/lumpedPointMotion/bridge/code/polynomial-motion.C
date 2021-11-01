@@ -194,9 +194,8 @@ int main(int argc, char *argv[])
     );
 
     // Run controls
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test movement without a mesh"
     );
     argList::addBoolOption
@@ -232,7 +231,7 @@ int main(int argc, char *argv[])
 
 
     // Control parameters
-    const bool dryrun = args.found("dry-run");
+    const bool dryrun = args.dryRun();
     const bool slave = args.found("slave");
     const bool removeLock = args.found("removeLock");
 

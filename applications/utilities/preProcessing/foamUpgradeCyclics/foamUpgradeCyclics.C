@@ -404,9 +404,8 @@ int main(int argc, char *argv[])
     timeSelector::addOptions();
 
     argList::addOptionCompat("dry-run", {"test", 1806});
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test only do not change any files"
     );
     argList::addBoolOption

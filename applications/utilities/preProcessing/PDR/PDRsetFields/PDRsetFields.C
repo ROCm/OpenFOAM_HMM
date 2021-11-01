@@ -74,9 +74,8 @@ int main(int argc, char* argv[])
         "Force use of legacy obstacles table"
     );
 
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Read obstacles and write VTK only"
     );
 
@@ -89,8 +88,6 @@ int main(int argc, char* argv[])
     Info<< "Reading " << dictIO.name() << nl << endl;
 
     IOdictionary setFieldsDict(dictIO);
-
-    const bool dryrun = args.found("dry-run");
 
     const fileName& casepath = runTime.globalPath();
 
@@ -181,7 +178,7 @@ int main(int argc, char* argv[])
 
     PDRobstacle::generateVtk(casepath/"VTK", obstacles, cylinders);
 
-    if (dryrun)
+    if (args.dryRun())
     {
         Info<< nl
             << "dry-run: stopping after reading/writing obstacles" << nl

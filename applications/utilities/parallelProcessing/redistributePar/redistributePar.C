@@ -2488,9 +2488,8 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::addBoolOption("decompose", "Decompose case");
     argList::addBoolOption("reconstruct", "Reconstruct case");
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test without writing the decomposition. "
         "Changes -cellDist to only write volScalarField."
     );
@@ -2555,7 +2554,7 @@ int main(int argc, char *argv[])
 
     const bool reconstruct = args.found("reconstruct");
     const bool writeCellDist = args.found("cellDist");
-    const bool dryrun = args.found("dry-run");
+    const bool dryrun = args.dryRun();
     const bool newTimes = args.found("newTimes");
 
     bool decompose = args.found("decompose");

@@ -103,7 +103,7 @@ SourceFiles
 #include "SLList.H"
 #include "HashSet.H"
 #include "fileName.H"
-#include "parRun.H"
+#include "parRun.H"  // "ParRunControl"
 #include "ITstream.H"
 #include "dlLibraryTable.H"
 #include "OSspecific.H"
@@ -131,9 +131,9 @@ class argList
         //- Track enabled/disabled checking of processor directories state
         static bool checkProcessorDirectories_;
 
-        //- Switch on/off parallel mode.
+        //- Switch on/off parallel mode, dry-run etc.
         //  Construct first so destructor is done last.
-        ParRunControl parRunControl_;
+        ParRunControl runControl_;
 
         //- The arguments after removing known options
         stringList args_;
@@ -183,9 +183,11 @@ class argList
         //   * [-case dir]
         //   * cwd
         //
-        // Also export FOAM_CASE and FOAM_CASENAME environment variables
-        // so they can be used immediately (eg, in decomposeParDict), as well
-        // as the FOAM_EXECUTABLE environment.
+        // Exports FOAM_CASE and FOAM_CASENAME env variables so they can
+        // be used immediately (eg, in decomposeParDict).
+        // Exports FOAM_EXECUTABLE env variable.
+        //
+        // Detects -dry-run option
         void setCasePaths();
 
         //- Transcribe argv into internal args_.
@@ -284,6 +286,15 @@ public:
 
     // Environment
 
+        //- Name of the executable from environment variable
+        //
+        //  Returns the contents of the \c FOAM_EXECUTABLE variable,
+        //  which has previously been set by argList.
+        //
+        //  This will normally be identical to the value of executable(),
+        //  but obtained from the environment.
+        static word envExecutable();
+
         //- Global case (directory) from environment variable
         //
         //  Returns the contents of the \c FOAM_CASE variable,
@@ -292,6 +303,19 @@ public:
         //  This will normally be identical to the value of globalPath(),
         //  but obtained via the environment.
         static fileName envGlobalPath();
+
+        //- Return the input relative to the globalPath by stripping off
+        //- a leading value of the envGlobalPath
+        //
+        //  \param input the directory or filename to make case-relative
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        static fileName envRelativePath
+        (
+            const fileName& input,
+            const bool caseTag = false
+        );
 
 
     // Low-level
@@ -304,19 +328,19 @@ public:
     // Access
 
         //- Name of executable without the path
-        inline const word& executable() const;
+        inline const word& executable() const noexcept;
 
         //- The command line options and arguments concatenated as a string
-        inline const string& commandLine() const;
+        inline const string& commandLine() const noexcept;
 
         //- Return root path
-        inline const fileName& rootPath() const;
+        inline const fileName& rootPath() const noexcept;
 
         //- Return case name (parallel run) or global case (serial run)
-        inline const fileName& caseName() const;
+        inline const fileName& caseName() const noexcept;
 
         //- Return global case name
-        inline const fileName& globalCaseName() const;
+        inline const fileName& globalCaseName() const noexcept;
 
         //- Return the full path to the (processor local) case
         //  \note This is guaranteed to be an absolute path
@@ -339,30 +363,36 @@ public:
             const bool caseTag = false
         ) const;
 
+        //- Return the run control (parallel, dry-run etc)
+        inline const ParRunControl& runControl() const noexcept;
+
+        //- Return the dryRun flag
+        inline bool dryRun() const noexcept;
+
+        //- Modify the dryRun flag
+        inline bool dryRun(const bool on) noexcept;
+
         //- Return distributed flag
         //- (i.e. are rootPaths different on different machines)
-        inline bool distributed() const;
-
-        //- Return the ParRunControl
-        inline const ParRunControl& parRunControl() const;
+        inline bool distributed() const noexcept;
 
         //- Mutable access to the loaded dynamic libraries
-        inline dlLibraryTable& libs() const;
+        inline dlLibraryTable& libs() const noexcept;
 
         //- The number of arguments
         inline label size() const noexcept;
 
         //- Return arguments
-        inline const stringList& args() const;
+        inline const stringList& args() const noexcept;
 
         //- Non-const access to the command arguments (non-options)
-        inline stringList& args();
+        inline stringList& args() noexcept;
 
         //- Return options
-        inline const HashTable<string>& options() const;
+        inline const HashTable<string>& options() const noexcept;
 
         //- Return non-const access to the command options
-        inline HashTable<string>& options();
+        inline HashTable<string>& options() noexcept;
 
         //- Return true if the named option is found
         inline bool found(const word& optName) const;
@@ -573,6 +603,13 @@ public:
         //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
+        //- Add a 'dry-run' bool option to validOptions with usage information
+        static void addDryRunOption
+        (
+            const string& usage,  //! usage information (mandatory)
+            bool advanced = false
+        );
+
         //- Remove '-noFunctionObjects' option and ignore any occurrences.
         //  Optionally add a '-withFunctionObjects' option instead
         static void noFunctionObjects(bool addWithOption = false);
@@ -686,6 +723,9 @@ public:
         {
             return this->getOrDefault<T>(optName, deflt);
         }
+
+        //- Same as runControl() - v2106 and earlier
+        const ParRunControl& parRunControl() const { return runControl_; }
 
 
     // Older style access (including 1712 release)

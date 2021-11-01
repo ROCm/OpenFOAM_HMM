@@ -91,16 +91,15 @@ int main(int argc, char *argv[])
         "Preserve sub-entry as .backup",
         true // Advanced
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Evaluate but do not write"
     );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    const bool dryrun      = args.found("dry-run");
+    const bool dryrun      = args.dryRun();
     const bool backup      = args.found("backup");
     const bool cacheFields = args.found("cache-fields");
 

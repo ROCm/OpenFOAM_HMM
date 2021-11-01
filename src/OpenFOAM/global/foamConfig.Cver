@@ -38,9 +38,6 @@ Description
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace
-{
-
 // Extract value from "key=<digits>", eg "LSB;label=32;scalar=64"
 // The 'tag' string includes the '=' for additional safety.
 // Return 0 on any errors
@@ -58,8 +55,6 @@ static inline unsigned getTaggedSize(const char* tag, const std::string& s)
 
     return std::stoul(s.substr(first, last));
 }
-
-} // End namespace anonymous
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

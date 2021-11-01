@@ -48,31 +48,31 @@ inline void Foam::argList::readList(ITstream& is, List<T>& list)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::argList::executable() const
+inline const Foam::word& Foam::argList::executable() const noexcept
 {
     return executable_;
 }
 
 
-inline const Foam::string& Foam::argList::commandLine() const
+inline const Foam::string& Foam::argList::commandLine() const noexcept
 {
     return commandLine_;
 }
 
 
-inline const Foam::fileName& Foam::argList::rootPath() const
+inline const Foam::fileName& Foam::argList::rootPath() const noexcept
 {
     return rootPath_;
 }
 
 
-inline const Foam::fileName& Foam::argList::caseName() const
+inline const Foam::fileName& Foam::argList::caseName() const noexcept
 {
     return case_;
 }
 
 
-inline const Foam::fileName& Foam::argList::globalCaseName() const
+inline const Foam::fileName& Foam::argList::globalCaseName() const noexcept
 {
     return globalCase_;
 }
@@ -100,19 +100,32 @@ inline Foam::fileName Foam::argList::relativePath
 }
 
 
-inline bool Foam::argList::distributed() const
+inline const Foam::ParRunControl&
+Foam::argList::runControl() const noexcept
 {
-    return parRunControl_.distributed();
+    return runControl_;
 }
 
 
-inline const Foam::ParRunControl& Foam::argList::parRunControl() const
+inline bool Foam::argList::dryRun() const noexcept
 {
-    return parRunControl_;
+    return runControl_.dryRun();
 }
 
 
-inline Foam::dlLibraryTable& Foam::argList::libs() const
+inline bool Foam::argList::dryRun(const bool on) noexcept
+{
+    return runControl_.dryRun(on);
+}
+
+
+inline bool Foam::argList::distributed() const noexcept
+{
+    return runControl_.distributed();
+}
+
+
+inline Foam::dlLibraryTable& Foam::argList::libs() const noexcept
 {
     return libs_;
 }
@@ -124,25 +137,27 @@ inline Foam::label Foam::argList::size() const noexcept
 }
 
 
-inline const Foam::stringList& Foam::argList::args() const
+inline const Foam::stringList& Foam::argList::args() const noexcept
 {
     return args_;
 }
 
 
-inline Foam::stringList& Foam::argList::args()
+inline Foam::stringList& Foam::argList::args() noexcept
 {
     return args_;
 }
 
 
-inline const Foam::HashTable<Foam::string>& Foam::argList::options() const
+inline const Foam::HashTable<Foam::string>&
+Foam::argList::options() const noexcept
 {
     return options_;
 }
 
 
-inline Foam::HashTable<Foam::string>& Foam::argList::options()
+inline Foam::HashTable<Foam::string>&
+Foam::argList::options() noexcept
 {
     return options_;
 }

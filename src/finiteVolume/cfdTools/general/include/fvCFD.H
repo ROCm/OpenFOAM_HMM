@@ -1,8 +1,6 @@
 #ifndef fvCFD_H
 #define fvCFD_H
 
-#include "parRun.H"
-
 #include "Time.H"
 #include "fvMesh.H"
 #include "fvc.H"

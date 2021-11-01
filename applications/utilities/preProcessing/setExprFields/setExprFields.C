@@ -549,9 +549,8 @@ int main(int argc, char *argv[])
         "file",
         "Alternative dictionary for setExprFieldsDict"
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Evaluate but do not write"
     );
     argList::addBoolOption
@@ -663,7 +662,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const bool dryrun = args.found("dry-run");
+    const bool dryrun = args.dryRun();
     const bool verbose = args.found("verbose");
 
     const word dictName("setExprFieldsDict");

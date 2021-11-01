@@ -1,8 +1,6 @@
 #ifndef faCFD_H
 #define faCFD_H
 
-#include "parRun.H"
-
 #include "Time.H"
 #include "faMesh.H"
 #include "areaFields.H"

@@ -28,7 +28,7 @@ Provided Variables
 Foam::autoPtr<Foam::fvMesh> meshPtr(nullptr);
 Foam::word regionName(Foam::polyMesh::defaultRegion);
 
-if (args.found("dry-run") || args.found("dry-run-write"))
+if (args.dryRun() || args.found("dry-run-write"))
 {
     Foam::Info
         << "Operating in 'dry-run' mode: case will run for 1 time step.  "
