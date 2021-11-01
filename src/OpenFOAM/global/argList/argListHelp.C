@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -454,7 +454,7 @@ void Foam::argList::printUsage(bool full) const
     printNotes();
 
     Info<< nl;
-    foamVersion::printBuildInfo(Info().stdStream(), true);
+    foamVersion::printBuildInfo(Info.stdStream(), true);
     Info<< endl;
 }
 

@@ -27,11 +27,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
 #include "JobInfo.H"
 #include "Pstream.H"
+#include "StringStream.H"
 #include "foamVersion.H"
 #include "OSspecific.H"
 #include "Switch.H"
@@ -47,12 +47,11 @@ bool Foam::error::warnAboutAge(const int version) noexcept
 
 bool Foam::error::warnAboutAge(const char* what, const int version)
 {
-    // No warning for 0 (unversioned) or -ve values (silent versioning)
-    const bool old = ((version > 0) && (version < foamVersion::api));
-
-    // Note:
-    // No warning for (version >= foamVersion::api), which
+    // No warning for 0 (unversioned) or -ve values (silent versioning).
+    // Also no warning for (version >= foamVersion::api), which
     // can be used to denote future expiry dates of transition features.
+
+    const bool old = ((version > 0) && (version < foamVersion::api));
 
     if (old)
     {
@@ -155,11 +154,22 @@ Foam::OSstream& Foam::error::operator()
     const int sourceFileLineNumber
 )
 {
-    functionName_ = functionName;
-    sourceFileName_ = sourceFileName;
+    functionName_.clear();
+    sourceFileName_.clear();
+
+    if (functionName)
+    {
+        // With nullptr protection
+        functionName_.assign(functionName);
+    }
+    if (sourceFileName)
+    {
+        // With nullptr protection
+        sourceFileName_.assign(sourceFileName);
+    }
     sourceFileLineNumber_ = sourceFileLineNumber;
 
-    return operator OSstream&();
+    return this->stream();
 }
 
 
@@ -179,20 +189,6 @@ Foam::OSstream& Foam::error::operator()
 }
 
 
-Foam::error::operator Foam::OSstream&()
-{
-    if (!messageStreamPtr_->good())
-    {
-        Perr<< nl
-            << "error::operator OSstream&() : error stream has failed"
-            << endl;
-        abort();
-    }
-
-    return *messageStreamPtr_;
-}
-
-
 Foam::error::operator Foam::dictionary() const
 {
     dictionary errDict;
@@ -208,6 +204,7 @@ Foam::error::operator Foam::dictionary() const
 
     return errDict;
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -289,6 +286,21 @@ void Foam::error::simpleExit(const int errNo, const bool isAbort)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::OSstream& Foam::error::stream()
+{
+    // Don't need (messageStreamPtr_) check - always allocated
+    if (!messageStreamPtr_->good())
+    {
+        Perr<< nl
+            << "error::stream() : error stream has failed"
+            << endl;
+        abort();
+    }
+
+    return *messageStreamPtr_;
+}
+
 
 Foam::string Foam::error::message() const
 {

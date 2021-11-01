@@ -28,19 +28,22 @@ Class
     Foam::messageStream
 
 Description
-    Class to handle messaging in a simple, consistent stream-based
-    manner.
+    Handle output messages in a simple, consistent stream-based manner.
 
-    The messageStream class is globally instantiated with a title string and
-    a severity (which controls the program termination) and a number of
-    errors before termination.  Errors, messages and other data are sent to
-    the messageStream class in the standard manner.
+    The messageStream class is globally instantiated with a title
+    string and a severity (which controls the program termination),
+    optionally with a max number of errors before termination.
 
-Usage
-    \code
-        messageStream
-            << "message1" << "message2" << FoamDataType << endl;
-    \endcode
+    Errors, messages and other data are sent to the messageStream class in
+    the standard manner.
+
+    For parallel applications, the output for 'standard' messages
+    (Info, Warnings) is effectively suppressed on all sub-processes,
+    which results in a single output message instead of a flood of output
+    messages from each process.  The error type of messages do, however,
+    retain output on all processes, which ensures that parallel termination
+    occurs correctly and the source of the problem is properly traceable to
+    the originating processor.
 
 SourceFiles
     messageStream.C
@@ -52,6 +55,7 @@ SourceFiles
 
 #include "label.H"
 #include "string.H"
+#include <iostream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,9 +64,7 @@ namespace Foam
 
 // Forward Declarations
 class IOstream;
-class Ostream;
 class OSstream;
-class OStringStream;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
@@ -73,14 +75,17 @@ class messageStream
 {
 public:
 
-    //- Message type, or error severity flags
+    //- Message type, error severity flags
     enum errorSeverity
     {
-        INFO = 1,   //!< General information output
-        WARNING,    //!< Warning of possible problem.
-        SERIOUS,    //!< A serious problem - eg, data corruption.
-        FATAL,      //!< A fatal error.
-        INFO_STDERR = INFO | 0x10,  //!< Information, but on stderr
+        // Serial-only output:
+        INFO = 1,       //!< General information output (stdout)
+        INFO_STDERR,    //!< General information output (stderr)
+        WARNING,        //!< Warning of possible problem.
+
+        // Parallel-aware output:
+        SERIOUS,        //!< A serious problem - eg, data corruption.
+        FATAL           //!< A fatal error.
     };
 
 
@@ -150,19 +155,43 @@ public:
             return old;
         }
 
-        //- Convert to OSstream
-        //  Prints to Pout for the master stream
+
+    // Output
+
+        //- Return OSstream for output operations.
+        //- Use the \c alternative stream for serial-only output
+        //- if it is a valid pointer.
+        OSstream& stream(OSstream* alternative = nullptr);
+
+        //- Return OSstream for output operations on the master process only,
+        //- Snull on other processes.
         OSstream& masterStream(const label communicator);
 
-        //- Print basic message
-        //  \return OSstream for further info.
+        //- Return std::ostream for output operations.
+        std::ostream& stdStream();
+
+        //- Implicit cast to OSstream for << operations
+        operator OSstream&()
+        {
+            return this->stream();
+        }
+
+        //- Explicitly convert to OSstream for << operations
+        OSstream& operator()()
+        {
+            return this->stream();
+        }
+
+        //- Report 'From function-name'
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName
         );
 
+        //- Report 'From function-name, source file, line number'
         //- Print basic message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -170,8 +199,8 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Print basic message
-        //  \return OSstream for further info.
+        //- Report 'From function-name, source file, line number'
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName,
@@ -179,8 +208,9 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Print basic message
-        //  \return OSstream for further info.
+        //- Report 'From function-name, source file, line number'
+        //- as well as io-file name and location
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -191,34 +221,27 @@ public:
             const label ioEndLineNumber = -1
         );
 
-        //- Print basic message
-        //  \return OSstream for further info.
+        //- Report 'From function-name, source file, line number'
+        //- as well as io-file name and location
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const IOstream&
+            const IOstream&  //!< Provides name and lineNumber
         );
 
-        //- Print basic message
-        //  \return OSstream for further info.
+        //- Report 'From function-name, source file, line number'
+        //- as well as io-file name and location
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const dictionary&
+            const dictionary&  //!< Provides name, startLine, endLine
         );
-
-        //- Convert to OSstream for << operations
-        operator OSstream&();
-
-        //- Explicitly convert to OSstream for << operations
-        OSstream& operator()()
-        {
-            return operator OSstream&();
-        }
 };
 
 
@@ -238,17 +261,17 @@ public:
 //  \note This flag is initialized to 1 by default.
 extern int infoDetailLevel;
 
-//- Information stream (uses stdout - output is on the master only)
+//- Information stream (stdout output on master, null elsewhere)
 extern messageStream Info;
 
-//- Information stream (uses stderr - output is on the master only)
+//- Information stream (stderr output on master, null elsewhere)
 extern messageStream InfoErr;
 
-//- Warning stream (uses stdout - output is on the master only),
+//- Warning stream (stdout output on master, null elsewhere),
 //- with additional 'FOAM Warning' header text.
 extern messageStream Warning;
 
-//- Error stream (uses stdout - output on all processes),
+//- Error stream (stdout output on all processes),
 //- with additional 'FOAM Serious Error' header text.
 extern messageStream SeriousError;
 

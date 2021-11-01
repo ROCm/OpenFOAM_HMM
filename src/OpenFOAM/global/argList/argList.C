@@ -873,7 +873,7 @@ Foam::argList::argList
                 ++argi;
                 if (argi >= args_.size())
                 {
-                    foamVersion::printBuildInfo(Info().stdStream(), false);
+                    foamVersion::printBuildInfo(Info.stdStream(), false);
 
                     Info<< nl
                         <<"Error: option '-" << optName
@@ -1038,7 +1038,7 @@ void Foam::argList::parse
     // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        foamVersion::printBuildInfo(Info().stdStream(), false);
+        foamVersion::printBuildInfo(Info.stdStream(), false);
         FatalError.write(Info, false);
 
         Pstream::exit(1); // works for serial and parallel

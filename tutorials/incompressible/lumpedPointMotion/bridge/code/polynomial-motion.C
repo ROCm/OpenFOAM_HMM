@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            Info().precision(8);
+            Info.stream().precision(8);
         }
 
 
@@ -498,7 +498,7 @@ int main(int argc, char *argv[])
             else
             {
                 // Report position/angle
-                auto& os = Info();
+                auto& os = Info.stream();
 
                 os.writeEntry("time", currTime);
                 state.writeDict(os);

@@ -64,6 +64,9 @@ SeeAlso
 namespace Foam
 {
 
+// Forward Declarations
+class OStringStream;
+
 /*---------------------------------------------------------------------------*\
                             Class error Declaration
 \*---------------------------------------------------------------------------*/
@@ -138,16 +141,19 @@ public:
         //- Clear any messages
         void clear() const;
 
+        //- The currently defined function name for output messages
         const string& functionName() const noexcept
         {
             return functionName_;
         }
 
+        //- The currently defined source-file name for output messages
         const string& sourceFileName() const noexcept
         {
             return sourceFileName_;
         }
 
+        //- The currently defined source-file line number for output messages
         label sourceFileLineNumber() const noexcept
         {
             return sourceFileLineNumber_;
@@ -168,15 +174,33 @@ public:
             return old;
         }
 
+
+    // Output
+
+        //- Return OSstream for output operations
+        OSstream& stream();
+
+        //- Implicit cast to OSstream for << operations
+        operator OSstream&()
+        {
+            return this->stream();
+        }
+
+        //- Explicit convert to OSstream for << operations
+        OSstream& operator()()
+        {
+            return this->stream();
+        }
+
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName
         );
 
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -185,7 +209,7 @@ public:
         );
 
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName,
@@ -193,16 +217,10 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Explicit convert to OSstream for << operations
-        OSstream& operator()()
-        {
-            return operator OSstream&();
-        }
 
-        //- Convert to OSstream
-        operator OSstream&();
+    // Other
 
-        //- Return a dictionary representation of the error
+        //- Extract a dictionary representation of the error information
         operator dictionary() const;
 
 
@@ -215,6 +233,7 @@ public:
 
         //- True if FOAM_ABORT is on.
         static bool useAbort();
+
 
         //- Exit : can be called for any error to exit program.
         //  Redirects to abort() when FOAM_ABORT is on.
@@ -285,23 +304,29 @@ public:
 
     // Member Functions
 
+        //- The currently defined IO name for output messages
         const string& ioFileName() const noexcept
         {
             return ioFileName_;
         }
 
+        //- The currently defined IO start-line number for output messages
         label ioStartLineNumber() const noexcept
         {
             return ioStartLineNumber_;
         }
 
+        //- The currently defined IO end-line number
         label ioEndLineNumber() const noexcept
         {
             return ioEndLineNumber_;
         }
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+
+    // Output
+
+        //- Define basic print message
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -312,8 +337,8 @@ public:
             const label ioEndLineNumber = -1
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message for IO stream
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -322,8 +347,9 @@ public:
             const IOstream& ioStream
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message for dictionary entries.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -331,6 +357,28 @@ public:
             const int sourceFileLineNumber,
             const dictionary& dict
         );
+
+
+        //- Define basic print message for IO stream,
+        //- independent of a source-file reference.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
+        OSstream& operator()
+        (
+            const std::string& where,
+            const IOstream& ioStream
+        );
+
+        //- Define basic print message for dictionary entries,
+        //- independent of a source-file reference.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
+        OSstream& operator()
+        (
+            const std::string& where,
+            const dictionary& dict
+        );
+
 
         //- Print basic message and exit.
         //  Uses cerr if streams not yet constructed (at startup).
@@ -344,9 +392,11 @@ public:
             const string& msg
         );
 
-        //- Return a dictionary representation of the error
-        operator dictionary() const;
 
+    // Other
+
+        //- Extract a dictionary representation of the error information
+        operator dictionary() const;
 
         //- Exit : can be called for any error to exit program
         void exit(const int errNo = 1);
@@ -371,11 +421,11 @@ Ostream& operator<<(Ostream& os, const IOerror& err);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error declarations: defined in error.C
 
-//- Error stream (uses stdout - output on all processes),
+//- Error stream (stdout output on all processes),
 //- with additional 'FOAM FATAL ERROR' header text and stack trace.
 extern error   FatalError;
 
-//- Error stream (uses stdout - output on all processes),
+//- Error stream (stdout output on all processes),
 //- with additional 'FOAM FATAL IO ERROR' header text and stack trace.
 extern IOerror FatalIOError;
 

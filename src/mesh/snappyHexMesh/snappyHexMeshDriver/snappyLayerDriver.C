@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1684,7 +1684,7 @@ void Foam::snappyLayerDriver::calculateLayerThickness
     {
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-        int oldPrecision = Info().precision();
+        const int oldPrecision = Info.stream().precision();
 
         // Find maximum length of a patch name, for a nicer output
         label maxPatchNameLen = 0;
@@ -3072,7 +3072,7 @@ void Foam::snappyLayerDriver::printLayerData
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-    int oldPrecision = Info().precision();
+    const int oldPrecision = Info.stream().precision();
 
     // Find maximum length of a patch name, for a nicer output
     label maxPatchNameLen = 0;

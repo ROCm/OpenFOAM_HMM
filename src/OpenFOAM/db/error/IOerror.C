@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
+#include "argList.H"
 #include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
@@ -71,12 +72,18 @@ Foam::OSstream& Foam::IOerror::operator()
     const label ioEndLineNumber
 )
 {
-    error::operator()(functionName, sourceFileName, sourceFileLineNumber);
+    OSstream& os = error::operator()
+    (
+        functionName,
+        sourceFileName,
+        sourceFileLineNumber
+    );
+
     ioFileName_ = ioFileName;
     ioStartLineNumber_ = ioStartLineNumber;
     ioEndLineNumber_ = ioEndLineNumber;
 
-    return operator OSstream&();
+    return os;
 }
 
 
@@ -93,9 +100,9 @@ Foam::OSstream& Foam::IOerror::operator()
         functionName,
         sourceFileName,
         sourceFileLineNumber,
-        ioStream.name(),
+        argList::envRelativePath(ioStream.name()),
         ioStream.lineNumber(),
-        -1
+        -1  // No known endLineNumber
     );
 }
 
@@ -113,7 +120,43 @@ Foam::OSstream& Foam::IOerror::operator()
         functionName,
         sourceFileName,
         sourceFileLineNumber,
-        dict.name(),
+        dict.relativeName(),
+        dict.startLineNumber(),
+        dict.endLineNumber()
+    );
+}
+
+
+Foam::OSstream& Foam::IOerror::operator()
+(
+    const std::string& where,
+    const IOstream& ioStream
+)
+{
+    return operator()
+    (
+        where.c_str(),
+        "",     // No source file
+        1,      // Non-zero to ensure that 'where' is reported
+        argList::envRelativePath(ioStream.name()),
+        ioStream.lineNumber(),
+        -1      // No known endLineNumber
+    );
+}
+
+
+Foam::OSstream& Foam::IOerror::operator()
+(
+    const std::string& where,
+    const dictionary& dict
+)
+{
+    return operator()
+    (
+        where.c_str(),
+        "",     // No source file
+        1,      // Non-zero to ensure that 'where' is reported
+        dict.relativeName(),
         dict.startLineNumber(),
         dict.endLineNumber()
     );

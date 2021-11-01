@@ -68,6 +68,75 @@ Foam::messageStream::messageStream(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::OSstream& Foam::messageStream::stream(OSstream* alternative)
+{
+    if (level)
+    {
+        // Serlal (master only) output?
+        const bool serialOnly
+        (
+            (
+                severity_ == INFO
+             || severity_ == INFO_STDERR
+             || severity_ == WARNING
+            )
+         || !Pstream::parRun()
+        );
+
+        if (serialOnly && (Pstream::parRun() && !Pstream::master()))
+        {
+            return Snull; // Non-serial, non-master: exit early
+        }
+
+
+        // Use stderr instead of stdout:
+        // - requested via static <redirect> variable
+        // - explicit:  INFO_STDERR
+        // - inferred:  WARNING -> stderr when infoDetailLevel == 0
+        const bool useStderr =
+        (
+            (redirect == 2)
+         || (severity_ == INFO_STDERR)
+         || (severity_ == WARNING && Foam::infoDetailLevel == 0)
+        );
+
+        OSstream* osptr;
+
+        if (serialOnly)
+        {
+            // Use supplied alternative? Valid for serial only
+            osptr = alternative;
+
+            if (!osptr)
+            {
+                osptr = (useStderr ? &Serr : &Sout);
+            }
+        }
+        else
+        {
+            // Non-serial
+            osptr = (useStderr ? &Perr : &Pout);
+        }
+
+        if (!title_.empty())
+        {
+            (*osptr) << title_.c_str();
+        }
+
+        if (maxErrors_ && (++errorCount_ >= maxErrors_))
+        {
+            FatalErrorInFunction
+                << "Too many errors..."
+                << abort(FatalError);
+        }
+
+        return *osptr;
+    }
+
+    return Snull;
+}
+
+
 Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 {
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
@@ -78,10 +147,16 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 
     if (communicator == UPstream::worldComm || UPstream::master(communicator))
     {
-        return operator()();
+        return this->stream();
     }
 
     return Snull;
+}
+
+
+std::ostream& Foam::messageStream::stdStream()
+{
+    return this->stream().stdStream();
 }
 
 
@@ -92,10 +167,13 @@ Foam::OSstream& Foam::messageStream::operator()
     const string& functionName
 )
 {
-    OSstream& os = operator OSstream&();
+    OSstream& os = this->stream();
 
-    os  << nl
-        << "    From " << functionName.c_str() << nl;
+    if (!functionName.empty())
+    {
+        os  << nl
+            << "    From " << functionName.c_str() << nl;
+    }
 
     return os;
 }
@@ -108,7 +186,7 @@ Foam::OSstream& Foam::messageStream::operator()
     const int sourceFileLineNumber
 )
 {
-    OSstream& os = operator OSstream&();
+    OSstream& os = this->stream();
 
     os  << nl
         << "    From " << functionName << nl
@@ -146,7 +224,7 @@ Foam::OSstream& Foam::messageStream::operator()
     const label ioEndLineNumber
 )
 {
-    OSstream& os = operator OSstream&();
+    OSstream& os = this->stream();
 
     os  << nl
         << "    From " << functionName << nl
@@ -185,7 +263,7 @@ Foam::OSstream& Foam::messageStream::operator()
         sourceFileLineNumber,
         ioStream.name(),
         ioStream.lineNumber(),
-        -1
+        -1  // No known endLineNumber
     );
 }
 
@@ -203,82 +281,29 @@ Foam::OSstream& Foam::messageStream::operator()
         functionName,
         sourceFileName,
         sourceFileLineNumber,
-        dict.name(),
+        dict.relativeName(),
         dict.startLineNumber(),
         dict.endLineNumber()
     );
 }
 
 
-Foam::messageStream::operator Foam::OSstream&()
-{
-    if (level)
-    {
-        const bool collect =
-        (
-            severity_ == INFO
-         || severity_ == WARNING
-         || severity_ == INFO_STDERR
-        );
-
-        // Could add guard with parRun
-        if (collect && !Pstream::master())
-        {
-            return Snull;
-        }
-
-        // Use stderr instead of stdout
-        // - INFO_STDERR
-        // - WARNING when infoDetailLevel == 0
-        const bool useStderr =
-        (
-            (severity_ == INFO_STDERR)
-         || (severity_ == WARNING && Foam::infoDetailLevel == 0)
-        );
-
-        OSstream& os =
-        (
-            (collect || !Pstream::parRun())
-          ? (useStderr ? Serr : Sout)
-          : (useStderr ? Perr : Pout)
-        );
-
-
-        if (!title().empty())
-        {
-            os << title().c_str();
-        }
-
-        if (maxErrors_ && (++errorCount_ >= maxErrors_))
-        {
-            FatalErrorInFunction
-                << "Too many errors"
-                << abort(FatalError);
-        }
-
-        return os;
-    }
-
-    return Snull;
-}
-
-
 // * * * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * //
 
-Foam::messageStream Foam::Info("", messageStream::INFO);
+Foam::messageStream Foam::Info("", Foam::messageStream::INFO);
 
-Foam::messageStream Foam::InfoErr("", messageStream::INFO_STDERR);
+Foam::messageStream Foam::InfoErr("", Foam::messageStream::INFO_STDERR);
 
 Foam::messageStream Foam::Warning
 (
     "--> FOAM Warning : ",
-    messageStream::WARNING
+    Foam::messageStream::WARNING
 );
 
 Foam::messageStream Foam::SeriousError
 (
     "--> FOAM Serious Error : ",
-    messageStream::SERIOUS,
+    Foam::messageStream::SERIOUS,
     100
 );
 

@@ -99,13 +99,13 @@ public:
         // Enquiry
 
             //- Return the stream prefix
-            const string& prefix() const
+            const string& prefix() const noexcept
             {
                 return prefix_;
             }
 
             //- Return non-const access to the stream prefix
-            string& prefix()
+            string& prefix() noexcept
             {
                 return prefix_;
             }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
             scalar totProfile = returnReduce(profile, sumOp<scalar>());
 
-            int oldPrecision = Info().precision(4);
+            const int oldPrecision = Info.stream().precision(4);
 
             Info<< setw(8) << levelI
                 << setw(8) << totNprocs
@@ -200,7 +200,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
                 << setw(12) << totProfile/totNprocs
                 << nl;
 
-            Info().precision(oldPrecision);
+            Info.stream().precision(oldPrecision);
         }
         Info<< endl;
     }
