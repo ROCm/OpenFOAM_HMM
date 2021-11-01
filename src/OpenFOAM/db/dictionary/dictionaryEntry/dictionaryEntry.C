@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,25 +87,25 @@ Foam::ITstream& Foam::dictionaryEntry::stream() const
 }
 
 
-const Foam::dictionary* Foam::dictionaryEntry::dictPtr() const
+const Foam::dictionary* Foam::dictionaryEntry::dictPtr() const noexcept
 {
     return this;
 }
 
 
-Foam::dictionary* Foam::dictionaryEntry::dictPtr()
+Foam::dictionary* Foam::dictionaryEntry::dictPtr() noexcept
 {
     return this;
 }
 
 
-const Foam::dictionary& Foam::dictionaryEntry::dict() const
+const Foam::dictionary& Foam::dictionaryEntry::dict() const noexcept
 {
     return *this;
 }
 
 
-Foam::dictionary& Foam::dictionaryEntry::dict()
+Foam::dictionary& Foam::dictionaryEntry::dict() noexcept
 {
     return *this;
 }

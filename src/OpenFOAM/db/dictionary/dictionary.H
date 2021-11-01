@@ -171,7 +171,8 @@ public:
             pointer eptr_;
 
 
-            //- Construct for the given dictionary context
+            //- Construct for the given dictionary context.
+            //  Allow implicit conversion
             Searcher(dict_pointer dict)
             :
                 dict_(dict),
@@ -196,62 +197,62 @@ public:
 
 
             //- True if entry was found
-            inline bool good() const
+            bool good() const noexcept
             {
                 return eptr_;
             }
 
             //- True if entry was found
-            inline bool found() const
+            bool found() const noexcept
             {
                 return eptr_;
             }
 
             //- The containing dictionary context
-            inline dict_reference context() const
+            dict_reference context() const
             {
                 return *dict_;
             }
 
             //- A pointer to the entry (nullptr if not found)
-            inline pointer ptr() const
+            pointer ptr() const noexcept
             {
                 return eptr_;
             }
 
             //- A reference to the entry (Error if not found)
-            inline reference ref() const
+            reference ref() const
             {
                 return *eptr_;
             }
 
             //- True if found entry is a dictionary.
-            inline bool isDict() const
+            bool isDict() const noexcept
             {
-                return eptr_ && eptr_->isDict();
+                return (eptr_ && eptr_->dictPtr());
             }
 
-            //- Pointer to the found entry as a dictionary or nullptr otherwise.
-            inline dict_pointer dictPtr() const
+            //- Pointer to the found entry as a dictionary, nullptr otherwise
+            dict_pointer dictPtr() const noexcept
             {
-                return eptr_ && eptr_->isDict() ? eptr_->dictPtr() : nullptr;
+                return eptr_ ? eptr_->dictPtr() : nullptr;
             }
 
             //- Reference the found entry as a dictionary.
             //  (Error if not found, or not a dictionary).
-            inline dict_reference dict() const
+            dict_reference dict() const
             {
                 return eptr_->dict();
             }
 
             //- Permit an explicit cast to the other (const/non-const) searcher
-            inline explicit operator const Searcher<!Const>&() const
+            explicit operator const Searcher<!Const>&() const
             {
                 return *reinterpret_cast<const Searcher<!Const>*>(this);
             }
 
             //- A pointer to the entry (nullptr if not found)
-            pointer operator->() const
+            pointer operator->() const noexcept
             {
                 return eptr_;
             }
@@ -359,9 +360,6 @@ private:
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is, const word& keyword) const;
 
-        //- The case-relative dictionary name. Uses FOAM_CASE
-        fileName relativeName(const bool caseTag=false) const;
-
         //- Report (on stderr) that the keyword default value was used
         template<class T>
         void reportDefault
@@ -379,7 +377,7 @@ public:
 
     //- Report optional keywords and values if not present in dictionary
     //  For value greater than 1: fatal.
-    //  Set/unset via an InfoSwitch
+    //  Set/unset via an InfoSwitch or -info-switch at the command-line
     static int writeOptionalEntries;
 
     //- An empty dictionary, which is also the parent for all dictionaries
@@ -445,13 +443,13 @@ public:
     // Access
 
         //- The dictionary name
-        const fileName& name() const
+        const fileName& name() const noexcept
         {
             return name_;
         }
 
         //- The dictionary name for modification (use with caution).
-        fileName& name()
+        fileName& name() noexcept
         {
             return name_;
         }
@@ -470,8 +468,16 @@ public:
             return scopedName.substr(i+1);
         }
 
+        //- The dictionary name relative to the case.
+        //  Uses argList::envRelativePath to obtain FOAM_CASE
+        //
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        fileName relativeName(const bool caseTag = false) const;
+
         //- Return the parent dictionary
-        const dictionary& parent() const
+        const dictionary& parent() const noexcept
         {
             return parent_;
         }

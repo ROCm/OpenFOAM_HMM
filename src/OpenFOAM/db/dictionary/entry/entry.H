@@ -210,7 +210,7 @@ public:
 
 
         //- Return true if this entry is a stream
-        virtual bool isStream() const
+        virtual bool isStream() const noexcept
         {
             return false;
         }
@@ -220,21 +220,21 @@ public:
 
 
         //- Return true if this entry is a dictionary
-        virtual bool isDict() const
+        virtual bool isDict() const noexcept
         {
             return this->dictPtr();
         }
 
         //- Return pointer to dictionary, if entry is a dictionary.
         //  Return nullptr if the entry is not a dictionary.
-        virtual const dictionary* dictPtr() const
+        virtual const dictionary* dictPtr() const noexcept
         {
             return nullptr;
         }
 
         //- Return non-const pointer to dictionary, if entry is a dictionary
         //  Return nullptr if the entry is not a dictionary.
-        virtual dictionary* dictPtr()
+        virtual dictionary* dictPtr() noexcept
         {
             return nullptr;
         }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,23 +57,6 @@ registerInfoSwitch
     int,
     Foam::dictionary::writeOptionalEntries
 );
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-Foam::fileName Foam::dictionary::relativeName(const bool caseTag) const
-{
-    const fileName caseDir(argList::envGlobalPath());
-
-    if (!caseDir.empty() && name().isAbsolute())
-    {
-        return name().relative(caseDir, caseTag);
-    }
-    else
-    {
-        return name();
-    }
-}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -188,6 +171,12 @@ Foam::dictionary::~dictionary()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName Foam::dictionary::relativeName(const bool caseTag) const
+{
+    return argList::envRelativePath(name(), caseTag);
+}
+
 
 const Foam::dictionary& Foam::dictionary::topDict() const
 {

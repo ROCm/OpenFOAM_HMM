@@ -162,7 +162,7 @@ public:
         virtual label endLineNumber() const;
 
         //- Return true - this entry is a stream
-        virtual bool isStream() const
+        virtual bool isStream() const noexcept
         {
             return true;
         }
