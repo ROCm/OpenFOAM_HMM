@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -320,7 +320,6 @@ bool Foam::processorLODs::box::doRefineBoxes
     const label refineIter,
     const label nSrcFaces,
     const List<labelList>& refineFlags,
-    const labelList& nElems,
     List<DynamicList<treeBoundBox>>& fixedBoxes
 )
 {
@@ -332,7 +331,7 @@ bool Foam::processorLODs::box::doRefineBoxes
         if (proci != Pstream::myProcNo())
         {
             UOPstream toProc(proci, pBufs);
-            toProc << nElems[proci] << refineFlags[proci];
+            toProc << refineFlags[proci];
         }
     }
 
@@ -341,7 +340,6 @@ bool Foam::processorLODs::box::doRefineBoxes
     // Receive refine refinement actions from remote procs and use to refine
     // local src boxes
     bool refineBoxes = false;
-    label nElem = 0;
     List<DynamicList<label>> newToOld(Pstream::nProcs());
 
 
@@ -353,7 +351,6 @@ bool Foam::processorLODs::box::doRefineBoxes
         }
 
         UIPstream fromProc(proci, pBufs);
-        nElem += readLabel(fromProc);
         const labelList refineFlags(fromProc);
 
         const List<treeBoundBox>& procBoxes = boxes_[proci];
@@ -467,7 +464,6 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createMap
                 refinementIter,
                 nSrcElems,
                 refineFlags,
-                nElems,
                 fixedBoxes
             );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -297,11 +297,9 @@ void Foam::StandardChemistryModel<ReactionThermo, ThermoType>::derivatives
     // Constant pressure
     // dT/dt = ...
     scalar rho = 0.0;
-    scalar cSum = 0.0;
     for (label i = 0; i < nSpecie_; i++)
     {
         const scalar W = specieThermo_[i].W();
-        cSum += c_[i];
         rho += W*c_[i];
     }
     scalar cp = 0.0;

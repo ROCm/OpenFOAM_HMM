@@ -622,7 +622,7 @@ void Foam::radiation::viewFactor::calculate()
             const labelList& coarsePatchFace =
                 coarseMesh_.patchFaceMap()[patchID];
 
-            scalar heatFlux = 0.0;
+            /// scalar heatFlux = 0.0;
             forAll(coarseToFine, coarseI)
             {
                 label globalCoarse =
@@ -631,12 +631,11 @@ void Foam::radiation::viewFactor::calculate()
 
                 const label coarseFaceID = coarsePatchFace[coarseI];
                 const labelList& fineFaces = coarseToFine[coarseFaceID];
-                forAll(fineFaces, k)
-                {
-                    label faceI = fineFaces[k];
 
-                    qrp[faceI] = q[globalCoarse];
-                    heatFlux += qrp[faceI]*sf[faceI];
+                for (const label facei : fineFaces)
+                {
+                    qrp[facei] = q[globalCoarse];
+                    /// heatFlux += qrp[facei]*sf[facei];
                 }
                 globCoarseId ++;
             }

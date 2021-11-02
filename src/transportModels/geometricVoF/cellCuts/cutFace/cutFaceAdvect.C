@@ -270,7 +270,6 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedFaceFlux
             scalarField pTimes_tri(3);
             fPts_tri[0] = mesh_.faceCentres()[faceI];
             pTimes_tri[0] = ((fPts_tri[0] - x0) & n0)/Un0;
-            scalar area = 0;
             for (label pi = 0; pi < nPoints; ++pi)
             {
                 fPts_tri[1] = fPts[pi];
@@ -284,7 +283,7 @@ Foam::scalar Foam::cutFaceAdvect::timeIntegratedFaceFlux
                        *(fPts_tri[2] - fPts_tri[0])
                        ^(fPts_tri[1] - fPts_tri[0])
                     );
-                area += magSf_tri;
+
                 const scalar phi_tri = phi*magSf_tri/magSf;
                 dVf +=
                     phi_tri/magSf_tri
