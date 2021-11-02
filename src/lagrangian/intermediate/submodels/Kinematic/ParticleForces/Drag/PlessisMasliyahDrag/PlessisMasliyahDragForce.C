@@ -28,25 +28,6 @@ License
 #include "PlessisMasliyahDragForce.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::scalar Foam::PlessisMasliyahDragForce<CloudType>::CdRe
-(
-    const scalar Re
-) const
-{
-    if (Re > 1000.0)
-    {
-        return 0.44*Re;
-    }
-    else
-    {
-        return 24.0*(1.0 + 0.15*pow(Re, 0.687));
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,12 +59,6 @@ class PlessisMasliyahDragForce
 
         //- Reference to the carrier volume fraction field
         const volScalarField& alphac_;
-
-
-    // Private Member Functions
-
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
 
 
 public:
