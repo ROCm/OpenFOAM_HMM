@@ -297,13 +297,13 @@ public:
     // Access
 
         //- Return reference to global points
-        const Field<point_type>& points() const
+        const Field<point_type>& points() const noexcept
         {
             return points_;
         }
 
         //- Number of faces in the patch
-        label nFaces() const
+        label nFaces() const noexcept
         {
             return FaceList::size();
         }

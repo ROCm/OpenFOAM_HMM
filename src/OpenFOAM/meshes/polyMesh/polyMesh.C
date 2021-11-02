@@ -1310,13 +1310,13 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
 }
 
 
-Foam::label Foam::polyMesh::comm() const
+Foam::label Foam::polyMesh::comm() const noexcept
 {
     return comm_;
 }
 
 
-Foam::label& Foam::polyMesh::comm()
+Foam::label& Foam::polyMesh::comm() noexcept
 {
     return comm_;
 }

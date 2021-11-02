@@ -308,10 +308,7 @@ Foam::faMatrix<Type>::faMatrix
 template<class Type>
 Foam::tmp<Foam::faMatrix<Type>> Foam::faMatrix<Type>::clone() const
 {
-    return tmp<faMatrix<Type>>
-    (
-        new faMatrix<Type>(*this)
-    );
+    return tmp<faMatrix<Type>>::New(*this);
 }
 
 

@@ -528,10 +528,7 @@ Foam::fvMatrix<Type>::fvMatrix
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type>> Foam::fvMatrix<Type>::clone() const
 {
-    return tmp<fvMatrix<Type>>
-    (
-        new fvMatrix<Type>(*this)
-    );
+    return tmp<fvMatrix<Type>>::New(*this);
 }
 
 

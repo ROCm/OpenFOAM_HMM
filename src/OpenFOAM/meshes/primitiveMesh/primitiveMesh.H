@@ -69,7 +69,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
 
 /*---------------------------------------------------------------------------*\
@@ -484,28 +484,28 @@ public:
             // Mesh size parameters
 
                 //- Number of mesh points
-                inline label nPoints() const;
+                inline label nPoints() const noexcept;
 
                 //- Number of mesh edges
                 inline label nEdges() const;
 
                 //- Number of mesh faces
-                inline label nFaces() const;
+                inline label nFaces() const noexcept;
 
                 //- Number of mesh cells
-                inline label nCells() const;
+                inline label nCells() const noexcept;
 
                 //- Number of internal faces
-                inline label nInternalFaces() const;
+                inline label nInternalFaces() const noexcept;
 
                 //- Number of boundary faces (== nFaces - nInternalFaces)
-                inline label nBoundaryFaces() const;
+                inline label nBoundaryFaces() const noexcept;
 
 
             // If points are ordered (nInternalPoints != -1):
 
                 //- Points not on boundary
-                inline label nInternalPoints() const;
+                inline label nInternalPoints() const noexcept;
 
                 //- Internal edges (i.e. not on boundary face) using
                 //- no boundary point
@@ -607,7 +607,7 @@ public:
 
 
             //- Return true if given face label is internal to the mesh
-            inline bool isInternalFace(const label faceIndex) const;
+            inline bool isInternalFace(const label faceIndex) const noexcept;
 
 
             // Topological checks
@@ -795,23 +795,23 @@ public:
             void printAllocated() const;
 
             // Per storage whether allocated
-            inline bool hasCellShapes() const;
-            inline bool hasEdges() const;
-            inline bool hasCellCells() const;
-            inline bool hasEdgeCells() const;
-            inline bool hasPointCells() const;
-            inline bool hasCells() const;
-            inline bool hasEdgeFaces() const;
-            inline bool hasPointFaces() const;
-            inline bool hasCellEdges() const;
-            inline bool hasFaceEdges() const;
-            inline bool hasPointEdges() const;
-            inline bool hasPointPoints() const;
-            inline bool hasCellPoints() const;
-            inline bool hasCellCentres() const;
-            inline bool hasFaceCentres() const;
-            inline bool hasCellVolumes() const;
-            inline bool hasFaceAreas() const;
+            inline bool hasCellShapes() const noexcept;
+            inline bool hasEdges() const noexcept;
+            inline bool hasCellCells() const noexcept;
+            inline bool hasEdgeCells() const noexcept;
+            inline bool hasPointCells() const noexcept;
+            inline bool hasCells() const noexcept;
+            inline bool hasEdgeFaces() const noexcept;
+            inline bool hasPointFaces() const noexcept;
+            inline bool hasCellEdges() const noexcept;
+            inline bool hasFaceEdges() const noexcept;
+            inline bool hasPointEdges() const noexcept;
+            inline bool hasPointPoints() const noexcept;
+            inline bool hasCellPoints() const noexcept;
+            inline bool hasCellCentres() const noexcept;
+            inline bool hasFaceCentres() const noexcept;
+            inline bool hasCellVolumes() const noexcept;
+            inline bool hasFaceAreas() const noexcept;
 
             // On-the-fly addressing calculation. These functions return either
             // a reference to the full addressing (if already calculated) or

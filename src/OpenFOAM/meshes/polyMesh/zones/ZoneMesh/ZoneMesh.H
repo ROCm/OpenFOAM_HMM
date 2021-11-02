@@ -249,13 +249,6 @@ public:
         //- Set/add group with zones
         void setGroup(const word& groupName, const labelUList& zoneIDs);
 
-
-        //- Clear addressing
-        void clearAddressing();
-
-        //- Clear the zones
-        void clear();
-
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
 
@@ -265,6 +258,17 @@ public:
 
         //- Correct zone mesh after moving points
         void movePoints(const pointField& pts);
+
+
+    // Storage Management
+
+        //- Clear addressing
+        void clearAddressing();
+
+        //- Clear the zones
+        void clear();
+
+        bool hasFaceAreas() const { return bool(zoneMapPtr_); }
 
 
     // Member Operators

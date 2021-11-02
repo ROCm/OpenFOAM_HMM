@@ -27,7 +27,6 @@ License
 
 #include "processorCyclicFvPatchField.H"
 #include "processorCyclicFvPatch.H"
-#include "demandDrivenData.H"
 #include "transformField.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //

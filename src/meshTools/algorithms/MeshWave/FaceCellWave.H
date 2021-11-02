@@ -83,7 +83,7 @@ class FaceCellWave
 protected:
 
     //- Information tagged with a source or destination id.
-    //  With std::pair as lightweight, moveable container.
+    //  With std::pair as lightweight, movable container.
     typedef std::pair<label,Type> taggedInfoType;
 
 

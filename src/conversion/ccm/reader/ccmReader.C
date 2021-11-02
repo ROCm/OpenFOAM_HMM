@@ -28,7 +28,6 @@ License
 #include "ccmReader.H"
 #include "IFstream.H"
 #include "IOdictionary.H"
-#include "demandDrivenData.H"
 
 #include "ccmInternal.H"  // include last to avoid any strange interactions
 

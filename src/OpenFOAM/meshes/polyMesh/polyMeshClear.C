@@ -92,7 +92,7 @@ void Foam::polyMesh::updateGeomPoints
             << exit(FatalError);
     }
 
-    // Clear all geometric mesh objects that are not 'moveable'
+    // Clear all geometric mesh objects that are not 'movable'
     meshObject::clearUpto
     <
         pointMesh,
@@ -143,7 +143,7 @@ void Foam::polyMesh::updateGeomPoints
     geometricD_ = Zero;
     solutionD_ = Zero;
 
-    // Update all 'moveable' objects
+    // Update all 'movable' objects
     meshObject::movePoints<polyMesh>(*this);
     meshObject::movePoints<pointMesh>(*this);
 }

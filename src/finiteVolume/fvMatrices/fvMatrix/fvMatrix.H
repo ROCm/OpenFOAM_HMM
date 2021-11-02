@@ -121,11 +121,27 @@ class fvMatrix
     public refCount,
     public lduMatrix
 {
+public:
+
+    // Public Types
+
+        //- Field type for psi
+        typedef
+            GeometricField<Type, fvPatchField, volMesh>
+            psiFieldType;
+
+        //- Field type for face flux (for non-orthogonal correction)
+        typedef
+            GeometricField<Type, fvsPatchField, surfaceMesh>
+            faceFluxFieldType;
+
+private:
+
     // Private Data
 
         //- Const reference to field
         //  Converted into a non-const reference at the point of solution.
-        const GeometricField<Type, fvPatchField, volMesh>& psi_;
+        const psiFieldType& psi_;
 
         //- Originating fvMatrices when assembling matrices. Empty if not used.
         PtrList<fvMatrix<Type>> subMatrices_;
@@ -154,8 +170,7 @@ class fvMatrix
         FieldField<Field, Type> boundaryCoeffs_;
 
         //- Face flux field for non-orthogonal correction
-        mutable GeometricField<Type, fvsPatchField, surfaceMesh>
-            *faceFluxCorrectionPtr_;
+        mutable faceFluxFieldType* faceFluxCorrectionPtr_;
 
 
 protected:
@@ -468,12 +483,18 @@ public:
 
             //- Declare return type of the faceFluxCorrectionPtr() function
             typedef GeometricField<Type, fvsPatchField, surfaceMesh>
-                *surfaceTypeFieldPtr;
+                *faceFluxFieldPtrType;
 
             //- Return pointer to face-flux non-orthogonal correction field
-            surfaceTypeFieldPtr& faceFluxCorrectionPtr()
+            faceFluxFieldPtrType& faceFluxCorrectionPtr()
             {
                 return faceFluxCorrectionPtr_;
+            }
+
+            //- True if face-flux non-orthogonal correction field exists
+            bool hasFaceFluxCorrection() const noexcept
+            {
+                return bool(faceFluxCorrectionPtr_);
             }
 
 

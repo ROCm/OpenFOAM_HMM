@@ -29,7 +29,6 @@ License
 #include "facePointPatch.H"
 #include "pointBoundaryMesh.H"
 #include "pointMesh.H"
-#include "demandDrivenData.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
