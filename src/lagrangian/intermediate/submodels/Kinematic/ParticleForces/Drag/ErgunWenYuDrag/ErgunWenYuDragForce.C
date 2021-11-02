@@ -31,19 +31,16 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::ErgunWenYuDragForce<CloudType>::CdRe
-(
-    const scalar Re
-) const
+Foam::scalar Foam::ErgunWenYuDragForce<CloudType>::CdRe(const scalar alphacRe)
+const
 {
-    if (Re > 1000.0)
+    // (ZZB:Eq. 14, GLSLR:Table 3)
+    if (alphacRe < 1000.0)
     {
-        return 0.44*Re;
+        return 24.0*(1.0 + 0.15*pow(alphacRe, 0.687));
     }
-    else
-    {
-        return 24.0*(1.0 + 0.15*pow(Re, 0.687));
-    }
+
+    return 0.44*alphacRe;
 }
 
 
@@ -85,13 +82,6 @@ Foam::ErgunWenYuDragForce<CloudType>::ErgunWenYuDragForce
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ErgunWenYuDragForce<CloudType>::~ErgunWenYuDragForce()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -105,7 +95,7 @@ Foam::forceSuSp Foam::ErgunWenYuDragForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    scalar alphac(alphac_[p.cell()]);
+    const scalar alphac = alphac_[p.cell()];
 
     if (alphac < 0.8)
     {

@@ -168,9 +168,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const PlessisMasliyahDragForce<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~PlessisMasliyahDragForce();
+    virtual ~PlessisMasliyahDragForce() = default;
 
 
     // Member Functions

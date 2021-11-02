@@ -168,8 +168,8 @@ class ErgunWenYuDragForce
 
     // Private Member Functions
 
-        //- Drag coefficient multiplied by Reynolds number
-        scalar CdRe(const scalar Re) const;
+        //- Drag coefficient multiplied by volume fraction and Reynolds number
+        scalar CdRe(const scalar alphacRe) const;
 
 
 public:
@@ -200,9 +200,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const ErgunWenYuDragForce<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~ErgunWenYuDragForce();
+    virtual ~ErgunWenYuDragForce() = default;
 
 
     // Member Functions

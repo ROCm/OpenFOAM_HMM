@@ -66,13 +66,6 @@ Foam::PlessisMasliyahDragForce<CloudType>::PlessisMasliyahDragForce
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PlessisMasliyahDragForce<CloudType>::~PlessisMasliyahDragForce()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -86,11 +79,11 @@ Foam::forceSuSp Foam::PlessisMasliyahDragForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    scalar alphac(alphac_[p.cell()]);
+    const scalar alphac = alphac_[p.cell()];
 
-    scalar cbrtAlphap(cbrt(1.0 - alphac));
+    const scalar cbrtAlphap = cbrt(1.0 - alphac);
 
-    scalar A =
+    const scalar A =
         26.8*pow3(alphac)
        /(
             sqr(cbrtAlphap)
@@ -99,9 +92,8 @@ Foam::forceSuSp Foam::PlessisMasliyahDragForce<CloudType>::calcCoupled
           + SMALL
         );
 
-    scalar B =
-        sqr(alphac)
-       /sqr(1.0 - sqr(cbrtAlphap));
+    // (P:Eq. 36)
+    const scalar B = sqr(alphac)/sqr(1.0 - sqr(cbrtAlphap));
 
     return forceSuSp
     (

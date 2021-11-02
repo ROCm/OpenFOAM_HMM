@@ -169,9 +169,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const SphereDragForce<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~SphereDragForce();
+    virtual ~SphereDragForce() = default;
 
 
     // Member Functions

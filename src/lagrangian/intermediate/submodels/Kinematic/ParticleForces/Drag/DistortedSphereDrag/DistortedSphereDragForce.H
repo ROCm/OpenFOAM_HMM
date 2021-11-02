@@ -126,7 +126,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class DistortedSphereDragForce Declaration
+                   Class DistortedSphereDragForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -168,9 +168,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const DistortedSphereDragForce<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~DistortedSphereDragForce();
+    virtual ~DistortedSphereDragForce() = default;
 
 
     // Member Functions

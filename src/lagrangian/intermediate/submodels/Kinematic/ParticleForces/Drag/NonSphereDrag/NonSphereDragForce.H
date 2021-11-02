@@ -165,7 +165,7 @@ protected:
     // Protected Data
 
         //- Ratio of surface of sphere having same volume as particle to
-        //  actual surface area of particle (0 < phi <= 1)
+        //- actual surface area of particle (0 < phi <= 1)
         scalar phi_;
 
 
@@ -214,9 +214,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const NonSphereDragForce<CloudType>&) = delete;
+
 
     //- Destructor
-    virtual ~NonSphereDragForce();
+    virtual ~NonSphereDragForce() = default;
 
 
     // Member Functions
