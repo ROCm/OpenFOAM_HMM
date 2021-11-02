@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,102 @@ Group
     grpLagrangianIntermediateForceSubModels
 
 Description
-    Wen-Yu drag model for solid spheres.
+    Particle-drag model wherein drag forces (per unit carrier-fluid
+    velocity) are dynamically computed based on the Wen-Yu drag model.
+
+    \f[
+        \mathrm{F}_\mathrm{D} =
+            \frac{3}{4}
+            \frac{(1 - \alpha_c) \, \mu_c \, \alpha_c \, \mathrm{Re}_p }{d_p^2}
+            \mathrm{C}_\mathrm{D} \, \alpha_c^{-2.65}
+    \f]
+    with
+
+    \f[
+        \mathrm{C}_\mathrm{D} =
+            \frac{24}{\alpha_c \, \mathrm{Re}_p}
+            \left(1 + \frac{1}{6}(\alpha_c \, \mathrm{Re}_p)^{2/3} \right)
+            \quad \mathrm{if} \quad \alpha_c \, \mathrm{Re}_p < 1000
+    \f]
+    \f[
+        \mathrm{C}_\mathrm{D} =
+            0.44 \quad \mathrm{if} \quad \alpha_c \, \mathrm{Re}_p \geq 1000
+    \f]
+    and
+    \f[
+        \mathrm{Re}_p =
+            \frac{\rho_c \, | \mathbf{u}_\mathrm{rel} | \, d_p}{\mu_c}
+    \f]
+
+    where
+    \vartable
+        \mathrm{F}_\mathrm{D} | Drag force per carrier-fluid velocity [kg/s]
+        \mathrm{C}_\mathrm{D} | Particle drag coefficient
+        \mathrm{Re}_p         | Particle Reynolds number
+        \mu_c    | Dynamic viscosity of carrier at the cell occupying particle
+        d_p                   | Particle diameter
+        \rho_c   | Density of carrier at the cell occupying particle
+        \mathbf{u}_\mathrm{rel} | Relative velocity between particle and carrier
+        \alpha_c              | Volume fraction of the carrier fluid
+    \endvartable
+
+    References:
+    \verbatim
+        Standard model:
+            Wen, C. Y., & Yu, Y. H., (1966).
+            Mechanics of fluidization.
+            Chem. Eng. Prog. Symp. Ser. 62, 100-111.
+
+        Drag-coefficient model:
+            Schiller, L., & Naumann, A. (1935).
+            Über die grundlegenden Berechnungen bei der Schwerkraftaufbereitung.
+            Z. Ver. Dtsch. Ing., 77: 318–326.
+
+        Expressions (tags:ZZB, GLSLR), (Eq.13-14, Table 3):
+            Zhou, L., Zhang, L., Bai, L., Shi, W.,
+            Li, W., Wang, C., & Agarwal, R. (2017).
+            Experimental study and transient CFD/DEM simulation in
+            a fluidized bed based on different drag models.
+            RSC advances, 7(21), 12764-12774.
+            DOI:10.1039/C6RA28615A
+
+            Gao, X., Li, T., Sarkar, A., Lu, L., & Rogers, W. A. (2018).
+            Development and validation of an enhanced filtered drag model
+            for simulating gas-solid fluidization of Geldart A particles
+            in all flow regimes.
+            Chemical Engineering Science, 184, 33-51.
+            DOI:10.1016/j.ces.2018.03.038
+    \endverbatim
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        particleForces
+        {
+            WenYuDrag
+            {
+                alphac    <alphacName>; // e.g. alpha.air
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: WenYuDrag              | word | yes  | -
+      alphac       | Name of carrier fluid             | word | yes  | -
+    \endtable
+
+Note
+  - \f$\mathrm{F}_\mathrm{D}\f$ is weighted with the particle mass/density
+    at the stage of a function return, so that it can later be normalised
+    with the effective mass, if necessary (e.g. when using virtual-mass forces).
+
+SourceFiles
+    WenYuDragForce.C
 
 \*---------------------------------------------------------------------------*/
 
