@@ -274,7 +274,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
         false
     ),
     myComm_(comm_),
-    writer_(maxThreadFileBufferSize, comm_),
+    writer_(mag(maxThreadFileBufferSize), comm_),
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
 {
@@ -295,7 +295,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 :
     masterUncollatedFileOperation(comm, false),
     myComm_(-1),
-    writer_(maxThreadFileBufferSize, comm),
+    writer_(mag(maxThreadFileBufferSize), comm),
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
 {
@@ -310,6 +310,9 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 
 Foam::fileOperations::collatedFileOperation::~collatedFileOperation()
 {
+    // Wait for any outstanding file operations
+    flush();
+
     if (myComm_ != -1 && myComm_ != UPstream::worldComm)
     {
         UPstream::freeCommunicator(myComm_);
@@ -460,7 +463,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         {
             // Re-check static maxThreadFileBufferSize variable to see
             // if needs to use threading
-            const bool useThread = (maxThreadFileBufferSize > 0);
+            const bool useThread = (maxThreadFileBufferSize != 0);
 
             if (debug)
             {

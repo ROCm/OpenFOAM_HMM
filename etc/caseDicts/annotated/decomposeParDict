@@ -208,9 +208,7 @@ constraints
     patches
     {
         //- Keep owner and neighbour on same processor for faces in patches
-        //  (only makes sense for cyclic patches. Not suitable for e.g.
-        //   cyclicAMI since these are not coupled on the patch level. Use
-        //   singleProcessorFaceSets for those)
+        //  (only makes sense for cyclic patches and cyclicAMI)
         type    preservePatches;
         patches (".*");
         enabled false;
@@ -271,9 +269,7 @@ constraints
 // preserveFaceZones (heater solid1 solid3);
 
 //- Keep owner and neighbour on same processor for faces in patches:
-//  (makes sense only for cyclic patches. Not suitable for e.g. cyclicAMI
-//   since these are not coupled on the patch level. Use
-//   singleProcessorFaceSets for those)
+//  (only makes sense for cyclic patches and cyclicAMI)
 //preservePatches (cyclic_half0 cyclic_half1);
 
 //- Keep all of faceSet on a single processor. This puts all cells

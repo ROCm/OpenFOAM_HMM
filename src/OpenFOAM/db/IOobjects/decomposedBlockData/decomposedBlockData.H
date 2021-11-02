@@ -213,7 +213,7 @@ public:
             const string& note,
             const fileName& location,
             const word& objectName,
-            const dictionary* extraEntries = nullptr
+            const dictionary& extraEntries
         );
 
         //- Helper: write FoamFile IOobject header

@@ -984,7 +984,8 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
             io.headerClassName(),
             io.note(),
             masterLocation,
-            name()
+            name(),
+            dictionary()
         );
     }
 

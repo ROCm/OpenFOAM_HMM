@@ -279,7 +279,15 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
     if (debug)
     {
-        Pout<< "UPstream::init : procs:" << numprocs
+        Pout<< "UPstream::init :"
+            << " thread-support : wanted:" << needsThread
+            << " obtained:"
+            <<  (
+                    provided_thread_support == MPI_THREAD_MULTIPLE
+                  ? "MPI_THREAD_MULTIPLE"
+                  : "MPI_THREAD_SINGLE"
+                )
+            << " procs:" << numprocs
             << " rank:" << myRank
             << " world:" << world << endl;
     }

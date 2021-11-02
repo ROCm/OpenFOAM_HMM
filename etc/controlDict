@@ -106,6 +106,10 @@ OptimisationSwitches
 
     //- collated: thread buffer size for queued file writes.
     //  If set to 0 or not sufficient for the file size, threading is not used.
+    //  A special setting is a negative value which assumes the buffer
+    //  (sized with magnitude of value) is large enough to hold all
+    //  outstanding writes so will not try to initialise the Pstream with
+    //  threading support.
     //  Default: 1e9
     maxThreadFileBufferSize 0;
 

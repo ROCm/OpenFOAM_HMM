@@ -57,14 +57,12 @@ SourceFiles
 #include "labelList.H"
 #include "FIFOStack.H"
 #include "SubList.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class dictionary;
 
 /*---------------------------------------------------------------------------*\
                         Class OFstreamCollator Declaration
@@ -84,7 +82,7 @@ class OFstreamCollator
             PtrList<List<char>> slaveData_;
             const IOstreamOption streamOpt_;
             const bool append_;
-            const dictionary* headerEntries_;
+            const dictionary headerEntries_;
 
             writeData
             (
@@ -95,7 +93,7 @@ class OFstreamCollator
                 const labelList& sizes,
                 IOstreamOption streamOpt,
                 const bool append,
-                const dictionary* headerEntriesPtr = nullptr
+                const dictionary& headerEntries
             )
             :
                 comm_(comm),
@@ -106,7 +104,7 @@ class OFstreamCollator
                 slaveData_(),
                 streamOpt_(streamOpt),
                 append_(append),
-                headerEntries_(headerEntriesPtr)
+                headerEntries_(headerEntries)
             {}
 
             //- The (approximate) size of master + any optional slave data
@@ -160,7 +158,7 @@ class OFstreamCollator
             const PtrList<SubList<char>>& slaveData,
             IOstreamOption streamOpt,
             const bool append,
-            const dictionary* headerEntriesPtr
+            const dictionary& headerEntries
         );
 
         //- Write all files in stack
@@ -204,7 +202,7 @@ public:
             IOstreamOption streamOpt,
             const bool append,
             const bool useThread = true,
-            const dictionary* headerEntriesPtr = nullptr
+            const dictionary& headerEntries = dictionary::null
         );
 
         //- Wait for all thread actions to have finished
