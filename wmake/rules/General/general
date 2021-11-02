@@ -20,6 +20,18 @@ DEFAULT_RULES   = $(ARCHITECTURE_RULES)$(COMPILER_FAMILY)
 RULES           = $(ARCHITECTURE_RULES)$(WM_COMPILER)
 WMAKE_BIN       = $(WM_PROJECT_DIR)/platforms/tools/$(WM_ARCH)$(WM_COMPILER)
 
+# --------
+# Extract compiler version suffix.
+# Most (all?) compilers use the convention <compiler>-<version>
+#
+# Thus (for example) version=11 -> gcc-11
+# --------
+ifneq (,$(findstring version=,$(WM_COMPILE_CONTROL)))
+    COMPILER_VERSION := $(shell echo "$(WM_COMPILE_CONTROL)" | sed -ne 's/^.*version=-*\([0-9][.0-9]*\).*/-\1/p')
+else
+    COMPILER_VERSION :=
+endif
+
 # Default compilation is 'Opt' - never permit an empty value
 ifeq (,$(WM_COMPILE_OPTION))
     WM_COMPILE_OPTION = Opt

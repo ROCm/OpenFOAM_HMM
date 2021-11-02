@@ -1,3 +1,4 @@
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Icc/c
 
 cARCH       =
@@ -13,3 +14,5 @@ LINK_LIBS   = $(cDBUG) -L$(IA32ROOT)/lib
 
 LINKLIBSO   = $(cc) $(cARCH) -i_dynamic
 LINKEXE     = $(cc) $(cARCH) -Xlinker -z -Xlinker nodefs
+
+#------------------------------------------------------------------------------

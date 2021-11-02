@@ -1,3 +1,4 @@
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Clang/c++
 
 c++ARCH     = -m64 -pthread -ftrapping-math
@@ -7,12 +8,14 @@ include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
-cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
+cxxtoo      = $(Ctoo)
 
 LINK_LIBS   = $(c++DBUG)
 
 LINKLIBSO   = $(CC) $(c++FLAGS) -Wl,-dylib,-undefined,dynamic_lookup
 
 LINKEXE     = $(CC) $(c++FLAGS) -Wl,-execute,-undefined,dynamic_lookup
+
+#------------------------------------------------------------------------------

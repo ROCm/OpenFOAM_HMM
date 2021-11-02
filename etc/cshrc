@@ -87,6 +87,7 @@ setenv WM_COMPILE_OPTION Opt
 # [WM_COMPILE_CONTROL] - additional control for compiler rules
 #   +gold   : with gold linker
 #   ~openmp : without openmp
+#   version=... : compiler suffix (eg, "11" for gcc-11)
 #setenv WM_COMPILE_CONTROL "+gold"
 
 # [WM_MPLIB] - MPI implementation:

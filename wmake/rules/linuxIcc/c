@@ -1,3 +1,4 @@
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Icc/c
 
 cARCH       = -gcc-version=400
@@ -12,3 +13,5 @@ ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 include $(GENERAL_RULES)/Icc/link-c
 
 LINK_LIBS   += -L$(IA32ROOT)/lib
+
+#------------------------------------------------------------------------------

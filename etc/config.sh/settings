@@ -78,11 +78,15 @@ Linux)
     esac
     ;;
 
-# Presume x86_64, with clang (not gcc) as system compiler
+# arm64 or x86_64 architectures
 Darwin)
     WM_ARCH=darwin64
-    [ "$WM_COMPILER" = Gcc ] && WM_COMPILER=Clang
-    echo "openfoam: darwin support is clang/llvm only" 1>&2
+    # Defult to clang (not gcc) as system compiler
+    if [ "$WM_COMPILER" = Gcc ]
+    then
+        WM_COMPILER=Clang
+        echo "openfoam (darwin): using clang instead of gcc" 1>&2
+    fi
     ;;
 
 # Presume x86_64, with mingw cross-compiled

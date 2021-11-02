@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 SUFFIXES += .C .cc .cpp .cxx
 
-CC          = icpc -std=c++14
+CC          = icpc$(COMPILER_VERSION) -std=c++14
 
 c++ARCH     =
 c++DBUG     =

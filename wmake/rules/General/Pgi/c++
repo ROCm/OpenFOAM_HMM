@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 SUFFIXES += .C .cc .cpp .cxx
 
-CC          = pgc++ -std=c++11
+CC          = pgc++$(COMPILER_VERSION) -std=c++11
 
 c++ARCH     =
 c++DBUG     =

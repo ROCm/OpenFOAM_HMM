@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -87,6 +87,7 @@ export WM_COMPILE_OPTION=Opt
 # [WM_COMPILE_CONTROL] - additional control for compiler rules
 #   +gold   : with gold linker
 #   ~openmp : without openmp
+#   version=... : compiler suffix (eg, "11" for gcc-11)
 #export WM_COMPILE_CONTROL="+gold"
 
 # [WM_MPLIB] - MPI implementation:

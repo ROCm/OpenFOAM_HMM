@@ -82,11 +82,13 @@ case Linux:
     endsw
     breaksw
 
-# Presume x86_64, with clang (not gcc) as system compiler
+# arm64 or x86_64 architectures
 case Darwin:
     setenv WM_ARCH darwin64
-    if ( "$WM_COMPILER" == Gcc ) setenv WM_COMPILER Clang
-    echo "openfoam: darwin support is clang/llvm only"
+    if ( "$WM_COMPILER" == Gcc ) then
+        setenv WM_COMPILER Clang
+        echo "openfoam (darwin): using clang instead of gcc"
+    endif
     breaksw
 
 # Presume x86_64, with mingw cross-compiled

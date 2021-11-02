@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cc          = icx
+cc          = icx$(COMPILER_VERSION)
 
 cARCH       =
 cDBUG       =

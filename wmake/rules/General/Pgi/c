@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cc          = pgcc
+cc          = pgcc$(COMPILER_VERSION)
 
 cARCH       =
 cDBUG       =

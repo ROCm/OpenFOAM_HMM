@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 SUFFIXES += .C .cc .cpp .cxx
 
-CC          = nvc++ -std=c++14
+CC          = nvc++$(COMPILER_VERSION) -std=c++14
 
 c++ARCH     =
 c++DBUG     =

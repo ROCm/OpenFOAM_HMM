@@ -1,7 +1,9 @@
+#------------------------------------------------------------------------------
 # Fujitsu compiler - a clang variant
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Clang/c
 
-cc          = fcc
+cc          = fcc$(COMPILER_VERSION)
 
 cARCH       =
 
@@ -13,3 +15,5 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
 include $(GENERAL_RULES)/Clang/link-c
+
+#------------------------------------------------------------------------------

@@ -1,4 +1,6 @@
+#------------------------------------------------------------------------------
 # AMD compiler - a clang variant
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Clang/c
 
 cARCH       = -m64
@@ -11,3 +13,5 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
 include $(GENERAL_RULES)/Amd/link-c
+
+#------------------------------------------------------------------------------

@@ -1,7 +1,9 @@
-# A clang variant
+#------------------------------------------------------------------------------
+# ARM compiler - a clang variant
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Clang/c
 
-cc          = armclang
+cc          = armclang$(COMPILER_VERSION)
 
 cARCH       = -mcpu=native
 
@@ -16,3 +18,5 @@ include $(GENERAL_RULES)/Clang/link-c
 
 LINKLIBSO  += -armpl
 LINKEXE    += -armpl
+
+#------------------------------------------------------------------------------

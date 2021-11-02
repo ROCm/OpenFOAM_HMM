@@ -1,4 +1,6 @@
+#------------------------------------------------------------------------------
 # Cray compiler - a gcc variant/wrapper
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Gcc/c
 
 cc          = cc
@@ -13,3 +15,5 @@ cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -f
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
 include $(GENERAL_RULES)/Gcc/link-c
+
+#------------------------------------------------------------------------------
