@@ -51,7 +51,7 @@
 #
 #-------------------------------------------------------------------------------
 printHelp() {
-    cat<<USAGE
+    cat<<HELP_HEAD
 
 Usage: ${0##*/} [OPTION] fileName [-- args]
        ${0##*/} [OPTION] [-list|-list-test] [fileName]
@@ -75,22 +75,38 @@ options:
   -quiet (-q)       Suppress all normal output
   -silent (-s)      Suppress stderr, except -csh-verbose, -sh-verbose output
   -version | --version  Print version (same as -show-api)
-  -help             Print the usage
+  -help             Display short help and exit
+  -help-full        Display full help and exit
 
 Locate user/group/other file as per '#includeEtc'
-
 Do not group single character options.
+HELP_HEAD
+
+if [ -n "$1" ]
+then
+cat<<HELP_FULL
+
 Equivalent options:
   |  -mode=MODE     | -mode MODE  | -m MODE
   |  -prefix=DIR    [obsolete 1812]
   |  -version=VER   [obsolete 1812]
 
+Environment
+    FOAM_CONFIG_ETC  : ${FOAM_CONFIG_ETC:-[]}
+    FOAM_CONFIG_MODE : ${FOAM_CONFIG_MODE:-[]}
+    WM_PROJECT_SITE  : ${WM_PROJECT_SITE:-[PROJECT/site]}
+HELP_FULL
+fi
+
+
+cat<<HELP_TAIL
+
 Exit status
     0  when the file is found. Print resolved path to stdout.
     1  for miscellaneous errors.
     2  when the file is not found.
+HELP_TAIL
 
-USAGE
     exit 0  # A clean exit
 }
 
@@ -147,7 +163,10 @@ unset optAll optConfig optList projectApi
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help*)
+    -help-f*)   # Full help
+        printHelp -full
+        ;;
+    -h | -help*) # Short help
         printHelp
         ;;
     -show-api | -version | --version)  # Show API and exit
