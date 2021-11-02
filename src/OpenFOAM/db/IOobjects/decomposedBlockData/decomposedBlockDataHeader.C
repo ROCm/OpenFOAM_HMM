@@ -141,7 +141,7 @@ void Foam::decomposedBlockData::writeHeader
     const string& note,
     const fileName& location,
     const word& objectName,
-    const dictionary* extraEntries
+    const dictionary& extraEntries
 )
 {
     if (IOobject::bannerEnabled())
@@ -161,9 +161,9 @@ void Foam::decomposedBlockData::writeHeader
         objectName
     );
 
-    if (extraEntries)
+    if (!extraEntries.empty())
     {
-        extraEntries->writeEntries(os);
+        extraEntries.writeEntries(os);
     }
 
     os.endBlock();

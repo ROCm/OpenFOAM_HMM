@@ -22,4 +22,16 @@ numberOfSubdomains  2;
 method          hierarchical;
 n               (2 1 1);
 
+constraints
+{
+    patches
+    {
+        //- Keep owner and neighbour on same processor for faces in patches
+        //  (only makes sense for cyclic patches and cyclicAMI)
+        type    preservePatches;
+        patches (".*");
+    }
+}
+
+
 // ************************************************************************* //

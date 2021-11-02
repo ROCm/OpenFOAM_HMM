@@ -778,7 +778,7 @@ Foam::argList::argList
     }
 
     // Detect any parallel options
-    bool needsThread = fileOperations::fileOperationInitialise::New
+    const bool needsThread = fileOperations::fileOperationInitialise::New
     (
         handlerType,
         argc,

@@ -93,6 +93,14 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         Pout.prefix() = '[' +  name(myProcNo(comm)) + "] ";
         Perr.prefix() = '[' +  name(myProcNo(comm)) + "] ";
     }
+
+    if (debug)
+    {
+        Pout<< "UPstream::setParRun :"
+            << " nProcs:" << nProcs
+            << " haveThreads:" << haveThreads
+            << endl;
+    }
 }
 
 

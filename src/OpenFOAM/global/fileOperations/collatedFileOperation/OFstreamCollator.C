@@ -52,7 +52,7 @@ bool Foam::OFstreamCollator::writeFile
     const PtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
     const bool append,
-    const dictionary* headerEntriesPtr
+    const dictionary& headerEntries
 )
 {
     if (debug)
@@ -96,7 +96,7 @@ bool Foam::OFstreamCollator::writeFile
                 "",             // note
                 "",             // location (leave empty instead inaccurate)
                 fName.name(),   // object name
-                headerEntriesPtr
+                headerEntries
             );
         }
     }
@@ -350,7 +350,7 @@ bool Foam::OFstreamCollator::write
     IOstreamOption streamOpt,
     const bool append,
     const bool useThread,
-    const dictionary* headerEntriesPtr
+    const dictionary& headerEntries
 )
 {
     // Determine (on master) sizes to receive. Note: do NOT use thread
@@ -389,7 +389,7 @@ bool Foam::OFstreamCollator::write
             dummySlaveData,
             streamOpt,
             append,
-            headerEntriesPtr
+            headerEntries
         );
     }
     else if (totalSize <= maxBufferSize_)
@@ -427,7 +427,7 @@ bool Foam::OFstreamCollator::write
                 recvSizes,
                 streamOpt,
                 append,
-                headerEntriesPtr
+                headerEntries
             )
         );
         writeData& fileAndData = fileAndDataPtr();
@@ -552,7 +552,7 @@ bool Foam::OFstreamCollator::write
                     recvSizes,
                     streamOpt,
                     append,
-                    headerEntriesPtr
+                    headerEntries
                 )
             );
 
