@@ -196,7 +196,6 @@ inline Foam::sutherlandTransport<Thermo> Foam::operator+
         return sutherlandTransport<Thermo>
         (
             t,
-            0,
             st1.As_,
             st1.Ts_
         );
