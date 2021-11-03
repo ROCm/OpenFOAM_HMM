@@ -18,9 +18,15 @@ c++WARN     = \
     -Wno-unknown-warning-option \
     $(FOAM_EXTRA_CXXFLAGS)
 
+# Many extra warnings from boost
 c++LESSWARN = \
     -Wno-old-style-cast -Wno-unused-local-typedefs \
     -Wno-tautological-undefined-compare -Wno-shift-negative-value \
-    -Wno-null-pointer-arithmetic
+    -Wno-null-pointer-arithmetic \
+    -Wno-null-pointer-subtraction \
+    -Wno-unknown-warning-option \
+    -Wno-deprecated-copy-with-user-provided-copy \
+    -Wno-tautological-overlap-compare \
+    -Wno-#pragma-messages
 
 #------------------------------------------------------------------------------

@@ -8,7 +8,7 @@ wmake -check-dir "$WM_PROJECT_DIR" 2>/dev/null || {
 }
 if [ -f "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments ]
 then  . "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments || \
-    echo "Argument parse error";
+    echo "Argument parse error"
 else
     echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
     echo "    Check your OpenFOAM environment and installation"
@@ -34,12 +34,12 @@ else
 fi
 
 echo
-echo "========================================"
+echo ========================================
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
 echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*/}"
 echo "  $WM_COMPILER ${WM_COMPILER_TYPE:-system} compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
-echo "========================================"
+echo ========================================
 echo
 
 # Compile tools for wmake
@@ -62,24 +62,21 @@ else
     echo "Skip ThirdParty (no directory)"
 fi
 
-echo "========================================"
-echo "Compile OpenFOAM libraries"
-echo
+# OpenFOAM libraries
 src/Allwmake $targetType $*
 
-echo "========================================"
-echo "Compile OpenFOAM applications"
-echo
+# OpenFOAM applications
 applications/Allwmake $targetType $*
+
 
 # Additional components/modules
 if [ "$FOAM_MODULE_PREFIX" = false ] || [ "$FOAM_MODULE_PREFIX" = none ]
 then
-    echo "========================================"
+    echo ========================================
     echo "OpenFOAM modules disabled (prefix=${FOAM_MODULE_PREFIX})"
     echo
-elif [ -d "$WM_PROJECT_DIR/modules" ]
-then
+else
+    # Use wmake -all instead of Allwmake to allow for overrides
     (cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all)
 fi
 
@@ -93,7 +90,7 @@ _foamCountDirEntries()
 # Some summary information
 echo
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
-echo "========================================"
+echo ========================================
 echo "  ${WM_PROJECT_DIR##*/}"
 echo "  $WM_COMPILER ${WM_COMPILER_TYPE:-system} compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
@@ -103,6 +100,6 @@ echo "  patch = $(etc/openfoam -show-patch 2>/dev/null)"
 echo "  bin   = $(_foamCountDirEntries "$FOAM_APPBIN") entries"
 echo "  lib   = $(_foamCountDirEntries "$FOAM_LIBBIN") entries"
 echo
-echo "========================================"
+echo ========================================
 
 #------------------------------------------------------------------------------

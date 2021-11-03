@@ -8,12 +8,16 @@ wmake -check-dir "$WM_PROJECT_DIR/src" 2>/dev/null || {
 }
 if [ -f "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments ]
 then  . "$WM_PROJECT_DIR"/wmake/scripts/AllwmakeParseArguments || \
-    echo "Argument parse error";
+    echo "Argument parse error"
 else
     echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
     echo "    Check your OpenFOAM environment and installation"
     exit 1
 fi
+
+echo ========================================
+echo Compile OpenFOAM libraries
+echo ========================================
 
 #------------------------------------------------------------------------------
 
@@ -127,5 +131,11 @@ dynamicFaMesh/Allwmake $targetType $*
 # Needs access to Turbulence
 
 wmake $targetType thermophysicalModels/thermophysicalPropertiesFvPatchFields/liquidProperties
+
+#------------------------------------------------------------------------------
+
+echo ========================================
+echo Done OpenFOAM libraries
+echo ========================================
 
 #------------------------------------------------------------------------------
