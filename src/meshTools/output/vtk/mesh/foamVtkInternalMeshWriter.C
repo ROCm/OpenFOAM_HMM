@@ -315,6 +315,11 @@ void Foam::vtk::internalMeshWriter::writeCellsConnectivity
         }
         else
         {
+// FIXME: clang-13 optimization jumps into incorrect branch
+            #ifdef __clang__
+            checkFormatterValidity();
+            #endif
+
             vtk::writeList(format(), cellTypes);
         }
 

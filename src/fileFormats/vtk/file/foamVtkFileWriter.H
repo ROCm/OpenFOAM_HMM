@@ -116,6 +116,9 @@ protected:
 
     // Protected Member Functions
 
+        //- Verify that formatter in either allocated or not required
+        void checkFormatterValidity() const;
+
         //- Generate message reporting bad writer state
         Ostream& reportBadState(Ostream&, outputState expected) const;
 

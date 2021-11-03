@@ -49,6 +49,18 @@ Foam::vtk::fileWriter::stateNames
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::vtk::fileWriter::checkFormatterValidity() const
+{
+    // In parallel can be unallocated on non-master nodes
+    if ((parallel_ ? Pstream::master() : true) && !format_)
+    {
+        FatalErrorInFunction
+            << "unallocated formatter" << endl
+            << exit(FatalError);
+    }
+}
+
+
 Foam::Ostream& Foam::vtk::fileWriter::reportBadState
 (
     Ostream& os,
@@ -285,7 +297,7 @@ Foam::vtk::fileWriter::fileWriter
     nCellData_(0),
     nPointData_(0),
     outputFile_(),
-    format_(),
+    format_(nullptr),
     os_()
 {
     // We do not currently support append mode at all
@@ -313,7 +325,7 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
 
     if (format_)
     {
-        format_.clear();
+        format_.reset(nullptr);
         os_.close();
     }
     nCellData_ = nPointData_ = 0;
@@ -368,7 +380,7 @@ void Foam::vtk::fileWriter::close()
 
     if (format_)
     {
-        format_.clear();
+        format_.reset(nullptr);
         os_.close();
     }
 
