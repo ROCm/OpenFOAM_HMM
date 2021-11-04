@@ -80,10 +80,10 @@ Foam::OSstream& Foam::messageStream::stream(OSstream* alternative)
              || severity_ == INFO_STDERR
              || severity_ == WARNING
             )
-         || !Pstream::parRun()
+         || !UPstream::parRun()
         );
 
-        if (serialOnly && (Pstream::parRun() && !Pstream::master()))
+        if (serialOnly && (UPstream::parRun() && !UPstream::master()))
         {
             return Snull; // Non-serial, non-master: exit early
         }

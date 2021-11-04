@@ -87,7 +87,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Keyword of entry
         keyType keyword_;
@@ -112,6 +112,14 @@ private:
 
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Report a read warning (on std::cerr)
+        static void reportReadWarning(const IOstream&, const std::string&);
 
 
 public:
@@ -201,6 +209,9 @@ public:
 
         //- Return the entry name for modification
         virtual fileName& name() = 0;
+
+        //- Return the entry name relative to the current case
+        virtual fileName relativeName() const = 0;
 
         //- Return line number of first token in dictionary
         virtual label startLineNumber() const = 0;

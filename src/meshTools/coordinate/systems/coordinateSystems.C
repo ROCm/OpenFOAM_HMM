@@ -60,12 +60,15 @@ void Foam::coordinateSystems::readFromStream(const bool valid)
         else if (headerClassName() == headerTypeCompat)
         {
             // Older (1806 and earlier) header name
-            std::cerr
-                << "--> FOAM IOWarning :" << nl
-                << "    Found header class name '" << headerTypeCompat
-                << "' instead of '" << typeName << "'" << nl;
+            if (error::master())
+            {
+                std::cerr
+                    << "--> FOAM IOWarning :" << nl
+                    << "    Found header class name '" << headerTypeCompat
+                    << "' instead of '" << typeName << "'" << nl;
 
-            error::warnAboutAge("header class", 1806);
+                error::warnAboutAge("header class", 1806);
+            }
 
             this->readIstream(is, coordinateSystem::iNew());
             close();

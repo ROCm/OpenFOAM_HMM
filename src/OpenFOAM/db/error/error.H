@@ -119,6 +119,13 @@ public:
 
     // Static Functions
 
+        //- Like Pstream::master but with a Pstream::parRun guard in case
+        //- Pstream has not yet been initialised.
+        //
+        //  \param communicator is the numbered MPI communicator.
+        //      By default it uses UPstream::worldComm
+        static bool master(const label communicator = -1);
+
         //- Test if an age warning should be emitted.
         //  \param version is the old version (YYMM) for determining the
         //      age in months compared to the current OpenFOAM version
@@ -244,7 +251,7 @@ public:
         void abort();
 
         //- Print error message
-        virtual void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool withTitle = true) const;
 
 
     // Housekeeping
@@ -405,7 +412,7 @@ public:
         void abort();
 
         //- Print error message
-        virtual void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool withTitle = true) const;
 };
 
 

@@ -58,25 +58,6 @@ namespace functionEntries
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace
-{
-    // This is akin to a SafeIOWarning, which does not yet exist
-    inline void safeIOWarning
-    (
-        const Foam::IOstream& is,
-        const std::string& msg
-    )
-    {
-        std::cerr
-            << "--> FOAM Warning :\n"
-            << "    Reading \"" << is.name() << "\" at line "
-            << is.lineNumber() << '\n'
-            << "    " << msg << std::endl;
-    }
-
-} // End anonymous namespace
-
-
 namespace Foam
 {
 
@@ -157,8 +138,6 @@ static bool slurpUntilBalancedBrace(ISstream& is, std::string& str)
     // Abnormal exit of the loop
 
     str.append(buf, nChar);  // Finalize pending content
-
-    safeIOWarning(is, "Premature end while reading expression - missing '}'?");
 
     is.fatalCheck(FUNCTION_NAME);
     return false;
@@ -252,7 +231,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     {
         InfoErr
             << "Empty #eval - line "
-            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+            << is.lineNumber() << " in file "
+            << parentDict.relativeName() << nl;
 
         return tokenList();
     }
@@ -268,7 +248,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     {
         InfoErr
             << "Failed #eval - line "
-            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+            << is.lineNumber() << " in file "
+            << parentDict.relativeName() << nl;
 
         return tokenList();
     }
@@ -296,7 +277,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     #ifdef FULLDEBUG
     DetailInfo
         << "Using #eval - line "
-        << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+        << is.lineNumber() << " in file "
+        << parentDict.relativeName() << nl;
     #endif
 
     token tok(is);
@@ -321,7 +303,14 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     else if (tok.isPunctuation(token::BEGIN_BLOCK))
     {
         // - #eval { expr }
-        slurpUntilBalancedBrace(dynamic_cast<ISstream&>(is), str);
+        if (!slurpUntilBalancedBrace(dynamic_cast<ISstream&>(is), str))
+        {
+            reportReadWarning
+            (
+                is,
+                "Premature end while reading expression - missing '}'?"
+            );
+        }
     }
     else
     {

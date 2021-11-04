@@ -201,6 +201,10 @@ public:
         //- Return stream name for modification
         virtual fileName& name();
 
+        //- Return the name of the stream relative to the current case.
+        //  Uses argList::envRelativePath()
+        fileName relativeName() const;
+
 
     // Check
 

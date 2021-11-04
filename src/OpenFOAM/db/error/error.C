@@ -38,6 +38,20 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+bool Foam::error::master(const label communicator)
+{
+    // Trap negative value for comm as 'default'. This avoids direct use
+    // of Pstream::worldComm which may not have been initialised
+
+    return
+    (
+        UPstream::parRun()
+      ? (communicator < 0 ? UPstream::master() : UPstream::master(communicator))
+      : true
+    );
+}
+
+
 bool Foam::error::warnAboutAge(const int version) noexcept
 {
     // No warning for 0 (unversioned) or -ve values (silent versioning)
@@ -245,20 +259,20 @@ void Foam::error::simpleExit(const int errNo, const bool isAbort)
         error::printStack(Perr);
         std::abort();
     }
-    else if (Pstream::parRun())
+    else if (UPstream::parRun())
     {
         if (isAbort)
         {
             Perr<< nl << *this << nl
                 << "\nFOAM parallel run aborting\n" << endl;
             error::printStack(Perr);
-            Pstream::abort();
+            UPstream::abort();
         }
         else
         {
             Perr<< nl << *this << nl
                 << "\nFOAM parallel run exiting\n" << endl;
-            Pstream::exit(errNo);
+            UPstream::exit(errNo);
         }
     }
     else
@@ -326,7 +340,7 @@ void Foam::error::abort()
 }
 
 
-void Foam::error::write(Ostream& os, const bool includeTitle) const
+void Foam::error::write(Ostream& os, const bool withTitle) const
 {
     if (os.bad())
     {
@@ -334,7 +348,7 @@ void Foam::error::write(Ostream& os, const bool includeTitle) const
     }
 
     os  << nl;
-    if (includeTitle && !title().empty())
+    if (withTitle && !title().empty())
     {
         os  << title().c_str()
             << "(openfoam-" << foamVersion::api;

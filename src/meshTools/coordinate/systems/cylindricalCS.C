@@ -55,12 +55,12 @@ namespace Foam
 
 static inline void warnCompatDegrees(const Foam::dictionary& dict)
 {
-    if (Pstream::parRun() ? Pstream::master() : true)
+    if (error::master())
     {
         std::cerr
             << "--> FOAM IOWarning :" << nl
             << "    Found [v1806] 'degrees' keyword in dictionary \""
-            << dict.name().c_str() << "\"    Ignored, now radians only." << nl
+            << dict.relativeName() << "\"    Ignored, now radians only." << nl
             << std::endl;
     }
 }

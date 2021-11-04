@@ -356,7 +356,7 @@ Foam::string Foam::functionEntries::codeStream::evaluate
 {
     DetailInfo
         << "Using #codeStream at line " << is.lineNumber()
-        << " in file " <<  parentDict.name() << endl;
+        << " in file " <<  parentDict.relativeName() << endl;
 
     dynamicCode::checkSecurity
     (

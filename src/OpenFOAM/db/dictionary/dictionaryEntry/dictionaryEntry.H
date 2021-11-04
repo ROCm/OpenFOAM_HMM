@@ -125,6 +125,12 @@ public:
             return dictionary::name();
         }
 
+        //- Return scoped dictionary name relative to the current case
+        virtual fileName relativeName() const
+        {
+            return dictionary::relativeName();
+        }
+
         //- Return line number of first token in dictionary
         virtual label startLineNumber() const;
 
@@ -132,7 +138,7 @@ public:
         virtual label endLineNumber() const;
 
         //- This entry is not a primitive,
-        //  calling this function generates a FatalError
+        //- calling this function generates a FatalError
         virtual ITstream& stream() const;
 
 

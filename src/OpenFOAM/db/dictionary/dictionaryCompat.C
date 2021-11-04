@@ -50,21 +50,14 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
         if (finder.good())
         {
-            // Want single warning (on master), but guard with parRun to avoid
-            // Pstream::master() when Pstream has not yet been initialized
-            if
-            (
-                (Pstream::parRun() ? Pstream::master() : true)
-             && error::warnAboutAge(alt.second)
-            )
+            if (error::warnAboutAge(alt.second) && error::master())
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
                     << "    Found [v" << alt.second << "] '"
                     << alt.first << "' entry instead of '"
                     << keyword.c_str() << "' in dictionary \""
-                    << name().c_str() << "\" "
-                    << nl
+                    << relativeName() << '"' << nl
                     << std::endl;
 
                 error::warnAboutAge("keyword", alt.second);
@@ -113,7 +106,7 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << relativeName()
             << exit(FatalIOError);
     }
 

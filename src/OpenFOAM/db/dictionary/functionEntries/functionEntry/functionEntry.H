@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,15 +49,15 @@ SourceFiles
 #ifndef functionEntry_H
 #define functionEntry_H
 
-#include "word.H"
-#include "memberFunctionSelectionTables.H"
 #include "primitiveEntry.H"
+#include "memberFunctionSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
@@ -67,16 +68,9 @@ class functionEntry
 :
     public primitiveEntry
 {
-    // Private Member Functions
-
-        //- No copy construct
-        functionEntry(const functionEntry&) = delete;
-
-        //- No copy assignment
-        void operator=(const functionEntry&) = delete;
-
-
 protected:
+
+    // Protected Member Functions
 
         //- Read line and return as a string token
         static token readLine(const word& key, Istream& is);
@@ -85,6 +79,12 @@ protected:
         //- list of size 1.
         template<class StringType>
         static List<StringType> readStringList(Istream& is);
+
+        //- No copy construct
+        functionEntry(const functionEntry&) = delete;
+
+        //- No copy assignment
+        void operator=(const functionEntry&) = delete;
 
 public:
 

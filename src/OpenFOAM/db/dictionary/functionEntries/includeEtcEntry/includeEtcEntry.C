@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,7 +138,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     FatalIOErrorInFunction(is)
         << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
-        << " while reading dictionary " << parentDict.name()
+        << " while reading dictionary " << parentDict.relativeName()
         << exit(FatalIOError);
 
     return false;
@@ -178,7 +178,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
     FatalIOErrorInFunction(is)
         << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
-        << " while reading dictionary " << parentDict.name()
+        << " while reading dictionary " << parentDict.relativeName()
         << exit(FatalIOError);
 
     return false;

@@ -262,7 +262,7 @@ void Foam::dictionary::checkITstream
                     "",                 // functionName
                     "",                 // sourceFileName
                     0,                  // sourceFileLineNumber
-                    this->name(),       // ioFileName
+                    relativeName(),     // ioFileName == dictionary name
                     is.lineNumber()     // ioStartLineNumber
                 );
 
@@ -284,7 +284,8 @@ void Foam::dictionary::checkITstream
                 << remaining << " excess tokens in stream" << nl << nl;
 
             std::cerr
-                << "file: " << this->name()
+                // ioFileName == dictionary name
+                << "file: " << relativeName()
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
@@ -301,7 +302,7 @@ void Foam::dictionary::checkITstream
                 "",                 // functionName
                 "",                 // sourceFileName
                 0,                  // sourceFileLineNumber
-                this->name(),       // ioFileName
+                relativeName(),     // ioFileName == dictionary name
                 is.lineNumber()     // ioStartLineNumber
             )
                 << "Entry '" << keyword
@@ -317,7 +318,8 @@ void Foam::dictionary::checkITstream
                 << "' had no tokens in stream" << nl << nl;
 
             std::cerr
-                << "file: " << this->name()
+                // ioFileName == dictionary name
+                << "file: " << relativeName()
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
@@ -340,7 +342,7 @@ void Foam::dictionary::raiseBadInput
         "",                 // functionName
         "",                 // sourceFileName
         0,                  // sourceFileLineNumber
-        this->name(),       // ioFileName
+        relativeName(),     // ioFileName == dictionary name
         is.lineNumber(),    // ioStartLineNumber
         -1                  // ioEndLineNumber
     )
@@ -401,7 +403,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -525,7 +527,7 @@ const Foam::dictionary& Foam::dictionary::subDict
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -545,7 +547,7 @@ Foam::dictionary& Foam::dictionary::subDict
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -574,7 +576,7 @@ Foam::dictionary& Foam::dictionary::subDictOrAdd
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword
             << "' is not a sub-dictionary in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -585,7 +587,7 @@ Foam::dictionary& Foam::dictionary::subDictOrAdd
         FatalIOErrorInFunction(*this)
             << "Failed to insert sub-dictionary '" << keyword
             << "' in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -613,7 +615,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword
             << "' is not a sub-dictionary in dictionary "
-            << name() << nl
+            << relativeName() << nl
             << exit(FatalIOError);
     }
 
@@ -622,7 +624,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
         IOWarningInFunction(*this)
             << "Entry '" << keyword
             << "' found but not a sub-dictionary in dictionary "
-            << name() << endl;
+            << relativeName() << endl;
     }
 
     // The move constructor properly qualifies the dictionary name
@@ -649,7 +651,7 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
         IOWarningInFunction(*this)
             << "Entry '" << keyword
             << "' found but not a sub-dictionary in dictionary "
-            << name() << endl;
+            << relativeName() << endl;
     }
 
     return *this;
@@ -737,7 +739,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         IOWarningInFunction(*this)
             << "Problem replacing entry "<< entryPtr->keyword()
-            << " in dictionary " << name() << endl;
+            << " in dictionary " << relativeName() << endl;
 
         parent_type::remove(entryPtr);
 
@@ -765,7 +767,8 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
     IOWarningInFunction(*this)
         << "Attempt to add entry " << entryPtr->keyword()
-        << " which already exists in dictionary " << name() << endl;
+        << " which already exists in dictionary "
+        << relativeName() << endl;
 
     delete entryPtr;
     return nullptr;
@@ -871,7 +874,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted merge to self, for dictionary "
-            << name() << nl
+            << relativeName() << nl
             << abort(FatalIOError);
     }
 
@@ -960,7 +963,7 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted addition to self, for dictionary "
-            << name() << nl
+            << relativeName() << nl
             << abort(FatalIOError);
     }
 
@@ -977,7 +980,7 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted |= merging to self, for dictionary "
-            << name() << nl
+            << relativeName() << nl
             << abort(FatalIOError);
     }
 
@@ -997,7 +1000,7 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     {
         FatalIOErrorInFunction(*this)
             << "Attempted addition to self, for dictionary "
-            << name() << nl
+            << relativeName() << nl
             << abort(FatalIOError);
     }
 
