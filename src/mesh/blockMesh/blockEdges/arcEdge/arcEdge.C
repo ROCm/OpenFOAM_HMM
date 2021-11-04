@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,41 +193,63 @@ Foam::blockEdges::arcEdge::arcEdge
 (
     const pointField& points,
     const point& origin,
-    const label start,
-    const label end
+    const edge& fromTo
 )
 :
-    blockEdge(points, start, end),
+    blockEdge(points, fromTo),
     radius_(0),
     angle_(0),
     cs_()
 {
-    calcFromCentre(points[start_], points[end_], origin);
+    calcFromCentre(firstPoint(), lastPoint(), origin);
 }
 
 
 Foam::blockEdges::arcEdge::arcEdge
 (
     const pointField& points,
-    const label start,
-    const label end,
+    const edge& fromTo,
     const point& midPoint
 )
 :
-    blockEdge(points, start, end),
+    blockEdge(points, fromTo),
     radius_(0),
     angle_(0),
     cs_()
 {
-    calcFromMidPoint(points[start_], points[end_], midPoint);
+    calcFromMidPoint(firstPoint(), lastPoint(), midPoint);
 }
+
+
+Foam::blockEdges::arcEdge::arcEdge
+(
+    const pointField& points,
+    const point& origin,
+    const label from,
+    const label to
+)
+:
+    arcEdge(points, origin, edge(from,to))
+{}
+
+
+Foam::blockEdges::arcEdge::arcEdge
+(
+    const pointField& points,
+    const label from,
+    const label to,
+    const point& midPoint
+)
+:
+    arcEdge(points, edge(from,to), midPoint)
+{}
 
 
 Foam::blockEdges::arcEdge::arcEdge
 (
     const dictionary& dict,
     const label index,
-    const searchableSurfaces& geometry,
+    const searchableSurfaces&,
     const pointField& points,
     Istream& is
 )
@@ -260,7 +282,7 @@ Foam::blockEdges::arcEdge::arcEdge
 
         is >> p;  // The origin (centre)
 
-        calcFromCentre(points_[start_], points_[end_], p, true, rMultiplier);
+        calcFromCentre(firstPoint(), lastPoint(), p, true, rMultiplier);
     }
     else
     {
@@ -268,7 +290,7 @@ Foam::blockEdges::arcEdge::arcEdge
 
         is >> p;  // A mid-point
 
-        calcFromMidPoint(points_[start_], points_[end_], p);
+        calcFromMidPoint(firstPoint(), lastPoint(), p);
     }
 
     if (debug)
@@ -295,11 +317,11 @@ Foam::point Foam::blockEdges::arcEdge::position(const scalar lambda) const
 
     if (lambda < SMALL)
     {
-        return points_[start_];
+        return firstPoint();
     }
     else if (lambda >= 1 - SMALL)
     {
-        return points_[end_];
+        return lastPoint();
     }
 
     return cs_.globalPosition(vector(radius_, (lambda*angle_), 0));

@@ -35,18 +35,18 @@ Description
     and face labels is shown below.  For vertex numbering in the sequence 0 to 7
     (block, centre): faces 0 (f0) and 1 are left and right, respectively; faces
     2 and 3 are front and back; and faces 4 and 5 are bottom and top:
-    \verbatim
-                   7 ---- 6
-              f5   |\     |\   f3
-               |   | 4 ---- 5    \
-               |   3 |--- 2 |     \
-               |    \|     \|      f2
-              f4     0 ---- 1
 
-         Z         f0 ----- f1
-         |  Y
-         | /
-         O --- X
+    \verbatim
+                    7 ---- 6
+              f5    |\     :\    f3
+               |    | 4 ---- 5    \
+               |    3.|....2 |     \
+               |     \|     \|     f2
+              f4      0 ---- 1
+      Y  Z
+       \ |          f0 ------ f1
+        \|
+         o--- X
      \endverbatim
 
 SourceFiles
@@ -91,11 +91,14 @@ class blockDescriptor
         //- Reference to the list of curved faces
         const blockFaceList& blockFaces_;
 
-        //- Block shape
+        //- Block shape. Likely only hex is supportable
         cellShape blockShape_;
 
         //- Expansion ratios in all directions
         List<gradingDescriptors> expand_;
+
+        //- The block index in the originating list (-1 for unknown)
+        label index_;
 
         //- Name of the zone (empty word if none)
         word zoneName_;
@@ -122,8 +125,7 @@ class blockDescriptor
         (
             pointField& edgePoints,
             scalarList& edgeWeights,
-            const label start,
-            const label end,
+            const Foam::edge& cellModelEdge,
             const label nDiv,
             const gradingDescriptors& expand
         ) const;
@@ -179,7 +181,7 @@ public:
         //- Return the block shape
         inline const cellShape& blockShape() const noexcept;
 
-        //- Return the mesh density (number of cells) in the i,j,k directions
+        //- The mesh density (number of cells) in the i,j,k directions
         inline const labelVector& density() const noexcept;
 
         //- Expansion ratios in all directions
@@ -206,10 +208,10 @@ public:
             const label j
         ) const;
 
-        //- Return true if point i,j,k addresses a block vertex
+        //- True if point i,j,k addresses a block vertex
         inline bool vertex(const label i, const label j, const label k) const;
 
-        //- Return true if point i,j,k addresses a block edge
+        //- True if point i,j,k addresses a block edge
         inline bool edge(const label i, const label j, const label k) const;
 
         //- Calculate the points and weights for all edges.

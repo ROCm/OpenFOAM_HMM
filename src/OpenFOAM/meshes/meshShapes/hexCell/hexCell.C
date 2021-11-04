@@ -74,17 +74,16 @@ const Foam::faceList& Foam::hexCell::modelFaces()
 
     if (!ptr)
     {
-        ptr.reset(new Foam::faceList(6));
+        ptr.reset(new Foam::faceList(hexCell::nFaces(), Foam::face(4)));
 
-        for (label facei = 0; facei < 6; ++facei)
+        label facei = 0;
+        for (auto& f : *ptr)
         {
-            auto& f = (*ptr)[facei];
-
-            f.resize(4);
             f[0] = modelFaces_[facei][0];
             f[1] = modelFaces_[facei][1];
             f[2] = modelFaces_[facei][2];
             f[3] = modelFaces_[facei][3];
+            ++facei;
         }
     }
 
@@ -98,14 +97,14 @@ const Foam::edgeList& Foam::hexCell::modelEdges()
 
     if (!ptr)
     {
-        ptr.reset(new Foam::edgeList(12));
+        ptr.reset(new Foam::edgeList(hexCell::nEdges()));
 
-        for (label edgei = 0; edgei < 12; ++edgei)
+        label edgei = 0;
+        for (auto& e : *ptr)
         {
-            auto& e = (*ptr)[edgei];
-
-            e.first()  = modelEdges_[edgei][0];
-            e.second() = modelEdges_[edgei][1];
+            e[0] = modelEdges_[edgei][0];
+            e[1] = modelEdges_[edgei][1];
+            ++edgei;
         }
     }
 
@@ -115,39 +114,35 @@ const Foam::edgeList& Foam::hexCell::modelEdges()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-/// Foam::faceList Foam::hexCell::faces() const
-/// {
-///     Foam::faceList result(6);
-///
-///     for (label facei = 0; facei < 6; ++facei)
-///     {
-///         auto& f = result[facei];
-///
-///         f.resize(4);
-///         f[0] = (*this)[modelFaces_[facei][0]];
-///         f[1] = (*this)[modelFaces_[facei][1]];
-///         f[2] = (*this)[modelFaces_[facei][2]];
-///         f[3] = (*this)[modelFaces_[facei][3]];
-///     }
-///
-///     return result;
-/// }
-///
-///
-/// Foam::edgeList Foam::hexCell::edges() const
-/// {
-///     Foam::edgeList result(12);
-///
-///     for (label edgei = 0; edgei < 12; ++edgei)
-///     {
-///         auto& e = result[edgei];
-///
-///         e.first()  = (*this)[modelEdges_[edgei][0]],
-///         e.second() = (*this)[modelEdges_[edgei][1]]
-///     }
-///
-///     return result;
-/// }
+Foam::faceList Foam::hexCell::faces() const
+{
+    Foam::faceList theFaces(hexCell::nFaces(), Foam::face(4));
+
+    label facei = 0;
+    for (auto& f : theFaces)
+    {
+        copyFace(f, facei);
+        ++facei;
+    }
+
+    return theFaces;
+}
+
+
+Foam::edgeList Foam::hexCell::edges() const
+{
+    Foam::edgeList theEdges(hexCell::nEdges());
+
+    label edgei = 0;
+    for (auto& e : theEdges)
+    {
+        e[0] = (*this)[modelEdges_[edgei][0]];
+        e[1] = (*this)[modelEdges_[edgei][1]];
+        ++edgei;
+    }
+
+    return theEdges;
+}
 
 
 Foam::cellShape Foam::hexCell::shape(const bool doCollapse) const

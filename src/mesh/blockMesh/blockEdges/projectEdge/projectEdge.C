@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ void Foam::blockEdges::projectEdge::findNearest
 {
     if (surfaces_.size())
     {
-        const scalar distSqr = magSqr(points_[end_]-points_[start_]);
+        const scalar distSqr = Foam::magSqr(lastPoint()-firstPoint());
 
         pointField boundaryNear(1);
         List<pointConstraint> boundaryConstraint(1);
@@ -95,7 +95,7 @@ Foam::blockEdges::projectEdge::projectEdge
     geometry_(geometry)
 {
     wordList names(is);
-    surfaces_.setSize(names.size());
+    surfaces_.resize(names.size());
     forAll(names, i)
     {
         surfaces_[i] = geometry_.findSurfaceID(names[i]);
@@ -115,7 +115,7 @@ Foam::blockEdges::projectEdge::projectEdge
 Foam::point Foam::blockEdges::projectEdge::position(const scalar lambda) const
 {
     // Initial guess
-    const point start(points_[start_] + lambda*(points_[end_]-points_[start_]));
+    const point start(blockEdge::linearPosition(lambda));
 
     point near(start);
 
@@ -150,14 +150,12 @@ Foam::blockEdges::projectEdge::position(const scalarList& lambdas) const
     auto tpoints = tmp<pointField>::New(lambdas.size());
     auto& points = tpoints.ref();
 
-    const point& startPt = points_[start_];
-    const point& endPt = points_[end_];
-    const vector d = endPt-startPt;
+    const scalar distSqr = Foam::magSqr(lastPoint()-firstPoint());
 
     // Initial guess
     forAll(lambdas, i)
     {
-        points[i] = startPt+lambdas[i]*d;
+        points[i] = blockEdge::linearPosition(lambdas[i]);
     }
 
 
@@ -181,7 +179,7 @@ Foam::blockEdges::projectEdge::position(const scalarList& lambdas) const
                 geometry_,
                 surfaces_,
                 start,
-                scalarField(start.size(), magSqr(d)),
+                scalarField(start.size(), distSqr),
                 points,
                 constraints
             );
@@ -189,11 +187,11 @@ Foam::blockEdges::projectEdge::position(const scalarList& lambdas) const
             // Reset start and end point
             if (lambdas[0] < SMALL)
             {
-                points[0] = startPt;
+                points[0] = firstPoint();
             }
             if (lambdas.last() > 1.0-SMALL)
             {
-                points.last() = endPt;
+                points.last() = lastPoint();
             }
 
             if (debugStr)

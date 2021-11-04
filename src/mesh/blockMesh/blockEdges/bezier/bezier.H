@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,8 +90,16 @@ public:
         bezier
         (
             const pointField& points,   //!< Referenced point field
-            const label start,      //!< Start point in referenced point field
-            const label end,        //!< End point in referenced point field
+            const edge& fromTo,         //!< Start/end in point field
+            const pointField& control   //!< The control points
+        );
+
+        //- Construct from components
+        bezier
+        (
+            const pointField& points,   //!< Referenced point field
+            const label from,           //!< Start point in point field
+            const label to,             //!< End point in point field
             const pointField& control   //!< The control points
         );
 
@@ -100,8 +108,8 @@ public:
         (
             const dictionary& dict,
             const label index,
-            const searchableSurfaces& geometry,
-            const pointField& points,   //!< Referenced point field
+            const searchableSurfaces&  /*unused*/,
+            const pointField& points,  //!< Referenced point field
             Istream& is
         );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ SourceFiles
 #define blockEdge_H
 
 #include "searchableSurfaces.H"
+#include "edge.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,12 +70,14 @@ protected:
         //- The referenced point field
         const pointField& points_;
 
-        //- Index of the start point
+        //- Index of the first point
         const label start_;
 
-        //- Index of the end point
+        //- Index of the last point
         const label end_;
 
+
+protected:
 
     // Protected Member Functions
 
@@ -83,12 +86,23 @@ protected:
         //  \deprecated(2020-10) use polyLine::concat
         static pointField appendEndPoints
         (
-            const pointField& points,   //!< Referenced point field
-            const label start,      //!< Start point in referenced point field
-            const label end,        //!< End point in referenced point field
+            const pointField& p,        //!< Referenced point field
+            const label from,           //!< Start point in point field
+            const label to,             //!< End point in point field
             const pointField& intermediate  //!< Intermediate points (knots)
         );
 
+        //- Construct from components
+        //  \deprecated(2021-11) use constructor with edge
+        blockEdge
+        (
+            const pointField& points,   //!< Referenced point field
+            const label from,           //!< Start point in point field
+            const label to              //!< End point in point field
+        )
+        :
+            blockEdge(points, edge(from,to))
+        {}
 
 public:
 
@@ -119,8 +133,7 @@ public:
         blockEdge
         (
             const pointField& points,   //!< Referenced point field
-            const label start,      //!< Start point in referenced point field
-            const label end         //!< End point in referenced point field
+            const edge& fromTo          //!< Start/end in point field
         );
 
         //- Construct from Istream and point field.
@@ -182,11 +195,21 @@ public:
 
     // Member Functions
 
-        //- Index of start point
-        inline label start() const;
+        //- True if first/last indices are unique and non-negative.
+        inline bool valid() const noexcept;
 
-        //- Index of end point
-        inline label end() const;
+        //- Index of start (first) point
+        inline label start() const noexcept;
+
+        //- Index of end (last) point
+        inline label end() const noexcept;
+
+        //- The location of the first point
+        inline const point& firstPoint() const;
+
+        //- The location of the last point
+        inline const point& lastPoint() const;
+
 
         //- Compare the given start/end points with this block edge
         //  Return:
@@ -208,6 +231,11 @@ public:
         //  - +1: identical
         //  - -1: same edge, but different orientation
         inline int compare(const label start, const label end) const;
+
+
+        //- The point position in the straight line
+        //  0 <= lambda <= 1
+        inline point linearPosition(const scalar lambda) const;
 
         //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1

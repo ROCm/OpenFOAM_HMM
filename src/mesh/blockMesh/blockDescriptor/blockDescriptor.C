@@ -210,6 +210,7 @@ Foam::blockDescriptor::blockDescriptor
     blockFaces_(faces),
     blockShape_(bshape),
     expand_(),
+    index_(-1),
     zoneName_(zoneName),
     curvedFaces_(-1),
     nCurvedFaces_(0)
@@ -241,6 +242,7 @@ Foam::blockDescriptor::blockDescriptor
     blockFaces_(faces),
     blockShape_(),
     expand_(),
+    index_(blockIndex),
     zoneName_(),
     curvedFaces_(-1),
     nCurvedFaces_(0)
@@ -383,7 +385,7 @@ void Foam::blockDescriptor::correctFacePoints
 {
     forAll(curvedFaces_, blockFacei)
     {
-        if (curvedFaces_[blockFacei] != -1)
+        if (curvedFaces_[blockFacei] >= 0)
         {
             blockFaces_[curvedFaces_[blockFacei]].project
             (

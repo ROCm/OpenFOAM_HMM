@@ -44,13 +44,12 @@ namespace Foam
 Foam::blockEdge::blockEdge
 (
     const pointField& points,
-    const label start,
-    const label end
+    const edge& fromTo
 )
 :
     points_(points),
-    start_(start),
-    end_(end)
+    start_(fromTo.first()),
+    end_(fromTo.last())
 {}
 
 
@@ -109,13 +108,13 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
 Foam::pointField Foam::blockEdge::appendEndPoints
 (
-    const pointField& pts,
-    const label start,
-    const label end,
+    const pointField& p,
+    const label from,
+    const label to,
     const pointField& intermediate
 )
 {
-    return pointField(polyLine::concat(pts[start], intermediate, pts[end]));
+    return pointField(polyLine::concat(p[from], intermediate, p[to]));
 }
 
 

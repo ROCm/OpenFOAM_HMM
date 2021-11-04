@@ -71,6 +71,12 @@ class hexCell
         static const label modelEdges_[12][2];
 
 
+    // Private Member Functions
+
+        //- Copy vertices for given face - no checks
+        inline void copyFace(Foam::face& f, const label facei) const;
+
+
 public:
 
     // Constructors
@@ -138,6 +144,15 @@ public:
 
         //- Return i-th edge reversed
         inline Foam::edge reverseEdge(const label edgei) const;
+
+        //- Return list of cell faces [6]
+        Foam::faceList faces() const;
+
+        //- Return list of cell edges [12]
+        Foam::edgeList edges() const;
+
+        //- Cell centre - uses simple average of points
+        inline point centre(const UList<point>& meshPoints) const;
 
         //- The points corresponding to this shape
         inline pointField points(const UList<point>& meshPoints) const;

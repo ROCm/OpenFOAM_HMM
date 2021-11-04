@@ -29,14 +29,7 @@ License
 #include "blockDescriptor.H"
 #include "lineEdge.H"
 #include "lineDivide.H"
-
-// * * * * * * * * * * * * * * Local Data Members  * * * * * * * * * * * * * //
-
-// Warning.
-// Ordering of edges needs to be the same as hex cell shape model
-static const int hexEdge0[12] = { 0, 3, 7, 4,  0, 1, 5, 4,  0, 1, 2, 3 };
-static const int hexEdge1[12] = { 1, 2, 6, 5,  3, 2, 6, 7,  4, 5, 6, 7 };
-
+#include "hexCell.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -44,21 +37,35 @@ int Foam::blockDescriptor::calcEdgePointsWeights
 (
     pointField& edgePoints,
     scalarList& edgeWeights,
-    const label start,
-    const label end,
+    const Foam::edge& cellModelEdge,
     const label nDiv,
     const gradingDescriptors& expand
 ) const
 {
-    // Set reference to the list of labels defining the block
-    const labelList& blockLabels = blockShape_;
+    // The topological edge on the block
+    const Foam::edge thisEdge(blockShape_, cellModelEdge);
+
+    const bool isCollapsedEdge = !thisEdge.valid();
+
+    if (blockEdge::debug && isCollapsedEdge)
+    {
+        Info<< "Collapsed edge:" << thisEdge;
+        if (index_ >= 0)
+        {
+            Info << " block:" << index_;
+        }
+        Info<< " model edge:" << cellModelEdge << nl;
+    }
+
+    // FUTURE: skip point generation for collapsed edge
+
 
     // Set the edge points/weights
     // The edge is a straight-line if it is not in the list of blockEdges
 
     for (const blockEdge& cedge : blockEdges_)
     {
-        const int cmp = cedge.compare(blockLabels[start], blockLabels[end]);
+        const int cmp = cedge.compare(thisEdge);
 
         if (cmp > 0)
         {
@@ -104,7 +111,7 @@ int Foam::blockDescriptor::calcEdgePointsWeights
 
     lineDivide divEdge
     (
-        blockEdges::lineEdge(blockPoints, start, end),
+        blockEdges::lineEdge(blockPoints, cellModelEdge),
         nDiv,
         expand
     );
@@ -126,14 +133,13 @@ int Foam::blockDescriptor::edgesPointsWeights
 {
     int nCurved = 0;
 
-    for (label edgei = 0; edgei < 12; ++edgei)
+    for (label edgei = 0; edgei < 12; ++edgei)  //< hexCell::nEdges()
     {
         nCurved += calcEdgePointsWeights
         (
             edgesPoints[edgei],
             edgesWeights[edgei],
-            hexEdge0[edgei],
-            hexEdge1[edgei],
+            hexCell::modelEdges()[edgei],
 
             sizes()[edgei/4],   // 12 edges -> 3 components (x,y,z)
             expand_[edgei]
@@ -153,7 +159,7 @@ bool Foam::blockDescriptor::edgePointsWeights
     const gradingDescriptors& gd
 ) const
 {
-    if (edgei < 0 || edgei >= 12)
+    if (edgei < 0 || edgei >= 12)  //< hexCell::nEdges()
     {
         FatalErrorInFunction
             << "Edge label " << edgei
@@ -165,8 +171,8 @@ bool Foam::blockDescriptor::edgePointsWeights
     (
         edgePoints,
         edgeWeights,
-        hexEdge0[edgei],
-        hexEdge1[edgei],
+        hexCell::modelEdges()[edgei],
+
         nDiv,
         gd
     );
@@ -182,7 +188,7 @@ bool Foam::blockDescriptor::edgePointsWeights
     scalarList& edgeWeights
 ) const
 {
-    if (edgei < 0 || edgei >= 12)
+    if (edgei < 0 || edgei >= 12)  //< hexCell::nEdges()
     {
         FatalErrorInFunction
             << "Edge label " << edgei
@@ -194,8 +200,8 @@ bool Foam::blockDescriptor::edgePointsWeights
     (
         edgePoints,
         edgeWeights,
-        hexEdge0[edgei],
-        hexEdge1[edgei],
+        hexCell::modelEdges()[edgei],
+
         sizes()[edgei/4],   // 12 edges -> 3 components (x,y,z)
         expand_[edgei]
     );

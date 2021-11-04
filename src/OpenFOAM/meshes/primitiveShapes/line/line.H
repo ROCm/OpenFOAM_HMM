@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ inline Ostream& operator<<(Ostream& os, const line<Point, PointRef>& l);
 template<class Point, class PointRef>
 class line
 {
-    // Private data
+    // Private Data
 
         //- First point
         PointRef a_;
@@ -81,7 +81,7 @@ public:
     // Constructors
 
         //- Construct from two points
-        inline line(const Point& start, const Point& end);
+        inline line(const Point& from, const Point& to);
 
         //- Construct from two points in the list of points
         //  The indices could be from edge etc.
@@ -100,19 +100,19 @@ public:
     // Access
 
         //- Return first point
-        inline PointRef first() const;
+        inline PointRef first() const noexcept;
 
         //- Return second (last) point
-        inline PointRef second() const;
+        inline PointRef second() const noexcept;
 
         //- Return last (second) point
-        inline PointRef last() const;
+        inline PointRef last() const noexcept;
 
         //- Return first point
-        inline PointRef start() const;
+        inline PointRef start() const noexcept;
 
         //- Return second (last) point
-        inline PointRef end() const;
+        inline PointRef end() const noexcept;
 
 
     // Properties

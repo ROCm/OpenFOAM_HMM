@@ -68,6 +68,7 @@ SourceFiles
 #define blockMesh_H
 
 #include "Enum.H"
+#include "Switch.H"
 #include "block.H"
 #include "PtrList.H"
 #include "cartesianCS.H"
@@ -138,8 +139,8 @@ private:
         //- Reference to mesh dictionary
         const IOdictionary& meshDict_;
 
-        //- Output verbosity
-        bool verbose_;
+        //- Output verbosity level
+        int verbose_;
 
         //- Check face consistency (defaults to true)
         bool checkFaceCorrespondence_;
@@ -228,6 +229,10 @@ private:
             const word& regionName
         );
 
+
+        //- Simple checks for collapsed hex cells
+        bool checkDegenerate() const;
+
         void check(const polyMesh& bm, const dictionary& dict) const;
 
         //- Determine merge info and final number of cells/points
@@ -272,7 +277,8 @@ public:
         (
             const IOdictionary& dict,
             const word& regionName = polyMesh::defaultRegion,
-            mergeStrategy strategy = mergeStrategy::DEFAULT_MERGE
+            mergeStrategy strategy = mergeStrategy::DEFAULT_MERGE,
+            int verbosity = 0   // 0: use static or dictionary value
         );
 
 
@@ -367,12 +373,12 @@ public:
 
     // Verbosity
 
-        //- Verbose output
-        bool verbose() const noexcept;
+        //- Output verbosity level
+        int verbose() const noexcept;
 
-        //- Enable/disable verbose output
-        //  \return old value
-        bool verbose(const bool on) noexcept;
+        //- Change the output verbosity level.
+        //  \return old level
+        int verbose(const int level) noexcept;
 
 
     // Mesh Generation

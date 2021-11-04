@@ -67,16 +67,15 @@ const Foam::faceList& Foam::tetCell::modelFaces()
 
     if (!ptr)
     {
-        ptr.reset(new Foam::faceList(4));
+        ptr.reset(new Foam::faceList(tetCell::nFaces(), Foam::face(3)));
 
-        for (label facei = 0; facei < 4; ++facei)
+        label facei = 0;
+        for (auto& f : *ptr)
         {
-            auto& f = (*ptr)[facei];
-
-            f.resize(3);
             f[0] = modelFaces_[facei][0];
             f[1] = modelFaces_[facei][1];
             f[2] = modelFaces_[facei][2];
+            ++facei;
         }
     }
 
@@ -90,14 +89,14 @@ const Foam::edgeList& Foam::tetCell::modelEdges()
 
     if (!ptr)
     {
-        ptr.reset(new Foam::edgeList(6));
+        ptr.reset(new Foam::edgeList(tetCell::nEdges()));
 
-        for (label edgei = 0; edgei < 6; ++edgei)
+        label edgei = 0;
+        for (auto& e : *ptr)
         {
-            auto& e = (*ptr)[edgei];
-
-            e.first()  = modelEdges_[edgei][0];
-            e.second() = modelEdges_[edgei][1];
+            e[0] = modelEdges_[edgei][0];
+            e[1] = modelEdges_[edgei][1];
+            ++edgei;
         }
     }
 
@@ -107,35 +106,34 @@ const Foam::edgeList& Foam::tetCell::modelEdges()
 
 /// Foam::faceList Foam::tetCell::faces() const
 /// {
-///     Foam::faceList result(4);
+///     Foam::faceList theFaces(tetCell::nFaces(), Foam::face(3));
 ///
-///     for (label facei = 0; facei < 4; ++facei)
+///     label facei = 0;
+///     for (auto& f : theFaces)
 ///     {
-///         auto& f = result[facei];
-///
-///         f.resize(3);
 ///         f[0] = (*this)[modelFaces_[facei][0]];
 ///         f[1] = (*this)[modelFaces_[facei][1]];
 ///         f[2] = (*this)[modelFaces_[facei][2]];
+///         ++facei;
 ///     }
 ///
-///     return result;
+///     return theFaces;
 /// }
 ///
 ///
 /// Foam::edgeList Foam::tetCell::edges() const
 /// {
-///     Foam::edgeList result(6);
+///     Foam::edgeList theEdges(tetCell::nEdges());
 ///
-///     for (label edgei = 0; edgei < 6; ++edgei)
+///     label edgei = 0;
+///     for (auto& e : theEdges)
 ///     {
-///         auto& e = result[edgei];
-///
-///         e.first()  = (*this)[modelEdges_[edgei][0]],
-///         e.second() = (*this)[modelEdges_[edgei][1]]
+///         e[0] = (*this)[modelEdges_[edgei][0]];
+///         e[1] = (*this)[modelEdges_[edgei][1]];
+///         ++edgei;
 ///     }
 ///
-///     return result;
+///     return theEdges;
 /// }
 
 

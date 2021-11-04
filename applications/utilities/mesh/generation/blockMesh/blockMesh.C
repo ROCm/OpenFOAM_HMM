@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,23 +96,24 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Block mesh generator.\n"
+        " \n"
         "  The ordering of vertex and face labels within a block as shown "
         "below.\n"
         "  For the local vertex numbering in the sequence 0 to 7:\n"
         "    Faces 0, 1 (x-direction) are left, right.\n"
         "    Faces 2, 3 (y-direction) are front, back.\n"
         "    Faces 4, 5 (z-direction) are bottom, top.\n"
-        "\n"
+        " \n"
         "                        7 ---- 6\n"
-        "                 f5     |\\     |\\     f3\n"
+        "                 f5     |\\     :\\     f3\n"
         "                 |      | 4 ---- 5     \\\n"
-        "                 |      3 |--- 2 |      \\\n"
+        "                 |      3.|....2 |      \\\n"
         "                 |       \\|     \\|      f2\n"
         "                 f4       0 ---- 1\n"
         "    Y  Z\n"
         "     \\ |                f0 ------ f1\n"
         "      \\|\n"
-        "       O--- X\n"
+        "       o--- X\n"
     );
 
     argList::noParallel();
@@ -129,7 +130,11 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "write-vtk",
-        "Write topology as VTK file and exit"
+        "Write topology as VTU file and exit"
+    );
+    argList::addVerboseOption
+    (
+        "Force verbose output. (Can be used multiple times)"
     );
 
     argList::addBoolOption
@@ -170,12 +175,12 @@ int main(int argc, char *argv[])
     const bool writeCellSets = args.found("sets");
 
     // Default merge (topology), unless otherwise specified
-    blockMesh::mergeStrategy strategy(blockMesh::DEFAULT_MERGE);
-
-    if (args.found("merge-points"))
-    {
-        strategy = blockMesh::MERGE_POINTS;
-    }
+    const blockMesh::mergeStrategy strategy =
+    (
+        args.found("merge-points")
+      ? blockMesh::MERGE_POINTS
+      : blockMesh::DEFAULT_MERGE
+    );
 
     word regionName(polyMesh::defaultRegion);
     word regionPath;
@@ -216,7 +221,7 @@ int main(int argc, char *argv[])
     // Locate appropriate blockMeshDict
     #include "findBlockMeshDict.H"
 
-    blockMesh blocks(meshDict, regionName, strategy);
+    blockMesh blocks(meshDict, regionName, strategy, args.verbose());
 
     if (!blocks.valid())
     {

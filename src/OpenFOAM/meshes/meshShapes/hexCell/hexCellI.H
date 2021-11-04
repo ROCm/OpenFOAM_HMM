@@ -25,6 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline void Foam::hexCell::copyFace(Foam::face& f, const label facei) const
+{
+    f[0] = (*this)[modelFaces_[facei][0]];
+    f[1] = (*this)[modelFaces_[facei][1]];
+    f[2] = (*this)[modelFaces_[facei][2]];
+    f[3] = (*this)[modelFaces_[facei][3]];
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::hexCell::hexCell()
@@ -77,7 +88,7 @@ inline Foam::hexCell::hexCell(Istream& is)
 inline Foam::face Foam::hexCell::face(const label facei) const
 {
     #ifdef FULLDEBUG
-    if (facei < 0 || facei >= 6)
+    if (facei < 0 || facei >= hexCell::nFaces())
     {
         FatalErrorInFunction
             << "Face index (" << facei << ") out of range 0..5\n"
@@ -86,10 +97,7 @@ inline Foam::face Foam::hexCell::face(const label facei) const
     #endif
 
     Foam::face f(4);
-    f[0] = (*this)[modelFaces_[facei][0]];
-    f[1] = (*this)[modelFaces_[facei][1]];
-    f[2] = (*this)[modelFaces_[facei][2]];
-    f[3] = (*this)[modelFaces_[facei][3]];
+    copyFace(f, facei);
 
     return f;
 }
@@ -98,7 +106,7 @@ inline Foam::face Foam::hexCell::face(const label facei) const
 inline Foam::edge Foam::hexCell::edge(const label edgei) const
 {
     #ifdef FULLDEBUG
-    if (edgei < 0 || edgei >= 12)
+    if (edgei < 0 || edgei >= hexCell::nEdges())
     {
         FatalErrorInFunction
             << "Edge index (" << edgei << ") out of range 0..11\n"
@@ -118,6 +126,27 @@ inline Foam::edge Foam::hexCell::reverseEdge(const label edgei) const
 {
     // Reverse edge. Using a copy is cheaper than inplace flip
     return this->edge(edgei).reverseEdge();
+}
+
+
+inline Foam::point Foam::hexCell::centre
+(
+    const UList<point>& meshPoints
+) const
+{
+    // Simple estimate of cell centre by averaging cell points
+    point cEst = Zero;
+    int npts = 0;
+    for (const label pointi : *this)
+    {
+        if (pointi >= 0)
+        {
+            cEst += meshPoints[pointi];
+            ++npts;
+        }
+    }
+
+    return (npts > 1 ? (cEst/scalar(npts)) : cEst);
 }
 
 

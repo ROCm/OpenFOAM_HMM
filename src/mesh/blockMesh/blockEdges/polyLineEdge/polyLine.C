@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,9 +81,9 @@ void Foam::polyLine::calcParam()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polyLine::polyLine(const pointField& ps, const bool)
+Foam::polyLine::polyLine(const pointField& p, const bool)
 :
-    points_(ps),
+    points_(p),
     lineLength_(0),
     param_()
 {
@@ -109,13 +109,13 @@ Foam::polyLine::polyLine
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::pointField& Foam::polyLine::points() const
+const Foam::pointField& Foam::polyLine::points() const noexcept
 {
     return points_;
 }
 
 
-Foam::label Foam::polyLine::nSegments() const
+Foam::label Foam::polyLine::nSegments() const noexcept
 {
     return points_.size()-1;
 }
@@ -207,7 +207,7 @@ Foam::point Foam::polyLine::position
 }
 
 
-Foam::scalar Foam::polyLine::length() const
+Foam::scalar Foam::polyLine::length() const noexcept
 {
     return lineLength_;
 }

@@ -230,11 +230,12 @@ Foam::blockMesh::blockMesh
 (
     const IOdictionary& dict,
     const word& regionName,
-    mergeStrategy strategy
+    mergeStrategy strategy,
+    int verbosity
 )
 :
     meshDict_(dict),
-    verbose_(meshDict_.getOrDefault("verbose", verboseOutput)),
+    verbose_(verbosity),
     checkFaceCorrespondence_
     (
         meshDict_.getOrDefault("checkFaceCorrespondence", true)
@@ -268,13 +269,32 @@ Foam::blockMesh::blockMesh
     transform_(),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
-    // Command-line option has precedence over dictionary setting
+    // Command-line options have precedence over dictionary setting
+
+    if (!verbose_)
+    {
+        verbose_ = meshDict_.getOrDefault("verbose", verboseOutput);
+    }
 
     if (mergeStrategy_ == mergeStrategy::DEFAULT_MERGE)
     {
         strategyNames_.readIfPresent("mergeType", meshDict_, mergeStrategy_);
 
         // Warn about fairly obscure old "fastMerge" option?
+
+        if
+        (
+            mergeStrategy_ == mergeStrategy::DEFAULT_MERGE
+         && checkDegenerate()
+        )
+        {
+            Info<< nl
+                << "Detected collapsed blocks "
+                << "- using merge points instead of merge topology" << nl
+                << endl;
+
+            mergeStrategy_ = mergeStrategy::MERGE_POINTS;
+        }
     }
 
     if (mergeStrategy_ == mergeStrategy::MERGE_POINTS)
@@ -298,16 +318,16 @@ bool Foam::blockMesh::valid() const noexcept
 }
 
 
-bool Foam::blockMesh::verbose() const noexcept
+int Foam::blockMesh::verbose() const noexcept
 {
     return verbose_;
 }
 
 
-bool Foam::blockMesh::verbose(const bool on) noexcept
+int Foam::blockMesh::verbose(const int level) noexcept
 {
-    bool old(verbose_);
-    verbose_ = on;
+    int old(verbose_);
+    verbose_ = level;
     return old;
 }
 

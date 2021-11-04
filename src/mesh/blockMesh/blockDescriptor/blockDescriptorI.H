@@ -156,14 +156,14 @@ inline bool Foam::blockDescriptor::flatFaceOrEdge
     const label i, const label j, const label k
 ) const
 {
-    if (i == 0 && curvedFaces_[0] == -1) return true;
-    if (i == sizes().x() && curvedFaces_[1] == -1) return true;
+    if (i == 0 && curvedFaces_[0] < 0) return true;
+    if (i == sizes().x() && curvedFaces_[1] < 0) return true;
 
-    if (j == 0 && curvedFaces_[2] == -1) return true;
-    if (j == sizes().y() && curvedFaces_[3] == -1) return true;
+    if (j == 0 && curvedFaces_[2] < 0) return true;
+    if (j == sizes().y() && curvedFaces_[3] < 0) return true;
 
-    if (k == 0 && curvedFaces_[4] == -1) return true;
-    if (k == sizes().z() && curvedFaces_[5] == -1) return true;
+    if (k == 0 && curvedFaces_[4] < 0) return true;
+    if (k == sizes().z() && curvedFaces_[5] < 0) return true;
 
     return this->edge(i, j, k);
 }

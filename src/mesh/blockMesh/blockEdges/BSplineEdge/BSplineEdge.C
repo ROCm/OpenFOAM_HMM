@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,16 +53,27 @@ namespace blockEdges
 Foam::blockEdges::BSplineEdge::BSplineEdge
 (
     const pointField& points,
-    const label start,
-    const label end,
+    const edge& fromTo,
     const pointField& internalPoints
 )
 :
-    blockEdge(points, start, end),
+    blockEdge(points, fromTo),
     BSpline
     (
-        polyLine::concat(points[start_], internalPoints, points[end_])
+        polyLine::concat(firstPoint(), internalPoints, lastPoint())
     )
+{}
+
+
+Foam::blockEdges::BSplineEdge::BSplineEdge
+(
+    const pointField& points,
+    const label from,
+    const label to,
+    const pointField& internalPoints
+)
+:
+    BSplineEdge(points, edge(from,to), internalPoints)
 {}
 
 
@@ -70,7 +81,7 @@ Foam::blockEdges::BSplineEdge::BSplineEdge
 (
     const dictionary& dict,
     const label index,
-    const searchableSurfaces& geometry,
+    const searchableSurfaces&,
     const pointField& points,
     Istream& is
 )
@@ -78,7 +89,7 @@ Foam::blockEdges::BSplineEdge::BSplineEdge
     blockEdge(dict, index, points, is),
     BSpline
     (
-        polyLine::concat(points[start_], pointField(is), points[end_])
+        polyLine::concat(firstPoint(), pointField(is), lastPoint())
     )
 {
     token tok(is);

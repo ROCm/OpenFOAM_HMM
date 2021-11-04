@@ -93,7 +93,7 @@ inline Foam::tetCell::tetCell(Istream& is)
 inline Foam::triFace Foam::tetCell::face(const label facei) const
 {
     #ifdef FULLDEBUG
-    if (facei < 0 || facei >= 4)
+    if (facei < 0 || facei >= tetCell::nFaces())
     {
         FatalErrorInFunction
             << "Face index (" << facei << ") out of range 0..3\n"
@@ -117,7 +117,7 @@ inline Foam::label Foam::tetCell::edgeFace(const label edgei) const
     static const label edgeFaces[6] = {2, 3, 1, 0, 0, 1};
 
     #ifdef FULLDEBUG
-    if (edgei < 0 || edgei >= 6)
+    if (edgei < 0 || edgei >= tetCell::nEdges())
     {
         FatalErrorInFunction
             << "Edge index (" << edgei << ") out of range 0..5\n"
@@ -148,14 +148,14 @@ inline Foam::label Foam::tetCell::edgeAdjacentFace
     };
 
     #ifdef FULLDEBUG
-    if (facei < 0 || facei >= 4)
+    if (facei < 0 || facei >= tetCell::nFaces())
     {
         FatalErrorInFunction
             << "Face index (" << facei << ") out of range 0..3\n"
             << abort(FatalError);
     }
 
-    if (edgei < 0 || edgei >= 6)
+    if (edgei < 0 || edgei >= tetCell::nEdges())
     {
         FatalErrorInFunction
             << "Edge index (" << edgei << ") out of range 0..5\n"
@@ -170,7 +170,7 @@ inline Foam::label Foam::tetCell::edgeAdjacentFace
 inline Foam::edge Foam::tetCell::edge(const label edgei) const
 {
     #ifdef FULLDEBUG
-    if (edgei < 0 || edgei >= 6)
+    if (edgei < 0 || edgei >= tetCell::nEdges())
     {
         FatalErrorInFunction
             << "Edge index (" << edgei << ") out of range 0..5\n"

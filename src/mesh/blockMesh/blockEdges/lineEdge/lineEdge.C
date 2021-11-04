@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +46,21 @@ namespace blockEdges
 Foam::blockEdges::lineEdge::lineEdge
 (
     const pointField& points,
-    const label start,
-    const label end
+    const edge& fromTo
 )
 :
-    blockEdge(points, start, end)
+    blockEdge(points, fromTo)
+{}
+
+
+Foam::blockEdges::lineEdge::lineEdge
+(
+    const pointField& points,
+    const label from,
+    const label to
+)
+:
+    blockEdge(points, from, to)
 {}
 
 
@@ -58,7 +68,7 @@ Foam::blockEdges::lineEdge::lineEdge
 (
     const dictionary& dict,
     const label index,
-    const searchableSurfaces& geometry,
+    const searchableSurfaces&,
     const pointField& points,
     Istream& is
 )
@@ -71,30 +81,13 @@ Foam::blockEdges::lineEdge::lineEdge
 
 Foam::point Foam::blockEdges::lineEdge::position(const scalar lambda) const
 {
-    #ifdef FULLDEBUG
-    if (lambda < -SMALL || lambda > 1 + SMALL)
-    {
-        InfoInFunction
-            << "Limit parameter to [0-1] range: " << lambda << nl;
-    }
-    #endif
-
-    if (lambda < SMALL)
-    {
-        return points_[start_];
-    }
-    else if (lambda >= 1 - SMALL)
-    {
-        return points_[end_];
-    }
-
-    return points_[start_] + lambda * (points_[end_] - points_[start_]);
+    return blockEdge::linearPosition(lambda);
 }
 
 
 Foam::scalar Foam::blockEdges::lineEdge::length() const
 {
-    return mag(points_[end_] - points_[start_]);
+    return Foam::mag(lastPoint() - firstPoint());
 }
 
 
