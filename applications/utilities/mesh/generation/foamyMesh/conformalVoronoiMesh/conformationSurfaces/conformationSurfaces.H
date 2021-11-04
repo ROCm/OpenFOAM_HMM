@@ -57,11 +57,9 @@ class conformationSurfaces
 {
     typedef extendedFeatureEdgeMesh::sideVolumeType sideVolumeType;
 
-    // Private data
+    // Private Data
 
         const Time& runTime_;
-
-        Random& rndGen_;
 
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;

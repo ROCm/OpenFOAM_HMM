@@ -275,7 +275,6 @@ Foam::conformationSurfaces::conformationSurfaces
 )
 :
     runTime_(runTime),
-    rndGen_(rndGen),
     allGeometry_(allGeometry),
     features_(),
     locationInMesh_(surfaceConformationDict.get<point>("locationInMesh")),
@@ -287,7 +286,7 @@ Foam::conformationSurfaces::conformationSurfaces
     regionOffset_(),
     patchInfo_(),
     globalBounds_(),
-    referenceVolumeTypes_(0)
+    referenceVolumeTypes_()
 {
     const dictionary& surfacesDict
     (
@@ -565,7 +564,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Extend the global bounds to stop the bound box sitting on the surfaces
     // to be conformed to
-    //globalBounds_ = globalBounds_.extend(rndGen_, 1e-4);
+    //globalBounds_ = globalBounds_.extend(rndGen, 1e-4);
 
     vector newSpan = 1e-4*globalBounds_.span();
 

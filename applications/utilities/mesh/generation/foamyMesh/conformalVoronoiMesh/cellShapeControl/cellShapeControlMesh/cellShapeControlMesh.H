@@ -55,6 +55,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class cellSizeAndAlignmentControls;
 
 /*---------------------------------------------------------------------------*\
@@ -74,13 +75,13 @@ public:
 
 private:
 
-        // Private data
+        // Private Data
 
         const Time& runTime_;
 
         mutable Cell_handle oldCellHandle_;
 
-        const scalar defaultCellSize_;
+        /// const scalar defaultCellSize_;
 
 
     // Private Member Functions
@@ -103,11 +104,12 @@ public:
 
     // Constructors
 
+        //- Construct from runTime
         explicit cellShapeControlMesh(const Time& runTime);
 
 
     //- Destructor
-    ~cellShapeControlMesh();
+    ~cellShapeControlMesh() = default;
 
 
     // Member Functions

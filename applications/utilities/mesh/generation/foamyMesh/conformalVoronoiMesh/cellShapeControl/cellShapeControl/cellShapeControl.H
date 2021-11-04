@@ -66,11 +66,7 @@ class cellShapeControl
 :
     public dictionary
 {
-    // Private data
-
-        const Time& runTime_;
-
-        const searchableSurfaces& allGeometry_;
+    // Private Data
 
         const conformationSurfaces& geometryToConformTo_;
 
@@ -114,7 +110,7 @@ public:
 
 
     //- Destructor
-    ~cellShapeControl();
+    ~cellShapeControl() = default;
 
 
     // Member Functions

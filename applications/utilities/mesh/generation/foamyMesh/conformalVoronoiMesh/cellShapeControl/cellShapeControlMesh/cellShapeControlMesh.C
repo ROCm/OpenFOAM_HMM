@@ -41,9 +41,9 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(cellShapeControlMesh, 0);
-
-word cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 }
+
+Foam::word Foam::cellShapeControlMesh::meshSubDir = "cellShapeControlMesh";
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -367,8 +367,7 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
         runTime,
         meshSubDir
     ),
-    runTime_(runTime),
-    defaultCellSize_(0.0)
+    runTime_(runTime)
 {
     if (this->vertexCount())
     {
@@ -440,12 +439,6 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellShapeControlMesh::~cellShapeControlMesh()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

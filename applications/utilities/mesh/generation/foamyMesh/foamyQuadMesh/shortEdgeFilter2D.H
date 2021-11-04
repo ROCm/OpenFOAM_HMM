@@ -53,8 +53,6 @@ class shortEdgeFilter2D
 {
     // Private Data
 
-        const CV2D& cv2Dmesh_;
-
         MeshedSurface<face> ms_;
 
         const scalar shortEdgeFilterFactor_;
@@ -98,13 +96,15 @@ public:
     //- Runtime type information
     ClassName("shortEdgeFilter2D");
 
+
     // Constructors
 
+        //- Construct from components
         shortEdgeFilter2D(const CV2D& cv2Dmesh, const dictionary& dict);
 
 
     //- Destructor
-    ~shortEdgeFilter2D();
+    ~shortEdgeFilter2D() = default;
 
 
     // Access Functions
