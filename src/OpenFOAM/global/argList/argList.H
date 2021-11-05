@@ -366,15 +366,22 @@ public:
         //- Return the run control (parallel, dry-run etc)
         inline const ParRunControl& runControl() const noexcept;
 
-        //- Return the dryRun flag
-        inline bool dryRun() const noexcept;
-
-        //- Modify the dryRun flag
-        inline bool dryRun(const bool on) noexcept;
-
         //- Return distributed flag
         //- (i.e. are rootPaths different on different machines)
         inline bool distributed() const noexcept;
+
+        //- Return the dry-run flag
+        inline int dryRun() const noexcept;
+
+        //- Modify the dry-run flag
+        inline int dryRun(const int level) noexcept;
+
+        //- Return the verbose flag
+        inline int verbose() const noexcept;
+
+        //- Modify the verbose flag
+        inline int verbose(const int level) noexcept;
+
 
         //- Mutable access to the loaded dynamic libraries
         inline dlLibraryTable& libs() const noexcept;
@@ -603,10 +610,17 @@ public:
         //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
-        //- Add a 'dry-run' bool option to validOptions with usage information
+        //- Enable a 'dry-run' bool option, with usage information
         static void addDryRunOption
         (
-            const string& usage,  //! usage information (mandatory)
+            const string& usage,  //! usage information (expected)
+            bool advanced = false
+        );
+
+        //- Enable a 'verbose' bool option, with usage information
+        static void addVerboseOption
+        (
+            const string& usage,  //! usage information (expected)
             bool advanced = false
         );
 

@@ -121,6 +121,9 @@ int main(int argc, char *argv[])
     argList::addArgument("label");
     argList::noMandatoryArgs();
 
+    argList::addDryRunOption("Just for testing");
+    argList::addVerboseOption("Increase verbosity");
+
     #include "setRootCase.H"
 
     Pout<< "command-line ("
@@ -132,6 +135,10 @@ int main(int argc, char *argv[])
         << "globalCase: " << args.globalCaseName() << nl
         << "globalPath: " << args.globalPath() << nl
         << nl;
+
+    Pout<< "dry-run: " << args.dryRun()
+        << " verbose: " << args.verbose() << nl;
+
 
     if (args.found("relative"))
     {

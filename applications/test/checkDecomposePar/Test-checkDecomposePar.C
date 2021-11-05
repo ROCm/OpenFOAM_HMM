@@ -57,9 +57,8 @@ int main(int argc, char *argv[])
 
     #include "addAllRegionOptions.H"
 
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "more information about decomposition"
     );
 
@@ -71,7 +70,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const auto decompFile = args.get<fileName>(1);
-    const bool verbose    = args.found("verbose");
 
     // Set time from database
     #include "createTime.H"
@@ -146,7 +144,7 @@ int main(int argc, char *argv[])
             nDomains
         );
 
-        if (verbose)
+        if (args.verbose())
         {
             info.printDetails(Info);
             Info<< nl;

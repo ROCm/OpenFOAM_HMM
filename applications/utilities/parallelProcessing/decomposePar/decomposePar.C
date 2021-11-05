@@ -330,9 +330,8 @@ int main(int argc, char *argv[])
         "Test without writing the decomposition. "
         "Changes -cellDist to only write VTK output."
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity"
     );
     argList::addOption
@@ -409,9 +408,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const bool dryrun           = args.dryRun();
     const bool writeCellDist    = args.found("cellDist");
-    const bool verbose          = args.found("verbose");
 
     // Most of these are ignored for dry-run (not triggered anywhere)
     const bool copyZero         = args.found("copyZero");
@@ -432,7 +429,7 @@ int main(int argc, char *argv[])
 
     // Allow override of time (unless dry-run)
     instantList times;
-    if (dryrun)
+    if (args.dryRun())
     {
         Info<< "\ndry-run: ignoring -copy*, -fields, -force, time selection"
             << nl;
@@ -477,7 +474,7 @@ int main(int argc, char *argv[])
             regionName == polyMesh::defaultRegion ? word::null : regionName
         );
 
-        if (dryrun)
+        if (args.dryRun())
         {
             Info<< "dry-run: decomposing mesh " << regionName << nl << nl
                 << "Create mesh..." << flush;
@@ -498,7 +495,7 @@ int main(int argc, char *argv[])
                 args.getOrDefault<word>("method", word::null)
             );
 
-            decompTest.execute(writeCellDist, verbose);
+            decompTest.execute(writeCellDist, args.verbose());
             continue;
         }
 

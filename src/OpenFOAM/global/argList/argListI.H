@@ -107,21 +107,33 @@ Foam::argList::runControl() const noexcept
 }
 
 
-inline bool Foam::argList::dryRun() const noexcept
+inline bool Foam::argList::distributed() const noexcept
+{
+    return runControl_.distributed();
+}
+
+
+inline int Foam::argList::dryRun() const noexcept
 {
     return runControl_.dryRun();
 }
 
 
-inline bool Foam::argList::dryRun(const bool on) noexcept
+inline int Foam::argList::dryRun(const int level) noexcept
 {
-    return runControl_.dryRun(on);
+    return runControl_.dryRun(level);
 }
 
 
-inline bool Foam::argList::distributed() const noexcept
+inline int Foam::argList::verbose() const noexcept
 {
-    return runControl_.distributed();
+    return runControl_.verbose();
+}
+
+
+inline int Foam::argList::verbose(const int level) noexcept
+{
+    return runControl_.verbose(level);
 }
 
 

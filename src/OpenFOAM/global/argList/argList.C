@@ -28,6 +28,7 @@ License
 
 #include "argList.H"
 #include "OSspecific.H"
+#include "Switch.H"
 #include "clock.H"
 #include "dictionary.H"
 #include "IOobject.H"
@@ -110,7 +111,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "opt-switch",
         "name=val",
-        "Specify the value of a registered optimisation switch (int/bool)."
+        "Specify the value of a registered optimisation switch."
         " Default is 1 if the value is omitted."
         " (Can be used multiple times)",
         true  // advanced option
@@ -326,7 +327,7 @@ void Foam::argList::addBoolOption
     bool advanced
 )
 {
-    addOption(optName, "", usage, advanced);
+    argList::addOption(optName, "", usage, advanced);
 }
 
 
@@ -455,7 +456,17 @@ void Foam::argList::addDryRunOption
     bool advanced
 )
 {
-    addOption("dry-run", "", usage, advanced);
+    argList::addBoolOption("dry-run", usage, advanced);
+}
+
+
+void Foam::argList::addVerboseOption
+(
+    const string& usage,
+    bool advanced
+)
+{
+    argList::addBoolOption("verbose", usage, advanced);
 }
 
 
@@ -469,7 +480,7 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
 
     if (addWithOption)
     {
-        addBoolOption
+        argList::addBoolOption
         (
             "withFunctionObjects",
             "Execute functionObjects",
@@ -487,7 +498,7 @@ void Foam::argList::noJobInfo()
 
 void Foam::argList::noLibs()
 {
-    addBoolOption
+    argList::addBoolOption
     (
         "no-libs",
         "Disable use of the controlDict libs entry",
@@ -768,11 +779,6 @@ void Foam::argList::setCasePaths()
 
     // Executable name, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", executable_, false);
-
-    if (validOptions.found("dry-run") && options_.found("dry-run"))
-    {
-        runControl_.dryRun(true);
-    }
 }
 
 
@@ -847,6 +853,9 @@ Foam::argList::argList
     // Set executable name immediately - useful when emitting errors.
     executable_ = fileName(args_[0]).name();
 
+    // Count -dry-run and -verbose switches
+    int numDryRun = 0, numVerbose = 0;
+
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
     for (int argi = 1; argi < args_.size(); ++argi)
@@ -862,15 +871,31 @@ Foam::argList::argList
             {
                 Warning
                     << "Ignoring lone '-' on the command-line" << endl;
+                continue;
             }
-            else if
+
+            // Option known and expects an argument?
+            // - use Switch for a tri-state
+            //   True  : known option, expects a parameter
+            //   False : known option, no parameter
+            //   bad() : unknown option
+
+            Switch wantArg(Switch::INVALID);
+            auto optIter = validOptions.cfind(optName);
+            if
             (
-                validOptions.lookup(optName, "").size()
-             || validParOptions.lookup(optName, "").size()
+                optIter.found()
+             || (optIter = validParOptions.cfind(optName)).found()
             )
             {
-                // If the option is known to require an argument,
-                // get it or emit a FatalError.
+                wantArg = !optIter.val().empty();
+            }
+
+
+            if (wantArg)
+            {
+                // Known option and expects a parameter
+                // - get it or emit a FatalError.
 
                 ++argi;
                 if (argi >= args_.size())
@@ -883,11 +908,15 @@ Foam::argList::argList
                         << "See '" << executable_ << " -help' for usage"
                         << nl << nl;
 
-                    Pstream::exit(1); // works for serial and parallel
+                    Pstream::exit(1);  // works for serial and parallel
                 }
 
                 commandLine_ += ' ';
                 commandLine_ += args_[argi];
+
+                //
+                // Special handling of these options
+                //
 
                 if (strcmp(optName, "lib") == 0)
                 {
@@ -921,7 +950,7 @@ Foam::argList::argList
                 }
                 else
                 {
-                    // Regular option:
+                    // Regular option (with a parameter):
                     // Duplicates handled by using the last -option specified
                     options_.set(optName, args_[argi]);
                 }
@@ -932,6 +961,19 @@ Foam::argList::argList
                 // registered as existing.
 
                 options_.insert(optName, "");
+
+                // Special increment handling for some known flags
+                if (wantArg.good())
+                {
+                    if (strcmp(optName, "dry-run") == 0)
+                    {
+                        ++numDryRun;
+                    }
+                    else if (strcmp(optName, "verbose") == 0)
+                    {
+                        ++numVerbose;
+                    }
+                }
             }
         }
         else
@@ -943,6 +985,10 @@ Foam::argList::argList
             ++nArgs;
         }
     }
+
+    // Commit number of -dry-run and -verbose flag occurrences
+    runControl_.dryRun(numDryRun);
+    runControl_.verbose(numVerbose);
 
     args_.resize(nArgs);
 
@@ -1043,7 +1089,7 @@ void Foam::argList::parse
         foamVersion::printBuildInfo(Info.stdStream(), false);
         FatalError.write(Info, false);
 
-        Pstream::exit(1); // works for serial and parallel
+        Pstream::exit(1);  // works for serial and parallel
     }
 
     if (initialise)
@@ -1227,7 +1273,13 @@ void Foam::argList::parse
             {
                 source = "-roots";
                 runControl_.distributed(true);
-                if (roots.size() != 1)
+                if (roots.empty())
+                {
+                    FatalErrorInFunction
+                        << "The -roots option must contain values"
+                        << exit(FatalError);
+                }
+                if (roots.size() > 1)
                 {
                     dictNProcs = roots.size()+1;
                 }
@@ -1235,17 +1287,27 @@ void Foam::argList::parse
             else if (options_.found("hostRoots"))
             {
                 source = "-hostRoots";
-                roots.resize(Pstream::nProcs()-1, fileName::null);
+                runControl_.distributed(true);
+
                 ITstream is(this->lookup("hostRoots"));
 
                 List<Tuple2<wordRe, fileName>> hostRoots(is);
                 checkITstream(is, "hostRoots");
 
+                if (hostRoots.empty())
+                {
+                    FatalErrorInFunction
+                        << "The -hostRoots option must contain values"
+                        << exit(FatalError);
+                }
+
+                // Match machine names to roots
+                roots.resize(Pstream::nProcs()-1, fileName::null);
                 for (const auto& hostRoot : hostRoots)
                 {
                     labelList matched
                     (
-                        findStrings(hostRoot.first(), hostMachine)
+                        findMatchingStrings(hostRoot.first(), hostMachine)
                     );
                     for (const label matchi : matched)
                     {
@@ -1275,7 +1337,7 @@ void Foam::argList::parse
                     }
                 }
 
-                if (roots.size() != 1)
+                if (roots.size() > 1)
                 {
                     dictNProcs = roots.size()+1;
                 }
@@ -1312,6 +1374,13 @@ void Foam::argList::parse
                         nDomainsMandatory = true;
                         runControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
+
+                        if (roots.empty())
+                        {
+                            DetailInfo
+                                << "WARNING: running distributed"
+                                << " but did not specify roots!" << nl;
+                        }
                     }
 
                     // Get numberOfSubdomains if it exists.
@@ -1330,7 +1399,7 @@ void Foam::argList::parse
                     {
                         // Optional if using default location
                         DetailInfo
-                            << "Warning: running without decomposeParDict "
+                            << "WARNING: running without decomposeParDict "
                             << this->relativePath(source) << nl;
                     }
                     else
@@ -1415,8 +1484,13 @@ void Foam::argList::parse
                 {
                     options_.set("case", roots[subproci-1]/globalCase_);
 
-                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
-                    toSubproc << args_ << options_ << roots.size();
+                    OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                    toProc
+                        << args_ << options_
+                        << runControl_.distributed()
+                        << label(runControl_.dryRun())
+                        << label(runControl_.verbose());
+
                 }
                 options_.erase("case");
 
@@ -1463,24 +1537,34 @@ void Foam::argList::parse
                 // Distribute the master's argument list (unaltered)
                 for (const int subproci : Pstream::subProcs())
                 {
-                    OPstream toSubproc(Pstream::commsTypes::scheduled, subproci);
-                    toSubproc << args_ << options_ << roots.size();
+                    OPstream toProc(Pstream::commsTypes::scheduled, subproci);
+                    toProc
+                        << args_ << options_
+                        << runControl_.distributed()
+                        << label(runControl_.dryRun())
+                        << label(runControl_.verbose());
                 }
             }
         }
         else
         {
             // Collect the master's argument list
-            label nroots;
+            bool isDistributed;
+            label numDryRun, numVerbose;
 
             IPstream fromMaster
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_ >> nroots;
+            fromMaster
+                >> args_ >> options_
+                >> isDistributed
+                >> numDryRun >> numVerbose;
 
-            runControl_.distributed(nroots);
+            runControl_.distributed(isDistributed);
+            runControl_.dryRun(numDryRun);
+            runControl_.verbose(numVerbose);
 
             // Establish rootPath_/globalCase_/case_ for sub-process
             setCasePaths();

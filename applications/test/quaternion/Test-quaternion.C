@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -124,15 +124,12 @@ int main(int argc, char *argv[])
         "(vector angle)",
         "Rotate about the <vector> by <angle> degrees - eg, '((1 0 0) 45)'"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
-        "Additional verbosity"
+        "Report euler angles"
     );
 
     argList args(argc, argv);
-
-    const bool verbose = args.found("verbose");
 
 
     vector rotVector;
@@ -327,7 +324,7 @@ int main(int argc, char *argv[])
         tensor rotQ(quaternion(order, angles).R());
         tensor rotE(euler::rotation(order, angles, false));
 
-        if (verbose)
+        if (args.verbose())
         {
             Info<< "euler " << orderName << angles << nl;
             printRotation(rotE);

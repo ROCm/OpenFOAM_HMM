@@ -78,9 +78,8 @@ int main(int argc, char *argv[])
         "detail",
         "Additional detail"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity"
     );
 
@@ -94,7 +93,6 @@ int main(int argc, char *argv[])
 
     const bool testOr = args.found("or");
     const bool detail = args.found("detail");
-    const bool verbose = args.found("verbose");
 
     label ngood = 0;
     label nbad = 0;
@@ -127,7 +125,7 @@ int main(int argc, char *argv[])
         {
             ++ngood;
 
-            if (verbose)
+            if (args.verbose())
             {
                 const word addr(Foam::name(ptr));
 

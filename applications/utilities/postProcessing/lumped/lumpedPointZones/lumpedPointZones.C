@@ -72,23 +72,18 @@ int main(int argc, char *argv[])
         "Suppress calculation/display of point interpolators"
     );
 
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity"
     );
 
     #include "addRegionOption.H"
-
     #include "setRootCase.H"
+    #include "createTime.H"
 
     const bool noInterpolate = args.found("no-interpolate");
 
-    // const bool verbose = args.found("verbose");
-
     args.readIfPresent("visual-length", lumpedPointState::visLength);
-
-    #include "createTime.H"
 
     if (args.dryRun())
     {

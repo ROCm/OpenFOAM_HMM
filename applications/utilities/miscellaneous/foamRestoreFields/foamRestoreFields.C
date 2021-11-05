@@ -232,9 +232,8 @@ int main(int argc, char *argv[])
     (
         "Report action without moving/renaming"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity"
     );
 
@@ -247,7 +246,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     dryrun = args.dryRun();
-    verbose = args.found("verbose");
+    verbose = args.verbose();
 
 
     // Construct time

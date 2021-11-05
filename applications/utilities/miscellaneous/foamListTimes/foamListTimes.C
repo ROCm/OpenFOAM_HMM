@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,9 +101,8 @@ int main(int argc, char *argv[])
         "rm",
         "Remove selected time directories"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Report progress of -rm option"
     );
     profiling::disable(); // Disable profiling (and its output)
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const bool removeFiles(args.found("rm"));
-    bool verbose(args.found("verbose"));
+    bool verbose(args.verbose());
 
 
     // Get times list from the master processor and subset based on

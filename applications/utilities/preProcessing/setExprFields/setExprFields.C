@@ -553,9 +553,8 @@ int main(int argc, char *argv[])
     (
         "Evaluate but do not write"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity",
         true // Advanced option
     );
@@ -661,9 +660,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     #include "createTime.H"
-
-    const bool dryrun = args.dryRun();
-    const bool verbose = args.found("verbose");
 
     const word dictName("setExprFieldsDict");
 
@@ -797,7 +793,7 @@ int main(int argc, char *argv[])
 
             setExprFieldsControl ctrl;
 
-            ctrl.dryRun = dryrun;
+            ctrl.dryRun = args.dryRun();
             ctrl.debugParsing = args.found("debug-parser");
             ctrl.cacheVariables = !args.found("no-variable-caching");
 
@@ -869,7 +865,7 @@ int main(int argc, char *argv[])
 
                 setExprFieldsControl ctrl;
 
-                ctrl.dryRun = dryrun;
+                ctrl.dryRun = args.dryRun();
                 ctrl.debugParsing = args.found("debug-parser");
                 ctrl.cacheVariables = !args.found("no-variable-caching");
 
@@ -934,7 +930,7 @@ int main(int argc, char *argv[])
                     ctrl.useDimensions = bool(dimPtr);
                 }
 
-                if (verbose && !timei)
+                if (args.verbose() && !timei)
                 {
                     // Report once
                     Info<< "Processing" << dict << nl;
