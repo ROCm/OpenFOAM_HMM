@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,12 +64,12 @@ Foam::simplifiedMeshes::simplifiedDynamicFvMeshBase::New
 
         const word modelType(dict.get<word>("dynamicFvMesh"));
 
-        auto cstrIter = timeConstructorTablePtr_->cfind(modelType);
+        auto* ctorPtr = timeConstructorTable(modelType);
 
-        if (cstrIter.found())
+        if (ctorPtr)
         {
             Info<< "Selecting simplified mesh model " << modelType << endl;
-            return autoPtr<dynamicFvMesh>(cstrIter()(io.time(), io.name()));
+            return autoPtr<dynamicFvMesh>(ctorPtr(io.time(), io.name()));
         }
     }
 

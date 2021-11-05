@@ -65,6 +65,55 @@ class basicThermo
 :
     public IOdictionary
 {
+    // Private Data
+
+        //- Components names/order
+        static const wordList componentHeader4;
+
+        //- Components names/order
+        static const wordList componentHeader7;
+
+
+    // Private Member Functions
+
+        //- Construct name of thermo package from dictionary components
+        static word makeThermoName
+        (
+            const dictionary& dict,
+            const wordList*& cmptHeaderPtr
+        );
+
+        //- Look up field from registry or construct and store
+        static volScalarField& lookupOrConstruct
+        (
+            const fvMesh& mesh,
+            const word& fieldName,
+            bool& isOwner  //!< Stored to registry by this instance
+        );
+
+        //- Generic lookup for thermodynamics package thermoTypeName
+        //  \return constructor pointer, or FatalError
+        template<class Thermo, class ThermoConstructTable>
+        static typename ThermoConstructTable::mapped_type
+        getThermoOrDie
+        (
+            const dictionary& thermoTypeDict,
+            ThermoConstructTable& thermoTable,
+            const word& thermoTypeName,
+            const wordList& cmptNames
+        );
+
+        //- Generic lookup for each of the related thermodynamics packages
+        //  \return constructor pointer, or FatalError
+        template<class Thermo, class ThermoConstructTable>
+        static typename ThermoConstructTable::mapped_type
+        getThermoOrDie
+        (
+            const dictionary& thermoDict,
+            ThermoConstructTable& thermoTable
+        );
+
+
 protected:
 
     // Protected Data
@@ -95,14 +144,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Look up field from registry or construct and store
-        static volScalarField& lookupOrConstruct
-        (
-            const fvMesh& mesh,
-            const word& fieldName,
-            bool& isOwner  //!< Stored to registry by this instance
-        );
 
         //- Return the enthalpy/internal energy field boundary types
         //- by interrogating the temperature field boundary types
@@ -173,24 +214,6 @@ public:
 
     // Selectors
 
-        //- Generic lookup for thermodynamics package thermoTypeName
-        template<class Thermo, class Table>
-        static typename Table::iterator lookupThermo
-        (
-            const dictionary& thermoTypeDict,
-            Table* tablePtr,
-            std::initializer_list<const char*> cmptNames,
-            const word& thermoTypeName
-        );
-
-        //- Generic lookup for each of the related thermodynamics packages
-        template<class Thermo, class Table>
-        static typename Table::iterator lookupThermo
-        (
-            const dictionary& thermoDict,
-            Table* tablePtr
-        );
-
         //- Generic New for each of the related thermodynamics packages
         template<class Thermo>
         static autoPtr<Thermo> New
@@ -249,6 +272,14 @@ public:
 
         static const basicThermo& lookupThermo(const fvPatchScalarField& pf);
 
+        //- Print (filtered) table of thermo names, splits on \c " ,<>"
+        static Ostream& printThermoNames
+        (
+            Ostream& os,
+            const wordList& cmptNames,
+            const wordList& thermoNames
+        );
+
         //- Check that the thermodynamics package is consistent
         //  with energy forms supported by the application
         void validate
@@ -287,11 +318,14 @@ public:
             const word&
         ) const;
 
-        //- Split name of thermo package into a list of the components names
+        //- Split thermo package name into a list of components names
+        //  Splits on \c " ,<>"
+        //  \return empty list if the split name does not have the
+        //  expected number of components (non-zero).
         static wordList splitThermoName
         (
-            const word& thermoName,
-            const int nCmpt
+            const std::string& thermoName,
+            const int nExpectedCmpts
         );
 
         //- Update properties

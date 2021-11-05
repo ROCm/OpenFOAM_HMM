@@ -56,9 +56,9 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.symmetric())
     {
-        auto cstrIter = symMatrixConstructorTablePtr_->cfind(solverName);
+        auto* ctorPtr = symMatrixConstructorTable(solverName);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -71,7 +71,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -81,9 +81,9 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.asymmetric())
     {
-        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(solverName);
+        auto* ctorPtr = asymMatrixConstructorTable(solverName);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -96,7 +96,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,

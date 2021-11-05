@@ -32,7 +32,7 @@ Description
 SourceFiles
     basicSolidChemistryModelI.H
     basicSolidChemistryModel.C
-    newChemistrySolidModel.C
+    basicSolidChemistryModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,11 +50,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                     class basicSolidChemistryModel Declaration
+                     Class basicSolidChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSolidChemistryModel
@@ -72,7 +72,7 @@ class basicSolidChemistryModel
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Solid thermo
         solidReactionThermo& solidThermo_;

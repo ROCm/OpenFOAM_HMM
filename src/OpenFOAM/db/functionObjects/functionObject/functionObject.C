@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,9 +108,9 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
             << exit(FatalError);
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
+    auto* ctorPtr = dictionaryConstructorTable(functionType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         // FatalError (not FatalIOError) to ensure it can be caught
         // as an exception and ignored
@@ -122,7 +122,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<functionObject>(cstrIter()(name, runTime, dict));
+    return autoPtr<functionObject>(ctorPtr(name, runTime, dict));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::ParticleForce<CloudType>::New
 {
     Info<< "    Selecting particle force " << forceType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(forceType);
+    auto* ctorPtr = dictionaryConstructorTable(forceType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -57,7 +57,7 @@ Foam::ParticleForce<CloudType>::New
 
     return autoPtr<ParticleForce<CloudType>>
     (
-        cstrIter()
+        ctorPtr
         (
             owner,
             mesh,

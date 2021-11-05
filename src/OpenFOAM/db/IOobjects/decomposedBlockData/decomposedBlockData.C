@@ -259,8 +259,8 @@ Foam::decomposedBlockData::readBlock
             if (!headerIO.readHeader(*realIsPtr))
             {
                 FatalIOErrorInFunction(*realIsPtr)
-                    << "Problem while reading header for object "
-                    << is.name() << nl
+                    << "Problem while reading object header "
+                    << is.relativeName() << nl
                     << exit(FatalIOError);
             }
         }
@@ -273,8 +273,8 @@ Foam::decomposedBlockData::readBlock
             if (!headerIO.readHeader(headerStream))
             {
                 FatalIOErrorInFunction(headerStream)
-                    << "Problem while reading header for object "
-                    << is.name() << nl
+                    << "Problem while reading object header "
+                    << is.relativeName() << nl
                     << exit(FatalIOError);
             }
             streamOptData = static_cast<IOstreamOption>(headerStream);
@@ -447,8 +447,8 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             if (!headerIO.readHeader(*realIsPtr))
             {
                 FatalIOErrorInFunction(*realIsPtr)
-                    << "Problem while reading header for object "
-                    << is.name() << nl
+                    << "Problem while reading object header "
+                    << is.relativeName() << nl
                     << exit(FatalIOError);
             }
         }

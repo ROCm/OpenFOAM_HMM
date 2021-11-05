@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,9 +44,9 @@ autoPtr<vibrationShellModel> vibrationShellModel::New
 {
     const word modelType = dict.get<word>("vibrationShellModel");
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInFunction
             << "Unknown vibrationShellModel type "
@@ -56,7 +56,7 @@ autoPtr<vibrationShellModel> vibrationShellModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<vibrationShellModel>(cstrIter()(modelType, p, dict));
+    return autoPtr<vibrationShellModel>(ctorPtr(modelType, p, dict));
 }
 
 

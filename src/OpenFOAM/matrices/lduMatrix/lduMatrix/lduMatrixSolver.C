@@ -70,9 +70,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.symmetric())
     {
-        auto cstrIter = symMatrixConstructorTablePtr_->cfind(name);
+        auto* ctorPtr = symMatrixConstructorTable(name);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -85,7 +85,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -98,9 +98,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.asymmetric())
     {
-        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(name);
+        auto* ctorPtr = asymMatrixConstructorTable(name);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -113,7 +113,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,

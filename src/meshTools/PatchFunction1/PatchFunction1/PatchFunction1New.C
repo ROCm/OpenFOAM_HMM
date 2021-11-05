@@ -145,9 +145,9 @@ Foam::PatchFunction1<Type>::New
     }
 
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInFunction(dict)
             << "Unknown PatchFunction1 type "
@@ -157,7 +157,7 @@ Foam::PatchFunction1<Type>::New
             << exit(FatalIOError);
     }
 
-    return cstrIter()(pp, modelType, entryName, *coeffs, faceValues);
+    return ctorPtr(pp, modelType, entryName, *coeffs, faceValues);
 }
 
 

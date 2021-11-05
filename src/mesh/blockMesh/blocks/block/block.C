@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,15 +110,15 @@ Foam::autoPtr<Foam::block> Foam::block::New
 
     const word blockOrCellShapeType(is);
 
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(blockOrCellShapeType);
+    auto* ctorPtr = IstreamConstructorTable(blockOrCellShapeType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         is.putBack(token(blockOrCellShapeType));
         return autoPtr<block>::New(dict, index, points, edges, faces, is);
     }
 
-    return autoPtr<block>(cstrIter()(dict, index, points, edges, faces, is));
+    return autoPtr<block>(ctorPtr(dict, index, points, edges, faces, is));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +48,9 @@ Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
     const polyMesh& mesh
 )
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = wordConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -60,7 +60,7 @@ Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<cellLooper>(cstrIter()(mesh));
+    return autoPtr<cellLooper>(ctorPtr(mesh));
 }
 
 

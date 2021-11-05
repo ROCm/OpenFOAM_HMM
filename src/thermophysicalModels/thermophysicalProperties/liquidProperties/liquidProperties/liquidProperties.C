@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,9 +94,9 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 {
     DebugInFunction << "Constructing liquidProperties" << nl;
 
-    auto cstrIter = ConstructorTablePtr_->cfind(name);
+    auto* ctorPtr = ConstructorTable(name);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -106,7 +106,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<liquidProperties>(cstrIter()());
+    return autoPtr<liquidProperties>(ctorPtr());
 }
 
 
@@ -128,9 +128,9 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
             return New(liquidType);
         }
 
-        auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
+        auto* ctorPtr = dictionaryConstructorTable(liquidType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -143,16 +143,13 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 
         return autoPtr<liquidProperties>
         (
-            cstrIter()
-            (
-                dict.optionalSubDict(liquidType + "Coeffs")
-            )
+            ctorPtr(dict.optionalSubDict(liquidType + "Coeffs"))
         );
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
+    auto* ctorPtr = dictionaryConstructorTable(liquidType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -163,7 +160,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<liquidProperties>(cstrIter()(dict));
+    return autoPtr<liquidProperties>(ctorPtr(dict));
 }
 
 

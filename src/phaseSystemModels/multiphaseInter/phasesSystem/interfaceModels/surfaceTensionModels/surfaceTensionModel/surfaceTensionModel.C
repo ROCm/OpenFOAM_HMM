@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,9 +76,9 @@ Foam::surfaceTensionModel::New
     Info<< "Selecting surfaceTensionModel for "
         << pair << ": " << modelType << endl;
 
-    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -89,7 +89,7 @@ Foam::surfaceTensionModel::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(dict, pair, true);
+    return ctorPtr(dict, pair, true);
 }
 
 

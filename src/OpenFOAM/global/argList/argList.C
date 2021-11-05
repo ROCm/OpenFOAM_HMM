@@ -571,6 +571,7 @@ Foam::word Foam::argList::optionCompat(const word& optName)
         {
             const auto& alt = fnd.val();
 
+            // No error::master() guard - only called on master anyhow
             if (error::warnAboutAge(alt.second))
             {
                 std::cerr
@@ -609,6 +610,7 @@ int Foam::argList::optionIgnore(const word& optName)
             // '-option ARG' or '-option'
             const int nskip = (alt.first ? 2 : 1);
 
+            // No error::master() guard - only called on master anyhow
             if (error::warnAboutAge(alt.second))
             {
                 std::cerr

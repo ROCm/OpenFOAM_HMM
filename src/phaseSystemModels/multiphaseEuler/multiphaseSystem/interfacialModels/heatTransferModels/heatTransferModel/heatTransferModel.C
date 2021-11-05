@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,9 +74,9 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
         << ": "
         << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -87,7 +87,7 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(dict, alpha1, phase1, phase2);
+    return ctorPtr(dict, alpha1, phase1, phase2);
 }
 
 

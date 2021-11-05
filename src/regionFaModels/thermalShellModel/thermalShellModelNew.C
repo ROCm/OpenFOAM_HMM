@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,9 @@ autoPtr<thermalShellModel> thermalShellModel::New
     const word modelType =
         dict.getOrDefault<word>("thermalShellModel", "thermalShell");
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInFunction
             << "Unknown thermalShellModel type "
@@ -57,7 +57,7 @@ autoPtr<thermalShellModel> thermalShellModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<thermalShellModel>(cstrIter()(modelType, p, dict));
+    return autoPtr<thermalShellModel>(ctorPtr(modelType, p, dict));
 }
 
 

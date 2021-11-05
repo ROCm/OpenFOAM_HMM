@@ -74,9 +74,9 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 {
     const word modelType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -87,7 +87,7 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<coordinateRotation>(cstrIter()(dict));
+    return autoPtr<coordinateRotation>(ctorPtr(dict));
 }
 
 

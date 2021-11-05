@@ -72,9 +72,8 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
                 << exit(FatalError);
         }
 
-        auto doInitCstrIter = doInitConstructorTablePtr_->cfind(modelType);
-
-        if (doInitCstrIter.found())
+        auto* doInitCtor = doInitConstructorTable(modelType);
+        if (doInitCtor)
         {
             DebugInfo
                 << "Constructing dynamicFvMesh with explicit initialisation"
@@ -82,7 +81,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 
             // Two-step constructor
             // 1. Construct mesh, do not initialise
-            autoPtr<dynamicFvMesh> meshPtr(doInitCstrIter()(io, false));
+            autoPtr<dynamicFvMesh> meshPtr(doInitCtor(io, false));
 
             // 2. Initialise parents and itself
             meshPtr().init(true);
@@ -90,9 +89,9 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
             return meshPtr;
         }
 
-        auto cstrIter = IOobjectConstructorTablePtr_->cfind(modelType);
+        auto* ctorPtr = IOobjectConstructorTable(modelType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -103,7 +102,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
             ) << exit(FatalIOError);
         }
 
-        return autoPtr<dynamicFvMesh>(cstrIter()(io));
+        return autoPtr<dynamicFvMesh>(ctorPtr(io));
     }
 
     DebugInfo

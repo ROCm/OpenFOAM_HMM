@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,9 @@ Foam::laminarModels::generalizedNewtonianViscosityModel::New
 
     Info<< "Selecting generalized Newtonian model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->find(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -53,7 +53,7 @@ Foam::laminarModels::generalizedNewtonianViscosityModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<generalizedNewtonianViscosityModel>(cstrIter()(dict));
+    return autoPtr<generalizedNewtonianViscosityModel>(ctorPtr(dict));
 }
 
 

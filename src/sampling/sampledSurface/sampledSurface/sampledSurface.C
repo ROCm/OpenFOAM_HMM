@@ -70,9 +70,9 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
     DebugInfo
         << "Selecting sampledType " << sampleType << endl;
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
+    auto* ctorPtr = wordConstructorTable(sampleType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -83,7 +83,7 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));
+    return autoPtr<sampledSurface>(ctorPtr(name, mesh, dict));
 }
 
 

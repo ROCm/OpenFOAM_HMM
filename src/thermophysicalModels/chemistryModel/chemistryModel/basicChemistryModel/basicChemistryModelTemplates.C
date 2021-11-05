@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,13 +87,14 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
         )
     );
 
-    dictionary chemistryTypeDictNew;
-    chemistryTypeDictNew.add("solver", solverName);
-    chemistryTypeDictNew.add("method", methodName);
+    {
+        dictionary chemistryTypeDictNew;
 
-    Info<< "Selecting chemistry solver " << chemistryTypeDictNew << endl;
+        chemistryTypeDictNew.add("solver", solverName);
+        chemistryTypeDictNew.add("method", methodName);
 
-    const auto& cnstrTable = *(ChemistryModel::thermoConstructorTablePtr_);
+        Info<< "Selecting chemistry solver " << chemistryTypeDictNew << endl;
+    }
 
     const word chemSolverCompThermoName
     (
@@ -102,30 +103,32 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
       + thermo.thermoName() + ">>"
     );
 
-    auto cstrIter = cnstrTable.cfind(chemSolverCompThermoName);
 
-    if (!cstrIter.found())
+    const auto& cnstrTable = *(ChemistryModel::thermoConstructorTablePtr_);
+
+    auto* ctorPtr = cnstrTable.lookup(chemSolverCompThermoName, nullptr);
+
+    if (!ctorPtr)
     {
+        const wordList names(cnstrTable.sortedToc());
+
         constexpr const int nCmpt = 8;
 
-        wordList thisCmpts;
-        thisCmpts.append(word::null);
-        thisCmpts.append(word::null);
+        DynamicList<word> thisCmpts(6);
         thisCmpts.append(ChemistryModel::reactionThermo::typeName);
         thisCmpts.append
         (
             basicThermo::splitThermoName(thermo.thermoName(), 5)
         );
 
-        List<wordList> validNames;
-
+        DynamicList<wordList> validNames;
         validNames.append
         (
             // Header
             wordList({"solver", "method"})
         );
 
-        List<wordList> validCmpts;
+        DynamicList<wordList> validCmpts(names.size() + 1);
         validCmpts.append
         (
             // Header
@@ -142,48 +145,50 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             })
         );
 
-        for (const word& validName : cnstrTable.sortedToc())
+        for (const word& validName : names)
         {
-            validCmpts.append
-            (
-                basicThermo::splitThermoName(validName, nCmpt)
-            );
+            wordList cmpts(basicThermo::splitThermoName(validName, nCmpt));
 
-            const wordList& cmpts = validCmpts.last();
-
-            bool isValid = true;
-            for (label i = 2; i < cmpts.size() && isValid; ++i)
+            if (!cmpts.empty())
             {
-                isValid = isValid && cmpts[i] == thisCmpts[i];
-            }
-
-            if (isValid)
-            {
-                validNames.append(SubList<word>(cmpts, 2));
+                if (thisCmpts == SubList<word>(cmpts, 6, 2))
+                {
+                    validNames.append(SubList<word>(cmpts, 2));
+                }
+                validCmpts.append(std::move(cmpts));
             }
         }
-
 
         FatalErrorInFunction
             << "Unknown " << typeName_() << " type " << solverName << nl << nl;
 
-        FatalErrorInFunction
-            << "All " << validNames[0][0] << '/' << validNames[0][1]
-            << "combinations for this thermodynamic model:" << nl << nl;
+        if (validNames.size() > 1)
+        {
+            FatalError
+                << "All " << validNames[0][0] << '/' << validNames[0][1]
+                << " combinations for this thermodynamic model:"
+                << nl << nl;
 
-        // Table of available packages (as constituent parts)
-        printTable(validNames, FatalErrorInFunction)
-            << nl
-            << "All " << validCmpts[0][0] << '/' << validCmpts[0][1] << '/'
-            << validCmpts[0][2] << "/thermoPhysics combinations are:"
-            << nl << nl;
+            // Table of available packages (as constituent parts)
+            printTable(validNames, FatalError) << nl;
+        }
 
-        // Table of available packages (as constituent parts)
-        printTable(validCmpts, FatalErrorInFunction)
+        if (validCmpts.size() > 1)
+        {
+            FatalError
+                << "All " << validCmpts[0][0] << '/' << validCmpts[0][1] << '/'
+                << validCmpts[0][2] << "/thermoPhysics combinations:"
+                << nl << nl;
+
+            // Table of available packages (as constituent parts)
+            printTable(validCmpts, FatalError) << nl;
+        }
+
+        FatalError
             << exit(FatalError);
     }
 
-    return autoPtr<ChemistryModel>(cstrIter()(thermo));
+    return autoPtr<ChemistryModel>(ctorPtr(thermo));
 }
 
 // ************************************************************************* //

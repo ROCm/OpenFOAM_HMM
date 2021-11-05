@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,9 @@ Foam::surfaceInterpolationScheme<Type>::New
         InfoInFunction << "Discretisation scheme = " << schemeName << endl;
     }
 
-    auto cstrIter = MeshConstructorTablePtr_->cfind(schemeName);
+    auto* ctorPtr = MeshConstructorTable(schemeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -71,7 +71,7 @@ Foam::surfaceInterpolationScheme<Type>::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(mesh, schemeData);
+    return ctorPtr(mesh, schemeData);
 }
 
 
@@ -101,9 +101,9 @@ Foam::surfaceInterpolationScheme<Type>::New
         InfoInFunction << "Discretisation scheme = " << schemeName << endl;
     }
 
-    auto cstrIter = MeshFluxConstructorTablePtr_->cfind(schemeName);
+    auto* ctorPtr = MeshFluxConstructorTable(schemeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -114,7 +114,7 @@ Foam::surfaceInterpolationScheme<Type>::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(mesh, faceFlux, schemeData);
+    return ctorPtr(mesh, faceFlux, schemeData);
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +39,9 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
 
     Info<< "Selecting windowModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
 
     return autoPtr<windowModel>
     (
-        cstrIter()(dict.subDict(modelType + "Coeffs"), nSamples)
+        ctorPtr(dict.subDict(modelType + "Coeffs"), nSamples)
     );
 }
 

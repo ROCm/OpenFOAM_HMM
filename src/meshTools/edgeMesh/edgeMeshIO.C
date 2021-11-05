@@ -94,9 +94,9 @@ void Foam::edgeMesh::write
 {
     DebugInFunction << "Writing to " << name << endl;
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
+    auto* mfuncPtr = writefileExtensionMemberFunctionTable(fileType);
 
-    if (!mfIter.found())
+    if (!mfuncPtr)
     {
         FatalErrorInLookup
         (
@@ -106,7 +106,7 @@ void Foam::edgeMesh::write
         ) << exit(FatalError);
     }
 
-    mfIter()(name, mesh, streamOpt, options);
+    mfuncPtr(name, mesh, streamOpt, options);
 }
 
 

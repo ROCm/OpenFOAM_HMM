@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ Foam::phaseChangeTwoPhaseMixture::New
 
     Info<< "Selecting phaseChange model " << modelType << endl;
 
-    auto cstrIter = componentsConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = componentsConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -69,7 +69,7 @@ Foam::phaseChangeTwoPhaseMixture::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi));
+    return autoPtr<phaseChangeTwoPhaseMixture>(ctorPtr(U, phi));
 }
 
 

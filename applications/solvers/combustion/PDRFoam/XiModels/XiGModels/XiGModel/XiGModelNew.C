@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<XiGModel>(cstrIter()(dict, thermo, turbulence, Su));
+    return autoPtr<XiGModel>(ctorPtr(dict, thermo, turbulence, Su));
 }
 
 

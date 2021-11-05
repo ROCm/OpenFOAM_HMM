@@ -319,9 +319,9 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             lduMeshConstructorTablePtr_
         );
 
-        auto cstrIter = lduMeshConstructorTablePtr_->cfind(agglomeratorType);
+        auto* ctorPtr = lduMeshConstructorTable(agglomeratorType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalErrorInFunction
                 << "Unknown GAMGAgglomeration type "
@@ -333,7 +333,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 << exit(FatalError);
         }
 
-        return store(cstrIter()(mesh, controlDict).ptr());
+        return store(ctorPtr(mesh, controlDict).ptr());
     }
 }
 
@@ -370,20 +370,15 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             lduMatrixConstructorTablePtr_
         );
 
-        if
-        (
-            !lduMatrixConstructorTablePtr_
-         || !lduMatrixConstructorTablePtr_->found(agglomeratorType)
-        )
+        auto* ctorPtr = lduMatrixConstructorTable(agglomeratorType);
+
+        if (!ctorPtr)
         {
             return New(mesh, controlDict);
         }
         else
         {
-            auto cstrIter =
-                lduMatrixConstructorTablePtr_->cfind(agglomeratorType);
-
-            return store(cstrIter()(matrix, controlDict).ptr());
+            return store(ctorPtr(matrix, controlDict).ptr());
         }
     }
 }
@@ -422,9 +417,9 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             geometryConstructorTablePtr_
         );
 
-        auto cstrIter = geometryConstructorTablePtr_->cfind(agglomeratorType);
+        auto* ctorPtr = geometryConstructorTable(agglomeratorType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalErrorInFunction
                 << "Unknown GAMGAgglomeration type "
@@ -436,7 +431,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 
         return store
         (
-            cstrIter()
+            ctorPtr
             (
                 mesh,
                 cellVolumes,

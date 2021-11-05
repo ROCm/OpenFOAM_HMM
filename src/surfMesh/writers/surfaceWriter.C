@@ -64,9 +64,9 @@ Foam::autoPtr<Foam::surfaceWriter>
 Foam::surfaceWriter::New(const word& writeType)
 {
     // Constructors without dictionary options
-    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
+    auto* ctorPtr = wordConstructorTable(writeType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         if (MeshedSurfaceProxy<face>::canWriteType(writeType))
         {
@@ -86,7 +86,7 @@ Foam::surfaceWriter::New(const word& writeType)
             << exit(FatalError);
     }
 
-    return autoPtr<surfaceWriter>(cstrIter()());
+    return autoPtr<surfaceWriter>(ctorPtr());
 }
 
 
@@ -98,17 +98,20 @@ Foam::surfaceWriter::New
 )
 {
     // Constructors with dictionary options
-    auto cstrIter2 = wordDictConstructorTablePtr_->cfind(writeType);
-
-    if (cstrIter2.found())
     {
-        return autoPtr<surfaceWriter>(cstrIter2()(writeOpts));
+        auto* ctorPtr = wordDictConstructorTable(writeType);
+
+        if (ctorPtr)
+        {
+            return autoPtr<surfaceWriter>(ctorPtr(writeOpts));
+        }
     }
 
-    // Constructors without dictionary options
-    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
 
-    if (!cstrIter.found())
+    // Constructors without dictionary options
+    auto* ctorPtr = wordConstructorTable(writeType);
+
+    if (!ctorPtr)
     {
         if (MeshedSurfaceProxy<face>::canWriteType(writeType))
         {
@@ -128,7 +131,7 @@ Foam::surfaceWriter::New
             << exit(FatalError);
     }
 
-    return autoPtr<surfaceWriter>(cstrIter()());
+    return autoPtr<surfaceWriter>(ctorPtr());
 }
 
 

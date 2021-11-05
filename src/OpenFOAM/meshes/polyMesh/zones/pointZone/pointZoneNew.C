@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,9 +43,9 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
 
     const word zoneType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(zoneType);
+    auto* ctorPtr = dictionaryConstructorTable(zoneType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<pointZone>(cstrIter()(name, dict, index, zm));
+    return autoPtr<pointZone>(ctorPtr(name, dict, index, zm));
 }
 
 

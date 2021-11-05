@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,9 @@ Foam::autoPtr<Foam::engineTime> Foam::engineTime::New
 
     Info<< "Selecting engine type " << engineType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(engineType);
+    auto* ctorPtr = dictionaryConstructorTable(engineType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -67,7 +67,7 @@ Foam::autoPtr<Foam::engineTime> Foam::engineTime::New
 
     return autoPtr<engineTime>
     (
-        cstrIter()
+        ctorPtr
         (
             name,
             rootPath,

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 DLR
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +52,9 @@ Foam::reconstructionSchemes::New
 
     Info<< "Selecting reconstructionScheme: " << schemeType << endl;
 
-    auto cstrIter = componentsConstructorTablePtr_->cfind(schemeType);
+    auto* ctorPtr = componentsConstructorTable(schemeType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -64,7 +65,7 @@ Foam::reconstructionSchemes::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<reconstructionSchemes>(cstrIter()(alpha1, phi, U, dict));
+    return autoPtr<reconstructionSchemes>(ctorPtr(alpha1, phi, U, dict));
 }
 
 

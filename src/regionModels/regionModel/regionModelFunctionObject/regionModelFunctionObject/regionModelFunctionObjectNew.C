@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::regionModels::regionModelFunctionObject::New
 
     Info<< "        " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -58,7 +58,7 @@ Foam::regionModels::regionModelFunctionObject::New
     return
         autoPtr<regionModelFunctionObject>
         (
-            cstrIter()
+            ctorPtr
             (
                 dict.subDict(modelName),
                 region

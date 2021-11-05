@@ -60,9 +60,9 @@ Foam::topoSet::New
     writeOption w
 )
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(setType);
+    auto* ctorPtr = wordConstructorTable(setType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -72,7 +72,7 @@ Foam::topoSet::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<topoSet>(cstrIter()(mesh, name, r, w));
+    return autoPtr<topoSet>(ctorPtr(mesh, name, r, w));
 }
 
 
@@ -86,9 +86,9 @@ Foam::topoSet::New
     writeOption w
 )
 {
-    auto cstrIter = sizeConstructorTablePtr_->cfind(setType);
+    auto* ctorPtr = sizeConstructorTable(setType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -98,7 +98,7 @@ Foam::topoSet::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<topoSet>(cstrIter()(mesh, name, size, w));
+    return autoPtr<topoSet>(ctorPtr(mesh, name, size, w));
 }
 
 
@@ -112,9 +112,9 @@ Foam::topoSet::New
     writeOption w
 )
 {
-    auto cstrIter = setConstructorTablePtr_->cfind(setType);
+    auto* ctorPtr = setConstructorTable(setType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -124,7 +124,7 @@ Foam::topoSet::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<topoSet>(cstrIter()(mesh, name, set, w));
+    return autoPtr<topoSet>(ctorPtr(mesh, name, set, w));
 }
 
 

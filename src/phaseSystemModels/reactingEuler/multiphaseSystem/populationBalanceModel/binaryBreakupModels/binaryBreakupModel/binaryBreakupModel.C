@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ Foam::diameterModels::binaryBreakupModel::New
     const dictionary& dict
 )
 {
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -63,7 +63,7 @@ Foam::diameterModels::binaryBreakupModel::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<binaryBreakupModel>(cstrIter()(popBal, dict));
+    return autoPtr<binaryBreakupModel>(ctorPtr(popBal, dict));
 }
 
 

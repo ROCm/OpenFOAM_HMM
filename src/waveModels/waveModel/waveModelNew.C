@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 IH-Cantabria
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +65,9 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
 
     Info<< "Selecting waveModel " << modelType << endl;
 
-    auto cstrIter = patchConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = patchConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -78,7 +78,7 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<waveModel>(cstrIter()(patchDict, mesh, patch));
+    return autoPtr<waveModel>(ctorPtr(patchDict, mesh, patch));
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,9 +93,9 @@ Foam::IsotropyModel<CloudType>::New
 
     Info<< "Selecting isotropy model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -106,7 +106,7 @@ Foam::IsotropyModel<CloudType>::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<IsotropyModel<CloudType>>(cstrIter()(dict, owner));
+    return autoPtr<IsotropyModel<CloudType>>(ctorPtr(dict, owner));
 }
 
 

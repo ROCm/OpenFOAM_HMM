@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,9 +161,7 @@ static void expandLeadingTilde(std::string& s)
         // Compat Warning
         const int version(1806);
 
-        // Single warning (on master) with guard to avoid Pstream::master()
-        // when Pstream has not yet been initialized
-        if (UPstream::parRun() ? UPstream::master() : true)
+        if (error::master())
         {
             std::cerr
                 << nl

@@ -173,9 +173,9 @@ Foam::decompositionConstraint::New
 {
     Info<< "Selecting decompositionConstraint " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -186,7 +186,7 @@ Foam::decompositionConstraint::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<decompositionConstraint>(cstrIter()(dict));
+    return autoPtr<decompositionConstraint>(ctorPtr(dict));
 }
 
 

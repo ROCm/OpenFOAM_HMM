@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,12 +104,11 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::NewCalculatedType
     const faPatchField<Type2>& pf
 )
 {
-    auto patchTypeCstrIter =
-        patchConstructorTablePtr_->cfind(pf.patch().type());
+    auto* patchTypeCtor = patchConstructorTable(pf.patch().type());
 
-    if (patchTypeCstrIter.found())
+    if (patchTypeCtor)
     {
-        return patchTypeCstrIter()
+        return patchTypeCtor
         (
             pf.patch(),
             DimensionedField<Type, areaMesh>::null()

@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "argList.H"
 #include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
@@ -100,7 +99,7 @@ Foam::OSstream& Foam::IOerror::operator()
         functionName,
         sourceFileName,
         sourceFileLineNumber,
-        argList::envRelativePath(ioStream.name()),
+        ioStream.relativeName(),
         ioStream.lineNumber(),
         -1  // No known endLineNumber
     );
@@ -137,8 +136,8 @@ Foam::OSstream& Foam::IOerror::operator()
     (
         where.c_str(),
         "",     // No source file
-        1,      // Non-zero to ensure that 'where' is reported
-        argList::envRelativePath(ioStream.name()),
+        -1,     // Non-zero to ensure 'where' is reported
+        ioStream.relativeName(),
         ioStream.lineNumber(),
         -1      // No known endLineNumber
     );
@@ -155,7 +154,7 @@ Foam::OSstream& Foam::IOerror::operator()
     (
         where.c_str(),
         "",     // No source file
-        1,      // Non-zero to ensure that 'where' is reported
+        -1,     // Non-zero to ensure 'where' is reported
         dict.relativeName(),
         dict.startLineNumber(),
         dict.endLineNumber()
@@ -188,7 +187,7 @@ void Foam::IOerror::SafeFatalIOError
             << nl
             << "--> FOAM FATAL IO ERROR:" << nl
             << msg << nl
-            << "file: " << ioStream.name()
+            << "file: " << ioStream.relativeName()
             << " at line " << ioStream.lineNumber() << '.' << nl << nl
             << "    From " << functionName << nl
             << "    in file " << sourceFileName
@@ -253,7 +252,7 @@ void Foam::IOerror::abort()
 }
 
 
-void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
+void Foam::IOerror::write(Ostream& os, const bool withTitle) const
 {
     if (os.bad())
     {
@@ -261,7 +260,7 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
     }
 
     os  << nl;
-    if (includeTitle && !title().empty())
+    if (withTitle && !title().empty())
     {
         os  << title().c_str()
             << "(openfoam-" << foamVersion::api;

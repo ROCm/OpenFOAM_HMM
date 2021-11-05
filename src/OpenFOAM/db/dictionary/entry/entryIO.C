@@ -92,10 +92,11 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
         << "--> FOAM Warning :" << nl
         << "    From function " << FUNCTION_NAME << nl
         << "    in file " << __FILE__ << " at line " << __LINE__ << nl
-        << "    Reading " << is.name() << nl
+        << "    Reading " << is.relativeName() << nl
         << "    found " << keyToken << nl
         << "    expected either " << token::END_BLOCK << " or EOF"
         << std::endl;
+
     return false;
 }
 

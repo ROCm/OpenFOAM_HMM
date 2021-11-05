@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,9 +48,9 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
 
     Info<< "    Selecting filmTurbulenceModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -61,7 +61,7 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));
+    return autoPtr<filmTurbulenceModel>(ctorPtr(model, dict));
 }
 
 

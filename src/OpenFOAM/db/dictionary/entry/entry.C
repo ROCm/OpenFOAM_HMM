@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,20 @@ Foam::entry::inputMode Foam::entry::globalInputMode = inputMode::MERGE;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::entry::reportReadWarning
+(
+    const IOstream& is,
+    const std::string& msg
+)
+{
+    std::cerr
+        << "--> FOAM Warning :\n"
+        << "    Reading \"" << is.relativeName()
+        << "\" at line " << is.lineNumber() << '\n'
+        << "    " << msg << std::endl;
+}
+
 
 void Foam::entry::resetInputMode()
 {
@@ -85,7 +99,7 @@ void Foam::entry::raiseBadInput(const ITstream& is) const
         "",                 // functionName
         "",                 // sourceFileName
         0,                  // sourceFileLineNumber
-        this->name(),       // ioFileName
+        this->relativeName(), // ioFileName
         is.lineNumber()     // ioStartLineNumber
     )
         << "Entry '" << keyword << "' with invalid input" << nl << nl
@@ -110,7 +124,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                     "",                 // functionName
                     "",                 // sourceFileName
                     0,                  // sourceFileLineNumber
-                    this->name(),       // ioFileName
+                    this->relativeName(), // ioFileName
                     is.lineNumber()     // ioStartLineNumber
                 );
 
@@ -132,7 +146,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 << remaining << " excess tokens in stream" << nl << nl;
 
             std::cerr
-                << "file: " << this->name()
+                << "file: " << this->relativeName()
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
@@ -149,7 +163,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 "",                 // functionName
                 "",                 // sourceFileName
                 0,                  // sourceFileLineNumber
-                this->name(),       // ioFileName
+                this->relativeName(), // ioFileName
                 is.lineNumber()     // ioStartLineNumber
             )
                 << "Entry '" << keyword
@@ -165,7 +179,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 << "' had no tokens in stream" << nl << nl;
 
             std::cerr
-                << "file: " << this->name()
+                << "file: " << this->relativeName()
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 

@@ -68,8 +68,9 @@ Foam::string Foam::functionEntries::calcEntry::evaluate
 )
 {
     DetailInfo
-        << "Using #calc at line " << is.lineNumber()
-        << " in file " <<  parentDict.name() << endl;
+        << "Using #calc - line "
+        << is.lineNumber() << " in file "
+        << parentDict.relativeName() << nl;
 
     dynamicCode::checkSecurity
     (

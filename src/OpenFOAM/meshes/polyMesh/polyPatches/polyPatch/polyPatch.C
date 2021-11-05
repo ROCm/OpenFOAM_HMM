@@ -276,21 +276,27 @@ Foam::polyPatch::~polyPatch()
 
 bool Foam::polyPatch::constraintType(const word& pt)
 {
-    return pointPatchField<scalar>::pointPatchConstructorTablePtr_->found(pt);
+    return
+    (
+        pointPatchField<scalar>::pointPatchConstructorTablePtr_
+     && pointPatchField<scalar>::pointPatchConstructorTablePtr_->found(pt)
+    );
 }
 
 
 Foam::wordList Foam::polyPatch::constraintTypes()
 {
-    wordList cTypes(dictionaryConstructorTablePtr_->size());
+    const auto& cnstrTable = *dictionaryConstructorTablePtr_;
+
+    wordList cTypes(cnstrTable.size());
 
     label i = 0;
 
-    forAllConstIters(*dictionaryConstructorTablePtr_, cstrIter)
+    forAllConstIters(cnstrTable, iter)
     {
-        if (constraintType(cstrIter.key()))
+        if (constraintType(iter.key()))
         {
-            cTypes[i++] = cstrIter.key();
+            cTypes[i++] = iter.key();
         }
     }
 

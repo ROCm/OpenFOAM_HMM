@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,9 +77,9 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
+    auto* ctorPtr = dictionaryConstructorTable(deltaType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -90,7 +90,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
+    return autoPtr<LESdelta>(ctorPtr(name, turbulence, dict));
 }
 
 
@@ -99,7 +99,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     const word& name,
     const turbulenceModel& turbulence,
     const dictionary& dict,
-    const dictionaryConstructorTable& additionalConstructors,
+    const dictionaryConstructorTableType& additionalConstructors,
     const word& lookupName
 )
 {
@@ -109,30 +109,37 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     // First any additional ones
     {
-        auto cstrIter = additionalConstructors.cfind(deltaType);
+        auto ctorIter = additionalConstructors.cfind(deltaType);
 
-        if (cstrIter.found())
+        if (ctorIter.found())
         {
-            return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
+            return autoPtr<LESdelta>(ctorIter.val()(name, turbulence, dict));
         }
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
+    auto* ctorPtr = dictionaryConstructorTable(deltaType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
             dict,
             "LESdelta",
             deltaType,
-            additionalConstructors
-        )
-            << " and " << dictionaryConstructorTablePtr_->sortedToc()
+            *dictionaryConstructorTablePtr_
+        );
+
+        if (!additionalConstructors.empty())
+        {
+            FatalIOError
+                << " and " << additionalConstructors.sortedToc() << nl;
+        }
+
+        FatalIOError
             << exit(FatalIOError);
     }
 
-    return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
+    return autoPtr<LESdelta>(ctorPtr(name, turbulence, dict));
 }
 
 

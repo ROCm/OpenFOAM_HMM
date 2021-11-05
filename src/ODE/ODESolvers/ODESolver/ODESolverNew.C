@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +39,9 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
     const word solverType(dict.get<word>("solver"));
     Info<< "Selecting ODE solver " << solverType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
+    auto* ctorPtr = dictionaryConstructorTable(solverType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -52,7 +52,7 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<ODESolver>(cstrIter()(odes, dict));
+    return autoPtr<ODESolver>(ctorPtr(odes, dict));
 }
 
 
