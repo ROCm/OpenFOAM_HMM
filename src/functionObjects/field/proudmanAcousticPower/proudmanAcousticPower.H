@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,10 @@ Usage
         // For incompressible flow simulations
         rhoInf      1.225;
         aRef        340;
+        // Turbulence field names (if not retrieved from the turb model)
+        k           kMean;
+        epsilon     epsilonMean;
+        omega       none; // omegaMean
 
         // Optional (inherited) entries
         ...
@@ -93,7 +97,10 @@ Usage
                --> | conditional | -
       aRef         | Speed of sound (incompressible)     | scalar <!--
                --> | conditional | -
-      alphaEps     | Empirical model coefficient         | scalar | no | 0.1
+      alphaEps     | Empirical model coefficient         | scalar | no  | 0.1
+      k            | Turbulence k field name             | word | no    | none
+      epsilon      | Turbulence epsilon field name       | word | no    | none
+      omega        | Turbulence omega field name         | word | no    | none
     \endtable
 
     The inherited entries are elaborated in:
@@ -148,6 +155,15 @@ class proudmanAcousticPower
         //- Reference speed of sound (incompressible calcs only)
         dimensionedScalar aRef_;
 
+        //- Name of turbulence k field; default = none
+        word kName_;
+
+        //- Name of turbulence epsilon field; default = none
+        word epsilonName_;
+
+        //- Name of turbulence omega field; default = none
+        word omegaName_;
+
 
     // Private Member Functions
 
@@ -156,6 +172,12 @@ class proudmanAcousticPower
 
         //- Speed of sound
         tmp<volScalarField> a() const;
+
+        //- Turbulence kinetic energy dissipation rate
+        tmp<volScalarField> k() const;
+
+        //- Turbulence dissipation
+        tmp<volScalarField> epsilon() const;
 
 
 public:

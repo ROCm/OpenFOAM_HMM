@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,7 @@ Foam::functionObjects::proudmanAcousticPower::rhoScale
     const tmp<volScalarField>& fld
 ) const
 {
-    const basicThermo* thermoPtr =
-        getObjectPtr<basicThermo>(basicThermo::dictName);
+    const auto* thermoPtr = getObjectPtr<basicThermo>(basicThermo::dictName);
 
     if (thermoPtr)
     {
@@ -80,8 +79,7 @@ Foam::functionObjects::proudmanAcousticPower::rhoScale
 Foam::tmp<Foam::volScalarField>
 Foam::functionObjects::proudmanAcousticPower::a() const
 {
-    const basicThermo* thermoPtr =
-        getObjectPtr<basicThermo>(basicThermo::dictName);
+    const auto* thermoPtr = getObjectPtr<basicThermo>(basicThermo::dictName);
 
     if (thermoPtr)
     {
@@ -105,6 +103,44 @@ Foam::functionObjects::proudmanAcousticPower::a() const
 }
 
 
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::proudmanAcousticPower::k() const
+{
+    if (kName_ != "none")
+    {
+        return lookupObject<volScalarField>(kName_);
+    }
+
+    const auto& turb =
+        lookupObject<turbulenceModel>(turbulenceModel::propertiesName);
+
+    return turb.k();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::proudmanAcousticPower::epsilon() const
+{
+    if (epsilonName_ != "none")
+    {
+        return lookupObject<volScalarField>(epsilonName_);
+    }
+
+    if (omegaName_ != "none")
+    {
+        // Construct epsilon on-the-fly
+        const auto& omega = lookupObject<volScalarField>(omegaName_);
+        const scalar betaStar = 0.09;
+        return betaStar*k()*omega;
+    }
+
+    const auto& turb =
+        lookupObject<turbulenceModel>(turbulenceModel::propertiesName);
+
+    return turb.epsilon();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::proudmanAcousticPower::proudmanAcousticPower
@@ -117,7 +153,10 @@ Foam::functionObjects::proudmanAcousticPower::proudmanAcousticPower
     fvMeshFunctionObject(name, runTime, dict),
     alphaEps_(0.1),
     rhoInf_("0", dimDensity, -1),
-    aRef_(dimVelocity, Zero)
+    aRef_(dimVelocity, Zero),
+    kName_("none"),
+    epsilonName_("none"),
+    omegaName_("none")
 {
     read(dict);
 
@@ -167,9 +206,48 @@ bool Foam::functionObjects::proudmanAcousticPower::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict))
     {
+        Info<< type() << " " << name() << nl;
+
         dict.readIfPresent("alphaEps", alphaEps_);
         rhoInf_.readIfPresent("rhoInf", dict);
         aRef_.readIfPresent("aRef", dict);
+
+        if (dict.readIfPresent("k", kName_))
+        {
+            Info<< "    k field: " << kName_ << endl;
+        }
+        else
+        {
+            Info<< "    k field from turbulence model" << endl;
+        }
+
+        if (dict.readIfPresent("epsilon", epsilonName_))
+        {
+            Info<< "    epsilon field: " << epsilonName_ << endl;
+        }
+        else
+        {
+            Info<< "    epsilon field from turbulence model (if needed)"
+                << endl;
+        }
+
+        if (dict.readIfPresent("omega", omegaName_))
+        {
+            Info<< "    omega field: " << omegaName_ << endl;
+        }
+        else
+        {
+            Info<< "    omega field from turbulence model (if needed)" << endl;
+        }
+
+        if (epsilonName_ != "none" && omegaName_ != "none")
+        {
+            FatalIOErrorInFunction(dict)
+                << "either epsilon or omega field names can be set but not both"
+                << exit(FatalIOError);
+        }
+
+        Info<< endl;
 
         return true;
     }
@@ -180,18 +258,13 @@ bool Foam::functionObjects::proudmanAcousticPower::read(const dictionary& dict)
 
 bool Foam::functionObjects::proudmanAcousticPower::execute()
 {
-    const turbulenceModel& turb =
-        lookupObject<turbulenceModel>(turbulenceModel::propertiesName);
+    const volScalarField Mt(sqrt(2*k())/a());
 
-    const volScalarField Mt(sqrt(2*turb.k())/a());
+    auto& P_A = mesh_.lookupObjectRef<volScalarField>(scopedName("P_A"));
 
-    volScalarField& P_A =
-        mesh_.lookupObjectRef<volScalarField>(scopedName("P_A"));
+    P_A = rhoScale(alphaEps_*epsilon()*pow5(Mt));
 
-    P_A = rhoScale(alphaEps_*turb.epsilon()*pow5(Mt));
-
-    volScalarField& L_P =
-        mesh_.lookupObjectRef<volScalarField>(scopedName("L_P"));
+    auto& L_P = mesh_.lookupObjectRef<volScalarField>(scopedName("L_P"));
 
     L_P = 10*log10(P_A/dimensionedScalar("PRef", dimPower/dimVolume, 1e-12));
 
@@ -203,15 +276,13 @@ bool Foam::functionObjects::proudmanAcousticPower::write()
 {
     Log << type() << " " << name() << " write:" << nl;
 
-    const volScalarField& P_A =
-        mesh_.lookupObject<volScalarField>(scopedName("P_A"));
+    const auto& P_A = mesh_.lookupObject<volScalarField>(scopedName("P_A"));
 
     Log << "    writing field " << P_A.name() << nl;
 
     P_A.write();
 
-    const volScalarField& L_P =
-        mesh_.lookupObject<volScalarField>(scopedName("L_P"));
+    const auto& L_P = mesh_.lookupObject<volScalarField>(scopedName("L_P"));
 
     Log << "    writing field " << L_P.name() << nl;
 
