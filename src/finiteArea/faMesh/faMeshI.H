@@ -139,4 +139,15 @@ inline Foam::uindirectPrimitivePatch& Foam::faMesh::patch()
 }
 
 
+inline const Foam::List<Foam::labelPair>&
+Foam::faMesh::boundaryConnections() const
+{
+    if (!bndConnectPtr_)
+    {
+        calcBoundaryConnections();
+    }
+    return *bndConnectPtr_;
+}
+
+
 // ************************************************************************* //

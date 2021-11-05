@@ -32,6 +32,7 @@ License
 #include "faMesh.H"
 #include "areaFields.H"
 #include "edgeFields.H"
+#include "edgeHashes.H"
 #include "polyMesh.H"
 #include "demandDrivenData.H"
 
@@ -116,12 +117,6 @@ Foam::faPatch::~faPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::faPatch::ngbPolyPatchIndex() const noexcept
-{
-    return nbrPolyPatchId_;
-}
-
-
 const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
@@ -131,6 +126,76 @@ const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 Foam::label Foam::faPatch::start() const
 {
     return boundaryMesh().mesh().patchStarts()[index()];
+}
+
+
+Foam::List<Foam::labelPair> Foam::faPatch::boundaryConnections() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    List<labelPair> output(this->nEdges());
+
+    // Like an IndirectList but removing the nInternalEdges offset
+    label count = 0;
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        output[count] = connections[bndEdgei];
+        ++count;
+    }
+
+    return output;
+}
+
+
+Foam::labelList Foam::faPatch::boundaryProcs() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    labelHashSet procsUsed(2*Pstream::nProcs());
+
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        const label proci = connections[bndEdgei].first();
+        procsUsed.insert(proci);
+    }
+    procsUsed.erase(-1);  // placeholder value
+    procsUsed.erase(Pstream::myProcNo());
+
+    return procsUsed.sortedToc();
+}
+
+
+Foam::List<Foam::labelPair> Foam::faPatch::boundaryProcSizes() const
+{
+    const auto& connections = boundaryMesh().mesh().boundaryConnections();
+    const label nInternalEdges = boundaryMesh().mesh().nInternalEdges();
+
+    Map<label> procCount(2*Pstream::nProcs());
+
+    for (const label patchEdgei : this->edgeLabels())
+    {
+        const label bndEdgei = (patchEdgei - nInternalEdges);
+        const label proci = connections[bndEdgei].first();
+        ++procCount(proci);
+    }
+    procCount.erase(-1);  // placeholder value
+    procCount.erase(Pstream::myProcNo());
+
+    // Flatten as list
+    List<labelPair> output(procCount.size());
+    label count = 0;
+    for (const label proci : procCount.sortedToc())
+    {
+        output[count].first() = proci;
+        output[count].second() = procCount[proci];  // size
+        ++count;
+    }
+
+    return output;
 }
 
 
@@ -145,88 +210,6 @@ const Foam::labelList& Foam::faPatch::pointLabels() const
 }
 
 
-void Foam::faPatch::calcPointLabels() const
-{
-    SLList<label> labels;
-
-    UList<edge> edges = patchSlice(boundaryMesh().mesh().edges());
-
-    forAll(edges, edgeI)
-    {
-        bool existStart = false;
-        bool existEnd = false;
-
-        forAllIters(labels, iter)
-        {
-            if (*iter == edges[edgeI].start())
-            {
-                existStart = true;
-            }
-
-            if (*iter == edges[edgeI].end())
-            {
-                existEnd = true;
-            }
-        }
-
-        if (!existStart)
-        {
-            labels.append(edges[edgeI].start());
-        }
-
-        if (!existEnd)
-        {
-            labels.append(edges[edgeI].end());
-        }
-    }
-
-    pointLabelsPtr_ = new labelList(labels);
-}
-
-
-void Foam::faPatch::calcPointEdges() const
-{
-    const labelList& points = pointLabels();
-
-    const edgeList::subList e = patchSlice(boundaryMesh().mesh().edges());
-
-    // set up storage for pointEdges
-    List<SLList<label>> pointEdgs(points.size());
-
-    forAll(e, edgeI)
-    {
-        const edge& curPoints = e[edgeI];
-
-        forAll(curPoints, pointI)
-        {
-            const label localPointIndex = points.find(curPoints[pointI]);
-
-            pointEdgs[localPointIndex].append(edgeI);
-        }
-    }
-
-    // sort out the list
-    pointEdgesPtr_ = new labelListList(pointEdgs.size());
-    labelListList& pEdges = *pointEdgesPtr_;
-
-    forAll(pointEdgs, pointI)
-    {
-        pEdges[pointI].setSize(pointEdgs[pointI].size());
-
-        label i = 0;
-        for
-        (
-            SLList<label>::iterator curEdgesIter = pointEdgs[pointI].begin();
-            curEdgesIter != pointEdgs[pointI].end();
-            ++curEdgesIter, ++i
-        )
-        {
-            pEdges[pointI][i] = curEdgesIter();
-        }
-    }
-}
-
-
 const Foam::labelListList& Foam::faPatch::pointEdges() const
 {
     if (!pointEdgesPtr_)
@@ -238,55 +221,91 @@ const Foam::labelListList& Foam::faPatch::pointEdges() const
 }
 
 
-Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
+void Foam::faPatch::calcPointLabels() const
 {
-    if (nbrPolyPatchId_ < 0)
+    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
+
+    // Walk boundary edges.
+    // The edge orientation corresponds to the face orientation
+    // (outwards normal).
+
+    // Note: could combine this with calcPointEdges for more efficiency
+
+    // Map<label> markedPoints(4*edges.size());
+    labelHashSet markedPoints(4*edges.size());
+    DynamicList<label> dynEdgePoints(2*edges.size());
+
+    for (const edge& e : edges)
     {
-        return labelList();
-    }
-
-    labelList ngbFaces(faPatch::size());
-
-    const faMesh& aMesh = boundaryMesh().mesh();
-    const polyMesh& pMesh = aMesh.mesh();
-    const auto& patch = aMesh.patch();
-
-    const labelListList& edgeFaces = pMesh.edgeFaces();
-
-    const labelList meshEdges
-    (
-        patch.meshEdges(pMesh.edges(), pMesh.pointEdges())
-    );
-
-    forAll(ngbFaces, edgeI)
-    {
-        ngbFaces[edgeI] = -1;
-
-        label curEdge = (*this)[edgeI];
-
-        label curPMeshEdge = meshEdges[curEdge];
-
-        forAll(edgeFaces[curPMeshEdge], faceI)
+        // if (markedPoints.insert(e.first(), markedPoints.size()))
+        if (markedPoints.insert(e.first()))
         {
-            label curFace = edgeFaces[curPMeshEdge][faceI];
-
-            label curPatchID = pMesh.boundaryMesh().whichPatch(curFace);
-
-            if (curPatchID == nbrPolyPatchId_)
-            {
-                ngbFaces[edgeI] = curFace;
-            }
+            dynEdgePoints.append(e.first());
         }
-
-        if (ngbFaces[edgeI] == -1)
+        // if (markedPoints.insert(e.second(), markedPoints.size()))
+        if (markedPoints.insert(e.second()))
         {
-            WarningInFunction
-                << "Problem with determination of edge ngb faces!"
-                << endl;
+            dynEdgePoints.append(e.second());
         }
     }
 
-    return ngbFaces;
+    // Transfer to plain list (reuse storage)
+    pointLabelsPtr_ = new labelList(std::move(dynEdgePoints));
+    /// const labelList& edgePoints = *pointLabelsPtr_;
+    ///
+    /// // Cannot use invertManyToMany - we have non-local edge numbering
+    ///
+    /// // Intermediate storage for pointEdges.
+    /// // Points on the boundary will normally connect 1 or 2 edges only.
+    /// List<DynamicList<label,2>> dynPointEdges(edgePoints.size());
+    ///
+    /// forAll(edges, edgei)
+    /// {
+    ///     const edge& e = edges[edgei];
+    ///
+    ///     dynPointEdges[markedPoints[e.first()]].append(edgei);
+    ///     dynPointEdges[markedPoints[e.second()]].append(edgei);
+    /// }
+    ///
+    /// // Flatten to regular list
+    /// pointEdgesPtr_ = new labelListList(edgePoints.size());
+    /// auto& pEdges = *pointEdgesPtr_;
+    ///
+    /// forAll(pEdges, pointi)
+    /// {
+    ///     pEdges[pointi] = std::move(dynPointEdges[pointi]);
+    /// }
+}
+
+
+void Foam::faPatch::calcPointEdges() const
+{
+    const edgeList::subList edges = patchSlice(boundaryMesh().mesh().edges());
+
+    const labelList& edgePoints = pointLabels();
+
+    // Cannot use invertManyToMany - we have non-local edge numbering
+
+    // Intermediate storage for pointEdges.
+    // Points on the boundary will normally connect 1 or 2 edges only.
+    List<DynamicList<label,2>> dynPointEdges(edgePoints.size());
+
+    forAll(edges, edgei)
+    {
+        const edge& e = edges[edgei];
+
+        dynPointEdges[edgePoints.find(e.first())].append(edgei);
+        dynPointEdges[edgePoints.find(e.second())].append(edgei);
+    }
+
+    // Flatten to regular list
+    pointEdgesPtr_ = new labelListList(edgePoints.size());
+    auto& pEdges = *pointEdgesPtr_;
+
+    forAll(pEdges, pointi)
+    {
+        pEdges[pointi] = std::move(dynPointEdges[pointi]);
+    }
 }
 
 
@@ -297,24 +316,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
         return tmp<vectorField>::New();
     }
 
-    auto tfN = tmp<vectorField>::New();
-    auto& fN = tfN.ref();
-
-    fN.setSize(faPatch::size());
-
-    labelList ngbFaces = ngbPolyPatchFaces();
-
-    const polyMesh& pMesh = boundaryMesh().mesh()();
-
-    const faceList& faces = pMesh.faces();
-    const pointField& points = pMesh.points();
-
-    forAll(fN, faceI)
-    {
-        fN[faceI] = faces[ngbFaces[faceI]].unitNormal(points);
-    }
-
-    return tfN;
+    return boundaryMesh().mesh().haloFaceNormals(this->index());
 }
 
 
@@ -325,24 +327,31 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
         return tmp<vectorField>::New();
     }
 
+    // Unit normals for the neighbour patch faces
+    const vectorField faceNormals
+    (
+        boundaryMesh().mesh().haloFaceNormals(this->index())
+    );
+
     const labelListList& pntEdges = pointEdges();
 
-    auto tpN = tmp<vectorField>::New(pntEdges.size(), Zero);
-    auto& pN = tpN.ref();
+    auto tpointNorm = tmp<vectorField>::New(pntEdges.size());
+    auto& pointNorm = tpointNorm.ref();
 
-    const vectorField faceNormals(ngbPolyPatchFaceNormals());
-
-    forAll(pN, pointI)
+    forAll(pointNorm, pointi)
     {
-        forAll(pntEdges[pointI], edgeI)
+        vector& n = pointNorm[pointi];
+        n = Zero;
+
+        for (const label bndEdgei : pntEdges[pointi])
         {
-            pN[pointI] += faceNormals[pntEdges[pointI][edgeI]];
+            n += faceNormals[bndEdgei];
         }
+
+        n.normalise();
     }
 
-    pN /= mag(pN);
-
-    return tpN;
+    return tpointNorm;
 }
 
 
@@ -380,11 +389,14 @@ const Foam::scalarField& Foam::faPatch::magEdgeLengths() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 {
-    tmp<vectorField> eN(new vectorField(size()));
+    auto tedgeNorm = tmp<vectorField>::New(edgeLengths());
 
-    eN.ref() = edgeLengths()/magEdgeLengths();
+    for (vector& n : tedgeNorm.ref())
+    {
+        n.normalise();
+    }
 
-    return eN;
+    return tedgeNorm;
 }
 
 

@@ -293,7 +293,7 @@ void Foam::faFieldDecomposer::reset
                 new processorEdgePatchFieldDecomposer
                 (
                     procMesh_.boundary()[patchi].size(),
-                    static_cast<const labelUList&>(localPatchSlice)
+                    localPatchSlice
                 )
             );
         }
@@ -308,6 +308,15 @@ void Foam::faFieldDecomposer::reset(const faMesh& completeMesh)
     patchFieldDecomposerPtrs_.resize(nMappers);
     processorAreaPatchFieldDecomposerPtrs_.resize(nMappers);
     processorEdgePatchFieldDecomposerPtrs_.resize(nMappers);
+
+    // Create weightings now - needed for proper parallel synchronization
+    (void)completeMesh.weights();
+
+    // faPatches don't have their own start() - so these are invariant
+    const labelList completePatchStarts
+    (
+        completeMesh.boundary().patchStarts()
+    );
 
     forAll(boundaryAddressing_, patchi)
     {
@@ -324,7 +333,7 @@ void Foam::faFieldDecomposer::reset(const faMesh& completeMesh)
                 (
                     completeMesh.boundary()[oldPatchi].size(),
                     localPatchSlice,
-                    completeMesh.boundary()[oldPatchi].start()
+                    completePatchStarts[oldPatchi]
                 )
             );
         }
@@ -346,7 +355,7 @@ void Foam::faFieldDecomposer::reset(const faMesh& completeMesh)
                 new processorEdgePatchFieldDecomposer
                 (
                     procMesh_.boundary()[patchi].size(),
-                    static_cast<const labelUList&>(localPatchSlice)
+                    localPatchSlice
                 )
             );
         }

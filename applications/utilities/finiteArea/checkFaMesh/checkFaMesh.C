@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,14 +30,22 @@ Application
 Description
     Check a finiteArea mesh
 
-Author
+Original Authors
     Zeljko Tukovic, FAMENA
     Hrvoje Jasak, Wikki Ltd.
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "faCFD.H"
+#include "Time.H"
+#include "argList.H"
+#include "faMesh.H"
+#include "polyMesh.H"
+#include "areaFaMesh.H"
+#include "edgeFaMesh.H"
+#include "areaFields.H"
+#include "edgeFields.H"
+#include "processorFaPatch.H"
+#include "foamVtkUIndPatchWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,37 +60,32 @@ int main(int argc, char *argv[])
         "Check a finiteArea mesh"
     );
 
-    #include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "write-vtk",
+        "Write mesh as a vtp (vtk) file for display or debugging"
+    );
 
+    #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
-    #include "createNamedMesh.H"
-    #include "createFaMesh.H"
+    #include "createNamedPolyMesh.H"
+
+
+    // Create
+    faMesh aMesh(mesh);
 
     Info<< "Time = " << runTime.timeName() << nl << endl;
 
-    // General mesh statistics
-    Info<< "Number of points: " << aMesh.nPoints() << nl
-        << "Number of internal edges: " << aMesh.nInternalEdges() << nl
-        << "Number of edges: " << aMesh.nEdges() << nl
-        << "Number of faces: " << aMesh.nFaces() << nl
-        << endl;
+    #include "printMeshSummary.H"
 
-    // Check geometry
-    Info<< "Face area:  min = " << min(aMesh.S().field())
-        << " max = "  << max(aMesh.S().field()) << nl
-        << "Internal edge length: min = "
-        << min(aMesh.magLe().internalField()) << nl
-        << " max = "  << max(aMesh.magLe().internalField()) << nl
-        << "Edge length: min = "
-        << min(aMesh.magLe()).value() << nl
-        << " max = "  << max(aMesh.magLe()).value() << nl
-        << "Face area normals:  min = " << min(aMesh.faceAreaNormals().field())
-        << " max = "  << max(aMesh.faceAreaNormals().field()) << nl
-        << endl;
+    if (args.found("write-vtk"))
+    {
+        #include "faMeshWriteVTK.H"
+    }
 
+    Info<< "\nEnd\n" << endl;
 
-    Info << "\nEnd" << endl;
     return 0;
 }
 

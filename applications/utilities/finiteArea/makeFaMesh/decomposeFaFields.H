@@ -17,8 +17,10 @@ Description
 
 if (Pstream::parRun())
 {
-    faMeshReconstructor reconstructor(areaMesh);
+    faMeshReconstructor reconstructor(aMesh);
     reconstructor.writeAddressing();
+
+    Info<< "Wrote proc-addressing" << nl << endl;
 
     // Handle area fields
     // ------------------
@@ -72,22 +74,53 @@ if (Pstream::parRun())
 
     if (nAreaFields)
     {
-        Info<< "Decomposing " << nAreaFields << " area fields" << nl << endl;
+        Info<< "Decomposing " << nAreaFields << " area fields" << nl;
 
         faFieldDecomposer fieldDecomposer
         (
             fullMesh,
-            areaMesh,
+            aMesh,
             reconstructor.edgeProcAddressing(),
             reconstructor.faceProcAddressing(),
             reconstructor.boundaryProcAddressing()
         );
 
-        fieldDecomposer.decomposeFields(areaScalarFields);
-        fieldDecomposer.decomposeFields(areaVectorFields);
-        fieldDecomposer.decomposeFields(areaSphTensorFields);
-        fieldDecomposer.decomposeFields(areaSymmTensorFields);
-        fieldDecomposer.decomposeFields(areaTensorFields);
+        if (areaScalarFields.size())
+        {
+            Info<< "  scalars: "
+                << flatOutput(PtrListOps::names(areaScalarFields)) << nl;
+            fieldDecomposer.decomposeFields(areaScalarFields);
+        }
+
+        if (areaVectorFields.size())
+        {
+            Info<< "  vectors: "
+                << flatOutput(PtrListOps::names(areaVectorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaVectorFields);
+        }
+
+        if (areaSphTensorFields.size())
+        {
+            Info<< "  sphTensors: "
+                << flatOutput(PtrListOps::names(areaSphTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaSphTensorFields);
+        }
+
+        if (areaSymmTensorFields.size())
+        {
+            Info<< "  symmTensors: "
+                << flatOutput(PtrListOps::names(areaSymmTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaSymmTensorFields);
+        }
+
+        if (areaTensorFields.size())
+        {
+            Info<< "  tensors: "
+                << flatOutput(PtrListOps::names(areaTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaTensorFields);
+        }
+
+        Info<< endl;
     }
 }
 

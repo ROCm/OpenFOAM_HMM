@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
+#include "faMeshBoundaryHalo.H"
 #include "faGlobalMeshData.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -50,6 +51,8 @@ namespace Foam
 const Foam::word Foam::faMesh::prefix("finite-area");
 
 Foam::word Foam::faMesh::meshSubDir = "faMesh";
+
+int Foam::faMesh::origPointAreaMethod_ = 0;  // Tuning
 
 const int Foam::faMesh::quadricsFit_ = 0;  // Tuning
 
@@ -109,17 +112,50 @@ static labelList selectPatchFaces
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::faMesh::checkBoundaryEdgeLabelRange
+(
+    const labelUList& edgeLabels
+) const
+{
+    label nErrors = 0;
+
+    for (const label edgei : edgeLabels)
+    {
+        if (edgei < nInternalEdges_ || edgei >= nEdges_)
+        {
+            if (!nErrors++)
+            {
+                FatalErrorInFunction
+                    << "Boundary edge label out of range "
+                    << nInternalEdges_ << ".." << (nEdges_-1) << nl
+                    << "   ";
+            }
+
+            FatalError<< ' ' << edgei;
+        }
+    }
+
+    if (nErrors)
+    {
+        FatalError << nl << exit(FatalError);
+    }
+}
+
+
 void Foam::faMesh::initPatch() const
 {
-    if (patchPtr_)
-    {
-        delete patchPtr_;
-    }
-    patchPtr_ = new uindirectPrimitivePatch
+    patchPtr_.reset
     (
-        UIndirectList<face>(mesh().faces(), faceLabels_),
-        mesh().points()
+        new uindirectPrimitivePatch
+        (
+            UIndirectList<face>(mesh().faces(), faceLabels_),
+            mesh().points()
+        )
     );
+    bndConnectPtr_.reset(nullptr);
+    haloMapPtr_.reset(nullptr);
+    haloFaceCentresPtr_.reset(nullptr);
+    haloFaceNormalsPtr_.reset(nullptr);
 }
 
 
@@ -168,12 +204,24 @@ void Foam::faMesh::setPrimitiveMeshData()
 }
 
 
+void Foam::faMesh::clearHalo() const
+{
+    DebugInFunction << "Clearing halo information" << endl;
+
+    haloMapPtr_.reset(nullptr);
+    haloFaceCentresPtr_.reset(nullptr);
+    haloFaceNormalsPtr_.reset(nullptr);
+}
+
+
 void Foam::faMesh::clearGeomNotAreas() const
 {
     DebugInFunction << "Clearing geometry" << endl;
 
+    clearHalo();
+    patchPtr_.reset(nullptr);
+    bndConnectPtr_.reset(nullptr);
     deleteDemandDrivenData(SPtr_);
-    deleteDemandDrivenData(patchPtr_);
     deleteDemandDrivenData(patchStartsPtr_);
     deleteDemandDrivenData(LePtr_);
     deleteDemandDrivenData(magLePtr_);
@@ -181,7 +229,7 @@ void Foam::faMesh::clearGeomNotAreas() const
     deleteDemandDrivenData(edgeCentresPtr_);
     deleteDemandDrivenData(faceAreaNormalsPtr_);
     deleteDemandDrivenData(edgeAreaNormalsPtr_);
-    deleteDemandDrivenData(pointAreaNormalsPtr_);
+    pointAreaNormalsPtr_.reset(nullptr);
     deleteDemandDrivenData(faceCurvaturesPtr_);
     deleteDemandDrivenData(edgeTransformTensorsPtr_);
 }
@@ -256,6 +304,7 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     ),
     comm_(Pstream::worldComm),
     patchPtr_(nullptr),
+    bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
     SPtr_(nullptr),
@@ -272,7 +321,11 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     faceCurvaturesPtr_(nullptr),
     edgeTransformTensorsPtr_(nullptr),
     correctPatchPointNormalsPtr_(nullptr),
-    globalMeshDataPtr_(nullptr)
+    globalMeshDataPtr_(nullptr),
+
+    haloMapPtr_(nullptr),
+    haloFaceCentresPtr_(nullptr),
+    haloFaceNormalsPtr_(nullptr)
 {
     DebugInFunction << "Creating from IOobject" << endl;
 
@@ -290,7 +343,7 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
 
-    if (isFile(pMesh.time().timePath()/mesh().dbDir()/"S0"))
+    if (fileHandler().isFile(pMesh.time().timePath()/"S0"))
     {
         S0Ptr_ = new DimensionedField<scalar, areaMesh>
         (
@@ -349,6 +402,7 @@ Foam::faMesh::faMesh
     ),
     comm_(Pstream::worldComm),
     patchPtr_(nullptr),
+    bndConnectPtr_(nullptr),
     lduPtr_(nullptr),
     curTimeIndex_(time().timeIndex()),
     SPtr_(nullptr),
@@ -365,7 +419,11 @@ Foam::faMesh::faMesh
     faceCurvaturesPtr_(nullptr),
     edgeTransformTensorsPtr_(nullptr),
     correctPatchPointNormalsPtr_(nullptr),
-    globalMeshDataPtr_(nullptr)
+    globalMeshDataPtr_(nullptr),
+
+    haloMapPtr_(nullptr),
+    haloFaceCentresPtr_(nullptr),
+    haloFaceNormalsPtr_(nullptr)
 {}
 
 
@@ -450,7 +508,7 @@ Foam::faMesh::faMesh
     // Calculate the geometry for the patches (transformation tensors etc.)
     boundary_.calcGeometry();
 
-    if (isFile(mesh().time().timePath()/"S0"))
+    if (fileHandler().isFile(pMesh.time().timePath()/"S0"))
     {
         S0Ptr_ = new DimensionedField<scalar, areaMesh>
         (
@@ -647,11 +705,20 @@ const Foam::vectorField& Foam::faMesh::pointAreaNormals() const
 {
     if (!pointAreaNormalsPtr_)
     {
-        calcPointAreaNormals();
+        pointAreaNormalsPtr_.reset(new vectorField(nPoints()));
+
+        if (origPointAreaMethod_)
+        {
+            calcPointAreaNormals_orig(*pointAreaNormalsPtr_);
+        }
+        else
+        {
+            calcPointAreaNormals(*pointAreaNormalsPtr_);
+        }
 
         if (quadricsFit_ > 0)
         {
-            calcPointAreaNormalsByQuadricsFit();
+            calcPointAreaNormalsByQuadricsFit(*pointAreaNormalsPtr_);
         }
     }
 

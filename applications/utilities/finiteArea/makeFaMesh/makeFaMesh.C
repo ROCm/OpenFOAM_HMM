@@ -32,7 +32,7 @@ Description
     When called in parallel, it will also try to act like decomposePar,
     create procAddressing and decompose serial finite-area fields.
 
-Author
+Original Authors
     Zeljko Tukovic, FAMENA
     Hrvoje Jasak, Wikki Ltd.
 
@@ -48,6 +48,8 @@ Author
 #include "areaFields.H"
 #include "faFieldDecomposer.H"
 #include "faMeshReconstructor.H"
+#include "PtrListOps.H"
+#include "foamVtkUIndPatchWriter.H"
 #include "OBJstream.H"
 
 using namespace Foam;
@@ -71,15 +73,27 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "dry-run",
+        "Create but do not write"
+    );
+    argList::addBoolOption
+    (
+        "write-vtk",
+        "Write mesh as a vtp (vtk) file for display or debugging"
+    );
+    argList::addBoolOption
+    (
         "write-edges-obj",
-        "Write mesh edges as obj files and exit",
-        false  // could make an advanced option
+        "Write mesh edges as obj files (one per processor)",
+        true  // advanced option (debugging only)
     );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedPolyMesh.H"
+
+    const bool dryrun = args.found("dry-run");
 
     // Reading faMeshDefinition dictionary
     #include "findMeshDefinitionDict.H"
@@ -91,33 +105,40 @@ int main(int argc, char *argv[])
         meshDefDict.add("emptyPatch", patchName, true);
     }
 
-    // Create
-    faMesh areaMesh(mesh, meshDefDict);
 
-    bool quickExit = false;
+    // Create
+    faMesh aMesh(mesh, meshDefDict);
+
+    // Mesh information
+    #include "printMeshSummary.H"
 
     if (args.found("write-edges-obj"))
     {
-        quickExit = true;
         #include "faMeshWriteEdgesOBJ.H"
     }
 
-    if (quickExit)
+    if (args.found("write-vtk"))
     {
-        Info<< "\nEnd\n" << endl;
-        return 0;
+        #include "faMeshWriteVTK.H"
     }
 
-    // Set the precision of the points data to 10
-    IOstream::defaultPrecision(10);
+    if (dryrun)
+    {
+        Info<< "\ndry-run: not writing mesh or decomposing fields\n" << nl;
+    }
+    else
+    {
+        // Set the precision of the points data to 10
+        IOstream::defaultPrecision(10);
 
-    Info<< nl << "Write finite area mesh." << nl;
-    areaMesh.write();
-    Info<< endl;
+        Info<< nl << "Write finite area mesh." << nl;
+        aMesh.write();
 
-    #include "decomposeFaFields.H"
+        Info<< endl;
+        #include "decomposeFaFields.H"
+    }
 
-    Info << "\nEnd\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

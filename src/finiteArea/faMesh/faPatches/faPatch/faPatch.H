@@ -80,17 +80,14 @@ class faPatch
         //- Reference to boundary mesh
         const faBoundaryMesh& boundaryMesh_;
 
+        //- Demand-driven: edge-face addressing
+        mutable labelList::subList* edgeFacesPtr_;
 
-        // Demand-driven private data
+        //- Demand-driven: local points labels
+        mutable labelList* pointLabelsPtr_;
 
-            //- Edge-face addressing
-            mutable labelList::subList* edgeFacesPtr_;
-
-            //- Local points labels
-            mutable labelList* pointLabelsPtr_;
-
-            //- Point-edge addressing
-            mutable labelListList* pointEdgesPtr_;
+        //- Demand-driven: point-edge addressing
+        mutable labelListList* pointEdgesPtr_;
 
 
     // Private Member Functions
@@ -231,6 +228,7 @@ public:
             return static_cast<const labelList&>(*this);
         }
 
+        //- Define new list of edges
         void edgeLabels(const UList<label>& newEdgeLabels);
 
         //- Number of patch points
@@ -245,8 +243,11 @@ public:
             return labelList::size();
         }
 
-        //- Return neighbour polyPatch index
-        label ngbPolyPatchIndex() const noexcept;
+        //- The neighbour polyPatch index
+        label ngbPolyPatchIndex() const noexcept
+        {
+            return nbrPolyPatchId_;
+        }
 
         //- Return boundaryMesh reference
         const faBoundaryMesh& boundaryMesh() const noexcept;
@@ -284,6 +285,21 @@ public:
         virtual void write(Ostream&) const;
 
 
+    // Topological information
+
+        //- List of proc/face for the boundary edge neighbours
+        //- in locally reordered edge numbering.
+        List<labelPair> boundaryConnections() const;
+
+        //- Boundary edge neighbour processors
+        //- (does not include own proc)
+        labelList boundaryProcs() const;
+
+        //- List of proc/size for the boundary edge neighbour processors
+        //- (does not include own proc)
+        List<labelPair> boundaryProcSizes() const;
+
+
         // Access functions for geometrical data
 
             //- Return patch point labels
@@ -292,10 +308,8 @@ public:
             //- Return patch point-edge addressing
             const labelListList& pointEdges() const;
 
-            //- Return edge neighbour polyPatch faces
-            labelList ngbPolyPatchFaces() const;
-
             //- Return normals of neighbour polyPatch faces
+            //  Same as faMesh::haloFaceNormals()
             tmp<vectorField> ngbPolyPatchFaceNormals() const;
 
             //- Return normals of neighbour polyPatch joined points

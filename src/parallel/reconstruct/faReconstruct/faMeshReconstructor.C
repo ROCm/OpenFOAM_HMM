@@ -88,11 +88,85 @@ void Foam::faMeshReconstructor::calcAddressing
     {
         globalFaceNum.gather(faFaceProcAddr_, singlePatchFaceLabels_);
 
-        labelList order(Foam::sortedOrder(singlePatchFaceLabels_));
+        const labelList globalOrder(Foam::sortedOrder(singlePatchFaceLabels_));
 
-        singlePatchFaceLabels_ = labelList(singlePatchFaceLabels_, order);
+        singlePatchFaceLabels_ =
+            labelList(singlePatchFaceLabels_, globalOrder);
 
-        globalFaceNum.scatter(order, faFaceProcAddr_);
+        // Set first face to be zero relative to the finiteArea patch
+        // ie, local-face numbering with the first being 0 on any given patch
+        {
+            label patchFirstMeshfacei
+            (
+                singlePatchFaceLabels_.empty()
+              ? 0
+              : singlePatchFaceLabels_.first()
+            );
+            Pstream::scatter(patchFirstMeshfacei);
+
+            for (label& facei : faFaceProcAddr_)
+            {
+                facei -= patchFirstMeshfacei;
+            }
+        }
+
+        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+
+        if (Pstream::master())
+        {
+            // Determine the respective local portions of the global ordering
+
+            labelList procTargets(globalFaceNum.size());
+
+            for (const label proci : Pstream::allProcs())
+            {
+                labelList::subList
+                (
+                    globalFaceNum.range(proci),
+                    procTargets
+                ) = proci;
+            }
+
+            labelList procStarts(globalFaceNum.offsets());
+            labelList procOrders(globalFaceNum.size());
+
+            for (const label globali : globalOrder)
+            {
+                const label proci = procTargets[globali];
+
+                procOrders[procStarts[proci]++] =
+                    (globali - globalFaceNum.localStart(proci));
+            }
+
+            // Send the local portions
+            for (const int proci : Pstream::subProcs())
+            {
+                SubList<label> localOrder
+                (
+                    procOrders,
+                    globalFaceNum.range(proci)
+                );
+
+                UOPstream toProc(proci, pBufs);
+                toProc << localOrder;
+            }
+
+            SubList<label> localOrder(procOrders, globalFaceNum.range(0));
+
+            faFaceProcAddr_ = labelList(faFaceProcAddr_, localOrder);
+        }
+
+        pBufs.finishedSends();
+
+        if (!Pstream::master())
+        {
+            labelList localOrder;
+
+            UIPstream fromProc(Pstream::master(), pBufs);
+            fromProc >> localOrder;
+
+            faFaceProcAddr_ = labelList(faFaceProcAddr_, localOrder);
+        }
     }
 
     // Broadcast the same information everywhere
@@ -201,12 +275,14 @@ void Foam::faMeshReconstructor::calcAddressing
         tmpFaces = initialPatch.localFaces();
         pointField tmpPoints(initialPatch.localPoints());
 
-        // The meshPointMap is contiguous, so flatten as linear list
-        /// Map<label> mpm(initialPatch.meshPointMap());
-        labelList mpm(initialPatch.nPoints());
-        forAllConstIters(initialPatch.meshPointMap(), iter)
+        // Equivalent to a flattened meshPointMap
+        labelList mpm(initialPatch.points().size(), -1);
         {
-            mpm[iter.key()] = iter.val();
+            const labelList& mp = initialPatch.meshPoints();
+            forAll(mp, i)
+            {
+                mpm[mp[i]] = i;
+            }
         }
         Pstream::scatter(mpm);
 
@@ -441,7 +517,13 @@ void Foam::faMeshReconstructor::createMesh()
         );
     }
 
+    // Serial mesh - no parallel communication
+
+    const bool oldParRun = Pstream::parRun(false);
+
     completeMesh.addFaPatches(completePatches);
+
+    Pstream::parRun(oldParRun);  // Restore parallel state
 }
 
 

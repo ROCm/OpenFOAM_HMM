@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,19 +177,19 @@ public:
     // Member Functions
 
         //- Return interface size
-        virtual label interfaceSize() const
+        virtual label interfaceSize() const noexcept
         {
             return size();
         }
 
         //- Return processor number
-        int myProcNo() const
+        int myProcNo() const noexcept
         {
             return myProcNo_;
         }
 
         //- Return neighbour processor number
-        int neighbProcNo() const
+        int neighbProcNo() const noexcept
         {
             return neighbProcNo_;
         }
@@ -197,18 +197,11 @@ public:
         //- Return true if running parallel
         virtual bool coupled() const
         {
-            if (Pstream::parRun())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return Pstream::parRun();
         }
 
         //- Is this the master side?
-        virtual bool master() const
+        virtual bool master() const noexcept
         {
             return (myProcNo_ < neighbProcNo_);
         }
