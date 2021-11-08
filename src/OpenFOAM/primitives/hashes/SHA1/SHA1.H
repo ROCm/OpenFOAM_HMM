@@ -111,7 +111,7 @@ public:
     // Member Functions
 
         //- Reset the hashed data before appending more
-        void clear();
+        void clear() noexcept;
 
         //- Append data for processing
         inline SHA1& append(const char* str);

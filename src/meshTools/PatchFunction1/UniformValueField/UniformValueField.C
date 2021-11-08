@@ -101,9 +101,8 @@ void Foam::PatchFunction1Types::UniformValueField<Type>::writeData
 ) const
 {
     PatchFunction1<Type>::writeData(os);
-    //os  << token::END_STATEMENT << nl;
+
     uniformValuePtr_->writeData(os);
-    //os  << endl;
 }
 
 

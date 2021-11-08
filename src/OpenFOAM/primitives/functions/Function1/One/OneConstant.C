@@ -74,8 +74,7 @@ template<class Type>
 void Foam::Function1Types::OneConstant<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-
-    os  << token::END_STATEMENT << nl;
+    os.endEntry();
 }
 
 

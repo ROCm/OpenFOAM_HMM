@@ -75,16 +75,16 @@ public:
         enum sourceType
         {
             UNKNOWN_SOURCE = 0, //!< Placeholder
-            SET_SOURCE = 0x10,  //!< Source based on topoSet
-            ZONE_SOURCE = 0x20, //!< Source based on mesh zone
             CELL_TYPE = 0x1,    //!< Geometric type is "cell"
             FACE_TYPE = 0x2,    //!< Geometric type is "face"
             POINT_TYPE = 0x4,   //!< Geometric type is "point"
 
+            SET_SOURCE = 0x10,  //!< A source based on topoSet
             CELLSET_SOURCE = (CELL_TYPE | SET_SOURCE),      //!< Cells as set
             FACESET_SOURCE = (FACE_TYPE | SET_SOURCE),      //!< Faces as set
             POINTSET_SOURCE = (POINT_TYPE | SET_SOURCE),    //!< Points as set
 
+            ZONE_SOURCE = 0x20, //!< A source based on mesh zone
             CELLZONE_SOURCE = (CELL_TYPE | ZONE_SOURCE),    //!< Cells as zone
             FACEZONE_SOURCE = (FACE_TYPE | ZONE_SOURCE),    //!< Faces as zone
             POINTZONE_SOURCE = (POINT_TYPE | ZONE_SOURCE),  //!< Points as zone
@@ -100,14 +100,18 @@ public:
         //- Enumeration defining the valid actions
         enum setAction
         {
-            ADD,                //!< Add elements to the set
-            SUBTRACT,           //!< Subtract elements from the set
-            SUBSET,             //!< Subset with elements in the set
-            INVERT,             //!< Invert the elements in the set
-            CLEAR,              //!< Clear the set, possibly creating it
+            // Fundamental actions
+            ADD,                //!< Add elements to current set
             NEW,                //!< Create a new set and ADD elements to it
+            SUBTRACT,           //!< Subtract elements from current set
+
+            // Derived/intrinsic actions
+            SUBSET,             //!< Union of elements with current set
+            INVERT,             //!< Invert the elements in the current set
+            CLEAR,              //!< Clear the set, possibly creating it
             REMOVE,             //!< Remove the set (from the file system)
             LIST,               //!< Print contents of the set
+
             DELETE = SUBTRACT,  //!< \deprecated(2018-10) Alias for SUBTRACT
         };
 
@@ -201,31 +205,31 @@ public:
         static Istream& checkIs(Istream& is);
 
         //- True if a "set" source
-        static inline bool isSetSource(const sourceType t)
+        static inline bool isSetSource(const sourceType t) noexcept
         {
             return (t & SET_SOURCE);
         }
 
         //- True if a "zone" source
-        static inline bool isZoneSource(const sourceType t)
+        static inline bool isZoneSource(const sourceType t) noexcept
         {
             return (t & ZONE_SOURCE);
         }
 
         //- True if "cell" geometric type
-        static inline bool isCell(const sourceType t)
+        static inline bool isCell(const sourceType t) noexcept
         {
             return (t & CELL_TYPE);
         }
 
         //- True if "face" geometric type
-        static inline bool isFace(const sourceType t)
+        static inline bool isFace(const sourceType t) noexcept
         {
             return (t & FACE_TYPE);
         }
 
         //- True if "point" geometric type
-        static inline bool isPoint(const sourceType t)
+        static inline bool isPoint(const sourceType t) noexcept
         {
             return (t & POINT_TYPE);
         }
@@ -362,7 +366,7 @@ public:
 
     // Member Functions
 
-        //- The source category (set/zone, cell/face/point)
+        //- The source category (cell/face/point combined with set/zone)
         virtual sourceType setType() const = 0;
 
         //- Apply specified action to the topoSet

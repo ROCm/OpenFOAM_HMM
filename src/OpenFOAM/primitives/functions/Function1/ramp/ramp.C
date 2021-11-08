@@ -68,7 +68,7 @@ void Foam::Function1Types::ramp::convertTimeBase(const Time& t)
 void Foam::Function1Types::ramp::writeData(Ostream& os) const
 {
     Function1<scalar>::writeData(os);
-    os  << token::END_STATEMENT << nl;
+    os.endEntry();
 
     os.beginBlock(word(this->name() + "Coeffs"));
     writeEntries(os);

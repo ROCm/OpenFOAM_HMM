@@ -314,7 +314,7 @@ private:
         //
         //  \param recursive search parent dictionaries
         //  \param pattern match using regular expressions as well
-        static inline enum keyType::option
+        inline static enum keyType::option
         matchOpt(bool recursive, bool pattern)
         {
             return
@@ -360,13 +360,14 @@ private:
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is, const word& keyword) const;
 
-        //- Report (on stderr) that the keyword default value was used
+        //- Report (stderr) that the keyword default value was used.
+        //- or FatalIOError when writeOptionalEntries greater than 1
         template<class T>
         void reportDefault
         (
             const word& keyword,
             const T& deflt,
-            const bool added = false
+            const bool added = false  // Value was added to the dictionary
         ) const;
 
 
@@ -375,13 +376,27 @@ public:
     // Declare name of the class and its debug switch
     ClassName("dictionary");
 
-    //- Report optional keywords and values if not present in dictionary
-    //  For value greater than 1: fatal.
-    //  Set/unset via an InfoSwitch or -info-switch at the command-line
-    static int writeOptionalEntries;
+    // Static Data
 
-    //- An empty dictionary, which is also the parent for all dictionaries
-    static const dictionary null;
+        //- Report optional keywords and values if not present in dictionary
+        //  For value greater than 1: fatal.
+        //  Set/unset via an InfoSwitch or -info-switch at the command-line
+        static int writeOptionalEntries;
+
+        //- An empty dictionary, which is also the parent for all dictionaries
+        static const dictionary null;
+
+
+    // Static Member Functions
+
+        //- Return the state of reporting optional (default) entries
+        //  0: no reporting, 1: report, 2: fatal if not set
+        inline static int reportOptional() noexcept;
+
+        //- Change the state of reporting optional (default) entries
+        //  0: no reporting, 1: report, 2: fatal if not set
+        //  \return old level
+        inline static int reportOptional(const int level) noexcept;
 
 
     // Constructors
@@ -443,30 +458,13 @@ public:
     // Access
 
         //- The dictionary name
-        const fileName& name() const noexcept
-        {
-            return name_;
-        }
+        inline const fileName& name() const noexcept;
 
         //- The dictionary name for modification (use with caution).
-        fileName& name() noexcept
-        {
-            return name_;
-        }
+        inline fileName& name() noexcept;
 
         //- The local dictionary name (final part of scoped name)
-        word dictName() const
-        {
-            word scopedName(name_.name());
-
-            const auto i = scopedName.rfind('.');
-            if (i == std::string::npos)
-            {
-                return scopedName;
-            }
-
-            return scopedName.substr(i+1);
-        }
+        inline word dictName() const;
 
         //- The dictionary name relative to the case.
         //  Uses argList::envRelativePath to obtain FOAM_CASE
@@ -476,11 +474,11 @@ public:
         //      not an absolute location
         fileName relativeName(const bool caseTag = false) const;
 
+        //- The dictionary is actually dictionary::null (root dictionary)
+        inline bool isNullDict() const noexcept;
+
         //- Return the parent dictionary
-        const dictionary& parent() const noexcept
-        {
-            return parent_;
-        }
+        inline const dictionary& parent() const noexcept;
 
         //- Return the top of the tree
         const dictionary& topDict() const;
@@ -505,7 +503,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return True if entry was found
-        bool found
+        inline bool found
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -516,7 +514,7 @@ public:
         //  \param matchOpt the search mode
         //
         //  \return the entry pointer found or a nullptr.
-        entry* findEntry
+        inline entry* findEntry
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -527,7 +525,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return the entry pointer found or a nullptr.
-        const entry* findEntry
+        inline const entry* findEntry
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -541,7 +539,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return the entry pointer found or a nullptr.
-        const entry* findScoped
+        inline const entry* findScoped
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -551,7 +549,7 @@ public:
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  \param matchOpt the default search is non-recursive with patterns
-        dictionary* findDict
+        inline dictionary* findDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -561,7 +559,7 @@ public:
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  \param matchOpt the default search is non-recursive with patterns
-        const dictionary* findDict
+        inline const dictionary* findDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -743,7 +741,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return true if the entry was found.
-        bool isDict
+        inline bool isDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -1528,6 +1526,10 @@ dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "dictionaryI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

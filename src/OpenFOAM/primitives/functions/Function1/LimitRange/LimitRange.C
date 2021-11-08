@@ -76,7 +76,7 @@ template<class Type>
 void Foam::Function1Types::LimitRange<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-    os  << token::END_STATEMENT << nl;
+    os.endEntry();
 
     os.beginBlock(word(this->name() + "Coeffs"));
     writeEntries(os);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SHA1.H"
-#include <cstring>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -64,7 +63,7 @@ inline Foam::SHA1& Foam::SHA1::append(const char* str)
 {
     if (str && *str)
     {
-        processBytes(str, strlen(str));
+        processBytes(str, std::char_traits<char>::length(str));
     }
     return *this;
 }
@@ -72,7 +71,7 @@ inline Foam::SHA1& Foam::SHA1::append(const char* str)
 
 inline Foam::SHA1& Foam::SHA1::append(const std::string& str)
 {
-    processBytes(str.data(), str.size());
+    processBytes(str.data(), str.length());
     return *this;
 }
 

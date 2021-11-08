@@ -39,6 +39,14 @@ void Foam::dictionary::reportDefault
     const bool added
 ) const
 {
+    if (writeOptionalEntries > 1)
+    {
+        FatalIOErrorInFunction(*this)
+            << "No optional entry: " << keyword
+            << " Default: " << deflt << nl
+            << exit(FatalIOError);
+    }
+
     InfoErr
         << "Dictionary: " << this->relativeName().c_str()
         << " Entry: " << keyword;
@@ -140,17 +148,7 @@ T Foam::dictionary::getOrDefault
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;
@@ -180,17 +178,7 @@ T Foam::dictionary::getOrAdd
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt, true);
-        }
+        reportDefault(keyword, deflt, true);  // Added
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -236,17 +224,7 @@ T Foam::dictionary::getCheckOrDefault
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;
@@ -291,17 +269,7 @@ T Foam::dictionary::getCheckOrAdd
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt, true);
-        }
+        reportDefault(keyword, deflt, true);  // Added
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -463,17 +431,7 @@ T Foam::dictionary::getOrDefaultCompat
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;

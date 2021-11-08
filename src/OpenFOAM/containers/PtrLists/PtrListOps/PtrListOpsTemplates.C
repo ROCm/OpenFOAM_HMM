@@ -35,7 +35,7 @@ Foam::labelList Foam::sortedOrder
     const UPtrList<T>& input
 )
 {
-    labelList order(input.size());
+    labelList order;
     sortedOrder(input, order, typename PtrListOps::less<T>(input));
     return order;
 }
@@ -60,15 +60,8 @@ void Foam::sortedOrder
     const ListComparePredicate& comp
 )
 {
-    const label len = input.size();
-
-    // List lengths must be identical
-    if (order.size() != len)
-    {
-        // Avoid copying elements, they are overwritten anyhow
-        order.clear();
-        order.resize(len);
-    }
+    // List lengths must be identical. Old content is overwritten
+    order.resize_nocopy(input.size());
 
     ListOps::identity(order);
 
@@ -79,7 +72,7 @@ void Foam::sortedOrder
 template<class T>
 void Foam::sort(UPtrList<T>& list)
 {
-    labelList order(list.size());
+    labelList order;
     sortedOrder(list, order);
     list.sortOrder(order, false);  // false = allow nullptr
 }
@@ -88,7 +81,7 @@ void Foam::sort(UPtrList<T>& list)
 template<class T, class Compare>
 void Foam::sort(UPtrList<T>& list, const Compare& comp)
 {
-    labelList order(list.size());
+    labelList order;
     sortedOrder(list, order, comp);
     list.sortOrder(order, false);  // false = allow nullptr
 }

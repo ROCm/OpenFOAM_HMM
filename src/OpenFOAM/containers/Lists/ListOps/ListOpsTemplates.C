@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -327,7 +327,7 @@ Foam::labelList Foam::sortedOrder
     const UList<T>& input
 )
 {
-    labelList order(input.size());
+    labelList order;
     sortedOrder(input, order, typename UList<T>::less(input));
     return order;
 }
@@ -352,15 +352,8 @@ void Foam::sortedOrder
     const ListComparePredicate& comp
 )
 {
-    const label len = input.size();
-
-    // List lengths must be identical
-    if (order.size() != len)
-    {
-        // Avoid copying elements, they are overwritten anyhow
-        order.clear();
-        order.resize(len);
-    }
+    // List lengths must be identical. Old content is overwritten
+    order.resize_nocopy(input.size());
 
     ListOps::identity(order);
 
@@ -374,7 +367,7 @@ Foam::labelList Foam::duplicateOrder
     const UList<T>& input
 )
 {
-    labelList order(input.size());
+    labelList order;
     duplicateOrder(input, order, typename UList<T>::less(input));
     return order;
 }
@@ -427,7 +420,7 @@ Foam::labelList Foam::uniqueOrder
     const UList<T>& input
 )
 {
-    labelList order(input.size());
+    labelList order;
     uniqueOrder(input, order, typename UList<T>::less(input));
     return order;
 }

@@ -351,46 +351,6 @@ void Foam::dictionary::raiseBadInput
 }
 
 
-bool Foam::dictionary::found
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-) const
-{
-    return csearch(keyword, matchOpt).good();
-}
-
-
-Foam::entry* Foam::dictionary::findEntry
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-)
-{
-    return search(keyword, matchOpt).ptr();
-}
-
-
-const Foam::entry* Foam::dictionary::findEntry
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-) const
-{
-    return csearch(keyword, matchOpt).ptr();
-}
-
-
-const Foam::entry* Foam::dictionary::findScoped
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-) const
-{
-    return csearchScoped(keyword, matchOpt).ptr();
-}
-
-
 const Foam::entry& Foam::dictionary::lookupEntry
 (
     const word& keyword,
@@ -482,36 +442,6 @@ bool Foam::dictionary::substituteScopedKeyword
     }
 
     return false;
-}
-
-
-bool Foam::dictionary::isDict
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-) const
-{
-    return csearch(keyword, matchOpt).isDict();
-}
-
-
-Foam::dictionary* Foam::dictionary::findDict
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-)
-{
-    return search(keyword, matchOpt).dictPtr();
-}
-
-
-const Foam::dictionary* Foam::dictionary::findDict
-(
-    const word& keyword,
-    enum keyType::option matchOpt
-) const
-{
-    return csearch(keyword, matchOpt).dictPtr();
 }
 
 
@@ -1019,9 +949,9 @@ Foam::dictionary Foam::operator+
     const dictionary& dict2
 )
 {
-    dictionary sum(dict1);
-    sum += dict2;
-    return sum;
+    dictionary result(dict1);
+    result += dict2;
+    return result;
 }
 
 
@@ -1031,9 +961,9 @@ Foam::dictionary Foam::operator|
     const dictionary& dict2
 )
 {
-    dictionary sum(dict1);
-    sum |= dict2;
-    return sum;
+    dictionary result(dict1);
+    result |= dict2;
+    return result;
 }
 
 
