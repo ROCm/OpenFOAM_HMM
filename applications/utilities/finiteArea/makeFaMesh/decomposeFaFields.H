@@ -11,11 +11,11 @@ License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Decompose area fields, when mesh was generated in parallel
+    Write proc addressing and decompose area fields (parallel only).
 
 \*---------------------------------------------------------------------------*/
 
-if (Pstream::parRun())
+if (doDecompose && Pstream::parRun())
 {
     faMeshReconstructor reconstructor(aMesh);
     reconstructor.writeAddressing();
@@ -43,24 +43,42 @@ if (Pstream::parRun())
 
         reconstructor.writeMesh();
 
-        const bool oldDistributed = fileHandler().distributed();
-        auto oldHandler = fileHandler(fileOperation::NewUncollated());
-        fileHandler().distributed(true);
-
-        IOobjectList objects(fullMesh.time(), runTime.timeName());
-
-        faFieldDecomposer::readFields(fullMesh, objects, areaScalarFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaVectorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaSphTensorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaSymmTensorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaTensorFields);
-
-        // Restore old settings
-        if (oldHandler)
+        if (doDecompFields)
         {
-            fileHandler(std::move(oldHandler));
+            const bool oldDistributed = fileHandler().distributed();
+            auto oldHandler = fileHandler(fileOperation::NewUncollated());
+            fileHandler().distributed(true);
+
+            IOobjectList objects(fullMesh.time(), runTime.timeName());
+
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaScalarFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaVectorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaSphTensorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaSymmTensorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaTensorFields
+            );
+
+            // Restore old settings
+            if (oldHandler)
+            {
+                fileHandler(std::move(oldHandler));
+            }
+            fileHandler().distributed(oldDistributed);
         }
-        fileHandler().distributed(oldDistributed);
     }
 
     const label nAreaFields =
@@ -123,5 +141,6 @@ if (Pstream::parRun())
         Info<< endl;
     }
 }
+
 
 // ************************************************************************* //

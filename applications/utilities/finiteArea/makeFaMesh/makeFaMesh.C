@@ -71,10 +71,21 @@ int main(int argc, char *argv[])
     );
     argList::addOption("dict", "file", "Alternative faMeshDefinition");
 
+    argList::addDryRunOption
+    (
+        "Create but do not write"
+    );
     argList::addBoolOption
     (
-        "dry-run",
-        "Create but do not write"
+        "no-decompose",
+        "Suppress procAddressing creation and field decomposition"
+        " (parallel)"
+    );
+    argList::addBoolOption
+    (
+        "no-fields",
+        "Suppress field decomposition"
+        " (parallel)"
     );
     argList::addBoolOption
     (
@@ -93,7 +104,17 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedPolyMesh.H"
 
-    const bool dryrun = args.found("dry-run");
+    const bool doDecompose = !args.found("no-decompose");
+    const bool doDecompFields = !args.found("no-fields");
+
+    if (!doDecompose)
+    {
+        Info<< "Skip decompose of finiteArea mesh/fields" << nl;
+    }
+    else if (!doDecompFields)
+    {
+        Info<< "Skip decompose of finiteArea fields" << nl;
+    }
 
     // Reading faMeshDefinition dictionary
     #include "findMeshDefinitionDict.H"
@@ -122,7 +143,7 @@ int main(int argc, char *argv[])
         #include "faMeshWriteVTK.H"
     }
 
-    if (dryrun)
+    if (args.dryRun())
     {
         Info<< "\ndry-run: not writing mesh or decomposing fields\n" << nl;
     }

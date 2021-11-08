@@ -46,13 +46,6 @@ void Foam::faFieldDecomposer::readFields
     // Search list of objects for fields of type GeoField
     IOobjectList fieldObjects(objects.lookupClass<GeoField>());
 
-    /// // Remove the cellDist field
-    /// auto iter = fieldObjects.find("cellDist");
-    /// if (iter.found())
-    /// {
-    ///     fieldObjects.erase(iter);
-    /// }
-
     // Use sorted set of names
     // (different processors might read objects in different order)
     const wordList masterNames(fieldObjects.sortedNames());

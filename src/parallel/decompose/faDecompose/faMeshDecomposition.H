@@ -155,19 +155,19 @@ public:
     // Settings
 
         //- Number of processor in decomposition
-        label nProcs() const
+        label nProcs() const noexcept
         {
             return nProcs_;
         }
 
         //- Is decomposition data to be distributed for each processor
-        bool distributed() const
+        bool distributed() const noexcept
         {
             return distributed_;
         }
 
         //- Change distributed flag
-        bool distributed(const bool on)
+        bool distributed(const bool on) noexcept
         {
             bool old(distributed_);
             distributed_ = on;
@@ -175,13 +175,13 @@ public:
         }
 
         //- Are global face zones used
-        bool useGlobalFaceZones() const
+        bool useGlobalFaceZones() const noexcept
         {
             return distributed_;
         }
 
         //- Change global face zones flag
-        bool useGlobalFaceZones(const bool on)
+        bool useGlobalFaceZones(const bool on) noexcept
         {
             bool old(hasGlobalFaceZones_);
             hasGlobalFaceZones_ = on;
