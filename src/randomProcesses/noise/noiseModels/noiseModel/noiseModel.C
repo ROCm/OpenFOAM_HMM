@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +141,7 @@ namespace Foam
 {
     tmp<scalarField> safeLog10(const scalarField& fld)
     {
-        auto tresult = tmp<scalarField>::New(fld.size(), Zero);
+        auto tresult = tmp<scalarField>::New(fld.size(), -GREAT);
         auto& result = tresult.ref();
 
         forAll(result, i)
@@ -594,6 +594,7 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     windowModelPtr_(),
     graphFormat_("raw"),
     SPLweighting_(weightingType::none),
+    dBRef_(2e-5),
     minPressure_(-0.5*VGREAT),
     maxPressure_(0.5*VGREAT),
     outputPrefix_(),
@@ -663,6 +664,11 @@ bool Foam::noiseModel::read(const dictionary& dict)
 
     Info<< "    Weighting: " << weightingTypeNames_[SPLweighting_] << endl;
 
+    if (dict.readIfPresent("dBRef", dBRef_))
+    {
+        Info<< "    Reference for dB calculation: " << dBRef_ << endl;
+    }
+
     Info<< "    Write options:" << endl;
     dictionary optDict(dict.subOrEmptyDict("writeOptions"));
     readWriteOption(optDict, "writePrmsf", writePrmsf_);
@@ -708,7 +714,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::PSD
     const scalarField& PSDf
 ) const
 {
-    return 10*safeLog10(PSDf/sqr(2e-5));
+    return 10*safeLog10(PSDf/sqr(dBRef_));
 }
 
 
@@ -718,7 +724,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
     const scalar f
 ) const
 {
-    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(2e-5)));
+    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(dBRef_)));
     scalarField& spl = tspl.ref();
 
     switch (SPLweighting_)
@@ -765,7 +771,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseModel::SPL
     const scalarField& f
 ) const
 {
-    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(2e-5)));
+    tmp<scalarField> tspl(10*safeLog10(Prms2/sqr(dBRef_)));
     scalarField& spl = tspl.ref();
 
     switch (SPLweighting_)
