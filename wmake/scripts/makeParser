@@ -9,8 +9,7 @@
 #   Copyright (C) 2019 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     makeParser
@@ -19,9 +18,7 @@
 #     Pregenerate ragel code and/or lemon parser headers
 #
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
 Usage: ${0##*/} [options]
@@ -32,7 +29,9 @@ options:
   -scanner=FILE     Generate ragel scanner code
   -code             Generate parser code, not header
   -header           Generate parser header, not code (default)
+  -grammar          Output grammar tables (if supported)
   -dry-run          Process m4 only (output on stdout)
+  -no-lines         Suppress generation of #line directives
   -no-tmp           Do not retain temporary m4 processed files
   -remove           Remove generated code
   -h, -help         Print the usage
@@ -40,18 +39,19 @@ options:
 Pregenerate ragel code and/or lemon parser headers
 
 USAGE
-    exit 1
+    exit 0 # Clean exit
 }
 
 #------------------------------------------------------------------------------
 # Parse arguments and options
 #------------------------------------------------------------------------------
 
-unset prefix parser scanner optHeader optDryRun optRemoveFile optRemoveTmp
+unset prefix parser scanner optHeader optGrammar optDryRun
+unset optRemoveFile optRemoveTmp optNoLines
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    (-h | -help*) usage ;;
+    (-h | -help*) printHelp ;;
 
     (-prefix=*)   prefix="${1#*=}" ;;
     (-parser=*)   parser="${1#*=}" ;;
@@ -59,7 +59,9 @@ do
 
     (-code)       optHeader=false ;;
     (-head*)      optHeader=true ;;
+    (-gram*)      optGrammar="-grammar" ;;  # Pass verbatim to wrapper
     (-dry-run)    optDryRun="-dry-run" ;;   # Pass verbatim to wrapper
+    (-no-lines)   optNoLines=true ;;
     (-no-tmp)     optRemoveTmp="-no-tmp" ;; # Pass verbatim to wrapper
     (-remove)     optRemoveFile=true ;;
 
@@ -92,7 +94,7 @@ case "$scanner" in
     elif command -v ragel >/dev/null
     then
         echo "Generating ragel scanner" 1>&2
-        ragel -G2 -o "$output" "$input"
+        ragel -G2 ${optNoLines:+-L} -o "$output" "$input"
     else
         echo "No ragel, leaving scanner intact" 1>&2
     fi
@@ -144,11 +146,13 @@ case "$parser" in
         then
             echo "Generating lemon parser code ($extCode)$message" 1>&2
             "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" \
-                $optDryRun $optRemoveTmp -e"$extCode" -p -s "$input"
+                $optDryRun $optGrammar $optRemoveTmp \
+                -e"$extCode" -p -s "$input"
         else
             echo "Generating lemon parser header$message" 1>&2
             "${WM_PROJECT_DIR:?}/wmake/scripts/wrap-lemon" \
-                $optDryRun $optRemoveTmp -header -p -s "$input"
+                $optDryRun $optGrammar $optRemoveTmp -header \
+                -p -s "$input"
         fi
     fi
     echo

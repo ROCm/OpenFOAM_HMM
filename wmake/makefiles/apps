@@ -8,8 +8,7 @@
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # File
 #     wmake/makefiles/apps
