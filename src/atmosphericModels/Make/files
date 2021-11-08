@@ -1,5 +1,6 @@
 /* Models */
-atmosphericTurbulentTransportModels.C
+turbulenceModels/atmosphericTurbulentTransportModels.C
+turbulenceModels/atmosphericTurbulentFluidThermoModels.C
 porosityModels/powerLawLopesdaCosta/powerLawLopesdaCosta.C
 
 
