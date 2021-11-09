@@ -314,9 +314,12 @@ public:
         static word member(const word& name);
 
         //- Create scope:name or scope_name string
-        //  An empty scope or name is ignored.
-        template<class StringType>
-        static inline word scopedName(StringType scope, const word& name);
+        //  An empty scope is ignored.
+        static inline word scopedName
+        (
+            const std::string& scope,
+            const word& name
+        );
 
         //- Return the IOobject, but also consider an alternative file name.
         //

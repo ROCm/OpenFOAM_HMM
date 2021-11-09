@@ -86,7 +86,10 @@ void Foam::functionObjects::solverInfo::createResidualField
         return;
     }
 
-    const word residualName("initialResidual:" + fieldName);
+    const word residualName
+    (
+        IOobject::scopedName("initialResidual", fieldName)
+    );
 
     if (!mesh_.foundObject<IOField<scalar>>(residualName))
     {

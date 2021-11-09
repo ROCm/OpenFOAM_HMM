@@ -31,21 +31,17 @@ License
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace Foam
+namespace
 {
-    // Return the current get position for std input stream
-    static inline std::streampos tellg(Istream* isptr)
-    {
-        ISstream* sptr = dynamic_cast<ISstream*>(isptr);
 
-        if (sptr)
-        {
-            return sptr->stdStream().tellg();
-        }
-
-        return 0;
-    }
+// The current get position (std::istream only)
+inline std::streampos stream_tellg(Foam::Istream* isptr)
+{
+    auto* sptr = dynamic_cast<Foam::ISstream*>(isptr);
+    return sptr ? sptr->stdStream().tellg() : std::streampos(0);
 }
+
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -141,7 +137,7 @@ bool Foam::Istream::readEnd(const char* funcName)
             << "Expected a '" << token::END_LIST
             << "' while reading " << funcName
             << ", found " << delimiter.info()
-            << " at stream position " << tellg(this) << nl
+            << " at stream position " << stream_tellg(this) << nl
             << exit(FatalIOError);
     }
 
@@ -182,7 +178,7 @@ char Foam::Istream::readEndList(const char* funcName)
             << "' or a '" << token::END_BLOCK
             << "' while reading " << funcName
             << ", found " << delimiter.info()
-            << " at stream position " << tellg(this) << nl
+            << " at stream position " << stream_tellg(this) << nl
             << exit(FatalIOError);
 
         return '\0';

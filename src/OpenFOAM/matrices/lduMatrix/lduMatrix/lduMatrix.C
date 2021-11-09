@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -330,18 +330,13 @@ void Foam::lduMatrix::setResidualField
         return;
     }
 
-    word lookupName;
-    if (initial)
-    {
-        lookupName = word("initialResidual:" + fieldName);
-    }
-    else
-    {
-        lookupName = word("residual:" + fieldName);
-    }
-
     scalarIOField* residualPtr =
-        mesh().thisDb().getObjectPtr<scalarIOField>(lookupName);
+        mesh().thisDb().getObjectPtr<scalarIOField>
+        (
+            initial
+          ? IOobject::scopedName("initialResidual", fieldName)
+          : IOobject::scopedName("residual", fieldName)
+        );
 
     if (residualPtr)
     {
