@@ -604,10 +604,14 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
     os.writeEntry("qr", qrName_);
     os.writeEntry("thermalInertia", thermalInertia_);
 
-    thicknessLayers_.writeEntry("thicknessLayers", os);
-    kappaLayers_.writeEntry("kappaLayers", os);
+    if (thicknessLayers_.size())
+    {
+        thicknessLayers_.writeEntry("thicknessLayers", os);
+        kappaLayers_.writeEntry("kappaLayers", os);
+    }
 
     temperatureCoupledBase::write(os);
+    mappedPatchFieldBase<scalar>::write(os);
 }
 
 

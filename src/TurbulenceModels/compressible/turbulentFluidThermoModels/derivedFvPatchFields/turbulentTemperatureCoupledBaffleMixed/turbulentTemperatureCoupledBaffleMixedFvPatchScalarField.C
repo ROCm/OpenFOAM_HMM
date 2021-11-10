@@ -381,9 +381,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     os.writeEntry("Tnbr", TnbrName_);
-    thicknessLayers_.writeEntry("thicknessLayers", os);
-    kappaLayers_.writeEntry("kappaLayers", os);
-
+    if (thicknessLayers_.size())
+    {
+        thicknessLayers_.writeEntry("thicknessLayers", os);
+        kappaLayers_.writeEntry("kappaLayers", os);
+    }
     temperatureCoupledBase::write(os);
     mappedPatchFieldBase<scalar>::write(os);
 }
