@@ -223,4 +223,78 @@ Foam::PatchFunction1<Type>::NewIfPresent
 }
 
 
+template<class Type>
+Foam::refPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::New
+(
+    HashPtrTable<PatchFunction1<Type>>& cache,
+
+    const polyPatch& pp,
+    const word& entryName,
+    const dictionary& dict,
+    enum keyType::option matchOpt,
+    const bool faceValues,
+    const bool mandatory
+)
+{
+    // See corresponding comments in Function1::New (caching version)
+
+    refPtr<PatchFunction1<Type>> fref;  // return value
+
+    // Try for direct cache hit
+    fref.cref(cache.get(entryName));
+
+    if (fref)
+    {
+        return fref;
+    }
+
+
+    // Lookup from dictionary
+    const entry* eptr = dict.findEntry(entryName, matchOpt);
+
+    if (eptr)
+    {
+        // Use keyword (potentially a wildcard) instead of entry name
+        const auto& kw = eptr->keyword();
+
+        // Try for a cache hit
+        fref.cref(cache.get(kw));
+
+        if (!fref)
+        {
+            // Create new entry
+            auto fauto
+            (
+                PatchFunction1<Type>::New
+                (
+                    pp,
+                    kw,
+                    eptr,  // Already resolved
+                    dict,
+                    faceValues,
+                    mandatory
+                )
+            );
+
+            if (fauto)
+            {
+                // Cache the newly created function
+                fref.cref(fauto.get());
+                cache.set(kw, fauto);
+            }
+        }
+    }
+
+    if (mandatory && !fref)
+    {
+        FatalIOErrorInFunction(dict)
+            << "No match for " << entryName << nl
+            << exit(FatalIOError);
+    }
+
+    return fref;
+}
+
+
 // ************************************************************************* //

@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SampleFunction1.H"
+#include "UniformValueField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,7 +41,12 @@ namespace Foam
     makeFunction1s(sphericalTensor);
     makeFunction1s(symmTensor);
     makeFunction1s(tensor);
-}
 
+    addUniformValueFieldFunction1s(sample, scalar);
+    addUniformValueFieldFunction1s(sample, vector);
+    addUniformValueFieldFunction1s(sample, sphericalTensor);
+    addUniformValueFieldFunction1s(sample, symmTensor);
+    addUniformValueFieldFunction1s(sample, tensor);
+}
 
 // ************************************************************************* //

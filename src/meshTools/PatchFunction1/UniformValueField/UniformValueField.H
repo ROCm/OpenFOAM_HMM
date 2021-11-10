@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,6 +172,17 @@ public:
 
 } // End namespace PatchFunction1Types
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Macros
+
+#undef  addUniformValueFieldFunction1s
+#define addUniformValueFieldFunction1s(F1Name, Type)                           \
+    PatchFunction1<Type>::adddictionaryConstructorToTable                      \
+    <PatchFunction1Types::UniformValueField<Type>>                             \
+        add##F1Name##UniformValueField##Type##ConstructorToTable_(#F1Name);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

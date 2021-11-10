@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ SeeAlso
 #include "patchFunction1Base.H"
 #include "coordinateScaling.H"
 #include "Field.H"
+#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -189,6 +190,22 @@ public:
             const word& entryName,
             const dictionary& dict,
             const bool faceValues = true
+        );
+
+
+    // Caching Selectors - accept wildcards in dictionary
+
+        //- Selector with external storage.
+        //- This also allows wildcard matches in a dictionary
+        static refPtr<PatchFunction1<Type>> New
+        (
+            HashPtrTable<PatchFunction1<Type>>& cache,
+            const polyPatch& pp,
+            const word& entryName,
+            const dictionary& dict,
+            enum keyType::option matchOpt = keyType::LITERAL,
+            const bool faceValues = true,
+            const bool mandatory = true
         );
 
 

@@ -51,6 +51,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class objectRegistry;
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -76,6 +77,9 @@ protected:
 
 
     // Protected Member Functions
+
+        //- Return the object registry (ie, the mesh) as pointer
+        const objectRegistry* obrPtr() const;
 
         //- No copy assignment
         void operator=(const patchFunction1Base&) = delete;
@@ -122,19 +126,19 @@ public:
     // Access
 
         //- The name of the entry
-        const word& name() const
+        const word& name() const noexcept
         {
             return name_;
         }
 
         //- Reference to the patch
-        const polyPatch& patch() const
+        const polyPatch& patch() const noexcept
         {
             return patch_;
         }
 
         //- Generate face or point values on patch?
-        bool faceValues() const
+        bool faceValues() const noexcept
         {
             return faceValues_;
         }
@@ -145,11 +149,29 @@ public:
             return (faceValues_ ? patch_.size() : patch_.nPoints());
         }
 
+        //- Has an associated objectRegistry (ie, from mesh)
+        /// bool hasDb() const noexcept
+        /// {
+        ///     return true;
+        /// }
+
+        //- Return the object registry (ie, the mesh)
+        const objectRegistry& obr() const;
+
+        //- False: not created with time
+        /// bool isTime() const noexcept
+        /// {
+        ///     return false;
+        /// }
+
+        //- Return the time database
+        const Time& time() const;
+
 
     // Manipulation
 
         //- Convert time
-        virtual void convertTimeBase(const Time&);
+        virtual void convertTimeBase(const Time& t);
 };
 
 
