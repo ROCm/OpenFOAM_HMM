@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "solution.H"
+#include "HashPtrTable.H"
+#include "Function1.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -55,23 +57,27 @@ void Foam::solution::read(const dictionary& dict)
 
     if (dict.found("relaxationFactors"))
     {
-        const dictionary& relaxDict(dict.subDict("relaxationFactors"));
+        const dictionary& relaxDict = dict.subDict("relaxationFactors");
+
         if (relaxDict.found("fields") || relaxDict.found("equations"))
         {
             if (relaxDict.found("fields"))
             {
                 fieldRelaxDict_ = relaxDict.subDict("fields");
+                fieldRelaxCache_.clear();
             }
 
             if (relaxDict.found("equations"))
             {
                 eqnRelaxDict_ = relaxDict.subDict("equations");
+                eqnRelaxCache_.clear();
             }
         }
         else
         {
             // backwards compatibility
             fieldRelaxDict_.clear();
+            fieldRelaxCache_.clear();
 
             for (const word& e : relaxDict.toc())
             {
@@ -85,17 +91,38 @@ void Foam::solution::read(const dictionary& dict)
                 {
                     fieldRelaxDict_.add(e, value);
                 }
-
             }
 
             eqnRelaxDict_ = relaxDict;
+            eqnRelaxCache_.clear();
         }
 
-        fieldRelaxDefault_ =
-            fieldRelaxDict_.getOrDefault<scalar>("default", 0);
 
-        eqnRelaxDefault_ =
-            eqnRelaxDict_.getOrDefault<scalar>("default", 0);
+        fieldRelaxDefault_ = Function1<scalar>::NewIfPresent
+        (
+            "default",
+            fieldRelaxDict_
+        );
+        if (!fieldRelaxDefault_)
+        {
+            fieldRelaxDefault_.reset
+            (
+                new Function1Types::Constant<scalar>("default", 0)
+            );
+        }
+
+        eqnRelaxDefault_ = Function1<scalar>::NewIfPresent
+        (
+            "default",
+            eqnRelaxDict_
+        );
+        if (!eqnRelaxDefault_)
+        {
+            eqnRelaxDefault_.reset
+            (
+                new Function1Types::Constant<scalar>("default", 0)
+            );
+        }
 
         DebugInfo
             << "Relaxation factors:" << nl
@@ -141,8 +168,6 @@ Foam::solution::solution
     caching_(false),
     fieldRelaxDict_(),
     eqnRelaxDict_(),
-    fieldRelaxDefault_(0),
-    eqnRelaxDefault_(0),
     solvers_()
 {
     if
@@ -155,6 +180,13 @@ Foam::solution::solution
         read(solutionDict());
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+// A non-default destructor since we had incomplete types in the header
+Foam::solution::~solution()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -257,11 +289,17 @@ Foam::scalar Foam::solution::fieldRelaxationFactor(const word& name) const
 
     if (fieldRelaxDict_.found(name))
     {
-        return fieldRelaxDict_.get<scalar>(name);
+        return Function1<scalar>::New
+        (
+            fieldRelaxCache_,  // cache
+            name,
+            fieldRelaxDict_,
+            keyType::REGEX
+        )().value(time().timeOutputValue());
     }
-    else if (fieldRelaxDefault_ > SMALL)
+    else if (fieldRelaxDefault_)
     {
-        return fieldRelaxDefault_;
+        return fieldRelaxDefault_().value(time().timeOutputValue());
     }
 
     FatalIOErrorInFunction(fieldRelaxDict_)
@@ -279,11 +317,17 @@ Foam::scalar Foam::solution::equationRelaxationFactor(const word& name) const
 
     if (eqnRelaxDict_.found(name))
     {
-        return eqnRelaxDict_.get<scalar>(name);
+        return Function1<scalar>::New
+        (
+            eqnRelaxCache_,  // cache
+            name,
+            eqnRelaxDict_,
+            keyType::REGEX
+        )().value(time().timeOutputValue());
     }
-    else if (eqnRelaxDefault_ > SMALL)
+    else if (eqnRelaxDefault_)
     {
-        return eqnRelaxDefault_;
+        return eqnRelaxDefault_().value(time().timeOutputValue());
     }
 
     FatalIOErrorInFunction(eqnRelaxDict_)
