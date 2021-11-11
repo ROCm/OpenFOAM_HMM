@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,13 @@ template<class Type>
 Foam::nastranSetWriter<Type>::nastranSetWriter()
 :
     writer<Type>()
+{}
+
+
+template<class Type>
+Foam::nastranSetWriter<Type>::nastranSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 

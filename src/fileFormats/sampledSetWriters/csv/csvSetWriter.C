@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +37,13 @@ template<class Type>
 Foam::csvSetWriter<Type>::csvSetWriter()
 :
     writer<Type>()
+{}
+
+
+template<class Type>
+Foam::csvSetWriter<Type>::csvSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 

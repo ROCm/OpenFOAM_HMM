@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +56,6 @@ class vtkSetWriter
 :
     public writer<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -64,8 +64,11 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         vtkSetWriter();
+
+        //- Construct with dictionary
+        explicit vtkSetWriter(const dictionary& dict);
 
 
     //- Destructor

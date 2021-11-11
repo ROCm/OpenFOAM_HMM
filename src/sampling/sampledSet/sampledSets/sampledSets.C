@@ -97,7 +97,8 @@ Foam::sampledSets::sampledSets
     outputPath_(fileName::null),
     searchEngine_(mesh_),
     interpolationScheme_(word::null),
-    writeFormat_(word::null)
+    writeFormat_(word::null),
+    writeFormatOptions_(dict.subOrEmptyDict("formatOptions"))
 {
     outputPath_ =
     (
@@ -106,7 +107,7 @@ Foam::sampledSets::sampledSets
 
     if (mesh_.name() != polyMesh::defaultRegion)
     {
-        outputPath_ = outputPath_/mesh_.name();
+        outputPath_ /= mesh_.name();
     }
 
     outputPath_.clean();  // Remove unneeded ".."
@@ -130,7 +131,8 @@ Foam::sampledSets::sampledSets
     outputPath_(fileName::null),
     searchEngine_(mesh_),
     interpolationScheme_(word::null),
-    writeFormat_(word::null)
+    writeFormat_(word::null),
+    writeFormatOptions_(dict.subOrEmptyDict("formatOptions"))
 {
     outputPath_ =
     (
@@ -139,7 +141,7 @@ Foam::sampledSets::sampledSets
 
     if (mesh_.name() != polyMesh::defaultRegion)
     {
-        outputPath_ = outputPath_/mesh_.name();
+        outputPath_ /= mesh_.name();
     }
 
     outputPath_.clean();  // Remove unneeded ".."

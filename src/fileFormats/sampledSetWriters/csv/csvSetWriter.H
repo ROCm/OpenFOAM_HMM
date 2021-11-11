@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,8 +75,11 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         csvSetWriter();
+
+        //- Construct with dictionary
+        explicit csvSetWriter(const dictionary& dict);
 
 
     //- Destructor

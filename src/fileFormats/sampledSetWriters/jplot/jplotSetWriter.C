@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +32,6 @@ License
 #include "fileName.H"
 #include "OFstream.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -50,6 +50,13 @@ template<class Type>
 Foam::jplotSetWriter<Type>::jplotSetWriter()
 :
     writer<Type>()
+{}
+
+
+template<class Type>
+Foam::jplotSetWriter<Type>::jplotSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 

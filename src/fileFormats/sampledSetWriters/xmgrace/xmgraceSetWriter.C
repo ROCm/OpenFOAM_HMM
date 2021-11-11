@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +38,13 @@ template<class Type>
 Foam::xmgraceSetWriter<Type>::xmgraceSetWriter()
 :
     writer<Type>()
+{}
+
+
+template<class Type>
+Foam::xmgraceSetWriter<Type>::xmgraceSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 

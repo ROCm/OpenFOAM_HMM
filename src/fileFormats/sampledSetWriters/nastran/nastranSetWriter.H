@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,13 +56,6 @@ class nastranSetWriter
 :
     public writer<Type>
 {
-public:
-
-    //- File field formats
-    using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
-
-private:
-
     // Private Member Functions
 
         //- Write the formatted keyword to the output stream
@@ -75,14 +68,21 @@ private:
 
 public:
 
+    //- File field formats
+    using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
+
+
     //- Runtime type information
     TypeName("nastran");
 
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         nastranSetWriter();
+
+        //- Construct with dictionary
+        explicit nastranSetWriter(const dictionary& dict);
 
 
     //- Destructor

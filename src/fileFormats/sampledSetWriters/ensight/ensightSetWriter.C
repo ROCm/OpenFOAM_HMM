@@ -42,6 +42,13 @@ Foam::ensightSetWriter<Type>::ensightSetWriter()
 {}
 
 
+template<class Type>
+Foam::ensightSetWriter<Type>::ensightSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

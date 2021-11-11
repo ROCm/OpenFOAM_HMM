@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,13 @@ template<class Type>
 Foam::gnuplotSetWriter<Type>::gnuplotSetWriter()
 :
     writer<Type>()
+{}
+
+
+template<class Type>
+Foam::gnuplotSetWriter<Type>::gnuplotSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
