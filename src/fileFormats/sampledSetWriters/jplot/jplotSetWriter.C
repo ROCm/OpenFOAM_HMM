@@ -53,13 +53,6 @@ Foam::jplotSetWriter<Type>::jplotSetWriter()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::jplotSetWriter<Type>::~jplotSetWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

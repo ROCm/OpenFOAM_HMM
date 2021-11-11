@@ -38,12 +38,6 @@ Foam::nastranSetWriter<Type>::nastranSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::nastranSetWriter<Type>::~nastranSetWriter()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -129,6 +123,7 @@ template<class Type>
 void Foam::nastranSetWriter<Type>::write
 (
     const bool writeTracks,
+    const List<scalarField>& times,
     const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,

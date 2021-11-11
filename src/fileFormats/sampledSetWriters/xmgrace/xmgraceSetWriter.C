@@ -40,13 +40,6 @@ Foam::xmgraceSetWriter<Type>::xmgraceSetWriter()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::xmgraceSetWriter<Type>::~xmgraceSetWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -91,7 +84,8 @@ template<class Type>
 void Foam::xmgraceSetWriter<Type>::write
 (
     const bool writeTracks,
-    const PtrList<coordSet>& trackPoints,
+    const List<scalarField>& times,
+    const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,
     Ostream& os
@@ -104,24 +98,24 @@ void Foam::xmgraceSetWriter<Type>::write
             << "Number of valueSets:" << valueSets.size()
             << exit(FatalError);
     }
-    if (trackPoints.size() > 0)
+    if (tracks.size() > 0)
     {
         os  << "@g0 on" << nl
             << "@with g0" << nl
-            << "@    title \"" << trackPoints[0].name() << '"' << nl
-            << "@    xaxis label " << '"' << trackPoints[0].axis() << '"' << nl;
+            << "@    title \"" << tracks[0].name() << '"' << nl
+            << "@    xaxis label " << '"' << tracks[0].axis() << '"' << nl;
 
         // Data index.
         label sI = 0;
 
-        forAll(trackPoints, trackI)
+        forAll(tracks, trackI)
         {
             forAll(valueSets, i)
             {
                 os  << "@    s" << sI << " legend " << '"'
                     << valueSetNames[i] << "_track" << i << '"' << nl
                     << "@target G0.S" << sI << nl;
-                this->writeTable(trackPoints[trackI], valueSets[i][trackI], os);
+                this->writeTable(tracks[trackI], valueSets[i][trackI], os);
                 os  << '&' << nl;
 
                 sI++;

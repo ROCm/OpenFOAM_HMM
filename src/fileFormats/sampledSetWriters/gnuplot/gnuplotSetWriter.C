@@ -41,12 +41,6 @@ Foam::gnuplotSetWriter<Type>::gnuplotSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::gnuplotSetWriter<Type>::~gnuplotSetWriter()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -112,7 +106,8 @@ template<class Type>
 void Foam::gnuplotSetWriter<Type>::write
 (
     const bool writeTracks,
-    const PtrList<coordSet>& trackPoints,
+    const List<scalarField>& times,
+    const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,
     Ostream& os
@@ -125,12 +120,12 @@ void Foam::gnuplotSetWriter<Type>::write
             << "Number of valueSets:" << valueSets.size()
             << exit(FatalError);
     }
-    if (trackPoints.size() > 0)
+    if (tracks.size() > 0)
     {
         os  << "set term postscript color" << nl
-            << "set output \"" << trackPoints[0].name() << ".ps\"" << nl;
+            << "set output \"" << tracks[0].name() << ".ps\"" << nl;
 
-        forAll(trackPoints, trackI)
+        forAll(tracks, trackI)
         {
             os  << "plot";
 
@@ -147,7 +142,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
             forAll(valueSets, i)
             {
-                this->writeTable(trackPoints[trackI], valueSets[i][trackI], os);
+                this->writeTable(tracks[trackI], valueSets[i][trackI], os);
                 os  << "e" << nl;
             }
         }

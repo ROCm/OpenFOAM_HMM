@@ -70,7 +70,7 @@ public:
 
 
     //- Destructor
-    virtual ~jplotSetWriter();
+    virtual ~jplotSetWriter() = default;
 
 
     // Member Functions
@@ -92,9 +92,10 @@ public:
         virtual void write
         (
             const bool writeTracks,
-            const PtrList<coordSet>&,
+            const List<scalarField>& times,
+            const PtrList<coordSet>& tracks,
             const wordList& valueSetNames,
-            const List<List<Field<Type>>>&,
+            const List<List<Field<Type>>>& valueSets,
             Ostream&
         ) const
         {

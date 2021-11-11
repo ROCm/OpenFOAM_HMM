@@ -41,12 +41,6 @@ Foam::vtkSetWriter<Type>::vtkSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::vtkSetWriter<Type>::~vtkSetWriter()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -111,6 +105,7 @@ template<class Type>
 void Foam::vtkSetWriter<Type>::write
 (
     const bool writeTracks,
+    const List<scalarField>& times,
     const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,
