@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::ensightPTraits
 
 Description
-    Conversion of OpenFOAM pTraits into the Ensight equivalent
+    Ensight names and component order for base types.
 
     For the purpose of traits, integers (label) are treated like
     floating point (scalar). Spherical tensors are mapped as a scalar.
@@ -38,7 +38,6 @@ Description
 #ifndef ensightPTraits_H
 #define ensightPTraits_H
 
-#include "pTraits.H"
 #include "fieldTypes.H"
 #include "direction.H"
 
@@ -51,20 +50,20 @@ namespace Foam
                          Class ensightPTraits Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class PrimitiveType>
-class ensightPTraits
+template<class Type>
+struct ensightPTraits
 {
-public:
+    //- The type name used in ensight case files
+    static const char* const typeName;
 
-    // Static data members
-
-        static const char* const typeName;
-
-        //- Ordering table: return OpenFOAM component given Ensight component
-        //  This is used for the symmTensor ordering: Ensight requires
-        //  xx yy zz xy xz yz
-        static const direction componentOrder[];
+    //- Ordering table: return OpenFOAM component given Ensight component
+    //  This is used for the symmTensor ordering: Ensight requires
+    //  xx yy zz xy xz yz
+    static const direction componentOrder[];
 };
+
+
+// Specializations
 
 template<>
 const char* const ensightPTraits<label>::typeName;

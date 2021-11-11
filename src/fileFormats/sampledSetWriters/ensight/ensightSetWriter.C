@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +28,10 @@ License
 
 #include "ensightSetWriter.H"
 #include "coordSet.H"
-#include "OFstream.H"
-#include "addToRunTimeSelectionTable.H"
 #include "IOmanip.H"
+#include "ensightGeoFile.H"
 #include "ensightPTraits.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -85,14 +86,15 @@ void Foam::ensightSetWriter<Type>::write
         << nl
         << "VARIABLE"
         << nl;
-    forAll(valueSetNames, setI)
+
+    for (const word& valueName : valueSetNames)
     {
-        fileName dataFile(base + ".***." + valueSetNames[setI]);
+        fileName dataFile(base + ".***." + valueName);
 
         os.setf(ios_base::left);
         os  << ensightPTraits<Type>::typeName
             << " per node:            1       "
-            << setw(15) << valueSetNames[setI]
+            << setw(15) << valueName
             << " " << dataFile.name().c_str()
             << nl;
     }
@@ -122,19 +124,12 @@ void Foam::ensightSetWriter<Type>::write
             << "coordinates" << nl
             << setw(10) << points.size() << nl;
 
-        for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+        for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
         {
-            forAll(points, pointi)
+            for (const point& p : points)
             {
-                const scalar comp = points[pointi][cmpt];
-                if (mag(comp) >= scalar(floatScalarVSMALL))
-                {
-                    os  << setw(12) << comp << nl;
-                }
-                else
-                {
-                    os  << setw(12) << scalar(0) << nl;
-                }
+                const float comp = narrowFloat(p[cmpt]);
+                os  << setw(12) << comp << nl;
             }
         }
         os  << "point" << nl
@@ -146,34 +141,29 @@ void Foam::ensightSetWriter<Type>::write
     }
 
     // Write data files
-    forAll(valueSetNames, setI)
+    forAll(valueSetNames, seti)
     {
-        fileName dataFile(base + ".000." + valueSetNames[setI]);
+        const word& valueName = valueSetNames[seti];
+        const Field<Type>& fld = *(valueSets[seti]);
+
+        fileName dataFile(base + ".000." + valueName);
         OFstream os(dataFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
+
+        os  << ensightPTraits<Type>::typeName << nl
+            << "part" << nl
+            << setw(10) << 1 << nl
+            << "coordinates" << nl;
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
         {
-            os  << ensightPTraits<Type>::typeName << nl
-                << "part" << nl
-                << setw(10) << 1 << nl
-                << "coordinates" << nl;
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
 
-            for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+            for (const Type& val : fld)
             {
-                label cmpt = ensightPTraits<Type>::componentOrder[i];
-
-                const scalarField fld(valueSets[setI]->component(cmpt));
-                forAll(fld, i)
-                {
-                    if (mag(fld[i]) >= scalar(floatScalarVSMALL))
-                    {
-                        os  << setw(12) << fld[i] << nl;
-                    }
-                    else
-                    {
-                        os  << setw(12) << scalar(0) << nl;
-                    }
-                }
+                const float comp = narrowFloat(component(val, cmpt));
+                os  << setw(12) << comp << nl;
             }
         }
     }
@@ -202,14 +192,15 @@ void Foam::ensightSetWriter<Type>::write
         << nl
         << "VARIABLE"
         << nl;
-    forAll(valueSetNames, setI)
+
+    for (const word& valueName : valueSetNames)
     {
-        fileName dataFile(base + ".***." + valueSetNames[setI]);
+        fileName dataFile(base + ".***." + valueName);
 
         os.setf(ios_base::left);
         os  << ensightPTraits<Type>::typeName
             << " per node:            1       "
-            << setw(15) << valueSetNames[setI]
+            << setw(15) << valueName
             << " " << dataFile.name().c_str()
             << nl;
     }
@@ -233,29 +224,22 @@ void Foam::ensightSetWriter<Type>::write
             << "node id assign" << nl
             << "element id assign" << nl;
 
-        forAll(tracks, trackI)
+        forAll(tracks, tracki)
         {
-            const coordSet& points = tracks[trackI];
+            const coordSet& points = tracks[tracki];
 
             os  << "part" << nl
-                << setw(10) << trackI+1 << nl
+                << setw(10) << tracki+1 << nl
                 << "internalMesh" << nl
                 << "coordinates" << nl
                 << setw(10) << points.size() << nl;
 
-            for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+            for (direction cmpt = 0; cmpt < vector::nComponents; ++cmpt)
             {
-                forAll(points, pointi)
+                for (const point& p : points)
                 {
-                    const scalar comp = points[pointi][cmpt];
-                    if (mag(comp) >= scalar(floatScalarVSMALL))
-                    {
-                        os  << setw(12) << comp << nl;
-                    }
-                    else
-                    {
-                        os  << setw(12) << scalar(0) << nl;
-                    }
+                    const float comp = narrowFloat(p[cmpt]);
+                    os  << setw(12) << comp << nl;
                 }
             }
 
@@ -275,37 +259,35 @@ void Foam::ensightSetWriter<Type>::write
 
 
     // Write data files
-    forAll(valueSetNames, setI)
+    forAll(valueSetNames, seti)
     {
-        fileName dataFile(base + ".000." + valueSetNames[setI]);
+        const word& valueName = valueSetNames[seti];
+        const List<Field<Type>>& fieldVals = valueSets[seti];
+
+        fileName dataFile(base + ".000." + valueName);
         OFstream os(dataFile);
         os.setf(ios_base::scientific, ios_base::floatfield);
         os.precision(5);
         {
             os  << ensightPTraits<Type>::typeName << nl;
 
-            const List<Field<Type>>& fieldVals = valueSets[setI];
-            forAll(fieldVals, trackI)
+            forAll(fieldVals, tracki)
             {
+                const Field<Type>& fld = fieldVals[tracki];
+
                 os  << "part" << nl
-                    << setw(10) << trackI+1 << nl
+                    << setw(10) << tracki+1 << nl
                     << "coordinates" << nl;
 
-                for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+                for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                 {
-                    label cmpt = ensightPTraits<Type>::componentOrder[i];
+                    const direction cmpt =
+                        ensightPTraits<Type>::componentOrder[d];
 
-                    const scalarField fld(fieldVals[trackI].component(cmpt));
-                    forAll(fld, i)
+                    for (const Type& val : fld)
                     {
-                        if (mag(fld[i]) >= scalar(floatScalarVSMALL))
-                        {
-                            os  << setw(12) << fld[i] << nl;
-                        }
-                        else
-                        {
-                            os  << setw(12) << scalar(0) << nl;
-                        }
+                        const float comp = narrowFloat(component(val, cmpt));
+                        os  << setw(12) << comp << nl;
                     }
                 }
             }
