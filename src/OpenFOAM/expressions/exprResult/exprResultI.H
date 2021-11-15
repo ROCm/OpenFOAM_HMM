@@ -214,15 +214,6 @@ Foam::expressions::exprResult::exprResult(Field<Type>&& fld)
 
 
 template<class Type>
-Foam::expressions::exprResult::exprResult(autoPtr<Type>&& obj)
-:
-    exprResult()
-{
-    setObjectResult(std::move(obj));
-}
-
-
-template<class Type>
 Foam::expressions::exprResult::exprResult(const dimensioned<Type>& dt)
 :
     exprResult()
@@ -281,15 +272,9 @@ inline Type Foam::expressions::exprResult::getValue() const
 }
 
 
-inline bool Foam::expressions::exprResult::isBool() const
+inline bool Foam::expressions::exprResult::is_bool() const
 {
     return valType_ == pTraits<bool>::typeName;
-}
-
-
-inline bool Foam::expressions::exprResult::isObject() const
-{
-    return bool(objectPtr_);
 }
 
 
@@ -366,30 +351,6 @@ void Foam::expressions::exprResult::setResultImpl
     fieldPtr_ = new Field<Type>(std::move(fld));
 
     DebugInFunction << nl;
-}
-
-
-template<class Type>
-void Foam::expressions::exprResult::setObjectResult(autoPtr<Type>&& obj)
-{
-    target().setObjectResultImpl(obj.ptr());  // release()
-}
-
-
-template<class T>
-void Foam::expressions::exprResult::setObjectResultImpl(T* ptr)
-{
-    clear();
-
-    isUniform_ = false;
-    isPointData_ = false;
-
-    if (ptr != nullptr)
-    {
-        size_ = ptr->size();
-        valType_ = ptr->typeName;
-        objectPtr_.reset(ptr);
-    }
 }
 
 
@@ -756,49 +717,9 @@ Foam::expressions::exprResult::ref()
 
 template<class Type>
 inline Foam::Field<Type>&
-Foam::expressions::exprResult::getRef() const
+Foam::expressions::exprResult::constCast() const
 {
     return const_cast<Field<Type>&>(this->cref<Type>());
-}
-
-
-template<class Type>
-inline Foam::tmp<Type>
-Foam::expressions::exprResult::getObjectResult(bool cacheCopy)
-{
-    DebugInFunction << nl;
-
-    if (!isType<Type>())
-    {
-        FatalErrorInFunction
-            << "The expected return type " << pTraits<Type>::typeName
-            << " is different from the stored result type "
-            << valType_ << nl << nl
-            << exit(FatalError);
-    }
-
-    Type* ptr = dynamic_cast<Type*>(objectPtr_.get());
-
-    if (!ptr)
-    {
-        WarningInFunction
-            << "Cannot cast object pointer to " << pTraits<Type>::typeName
-            << nl << nl;
-
-        return nullptr;
-    }
-
-    if (cacheCopy)
-    {
-        // Return duplicated content
-        return tmp<Type>::New(*ptr);
-    }
-
-    objectPtr_.release();  // Take ownership in ptr
-
-    clear();
-
-    return tmp<Type>(ptr);
 }
 
 

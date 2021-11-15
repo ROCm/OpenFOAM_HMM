@@ -213,8 +213,7 @@ Foam::expressions::exprResult::exprResult()
     needsReset_(false),
     size_(0),
     single_(),
-    fieldPtr_(nullptr),
-    objectPtr_(nullptr)
+    fieldPtr_(nullptr)
 {
     clear();
 }
@@ -251,8 +250,7 @@ Foam::expressions::exprResult::exprResult
     needsReset_(false),
     size_(0),
     single_(),
-    fieldPtr_(nullptr),
-    objectPtr_(nullptr)
+    fieldPtr_(nullptr)
 {
     DebugInFunction << nl;
 
@@ -399,7 +397,6 @@ void Foam::expressions::exprResult::clear()
 {
     uglyDelete();
     valType_.clear();
-    objectPtr_.reset(nullptr);
     size_ = 0;
 }
 
@@ -533,12 +530,6 @@ void Foam::expressions::exprResult::operator=(const exprResult& rhs)
                 << exit(FatalError);
         }
     }
-    else if (objectPtr_)
-    {
-        FatalErrorInFunction
-            << "Assignment with general content not possible" << nl
-            << exit(FatalError);
-    }
 }
 
 
@@ -560,8 +551,6 @@ void Foam::expressions::exprResult::operator=(exprResult&& rhs)
 
     single_ = rhs.single_;
     fieldPtr_ = rhs.fieldPtr_;
-
-    objectPtr_.reset(rhs.objectPtr_.release());
 
     rhs.fieldPtr_ = nullptr;  // Took ownership of field pointer
     rhs.clear();
@@ -707,13 +696,6 @@ Foam::expressions::exprResult::operator*=
     const scalar& b
 )
 {
-    if (isObject())
-    {
-        FatalErrorInFunction
-            << "Can only multiply Field-type exprResult. Not "
-            << valType_ << nl
-            << exit(FatalError);
-    }
     if (!fieldPtr_)
     {
         FatalErrorInFunction
@@ -748,13 +730,6 @@ Foam::expressions::exprResult::operator+=
     const exprResult& b
 )
 {
-    if (isObject())
-    {
-        FatalErrorInFunction
-            << "Can only add Field-type, not type: "
-            << valType_ << nl
-            << exit(FatalError);
-    }
     if (!fieldPtr_)
     {
         FatalErrorInFunction
