@@ -77,29 +77,6 @@ bool Foam::objectRegistry::parentNotTime() const
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
-(
-    const word& name,
-    const bool recursive
-) const
-{
-    const_iterator iter = cfind(name);
-
-    if (iter.found())
-    {
-        return iter.val();
-    }
-    else if (recursive && this->parentNotTime())
-    {
-        return parent_.cfindIOobject(name, recursive);
-    }
-
-    return nullptr;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors *  * * * * * * * * * * * * * //
 
 Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
@@ -421,6 +398,27 @@ void Foam::objectRegistry::rename(const word& newName)
     {
         dbDir_.replace(i+1, string::npos, newName);
     }
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = cfind(name);
+
+    if (iter.found())
+    {
+        return iter.val();
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.cfindIOobject(name, recursive);
+    }
+
+    return nullptr;
 }
 
 

@@ -138,20 +138,6 @@ class objectRegistry
         void operator=(const objectRegistry&) = delete;
 
 
-    // Protected Member Functions
-
-        //- Return const pointer to the regIOobject.
-        //
-        //  \param recursive search parent registries
-        //
-        //  \return nullptr if the object was not found.
-        const regIOobject* cfindIOobject
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-
 public:
 
     //- Declare type name for this IOobject
@@ -355,6 +341,16 @@ public:
         template<class Type>
         HashTable<Type*> lookupClass(const bool strict = false);
 
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* cfindIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
 
         //- Can the regIOobject object be found (by name).
         //
