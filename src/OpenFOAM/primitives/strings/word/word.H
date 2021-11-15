@@ -231,7 +231,7 @@ word name(const void* ptr);
 template<class T>
 struct nameOp
 {
-    inline word operator()(const T& obj) const
+    word operator()(const T& obj) const
     {
         return obj.name();
     }
@@ -242,7 +242,7 @@ struct nameOp
 template<class T>
 struct typeOp
 {
-    inline word operator()(const T& obj) const
+    word operator()(const T& obj) const
     {
         return obj.type();
     }

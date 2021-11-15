@@ -31,7 +31,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const pTraits<Scalar>::typeName = "scalar";
 const char* const pTraits<Scalar>::componentNames[] = { "" };
@@ -45,7 +45,9 @@ const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
 const Scalar pTraits<Scalar>::vsmall = ScalarVSMALL;
 
 
-pTraits<Scalar>::pTraits(const Scalar& val)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+pTraits<Scalar>::pTraits(const Scalar& val) noexcept
 :
     p_(val)
 {}

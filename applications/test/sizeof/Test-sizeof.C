@@ -39,6 +39,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "IOobject.H"
+#include "scalarField.H"
 
 namespace Foam
 {
@@ -138,6 +139,8 @@ int main(int argc, char *argv[])
     cout<<"IOstream:" << sizeof(Foam::IOstream) << nl;
     cout<<"PstreamBuffers:" << sizeof(Foam::PstreamBuffers) << nl;
     cout<<"Time:" << sizeof(Foam::Time) << nl;
+
+    cout<<"tmp<>:" << sizeof(tmp<scalarField>) << nl;
 
     Info << "---\nEnd\n" << endl;
 

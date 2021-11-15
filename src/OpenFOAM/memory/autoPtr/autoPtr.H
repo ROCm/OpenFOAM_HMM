@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ namespace Foam
 template<class T>
 class autoPtr
 {
-    //- Pointer to managed object
+    //- The managed pointer
     T* ptr_;
 
 
@@ -103,10 +103,10 @@ public:
 
     // Constructors
 
-        //- Construct with no managed object.
+        //- Construct with no managed pointer.
         inline constexpr autoPtr() noexcept;
 
-        //- Construct with no managed object (literal nullptr).
+        //- Construct with no managed pointer (literal nullptr).
         inline constexpr autoPtr(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
@@ -134,7 +134,7 @@ public:
         #endif
 
 
-    //- Deletes the managed object if such is present
+    //- Deletes the managed pointer
     inline ~autoPtr() noexcept;
 
 
@@ -142,14 +142,8 @@ public:
 
     // Query
 
-        //- Deprecated(2020-07) True if the managed pointer is null
-        //
-        //  \deprecated(2020-07) - use bool operator
-        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
-        bool empty() const noexcept { return !ptr_; }
-
         //- True if the managed pointer is non-null
-        bool valid() const noexcept { return ptr_; }
+        bool valid() const noexcept { return bool(ptr_); }
 
 
     // Access
@@ -170,7 +164,7 @@ public:
 
     // Edit
 
-        //- Return pointer to the managed object and release ownership.
+        //- Release ownership and return the pointer.
         inline T* release() noexcept;
 
         //- Same as \c release().
@@ -182,11 +176,11 @@ public:
         void clear() noexcept { reset(nullptr); }
 
         //- Delete managed object and set to new given pointer
-        inline void reset(T* p = nullptr) noexcept;
+        //  \remark Same as move assign, but better for code documentation
+        inline void reset(autoPtr<T>&& other) noexcept;
 
         //- Delete managed object and set to new given pointer
-        //  \remark Same as move assign, but better for code documentation
-        inline void reset(autoPtr<T>&& ap) noexcept;
+        inline void reset(T* p = nullptr) noexcept;
 
         //- Swaps the managed object with other autoPtr.
         inline void swap(autoPtr<T>& other) noexcept;
@@ -230,7 +224,7 @@ public:
 
     // Casting
 
-        //- True if the managed pointer is non-null
+        //- True if pointer/reference is non-null. Same as valid()
         explicit operator bool() const noexcept { return bool(ptr_); }
 
         //- Cast to pointer type
@@ -253,6 +247,9 @@ public:
 
     // Assignment
 
+        //- No copy assignment from plain pointer (uncontrolled access)
+        void operator=(T* p) = delete;
+
         //- Transfer object ownership from parameter
         inline void operator=(autoPtr<T>&& ap) noexcept;
 
@@ -270,6 +267,12 @@ public:
 
     // Housekeeping
 
+        //- Deprecated(2020-07) True if the managed pointer is null
+        //
+        //  \deprecated(2020-07) - use bool operator
+        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
+        bool empty() const noexcept { return !ptr_; }
+
         //- Deprecated(2018-02) Identical to reset().
         //  \note Provided for backward compatibility - the older version
         //      enforced a run-time check (Fatal if pointer was already set)
@@ -279,10 +282,6 @@ public:
         FOAM_DEPRECATED_FOR(2018-02, "reset() - same behaviour")
         #endif
         void set(T* p) noexcept { reset(p); }
-
-        //- Deprecated(2018-02) No copy assignment from plain pointer
-        //  \deprecated(2018-02) Convenient, but uncontrolled access
-        void operator=(T* p) = delete;
 };
 
 

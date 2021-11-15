@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const bool& p);
+        explicit pTraits(const bool& p) noexcept;
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);
@@ -118,13 +118,13 @@ public:
     // Member Functions
 
         //- Access to the value
-        operator bool() const
+        operator bool() const noexcept
         {
             return p_;
         }
 
         //- Access to the value
-        operator bool&()
+        operator bool&() noexcept
         {
             return p_;
         }

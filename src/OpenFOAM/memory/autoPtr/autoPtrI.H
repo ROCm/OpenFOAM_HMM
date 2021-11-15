@@ -114,9 +114,13 @@ inline void Foam::autoPtr<T>::reset(T* p) noexcept
 
 
 template<class T>
-inline void Foam::autoPtr<T>::reset(autoPtr<T>&& ap) noexcept
+inline void Foam::autoPtr<T>::reset(autoPtr<T>&& other) noexcept
 {
-    reset(ap.release());
+    if (&other != this)
+    {
+        // Ignore self-assignment
+        reset(other.release());
+    }
 }
 
 

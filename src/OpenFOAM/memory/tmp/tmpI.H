@@ -210,41 +210,35 @@ inline bool Foam::tmp<T>::movable() const noexcept
 template<class T>
 inline const T& Foam::tmp<T>::cref() const
 {
-    if (type_ == PTR)
+    if (type_ == PTR && !ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
-    return *ptr_; // const reference
+    return *ptr_;  // const reference
 }
 
 
 template<class T>
 inline T& Foam::tmp<T>::ref() const
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (type_ == CREF)
     {
         FatalErrorInFunction
-            << "Attempted non-const reference to const object from a "
+            << "Attempted non-const reference to const object: "
             << this->typeName()
             << abort(FatalError);
     }
+    else if (type_ == PTR && !ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
+    }
 
-    return *ptr_; // non-const reference
+    return *ptr_;  // non-const reference
 }
 
 
@@ -387,14 +381,11 @@ inline void Foam::tmp<T>::swap(tmp<T>& other) noexcept
 template<class T>
 inline const T* Foam::tmp<T>::operator->() const
 {
-    if (type_ == PTR)
+    if (type_ == PTR && !ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
     return ptr_;
@@ -404,20 +395,17 @@ inline const T* Foam::tmp<T>::operator->() const
 template<class T>
 inline T* Foam::tmp<T>::operator->()
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (type_ == CREF)
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a "
+            << "Attempt to cast const object to non-const: "
             << this->typeName()
+            << abort(FatalError);
+    }
+    else if (type_ == PTR && !ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
             << abort(FatalError);
     }
 

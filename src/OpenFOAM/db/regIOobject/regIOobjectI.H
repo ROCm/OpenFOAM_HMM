@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,12 +98,12 @@ inline Type& Foam::regIOobject::store(refPtr<Type>& ptr)
     if (ptr.is_pointer())
     {
         // Acquire ownership, pass management to objectRegistry
-        p = ptr.ptr();
+        p = ptr.release();
 
         store(p);
 
         // Change parameter to access the stored reference
-        ptr.cref(*p);
+        ptr.cref(p);
     }
     else
     {
@@ -144,7 +144,7 @@ inline Type& Foam::regIOobject::store(tmp<Type>& ptr)
         store(p);
 
         // Change parameter to access the stored reference
-        ptr.cref(*p);
+        ptr.cref(p);
     }
     else
     {

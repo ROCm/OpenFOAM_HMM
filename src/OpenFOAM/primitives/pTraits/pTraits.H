@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::pTraits
 
 Description
-    Traits class for primitives.
+    A traits class, which is primarily used for primitives.
 
     All primitives need a specialised version of this class. The
     specialised version will normally also require a conversion
@@ -51,25 +51,27 @@ class Istream;
                            Class pTraits Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class PrimitiveType>
+// The base implementation is a pass-through to the base class.
+// Accordingly it inherits all static methods (eg, typeName etc).
+template<class Base>
 class pTraits
 :
-    public PrimitiveType
+    public Base
 {
 public:
 
     // Constructors
 
-        //- Copy construct from primitive
-        explicit pTraits(const PrimitiveType& p)
+        //- Copy construct from base class
+        explicit pTraits(const Base& obj)
         :
-            PrimitiveType(p)
+            Base(obj)
         {}
 
         //- Construct from Istream
         explicit pTraits(Istream& is)
         :
-            PrimitiveType(is)
+            Base(is)
         {}
 };
 

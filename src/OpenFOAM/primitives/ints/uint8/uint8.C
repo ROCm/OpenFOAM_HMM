@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 #include "uint8.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<uint8_t>::typeName = "uint8";
 const char* const Foam::pTraits<uint8_t>::componentNames[] = { "" };
@@ -40,10 +40,13 @@ const uint8_t Foam::pTraits<uint8_t>::rootMin = 0;
 const uint8_t Foam::pTraits<uint8_t>::rootMax = UINT8_MAX;
 
 
-Foam::pTraits<uint8_t>::pTraits(const uint8_t& val)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pTraits<uint8_t>::pTraits(const uint8_t& val) noexcept
 :
     p_(val)
 {}
+
 
 Foam::pTraits<uint8_t>::pTraits(Istream& is)
 {
