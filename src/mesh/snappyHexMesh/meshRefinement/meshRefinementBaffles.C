@@ -4525,8 +4525,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         {
             const face& f = mesh_.faces()[faceI];
 
-            label ownRegion = cellRegion[faceOwner[faceI]];
-            label neiRegion = cellRegion[faceNeighbour[faceI]];
+            const label ownRegion = cellRegion[faceOwner[faceI]];
+            const label neiRegion = cellRegion[faceNeighbour[faceI]];
 
             if (ownRegion == -1 && neiRegion != -1)
             {
@@ -4551,6 +4551,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
                 }
             }
         }
+
+        labelList neiCellRegion;
+        syncTools::swapBoundaryCellList(mesh_, cellRegion, neiCellRegion);
         for
         (
             label faceI = mesh_.nInternalFaces();
@@ -4560,9 +4563,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
         {
             const face& f = mesh_.faces()[faceI];
 
-            label ownRegion = cellRegion[faceOwner[faceI]];
+            const label ownRegion = cellRegion[faceOwner[faceI]];
+            const label neiRegion = neiCellRegion[faceI-mesh_.nInternalFaces()];
 
-            if (ownRegion == -1)
+            if (ownRegion == -1 && neiRegion != -1)
             {
                 forAll(f, fp)
                 {
