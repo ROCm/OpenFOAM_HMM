@@ -128,7 +128,7 @@ public:
         bool active() const noexcept
         {
             // Same as refPtr::movable()
-            return (this->is_pointer() && this->valid());
+            return (this->is_pointer() && this->good());
         }
 
         //- Commit adapted content changes (no-op for const adaptor)
@@ -253,13 +253,13 @@ public:
         bool active() const noexcept
         {
             // Same as refPtr::movable()
-            return (this->is_pointer() && this->valid());
+            return (this->is_pointer() && this->good());
         }
 
         //- Commit adapted content changes back to original input (as required)
         void commit()
         {
-            if (this->active() && orig_.valid())
+            if (this->active() && orig_.good())
             {
                 const auto& stored = this->cref();
                 auto& input = orig_.ref();

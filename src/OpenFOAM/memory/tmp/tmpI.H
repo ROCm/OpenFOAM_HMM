@@ -191,6 +191,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>& rhs, bool reuse)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 template<class T>
 inline Foam::tmp<T>::~tmp()
 {
@@ -224,7 +226,7 @@ inline const T& Foam::tmp<T>::cref() const
 template<class T>
 inline T& Foam::tmp<T>::ref() const
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object: "
@@ -326,6 +328,20 @@ inline void Foam::tmp<T>::reset(tmp<T>&& other) noexcept
 
 
 template<class T>
+inline void Foam::tmp<T>::cref(const tmp<T>& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = (ptr_ ? CREF : PTR);
+}
+
+
+template<class T>
 inline void Foam::tmp<T>::cref(const T& obj) noexcept
 {
     clear();
@@ -395,7 +411,7 @@ inline const T* Foam::tmp<T>::operator->() const
 template<class T>
 inline T* Foam::tmp<T>::operator->()
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
             << "Attempt to cast const object to non-const: "

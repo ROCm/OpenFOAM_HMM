@@ -32,18 +32,26 @@ struct myScalarField : public scalarField
 template<class T>
 void printInfo(const tmp<T>& item, const bool verbose = false)
 {
-    Info<< "tmp valid:" << Switch::name(item.valid())
+    Info<< "tmp good:" << Switch::name(item.good())
         << " pointer:" << Switch::name(item.is_pointer())
-        << " addr: " << name(item.get())
+        << " addr: " << Foam::name(item.get())
         << " movable:" << Switch(item.movable());
-
-    if (item.valid())
+    if (item)
     {
         Info<< " refCount:" << item->count();
     }
-    Info<< nl;
 
-    if (verbose && item.valid())
+    Info<< " move-constructible:"
+        << std::is_move_constructible<tmp<T>>::value
+        << " move-assignable:"
+        << std::is_move_assignable<tmp<T>>::value
+        << " nothrow:"
+        << std::is_nothrow_move_assignable<tmp<T>>::value
+        << " trivially:"
+        << std::is_trivially_move_assignable<tmp<T>>::value
+        << nl;
+
+    if (verbose && item)
     {
         Info<< "content: " << item() << nl;
     }

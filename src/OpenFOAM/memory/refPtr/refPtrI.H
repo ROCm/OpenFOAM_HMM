@@ -167,6 +167,8 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 template<class T>
 inline Foam::refPtr<T>::~refPtr()
 {
@@ -200,7 +202,7 @@ inline const T& Foam::refPtr<T>::cref() const
 template<class T>
 inline T& Foam::refPtr<T>::ref() const
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
             << "Attempted non-const reference to const object: "
@@ -222,6 +224,21 @@ template<class T>
 inline T& Foam::refPtr<T>::constCast() const
 {
     return const_cast<T&>(cref());
+}
+
+
+template<class T>
+inline Foam::refPtr<T> Foam::refPtr<T>::shallowClone() const noexcept
+{
+    refPtr<T> dup;
+
+    if (ptr_)
+    {
+        dup.ptr_ = ptr_;
+        dup.type_ = (is_const() ? CREF : REF);
+    }
+
+    return dup;
 }
 
 
@@ -300,6 +317,20 @@ inline void Foam::refPtr<T>::reset(refPtr<T>&& other) noexcept
 
 
 template<class T>
+inline void Foam::refPtr<T>::cref(const refPtr<T>& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = (ptr_ ? CREF : PTR);
+}
+
+
+template<class T>
 inline void Foam::refPtr<T>::cref(const T& obj) noexcept
 {
     clear();
@@ -368,7 +399,7 @@ inline const T& Foam::refPtr<T>::operator*() const
 template<class T>
 inline T& Foam::refPtr<T>::operator*()
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
             << "Attempt to cast const object to non-const: "
@@ -403,7 +434,7 @@ inline const T* Foam::refPtr<T>::operator->() const
 template<class T>
 inline T* Foam::refPtr<T>::operator->()
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
             << "Attempt to cast const object to non-const: "

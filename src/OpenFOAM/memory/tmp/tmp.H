@@ -166,17 +166,14 @@ public:
 
     // Query
 
-        //- True if pointer/reference is non-null
-        bool valid() const noexcept { return bool(ptr_); }
+        //- True if pointer/reference is non-null.
+        bool good() const noexcept { return bool(ptr_); }
 
         //- If the stored/referenced content is const
         bool is_const() const noexcept { return type_ == CREF; }
 
         //- True if this is a managed pointer (not a reference)
         bool is_pointer() const noexcept { return type_ == PTR; }
-
-        //- Identical to is_pointer()
-        bool isTmp() const noexcept { return type_ == PTR; }
 
         //- True if this is a non-null managed pointer with a unique ref-count
         inline bool movable() const noexcept;
@@ -215,11 +212,16 @@ public:
         //- delete object and set pointer to nullptr
         inline void clear() const noexcept;
 
+
         //- Clear existing and transfer ownership.
         inline void reset(tmp<T>&& other) noexcept;
 
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p = nullptr) noexcept;
+
+
+        //- Clear existing and set (const) reference from other
+        inline void cref(const tmp<T>& other) noexcept;
 
         //- Clear existing and set (const) reference
         inline void cref(const T& obj) noexcept;
@@ -228,6 +230,7 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void cref(const T* p) noexcept;
 
+
         //- Clear existing and set to (non-const) reference
         inline void ref(T& obj) noexcept;
 
@@ -235,11 +238,16 @@ public:
         //  The pointer can be null, which is handled like a clear().
         inline void ref(T* p) noexcept;
 
+
         //- Swaps the managed object with other.
         inline void swap(tmp<T>& other) noexcept;
 
 
     // Member Operators
+
+        // Note: no 'operator*()' types since there are large chunks
+        // of code that use tmp\<Field\> and Field interchangeable
+        // Eg, \code (a * b) - and the '*' would be misinterpreted
 
         //- Dereferences (const) pointer to the managed object.
         //  Fatal for a null managed pointer.
@@ -252,11 +260,17 @@ public:
         //- Return const reference to the object - same as cref() method.
         const T& operator()() const { return cref(); }
 
+
+    // Casting
+
+        //- True if pointer/reference is non-null. Same as good()
+        explicit operator bool() const noexcept { return bool(ptr_); }
+
         //- Cast to underlying data type, using the cref() method.
         operator const T&() const { return cref(); }
 
-        //- True if pointer/reference is non-null. Same as valid()
-        explicit operator bool() const noexcept { return bool(ptr_); }
+
+    // Assignment
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
@@ -275,6 +289,12 @@ public:
 
     // Housekeeping
 
+        //- Identical to good(), or bool operator
+        bool valid() const noexcept { return bool(ptr_); }
+
+        //- Identical to is_pointer()
+        bool isTmp() const noexcept { return type_ == PTR; }
+
         //- Deprecated(2020-07) True if a null managed pointer
         //
         //  \deprecated(2020-07) - use bool operator
@@ -282,6 +302,8 @@ public:
         bool empty() const noexcept { return !ptr_; }
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Global Functions
 

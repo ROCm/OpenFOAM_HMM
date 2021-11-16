@@ -143,7 +143,7 @@ public:
     // Query
 
         //- True if the managed pointer is non-null
-        bool valid() const noexcept { return bool(ptr_); }
+        bool good() const noexcept { return bool(ptr_); }
 
 
     // Access
@@ -165,6 +165,7 @@ public:
     // Edit
 
         //- Release ownership and return the pointer.
+        //  \remark Method naming consistent with std::unique_ptr
         inline T* release() noexcept;
 
         //- Same as \c release().
@@ -174,6 +175,7 @@ public:
         //- Same as \c reset(nullptr)
         //  \remark Method naming consistent with Foam::tmp
         void clear() noexcept { reset(nullptr); }
+
 
         //- Delete managed object and set to new given pointer
         //  \remark Same as move assign, but better for code documentation
@@ -224,7 +226,7 @@ public:
 
     // Casting
 
-        //- True if pointer/reference is non-null. Same as valid()
+        //- True if pointer/reference is non-null. Same as good()
         explicit operator bool() const noexcept { return bool(ptr_); }
 
         //- Cast to pointer type
@@ -267,6 +269,9 @@ public:
 
     // Housekeeping
 
+        //- Identical to good(), or bool operator
+        bool valid() const noexcept { return bool(ptr_); }
+
         //- Deprecated(2020-07) True if the managed pointer is null
         //
         //  \deprecated(2020-07) - use bool operator
@@ -284,6 +289,8 @@ public:
         void set(T* p) noexcept { reset(p); }
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Global Functions
 
