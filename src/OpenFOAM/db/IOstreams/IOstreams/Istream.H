@@ -77,7 +77,7 @@ protected:
     // Protected Member Functions
 
         //- True if putback token is in use
-        inline bool hasPutback() const noexcept
+        bool hasPutback() const noexcept
         {
             return putBackAvail_;
         }

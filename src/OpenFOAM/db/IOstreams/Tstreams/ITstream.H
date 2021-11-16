@@ -46,9 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class ISstream;
-
 /*---------------------------------------------------------------------------*\
                            Class ITstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -68,10 +65,6 @@ class ITstream
 
 
     // Private Member Functions
-
-        //- Convert input sequence into a list of tokens.
-        //  \return the number of tokens in the resulting list.
-        static label parseStream(ISstream& input, tokenList& tokens);
 
         //- An ad hoc combination of reserve and setCapacity somewhat
         //- similar to DynamicList.
@@ -186,6 +179,12 @@ public:
     // Member Functions
 
     // Token Access
+
+        //- True if putback token is in use
+        bool hasPutback() const noexcept
+        {
+            return Istream::hasPutback();
+        }
 
         //- Failsafe peek at the \b first token in the list.
         //  \return \c undefinedToken if the list is empty.
