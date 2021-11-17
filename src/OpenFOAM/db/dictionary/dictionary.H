@@ -97,6 +97,7 @@ SeeAlso
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
+#include "refPtr.H"
 
 // Some common data types
 #include "label.H"
@@ -110,6 +111,7 @@ namespace Foam
 
 // Forward Declarations
 class dictionary;
+class OSstream;
 class SHA1Digest;
 
 Istream& operator>>(Istream& is, dictionary& dict);
@@ -360,7 +362,11 @@ private:
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is, const word& keyword) const;
 
-        //- Report (stderr) that the keyword default value was used.
+        //- The currently known executable name,
+        //- obtained from argList envExecutable
+        static word executableName();
+
+        //- Report (usually stderr) that the keyword default value was used,
         //- or FatalIOError when writeOptionalEntries greater than 1
         template<class T>
         void reportDefault
@@ -385,6 +391,9 @@ public:
 
         //- An empty dictionary, which is also the parent for all dictionaries
         static const dictionary null;
+
+        //- Output location when reporting default values
+        static refPtr<OSstream> reportingOutput;
 
 
     // Static Member Functions

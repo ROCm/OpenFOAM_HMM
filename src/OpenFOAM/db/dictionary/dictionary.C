@@ -33,6 +33,7 @@ License
 #include "dictionaryEntry.H"
 #include "regExp.H"
 #include "OSHA1stream.H"
+#include "OSstream.H"
 #include "argList.H"
 #include "registerSwitch.H"
 
@@ -42,6 +43,8 @@ namespace Foam
 {
     defineTypeNameAndDebug(dictionary, 0);
 }
+
+Foam::refPtr<Foam::OSstream> Foam::dictionary::reportingOutput(nullptr);
 
 const Foam::dictionary Foam::dictionary::null;
 
@@ -57,6 +60,14 @@ registerInfoSwitch
     int,
     Foam::dictionary::writeOptionalEntries
 );
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::dictionary::executableName()
+{
+    return argList::envExecutable();
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
