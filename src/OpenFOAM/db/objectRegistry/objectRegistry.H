@@ -164,19 +164,19 @@ public:
     // Access
 
         //- Return the object registry
-        const objectRegistry& thisDb() const
+        const objectRegistry& thisDb() const noexcept
         {
             return *this;
         }
 
-        //- Return time
-        const Time& time() const
+        //- Return time registry
+        const Time& time() const noexcept
         {
             return time_;
         }
 
         //- Return the parent objectRegistry
-        const objectRegistry& parent() const
+        const objectRegistry& parent() const noexcept
         {
             return parent_;
         }

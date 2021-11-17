@@ -84,10 +84,6 @@ protected:
             const word& typeName
         );
 
-        //- Construct and return an IFstream for the object.
-        //  The results is NULL if the stream construction failed
-        Istream* objectStream();
-
         //- To flag master-only reading of objects
         static bool masterOnlyReading;
 
@@ -117,8 +113,8 @@ private:
 
     // Private Member Functions
 
-        //- Return Istream
-        Istream& readStream(const bool valid = true);
+        //- Construct object stream, read header if not already constructed
+        void readStream(const bool valid);
 
         //- No copy assignment
         void operator=(const regIOobject&) = delete;
@@ -141,7 +137,7 @@ public:
 
         //- Construct from IOobject. The optional flag adds special handling
         //- if the object is the top-level regIOobject (eg, Time).
-        regIOobject(const IOobject& io, const bool isTime = false);
+        regIOobject(const IOobject& io, const bool isTimeObject = false);
 
         //- Copy construct
         regIOobject(const regIOobject& rio);
