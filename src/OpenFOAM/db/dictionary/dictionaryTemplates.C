@@ -41,23 +41,41 @@ void Foam::dictionary::reportDefault
 {
     if (writeOptionalEntries > 1)
     {
-        FatalIOErrorInFunction(*this)
+        FatalIOError(dictionary::executableName(), *this)
             << "No optional entry: " << keyword
             << " Default: " << deflt << nl
             << exit(FatalIOError);
     }
 
-    InfoErr
-        << "Dictionary: " << this->relativeName().c_str()
-        << " Entry: " << keyword;
+    OSstream& os = InfoErr.stream(reportingOutput.get());
+
+    // Tag with "-- " prefix to make the message stand out
+    os  << "-- Executable: "
+        << dictionary::executableName()
+        << " Dictionary: ";
+
+    // Double-quote dictionary and entry for more reliably parsing,
+    // especially if the keyword contains regular expressions.
+
+    if (this->isNullDict())
+    {
+        // Output as "", but could have "(null)" etc
+        os << token::DQUOTE << token::DQUOTE;
+    }
+    else
+    {
+        os.writeQuoted(this->relativeName(), true);
+    }
+
+    os  << " Entry: ";
+    os.writeQuoted(keyword, true);
+    os  << " Default: " << deflt;
 
     if (added)
     {
-        InfoErr
-            << " Added";
+        os  << " Added: true";
     }
-    InfoErr
-        << " Default: " << deflt << nl;
+    os  << nl;
 }
 
 
@@ -195,14 +213,15 @@ T Foam::dictionary::getCheckOrDefault
     enum keyType::option matchOpt
 ) const
 {
+    #ifdef FULLDEBUG
     if (!pred(deflt))
     {
-        // Could be as FULLDEBUG instead?
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' with invalid default in dictionary "
             << name()
             << exit(FatalIOError);
     }
+    #endif
 
     const const_searcher finder(csearch(keyword, matchOpt));
 
@@ -240,14 +259,15 @@ T Foam::dictionary::getCheckOrAdd
     enum keyType::option matchOpt
 )
 {
+    #ifdef FULLDEBUG
     if (!pred(deflt))
     {
-        // Could be as FULLDEBUG instead?
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' with invalid default in dictionary "
             << name()
             << exit(FatalIOError);
     }
+    #endif
 
     const const_searcher finder(csearch(keyword, matchOpt));
 
