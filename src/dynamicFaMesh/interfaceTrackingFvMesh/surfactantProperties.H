@@ -183,7 +183,7 @@ public:
                 IOobject
                 (
                     "dSigma",
-                    surfactConc.mesh().mesh().time().timeName(),
+                    surfactConc.mesh().time().timeName(),
                     surfactConc.mesh().mesh(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE

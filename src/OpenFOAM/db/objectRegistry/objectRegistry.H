@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ class objectRegistry
 
         //- Is the objectRegistry parent_ different from time_
         //  Used to terminate searching within the ancestors
-        bool parentNotTime() const;
+        bool parentNotTime() const noexcept;
 
         //- Templated implementation for count()
         //  The number of items with a matching class
@@ -169,17 +169,20 @@ public:
             return *this;
         }
 
+        //- Return the parent objectRegistry
+        const objectRegistry& parent() const noexcept
+        {
+            return parent_;
+        }
+
         //- Return time registry
         const Time& time() const noexcept
         {
             return time_;
         }
 
-        //- Return the parent objectRegistry
-        const objectRegistry& parent() const noexcept
-        {
-            return parent_;
-        }
+        //- True if the registry is Time
+        bool isTimeDb() const noexcept;
 
         //- Local directory path of this objectRegistry relative to the time
         virtual const fileName& dbDir() const

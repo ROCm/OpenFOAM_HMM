@@ -71,9 +71,9 @@ static label eraseImpl(objectRegistry& obr, InputIter first, InputIter last)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::objectRegistry::parentNotTime() const
+bool Foam::objectRegistry::parentNotTime() const noexcept
 {
-    return (&parent_ != dynamic_cast<const objectRegistry*>(&time_));
+    return (&parent_ != static_cast<const objectRegistry*>(&time_));
 }
 
 
@@ -124,6 +124,12 @@ Foam::objectRegistry::~objectRegistry()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::objectRegistry::isTimeDb() const noexcept
+{
+    return (this == &static_cast<const objectRegistry&>(time_));
+}
+
 
 Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classes() const
 {

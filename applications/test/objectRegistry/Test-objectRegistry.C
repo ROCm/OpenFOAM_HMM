@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,6 +146,9 @@ int main(int argc, char *argv[])
     const objectRegistry& db = (optMesh ? mesh.thisDb() : runTime);
 
     Info<<"## start ##" << nl;
+    Info<< "db isTime:" << db.isTimeDb() << " addr:" << Foam::name(&db)
+        << " time: " << Foam::name(&(db.time())) << nl;
+
     printRegistry(Info, db);
     Info<< nl;
 
