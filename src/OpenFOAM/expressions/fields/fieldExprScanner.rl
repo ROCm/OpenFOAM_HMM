@@ -219,12 +219,16 @@ static int driverTokenType
 
     decimal = ((digit* '.' digit+) | (digit+ '.'?)) ;
     number  = ((digit+ | decimal) ([Ee][\-+]? digit+)?) ;
-    ident   = ((alpha|'_') . ((alnum|[._])**)) ;
+    identifier = ((alpha|'_') . ((alnum|[._])**)) ;
     dquoted = '"' [^\"]+ '"' ;
     squoted = "'" [^\']+ "'" ;
 
+    ## Allow 'fn:' prefix for function identifier
+    ident = ('fn:')? identifier ;
 
+    ## ===========
     ## The scanner
+    ## ===========
     main := |*
         space*;
 
@@ -431,6 +435,22 @@ bool Foam::expressions::fieldExpr::scanner::dispatch_ident
 
         do
         {
+            #undef  doLocalCode
+            #define doLocalCode(TokType, Type)                      \
+            if (driver_.isFunction<Type>(funcName))                 \
+            {                                                       \
+                ident = std::move(funcName);                        \
+                tokType = TokType;                                  \
+                break;                                              \
+            }
+
+            #ifdef TOK_SCALAR_FUNCTION_ID
+            doLocalCode(TOK_SCALAR_FUNCTION_ID, scalar);
+            #endif
+            #ifdef TOK_VECTOR_FUNCTION_ID
+            doLocalCode(TOK_VECTOR_FUNCTION_ID, vector);
+            #endif
+            #undef doLocalCode
         }
         while (false);
     }

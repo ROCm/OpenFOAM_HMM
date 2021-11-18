@@ -46,63 +46,6 @@ Foam::expressions::exprDriver::cfindFieldObject
 }
 
 
-template<class TableType>
-bool Foam::expressions::exprDriver::readTable
-(
-    const word& name,
-    const dictionary& dict,
-    HashTable<TableType>& tbl,
-    bool clear
-)
-{
-    if (clear)
-    {
-        tbl.clear();
-    }
-
-    if (!dict.found(name))
-    {
-        return false;
-    }
-
-    ITstream& is = dict.lookup(name);
-    List<dictionary> input(is);
-
-    for (const dictionary& d : input)
-    {
-        tbl.insert(dict.get<word>("name"), TableType(d));
-    }
-
-    return true;
-}
-
-
-template<class TableType>
-void Foam::expressions::exprDriver::writeTable
-(
-    Ostream& os,
-    const word& name,
-    const HashTable<TableType>& tbl
-)
-{
-    if (tbl.size())
-    {
-        os.writeKeyword(name);
-        os  << token::BEGIN_LIST << nl;
-
-        forAllConstIters(tbl, iter)
-        {
-            os.beginBlock();
-            os.writeEntry("name", iter.key());
-            (*iter).write(os);
-            os.endBlock();
-        }
-        os  << token::END_LIST
-            << token::END_STATEMENT << nl;
-    }
-}
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -179,6 +122,181 @@ Foam::expressions::exprDriver::getResult(bool wantPointData)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+const Foam::Function1<Type>* Foam::expressions::exprDriver::getFunction1Ptr
+(
+    const word& name,
+    const HashTable<refPtr<Function1<Type>>>& tbl,
+    wordList* listFailure
+)
+{
+    const Function1<Type>* func = nullptr;
+
+    const auto iter = tbl.cfind(name);
+
+    if (iter.found())
+    {
+        func = iter.val().get();
+    }
+
+    if (!func && listFailure)
+    {
+        *listFailure = tbl.sortedToc();
+    }
+
+    return func;
+}
+
+
+template<class Type>
+bool Foam::expressions::exprDriver::isFunction(const word& name) const
+{
+    // Currently only scalar, vector
+    #undef doLocalCode
+    #define doLocalCode(WhichType, MapperMember)                    \
+    if (std::is_same<Type, WhichType>::value)                       \
+    {                                                               \
+        return bool                                                 \
+        (                                                           \
+            this->template getFunction1Ptr<WhichType>               \
+            (                                                       \
+                name, MapperMember                                  \
+            )                                                       \
+        );                                                          \
+    }
+
+    doLocalCode(scalar, scalarFuncs_);
+    doLocalCode(vector, vectorFuncs_);
+    #undef doLocalCode
+
+    return false;
+}
+
+
+template<class Type>
+Type Foam::expressions::exprDriver::getFunctionValue
+(
+    const word& name,
+    const scalar x
+) const
+{
+    const Function1<Type>* func = nullptr;
+
+    wordList failed;
+
+    do
+    {
+        // Currently only scalar, vector
+        #undef doLocalCode
+        #define doLocalCode(WhichType, MapperMember)                \
+        if (std::is_same<Type, WhichType>::value)                   \
+        {                                                           \
+            const Function1<WhichType>* ptr =                       \
+                this->template getFunction1Ptr<WhichType>           \
+                (                                                   \
+                    name, MapperMember, &failed                     \
+                );                                                  \
+            func = reinterpret_cast<const Function1<Type>*>(ptr);   \
+            break;                                                  \
+        }
+
+        doLocalCode(scalar, scalarFuncs_);
+        doLocalCode(vector, vectorFuncs_);
+        #undef doLocalCode
+    }
+    while (false);
+
+    // Error handling
+    if (!failed.empty())
+    {
+        FatalErrorInFunction
+            << "No mapping '" << name << " (" << pTraits<Type>::typeName
+            << ") found." << nl
+            << "Valid entries: "
+            << flatOutput(failed) << nl
+            << exit(FatalError);
+    }
+
+    if (func)
+    {
+        return func->value(x);
+    }
+
+    return pTraits<Type>::zero;
+}
+
+
+template<class Type>
+void Foam::expressions::exprDriver::fillFunctionValues
+(
+    Field<Type>& result,
+    const word& name,
+    const scalarField& input
+) const
+{
+    // #ifdef FULLDEBUG
+    // checkSize(result, input);
+    // #endif
+
+    const Function1<Type>* func = nullptr;
+
+    wordList failed;
+
+    do
+    {
+        // Currently only scalar, vector
+        #undef doLocalCode
+        #define doLocalCode(WhichType, MapperMember)                \
+        if (std::is_same<Type, WhichType>::value)                   \
+        {                                                           \
+            const Function1<WhichType>* ptr =                       \
+                this->template getFunction1Ptr<WhichType>           \
+                (                                                   \
+                    name, MapperMember, &failed                     \
+                );                                                  \
+            func = reinterpret_cast<const Function1<Type>*>(ptr);   \
+            break;                                                  \
+        }
+
+        doLocalCode(scalar, scalarFuncs_);
+        doLocalCode(vector, vectorFuncs_);
+        #undef doLocalCode
+    }
+    while (false);
+
+    // Error handling
+    if (!failed.empty())
+    {
+        FatalErrorInFunction
+            << "No mapping '" << name << " (" << pTraits<Type>::typeName
+            << ") found." << nl
+            << "Valid entries: "
+            << flatOutput(failed) << nl
+            << exit(FatalError);
+    }
+
+    if (func)
+    {
+        const label len = min(result.size(), input.size());
+
+        for (label i = 0; i < len; ++i)
+        {
+            result[i] = func->value(input[i]);
+        }
+
+        // Safety
+        for (label i = len; i < result.size(); ++i)
+        {
+            result[i] = Zero;
+        }
+
+        return;
+    }
+
+    result = Zero;
+}
+
 
 template<class Type>
 bool Foam::expressions::exprDriver::isLocalVariable

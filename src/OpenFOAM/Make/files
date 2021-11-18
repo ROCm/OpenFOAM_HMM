@@ -168,6 +168,7 @@ $(expr)/traits/exprTraits.C
 
 $(expr)/exprDriver/exprDriver.C
 $(expr)/exprDriver/exprDriverFields.C
+$(expr)/exprDriver/exprDriverFunctions.C
 $(expr)/exprDriver/exprDriverIO.C
 
 fieldExpr = $(expr)/fields

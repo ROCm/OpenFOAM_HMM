@@ -156,8 +156,7 @@ public:
 
         //- Return named field (variable) if available
         template<class Type>
-        tmp<Field<Type>>
-        getField(const word& fieldName) const;
+        tmp<Field<Type>> getField(const word& fieldName) const;
 
 
     // Custom Field Functions

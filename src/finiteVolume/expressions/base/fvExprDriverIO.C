@@ -251,9 +251,8 @@ Foam::Ostream& Foam::expressions::fvExprDriver::writeCommon
         os.writeEntry("globalScopes", globalScopes_);
     }
 
-    // writeTable(os, "timelines", lines_);
-    // writeTable(os, "lookuptables", lookup_);
-    // writeTable(os, "lookuptables2D", lookup2D_);
+    // Write "functions<scalar>" ...
+    writeFunctions(os);
 
     return os;
 }

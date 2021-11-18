@@ -173,8 +173,11 @@ svalue (lhs) ::= DELTA_T LPAREN RPAREN . { lhs = driver->deltaT(); }
 
 svalue (lhs) ::= SCALAR_FUNCTION_ID (name) LPAREN RPAREN .
 {
-    driver->reportFatal("Not implemented: " + make_obj(name.name_));
-    lhs = 0;
+    lhs = driver->getFunctionValue<Foam::scalar>
+    (
+        make_obj(name.name_),
+        driver->timeValue()
+    );
 }
 
 
@@ -193,8 +196,12 @@ vvalue (lhs) ::= VECTOR_VALUE (tok) .
 
 vvalue (lhs) ::= VECTOR_FUNCTION_ID (name) LPAREN RPAREN .
 {
-    driver->reportFatal("Not implemented: " + make_obj(name.name_));
-    lhs = new Foam::vector(0,0,0);
+    auto val = driver->getFunctionValue<Foam::vector>
+    (
+        make_obj(name.name_),
+        driver->timeValue()
+    );
+    lhs = new Foam::vector(val);
 }
 
 
@@ -253,8 +260,12 @@ _target_ (lhs) ::= RAND LPAREN NUMBER (seed) RPAREN.
 _target_ (lhs) ::= SCALAR_FUNCTION_ID (name) LPAREN _scalar_arg_ (values) RPAREN.
 {
     lhs = _new_target_;
-    (void) make_obj(values);
-    driver->reportFatal("Not implemented: " + make_obj(name.name_));
+    driver->fillFunctionValues<_value_type_>
+    (
+        *lhs,
+        make_obj(name.name_),
+        make_obj(values)
+    );
 }
 
 
@@ -283,8 +294,12 @@ rules_vector_functions()
 _target_ (lhs) ::= VECTOR_FUNCTION_ID (name) LPAREN _scalar_arg_ (values) RPAREN.
 {
     lhs = _new_target_;
-    (void) make_obj(values);
-    driver->reportFatal("Not implemented: " + make_obj(name.name_));
+    driver->fillFunctionValues<_value_type_>
+    (
+        *lhs,
+        make_obj(name.name_),
+        make_obj(values)
+    );
 }
 
 
