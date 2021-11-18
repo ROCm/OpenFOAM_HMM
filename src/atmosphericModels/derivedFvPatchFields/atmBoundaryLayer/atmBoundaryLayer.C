@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +45,10 @@ atmBoundaryLayer::atmBoundaryLayer(const Time& time, const polyPatch& pp)
     ppMin_((boundBox(pp.points())).min()),
     time_(time),
     patch_(pp),
-    flowDir_(time, "flowDir"),
-    zDir_(time, "zDir"),
-    Uref_(time, "Uref"),
-    Zref_(time, "Zref"),
+    flowDir_(nullptr),
+    zDir_(nullptr),
+    Uref_(nullptr),
+    Zref_(nullptr),
     z0_(nullptr),
     d_(nullptr)
 {}
@@ -72,10 +72,10 @@ atmBoundaryLayer::atmBoundaryLayer
     ppMin_((boundBox(pp.points())).min()),
     time_(time),
     patch_(pp),
-    flowDir_(TimeFunction1<vector>(time, "flowDir", dict)),
-    zDir_(TimeFunction1<vector>(time, "zDir", dict)),
-    Uref_(TimeFunction1<scalar>(time, "Uref", dict)),
-    Zref_(TimeFunction1<scalar>(time, "Zref", dict)),
+    flowDir_(Function1<vector>::New("flowDir", dict, &time)),
+    zDir_(Function1<vector>::New("zDir", dict, &time)),
+    Uref_(Function1<scalar>::New("Uref", dict, &time)),
+    Zref_(Function1<scalar>::New("Zref", dict, &time)),
     z0_(PatchFunction1<scalar>::New(pp, "z0", dict)),
     d_(PatchFunction1<scalar>::New(pp, "d", dict))
 {}
@@ -96,10 +96,10 @@ atmBoundaryLayer::atmBoundaryLayer
     ppMin_(abl.ppMin_),
     time_(abl.time_),
     patch_(patch.patch()),
-    flowDir_(abl.flowDir_),
-    zDir_(abl.zDir_),
-    Uref_(abl.Uref_),
-    Zref_(abl.Zref_),
+    flowDir_(abl.flowDir_.clone()),
+    zDir_(abl.zDir_.clone()),
+    Uref_(abl.Uref_.clone()),
+    Zref_(abl.Zref_.clone()),
     z0_(abl.z0_.clone(patch_)),
     d_(abl.d_.clone(patch_))
 {}
@@ -129,13 +129,13 @@ atmBoundaryLayer::atmBoundaryLayer(const atmBoundaryLayer& abl)
 vector atmBoundaryLayer::flowDir() const
 {
     const scalar t = time_.timeOutputValue();
-    const vector dir(flowDir_.value(t));
+    const vector dir(flowDir_->value(t));
     const scalar magDir = mag(dir);
 
     if (magDir < SMALL)
     {
         FatalErrorInFunction
-            << "magnitude of " << flowDir_.name() << " = " << magDir
+            << "magnitude of " << flowDir_->name() << " = " << magDir
             << " vector must be greater than zero"
             << abort(FatalError);
     }
@@ -147,13 +147,13 @@ vector atmBoundaryLayer::flowDir() const
 vector atmBoundaryLayer::zDir() const
 {
     const scalar t = time_.timeOutputValue();
-    const vector dir(zDir_.value(t));
+    const vector dir(zDir_->value(t));
     const scalar magDir = mag(dir);
 
     if (magDir < SMALL)
     {
         FatalErrorInFunction
-            << "magnitude of " << zDir_.name() << " = " << magDir
+            << "magnitude of " << zDir_->name() << " = " << magDir
             << " vector must be greater than zero"
             << abort(FatalError);
     }
@@ -165,13 +165,13 @@ vector atmBoundaryLayer::zDir() const
 tmp<scalarField> atmBoundaryLayer::Ustar(const scalarField& z0) const
 {
     const scalar t = time_.timeOutputValue();
-    const scalar Uref = Uref_.value(t);
-    const scalar Zref = Zref_.value(t);
+    const scalar Uref = Uref_->value(t);
+    const scalar Zref = Zref_->value(t);
 
     if (Zref < 0)
     {
         FatalErrorInFunction
-            << "Negative entry in " << Zref_.name() << " = " << Zref
+            << "Negative entry in " << Zref_->name() << " = " << Zref
             << abort(FatalError);
     }
 
@@ -274,10 +274,10 @@ void atmBoundaryLayer::write(Ostream& os) const
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("C1", C1_);
     os.writeEntry("C2", C2_);
-    flowDir_.writeData(os);
-    zDir_.writeData(os);
-    Uref_.writeData(os);
-    Zref_.writeData(os);
+    flowDir_->writeData(os);
+    zDir_->writeData(os);
+    Uref_->writeData(os);
+    Zref_->writeData(os);
     if (z0_)
     {
         z0_->writeData(os) ;

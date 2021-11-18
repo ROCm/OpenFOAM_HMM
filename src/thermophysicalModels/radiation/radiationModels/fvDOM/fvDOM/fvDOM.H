@@ -183,7 +183,7 @@ class fvDOM
         scalarList spectralDistribution_;
 
         //- Time-dependent spectral distributions
-        autoPtr<TimeFunction1<scalarField>> spectralDistributions_;
+        autoPtr<Function1<scalarField>> spectralDistributions_;
 
         //- Solar calculator
         autoPtr<solarCalculator> solarCalculator_;

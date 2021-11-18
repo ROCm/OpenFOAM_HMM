@@ -59,7 +59,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "CloudSubModelBase.H"
 #include "vector.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,7 +110,7 @@ protected:
             scalar massTotal_;
 
             //- Mass flow rate profile for steady calculations
-            TimeFunction1<scalar> massFlowRate_;
+            autoPtr<Function1<scalar>> massFlowRate_;
 
             //- Total mass injected to date [kg]
             scalar massInjected_;

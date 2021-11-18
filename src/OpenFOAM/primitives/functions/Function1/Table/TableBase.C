@@ -134,11 +134,6 @@ void Foam::Function1Types::TableBase<Type>::initialise()
         prevValue = currValue;
         ++i;
     }
-
-    if (this->isTime())
-    {
-        convertTimeBase(this->time());
-    }
 }
 
 

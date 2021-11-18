@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ SourceFiles
 #include "InjectionModel.H"
 #include "distributionModel.H"
 #include "vectorList.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,16 +91,16 @@ class ConeInjection
         const label parcelsPerInjector_;
 
         //- Flow rate profile relative to SOI []
-        const TimeFunction1<scalar> flowRateProfile_;
+        const autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Parcel velocity magnitude relative to SOI [m/s]
-        const TimeFunction1<scalar> Umag_;
+        const autoPtr<Function1<scalar>> Umag_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaInner_;
+        const autoPtr<Function1<scalar>> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaOuter_;
+        const autoPtr<Function1<scalar>> thetaOuter_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModel> sizeDistribution_;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ConeNozzleInjection.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 #include "unitConversion.H"
 #include "distributionModel.H"
 
@@ -74,7 +74,15 @@ void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
         }
         case injectionMethod::imMovingPoint:
         {
-            positionVsTime_.reset(this->coeffDict());
+            positionVsTime_.reset
+            (
+                Function1<vector>::New
+                (
+                    "position",
+                    this->coeffDict(),
+                    &this->owner().db().time()
+                )
+            );
             break;
         }
         default:
@@ -100,12 +108,28 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
         }
         case flowType::ftPressureDrivenVelocity:
         {
-            Pinj_.reset(this->coeffDict());
+            Pinj_.reset
+            (
+                Function1<scalar>::New
+                (
+                    "Pinj",
+                    this->coeffDict(),
+                    &this->owner().db().time()
+                )
+            );
             break;
         }
         case flowType::ftFlowRateAndDischarge:
         {
-            Cd_.reset(this->coeffDict());
+            Cd_.reset
+            (
+                Function1<scalar>::New
+                (
+                    "Cd",
+                    this->coeffDict(),
+                    &this->owner().db().time()
+                )
+            );
             break;
         }
         default:
@@ -138,7 +162,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     outerDiameter_(this->coeffDict().getScalar("outerDiameter")),
     innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
     duration_(this->coeffDict().getScalar("duration")),
-    positionVsTime_(owner.db().time(), "position"),
+    positionVsTime_(nullptr),
     position_(Zero),
     injectorCell_(-1),
     tetFacei_(-1),
@@ -147,29 +171,29 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "flowRateProfile",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.db().time()
         )
     ),
     thetaInner_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "thetaInner",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.db().time()
         )
     ),
     thetaOuter_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "thetaOuter",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.db().time()
         )
     ),
     sizeDistribution_
@@ -185,8 +209,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     normal_(Zero),
 
     UMag_(0.0),
-    Cd_(owner.db().time(), "Cd"),
-    Pinj_(owner.db().time(), "Pinj")
+    Cd_(nullptr),
+    Pinj_(nullptr)
 {
     if (innerDiameter_ >= outerDiameter_)
     {
@@ -224,7 +248,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     tanVec2_ = direction_^tanVec1_;
 
     // Set total volume to inject
-    this->volumeTotal_ = flowRateProfile_.integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_->integrate(0.0, duration_);
 
     updateMesh();
 }
@@ -242,23 +266,23 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     outerDiameter_(im.outerDiameter_),
     innerDiameter_(im.innerDiameter_),
     duration_(im.duration_),
-    positionVsTime_(im.positionVsTime_),
+    positionVsTime_(im.positionVsTime_.clone()),
     position_(im.position_),
     injectorCell_(im.injectorCell_),
     tetFacei_(im.tetFacei_),
     tetPti_(im.tetPti_),
     direction_(im.direction_),
     parcelsPerSecond_(im.parcelsPerSecond_),
-    flowRateProfile_(im.flowRateProfile_),
-    thetaInner_(im.thetaInner_),
-    thetaOuter_(im.thetaOuter_),
+    flowRateProfile_(im.flowRateProfile_.clone()),
+    thetaInner_(im.thetaInner_.clone()),
+    thetaOuter_(im.thetaOuter_.clone()),
     sizeDistribution_(im.sizeDistribution_.clone()),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_),
     normal_(im.normal_),
     UMag_(im.UMag_),
-    Cd_(im.Cd_),
-    Pinj_(im.Pinj_)
+    Cd_(im.Cd_.clone()),
+    Pinj_(im.Pinj_.clone())
 {}
 
 
@@ -329,7 +353,7 @@ Foam::scalar Foam::ConeNozzleInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return flowRateProfile_.integrate(time0, time1);
+        return flowRateProfile_->integrate(time0, time1);
     }
 
     return 0.0;
@@ -366,7 +390,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
         }
         case injectionMethod::imMovingPoint:
         {
-            position = positionVsTime_.value(time - this->SOI_);
+            position = positionVsTime_->value(time - this->SOI_);
 
             this->findCellAtPosition
             (
@@ -419,8 +443,8 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
 
     // Set particle velocity
     scalar t = time - this->SOI_;
-    scalar ti = thetaInner_.value(t);
-    scalar to = thetaOuter_.value(t);
+    scalar ti = thetaInner_->value(t);
+    scalar to = thetaOuter_->value(t);
     scalar coneAngle = degToRad(rndGen.sample01<scalar>()*(to - ti) + ti);
 
     scalar alpha = sin(coneAngle);
@@ -442,7 +466,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
         {
             scalar pAmbient = this->owner().pAmbient();
             scalar rho = parcel.rho();
-            scalar UMag = ::sqrt(2.0*(Pinj_.value(t) - pAmbient)/rho);
+            scalar UMag = ::sqrt(2.0*(Pinj_->value(t) - pAmbient)/rho);
             parcel.U() = UMag*dirVec;
             break;
         }
@@ -452,10 +476,10 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
             scalar Ai = 0.25*mathematical::pi*innerDiameter_*innerDiameter_;
             scalar massFlowRate =
                 this->massTotal()
-               *flowRateProfile_.value(t)
+               *flowRateProfile_->value(t)
                /this->volumeTotal();
 
-            scalar Umag = massFlowRate/(parcel.rho()*Cd_.value(t)*(Ao - Ai));
+            scalar Umag = massFlowRate/(parcel.rho()*Cd_->value(t)*(Ao - Ai));
             parcel.U() = Umag*dirVec;
             break;
         }

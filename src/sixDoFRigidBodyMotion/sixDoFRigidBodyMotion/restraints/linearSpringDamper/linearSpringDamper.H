@@ -44,7 +44,7 @@ SourceFiles
 
 #include "sixDoFRigidBodyMotionRestraint.H"
 #include "point.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,7 +66,7 @@ class linearSpringDamper
 
         //- Anchor point, where the spring is attached to an immovable
         //  object
-        mutable autoPtr<TimeFunction1<vector>> anchor_;
+        mutable autoPtr<Function1<vector>> anchor_;
 
         //- Reference point of attachment to the solid body
         point refAttachmentPt_;

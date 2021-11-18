@@ -122,8 +122,8 @@ Usage
     solarLoadCoeffs
     {
         sunLoadModel                timeDependent;
-        directSolarRad              <TimeFunction1<scalar>>;
-        diffuseSolarRad             <TimeFunction1<scalar>>;
+        directSolarRad              <Function1<scalar>>;
+        diffuseSolarRad             <Function1<scalar>>;
     }
     \endverbatim
 
@@ -131,10 +131,10 @@ Usage
     \table
       Property     | Description                       | Type    | Reqd | Deflt
       directSolarRad  | Time-series of direct solar irradiation        <!--
-                   --> [W/m2]          | TimeFunction1\<scalar\> | yes  | -
+                   --> [W/m2]          | Function1\<scalar\> | yes  | -
       diffuseSolarRad | Time-series of diffuse solar irradiation on    <!--
                    --> vertical surfaces [W/m2]                        <!--
-                   -->                  | TimeFunction1\<scalar\> | yes | -
+                   -->                  | Function1\<scalar\> | yes | -
     \endtable
 
 
@@ -223,7 +223,7 @@ SourceFiles
 #include "DynamicField.H"
 #include "HashSet.H"
 #include "coordinateSystem.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -316,10 +316,10 @@ private:
         // sunLoadModel = timeDependent
 
             //- Time-series of direct solar irradiation
-            autoPtr<TimeFunction1<scalar>> directSolarRads_;
+            autoPtr<Function1<scalar>> directSolarRads_;
 
             //- Time-series of diffuse solar irradiation on vertical surfaces
-            autoPtr<TimeFunction1<scalar>> diffuseSolarRads_;
+            autoPtr<Function1<scalar>> diffuseSolarRads_;
 
 
         // sunLoadModel = fairWeather

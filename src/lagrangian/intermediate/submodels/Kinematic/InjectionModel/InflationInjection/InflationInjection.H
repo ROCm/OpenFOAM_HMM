@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,10 +90,10 @@ class InflationInjection
         scalar duration_;
 
         //- Flow rate profile relative to SOI [m3/s]
-        TimeFunction1<scalar> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Growth rate of particle diameters towards target [m/s]
-        TimeFunction1<scalar> growthRate_;
+        autoPtr<Function1<scalar>> growthRate_;
 
         //- Positions, velocities, diameters and target diameters of
         //  new particles after splitting

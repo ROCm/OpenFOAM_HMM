@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +60,6 @@ SourceFiles
 namespace Foam
 {
 
-template<class Type>
-class TimeFunction1;
-
 class distributionModel;
 
 /*---------------------------------------------------------------------------*\
@@ -86,7 +84,7 @@ class PatchInjection
         const vector U0_;
 
         //- Flow rate profile relative to SOI []
-        const TimeFunction1<scalar> flowRateProfile_;
+        const autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModel> sizeDistribution_;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PatchInjection.H"
-#include "TimeFunction1.H"
 #include "distributionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -50,11 +49,11 @@ Foam::PatchInjection<CloudType>::PatchInjection
     U0_(this->coeffDict().lookup("U0")),
     flowRateProfile_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "flowRateProfile",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.db().time()
         )
     ),
     sizeDistribution_
@@ -71,7 +70,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     patchInjectionBase::updateMesh(owner.mesh());
 
     // Set total volume/mass to inject
-    this->volumeTotal_ = flowRateProfile_.integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_->integrate(0.0, duration_);
 }
 
 
@@ -86,7 +85,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     duration_(im.duration_),
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
-    flowRateProfile_(im.flowRateProfile_),
+    flowRateProfile_(im.flowRateProfile_.clone()),
     sizeDistribution_(im.sizeDistribution_.clone())
 {}
 
@@ -155,7 +154,7 @@ Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return flowRateProfile_.integrate(time0, time1);
+        return flowRateProfile_->integrate(time0, time1);
     }
 
     return 0.0;

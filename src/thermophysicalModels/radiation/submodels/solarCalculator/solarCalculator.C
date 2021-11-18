@@ -203,21 +203,21 @@ void Foam::solarCalculator::initialise()
         {
             directSolarRads_.reset
             (
-                new TimeFunction1<scalar>
+                Function1<scalar>::New
                 (
-                    mesh_.time(),
                     "directSolarRad",
-                    dict_
+                    dict_,
+                    &mesh_.time()
                 )
             );
 
             diffuseSolarRads_.reset
             (
-                new TimeFunction1<scalar>
+                Function1<scalar>::New
                 (
-                    mesh_.time(),
                     "diffuseSolarRad",
-                    dict_
+                    dict_,
+                    &mesh_.time()
                 )
             );
 

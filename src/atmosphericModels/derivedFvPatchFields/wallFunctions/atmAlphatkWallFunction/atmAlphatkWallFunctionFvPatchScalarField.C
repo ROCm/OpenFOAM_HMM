@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +73,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     Cmu_(0.09),
     kappa_(0.41),
-    Pr_(db().time(), "Pr"),
+    Pr_(nullptr),
     Prt_(nullptr),
     z0_(nullptr)
 {
@@ -93,7 +93,7 @@ atmAlphatkWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
-    Pr_(ptf.Pr_),
+    Pr_(ptf.Pr_.clone()),
     Prt_(ptf.Prt_.clone(p.patch())),
     z0_(ptf.z0_.clone(p.patch()))
 {
@@ -128,7 +128,7 @@ atmAlphatkWallFunctionFvPatchScalarField
             scalarMinMax::ge(SMALL)
         )
     ),
-    Pr_(TimeFunction1<scalar>(db().time(), "Pr", dict)),
+    Pr_(Function1<scalar>::New("Pr", dict, &db().time())),
     Prt_(PatchFunction1<scalar>::New(p.patch(), "Prt", dict)),
     z0_(PatchFunction1<scalar>::New(p.patch(), "z0", dict))
 {
@@ -204,7 +204,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::updateCoeffs()
     const scalar Cmu25 = pow025(Cmu_);
 
     const scalar t = db().time().timeOutputValue();
-    const scalar Pr = Pr_.value(t);
+    const scalar Pr = Pr_->value(t);
 
     #ifdef FULLDEBUG
     if (Pr < VSMALL)
@@ -289,7 +289,7 @@ void atmAlphatkWallFunctionFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("kappa", kappa_);
-    Pr_.writeData(os);
+    Pr_->writeData(os);
     Prt_->writeData(os);
     z0_->writeData(os);
     writeEntry("value", os);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ namespace Foam
 // Forward declaration of classes
 
 template<class Type>
-class TimeFunction1;
+class Function1;
 
 class distributionModel;
 
@@ -134,7 +134,7 @@ private:
         scalar duration_;
 
         //- Position relative to SOI []
-        TimeFunction1<vector> positionVsTime_;
+        autoPtr<Function1<vector>> positionVsTime_;
 
         //- Injector position [m]
         vector position_;
@@ -155,13 +155,13 @@ private:
         const label parcelsPerSecond_;
 
         //- Flow rate profile relative to SOI []
-        const TimeFunction1<scalar> flowRateProfile_;
+        const autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaInner_;
+        const autoPtr<Function1<scalar>> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaOuter_;
+        const autoPtr<Function1<scalar>> thetaOuter_;
 
         //- Parcel size PDF model
         const autoPtr<distributionModel> sizeDistribution_;
@@ -185,10 +185,10 @@ private:
             scalar UMag_;
 
             //- Discharge coefficient, relative to SOI [m/s]
-            TimeFunction1<scalar> Cd_;
+            autoPtr<Function1<scalar>> Cd_;
 
             //- Injection pressure [Pa]
-            TimeFunction1<scalar> Pinj_;
+            autoPtr<Function1<scalar>> Pinj_;
 
 
     // Private Member Functions
