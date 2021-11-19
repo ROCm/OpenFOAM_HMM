@@ -95,7 +95,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     (
         IOobject
         (
-            alphaName_ + "_liquidCore",
+            scopedName(alphaName_ + "_liquidCore"),
             obr_.time().timeName(),
             obr_,
             IOobject::NO_READ
@@ -108,7 +108,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     (
         IOobject
         (
-            alphaName_ + "_background",
+            scopedName(alphaName_ + "_background"),
             obr_.time().timeName(),
             obr_,
             IOobject::NO_READ

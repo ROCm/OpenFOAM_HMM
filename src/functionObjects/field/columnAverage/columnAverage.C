@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,7 +113,7 @@ const Foam::word Foam::functionObjects::columnAverage::averageName
     const word& fieldName
 ) const
 {
-    return name() + ":columnAverage(" + fieldName + ")";
+    return scopedName("columnAverage(" + fieldName + ")");
 }
 
 

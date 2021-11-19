@@ -236,7 +236,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
         (
             IOobject
             (
-                name() + ":p",
+                scopedName("p"),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ

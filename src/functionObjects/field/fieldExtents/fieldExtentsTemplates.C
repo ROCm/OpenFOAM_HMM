@@ -55,8 +55,7 @@ void Foam::functionObjects::fieldExtents::calcFieldExtents
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const VolFieldType* fieldPtr =
-        obr_.findObject<VolFieldType>(fieldName);
+    const VolFieldType* fieldPtr = obr_.findObject<VolFieldType>(fieldName);
 
     if (!fieldPtr)
     {

@@ -113,7 +113,8 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 
     Info<< type() << " fields: " << selectFields_ << nl;
 
-    resultName_ = dict.getOrDefault<word>("result", type() + "(@@)");
+    resultName_ =
+        dict.getOrDefault<word>("result", scopedName(type() + "(@@)"));
 
     // Require '@@' token for result, unless a single (non-regex) source field
     return

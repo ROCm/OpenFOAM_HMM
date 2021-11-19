@@ -83,7 +83,7 @@ Foam::functionObjects::yPlus::yPlus
         (
             IOobject
             (
-                typeName,
+                scopedName(typeName),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -115,8 +115,7 @@ bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 
 bool Foam::functionObjects::yPlus::execute()
 {
-    volScalarField& yPlus =
-        lookupObjectRef<volScalarField>(typeName);
+    auto& yPlus = lookupObjectRef<volScalarField>(scopedName(typeName));
 
     if (foundObject<turbulenceModel>(turbulenceModel::propertiesName))
     {
@@ -192,8 +191,7 @@ bool Foam::functionObjects::yPlus::execute()
 
 bool Foam::functionObjects::yPlus::write()
 {
-    const volScalarField& yPlus =
-        obr_.lookupObject<volScalarField>(type());
+    const auto& yPlus = obr_.lookupObject<volScalarField>(scopedName(typeName));
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing field " << yPlus.name() << endl;

@@ -287,7 +287,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
             (
                 IOobject
                 (
-                    fieldName("forceCoeff"),
+                    scopedName("forceCoeff"),
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -306,7 +306,7 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
             (
                 IOobject
                 (
-                    fieldName("momentCoeff"),
+                    scopedName("momentCoeff"),
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -467,16 +467,16 @@ bool Foam::functionObjects::forceCoeffs::execute()
     if (writeFields_)
     {
         const volVectorField& force =
-            lookupObject<volVectorField>(fieldName("force"));
+            lookupObject<volVectorField>(scopedName("force"));
 
         const volVectorField& moment =
-            lookupObject<volVectorField>(fieldName("moment"));
+            lookupObject<volVectorField>(scopedName("moment"));
 
         volVectorField& forceCoeff =
-            lookupObjectRef<volVectorField>(fieldName("forceCoeff"));
+            lookupObjectRef<volVectorField>(scopedName("forceCoeff"));
 
         volVectorField& momentCoeff =
-            lookupObjectRef<volVectorField>(fieldName("momentCoeff"));
+            lookupObjectRef<volVectorField>(scopedName("momentCoeff"));
 
         dimensionedScalar f0("f0", dimForce, Aref_*pDyn);
         dimensionedScalar m0("m0", dimForce*dimLength, Aref_*lRef_*pDyn);
@@ -494,10 +494,10 @@ bool Foam::functionObjects::forceCoeffs::write()
     if (writeFields_)
     {
         const volVectorField& forceCoeff =
-            lookupObject<volVectorField>(fieldName("forceCoeff"));
+            lookupObject<volVectorField>(scopedName("forceCoeff"));
 
         const volVectorField& momentCoeff =
-            lookupObject<volVectorField>(fieldName("momentCoeff"));
+            lookupObject<volVectorField>(scopedName("momentCoeff"));
 
         forceCoeff.write();
         momentCoeff.write();

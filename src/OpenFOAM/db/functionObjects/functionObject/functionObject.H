@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -221,6 +221,9 @@ class functionObject
         //- Name
         const word name_;
 
+        //- Flag to indicate that names should be scoped
+        bool scopedNames_;
+
 
 protected:
 
@@ -266,7 +269,11 @@ public:
     // Constructors
 
         //- Construct from components
-        functionObject(const word& name);
+        explicit functionObject
+        (
+            const word& name,
+            const bool scopedNames = true
+        );
 
         //- Return clone
         autoPtr<functionObject> clone() const
@@ -294,7 +301,10 @@ public:
     // Member Functions
 
         //- Return the name of this functionObject
-        const word& name() const;
+        const word& name() const noexcept;
+
+        //- Return the scoped names flag
+        bool scopedNames() const noexcept;
 
         //- Read and set the function object if its data have changed
         virtual bool read(const dictionary& dict);
@@ -347,7 +357,7 @@ class functionObject::unavailableFunctionObject
 protected:
 
     //- Construct with name
-    unavailableFunctionObject(const word& name);
+    explicit unavailableFunctionObject(const word& name);
 
     //- Report it is unavailable, emitting a FatalError for try/catch
     //- in the caller
