@@ -1,11 +1,11 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,51 +23,70 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::expressions::fieldExpr
-
-Description
-    Namespace for primitive field expressions parsing and evaluation
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_fieldExprFwd_H
-#define expressions_fieldExprFwd_H
+#include "exprScanToken.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::expressions::scanToken Foam::expressions::scanToken::null()
 {
-namespace expressions
+    scanToken tok;
+    tok.type_ = LABEL;
+    tok.labelValue = 0;
+
+    return tok;
+}
+
+
+void Foam::expressions::scanToken::destroy()
 {
-namespace fieldExpr
+    if (type_ == VECTOR)
+    {
+        delete vectorPtr;
+        vectorPtr = nullptr;
+    }
+    else if (type_ == WORD)
+    {
+        delete wordPtr;
+        wordPtr = nullptr;
+    }
+}
+
+
+void Foam::expressions::scanToken::setLabel(label val)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Forward Declarations
-class parser;
-class scanner;
-class parseDriver;
-
-//- Static debugging option
-extern int debug;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fieldExpr
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Typedef for fieldExpr parseDriver
-typedef fieldExpr::parseDriver fieldExprDriver;
+    type_ = LABEL;
+    labelValue = val;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-} // End namespace expressions
-} // End namespace Foam
+void Foam::expressions::scanToken::setScalar(scalar val)
+{
+    type_ = SCALAR;
+    scalarValue = val;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+void Foam::expressions::scanToken::setVector(scalar x, scalar y, scalar z)
+{
+    type_ = VECTOR;
+    vectorPtr = new Foam::vector(x, y, z);
+}
 
-#endif
+
+void Foam::expressions::scanToken::setVector(const vector& val)
+{
+    type_ = VECTOR;
+    vectorPtr = new Foam::vector(val);
+}
+
+
+void Foam::expressions::scanToken::setWord(const word& val)
+{
+    type_ = WORD;
+    wordPtr = new Foam::word(val);
+}
+
 
 // ************************************************************************* //

@@ -59,6 +59,27 @@ rule_driver_unary_named($1, SN_GRAD, $3, patchNormalField, $2)dnl
 
 define([rules_driver_surface_functions],
 [dnl
+_logic_ (lhs) ::= CELL_SET LPAREN identifier (name) RPAREN .dnl
+{dnl
+    driver->reportFatal("Not implemented: " + make_obj(name));
+    lhs = nullptr;dnl
+}dnl
+_logic_ (lhs) ::= CELL_ZONE LPAREN identifier (name) RPAREN .dnl
+{dnl
+    driver->reportFatal("Not implemented: " + make_obj(name));
+    lhs = nullptr;dnl
+}dnl
+_logic_ (lhs) ::= FACE_SET LPAREN identifier (name) RPAREN .dnl
+{dnl
+    driver->reportFatal("Not implemented: " + make_obj(name));
+    lhs = nullptr;dnl
+}dnl
+_logic_ (lhs) ::= FACE_ZONE LPAREN identifier (name) RPAREN .dnl
+{dnl
+    driver->reportFatal("Not implemented: " + make_obj(name));
+    lhs = nullptr;dnl
+}dnl
+dnl
 rule_driver_nullary(_scalar_, FACE_AREA, field_faceArea)dnl
 rule_driver_nullary(_vector_, POS, field_faceCentre)dnl  FACE_CENTRE
 rule_driver_nullary(_vector_, FACE_EXPR, field_areaNormal)dnl

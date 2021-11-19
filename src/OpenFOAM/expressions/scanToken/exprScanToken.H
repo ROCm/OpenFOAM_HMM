@@ -24,90 +24,87 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::expressions::patchExpr::parser
+    Foam::expressions::scanToken
 
 Description
-    Lemon parser interface for patch expressions grammar
+    A low-level input/scan token content.
+    No defined constructors/destructors.
+    All memory management is manual!
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef expressions_patchExprParser_H
-#define expressions_patchExprParser_H
+#ifndef expressions_scanToken_H
+#define expressions_scanToken_H
 
-#include "exprScanToken.H"
-#include "patchExprFwd.H"
+#include "scalar.H"
+#include "vector.H"
+#include "word.H"
 
 namespace Foam
 {
 namespace expressions
 {
-namespace patchExpr
-{
 
 /*---------------------------------------------------------------------------*\
-                           Class parser Declaration
+                          Class scanToken Declaration
 \*---------------------------------------------------------------------------*/
 
-class parser
+struct scanToken
 {
-    // Private Data
-
-        //- Prompt for parser tracing
-        static constexpr const char* const prompt_ = "patchExpr:";
-
-        //- The lemon parser (demand-driven)
-        void* lemon_;
-
-
-public:
-
-    //- Local object debugging
-    int debug;
-
-
-    // Constructors
-
-        //- Construct null
-        parser() : lemon_(nullptr), debug(patchExpr::debug) {}
-
-
-    //- Destructor, deletes parser backend
-    ~parser()
+    //- Tagged union types
+    enum tokenType : unsigned char
     {
-        stop();
-    }
+        LABEL = 0,
+        SCALAR,
+        VECTOR,
+        WORD
+    };
 
 
-    // Static Member Functions
+    // Data
 
-        //- Return the text name corresponding to the tokenId
-        static word tokenName(int tokenId);
+        //- The data content (as a union).
+        //  For memory alignment have this appear as the first member.
+        union
+        {
+            Foam::label    labelValue;
+            Foam::scalar   scalarValue;
+            Foam::vector*  vectorPtr;
+            Foam::word*    wordPtr;
+            Foam::word*    name_;
+        };
 
-        //- Print all token names
-        static void printTokenNames(Ostream& os);
-
-        //- Print all rules
-        static void printRules(Ostream& os);
+        //- The token type
+        tokenType type_;
 
 
     // Member Functions
 
-        //- Start parsing, with the given driver context
-        void start(parseDriver& driver_);
+        //- Return a null token - in lieu of a default constructor
+        static scanToken null();
 
-        //- Stop parsing, freeing the allocated parser
-        void stop();
+        //- Assign type/value to be LABEL. Does not call destroy().
+        void setLabel(label val);
 
-        //- Push token type to parser with default token
-        void parse(int tokenId);
+        //- Assign type/value to be SCALAR. Does not call destroy().
+        void setScalar(scalar val);
 
-        //- Push token type/value to parser
-        void parse(int tokenId, scanToken tok);
+        //- Assign type/value to be VECTOR. Does not call destroy().
+        void setVector(scalar x, scalar y, scalar z);
+
+        //- Assign type/value to be VECTOR. Does not call destroy().
+        void setVector(const vector& val);
+
+        //- Assign type/value to be WORD (name). Does not call destroy().
+        void setWord(const word& val);
+
+        //- Manual deletion of pointer types
+        void destroy();
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace patchExpr
 } // End namespace expressions
 } // End namespace Foam
 

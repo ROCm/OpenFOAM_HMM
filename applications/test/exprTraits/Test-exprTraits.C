@@ -21,6 +21,7 @@ Description
 #include "uLabel.H"
 #include "error.H"
 #include "stringList.H"
+#include "exprScanToken.H"
 
 using namespace Foam;
 
@@ -70,6 +71,34 @@ int main()
     Info<< "Name of typeCode: "
         << getName(expressions::valueTypeCode::type_bool) << nl;
 
+
+    {
+        expressions::scanToken tok;
+        expressions::scanToken tok2;
+
+        Info<< nl << "sizeof(scanToken): "
+            << sizeof(tok) << nl;
+
+        Info<< "    type:" << int(tok.type_) << nl;
+        Info<< "    ptr:" << Foam::name(tok.name_) << nl;
+
+        Info<< "    type:" << int(tok2.type_) << nl;
+        Info<< "    ptr:" << Foam::name(tok2.name_) << nl;
+
+        tok.setWord("hello");
+
+        Info<< "    type:" << int(tok.type_) << nl;
+        Info<< "    ptr:" << Foam::name(tok.name_) << nl;
+
+        tok2 = tok;
+        Info<< "    type:" << int(tok2.type_) << nl;
+        Info<< "    ptr:" << Foam::name(tok2.name_) << nl;
+
+        tok2.destroy();
+
+        Info<< "    type:" << int(tok2.type_) << nl;
+        Info<< "    ptr:" << Foam::name(tok2.name_) << nl;
+    }
 
     Info<< nl << "Done" << nl;
     return 0;

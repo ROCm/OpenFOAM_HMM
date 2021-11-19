@@ -162,6 +162,7 @@ $(expr)/exprResult/exprResultStored.C
 $(expr)/exprResult/exprResultStoredStack.C
 $(expr)/exprString/exprString.C
 $(expr)/exprTools/exprTools.C
+$(expr)/scanToken/exprScanToken.C
 
 $(expr)/traits/exprTraits.C
 

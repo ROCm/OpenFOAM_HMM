@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,7 @@ Description
 #ifndef expressions_volumeExprParser_H
 #define expressions_volumeExprParser_H
 
+#include "exprScanToken.H"
 #include "volumeExprFwd.H"
 
 namespace Foam
@@ -97,8 +98,11 @@ public:
         //- Stop parsing, freeing the allocated parser
         void stop();
 
-        //- Push token/value to parser
-        void parse(int tokenId, scanToken* tokenVal);
+        //- Push token type to parser with default token
+        void parse(int tokenId);
+
+        //- Push token type/value to parser
+        void parse(int tokenId, scanToken tok);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

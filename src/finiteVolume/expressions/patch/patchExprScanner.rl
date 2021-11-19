@@ -28,6 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "exprScanToken.H"
 #include "patchExprScanner.H"
 #include "patchExprDriver.H"
 #include "patchExprLemonParser.h"
@@ -42,7 +43,6 @@ Description
 #undef  DebugInfo
 #define DebugInfo if (debug & 0x2) InfoErr
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -55,9 +55,21 @@ namespace Foam
 #define TOKEN_PAIR(Name,T)  { TOKEN_OF(T), Name }
 
 //- An {int, c_str} enum pairing for field types
-#define FIELD_PAIR(Fld,T)  { TOKEN_OF(T), Fld::typeName.c_str() }
+#define FIELD_PAIR(Fld,T)   { TOKEN_OF(T), Fld::typeName.c_str() }
 
 #undef HAS_LOOKBEHIND_TOKENS
+#ifdef HAS_LOOKBEHIND_TOKENS
+// Special handling for these known (stashed) look-back types
+static const Enum<int> lookBehindTokenEnums
+({
+    TOKEN_PAIR("cellZone", CELL_ZONE), TOKEN_PAIR("cellSet", CELL_SET),
+    TOKEN_PAIR("faceZone", FACE_ZONE), TOKEN_PAIR("faceSet", FACE_SET),
+    #ifdef TOK_POINT_ZONE
+    TOKEN_PAIR("pointZone", POINT_ZONE), TOKEN_PAIR("pointSet", POINT_SET),
+    #endif
+});
+#endif
+
 
 // Special handling of predefined method types. Eg, .x(), .y(), ...
 static const Enum<int> fieldMethodEnums
@@ -176,7 +188,7 @@ static int driverTokenType
     const word& ident
 )
 {
-#if 0
+    #if 0
     // Get stashed "look-behind" to decide what type of identifier we expect
     const int lookBehind = driver_.resetStashedTokenId();
 
@@ -186,12 +198,17 @@ static int driverTokenType
 
         switch (lookBehind)
         {
-            case TOK_CELL_SET : good = driver_.isCellSet(ident); break;
-            case TOK_FACE_SET : good = driver_.isFaceSet(ident); break;
-            case TOK_POINT_SET : good = driver_.isPointSet(ident); break;
             case TOK_CELL_ZONE : good = driver_.isCellZone(ident); break;
+            case TOK_CELL_SET : good = driver_.isCellSet(ident); break;
+
             case TOK_FACE_ZONE : good = driver_.isFaceZone(ident); break;
+            case TOK_FACE_SET : good = driver_.isFaceSet(ident); break;
+
+            #ifdef TOK_POINT_ZONE
+            // Not yet ready or particularly useful it seems
             case TOK_POINT_ZONE : good = driver_.isPointZone(ident); break;
+            case TOK_POINT_SET : good = driver_.isPointSet(ident); break;
+            #endif
         }
 
         if (good)
@@ -207,50 +224,48 @@ static int driverTokenType
 
         return -2;  // Extra safety
     }
-#endif
+    #endif
 
     // Face variables
     #ifdef TOK_SSCALAR_ID
     {
-        #undef checkFieldToken
-        #define checkFieldToken(TokType, Type)                                \
-        if (driver_.isVariable<Type>(ident, false))                           \
-        {                                                                     \
-            return TokType;                                                   \
+        #undef  doLocalCode
+        #define doLocalCode(TokType, Type)                          \
+        if (driver_.isVariable<Type>(ident, false))                 \
+        {                                                           \
+            return TokType;                                         \
         }
 
-        checkFieldToken(TOK_SSCALAR_ID, scalar);
-        checkFieldToken(TOK_SVECTOR_ID, vector);
-        checkFieldToken(TOK_SSYM_TENSOR_ID, symmTensor);
-        checkFieldToken(TOK_SSPH_TENSOR_ID, sphericalTensor);
-        checkFieldToken(TOK_STENSOR_ID, tensor);
-
-        // Not tested: checkFieldToken(TOK_SBOOL_ID, bool);
+        doLocalCode(TOK_SSCALAR_ID, scalar);
+        doLocalCode(TOK_SVECTOR_ID, vector);
+        doLocalCode(TOK_SSYM_TENSOR_ID, symmTensor);
+        doLocalCode(TOK_SSPH_TENSOR_ID, sphericalTensor);
+        doLocalCode(TOK_STENSOR_ID, tensor);
+        // Untested: doLocalCode(TOK_SBOOL_ID, bool);
+        #undef doLocalCode
     }
     #endif
 
     // Point variables
     #ifdef TOK_PSCALAR_ID
     {
-        #undef checkFieldToken
-        #define checkFieldToken(TokType, Type)                                \
-        if (driver_.isVariable<Type>(ident, true))                            \
-        {                                                                     \
-            return TokType;                                                   \
+        #undef  doLocalCode
+        #define doLocalCode(TokType, Type)                          \
+        if (driver_.isVariable<Type>(ident, true))                  \
+        {                                                           \
+            return TokType;                                         \
         }
 
-        checkFieldToken(TOK_PSCALAR_ID, scalar);
-        checkFieldToken(TOK_PVECTOR_ID, vector);
-        checkFieldToken(TOK_PTENSOR_ID, tensor);
-        checkFieldToken(TOK_PTENSOR_ID, tensor);
-        checkFieldToken(TOK_PSYM_TENSOR_ID, symmTensor);
-        checkFieldToken(TOK_PSPH_TENSOR_ID, sphericalTensor);
-
-        // Not tested: checkFieldToken(TOK_PBOOL_ID, bool);
+        doLocalCode(TOK_PSCALAR_ID, scalar);
+        doLocalCode(TOK_PVECTOR_ID, vector);
+        doLocalCode(TOK_PTENSOR_ID, tensor);
+        doLocalCode(TOK_PTENSOR_ID, tensor);
+        doLocalCode(TOK_PSYM_TENSOR_ID, symmTensor);
+        doLocalCode(TOK_PSPH_TENSOR_ID, sphericalTensor);
+        // Untested: doLocalCode(TOK_SBOOL_ID, bool);
+        #undef doLocalCode
     }
     #endif
-
-    #undef checkFieldToken
 
     // Check registered fields and/or disk-files
     {
@@ -267,7 +282,7 @@ static int driverTokenType
     return -1;
 }
 
-} // End anonymous namespace
+} // End namespace Foam
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -280,7 +295,15 @@ static int driverTokenType
 #define EMIT_TOKEN(T)                                                         \
     driver_.parsePosition() = (ts-buf);                                       \
     DebugInfo<< STRINGIFY(T) << " at " << driver_.parsePosition() << nl;      \
-    parser_->parse(TOKEN_OF(T), nullptr);                                     \
+    parser_->parse(TOKEN_OF(T));                                              \
+    driver_.parsePosition() = (p-buf);
+
+#define EMIT_VECTOR_TOKEN(X, Y, Z)                                            \
+    driver_.parsePosition() = (ts-buf);                                       \
+    DebugInfo<< "VECTOR at " << driver_.parsePosition() << nl;                \
+    scanToken scanTok;                                                        \
+    scanTok.setVector(X,Y,Z);                                                 \
+    parser_->parse(TOK_VECTOR_VALUE, scanTok);                                \
     driver_.parsePosition() = (p-buf);
 
 
@@ -289,15 +312,18 @@ static int driverTokenType
     write   data;
 
     action emit_number {
+        // Emit number
         driver_.parsePosition() = (ts-buf);
 
         DebugInfo
             << "Number:" << std::string(ts, te-ts).c_str()
             << " at " << driver_.parsePosition() << nl;
 
-        if (readScalar(std::string(ts, te-ts), scanTok.svalue))
+        scanToken scanTok;
+        scanTok.setScalar(0);
+        if (readScalar(std::string(ts, te-ts), scanTok.scalarValue))
         {
-            parser_->parse(TOKEN_OF(NUMBER), &scanTok);
+            parser_->parse(TOKEN_OF(NUMBER), scanTok);
         }
         else
         {
@@ -311,15 +337,16 @@ static int driverTokenType
     }
 
     action emit_ident {
+        // Emit identifier
         driver_.parsePosition() = (ts-buf);
-        dispatch_ident(driver_, scanTok, word(ts, te-ts, false));
+        dispatch_ident(driver_, word(ts, te-ts, false));
         driver_.parsePosition() = (p-buf);
     }
 
     action emit_method {
         // Tokenized ".method" - dispatch '.' and "method" separately
         driver_.parsePosition() = (ts-buf);
-        dispatch_method(driver_, scanTok, word(ts+1, te-ts-1, false));
+        dispatch_method(driver_, word(ts+1, te-ts-1, false));
         driver_.parsePosition() = (p-buf);
     }
 
@@ -337,7 +364,7 @@ static int driverTokenType
     number => emit_number;
 
     ## Operators
-    '!'  =>{ EMIT_TOKEN(NOT); };
+    '!'  =>{ EMIT_TOKEN(LNOT); };
     '%'  =>{ EMIT_TOKEN(PERCENT); };
     '('  =>{ EMIT_TOKEN(LPAREN); };
     ')'  =>{ EMIT_TOKEN(RPAREN); };
@@ -358,7 +385,7 @@ static int driverTokenType
     '&&' =>{ EMIT_TOKEN(LAND); };
     '||' =>{ EMIT_TOKEN(LOR); };
     '&'  =>{ EMIT_TOKEN(BIT_AND); };
-## Not needed?  '|'  =>{ EMIT_TOKEN(BIT_OK); };
+## Not needed?  '|'  =>{ EMIT_TOKEN(BIT_OR); };
     '^'  =>{ EMIT_TOKEN(BIT_XOR); };
 
     ## Some '.method' - Error if unknown
@@ -417,9 +444,12 @@ static int driverTokenType
     "sphericalTensor" =>{ EMIT_TOKEN(SPH_TENSOR); };
 
     ## Single value (constants, etc)
-    "Zero"      =>{ EMIT_TOKEN(ZERO); };
     "true"      =>{ EMIT_TOKEN(LTRUE); };
     "false"     =>{ EMIT_TOKEN(LFALSE); };
+    "Zero"      =>{ EMIT_TOKEN(ZERO); };
+    "vector::x" =>{ EMIT_VECTOR_TOKEN(1,0,0); };
+    "vector::y" =>{ EMIT_VECTOR_TOKEN(0,1,0); };
+    "vector::z" =>{ EMIT_VECTOR_TOKEN(0,0,1); };
     "tensor::I" =>{ EMIT_TOKEN(IDENTITY_TENSOR); };
     "arg"       =>{ EMIT_TOKEN(ARG); };
     "time"      =>{ EMIT_TOKEN(TIME); };
@@ -452,8 +482,7 @@ Foam::expressions::patchExpr::scanner::~scanner()
 bool Foam::expressions::patchExpr::scanner::dispatch_method
 (
     const parseDriver& driver_,
-    scanToken& scanTok,
-    word&& ident
+    word ident
 ) const
 {
     if (ident[0] == '.')
@@ -470,8 +499,8 @@ bool Foam::expressions::patchExpr::scanner::dispatch_method
     if (methType > 0)
     {
         // Dispatch '.' and "method" separately
-        parser_->parse(TOK_DOT, nullptr);
-        parser_->parse(methType, nullptr);
+        parser_->parse(TOK_DOT);
+        parser_->parse(methType);
 
         return true;
     }
@@ -484,10 +513,11 @@ bool Foam::expressions::patchExpr::scanner::dispatch_method
 bool Foam::expressions::patchExpr::scanner::dispatch_ident
 (
     const parseDriver& driver_,
-    scanToken& scanTok,
-    word&& ident
+    word ident
 ) const
 {
+    // Peek at stashed "look-behind". It may influence decisions
+    int lookBehindTok = driver_.stashedTokenId();
     int tokType = -1;
 
     const bool quoted =
@@ -512,12 +542,12 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
                 << "Emit:" << ident << " function:"
                 << parser_->tokenName(tokType) << nl;
 
-            parser_->parse(tokType, nullptr);
+            parser_->parse(tokType);
             return true;
         }
 
         #ifdef HAS_LOOKBEHIND_TOKENS
-        // Specials such "cset" also reset the look-behind
+        // Specials such "cellSet" etc also reset the look-behind
         tokType = lookBehindTokenEnums.lookup(ident, -1);
 
         if (tokType > 0)
@@ -527,17 +557,28 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
                 << parser_->tokenName(tokType) << nl;
 
             driver_.resetStashedTokenId(tokType);
-            parser_->parse(tokType, nullptr);
+            parser_->parse(tokType);
             return true;
         }
         #endif
     }
 
+    // Functions: scalar, vector, probably don't need others
+    // - "fn:" prefix to avoid any ambiguities
+    if (lookBehindTok <= 0 && ident.starts_with("fn:"))
+    {
+        word funcName(ident.substr(3));  // strip prefix
 
-    // Can also peek at stashed "look-behind"
-    // const int lookBehind = driver_.stashedTokenId();
+        do
+        {
+        }
+        while (false);
+    }
 
-    tokType = driverTokenType(driver_, ident);
+    if (tokType <= 0)
+    {
+        tokType = driverTokenType(driver_, ident);
+    }
 
     if (tokType > 0)
     {
@@ -545,8 +586,9 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
             << "Emit:" << ident << " token:"
             << parser_->tokenName(tokType) << nl;
 
-        scanTok.name = new Foam::word(std::move(ident));
-        parser_->parse(tokType, &scanTok);
+        scanToken scanTok;
+        scanTok.setWord(ident);
+        parser_->parse(tokType, scanTok);
 
         return true;
     }
@@ -578,12 +620,13 @@ bool Foam::expressions::patchExpr::scanner::dispatch_ident
         // The field (before the ".")
         ident.erase(dot);
 
-        scanTok.name = new Foam::word(std::move(ident));
-        parser_->parse(tokType, &scanTok);
+        scanToken scanTok;
+        scanTok.setWord(ident);
+        parser_->parse(tokType, scanTok);
 
         // Dispatch '.' and "method" separately
-        parser_->parse(TOK_DOT, nullptr);
-        parser_->parse(methType, nullptr);
+        parser_->parse(TOK_DOT);
+        parser_->parse(methType);
 
         return true;
     }
@@ -646,9 +689,6 @@ bool Foam::expressions::patchExpr::scanner::process
 
     parser_->start(driver_);
 
-    // Scan token type
-    scanToken scanTok;
-
     // Token start/end (Ragel naming)
     const char* ts;
     const char* te;
@@ -678,7 +718,7 @@ bool Foam::expressions::patchExpr::scanner::process
     }
 
     // Terminate parser execution
-    parser_->parse(0, nullptr);
+    parser_->parse(0);
     parser_->stop();
 
     if (debug & 0x6)
