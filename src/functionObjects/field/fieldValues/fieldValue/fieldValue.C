@@ -114,7 +114,7 @@ bool Foam::functionObjects::fieldValue::execute()
 
 bool Foam::functionObjects::fieldValue::write()
 {
-    Log << type() << " " << name() << " write:" << nl;
+    Log << type() << ' ' << name() << " write:" << nl;
 
     return true;
 }

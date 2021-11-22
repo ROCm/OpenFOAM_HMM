@@ -35,19 +35,32 @@ License
 #include "interpolationCell.H"
 #include "interpolationCellPoint.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class WeightType>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
+(
+    const Field<WeightType>& weightField,
+    const bool useMag /* ignore */
+)
+{
+    // The scalar form is specialized.
+    // Other types: use mag() to generate a scalar field.
+    return mag(weightField);
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class WeightType>
 inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::canWeight
 (
-    const Field<WeightType>& weightField
+    const Field<WeightType>& fld
 ) const
 {
-    return
-    (
-        usesWeight()
-     && returnReduce(!weightField.empty(), orOp<bool>()) // On some processor
-    );
+    // Non-empty on some processor
+    return returnReduce(!fld.empty(), orOp<bool>());
 }
 
 
@@ -156,9 +169,13 @@ processSameTypeValues
         case opWeightedSum:
         case opAbsWeightedSum:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
-                tmp<scalarField> weight(weightingFactor(weightField));
+                tmp<scalarField> weight
+                (
+                    weightingFactor(weightField, Sf, is_magOp())
+                );
+
                 result = gSum(weight*values);
             }
             else
@@ -183,9 +200,12 @@ processSameTypeValues
         case opWeightedAverage:
         case opAbsWeightedAverage:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
-                const scalarField factor(weightingFactor(weightField));
+                const scalarField factor
+                (
+                    weightingFactor(weightField, Sf, is_magOp())
+                );
 
                 result = gSum(factor*values)/(gSum(factor) + ROOTVSMALL);
             }
@@ -193,6 +213,7 @@ processSameTypeValues
             {
                 // Unweighted form
                 const label n = returnReduce(values.size(), sumOp<label>());
+
                 result = gSum(values)/(scalar(n) + ROOTVSMALL);
             }
             break;
@@ -201,9 +222,12 @@ processSameTypeValues
         case opWeightedAreaAverage:
         case opAbsWeightedAreaAverage:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
-                const scalarField factor(weightingFactor(weightField, Sf));
+                const scalarField factor
+                (
+                    areaWeightingFactor(weightField, Sf, is_magOp())
+                );
 
                 result = gSum(factor*values)/gSum(factor + ROOTVSMALL);
             }
@@ -211,7 +235,8 @@ processSameTypeValues
             {
                 // Unweighted form
                 const scalarField factor(mag(Sf));
-                result = gSum(factor*values)/gSum(factor);
+
+                result = gSum(factor*values)/gSum(factor + ROOTVSMALL);
             }
             break;
         }
@@ -219,15 +244,20 @@ processSameTypeValues
         case opWeightedAreaIntegrate:
         case opAbsWeightedAreaIntegrate:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
-                tmp<scalarField> factor(weightingFactor(weightField, Sf));
+                tmp<scalarField> factor
+                (
+                    areaWeightingFactor(weightField, Sf, is_magOp())
+                );
+
                 result = gSum(factor*values);
             }
             else
             {
                 // Unweighted form
                 tmp<scalarField> factor(mag(Sf));
+
                 result = gSum(factor*values);
             }
             break;
@@ -264,14 +294,14 @@ processSameTypeValues
         case opWeightedUniformity:
         case opAbsWeightedUniformity:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 // Change weighting from vector -> scalar and dispatch again
                 return processValues<Type, scalar>
                 (
                     values,
                     Sf,
-                    weightingFactor(weightField)
+                    weightingFactor(weightField, is_magOp())
                 );
             }
 
@@ -292,19 +322,6 @@ Type Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 ) const
 {
     return processSameTypeValues(values, Sf, weightField);
-}
-
-
-template<class WeightType>
-Foam::tmp<Foam::scalarField>
-Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
-(
-    const Field<WeightType>& weightField
-) const
-{
-    // The scalar form is specialized.
-    // For other types always need mag() to generate a scalar field.
-    return mag(weightField);
 }
 
 

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,32 +25,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-inline const Foam::dictionary& Foam::functionObjects::fieldValue::dict()
+inline bool Foam::functionObjects::fieldValues::volFieldValue::is_magOp()
 const noexcept
 {
-    return dict_;
+    // Operation tagged to use mag
+    return (operation_ & typeAbsolute);
 }
 
 
-inline const Foam::word& Foam::functionObjects::fieldValue::regionName()
+inline bool Foam::functionObjects::fieldValues::volFieldValue::is_weightedOp()
 const noexcept
 {
-    return regionName_;
+    // Operation tagged to require a weight field
+    return (operation_ & typeWeighted);
 }
 
 
-inline const Foam::wordList& Foam::functionObjects::fieldValue::fields()
-const noexcept
+inline bool Foam::functionObjects::fieldValues::volFieldValue::canWeight
+(
+    const scalarField& fld
+) const
 {
-    return fields_;
-}
-
-
-inline bool Foam::functionObjects::fieldValue::writeFields() const noexcept
-{
-    return writeFields_;
+    // Non-empty on some processor
+    return returnReduce(!fld.empty(), orOp<bool>());
 }
 
 

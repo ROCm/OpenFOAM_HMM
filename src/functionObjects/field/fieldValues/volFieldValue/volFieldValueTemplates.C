@@ -112,7 +112,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
         case opSum:
         case opWeightedSum:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 result = gSum(weightField*values);
             }
@@ -126,7 +126,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
         case opAverage:
         case opWeightedAverage:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 result =
                     gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
@@ -142,7 +142,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
         case opVolAverage:
         case opWeightedVolAverage:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 result = gSum(weightField*V*values)
                     /(gSum(weightField*V) + ROOTVSMALL);
@@ -157,7 +157,7 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
         case opVolIntegrate:
         case opWeightedVolIntegrate:
         {
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 result = gSum(weightField*V*values);
             }

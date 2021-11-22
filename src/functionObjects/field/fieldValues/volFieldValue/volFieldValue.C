@@ -84,9 +84,10 @@ Foam::functionObjects::fieldValues::volFieldValue::postOperationTypeNames_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldValues::volFieldValue::usesVol() const
+bool Foam::functionObjects::fieldValues::volFieldValue::usesVol()
+const noexcept
 {
-    // Only a few operations require the cell volume
+    // Few operations require the cell volume
     switch (operation_)
     {
         case opVolAverage:
@@ -99,33 +100,6 @@ bool Foam::functionObjects::fieldValues::volFieldValue::usesVol() const
         default:
             return false;
     }
-}
-
-
-bool Foam::functionObjects::fieldValues::volFieldValue::usesMag() const
-{
-    // Operation specifically tagged to use mag
-    return (operation_ & typeAbsolute);
-}
-
-
-bool Foam::functionObjects::fieldValues::volFieldValue::usesWeight() const
-{
-    // Operation specifically tagged to require a weight field
-    return (operation_ & typeWeighted);
-}
-
-
-bool Foam::functionObjects::fieldValues::volFieldValue::canWeight
-(
-    const scalarField& weightField
-) const
-{
-    return
-    (
-        usesWeight()
-     && returnReduce(!weightField.empty(), orOp<bool>()) // On some processor
-    );
 }
 
 
@@ -260,7 +234,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
 
     weightFieldNames_.clear();
 
-    if (usesWeight())
+    if (is_weightedOp())
     {
         // Can have "weightFields" or "weightField"
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,28 +44,31 @@ withSurfaceFields() const
 
 
 inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
-withTopologicalMerge() const
+withTopologicalMerge() const noexcept
 {
     return (stFaceZone == regionType_ || stPatch == regionType_);
 }
 
 
 inline const Foam::labelList&
-Foam::functionObjects::fieldValues::surfaceFieldValue::faceId() const
+Foam::functionObjects::fieldValues::surfaceFieldValue::faceId()
+const noexcept
 {
     return faceId_;
 }
 
 
 inline const Foam::labelList&
-Foam::functionObjects::fieldValues::surfaceFieldValue::facePatch() const
+Foam::functionObjects::fieldValues::surfaceFieldValue::facePatch()
+const noexcept
 {
     return facePatchId_;
 }
 
 
 inline const Foam::boolList&
-Foam::functionObjects::fieldValues::surfaceFieldValue::faceFlip() const
+Foam::functionObjects::fieldValues::surfaceFieldValue::faceFlip()
+const noexcept
 {
     return faceFlip_;
 }
@@ -73,16 +76,17 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::faceFlip() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool
-Foam::functionObjects::fieldValues::surfaceFieldValue::usesMag() const
+inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
+is_magOp()
+const noexcept
 {
     // Operation specifically tagged to use mag
     return (operation_ & typeAbsolute);
 }
 
 
-inline bool
-Foam::functionObjects::fieldValues::surfaceFieldValue::usesWeight() const
+inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
+is_weightedOp() const noexcept
 {
     // Operation specifically tagged to require a weight field
     return (operation_ & typeWeighted);
@@ -90,7 +94,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::usesWeight() const
 
 
 inline Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes
-Foam::functionObjects::fieldValues::surfaceFieldValue::regionType() const
+Foam::functionObjects::fieldValues::surfaceFieldValue::regionType()
+const noexcept
 {
     return regionType_;
 }
