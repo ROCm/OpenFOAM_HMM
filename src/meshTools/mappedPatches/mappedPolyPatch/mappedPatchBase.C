@@ -1341,7 +1341,18 @@ Foam::mappedPatchBase::mappedPatchBase
      && sampleRegion_ == patch_.boundaryMesh().mesh().name()
     ),
     mapPtr_(nullptr),
-    AMIReverse_(dict.getOrDefault("flipNormals", false)),
+    AMIReverse_
+    (
+        dict.getOrDefault
+        (
+            "reverseTarget",        // AMIInterpolation uses this keyword
+            dict.getOrDefault
+            (
+                "flipNormals",
+                false
+            )
+        )
+    ),
     AMIPtr_
     (
         AMIInterpolation::New
@@ -1433,7 +1444,18 @@ Foam::mappedPatchBase::mappedPatchBase
      && sampleRegion_ == patch_.boundaryMesh().mesh().name()
     ),
     mapPtr_(nullptr),
-    AMIReverse_(dict.getOrDefault("flipNormals", false)),
+    AMIReverse_
+    (
+        dict.getOrDefault
+        (
+            "reverseTarget",        // AMIInterpolation uses this keyword
+            dict.getOrDefault
+            (
+                "flipNormals",
+                false
+            )
+        )
+    ),
     AMIPtr_
     (
         AMIInterpolation::New
@@ -1968,18 +1990,20 @@ void Foam::mappedPatchBase::write(Ostream& os) const
                 break;
             }
         }
+    }
 
-        if (mode_ == NEARESTPATCHFACEAMI)
+    if (mode_ == NEARESTPATCHFACEAMI)
+    {
+        if (AMIPtr_)
         {
-            if (AMIReverse_)
-            {
-                os.writeEntry("flipNormals", AMIReverse_);
-            }
-
-            if (!surfDict_.empty())
-            {
-                surfDict_.writeEntry(surfDict_.dictName(), os);
-            }
+            // Use AMI to write itself. Problem: outputs:
+            // - restartUncoveredSourceFace
+            // - reverseTarget (instead of flipNormals)
+            AMIPtr_->write(os);
+        }
+        if (!surfDict_.empty())
+        {
+            surfDict_.writeEntry(surfDict_.dictName(), os);
         }
     }
 }
