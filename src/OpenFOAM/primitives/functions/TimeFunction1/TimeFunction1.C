@@ -43,7 +43,7 @@ Foam::TimeFunction1<Type>::TimeFunction1
     entry_(Function1<Type>::New(entryName, dict, &runTime))
 {
     // Time conversion now handled by Function1 directly
-    // entry_->convertTimeBase(runTime);
+    // entry_->userTimeToTime(runTime);
 }
 
 
@@ -83,7 +83,7 @@ template<class Type>
 void Foam::TimeFunction1<Type>::reset(const dictionary& dict)
 {
     entry_ = Function1<Type>::New(name_, dict, &time_);
-    entry_->convertTimeBase(time_);
+    entry_->userTimeToTime(time_);
 }
 
 

@@ -75,7 +75,7 @@ Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& rhs)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Sine<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::Sine<Type>::userTimeToTime(const Time& t)
 {
     t0_ = t.timeToUserTime(t0_);
 }

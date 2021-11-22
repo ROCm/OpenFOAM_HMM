@@ -254,7 +254,7 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
 
 
 template<class Type>
-void Foam::Function1Types::TableBase<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::TableBase<Type>::userTimeToTime(const Time& t)
 {
     for (auto& item : table_)
     {

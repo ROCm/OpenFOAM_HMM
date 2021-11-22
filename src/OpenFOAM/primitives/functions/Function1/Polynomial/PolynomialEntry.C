@@ -129,7 +129,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial(const Polynomial& poly)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Polynomial<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::Polynomial<Type>::userTimeToTime(const Time& t)
 {
     forAll(coeffs_, i)
     {

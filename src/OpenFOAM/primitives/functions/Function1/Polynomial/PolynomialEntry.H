@@ -141,7 +141,7 @@ public:
     // Member Functions
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 
         //- Return Polynomial value
         virtual Type value(const scalar x) const;

@@ -102,7 +102,7 @@ const Foam::Time& Foam::patchFunction1Base::time() const
 }
 
 
-void Foam::patchFunction1Base::convertTimeBase(const Time& t)
+void Foam::patchFunction1Base::userTimeToTime(const Time& t)
 {}
 
 

@@ -132,7 +132,7 @@ void Foam::function1Base::resetDb(const objectRegistry& db) noexcept
 }
 
 
-void Foam::function1Base::convertTimeBase(const Time& t)
+void Foam::function1Base::userTimeToTime(const Time& t)
 {}
 
 

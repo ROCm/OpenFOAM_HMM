@@ -167,7 +167,7 @@ public:
     // Manipulation
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 };
 
 
