@@ -378,7 +378,7 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
     );
 
     spectralDistribution_ =
-        spectralDistributions_->value(mesh_.time().value());
+        spectralDistributions_->value(mesh_.time().timeOutputValue());
 
     nBands_ = spectralDistribution_.size();
 

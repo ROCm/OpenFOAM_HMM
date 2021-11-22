@@ -84,7 +84,7 @@ class PatchFlowRateInjection
         scalar duration_;
 
         //- Concentration profile of particle volume to carrier volume [-]
-        const autoPtr<Function1<scalar>> concentration_;
+        autoPtr<Function1<scalar>> concentration_;
 
         //- Parcels to introduce per unit volume flow rate m3 [n/m3]
         const scalar parcelConcentration_;

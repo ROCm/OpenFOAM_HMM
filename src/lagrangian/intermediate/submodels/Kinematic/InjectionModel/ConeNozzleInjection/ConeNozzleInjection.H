@@ -155,16 +155,16 @@ private:
         const label parcelsPerSecond_;
 
         //- Flow rate profile relative to SOI []
-        const autoPtr<Function1<scalar>> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const autoPtr<Function1<scalar>> thetaInner_;
+        autoPtr<Function1<scalar>> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const autoPtr<Function1<scalar>> thetaOuter_;
+        autoPtr<Function1<scalar>> thetaOuter_;
 
         //- Parcel size PDF model
-        const autoPtr<distributionModel> sizeDistribution_;
+        autoPtr<distributionModel> sizeDistribution_;
 
 
         // Tangential vectors to the direction vector

@@ -348,6 +348,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
                     &owner.mesh()
                 )
             );
+            massFlowRate_->userTimeToTime(owner.db().time());
             massTotal_ = massFlowRate_->value(owner.db().time().value());
             this->coeffDict().readIfPresent("SOI", SOI_);
         }

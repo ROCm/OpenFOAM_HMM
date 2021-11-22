@@ -131,7 +131,7 @@ void Foam::radiation::fvDOM::initialise()
         );
 
         spectralDistribution_ =
-            spectralDistributions_->value(mesh_.time().value());
+            spectralDistributions_->value(mesh_.time().timeOutputValue());
 
         spectralDistribution_ =
             spectralDistribution_/sum(spectralDistribution_);

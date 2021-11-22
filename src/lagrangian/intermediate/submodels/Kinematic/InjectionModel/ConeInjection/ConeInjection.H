@@ -91,19 +91,19 @@ class ConeInjection
         const label parcelsPerInjector_;
 
         //- Flow rate profile relative to SOI []
-        const autoPtr<Function1<scalar>> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Parcel velocity magnitude relative to SOI [m/s]
-        const autoPtr<Function1<scalar>> Umag_;
+        autoPtr<Function1<scalar>> Umag_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const autoPtr<Function1<scalar>> thetaInner_;
+        autoPtr<Function1<scalar>> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const autoPtr<Function1<scalar>> thetaOuter_;
+        autoPtr<Function1<scalar>> thetaOuter_;
 
         //- Parcel size distribution model
-        const autoPtr<distributionModel> sizeDistribution_;
+        autoPtr<distributionModel> sizeDistribution_;
 
         //- Number of parcels per injector already injected
         mutable label nInjected_;

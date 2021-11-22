@@ -84,7 +84,7 @@ class PatchInjection
         const vector U0_;
 
         //- Flow rate profile relative to SOI []
-        const autoPtr<Function1<scalar>> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModel> sizeDistribution_;

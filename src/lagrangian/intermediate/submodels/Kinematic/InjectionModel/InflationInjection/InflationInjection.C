@@ -82,7 +82,11 @@ Foam::InflationInjection<CloudType>::InflationInjection
         )
     )
 {
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
+    growthRate_->userTimeToTime(time);
 
     if (selfSeed_)
     {

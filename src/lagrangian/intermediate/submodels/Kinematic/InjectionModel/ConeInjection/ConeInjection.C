@@ -106,7 +106,13 @@ Foam::ConeInjection<CloudType>::ConeInjection
     tanVec1_.setSize(positionAxis_.size());
     tanVec2_.setSize(positionAxis_.size());
 
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
+    Umag_->userTimeToTime(time);
+    thetaInner_->userTimeToTime(time);
+    thetaOuter_->userTimeToTime(time);
 
     // Normalise direction vector and determine direction vectors
     // tangential to injector axis direction

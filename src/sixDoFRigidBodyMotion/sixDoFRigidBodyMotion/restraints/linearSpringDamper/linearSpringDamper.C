@@ -92,7 +92,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpringDamper::restrain
         );
     }
 
-    scalar t = motion.time().value();
+    scalar t = motion.time().timeOutputValue();
 
     restraintPosition = motion.transform(refAttachmentPt_);
 

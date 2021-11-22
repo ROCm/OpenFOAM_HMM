@@ -221,8 +221,10 @@ void Foam::solarCalculator::initialise()
                 )
             );
 
-            directSolarRad_ = directSolarRads_->value(mesh_.time().value());
-            diffuseSolarRad_ = diffuseSolarRads_->value(mesh_.time().value());
+            directSolarRad_ =
+                directSolarRads_->value(mesh_.time().timeOutputValue());
+            diffuseSolarRad_ =
+                diffuseSolarRads_->value(mesh_.time().timeOutputValue());
             break;
         }
         case mSunLoadFairWeatherConditions:

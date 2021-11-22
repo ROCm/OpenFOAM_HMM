@@ -65,7 +65,10 @@ Foam::PatchInjection<CloudType>::PatchInjection
         )
     )
 {
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
 
     patchInjectionBase::updateMesh(owner.mesh());
 

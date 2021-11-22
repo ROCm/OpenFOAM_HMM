@@ -61,8 +61,8 @@ void Foam::Function1Types::ramp::writeEntries(Ostream& os) const
 
 void Foam::Function1Types::ramp::userTimeToTime(const Time& t)
 {
-    start_ = t.timeToUserTime(start_);
-    duration_ = t.timeToUserTime(duration_);
+    start_ = t.userTimeToTime(start_);
+    duration_ = t.userTimeToTime(duration_);
 }
 
 

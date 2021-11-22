@@ -83,6 +83,7 @@ void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
                     &this->owner().mesh()
                 )
             );
+            positionVsTime_->userTimeToTime(this->owner().time());
             break;
         }
         default:
@@ -117,6 +118,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
                     &this->owner().mesh()
                 )
             );
+            Pinj_->userTimeToTime(this->owner().time());
             break;
         }
         case flowType::ftFlowRateAndDischarge:
@@ -130,6 +132,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
                     &this->owner().mesh()
                 )
             );
+            Cd_->userTimeToTime(this->owner().time());
             break;
         }
         default:
@@ -221,7 +224,12 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
             << exit(FatalError);
     }
 
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
+    thetaInner_->userTimeToTime(time);
+    thetaOuter_->userTimeToTime(time);
 
     setInjectionMethod();
 
