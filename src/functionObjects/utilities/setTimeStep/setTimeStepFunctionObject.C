@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,7 @@ bool Foam::functionObjects::setTimeStepFunctionObject::read
 {
     timeFunctionObject::read(dict);
 
-    timeStepPtr_ = Function1<scalar>::New("deltaT", dict);
+    timeStepPtr_ = Function1<scalar>::New("deltaT", dict, &time_);
 
     // Ensure that adjustTimeStep is active
     if (!time_.controlDict().getOrDefault("adjustTimeStep", false))

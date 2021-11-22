@@ -37,7 +37,7 @@ Description
     It accepts primitive or dictionary entries for dispatching to different
     function types, but wraps unspecified types as "constant".
 
-    In the dictionary form, the coefficents are the dictionary itself.
+    In the dictionary form, the coefficients are the dictionary itself.
     This is arguably the more readable form.
     For example,
     \verbatim
@@ -49,7 +49,7 @@ Description
         }
     \endverbatim
 
-    In the primitive form, the coefficents are provided separately.
+    In the primitive form, the coefficients are provided separately.
     For example,
     \verbatim
         <entryName>   linearRamp;

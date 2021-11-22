@@ -34,7 +34,7 @@ void Foam::Function1Types::LimitRange<Type>::read(const dictionary& coeffs)
 {
     min_ = coeffs.get<scalar>("min");
     max_ = coeffs.get<scalar>("max");
-    value_ = Function1<Type>::New("value", coeffs);
+    value_ = Function1<Type>::New("value", coeffs, this->obrPtr_);
 }
 
 

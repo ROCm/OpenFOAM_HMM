@@ -373,7 +373,7 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
         (
             "spectralDistribution",
             coeffs,
-            &mesh_.time()
+            &mesh_
         )
     );
 

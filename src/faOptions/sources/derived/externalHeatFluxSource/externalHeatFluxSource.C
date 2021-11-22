@@ -74,7 +74,7 @@ Foam::fa::externalHeatFluxSource::externalHeatFluxSource
     Q_(0),
     q_(0),
     h_(0),
-    Ta_(),
+    Ta_(nullptr),
     emissivity_(dict.getOrDefault<scalar>("emissivity", 0))
 {
     fieldNames_.resize(1, TName_);
@@ -194,7 +194,7 @@ bool Foam::fa::externalHeatFluxSource::read(const dictionary& dict)
             case fixedHeatTransferCoeff:
             {
                 dict.readEntry("h", h_);
-                Ta_ = Function1<scalar>::New("Ta", dict);
+                Ta_ = Function1<scalar>::New("Ta", dict, &mesh_);
                 break;
             }
         }

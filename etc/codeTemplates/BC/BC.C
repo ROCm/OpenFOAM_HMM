@@ -78,7 +78,7 @@ CONSTRUCT
     scalarData_(dict.get<scalar>("scalarData")),
     data_(dict.get<TYPE>("data")),
     fieldData_("fieldData", dict, p.size()),
-    timeVsData_(Function1<TYPE>::New("timeVsData", dict)),
+    timeVsData_(Function1<TYPE>::New("timeVsData", dict, &this->db())),
     wordData_(dict.getOrDefault<word>("wordName", "wordDefault")),
     labelData_(-1),
     boolData_(false)

@@ -47,7 +47,7 @@ bool Foam::functionObjects::reference::calcType()
 
         autoPtr<Function1<Type>> valuePtr
         (
-            Function1<Type>::New("refValue", localDict_, &mesh_)
+            Function1<Type>::New("refValue", localDict_, &this->mesh_)
         );
 
         refValue.value() = valuePtr->value(this->time().value());

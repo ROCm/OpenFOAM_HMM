@@ -126,7 +126,7 @@ void Foam::radiation::fvDOM::initialise()
             (
                 "spectralDistribution",
                 coeffs_,
-                &mesh_.time()
+                &mesh_
             )
         );
 

@@ -56,7 +56,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
 :
     alphaContactAngleTwoPhaseFvPatchScalarField(p, iF, dict),
     TName_(dict.getOrDefault<word>("T", "T")),
-    theta0_(Function1<scalar>::New("theta0", dict))
+    theta0_(Function1<scalar>::New("theta0", dict, &db()))
 {
     evaluate();
 }

@@ -128,7 +128,7 @@ atmAlphatkWallFunctionFvPatchScalarField
             scalarMinMax::ge(SMALL)
         )
     ),
-    Pr_(Function1<scalar>::New("Pr", dict, &db().time())),
+    Pr_(Function1<scalar>::New("Pr", dict, &db())),
     Prt_(PatchFunction1<scalar>::New(p.patch(), "Prt", dict)),
     z0_(PatchFunction1<scalar>::New(p.patch(), "z0", dict))
 {

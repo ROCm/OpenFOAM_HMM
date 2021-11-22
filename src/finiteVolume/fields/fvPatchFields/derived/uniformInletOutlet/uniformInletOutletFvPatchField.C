@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,10 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
-    uniformInletValue_(Function1<Type>::New("uniformInletValue", dict))
+    uniformInletValue_
+    (
+        Function1<Type>::New("uniformInletValue", dict, &this->db())
+    )
 {
     this->patchType() = dict.getOrDefault<word>("patchType", word::null);
     this->refValue() =

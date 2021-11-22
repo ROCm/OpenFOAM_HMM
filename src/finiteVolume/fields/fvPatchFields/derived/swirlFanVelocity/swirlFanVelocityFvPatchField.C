@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,7 +155,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     rpm_
     (
         this->cyclicPatch().owner()
-      ? Function1<scalar>::New("rpm", dict)
+      ? Function1<scalar>::New("rpm", dict, &db())
       : nullptr
     ),
     rEff_(dict.getOrDefault<scalar>("rEff", 0)),

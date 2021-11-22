@@ -103,7 +103,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
         )
     ),
     alphaEffName_(dict.get<word>("alphaEff")),
-    Cp0_(Function1<scalar>::New("Cp0", dict, &db().time())),
+    Cp0_(Function1<scalar>::New("Cp0", dict, &db())),
     q_(PatchFunction1<scalar>::New(p.patch(), "q", dict))
 {
     if (dict.found("value") && dict.found("gradient"))

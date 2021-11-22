@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 )
 :
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
-    omega_(Function1<vector>::New("omega", dict))
+    omega_(Function1<vector>::New("omega", dict, &db()))
 {
     patchType() = dict.getOrDefault<word>("patchType", word::null);
     calcTangentialVelocity();

@@ -52,7 +52,7 @@ Foam::PatchFlowRateInjection<CloudType>::PatchFlowRateInjection
         (
             "concentration",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     parcelConcentration_

@@ -59,8 +59,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
-    D_(Function1<scalar>::New("D", dict)),
-    I_(Function1<scalar>::New("I", dict)),
+    D_(Function1<scalar>::New("D", dict, &db())),
+    I_(Function1<scalar>::New("I", dict, &db())),
     length_(dict.get<scalar>("length")),
     uniformJump_(dict.getOrDefault("uniformJump", false))
 {

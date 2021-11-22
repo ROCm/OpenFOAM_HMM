@@ -59,7 +59,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         (
             "flowRateProfile",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     Umag_
@@ -68,7 +68,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         (
             "Umag",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     thetaInner_
@@ -77,7 +77,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         (
             "thetaInner",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     thetaOuter_
@@ -86,7 +86,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
         (
             "thetaOuter",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     sizeDistribution_

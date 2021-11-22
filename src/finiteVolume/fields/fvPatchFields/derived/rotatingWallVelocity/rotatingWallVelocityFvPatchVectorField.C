@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +58,7 @@ rotatingWallVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(p, iF, dict, false),
     origin_(dict.lookup("origin")),
     axis_(dict.lookup("axis")),
-    omega_(Function1<scalar>::New("omega", dict))
+    omega_(Function1<scalar>::New("omega", dict, &db()))
 {
     if (dict.found("value"))
     {

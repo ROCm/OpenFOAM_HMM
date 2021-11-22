@@ -51,7 +51,7 @@ Foam::saturationModels::function1::function1
     saturationModel(db),
     function_
     (
-        Function1<scalar>::New("function", dict)
+        Function1<scalar>::New("function", dict, &db)
     )
 {}
 

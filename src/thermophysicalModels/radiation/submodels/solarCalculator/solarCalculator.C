@@ -207,7 +207,7 @@ void Foam::solarCalculator::initialise()
                 (
                     "directSolarRad",
                     dict_,
-                    &mesh_.time()
+                    &mesh_
                 )
             );
 
@@ -217,7 +217,7 @@ void Foam::solarCalculator::initialise()
                 (
                     "diffuseSolarRad",
                     dict_,
-                    &mesh_.time()
+                    &mesh_
                 )
             );
 

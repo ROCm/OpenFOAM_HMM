@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict, false),
-    profile_(Function1<Type>::New("profile", dict)),
+    profile_(Function1<Type>::New("profile", dict, &this->db())),
     dir_(dict.lookup("direction")),
     origin_(dict.get<scalar>("origin"))
 {

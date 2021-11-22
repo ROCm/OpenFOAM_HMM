@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +256,7 @@ Foam::MRFZone::MRFZone
     ),
     origin_(coeffs_.get<vector>("origin")),
     axis_(coeffs_.get<vector>("axis").normalise()),
-    omega_(Function1<scalar>::New("omega", coeffs_))
+    omega_(Function1<scalar>::New("omega", coeffs_, &mesh_))
 {
     if (cellZoneName_ == word::null)
     {

@@ -56,7 +56,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
         (
             "flowRateProfile",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     growthRate_
@@ -65,7 +65,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
         (
             "growthRate",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     newParticles_(),

@@ -343,12 +343,12 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     focalLaserPosition_
     (
-        Function1<point>::New("focalLaserPosition", *this)
+        Function1<point>::New("focalLaserPosition", *this, &mesh_)
     ),
 
     laserDirection_
     (
-        Function1<vector>::New("laserDirection", *this)
+        Function1<vector>::New("laserDirection", *this, &mesh_)
     ),
 
     focalLaserRadius_(get<scalar>("focalLaserRadius")),
@@ -359,7 +359,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     sigma_(0),
     I0_(0),
-    laserPower_(Function1<scalar>::New("laserPower", *this)),
+    laserPower_(Function1<scalar>::New("laserPower", *this, &mesh_)),
     powerDistribution_(),
 
     reflectionSwitch_(false),
@@ -441,11 +441,11 @@ Foam::radiation::laserDTRM::laserDTRM
 
     focalLaserPosition_
     (
-        Function1<point>::New("focalLaserPosition", *this)
+        Function1<point>::New("focalLaserPosition", *this, &mesh_)
     ),
     laserDirection_
     (
-        Function1<vector>::New("laserDirection", *this)
+        Function1<vector>::New("laserDirection", *this, &mesh_)
     ),
 
     focalLaserRadius_(get<scalar>("focalLaserRadius")),
@@ -456,7 +456,7 @@ Foam::radiation::laserDTRM::laserDTRM
 
     sigma_(0),
     I0_(0),
-    laserPower_(Function1<scalar>::New("laserPower", *this)),
+    laserPower_(Function1<scalar>::New("laserPower", *this, &mesh_)),
     powerDistribution_(),
 
     reflectionSwitch_(false),

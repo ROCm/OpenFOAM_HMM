@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,9 +76,15 @@ swirlInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(p, iF, dict),
     origin_(dict.lookup("origin")),
     axis_(dict.lookup("axis")),
-    axialVelocity_(Function1<scalar>::New("axialVelocity", dict)),
-    radialVelocity_(Function1<scalar>::New("radialVelocity", dict)),
-    tangentialVelocity_(Function1<scalar>::New("tangentialVelocity", dict))
+    axialVelocity_(Function1<scalar>::New("axialVelocity", dict, &db())),
+    radialVelocity_
+    (
+        Function1<scalar>::New("radialVelocity", dict, &db())
+    ),
+    tangentialVelocity_
+    (
+        Function1<scalar>::New("tangentialVelocity", dict, &db())
+    )
 {}
 
 

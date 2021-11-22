@@ -78,9 +78,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
     (
         dict.getOrDefault<word>("filmRegion", "surfaceFilmProperties")
     ),
-    GammaMean_(Function1<scalar>::New("GammaMean", dict)),
-    a_(Function1<scalar>::New("a", dict)),
-    omega_(Function1<scalar>::New("omega", dict))
+    GammaMean_(Function1<scalar>::New("GammaMean", dict, &db())),
+    a_(Function1<scalar>::New("a", dict, &db())),
+    omega_(Function1<scalar>::New("omega", dict, &db()))
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     psiName_(dict.getOrDefault<word>("psi", "none")),
     gamma_(psiName_ != "none" ? dict.get<scalar>("gamma") : 1),
-    p0_(Function1<scalar>::New("p0", dict))
+    p0_(Function1<scalar>::New("p0", dict, &db()))
 {
     if (dict.found("value"))
     {

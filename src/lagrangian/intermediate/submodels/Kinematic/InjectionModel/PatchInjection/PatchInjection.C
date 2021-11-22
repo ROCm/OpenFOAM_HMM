@@ -53,7 +53,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
         (
             "flowRateProfile",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     sizeDistribution_

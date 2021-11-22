@@ -33,8 +33,8 @@ License
 template<class Type>
 void Foam::Function1Types::Scale<Type>::read(const dictionary& coeffs)
 {
-    scale_ = Function1<scalar>::New("scale", coeffs);
-    value_ = Function1<Type>::New("value", coeffs);
+    scale_ = Function1<scalar>::New("scale", coeffs, this->obrPtr_);
+    value_ = Function1<Type>::New("value", coeffs, this->obrPtr_);
 }
 
 

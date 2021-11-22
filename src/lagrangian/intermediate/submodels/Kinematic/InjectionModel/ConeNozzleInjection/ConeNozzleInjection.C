@@ -80,7 +80,7 @@ void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
                 (
                     "position",
                     this->coeffDict(),
-                    &this->owner().db().time()
+                    &this->owner().mesh()
                 )
             );
             break;
@@ -114,7 +114,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
                 (
                     "Pinj",
                     this->coeffDict(),
-                    &this->owner().db().time()
+                    &this->owner().mesh()
                 )
             );
             break;
@@ -127,7 +127,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
                 (
                     "Cd",
                     this->coeffDict(),
-                    &this->owner().db().time()
+                    &this->owner().mesh()
                 )
             );
             break;
@@ -175,7 +175,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
         (
             "flowRateProfile",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     thetaInner_
@@ -184,7 +184,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
         (
             "thetaInner",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     thetaOuter_
@@ -193,7 +193,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
         (
             "thetaOuter",
             this->coeffDict(),
-            &owner.db().time()
+            &owner.mesh()
         )
     ),
     sizeDistribution_

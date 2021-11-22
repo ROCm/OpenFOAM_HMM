@@ -133,7 +133,7 @@ waxSolventEvaporation::waxSolventEvaporation
     YInfZero_(coeffDict_.getOrDefault("YInfZero", false)),
     activityCoeff_
     (
-        Function1<scalar>::New("activityCoeff", coeffDict_)
+        Function1<scalar>::New("activityCoeff", coeffDict_, &film.regionMesh())
     )
 {}
 

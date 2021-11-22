@@ -40,15 +40,21 @@ Foam::Function1Types::Sine<Type>::Sine
 :
     Function1<Type>(entryName, dict, obrPtr),
     t0_(dict.getOrDefault<scalar>("t0", 0)),
-    amplitude_(Function1<scalar>::NewIfPresent("amplitude", dict)),
-    period_(Function1<scalar>::NewIfPresent("period", dict)),
+    amplitude_
+    (
+        Function1<scalar>::NewIfPresent("amplitude", dict, word::null, obrPtr)
+    ),
+    period_
+    (
+        Function1<scalar>::NewIfPresent("period", dict, word::null, obrPtr)
+    ),
     frequency_(nullptr),
-    scale_(Function1<Type>::New("scale", dict)),
-    level_(Function1<Type>::New("level", dict))
+    scale_(Function1<Type>::New("scale", dict, obrPtr)),
+    level_(Function1<Type>::New("level", dict, obrPtr))
 {
     if (!period_)
     {
-        frequency_ = Function1<scalar>::New("frequency", dict);
+        frequency_ = Function1<scalar>::New("frequency", dict, obrPtr);
     }
 }
 

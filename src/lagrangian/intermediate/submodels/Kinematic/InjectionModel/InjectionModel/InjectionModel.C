@@ -345,7 +345,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
                 (
                     "massFlowRate",
                     this->coeffDict(),
-                    &owner.db().time()
+                    &owner.mesh()
                 )
             );
             massTotal_ = massFlowRate_->value(owner.db().time().value());
