@@ -92,8 +92,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codeStream_H
-#define codeStream_H
+#ifndef functionEntries_codeStream_H
+#define functionEntries_codeStream_H
 
 #include "functionEntry.H"
 

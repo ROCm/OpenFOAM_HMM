@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef includeEtcEntry_H
-#define includeEtcEntry_H
+#ifndef functionEntries_includeEtcEntry_H
+#define functionEntries_includeEtcEntry_H
 
 #include "functionEntry.H"
 

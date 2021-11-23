@@ -52,8 +52,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef removeEntry_H
-#define removeEntry_H
+#ifndef functionEntries_removeEntry_H
+#define functionEntries_removeEntry_H
 
 #include "functionEntry.H"
 

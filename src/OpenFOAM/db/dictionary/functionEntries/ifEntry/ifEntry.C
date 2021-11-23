@@ -50,13 +50,13 @@ namespace functionEntries
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 bool Foam::functionEntries::ifEntry::isTrue(ITstream& its)
 {
     Switch logic;
 
-    if (its.size() && its.first().isScalar())
+    if (its.peekFirst().isScalar())
     {
         // Use default rounding tolerance
         logic = Switch(its.first().scalarToken());
@@ -69,6 +69,8 @@ bool Foam::functionEntries::ifEntry::isTrue(ITstream& its)
     return logic;
 }
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::functionEntries::ifEntry::execute
 (

@@ -80,6 +80,15 @@ protected:
         template<class StringType>
         static List<StringType> readStringList(Istream& is);
 
+        //- Slurp a string until a closing '}' is found.
+        //  Track balanced bracket/brace pairs, with max stack depth of 60.
+        static bool continueReadUntilRightBrace
+        (
+            Istream& is,
+            std::string& str,
+            const bool stripComments = true
+        );
+
         //- No copy construct
         functionEntry(const functionEntry&) = delete;
 

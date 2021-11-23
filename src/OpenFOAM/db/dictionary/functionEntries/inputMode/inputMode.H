@@ -55,8 +55,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef inputMode_H
-#define inputMode_H
+#ifndef functionEntries_inputMode_H
+#define functionEntries_inputMode_H
 
 #include "entry.H"
 #include "functionEntry.H"

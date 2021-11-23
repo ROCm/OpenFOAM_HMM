@@ -66,7 +66,8 @@ class ISstream
 
     // Private Member Functions
 
-        //- Get the next valid character
+        //- Get the next valid (non-whitespace) character,
+        //- after skipping any C/C++ comments.
         char nextValid();
 
         //- No copy assignment
@@ -130,6 +131,18 @@ public:
         //- Discard until end of C-style comment '*/'
         //  \return False if stream exhausted before finding the comment end
         bool seekCommentEnd_Cstyle();
+
+        //- Raw, low-level get into a string.
+        //- Continues reading \b after an initial left-brace until it finds
+        //- the matching closing right-brace.
+        //  Tracks balanced pairs, trims out leading/trailing whitespace.
+        //
+        //  \return False if stream exhausted before finding closing brace
+        bool continueReadUntilRightBrace
+        (
+            std::string& str,
+            const bool stripComments = true
+        );
 
 
         // Read Functions

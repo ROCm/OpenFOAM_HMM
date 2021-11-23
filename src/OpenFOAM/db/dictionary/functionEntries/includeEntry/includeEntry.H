@@ -53,8 +53,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef includeEntry_H
-#define includeEntry_H
+#ifndef functionEntries_includeEntry_H
+#define functionEntries_includeEntry_H
 
 #include "functionEntry.H"
 

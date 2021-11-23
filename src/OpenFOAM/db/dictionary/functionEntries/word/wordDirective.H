@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,36 +24,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionEntries::calcEntry
+    Foam::functionEntries::wordDirective
 
 Description
-    Uses dynamic compilation to provide calculating functionality
-    for entering dictionary entries.
+    Converts/expands string content to a word.
+    This can be useful for composition of names.
 
-    E.g.
-
+    For example,
     \verbatim
-    a 1.0;
-    b 3;
-    c \#calc "$a/$b";
+    #word "some_prefix_solverInfo_${application}_${{10 * 5}}"
+    {
+        type    solverInfo;
+        libs    (utilityFunctionObjects);
+        fields  (".*");
+
+        returnName  #word solver$type;
+    }
     \endverbatim
 
-    Note the explicit trailing 0 ('1.0') to force a to be read (and written)
-    as a floating point number.
-
-Note
-    Internally this is just a wrapper around codeStream functionality - the
-    \#calc string gets used to construct a dictionary for codeStream.
-
 SourceFiles
-    calcEntry.C
+    wordDirective.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionEntries_calcEntry_H
-#define functionEntries_calcEntry_H
+#ifndef functionEntries_wordDirective_H
+#define functionEntries_wordDirective_H
 
-#include "codeStream.H"
+#include "functionEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,17 +60,17 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class calcEntry Declaration
+                        Class wordDirective Declaration
 \*---------------------------------------------------------------------------*/
 
-class calcEntry
+class wordDirective
 :
-    public codeStream
+    public functionEntry
 {
     // Private Member Functions
 
-    //- Evaluate dynamically compiled code, returning result as string
-    static string evaluate(const dictionary& parentDict, Istream& is);
+    //- Evaluate
+    static token evaluate(const dictionary& parentDict, Istream& is);
 
 
 public:
@@ -87,7 +83,7 @@ public:
         Istream& is
     );
 
-    //- Execute in a sub-dict context
+    //- Execute in a sub-dict context.
     static bool execute(dictionary& parentDict, Istream& is);
 };
 

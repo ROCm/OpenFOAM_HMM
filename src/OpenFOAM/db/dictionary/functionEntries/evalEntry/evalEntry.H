@@ -65,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef evalEntry_H
-#define evalEntry_H
+#ifndef functionEntries_evalEntry_H
+#define functionEntries_evalEntry_H
 
 #include "functionEntry.H"
 
@@ -97,6 +97,7 @@ class evalEntry
 
     //- Evaluate and return a token list
     static tokenList evaluate(const dictionary& parentDict, Istream& is);
+
 
 public:
 

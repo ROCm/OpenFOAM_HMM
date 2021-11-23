@@ -303,13 +303,15 @@ $(functionEntries)/calcEntry/calcEntry.C
 $(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/evalEntry/evalEntry.C
 $(functionEntries)/functionEntry/functionEntry.C
+$(functionEntries)/ifEntry/ifEntry.C
+$(functionEntries)/ifeqEntry/ifeqEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/inputMode/inputMode.C
+$(functionEntries)/message/messageDirective.C
 $(functionEntries)/removeEntry/removeEntry.C
-$(functionEntries)/ifeqEntry/ifeqEntry.C
-$(functionEntries)/ifEntry/ifEntry.C
+$(functionEntries)/word/wordDirective.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/baseIOdictionary.C

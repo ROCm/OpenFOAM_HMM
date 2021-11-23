@@ -47,6 +47,7 @@ namespace Foam
         execute,
         primitiveEntryIstream
     );
+
 } // End namespace Foam
 
 
@@ -58,6 +59,19 @@ Foam::token Foam::functionEntry::readLine(const word& key, Istream& is)
     dynamic_cast<ISstream&>(is).getLine(s);
 
     return token(string(key+s), is.lineNumber());
+}
+
+
+bool Foam::functionEntry::continueReadUntilRightBrace
+(
+    Istream& is,
+    std::string& str,
+    const bool stripComments
+)
+{
+    return
+        dynamic_cast<ISstream&>(is)
+            .continueReadUntilRightBrace(str, stripComments);
 }
 
 
