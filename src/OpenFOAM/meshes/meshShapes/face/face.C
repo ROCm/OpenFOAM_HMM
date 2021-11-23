@@ -287,14 +287,19 @@ int Foam::face::compare(const face& a, const face& b)
     const label sizeA = a.size();
     const label sizeB = b.size();
 
-    // Trivial reject: faces are different size
-    if (sizeA != sizeB || sizeA == 0)
+    if (sizeA != sizeB)
     {
+        // Trivial reject: faces have different sizes
         return 0;
+    }
+    else if (sizeA == 0)
+    {
+        // Both faces with zero vertices. Always identical
+        return 1;
     }
     else if (sizeA == 1)
     {
-        // Trivial: face with a single vertex
+        // Both faces with a single vertex. Simple check
         return (a[0] == b[0] ? 1 : 0);
     }
 
