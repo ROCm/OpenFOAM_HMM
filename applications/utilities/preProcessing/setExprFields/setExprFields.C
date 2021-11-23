@@ -53,15 +53,15 @@ Note
 
 using namespace Foam;
 
-using FieldAssociation = expressions::volumeExpr::FieldAssociation;
+using FieldAssociation = expressions::FieldAssociation;
 
 word fieldGeoType(const FieldAssociation geoType)
 {
     switch (geoType)
     {
-        case FieldAssociation::VOLUME_DATA : return "cells"; break;
-        case FieldAssociation::SURFACE_DATA : return "faces"; break;
         case FieldAssociation::POINT_DATA : return "points"; break;
+        case FieldAssociation::FACE_DATA : return "faces"; break;
+        case FieldAssociation::VOLUME_DATA : return "cells"; break;
         default: break;
     }
 
@@ -356,6 +356,7 @@ void evaluate
                 if (ptr)
                 {
                     conditionField = ptr->internalField();
+                    // VOLUME_DATA
                     break;
                 }
             }
@@ -366,7 +367,7 @@ void evaluate
                 if (ptr)
                 {
                     conditionField = ptr->internalField();
-                    conditionDataType = FieldAssociation::SURFACE_DATA;
+                    conditionDataType = FieldAssociation::FACE_DATA;
                     break;
                 }
             }

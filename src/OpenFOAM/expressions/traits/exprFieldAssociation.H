@@ -23,28 +23,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::expressions::FieldAssociation
+
+Description
+    The field association for mesh (patch/volume) values.
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef expressions_FieldAssociation_H
+#define expressions_FieldAssociation_H
 
-inline Foam::label Foam::expressions::patchExpr::parseDriver::size
-(
-    const FieldAssociation geoType
-) const
+namespace Foam
 {
-    switch (geoType)
-    {
-        case FieldAssociation::POINT_DATA :
-            return patch_.patch().nPoints();
+namespace expressions
+{
 
-        case FieldAssociation::FACE_DATA :
-            return patch_.patch().size();
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-        default:
-            break;
-    }
-    return 0;
-}
+enum FieldAssociation : unsigned char
+{
+    NO_DATA = 0,         //!< No data
+    POINT_DATA = 1,      //!< Point data
+    FACE_DATA = 2,       //!< Face data
+    VOLUME_DATA = 4      //!< Volume data
+};
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace expressions
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

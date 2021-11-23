@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,9 +77,9 @@ public:
     enum FieldAssociation
     {
         NO_DATA = 0,            //!< No associated data
-        FACE_DATA = 0x1,        //!< Data associated with faces
-        POINT_DATA = 0x2,       //!< Data associated with points
-        FACE_POINT_DATA = 0x3   //!< Data associated with faces and points
+        FACE_DATA = 1,          //!< Data associated with faces
+        POINT_DATA = 2,         //!< Data associated with points
+        FACE_OR_POINT_DATA = 3  //!< Data associated with faces or points
     };
 
 

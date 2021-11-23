@@ -67,6 +67,7 @@ SourceFiles
 
 #include "patchExprFwd.H"
 #include "fvExprDriver.H"
+#include "exprFieldAssociation.H"
 #include "Enum.H"
 #include "volFields.H"
 #include "surfaceFields.H"

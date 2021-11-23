@@ -57,12 +57,8 @@ SourceFiles
 #ifndef expressions_exprResult_H
 #define expressions_exprResult_H
 
-#include "vector.H"
-#include "tensor.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
+#include "exprTraits.H"
 #include "dimensionedType.H"
-#include "IOField.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -59,10 +59,12 @@ SourceFiles
 #ifndef expressions_exprDriver_H
 #define expressions_exprDriver_H
 
-#include "exprString.H"
 #include "exprResult.H"
+#include "exprString.H"
+#include "exprTraits.H"
 #include "pointField.H"
 #include "primitiveFields.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -84,6 +84,7 @@ SourceFiles
 
 #include "volumeExprFwd.H"
 #include "fvExprDriver.H"
+#include "exprFieldAssociation.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "pointFields.H"
@@ -126,7 +127,7 @@ protected:
         bool isLogical_;
 
         //- A volume/surface/point field
-        enum FieldAssociation fieldGeoType_;
+        expressions::FieldAssociation fieldGeoType_;
 
         //- The result dimensions
         dimensionSet resultDimension_;
@@ -259,37 +260,37 @@ public:
         //- The result type-name.
         //  Normally volScalarField, surfaceVectorField etc,
         //  but Scalar is modified for logical as volScalarField etc
-        const word& resultType() const
+        const word& resultType() const noexcept
         {
             return resultType_;
         }
 
         //- The geometric field association
-        FieldAssociation fieldAssociation() const
+        FieldAssociation fieldAssociation() const noexcept
         {
             return fieldGeoType_;
         }
 
         //- A logical (bool-like) field. Actually stored as a scalar.
-        bool isLogical() const
+        bool isLogical() const noexcept
         {
             return isLogical_;
         }
 
         //- A volume field
-        bool isVolumeData() const
+        bool isVolumeData() const noexcept
         {
             return fieldGeoType_ == FieldAssociation::VOLUME_DATA;
         }
 
         //- A surface field
-        bool isSurfaceData() const
+        bool isFaceData() const noexcept
         {
-            return fieldGeoType_ == FieldAssociation::SURFACE_DATA;
+            return fieldGeoType_ == FieldAssociation::FACE_DATA;
         }
 
         //- A point field
-        bool isPointData() const
+        bool isPointData() const noexcept
         {
             return fieldGeoType_ == FieldAssociation::POINT_DATA;
         }
