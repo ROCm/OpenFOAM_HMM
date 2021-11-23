@@ -95,11 +95,10 @@ const Foam::fvMesh* Foam::expressions::fvExprDriver::resetDefaultMesh
 Foam::expressions::fvExprDriver::fvExprDriver
 (
     enum exprDriver::searchControls search,
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
-    expressions::exprDriver(search, dict, ts),
+    expressions::exprDriver(search, dict),
     globalScopes_(),
     delayedVariables_(),
     storedVariables_(),
@@ -126,11 +125,10 @@ Foam::expressions::fvExprDriver::fvExprDriver
 
 Foam::expressions::fvExprDriver::fvExprDriver
 (
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
-    expressions::exprDriver(dict, ts),
+    expressions::exprDriver(dict),
     globalScopes_(),
     delayedVariables_(),
     storedVariables_(),

@@ -130,6 +130,9 @@ protected:
         //- Reference to the time-state
         mutable const TimeState* timeStatePtr_;
 
+        //- Pointer to an object registry (for functions etc).
+        const objectRegistry* obrPtr_;
+
 
     // Controls, tracing etc.
 
@@ -274,19 +277,14 @@ public:
         explicit exprDriver
         (
             enum searchControls search = searchControls::DEFAULT_SEARCH,
-            const dictionary& dict = dictionary::null,
-            const TimeState* ts = nullptr
+            const dictionary& dict = dictionary::null
         );
 
         //- Copy construct
         exprDriver(const exprDriver& rhs);
 
         //- Construct from a dictionary
-        explicit exprDriver
-        (
-            const dictionary& dict,
-            const TimeState* ts = nullptr
-        );
+        explicit exprDriver(const dictionary& dict);
 
 
     //- Destructor
@@ -308,7 +306,7 @@ public:
         }
 
         //- Reference to the current time-state (can be nullptr)
-        const TimeState* timeState() const;
+        const TimeState* timeState() const noexcept;
 
         //- The current time value
         virtual scalar timeValue() const;
@@ -347,6 +345,15 @@ public:
         {
             return result_.valueType();
         }
+
+
+    // External References
+
+        //- Reset the objectRegistry (for functions)
+        void resetDb(const objectRegistry* obrPtr = nullptr);
+
+        //- Reset the objectRegistry (for functions)
+        void resetDb(const objectRegistry& db);
 
 
     // Specials

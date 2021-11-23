@@ -365,19 +365,14 @@ public:
         (
             enum exprDriver::searchControls search =
                 exprDriver::searchControls::DEFAULT_SEARCH,
-            const dictionary& dict = dictionary::null,
-            const TimeState* ts = nullptr
+            const dictionary& dict = dictionary::null
         );
 
         //- Copy construct
         fvExprDriver(const fvExprDriver&);
 
         //- Construct from a dictionary
-        explicit fvExprDriver
-        (
-            const dictionary& dict,
-            const TimeState* ts = nullptr
-        );
+        explicit fvExprDriver(const dictionary& dict);
 
 
         //- Return a reference to the selected value driver

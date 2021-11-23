@@ -29,7 +29,7 @@ License
 #include "exprDriver.H"
 #include "expressionEntry.H"
 #include "stringOps.H"
-#include "TimeState.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -115,34 +115,40 @@ void Foam::expressions::exprDriver::resetTimeReference(const TimeState& ts)
 }
 
 
+void Foam::expressions::exprDriver::resetDb(const objectRegistry* obrPtr)
+{
+    obrPtr_ = obrPtr;
+}
+
+
+void Foam::expressions::exprDriver::resetDb(const objectRegistry& db)
+{
+    resetDb(&db);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::exprDriver::exprDriver
 (
     enum searchControls search,
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
     dict_(dict),
     result_(),
     variableStrings_(),
-    variables_(),
+    variables_(16),
     arg1Value_(0),
-    timeStatePtr_(ts),
+    timeStatePtr_(nullptr),
+    obrPtr_(nullptr),
     stashedTokenId_(0),
 
     // Controls
     debugScanner_(dict.getOrDefault("debugScanner", false)),
     debugParser_(dict.getOrDefault("debugParser", false)),
-    allowShadowing_
-    (
-        dict.getOrDefault("allowShadowing", false)
-    ),
-    prevIterIsOldTime_
-    (
-        dict.getOrDefault("prevIterIsOldTime", false)
-    ),
+    allowShadowing_(dict.getOrDefault("allowShadowing", false)),
+    prevIterIsOldTime_(dict.getOrDefault("prevIterIsOldTime", false)),
     searchCtrl_(search)
 {}
 
@@ -158,8 +164,10 @@ Foam::expressions::exprDriver::exprDriver
     variables_(rhs.variables_),
     arg1Value_(rhs.arg1Value_),
     timeStatePtr_(rhs.timeStatePtr_),
+    obrPtr_(rhs.obrPtr_),
     stashedTokenId_(0),
 
+    // Controls
     debugScanner_(rhs.debugScanner_),
     debugParser_(rhs.debugParser_),
     allowShadowing_(rhs.allowShadowing_),
@@ -171,15 +179,13 @@ Foam::expressions::exprDriver::exprDriver
 
 Foam::expressions::exprDriver::exprDriver
 (
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
     exprDriver
     (
         searchControls(exprDriver::getSearchControls(dict)),
-        dict,
-        ts
+        dict
     )
 {
     readDict(dict);
@@ -188,9 +194,17 @@ Foam::expressions::exprDriver::exprDriver
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::TimeState* Foam::expressions::exprDriver::timeState() const
+const Foam::TimeState* Foam::expressions::exprDriver::timeState() const noexcept
 {
-    return timeStatePtr_;
+    if (timeStatePtr_)
+    {
+        return timeStatePtr_;
+    }
+    else if (obrPtr_)
+    {
+        return &(obrPtr_->time());
+    }
+    return nullptr;
 }
 
 
@@ -199,6 +213,10 @@ Foam::scalar Foam::expressions::exprDriver::timeValue() const
     if (timeStatePtr_)
     {
         return timeStatePtr_->value();
+    }
+    else if (obrPtr_)
+    {
+        return obrPtr_->time().value();
     }
     return 0;
 }
@@ -209,6 +227,10 @@ Foam::scalar Foam::expressions::exprDriver::deltaT() const
     if (timeStatePtr_)
     {
         return timeStatePtr_->deltaT().value();
+    }
+    else if (obrPtr_)
+    {
+        return obrPtr_->time().deltaT().value();
     }
     return 0;
 }

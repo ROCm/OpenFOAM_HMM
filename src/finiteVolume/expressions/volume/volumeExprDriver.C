@@ -81,22 +81,6 @@ addNamedToRunTimeSelectionTable
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-static inline const TimeState* lookupTimeState
-(
-    const polyMesh& m
-)
-{
-    return &static_cast<const TimeState&>(m.time());
-}
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
@@ -106,13 +90,16 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
+    expressions::fvExprDriver(dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
     fieldGeoType_(NO_DATA),
     resultDimension_()
-{}
+{
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
+}
 
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
@@ -129,7 +116,8 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
     fieldGeoType_(NO_DATA),
     resultDimension_()
 {
-    resetTimeReference(mesh_.time());  // Extra safety
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
 }
 
 
@@ -152,13 +140,16 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
+    expressions::fvExprDriver(dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
     fieldGeoType_(NO_DATA),
     resultDimension_()
-{}
+{
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

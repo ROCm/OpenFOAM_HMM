@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2010-2018
+    Copyright (C) 2010-2018 Bernhard Gschaider
     Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -201,9 +201,8 @@ bool Foam::expressions::exprDriver::isLocalVariable
         const exprResult& var = variable(name);
 
         DebugInfo
-            << " - found (" << var.valueType() << ' '
-            << var.isPointData() << ')';
-
+            << " - found (" << var.valueType()
+            << (var.isPointData() ? " point" : "") << ')';
 
         good = (var.isType<Type>() && var.isPointData(wantPointData));
 
