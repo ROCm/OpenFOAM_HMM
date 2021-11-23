@@ -24,18 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::LimitRange
+    Foam::Function1Types::InputValueMapper
 
 Description
-    Function1 wrapper that limits the input range of another Function1
+    Function1 wrapper that maps the input value prior to it being used by
+    another Function1.
 
     Example usage for limiting a polynomial:
     \verbatim
         <entryName>
         {
-            type limitRange;
-            min  0.4;
-            max  1.4;
+            type            inputValueMapper;
+            mode            minMax;
+
+            min             0.4;
+            max             1.4;
 
             value polynomial
             (
@@ -53,18 +56,24 @@ Description
     - poly(x) for 0.4 < x < 1.4.
 
 
-    Example usage for limiting a file-based table:
+    Example usage for supplying a patch mass flux for a table lookup:
     \verbatim
         <entryName>
         {
-            type limitRange;
-            min  0.4;
-            max  1.4;
+            type            inputValueMapper;
+            mode            function;
+
+            function
+            {
+                type            functionObjectValue;
+                functionObject  surfaceFieldValue1;
+                functionObjectResult sum(outlet,phi);
+            }
 
             value
             {
-                type table;
-                file "<system>/fanCurve.txt";
+                type        table;
+                file        "<system>/fanCurve.txt";
             }
         }
     \endverbatim
@@ -72,20 +81,34 @@ Description
     Where:
     \table
         Property | Description                                  | Required
-        min      | Minimum input value                          | yes
-        max      | Maximum input value                          | yes
+        mode     | Mapping mode (see below)                     | yes
+        function | Mapping Function1                            | no*
+        min      | Minimum input value                          | no*
+        max      | Maximum input value                          | no*
         value    | Function of type Function1<Type>             | yes
     \endtable
 
+    Mapping modes include
+    - none     : the input value is simply passed to the 'value' Function1
+    - function : the input value is passed through the 'function' Function1
+                 before being passed to the 'value' Function1
+    - minMax   : limits the input value to 'min' and 'max' values before being
+                 passed to the 'value' Function1
+
+Note
+    Replaces the LimitRange Function1 (v2106 and earlier)
+
 SourceFiles
-    LimitRange.C
+    InputValueMapper.C
+    InputValueMapperI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_LimitRange_H
-#define Function1Types_LimitRange_H
+#ifndef Function1Types_InputValueMapper_H
+#define Function1Types_InputValueMapper_H
 
 #include "Function1.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,24 +118,56 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class LimitRange Declaration
+                      Class InputValueMapper Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class LimitRange
+class InputValueMapper
 :
     public Function1<Type>
 {
+public:
+
+    // Public Enumerations
+
+        //- Input value mapping mode
+        enum class mappingMode
+        {
+            NONE,
+            FUNCTION1,
+            MINMAX
+        };
+
+        //- Names for the input value  mapping modes
+        static const Enum<mappingMode> mappingModeNames_;
+
+
+private:
+
     // Private Data
 
-        //- Minimum input value
-        scalar min_;
+        //- Mapping mode
+        mappingMode mappingMode_;
 
-        //- Maximum input value
-        scalar max_;
+        // Function1 mapping
 
-        //- Value function
-        autoPtr<Function1<Type>> value_;
+            //- Input value Function1
+            autoPtr<Function1<scalar>> mappingValuePtr_;
+
+
+        // Min/max mapping
+
+            //- Minimum input value
+            scalar min_;
+
+            //- Maximum input value
+            scalar max_;
+
+
+        // Function being wrapped
+
+            //- Value function
+            autoPtr<Function1<Type>> value_;
 
 
     // Private Member Functions
@@ -124,19 +179,19 @@ class LimitRange
 public:
 
     //- Runtime type information
-    TypeName("limitRange");
+    TypeName("inputValueMapper");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const LimitRange<Type>&) = delete;
+        void operator=(const InputValueMapper<Type>&) = delete;
 
 
     // Constructors
 
         //- Construct from entry name, dictionary and optional registry
-        LimitRange
+        InputValueMapper
         (
             const word& entryName,
             const dictionary& dict,
@@ -144,11 +199,11 @@ public:
         );
 
         //- Copy construct
-        explicit LimitRange(const LimitRange<Type>& rhs);
+        explicit InputValueMapper(const InputValueMapper<Type>& rhs);
 
 
     //- Destructor
-    virtual ~LimitRange() = default;
+    virtual ~InputValueMapper() = default;
 
 
     // Member Functions
@@ -174,10 +229,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "LimitRangeI.H"
+#include "InputValueMapperI.H"
 
 #ifdef NoRepository
-    #include "LimitRange.C"
+    #include "InputValueMapper.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

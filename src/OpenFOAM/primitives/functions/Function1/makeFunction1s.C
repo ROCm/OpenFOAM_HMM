@@ -38,7 +38,7 @@ License
 #include "Table.H"
 #include "TableFile.H"
 #include "Scale.H"
-#include "LimitRange.H"
+#include "InputValueMapper.H"
 #include "FunctionObjectValue.H"
 #include "fieldTypes.H"
 
@@ -58,7 +58,7 @@ License
     makeFunction1Type(Table, Type);                                            \
     makeFunction1Type(TableFile, Type);                                        \
     makeFunction1Type(Scale, Type);                                            \
-    makeFunction1Type(LimitRange, Type);                                       \
+    makeFunction1Type(InputValueMapper, Type);                                 \
     makeFunction1Type(FunctionObjectValue, Type);
 
 #define makeFieldFunction1s(Type)                                              \

@@ -41,7 +41,8 @@ inline Type Foam::Function1Types::FunctionObjectValue<Type>::value
     {
         if (haveDefaultValue_)
         {
-            Info<< "    Function object " << foName_
+            DebugInfo
+                << "    Function object " << foName_
                 << " not found; using default value " << defaultValue_
                 << endl;
 
@@ -59,7 +60,8 @@ inline Type Foam::Function1Types::FunctionObjectValue<Type>::value
     {
         if (haveDefaultValue_)
         {
-            Info<< "    Function object " << foName_
+            DebugInfo
+                << "    Function object " << foName_
                 << " result " << foResultName_
                 << " not found; using default value " << defaultValue_
                 << endl;
@@ -75,9 +77,13 @@ inline Type Foam::Function1Types::FunctionObjectValue<Type>::value
             << exit(FatalError);
     }
 
-    Info<< "    Using " << foName_ << " function object value" << endl;
+    Type value = props.template getObjectResult<Type>(foName_, foResultName_);
 
-    return props.template getObjectResult<Type>(foName_, foResultName_);
+    DebugInfo
+        << "    Using " << foName_ << " function object value: " << value
+        << endl;
+
+    return value;
 }
 
 
