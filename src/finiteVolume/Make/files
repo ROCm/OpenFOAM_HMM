@@ -241,6 +241,7 @@ $(derivedFvPatchFields)/swirlFanVelocity/swirlFanVelocityFvPatchField.C
 $(derivedFvPatchFields)/acousticWaveTransmissive/acousticWaveTransmissiveFvPatchFields.C
 $(derivedFvPatchFields)/prghPermeableAlphaTotalPressure/prghPermeableAlphaTotalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/pressurePermeableAlphaInletOutletVelocity/pressurePermeableAlphaInletOutletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/electrostaticDeposition/electrostaticDepositionFvPatchScalarField.C
 
 $(derivedFvPatchFields)/mappedMixed/mappedMixedFvPatchFields.C
 $(derivedFvPatchFields)/mappedField/Sampled/makeSampledPatchFunction1s.C
