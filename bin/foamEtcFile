@@ -46,6 +46,9 @@
 #     The '-show-api' and '-show-patch' options extract values from
 #     the "META-INFO/api-info" file
 #
+#     The '-show-build' options extract values from
+#     the "META-INFO/build-info" file
+#
 # SeeAlso
 #     META-INFO/README.md for other routines that also use META-INFO.
 #
@@ -71,6 +74,7 @@ options:
   -etc=[DIR]        set/unset FOAM_CONFIG_ETC for alternative etc directory
   -show-api         Print META-INFO api value and exit
   -show-patch       Print META-INFO patch value and exit
+  -show-build       Print META-INFO build value and exit
   -with-api=NUM     Specify alternative api value to search with
   -quiet (-q)       Suppress all normal output
   -silent (-s)      Suppress stderr, except -csh-verbose, -sh-verbose output
@@ -155,6 +159,14 @@ getApiInfo()
 }
 
 
+# Get 'build' from META-INFO/build-info
+getBuildValue()
+{
+    value="$(sed -ne 's@^build *= *\([^ ]*\).*@\1@p' "$projectDir"/META-INFO/build-info 2>/dev/null)"
+    echo "$value"
+}
+
+
 #-------------------------------------------------------------------------------
 unset shellOutput verboseOutput
 unset optAll optConfig optList projectApi
@@ -175,6 +187,10 @@ do
         ;;
     -show-patch)  # Show patch level and exit
         getApiInfo patch
+        exit $?
+        ;;
+    -show-build)  # Show build information and exit
+        getBuildValue
         exit $?
         ;;
     -with-api=*)

@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -68,26 +68,48 @@ then
     # Some feedback
     if [ -n "$PS1" ] && [ -d "$WM_PROJECT_DIR" ]
     then
-        info="$("$WM_PROJECT_DIR"/bin/foamEtcFile -show-patch 2>/dev/null)"
+        _foam_api="$("$WM_PROJECT_DIR"/bin/foamEtcFile -show-api 2>/dev/null)"
+        _foam_patch="$("$WM_PROJECT_DIR"/bin/foamEtcFile -show-patch 2>/dev/null)"
+        _foam_build="$("$WM_PROJECT_DIR"/bin/foamEtcFile -show-build 2>/dev/null)"
 
-        # echo "Using: OpenFOAM-$WM_PROJECT_VERSION ($FOAM_API${info:+ patch=$info}) - visit www.openfoam.com" 1>&2
-        echo "Using: OpenFOAM-$WM_PROJECT_VERSION${info:+ (patch=$info)} - visit www.openfoam.com" 1>&2
+        if [ "${_foam_patch:-0}" = 0 ]
+        then
+            unset _foam_patch
+        fi
+        if [ -n "$_foam_build" ]
+        then
+            # Everything there - format like binary -help output
+            _foam_build="${_foam_build}${_foam_patch:+ (patch=${_foam_patch})}"
+            _foam_verinfo="${_foam_api}"
+        else
+            # Missing build info - combine api and patch info together
+            _foam_verinfo="${_foam_api}${_foam_patch:+ patch=${_foam_patch}}"
+        fi
+
+        echo "Using: OpenFOAM-$WM_PROJECT_VERSION (${_foam_verinfo}) - visit www.openfoam.com" 1>&2
+        if [ -n "$_foam_build" ]
+        then
+            echo "Build: ${_foam_build}" 1>&2
+        fi
         echo "Arch:  $WM_OPTIONS (mpi=$FOAM_MPI)" 1>&2
+        # Arch:  LSB;label=32;scalar=64
 
-        ## echo "$WM_PROJECT_DIR" 1>&2
         ## echo 1>&2
 
         # Set prompt as reminder that this is a shell session
 
         # Chalmers likes this one:
-        # PS1="OpenFOAM${FOAM_API:+-$FOAM_API}:"'$(foamPwd)\n\u\$ '
+        # PS1="openfoam${_foam_api}:"'$(foamPwd)\n\u\$ '
 
-        PS1="OpenFOAM${FOAM_API:+-$FOAM_API}:"'\w/\n\u\$ '
+        PS1="openfoam${_foam_api}:"'\w/\n\u\$ '
+        unset _foam_api _foam_patch _foam_build _foam_verinfo
     fi
 else
     echo "Could not locate OpenFOAM etc/bashrc in '$projectDir'" 1>&2
 fi
 
+echo 1>&2
+echo "openfoam = $WM_PROJECT_DIR" 1>&2
 echo "OpenFOAM shell session - use exit to quit" 1>&2
 echo 1>&2
 
