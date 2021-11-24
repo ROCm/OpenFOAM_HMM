@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,6 +120,7 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
 }
 
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::humidityTemperatureCoupledMixedFvPatchScalarField::
@@ -159,7 +160,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     fluid_(false),
     cp_(patch().size(), Zero),
     thickness_(patch().size(), Zero),
-    rho_(patch().size(), Zero)
+    rho_(patch().size(), Zero),
+    thicknessLayers_(0),
+    kappaLayers_(0)
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -199,7 +202,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     fluid_(psf.fluid_),
     cp_(psf.cp_, mapper),
     thickness_(psf.thickness_, mapper),
-    rho_(psf.rho_, mapper)
+    rho_(psf.rho_, mapper),
+    thicknessLayers_(psf.thicknessLayers_),
+    kappaLayers_(psf.kappaLayers_)
 {}
 
 
@@ -234,7 +239,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     fluid_(false),
     cp_(patch().size(), Zero),
     thickness_(patch().size(), Zero),
-    rho_(patch().size(), Zero)
+    rho_(patch().size(), Zero),
+    thicknessLayers_(0),
+    kappaLayers_(0)
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -252,6 +259,11 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     if (massModeTypeNames_.readIfPresent("mode", dict, mode_))
     {
         fluid_ = true;
+    }
+
+    if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
+    {
+        dict.readEntry("kappaLayers", kappaLayers_);
     }
 
     if (fluid_)
@@ -357,7 +369,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     fluid_(psf.fluid_),
     cp_(psf.cp_),
     thickness_(psf.thickness_),
-    rho_(psf.rho_)
+    rho_(psf.rho_),
+    thicknessLayers_(psf.thicknessLayers_),
+    kappaLayers_(psf.kappaLayers_)
 {}
 
 
@@ -468,6 +482,16 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
     myKDelta_ = K*patch().deltaCoeffs();
 
+    if (thicknessLayers_.size() > 0)
+    {
+        myKDelta_ = 1.0/myKDelta_;
+        forAll(thicknessLayers_, iLayer)
+        {
+            myKDelta_ += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+        }
+        myKDelta_ = 1.0/myKDelta_;
+    }
+
     scalarField dm(patch().size(), Zero);
 
     // Fluid Side
@@ -484,6 +508,8 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
             scalarField hfg(patch().size(), Zero);
             scalarField htc(patch().size(), GREAT);
             scalarField liquidRho(patch().size(), Zero);
+            scalarField Tdew(patch().size(), Zero);
+            scalarField RH(patch().size(), Zero);
 
             fixedGradientFvPatchField<scalar>& Yp =
                 const_cast<fixedGradientFvPatchField<scalar>&>
@@ -537,25 +563,26 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                 const scalar invMwmean =
                         Yi[faceI]/Mv + (1.0 - Yi[faceI])/Mcomp_;
                 const scalar Xv = Yi[faceI]/invMwmean/Mv;
-                const scalar RH = min(Xv*pf/pSat, 1.0);
+                RH[faceI] = min(Xv*pf/pSat, 1.0);
 
                 scalar RHmin = 0.01;
-                scalar Tdew = -GREAT;
+                Tdew[faceI] = -GREAT;
 
-                if (RH > RHmin)
+                if (RH[faceI] > RHmin)
                 {
                     scalar b = 243.5;
                     scalar c = 17.65;
                     scalar TintDeg = Tint - 273;
-                    Tdew =
-                        b*(log(RH) + (c*TintDeg)/(b + TintDeg))
-                       /(c - log(RH) - ((c*TintDeg)/(b + TintDeg))) + 273;
+                    Tdew[faceI] =
+                        b*(log(RH[faceI]) + (c*TintDeg)/(b + TintDeg))
+                       /(c - log(RH[faceI]) - ((c*TintDeg)/(b + TintDeg)))
+                       + 273;
                 }
 
                 if
                 (
-                    Tf < Tdew
-                 && RH > RHmin
+                    Tf < Tdew[faceI]
+                 && RH[faceI] > RHmin
                  && (
                         mode_ == mtCondensation
                      || mode_ == mtCondensationAndEvaporation
@@ -613,7 +640,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
                     htc[faceI] = htcCondensation(TSat, Re)*nbrK[faceI]/L_;
                 }
-                else if (Tf > Tdew && Tf < Tvap_ && mass_[faceI] > 0.0)
+                else if (Tf > Tdew[faceI] && Tf < Tvap_ && mass_[faceI] > 0.0)
                 {
                     htc[faceI] = htcCondensation(TSat, Re)*nbrK[faceI]/L_;
                 }
@@ -649,6 +676,15 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
 
             // Heat flux due to change of phase [W/m2]
             dmHfg_ = dm*hfg;
+
+            // Output RH and Tdew
+            scalarField& bRH =
+                thicknessField("RH", refCast<const fvMesh>(mesh));
+            bRH = RH;
+
+            scalarField& bTdew =
+                thicknessField("Tdew", refCast<const fvMesh>(mesh));
+            bTdew = Tdew;
         }
         else
         {
@@ -761,6 +797,12 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
         word liq = "liquid";
         os << token::TAB << token::TAB << liq;
         liquidDict_.write(os);
+    }
+
+    if (thicknessLayers_.size())
+    {
+        thicknessLayers_.writeEntry("thicknessLayers", os);
+        kappaLayers_.writeEntry("kappaLayers", os);
     }
 
     temperatureCoupledBase::write(os);
