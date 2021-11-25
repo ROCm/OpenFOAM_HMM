@@ -1982,7 +1982,7 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 //                }
 //            }
 //
-//            forAllConstIter(Map<labelList>, cellToFaces, iter)
+//            forAllConstIters(cellToFaces, iter)
 //            {
 //                if (iter().size() == 2)
 //                {

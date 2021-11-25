@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,11 +111,8 @@ bool Foam::loopControl::checkConverged() const
         const fvMesh& regionMesh = *(meshIter.val());
 
         const dictionary& solverDict = regionMesh.solverPerformanceDict();
-
-        forAllConstIters(solverDict, iter)
+        for (const entry& dataDictEntry : solverDict)
         {
-            const entry& dataDictEntry = *iter;
-
             const word& variableName = dataDictEntry.keyword();
 
             const scalar absTol =

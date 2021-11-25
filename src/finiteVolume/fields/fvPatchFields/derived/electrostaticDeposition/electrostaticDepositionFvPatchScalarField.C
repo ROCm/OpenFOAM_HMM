@@ -236,19 +236,18 @@ electrostaticDepositionFvPatchScalarField
         sigmas_.setSize(phasesDict_.size());
 
         label phasei = 0;
-        forAllConstIters(phasesDict_, iter)
+        for (const entry& dEntry : phasesDict_)
         {
-            const word& key = iter().keyword();
+            const word& key = dEntry.keyword();
 
-            if (!phasesDict_.isDict(key))
+            if (!dEntry.isDict())
             {
-                FatalErrorInFunction
-                    << "Found non-dictionary entry " << iter()
-                    << " in top-level dictionary " << phasesDict_
-                    << exit(FatalError);
+                FatalIOErrorInFunction(phasesDict_)
+                    << "Entry " << key << " is not a dictionary" << nl
+                    << exit(FatalIOError);
             }
 
-            const dictionary& subDict = phasesDict_.subDict(key);
+            const dictionary& subDict = dEntry.dict();
 
             phaseNames_[phasei] = key;
 
