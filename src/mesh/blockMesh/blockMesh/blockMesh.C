@@ -271,7 +271,12 @@ Foam::blockMesh::blockMesh
 {
     // Command-line options have precedence over dictionary setting
 
-    if (!verbose_)
+    if (verbose_ < 0)
+    {
+        // Forced as 'off'
+        verbose_ = 0;
+    }
+    else if (!verbose_)
     {
         verbose_ = meshDict_.getOrDefault("verbose", verboseOutput);
     }

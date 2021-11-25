@@ -75,6 +75,7 @@ Usage
 
 #include "blockMesh.H"
 #include "foamVtkInternalMeshWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "attachPolyTopoChanger.H"
 #include "polyTopoChange.H"
 #include "cyclicPolyPatch.H"
