@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Version:  v2106
+   \\    /   O peration     | Version:  v2112
     \\  /    A nd           | Website:  www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
@@ -15,11 +15,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-type            dsmcFields;
-libs            ("liblagrangianFunctionObjects.so");
+type    dsmcFields;
+libs    ("liblagrangianFunctionObjects.so");
 
-fields          (rhoNMean rhoMMean momentumMean linearKEMean internalEMean
-                 iDofMean fDMean);
+// Names for reference purposes only
+fields  ( rhoNMean rhoMMean momentumMean linearKEMean internalEMean
+          iDofMean fDMean );
 
 executeControl  writeTime;
 writeControl    writeTime;
