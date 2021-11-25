@@ -39,6 +39,7 @@ License
 #include "TableFile.H"
 #include "Scale.H"
 #include "InputValueMapper.H"
+#include "FunctionObjectTrigger.H"
 #include "FunctionObjectValue.H"
 #include "fieldTypes.H"
 
@@ -72,6 +73,10 @@ namespace Foam
 {
     makeFunction1(label);
     makeFunction1Type(Constant, label);
+
+    makeFunction1Type(FunctionObjectTrigger, label);
+    makeFunction1Type(FunctionObjectTrigger, scalar);
+    // Only (label/scalar) makes sense for triggers
 
     makeFunction1s(scalar);
     makeFunction1s(vector);

@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,32 +25,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Constant.H"
+#include "FunctionObjectTrigger.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-inline void Foam::Function1Types::Constant<Type>::reset(const Type& val)
+inline bool Foam::Function1Types::FunctionObjectTrigger<Type>::active() const
 {
-    value_ = val;
+    if (triggers_.empty())
+    {
+        return false;
+    }
+
+    const label idx = this->time().functionObjects().triggerIndex();
+
+    return
+    (
+        idx == labelMin ? defaultValue_ : triggers_.found(idx)
+    );
 }
 
 
 template<class Type>
-inline Type Foam::Function1Types::Constant<Type>::value(const scalar) const
+inline const Foam::labelList&
+Foam::Function1Types::FunctionObjectTrigger<Type>::triggers() const noexcept
 {
-    return value_;
+    return triggers_;
 }
 
 
 template<class Type>
-inline Type Foam::Function1Types::Constant<Type>::integrate
+inline void Foam::Function1Types::FunctionObjectTrigger<Type>::resetTriggers
+(
+    const labelUList& indices
+)
+{
+    triggers_ = indices;
+}
+
+
+template<class Type>
+inline Type Foam::Function1Types::FunctionObjectTrigger<Type>::value
+(
+    const scalar /*unused*/
+) const
+{
+    return this->active() ? pTraits<Type>::one : pTraits<Type>::zero;
+}
+
+
+template<class Type>
+inline Type Foam::Function1Types::FunctionObjectTrigger<Type>::integrate
 (
     const scalar x1,
     const scalar x2
 ) const
 {
-    return Type((x2 - x1)*value_);
+    NotImplemented;
+    return pTraits<Type>::zero;
 }
 
 

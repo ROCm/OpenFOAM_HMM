@@ -131,6 +131,9 @@ public:
 
     // Member Functions
 
+        //- Change the constant value
+        inline void reset(const Type& val);
+
         //- Return constant value
         virtual inline Type value(const scalar) const;
 

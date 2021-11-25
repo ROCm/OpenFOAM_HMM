@@ -74,18 +74,25 @@ Foam::dictionary& Foam::functionObjects::stateFunctionObject::propertyDict()
 }
 
 
-bool Foam::functionObjects::stateFunctionObject::setTrigger
-(
-    const label triggeri
-)
+void Foam::functionObjects::stateFunctionObject::clearTrigger()
 {
-    return stateDict().setTrigger(triggeri);
+    return stateDict().clearTrigger();
 }
 
 
 Foam::label Foam::functionObjects::stateFunctionObject::getTrigger() const
 {
     return stateDict().getTrigger();
+}
+
+
+bool Foam::functionObjects::stateFunctionObject::setTrigger
+(
+    const label triggeri,
+    bool increaseOnly
+)
+{
+    return stateDict().setTrigger(triggeri, increaseOnly);
 }
 
 

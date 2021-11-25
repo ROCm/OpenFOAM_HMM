@@ -24,35 +24,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::FunctionObjectValue
+    Foam::Function1Types::FunctionObjectTrigger
 
 Description
-    Returns a value retrieved from a function object result.
+    Returns a 0/1 value corresponding to function object trigger levels.
 
     Usage:
     \verbatim
-        <entryName> functionObjectValue;
+        <entryName> functionObjectTrigger;
         <entryName>Coeffs
         {
-            functionObject          <name>;
-            functionObjectResult    <function object result field>;
-            defaultValue            <value>; // optional
+            triggers        (1 3 5);
+            defaultValue    false;  // Optional
         }
     \endverbatim
+
+    Where:
+    \table
+        Property | Description                                  | Required
+        triggers | List of active trigger states to check for   | yes |
+        defaultValue | Treatment for unactivated trigger state  | no  | false
+    \endtable
+
+    In some circumstances, it can be useful to treat an unactivated trigger
+    as being true. This is the role of the "defaultValue" keyword.
 
 Note
 - does not implement integrate()
 
 SourceFiles
-    FunctionObjectValue.C
-    FunctionObjectValueI.H
+    FunctionObjectTrigger.C
+    FunctionObjectTriggerI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_FunctionObjectValue_H
-#define Function1Types_FunctionObjectValue_H
+#ifndef Function1Types_FunctionObjectTrigger_H
+#define Function1Types_FunctionObjectTrigger_H
 
 #include "Function1.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,30 +72,28 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class FunctionObjectValue Declaration
+                     Class FunctionObjectTrigger Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class FunctionObjectValue
+class FunctionObjectTrigger
 :
     public Function1<Type>
 {
+
     // Private Data
 
-        //- Function object name
-        word foName_;
+        //- Trigger indices when it is considered active
+        labelList triggers_;
 
-        //- Function object result name
-        word foResultName_;
-
-        //- Default value when function object result is unavailable
-        Type defaultValue_;
-
-        //- Flag to indicate that default value is available
-        bool haveDefaultValue_;
+        //- Treatment for unactivated trigger state (true/false)
+        bool defaultValue_;
 
 
     // Private Member Functions
+
+        //- Is the trigger considered active?
+        inline bool active() const;
 
         //- Read the coefficients from the given dictionary
         void read(const dictionary& coeffs);
@@ -94,19 +102,19 @@ class FunctionObjectValue
 public:
 
     //- Runtime type information
-    TypeName("functionObjectValue");
+    TypeName("functionObjectTrigger");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const FunctionObjectValue<Type>&) = delete;
+        void operator=(const FunctionObjectTrigger<Type>&) = delete;
 
 
     // Constructors
 
         //- Construct from entry name, dictionary and optional registry
-        FunctionObjectValue
+        FunctionObjectTrigger
         (
             const word& entryName,
             const dictionary& dict,
@@ -114,26 +122,33 @@ public:
         );
 
         //- Copy construct
-        explicit FunctionObjectValue(const FunctionObjectValue<Type>& rhs);
+        explicit FunctionObjectTrigger(const FunctionObjectTrigger<Type>& rhs);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const
         {
-            return tmp<Function1<Type>>(new FunctionObjectValue<Type>(*this));
+            return tmp<Function1<Type>>(new FunctionObjectTrigger<Type>(*this));
         }
 
 
     //- Destructor
-    virtual ~FunctionObjectValue() = default;
+    virtual ~FunctionObjectTrigger() = default;
 
 
     // Member Functions
 
-        //- Return value at current time
+        //- Return the trigger indices
+        inline const labelList& triggers() const noexcept;
+
+        //- Change the trigger indices
+        inline void resetTriggers(const labelUList& indices);
+
+
+        //- Return 0/1 value at current time
         virtual inline Type value(const scalar /*unused*/) const;
 
         //- Integrate between two (scalar) values. Not implemented!
-        virtual Type integrate(const scalar x1, const scalar x2) const;
+        virtual inline Type integrate(const scalar, const scalar) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
@@ -150,10 +165,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "FunctionObjectValueI.H"
+#include "FunctionObjectTriggerI.H"
 
 #ifdef NoRepository
-    #include "FunctionObjectValue.C"
+    #include "FunctionObjectTrigger.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

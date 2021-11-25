@@ -509,7 +509,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
 Foam::label Foam::functionObjectList::triggerIndex() const
 {
-    return propsDict().getOrDefault<label>("triggerIndex", labelMin);
+    return propsDict().getTrigger();
 }
 
 

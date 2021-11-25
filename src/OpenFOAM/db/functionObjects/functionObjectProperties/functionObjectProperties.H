@@ -117,11 +117,20 @@ public:
                 const word& entryName
             ) const;
 
+            //- Remove the trigger index from the properties
+            void clearTrigger();
+
             //- Get the current trigger index
             label getTrigger() const;
 
-            //- Set the current trigger index
-            bool setTrigger(const label triggeri);
+            //- Set the trigger index. Normally only if greater than current
+            //
+            //  \param triggeri the new trigger index
+            //  \param increaseOnly (default) only change if new index
+            //      is greater than the current index.
+            //
+            //  \return True if the index changed
+            bool setTrigger(const label triggeri, bool increaseOnly = true);
 
             //- Set dictionary from named object, return true if set
             bool getObjectDict

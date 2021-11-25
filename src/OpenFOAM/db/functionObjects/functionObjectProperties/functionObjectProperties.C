@@ -79,26 +79,38 @@ Foam::dictionary& Foam::functionObjects::properties::getObjectDict
 }
 
 
-bool Foam::functionObjects::properties::setTrigger
-(
-    const label triggeri
-)
+void Foam::functionObjects::properties::clearTrigger()
 {
-    label oldTriggeri = getOrDefault<label>("triggerIndex", labelMin);
-
-    if (triggeri > oldTriggeri)
-    {
-        set("triggerIndex", triggeri);
-        return true;
-    }
-
-    return false;
+    remove("triggerIndex");
 }
 
 
 Foam::label Foam::functionObjects::properties::getTrigger() const
 {
-    return getOrDefault<label>("triggerIndex", labelMin);
+    // Like getOrDefault, but without reporting missing entry (noisy)
+    label idx = labelMin;
+    readIfPresent("triggerIndex", idx);
+    return idx;
+}
+
+
+bool Foam::functionObjects::properties::setTrigger
+(
+    const label triggeri,
+    bool increaseOnly
+)
+{
+    const label currTriggeri = getTrigger();
+
+    if (increaseOnly ? (triggeri > currTriggeri) : (triggeri != currTriggeri))
+    {
+        set("triggerIndex", triggeri);
+        return true;
+    }
+
+    // TBD: any special handling for triggeri == labelMin - eg, clearTrigger()
+
+    return false;
 }
 
 
