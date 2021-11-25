@@ -28,24 +28,6 @@ License
 
 #include "objectRegistry.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class GeoField>
-Foam::tmp<GeoField>
-Foam::expressions::exprDriver::cfindFieldObject
-(
-    const objectRegistry& obr,
-    const word& fldName
-)
-{
-    tmp<GeoField> tfld;
-
-    tfld.cref(obr.cfindObject<GeoField>(fldName));
-
-    return tfld;
-}
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>

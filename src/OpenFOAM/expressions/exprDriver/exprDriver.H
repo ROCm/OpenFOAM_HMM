@@ -55,6 +55,7 @@ Description
 
 SourceFiles
     exprDriverI.H
+    exprDriverContextI.H
     exprDriver.C
     exprDriverFields.C
     exprDriverFunctions.C
@@ -108,6 +109,10 @@ public:
         };
 
 
+    //- Externally defined context fields
+    typedef HashTable<const regIOobject*> contextObjectTableType;
+
+
 private:
 
     // Private Member Functions
@@ -154,6 +159,9 @@ protected:
         //- evaluated at the simulation time or with arbitrary scalars
         HashTable<refPtr<Function1<vector>>> vectorFuncs_;
 
+        //- Externally defined context fields
+        contextObjectTableType contextObjects_;
+
         //- Special-purpose scalar reference argument
         scalar arg1Value_;
 
@@ -196,12 +204,6 @@ protected:
 
         //- Reset the time-state reference
         void resetTimeReference(const TimeState& ts);
-
-        //- Lookup field object.
-        //  \return const-ref tmp or invalid if not found
-        template<class GeoField>
-        static tmp<GeoField>
-        cfindFieldObject(const objectRegistry& obr, const word& fldName);
 
         //- Write scalar/vector Function1 entries in dictionary format
         void writeFunctions(Ostream& os) const;
@@ -458,6 +460,38 @@ public:
         );
 
 
+    // Context fields (similar to objectRegistry)
+
+        //- True if any context fields are defined
+        inline bool hasContextObjects() const;
+
+        //- Find named context field, if it exists
+        inline const regIOobject* cfindContextIOobject(const word& name) const;
+
+        //- Find context field object of specified type
+        //  \return nullptr if not found
+        template<class ObjType>
+        const ObjType* cfindContextObject(const word& name) const;
+
+        //- Add the object to the context
+        inline void addContextObject(const word& name, const regIOobject*);
+
+        //- Add the object to the context
+        inline void addContextObject(const regIOobject*);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const word& name);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const regIOobject*);
+
+        //- Read access to the object context
+        inline const contextObjectTableType& contextObjects() const noexcept;
+
+        //- Write access to the object context
+        inline contextObjectTableType& contextObjects() noexcept;
+
+
     // Scalar mappings (timelines / lookups)
 
         //- Named mapping with given type exists
@@ -620,6 +654,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "exprDriverI.H"
+#include "exprDriverContextI.H"
 
 #ifdef NoRepository
     #include "exprDriverTemplates.C"
