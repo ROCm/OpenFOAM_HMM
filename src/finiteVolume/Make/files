@@ -433,6 +433,7 @@ $(divSchemes)/gaussDivScheme/gaussDivSchemes.C
 gradSchemes = finiteVolume/gradSchemes
 $(gradSchemes)/gradScheme/gradSchemes.C
 $(gradSchemes)/gaussGrad/gaussGrads.C
+$(gradSchemes)/iterativeGaussGrad/iterativeGaussGrads.C
 
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
