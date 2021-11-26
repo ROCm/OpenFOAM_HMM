@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,8 +139,17 @@ Foam::fileName Foam::sampledSets::writeSampleFile
 
     forAll(masterFields, fieldi)
     {
-        valueSetNames[fieldi] = masterFields[fieldi].name();
+        const word& fieldName = masterFields[fieldi].name();
+
+        valueSetNames[fieldi] = fieldName;
         valueSets[fieldi] = &masterFields[fieldi][setI];
+
+        // Set results
+
+        setResult("average(" + fieldName + ")", average(*valueSets[fieldi]));
+        setResult("min(" + fieldName + ")", min(*valueSets[fieldi]));
+        setResult("max(" + fieldName + ")", max(*valueSets[fieldi]));
+        setResult("size(" + fieldName + ")", valueSets[fieldi]->size());
     }
 
     fileName fName

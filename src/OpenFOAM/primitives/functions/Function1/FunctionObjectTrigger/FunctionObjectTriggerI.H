@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,62 +25,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LimitRange.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::Function1Types::LimitRange<Type>::read(const dictionary& coeffs)
-{
-    min_ = coeffs.get<scalar>("min");
-    max_ = coeffs.get<scalar>("max");
-    value_ = Function1<Type>::New("value", coeffs);
-}
-
-
-template<class Type>
-Foam::Function1Types::LimitRange<Type>::LimitRange
-(
-    const word& entryName,
-    const dictionary& dict
-)
-:
-    Function1<Type>(entryName)
-{
-    read(dict);
-}
-
-
-template<class Type>
-Foam::Function1Types::LimitRange<Type>::LimitRange(const LimitRange<Type>& rhs)
-:
-    Function1<Type>(rhs),
-    min_(rhs.min_),
-    max_(rhs.max_),
-    value_(rhs.value_.clone())
-{}
-
+#include "FunctionObjectTrigger.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::LimitRange<Type>::writeEntries(Ostream& os) const
+inline bool Foam::Function1Types::FunctionObjectTrigger<Type>::active() const
 {
-    os.writeEntry("min", min_);
-    os.writeEntry("max", max_);
-    value_->writeData(os);
+    if (triggers_.empty())
+    {
+        return false;
+    }
+
+    const label idx = this->time().functionObjects().triggerIndex();
+
+    return
+    (
+        idx == labelMin ? defaultValue_ : triggers_.found(idx)
+    );
 }
 
 
 template<class Type>
-void Foam::Function1Types::LimitRange<Type>::writeData(Ostream& os) const
+inline const Foam::labelList&
+Foam::Function1Types::FunctionObjectTrigger<Type>::triggers() const noexcept
 {
-    Function1<Type>::writeData(os);
-    os.endEntry();
+    return triggers_;
+}
 
-    os.beginBlock(word(this->name() + "Coeffs"));
-    writeEntries(os);
-    os.endBlock();
+
+template<class Type>
+inline void Foam::Function1Types::FunctionObjectTrigger<Type>::resetTriggers
+(
+    const labelUList& indices
+)
+{
+    triggers_ = indices;
+}
+
+
+template<class Type>
+inline Type Foam::Function1Types::FunctionObjectTrigger<Type>::value
+(
+    const scalar /*unused*/
+) const
+{
+    return this->active() ? pTraits<Type>::one : pTraits<Type>::zero;
+}
+
+
+template<class Type>
+inline Type Foam::Function1Types::FunctionObjectTrigger<Type>::integrate
+(
+    const scalar x1,
+    const scalar x2
+) const
+{
+    NotImplemented;
+    return pTraits<Type>::zero;
 }
 
 

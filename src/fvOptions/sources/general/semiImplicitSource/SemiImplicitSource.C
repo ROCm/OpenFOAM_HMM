@@ -91,8 +91,8 @@ void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
         else
         {
             const dictionary& Sdict = dEntry.dict();
-            Su_.set(count, Function1<Type>::New("Su", Sdict));
-            Sp_.set(count, Function1<scalar>::New("Sp", Sdict));
+            Su_.set(count, Function1<Type>::New("Su", Sdict, &mesh_));
+            Sp_.set(count, Function1<scalar>::New("Sp", Sdict, &mesh_));
         }
 
         ++count;

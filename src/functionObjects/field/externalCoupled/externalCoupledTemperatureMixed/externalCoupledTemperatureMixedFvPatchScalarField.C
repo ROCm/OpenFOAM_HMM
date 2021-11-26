@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
 
     if (refTempType_ == refTemperatureType::USER)
     {
-        Tref_ = Function1<scalar>::New("Tref", dict);
+        Tref_ = Function1<scalar>::New("Tref", dict, &db());
     }
 
     if (dict.found("refValue"))

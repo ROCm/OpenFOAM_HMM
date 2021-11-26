@@ -29,9 +29,10 @@ License
 #include "fieldTypes.H"
 #include "ConstantField.H"
 #include "UniformValueField.H"
+#include "FunctionObjectValue.H"
 #include "MappedFile.H"
-#include "addToRunTimeSelectionTable.H"
 #include "Table.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,11 +41,6 @@ License
     makePatchFunction1Type(ConstantField, Type);                               \
     makePatchFunction1Type(MappedFile, Type);                                  \
     makePatchFunction1Type(UniformValueField, Type);
-
-#define addUniformValueFieldFunction1s(F1Type, Type)                           \
-    PatchFunction1<Type>::adddictionaryConstructorToTable                      \
-    <PatchFunction1Types::UniformValueField<Type>>                             \
-        add##F1Type##UniformValueField##Type##ConstructorToTable_(#F1Type);
 
 namespace Foam
 {
@@ -120,6 +116,12 @@ namespace Foam
     addUniformValueFieldFunction1s(scale, sphericalTensor);
     addUniformValueFieldFunction1s(scale, symmTensor);
     addUniformValueFieldFunction1s(scale, tensor);
+
+    addUniformValueFieldFunction1s(functionObjectValue, scalar);
+    addUniformValueFieldFunction1s(functionObjectValue, vector);
+    addUniformValueFieldFunction1s(functionObjectValue, sphericalTensor);
+    addUniformValueFieldFunction1s(functionObjectValue, symmTensor);
+    addUniformValueFieldFunction1s(functionObjectValue, tensor);
 
 
     ////- Option2 : at static initialisation add all Function1 types.

@@ -123,7 +123,7 @@ Foam::fv::VoFSolidificationMeltingSource::VoFSolidificationMeltingSource
 )
 :
     fv::cellSetOption(sourceName, modelType, dict, mesh),
-    alphaSolidT_(Function1<scalar>::New("alphaSolidT", coeffs_)),
+    alphaSolidT_(Function1<scalar>::New("alphaSolidT", coeffs_, &mesh)),
     L_("L", dimEnergy/dimMass, coeffs_),
     relax_(coeffs_.getOrDefault("relax", 0.9)),
     Cu_(coeffs_.getOrDefault<scalar>("Cu", 100000)),

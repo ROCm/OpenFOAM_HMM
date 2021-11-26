@@ -37,7 +37,7 @@ Description
     It accepts primitive or dictionary entries for dispatching to different
     function types, but wraps unspecified types as "constant".
 
-    In the dictionary form, the coefficents are the dictionary itself.
+    In the dictionary form, the coefficients are the dictionary itself.
     This is arguably the more readable form.
     For example,
     \verbatim
@@ -49,7 +49,7 @@ Description
         }
     \endverbatim
 
-    In the primitive form, the coefficents are provided separately.
+    In the primitive form, the coefficients are provided separately.
     For example,
     \verbatim
         <entryName>   linearRamp;
@@ -84,8 +84,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Time;
-template<class Type> class Function1;
 template<class Type> Ostream& operator<<(Ostream&, const Function1<Type>&);
 
 /*---------------------------------------------------------------------------*\
@@ -106,6 +104,7 @@ class Function1
             const entry* eptr,       // Eg, dict.findEntry(entryName)
             const dictionary& dict,
             const word& redirectType,
+            const objectRegistry* obrPtr,
             const bool mandatory
         );
 
@@ -133,19 +132,30 @@ public:
         dictionary,
         (
             const word& entryName,
-            const dictionary& dict
+            const dictionary& dict,
+            const objectRegistry* obrPtr
         ),
-        (entryName, dict)
+        (entryName, dict, obrPtr)
     );
 
 
     // Constructors
 
         //- Construct from entry name
-        explicit Function1(const word& entryName);
+        explicit Function1
+        (
+            const word& entryName,
+            const objectRegistry* obrPtr = nullptr
+        );
 
-        //- Construct from entry name and dictionary (unused)
-        Function1(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, (unused) dictionary
+        //- and optional registry
+        Function1
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit Function1(const Function1<Type>& rhs);
@@ -162,6 +172,7 @@ public:
             const word& entryName,
             const dictionary& dict,
             const word& redirectType,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -172,6 +183,7 @@ public:
             std::initializer_list<std::pair<const char*,int>> compat,
             const dictionary& dict,
             const word& redirectType = word::null,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -180,6 +192,7 @@ public:
         (
             const word& entryName,
             const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -188,7 +201,8 @@ public:
         (
             const word& entryName,
             const dictionary& dict,
-            const word& redirectType = word::null
+            const word& redirectType = word::null,
+            const objectRegistry* obrPtr = nullptr
         );
 
 
@@ -202,6 +216,7 @@ public:
             const word& entryName,
             const dictionary& dict,
             enum keyType::option matchOpt = keyType::LITERAL,
+            const objectRegistry* obrPtr = nullptr,
             const bool mandatory = true
         );
 
@@ -214,7 +229,8 @@ public:
         ///     const word& entryName,
         ///     const dictionary& dict,
         ///     const Type& deflt,
-        ///     enum keyType::option matchOpt = keyType::LITERAL
+        ///     enum keyType::option matchOpt = keyType::LITERAL,
+        ///     const objectRegistry* obrPtr = nullptr
         /// );
 
 
@@ -279,7 +295,12 @@ public:
     // Constructors
 
         //- Construct from entry name and dictionary
-        FieldFunction1(const word& entryName, const dictionary& dict);
+        FieldFunction1
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const;

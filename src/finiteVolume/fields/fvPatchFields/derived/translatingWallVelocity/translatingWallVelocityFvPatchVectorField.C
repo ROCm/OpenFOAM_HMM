@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,7 @@ translatingWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
-    U_(Function1<vector>::New("U", dict))
+    U_(Function1<vector>::New("U", dict, &db()))
 {
     // Evaluate the wall velocity
     updateCoeffs();

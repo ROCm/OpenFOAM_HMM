@@ -34,10 +34,11 @@ template<class Type>
 Foam::Function1Types::Table<Type>::Table
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    TableBase<Type>(entryName, dict),
+    TableBase<Type>(entryName, dict, obrPtr),
     fName_()
 {
     const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
@@ -84,7 +85,7 @@ Foam::Function1Types::Table<Type>::Table
         dict.readEntry("values", this->table_);
     }
 
-    TableBase<Type>::check();
+    TableBase<Type>::initialise();
 }
 
 

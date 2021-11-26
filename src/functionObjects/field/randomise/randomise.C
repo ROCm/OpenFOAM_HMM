@@ -56,7 +56,7 @@ bool Foam::functionObjects::randomise::calcTemplate()
     {
         const auto& field = *fieldPtr;
 
-        resultName_ = fieldName_ & "Random";
+        resultName_ = scopedName(fieldName_ & "Random");
 
         auto trfield = tmp<VolFieldType>::New(field);
         auto& rfield = trfield.ref();

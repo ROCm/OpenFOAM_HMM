@@ -113,7 +113,7 @@ alphatWallBoilingWallFunctionFvPatchScalarField
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
     otherPhaseName_(dict.get<word>("otherPhase")),
     phaseType_(phaseTypeNames_.get("phaseType", dict)),
-    relax_(Function1<scalar>::New("relax", dict)),
+    relax_(Function1<scalar>::New("relax", dict, &db())),
     AbyV_(p.size(), 0),
     alphatConv_(p.size(), 0),
     dDep_(p.size(), 1e-5),

@@ -256,9 +256,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Create a field name
-        word fieldName(const word& name) const;
-
         //- Create the output files
         void createFiles();
 

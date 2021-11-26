@@ -80,7 +80,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
         {
             Tuniform_.reset
             (
-                Function1<scalar>::New("temperature", coeffs_).ptr()
+                Function1<scalar>::New("temperature", coeffs_, &mesh_)
             );
             break;
         }
@@ -152,7 +152,7 @@ bool Foam::fv::fixedTemperatureConstraint::read(const dictionary& dict)
         {
             Tuniform_.reset
             (
-                Function1<scalar>::New(Tuniform_->name(), dict).ptr()
+                Function1<scalar>::New(Tuniform_->name(), dict, &mesh_)
             );
         }
 

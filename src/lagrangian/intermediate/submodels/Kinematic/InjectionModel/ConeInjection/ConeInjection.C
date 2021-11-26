@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ConeInjection.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 #include "mathematicalConstants.H"
 #include "unitConversion.H"
 
@@ -55,38 +55,38 @@ Foam::ConeInjection<CloudType>::ConeInjection
     ),
     flowRateProfile_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "flowRateProfile",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.mesh()
         )
     ),
     Umag_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "Umag",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.mesh()
         )
     ),
     thetaInner_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "thetaInner",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.mesh()
         )
     ),
     thetaOuter_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "thetaOuter",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.mesh()
         )
     ),
     sizeDistribution_
@@ -106,7 +106,13 @@ Foam::ConeInjection<CloudType>::ConeInjection
     tanVec1_.setSize(positionAxis_.size());
     tanVec2_.setSize(positionAxis_.size());
 
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
+    Umag_->userTimeToTime(time);
+    thetaInner_->userTimeToTime(time);
+    thetaOuter_->userTimeToTime(time);
 
     // Normalise direction vector and determine direction vectors
     // tangential to injector axis direction
@@ -132,7 +138,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     }
 
     // Set total volume to inject
-    this->volumeTotal_ = flowRateProfile_.integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_->integrate(0.0, duration_);
 }
 
 
@@ -149,10 +155,10 @@ Foam::ConeInjection<CloudType>::ConeInjection
     injectorTetPts_(im.injectorTetPts_),
     duration_(im.duration_),
     parcelsPerInjector_(im.parcelsPerInjector_),
-    flowRateProfile_(im.flowRateProfile_),
-    Umag_(im.Umag_),
-    thetaInner_(im.thetaInner_),
-    thetaOuter_(im.thetaOuter_),
+    flowRateProfile_(im.flowRateProfile_.clone()),
+    Umag_(im.Umag_.clone()),
+    thetaInner_(im.thetaInner_.clone()),
+    thetaOuter_(im.thetaOuter_.clone()),
     sizeDistribution_(im.sizeDistribution_.clone()),
     nInjected_(im.nInjected_),
     injectorOrder_(im.injectorOrder_),
@@ -220,7 +226,7 @@ Foam::label Foam::ConeInjection<CloudType>::parcelsToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        const scalar targetVolume = flowRateProfile_.integrate(0, time1);
+        const scalar targetVolume = flowRateProfile_->integrate(0, time1);
 
         const scalar volumeFraction = targetVolume/this->volumeTotal_;
 
@@ -243,7 +249,7 @@ Foam::scalar Foam::ConeInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return flowRateProfile_.integrate(time0, time1);
+        return flowRateProfile_->integrate(time0, time1);
     }
 
     return 0.0;
@@ -288,8 +294,8 @@ void Foam::ConeInjection<CloudType>::setProperties
 
     // Set direction vectors for position i
     scalar t = time - this->SOI_;
-    scalar ti = thetaInner_.value(t);
-    scalar to = thetaOuter_.value(t);
+    scalar ti = thetaInner_->value(t);
+    scalar to = thetaOuter_->value(t);
     scalar coneAngle = degToRad(rnd.position<scalar>(ti, to));
 
     scalar alpha = sin(coneAngle);
@@ -302,7 +308,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     dirVec.normalise();
 
     // Set particle velocity
-    parcel.U() = Umag_.value(t)*dirVec;
+    parcel.U() = Umag_->value(t)*dirVec;
 
     // Set particle diameter
     parcel.d() = sizeDistribution_().sample();

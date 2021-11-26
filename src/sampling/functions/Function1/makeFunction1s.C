@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,43 +25,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LimitRange.H"
+#include "SampleFunction1.H"
+#include "UniformValueField.H"
+#include "fieldTypes.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-inline Type Foam::Function1Types::LimitRange<Type>::value(const scalar t) const
+#define makeFunction1s(Type)                                                   \
+    makeFunction1Type(Sample, Type);
+
+namespace Foam
 {
-    scalar tlim = min(max(t, min_), max_);
+    makeFunction1s(scalar);
+    makeFunction1s(vector);
+    makeFunction1s(sphericalTensor);
+    makeFunction1s(symmTensor);
+    makeFunction1s(tensor);
 
-    return value_->value(tlim);
+    addUniformValueFieldFunction1s(sample, scalar);
+    addUniformValueFieldFunction1s(sample, vector);
+    addUniformValueFieldFunction1s(sample, sphericalTensor);
+    addUniformValueFieldFunction1s(sample, symmTensor);
+    addUniformValueFieldFunction1s(sample, tensor);
 }
-
-
-template<class Type>
-Type Foam::Function1Types::LimitRange<Type>::integrate
-(
-    const scalar x1,
-    const scalar x2
-) const
-{
-    scalar xlim0 = min(max(x1, min_), max_);
-    scalar xlim1 = min(max(x2, min_), max_);
-
-    Type intValue = value_->integrate(xlim0, xlim1);
-
-    if (x1 < min_)
-    {
-        intValue += (min(min_, x2) - x1)*this->value(min_);
-    }
-
-    if (x2 > max_)
-    {
-        intValue += (x2 - max(max_, x1))*this->value(max_);
-    }
-
-    return intValue;
-}
-
 
 // ************************************************************************* //

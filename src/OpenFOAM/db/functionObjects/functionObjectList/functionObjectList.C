@@ -97,13 +97,13 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void Foam::functionObjectList::createStateDict() const
+void Foam::functionObjectList::createPropertiesDict() const
 {
-    // Cannot set the state dictionary on construction since Time has not
+    // Cannot set the properties dictionary on construction since Time has not
     // been fully initialised
-    stateDictPtr_.reset
+    propsDictPtr_.reset
     (
-        new IOdictionary
+        new functionObjects::properties
         (
             IOobject
             (
@@ -412,7 +412,7 @@ Foam::functionObjectList::functionObjectList
     warnings_(),
     time_(runTime),
     parentDict_(parentDict),
-    stateDictPtr_(nullptr),
+    propsDictPtr_(nullptr),
     objectsRegistryPtr_(nullptr),
     execution_(execution),
     updated_(false)
@@ -509,37 +509,38 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
 Foam::label Foam::functionObjectList::triggerIndex() const
 {
-    return stateDict().getOrDefault<label>("triggerIndex", labelMin);
+    return propsDict().getTrigger();
 }
 
 
-void Foam::functionObjectList::resetState()
+void Foam::functionObjectList::resetPropertiesDict()
 {
-    // Reset (re-read) the state dictionary
-    stateDictPtr_.reset(nullptr);
-    createStateDict();
+    // Reset (re-read) the properties dictionary
+    propsDictPtr_.reset(nullptr);
+    createPropertiesDict();
 }
 
 
-Foam::IOdictionary& Foam::functionObjectList::stateDict()
+Foam::functionObjects::properties& Foam::functionObjectList::propsDict()
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
-    return *stateDictPtr_;
+    return *propsDictPtr_;
 }
 
 
-const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
+const Foam::functionObjects::properties&
+Foam::functionObjectList::propsDict() const
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
-    return *stateDictPtr_;
+    return *propsDictPtr_;
 }
 
 
@@ -768,13 +769,13 @@ bool Foam::functionObjectList::execute()
         }
     }
 
-    // Force writing of state dictionary after function object execution
+    // Force writing of properties dictionary after function object execution
     if (time_.writeTime())
     {
         const auto oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
 
-        stateDictPtr_->writeObject
+        propsDictPtr_->writeObject
         (
             IOstreamOption(IOstream::ASCII, time_.writeCompression()),
             true
@@ -930,9 +931,9 @@ bool Foam::functionObjectList::adjustTimeStep()
 
 bool Foam::functionObjectList::read()
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
     updated_ = execution_;

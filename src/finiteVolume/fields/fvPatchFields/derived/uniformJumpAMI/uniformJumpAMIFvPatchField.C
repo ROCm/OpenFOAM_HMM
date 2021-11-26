@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +69,7 @@ Foam::uniformJumpAMIFvPatchField<Type>::uniformJumpAMIFvPatchField
 {
     if (this->cyclicAMIPatch().owner())
     {
-        jumpTable_ = Function1<Type>::New("jumpTable", dict);
+        jumpTable_ = Function1<Type>::New("jumpTable", dict, &this->db());
     }
 
     if (dict.found("value"))

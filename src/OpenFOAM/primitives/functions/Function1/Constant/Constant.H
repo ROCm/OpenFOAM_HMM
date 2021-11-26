@@ -95,10 +95,20 @@ public:
     // Constructors
 
         //- Construct from components
-        Constant(const word& entryName, const Type& value);
+        Constant
+        (
+            const word& entryName,
+            const Type& value,
+            const objectRegistry* obrPtr = nullptr
+        );
 
-        //- Construct from entry name and dictionary
-        Constant(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        Constant
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct from entry name and Istream
         //  Reads the constant value without the Function1 type
@@ -120,6 +130,9 @@ public:
 
 
     // Member Functions
+
+        //- Change the constant value
+        inline void reset(const Type& val);
 
         //- Return constant value
         virtual inline Type value(const scalar) const;

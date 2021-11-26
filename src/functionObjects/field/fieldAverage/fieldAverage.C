@@ -310,6 +310,12 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     dict.readIfPresent("periodicRestart",  periodicRestart_);
     dict.readEntry("fields", faItems_);
 
+    for (auto& item : faItems_)
+    {
+        item.setMeanFieldName(scopedName(item.meanFieldName()));
+        item.setPrime2MeanFieldName(scopedName(item.prime2MeanFieldName()));
+    }
+
     const scalar currentTime = obr().time().value();
 
     if (periodicRestart_)

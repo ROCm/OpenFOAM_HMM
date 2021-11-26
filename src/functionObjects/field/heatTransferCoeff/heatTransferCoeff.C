@@ -71,7 +71,7 @@ Foam::functionObjects::heatTransferCoeff::heatTransferCoeff
 {
     read(dict);
 
-    setResultName(typeName, name + ":htc:" + htcModelPtr_->type());
+    setResultName(typeName, "htc:" + htcModelPtr_->type());
 
     auto* heatTransferCoeffPtr =
         new volScalarField

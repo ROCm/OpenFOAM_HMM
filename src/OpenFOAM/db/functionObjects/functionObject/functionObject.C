@@ -48,15 +48,25 @@ Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
 Foam::word Foam::functionObject::scopedName(const word& name) const
 {
-    return name_ + ":" + name;
+    if (scopedNames_)
+    {
+        return IOobject::scopedName(name_, name);
+    }
+
+    return name_;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObject::functionObject(const word& name)
+Foam::functionObject::functionObject
+(
+    const word& name,
+    const bool scopedNames
+)
 :
     name_(name),
+    scopedNames_(scopedNames),
     log(postProcess)
 {}
 
@@ -128,9 +138,15 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::word& Foam::functionObject::name() const
+const Foam::word& Foam::functionObject::name() const noexcept
 {
     return name_;
+}
+
+
+bool Foam::functionObject::scopedNames() const noexcept
+{
+    return scopedNames_;
 }
 
 
@@ -138,6 +154,7 @@ bool Foam::functionObject::read(const dictionary& dict)
 {
     if (!postProcess)
     {
+        scopedNames_ = dict.getOrDefault("scopedNames", true);
         log = dict.getOrDefault("log", true);
     }
 

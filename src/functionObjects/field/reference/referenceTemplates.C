@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interpolation.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -40,36 +40,24 @@ bool Foam::functionObjects::reference::calcType()
     {
         const VolFieldType& vf = *vfPtr;
 
+        // non-mandatory
         dimensioned<Type> offset("offset", vf.dimensions(), Zero, localDict_);
 
-        dimensioned<Type> cellValue("value", vf.dimensions(), Zero);
+        dimensioned<Type> refValue("refValue", vf.dimensions(), Zero);
 
-        if (positionIsSet_)
-        {
-            cellValue.value() = -pTraits<Type>::one*GREAT;
+        autoPtr<Function1<Type>> valuePtr
+        (
+            Function1<Type>::New("refValue", localDict_, &this->mesh_)
+        );
 
-            // Might trigger parallel comms (e.g. volPointInterpolation, if
-            // result is not yet cached) so have all processors do it
-            autoPtr<interpolation<Type>> interpolator
-            (
-                interpolation<Type>::New(interpolationScheme_, vf)
-            );
+        refValue.value() = valuePtr->value(this->time().value());
 
-            if (celli_ != -1)
-            {
-                cellValue.value() =
-                    interpolator().interpolate(position_, celli_, -1);
-            }
-
-            reduce(cellValue.value(), maxOp<Type>());
-
-            Log << "    sampled value: " << cellValue.value() << endl;
-        }
+        Info<< "    Reference value: " << refValue.value() << endl;
 
         return store
         (
             resultName_,
-            scale_*(vf - cellValue + offset)
+            scale_*(vf - refValue + offset)
         );
     }
 

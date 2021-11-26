@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ License
 #include "dictionary.H"
 #include "dsmcCloud.H"
 #include "constants.H"
+#include "stringListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 using namespace Foam::constant;
@@ -53,6 +54,37 @@ namespace functionObjects
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+static const word& filteredName
+(
+    const word& baseName,
+    const wordList& names,
+    const string& scopePrefix
+)
+{
+    label idx = names.find(baseName);
+
+    if (idx < 0 && !scopePrefix.empty())
+    {
+        // Take the first matching item
+        idx = firstMatchingString(regExp(scopePrefix + baseName), names);
+    }
+
+    if (idx < 0)
+    {
+        return word::null;
+    }
+
+    return names[idx];
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::dsmcFields::dsmcFields
@@ -66,12 +98,6 @@ Foam::functionObjects::dsmcFields::dsmcFields
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::dsmcFields::~dsmcFields()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -91,40 +117,92 @@ bool Foam::functionObjects::dsmcFields::execute()
 
 bool Foam::functionObjects::dsmcFields::write()
 {
-    word rhoNMeanName = "rhoNMean";
-    word rhoMMeanName = "rhoMMean";
-    word momentumMeanName = "momentumMean";
-    word linearKEMeanName = "linearKEMean";
-    word internalEMeanName = "internalEMean";
-    word iDofMeanName = "iDofMean";
-    word fDMeanName = "fDMean";
+    // This is fairly horrible with too many hard-coded names...
 
-    const volScalarField& rhoNMean =
-        obr_.lookupObject<volScalarField>(rhoNMeanName);
+    // Pre-filter names to obtain 'Mean' vol fields
+    const wordList allMeanNames
+    (
+        obr_.sortedNames
+        (
+            regExp("vol.*Field"),  // Any vol field type
+            regExp(".+Mean")       // Mean field names
+        )
+    );
 
-    const volScalarField& rhoMMean =
-        obr_.lookupObject<volScalarField>(rhoMMeanName);
+    // The separator is often ':', but could be something else.
+    // Replace as first char in [..], so that the regex remains valid,
+    // even if the separator happens to be '-'.
 
-    const volVectorField& momentumMean =
-        obr_.lookupObject<volVectorField>(momentumMeanName);
+    string scopePrefix = ".+[_:]";
+    scopePrefix[3] = IOobject::scopeSeparator;
 
-    const volScalarField& linearKEMean =
-        obr_.lookupObject<volScalarField>(linearKEMeanName);
 
-    const volScalarField& internalEMean =
-        obr_.lookupObject<volScalarField>(internalEMeanName);
+    // Find scoped/unscoped field name and do lookup.
+    // Short-circuit with message if not found (name or field)
 
-    const volScalarField& iDofMean =
-        obr_.lookupObject<volScalarField>(iDofMeanName);
+    // Note: currently just find a match without and with a scoping prefix
+    // but could refine to pick the longest name etc, or after finding
+    // the first matching field, use the same prefix for all subsequent fields
 
-    const volVectorField& fDMean =
-        obr_.lookupObject<volVectorField>(fDMeanName);
+    #undef  doLocalCode
+    #define doLocalCode(Name, FieldType, Member)                               \
+                                                                               \
+        const FieldType* Member##Ptr = nullptr;                                \
+        {                                                                      \
+            const word& fldName =                                              \
+                filteredName(Name, allMeanNames, scopePrefix);                 \
+                                                                               \
+            if (!fldName.empty())                                              \
+            {                                                                  \
+                Member##Ptr = obr_.cfindObject<FieldType>(fldName);            \
+            }                                                                  \
+                                                                               \
+            if (returnReduce(!Member##Ptr, orOp<bool>()))                      \
+            {                                                                  \
+                Log << type() << ' ' << name() << " : no " << Name             \
+                    << " field found - not calculating\n";                     \
+                return false;                                                  \
+            }                                                                  \
+        }                                                                      \
+        /* Define the const reference */                                       \
+        const FieldType& Member = *Member##Ptr;
 
-    if (min(mag(rhoNMean)).value() > VSMALL)
+
+    // rhoNMean: always required
+    doLocalCode("rhoNMean", volScalarField, rhoNMean);
+
+    // Also check for division by zero
+    {
+        const scalar minval = min(mag(rhoNMean)).value();
+
+        if (minval <= VSMALL)
+        {
+            Log << type() << ' ' << name()
+                << " : Small value (" << minval << ") in rhoNMean field"
+                << " - not calculating to avoid division by zero" << nl;
+            return false;
+        }
+    }
+
+
+    // The other fields
+
+    doLocalCode("rhoMMean", volScalarField, rhoMMean);
+    doLocalCode("momentumMean", volVectorField, momentumMean);
+    doLocalCode("linearKEMean", volScalarField, linearKEMean);
+    doLocalCode("internalEMean", volScalarField, internalEMean);
+    doLocalCode("iDofMean", volScalarField, iDofMean);
+    doLocalCode("fDMean", volVectorField, fDMean);
+    #undef doLocalCode
+
+
+    //
+    // Everything seem to be okay - can execute
+    //
     {
         Log << "Calculating dsmcFields." << endl;
 
-        Log << "    Calculating UMean field." << endl;
+        Log << "    Calculating UMean field." << nl;
         volVectorField UMean
         (
             IOobject
@@ -207,26 +285,30 @@ bool Foam::functionObjects::dsmcFields::write()
         }
 
 
+        // Report
+
         Log << "    mag(UMean) max/min : "
-            << max(mag(UMean)).value() << " "
+            << max(mag(UMean)).value() << token::SPACE
             << min(mag(UMean)).value() << nl
 
             << "    translationalT max/min : "
-            << max(translationalT).value() << " "
+            << max(translationalT).value() << token::SPACE
             << min(translationalT).value() << nl
 
             << "    internalT max/min : "
-            << max(internalT).value() << " "
+            << max(internalT).value() << token::SPACE
             << min(internalT).value() << nl
 
             << "    overallT max/min : "
-            << max(overallT).value() << " "
+            << max(overallT).value() << token::SPACE
             << min(overallT).value() << nl
 
             << "    p max/min : "
-            << max(p).value() << " "
+            << max(p).value() << token::SPACE
             << min(p).value() << endl;
 
+
+        // Write
         UMean.write();
 
         translationalT.write();
@@ -236,20 +318,10 @@ bool Foam::functionObjects::dsmcFields::write()
         overallT.write();
 
         p.write();
-
-        Log << "dsmcFields written." << nl << endl;
-
-        return true;
     }
-    else
-    {
-        Log << "Small value (" << min(mag(rhoNMean))
-            << ") found in rhoNMean field. "
-            << "Not calculating dsmcFields to avoid division by zero."
-            << endl;
 
-        return false;
-    }
+    Log << "dsmcFields written." << nl << endl;
+    return true;
 }
 
 

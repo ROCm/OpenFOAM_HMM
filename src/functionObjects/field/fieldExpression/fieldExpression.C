@@ -63,6 +63,8 @@ void Foam::functionObjects::fieldExpression::setResultName
         {
             resultName_ = typeName;
         }
+
+        resultName_ = scopedName(resultName_);
     }
 }
 

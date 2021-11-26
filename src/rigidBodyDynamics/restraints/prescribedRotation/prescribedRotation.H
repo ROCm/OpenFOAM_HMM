@@ -44,9 +44,9 @@ Usage
         referenceOrientation | Orientation          | no       | I
         axis         | Rotation axis (in reference) | yes      |
         omega        | Angular velocity (rad/s)     | yes      |
-        relax        | Relax moment with prevoius iter | yes
+        relax        | Relax moment with previous iter | yes
         p            | Propoptional corrector for PDI | yes
-        d            | Differencial corrector for PDI | yes
+        d            | Differential corrector for PDI | yes
         i            | Integral corrector for PDI     | yes
     \endtable
 
@@ -59,7 +59,7 @@ SourceFiles
 #define prescribedRotation_H
 
 #include "rigidBodyRestraint.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,7 +87,7 @@ class prescribedRotation
         vector axis_;
 
         //- Rotational velocity [rad/sec]
-        TimeFunction1<vector> omegaSet_;
+        autoPtr<Function1<vector>> omegaSet_;
 
         //- Cache omega
         mutable vector omega_;

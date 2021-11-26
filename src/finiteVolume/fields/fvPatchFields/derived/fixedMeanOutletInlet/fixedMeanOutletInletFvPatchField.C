@@ -53,7 +53,7 @@ Foam::fixedMeanOutletInletFvPatchField<Type>::fixedMeanOutletInletFvPatchField
 )
 :
     outletInletFvPatchField<Type>(p, iF),
-    meanValue_(Function1<Type>::New("meanValue", dict))
+    meanValue_(Function1<Type>::New("meanValue", dict, &this->db()))
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 

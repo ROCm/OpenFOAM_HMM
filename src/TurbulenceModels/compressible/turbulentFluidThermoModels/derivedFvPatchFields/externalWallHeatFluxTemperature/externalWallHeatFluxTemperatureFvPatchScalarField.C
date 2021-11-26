@@ -110,7 +110,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     {
         case fixedPower:
         {
-            Q_ = Function1<scalar>::New("Q", dict);
+            Q_ = Function1<scalar>::New("Q", dict, &db());
             break;
         }
         case fixedHeatFlux:
@@ -121,7 +121,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         case fixedHeatTransferCoeff:
         {
             h_ = PatchFunction1<scalar>::New(patch().patch(), "h", dict);
-            Ta_ = Function1<scalar>::New("Ta", dict);
+            Ta_ = Function1<scalar>::New("Ta", dict, &db());
 
             if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
             {

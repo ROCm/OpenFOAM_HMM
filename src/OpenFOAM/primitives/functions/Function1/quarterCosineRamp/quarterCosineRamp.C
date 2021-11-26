@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +44,8 @@ namespace Function1Types
 Foam::Function1Types::quarterCosineRamp::quarterCosineRamp
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
     ramp(entryName, dict)

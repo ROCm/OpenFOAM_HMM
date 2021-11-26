@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,11 +125,12 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
+        //- Construct from entry name, dictionary and optional registry
         CSV
         (
             const word& entryName,
             const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr,
             const fileName& fName = fileName::null
         );
 

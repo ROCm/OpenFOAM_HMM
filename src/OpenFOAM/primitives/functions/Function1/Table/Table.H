@@ -119,8 +119,13 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary.
-        Table(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        Table
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit Table(const Table<Type>& tbl);

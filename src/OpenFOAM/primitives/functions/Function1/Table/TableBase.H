@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,20 +101,25 @@ public:
     // Constructors
 
         //- Construct from dictionary - note table is not populated
-        TableBase(const word& name, const dictionary& dict);
+        TableBase
+        (
+            const word& name,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy constructor. Note: steals interpolator, tableSamples
         explicit TableBase(const TableBase<Type>& tbl);
 
 
     //- Destructor
-    virtual ~TableBase();
+    virtual ~TableBase() = default;
 
 
     // Member Functions
 
         //- Check the table for size and consistency
-        void check() const;
+        void initialise();
 
         //- Check minimum table bounds
         bool checkMinBounds(const scalar x, scalar& xDash) const;
@@ -123,7 +128,7 @@ public:
         bool checkMaxBounds(const scalar x, scalar& xDash) const;
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 
         //- Return Table value
         virtual Type value(const scalar x) const;

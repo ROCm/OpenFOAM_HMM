@@ -84,7 +84,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 
     if (this->cyclicPatch().owner())
     {
-        this->jumpTable_ = Function1<Type>::New("jumpTable", dict);
+        this->jumpTable_ = Function1<Type>::New("jumpTable", dict, &this->db());
     }
 
     if (dict.found("value"))

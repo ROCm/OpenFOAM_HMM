@@ -57,7 +57,7 @@ Foam::surfaceTensionModels::temperatureDependent::temperatureDependent
 :
     surfaceTensionModel(mesh),
     TName_(dict.getOrDefault<word>("T", "T")),
-    sigma_(Function1<scalar>::New("sigma", dict))
+    sigma_(Function1<scalar>::New("sigma", dict, &mesh))
 {}
 
 
@@ -112,7 +112,7 @@ bool Foam::surfaceTensionModels::temperatureDependent::readDict
     const dictionary& sigmaDict = surfaceTensionModel::sigmaDict(dict);
 
     TName_ = sigmaDict.getOrDefault<word>("T", "T");
-    sigma_ = Function1<scalar>::New("sigma", sigmaDict);
+    sigma_ = Function1<scalar>::New("sigma", sigmaDict, &mesh_);
 
     return true;
 }

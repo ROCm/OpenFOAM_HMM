@@ -62,7 +62,7 @@ function1Viscosity::function1Viscosity
     viscosity_(filmViscosityModel::New(film, coeffDict_, mu)),
     function_
     (
-        Function1<scalar>::New("function", coeffDict_)
+        Function1<scalar>::New("function", coeffDict_, &film.regionMesh())
     )
 {}
 

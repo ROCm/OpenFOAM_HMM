@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,66 +24,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::LimitRange
+    Foam::Function1Types::FunctionObjectValue
 
 Description
-    Function1 wrapper that limits the input range of another Function1
+    Returns a value retrieved from a function object result.
 
-    Example usage for limiting a polynomial:
+    Usage:
     \verbatim
-        <entryName>
+        <entryName> functionObjectValue;
+        <entryName>Coeffs
         {
-            type limitRange;
-            min  0.4;
-            max  1.4;
-
-            value polynomial
-            (
-                (5 1)
-                (-2 2)
-                (-2 3)
-                (1 4)
-            );
+            functionObject          <name>;
+            functionObjectResult    <function object result field>;
+            defaultValue            <value>; // optional
         }
     \endverbatim
 
-    Here the return value will be:
-    - poly(0.4) for x <= 0.4;
-    - poly(1.4) for x >= 1.4; and
-    - poly(x) for 0.4 < x < 1.4.
-
-
-    Example usage for limiting a file-based table:
-    \verbatim
-        <entryName>
-        {
-            type limitRange;
-            min  0.4;
-            max  1.4;
-
-            value
-            {
-                type table;
-                file "<system>/fanCurve.txt";
-            }
-        }
-    \endverbatim
-
-    Where:
-    \table
-        Property | Description                                  | Required
-        min      | Minimum input value                          | yes
-        max      | Maximum input value                          | yes
-        value    | Function of type Function1<Type>             | yes
-    \endtable
+Note
+- does not implement integrate()
 
 SourceFiles
-    LimitRange.C
+    FunctionObjectValue.C
+    FunctionObjectValueI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_LimitRange_H
-#define Function1Types_LimitRange_H
+#ifndef Function1Types_FunctionObjectValue_H
+#define Function1Types_FunctionObjectValue_H
 
 #include "Function1.H"
 
@@ -95,24 +62,27 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class LimitRange Declaration
+                     Class FunctionObjectValue Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class LimitRange
+class FunctionObjectValue
 :
     public Function1<Type>
 {
     // Private Data
 
-        //- Minimum input value
-        scalar min_;
+        //- Function object name
+        word foName_;
 
-        //- Maximum input value
-        scalar max_;
+        //- Function object result name
+        word foResultName_;
 
-        //- Value function
-        autoPtr<Function1<Type>> value_;
+        //- Default value when function object result is unavailable
+        Type defaultValue_;
+
+        //- Flag to indicate that default value is available
+        bool haveDefaultValue_;
 
 
     // Private Member Functions
@@ -124,35 +94,46 @@ class LimitRange
 public:
 
     //- Runtime type information
-    TypeName("limitRange");
+    TypeName("functionObjectValue");
 
 
     // Generated Methods
 
         //- No copy assignment
-        void operator=(const LimitRange<Type>&) = delete;
+        void operator=(const FunctionObjectValue<Type>&) = delete;
 
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        LimitRange(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        FunctionObjectValue
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
-        explicit LimitRange(const LimitRange<Type>& rhs);
+        explicit FunctionObjectValue(const FunctionObjectValue<Type>& rhs);
+
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new FunctionObjectValue<Type>(*this));
+        }
 
 
     //- Destructor
-    virtual ~LimitRange() = default;
+    virtual ~FunctionObjectValue() = default;
 
 
     // Member Functions
 
-        //- Return value for time t
-        virtual inline Type value(const scalar t) const;
+        //- Return value at current time
+        virtual inline Type value(const scalar /*unused*/) const;
 
-        //- Integrate between two (scalar) values
-        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+        //- Integrate between two (scalar) values. Not implemented!
+        virtual Type integrate(const scalar x1, const scalar x2) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
@@ -169,10 +150,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "LimitRangeI.H"
+#include "FunctionObjectValueI.H"
 
 #ifdef NoRepository
-    #include "LimitRange.C"
+    #include "FunctionObjectValue.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

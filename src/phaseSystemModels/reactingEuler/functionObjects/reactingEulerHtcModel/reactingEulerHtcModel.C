@@ -137,7 +137,7 @@ Foam::functionObjects::reactingEulerHtcModel::reactingEulerHtcModel
 {
     read(dict);
 
-    setResultName(typeName, name + ":htc:" + htcModelPtr_->type());
+    setResultName(typeName, "htc:" + htcModelPtr_->type());
 
     volScalarField* htcPtr =
         new volScalarField

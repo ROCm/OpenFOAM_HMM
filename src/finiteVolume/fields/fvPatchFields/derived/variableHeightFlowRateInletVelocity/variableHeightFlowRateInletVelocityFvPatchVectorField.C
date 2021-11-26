@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    flowRate_(Function1<scalar>::New("flowRate", dict)),
+    flowRate_(Function1<scalar>::New("flowRate", dict, &db())),
     alphaName_(dict.lookup("alpha"))
 {}
 

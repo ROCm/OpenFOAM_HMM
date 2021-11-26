@@ -48,12 +48,6 @@ namespace functionObjects
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::word Foam::functionObjects::forces::fieldName(const word& name) const
-{
-    return this->name() + ":" + name;
-}
-
-
 void Foam::functionObjects::forces::createFiles()
 {
     // Note: Only possible to create bin files after bins have been initialised
@@ -332,12 +326,12 @@ void Foam::functionObjects::forces::resetFields()
     if (writeFields_)
     {
         volVectorField& force =
-            lookupObjectRef<volVectorField>(fieldName("force"));
+            lookupObjectRef<volVectorField>(scopedName("force"));
 
         force == dimensionedVector(force.dimensions(), Zero);
 
         volVectorField& moment =
-            lookupObjectRef<volVectorField>(fieldName("moment"));
+            lookupObjectRef<volVectorField>(scopedName("moment"));
 
         moment == dimensionedVector(moment.dimensions(), Zero);
     }
@@ -526,11 +520,11 @@ void Foam::functionObjects::forces::addToFields
         return;
     }
 
-    auto& force = lookupObjectRef<volVectorField>(fieldName("force"));
+    auto& force = lookupObjectRef<volVectorField>(scopedName("force"));
     vectorField& pf = force.boundaryFieldRef()[patchi];
     pf += fN + fT + fP;
 
-    auto& moment = lookupObjectRef<volVectorField>(fieldName("moment"));
+    auto& moment = lookupObjectRef<volVectorField>(scopedName("moment"));
     vectorField& pm = moment.boundaryFieldRef()[patchi];
     pm = Md^pf;
 }
@@ -550,8 +544,8 @@ void Foam::functionObjects::forces::addToFields
         return;
     }
 
-    auto& force = lookupObjectRef<volVectorField>(fieldName("force"));
-    auto& moment = lookupObjectRef<volVectorField>(fieldName("moment"));
+    auto& force = lookupObjectRef<volVectorField>(scopedName("force"));
+    auto& moment = lookupObjectRef<volVectorField>(scopedName("moment"));
 
     forAll(cellIDs, i)
     {
@@ -913,7 +907,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
             (
                 IOobject
                 (
-                    fieldName("force"),
+                    scopedName("force"),
                     time_.timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -932,7 +926,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
             (
                 IOobject
                 (
-                    fieldName("moment"),
+                    scopedName("moment"),
                     time_.timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -1120,8 +1114,8 @@ bool Foam::functionObjects::forces::write()
 {
     if (writeFields_)
     {
-        lookupObject<volVectorField>(fieldName("force")).write();
-        lookupObject<volVectorField>(fieldName("moment")).write();
+        lookupObject<volVectorField>(scopedName("force")).write();
+        lookupObject<volVectorField>(scopedName("moment")).write();
     }
 
     return true;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,20 +34,27 @@ template<class Type>
 Foam::Function1Types::Sine<Type>::Sine
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict),
+    Function1<Type>(entryName, dict, obrPtr),
     t0_(dict.getOrDefault<scalar>("t0", 0)),
-    amplitude_(Function1<scalar>::NewIfPresent("amplitude", dict)),
-    period_(Function1<scalar>::NewIfPresent("period", dict)),
+    amplitude_
+    (
+        Function1<scalar>::NewIfPresent("amplitude", dict, word::null, obrPtr)
+    ),
+    period_
+    (
+        Function1<scalar>::NewIfPresent("period", dict, word::null, obrPtr)
+    ),
     frequency_(nullptr),
-    scale_(Function1<Type>::New("scale", dict)),
-    level_(Function1<Type>::New("level", dict))
+    scale_(Function1<Type>::New("scale", dict, obrPtr)),
+    level_(Function1<Type>::New("level", dict, obrPtr))
 {
     if (!period_)
     {
-        frequency_ = Function1<scalar>::New("frequency", dict);
+        frequency_ = Function1<scalar>::New("frequency", dict, obrPtr);
     }
 }
 
@@ -68,9 +75,9 @@ Foam::Function1Types::Sine<Type>::Sine(const Sine<Type>& rhs)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Sine<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::Sine<Type>::userTimeToTime(const Time& t)
 {
-    t0_ = t.timeToUserTime(t0_);
+    t0_ = t.userTimeToTime(t0_);
 }
 
 

@@ -119,7 +119,10 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     test_(coeffDict().getOrDefault("test", false)),
     rhoInf_(1.0),
     rhoName_(coeffDict().getOrDefault<word>("rho", "rho")),
-    ramp_(Function1<scalar>::NewIfPresent("ramp", coeffDict())),
+    ramp_
+    (
+        Function1<scalar>::NewIfPresent("ramp", coeffDict(), word::null, &mesh)
+    ),
     curTimeIndex_(-1),
     cOfGdisplacement_
     (

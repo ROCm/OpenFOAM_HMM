@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Group
 
 Description
     Computes a field whose values are offset to a reference
-    value obtained by sampling the field at a user-specified location.
+    value obtained by from a Function1.
 
     The field values are calculated using:
 
@@ -44,7 +44,7 @@ Description
         r_c             | field values at cell
         s               | optional scale factor (default = 1)
         f_{c}(t)        | current field values at cell at this time
-        f_p             | field value at position
+        f_p             | reference value
         f_{off}         | offset field value (default = 0)
     \endvartable
 
@@ -72,11 +72,12 @@ Usage
         // Mandatory (inherited) entry (runtime modifiable)
         field       <field>;
 
+        // Reference value
+        refValue    <Function1>;
+
         // Optional entries (runtime modifiable)
-        position    (0 0 0);
         scale       1.0;
         offset      0.0;
-        interpolationScheme    cell;
 
         // Optional (inherited) entries
         ...
@@ -88,10 +89,9 @@ Usage
         Property     | Description                | Type | Req'd | Dflt
         type         | Type name: reference       | word | yes   | -
         field        | Name of the operand field  | word | yes   | -
-        position     | Position to sample         | vector | no  | \<not used\>
-        scale        | Scale value                | scalar | no  | 1.0
-        offset       | Offset value               | scalar | no  | 0.0
-        interpolationScheme  | Sampling scheme    | word   | no  | cell
+        refValue     | Function1 reference value  | Function1 | yes | -
+        offset       | Offset value               | type-value | no  | zero
+        scale        | Scale factor               | scalar | no  | 1
     \endtable
 
     The inherited entries are elaborated in:
@@ -104,6 +104,7 @@ See also
     - Foam::functionObject
     - Foam::functionObjects::fvMeshFunctionObject
     - Foam::functionObjects::fieldExpression
+    - Foam::Function1
     - ExtendedCodeGuide::functionObjects::field::reference
 
 SourceFiles
@@ -135,23 +136,11 @@ class reference
 {
     // Private Data
 
-        //- Flag to indicate that the position is set
-        bool positionIsSet_;
-
-        //- Sample cell
-        label celli_;
-
-        //- Interpolation scheme
-        word interpolationScheme_;
-
-        //- Scale factor
-        scalar scale_;
-
         //- Local copy of dictionary used for construction
         dictionary localDict_;
 
-        //- Sample location
-        point position_;
+        //- Scale factor
+        scalar scale_;
 
 
     // Private Member Functions

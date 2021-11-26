@@ -108,14 +108,20 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        Polynomial(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        Polynomial
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Construct from components
         Polynomial
         (
             const word& entryName,
-            const List<Tuple2<Type, Type>>& coeffs
+            const List<Tuple2<Type, Type>>& coeffs,
+            const objectRegistry* obrPtr = nullptr
         );
 
         //- Copy constructor
@@ -135,7 +141,7 @@ public:
     // Member Functions
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 
         //- Return Polynomial value
         virtual Type value(const scalar x) const;

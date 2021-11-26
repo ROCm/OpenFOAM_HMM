@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "patchFunction1Base.H"
+#include "polyBoundaryMesh.H"
+#include "polyMesh.H"
 #include "polyPatch.H"
+#include "objectRegistry.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
@@ -81,7 +84,25 @@ Foam::patchFunction1Base::patchFunction1Base
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::patchFunction1Base::convertTimeBase(const Time&)
+const Foam::objectRegistry* Foam::patchFunction1Base::obrPtr() const
+{
+    return &(patch_.boundaryMesh().mesh());  // mesh registry
+}
+
+
+const Foam::objectRegistry& Foam::patchFunction1Base::obr() const
+{
+    return patch_.boundaryMesh().mesh();  // mesh registry
+}
+
+
+const Foam::Time& Foam::patchFunction1Base::time() const
+{
+    return patch_.boundaryMesh().mesh().time();
+}
+
+
+void Foam::patchFunction1Base::userTimeToTime(const Time& t)
 {}
 
 

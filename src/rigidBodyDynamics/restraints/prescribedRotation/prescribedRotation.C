@@ -61,7 +61,7 @@ Foam::RBD::restraints::prescribedRotation::prescribedRotation
 )
 :
     restraint(name, dict, model),
-    omegaSet_(model_.time(), "omega"),
+    omegaSet_(nullptr),
     omega_(Zero),
     oldMom_(Zero),
     error0_(Zero),
@@ -133,7 +133,7 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     // from the definition of the angular momentum:
     // moment = Inertia*ddt(omega)
 
-    vector error = omegaSet_.value(model_.time().value()) - omega;
+    vector error = omegaSet_->value(model_.time().value()) - omega;
     vector integral = integral0_ + error;
     vector derivative = (error - error0_);
 
@@ -146,7 +146,7 @@ void Foam::RBD::restraints::prescribedRotation::restrain
     {
         Info<< " angle  " << theta*sign(a & axis_) << endl
             << " omega  " << omega << endl
-            << " wanted " << omegaSet_.value(model_.time().value()) << endl
+            << " wanted " << omegaSet_->value(model_.time().value()) << endl
             << " moment " << moment << endl
             << " oldDir " << oldDir << endl
             << " newDir " << newDir << endl
@@ -207,7 +207,7 @@ bool Foam::RBD::restraints::prescribedRotation::read
     }
 
     // Read the actual entry
-    omegaSet_.reset(coeffs_);
+    omegaSet_.reset(Function1<vector>::New("omega", coeffs_, &model_.time()));
 
     return true;
 }
@@ -222,7 +222,7 @@ void Foam::RBD::restraints::prescribedRotation::write
 
     os.writeEntry("referenceOrientation", refQ_);
     os.writeEntry("axis", axis_);
-    omegaSet_.writeData(os);
+    omegaSet_->writeData(os);
 }
 
 

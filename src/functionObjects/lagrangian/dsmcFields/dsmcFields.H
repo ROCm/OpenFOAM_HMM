@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,7 +66,6 @@ SourceFiles
 #define functionObjects_dsmcFields_H
 
 #include "fvMeshFunctionObject.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,8 +83,6 @@ class dsmcFields
     public fvMeshFunctionObject
 {
 
-        //- Switch to send output to Info as well as to file
-        Switch log_;
     // Private Member Functions
 
         //- No copy construct
@@ -113,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~dsmcFields();
+    virtual ~dsmcFields() = default;
 
 
     // Member Functions

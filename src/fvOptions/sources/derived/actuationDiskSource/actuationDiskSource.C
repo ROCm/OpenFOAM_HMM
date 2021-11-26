@@ -213,8 +213,8 @@ Foam::fv::actuationDiskSource::actuationDiskSource
             [&](const vector& vec){ return mag(vec) > VSMALL; }
         ).normalise()
     ),
-    UvsCpPtr_(Function1<scalar>::New("Cp", coeffs_)),
-    UvsCtPtr_(Function1<scalar>::New("Ct", coeffs_)),
+    UvsCpPtr_(Function1<scalar>::New("Cp", coeffs_, &mesh)),
+    UvsCtPtr_(Function1<scalar>::New("Ct", coeffs_, &mesh)),
     monitorCells_()
 {
     setMonitorCells(coeffs_);

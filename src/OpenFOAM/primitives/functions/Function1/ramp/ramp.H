@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,11 +119,12 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
+        //- Construct from entry name, dictionary and optional registry
         ramp
         (
             const word& entryName,
-            const dictionary& dict
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
         );
 
 
@@ -134,7 +135,7 @@ public:
     // Member Functions
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 
         //- Return value for time t
         virtual scalar value(const scalar t) const = 0;

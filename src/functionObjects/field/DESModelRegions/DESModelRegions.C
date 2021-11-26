@@ -68,7 +68,7 @@ Foam::functionObjects::DESModelRegions::DESModelRegions
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    resultName_(name)
+    resultName_(scopedName("regions"))
 {
     read(dict);
 
