@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +31,14 @@ Group
     grpCompressibleSolvers
 
 Description
-    Density-based compressible flow solver based on central-upwind
-    schemes of Kurganov and Tadmor.
+    Density-based compressible flow solver based on
+    central-upwind schemes of Kurganov and Tadmor with
+    support for mesh-motion and topology changes.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "psiThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "fixedRhoFvPatchScalarField.H"
@@ -49,8 +52,9 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Density-based compressible flow solver based on central-upwind"
-        " schemes of Kurganov and Tadmor."
+        "Density-based compressible flow solver based on"
+        " central-upwind schemes of Kurganov and Tadmor with"
+        " support for mesh-motion and topology changes."
     );
 
     #define NO_CONTROL
@@ -59,7 +63,7 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
+    #include "createDynamicFvMesh.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
     #include "createTimeControls.H"
@@ -80,6 +84,18 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
+        #include "readTimeControls.H"
+
+        if (!LTS)
+        {
+            #include "setDeltaT.H"
+
+            ++runTime;
+
+            // Do any mesh changes
+            mesh.update();
+        }
+
         // --- Directed interpolation of primitive fields onto faces
 
         surfaceScalarField rho_pos(interpolate(rho, pos));
@@ -106,6 +122,15 @@ int main(int argc, char *argv[])
         phiv_pos.setOriented(false);
         surfaceScalarField phiv_neg("phiv_neg", U_neg & mesh.Sf());
         phiv_neg.setOriented(false);
+
+        // Make fluxes relative to mesh-motion
+        if (mesh.moving())
+        {
+            surfaceScalarField meshPhi(mesh.phi());
+            meshPhi.setOriented(false);
+            phiv_pos -= meshPhi;
+            phiv_neg -= meshPhi;
+        }
 
         volScalarField c("c", sqrt(thermo.Cp()/thermo.Cv()*rPsi));
         surfaceScalarField cSf_pos
@@ -157,18 +182,13 @@ int main(int argc, char *argv[])
         amaxSf = max(mag(aphiv_pos), mag(aphiv_neg));
 
         #include "centralCourantNo.H"
-        #include "readTimeControls.H"
 
         if (LTS)
         {
             #include "setRDeltaT.H"
-        }
-        else
-        {
-            #include "setDeltaT.H"
-        }
 
-        ++runTime;
+            ++runTime;
+        }
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -188,6 +208,14 @@ int main(int argc, char *argv[])
           + aphiv_neg*(rho_neg*(e_neg + 0.5*magSqr(U_neg)) + p_neg)
           + aSf*p_pos - aSf*p_neg
         );
+
+        // Make flux for pressure-work absolute
+        if (mesh.moving())
+        {
+            surfaceScalarField meshPhi(mesh.phi());
+            meshPhi.setOriented(false);
+            phiEp += meshPhi*(a_pos*p_pos + a_neg*p_neg);
+        }
 
         volScalarField muEff("muEff", turbulence->muEff());
         volTensorField tauMC("tauMC", muEff*dev2(Foam::T(fvc::grad(U))));

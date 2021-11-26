@@ -5,8 +5,7 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 (
     wmake $targetType BCs \
- && wmake $targetType \
- && wmake $targetType rhoCentralDyMFoam \
+ && wmake $targetType
 )
 
 #------------------------------------------------------------------------------
