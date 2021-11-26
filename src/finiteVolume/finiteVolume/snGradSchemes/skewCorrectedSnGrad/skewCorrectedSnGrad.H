@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,17 @@ Group
     grpFvSnGradSchemes
 
 Description
-    Simple central-difference snGrad scheme with non-orthogonal correction.
+    Surface gradient scheme with skewness and full
+    explicit non-orthogonal corrections.
+
+Usage
+    Minimal example by using \c system/fvSchemes:
+    \verbatim
+    snGradSchemes
+    {
+        snGrad(<term>)       skewCorrected;
+    }
+    \endverbatim
 
 SourceFiles
     skewCorrectedSnGrad.C
@@ -81,7 +92,6 @@ public:
             snGradScheme<Type>(mesh)
         {}
 
-
         //- Construct from mesh and data stream
         skewCorrectedSnGrad(const fvMesh& mesh, Istream&)
         :
@@ -105,7 +115,7 @@ public:
         }
 
         //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual bool corrected() const noexcept
         {
             return true;
         }

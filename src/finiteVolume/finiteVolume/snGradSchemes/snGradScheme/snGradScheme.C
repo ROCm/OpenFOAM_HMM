@@ -60,8 +60,8 @@ tmp<snGradScheme<Type>> snGradScheme<Type>::New
     {
         FatalIOErrorInFunction(schemeData)
             << "Discretisation scheme not specified"
-            << endl << endl
-            << "Valid schemes are :" << endl
+            << nl << nl
+            << "Valid schemes are :" << nl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
