@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,12 +48,13 @@ Foam::fv::gaussGrad<Type>::gradf
 )
 {
     typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
     const fvMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tgGrad
+    tmp<GradFieldType> tgGrad
     (
-        new GeometricField<GradType, fvPatchField, volMesh>
+        new GradFieldType
         (
             IOobject
             (
@@ -67,7 +69,7 @@ Foam::fv::gaussGrad<Type>::gradf
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& gGrad = tgGrad.ref();
+    GradFieldType& gGrad = tgGrad.ref();
 
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
@@ -78,7 +80,7 @@ Foam::fv::gaussGrad<Type>::gradf
 
     forAll(owner, facei)
     {
-        GradType Sfssf = Sf[facei]*issf[facei];
+        const GradType Sfssf = Sf[facei]*issf[facei];
 
         igGrad[owner[facei]] += Sfssf;
         igGrad[neighbour[facei]] -= Sfssf;
@@ -124,12 +126,13 @@ Foam::fv::gaussGrad<Type>::calcGrad
 ) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tgGrad
+    tmp<GradFieldType> tgGrad
     (
         gradf(tinterpScheme_().interpolate(vsf), name)
     );
-    GeometricField<GradType, fvPatchField, volMesh>& gGrad = tgGrad.ref();
+    GradFieldType& gGrad = tgGrad.ref();
 
     correctBoundaryConditions(vsf, gGrad);
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,22 +66,22 @@ Foam::fv::faceMDLimitedGrad<Foam::scalar>::calcGrad
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
 
-    scalar rk = (1.0/k_ - 1.0);
+    const scalar rk = (1.0/k_ - 1.0);
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        scalar vsfOwn = vsf[own];
-        scalar vsfNei = vsf[nei];
+        const scalar vsfOwn = vsf[own];
+        const scalar vsfNei = vsf[nei];
 
         scalar maxFace = max(vsfOwn, vsfNei);
         scalar minFace = min(vsfOwn, vsfNei);
 
         if (k_ < 1.0)
         {
-            scalar maxMinFace = rk*(maxFace - minFace);
+            const scalar maxMinFace = rk*(maxFace - minFace);
             maxFace += maxMinFace;
             minFace -= maxMinFace;
         }
@@ -119,7 +120,7 @@ Foam::fv::faceMDLimitedGrad<Foam::scalar>::calcGrad
 
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
 
                 scalar vsfOwn = vsf[own];
                 scalar vsfNei = psfNei[pFacei];
@@ -129,7 +130,7 @@ Foam::fv::faceMDLimitedGrad<Foam::scalar>::calcGrad
 
                 if (k_ < 1.0)
                 {
-                    scalar maxMinFace = rk*(maxFace - minFace);
+                    const scalar maxMinFace = rk*(maxFace - minFace);
                     maxFace += maxMinFace;
                     minFace -= maxMinFace;
                 }
@@ -147,17 +148,17 @@ Foam::fv::faceMDLimitedGrad<Foam::scalar>::calcGrad
         {
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
 
-                scalar vsfOwn = vsf[own];
-                scalar vsfNei = psf[pFacei];
+                const scalar vsfOwn = vsf[own];
+                const scalar vsfNei = psf[pFacei];
 
                 scalar maxFace = max(vsfOwn, vsfNei);
                 scalar minFace = min(vsfOwn, vsfNei);
 
                 if (k_ < 1.0)
                 {
-                    scalar maxMinFace = rk*(maxFace - minFace);
+                    const scalar maxMinFace = rk*(maxFace - minFace);
                     maxFace += maxMinFace;
                     minFace -= maxMinFace;
                 }
@@ -205,22 +206,22 @@ Foam::fv::faceMDLimitedGrad<Foam::vector>::calcGrad
     const volVectorField& C = mesh.C();
     const surfaceVectorField& Cf = mesh.Cf();
 
-    scalar rk = (1.0/k_ - 1.0);
+    const scalar rk = (1.0/k_ - 1.0);
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector vvfOwn = vvf[own];
-        vector vvfNei = vvf[nei];
+        const vector& vvfOwn = vvf[own];
+        const vector& vvfNei = vvf[nei];
 
-        vector maxFace = max(vvfOwn, vvfNei);
-        vector minFace = min(vvfOwn, vvfNei);
+        vector maxFace(max(vvfOwn, vvfNei));
+        vector minFace(min(vvfOwn, vvfNei));
 
         if (k_ < 1.0)
         {
-            vector maxMinFace = rk*(maxFace - minFace);
+            const vector maxMinFace(rk*(maxFace - minFace));
             maxFace += maxMinFace;
             minFace -= maxMinFace;
         }
@@ -261,17 +262,17 @@ Foam::fv::faceMDLimitedGrad<Foam::vector>::calcGrad
 
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
 
-                vector vvfOwn = vvf[own];
-                vector vvfNei = psfNei[pFacei];
+                const vector& vvfOwn = vvf[own];
+                const vector& vvfNei = psfNei[pFacei];
 
-                vector maxFace = max(vvfOwn, vvfNei);
-                vector minFace = min(vvfOwn, vvfNei);
+                vector maxFace(max(vvfOwn, vvfNei));
+                vector minFace(min(vvfOwn, vvfNei));
 
                 if (k_ < 1.0)
                 {
-                    vector maxMinFace = rk*(maxFace - minFace);
+                    const vector maxMinFace(rk*(maxFace - minFace));
                     maxFace += maxMinFace;
                     minFace -= maxMinFace;
                 }
@@ -288,17 +289,17 @@ Foam::fv::faceMDLimitedGrad<Foam::vector>::calcGrad
         {
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
 
-                vector vvfOwn = vvf[own];
-                vector vvfNei = psf[pFacei];
+                const vector& vvfOwn = vvf[own];
+                const vector& vvfNei = psf[pFacei];
 
-                vector maxFace = max(vvfOwn, vvfNei);
-                vector minFace = min(vvfOwn, vvfNei);
+                vector maxFace(max(vvfOwn, vvfNei));
+                vector minFace(min(vvfOwn, vvfNei));
 
                 if (k_ < 1.0)
                 {
-                    vector maxMinFace = rk*(maxFace - minFace);
+                    const vector maxMinFace(rk*(maxFace - minFace));
                     maxFace += maxMinFace;
                     minFace -= maxMinFace;
                 }

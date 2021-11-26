@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 
     // Create the base form of the dd-tensor
     // including components for the "empty" directions
-    symmTensor dd0(sqr((Vector<label>::one - mesh.geometricD())/2));
+    const symmTensor dd0(sqr((Vector<label>::one - mesh.geometricD())/2));
 
     forAll(vectors_, i)
     {
@@ -73,10 +73,10 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 
         // The current cell is 0 in the stencil
         // Calculate the deltas and sum the weighted dd
-        for (label j=1; j<lsvi.size(); j++)
+        for (label j = 1; j < lsvi.size(); ++j)
         {
             lsvi[j] = lsvi[j] - lsvi[0];
-            scalar magSqrLsvi = magSqr(lsvi[j]);
+            const scalar magSqrLsvi = magSqr(lsvi[j]);
             dd += sqr(lsvi[j])/magSqrLsvi;
             lsvi[j] /= magSqrLsvi;
         }
@@ -89,7 +89,7 @@ void Foam::fv::LeastSquaresVectors<Stencil>::calcLeastSquaresVectors()
 
         // Finalize the gradient weighting vectors
         lsvi[0] = Zero;
-        for (label j=1; j<lsvi.size(); j++)
+        for (label j = 1; j < lsvi.size(); ++j)
         {
             lsvi[j] = dd & lsvi[j];
             lsvi[0] -= lsvi[j];

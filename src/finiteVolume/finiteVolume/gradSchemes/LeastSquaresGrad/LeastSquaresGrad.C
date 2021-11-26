@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +52,7 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
 ) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
     const fvMesh& mesh = vtf.mesh();
 
@@ -60,9 +62,9 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
         mesh
     );
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tlsGrad
+    tmp<GradFieldType> tlsGrad
     (
-        new GeometricField<GradType, fvPatchField, volMesh>
+        new GradFieldType
         (
             IOobject
             (
@@ -77,7 +79,7 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad.ref();
+    GradFieldType& lsGrad = tlsGrad.ref();
     Field<GradType>& lsGradIf = lsGrad;
 
     const extendedCentredCellToCellStencil& stencil = lsv.stencil();
