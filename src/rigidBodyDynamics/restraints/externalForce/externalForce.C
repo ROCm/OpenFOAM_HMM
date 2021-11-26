@@ -29,7 +29,6 @@ License
 #include "externalForce.H"
 #include "rigidBodyModel.H"
 #include "rigidBodyModelState.H"
-#include "OneConstant.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

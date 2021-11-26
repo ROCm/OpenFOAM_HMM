@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,22 +170,23 @@ public:
 
     // Member Functions
 
+        //- Value is independent of x
+        virtual inline bool constant() const
+        {
+            return true;
+        }
+
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual inline bool uniform() const
+        {
+            return isUniform_ && PatchFunction1<Type>::uniform();
+        }
+
+
         // Evaluation
 
             //- Return constant value
             virtual inline tmp<Field<Type>> value(const scalar x) const;
-
-            //- Is value constant (i.e. independent of x)
-            virtual inline bool constant() const
-            {
-                return true;
-            }
-
-            //- Is value uniform (i.e. independent of coordinate)
-            virtual inline bool uniform() const
-            {
-                return isUniform_ && PatchFunction1<Type>::uniform();
-            }
 
             //- Integrate between two values
             virtual inline tmp<Field<Type>> integrate

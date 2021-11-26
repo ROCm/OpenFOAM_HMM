@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,23 +24,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Function1Types::OneConstant
+    Foam::Function1Types::None
 
 Description
-    Templated function that returns the corresponding 1 (one).
+    Templated placeholder function that returns an error message if called.
 
-    Usage:
-    \verbatim
-        <entryName> one;
-    \endverbatim
-
-SourceFiles
-    OneConstant.C
+    This is principally useful for interfaces that expect a Function1
+    but where it is not necessarily used by a particular submodel.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_OneConstant_H
-#define Function1Types_OneConstant_H
+#ifndef Function1Types_None_H
+#define Function1Types_None_H
 
 #include "Function1.H"
 
@@ -53,37 +47,39 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OneConstant Declaration
+                            Class None Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class OneConstant
+class None
 :
     public Function1<Type>
 {
+    // Private Member Data
+
+        //- Context (eg, dictionary name) for the function
+        string context_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("one");
+    TypeName("none");
 
 
     // Generated Methods
 
+        //- Default copy constructor
+        None(const None<Type>& rhs) = default;
+
         //- No copy assignment
-        void operator=(const OneConstant<Type>&) = delete;
+        void operator=(const None<Type>&) = delete;
 
 
     // Constructors
 
-        //- Construct from entry name and optional registry
-        explicit OneConstant
-        (
-            const word& entryName,
-            const objectRegistry* obrPtr = nullptr
-        );
-
         //- Construct from entry name, dictionary and optional registry
-        OneConstant
+        None
         (
             const word& entryName,
             const dictionary& dict,
@@ -93,12 +89,12 @@ public:
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const
         {
-            return tmp<Function1<Type>>(new OneConstant<Type>(*this));
+            return tmp<Function1<Type>>(new None<Type>(*this));
         }
 
 
     //- Destructor
-    virtual ~OneConstant() = default;
+    virtual ~None() = default;
 
 
     // Member Functions
@@ -106,21 +102,14 @@ public:
         //- Value is independent of x
         virtual inline bool constant() const { return true; }
 
-        //- Return constant value
-        virtual inline Type value(const scalar) const;
+        //- Placeholder: generates an error if called
+        virtual Type value(const scalar x) const;
 
-        //- Integrate between two values
-        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+        //- Placeholder: generates an error if called
+        virtual Type integral(const scalar x1, const scalar x2) const;
 
-        //- Return value as a function of (scalar) independent variable
+        //- Placeholder: generates an error if called
         virtual tmp<Field<Type>> value(const scalarField& x) const;
-
-        //- Integrate between two (scalar) values
-        virtual tmp<Field<Type>> integrate
-        (
-            const scalarField& x1,
-            const scalarField& x2
-        ) const;
 
         //- Write as primitive (inline) format
         virtual void writeData(Ostream& os) const;
@@ -132,12 +121,8 @@ public:
 } // End namespace Function1Types
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "OneConstantI.H"
-
 #ifdef NoRepository
-    #include "OneConstant.C"
+    #include "NoneFunction1.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

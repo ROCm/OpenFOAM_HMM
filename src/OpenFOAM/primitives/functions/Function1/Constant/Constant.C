@@ -117,7 +117,8 @@ void Foam::Function1Types::Constant<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
 
-    os  << token::SPACE << value_ << token::END_STATEMENT << nl;
+    os  << token::SPACE << value_;
+    os.endEntry();
 }
 
 

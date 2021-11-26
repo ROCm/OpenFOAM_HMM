@@ -134,6 +134,9 @@ public:
         //- Change the constant value
         inline void reset(const Type& val);
 
+        //- Value is independent of x
+        virtual inline bool constant() const { return true; }
+
         //- Return constant value
         virtual inline Type value(const scalar) const;
 

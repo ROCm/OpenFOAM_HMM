@@ -90,7 +90,7 @@ protected:
 
     // Protected Data
 
-        //- Optional local co-ordinate system and scaling
+        //- Optional local coordinate system and scaling
         coordinateScaling<Type> coordSys_;
 
 

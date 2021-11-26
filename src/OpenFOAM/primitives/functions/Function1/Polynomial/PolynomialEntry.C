@@ -90,7 +90,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     }
     else
     {
-        // Dictionary format - "values" lookup. Eg,
+        // Dictionary format - "coeffs" lookup. Eg,
         //
         // key { type polynomial; coeffs ((0 0) (10 1)); }
 
@@ -203,7 +203,8 @@ void Foam::Function1Types::Polynomial<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
 
-    os  << nl << indent << coeffs_ << token::END_STATEMENT << nl;
+    os  << nl << indent << coeffs_;
+    os.endEntry();
 }
 
 

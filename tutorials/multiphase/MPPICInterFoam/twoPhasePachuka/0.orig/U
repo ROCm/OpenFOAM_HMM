@@ -68,7 +68,10 @@ boundaryField
 
                 if (!baseVel)
                 {
-                    baseVel = Function1<scalar>::New("timeFunction", dict);
+                    baseVel = Function1<scalar>::New
+                    (
+                        "timeFunction", dict, &db()
+                    );
                 }
 
                 const bool verbose = dict.getOrDefault<bool>("verbose", false);
@@ -76,7 +79,10 @@ boundaryField
                 if (!baseDir && dict.found("directionFunction"))
                 {
                     // ie, NewIfPresent
-                    baseDir = Function1<vector>::New("directionFunction", dict);
+                    baseDir = Function1<vector>::New
+                    (
+                        "directionFunction", dict, &db()
+                    );
 
                     InfoErr
                         << "Function1 for direction" << nl;

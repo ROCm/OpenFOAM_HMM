@@ -240,23 +240,30 @@ public:
 
     // Member Functions
 
-        // Evaluation
+        //- Is value constant (i.e. independent of x)
+        virtual bool constant() const
+        {
+            return false;
+        }
 
-            //- Return value as a function of (scalar) independent variable
-            virtual Type value(const scalar x) const;
 
-            //- Return value as a function of (scalar) independent variable
-            virtual tmp<Field<Type>> value(const scalarField& x) const;
+    // Evaluation
 
-            //- Integrate between two (scalar) values
-            virtual Type integrate(const scalar x1, const scalar x2) const;
+        //- Return value as a function of (scalar) independent variable
+        virtual Type value(const scalar x) const;
 
-            //- Integrate between two (scalar) values
-            virtual tmp<Field<Type>> integrate
-            (
-                const scalarField& x1,
-                const scalarField& x2
-            ) const;
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<Type>> value(const scalarField& x) const;
+
+        //- Integrate between two (scalar) values
+        virtual Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Integrate between two (scalar) values
+        virtual tmp<Field<Type>> integrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
 
 
     // I/O
@@ -312,20 +319,18 @@ public:
 
     // Member Functions
 
-        // Evaluation
+        using Function1Type::value;
+        using Function1Type::integrate;
 
-            using Function1Type::value;
-            using Function1Type::integrate;
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<Type>> value(const scalarField& x) const;
 
-            //- Return value as a function of (scalar) independent variable
-            virtual tmp<Field<Type>> value(const scalarField& x) const;
-
-            //- Integrate between two (scalar) values
-            virtual tmp<Field<Type>> integrate
-            (
-                const scalarField& x1,
-                const scalarField& x2
-            ) const;
+        //- Integrate between two (scalar) values
+        virtual tmp<Field<Type>> integrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
 };
 
 

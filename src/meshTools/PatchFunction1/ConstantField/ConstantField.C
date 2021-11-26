@@ -291,8 +291,8 @@ void Foam::PatchFunction1Types::ConstantField<Type>::writeData
     if (isUniform_)
     {
         os.writeKeyword(this->name())
-            << word("constant") << token::SPACE << uniformValue_
-            << token::END_STATEMENT << nl;
+            << word("constant") << token::SPACE << uniformValue_;
+        os.endEntry();
     }
     else
     {

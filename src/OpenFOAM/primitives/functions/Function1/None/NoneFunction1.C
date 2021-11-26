@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,85 +25,73 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchFunction1Base.H"
-#include "polyBoundaryMesh.H"
-#include "polyMesh.H"
-#include "polyPatch.H"
-#include "objectRegistry.H"
-#include "Time.H"
+#include "NoneFunction1.H"
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::patchFunction1Base::patchFunction1Base
+template<class Type>
+Foam::Function1Types::None<Type>::None
 (
-    const polyPatch& pp,
-    const word& entryName,
-    const bool faceValues
-)
-:
-    refCount(),
-    name_(entryName),
-    patch_(pp),
-    faceValues_(faceValues)
-{}
-
-
-Foam::patchFunction1Base::patchFunction1Base
-(
-    const polyPatch& pp,
     const word& entryName,
     const dictionary& dict,
-    const bool faceValues
+    const objectRegistry* obrPtr
 )
 :
-    refCount(),
-    name_(entryName),
-    patch_(pp),
-    faceValues_(faceValues)
-{}
-
-
-Foam::patchFunction1Base::patchFunction1Base(const patchFunction1Base& rhs)
-:
-    patchFunction1Base(rhs, rhs.patch())
-{}
-
-
-Foam::patchFunction1Base::patchFunction1Base
-(
-    const patchFunction1Base& rhs,
-    const polyPatch& pp
-)
-:
-    refCount(),
-    name_(rhs.name_),
-    patch_(pp),
-    faceValues_(rhs.faceValues_)
+    Function1<Type>(entryName, dict, obrPtr),
+    context_(dict.relativeName())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::objectRegistry* Foam::patchFunction1Base::whichDb() const
+template<class Type>
+Type Foam::Function1Types::None<Type>::value(const scalar) const
 {
-    return &(patch_.boundaryMesh().mesh());  // mesh registry
+    FatalErrorInFunction
+        << "Function " << this->name() << " is 'none' in " << context_ << nl
+        << exit(FatalError);
+
+    return pTraits<Type>::zero;
 }
 
 
-const Foam::objectRegistry& Foam::patchFunction1Base::obr() const
+template<class Type>
+Type Foam::Function1Types::None<Type>::integral
+(
+    const scalar x1,
+    const scalar x2
+)
+const
 {
-    return patch_.boundaryMesh().mesh();  // mesh registry
+    FatalErrorInFunction
+        << "Function " << this->name() << " is 'none' in " << context_ << nl
+        << exit(FatalError);
+
+    return pTraits<Type>::zero;
 }
 
 
-const Foam::Time& Foam::patchFunction1Base::time() const
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::Function1Types::None<Type>::value
+(
+    const scalarField& x
+) const
 {
-    return patch_.boundaryMesh().mesh().time();
+    FatalErrorInFunction
+        << "Function " << this->name() << " is 'none' in " << context_ << nl
+        << exit(FatalError);
+
+    return nullptr;
 }
 
 
-void Foam::patchFunction1Base::userTimeToTime(const Time& t)
-{}
+template<class Type>
+void Foam::Function1Types::None<Type>::writeData(Ostream& os) const
+{
+    // OR:  os.writeEntry(this->name(), this->type());
+    Function1<Type>::writeData(os);
+    os.endEntry();
+}
 
 
 // ************************************************************************* //

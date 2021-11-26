@@ -30,6 +30,7 @@ License
 #include "Uniform.H"
 #include "ZeroConstant.H"
 #include "OneConstant.H"
+#include "NoneFunction1.H"
 #include "PolynomialEntry.H"
 #include "Sine.H"
 #include "Cosine.H"
@@ -49,6 +50,7 @@ License
     makeFunction1(Type);                                                       \
     makeFunction1Type(Constant, Type);                                         \
     makeFunction1Type(Uniform, Type);                                          \
+    makeFunction1Type(None, Type);                                             \
     makeFunction1Type(ZeroConstant, Type);                                     \
     makeFunction1Type(OneConstant, Type);                                      \
     makeFunction1Type(Polynomial, Type);                                       \
@@ -73,6 +75,7 @@ namespace Foam
 {
     makeFunction1(label);
     makeFunction1Type(Constant, label);
+    makeFunction1Type(None, label);
 
     makeFunction1Type(FunctionObjectTrigger, label);
     makeFunction1Type(FunctionObjectTrigger, scalar);

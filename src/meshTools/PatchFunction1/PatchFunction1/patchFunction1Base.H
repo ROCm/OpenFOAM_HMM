@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,9 +78,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the object registry (ie, the mesh) as pointer
-        const objectRegistry* obrPtr() const;
-
         //- No copy assignment
         void operator=(const patchFunction1Base&) = delete;
 
@@ -149,16 +146,14 @@ public:
             return (faceValues_ ? patch_.size() : patch_.nPoints());
         }
 
-        //- Has an associated objectRegistry (ie, from mesh)
-        /// bool hasDb() const noexcept
-        /// {
-        ///     return true;
-        /// }
+
+        //- Return the associated registry (ie, the mesh)
+        const objectRegistry* whichDb() const;
 
         //- Return the object registry (ie, the mesh)
         const objectRegistry& obr() const;
 
-        //- False: not created with time
+        //- Return false: function not created with time database
         /// bool isTime() const noexcept
         /// {
         ///     return false;

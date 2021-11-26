@@ -30,6 +30,7 @@ License
 #include "ConstantField.H"
 #include "UniformValueField.H"
 #include "FunctionObjectValue.H"
+#include "NoneFunction1.H"
 #include "MappedFile.H"
 #include "Table.H"
 #include "addToRunTimeSelectionTable.H"
@@ -57,6 +58,14 @@ namespace Foam
     //- Option1 : add UniformFieldValue under the same name as Function1
     //            See makeFunction1s.C. Note that we do not need
     //            Constant & Uniform
+
+/// Undecided if we actually need 'none':
+/// addUniformValueFieldFunction1s(none, scalar);
+/// addUniformValueFieldFunction1s(none, vector);
+/// addUniformValueFieldFunction1s(none, sphericalTensor);
+/// addUniformValueFieldFunction1s(none, symmTensor);
+/// addUniformValueFieldFunction1s(none, tensor);
+
     addUniformValueFieldFunction1s(zero, scalar);
     addUniformValueFieldFunction1s(zero, vector);
     addUniformValueFieldFunction1s(zero, sphericalTensor);

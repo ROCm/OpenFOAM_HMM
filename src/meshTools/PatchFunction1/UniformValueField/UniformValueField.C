@@ -48,7 +48,7 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
             entryName,
             dict,
             redirectType,
-            patchFunction1Base::obrPtr()  // mesh registry
+            patchFunction1Base::whichDb()  // mesh registry
         )
     )
 {}
@@ -76,7 +76,7 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 {
     if (uniformValuePtr_)
     {
-        uniformValuePtr_->resetDb(patchFunction1Base::obrPtr());
+        uniformValuePtr_->resetDb(patchFunction1Base::whichDb());
     }
 }
 

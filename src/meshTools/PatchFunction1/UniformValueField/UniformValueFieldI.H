@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,18 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "UniformValueField.H"
-#include "SubField.H"
-#include "Constant.H"
+#include "Field.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-inline bool
-Foam::PatchFunction1Types::UniformValueField<Type>::constant() const
-{
-    return uniformValuePtr_->type() == Function1Types::Constant<Type>::typeName;
-}
-
 
 template<class Type>
 inline Foam::tmp<Foam::Field<Type>>

@@ -369,7 +369,10 @@ template<class Type>
 void Foam::Function1Types::TableBase<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+
+    os  << nl << indent << table_;
+    os.endEntry();
+
     writeEntries(os);
 }
 
