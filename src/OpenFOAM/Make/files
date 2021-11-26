@@ -162,11 +162,13 @@ $(expr)/exprResult/exprResultStored.C
 $(expr)/exprResult/exprResultStoredStack.C
 $(expr)/exprString/exprString.C
 $(expr)/exprTools/exprTools.C
+$(expr)/scanToken/exprScanToken.C
 
 $(expr)/traits/exprTraits.C
 
 $(expr)/exprDriver/exprDriver.C
 $(expr)/exprDriver/exprDriverFields.C
+$(expr)/exprDriver/exprDriverFunctions.C
 $(expr)/exprDriver/exprDriverIO.C
 
 fieldExpr = $(expr)/fields

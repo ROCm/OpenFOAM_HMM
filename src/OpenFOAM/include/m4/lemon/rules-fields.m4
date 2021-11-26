@@ -62,37 +62,18 @@ define([_get_]$1, [driver->$5<$3>($][1).ptr()])dnl
 # Example
 # rule_get_field(sfield, SCALAR_ID)
 #
-# sfield (lhs) ::= SCALAR_ID (ident) .
+# sfield (lhs) ::= SCALAR_ID (name) .
 # {
-#     lhs = driver->getVolField<Foam::scalar>(make_obj(ident->name)).ptr();
+#     lhs = driver->getVolField<Foam::scalar>(make_obj(name.name_)).ptr();
 # }
 #------------------------------------------------------------------------------
 
 define([rule_get_field],
-[$1 (lhs) ::= $2 (ident) .
+[$1 (lhs) ::= $2 (name) .
 {
-    lhs = _get_$1(make_obj(ident->name));
+    lhs = _get_$1(make_obj(name.name_));
 }]
 )
-
-
-#------------------------------------------------------------------------------
-# rule_driver_select(out, tok, method)
-#
-# Description
-#     Production rule for driver get cell/face/point selection methods
-#
-# Example
-# rule_driver_select(sfield, CSET, field_cellSet)
-#
-# sfield (lhs) ::= CSET LPAREN IDENTIFIER (ident) RPAREN .
-# {
-#     lhs = driver->field_cellSet(make_obj(ident->name)).ptr();
-# }
-#------------------------------------------------------------------------------
-
-define([rule_driver_select],
-[rule_driver_unary_named($1, $2, IDENTIFIER, $3)])
 
 
 #------------------------------------------------------------------------------
@@ -454,19 +435,19 @@ ifelse($5,[],[],[<$5>])dnl      # Optional template parameter (value_type)
 #        Foam::scalar
 #    )
 #
-# sfield(lhs) ::= SN_GRAD LPAREN SCALAR_ID (ident) RPAREN .
+# sfield(lhs) ::= SN_GRAD LPAREN SCALAR_ID (name) RPAREN .
 # {
-#     lhs = driver->patchNormalField<Foam::scalar>(make_obj(ident->name)).ptr();
+#     lhs = driver->patchNormalField<Foam::scalar>(make_obj(name.name_)).ptr();
 # }
 #
 #------------------------------------------------------------------------------
 
 define([rule_driver_unary_named],
-[$1 (lhs) ::= $2 LPAREN $3 (ident) RPAREN .
+[$1 (lhs) ::= $2 LPAREN $3 (name) RPAREN .
 {
     lhs = driver->$4[]dnl       # The method call
 ifelse($5,[],[],[<$5>])dnl      # Optional template parameter (value_type)
-(make_obj(ident->name)).ptr();
+(make_obj(name.name_)).ptr();
 }]
 )
 

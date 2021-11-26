@@ -6,11 +6,10 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, distributed under GNU General Public
-#     License GPL-3.0 or later <https://www.gnu.org/licenses/gpl-3.0>
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Defines standard operator precedence macro for lemon grammar.
@@ -20,18 +19,34 @@ divert(-1)dnl
 
 define([operator_precedence],
 [// [https://en.cppreference.com/w/cpp/language/operator_precedence]
-%right QUESTION COLON .                 // 16: right-to-left
-%left LOR  .                            // 15:
-%left LAND .                            // 14:
-// %left BIT_OR  .                        // 13 (unused)
-%left BIT_XOR .                         // 12
-%left BIT_AND .                         // 11
-%left EQUAL NOT_EQUAL .                 // 10
-%left LESS_EQ GREATER_EQ LESS GREATER . // 9
-%left PLUS MINUS .                      // 6
-%left TIMES DIVIDE PERCENT .            // 5
-%right NEGATE NOT .                     // 3: right-to-left
-%left DOT  .                            // 2: (method)]
+%right QUESTION COLON .                 // 13: right-to-left
+%left LOR  .                            // 12:
+%left LAND .                            // 11:
+%left BIT_OR  .                         // 10 (unused)
+%left BIT_XOR .                         // 9
+%left BIT_AND .                         // 8
+%left EQUAL NOT_EQUAL .                 // 7
+%left LESS LESS_EQ GREATER GREATER_EQ . // 6
+%left PLUS MINUS .                      // 4
+%left TIMES DIVIDE PERCENT .            // 3
+%right NEGATE LNOT BIT_NOT .            // 2: right-to-left
+%left DOT  .                            // 1: (method)]
+)
+
+
+define([standard_tokens],
+[// Standard tokens for operators, constants and common types]
+%token
+  LPAREN RPAREN COMMA
+  QUESTION COLON LOR LAND LNOT
+  BIT_OR BIT_XOR BIT_AND BIT_NOT
+  EQUAL NOT_EQUAL
+  LESS LESS_EQ GREATER GREATER_EQ
+  PLUS MINUS TIMES DIVIDE PERCENT
+  NEGATE DOT
+  BOOL LTRUE LFALSE
+  NUMBER ZERO IDENTIFIER
+.
 )
 
 #------------------------------------------------------------------------------

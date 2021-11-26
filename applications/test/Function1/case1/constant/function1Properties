@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -135,6 +135,55 @@ cosine6
     period      6;
     scale       1;
     level       0;
+}
+
+
+expr1
+{
+    type expression;
+
+    functions<scalar>
+    {
+        func1 constant 21;
+        func2 constant 15;
+        sin   constant -5;
+    }
+
+    functions<vector>
+    {
+        vfunc3 constant (1 2 3);
+        vfunc4 constant (3 2 1);
+    }
+
+    expression
+    #{
+        100 * fn:vfunc3() & fn:vfunc4() * (vector::z) .z()
+      * (fn:sin(arg()) + fn:func1(fn:func2()))
+    #};
+}
+
+
+expr2
+{
+    type expression;
+
+    functions<scalar>
+    {
+        func1 constant 21;
+        func2 constant 15;
+        sin   constant -5;
+    }
+
+    functions<vector>
+    {
+        vfunc3 constant (1 2 3);
+        vfunc4 constant (3 2 1);
+    }
+
+    expression
+    #{
+        (fn:vfunc3() & vector::z) * arg()
+    #};
 }
 
 

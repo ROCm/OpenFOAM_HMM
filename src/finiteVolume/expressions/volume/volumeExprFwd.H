@@ -47,7 +47,6 @@ namespace volumeExpr
 class parser;
 class scanner;
 class parseDriver;
-union scanToken;
 
 //- Static debugging option
 extern int debug;

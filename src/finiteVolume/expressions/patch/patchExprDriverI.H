@@ -47,4 +47,60 @@ inline Foam::label Foam::expressions::patchExpr::parseDriver::size
 }
 
 
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::parseDriver::field_cellSet
+(
+    const word& name
+) const
+{
+    return field_cellSelection
+    (
+        name,
+        topoSetSource::sourceType::CELLSET_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_cellZone
+(
+    const word& name
+) const
+{
+    return field_cellSelection
+    (
+        name,
+        topoSetSource::sourceType::CELLZONE_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_faceSet
+(
+    const word& name
+) const
+{
+    return field_faceSelection
+    (
+        name,
+        topoSetSource::sourceType::FACESET_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_faceZone
+(
+    const word& name
+) const
+{
+    return field_faceSelection
+    (
+        name,
+        topoSetSource::sourceType::FACEZONE_SOURCE
+    );
+}
+
+
 // ************************************************************************* //

@@ -6,11 +6,10 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, distributed under GNU General Public
-#     License GPL-3.0 or later <https://www.gnu.org/licenses/gpl-3.0>
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     A collection of 'base' setup of m4 macros for lemon, and setup
@@ -34,7 +33,7 @@ divert(-1)dnl
 #     _sphTensor_, _symTensor_, _tensor_
 #
 # Values for the currently targeted rule
-#     _target_, _value_type_
+#     _target_, _value_type_, _scalar_arg_
 #
 # Note
 #     The `undefine' occur immediately upon inclusion of this file.
@@ -109,18 +108,19 @@ Foam::tmp<T> make_tmp(T* p)
 
 //- Default [make_obj] is pass-through
 template<class T>
-const T& make_obj(const T& obj)
+const T& make_obj(const T& o) noexcept
 {
-    return obj;
+    return o;
 }
 
 //- Move construct an object from a pointer and destroy the pointer
 template<class T>
-T make_obj(T* p)
+T make_obj(T*& p)
 {
-    T obj(std::move(*p));
+    T o(std::move(*p));
     delete p;
-    return obj;
+    p = nullptr;  // Prevent caller from deleting too
+    return o;
 }]
 )
 
@@ -149,6 +149,7 @@ undefine([_tensor_])
 
 undefine([_target_])
 undefine([_value_type_])
+undefine([_scalar_arg_])
 
 #------------------------------------------------------------------------------
 divert(0)dnl

@@ -55,6 +55,97 @@ Foam::expressions::patchExpr::parseDriver::getPointField<bool>
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_cellSelection
+(
+    const word& name,
+    enum topoSetSource::sourceType setType
+) const
+{
+    refPtr<labelList> tselected;
+    switch (setType)
+    {
+        case topoSetSource::sourceType::CELLZONE_SOURCE:
+        case topoSetSource::sourceType::CELLSET_SOURCE:
+        {
+            tselected = getTopoSetLabels(name, setType);
+            break;
+        }
+
+        default:
+        {
+            FatalErrorInFunction
+                << "Unexpected sourceType: " << int(setType) << nl
+                << exit(FatalError);
+            break;
+        }
+    }
+
+    // Not particularly efficient...
+    labelHashSet inSelection(tselected());
+
+    const labelList& faceCells = patch_.faceCells();
+    auto tresult = tmp<boolField>::New(this->size(), false);
+    auto& result = tresult.ref();
+
+    forAll(result, facei)
+    {
+        if (inSelection.found(faceCells[facei]))
+        {
+            result[facei] = true;
+        }
+    }
+
+    return tresult;
+}
+
+
+Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_faceSelection
+(
+    const word& name,
+    enum topoSetSource::sourceType setType
+) const
+{
+    refPtr<labelList> tselected;
+    switch (setType)
+    {
+        case topoSetSource::sourceType::FACESET_SOURCE:
+        case topoSetSource::sourceType::FACEZONE_SOURCE:
+        {
+            tselected = getTopoSetLabels(name, setType);
+            break;
+        }
+
+        default:
+        {
+            FatalErrorInFunction
+                << "Unexpected sourceType: " << int(setType) << nl
+                << exit(FatalError);
+            break;
+        }
+    }
+
+    // Not particularly efficient...
+    labelHashSet inSelection(tselected());
+
+    const label patchStart = patch_.start();
+
+    auto tresult = tmp<boolField>::New(this->size(), false);
+    auto& result = tresult.ref();
+
+    forAll(result, facei)
+    {
+        if (inSelection.found(facei + patchStart))
+        {
+            result[facei] = true;
+        }
+    }
+
+    return tresult;
+}
+
+
 Foam::tmp<Foam::scalarField>
 Foam::expressions::patchExpr::parseDriver::field_faceArea() const
 {

@@ -98,6 +98,7 @@ TBD
  */
 %include
 {
+#include "exprScanToken.H"
 #include "fieldExprDriver.H"
 #include "fieldExprParser.H"
 #include "fieldExprScanner.H"
@@ -131,11 +132,8 @@ tmp_management()
 %token_prefix TOK_
 
 // Terminals
-%token_type    {Foam::expressions::fieldExpr::scanToken*}
-// Non-terminals
-%type ivalue   { Foam::label }
-%type svalue   { Foam::scalar }
-%type ident    { Foam::word* }
+%token_type         {Foam::expressions::scanToken}
+%token_destructor   { ($$).destroy(); }
 
 // Fields
 declare_field(lfield, Foam::boolField, bool, newField, getField)
@@ -150,6 +148,7 @@ declare_field(tfield, Foam::tensorField, Foam::tensor, newField, getField)
 // Lemon does not generate a destructor for that.
 // So do not use Lemon destructors for anything.
 
+standard_tokens()
 operator_precedence()
 
 %start_symbol evaluate
@@ -160,7 +159,10 @@ operator_precedence()
  * Productions (scalar)
 \*---------------------------------------------------------------------------*/
 
-svalue (lhs) ::= NUMBER (a) .       { lhs = (a)->svalue; }  // From scanToken
+%type svalue { Foam::scalar }
+
+svalue (lhs) ::= NUMBER (tok) .     { lhs = (tok).scalarValue; } // scanToken
+
 svalue (lhs) ::= ZERO .             { lhs = Foam::Zero; }
 svalue (lhs) ::= PI LPAREN RPAREN . { lhs = Foam::constant::mathematical::pi; }
 svalue (lhs) ::= DEG_TO_RAD LPAREN RPAREN . { lhs = Foam::degToRad(); }
@@ -168,6 +170,39 @@ svalue (lhs) ::= RAD_TO_DEG LPAREN RPAREN . { lhs = Foam::radToDeg(); }
 svalue (lhs) ::= ARG LPAREN RPAREN . { lhs = driver->argValue(); }
 svalue (lhs) ::= TIME LPAREN RPAREN . { lhs = driver->timeValue(); }
 svalue (lhs) ::= DELTA_T LPAREN RPAREN . { lhs = driver->deltaT(); }
+
+svalue (lhs) ::= SCALAR_FUNCTION_ID (name) LPAREN RPAREN .
+{
+    lhs = driver->getFunctionValue<Foam::scalar>
+    (
+        make_obj(name.name_),
+        driver->timeValue()
+    );
+}
+
+
+/*---------------------------------------------------------------------------*\
+ * Productions (vector)
+\*---------------------------------------------------------------------------*/
+
+%type vvalue { Foam::vector* }
+%destructor vvalue { delete($$); $$ = nullptr; }
+
+vvalue (lhs) ::= VECTOR_VALUE (tok) .
+{
+    // Take ownership of pointer from scan token
+    lhs = tok.vectorPtr; tok.vectorPtr = nullptr;
+}
+
+vvalue (lhs) ::= VECTOR_FUNCTION_ID (name) LPAREN RPAREN .
+{
+    auto val = driver->getFunctionValue<Foam::vector>
+    (
+        make_obj(name.name_),
+        driver->timeValue()
+    );
+    lhs = new Foam::vector(val);
+}
 
 
 /* * * * * * * * * * * * * * * * * * Fields  * * * * * * * * * * * * * * * * *\
@@ -184,7 +219,9 @@ dnl
 /*---------------------------------------------------------------------------*\
  * Productions (scalarField)
 dnl
+define([_scalar_arg_],  [sfield])dnl
 define([_target_],      [sfield])dnl
+define([_new_target_],  [_new_sfield])dnl
 define([_value_type_],  [Foam::scalar])dnl
 dnl
 \*---------------------------------------------------------------------------*/
@@ -200,9 +237,9 @@ rules_scalar_operations()
 rules_scalar_functions()
 
 // Non-standard but manage via FieldOps::assign
-rule_unary_assign(_target_, _target_, FLOOR, Foam::floorOp<Foam::scalar>())
-rule_unary_assign(_target_, _target_, CEIL, Foam::ceilOp<Foam::scalar>())
-rule_unary_assign(_target_, _target_, ROUND, Foam::roundOp<Foam::scalar>())
+rule_unary_assign(_target_, _target_, FLOOR, Foam::floorOp<_value_type_>())
+rule_unary_assign(_target_, _target_, CEIL, Foam::ceilOp<_value_type_>())
+rule_unary_assign(_target_, _target_, ROUND, Foam::roundOp<_value_type_>())
 
 // Non-standard but works directly for scalarField
 rule_binary_func(_target_, _target_, _target_, HYPOT, Foam::hypot)
@@ -217,20 +254,34 @@ _target_ (lhs) ::= RAND LPAREN RPAREN.
 
 _target_ (lhs) ::= RAND LPAREN NUMBER (seed) RPAREN.
 {
-    lhs = driver->field_rand(std::round((seed)->svalue)).ptr();
+    lhs = driver->field_rand(std::round((seed).scalarValue)).ptr();
+}
+
+_target_ (lhs) ::= SCALAR_FUNCTION_ID (name) LPAREN _scalar_arg_ (values) RPAREN.
+{
+    lhs = _new_target_;
+    driver->fillFunctionValues<_value_type_>
+    (
+        *lhs,
+        make_obj(name.name_),
+        make_obj(values)
+    );
 }
 
 
 /*---------------------------------------------------------------------------*\
  * Productions (vectorField)
 dnl
+define([_scalar_arg_],  [sfield])dnl
 define([_target_],      [vfield])dnl
+define([_new_target_],  [_new_vfield])dnl
 define([_value_type_],  [Foam::vector])dnl
 dnl
 \*---------------------------------------------------------------------------*/
 
 evaluate ::= _target_ (a) . { driver->setResult(a); }
 
+rule_field_from_value(_target_, vvalue)
 rule_get_field(_target_, VECTOR_ID)
 
 rules_standard(_target_, _value_type_, _logic_)
@@ -238,11 +289,26 @@ rules_inplace_gUnary(_target_)
 rules_vector_operations()
 rules_vector_functions()
 
+// Other functions
+
+_target_ (lhs) ::= VECTOR_FUNCTION_ID (name) LPAREN _scalar_arg_ (values) RPAREN.
+{
+    lhs = _new_target_;
+    driver->fillFunctionValues<_value_type_>
+    (
+        *lhs,
+        make_obj(name.name_),
+        make_obj(values)
+    );
+}
+
 
 /*---------------------------------------------------------------------------*\
  * Productions (sphericalTensorField)
 dnl
+define([_scalar_arg_],  [sfield])dnl
 define([_target_],      [hfield])dnl
+define([_new_target_],  [_new_hfield])dnl
 define([_value_type_],  [Foam::sphericalTensor])dnl
 dnl
 \*---------------------------------------------------------------------------*/
@@ -260,7 +326,9 @@ rules_sphTensor_functions()
 /*---------------------------------------------------------------------------*\
  * Productions (symmTensorField)
 dnl
+define([_scalar_arg_],  [sfield])dnl
 define([_target_],      [yfield])dnl
+define([_new_target_],  [_new_yfield])dnl
 define([_value_type_],  [Foam::symmTensor])dnl
 dnl
 \*---------------------------------------------------------------------------*/
@@ -278,7 +346,9 @@ rules_symTensor_functions()
 /*---------------------------------------------------------------------------*\
  * Productions (tensorField)
 dnl
+define([_scalar_arg_],  [sfield])dnl
 define([_target_],      [tfield])dnl
+define([_new_target_],  [_new_tfield])dnl
 define([_value_type_],  [Foam::tensor])dnl
 dnl
 \*---------------------------------------------------------------------------*/
@@ -300,6 +370,7 @@ rules_tensor_functions()
  * Logic field productions (boolField)
 dnl
 define([_target_],      [lfield])dnl
+define([_new_target_],  [_new_lfield])dnl
 define([_value_type_],  [bool])dnl
 dnl
 \*---------------------------------------------------------------------------*/
@@ -393,13 +464,15 @@ void Foam::expressions::fieldExpr::parser::start(parseDriver& driver_)
 }
 
 
-void Foam::expressions::fieldExpr::parser::parse
-(
-    int tokenId,
-    scanToken* tokenVal
-)
+void Foam::expressions::fieldExpr::parser::parse(int tokenId)
 {
-    Parse(lemon_, tokenId, tokenVal);
+    Parse(lemon_, tokenId, scanToken::null());
+}
+
+
+void Foam::expressions::fieldExpr::parser::parse(int tokenId, scanToken tok)
+{
+    Parse(lemon_, tokenId, tok);
 }
 
 

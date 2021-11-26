@@ -36,6 +36,8 @@ Description
     \table
         Property     | Description                          | Required | Default
         variables    | List of variables for expressions    | no  | ()
+        lookup\<scalar\> | Dictionary of scalar Function1     | no  | {}
+        lookup\<vector\> | Dictionary of vector Function1     | no  | {}
         allowShadowing | Allow variables to shadow field names | no  | false
     \endtable
 
@@ -47,10 +49,16 @@ Description
         debugParser  | Add debug for parser                 | no  | false
     \endtable
 
+    The \c lookup<scalar> and \c lookup<vector> are dictionaries
+    of Function1 definitions that can either be used to establish
+    a time-varying quantity, to remap a field of scalar values, or both.
+
 SourceFiles
     exprDriverI.H
+    exprDriverContextI.H
     exprDriver.C
     exprDriverFields.C
+    exprDriverFunctions.C
     exprDriverIO.C
     exprDriverTemplates.C
 
@@ -65,6 +73,9 @@ SourceFiles
 #include "pointField.H"
 #include "primitiveFields.H"
 #include "objectRegistry.H"
+#include "HashTable.H"
+#include "HashSet.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,12 +109,28 @@ public:
         };
 
 
+    //- Externally defined context fields
+    typedef HashTable<const regIOobject*> contextObjectTableType;
+
+
 private:
 
     // Private Member Functions
 
         //- Get search/caching controls from dictionary entries
         static int getSearchControls(const dictionary& dict);
+
+        //- Read/reset Function1 entries
+        void resetFunctions(const dictionary& dict);
+
+        //- Helper for lookup of Function1 in table
+        template<class Type>
+        static const Function1<Type>* getFunction1Ptr
+        (
+            const word& name,
+            const HashTable<refPtr<Function1<Type>>>& tbl,
+            wordList* listFailure = nullptr
+        );
 
 
 protected:
@@ -123,6 +150,17 @@ protected:
 
         //- The variables table
         HashTable<exprResult> variables_;
+
+        //- Function1 mappings/timelines (scalar),
+        //- evaluated at the simulation time or with arbitrary scalars
+        HashTable<refPtr<Function1<scalar>>> scalarFuncs_;
+
+        //- Function1 mappings/timelines (vector),
+        //- evaluated at the simulation time or with arbitrary scalars
+        HashTable<refPtr<Function1<vector>>> vectorFuncs_;
+
+        //- Externally defined context fields
+        contextObjectTableType contextObjects_;
 
         //- Special-purpose scalar reference argument
         scalar arg1Value_;
@@ -167,30 +205,8 @@ protected:
         //- Reset the time-state reference
         void resetTimeReference(const TimeState& ts);
 
-        //- Lookup field object.
-        //  \return const-ref tmp or invalid if not found
-        template<class GeoField>
-        static tmp<GeoField>
-        cfindFieldObject(const objectRegistry& obr, const word& fldName);
-
-        //- Read an interpolation table
-        template<typename TableType>
-        static bool readTable
-        (
-            const word& name,
-            const dictionary& dict,
-            HashTable<TableType>& tbl,
-            bool clear=true
-        );
-
-        //- Write an interpolation table
-        template<class TableType>
-        static void writeTable
-        (
-            Ostream& os,
-            const word& name,
-            const HashTable<TableType>& tbl
-        );
+        //- Write scalar/vector Function1 entries in dictionary format
+        void writeFunctions(Ostream& os) const;
 
 
     // Variables
@@ -444,6 +460,59 @@ public:
         );
 
 
+    // Context fields (similar to objectRegistry)
+
+        //- True if any context fields are defined
+        inline bool hasContextObjects() const;
+
+        //- Find named context field, if it exists
+        inline const regIOobject* cfindContextIOobject(const word& name) const;
+
+        //- Find context field object of specified type
+        //  \return nullptr if not found
+        template<class ObjType>
+        const ObjType* cfindContextObject(const word& name) const;
+
+        //- Add the object to the context
+        inline void addContextObject(const word& name, const regIOobject*);
+
+        //- Add the object to the context
+        inline void addContextObject(const regIOobject*);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const word& name);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const regIOobject*);
+
+        //- Read access to the object context
+        inline const contextObjectTableType& contextObjects() const noexcept;
+
+        //- Write access to the object context
+        inline contextObjectTableType& contextObjects() noexcept;
+
+
+    // Scalar mappings (timelines / lookups)
+
+        //- Named mapping with given type exists
+        template<class Type>
+        bool isFunction(const word& name) const;
+
+        //- Evaluate named mapping for the given time/value.
+        //- Zero for undefined/unknown
+        template<class Type>
+        Type getFunctionValue(const word& name, const scalar x) const;
+
+        //- Fill result with values remapped according to the named Function1
+        template<class Type>
+        void fillFunctionValues
+        (
+            Field<Type>& result,
+            const word& name,
+            const scalarField& input
+        ) const;
+
+
     // Fields
 
         //- Test existence of a local variable
@@ -585,6 +654,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "exprDriverI.H"
+#include "exprDriverContextI.H"
 
 #ifdef NoRepository
     #include "exprDriverTemplates.C"

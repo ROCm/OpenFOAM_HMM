@@ -471,8 +471,8 @@ public:
         //- Return cell/face/point zone/set type or unknown
         topoSetSource::sourceType topoSourceType(const word& name) const;
 
-        //- Read and return labels associated with the topo set
-        labelList getTopoSetLabels
+        //- Get the labels associated with the topo set
+        refPtr<labelList> getTopoSetLabels
         (
             const word& name,
             enum topoSetSource::sourceType setType
