@@ -106,6 +106,11 @@ unsetenv FOAM_USER_APPBIN
 unsetenv FOAM_USER_LIBBIN
 unsetenv FOAM_UTILITIES
 
+# Build related
+unsetenv FOAM_BUILDROOT
+unsetenv FOAM_THIRD_PARTY_BUILDROOT
+unsetenv FOAM_THIRD_PARTY_SOURCES
+
 # Older, unused variables
 
 # Before 1812

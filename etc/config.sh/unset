@@ -95,6 +95,11 @@ unset FOAM_USER_APPBIN
 unset FOAM_USER_LIBBIN
 unset FOAM_UTILITIES
 
+# Build related
+unset FOAM_BUILDROOT
+unset FOAM_THIRD_PARTY_BUILDROOT
+unset FOAM_THIRD_PARTY_SOURCES
+
 # Older, unused variables
 
 # Before 1812
