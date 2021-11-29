@@ -99,13 +99,12 @@ void Foam::globalIndex::gather
         allFld.resize_nocopy(off.last());
 
         // Assign my local data - respect offset information
-        // so that we can request 0 entries to be copied
+        // so that we can request 0 entries to be copied.
+        // Also handle the case where we have a slice of the full
+        // list.
 
-        SubList<Type> localSlot(allFld, off[1]-off[0], off[0]);
-        if (!localSlot.empty())
-        {
-            localSlot = fld;
-        }
+        SubList<Type>(allFld, off[1]-off[0], off[0]) =
+           SubList<Type>(fld, off[1]-off[0]);
 
         if
         (
