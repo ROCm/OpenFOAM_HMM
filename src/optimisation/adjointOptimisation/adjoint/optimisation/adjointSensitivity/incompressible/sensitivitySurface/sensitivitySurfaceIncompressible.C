@@ -31,10 +31,11 @@ License
 #include "PrimitivePatchInterpolation.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
-#include "faCFD.H"
-#include "fixedValueFaPatchFieldsFwd.H"
+#include "faMatrices.H"
+#include "famSup.H"
+#include "famLaplacian.H"
+#include "volSurfaceMapping.H"
 #include "fixedValueFaPatchFields.H"
-#include "zeroGradientFaPatchFieldsFwd.H"
 #include "zeroGradientFaPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,7 +80,7 @@ void sensitivitySurface::addGeometricSens()
         for (const label patchI : sensitivityPatchIDs_)
         {
             const fvPatch& patch = mesh_.boundary()[patchI];
-            vectorField nf(patch.nf());
+            const vectorField nf(patch.nf());
 
             // point sens result for patch
             vectorField& patchdSdb = pointSensdSdb()[patchI];
@@ -87,14 +88,10 @@ void sensitivitySurface::addGeometricSens()
 
             vectorField dSdbMultiplierTot(patch.size(), Zero);
             vectorField dndbMultiplierTot(patch.size(), Zero);
-            forAll(functions, funcI)
+            for (auto& fun : functions)
             {
-                dSdbMultiplierTot +=
-                    functions[funcI].weight()
-                   *functions[funcI].dSdbMultiplier(patchI);
-                dndbMultiplierTot +=
-                    functions[funcI].weight()
-                   *functions[funcI].dndbMultiplier(patchI);
+                dSdbMultiplierTot += fun.weight()*fun.dSdbMultiplier(patchI);
+                dndbMultiplierTot += fun.weight()*fun.dndbMultiplier(patchI);
             }
             // Correspondence of local point addressing to global point
             // addressing
@@ -114,13 +111,12 @@ void sensitivitySurface::addGeometricSens()
             forAll(meshPoints, ppI)
             {
                 const labelList& pointFaces = patchPointFaces[ppI];
-                forAll(pointFaces, pfI)
+                for (label localFaceIndex : pointFaces)
                 {
-                    label localFaceIndex = pointFaces[pfI];
                     label globalFaceIndex = patchStartIndex + localFaceIndex;
                     const face& faceI = faces[globalFaceIndex];
                     // Point coordinates. All indices in global numbering
-                    pointField p(faceI.points(mesh_.points()));
+                    const pointField p(faceI.points(mesh_.points()));
                     tensorField p_d(faceI.size(), Zero);
                     forAll(faceI, facePointI)
                     {
@@ -129,8 +125,10 @@ void sensitivitySurface::addGeometricSens()
                             p_d[facePointI] = tensor::I;
                         }
                     }
-                    tensorField deltaNormals =
-                        dBoundary.makeFaceCentresAndAreas_d(p, p_d);
+                    const tensorField deltaNormals
+                    (
+                        dBoundary.makeFaceCentresAndAreas_d(p, p_d)
+                    );
 
                     // Element [1] is the variation in the (dimensional) normal
                     const tensor& deltaSf = deltaNormals[1];
@@ -139,7 +137,7 @@ void sensitivitySurface::addGeometricSens()
 
                     // Element [2] is the variation in the unit normal
                     const tensor& deltaNf = deltaNormals[2];
-                    patchdndb[ppI]   +=
+                    patchdndb[ppI] +=
                         dndbMultiplierTot[localFaceIndex] & deltaNf;
                 }
             }
@@ -231,8 +229,8 @@ void sensitivitySurface::smoothSensitivities()
         "faceLabels",
         mesh_.time().findInstance
         (
-            mesh_.dbDir()/faMesh::meshSubDir, 
-            "faceLabels", 
+            mesh_.dbDir()/faMesh::meshSubDir,
+            "faceLabels",
             IOobject::READ_IF_PRESENT
         ),
         faMesh::meshSubDir,
@@ -260,7 +258,7 @@ void sensitivitySurface::smoothSensitivities()
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
-        
+
         // If the faMeshDefinitionDict exists, use it to construct the mesh
         if (faMeshDefinitionDict.typeHeaderOk<IOdictionary>(false))
         {
@@ -271,16 +269,16 @@ void sensitivitySurface::smoothSensitivities()
         // sensitivities
         else
         {
-            Info<< "Constructing faMeshDefinition from sensitivity patches" 
+            Info<< "Constructing faMeshDefinition from sensitivity patches"
                 << endl;
             wordList polyMeshPatches(sensitivityPatchIDs_.size());
             label i(0);
             for (const label patchID : sensitivityPatchIDs_)
             {
-                polyMeshPatches[i++] = mesh_.boundary()[patchID].name();    
+                polyMeshPatches[i++] = mesh_.boundary()[patchID].name();
             }
             faMeshDefinition.add<wordList>("polyMeshPatches", polyMeshPatches);
-            dictionary& boundary = faMeshDefinition.subDictOrAdd("boundary");
+            (void)faMeshDefinition.subDictOrAdd("boundary");
         }
 
         // Construct faMesh
@@ -293,10 +291,10 @@ void sensitivitySurface::smoothSensitivities()
     const scalar Rphysical
         (dict().getOrDefault<scalar>("radius", computeRadius(aMesh)));
     DebugInfo
-        << "Physical radius of the sensitivity smoothing " 
+        << "Physical radius of the sensitivity smoothing "
         << Rphysical << nl << endl;
 
-    // Radius used as the diffusivity in the Helmholtz filter, computed as a 
+    // Radius used as the diffusivity in the Helmholtz filter, computed as a
     // function of the physical radius
     const dimensionedScalar RpdeSqr
     (
