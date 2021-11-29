@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +31,9 @@ Group
     grpHeatTransferSolvers
 
 Description
-    Transient solver for buoyant, turbulent flow of compressible fluids for
-    ventilation and heat-transfer.
+    Transient solver for buoyant, turbulent flow of compressible fluids
+    for ventilation and heat-transfer, with optional mesh motion
+    and mesh topology changes.
 
     Turbulence is modelled using a run-time selectable compressible RAS or
     LES model.
@@ -39,12 +41,16 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "rhoThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "radiationModel.H"
+#include "CorrectPhi.H"
 #include "fvOptions.H"
 #include "pimpleControl.H"
 #include "pressureControl.H"
+#include "localEulerDdtScheme.H"
+#include "fvcSmooth.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +59,8 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Transient solver for buoyant, turbulent fluid flow"
-        " of compressible fluids, including radiation."
+        " of compressible fluids, including radiation,"
+        " with optional mesh motion and mesh topology changes."
     );
 
     #include "postProcess.H"
@@ -61,16 +68,20 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
+    #include "createDynamicFvMesh.H"
+    #include "createDyMControls.H"
+    #include "initContinuityErrs.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
-    #include "initContinuityErrs.H"
-    #include "createTimeControls.H"
-    #include "compressibleCourantNo.H"
-    #include "setInitialDeltaT.H"
+    #include "createRhoUfIfPresent.H"
 
     turbulence->validate();
+
+    if (!LTS)
+    {
+        #include "compressibleCourantNo.H"
+        #include "setInitialDeltaT.H"
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,19 +89,84 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readTimeControls.H"
-        #include "compressibleCourantNo.H"
-        #include "setDeltaT.H"
+        #include "readDyMControls.H"
+
+        // Store divrhoU from the previous mesh
+        // so that it can be mapped and used in correctPhi
+        // to ensure the corrected phi has the same divergence
+        autoPtr<volScalarField> divrhoU;
+        if (correctPhi)
+        {
+            divrhoU.reset
+            (
+                new volScalarField
+                (
+                    "divrhoU",
+                    fvc::div(fvc::absolute(phi, rho, U))
+                )
+            );
+        }
+
+        if (LTS)
+        {
+            #include "setRDeltaT.H"
+        }
+        else
+        {
+            #include "compressibleCourantNo.H"
+            #include "setDeltaT.H"
+        }
 
         ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "rhoEqn.H"
-
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+                // Store momentum to set rhoUf for introduced faces.
+                autoPtr<volVectorField> rhoU;
+                if (rhoUf.valid())
+                {
+                    rhoU.reset(new volVectorField("rhoU", rho*U));
+                }
+
+                // Do any mesh changes
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    gh = (g & mesh.C()) - ghRef;
+                    ghf = (g & mesh.Cf()) - ghRef;
+
+                    MRF.update();
+
+                    if (correctPhi)
+                    {
+                        // Calculate absolute flux
+                        // from the mapped surface velocity
+                        phi = mesh.Sf() & rhoUf();
+
+                        #include "correctPhi.H"
+
+                        // Make the fluxes relative to the mesh-motion
+                        fvc::makeRelative(phi, rho, U);
+                    }
+
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
+                }
+            }
+
+            if (pimple.firstIter() && !pimple.SIMPLErho())
+            {
+                #include "rhoEqn.H"
+            }
+
             #include "UEqn.H"
             #include "EEqn.H"
 
