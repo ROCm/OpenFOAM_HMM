@@ -206,9 +206,9 @@ void Foam::ccm::reader::readMeshTopology
             label maxId = max(origPointId);
             labelList mapToFoam(invert(maxId+1, origPointId));
 
-            forAll(faces_, faceI)
+            for (face& f : faces_)
             {
-                inplaceRenumber(mapToFoam, faces_[faceI]);
+                inplaceRenumber(mapToFoam, f);
             }
         }
         origPointId.clear();
@@ -518,10 +518,8 @@ void Foam::ccm::reader::readCells
     origBndId_  = -1;
     nPatches = 0;
 
-    forAll(bndInfo, infoI)
+    for (ccmBoundaryInfo& info : bndInfo)
     {
-        ccmBoundaryInfo& info = bndInfo[infoI];
-
         if (info.patchId != -1)
         {
             // Already inserted - eg, as interface
@@ -639,9 +637,8 @@ void Foam::ccm::reader::readCells
     // ~~~~~~~~~~~~~~~~~~~~~~~
     label patchFaceI = nInternalFaces_;
 
-    forAll(ccmLookupOrder, lookupI)
+    for (const ccmBoundaryInfo& info : ccmLookupOrder)
     {
-        const ccmBoundaryInfo& info = ccmLookupOrder[lookupI];
         const unsigned int patchSize = info.size;
 
         if
@@ -1385,13 +1382,11 @@ void Foam::ccm::reader::removeUnwanted()
     oldToNew = -1;
 
     // Mark up all the used points
-    forAll(faces_, faceI)
+    for (const face& f : faces_)
     {
-        const labelList& facePoints = faces_[faceI];
-
-        forAll(facePoints, ptI)
+        for (const label pointi : f)
         {
-            ++oldToNew[facePoints[ptI]];
+            ++oldToNew[pointi];
         }
     }
 
@@ -1412,9 +1407,9 @@ void Foam::ccm::reader::removeUnwanted()
     nPoints_ = nPointUsed;
     points_.setSize(nPoints_);
 
-    forAll(faces_, faceI)
+    for (face& f : faces_)
     {
-        inplaceRenumber(oldToNew, faces_[faceI]);
+        inplaceRenumber(oldToNew, f);
     }
 
     // Report sizes
@@ -1753,7 +1748,7 @@ void Foam::ccm::reader::cleanupInterfaces()
 
         forAllIters(monitoringSets_, iter)
         {
-            inplaceRenumber(oldToNew, iter());
+            inplaceRenumber(oldToNew, iter.val());
         }
 #endif
     }
@@ -1908,20 +1903,20 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
         {
             const face& f = faces_[origPatchStarts[patch0] + local0FaceI];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
                 // Simultaneously account for previous point merges
-                whichPoints.set(oldToNew[f[fp]]);
+                whichPoints.set(oldToNew[pointi]);
             }
         }
         for (label local1FaceI = 0; local1FaceI < nPatch1Faces; ++local1FaceI)
         {
             const face& f = faces_[origPatchStarts[patch1] + local1FaceI];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
                 // Simultaneously account for previous point merges
-                whichPoints.set(oldToNew[f[fp]]);
+                whichPoints.set(oldToNew[pointi]);
             }
         }
 
@@ -1930,7 +1925,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
         const UIndirectList<point> pointsToMerge(points_, addr);
 
-        Info<< "    patch "  << patch0 << "," << patch1 << ": ("
+        Info<< "    patch "  << patch0 << ',' << patch1 << ": ("
             << nPatch0Faces << " and " << nPatch1Faces << " faces) " << flush;
 
         const label nMerged = mergePoints
@@ -1946,10 +1941,32 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
         if (nMerged)
         {
-            // Transcribe local to global addressing
-            forAll(mergedPointMap, i)
+            // Two-steps:
+            // * Identify duplicate points - without changing the order!
+            // * Transcribe local to global addressing (oldToNew)
+
+            forAll(mergedPointMap, pti)
             {
-                oldToNew[addr[i]] = addr[mergedPointMap[i]];
+                const label mergedPti = mergedPointMap[pti];
+
+                if (mergedPti < 0)
+                {
+                    continue;  // Already seen as duplicate
+                }
+
+                const label origPointi = oldToNew[addr[pti]];
+
+                // Find further duplicate points
+                for
+                (
+                    label dupPti = pti+1;
+                    (dupPti = mergedPointMap.find(mergedPti, dupPti)) != -1;
+                    ++dupPti
+                )
+                {
+                    oldToNew[addr[dupPti]] = origPointi;
+                    mergedPointMap[dupPti] = -1;  // Mark as already seen
+                }
             }
 
             interfacesToMerge.append(interI);
@@ -1967,23 +1984,21 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     }
 
     // Update point references to account for point merge:
-    forAll(faces_, faceI)
+    for (face& f : faces_)
     {
-        inplaceRenumber(oldToNew, faces_[faceI]);
+        inplaceRenumber(oldToNew, f);
     }
 
     // Determine which points are actually in use:
-    oldToNew.setSize(nPoints_);
+    oldToNew.resize_nocopy(nPoints_);
     oldToNew = -1;
 
     // Mark up all the used points
-    forAll(faces_, faceI)
+    for (const face& f : faces_)
     {
-        const labelList& facePoints = faces_[faceI];
-
-        forAll(facePoints, ptI)
+        for (const label pointi : f)
         {
-            ++oldToNew[facePoints[ptI]];
+            ++oldToNew[pointi];
         }
     }
 
@@ -2005,11 +2020,11 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     //     << nPoints_ << " to " << nPointUsed << endl;
 
     nPoints_ = nPointUsed;
-    points_.setSize(nPoints_);
+    points_.resize(nPoints_);
 
-    forAll(faces_, faceI)
+    for (face& f : faces_)
     {
-        inplaceRenumber(oldToNew, faces_[faceI]);
+        inplaceRenumber(oldToNew, f);
     }
 
 
@@ -2119,14 +2134,10 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
             // Note which one were successful
             labelHashSet done(failed0.size());
 
-            forAllConstIters(failed0, iter0)
+            for (const label face0I : failed0)
             {
-                const label face0I = iter0.key();
-
-                forAllConstIters(failed1, iter1)
+                for (const label face1I : failed1)
                 {
-                    const label face1I = iter1.key();
-
                     // This is what we expect
                     if (face::compare(faces_[face0I], faces_[face1I]))
                     {
@@ -2160,7 +2171,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
             failed0 = done;
         }
 
-        Info<< "    patch "  << patch0 << ", " << patch1 << ": "
+        Info<< "    patch "  << patch0 << ',' << patch1 << ": "
             << nMerged << " from " << faceAddr0.size() << " faces";
 
         if (failed0.size())
@@ -2273,8 +2284,8 @@ void Foam::ccm::reader::reorderMesh()
 
     forAll(faceOwner_, faceI)
     {
-        label nbr = faceNeighbour_[faceI];
-        label own = faceOwner_[faceI];
+        const label nbr = faceNeighbour_[faceI];
+        const label own = faceOwner_[faceI];
 
         if (nbr >= cellTableId_.size() || own >= cellTableId_.size())
         {
@@ -2296,9 +2307,9 @@ void Foam::ccm::reader::reorderMesh()
         // And check the face
         const face& f = faces_[faceI];
 
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            if (f[fp] < 0 || f[fp] >= points_.size())
+            if (pointi < 0 || pointi >= points_.size())
             {
                 FatalErrorInFunction
                     << "face:" << faceI << " f:" << f

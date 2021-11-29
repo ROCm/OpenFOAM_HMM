@@ -47,7 +47,7 @@ Foam::label Foam::mergePoints
     const label nPoints = points.size();
 
     // Create an old to new point mapping array
-    pointMap.setSize(nPoints);
+    pointMap.resize_nocopy(nPoints);
     pointMap = -1;
 
     if (!nPoints)
@@ -176,6 +176,13 @@ Foam::label Foam::mergePoints
             // Differs. Store new point.
             pointMap[pointi] = newPointi++;
         }
+    }
+
+    if (verbose)
+    {
+        Pout<< "Foam::mergePoints : "
+            << newPointi << " of " << points.size() << " unique points"
+            << endl;
     }
 
     return newPointi;
