@@ -59,8 +59,8 @@ Usage
         direction    | direction of flow through fan [in/out] | yes |
         p0           | environmental total pressure      | yes |
         nonDimensional | uses non-dimensional table      | no  | false
-        rpm          | fan rpm for non-dimensional table | no  | 0
-        dm           | mean diameter for non-dimensional table | no | 0.0
+        rpm          | fan rpm for non-dimensional table | no  |
+        dm           | mean diameter for non-dimensional table | no |
         file         | fan curve file name               | legacy |
         outOfBounds  | out of bounds handling            | legacy |
     \endtable
@@ -154,10 +154,10 @@ private:
         bool nonDimensional_;
 
         //- Fan rpm (for non-dimensional curve)
-        scalar rpm_;
+        autoPtr<Function1<scalar>> rpm_;
 
         //- Fan mean diameter (for non-dimensional curve)
-        scalar dm_;
+        autoPtr<Function1<scalar>> dm_;
 
 
 public:

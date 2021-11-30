@@ -84,7 +84,14 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                 if (rMag > rInner_ && rMag < rOuter_)
                 {
                     magTangU[i] =
-                        deltaP[i]/rMag/fanEff_/rpmToRads(rpm);
+                    (
+                        deltaP[i]
+                      / stabilise
+                        (
+                            fanEff_ * rMag * rpmToRads(rpm),
+                            VSMALL
+                        )
+                    );
                 }
             }
         }
@@ -93,12 +100,19 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
             if (rEff_ <= 0)
             {
                 FatalErrorInFunction
-                    << "Effective radius rEff should be specified in the "<< nl
+                    << "Effective radius 'rEff' was ill-specified in the "
                     << "dictionary." << nl
                     << exit(FatalError);
             }
             magTangU =
-                deltaP/rEff_/fanEff_/rpmToRads(rpm);
+            (
+                deltaP
+              / stabilise
+                (
+                    fanEff_ * rEff_ * rpmToRads(rpm),
+                    VSMALL
+                )
+            );
         }
 
         // Calculate the tangential velocity
@@ -122,11 +136,11 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     pName_("p"),
     rhoName_("rho"),
     origin_(),
-    rpm_(),
-    rEff_(0.0),
-    fanEff_(1.0),
-    rInner_(0.0),
-    rOuter_(0.0),
+    rpm_(nullptr),
+    fanEff_(1),
+    rEff_(0),
+    rInner_(0),
+    rOuter_(0),
     useRealRadius_(false)
 {}
 
@@ -158,8 +172,8 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
       ? Function1<scalar>::New("rpm", dict, &db())
       : nullptr
     ),
-    rEff_(dict.getOrDefault<scalar>("rEff", 0)),
     fanEff_(dict.getOrDefault<scalar>("fanEff", 1)),
+    rEff_(dict.getOrDefault<scalar>("rEff", 0)),
     rInner_(dict.getOrDefault<scalar>("rInner", 0)),
     rOuter_(dict.getOrDefault<scalar>("rOuter", 0)),
     useRealRadius_(dict.getOrDefault("useRealRadius", false))
@@ -168,60 +182,62 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 
 Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 (
-    const swirlFanVelocityFvPatchField& ptf,
+    const swirlFanVelocityFvPatchField& rhs,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedJumpFvPatchField<vector>(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_),
-    pName_(ptf.pName_),
-    rhoName_(ptf.rhoName_),
-    origin_(ptf.origin_),
-    rpm_(ptf.rpm_.clone()),
-    rEff_(ptf.rEff_),
-    fanEff_(ptf.fanEff_),
-    rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_),
-    useRealRadius_(ptf.useRealRadius_)
+    fixedJumpFvPatchField<vector>(rhs, p, iF, mapper),
+    phiName_(rhs.phiName_),
+    pName_(rhs.pName_),
+    rhoName_(rhs.rhoName_),
+    origin_(rhs.origin_),
+    rpm_(rhs.rpm_.clone()),
+    fanEff_(rhs.fanEff_),
+    rEff_(rhs.rEff_),
+    rInner_(rhs.rInner_),
+    rOuter_(rhs.rOuter_),
+    useRealRadius_(rhs.useRealRadius_)
 {}
 
 
 Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 (
-    const swirlFanVelocityFvPatchField& ptf
+    const swirlFanVelocityFvPatchField& rhs
 )
 :
-    fixedJumpFvPatchField<vector>(ptf),
-    phiName_(ptf.phiName_),
-    pName_(ptf.pName_),
-    rhoName_(ptf.rhoName_),
-    origin_(ptf.origin_),
-    rpm_(ptf.rpm_.clone()),
-    rEff_(ptf.rEff_),
-    rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_),
-    useRealRadius_(ptf.useRealRadius_)
+    fixedJumpFvPatchField<vector>(rhs),
+    phiName_(rhs.phiName_),
+    pName_(rhs.pName_),
+    rhoName_(rhs.rhoName_),
+    origin_(rhs.origin_),
+    rpm_(rhs.rpm_.clone()),
+    fanEff_(rhs.fanEff_),
+    rEff_(rhs.rEff_),
+    rInner_(rhs.rInner_),
+    rOuter_(rhs.rOuter_),
+    useRealRadius_(rhs.useRealRadius_)
 {}
 
 
 Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 (
-    const swirlFanVelocityFvPatchField& ptf,
+    const swirlFanVelocityFvPatchField& rhs,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<vector>(ptf, iF),
-    phiName_(ptf.phiName_),
-    pName_(ptf.pName_),
-    rhoName_(ptf.rhoName_),
-    origin_(ptf.origin_),
-    rpm_(ptf.rpm_.clone()),
-    rEff_(ptf.rEff_),
-    rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_),
-    useRealRadius_(ptf.useRealRadius_)
+    fixedJumpFvPatchField<vector>(rhs, iF),
+    phiName_(rhs.phiName_),
+    pName_(rhs.pName_),
+    rhoName_(rhs.rhoName_),
+    origin_(rhs.origin_),
+    rpm_(rhs.rpm_.clone()),
+    fanEff_(rhs.fanEff_),
+    rEff_(rhs.rEff_),
+    rInner_(rhs.rInner_),
+    rOuter_(rhs.rOuter_),
+    useRealRadius_(rhs.useRealRadius_)
 {}
 
 
@@ -254,10 +270,18 @@ void Foam::swirlFanVelocityFvPatchField::write(Ostream& os) const
             rpm_->writeData(os);
         }
 
-        os.writeEntryIfDifferent<scalar>("rEff", 0.0, rEff_);
-        os.writeEntryIfDifferent<bool>("useRealRadius", false, useRealRadius_);
-        os.writeEntryIfDifferent<scalar>("rInner", 0.0, rInner_);
-        os.writeEntryIfDifferent<scalar>("rOuter", 0.0, rOuter_);
+        os.writeEntryIfDifferent<scalar>("fanEff", 1, rEff_);
+
+        if (useRealRadius_)
+        {
+            os.writeEntry("useRealRadius", "true");
+            os.writeEntryIfDifferent<scalar>("rInner", 0, rInner_);
+            os.writeEntryIfDifferent<scalar>("rOuter", 0, rOuter_);
+        }
+        else
+        {
+            os.writeEntryIfDifferent<scalar>("rEff", 0, rEff_);
+        }
     }
 }
 

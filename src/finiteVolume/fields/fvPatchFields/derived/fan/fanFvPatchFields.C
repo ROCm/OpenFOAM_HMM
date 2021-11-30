@@ -45,17 +45,35 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             patch().patchField<surfaceScalarField, scalar>(phi);
 
         scalarField Un(max(phip/patch().magSf(), scalar(0)));
+
+        // The non-dimensional parameters
+
+        scalar rpm(0);
+        scalar meanDiam(0);
+
+        if (nonDimensional_)
+        {
+            rpm = rpm_->value(this->db().time().timeOutputValue());
+            meanDiam = dm_->value(this->db().time().timeOutputValue());
+        }
+
         if (uniformJump_)
         {
-            scalar area = gSum(patch().magSf());
+            const scalar area = gSum(patch().magSf());
             Un = gSum(Un*patch().magSf())/area;
 
             if (nonDimensional_)
             {
                 // Create an non-dimensional velocity
                 Un =
-                    120.0*Un/pow3(constant::mathematical::pi)
-                  / dm_/rpm_;
+                (
+                    120.0*Un
+                  / stabilise
+                    (
+                        pow3(constant::mathematical::pi) * meanDiam * rpm,
+                        VSMALL
+                    )
+                );
             }
         }
 
@@ -71,7 +89,8 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             // Convert non-dimensional deltap from curve into deltaP
             scalarField pdFan
             (
-                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0
+                deltap*pow4(constant::mathematical::pi)
+              * sqr(meanDiam*rpm)/1800.0
             );
 
             this->setJump(pdFan);
