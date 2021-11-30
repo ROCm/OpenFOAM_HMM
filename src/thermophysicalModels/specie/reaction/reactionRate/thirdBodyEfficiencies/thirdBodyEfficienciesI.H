@@ -62,7 +62,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
     {
         if (coeffs.size() != species_.size())
         {
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "number of efficiencies = " << coeffs.size()
                 << " is not equat to the number of species " << species_.size()
                 << exit(FatalIOError);

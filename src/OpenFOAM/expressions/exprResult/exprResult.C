@@ -284,16 +284,16 @@ Foam::expressions::exprResult::exprResult
                 valType_ = "none";
             }
 
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Do not know how to read data type " << valType_
                 << (uniform ? " as a single value." : ".") << nl
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
     }
     else if (needsValue)
     {
         FatalIOErrorInFunction(dict)
-            << "No entry 'value' defined in " << dict.name() << nl
+            << "No entry 'value' defined" << nl
             << exit(FatalIOError);
     }
 }

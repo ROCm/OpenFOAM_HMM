@@ -68,7 +68,7 @@ addRadialActuationDiskAxialInertialResistance
         FatalErrorInFunction
             << "Radial distribution coefficients lead to zero polynomial." << nl
             << "radialCoeffs = " << radialCoeffs_
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 
     // Compute upstream U and rho, spatial-averaged over monitor-region

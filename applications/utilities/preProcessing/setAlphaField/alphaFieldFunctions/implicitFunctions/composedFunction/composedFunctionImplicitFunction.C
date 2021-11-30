@@ -137,7 +137,7 @@ composedFunctionImplicitFunction
         {
             FatalIOErrorInFunction(funcDict)
                 << "Entry " << key << " is not a dictionary" << endl
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
 
         const dictionary& subdict = dEntry.dict();

@@ -131,7 +131,7 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
     if (debug && !ptf.ready())
     {

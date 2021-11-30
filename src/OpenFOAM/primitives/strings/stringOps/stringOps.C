@@ -564,7 +564,7 @@ static Foam::string recursiveExpand
                 {
                     FatalErrorInFunction
                         << "Expansion ${{ is missing a closing '}}'\n"
-                        << exit(FatalIOError);
+                        << exit(FatalError);
                 }
 
                 ///Info<< "eval <" << out << ">" << endl;

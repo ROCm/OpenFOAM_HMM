@@ -436,7 +436,7 @@ bool Foam::surfaceWriter::checkOpen() const
     {
         FatalErrorInFunction
             << type() << " : Attempted to write without a path" << nl
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 
     return !outputPath_.empty();

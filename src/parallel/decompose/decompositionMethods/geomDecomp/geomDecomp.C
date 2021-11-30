@@ -60,7 +60,7 @@ void Foam::geomDecomp::setOrder()
                 FatalIOErrorInFunction(decompDict_)
                     << "Illegal decomposition order " << order << nl
                     << "It should only contain x, y or z"
-                    << exit(FatalError);
+                    << exit(FatalIOError);
                 break;
         }
     }
@@ -76,11 +76,11 @@ void Foam::geomDecomp::readCoeffs()
     if (nDomains_ != n_.x()*n_.y()*n_.z())
     {
         // Verify that the input makes sense
-        FatalErrorInFunction
+        FatalIOErrorInFunction(coeffsDict_)
             << "Wrong number of domain divisions in geomDecomp:" << nl
             << "Number of domains    : " << nDomains_ << nl
             << "Wanted decomposition : " << n_
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
     setOrder();
 

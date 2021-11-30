@@ -106,7 +106,7 @@ void Foam::fv::actuationDiskSource::calcFroudeMethod
         FatalErrorInFunction
            << "Cp and Ct must be greater than zero." << nl
            << "Cp = " << Cp << ", Ct = " << Ct
-           << exit(FatalIOError);
+           << exit(FatalError);
     }
 
     // (BJSB:Eq. 3.9)
@@ -213,7 +213,7 @@ void Foam::fv::actuationDiskSource::calcVariableScalingMethod
         FatalErrorInFunction
            << "Cp and Ct must be greater than zero." << nl
            << "Cp = " << Cp << ", Ct = " << Ct
-           << exit(FatalIOError);
+           << exit(FatalError);
     }
 
     // Calibrated thrust/power coeffs from power/thrust curves (LSRMTK:Eq. 6)
