@@ -199,10 +199,11 @@ Foam::expressions::exprDriver::exprDriver
 
 Foam::expressions::exprDriver::exprDriver
 (
-    const exprDriver& rhs
+    const exprDriver& rhs,
+    const dictionary& dict
 )
 :
-    dict_(rhs.dict_),
+    dict_(dict),
     result_(rhs.result_),
     variableStrings_(rhs.variableStrings_),
     variables_(rhs.variables_),

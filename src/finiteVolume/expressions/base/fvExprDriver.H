@@ -368,8 +368,12 @@ public:
             const dictionary& dict = dictionary::null
         );
 
-        //- Copy construct
-        fvExprDriver(const fvExprDriver&);
+        //- Copy construct with dictionary reference
+        explicit fvExprDriver
+        (
+            const fvExprDriver& rhs,
+            const dictionary& dict
+        );
 
         //- Construct from a dictionary
         explicit fvExprDriver(const dictionary& dict);
@@ -396,8 +400,8 @@ public:
             const fvMesh& mesh
         );
 
-        //- Clone
-        virtual autoPtr<fvExprDriver> clone() const = 0;
+        //- Not generally clonable
+        virtual autoPtr<fvExprDriver> clone() = delete;
 
 
     //- Destructor

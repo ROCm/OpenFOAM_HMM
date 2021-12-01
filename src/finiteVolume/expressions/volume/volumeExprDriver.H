@@ -165,16 +165,18 @@ protected:
         ) const;
 
 
+public:
+
+    ClassName("volumeExpr::driver");
+
+    // Generated Methods
+
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
 
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("volumeExpr::driver");
 
     // Constructors
 
@@ -186,7 +188,12 @@ public:
         );
 
         //- Construct for specified mesh with copy of driver context
-        parseDriver(const fvMesh& mesh, const parseDriver& driver);
+        parseDriver
+        (
+            const fvMesh& mesh,
+            const parseDriver& driver,
+            const dictionary& dict
+        );
 
         //- Construct with meshName for the given mesh
         parseDriver(const word& meshName, const fvMesh& mesh);
@@ -195,14 +202,7 @@ public:
         parseDriver(const dictionary& dict, const fvMesh& mesh);
 
 
-        //- Clone
-        virtual autoPtr<expressions::fvExprDriver> clone() const
-        {
-            return autoPtr<expressions::fvExprDriver>
-            (
-                new parseDriver(this->mesh_, *this)
-            );
-        }
+    // Not generally clonable
 
 
     //- Destructor

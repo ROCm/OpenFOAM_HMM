@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "exprMixedFvPatchField.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -48,8 +49,9 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    mixedFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase(),
+    dict_(),
     driver_(this->patch())
 {
     this->refValue() = Zero;
@@ -61,15 +63,16 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 template<class Type>
 Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 (
-    const exprMixedFvPatchField<Type>& ptf,
+    const exprMixedFvPatchField<Type>& rhs,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFvPatchField<Type>(ptf, p, iF, mapper),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs, p, iF, mapper),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -84,13 +87,27 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     const dictionary& dict
 )
 :
-    mixedFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase
     (
         dict,
         expressions::patchExprFieldBase::expectedTypes::MIXED_TYPE
     ),
-    driver_(this->patch(), dict)
+    dict_
+    (
+        // Copy dictionary without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordList(),  // allow
+            wordList     // deny
+            ({
+                "type",  // redundant
+                "value", "refValue", "refGradient", "valueFraction"
+            })
+        )
+    ),
+    driver_(this->patch(), dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -144,7 +161,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
 
 
-    driver_.readDict(dict);
+    driver_.readDict(dict_);
 
     // Similar to fvPatchField constructor, which we have bypassed
     dict.readIfPresent("patchType", this->patchType());
@@ -217,7 +234,7 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
         // but avoid our own updateCoeffs
         if (!this->updated())
         {
-            this->mixedFvPatchField<Type>::updateCoeffs();
+            this->parent_bctype::updateCoeffs();
         }
 
         Field<Type>::operator=
@@ -239,12 +256,13 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 template<class Type>
 Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 (
-    const exprMixedFvPatchField<Type>& ptf
+    const exprMixedFvPatchField<Type>& rhs
 )
 :
-    mixedFvPatchField<Type>(ptf),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -254,13 +272,14 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 template<class Type>
 Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 (
-    const exprMixedFvPatchField<Type>& ptf,
+    const exprMixedFvPatchField<Type>& rhs,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    mixedFvPatchField<Type>(ptf, iF),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs, iF),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -366,14 +385,14 @@ void Foam::exprMixedFvPatchField<Type>::updateCoeffs()
         }
     }
 
-    mixedFvPatchField<Type>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 
 template<class Type>
 void Foam::exprMixedFvPatchField<Type>::write(Ostream& os) const
 {
-    mixedFvPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     expressions::patchExprFieldBase::write(os);
 
     driver_.writeCommon(os, this->debug_ || debug);

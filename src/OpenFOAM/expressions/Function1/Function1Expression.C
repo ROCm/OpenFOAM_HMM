@@ -38,7 +38,7 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
 )
 :
     Function1<Type>(entryName, dict, obrPtr),
-    dict_(dict),
+    dict_(dict),  // Deep copy
     valueExpr_(),
     driver_(1, dict_)
 {
@@ -48,8 +48,8 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
     }
 
     string expr;
-    dict.readEntry("expression", expr);
-    valueExpr_ = expressions::exprString(expr, dict);
+    dict_.readEntry("expression", expr);
+    valueExpr_ = expressions::exprString(std::move(expr), dict_);
 
     // Basic sanity
     if (valueExpr_.empty())
@@ -70,9 +70,9 @@ Foam::Function1Types::Function1Expression<Type>::Function1Expression
 )
 :
     Function1<Type>(rhs),
-    dict_(rhs.dict_),
+    dict_(rhs.dict_),  // Deep copy
     valueExpr_(rhs.valueExpr_),
-    driver_(1, rhs.driver_)
+    driver_(1, rhs.driver_, dict_)
 {}
 
 

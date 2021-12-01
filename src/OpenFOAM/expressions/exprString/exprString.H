@@ -183,6 +183,19 @@ public:
 
         //- Move assign from string. No expansions, no comment stripping
         inline exprString& operator=(std::string&& str);
+
+
+    // Write
+
+        //- Dictionary entry for expression string, normally suppressing
+        //- empty strings. Generally used verbatim output (readability)
+        //  \return true if entry was written
+        bool writeEntry
+        (
+            const word& keyword,
+            Ostream& os,
+            bool writeEmpty = false
+        ) const;
 };
 
 

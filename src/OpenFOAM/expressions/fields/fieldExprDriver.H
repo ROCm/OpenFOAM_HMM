@@ -82,8 +82,11 @@ protected:
         //- The field size
         label size_;
 
+public:
 
-    // Protected Member Functions
+    ClassName("fieldExpr::driver");
+
+    // Generated Methods
 
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
@@ -91,10 +94,6 @@ protected:
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("fieldExpr::driver");
 
     // Constructors
 
@@ -104,8 +103,13 @@ public:
         //- Construct for specified size with given dictionary
         parseDriver(const label len, const dictionary& dict);
 
-        //- Construct for specified size with copy of driver context
-        parseDriver(const label len, const parseDriver& rhs);
+        //- Construct for specified size, copy of driver context
+        parseDriver
+        (
+            const label len,
+            const parseDriver& rhs,
+            const dictionary& dict
+        );
 
 
     //- Destructor

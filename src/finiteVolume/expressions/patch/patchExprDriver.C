@@ -117,11 +117,12 @@ Foam::expressions::patchExpr::parseDriver::parseDriver
 Foam::expressions::patchExpr::parseDriver::parseDriver
 (
     const fvPatch& p,
-    const parseDriver& rhs
+    const parseDriver& rhs,
+    const dictionary& dict
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(rhs),
+    expressions::fvExprDriver(rhs, dict),
     patch_(p)
 {
     resetTimeReference(nullptr);

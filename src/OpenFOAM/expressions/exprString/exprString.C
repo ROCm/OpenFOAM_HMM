@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,6 +83,38 @@ Foam::expressions::exprString::expand
     #endif
 
     return *this;
+}
+
+
+bool Foam::expressions::exprString::writeEntry
+(
+    const word& keyword,
+    Ostream& os,
+    bool writeEmpty
+) const
+{
+    const bool ok = (writeEmpty || !empty());
+
+    if (ok)
+    {
+        if (!keyword.empty())
+        {
+            os.writeKeyword(keyword);
+        }
+
+        // Write as regular or verbatim string
+
+        token tok(*this);
+        if (!empty())
+        {
+            tok.setType(token::tokenType::VERBATIM);
+        }
+
+        os.write(tok);
+        os.endEntry();
+    }
+
+    return ok;
 }
 
 

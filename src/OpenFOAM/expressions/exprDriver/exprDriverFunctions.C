@@ -188,10 +188,7 @@ static void writeFuncsImpl
                 os.beginBlock(subDictName);
             }
 
-            os.beginBlock(entryName);
-            os.writeEntry("type", (*funcPtr).type());
-            (*funcPtr).writeEntries(os);
-            os.endBlock();
+            (*funcPtr).writeData(os);
         }
     }
 

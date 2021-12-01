@@ -126,16 +126,18 @@ protected:
         ) const;
 
 
+public:
+
+    ClassName("patchExpr::driver");
+
+    // Generated Methods
+
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
 
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("patchExpr::driver");
 
     // Constructors
 
@@ -147,7 +149,12 @@ public:
         );
 
         //- Construct for specified patch with copy of driver context
-        parseDriver(const fvPatch& p, const parseDriver& driver);
+        parseDriver
+        (
+            const fvPatch& p,
+            const parseDriver& driver,
+            const dictionary& dict  // = dictionary::null
+        );
 
         //- Construct with patchName for the given mesh
         parseDriver(const word& patchName, const fvMesh& mesh);
@@ -157,14 +164,7 @@ public:
         parseDriver(const dictionary& dict, const fvMesh& mesh);
 
 
-        //- Clone
-        virtual autoPtr<expressions::fvExprDriver> clone() const
-        {
-            return autoPtr<expressions::fvExprDriver>
-            (
-                new parseDriver(this->patch_, *this)
-            );
-        }
+    // Not generally clonable
 
 
     //- Destructor

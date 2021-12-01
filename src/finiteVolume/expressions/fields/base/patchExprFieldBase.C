@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,18 +170,10 @@ void Foam::expressions::patchExprFieldBase::write(Ostream& os) const
 
     // Do not emit debug_ value
 
-    if (!valueExpr_.empty())
-    {
-        os.writeEntry("valueExpr", valueExpr_);
-    }
-    if (!gradExpr_.empty())
-    {
-        os.writeEntry("gradientExpr", gradExpr_);
-    }
-    if (!fracExpr_.empty())
-    {
-        os.writeEntry("fractionExpr", fracExpr_);
-    }
+    // Write expression, but not empty ones
+    valueExpr_.writeEntry("valueExpr", os, false);
+    gradExpr_.writeEntry("gradientExpr", os, false);
+    fracExpr_.writeEntry("fractionExpr", os, false);
 }
 
 

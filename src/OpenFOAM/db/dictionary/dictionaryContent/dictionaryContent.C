@@ -27,21 +27,18 @@ License
 
 #include "dictionaryContent.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::dictionary
-Foam::dictionaryContent::copyDict
+namespace Foam
+{
+
+template<class UnaryPredicate>
+static dictionary copyFilteredDict
 (
     const dictionary& input,
-    const wordRes& allow,
-    const wordRes& deny
+    const UnaryPredicate& pred
 )
 {
-    if (allow.empty() && deny.empty())
-    {
-        return dictionary(input);
-    }
-
     dictionary dict;
     dict.name() = input.name();  // rename
 
@@ -57,20 +54,9 @@ Foam::dictionaryContent::copyDict
             // - could also have a "pruneRegex" flag (for example)
             accept = true;
         }
-        else if (allow.size())
-        {
-            const auto result = allow.matched(key);
-
-            accept =
-            (
-                result == wordRe::LITERAL
-              ? true
-              : (result == wordRe::REGEX && !deny.match(key))
-            );
-        }
         else
         {
-            accept = !deny.match(key);
+            accept = pred(key);
         }
 
         if (accept)
@@ -80,6 +66,98 @@ Foam::dictionaryContent::copyDict
     }
 
     return dict;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::dictionary
+Foam::dictionaryContent::copyDict
+(
+    const dictionary& input,
+    const wordList& allow,
+    const wordList& deny
+)
+{
+    if (allow.empty())
+    {
+        if (deny.empty())
+        {
+            // Pass-through
+            return dictionary(input);
+        }
+
+        // Deny only
+        return copyFilteredDict
+        (
+            input,
+            [&](const std::string& key) { return !deny.found(key); }
+        );
+    }
+
+    // Allow is non-empty
+
+    // No general case with deny as well
+    return copyFilteredDict
+    (
+        input,
+        [&](const std::string& key) { return allow.found(key); }
+    );
+}
+
+
+Foam::dictionary
+Foam::dictionaryContent::copyDict
+(
+    const dictionary& input,
+    const wordRes& allow,
+    const wordRes& deny
+)
+{
+    if (allow.empty())
+    {
+        if (deny.empty())
+        {
+            // Pass-through
+            return dictionary(input);
+        }
+
+        // Deny only
+        return copyFilteredDict
+        (
+            input,
+            [&](const std::string& key) { return !deny.match(key); }
+        );
+    }
+
+    // Allow is non-empty
+
+    if (deny.empty())
+    {
+        return copyFilteredDict
+        (
+            input,
+            [&](const std::string& key) { return allow.match(key); }
+        );
+    }
+
+    // General case - have both deny and allow
+    return copyFilteredDict
+    (
+        input,
+        [&](const std::string& key)
+        {
+            const auto result = allow.matched(key);
+            return
+            (
+                result == wordRe::LITERAL
+              ? true
+              : (result == wordRe::REGEX && !deny.match(key))
+            );
+        }
+    );
 }
 
 

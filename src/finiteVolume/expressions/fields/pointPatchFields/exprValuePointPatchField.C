@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2010-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ License
 
 #include "exprValuePointPatchField.H"
 #include "pointPatchFieldMapper.H"
-#include "typeInfo.H"
 #include "facePointPatch.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,8 +40,9 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     const DimensionedField<Type, pointMesh>& iF
 )
 :
-    valuePointPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase(),
+    dict_(),
     driver_
     (
         fvPatch::lookupPatch
@@ -55,21 +56,23 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 template<class Type>
 Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 (
-    const exprValuePointPatchField<Type>& ptf,
+    const exprValuePointPatchField<Type>& rhs,
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
 )
 :
-    valuePointPatchField<Type>(ptf, p, iF, mapper),
-    expressions::patchExprFieldBase(ptf),
+    parent_bctype(rhs, p, iF, mapper),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
     driver_
     (
         fvPatch::lookupPatch
         (
             dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
-        ptf.driver_
+        rhs.driver_,
+        dict_
     )
 {}
 
@@ -82,12 +85,26 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     const dictionary& dict
 )
 :
-    valuePointPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase
     (
         dict,
         expressions::patchExprFieldBase::expectedTypes::VALUE_TYPE,
-        true // pointValue
+        true  // pointValue
+    ),
+    dict_
+    (
+        // Copy dictionary without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordList(),  // allow
+            wordList     // deny
+            ({
+                "type",  // redundant
+                "value"
+            })
+        )
     ),
     driver_
     (
@@ -95,7 +112,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
         (
             dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
-        dict
+        dict_
     )
 {
     // Require valueExpr
@@ -107,7 +124,7 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
     }
 
 
-    driver_.readDict(dict);
+    driver_.readDict(dict_);
 
     if (dict.found("value"))
     {
@@ -136,19 +153,21 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 template<class Type>
 Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 (
-    const exprValuePointPatchField<Type>& ptf,
+    const exprValuePointPatchField<Type>& rhs,
     const DimensionedField<Type, pointMesh>& iF
 )
 :
-    valuePointPatchField<Type>(ptf, iF),
-    expressions::patchExprFieldBase(ptf),
+    parent_bctype(rhs, iF),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
     driver_
     (
         fvPatch::lookupPatch
         (
             dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
-        ptf.driver_
+        rhs.driver_,
+        dict_
     )
 {}
 
@@ -156,18 +175,20 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 template<class Type>
 Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 (
-    const exprValuePointPatchField<Type>& ptf
+    const exprValuePointPatchField<Type>& rhs
 )
 :
-    valuePointPatchField<Type>(ptf),
-    expressions::patchExprFieldBase(ptf),
+    parent_bctype(rhs),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
     driver_
     (
         fvPatch::lookupPatch
         (
             dynamicCast<const facePointPatch>(this->patch()).patch()
         ),
-        ptf.driver_
+        rhs.driver_,
+        dict_
     )
 {}
 
@@ -212,14 +233,14 @@ void Foam::exprValuePointPatchField<Type>::updateCoeffs()
         }
     }
 
-    valuePointPatchField<Type>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 
 template<class Type>
 void Foam::exprValuePointPatchField<Type>::write(Ostream& os) const
 {
-    valuePointPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     expressions::patchExprFieldBase::write(os);
 
     this->writeEntry("value", os);

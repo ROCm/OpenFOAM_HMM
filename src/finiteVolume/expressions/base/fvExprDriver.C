@@ -110,10 +110,11 @@ Foam::expressions::fvExprDriver::fvExprDriver
 
 Foam::expressions::fvExprDriver::fvExprDriver
 (
-    const fvExprDriver& rhs
+    const fvExprDriver& rhs,
+    const dictionary& dict
 )
 :
-    expressions::exprDriver(rhs),
+    expressions::exprDriver(rhs, dict),
     globalScopes_(rhs.globalScopes_),
     delayedVariables_(rhs.delayedVariables_),
     storedVariables_(rhs.storedVariables_),

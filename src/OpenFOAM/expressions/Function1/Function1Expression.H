@@ -124,6 +124,12 @@ public:
         //- Copy construct
         explicit Function1Expression(const Function1Expression<Type>& rhs);
 
+        //- Construct and return a clone
+        virtual tmp<Function1<Type>> clone() const
+        {
+            return tmp<Function1<Type>>(new Function1Expression<Type>(*this));
+        }
+
 
     //- Destructor
     virtual ~Function1Expression() = default;

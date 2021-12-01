@@ -277,14 +277,19 @@ protected:
         virtual exprResult getRemoteResult(const exprDriver& other) const;
 
 
-        //- No copy assignment
-        void operator=(const exprDriver&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("exprDriver");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        exprDriver(const exprDriver&) = delete;
+
+        //- No copy assignment
+        void operator=(const exprDriver&) = delete;
 
 
     // Constructors
@@ -296,8 +301,8 @@ public:
             const dictionary& dict = dictionary::null
         );
 
-        //- Copy construct
-        exprDriver(const exprDriver& rhs);
+        //- Copy construct with new dictionary reference
+        exprDriver(const exprDriver& rhs, const dictionary& dict);
 
         //- Construct from a dictionary
         explicit exprDriver(const dictionary& dict);

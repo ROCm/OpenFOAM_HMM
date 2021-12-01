@@ -105,11 +105,12 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 Foam::expressions::volumeExpr::parseDriver::parseDriver
 (
     const fvMesh& mesh,
-    const parseDriver& driver
+    const parseDriver& driver,
+    const dictionary& dict
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(driver),
+    expressions::fvExprDriver(driver, dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),

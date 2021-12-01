@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2009-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "exprFixedValueFvPatchField.H"
+#include "dictionaryContent.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -49,8 +50,9 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase(),
+    dict_(),
     driver_(this->patch())
 {}
 
@@ -58,15 +60,16 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 template<class Type>
 Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 (
-    const exprFixedValueFvPatchField<Type>& ptf,
+    const exprFixedValueFvPatchField<Type>& rhs,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs, p, iF, mapper),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -82,13 +85,27 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     const bool valueRequired
 )
 :
-    fixedValueFvPatchField<Type>(p, iF),
+    parent_bctype(p, iF),
     expressions::patchExprFieldBase
     (
         dict,
         expressions::patchExprFieldBase::expectedTypes::VALUE_TYPE
     ),
-    driver_(this->patch(), dict)
+    dict_
+    (
+        // Copy dictionary without "heavy" data chunks
+        dictionaryContent::copyDict
+        (
+            dict,
+            wordList(),  // allow
+            wordList     // deny
+            ({
+                "type",  // redundant
+                "value"
+            })
+        )
+    ),
+    driver_(this->patch(), dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -102,7 +119,7 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     }
 
 
-    driver_.readDict(dict);
+    driver_.readDict(dict_);
 
     if (dict.found("value"))
     {
@@ -134,12 +151,13 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 template<class Type>
 Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 (
-    const exprFixedValueFvPatchField<Type>& ptf
+    const exprFixedValueFvPatchField<Type>& rhs
 )
 :
-    fixedValueFvPatchField<Type>(ptf),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -149,13 +167,14 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 template<class Type>
 Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 (
-    const exprFixedValueFvPatchField<Type>& ptf,
+    const exprFixedValueFvPatchField<Type>& rhs,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<Type>(ptf, iF),
-    expressions::patchExprFieldBase(ptf),
-    driver_(this->patch(), ptf.driver_)
+    parent_bctype(rhs, iF),
+    expressions::patchExprFieldBase(rhs),
+    dict_(rhs.dict_),  // Deep copy
+    driver_(this->patch(), rhs.driver_, dict_)
 {
     setDebug();
     DebugInFunction << nl;
@@ -199,14 +218,14 @@ void Foam::exprFixedValueFvPatchField<Type>::updateCoeffs()
         }
     }
 
-    fixedValueFvPatchField<Type>::updateCoeffs();
+    this->parent_bctype::updateCoeffs();
 }
 
 
 template<class Type>
 void Foam::exprFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
-    fixedValueFvPatchField<Type>::write(os);
+    this->parent_bctype::write(os);
     expressions::patchExprFieldBase::write(os);
 
     driver_.writeCommon(os, this->debug_ || debug);

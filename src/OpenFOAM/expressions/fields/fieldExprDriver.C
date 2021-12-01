@@ -75,11 +75,12 @@ Foam::expressions::fieldExpr::parseDriver::parseDriver
 Foam::expressions::fieldExpr::parseDriver::parseDriver
 (
     const label len,
-    const parseDriver& rhs
+    const parseDriver& rhs,
+    const dictionary& dict
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::exprDriver(rhs),
+    expressions::exprDriver(rhs, dict),
     size_(len)
 {}
 
