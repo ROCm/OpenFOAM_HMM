@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2019,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::autoMap
 )
 {
     fixedGradientFvPatchScalarField::autoMap(m);
+    temperatureCoupledBase::autoMap(m);
     qrIncident_.autoMap(m);
 }
 
@@ -149,6 +150,7 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::rmap
             psf
         );
 
+    temperatureCoupledBase::rmap(thftpsf, addr);
     qrIncident_.rmap(thftpsf.qrIncident_, addr);
 }
 

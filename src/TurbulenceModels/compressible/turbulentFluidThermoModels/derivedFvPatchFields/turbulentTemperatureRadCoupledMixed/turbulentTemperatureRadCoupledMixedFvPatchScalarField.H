@@ -45,6 +45,8 @@ Usage
         qr         | name of the radiative flux in this region | no | none
         thicknessLayers | list of thicknesses per layer [m] | no |
         kappaLayers  | list of thermal conductivites per layer [W/m/K] | no |
+        thicknessLayer | single thickness of layer [m] | no |
+        kappaLayer  | corresponding thermal conductivity [W/m/K] | no |
         kappaMethod  | inherited from temperatureCoupledBase | inherited |
         kappa        | inherited from temperatureCoupledBase | inherited |
         thermalInertia | Add thermal inertia to wall node | no | false
@@ -114,11 +116,13 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
         //- Name of the radiative heat flux in local region
         const word qrName_;
 
-        //- Thickness of layers
+        //- Thickness of layers (either scalarList or a single PatchFunction1)
         scalarList thicknessLayers_;
+        autoPtr<PatchFunction1<scalar>> thicknessLayer_;
 
         //- Conductivity of layers
         scalarList kappaLayers_;
+        autoPtr<PatchFunction1<scalar>> kappaLayer_;
 
         //- Thermal inertia term
         Switch thermalInertia_;
@@ -223,6 +227,27 @@ public:
 
 
     // Member Functions
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<scalar>&,
+                const labelList&
+            );
+
+
+        //- Given patch temperature calculate corresponding K field. Override
+        //- temperatureCoupledBase::kappa to includes effect of any
+        //- explicit kappaThickness
+        virtual tmp<scalarField> kappa(const scalarField& Tp) const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

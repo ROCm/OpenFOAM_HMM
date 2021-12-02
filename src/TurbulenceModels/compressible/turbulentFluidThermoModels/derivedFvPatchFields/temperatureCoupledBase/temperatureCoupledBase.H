@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,15 +39,18 @@ Description
       - 'directionalSolidThermo': uses look up for volSymmTensorField for
         transformed kappa vector. Field name definable in 'alphaAni',
         named 'Anialpha' in solid solver by default
+      - 'function' : kappa, alpha directly specified as Function1
       - 'phaseSystem' : used for multiphase thermos
 
     \par Keywords provided by this class:
       \table
         Property     | Description                          | Required | Default
         kappaMethod  | Thermal conductivity method          | yes |
-        kappa        | Name of thermal conductivity field   | no  | none
-        alpha        | Name of thermal diffusivity field    | no  | none
-        alphaAni     | Name of non-isotropic alpha          | no  | none
+        kappa        | Name of thermal conductivity field   | no  |
+        alpha        | Name of thermal diffusivity field    | no  |
+        alphaAni     | Name of non-isotropic alpha          | no  |
+        kappaValue   | Function1 supplying kappa            | no  |
+        alphaValue   | Function1 supplying alpha            | no  |
       \endtable
 
 Usage
@@ -56,8 +59,18 @@ Usage
     {
         ...
         kappaMethod     directionalSolidThermo;
-        kappa           none;
         alphaAni        Anialpha;
+        ...
+    }
+    \endverbatim
+
+    \verbatim
+    specifiedWall
+    {
+        ...
+        kappaMethod     function;
+        kappaFunction   constant 1.0;
+        alphaFunction   constant 100.0;
         ...
     }
     \endverbatim
@@ -73,6 +86,7 @@ SourceFiles
 #include "scalarField.H"
 #include "Enum.H"
 #include "fvPatch.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,7 +109,8 @@ public:
             mtFluidThermo,
             mtSolidThermo,
             mtDirectionalSolidThermo,
-            mtLookup
+            mtLookup,
+            mtFunction
         };
 
 
@@ -119,6 +134,12 @@ protected:
 
         //- Name of thermal diffusivity
         const word alphaName_;
+
+        //- Function1 for kappa
+        autoPtr<PatchFunction1<scalar>> kappaFunction1_;
+
+        //- Function1 for alpha
+        autoPtr<PatchFunction1<scalar>> alphaFunction1_;
 
 
 public:
@@ -149,6 +170,12 @@ public:
             const temperatureCoupledBase& base
         );
 
+        //- Construct as copy
+        temperatureCoupledBase
+        (
+            const temperatureCoupledBase&
+        );
+
 
     //- Destructor
     virtual ~temperatureCoupledBase() = default;
@@ -173,6 +200,19 @@ public:
         {
             return alphaName_;
         }
+
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const FieldMapper&
+        );
+
+        //- Reverse map the given fvPatchField onto this fvPatchField
+        virtual void rmap
+        (
+            const temperatureCoupledBase&,
+            const labelList&
+        );
 
         //- Given patch temperature calculate corresponding K field
         virtual tmp<scalarField> kappa(const scalarField& Tp) const;

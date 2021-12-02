@@ -383,6 +383,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::autoMap
 )
 {
     mixedFvPatchScalarField::autoMap(m);
+    temperatureCoupledBase::autoMap(m);
 
     if (fluid_)
     {
@@ -411,6 +412,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::rmap
             ptf
         );
 
+    temperatureCoupledBase::rmap(tiptf, addr);
     if (fluid_)
     {
         mass_.rmap(tiptf.mass_, addr);

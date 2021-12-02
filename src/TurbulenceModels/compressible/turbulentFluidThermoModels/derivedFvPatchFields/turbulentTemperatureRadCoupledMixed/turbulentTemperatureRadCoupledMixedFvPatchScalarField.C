@@ -67,8 +67,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     TnbrName_("undefined-Tnbr"),
     qrNbrName_("undefined-qrNbr"),
     qrName_("undefined-qr"),
-    thicknessLayers_(0),
-    kappaLayers_(0),
     thermalInertia_(false)
 {
     this->refValue() = 0.0;
@@ -99,7 +97,9 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
+    thicknessLayer_(psf.thicknessLayer_.clone(p.patch())),
     kappaLayers_(psf.kappaLayers_),
+    kappaLayer_(psf.kappaLayer_.clone(p.patch())),
     thermalInertia_(psf.thermalInertia_)
 {}
 
@@ -123,8 +123,6 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
     qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
     qrName_(dict.getOrDefault<word>("qr", "none")),
-    thicknessLayers_(0),
-    kappaLayers_(0),
     thermalInertia_(dict.getOrDefault<Switch>("thermalInertia", false))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
@@ -137,10 +135,65 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
             << exit(FatalError);
     }
 
+    //const auto* eptr = dict.findEntry("thicknessLayers");
+    //if (eptr)
+    //{
+    //    // Detect either a list (parsed as a scalarList) or
+    //    // a single entry (parsed as a PatchFunction1) or
+    //
+    //    if
+    //    (
+    //        eptr->isStream()
+    //     && eptr->stream().peek().isPunctuation(token::BEGIN_LIST)
+    //    )
+    //    {
+    //        // Backwards compatibility
+    //        thicknessLayers_ = dict.get<scalarList>("thicknessLayers");
+    //        kappaLayers_ = dict.get<scalarList>("kappaLayers");
+    //
+    //        if (thicknessLayers_.size() != kappaLayers_.size())
+    //        {
+    //            FatalIOErrorInFunction(dict) << "Inconstent sizes :"
+    //                << "thicknessLayers:" << thicknessLayers_
+    //                << "kappaLayers:" << kappaLayers_
+    //                << exit(FatalIOError);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        thicknessLayer_ = PatchFunction1<scalar>::New
+    //        (
+    //            p.patch(),
+    //            "thicknessLayers",
+    //            dict
+    //        );
+    //        kappaLayer_ = PatchFunction1<scalar>::New
+    //        (
+    //            p.patch(),
+    //            "kappaLayers",
+    //            dict
+    //        );
+    //    }
+    //}
+
+    // Read list of layers
     if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
         dict.readEntry("kappaLayers", kappaLayers_);
     }
+    // Read single additional PatchFunction1
+    thicknessLayer_ = PatchFunction1<scalar>::NewIfPresent
+    (
+        p.patch(),
+        "thicknessLayer",
+        dict
+    );
+    kappaLayer_ = PatchFunction1<scalar>::NewIfPresent
+    (
+        p.patch(),
+        "kappaLayer",
+        dict
+    );
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
@@ -194,7 +247,9 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
+    thicknessLayer_(psf.thicknessLayer_.clone(patch().patch())),
     kappaLayers_(psf.kappaLayers_),
+    kappaLayer_(psf.kappaLayer_.clone(patch().patch())),
     thermalInertia_(psf.thermalInertia_)
 {}
 
@@ -217,12 +272,96 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
     thicknessLayers_(psf.thicknessLayers_),
+    thicknessLayer_(psf.thicknessLayer_.clone(patch().patch())),
     kappaLayers_(psf.kappaLayers_),
+    kappaLayer_(psf.kappaLayer_.clone(patch().patch())),
     thermalInertia_(psf.thermalInertia_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void turbulentTemperatureRadCoupledMixedFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
+{
+    mixedFvPatchScalarField::autoMap(mapper);
+    temperatureCoupledBase::autoMap(mapper);
+    //mappedPatchFieldBase<scalar>::autoMap(mapper);
+    if (thicknessLayer_)
+    {
+        thicknessLayer_().autoMap(mapper);
+        kappaLayer_().autoMap(mapper);
+    }
+}
+
+
+void turbulentTemperatureRadCoupledMixedFvPatchScalarField::rmap
+(
+    const fvPatchField<scalar>& ptf,
+    const labelList& addr
+)
+{
+    mixedFvPatchScalarField::rmap(ptf, addr);
+
+    const turbulentTemperatureRadCoupledMixedFvPatchScalarField& tiptf =
+        refCast
+        <
+            const turbulentTemperatureRadCoupledMixedFvPatchScalarField
+        >(ptf);
+
+    temperatureCoupledBase::rmap(tiptf, addr);
+    //mappedPatchFieldBase<scalar>::rmap(ptf, addr);
+    if (thicknessLayer_)
+    {
+        thicknessLayer_().rmap(tiptf.thicknessLayer_(), addr);
+        kappaLayer_().rmap(tiptf.kappaLayer_(), addr);
+    }
+}
+
+
+tmp<Foam::scalarField>
+turbulentTemperatureRadCoupledMixedFvPatchScalarField::kappa
+(
+    const scalarField& Tp
+) const
+{
+    // Get kappa from relevant thermo
+    tmp<scalarField> tk(temperatureCoupledBase::kappa(Tp));
+
+    // Optionally modify with explicit resistance
+    if (thicknessLayer_ || thicknessLayers_.size())
+    {
+        scalarField KDelta(tk*patch().deltaCoeffs());
+
+        // Harmonic averaging of kappa*deltaCoeffs
+        {
+            KDelta = 1.0/KDelta;
+            if (thicknessLayer_)
+            {
+                const scalar t = db().time().timeOutputValue();
+                KDelta +=
+                    thicknessLayer_().value(t)
+                   /kappaLayer_().value(t);
+            }
+            if (thicknessLayers_.size())
+            {
+                forAll(thicknessLayers_, iLayer)
+                {
+                    KDelta += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
+                }
+            }
+            KDelta = 1.0/KDelta;
+        }
+
+        // Update kappa from KDelta
+        tk = KDelta/patch().deltaCoeffs();
+    }
+
+    return tk;
+}
+
 
 void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 {
@@ -250,17 +389,8 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
     const scalarField Tc(patchInternalField());
     const scalarField& Tp = *this;
 
-    scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
-
-    if (thicknessLayers_.size() > 0)
-    {
-        KDelta = 1.0/KDelta;
-        forAll(thicknessLayers_, iLayer)
-        {
-            KDelta += thicknessLayers_[iLayer]/kappaLayers_[iLayer];
-        }
-        KDelta = 1.0/KDelta;
-    }
+    const scalarField kappaTp(kappa(Tp));
+    const scalarField KDelta(kappaTp*patch().deltaCoeffs());
 
 
     scalarField TcNbr;
@@ -400,13 +530,13 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         valueFraction() = alpha/(alpha + KDelta);
         scalarField c(KDeltaNbr*TcNbr + (mCpDt + mCpDtNbr)*TpOld);
         refValue() = c/alpha;
-        refGrad() = (qr + qrNbr)/kappa(Tp);
+        refGrad() = (qr + qrNbr)/kappaTp;
     }
     else
     {
         valueFraction() = KDeltaNbr/(KDeltaNbr + KDelta);
         refValue() = TcNbr;
-        refGrad() = (qr + qrNbr)/kappa(Tp);
+        refGrad() = (qr + qrNbr)/kappaTp;
     }
 
     source() = Zero;
@@ -426,7 +556,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar Q = gSum(kappa(Tp)*patch().magSf()*snGrad());
+        scalar Q = gSum(kappaTp*patch().magSf()*snGrad());
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
@@ -604,6 +734,11 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
     os.writeEntry("qr", qrName_);
     os.writeEntry("thermalInertia", thermalInertia_);
 
+    if (thicknessLayer_)
+    {
+        thicknessLayer_().writeData(os);
+        kappaLayer_().writeData(os);
+    }
     if (thicknessLayers_.size())
     {
         thicknessLayers_.writeEntry("thicknessLayers", os);
