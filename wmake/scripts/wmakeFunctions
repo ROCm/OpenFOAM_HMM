@@ -214,7 +214,7 @@ cdSource()
 # - the objectsDir
 #
 # Global variables used:
-# - WM_PROJECT_DIR, WM_OPTIONS
+# - FOAM_BUILDROOT, WM_PROJECT_DIR, WM_OPTIONS
 findObjectDir()
 {
     local project="$(expandPath "$WM_PROJECT_DIR")"
@@ -225,8 +225,13 @@ findObjectDir()
     relativeDir="${absdir#${project}/}"
     if [ "$relativeDir" != "$absdir" ]
     then
-        [ -w "$WM_PROJECT_DIR" ] && \
+        if [ -n "$FOAM_BUILDROOT" ] && [ -w "$FOAM_BUILDROOT" ]
+        then
+            objectsDir="${FOAM_BUILDROOT}/build/${WM_OPTIONS}/${relativeDir}"
+        elif [ -w "$WM_PROJECT_DIR" ]
+        then
             objectsDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${relativeDir}"
+        fi
     fi
 
     # Default (local) build directory
