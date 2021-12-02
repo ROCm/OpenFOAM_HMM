@@ -139,26 +139,6 @@ thermalBaffleFvPatchScalarField::thermalBaffleFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-void thermalBaffleFvPatchScalarField::autoMap
-(
-    const fvPatchFieldMapper& m
-)
-{
-    mixedFvPatchScalarField::autoMap(m);
-}
-
-
-void thermalBaffleFvPatchScalarField::rmap
-(
-    const fvPatchScalarField& ptf,
-    const labelList& addr
-)
-{
-    mixedFvPatchScalarField::rmap(ptf, addr);
-}
-
-
 void thermalBaffleFvPatchScalarField::createPatchMesh()
 {
     const fvMesh& thisMesh = patch().boundaryMesh().mesh();

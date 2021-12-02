@@ -129,6 +129,34 @@ lumpedMassWallTemperatureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::lumpedMassWallTemperatureFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
+{
+    mixedFvPatchScalarField::autoMap(mapper);
+    temperatureCoupledBase::autoMap(mapper);
+}
+
+
+void Foam::lumpedMassWallTemperatureFvPatchScalarField::rmap
+(
+    const fvPatchField<scalar>& ptf,
+    const labelList& addr
+)
+{
+    mixedFvPatchScalarField::rmap(ptf, addr);
+
+    const lumpedMassWallTemperatureFvPatchScalarField& tiptf =
+        refCast
+        <
+            const lumpedMassWallTemperatureFvPatchScalarField
+        >(ptf);
+
+    temperatureCoupledBase::rmap(tiptf, addr);
+}
+
+
 void Foam::lumpedMassWallTemperatureFvPatchScalarField::updateCoeffs()
 {
     if (updated() || (curTimeIndex_ == this->db().time().timeIndex()))

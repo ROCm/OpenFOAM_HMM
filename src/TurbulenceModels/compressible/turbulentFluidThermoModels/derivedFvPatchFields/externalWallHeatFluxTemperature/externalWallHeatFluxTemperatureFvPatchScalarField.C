@@ -261,6 +261,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::autoMap
 )
 {
     mixedFvPatchScalarField::autoMap(mapper);
+    temperatureCoupledBase::autoMap(mapper);
 
     if (q_)
     {
@@ -288,6 +289,9 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::rmap
 
     const auto& rhs =
         refCast<const externalWallHeatFluxTemperatureFvPatchScalarField>(ptf);
+
+    temperatureCoupledBase::rmap(rhs, addr);
+
 
     if (q_)
     {

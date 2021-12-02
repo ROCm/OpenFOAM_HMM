@@ -225,6 +225,34 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
+{
+    mixedFvPatchScalarField::autoMap(mapper);
+    temperatureCoupledBase::autoMap(mapper);
+}
+
+
+void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::rmap
+(
+    const fvPatchField<scalar>& ptf,
+    const labelList& addr
+)
+{
+    mixedFvPatchScalarField::rmap(ptf, addr);
+
+    const filmPyrolysisRadiativeCoupledMixedFvPatchScalarField& tiptf =
+        refCast
+        <
+            const filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
+        >(ptf);
+
+    temperatureCoupledBase::rmap(tiptf, addr);
+}
+
+
 void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
 {
     if (updated())
