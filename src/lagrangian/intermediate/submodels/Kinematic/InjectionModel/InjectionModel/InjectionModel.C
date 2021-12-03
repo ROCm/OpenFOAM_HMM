@@ -148,7 +148,7 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
                 tetPti
             );
 
-            if (celli > 0)
+            if (celli >= 0)
             {
                 proci = Pstream::myProcNo();
             }
