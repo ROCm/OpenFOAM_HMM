@@ -31,15 +31,18 @@ License
 
 inline Foam::regExpPosix::regExpPosix() noexcept
 :
-    preg_(nullptr)
+    preg_(nullptr),
+    ctrl_(0)
 {}
 
 
 inline Foam::regExpPosix::regExpPosix(regExpPosix&& rgx) noexcept
 :
-    preg_(rgx.preg_)
+    preg_(rgx.preg_),
+    ctrl_(rgx.ctrl_)
 {
     rgx.preg_ = nullptr;
+    rgx.ctrl_ = 0;
 }
 
 
@@ -49,7 +52,8 @@ inline Foam::regExpPosix::regExpPosix
     const bool ignoreCase
 )
 :
-    preg_(nullptr)
+    preg_(nullptr),
+    ctrl_(0)
 {
     set(pattern, ignoreCase);
 }
@@ -61,7 +65,8 @@ inline Foam::regExpPosix::regExpPosix
     const bool ignoreCase
 )
 :
-    preg_(nullptr)
+    preg_(nullptr),
+    ctrl_(0)
 {
     set(pattern, ignoreCase);
 }
@@ -89,14 +94,72 @@ inline bool Foam::regExpPosix::exists() const noexcept
 }
 
 
+inline bool Foam::regExpPosix::negated() const noexcept
+{
+    return (ctrl_ == ctrlType::NEGATED);
+}
+
+
+inline bool Foam::regExpPosix::negate(bool on) noexcept
+{
+    bool old(ctrl_ == ctrlType::NEGATED);
+
+    if (on)
+    {
+        if (ctrl_)
+        {
+            ctrl_ = ctrlType::NEGATED;
+        }
+    }
+    else if (old)
+    {
+        ctrl_ = ctrlType::NORMAL;
+    }
+
+    return old;
+}
+
+
 inline unsigned Foam::regExpPosix::ngroups() const
 {
-    return preg_ ? preg_->re_nsub : 0;
+    return (preg_ && ctrl_ == ctrlType::NORMAL) ? preg_->re_nsub : 0;
+}
+
+
+inline bool Foam::regExpPosix::set(const char* pattern, bool ignoreCase)
+{
+    // Silently handle nullptr
+    return set_pattern
+    (
+        pattern,
+        (pattern ? std::char_traits<char>::length(pattern) : 0),
+        ignoreCase
+    );
+}
+
+
+inline bool Foam::regExpPosix::set(const std::string& pattern, bool ignoreCase)
+{
+    return set_pattern
+    (
+        pattern.data(),
+        pattern.length(),
+        ignoreCase
+    );
 }
 
 
 inline bool Foam::regExpPosix::search(const std::string& text) const
 {
+    if (!ctrl_)
+    {
+        return false;
+    }
+    else if (text.empty())
+    {
+        return (ctrl_ == ctrlType::NEGATED);
+    }
+
     return std::string::npos != find(text);
 }
 
@@ -107,6 +170,7 @@ inline void Foam::regExpPosix::swap(regExpPosix& rgx)
     {
         // Self-swap is a no-op
         std::swap(preg_, rgx.preg_);
+        std::swap(ctrl_, rgx.ctrl_);
     }
 }
 

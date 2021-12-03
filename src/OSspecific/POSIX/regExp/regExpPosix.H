@@ -28,10 +28,20 @@ Class
     Foam::regExpPosix
 
 Description
-    Wrapper around POSIX extended regular expressions.
+    Wrapper around POSIX extended regular expressions
+    with some additional prefix-handling. The prefix-handling is
+    loosely oriented on PCRE regular expressions and provides a
+    simple means of tuning the expressions.
 
-    The PCRE '(?i)' extension is provided to compile the regular expression
-    as being case-insensitive.
+    The prefixes are detected as \c (?...) at the beginning of
+    the regular expression. Any unknown/unsupported prefixes are silently
+    ignored.
+
+    - "(?!i)" :
+       one or more embedded pattern-match modifiers for the entire pattern.
+    - the \c 'i' indicates ignore-case
+    - the \c '!' (exclamation) indicates negated (inverted) matching
+    .
 
 SeeAlso
     The manpage regex(7) for more information about POSIX regular expressions.
@@ -49,8 +59,8 @@ Warning
     for regular expressions continues to improve.
 
 SourceFiles
-    regExpPosixI.H
     regExpPosix.C
+    regExpPosixI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -74,10 +84,26 @@ template<class StringType> class SubStrings;
 
 class regExpPosix
 {
+    // Data Types
+
+        //- Simple control types
+        enum ctrlType { EMPTY = 0, NORMAL = 1, NEGATED = 2 };
+
+
     // Private Data
 
         //- Compiled regular expression
         regex_t* preg_;
+
+        //- Track if input pattern is non-empty, negated etc.
+        unsigned char ctrl_;
+
+
+    // Private Member Functions
+
+        //- Assign pattern
+        bool set_pattern(const char* pattern, size_t len, bool ignoreCase);
+
 
 public:
 
@@ -158,7 +184,14 @@ public:
         //- Return true if a precompiled expression exists
         inline bool exists() const noexcept;
 
-        //- The number of capture groups for a non-empty expression
+        //- True if pattern matching is negated
+        inline bool negated() const noexcept;
+
+        //- Change pattern negation, return previous value
+        inline bool negate(bool on) noexcept;
+
+        //- The number of capture groups for a non-empty,
+        //- non-negated expressions
         inline unsigned ngroups() const;
 
 
@@ -173,17 +206,19 @@ public:
 
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
-        bool set(const char* pattern, bool ignoreCase=false);
+        inline bool set(const char* pattern, bool ignoreCase=false);
 
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
-        bool set(const std::string& pattern, bool ignoreCase=false);
+        inline bool set(const std::string& pattern, bool ignoreCase=false);
 
 
     // Matching/Searching
 
         //- Find position within the text.
         //  \return The index where it begins or string::npos if not found
+        //
+        //  \note does not properly work with negated regex!
         std::string::size_type find(const std::string& text) const;
 
         //- True if the regex matches the entire text.
@@ -193,6 +228,8 @@ public:
         //- True if the regex matches the text, set the matches.
         //  The first group starts at index 1 (0 is the entire match).
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        //
+        //  \note does not properly work with negated regex!
         bool match(const std::string& text, results_type& matches) const;
 
         //- Return true if the regex was found within the text

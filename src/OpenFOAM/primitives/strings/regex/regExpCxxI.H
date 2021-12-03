@@ -82,23 +82,23 @@ inline bool Foam::regExpCxx::is_meta
 inline Foam::regExpCxx::regExpCxx()
 :
     re_(),
-    ok_(false)
+    ctrl_(0)
 {}
 
 
 inline Foam::regExpCxx::regExpCxx(const regExpCxx& rgx)
 :
     re_(rgx.re_),
-    ok_(rgx.ok_)
+    ctrl_(rgx.ctrl_)
 {}
 
 
 inline Foam::regExpCxx::regExpCxx(regExpCxx&& rgx) noexcept
 :
     re_(std::move(rgx.re_)),
-    ok_(rgx.ok_)
+    ctrl_(rgx.ctrl_)
 {
-    rgx.ok_ = false;
+    rgx.ctrl_ = 0;
 }
 
 
@@ -109,7 +109,7 @@ inline Foam::regExpCxx::regExpCxx
 )
 :
     re_(),
-    ok_(false)
+    ctrl_(0)
 {
     set(pattern, ignoreCase);
 }
@@ -122,7 +122,7 @@ inline Foam::regExpCxx::regExpCxx
 )
 :
     re_(),
-    ok_(false)
+    ctrl_(0)
 {
     set(pattern, ignoreCase);
 }
@@ -132,34 +132,61 @@ inline Foam::regExpCxx::regExpCxx
 
 inline bool Foam::regExpCxx::empty() const noexcept
 {
-    return !ok_;
+    return !ctrl_;
 }
 
 
 inline bool Foam::regExpCxx::exists() const noexcept
 {
-    return ok_;
+    return ctrl_;
+}
+
+
+inline bool Foam::regExpCxx::negated() const noexcept
+{
+    return (ctrl_ == ctrlType::NEGATED);
+}
+
+
+inline bool Foam::regExpCxx::negate(bool on) noexcept
+{
+    bool old(ctrl_ == ctrlType::NEGATED);
+
+    if (on)
+    {
+        if (ctrl_)
+        {
+            ctrl_ = ctrlType::NEGATED;
+        }
+    }
+    else if (old)
+    {
+        ctrl_ = ctrlType::NORMAL;
+    }
+
+    return old;
 }
 
 
 inline unsigned Foam::regExpCxx::ngroups() const
 {
-    return ok_ ? re_.mark_count() : 0;
+    // Groups only make sense for regular (not negated) matching
+    return ctrl_ == ctrlType::NORMAL ? re_.mark_count() : 0;
 }
 
 
 inline bool Foam::regExpCxx::nocase() const
 {
-    return ok_ && ((re_.flags() & std::regex::icase) == std::regex::icase);
+    return ctrl_ && ((re_.flags() & std::regex::icase) == std::regex::icase);
 }
 
 
 inline bool Foam::regExpCxx::clear()
 {
-    if (ok_)
+    if (ctrl_)
     {
         re_.assign("");
-        ok_ = false;
+        ctrl_ = 0;
 
         return true;
     }
@@ -174,33 +201,102 @@ inline void Foam::regExpCxx::swap(regExpCxx& rgx)
     {
         // Self-swap is a no-op
         re_.swap(rgx.re_);
-        std::swap(ok_, rgx.ok_);
+        std::swap(ctrl_, rgx.ctrl_);
     }
+}
+
+
+inline bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
+{
+    // Silently handle nullptr
+    return set_pattern
+    (
+        pattern,
+        (pattern ? std::char_traits<char>::length(pattern) : 0),
+        ignoreCase
+    );
+}
+
+
+inline bool Foam::regExpCxx::set(const std::string& pattern, bool ignoreCase)
+{
+    return set_pattern
+    (
+        pattern.data(),
+        pattern.length(),
+        ignoreCase
+    );
 }
 
 
 inline std::string::size_type
 Foam::regExpCxx::find(const std::string& text) const
 {
-    std::smatch mat;
-    if (!text.empty() && std::regex_search(text, mat, re_))
+    // Find with negated is probably not very reliable...
+    if (!ctrl_)
     {
-        return mat.position(0);
+        // Undefined: never matches
+        return std::string::npos;
+    }
+    else if (text.empty())
+    {
+        if (ctrl_ == ctrlType::NEGATED)
+        {
+            return 0;  // No match - pretend it starts at position 0
+        }
+        else
+        {
+            return std::string::npos;
+        }
+    }
+    else
+    {
+        std::smatch mat;
+
+        const bool ok = std::regex_search(text, mat, re_);
+
+        if (ctrl_ == ctrlType::NEGATED)
+        {
+            if (!ok)
+            {
+                return 0;  // No match - claim that is starts at position 0
+            }
+        }
+        else if (ok)
+        {
+            return mat.position(0);
+        }
     }
 
-    return std::string::npos;
+    return std::string::npos;  // False
 }
 
 
 inline bool Foam::regExpCxx::search(const std::string& text) const
 {
-    return (ok_ && !text.empty() && std::regex_search(text, re_));
+    if (!ctrl_)
+    {
+        // Undefined: never matches
+        return false;
+    }
+
+    const bool ok = (!text.empty() && std::regex_search(text, re_));
+
+    return (ctrl_ == ctrlType::NEGATED) ? !ok : ok;
 }
 
 
 inline bool Foam::regExpCxx::match(const std::string& text) const
 {
-    return (ok_ && !text.empty() && std::regex_match(text, re_));
+    if (!ctrl_)
+    {
+        // Undefined: never matches
+        return false;
+    }
+
+    const bool ok = (!text.empty() && std::regex_match(text, re_));
+
+    return (ctrl_ == ctrlType::NEGATED) ? !ok : ok;
 }
 
 
@@ -210,6 +306,13 @@ inline bool Foam::regExpCxx::match
     std::smatch& matches
 ) const
 {
+    // Probably does not make sense for negated pattern...
+    if (negated())
+    {
+        // clear: matches = std::smatch();
+        return match(text);
+    }
+
     return std::regex_match(text, matches, re_);
 }
 
@@ -228,7 +331,7 @@ inline void Foam::regExpCxx::operator=(const regExpCxx& rgx)
     {
         // Self-assignment is a no-op
         re_ = rgx.re_;
-        ok_ = rgx.ok_;
+        ctrl_ = rgx.ctrl_;
     }
 }
 
