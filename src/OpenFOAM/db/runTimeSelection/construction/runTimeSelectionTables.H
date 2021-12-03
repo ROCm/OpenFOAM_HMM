@@ -61,7 +61,7 @@ Description
     <                                                                          \
         prefix##Ptr,                                                           \
         ::Foam::word,                                                          \
-        ::Foam::string::hasher                                                 \
+        ::Foam::Hash<::Foam::word>                                             \
     > prefix##TableType;                                                       \
                                                                                \
     /* Lookup aliases for constructors */                                      \
@@ -69,7 +69,7 @@ Description
     <                                                                          \
         std::pair<::Foam::word,int>,                                           \
         ::Foam::word,                                                          \
-        ::Foam::string::hasher                                                 \
+        ::Foam::Hash<::Foam::word>                                             \
     > prefix##CompatTableType;                                                 \
                                                                                \
     /* Table singleton (storage) */                                            \
