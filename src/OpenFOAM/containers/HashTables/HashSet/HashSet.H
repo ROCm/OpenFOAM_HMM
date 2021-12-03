@@ -52,7 +52,7 @@ Typedef
     Foam::wordHashSet
 
 Description
-    A HashSet with (the default) word keys.
+    A HashSet with word keys and string hasher.
 
 Typedef
     Foam::labelHashSet
@@ -75,12 +75,22 @@ namespace Foam
 
 // Forward Declarations
 template<class T> class MinMax;
+template<class Key, class Hash> class HashSet;
+
+// Common hash-set types
+
+//- A HashSet of words, uses string hasher.
+typedef HashSet<word, Hash<word>> wordHashSet;
+
+//- A HashSet of labels, uses label hasher.
+typedef HashSet<label, Hash<label>> labelHashSet;
+
 
 /*---------------------------------------------------------------------------*\
                            Class HashSet Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Key=word, class Hash=Foam::Hash<Key>>
+template<class Key, class Hash=Foam::Hash<Key>>
 class HashSet
 :
     public HashTable<zero::null, Key, Hash>
@@ -401,14 +411,7 @@ public:
 };
 
 
-// Typedefs
-
-//- A HashSet with word keys.
-typedef HashSet<word> wordHashSet;
-
-//- A HashSet with label keys and label hasher.
-typedef HashSet<label, Hash<label>> labelHashSet;
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Global Functions
 

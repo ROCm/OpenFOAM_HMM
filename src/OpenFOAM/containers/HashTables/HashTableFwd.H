@@ -39,9 +39,10 @@ Description
 namespace Foam
 {
 
+template<class Key, class Hash> class HashSet;
+
 template<class T, class Key, class Hash> class HashTable;
 template<class T, class Key, class Hash> class HashPtrTable;
-template<class Key, class Hash> class HashSet;
 
 template<class T> class Map;
 template<class T> class PtrMap;

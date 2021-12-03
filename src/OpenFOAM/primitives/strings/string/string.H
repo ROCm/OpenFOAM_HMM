@@ -62,10 +62,13 @@ namespace Foam
 {
 
 // Forward Declarations
+class string;
 class word;
 class wordRe;
 class Istream;
 class Ostream;
+
+template<class T> struct Hash;
 
 /*---------------------------------------------------------------------------*\
                            Class string Declaration
@@ -150,7 +153,8 @@ public:
             }
         };
 
-        //- Hashing functor for string and derived string classes
+        //- Deprecated hashing functor - use hasher
+        //  \deprecated(2021-04) - use hasher
         struct hash : string::hasher {};
 
 
@@ -332,6 +336,17 @@ public:
         bool removeTrailing(const char c) { return removeEnd(c); }
 };
 
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Hashing for Foam::string
+template<> struct Hash<string> : string::hasher {};
+
+//- Hashing for std:::string
+template<> struct Hash<std::string> : string::hasher {};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // IOstream Operators
 

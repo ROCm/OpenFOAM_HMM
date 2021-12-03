@@ -58,9 +58,14 @@ namespace Foam
 // Forward Declarations
 class fileName;
 class token;
+
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
+
+//- Hashing for fileName
+template<> struct Hash<fileName> : string::hasher {};
+
 
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration

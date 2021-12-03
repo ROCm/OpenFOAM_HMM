@@ -58,6 +58,10 @@ class token;
 Istream& operator>>(Istream& is, keyType& val);
 Ostream& operator<<(Ostream& os, const keyType& val);
 
+//- Hashing for keyType
+template<> struct Hash<keyType> : string::hasher {};
+
+
 /*---------------------------------------------------------------------------*\
                            Class keyType Declaration
 \*---------------------------------------------------------------------------*/
@@ -236,6 +240,8 @@ public:
         {}
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // IOstream Operators
 

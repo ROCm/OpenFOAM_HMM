@@ -30,11 +30,8 @@ Class
 Description
     Hash function class.
     The default definition is for primitives.
-    Non-primitives used to hash entries on hash tables will likely need
+    Non-primitives used to hash entries on hash tables will need
     a specialized version.
-
-Note
-    The second template parameter (bool) is used for SFINAE overloading,
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,8 +40,6 @@ Note
 
 #include "Hasher.H"
 #include <cstdint>
-#include <string>
-#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +50,7 @@ namespace Foam
                             Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, class SFINAEType=bool>
+template<class T>
 struct Hash
 {
     unsigned operator()(const T& obj, unsigned seed=0) const
@@ -67,35 +62,7 @@ struct Hash
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Specialization for trivial (integer) types
-
-#undef  FOAM_INTHASHER
-#define FOAM_INTHASHER(IntType)                                               \
-    /*! \brief Hashing specialization for IntType */                          \
-    /*! Unseeded (single value) uses natural order, otherwise incremental */  \
-    template<> struct Hash<IntType>                                           \
-    {                                                                         \
-        unsigned operator()(const IntType val) const                          \
-        {                                                                     \
-            return static_cast<unsigned>(val);                                \
-        }                                                                     \
-        unsigned operator()(const IntType val, unsigned seed) const           \
-        {                                                                     \
-            return Foam::Hasher(&val, sizeof(IntType), seed);                 \
-        }                                                                     \
-    }
-
-FOAM_INTHASHER(bool);
-FOAM_INTHASHER(char);
-FOAM_INTHASHER(int32_t);
-FOAM_INTHASHER(int64_t);
-FOAM_INTHASHER(uint32_t);
-
-#undef FOAM_INTHASHER
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Hashing specialization for nullptr. Always 0
+//- Hashing of nullptr, always 0
 template<>
 struct Hash<std::nullptr_t>
 {
@@ -105,7 +72,7 @@ struct Hash<std::nullptr_t>
     }
 };
 
-//- Hashing specialization for pointers, interpret pointer as a integer type
+//- Hashing of pointers, treat as unsigned integer
 template<>
 struct Hash<void*>
 {
@@ -119,20 +86,32 @@ struct Hash<void*>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Hashing partial specialization for derived string types
-template<class StringType>
-struct Hash
-<
-    StringType,
-    typename std::enable_if
-    <std::is_base_of<std::string, StringType>::value, bool>::type
->
-{
-    unsigned operator()(const std::string& str, unsigned seed=0) const
-    {
-        return Foam::Hasher(str.data(), str.length(), seed);
+// Specialization for common integral types
+
+#undef  FOAM_HASH_SPECIALIZATION
+#define FOAM_HASH_SPECIALIZATION(Type)                                        \
+                                                                              \
+    /*! \brief Hashing of integral type: Type */                              \
+    /*! Unseeded (single value) uses natural order, otherwise incremental */  \
+    template<>                                                                \
+    struct Hash<Type>                                                         \
+    {                                                                         \
+        unsigned operator()(const Type val) const                             \
+        {                                                                     \
+            return static_cast<unsigned>(val);                                \
+        }                                                                     \
+        unsigned operator()(const Type val, unsigned seed) const              \
+        {                                                                     \
+            return Foam::Hasher(&val, sizeof(Type), seed);                    \
+        }                                                                     \
     }
-};
+
+FOAM_HASH_SPECIALIZATION(bool);
+FOAM_HASH_SPECIALIZATION(char);
+FOAM_HASH_SPECIALIZATION(int32_t);
+FOAM_HASH_SPECIALIZATION(int64_t);
+FOAM_HASH_SPECIALIZATION(uint32_t);
+#undef FOAM_HASH_SPECIALIZATION
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
