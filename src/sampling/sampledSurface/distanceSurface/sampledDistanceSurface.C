@@ -64,6 +64,30 @@ Foam::sampledDistanceSurface::sampledDistanceSurface
 {}
 
 
+Foam::sampledDistanceSurface::sampledDistanceSurface
+(
+    const word name,
+    const polyMesh& mesh,
+    const bool interpolate,
+    autoPtr<searchableSurface>&& surface,
+    const scalar distance,
+    const bool useSignedDistance
+)
+:
+    sampledSurface(name, mesh, interpolate),
+    distanceSurface
+    (
+        mesh,
+        interpolate,
+        std::move(surface),
+        distance,
+        useSignedDistance
+    ),
+    average_(false), // pass as param?
+    needsUpdate_(true)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::sampledDistanceSurface::needsUpdate() const

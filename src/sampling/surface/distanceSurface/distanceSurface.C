@@ -349,9 +349,10 @@ Foam::distanceSurface::distanceSurface
     const isoSurfaceParams& params
 )
 :
-    mesh_(mesh),
-    geometryPtr_
+    distanceSurface
     (
+        mesh,
+        interpolate,
         searchableSurface::New
         (
             surfaceType,
@@ -365,8 +366,26 @@ Foam::distanceSurface::distanceSurface
                 IOobject::NO_WRITE
             ),
             dictionary()
-        )
-    ),
+        ),
+        distance,
+        useSignedDistance,
+        params
+    )
+{}
+
+
+Foam::distanceSurface::distanceSurface
+(
+    const polyMesh& mesh,
+    const bool interpolate,
+    autoPtr<searchableSurface>&& surface,
+    const scalar distance,
+    const bool useSignedDistance,
+    const isoSurfaceParams& params
+)
+:
+    mesh_(mesh),
+    geometryPtr_(surface),
     distance_(distance),
     withZeroDistance_(equal(distance_, 0)),
     withSignDistance_
