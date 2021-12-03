@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,12 +45,6 @@ Foam::MRFZoneList::MRFZoneList
 
     active(true);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::MRFZoneList::~MRFZoneList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -101,6 +96,27 @@ void Foam::MRFZoneList::reset(const dictionary& dict)
             );
         }
     }
+}
+
+
+const Foam::MRFZone& Foam::MRFZoneList::getFromName
+(
+    const word& name
+) const
+{
+    for (const auto& mrf: *this)
+    {
+        if (mrf.name() == name)
+        {
+            return mrf;
+        }
+    }
+
+    FatalErrorInFunction
+        << "Unable to find MRFZone " << name
+        << exit(FatalError);
+
+    return first();
 }
 
 

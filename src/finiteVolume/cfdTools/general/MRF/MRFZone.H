@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,6 +188,12 @@ public:
 
         //- Return const access to the MRF active flag
         inline bool active() const;
+
+        //- Return const access to the MRF origin
+        inline const vector& origin() const;
+
+        //- Return const access to the MRF axis
+        inline const vector& axis() const;
 
         //- Return the current Omega vector
         vector Omega() const;

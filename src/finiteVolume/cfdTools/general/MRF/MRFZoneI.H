@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +35,18 @@ inline const Foam::word& Foam::MRFZone::name() const
 inline bool Foam::MRFZone::active() const
 {
     return active_;
+}
+
+
+inline const Foam::vector& Foam::MRFZone::origin() const
+{
+    return origin_;
+}
+
+
+inline const Foam::vector& Foam::MRFZone::axis() const
+{
+    return axis_;
 }
 
 
