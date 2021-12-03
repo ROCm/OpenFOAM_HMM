@@ -77,7 +77,7 @@ void Foam::functionObjects::forces::writeIntegratedHeader
 ) const
 {
     writeHeader(os, header);
-    writeHeaderValue(os, "CofR", coordSys_.origin());
+    writeHeaderValue(os, "CofR", coordSysPtr_->origin());
     writeHeader(os, "");
     writeCommented(os, "Time");
     writeTabbed(os, "(total_x total_y total_z)");
@@ -156,17 +156,17 @@ void Foam::functionObjects::forces::setCoordinateSystem
     const word& e1Name
 )
 {
-    coordSys_.clear();
+    coordSysPtr_.clear();
 
-    if (dict.readIfPresent<point>("CofR", coordSys_.origin()))
+    point origin(Zero);
+    if (dict.readIfPresent<point>("CofR", origin))
     {
         const vector e3 = e3Name == word::null ?
             vector(0, 0, 1) : dict.get<vector>(e3Name);
         const vector e1 = e1Name == word::null ?
             vector(1, 0, 0) : dict.get<vector>(e1Name);
 
-        coordSys_ =
-            coordSystem::cartesian(coordSys_.origin(), e3, e1);
+        coordSysPtr_.reset(new coordSystem::cartesian(origin, e3, e1));
     }
     else
     {
@@ -176,7 +176,7 @@ void Foam::functionObjects::forces::setCoordinateSystem
         if (dict.found(coordinateSystem::typeName_()))
         {
             // New() for access to indirect (global) coordinate system
-            coordSys_ =
+            coordSysPtr_ =
                 coordinateSystem::New
                 (
                     obr_,
@@ -186,7 +186,7 @@ void Foam::functionObjects::forces::setCoordinateSystem
         }
         else
         {
-            coordSys_ = coordSystem::cartesian(dict);
+            coordSysPtr_.reset(new coordSystem::cartesian(dict));
         }
     }
 
@@ -604,21 +604,23 @@ void Foam::functionObjects::forces::writeForces()
 {
     Log << type() << " " << name() << " write:" << nl;
 
+    const auto& coordSys = coordSysPtr_();
+
     writeIntegratedForceMoment
     (
         "forces",
-        coordSys_.localVector(force_[0]),
-        coordSys_.localVector(force_[1]),
-        coordSys_.localVector(force_[2]),
+        coordSys.localVector(force_[0]),
+        coordSys.localVector(force_[1]),
+        coordSys.localVector(force_[2]),
         forceFilePtr_
     );
 
     writeIntegratedForceMoment
     (
         "moments",
-        coordSys_.localVector(moment_[0]),
-        coordSys_.localVector(moment_[1]),
-        coordSys_.localVector(moment_[2]),
+        coordSys.localVector(moment_[0]),
+        coordSys.localVector(moment_[1]),
+        coordSys.localVector(moment_[2]),
         momentFilePtr_
     );
 
@@ -673,14 +675,16 @@ void Foam::functionObjects::forces::writeBinnedForceMoment
 
 void Foam::functionObjects::forces::writeBins()
 {
+    const auto& coordSys = coordSysPtr_();
+
     List<Field<vector>> lf(3);
     List<Field<vector>> lm(3);
-    lf[0] = coordSys_.localVector(force_[0]);
-    lf[1] = coordSys_.localVector(force_[1]);
-    lf[2] = coordSys_.localVector(force_[2]);
-    lm[0] = coordSys_.localVector(moment_[0]);
-    lm[1] = coordSys_.localVector(moment_[1]);
-    lm[2] = coordSys_.localVector(moment_[2]);
+    lf[0] = coordSys.localVector(force_[0]);
+    lf[1] = coordSys.localVector(force_[1]);
+    lf[2] = coordSys.localVector(force_[2]);
+    lm[0] = coordSys.localVector(moment_[0]);
+    lm[1] = coordSys.localVector(moment_[1]);
+    lm[2] = coordSys.localVector(moment_[2]);
 
     writeBinnedForceMoment(lf, forceBinFilePtr_);
     writeBinnedForceMoment(lm, momentBinFilePtr_);
@@ -713,7 +717,7 @@ Foam::functionObjects::forces::forces
     fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
-    coordSys_(),
+    coordSysPtr_(nullptr),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
@@ -758,7 +762,7 @@ Foam::functionObjects::forces::forces
     fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
-    coordSys_(),
+    coordSysPtr_(nullptr),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
@@ -950,6 +954,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
     resetFields();
 
+    const point& origin = coordSysPtr_->origin();
+
     if (directForceDensity_)
     {
         const volVectorField& fD = lookupObject<volVectorField>(fDName_);
@@ -958,10 +964,7 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
         for (const label patchi : patchSet_)
         {
-            vectorField Md
-            (
-                mesh_.C().boundaryField()[patchi] - coordSys_.origin()
-            );
+            vectorField Md(mesh_.C().boundaryField()[patchi] - origin);
 
             scalarField sA(mag(Sfb[patchi]));
 
@@ -1000,10 +1003,7 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
         for (const label patchi : patchSet_)
         {
-            vectorField Md
-            (
-                mesh_.C().boundaryField()[patchi] - coordSys_.origin()
-            );
+            vectorField Md(mesh_.C().boundaryField()[patchi] - origin);
 
             vectorField fN
             (
@@ -1052,7 +1052,7 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
                 const vectorField d(mesh_.C(), cZone);
                 const vectorField fP(fPTot, cZone);
-                const vectorField Md(d - coordSys_.origin());
+                const vectorField Md(d - origin);
 
                 const vectorField fDummy(Md.size(), Zero);
 

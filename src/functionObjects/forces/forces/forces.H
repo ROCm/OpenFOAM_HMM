@@ -141,7 +141,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
-#include "cartesianCS.H"
+#include "coordinateSystem.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
 #include "Tuple2.H"
@@ -217,7 +217,7 @@ protected:
             scalar pRef_;
 
             //- Coordinate system used when evaluating forces/moments
-            coordSystem::cartesian coordSys_;
+            autoPtr<coordinateSystem> coordSysPtr_;
 
             //- Flag to include porosity effects
             bool porosity_;

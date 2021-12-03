@@ -89,17 +89,18 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedHeader
     Ostream& os
 ) const
 {
+    const auto& coordSys = coordSysPtr_();
     writeHeader(os, "Force coefficients");
-    writeHeaderValue(os, "dragDir", coordSys_.e1());
-    writeHeaderValue(os, "sideDir", coordSys_.e2());
-    writeHeaderValue(os, "liftDir", coordSys_.e3());
-    writeHeaderValue(os, "rollAxis", coordSys_.e1());
-    writeHeaderValue(os, "pitchAxis", coordSys_.e2());
-    writeHeaderValue(os, "yawAxis", coordSys_.e3());
+    writeHeaderValue(os, "dragDir", coordSys.e1());
+    writeHeaderValue(os, "sideDir", coordSys.e2());
+    writeHeaderValue(os, "liftDir", coordSys.e3());
+    writeHeaderValue(os, "rollAxis", coordSys.e1());
+    writeHeaderValue(os, "pitchAxis", coordSys.e2());
+    writeHeaderValue(os, "yawAxis", coordSys.e3());
     writeHeaderValue(os, "magUInf", magUInf_);
     writeHeaderValue(os, "lRef", lRef_);
     writeHeaderValue(os, "Aref", Aref_);
-    writeHeaderValue(os, "CofR", coordSys_.origin());
+    writeHeaderValue(os, "CofR", coordSys.origin());
     writeHeader(os, "");
     writeCommented(os, "Time");
     writeTabbed(os, "Cd");
@@ -362,10 +363,12 @@ bool Foam::functionObjects::forceCoeffs::execute()
     const scalar momentScaling = 1.0/(Aref_*pDyn*lRef_ + SMALL);
     const scalar forceScaling = 1.0/(Aref_*pDyn + SMALL);
 
+    const auto& coordSys = coordSysPtr_();
+
     forAll(liftCoeffs, i)
     {
-        const Field<vector> localForce(coordSys_.localVector(force_[i]));
-        const Field<vector> localMoment(coordSys_.localVector(moment_[i]));
+        const Field<vector> localForce(coordSys.localVector(force_[i]));
+        const Field<vector> localMoment(coordSys.localVector(moment_[i]));
 
         dragCoeffs[i] = forceScaling*(localForce.component(0));
         sideCoeffs[i] = forceScaling*(localForce.component(1));
