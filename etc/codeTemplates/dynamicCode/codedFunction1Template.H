@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,47 +24,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Template for use with dynamic code generation of a functionObject.
+    Template for use with dynamic code generation of a Function1
 
 SourceFiles
-    functionObjectTemplate.C
+    codedFunction1Template.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coded_functionObjectTemplate_H
-#define coded_functionObjectTemplate_H
+#ifndef dynamicCode_codedFunction1_${typeName}_${TemplateType}_H
+#define dynamicCode_codedFunction1_${typeName}_${TemplateType}_H
 
-#include "regionFunctionObject.H"
+#include "Function1.H"
 #include "dictionaryContent.H"
-
-//{{{ begin codeInclude
-${codeInclude}
-//}}} end codeInclude
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class fvMesh;
+namespace Function1Types
+{
 
 /*---------------------------------------------------------------------------*\
-                         A templated functionObject
+                           A coded version Function1
 \*---------------------------------------------------------------------------*/
 
-class ${typeName}FunctionObject
+class ${typeName}Function1_${TemplateType}
 :
-    public functionObjects::regionFunctionObject,
+    public Function1<${TemplateType}>,
     public dictionaryContent
 {
-    // Private Data
-
-//{{{ begin codeData
-        ${codeData}
-//}}} end codeData
-
-
     // Private Member Functions
 
         //- Report a message with the SHA1sum
@@ -73,21 +60,6 @@ class ${typeName}FunctionObject
         {
             Info<< message << " sha1: " << SHA1sum << '\n';
         }
-
-        //- Cast reference of objectRegistry to fvMesh
-        const fvMesh& mesh() const;
-
-        //- No copy construct
-        ${typeName}FunctionObject
-        (
-            const ${typeName}FunctionObject&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=
-        (
-            const ${typeName}FunctionObject&
-        ) = delete;
 
 public:
 
@@ -100,43 +72,44 @@ public:
 
     // Constructors
 
-        //- Construct from Time and dictionary
-        ${typeName}FunctionObject
+        //- Construct from entry name, dictionary and registry
+        ${typeName}Function1_${TemplateType}
         (
-            const word& name,
-            const Time& runTime,
-            const dictionary& dict
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
         );
+
+        //- Copy construct
+        ${typeName}Function1_${TemplateType}
+        (
+            const ${typeName}Function1_${TemplateType}& rhs
+        ) = default;
+
+        //- Construct and return a clone
+        virtual tmp<Function1<${TemplateType}>> clone() const
+        {
+            return tmp<Function1<${TemplateType}>>
+            (
+                new ${typeName}Function1_${TemplateType}(*this)
+            );
+        }
 
 
     //- Destructor
-    virtual ~${typeName}FunctionObject();
+    virtual ~${typeName}Function1_${TemplateType}() = default;
 
 
     // Member Functions
 
-        //- Code context as a dictionary
-        const dictionary& codeContext() const noexcept
-        {
-            return dictionaryContent::dict();
-        }
-
-        //- Read optional controls
-        virtual bool read(const dictionary& dict);
-
-        //- Execute (at time-step)
-        virtual bool execute();
-
-        //- Write (at write interval)
-        virtual bool write();
-
-        //- Executed at the final time-loop
-        virtual bool end();
+        //- Return value as a function of (scalar) independent variable
+        virtual ${TemplateType} value(const scalar x) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Function1Types
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

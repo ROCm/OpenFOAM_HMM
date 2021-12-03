@@ -80,14 +80,17 @@ defineTypeNameAndDebug
     ${typeName}PatchFunction1${FieldType},
     0
 );
-PatchFunction1<${TemplateType}>::adddictionaryConstructorToTable
+PatchFunction1<${TemplateType}>::addRemovabledictionaryConstructorToTable
     <${typeName}PatchFunction1${FieldType}>
-    add${typeName}PatchFunction1${FieldType}ConstructorToTable_;
+    addRemovable${typeName}PatchFunction1${FieldType}ConstructorToTable_;
 
+} // namespace PatchFunction1Types
+} // namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::PatchFunction1Types::
 ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
@@ -107,6 +110,7 @@ ${typeName}PatchFunction1${FieldType}
 }
 
 
+Foam::PatchFunction1Types::
 ${typeName}PatchFunction1${FieldType}::
 ${typeName}PatchFunction1${FieldType}
 (
@@ -121,7 +125,7 @@ ${typeName}PatchFunction1${FieldType}
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::Field<Foam::${TemplateType}>>
-${typeName}PatchFunction1${FieldType}::value
+Foam::PatchFunction1Types::${typeName}PatchFunction1${FieldType}::value
 (
     const scalar x
 ) const
@@ -130,12 +134,6 @@ ${typeName}PatchFunction1${FieldType}::value
     ${code}
 //}}} end code
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace PatchFunction1Types
-} // End namespace Foam
 
 
 // ************************************************************************* //

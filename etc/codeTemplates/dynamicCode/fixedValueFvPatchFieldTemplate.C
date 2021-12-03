@@ -78,9 +78,12 @@ makeRemovablePatchTypeField
     ${typeName}FixedValueFvPatch${FieldType}
 );
 
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
@@ -97,6 +100,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
@@ -115,6 +119,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
@@ -132,6 +137,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
@@ -147,6 +153,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ${typeName}FixedValueFvPatch${FieldType}
 (
@@ -165,6 +172,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::
 ~${typeName}FixedValueFvPatch${FieldType}()
 {
@@ -178,6 +186,7 @@ ${typeName}FixedValueFvPatch${FieldType}::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void
+Foam::
 ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
@@ -197,9 +206,5 @@ ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
     this->parent_bctype::updateCoeffs();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

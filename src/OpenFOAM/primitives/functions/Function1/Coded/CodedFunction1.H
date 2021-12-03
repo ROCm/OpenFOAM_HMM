@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::PatchFunction1Types::CodedField
+    Foam::Function1Types::CodedFunction1
 
 Description
-    PatchFunction1 with the code supplied by an on-the-fly compiled C++
+    Function1 with the code supplied by an on-the-fly compiled C++
     expression.
 
     The code entries:
@@ -80,31 +80,31 @@ See also
     Foam::functionEntries::codeStream
 
 SourceFiles
-    CodedField.C
+    CodedFunction1.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PatchFunction1Types_CodedField_H
-#define PatchFunction1Types_CodedField_H
+#ifndef Function1Types_CodedFunction1_H
+#define Function1Types_CodedFunction1_H
 
-#include "PatchFunction1.H"
+#include "Function1.H"
 #include "codedBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace PatchFunction1Types
+namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class CodedField Declaration
+                         Class CodedFunction1 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class CodedField
+class CodedFunction1
 :
-    public PatchFunction1<Type>,
+    public Function1<Type>,
     protected codedBase
 {
     // Private Data
@@ -114,13 +114,13 @@ class CodedField
 
         const word redirectName_;
 
-        mutable autoPtr<PatchFunction1<Type>> redirectFunctionPtr_;
+        mutable autoPtr<Function1<Type>> redirectFunctionPtr_;
 
 
     // Private Member Functions
 
         //- Get reference to the underlying Function1
-        const PatchFunction1<Type>& redirectFunction() const;
+        const Function1<Type>& redirectFunction() const;
 
 
 protected:
@@ -149,8 +149,10 @@ protected:
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
 
+    // Generated Methods
+
         //- No copy assignment
-        void operator=(const CodedField<Type>&) = delete;
+        void operator=(const CodedFunction1<Type>&) = delete;
 
 public:
 
@@ -158,11 +160,11 @@ public:
 
         //- Name of the C code template to be used
         static constexpr const char* const codeTemplateC
-            = "codedPatchFunction1Template.C";
+            = "codedFunction1Template.C";
 
         //- Name of the H code template to be used
         static constexpr const char* const codeTemplateH
-            = "codedPatchFunction1Template.H";
+            = "codedFunction1Template.H";
 
 
     //- Runtime type information
@@ -171,97 +173,49 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        CodedField
+        //- Construct from entry name, dictionary and optional registry
+        CodedFunction1
         (
-            const polyPatch& pp,
-            const word& redirectType,
             const word& entryName,
             const dictionary& dict,
-            const bool faceValues = true
+            const objectRegistry* obrPtr = nullptr
         );
 
         //- Copy construct
-        explicit CodedField(const CodedField<Type>& rhs);
-
-        //- Copy construct, setting patch
-        explicit CodedField
-        (
-            const CodedField<Type>& rhs,
-            const polyPatch& pp
-        );
+        explicit CodedFunction1(const CodedFunction1<Type>& rhs);
 
         //- Construct and return a clone
-        virtual tmp<PatchFunction1<Type>> clone() const
+        virtual tmp<Function1<Type>> clone() const
         {
-            return tmp<PatchFunction1<Type>>
-            (
-                new CodedField<Type>(*this)
-            );
-        }
-
-        //- Construct and return a clone setting patch
-        virtual tmp<PatchFunction1<Type>> clone(const polyPatch& pp) const
-        {
-            return tmp<PatchFunction1<Type>>
-            (
-                new CodedField<Type>(*this, pp)
-            );
+            return tmp<Function1<Type>>(new CodedFunction1<Type>(*this));
         }
 
 
     //- Destructor
-    virtual ~CodedField() = default;
+    virtual ~CodedFunction1() = default;
 
 
     // Member Functions
 
-        //- Is value uniform (i.e. independent of coordinate)
-        virtual inline bool uniform() const { return false; }
+        //- Return value at current time
+        virtual inline Type value(const scalar x) const;
 
+        // Integrate etc are not implemented!
 
-        // Evaluation
-
-            //- Return CodedField value
-            virtual tmp<Field<Type>> value(const scalar x) const;
-
-            //- Integrate between two values
-            virtual tmp<Field<Type>> integrate
-            (
-                const scalar x1,
-                const scalar x2
-            ) const;
-
-
-        // Mapping
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap(const FieldMapper& mapper);
-
-            //- Reverse map the given PatchFunction1 onto this PatchFunction1
-            virtual void rmap
-            (
-                const PatchFunction1<Type>& pf1,
-                const labelList& addr
-            );
-
-
-        // I-O
-
-            //- Write in dictionary format
-            virtual void writeData(Ostream& os) const;
+        //- Write in dictionary format
+        virtual void writeData(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace PatchFunction1Types
+} // End namespace Function1Types
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "CodedField.C"
+    #include "CodedFunction1.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

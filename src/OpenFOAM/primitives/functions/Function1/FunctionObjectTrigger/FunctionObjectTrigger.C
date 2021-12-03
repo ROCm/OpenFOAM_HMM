@@ -78,7 +78,7 @@ void Foam::Function1Types::FunctionObjectTrigger<Type>::writeEntries
 ) const
 {
     os.writeKeyword("triggers");
-    flatOutput(triggers_);
+    os << flatOutput(triggers_);
     os.endEntry();
 
     if (defaultValue_)

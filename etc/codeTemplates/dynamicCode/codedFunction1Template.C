@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
-    Copyright (C) YEAR AUTHOR, AFFILIATION
+    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,24 +26,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "codedFvOptionTemplate.H"
+#include "codedFunction1Template.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvPatchFieldMapper.H"
-#include "volFields.H"
-#include "surfaceFields.H"
 #include "unitConversion.H"
-#include "fvMatrix.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
 //}}} end codeInclude
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
-{
-namespace fv
 {
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -51,7 +44,6 @@ namespace fv
 //{{{ begin localCode
 ${localCode}
 //}}} end localCode
-
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -73,128 +65,55 @@ extern "C" void ${typeName}_${SHA1sum}(bool load)
 }
 
 
+namespace Function1Types
+{
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(${typeName}FvOption${SourceType}, 0);
-addRemovableToRunTimeSelectionTable
+//makeFunction1(${typeName}Function1, ${TemplateType});
+defineTypeNameAndDebug
 (
-    option,
-    ${typeName}FvOption${SourceType},
-    dictionary
+    ${typeName}Function1_${TemplateType},
+    0
 );
+Function1<${TemplateType}>::addRemovabledictionaryConstructorToTable
+    <${typeName}Function1_${TemplateType}>
+    addRemovable${typeName}Function1_${TemplateType}ConstructorToTable_;
 
-} // End namespace fv
-} // End namespace Foam
+} // namespace Function1Types
+} // namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::
-${typeName}FvOption${SourceType}::
-${typeName}FvOption${SourceType}
+Foam::Function1Types::
+${typeName}Function1_${TemplateType}::
+${typeName}Function1_${TemplateType}
 (
-    const word& name,
-    const word& modelType,
+    const word& entryName,
     const dictionary& dict,
-    const fvMesh& mesh
+    const objectRegistry* obrPtr
 )
 :
-    fv::cellSetOption(name, modelType, dict, mesh)
+    Function1<${TemplateType}>(entryName, dict, obrPtr)
 {
     if (${verbose:-false})
     {
-        printMessage("Construct ${typeName} fvOption from dictionary");
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::
-${typeName}FvOption${SourceType}::
-~${typeName}FvOption${SourceType}()
-{
-    if (${verbose:-false})
-    {
-        printMessage("Destroy ${typeName}");
+        printMessage("Construct ${typeName} Function1 from dictionary");
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void
-Foam::fv::
-${typeName}FvOption${SourceType}::correct
+Foam::${TemplateType}
+Foam::Function1Types::${typeName}Function1_${TemplateType}::value
 (
-    GeometricField<${TemplateType}, fvPatchField, volMesh>& fld
-)
+    const scalar x
+) const
 {
-    if (${verbose:-false})
-    {
-        Info<< "${typeName}FvOption${SourceType}::correct()\n";
-    }
-
 //{{{ begin code
-    ${codeCorrect}
-//}}} end code
-}
-
-
-void
-Foam::fv::
-${typeName}FvOption${SourceType}::addSup
-(
-    fvMatrix<${TemplateType}>& eqn,
-    const label fieldi
-)
-{
-    if (${verbose:-false})
-    {
-        Info<< "${typeName}FvOption${SourceType}::addSup()\n";
-    }
-
-//{{{ begin code - warn/fatal if not implemented?
-    ${codeAddSup}
-//}}} end code
-}
-
-
-void
-Foam::fv::
-${typeName}FvOption${SourceType}::addSup
-(
-    const volScalarField& rho,
-    fvMatrix<${TemplateType}>& eqn,
-    const label fieldi
-)
-{
-    if (${verbose:-false})
-    {
-        Info<< "${typeName}FvOption${SourceType}::addSup(rho)\n";
-    }
-
-//{{{ begin code - warn/fatal if not implemented?
-    ${codeAddSupRho}
-//}}} end code
-}
-
-
-void
-Foam::fv::
-${typeName}FvOption${SourceType}::constrain
-(
-    fvMatrix<${TemplateType}>& eqn,
-    const label fieldi
-)
-{
-    if (${verbose:-false})
-    {
-        Info<< "${typeName}FvOption${SourceType}::constrain()\n";
-    }
-
-//{{{ begin code
-    ${codeConstrain}
+    ${code}
 //}}} end code
 }
 

@@ -40,6 +40,16 @@ boundaryField
         // For general testing purposes:
         type            exprFixedValue;
 
+        functions<scalar>
+        {
+            trigger
+            {
+                type     functionObjectTrigger;
+                triggers (2 4);
+                defaultValue true;
+            }
+        }
+
         variables
         (
             "Tcrit = 500"

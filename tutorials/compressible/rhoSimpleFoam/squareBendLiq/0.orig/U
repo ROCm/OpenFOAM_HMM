@@ -23,8 +23,26 @@ boundaryField
     inlet
     {
         type            flowRateInletVelocity;
-        massFlowRate    constant 5;
         rhoInlet        1000;    // Guess for rho
+
+        // massFlowRate constant 5;
+
+        massFlowRate
+        {
+            type  coded;
+            name  liquidIn;
+            code
+            #{
+                // Receives 'x' as the argument
+                static bool reported(false);
+                if (!reported)
+                {
+                    Info<< "Using coded value for massFlowRate" << nl;
+                    reported = true;
+                }
+                return 5;
+            #};
+        }
     }
 
     outlet

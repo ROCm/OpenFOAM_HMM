@@ -77,9 +77,12 @@ makePointPatchTypeField
     ${typeName}FixedValuePointPatch${FieldType}
 );
 
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
@@ -96,6 +99,7 @@ ${typeName}FixedValuePointPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
@@ -114,6 +118,7 @@ ${typeName}FixedValuePointPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
@@ -132,6 +137,7 @@ ${typeName}FixedValuePointPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
@@ -147,6 +153,7 @@ ${typeName}FixedValuePointPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ${typeName}FixedValuePointPatch${FieldType}
 (
@@ -165,6 +172,7 @@ ${typeName}FixedValuePointPatch${FieldType}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::
 ~${typeName}FixedValuePointPatch${FieldType}()
 {
@@ -178,6 +186,7 @@ ${typeName}FixedValuePointPatch${FieldType}::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void
+Foam::
 ${typeName}FixedValuePointPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
@@ -197,9 +206,5 @@ ${typeName}FixedValuePointPatch${FieldType}::updateCoeffs()
     this->parent_bctype::updateCoeffs();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

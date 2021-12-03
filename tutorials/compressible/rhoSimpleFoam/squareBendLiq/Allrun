@@ -5,6 +5,12 @@ cd "${0%/*}" || exit                                # Run from this directory
 
 ./Allrun.pre
 
+if ! canCompile
+then
+   echo "-- No dynamicCode: replace coded Function1 with constant value"
+   foamDictionary -entry boundaryField/inlet/massFlowRate -set 'constant 5' 0/U
+fi
+
 runApplication decomposePar
 
 #- Run without processorAgglomerator

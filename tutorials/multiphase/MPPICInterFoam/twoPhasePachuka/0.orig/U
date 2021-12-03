@@ -70,7 +70,7 @@ boundaryField
                 {
                     baseVel = Function1<scalar>::New
                     (
-                        "timeFunction", dict, &db()
+                        "timeFunction", dict, this->whichDb()
                     );
                 }
 
@@ -81,7 +81,7 @@ boundaryField
                     // ie, NewIfPresent
                     baseDir = Function1<vector>::New
                     (
-                        "directionFunction", dict, &db()
+                        "directionFunction", dict, this->whichDb()
                     );
 
                     InfoErr

@@ -150,7 +150,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 :
     parent_bctype(rhs, p, iF, mapper),
     codedBase(),
-    dict_(rhs.dict_),
+    dict_(rhs.dict_),  // Deep copy
     name_(rhs.name_),
     redirectPatchFieldPtr_(nullptr)
 {}
@@ -168,12 +168,12 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
     codedBase(),
     dict_
     (
-        // Copy dictionary, but without "heavy" data chunks
+        // Copy dictionary without "heavy" data chunks
         dictionaryContent::copyDict
         (
             dict,
-            wordRes(),  // allow
-            wordRes     // deny
+            wordList(),  // allow
+            wordList     // deny
             ({
                 "type",  // redundant
                 "value"
@@ -195,7 +195,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 :
     parent_bctype(rhs),
     codedBase(),
-    dict_(rhs.dict_),
+    dict_(rhs.dict_),  // Deep copy
     name_(rhs.name_),
     redirectPatchFieldPtr_(nullptr)
 {}
@@ -210,7 +210,7 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 :
     parent_bctype(rhs, iF),
     codedBase(),
-    dict_(rhs.dict_),
+    dict_(rhs.dict_),  // Deep copy
     name_(rhs.name_),
     redirectPatchFieldPtr_(nullptr)
 {}

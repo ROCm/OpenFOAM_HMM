@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,22 +33,22 @@ License
 
 template<class Type>
 Foam::dlLibraryTable&
-Foam::PatchFunction1Types::CodedField<Type>::libs() const
+Foam::Function1Types::CodedFunction1<Type>::libs() const
 {
-    return this->patch_.boundaryMesh().mesh().time().libs();
+    return this->time().libs();
 }
 
 
 template<class Type>
 Foam::string
-Foam::PatchFunction1Types::CodedField<Type>::description() const
+Foam::Function1Types::CodedFunction1<Type>::description() const
 {
-    return "CodedField " + redirectName_;
+    return "CodedFunction1 " + redirectName_;
 }
 
 
 template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
+void Foam::Function1Types::CodedFunction1<Type>::clearRedirect() const
 {
     redirectFunctionPtr_.reset(nullptr);
 }
@@ -56,7 +56,7 @@ void Foam::PatchFunction1Types::CodedField<Type>::clearRedirect() const
 
 template<class Type>
 const Foam::dictionary&
-Foam::PatchFunction1Types::CodedField<Type>::codeContext() const
+Foam::Function1Types::CodedFunction1<Type>::codeContext() const
 {
     // What else would make sense?
     return dict_;
@@ -65,13 +65,13 @@ Foam::PatchFunction1Types::CodedField<Type>::codeContext() const
 
 template<class Type>
 const Foam::dictionary&
-Foam::PatchFunction1Types::CodedField<Type>::codeDict
+Foam::Function1Types::CodedFunction1<Type>::codeDict
 (
     const dictionary& dict
 ) const
 {
     // Use named subdictionary if present to provide the code.
-    // This allows running with multiple PatchFunction1s
+    // This allows running with multiple Function1s
 
     return
     (
@@ -84,14 +84,14 @@ Foam::PatchFunction1Types::CodedField<Type>::codeDict
 
 template<class Type>
 const Foam::dictionary&
-Foam::PatchFunction1Types::CodedField<Type>::codeDict() const
+Foam::Function1Types::CodedFunction1<Type>::codeDict() const
 {
     return codeDict(dict_);
 }
 
 
 template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::prepare
+void Foam::Function1Types::CodedFunction1<Type>::prepare
 (
     dynamicCode& dynCode,
     const dynamicCodeContext& context
@@ -100,8 +100,7 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
     if (context.code().empty())
     {
         FatalIOErrorInFunction(dict_)
-            << "No code section in input dictionary for patch "
-            << this->patch_.name()
+            << "No code section in input dictionary for Function1 "
             << " name " << redirectName_
             << exit(FatalIOError);
     }
@@ -128,12 +127,10 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
     dynCode.setMakeOptions
     (
         "EXE_INC = -g \\\n"
-        "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
         "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
         "    -lOpenFOAM \\\n"
-        "    -lfiniteVolume \\\n"
         "    -lmeshTools \\\n"
       + context.libs()
     );
@@ -143,16 +140,14 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::PatchFunction1Types::CodedField<Type>::CodedField
+Foam::Function1Types::CodedFunction1<Type>::CodedFunction1
 (
-    const polyPatch& pp,
-    const word& redirectType,
     const word& entryName,
     const dictionary& dict,
-    const bool faceValues
+    const objectRegistry* obrPtr
 )
 :
-    PatchFunction1<Type>(pp, entryName, dict, faceValues),
+    Function1<Type>(entryName, dict, obrPtr),
     codedBase(),
     dict_(dict),
     redirectName_(dict.getOrDefault<word>("name", entryName))
@@ -166,23 +161,12 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
 
 
 template<class Type>
-Foam::PatchFunction1Types::CodedField<Type>::CodedField
+Foam::Function1Types::CodedFunction1<Type>::CodedFunction1
 (
-    const CodedField<Type>& rhs
+    const CodedFunction1<Type>& rhs
 )
 :
-    CodedField<Type>(rhs, rhs.patch())
-{}
-
-
-template<class Type>
-Foam::PatchFunction1Types::CodedField<Type>::CodedField
-(
-    const CodedField<Type>& rhs,
-    const polyPatch& pp
-)
-:
-    PatchFunction1<Type>(rhs, pp),
+    Function1<Type>(rhs),
     codedBase(),
     dict_(rhs.dict_),
     redirectName_(rhs.redirectName_)
@@ -192,8 +176,8 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::PatchFunction1<Type>&
-Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
+const Foam::Function1<Type>&
+Foam::Function1Types::CodedFunction1<Type>::redirectFunction() const
 {
     if (!redirectFunctionPtr_)
     {
@@ -207,12 +191,11 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
 
         redirectFunctionPtr_.reset
         (
-            PatchFunction1<Type>::New
+            Function1<Type>::New
             (
-                this->patch(),
                 redirectName_,
                 constructDict,
-                this->faceValues()
+                this->whichDb()
             )
         );
 
@@ -236,8 +219,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::PatchFunction1Types::CodedField<Type>::value
+Type Foam::Function1Types::CodedFunction1<Type>::value
 (
     const scalar x
 ) const
@@ -250,59 +232,14 @@ Foam::PatchFunction1Types::CodedField<Type>::value
 
 
 template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::PatchFunction1Types::CodedField<Type>::integrate
-(
-    const scalar x1,
-    const scalar x2
-) const
-{
-    // Ensure library containing user-defined code is up-to-date
-    updateLibrary(redirectName_);
-
-    return redirectFunction().integrate(x1, x2);
-}
-
-
-template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::autoMap
-(
-    const FieldMapper& mapper
-)
-{
-    PatchFunction1<Type>::autoMap(mapper);
-    if (redirectFunctionPtr_)
-    {
-        redirectFunctionPtr_->autoMap(mapper);
-    }
-}
-
-
-template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::rmap
-(
-    const PatchFunction1<Type>& pf1,
-    const labelList& addr
-)
-{
-    PatchFunction1<Type>::rmap(pf1, addr);
-    if (redirectFunctionPtr_)
-    {
-        redirectFunctionPtr_->rmap(pf1, addr);
-    }
-}
-
-
-template<class Type>
-void Foam::PatchFunction1Types::CodedField<Type>::writeData
+void Foam::Function1Types::CodedFunction1<Type>::writeData
 (
     Ostream& os
 ) const
 {
     // Should really only output only relevant entries but since using
-    // PatchFunction1-from-subdict upon construction our dictionary contains
-    // only the relevant entries. It would be different if PatchFunction1-from
-    // primitiveEntry when the whole 'value' entry would be present
+    // Function1-from-subdict upon construction our dictionary contains
+    // only the relevant entries.
     dict_.writeEntry(this->name(), os);
 }
 

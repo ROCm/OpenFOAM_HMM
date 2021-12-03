@@ -143,7 +143,7 @@ public:
     // Member Functions
 
         //- Code context as a dictionary
-        const dictionary& codeContext() const
+        const dictionary& codeContext() const noexcept
         {
             return dictionaryContent::dict();
         }

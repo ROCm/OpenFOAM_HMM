@@ -26,6 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "CodedFunction1.H"
 #include "Constant.H"
 #include "Uniform.H"
 #include "ZeroConstant.H"
@@ -48,6 +49,7 @@ License
 
 #define makeFunction1s(Type)                                                   \
     makeFunction1(Type);                                                       \
+    makeFunction1Type(CodedFunction1, Type);                                   \
     makeFunction1Type(Constant, Type);                                         \
     makeFunction1Type(Uniform, Type);                                          \
     makeFunction1Type(None, Type);                                             \
