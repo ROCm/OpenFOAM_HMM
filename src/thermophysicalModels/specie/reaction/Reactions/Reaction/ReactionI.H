@@ -27,48 +27,15 @@ License
 
 #include "Reaction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ReactionThermo>
-inline const word& Reaction<ReactionThermo>::name() const
-{
-    return name_;
-}
-
-
-template<class ReactionThermo>
-inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&
-Reaction<ReactionThermo>::lhs() const
-{
-    return lhs_;
-}
-
-
-template<class ReactionThermo>
-inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&
-Reaction<ReactionThermo>::rhs() const
-{
-    return rhs_;
-}
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-template<class ReactionThermo>
-inline Ostream& operator<<(Ostream& os, const Reaction<ReactionThermo>& r)
+inline Foam::Ostream&
+Foam::operator<<(Ostream& os, const Reaction<ReactionThermo>& r)
 {
     r.write(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

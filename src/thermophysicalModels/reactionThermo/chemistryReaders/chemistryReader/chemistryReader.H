@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,6 @@ namespace Foam
 
 typedef HashTable<List<specieElement>> speciesCompositionTable;
 
-
 /*---------------------------------------------------------------------------*\
                       Class chemistryReader Declaration
 \*---------------------------------------------------------------------------*/
@@ -72,7 +72,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         chemistryReader()
         {}
 
@@ -115,7 +115,7 @@ public:
         virtual const speciesCompositionTable& specieComposition() const = 0;
 
         //- Return access to the thermo packages
-        virtual const HashPtrTable<ThermoType>& speciesThermo() const = 0;
+        virtual const ReactionTable<ThermoType>& speciesThermo() const = 0;
 
         //- Return access to the list of reactions
         virtual const ReactionList<ThermoType>& reactions() const = 0;
@@ -143,7 +143,7 @@ public:
 
 #define makeChemistryReaderType(Reader, Thermo)                                \
     defineNamedTemplateTypeNameAndDebug(Reader<Thermo>, 0);                    \
-    chemistryReader<Thermo>::adddictionaryConstructorToTable<Reader<Thermo>> \
+    chemistryReader<Thermo>::adddictionaryConstructorToTable<Reader<Thermo>>   \
         add##Reader##Thermo##ConstructorToTable_
 
 

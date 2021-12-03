@@ -27,8 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactionList.H"
-#include "IFstream.H"
-#include "SLPtrList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -36,7 +34,7 @@ template<class ThermoType>
 Foam::ReactionList<ThermoType>::ReactionList
 (
     const speciesTable& species,
-    const HashPtrTable<ThermoType>& thermoDb
+    const ReactionTable<ThermoType>& thermoDb
 )
 :
     SLPtrList<Reaction<ThermoType>>(),
@@ -50,7 +48,7 @@ template<class ThermoType>
 Foam::ReactionList<ThermoType>::ReactionList
 (
     const speciesTable& species,
-    const HashPtrTable<ThermoType>& thermoDb,
+    const ReactionTable<ThermoType>& thermoDb,
     const dictionary& dict
 )
 :

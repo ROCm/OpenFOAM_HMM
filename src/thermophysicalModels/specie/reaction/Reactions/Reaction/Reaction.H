@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
+
+template<class ThermoType>
+using ReactionTable = HashPtrTable<ThermoType>;
 
 template<class ReactionThermo>
 class Reaction;
@@ -69,29 +72,18 @@ class Reaction
 :
     public ReactionThermo::thermoType
 {
-protected:
-
-    // Protected member functions
-
-        //- Return string representation of the left of the reaction
-        void reactionStrLeft(OStringStream& reaction) const;
-
-        //- Return string representation of the right of the reaction
-        void reactionStrRight(OStringStream& reaction) const;
-
-
 public:
 
-    // Static data
+    // Static Data
 
         //- Number of un-named reactions
         static label nUnNamedReactions;
 
 
-    // Public data types
+    // Public Classes
 
-        //- Class to hold the specie index and its coefficients in the
-        //  reaction rate expression
+        //- Hold specie index and its coefficients in the
+        //- reaction rate expression
         struct specieCoeffs
         {
             label index;
@@ -129,7 +121,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Name of reaction
         const word name_;
@@ -150,13 +142,24 @@ private:
         string reactionStr(OStringStream& reaction) const;
 
         //- Construct reaction thermo
-        void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
+        void setThermo(const ReactionTable<ReactionThermo>& thermoDatabase);
+
+        //- Return new reaction ID for un-named reactions
+        label getNewReactionID();
 
         //- No copy assignment
         void operator=(const Reaction<ReactionThermo>&) = delete;
 
-        //- Return new reaction ID for un-named reactions
-        label getNewReactionID();
+
+protected:
+
+    // Protected Member Functions
+
+        //- Return string representation of the left of the reaction
+        void reactionStrLeft(OStringStream& reaction) const;
+
+        //- Return string representation of the right of the reaction
+        void reactionStrRight(OStringStream& reaction) const;
 
 
 public:
@@ -174,7 +177,7 @@ public:
             dictionary,
             (
                 const speciesTable& species,
-                const HashPtrTable<ReactionThermo>& thermoDatabase,
+                const ReactionTable<ReactionThermo>& thermoDatabase,
                 const dictionary& dict
             ),
             (species, thermoDatabase, dict)
@@ -189,7 +192,7 @@ public:
             const speciesTable& species,
             const List<specieCoeffs>& lhs,
             const List<specieCoeffs>& rhs,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const ReactionTable<ReactionThermo>& thermoDatabase,
             bool initReactionThermo = true
         );
 
@@ -207,13 +210,13 @@ public:
         Reaction
         (
             const speciesTable& species,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const ReactionTable<ReactionThermo>& thermoDatabase,
             const dictionary& dict,
             bool initReactionThermo = true
         );
 
         //- Construct and return a clone
-        virtual autoPtr<Reaction<ReactionThermo>> clone() const //
+        virtual autoPtr<Reaction<ReactionThermo>> clone() const
         {
             return autoPtr<Reaction<ReactionThermo>>::New(*this);
         }
@@ -234,7 +237,7 @@ public:
         static autoPtr<Reaction<ReactionThermo>> New
         (
             const speciesTable& species,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const ReactionTable<ReactionThermo>& thermoDatabase,
             const dictionary& dict
         );
 
@@ -245,23 +248,29 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline const word& name() const;
+        //- Name of reaction
+        const word& name() const noexcept { return name_; }
 
-            // - Access to basic components of the reaction
-            inline const List<specieCoeffs>& lhs() const;
-            inline const List<specieCoeffs>& rhs() const;
+        //- Access to specie list
+        const speciesTable& species() const noexcept { return species_; }
 
-            // - Access to gas components of the reaction
-            virtual const List<specieCoeffs>& grhs() const;
-            virtual const List<specieCoeffs>& glhs() const;
+        //- Specie info for the left-hand-side of the reaction
+        const List<specieCoeffs>& lhs() const noexcept { return lhs_; }
 
-            //- Access to specie list
-            const speciesTable& species() const;
+        //- Specie info for the right-hand-side of the reaction
+        const List<specieCoeffs>& rhs() const noexcept { return rhs_; }
 
-            //- Access to gas specie list
-            virtual const speciesTable& gasSpecies() const;
+        //- Access to gas specie list
+        virtual const speciesTable& gasSpecies() const;
+
+        //- Access to gas components of the reaction
+        virtual const List<specieCoeffs>& grhs() const;
+        virtual const List<specieCoeffs>& glhs() const;
+
+
+        // Manipulation
 
             //- Construct the left- and right-hand-side reaction coefficients
             void setLRhs
@@ -304,7 +313,7 @@ public:
 
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
 
     // Ostream Operator

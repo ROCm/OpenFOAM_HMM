@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,8 +43,6 @@ SourceFiles
 
 #include "chemistryReader.H"
 #include "fileName.H"
-#include "typeInfo.H"
-#include "HashPtrTable.H"
 #include "labelList.H"
 #include "speciesTable.H"
 #include "atomicWeights.H"
@@ -81,7 +80,7 @@ class foamChemistryReader
         speciesCompositionTable speciesComposition_;
 
         //- Table of the thermodynamic data given in the foamChemistry file
-        HashPtrTable<ThermoType> speciesThermo_;
+        ReactionTable<ThermoType> speciesThermo_;
 
         //- List of the reactions
         ReactionList<ThermoType> reactions_;
@@ -118,8 +117,8 @@ public:
             const fileName& thermoFileName
         );
 
-        //- Construct by getting the foamChemistry and thermodynamics file names
-        //  from dictionary
+        //- Construct by getting foamChemistry and thermodynamics file names
+        //- from dictionary
         foamChemistryReader
         (
             const dictionary& thermoDict,
@@ -131,7 +130,7 @@ public:
     virtual ~foamChemistryReader() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- List of elements
         const wordList& elementNames() const
@@ -158,7 +157,7 @@ public:
         }
 
         //- Table of the thermodynamic data given in the foamChemistry file
-        const HashPtrTable<ThermoType>& speciesThermo() const
+        const ReactionTable<ThermoType>& speciesThermo() const
         {
             return speciesThermo_;
         }

@@ -62,7 +62,6 @@ class rhoReactionThermo
 :
     public rhoThermo
 {
-
 public:
 
     //- Runtime type information

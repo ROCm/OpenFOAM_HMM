@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +86,7 @@ public:
     virtual ~basicSpecieMixture() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Per specie properties
 
@@ -210,11 +210,7 @@ public:
             //- Species composition
             virtual autoPtr<speciesCompositionTable> specieComposition() const
             {
-                return
-                    autoPtr<speciesCompositionTable>
-                    (
-                        new speciesCompositionTable()
-                    );
+                return autoPtr<speciesCompositionTable>::New();
             }
 };
 

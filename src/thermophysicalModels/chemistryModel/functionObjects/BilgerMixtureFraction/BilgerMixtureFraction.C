@@ -285,7 +285,7 @@ bool Foam::functionObjects::BilgerMixtureFraction::read(const dictionary& dict)
     const auto* rhoChemPtr =
         mesh_.cfindObject<rhoChemistryModelType>("chemistryProperties");
 
-    autoPtr<HashTable<List<specieElement>>> speciesCompPtr;
+    autoPtr<speciesCompositionTable> speciesCompPtr;
 
     if (psiChemPtr)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ class NonEquilibriumReversibleReaction
 :
     public ReactionType<ReactionThermo>
 {
-    // Private data
+    // Private Data
 
         ReactionRate fk_;
         ReactionRate rk_;
@@ -109,7 +109,7 @@ public:
         NonEquilibriumReversibleReaction
         (
             const speciesTable& species,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const ReactionTable<ReactionThermo>& thermoDatabase,
             const dictionary& dict
         );
 
@@ -175,7 +175,7 @@ public:
 
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

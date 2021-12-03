@@ -89,7 +89,7 @@ Foam::multiComponentMixture<ThermoType>::multiComponentMixture
 (
     const dictionary& thermoDict,
     const wordList& specieNames,
-    const HashPtrTable<ThermoType>& thermoData,
+    const ReactionTable<ThermoType>& thermoData,
     const fvMesh& mesh,
     const word& phaseName
 )
