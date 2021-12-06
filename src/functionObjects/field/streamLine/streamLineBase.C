@@ -742,7 +742,8 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
             scalarFormatterPtr_().write
             (
-                true,           // writeTracks
+                true,                   // writeTracks
+                List<scalarField>(),    // times
                 tracks,
                 scalarNames_,
                 scalarValues,
@@ -782,7 +783,8 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
             vectorFormatterPtr_().write
             (
-                true,           // writeTracks
+                true,                   // writeTracks
+                List<scalarField>(),    // times
                 tracks,
                 vectorNames_,
                 vectorValues,

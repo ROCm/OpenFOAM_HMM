@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,98 +24,107 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::jplotSetWriter
+    Foam::glTF::bufferView
+
+Description
+    glTF buffer view - provides a view/slice of the glTF buffer
+
+Note
+    Implements the glTF v2 specification
 
 SourceFiles
-    jplotSetWriter.C
+    foamGltfBufferView.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef jplotSetWriter_H
-#define jplotSetWriter_H
+#ifndef foam_gltf_bufferview_H
+#define foam_gltf_bufferview_H
 
-#include "writer.H"
-#include "vector.H"
+#include "foamGltfBase.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace glTF
+{
+    class bufferView;
+}
 
-/*---------------------------------------------------------------------------*\
-                      Class jplotSetWriter Declaration
-\*---------------------------------------------------------------------------*/
+Ostream& operator<<(Ostream&, const glTF::bufferView& bv);
 
-template<class Type>
-class jplotSetWriter
-:
-    public writer<Type>
+namespace glTF
 {
 
-    // Private Member Functions
+/*---------------------------------------------------------------------------*\
+                      Class glTF::bufferView Declaration
+\*---------------------------------------------------------------------------*/
 
-        //- Write header
-        Ostream& writeHeader(Ostream&) const;
+class bufferView
+:
+    public base
+{
+protected:
+
+    // Protected Data
+
+        //- Buffer index
+        label buffer_;
+
+        //- Byte offset
+        label byteOffset_;
+
+        //- Byte length
+        label byteLength_;
+
+        //- Target
+        label target_;
+
 
 public:
-
-    //- Runtime type information
-    TypeName("jplot");
-
 
     // Constructors
 
         //- Default construct
-        jplotSetWriter();
+        bufferView();
 
-        //- Construct with dictionary
-        explicit jplotSetWriter(const dictionary& dict);
+        //- Construct with name
+        explicit bufferView(const word& name);
 
 
     //- Destructor
-    virtual ~jplotSetWriter() = default;
+    ~bufferView() = default;
 
 
-    // Member Functions
+    // Public Member Functions
 
-        virtual fileName getFileName
-        (
-            const coordSet&,
-            const wordList&
-        ) const;
+        //- Return the buffer index
+        label& buffer() noexcept;
 
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
+        //- Return the byte offset
+        label& byteOffset() noexcept;
 
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const
-        {
-            NotImplemented;
-        }
+        //- Return the byte length
+        label& byteLength() noexcept;
+
+        //- Return the target
+        label& target() noexcept;
+
+        //- Write
+        void write(Ostream& os) const;
+
+
+    // Member Operators
+
+        void operator=(const bufferView& bv);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace glTF
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "jplotSetWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

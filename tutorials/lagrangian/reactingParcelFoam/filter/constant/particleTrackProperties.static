@@ -10,54 +10,42 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      particleTrackProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     reactingParcelFoam;
+cloud           reactingCloud1;
 
-startFrom       startTime;
+sampleFrequency 1;
 
-startTime       0;
+maxPositions    1000000;
 
-stopAt          endTime;
+//maxTracks       5;
 
-endTime         5;
+setFormat       gltf;
 
-deltaT          0.001;
-
-writeControl    adjustable;
-
-writeInterval   0.1;
-
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  10;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-adjustTimeStep  yes;
-
-maxCo           1.0;
-
-maxDeltaT       1;
-
-functions
+formatOptions
 {
-    #include "sample"
-    #include "dataCloud"
-    #include "vtkCloud"
-    #include "vtkWrite"
-    #include "pressureDifference"
+    animate         no;
+    colour          yes;
+
+    fieldInfo
+    {
+        d
+        {
+            colourMap       rainbow;
+            min             0;
+            max             0.001;
+
+            alpha           field; // uniform | field;
+            //alphaValue      0.1; // uniform alpha value
+            alphaField      d;
+            normalise       yes;
+        }
+    }
 }
+
+fields          (d);
 
 
 // ************************************************************************* //

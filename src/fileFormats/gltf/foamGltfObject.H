@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,97 +24,83 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::jplotSetWriter
+    Foam::glTF::object
+
+Description
+    glTF binary object
+
+Note
+    Implements the glTF v2 specification
 
 SourceFiles
-    jplotSetWriter.C
+    foamGltfObject.C
+    foamGltfObjectTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef jplotSetWriter_H
-#define jplotSetWriter_H
+#ifndef foam_gltf_object_H
+#define foam_gltf_object_H
 
-#include "writer.H"
-#include "vector.H"
+#include "foamGltfBase.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                      Class jplotSetWriter Declaration
-\*---------------------------------------------------------------------------*/
-
-template<class Type>
-class jplotSetWriter
-:
-    public writer<Type>
+namespace glTF
 {
 
-    // Private Member Functions
+/*---------------------------------------------------------------------------*\
+                        Class glTF::object Declaration
+\*---------------------------------------------------------------------------*/
 
-        //- Write header
-        Ostream& writeHeader(Ostream&) const;
+class object
+:
+    public base
+{
+    // Private Data
+
+        //- Buffer storage
+        Foam::List<float> data_;
+
 
 public:
-
-    //- Runtime type information
-    TypeName("jplot");
-
 
     // Constructors
 
         //- Default construct
-        jplotSetWriter();
+        object();
 
-        //- Construct with dictionary
-        explicit jplotSetWriter(const dictionary& dict);
-
-
-    //- Destructor
-    virtual ~jplotSetWriter() = default;
+        //- Construct with name
+        explicit object(const word& name);
 
 
-    // Member Functions
+    // Public Member Functions
 
-        virtual fileName getFileName
-        (
-            const coordSet&,
-            const wordList&
-        ) const;
+        //- Add data to the buffer
+        template<class Type>
+        void addData(const Type& fld);
 
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
+        //- Add data to the buffer from 2 containers of the same size
+        //  E.g. to combine vector and scalar to create RGBA data
+        template<class Type1, class Type2>
+        void addData(const Type1& fld1, const Type2& fld2);
 
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const
-        {
-            NotImplemented;
-        }
+        //- Return const access to the data buffer
+        const Foam::List<float>& data() const noexcept;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace glTF
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "jplotSetWriter.C"
+    #include "foamGltfObjectTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2700,7 +2700,8 @@ Foam::label Foam::meshRefinement::findRegions
                     {
                         leakPathFormatter.write
                         (
-                            true,               // write tracks
+                            true,                // write tracks
+                            List<scalarField>(), // times
                             allLeakPaths,
                             valueSetNames,
                             allLeakData,

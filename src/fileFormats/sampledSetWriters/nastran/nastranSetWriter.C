@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,10 +38,11 @@ Foam::nastranSetWriter<Type>::nastranSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::nastranSetWriter<Type>::~nastranSetWriter()
+Foam::nastranSetWriter<Type>::nastranSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
@@ -129,6 +130,7 @@ template<class Type>
 void Foam::nastranSetWriter<Type>::write
 (
     const bool writeTracks,
+    const List<scalarField>& times,
     const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,

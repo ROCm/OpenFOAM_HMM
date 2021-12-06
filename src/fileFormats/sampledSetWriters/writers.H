@@ -61,7 +61,11 @@ SourceFiles
     addTemplatedToRunTimeSelectionTable                                        \
     (                                                                          \
         writer, typeWriter, dataType, word                                     \
-    )
+    );                                                                         \
+    addTemplatedToRunTimeSelectionTable                                        \
+    (                                                                          \
+        writer, typeWriter, dataType, dict                                     \
+    );
 
 
 // Define type info for scalar, vector etc. instantiations

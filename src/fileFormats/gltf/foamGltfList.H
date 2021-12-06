@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,97 +24,98 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::jplotSetWriter
+    Foam::glTF::List
+
+Description
+    Container for glTF entities
+
+Note
+    Implements the glTF v2 specification
 
 SourceFiles
-    jplotSetWriter.C
+    foamGltfList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef jplotSetWriter_H
-#define jplotSetWriter_H
+#ifndef foam_gltf_list_H
+#define foam_gltf_list_H
 
-#include "writer.H"
-#include "vector.H"
+#include "DynamicList.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace glTF
+{
+    template<class Type> class List;
+}
+
+template<class Type>
+Ostream& operator<<(Ostream& os, const glTF::List<Type>& lst);
+
+namespace glTF
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class jplotSetWriter Declaration
+                         Class glTF::List Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class jplotSetWriter
-:
-    public writer<Type>
+class List
 {
+    // Private Data
 
-    // Private Member Functions
+        //- Storage
+        DynamicList<Type> data_;
 
-        //- Write header
-        Ostream& writeHeader(Ostream&) const;
 
 public:
-
-    //- Runtime type information
-    TypeName("jplot");
-
 
     // Constructors
 
         //- Default construct
-        jplotSetWriter();
-
-        //- Construct with dictionary
-        explicit jplotSetWriter(const dictionary& dict);
+        List() = default;
 
 
     //- Destructor
-    virtual ~jplotSetWriter() = default;
+    ~List() = default;
 
 
-    // Member Functions
+    // Public Member Functions
 
-        virtual fileName getFileName
-        (
-            const coordSet&,
-            const wordList&
-        ) const;
+        //- Helper to create a new Type on the list and set the ID
+        Type& create(const word& name);
 
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
+        //- Return const access to the underlying list
+        const DynamicList<Type>& data() const noexcept;
 
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const
-        {
-            NotImplemented;
-        }
+        //- List contains no data
+        bool empty() const noexcept;
+
+        //- Return the list size
+        label size() const noexcept;
+
+        //- Write
+        void write(Ostream& os, const word& keyword, bool firstEntry = false);
+
+        //- Write
+        void write(Ostream& os) const;
+
+        Type& operator[](const label i);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace glTF
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "jplotSetWriter.C"
+    #include "foamGltfList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

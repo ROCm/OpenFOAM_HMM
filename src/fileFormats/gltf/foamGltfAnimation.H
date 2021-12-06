@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,98 +24,121 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::jplotSetWriter
+    Foam::glTF::animation
+
+Description
+    glTF animation
+
+Note
+    Implements the glTF v2 specification
 
 SourceFiles
-    jplotSetWriter.C
+    foamGltfAnimation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef jplotSetWriter_H
-#define jplotSetWriter_H
+#ifndef foam_gltf_animation_H
+#define foam_gltf_animation_H
 
-#include "writer.H"
-#include "vector.H"
+#include "foamGltfBase.H"
+#include "DynamicList.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace glTF
+{
+    class animation;
+}
 
-/*---------------------------------------------------------------------------*\
-                      Class jplotSetWriter Declaration
-\*---------------------------------------------------------------------------*/
+Ostream& operator<<(Ostream& os, const glTF::animation& animation);
 
-template<class Type>
-class jplotSetWriter
-:
-    public writer<Type>
+namespace glTF
 {
 
-    // Private Member Functions
+/*---------------------------------------------------------------------------*\
+                       Class glTF::animation Declaration
+\*---------------------------------------------------------------------------*/
 
-        //- Write header
-        Ostream& writeHeader(Ostream&) const;
+
+class animation
+:
+    public base
+{
+protected:
+
+    // Local Helpers
+
+        // Sampler
+        struct glTFSampler
+        {
+            label input;
+            string interpolation;
+            label output;
+        };
+
+        // Channel target
+        struct glTFTarget
+        {
+            label node;
+            string path;
+        };
+
+        // Channel
+        struct glTFChannel
+        {
+            label samplerId;
+            glTFTarget target;
+        };
+
+
+
+    // Protected Member Data
+
+        //- Samplers
+        DynamicList<glTFSampler> samplers_;
+
+        //- Channels
+        DynamicList<glTFChannel> channels_;
+
 
 public:
-
-    //- Runtime type information
-    TypeName("jplot");
-
 
     // Constructors
 
         //- Default construct
-        jplotSetWriter();
+        animation();
 
-        //- Construct with dictionary
-        explicit jplotSetWriter(const dictionary& dict);
+        //- Construct with name
+        explicit animation(const word& name);
 
 
     //- Destructor
-    virtual ~jplotSetWriter() = default;
+    ~animation() = default;
 
 
-    // Member Functions
+    // Public Member Functions
 
-        virtual fileName getFileName
+        //- Add translation
+        void addTranslation
         (
-            const coordSet&,
-            const wordList&
-        ) const;
+            const label inputId,
+            const label outputId,
+            const label nodeId,
+            const string& interpolation
+        );
 
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
-
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const
-        {
-            NotImplemented;
-        }
+        //- Write
+        void write(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace glTF
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "jplotSetWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

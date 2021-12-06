@@ -31,7 +31,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
@@ -52,6 +52,29 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
     }
 
     return autoPtr<writer<Type>>(ctorPtr());
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
+(
+    const word& writeType,
+    const dictionary& formatOptions
+)
+{
+    auto ctorPtr = dictConstructorTable(writeType);
+
+    if (!ctorPtr)
+    {
+        FatalErrorInLookup
+        (
+            "writer",
+            writeType,
+            *dictConstructorTablePtr_
+        ) << exit(FatalError);
+    }
+
+    return autoPtr<writer<Type>>(ctorPtr(formatOptions));
 }
 
 
@@ -143,10 +166,8 @@ Foam::writer<Type>::writer()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::writer<Type>::~writer()
+Foam::writer<Type>::writer(const dictionary& dict)
 {}
 
 

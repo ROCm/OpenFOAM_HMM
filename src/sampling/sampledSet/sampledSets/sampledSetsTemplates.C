@@ -231,7 +231,7 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
         // Create or use existing writer
         if (!fields.formatter)
         {
-            fields = writeFormat_;
+            fields.setFormatter(writeFormat_, writeFormatOptions_);
         }
 
         // Storage for interpolated values

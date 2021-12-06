@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ SourceFiles
 #include "CompactIOField.H"
 #include "polyMesh.H"
 #include "bitSet.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -238,6 +239,21 @@ public:
             (
                 const Cloud<ParticleType>& c,
                 const CompactIOField<Field<DataType>, DataType>& data
+            ) const;
+
+            //- Helper function to store a cloud field on its registry
+            template<class Type>
+            bool readStoreFile
+            (
+                const IOobject& io,
+                const IOobject& ioNew
+            ) const;
+
+            //- Read from files into objectRegistry
+            void readFromFiles
+            (
+                objectRegistry& obr,
+                const wordRes& selectFields
             ) const;
 
 

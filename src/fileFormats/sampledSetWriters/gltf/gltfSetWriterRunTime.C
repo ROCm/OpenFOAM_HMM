@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,28 +25,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "gltfSetWriter.H"
 #include "writers.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-#define defineSetWriterType(dataType)                                          \
-    defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                 \
-    defineTemplatedRunTimeSelectionTable(writer, word, dataType);              \
-    defineTemplatedRunTimeSelectionTable(writer, dict, dataType);
-
-defineSetWriterType(scalar);
-defineSetWriterType(vector);
-defineSetWriterType(sphericalTensor);
-defineSetWriterType(symmTensor);
-defineSetWriterType(tensor);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeSetWriters(gltfSetWriter);
+}
 
 // ************************************************************************* //

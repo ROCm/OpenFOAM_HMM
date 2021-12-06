@@ -41,10 +41,11 @@ Foam::ensightSetWriter<Type>::ensightSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::ensightSetWriter<Type>::~ensightSetWriter()
+Foam::ensightSetWriter<Type>::ensightSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
@@ -174,6 +175,7 @@ template<class Type>
 void Foam::ensightSetWriter<Type>::write
 (
     const bool writeTracks,
+    const List<scalarField>& times,
     const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,

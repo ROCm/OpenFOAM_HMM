@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -26,28 +25,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writers.H"
+#include "foamGltfObject.H"
+#include "endian.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::glTF::object::object()
+:
+    base(),
+    data_()
 {
+    #ifdef WM_LITTLE_ENDIAN
+    #else
+    FatalErrorInFunction
+        << "Big-endian buffer support is not available"
+        << abort(FatalError);
+    #endif
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#define defineSetWriterType(dataType)                                          \
-    defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                 \
-    defineTemplatedRunTimeSelectionTable(writer, word, dataType);              \
-    defineTemplatedRunTimeSelectionTable(writer, dict, dataType);
+Foam::glTF::object::object(const word& name)
+:
+    base(name),
+    data_()
+{
+    #ifdef WM_LITTLE_ENDIAN
+    #else
+    FatalErrorInFunction
+        << "Big-endian buffer support is not available"
+        << abort(FatalError);
+    #endif
+}
 
-defineSetWriterType(scalar);
-defineSetWriterType(vector);
-defineSetWriterType(sphericalTensor);
-defineSetWriterType(symmTensor);
-defineSetWriterType(tensor);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
+const Foam::List<float>& Foam::glTF::object::data() const noexcept
+{
+    return data_;
+}
+
 
 // ************************************************************************* //

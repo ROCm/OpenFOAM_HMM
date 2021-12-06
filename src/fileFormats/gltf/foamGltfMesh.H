@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,98 +24,95 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::jplotSetWriter
+    Foam::glTF::mesh
+
+Description
+    glTF mesh
+
+Note
+    Implements the glTF v2 specification
 
 SourceFiles
-    jplotSetWriter.C
+    foamGltfMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef jplotSetWriter_H
-#define jplotSetWriter_H
+#ifndef foam_gltf_mesh_H
+#define foam_gltf_mesh_H
 
-#include "writer.H"
-#include "vector.H"
+#include "foamGltfBase.H"
+#include "DynamicList.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace glTF
+{
+    class mesh;
+}
 
-/*---------------------------------------------------------------------------*\
-                      Class jplotSetWriter Declaration
-\*---------------------------------------------------------------------------*/
+Ostream& operator<<(Ostream& os, const glTF::mesh& mesh);
 
-template<class Type>
-class jplotSetWriter
-:
-    public writer<Type>
+namespace glTF
 {
 
-    // Private Member Functions
+/*---------------------------------------------------------------------------*\
+                         Class glTF::mesh Declaration
+\*---------------------------------------------------------------------------*/
 
-        //- Write header
-        Ostream& writeHeader(Ostream&) const;
+class mesh
+:
+    public base
+{
+    // Private Data
+
+        //- List of fields (name, accessor ID)
+        DynamicList<Tuple2<string, label>> fields_;
+
+        //- List of colours (name, accessor ID)
+        DynamicList<Tuple2<string, label>> colours_;
+
+        //- Accessor ID
+        label accessorId_;
+
 
 public:
-
-    //- Runtime type information
-    TypeName("jplot");
-
 
     // Constructors
 
         //- Default construct
-        jplotSetWriter();
+        mesh();
 
-        //- Construct with dictionary
-        explicit jplotSetWriter(const dictionary& dict);
+        //- Construct from name
+        explicit mesh(const word& name);
 
 
     //- Destructor
-    virtual ~jplotSetWriter() = default;
+    ~mesh() = default;
 
 
-    // Member Functions
+    // Public Member Functions
 
-        virtual fileName getFileName
-        (
-            const coordSet&,
-            const wordList&
-        ) const;
+        //- Return the accessor ID
+        label& accessorId() noexcept;
 
-        virtual void write
-        (
-            const coordSet&,
-            const wordList&,
-            const List<const Field<Type>*>&,
-            Ostream&
-        ) const;
+        //- Add a field to the mesh
+        void addField(const word& name, const label accessorId);
 
-        virtual void write
-        (
-            const bool writeTracks,
-            const List<scalarField>& times,
-            const PtrList<coordSet>& tracks,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            Ostream&
-        ) const
-        {
-            NotImplemented;
-        }
+        //- Add a colour to the mesh
+        void addColour(const label accessorId);
+
+        //- Write
+        void write(Ostream& os) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace glTF
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "jplotSetWriter.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

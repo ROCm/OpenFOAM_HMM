@@ -27,7 +27,7 @@ Application
     steadyParticleTracks
 
 Group
-    grpPostProcessingUtilitie
+    grpPostProcessingUtilities
 
 Description
     Generate a legacy VTK file of particle tracks for cases that were

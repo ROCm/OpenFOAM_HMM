@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +40,10 @@ Foam::csvSetWriter<Type>::csvSetWriter()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::csvSetWriter<Type>::~csvSetWriter()
+Foam::csvSetWriter<Type>::csvSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
@@ -86,13 +87,14 @@ template<class Type>
 void Foam::csvSetWriter<Type>::write
 (
     const bool writeTracks,
-    const PtrList<coordSet>& points,
+    const List<scalarField>& times,
+    const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,
     Ostream& os
 ) const
 {
-    writeHeader(points[0],valueSetNames,os);
+    writeHeader(tracks[0],valueSetNames,os);
 
     if (valueSets.size() != valueSetNames.size())
     {
@@ -104,7 +106,7 @@ void Foam::csvSetWriter<Type>::write
 
     List<const List<Type>*> columns(valueSets.size());
 
-    forAll(points, trackI)
+    forAll(tracks, trackI)
     {
         // Collect sets into columns
         forAll(valueSets, i)
@@ -112,7 +114,7 @@ void Foam::csvSetWriter<Type>::write
             columns[i] = &valueSets[i][trackI];
         }
 
-        this->writeTable(points[trackI], columns, os);
+        this->writeTable(tracks[trackI], columns, os);
         os  << nl << nl;
     }
 }

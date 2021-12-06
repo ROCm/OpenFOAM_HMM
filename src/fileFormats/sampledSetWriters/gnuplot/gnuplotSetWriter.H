@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +53,6 @@ class gnuplotSetWriter
 :
     public writer<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -61,12 +61,15 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         gnuplotSetWriter();
+
+        //- Construct with dictionary
+        explicit gnuplotSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~gnuplotSetWriter();
+    virtual ~gnuplotSetWriter() = default;
 
 
     // Member Functions
@@ -88,9 +91,10 @@ public:
         virtual void write
         (
             const bool writeTracks,
-            const PtrList<coordSet>&,
+            const List<scalarField>& times,
+            const PtrList<coordSet>& tracks,
             const wordList& valueSetNames,
-            const List<List<Field<Type>>>&,
+            const List<List<Field<Type>>>& valueSets,
             Ostream&
         ) const;
 };
