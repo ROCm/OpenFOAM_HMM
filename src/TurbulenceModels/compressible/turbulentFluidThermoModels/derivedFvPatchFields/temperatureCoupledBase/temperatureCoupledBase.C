@@ -170,7 +170,7 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 
 void Foam::temperatureCoupledBase::autoMap
 (
-    const FieldMapper& mapper
+    const fvPatchFieldMapper& mapper
 )
 {
     if (kappaFunction1_)
@@ -186,17 +186,22 @@ void Foam::temperatureCoupledBase::autoMap
 
 void Foam::temperatureCoupledBase::rmap
 (
-    const temperatureCoupledBase& ptf,
+    const fvPatchField<scalar>& ptf,
     const labelList& addr
 )
 {
-    if (kappaFunction1_)
+    const auto* tcb = isA<temperatureCoupledBase>(ptf);
+
+    if (tcb)
     {
-        kappaFunction1_().rmap(ptf.kappaFunction1_(), addr);
-    }
-    if (alphaFunction1_)
-    {
-        alphaFunction1_().rmap(ptf.alphaFunction1_(), addr);
+        if (kappaFunction1_)
+        {
+            kappaFunction1_().rmap(tcb->kappaFunction1_(), addr);
+        }
+        if (alphaFunction1_)
+        {
+            alphaFunction1_().rmap(tcb->alphaFunction1_(), addr);
+        }
     }
 }
 

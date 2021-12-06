@@ -87,6 +87,7 @@ SourceFiles
 #include "Enum.H"
 #include "fvPatch.H"
 #include "PatchFunction1.H"
+#include "fvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -204,15 +205,15 @@ public:
         //- Map (and resize as needed) from self given a mapping object
         virtual void autoMap
         (
-            const FieldMapper&
-        );
+            const fvPatchFieldMapper&
+        ) = 0;
 
         //- Reverse map the given fvPatchField onto this fvPatchField
         virtual void rmap
         (
-            const temperatureCoupledBase&,
+            const fvPatchField<scalar>&,
             const labelList&
-        );
+        ) = 0;
 
         //- Given patch temperature calculate corresponding K field
         virtual tmp<scalarField> kappa(const scalarField& Tp) const;
