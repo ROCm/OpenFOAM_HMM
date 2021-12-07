@@ -264,7 +264,7 @@ GCC_NOT_FOUND
     if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
-        echo "    ${gccDir##*/}  (${gmpDir##*/}  $${mpfrDir##*/}  ${mpcDir##*/})"
+        echo "    ${gccDir##*/}  (${gmpDir##*/}  ${mpfrDir##*/}  ${mpcDir##*/})"
     fi
     ;;
 

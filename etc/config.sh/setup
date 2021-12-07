@@ -130,22 +130,19 @@ then
                 ;;
             (*=)
                 # name=       -> unset name
-                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                    && echo "unset ${foamVar_eval%=}" 1>&2
+                _foamEcho "unset ${foamVar_eval%=}"
                 eval "unset ${foamVar_eval%=}"
                 ;;
             (*=*)
                 # name=value  -> export name=value
-                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                    && echo "export $foamVar_eval" 1>&2
+                _foamEcho "export $foamVar_eval"
                 eval "export $foamVar_eval"
                 ;;
             (*)
                 # Filename: source it
                 if [ -f "$foamVar_eval" ]
                 then
-                    [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
-                        && echo "Using: $foamVar_eval" 1>&2
+                    _foamEcho "Use file: $foamVar_eval"
                     . "$foamVar_eval"
                 elif [ -n "$foamVar_eval" ]
                 then
@@ -229,7 +226,7 @@ then
     _foamAddMan "$WM_PROJECT_DIR/doc"
 fi
 
-# Interactive shell (use PS1, not tty)
+# Interactive shell
 if [ -n "$PS1" ]
 then
     _foamEtc -config  aliases

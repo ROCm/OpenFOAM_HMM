@@ -437,10 +437,10 @@ case SGIMPI:
 
 
 # ----
+# Also support any ending (eg, INTELMPI_custom) to allow custom wmake rules
 case intelmpi:
 case intelmpi-[1-9]*:
-case INTELMPI:
-case INTELMPI-[1-9]*:
+case INTELMPI*:  ## Also includes (INTELMPI | INTELMPI-[1-9]*)
     setenv FOAM_MPI intelmpi
 
     ## Add version embedded in the naming

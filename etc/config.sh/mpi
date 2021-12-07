@@ -442,8 +442,9 @@ SGIMPI)
 
 
 # ----
+# Also support any ending (eg, INTELMPI_custom) to allow custom wmake rules
 intelmpi | intelmpi-[1-9]* |\
-INTELMPI | INTELMPI-[1-9]* )
+INTELMPI*)  # Also includes (INTELMPI | INTELMPI-[1-9]*)
     export FOAM_MPI=intelmpi
 
     _foamMpiEmbedVersion intelmpi INTELMPI

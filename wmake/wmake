@@ -128,15 +128,16 @@ cat<<HELP_TAIL_FULL
 Makefile targets:   platforms/linux64GccDPInt32Opt/.../fvMesh.o (for example)
 Special targets:
   all | queue       Same as -all | -queue options
-  exe               Compile statically linked executable
-  lib               Compile statically linked archive lib (.a)
-  libo              Compile statically linked lib (.o)
-  libso             Compile dynamically linked lib (.so)
+  exe               Create executable
+  lib               Create statically linked archive lib (.a)
+  libo              Create statically linked lib (.o)
+  libso             Create dynamically linked lib (.so)
   dep               Create lnInclude and dependencies only
   updatedep         Create dependencies only (in case of broken dependencies)
   objects           Compile but not link
 
 Environment
+  FOAM_BUILDROOT
   FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
   FOAM_MODULE_PREFIX
 
@@ -146,8 +147,8 @@ cat<<HELP_TAIL_BRIEF
 
 Some special targets (see -help-full for details):
   all | queue       Same as -all | -queue options
-  exe               Executables
-  lib libo libso    Libraries
+  exe               Executable
+  lib libo libso    Libraries (.a .o .so)
 
 HELP_TAIL_BRIEF
 fi

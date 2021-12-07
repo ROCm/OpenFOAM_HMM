@@ -107,7 +107,8 @@ getApiInfo()
 # - No inheritance of FOAM_SETTINGS
 # - No default verbosity (only as command-line option)
 unset FOAM_CONFIG_ETC FOAM_SETTINGS FOAM_VERBOSE
-unset _foamEtcDir _foamSettings _foamScriptCommand _foamSourceBashEnv
+unset _foam_config_etc _foam_bashrcFile
+unset _foamSettings _foamScriptCommand
 unset optTestTut
 
 # Parse options
@@ -162,9 +163,14 @@ do
         _foamSettings="$_foamSettings${_foamSettings:+ }WM_LABEL_SIZE=${1#-int}"
         ;;
 
+#TDB: -etc-*)
+#TDB:     # Define FOAM_CONFIG_ETC for finding files
+#TDB:     _foam_config_etc="${1#*-}"
+#TDB:     ;;
+
     -etc=*)
         # Define FOAM_CONFIG_ETC for finding files
-        _foamEtcDir="${1#*=}"
+        _foam_config_etc="${1#*=}"
         ;;
 
     -prefix=*)
@@ -172,7 +178,7 @@ do
         ;;
 
     -init=*)
-        _foamSourceBashEnv="${1#*=}"
+        _foam_bashrcFile="${1#*=}"
         ;;
 
     -verbose)
@@ -227,28 +233,48 @@ then
     interactive=true
 fi
 
-if [ -z "$_foamSourceBashEnv" ]
+if [ -z "$_foam_bashrcFile" ]
 then
     if [ -n "$interactive" ]
     then
         # Interactive shell, chain off via a file
-        _foamSourceBashEnv="$projectDir/bin/tools/source-bashrc"
+        _foam_bashrcFile="$projectDir/bin/tools/source-bashrc"
     else
         # Default: OPENFOAM etc/bashrc
-        _foamSourceBashEnv="$projectDir/etc/bashrc"
+        _foam_bashrcFile="$projectDir/etc/bashrc"
     fi
 fi
 
 
-[ -f "$_foamSourceBashEnv" ] || {
-    echo "Error: file not found: $_foamSourceBashEnv" 1>&2
+[ -f "$_foam_bashrcFile" ] || {
+    echo "Error: file not found: $_foam_bashrcFile" 1>&2
     exit 2
 }
 
-if [ -n "$_foamEtcDir" ] && [ -d "$_foamEtcDir" ]
+
+# FOAM_CONFIG_ETC: additional etc directory
+case "$_foam_config_etc" in
+('')    # Empty - ignore
+    ;;
+
+(/*)    # Absolute
+    [ -d "$_foam_config_etc" ] || unset _foam_config_etc
+    ;;
+
+(*)     # Relative
+    if [ -d "$_foam_config_etc" ]
+    then
+        # Qualify local dir
+        _foam_config_etc="$PWD/$_foam_config_etc"
+    else
+        [ -d "$projectDir/$_foam_config_etc" ] || unset _foam_config_etc
+    fi
+    ;;
+esac
+
+if [ -n "$_foam_config_etc" ]
 then
-    # Additional etc directory
-    export FOAM_CONFIG_ETC="$_foamEtcDir"
+    export FOAM_CONFIG_ETC="$_foam_config_etc"
 fi
 
 if [ -n "$interactive" ]
@@ -266,10 +292,10 @@ then
         export FOAM_SETTINGS="$_foamSettings"
     fi
 
-    ## echo "Source with $_foamSourceBashEnv with '$FOAM_SETTINGS'" 1>&2
+    ## echo "Source with $_foam_bashrcFile with '$FOAM_SETTINGS'" 1>&2
 
     # Newer bash can use --init-file instead of --rcfile
-    exec bash --rcfile "$_foamSourceBashEnv" -i
+    exec bash --rcfile "$_foam_bashrcFile" -i
     exit $? # Safety
 fi
 
@@ -281,7 +307,7 @@ fi
 # Suppresses aliases as a side-effect, but non-interactive anyhow.
 sourceBashrc()
 {
-    . "$_foamSourceBashEnv" $_foamSettings
+    . "$_foam_bashrcFile" $_foamSettings
 }
 
 

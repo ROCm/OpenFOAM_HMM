@@ -118,7 +118,7 @@ case "$ParaView_VERSION" in
         ;;
 
     ([0-9]*)
-        # Extract API from VERSION
+        # Extract API (major.minor) from VERSION
         pv_api=$(echo "$ParaView_VERSION" | \
             sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')
         ;;
@@ -162,7 +162,7 @@ case "$ParaView_VERSION" in
             if [ -d "$ParaView_DIR/$pvLibDir" ]
             then
                 case "$pv_api" in
-                (5.[0-4]*)
+                (5.[0-4])
                     libDir="$pvLibDir"   # Needs lib/paraview-X.X (not lib)
                     ;;
                 esac

@@ -99,7 +99,7 @@ case "none":
     breaksw
 
 case "system":
-    # Obtain major.minor from `paraview --version`
+    # Obtain (major.minor) from `paraview --version`
     set pv_api=`paraview --version | sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p'`
 
     if ("${pv_api}" == "") then
@@ -183,7 +183,7 @@ default:
             set pvLibDir="${libDir}/paraview-${pv_api}"
             if ( -d "${ParaView_DIR}/${pvLibDir}" ) then
                 switch ("$pv_api")
-                case 5.[0-4]*:
+                case 5.[0-4]:
                     set libDir="$pvLibDir"   # Needs lib/paraview-X.X (not lib)
                     breaksw
                 endsw
@@ -203,8 +203,8 @@ default:
 
 
         # Any extra library directories
-        if ( -n "$pv_libdirs" != "" ) then
-            switch "WM_ARCH" in
+        if ( "$pv_libdirs" != "" ) then
+            switch ("$WM_ARCH")
             case darwin*:
                 setenv DYLD_LIBRARY_PATH "${pv_libdirs}:$DYLD_LIBRARY_PATH"
                 breaksw
