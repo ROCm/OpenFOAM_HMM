@@ -415,10 +415,10 @@ public:
         void clear();
 
         //- Change reset behaviour
-        void noReset() { noReset_ = true; }
+        void noReset() noexcept { noReset_ = true; }
 
         //- Change reset behaviour
-        void allowReset() { noReset_ = false; }
+        void allowReset() noexcept { noReset_ = false; }
 
         //- Test if field corresponds to a single-value and thus uniform.
         //  Uses field min/max to establish uniformity.
@@ -467,11 +467,6 @@ public:
         //- optionally keeping a copy in cache
         template<class Type>
         inline tmp<Field<Type>> getResult(bool cacheCopy=false);
-
-        //- Get object result (Caution - potentially fragile)
-        //- optionally keeping a copy in cache
-        template<class Type>
-        inline tmp<Type> getObjectResult(bool cacheCopy=false);
 
         //- Construct a uniform field from the current results
         //  Uses the field average. Optionally warning if the min/max

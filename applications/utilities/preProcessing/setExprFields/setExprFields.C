@@ -64,7 +64,6 @@ word fieldGeoType(const FieldAssociation geoType)
         case FieldAssociation::VOLUME_DATA : return "cells"; break;
         default: break;
     }
-
     return "unknown";
 }
 
@@ -75,7 +74,7 @@ struct setExprFieldsControl
     bool dryRun;
     bool debugParsing;
     bool cacheVariables;
-    bool useDimensions;
+    bool hasDimensions;
     bool createNew;
     bool keepPatches;
     bool correctPatches;
@@ -123,13 +122,12 @@ void doCorrectBoundaryConditions
 {}
 
 
-template<class GeoField, class Mesh>
-void setField
+template<class GeoField>
+bool setField
 (
     const word& fieldName,
-    const Mesh& mesh,
-    const GeoField& result,
-    const scalarField& cond,
+    const GeoField& evaluated,
+    const boolField& fieldMask,
     const dimensionSet& dims,
     const wordList& valuePatches,
 
@@ -138,6 +136,8 @@ void setField
 {
     Info<< "setField(" << fieldName << "): "
         << pTraits<GeoField>::typeName << endl;
+
+    const auto& mesh = evaluated.mesh();
 
     tmp<GeoField> toutput;
 
@@ -171,55 +171,57 @@ void setField
 
     auto& output = toutput.ref();
 
-    label setCells = 0;
+    label numValuesChanged = 0;
 
-    if (cond.empty())
+    // Internal field
+    if (fieldMask.empty())
     {
-        // No condition - set all
-        output = result;
+        // No field-mask - set entire internal field
+        numValuesChanged = output.size();
 
-        setCells = output.size();
+        output.primitiveFieldRef() = evaluated;
     }
     else
     {
-        forAll(output, celli)
+        auto& internal = output.primitiveFieldRef();
+
+        forAll(internal, idx)
         {
-            if (expressions::boolOp<scalar>()(cond[celli]))
+            if (fieldMask[idx])
             {
-                output[celli] = result[celli];
-                ++setCells;
+                internal[idx] = evaluated[idx];
+                ++numValuesChanged;
             }
         }
     }
 
-    const label totalCells = returnReduce(output.size(), plusOp<label>());
-    reduce(setCells, plusOp<label>());
-
-    forAll(result.boundaryField(), patchi)
+    // Boundary fields
+    forAll(evaluated.boundaryField(), patchi)
     {
         auto& pf = output.boundaryFieldRef()[patchi];
 
         if (pf.patch().coupled())
         {
-            pf == result.boundaryField()[patchi];
+            pf == evaluated.boundaryField()[patchi];
         }
     }
 
+    doCorrectBoundaryConditions(ctrl.correctBCs, output);
 
-    if (setCells == totalCells)
+    const label numTotal = returnReduce(output.size(), plusOp<label>());
+    reduce(numValuesChanged, plusOp<label>());
+
+    if (numValuesChanged == numTotal)
     {
         Info<< "Set all ";
     }
     else
     {
-        Info<< "Set " << setCells << " of ";
+        Info<< "Set " << numValuesChanged << " of ";
     }
-    Info<< totalCells << " cells" << endl;
+    Info<< numTotal << " values" << endl;
 
-
-    doCorrectBoundaryConditions(ctrl.correctBCs, output);
-
-    if (ctrl.useDimensions)
+    if (ctrl.hasDimensions)
     {
         Info<< "Setting dimensions to " << dims << endl;
         output.dimensions().reset(dims);
@@ -234,6 +236,8 @@ void setField
         Info<< "Writing to " << output.name() << nl;
         output.writeObject(ctrl.streamOpt, true);
     }
+
+    return true;
 }
 
 
@@ -241,8 +245,8 @@ void evaluate
 (
     const fvMesh& mesh,
     const word& fieldName,
-    const expressions::exprString& expression,
-    const expressions::exprString& condition,
+    const expressions::exprString& valueExpr_,
+    const expressions::exprString& maskExpr_,
     const dictionary& dict,
     const dimensionSet& dims,
     const wordList& valuePatches,
@@ -273,10 +277,8 @@ void evaluate
         if (oldFieldType == IOobject::typeName)
         {
             FatalErrorInFunction
-                << "Field " << fieldName << " is  "
-                << oldFieldType
-                << ". Seems that it does not exist. Use 'create'"
-                << nl
+                << "Field " << fieldName << "(type: " << oldFieldType
+                << ") seems to be missing. Use 'create'" << nl
                 << exit(FatalError);
         }
 
@@ -284,17 +286,21 @@ void evaluate
             << " (type " << oldFieldType << ')';
     }
 
+
     Info<< " time=" << mesh.thisDb().time().timeName() << nl
         << "Expression:" << nl
         << ">>>>" << nl
-        << expression.c_str() << nl
+        << valueExpr_.c_str() << nl
         << "<<<<" << nl;
 
-    if (condition.size() && condition != "true")
+    bool evalFieldMask =
+        (maskExpr_.size() && maskExpr_ != "true" && maskExpr_ != "1");
+
+    if (evalFieldMask)
     {
-        Info<< "Condition:" << nl
+        Info<< "field-mask:" << nl
             << ">>>>" << nl
-            << condition.c_str() << nl
+            << maskExpr_.c_str() << nl
             << "<<<<" << nl;
     }
 
@@ -318,129 +324,95 @@ void evaluate
 
     if (ctrl.debugParsing)
     {
-        Info<< "Parsing expression: " << expression << "\nand condition "
-            << condition << nl << endl;
+        Info<< "Parsing expression: " << valueExpr_ << "\nand field-mask "
+            << maskExpr_ << nl << endl;
         driver.setDebugging(true, true);
     }
 
 
     driver.clearVariables();
 
-    scalarField conditionField;
 
-    bool evaluatedCondition = false;
+    // Handle "field-mask" evaluation
 
-    FieldAssociation conditionDataType(FieldAssociation::VOLUME_DATA);
+    boolField fieldMask;
+    FieldAssociation maskFieldAssoc(FieldAssociation::NO_DATA);
 
-    if (condition.size() && condition != "true")
+    if (evalFieldMask)
     {
         if (ctrl.debugParsing)
         {
-            Info<< "Parsing condition:" << condition << endl;
+            Info<< "Parsing field-mask:" << maskExpr_ << endl;
         }
 
-        driver.parse(condition);
+        driver.parse(maskExpr_);
         if (ctrl.debugParsing)
         {
-            Info<< "Parsed condition" << endl;
+            Info<< "Parsed field-mask" << endl;
         }
 
-        // Process any/all scalar fields. May help with diagnosis
-
-        bool goodCond = true;
-        while (goodCond)
+        if (driver.isLogical())
         {
-            // volScalarField
+            auto& result = driver.result();
+            if (result.is_bool())
             {
-                const auto* ptr = driver.isResultType<volScalarField>();
-                if (ptr)
-                {
-                    conditionField = ptr->internalField();
-                    // VOLUME_DATA
-                    break;
-                }
+                fieldMask = result.getResult<bool>();
+                maskFieldAssoc = driver.fieldAssociation();
             }
-
-            // surfaceScalarField
-            {
-                const auto* ptr = driver.isResultType<surfaceScalarField>();
-                if (ptr)
-                {
-                    conditionField = ptr->internalField();
-                    conditionDataType = FieldAssociation::FACE_DATA;
-                    break;
-                }
-            }
-
-            // pointScalarField
-            {
-                const auto* ptr = driver.isResultType<pointScalarField>();
-                if (ptr)
-                {
-                    conditionField = ptr->internalField();
-                    conditionDataType = FieldAssociation::POINT_DATA;
-                    break;
-                }
-            }
-
-            // No matching field types
-            goodCond = false;
         }
 
-        // Verify that it also logical
-        goodCond = goodCond && driver.isLogical();
+        // Slightly pedantic...
+        driver.clearField();
+        driver.clearResult();
 
-        if (!goodCond)
+        evalFieldMask = (maskFieldAssoc != FieldAssociation::NO_DATA);
+
+        if (!evalFieldMask)
         {
             FatalErrorInFunction
-                << " condition: " << condition
+                << " mask: " << maskExpr_
                 << " does not evaluate to a logical expression: "
                 << driver.resultType() << nl
                 #ifdef FULLDEBUG
-                << "contents: " << conditionField
+                << "contents: " << fieldMask
                 #endif
                 << exit(FatalError);
         }
 
         if (ctrl.debugParsing)
         {
-            Info<< "Condition evaluates to "
-                << conditionField << nl;
+            Info<< "Field-mask evaluates to "
+                << fieldMask << nl;
         }
-
-        evaluatedCondition = true;
     }
 
     if (ctrl.debugParsing)
     {
-        Info<< "Parsing expression:" << expression << endl;
+        Info<< "Parsing expression:" << valueExpr_ << endl;
     }
 
-    driver.parse(expression);
+    driver.parse(valueExpr_);
 
     if (ctrl.debugParsing)
     {
         Info<< "Parsed expression" << endl;
     }
 
-    if (evaluatedCondition)
+    if (evalFieldMask && maskFieldAssoc != driver.fieldAssociation())
     {
-        if (conditionDataType != driver.fieldAssociation())
-        {
-            FatalErrorInFunction
-                << "Mismatch between condition geometric type ("
-                << fieldGeoType(conditionDataType) << ") and" << nl
-                << "expression geometric type ("
-                << fieldGeoType(driver.fieldAssociation()) << ')' << nl
-                << nl
-                << "Expression: " << expression << nl
-                << "Condition: " << condition << nl
-                << nl
-                << exit(FatalError);
-        }
+        FatalErrorInFunction
+            << "Mismatch between field-mask geometric type ("
+            << fieldGeoType(maskFieldAssoc) << ") and" << nl
+            << "expression geometric type ("
+            << fieldGeoType(driver.fieldAssociation()) << ')' << nl
+            << nl
+            << "expression: " << valueExpr_ << nl
+            << "field-mask: " << maskExpr_ << nl
+            << nl
+            << exit(FatalError);
     }
 
-    if (!ctrl.createNew && driver.resultType() != oldFieldType)
+    if (!oldFieldType.empty() && driver.resultType() != oldFieldType)
     {
         FatalErrorInFunction
             << "Inconsistent types: " << fieldName << " is  "
@@ -452,81 +424,69 @@ void evaluate
 
     Info<< "Dispatch ... " << driver.resultType() << nl;
 
-    #undef setFieldDispatch
-    #define setFieldDispatch(FieldType)                                       \
-    {                                                                         \
-        /* FieldType */                                                       \
-        const auto* ptr = driver.isResultType<FieldType>();                   \
-        if (ptr)                                                              \
-        {                                                                     \
-            /* driver.getResult<FieldType>(correctPatches), */                \
-                                                                              \
-            setField                                                          \
-            (                                                                 \
-                fieldName,                                                    \
-                mesh,                                                         \
-                *ptr,                                                         \
-                conditionField,                                               \
-                dims,                                                         \
-                valuePatches,                                                 \
-                ctrl                                                          \
-            );                                                                \
-            return;                                                           \
-        }                                                                     \
-    }                                                                         \
 
+    bool applied = false;
+    switch (driver.fieldAssociation())
+    {
+        #undef  doLocalCode
+        #define doLocalCode(GeoField)                                        \
+        {                                                                    \
+            const auto* ptr = driver.isResultType<GeoField>();               \
+            if (ptr)                                                         \
+            {                                                                \
+                applied = setField                                           \
+                (                                                            \
+                    fieldName,                                               \
+                    *ptr,                                                    \
+                    fieldMask,                                               \
+                    dims,                                                    \
+                    valuePatches,                                            \
+                    ctrl                                                     \
+                );                                                           \
+                break;                                                       \
+            }                                                                \
+        }
 
-    setFieldDispatch(volScalarField);
-    setFieldDispatch(volVectorField);
-    setFieldDispatch(volTensorField);
-    setFieldDispatch(volSymmTensorField);
-    setFieldDispatch(volSphericalTensorField);
+        case FieldAssociation::VOLUME_DATA:
+        {
+            doLocalCode(volScalarField);
+            doLocalCode(volVectorField);
+            doLocalCode(volTensorField);
+            doLocalCode(volSymmTensorField);
+            doLocalCode(volSphericalTensorField);
+            break;
+        }
+        case FieldAssociation::FACE_DATA:
+        {
+            doLocalCode(surfaceScalarField);
+            doLocalCode(surfaceVectorField);
+            doLocalCode(surfaceTensorField);
+            doLocalCode(surfaceSymmTensorField);
+            doLocalCode(surfaceSphericalTensorField);
+            break;
+        }
+        case FieldAssociation::POINT_DATA:
+        {
+            doLocalCode(pointScalarField);
+            doLocalCode(pointVectorField);
+            doLocalCode(pointTensorField);
+            doLocalCode(pointSymmTensorField);
+            doLocalCode(pointSphericalTensorField);
+            break;
+        }
 
-    setFieldDispatch(surfaceScalarField);
-    setFieldDispatch(surfaceVectorField);
-    setFieldDispatch(surfaceTensorField);
-    setFieldDispatch(surfaceSymmTensorField);
-    setFieldDispatch(surfaceSphericalTensorField);
+        default: break;
+        #undef doLocalCode
+    }
 
-    #undef setFieldDispatch
-    #define setFieldDispatch(FieldType)                                       \
-    {                                                                         \
-        /* FieldType */                                                       \
-        const auto* ptr = driver.isResultType<FieldType>();                   \
-                                                                              \
-        if (ptr)                                                              \
-        {                                                                     \
-            /* driver.getResult<FieldType>(correctPatches), */                \
-                                                                              \
-            setField                                                          \
-            (                                                                 \
-                fieldName,                                                    \
-                pointMesh::New(mesh),                                         \
-                *ptr,                                                         \
-                conditionField,                                               \
-                dims,                                                         \
-                valuePatches,                                                 \
-                ctrl                                                          \
-            );                                                                \
-            return;                                                           \
-        }                                                                     \
-    }                                                                         \
-
-    setFieldDispatch(pointScalarField);
-    setFieldDispatch(pointVectorField);
-    setFieldDispatch(pointTensorField);
-    setFieldDispatch(pointSymmTensorField);
-    setFieldDispatch(pointSphericalTensorField);
-
-    #undef setFieldDispatch
-
-    // Nothing dispatched?
-
-    FatalErrorInFunction
-        << "Expression evaluates to an unsupported type: "
-        << driver.resultType() << nl << nl
-        << "Expression " << expression << nl << endl
-        << exit(FatalError);
+    if (!applied)
+    {
+        FatalErrorInFunction
+            << "Expression evaluates to an unsupported type: "
+            << driver.resultType() << nl << nl
+            << "Expression " << valueExpr_ << nl << endl
+            << exit(FatalError);
+    }
 }
 
 
@@ -584,12 +544,13 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "condition",
+        "field-mask",
         "logic",
-        "The logical condition when to apply the expression"
+        "The field mask (logical condition) when to apply the expression"
         " (command-line operation)",
         true // Advanced option
     );
+    argList::addOptionCompat("field-mask", {"condition", 2106});
     argList::addOption
     (
         "dimensions",
@@ -726,7 +687,7 @@ int main(int argc, char *argv[])
         wordHashSet badOptions
         ({
             "create", "keepPatches", "value-patches",
-            "condition", "expression", "dimensions"
+            "field-mask", "expression", "dimensions"
         });
         badOptions.retain(args.options());
 
@@ -802,25 +763,24 @@ int main(int argc, char *argv[])
             ctrl.keepPatches = args.found("keepPatches");
             ctrl.correctPatches = !args.found("noCorrectPatches");
             ctrl.correctBCs = args.found("correctResultBoundaryFields");
-            ctrl.useDimensions = args.found("dimensions");
+            ctrl.hasDimensions = args.found("dimensions");
             ctrl.streamOpt.format(runTime.writeFormat());
             if (args.found("ascii"))
             {
                 ctrl.streamOpt.format(IOstream::ASCII);
             }
 
-            expressions::exprString
-                expression
-                (
-                    args["expression"],
-                    dictionary::null
-                );
+            expressions::exprString valueExpr_
+            (
+                args["expression"],
+                dictionary::null
+            );
 
-            expressions::exprString condition;
-            args.readIfPresent("condition", condition);
+            expressions::exprString maskExpr_;
+            args.readIfPresent("field-mask", maskExpr_);
 
             dimensionSet dims;
-            if (ctrl.useDimensions)
+            if (ctrl.hasDimensions)
             {
                 ITstream is(args.lookup("dimensions"));
                 is >> dims;
@@ -830,8 +790,8 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 fieldName,
-                expression,
-                condition,
+                valueExpr_,
+                maskExpr_,
                 dictionary::null,
                 dims,
                 args.getList<word>("value-patches", false),
@@ -899,22 +859,28 @@ int main(int argc, char *argv[])
 
                 const word fieldName(dict.get<word>("field"));
 
-                expressions::exprString expression
+                auto valueExpr_
                 (
-                    dict.get<string>("expression"),
-                    dict
+                    expressions::exprString::getEntry
+                    (
+                        "expression",
+                        dict
+                    )
                 );
 
-                expressions::exprString condition;
-
-                if (dict.found("condition"))
+                expressions::exprString maskExpr_;
                 {
-                    condition =
-                        expressions::exprString
-                        (
-                            dict.get<string>("condition"),
-                            dict
-                        );
+                    const entry* eptr = dict.findCompat
+                    (
+                        "fieldMask", {{"condition", 2106}},
+                        keyType::LITERAL
+                    );
+
+                    if (eptr)
+                    {
+                        maskExpr_.readEntry(eptr->keyword(), dict);
+                        maskExpr_.trim();
+                    }
                 }
 
                 dimensionSet dims;
@@ -928,7 +894,7 @@ int main(int argc, char *argv[])
                     {
                         dimPtr->stream() >> dims;
                     }
-                    ctrl.useDimensions = bool(dimPtr);
+                    ctrl.hasDimensions = bool(dimPtr);
                 }
 
                 if (args.verbose() && !timei)
@@ -941,8 +907,8 @@ int main(int argc, char *argv[])
                 (
                     mesh,
                     fieldName,
-                    expression,
-                    condition,
+                    valueExpr_,
+                    maskExpr_,
                     dict,
                     dims,
                     dict.getOrDefault<wordList>("valuePatches", wordList()),

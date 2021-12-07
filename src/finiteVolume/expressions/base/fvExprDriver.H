@@ -410,10 +410,10 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const = 0;
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const = 0;
 
 
@@ -425,7 +425,7 @@ public:
 
     // Variables
 
-        //- Clear temporary variables and resets from expression strings
+        //- Clear temporary variables, reset from expression strings
         virtual void clearVariables();
 
         //- True if named variable exists

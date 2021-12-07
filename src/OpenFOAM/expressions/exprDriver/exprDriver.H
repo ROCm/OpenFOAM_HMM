@@ -314,13 +314,13 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return 1;
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return 1;
@@ -358,6 +358,7 @@ public:
         void clearResult();
 
         //- Return the expression result as a tmp field
+        //  This also clears the result and associated memory.
         template<class Type>
         tmp<Field<Type>> getResult(bool wantPointData=false);
 
@@ -426,7 +427,7 @@ public:
 
     // Variables
 
-        //- Clear temporary variables and resets from expression strings
+        //- Clear temporary variables, reset from expression strings
         virtual void clearVariables();
 
         //- Set special-purpose scalar reference argument.
@@ -555,7 +556,8 @@ public:
             size_t len = std::string::npos
         ) = 0;
 
-        //- Evaluate the expression and return the field
+        //- Evaluate the expression and return the field.
+        //  This also clears the result and associated memory.
         template<class Type>
         inline tmp<Field<Type>>
         evaluate
@@ -564,7 +566,8 @@ public:
             bool wantPointData = false
         );
 
-        //- Evaluate the expression and return a single value
+        //- Evaluate the expression and return a single value.
+        //  Does not clear the result.
         template<class Type>
         inline Type evaluateUniform
         (

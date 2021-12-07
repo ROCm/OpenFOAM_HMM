@@ -135,13 +135,22 @@ public:
 
         //- Get and expand expression with dictionary entries,
         //- optionally strip C/C++ comments from the input.
-        //
         // Expansion behaviour as per inplaceExpand
-        static exprString getExpression
+        static exprString getEntry
         (
-            const word& name,
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict,
-            const bool stripComments = false
+            const bool stripComments = true
+        );
+
+        //- Get and expand expression with dictionary entries,
+        //- optionally strip C/C++ comments from the input.
+        // Expansion behaviour as per inplaceExpand
+        static exprString getOptional
+        (
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict,
+            const bool stripComments = true
         );
 
         //- Copy convert string to exprString.
@@ -155,16 +164,25 @@ public:
 
     // Member Functions
 
-        //- Inplace expansion with dictionary variables,
-        //- and strip C/C++ comments from the input
-        exprString& expand
-        (
-            const dictionary& dict,
-            const bool stripComments = true
-        );
-
         //- Check for unexpanded '$' entries. Fatal if any exist.
         inline bool valid() const;
+
+        //- Inplace expansion with dictionary variables,
+        //- and strip C/C++ comments from the input
+        void expand(const dictionary& dict, const bool stripComments = true);
+
+        //- Inplace trim leading and trailing whitespace
+        void trim();
+
+        //- Read/expand entry with dictionary variables,
+        //- and strip C/C++ comments from the input
+        bool readEntry
+        (
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict,
+            bool mandatory = true,
+            const bool stripComments = true
+        );
 
 
     // Member Operators
