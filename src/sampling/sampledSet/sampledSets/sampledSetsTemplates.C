@@ -136,46 +136,63 @@ Foam::fileName Foam::sampledSets::writeSampleFile
 {
     wordList valueSetNames(masterFields.size());
     List<const Field<Type>*> valueSets(masterFields.size());
-
     forAll(masterFields, fieldi)
     {
         const word& fieldName = masterFields[fieldi].name();
 
         valueSetNames[fieldi] = fieldName;
-        valueSets[fieldi] = &masterFields[fieldi][setI];
+
+        // Values only available on master
+        Type averageValue, minValue, maxValue;
+        label sizeValue;
+        if (Pstream::master())
+        {
+            valueSets[fieldi] = &masterFields[fieldi][setI];
+            averageValue = average(*valueSets[fieldi]);
+            minValue = min(*valueSets[fieldi]);
+            maxValue = max(*valueSets[fieldi]);
+            sizeValue = valueSets[fieldi]->size();
+        }
+        Pstream::scatter(averageValue);
+        Pstream::scatter(minValue);
+        Pstream::scatter(maxValue);
+        Pstream::scatter(sizeValue);
 
         // Set results
 
-        setResult("average(" + fieldName + ")", average(*valueSets[fieldi]));
-        setResult("min(" + fieldName + ")", min(*valueSets[fieldi]));
-        setResult("max(" + fieldName + ")", max(*valueSets[fieldi]));
-        setResult("size(" + fieldName + ")", valueSets[fieldi]->size());
+        setResult("average(" + fieldName + ")", averageValue);
+        setResult("min(" + fieldName + ")", minValue);
+        setResult("max(" + fieldName + ")", maxValue);
+        setResult("size(" + fieldName + ")", sizeValue);
     }
 
-    fileName fName
-    (
-        timeDir/formatter.getFileName(masterSampleSet, valueSetNames)
-    );
+    fileName fName;
+    if (Pstream::master())
+    {
+        fName = timeDir/formatter.getFileName(masterSampleSet, valueSetNames);
 
-    OFstream ofs(fName);
-    if (ofs.opened())
-    {
-        formatter.write
-        (
-            masterSampleSet,
-            valueSetNames,
-            valueSets,
-            ofs
-        );
-        return fName;
+        OFstream ofs(fName);
+        if (ofs.opened())
+        {
+            formatter.write
+            (
+                masterSampleSet,
+                valueSetNames,
+                valueSets,
+                ofs
+            );
+        }
+        else
+        {
+            WarningInFunction
+                << "File " << ofs.name() << " could not be opened. "
+                << "No data will be written" << endl;
+        }
     }
-    else
-    {
-        WarningInFunction
-            << "File " << ofs.name() << " could not be opened. "
-            << "No data will be written" << endl;
-        return fileName::null;
-    }
+
+    Pstream::scatter(fName);
+
+    return fName;
 }
 
 
@@ -325,20 +342,15 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
 
         forAll(masterSampledSets_, setI)
         {
-            fileName sampleFile;
-            if (Pstream::master())
-            {
-                sampleFile = writeSampleFile
-                (
-                    masterSampledSets_[setI],
-                    masterFields,
-                    setI,
-                    outputPath_/mesh_.time().timeName(),
-                    fields.formatter()
-                );
-            }
+            fileName sampleFile = writeSampleFile
+            (
+                masterSampledSets_[setI],
+                masterFields,
+                setI,
+                outputPath_/mesh_.time().timeName(),
+                fields.formatter()
+            );
 
-            Pstream::scatter(sampleFile);
             if (sampleFile.size())
             {
                 // Case-local file name with "<case>" to make relocatable
