@@ -251,7 +251,7 @@ Foam::scalar Foam::volBSplinesBase::computeMaxBoundaryDisplacement
 void Foam::volBSplinesBase::boundControlPointMovement
 (
     vectorField& controlPointsMovement
-)
+) const
 {
     label pastControlPoints(0);
     forAll(volume_, iNURB)
