@@ -107,7 +107,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::writeFilmFields() const
     (
         IOobject
         (
-            IOobject::scopedName(word("electrostaticDeposition"), "h"),
+            IOobject::scopedName("electrostaticDeposition", "h"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,

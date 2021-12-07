@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -224,15 +224,6 @@ protected:
 
         //- Write momentum data
         void writeValues(Ostream& os);
-
-    // Protected Member Functions
-
-        //- Return a scoped name
-        //  TODO - revisit issue #1675
-        word scopedName(const word& base) const
-        {
-            return IOobject::scopedName(this->name(), base);
-        }
 
 
 public:

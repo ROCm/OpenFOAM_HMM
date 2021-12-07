@@ -53,7 +53,7 @@ Foam::word Foam::functionObject::scopedName(const word& name) const
         return IOobject::scopedName(name_, name);
     }
 
-    return name_;
+    return name;
 }
 
 
