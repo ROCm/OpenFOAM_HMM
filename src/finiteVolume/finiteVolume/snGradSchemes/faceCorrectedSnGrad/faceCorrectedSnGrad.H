@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,16 @@ Group
     grpFvSnGradSchemes
 
 Description
-    Simple central-difference snGrad scheme with non-orthogonal correction.
+    Surface gradient scheme with full explicit non-orthogonal correction.
+
+Usage
+    Minimal example by using \c system/fvSchemes:
+    \verbatim
+    snGradSchemes
+    {
+        snGrad(<term>)       faceCorrected;
+    }
+    \endverbatim
 
 SourceFiles
     faceCorrectedSnGrad.C
@@ -53,7 +63,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class faceCorrectedSnGrad Declaration
+                      Class faceCorrectedSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -81,7 +91,6 @@ public:
             snGradScheme<Type>(mesh)
         {}
 
-
         //- Construct from mesh and data stream
         faceCorrectedSnGrad(const fvMesh& mesh, Istream&)
         :
@@ -90,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~faceCorrectedSnGrad();
+    virtual ~faceCorrectedSnGrad() = default;
 
 
     // Member Functions
@@ -105,13 +114,13 @@ public:
         }
 
         //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual bool corrected() const noexcept
         {
             return true;
         }
 
         //- Return the explicit correction to the faceCorrectedSnGrad
-        //  for the given field using the gradient of the field
+        //- for the given field using the gradient of the field
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         fullGradCorrection
         (
@@ -119,7 +128,7 @@ public:
         ) const;
 
         //- Return the explicit correction to the faceCorrectedSnGrad
-        //  for the given field using the gradients of the field components
+        //- for the given field using the gradients of the field components
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const;
 };

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,17 @@ Group
     grpFvSnGradSchemes
 
 Description
-    Abstract base class for snGrad schemes.
+    Abstract base class for runtime selected \c snGrad surface
+    normal gradient schemes.
+
+    A surface normal gradient is evaluated at a cell face. It
+    is the normal-to-face component of the gradient of
+    values at the centres of two cells that the face connects.
+
+    Unit-surface-normal vector decomposition is based on the
+    so-called over-relaxed approach. Orthogonal components are
+    treated implicitly and non-orthogonal components are treated
+    explicitly with (or without) various limiters.
 
 SourceFiles
     snGradScheme.C
@@ -59,7 +70,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class snGradScheme Declaration
+                        Class snGradScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -67,9 +78,9 @@ class snGradScheme
 :
     public refCount
 {
-    // Private data
+    // Private Data
 
-        //- Hold reference to mesh
+        //- Hold const reference to mesh
         const fvMesh& mesh_;
 
 
@@ -125,14 +136,14 @@ public:
 
     // Member Functions
 
-        //- Return mesh reference
+        //- Return const reference to mesh
         const fvMesh& mesh() const
         {
             return mesh_;
         }
 
-
-        //- Return the snGrad of the given cell field with the given deltaCoeffs
+        //- Return the snGrad of the given cell field
+        //- by using the given deltaCoeffs
         static tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad
         (
@@ -156,13 +167,13 @@ public:
         ) const = 0;
 
         //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual bool corrected() const noexcept
         {
             return false;
         }
 
         //- Return the explicit correction to the snGrad
-        //  for the given field
+        //- for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const
         {
@@ -173,12 +184,12 @@ public:
         }
 
         //- Return the snGrad of the given cell field
-        //  with explicit correction
+        //- with explicit correction
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad(const GeometricField<Type, fvPatchField, volMesh>&) const;
 
         //- Return the snGrad of the given tmp cell field
-        //  with explicit correction
+        //- with explicit correction
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         snGrad
         (

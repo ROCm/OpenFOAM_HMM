@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 Zeljko Tukovic, FSB Zagreb.
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,8 +72,6 @@ Foam::fv::skewCorrectedSnGrad<Type>::fullGradCorrection
 
     const vectorField& Sf = mesh.Sf().internalField();
     const scalarField& magSf = mesh.magSf().internalField();
-
-    vectorField nf(Sf/magSf);
 
     const vectorField& Cf = mesh.Cf().internalField();
     const vectorField& C = mesh.C().internalField();

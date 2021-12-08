@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +31,21 @@ Group
     grpFvSnGradSchemes
 
 Description
-    Simple central-difference snGrad scheme using the non-orthogonal mesh
-    delta-coefficients but without non-orthogonal correction.
+    Surface gradient scheme with no non-orthogonal correction.
+
+Usage
+    Minimal example by using \c system/fvSchemes:
+    \verbatim
+    snGradSchemes
+    {
+        snGrad(<term>)       uncorrected;
+    }
+    \endverbatim
+
+Note
+  - Interpolation weighting factors (i.e. delta coefficients) are based
+    on the \c nonOrthDeltaCoeffs function rather than the \c deltaCoeffs
+    function, which is used by the \c orthogonal scheme.
 
 SourceFiles
     uncorrectedSnGrad.C
@@ -54,7 +68,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class uncorrectedSnGrad Declaration
+                      Class uncorrectedSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -82,7 +96,6 @@ public:
             snGradScheme<Type>(mesh)
         {}
 
-
         //- Construct from mesh and data stream
         uncorrectedSnGrad(const fvMesh& mesh, Istream&)
         :
@@ -91,7 +104,7 @@ public:
 
 
     //- Destructor
-    virtual ~uncorrectedSnGrad();
+    virtual ~uncorrectedSnGrad() = default;
 
 
     // Member Functions
@@ -106,13 +119,13 @@ public:
         }
 
         //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual bool corrected() const noexcept
         {
             return false;
         }
 
         //- Return the explicit correction to the uncorrectedSnGrad
-        //  for the given field
+        //- for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const;
 };
