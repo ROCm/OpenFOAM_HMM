@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +180,7 @@ liquidFilmModel::liquidFilmModel
             primaryMesh().time().timeName(),
             primaryMesh(),
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         regionMesh(),
         dimensionedScalar(dimVelocity, Zero)
@@ -215,7 +215,7 @@ liquidFilmModel::liquidFilmModel
             primaryMesh().time().timeName(),
             primaryMesh(),
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         primaryMesh(),
         dimensionedScalar(dimMass, Zero),
@@ -230,7 +230,7 @@ liquidFilmModel::liquidFilmModel
             primaryMesh().time().timeName(),
             primaryMesh(),
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         primaryMesh(),
         dimensionedScalar(dimLength, Zero),
