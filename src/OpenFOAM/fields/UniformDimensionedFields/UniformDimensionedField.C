@@ -85,8 +85,12 @@ template<class Type>
 bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
 {
     dictionary dict(is);
-    scalar multiplier;
-    this->dimensions().read(dict.lookup("dimensions"), multiplier);
+    scalar multiplier(1);
+    this->dimensions().read
+    (
+        dict.lookup("dimensions", keyType::LITERAL),
+        multiplier
+    );
 
     dict.readEntry("value", this->value());
     this->value() *= multiplier;
@@ -98,7 +102,7 @@ bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
 template<class Type>
 bool Foam::UniformDimensionedField<Type>::writeData(Ostream& os) const
 {
-    scalar multiplier;
+    scalar multiplier(1);
     os.writeKeyword("dimensions");
     this->dimensions().write(os, multiplier) << token::END_STATEMENT << nl;
     os.writeEntry("value", this->value()/multiplier) << nl;

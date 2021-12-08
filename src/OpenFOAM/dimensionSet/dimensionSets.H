@@ -34,7 +34,6 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-
 #ifndef dimensionSets_H
 #define dimensionSets_H
 
@@ -85,7 +84,7 @@ extern const dimensionSet dimDynamicViscosity;
 //- Construction of unit sets
 class dimensionSets
 {
-    // Private data
+    // Private Data
 
         //- Set of dimensions
         PtrList<dimensionedScalar> units_;
@@ -111,16 +110,17 @@ public:
             const wordList& unitNames
         );
 
+
     // Member Functions
 
         //- Return the units
-        const PtrList<dimensionedScalar>& units() const
+        const PtrList<dimensionedScalar>& units() const noexcept
         {
             return units_;
         }
 
         //- Is there a valid inverse of the selected unit
-        bool valid() const
+        bool valid() const noexcept
         {
             return valid_;
         }

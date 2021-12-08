@@ -28,10 +28,21 @@ Class
     Foam::dimensionSet
 
 Description
-    Dimension set for the base types.
+    Dimension set for the base types, which can be used to implement
+    rigorous dimension checking for algebraic manipulation.
 
-    This type may be used to implement rigorous dimension checking
-    for algebraic manipulation.
+    The dimensions are specified in the following order
+    (SI units for reference only):
+    \table
+        Property    | SI Description        | SI unit
+        MASS        | kilogram              | \c kg
+        LENGTH      | metre                 | \c m
+        TIME        | second                | \c s
+        TEMPERATURE | Kelvin                | \c K
+        MOLES       | mole                  | \c mol
+        CURRENT     | Ampere                | \c A
+        LUMINOUS_INTENSITY | Candela        | \c cd
+    \endtable
 
 SourceFiles
     dimensionSet.C
@@ -55,7 +66,7 @@ namespace Foam
 {
 
 // Forward Declarations
-
+class dictionary;
 class dimensionSet;
 class dimensionSets;
 
@@ -79,13 +90,13 @@ public:
         //- Enumeration for the dimension exponents
         enum dimensionType
         {
-            MASS,               //!< kilogram   kg
-            LENGTH,             //!< metre      m
-            TIME,               //!< second     s
-            TEMPERATURE,        //!< Kelvin     K
-            MOLES,              //!< mole       mol
-            CURRENT,            //!< Ampere     A
-            LUMINOUS_INTENSITY  //!< Candela    Cd
+            MASS,               //!< kilogram   \c kg
+            LENGTH,             //!< metre      \c m
+            TIME,               //!< second     \c s
+            TEMPERATURE,        //!< Kelvin     \c K
+            MOLES,              //!< mole       \c mol
+            CURRENT,            //!< Ampere     \c A
+            LUMINOUS_INTENSITY  //!< Candela    \c cd
         };
 
 
@@ -130,7 +141,7 @@ private:
 
             // Constructors
 
-                 tokeniser(Istream& is);
+                 explicit tokeniser(Istream& is);
 
 
             // Member Functions
@@ -154,8 +165,8 @@ private:
         };
 
 
-        //- Reset exponents to nearest integer if close to it. Used to
-        //  handle reading with insufficient precision.
+        //- Reset exponents to nearest integer if close to it.
+        //  Handles reading with insufficient precision.
         void round(const scalar tol);
 
         dimensionedScalar parse
@@ -164,6 +175,7 @@ private:
             tokeniser& tis,
             const HashTable<dimensionedScalar>&
         ) const;
+
 
 public:
 
@@ -212,8 +224,22 @@ public:
         //- Copy construct
         dimensionSet(const dimensionSet& ds);
 
-        //- Construct from dictionary entry - usually "dimensions".
-        dimensionSet(const dictionary& dict, const word& entryName);
+        //- Construct from dictionary entry (usually "dimensions")
+        //  Dimensionless if non-mandatory and not found.
+        dimensionSet
+        (
+            const word& entryName,  //!< Lookup key. LITERAL (not REGEX)
+            const dictionary& dict,
+            const bool mandatory = true
+        );
+
+        //- Construct from dictionary entry (usually "dimensions")
+        dimensionSet
+        (
+            const dictionary& dict,
+            const word& entryName,  //!< Lookup key. LITERAL (not REGEX)
+            const bool mandatory = true
+        );
 
         //- Construct and return a clone
         autoPtr<dimensionSet> clone() const
@@ -230,13 +256,13 @@ public:
         //- Return true if it is dimensionless
         bool dimensionless() const;
 
-        //- Return const access to the exponents as a list
-        const FixedList<scalar,7>& values() const;
+        //- Const access to the exponents as a list
+        const FixedList<scalar,7>& values() const noexcept;
 
-        //- Return non-const access to the exponents as a list
-        FixedList<scalar,7>& values();
+        //- Non-const access to the exponents as a list
+        FixedList<scalar,7>& values() noexcept;
 
-        //- Reset exponents to be dimensionless
+        //- Clear exponents - resets to be dimensionless
         void clear();
 
         //- Copy assign the exponents from the dimensionSet
@@ -244,6 +270,18 @@ public:
 
 
     // IO
+
+        //- Update the dimensions from dictionary entry.
+        //- FatalIOError if it is found and the number of tokens is incorrect,
+        //- or it is mandatory and not found.
+        //
+        //  \return true if the entry was found.
+        bool readEntry
+        (
+            const word& entryName,      //!< Lookup key. LITERAL (not REGEX)
+            const dictionary& dict,     //!< The dictionary
+            const bool mandatory = true //!< The entry is mandatory
+        );
 
         //- Read using provided units. Used only in initial parsing
         Istream& read
@@ -302,6 +340,7 @@ public:
         bool operator*=(const dimensionSet&);
         bool operator/=(const dimensionSet&);
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -113,7 +113,7 @@ Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
 
 bool Foam::dimensionSet::dimensionless() const
 {
-    for (const scalar& val : exponents_)
+    for (const scalar val : exponents_)
     {
         // ie, mag(val) > smallExponent
         if ((val > smallExponent) || (val < -smallExponent))
@@ -126,13 +126,15 @@ bool Foam::dimensionSet::dimensionless() const
 }
 
 
-const Foam::FixedList<Foam::scalar,7>& Foam::dimensionSet::values() const
+const Foam::FixedList<Foam::scalar,7>&
+Foam::dimensionSet::values() const noexcept
 {
     return exponents_;
 }
 
 
-Foam::FixedList<Foam::scalar,7>& Foam::dimensionSet::values()
+Foam::FixedList<Foam::scalar,7>&
+Foam::dimensionSet::values() noexcept
 {
     return exponents_;
 }

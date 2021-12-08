@@ -38,7 +38,7 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
     const word& fieldDictEntry
 )
 {
-    dimensions_.reset(dimensionSet(fieldDict, "dimensions"));
+    dimensions_.readEntry("dimensions", fieldDict);
 
     // Note: oriented state may have already been set on construction
     // - if so - do not reset by re-reading

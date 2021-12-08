@@ -186,7 +186,7 @@ const dimensionSets& writeUnitSet()
 }
 
 
-const dimensionSet dimless(0, 0, 0, 0, 0, 0, 0);
+const dimensionSet dimless;
 
 const dimensionSet dimMass(1, 0, 0, 0, 0, 0, 0);
 const dimensionSet dimLength(0, 1, 0, 0, 0, 0, 0);
