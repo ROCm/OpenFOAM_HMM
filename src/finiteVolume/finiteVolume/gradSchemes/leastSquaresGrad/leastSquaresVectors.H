@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +55,12 @@ class leastSquaresVectors
 :
     public MeshObject<fvMesh, MoveableMeshObject, leastSquaresVectors>
 {
-    // Private data
+    // Private Data
 
-        //- Least-squares gradient vectors
+        //- Owner least-squares gradient vectors
         surfaceVectorField pVectors_;
+
+        //- Neighbour least-squares gradient vectors
         surfaceVectorField nVectors_;
 
 
@@ -85,13 +88,13 @@ public:
 
     // Member functions
 
-        //- Return reference to owner least square vectors
+        //- Return const reference to owner least square vectors
         const surfaceVectorField& pVectors() const
         {
             return pVectors_;
         }
 
-        //- Return reference to neighbour least square vectors
+        //- Return const reference to neighbour least square vectors
         const surfaceVectorField& nVectors() const
         {
             return nVectors_;

@@ -1,0 +1,139 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# settings
+
+    # operand setups
+    setups="
+    Gauss-linear
+    leastSquares
+    Gauss-pointLinear
+    iterativeGauss-linear-1
+    cellLimited-Gauss-linear-1
+    cellLimited-leastSquares-1
+    cellLimited-Gauss-pointLinear-1
+    cellLimited-iterativeGauss-linear-5-1
+    faceLimited-Gauss-linear-1
+    faceLimited-leastSquares-1
+    faceLimited-Gauss-pointLinear-1
+    faceLimited-iterativeGauss-linear-5-1
+    cellMDLimited-Gauss-linear-1
+    cellMDLimited-leastSquares-1
+    cellMDLimited-Gauss-pointLinear-1
+    cellMDLimited-iterativeGauss-linear-5-1
+    faceMDLimited-Gauss-linear-1
+    faceMDLimited-leastSquares-1
+    faceMDLimited-Gauss-pointLinear-1
+    faceMDLimited-iterativeGauss-linear-5-1
+    iterativeGauss-linear-2
+    iterativeGauss-linear-3
+    iterativeGauss-linear-4
+    iterativeGauss-linear-5
+    iterativeGauss-linear-10
+    iterativeGauss-linear-20
+    "
+
+    # flag to enable computations in parallel mode
+    parallel=false
+
+
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirResult"
+
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        mv -f constant "$dirResult"/
+        mv -f system "$dirResult"/
+        mv -f 0 "$dirResult"/
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+
+    if [ ! -d "$dirSetup" ]
+    then
+        echo "Setup directory: $dirSetup" \
+             "could not be found - skipping execution" 1>&2
+        exit 1
+    fi
+
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    [ -d 0 ] && rm -rf 0
+    mkdir 0
+
+
+    runApplication checkMesh \
+        -allTopology -allGeometry -constant \
+        -writeAllFields -writeAllSurfaceFields
+
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel postProcess -constant
+
+        runApplication reconstructPar
+
+    else
+
+        runApplication postProcess -constant
+
+    fi
+
+    collect "$setup"
+
+done
+
+
+#------------------------------------------------------------------------------

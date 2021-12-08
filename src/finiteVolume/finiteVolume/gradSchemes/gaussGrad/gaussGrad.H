@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,8 +65,9 @@ class gaussGrad
 :
     public fv::gradScheme<Type>
 {
-    // Private data
+    // Private Data
 
+        //- Interpolation scheme
         tmp<surfaceInterpolationScheme<Type>> tinterpScheme_;
 
 
@@ -121,7 +123,7 @@ public:
     // Member Functions
 
         //- Return the gradient of the given field
-        //  calculated using Gauss' theorem on the given surface field
+        //- calculated using Gauss' theorem on the given surface field
         static
         tmp
         <
@@ -134,7 +136,7 @@ public:
         );
 
         //- Return the gradient of the given field to the gradScheme::grad
-        //  for optional caching
+        //- for optional caching
         virtual tmp
         <
             GeometricField
@@ -146,7 +148,7 @@ public:
         ) const;
 
         //- Correct the boundary values of the gradient using the patchField
-        // snGrad functions
+        //- snGrad functions
         static void correctBoundaryConditions
         (
             const GeometricField<Type, fvPatchField, volMesh>&,

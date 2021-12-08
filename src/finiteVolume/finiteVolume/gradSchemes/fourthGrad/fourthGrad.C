@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,23 +59,24 @@ Foam::fv::fourthGrad<Type>::calcGrad
     // gradient to complete the accuracy.
 
     typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
     const fvMesh& mesh = vsf.mesh();
 
     // Assemble the second-order least-square gradient
     // Calculate the second-order least-square gradient
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tsecondfGrad
+    tmp<GradFieldType> tsecondfGrad
       = leastSquaresGrad<Type>(mesh).grad
         (
             vsf,
             "leastSquaresGrad(" + vsf.name() + ")"
         );
-    const GeometricField<GradType, fvPatchField, volMesh>& secondfGrad =
+    const GradFieldType& secondfGrad =
         tsecondfGrad();
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tfGrad
+    tmp<GradFieldType> tfGrad
     (
-        new GeometricField<GradType, fvPatchField, volMesh>
+        new GradFieldType
         (
             IOobject
             (
@@ -87,7 +89,7 @@ Foam::fv::fourthGrad<Type>::calcGrad
             secondfGrad
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& fGrad = tfGrad.ref();
+    GradFieldType& fGrad = tfGrad.ref();
 
     const vectorField& C = mesh.C();
 
@@ -132,7 +134,7 @@ Foam::fv::fourthGrad<Type>::calcGrad
             const labelUList& faceCells = p.faceCells();
 
             // Build the d-vectors
-            vectorField pd(p.delta());
+            const vectorField pd(p.delta());
 
             const Field<GradType> neighbourSecondfGrad
             (

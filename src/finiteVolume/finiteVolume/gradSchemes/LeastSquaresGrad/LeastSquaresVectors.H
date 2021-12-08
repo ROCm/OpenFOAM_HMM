@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +63,7 @@ class LeastSquaresVectors
 :
     public MeshObject<fvMesh, MoveableMeshObject, LeastSquaresVectors<Stencil>>
 {
-    // Private data
+    // Private Data
 
         //- Least-squares gradient vectors
         List<List<vector>> vectors_;
@@ -95,13 +96,13 @@ public:
 
     // Member functions
 
-        //- Return reference to the stencil
+        //- Return const reference to the stencil
         const extendedCentredCellToCellStencil& stencil() const
         {
             return Stencil::New(this->mesh_);
         }
 
-        //- Return reference to the least square vectors
+        //- Return const reference to the least square vectors
         const List<List<vector>>& vectors() const
         {
             return vectors_;
