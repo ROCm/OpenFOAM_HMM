@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -251,6 +251,28 @@ Foam::label Foam::probes::prepare()
                 {
                     fout<< "  # Not Found";
                 }
+                // Only for patchProbes
+                else if (probei < patchIDList_.size())
+                {
+                    const label patchi = patchIDList_[probei];
+                    if (patchi != -1)
+                    {
+                        const polyBoundaryMesh& bm = mesh_.boundaryMesh();
+                        if
+                        (
+                            patchi < bm.nNonProcessor()
+                         || processor_[probei] == Pstream::myProcNo()
+                        )
+                        {
+                            fout<< " at patch " << bm[patchi].name();
+                        }
+                        fout<< " with a distance of "
+                            << mag(operator[](probei)-oldPoints_[probei])
+                            << " m to the original point "
+                            << oldPoints_[probei];
+                    }
+                }
+
                 fout<< endl;
             }
 
@@ -325,7 +347,7 @@ bool Foam::probes::read(const dictionary& dict)
         {
             WarningInFunction
                 << "Only cell interpolation can be applied when "
-                << "not using fixedLocations.  InterpolationScheme "
+                << "not using fixedLocations. InterpolationScheme "
                 << "entry will be ignored"
                 << endl;
         }
