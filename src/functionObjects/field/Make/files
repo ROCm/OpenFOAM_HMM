@@ -128,4 +128,7 @@ DMD/DMDModels/DMDModel/DMDModel.C
 DMD/DMDModels/DMDModel/DMDModelNew.C
 DMD/DMDModels/derived/STDMD/STDMD.C
 
+age/age.C
+comfort/comfort.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
