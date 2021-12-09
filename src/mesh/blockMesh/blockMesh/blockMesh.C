@@ -53,6 +53,25 @@ Foam::blockMesh::strategyNames_
 namespace Foam
 {
 
+// Define/refine the verbosity level
+// Command-line options have precedence over dictionary setting
+static int getVerbosity(const dictionary& dict, int verbosity)
+{
+    if (verbosity < 0)
+    {
+        // Forced as 'off'
+        verbosity = 0;
+    }
+    else if (!verbosity)
+    {
+        // Not specified: use dictionary value or static default
+        verbosity = dict.getOrDefault("verbose", blockMesh::verboseOutput);
+    }
+
+    return verbosity;
+}
+
+
 // Process dictionary entry with single scalar or vector quantity
 // - return 0 if scaling is not needed. Eg, Not found or is unity
 // - return 1 for uniform scaling
@@ -235,7 +254,7 @@ Foam::blockMesh::blockMesh
 )
 :
     meshDict_(dict),
-    verbose_(verbosity),
+    verbose_(getVerbosity(dict, verbosity)),
     checkFaceCorrespondence_
     (
         meshDict_.getOrDefault("checkFaceCorrespondence", true)
@@ -269,18 +288,6 @@ Foam::blockMesh::blockMesh
     transform_(),
     topologyPtr_(createTopology(meshDict_, regionName))
 {
-    // Command-line options have precedence over dictionary setting
-
-    if (verbose_ < 0)
-    {
-        // Forced as 'off'
-        verbose_ = 0;
-    }
-    else if (!verbose_)
-    {
-        verbose_ = meshDict_.getOrDefault("verbose", verboseOutput);
-    }
-
     if (mergeStrategy_ == mergeStrategy::DEFAULT_MERGE)
     {
         strategyNames_.readIfPresent("mergeType", meshDict_, mergeStrategy_);
