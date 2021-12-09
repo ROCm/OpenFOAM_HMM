@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -253,11 +253,12 @@ void Foam::LiquidEvapFuchsKnudsen<CloudType>::calculate
     // Sherwood number
     const scalar Sherwood = Sh(Re, Sc);
 
-    // mass flux  [kg/s]
+    // mass flux density [kg/m2/s]
     const scalar Ni = (rhog*Sherwood*Dab*Cm/d)*log((1 - YeInf)/(1 - YeSurf));
 
     // mass transfer [kg]
-    dMassPC[lid] += Ni*dt;
+    const scalar As = Foam::constant::mathematical::pi*d*d;
+    dMassPC[lid] += Ni*As*dt;
 }
 
 

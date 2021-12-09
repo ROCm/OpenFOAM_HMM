@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 IH-Cantabria
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ protected:
         scalar waveAngle_;
 
         //-
-        const scalarField& x_;
+        const scalarField x_;
 
         const scalar x0_;
 

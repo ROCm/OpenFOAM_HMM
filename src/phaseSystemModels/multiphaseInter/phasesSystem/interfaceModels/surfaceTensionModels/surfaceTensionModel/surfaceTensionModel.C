@@ -32,14 +32,17 @@ License
 
 namespace Foam
 {
+namespace multiphaseInter
+{
     defineTypeNameAndDebug(surfaceTensionModel, 0);
     defineRunTimeSelectionTable(surfaceTensionModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModel::surfaceTensionModel
+Foam::multiphaseInter::surfaceTensionModel::surfaceTensionModel
 (
     const dictionary& dict,
     const phasePair& pair,
@@ -64,8 +67,8 @@ Foam::surfaceTensionModel::surfaceTensionModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surfaceTensionModel>
-Foam::surfaceTensionModel::New
+Foam::autoPtr<Foam::multiphaseInter::surfaceTensionModel>
+Foam::multiphaseInter::surfaceTensionModel::New
 (
     const dictionary& dict,
     const phasePair& pair
@@ -95,7 +98,7 @@ Foam::surfaceTensionModel::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfaceTensionModel::writeData(Ostream& os) const
+bool Foam::multiphaseInter::surfaceTensionModel::writeData(Ostream& os) const
 {
     return os.good();
 }

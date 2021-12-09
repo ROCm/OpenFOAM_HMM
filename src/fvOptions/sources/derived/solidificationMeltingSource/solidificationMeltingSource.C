@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +127,11 @@ void Foam::fv::solidificationMeltingSource::update(const volScalarField& Cp)
     if (debug)
     {
         Info<< type() << ": " << name_ << " - updating phase indicator" << endl;
+    }
+
+    if (mesh_.topoChanging())
+    {
+        deltaT_.resize(cells_.size());
     }
 
     // update old time alpha1 field

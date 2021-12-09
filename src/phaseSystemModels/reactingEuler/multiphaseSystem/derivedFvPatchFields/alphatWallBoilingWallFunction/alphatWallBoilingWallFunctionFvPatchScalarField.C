@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +131,6 @@ alphatWallBoilingWallFunctionFvPatchScalarField
     TDNBModel_(nullptr),
     wp_(1)
 {
-
     // Check that otherPhaseName != this phase
     if (internalField().group() == otherPhaseName_)
     {
@@ -143,28 +142,22 @@ alphatWallBoilingWallFunctionFvPatchScalarField
             << abort(FatalError);
     }
 
+    partitioningModel_ =
+        wallBoilingModels::partitioningModel::New
+        (
+            dict.subDict("partitioningModel")
+        );
+
     switch (phaseType_)
     {
         case vaporPhase:
         {
-            partitioningModel_ =
-                wallBoilingModels::partitioningModel::New
-                (
-                    dict.subDict("partitioningModel")
-                );
-
-            dmdt_ = 0;
+            dmdt_ = Zero;
 
             break;
         }
         case liquidPhase:
         {
-            partitioningModel_ =
-                wallBoilingModels::partitioningModel::New
-                (
-                    dict.subDict("partitioningModel")
-                );
-
             nucleationSiteModel_ =
                 wallBoilingModels::nucleationSiteModel::New
                 (
@@ -1122,36 +1115,16 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
 
     relax_->writeData(os);
 
+    os.beginBlock("partitioningModel");
+    partitioningModel_->write(os);
+    os.endBlock();
+
     switch (phaseType_)
     {
         case vaporPhase:
-        {
-            os.beginBlock("partitioningModel");
-            partitioningModel_->write(os);
-            os.endBlock();
-
-            if (filmBoilingModel_)
-            {
-                os.beginBlock("filmBoilingModel");
-                filmBoilingModel_->write(os);
-                os.endBlock();
-            }
-
-            if (LeidenfrostModel_)
-            {
-                os.beginBlock("LeidenfrostModel");
-                LeidenfrostModel_->write(os);
-                os.endBlock();
-            }
-
             break;
-        }
         case liquidPhase:
         {
-            os.beginBlock("partitioningModel");
-            partitioningModel_->write(os);
-            os.endBlock();
-
             os.beginBlock("nucleationSiteModel");
             nucleationSiteModel_->write(os);
             os.endBlock();

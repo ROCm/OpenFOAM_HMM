@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,10 @@ namespace Foam
 {
 
 // Forward Declarations
+namespace multiphaseInter
+{
 class surfaceTensionModel;
+}
 class porousModel;
 
 /*---------------------------------------------------------------------------*\
@@ -95,7 +98,7 @@ protected:
         typedef
             HashTable
             <
-                autoPtr<surfaceTensionModel>,
+                autoPtr<multiphaseInter::surfaceTensionModel>,
                 phasePairKey,
                 phasePairKey::hash
             >
