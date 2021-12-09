@@ -108,14 +108,60 @@ optimisation
 {
     sensitivities
     {
-        type               surfacePoints;
-        patches            (motorBikeGroup);
-        includeSurfaceArea false;
-        adjointEikonalSolver
+        // Used to compute a number of variants of the sensitivity map
+        // at once
+        type            multiple;
+        patches         (motorBikeGroup);
+        sensTypes
         {
-            tolerance 1.e-5;
-            iters     1000;
-            epsilon   0.1;
+            pointBased
+            {
+                type               surfacePoints;
+                patches            (motorBikeGroup);
+                includeSurfaceArea false;
+                adjointEikonalSolver
+                {
+                    tolerance 1.e-5;
+                    iters     1000;
+                    epsilon   0.1;
+                }
+            }
+            faceBased-unsmoothed
+            {
+                type                 surface;
+                patches              (motorBikeGroup);
+                includeSurfaceArea   false;
+            }
+            faceBased-RMult_2
+            {
+                type                 surface;
+                patches              (motorBikeGroup);
+                includeSurfaceArea   false;
+                smoothSensitivities  true;
+                meanRadiusMultiplier 2;
+                suffix               Rmult2; // suffix of the sensitivity map output files
+                iters                2000;
+            }
+            faceBased-RMult_5
+            {
+                type                 surface;
+                patches              (motorBikeGroup);
+                includeSurfaceArea   false;
+                smoothSensitivities  true;
+                meanRadiusMultiplier 5;
+                suffix               Rmult5; // suffix of the sensitivity map output files
+                iters                2000;
+            }
+            faceBased-RMult_10
+            {
+                type                 surface;
+                patches              (motorBikeGroup);
+                includeSurfaceArea   false;
+                smoothSensitivities  true;
+                meanRadiusMultiplier 10;
+                suffix               Rmult10; // suffix of the sensitivity map output files
+                iters                2000;
+            }
         }
     }
 }
