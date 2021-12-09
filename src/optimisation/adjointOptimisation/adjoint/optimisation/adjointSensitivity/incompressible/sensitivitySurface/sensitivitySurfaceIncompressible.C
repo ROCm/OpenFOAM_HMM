@@ -602,61 +602,6 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
     autoPtr<incompressibleAdjoint::adjointRASModel>& adjointTurbulence =
         adjointVars_.adjointTurbulence();
 
-    Info<< "    Calculating auxiliary quantities " << endl;
-    // Fields needed to calculate adjoint sensitivities
-    const autoPtr<incompressible::RASModelVariables>&
-       turbVars = primalVars_.RASModelVariables();
-    const singlePhaseTransportModel& lamTransp = primalVars_.laminarTransport();
-    volScalarField nuEff(lamTransp.nu() + turbVars->nutRef());
-    volTensorField gradUa(fvc::grad(Ua));
-    volTensorField gradU(fvc::grad(U));
-
-    // Explicitly correct the boundary gradient to get rid of the tangential
-    // component
-    forAll(mesh_.boundary(), patchI)
-    {
-        const fvPatch& patch = mesh_.boundary()[patchI];
-        if (isA<wallFvPatch>(patch))
-        {
-            tmp<vectorField> tnf = mesh_.boundary()[patchI].nf();
-            const vectorField& nf = tnf();
-            gradU.boundaryFieldRef()[patchI] =
-                nf*U.boundaryField()[patchI].snGrad();
-        }
-    }
-
-    // Auxiliary terms
-    volVectorField gradp(fvc::grad(p));
-    volTensorField stress(nuEff*(gradU + T(gradU)));
-    autoPtr<volVectorField> stressXPtr
-    (
-        createZeroFieldPtr<vector>(mesh_, "stressX", stress.dimensions())
-    );
-    autoPtr<volVectorField> stressYPtr
-    (
-        createZeroFieldPtr<vector>(mesh_, "stressY", stress.dimensions())
-    );
-    autoPtr<volVectorField> stressZPtr
-    (
-        createZeroFieldPtr<vector>(mesh_, "stressZ", stress.dimensions())
-    );
-
-    stressXPtr().replace(0, stress.component(0));
-    stressXPtr().replace(1, stress.component(1));
-    stressXPtr().replace(2, stress.component(2));
-
-    stressYPtr().replace(0, stress.component(3));
-    stressYPtr().replace(1, stress.component(4));
-    stressYPtr().replace(2, stress.component(5));
-
-    stressZPtr().replace(0, stress.component(6));
-    stressZPtr().replace(1, stress.component(7));
-    stressZPtr().replace(2, stress.component(8));
-
-    volTensorField gradStressX(fvc::grad(stressXPtr()));
-    volTensorField gradStressY(fvc::grad(stressYPtr()));
-    volTensorField gradStressZ(fvc::grad(stressZPtr()));
-
     // Accumulate source for additional post-processing PDEs, if necessary
     if (includeDistance_)
     {
@@ -675,8 +620,105 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
     DebugInfo
         << "    Calculating adjoint sensitivity. " << endl;
 
+    tmp<volScalarField> tnuEff = adjointTurbulence->nuEff();
+    const volScalarField& nuEff = tnuEff.ref();
+
     // Sensitivities do not include locale surface area by default.
-    // Part of the sensitivities that multiplies dxFace/db
+    // The part of the sensitivities that multiplies dxFace/db follows
+
+    // Deal with the stress part first since it's the most awkward in terms
+    // of memory managment
+    if (includeGradStressTerm_)
+    {
+        // Terms corresponding to contributions from converting delta
+        // to thetas are added through the corresponding adjoint
+        // boundary conditions instead of grabbing contributions from
+        // the objective function.  Useful to have a unified
+        // formulation for low- and high-re meshes
+
+        tmp<volVectorField> tgradp = fvc::grad(p);
+        const volVectorField& gradp = tgradp.ref();
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchI];
+            tmp<vectorField> tnf = patch.nf();
+            const fvPatchVectorField& Uab = Ua.boundaryField()[patchI];
+            wallFaceSensVecPtr_()[patchI] -=
+                (Uab & tnf)*gradp.boundaryField()[patchI]*dt;
+        }
+        tgradp.clear();
+
+        // We only need to modify the boundaryField of gradU locally.
+        // If grad(U) is cached then
+        // a. The .ref() call fails since the tmp is initialised from a
+        //    const ref
+        // b. we would be changing grad(U) for all other places in the code
+        //    that need it
+        // So, always allocate new memory and avoid registering the new field
+        tmp<volTensorField> tgradU =
+            volTensorField::New("gradULocal", fvc::grad(U));
+        volTensorField::Boundary& gradUbf = tgradU.ref().boundaryFieldRef();
+
+        // Explicitly correct the boundary gradient to get rid of the
+        // tangential component
+        forAll(mesh_.boundary(), patchI)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchI];
+            if (isA<wallFvPatch>(patch))
+            {
+                tmp<vectorField> tnf = mesh_.boundary()[patchI].nf();
+                gradUbf[patchI] = tnf*U.boundaryField()[patchI].snGrad();
+            }
+        }
+
+        tmp<volSymmTensorField> tstress = nuEff*twoSymm(tgradU);
+        const volSymmTensorField& stress = tstress.cref();
+        autoPtr<volVectorField> ptemp
+            (Foam::createZeroFieldPtr<vector>(mesh_, "temp", sqr(dimVelocity)));
+        volVectorField& temp = ptemp.ref();
+        for (label idir = 0; idir < pTraits<vector>::nComponents; ++idir)
+        {
+            unzipRow(stress, idir, temp);
+            volTensorField gradStressDir(fvc::grad(temp));
+            for (const label patchI : sensitivityPatchIDs_)
+            {
+                const fvPatch& patch = mesh_.boundary()[patchI];
+                tmp<vectorField> tnf = patch.nf();
+                const fvPatchVectorField& Uab = Ua.boundaryField()[patchI];
+                wallFaceSensVecPtr_()[patchI] +=
+                    (
+                        Uab.component(idir)
+                       *(gradStressDir.boundaryField()[patchI] & tnf)
+                    )*dt;
+            }
+        }
+    }
+
+    // Transpose part of the adjoint stresses
+    // Dealt with separately to deallocate gradUa as soon as possible
+    if (includeTransposeStresses_)
+    {
+        tmp<volTensorField> tgradUa = fvc::grad(Ua);
+        const volTensorField::Boundary& gradUabf =
+            tgradUa.ref().boundaryField();
+
+        for (const label patchI : sensitivityPatchIDs_)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchI];
+            tmp<vectorField> tnf = patch.nf();
+            const vectorField& nf = tnf();
+            vectorField gradUaNf
+                (
+                    useSnGradInTranposeStresses_
+                  ? (Ua.boundaryField()[patchI].snGrad() & nf)*nf
+                  : (gradUabf[patchI] & nf)
+                );
+            wallFaceSensVecPtr_()[patchI] -=
+                nuEff.boundaryField()[patchI]
+               *(gradUaNf & U.boundaryField()[patchI].snGrad())*nf;
+        }
+    }
+
     for (const label patchI : sensitivityPatchIDs_)
     {
         const fvPatch& patch = mesh_.boundary()[patchI];
@@ -706,49 +748,15 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
           * nf
         );
 
-
-        if (includeTransposeStresses_)
-        {
-            vectorField gradUaNf
-                (
-                    useSnGradInTranposeStresses_ ?
-                    (Ua.boundaryField()[patchI].snGrad() & nf)*nf :
-                    (gradUa.boundaryField()[patchI] & nf)
-                );
-
-            stressTerm -=
-                nuEff.boundaryField()[patchI]
-               *(gradUaNf & U.boundaryField()[patchI].snGrad())
-               *nf;
-        }
-
         if (includeDivTerm_)
         {
             stressTerm +=
                 scalar(1./3.)*nuEff.boundaryField()[patchI]
               * (
                     ((Ua.boundaryField()[patchI].snGrad() &nf)*nf)
-                    & U.boundaryField()[patchI].snGrad()
+                  & U.boundaryField()[patchI].snGrad()
                 )
               * nf;
-        }
-
-        vectorField gradStressTerm(patch.size(), Zero);
-        if (includeGradStressTerm_)
-        {
-            // Terms corresponding to contributions from converting delta to
-            // thetas are added through the corresponding adjoint boundary
-            // conditions instead of grabbing contributions from the objective
-            // function.  Useful to have a unified formulation for low- and
-            // high-re meshes
-            const fvPatchVectorField& Uab = Ua.boundaryField()[patchI];
-            gradStressTerm = - ((Uab & nf)*gradp.boundaryField()[patchI]);
-            gradStressTerm +=
-            (
-                Uab.component(0) * gradStressX.boundaryField()[patchI]
-              + Uab.component(1) * gradStressY.boundaryField()[patchI]
-              + Uab.component(2) * gradStressZ.boundaryField()[patchI]
-            ) & nf;
         }
 
         // Adjoint pressure terms
@@ -783,7 +791,6 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
         wallFaceSensVecPtr_()[patchI] +=
         (
             stressTerm
-          + gradStressTerm
           + pressureTerm
           + adjointTMsensitivities[patchI]
           + dxdbMultiplierTot
