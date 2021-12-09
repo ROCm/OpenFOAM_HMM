@@ -25,4 +25,6 @@ $(surfaceTension)/surfaceTensionModel/surfaceTensionModel.C
 $(surfaceTension)/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
 */
 
+derivedFvPatchFields/timeVaryingMassSorption/timeVaryingMassSorptionFvPatchScalarField.C
+
 LIB = $(FOAM_LIBBIN)/libincompressibleMultiphaseSystems
