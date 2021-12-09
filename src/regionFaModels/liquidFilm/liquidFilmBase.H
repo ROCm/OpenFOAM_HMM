@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,6 +260,9 @@ public:
 
             //- Access to pRef
             scalar pRef();
+
+            //- Name of the U field
+            word UName() const;
 
 
             // Transfer fields - to the primary region (lagragian injection)

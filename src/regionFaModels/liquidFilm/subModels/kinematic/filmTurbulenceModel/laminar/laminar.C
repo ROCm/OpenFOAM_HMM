@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,14 +51,7 @@ laminar::laminar
     const dictionary& dict
 )
 :
-    filmTurbulenceModel(type(), film, dict),
-    Cf_(dict_.get<scalar>("Cf"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-laminar::~laminar()
+    filmTurbulenceModel(type(), film, dict)
 {}
 
 
@@ -66,20 +59,19 @@ laminar::~laminar()
 
 tmp<areaScalarField> laminar::mut() const
 {
-    auto tmut =
-        tmp<areaScalarField>::New
+    auto tmut = tmp<areaScalarField>::New
+    (
+        IOobject
         (
-            IOobject
-            (
-                "mut",
-                film().primaryMesh().time().timeName(),
-                film().primaryMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            film().regionMesh(),
-            dimensionedScalar(dimMass/dimLength/dimTime)
-        );
+            "mut",
+            film().primaryMesh().time().timeName(),
+            film().primaryMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        film().regionMesh(),
+        dimensionedScalar(dimMass/dimLength/dimTime)
+    );
 
     return tmut;
 }
@@ -91,18 +83,18 @@ void laminar::correct()
 
 tmp<faVectorMatrix> laminar::Su(areaVectorField& U) const
 {
+    return primaryRegionFriction(U) + wallFriction(U);
+}
+
+
+tmp<faVectorMatrix> laminar::wallFriction(areaVectorField& U) const
+{
     // local references to film fields
     tmp<areaVectorField> Uw = film_.Uw();
-    tmp<areaVectorField> Up = film_.Up();
-
-    // employ simple coeff-based model
-    const dimensionedScalar Cf("Cf", dimVelocity, Cf_);
-
     tmp<areaScalarField> wf = Cw();
 
     return
     (
-       - fam::Sp(Cf, U) + Cf*Up()     // surface contribution
        - fam::Sp(wf(), U) + wf()*Uw() // wall contribution
     );
 }

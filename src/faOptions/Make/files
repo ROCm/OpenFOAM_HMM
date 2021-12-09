@@ -13,4 +13,9 @@ $(derivedSources)/jouleHeatingSource/jouleHeatingSource.C
 $(derivedSources)/contactHeatFluxSource/contactHeatFluxSource.C
 $(derivedSources)/externalFileSource/externalFileSource.C
 
+/* Corrections */
+corrections=corrections
+
+$(corrections)/limitVelocity/limitVelocity.C
+
 LIB = $(FOAM_LIBBIN)/libfaOptions
