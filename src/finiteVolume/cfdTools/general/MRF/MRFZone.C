@@ -247,56 +247,15 @@ Foam::MRFZone::MRFZone
     mesh_(mesh),
     name_(name),
     coeffs_(dict),
-    active_(coeffs_.getOrDefault("active", true)),
+    active_(true),
     cellZoneName_(cellZoneName),
-    cellZoneID_(),
-    excludedPatchNames_
-    (
-        coeffs_.getOrDefault<wordRes>("nonRotatingPatches", wordRes())
-    ),
-    origin_(coeffs_.get<vector>("origin")),
-    axis_(coeffs_.get<vector>("axis").normalise()),
-    omega_(Function1<scalar>::New("omega", coeffs_, &mesh_))
+    cellZoneID_(-1),
+    excludedPatchNames_(wordRes()),
+    origin_(Zero),
+    axis_(Zero),
+    omega_(nullptr)
 {
-    if (cellZoneName_ == word::null)
-    {
-        coeffs_.readEntry("cellZone", cellZoneName_);
-    }
-
-    if (!active_)
-    {
-        cellZoneID_ = -1;
-    }
-    else
-    {
-        cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
-
-        const labelHashSet excludedPatchSet
-        (
-            mesh_.boundaryMesh().patchSet(excludedPatchNames_)
-        );
-
-        excludedPatchLabels_.setSize(excludedPatchSet.size());
-
-        label i = 0;
-        for (const label patchi : excludedPatchSet)
-        {
-            excludedPatchLabels_[i++] = patchi;
-        }
-
-        bool cellZoneFound = (cellZoneID_ != -1);
-
-        reduce(cellZoneFound, orOp<bool>());
-
-        if (!cellZoneFound)
-        {
-            FatalErrorInFunction
-                << "cannot find MRF cellZone " << cellZoneName_
-                << exit(FatalError);
-        }
-
-        setMRFFaces();
-    }
+    read(dict);
 }
 
 
@@ -593,9 +552,60 @@ bool Foam::MRFZone::read(const dictionary& dict)
 {
     coeffs_ = dict;
 
-    active_ = coeffs_.getOrDefault("active", true);
-    coeffs_.readEntry("cellZone", cellZoneName_);
-    cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
+    coeffs_.readIfPresent("active", active_);
+
+    if (!active_)
+    {
+        cellZoneID_ = -1;
+        return true;
+    }
+
+    coeffs_.readIfPresent("nonRotatingPatches", excludedPatchNames_);
+
+    origin_ = coeffs_.get<vector>("origin");
+    axis_ = coeffs_.get<vector>("axis").normalise();
+    omega_.reset(Function1<scalar>::New("omega", coeffs_, &mesh_));
+
+    const word oldCellZoneName = cellZoneName_;
+    if (cellZoneName_ == word::null)
+    {
+        coeffs_.readEntry("cellZone", cellZoneName_);
+    }
+    else
+    {
+        coeffs_.readIfPresent("cellZone", cellZoneName_);
+    }
+
+    if (cellZoneID_ == -1 || oldCellZoneName != cellZoneName_)
+    {
+        cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
+
+        const labelHashSet excludedPatchSet
+        (
+            mesh_.boundaryMesh().patchSet(excludedPatchNames_)
+        );
+
+        excludedPatchLabels_.setSize(excludedPatchSet.size());
+
+        label i = 0;
+        for (const label patchi : excludedPatchSet)
+        {
+            excludedPatchLabels_[i++] = patchi;
+        }
+
+        bool cellZoneFound = (cellZoneID_ != -1);
+
+        reduce(cellZoneFound, orOp<bool>());
+
+        if (!cellZoneFound)
+        {
+            FatalErrorInFunction
+                << "cannot find MRF cellZone " << cellZoneName_
+                << exit(FatalError);
+        }
+
+        setMRFFaces();
+    }
 
     return true;
 }

@@ -88,8 +88,10 @@ class MRFZone
         //- Cell zone ID
         label cellZoneID_;
 
-        const wordRes excludedPatchNames_;
+        //- Non-rotating patches
+        wordRes excludedPatchNames_;
 
+        //- Indices of non-rotating patches
         labelList excludedPatchLabels_;
 
         //- Internal faces that are part of MRF
@@ -102,7 +104,7 @@ class MRFZone
         labelListList excludedFaces_;
 
         //- Origin of the axis
-        const vector origin_;
+        vector origin_;
 
         //- Axis vector
         vector axis_;

@@ -104,16 +104,20 @@ const Foam::MRFZone& Foam::MRFZoneList::getFromName
     const word& name
 ) const
 {
+    DynamicList<word> names;
     for (const auto& mrf: *this)
     {
         if (mrf.name() == name)
         {
             return mrf;
         }
+
+        names.append(mrf.name());
     }
 
     FatalErrorInFunction
         << "Unable to find MRFZone " << name
+        << ". Available zones are: " << names
         << exit(FatalError);
 
     return first();
@@ -123,10 +127,9 @@ const Foam::MRFZone& Foam::MRFZoneList::getFromName
 bool Foam::MRFZoneList::read(const dictionary& dict)
 {
     bool allOk = true;
-    forAll(*this, i)
+    for (auto& mrf: *this)
     {
-        MRFZone& pm = this->operator[](i);
-        bool ok = pm.read(dict.subDict(pm.name()));
+        bool ok = mrf.read(dict.subDict(mrf.name()));
         allOk = (allOk && ok);
     }
     return allOk;
@@ -135,10 +138,10 @@ bool Foam::MRFZoneList::read(const dictionary& dict)
 
 bool Foam::MRFZoneList::writeData(Ostream& os) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
         os  << nl;
-        this->operator[](i).writeData(os);
+        mrf.writeData(os);
     }
 
     return os.good();
@@ -151,18 +154,18 @@ void Foam::MRFZoneList::addAcceleration
     volVectorField& ddtU
 ) const
 {
-    forAll(*this, i)
-     {
-        operator[](i).addCoriolis(U, ddtU);
+    for (const auto& mrf: *this)
+    {
+        mrf.addCoriolis(U, ddtU);
     }
 }
 
 
 void Foam::MRFZoneList::addAcceleration(fvVectorMatrix& UEqn) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).addCoriolis(UEqn);
+        mrf.addCoriolis(UEqn);
     }
 }
 
@@ -173,9 +176,9 @@ void Foam::MRFZoneList::addAcceleration
     fvVectorMatrix& UEqn
 ) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).addCoriolis(rho, UEqn);
+        mrf.addCoriolis(rho, UEqn);
     }
 }
 
@@ -185,9 +188,8 @@ Foam::tmp<Foam::volVectorField> Foam::MRFZoneList::DDt
     const volVectorField& U
 ) const
 {
-    tmp<volVectorField> tacceleration
-    (
-        new volVectorField
+    auto tacceleration =
+        tmp<volVectorField>::New
         (
             IOobject
             (
@@ -197,13 +199,12 @@ Foam::tmp<Foam::volVectorField> Foam::MRFZoneList::DDt
             ),
             U.mesh(),
             dimensionedVector(U.dimensions()/dimTime, Zero)
-        )
-    );
-    volVectorField& acceleration = tacceleration.ref();
+        );
+    auto& acceleration = tacceleration.ref();
 
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).addCoriolis(U, acceleration);
+        mrf.addCoriolis(U, acceleration);
     }
 
     return tacceleration;
@@ -222,18 +223,18 @@ Foam::tmp<Foam::volVectorField> Foam::MRFZoneList::DDt
 
 void Foam::MRFZoneList::makeRelative(volVectorField& U) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeRelative(U);
+        mrf.makeRelative(U);
     }
 }
 
 
 void Foam::MRFZoneList::makeRelative(surfaceScalarField& phi) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeRelative(phi);
+        mrf.makeRelative(phi);
     }
 }
 
@@ -279,9 +280,9 @@ Foam::MRFZoneList::relative
     {
         tmp<FieldField<fvsPatchField, scalar>> rphi(New(tphi, true));
 
-        forAll(*this, i)
+        for (const auto& mrf: *this)
         {
-            operator[](i).makeRelative(rphi.ref());
+            mrf.makeRelative(rphi.ref());
         }
 
         tphi.clear();
@@ -306,9 +307,9 @@ Foam::MRFZoneList::relative
     {
         tmp<Field<scalar>> rphi(New(tphi, true));
 
-        forAll(*this, i)
+        for (const auto& mrf: *this)
         {
-            operator[](i).makeRelative(rphi.ref(), patchi);
+            mrf.makeRelative(rphi.ref(), patchi);
         }
 
         tphi.clear();
@@ -328,27 +329,27 @@ void Foam::MRFZoneList::makeRelative
     surfaceScalarField& phi
 ) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeRelative(rho, phi);
+        mrf.makeRelative(rho, phi);
     }
 }
 
 
 void Foam::MRFZoneList::makeAbsolute(volVectorField& U) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeAbsolute(U);
+        mrf.makeAbsolute(U);
     }
 }
 
 
 void Foam::MRFZoneList::makeAbsolute(surfaceScalarField& phi) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeAbsolute(phi);
+        mrf.makeAbsolute(phi);
     }
 }
 
@@ -390,18 +391,18 @@ void Foam::MRFZoneList::makeAbsolute
     surfaceScalarField& phi
 ) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).makeAbsolute(rho, phi);
+        mrf.makeAbsolute(rho, phi);
     }
 }
 
 
 void Foam::MRFZoneList::correctBoundaryVelocity(volVectorField& U) const
 {
-    forAll(*this, i)
+    for (const auto& mrf: *this)
     {
-        operator[](i).correctBoundaryVelocity(U);
+        mrf.correctBoundaryVelocity(U);
     }
 }
 
@@ -417,15 +418,11 @@ void Foam::MRFZoneList::correctBoundaryFlux
         relative(mesh_.Sf().boundaryField() & U.boundaryField())
     );
 
-
     surfaceScalarField::Boundary& phibf = phi.boundaryFieldRef();
 
     forAll(mesh_.boundary(), patchi)
     {
-        if
-        (
-            isA<fixedValueFvsPatchScalarField>(phibf[patchi])
-        )
+        if (isA<fixedValueFvsPatchScalarField>(phibf[patchi]))
         {
             phibf[patchi] == Uf[patchi];
         }
@@ -437,9 +434,9 @@ void Foam::MRFZoneList::update()
 {
     if (mesh_.topoChanging())
     {
-        forAll(*this, i)
+        for (auto& mrf: *this)
         {
-            operator[](i).update();
+            mrf.update();
         }
     }
 }
