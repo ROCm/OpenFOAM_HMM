@@ -26,6 +26,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
+{
+    return NullObjectRef<SubField<Type>>();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -104,13 +113,6 @@ inline Foam::SubField<Type>::SubField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
-{
-    return NullObjectRef<SubField<Type>>();
-}
-
 
 template<class Type>
 inline Foam::tmp<Foam::Field<typename Foam::SubField<Type>::cmptType>>

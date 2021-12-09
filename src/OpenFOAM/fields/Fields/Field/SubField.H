@@ -28,11 +28,9 @@ Class
     Foam::SubField
 
 Description
-    SubField is a Field obtained as a section of another Field.
-
-    Thus it is itself unallocated so that no storage is allocated or
-    deallocated during its use.  To achieve this behaviour, SubField is
-    derived from a SubList rather than a List.
+    SubField is a Field obtained as a section of another Field,
+    without its own allocation.
+    SubField is derived from a SubList rather than a List.
 
 SourceFiles
     SubFieldI.H
@@ -42,17 +40,15 @@ SourceFiles
 #ifndef SubField_H
 #define SubField_H
 
-#include "SubList.H"
 #include "Field.H"
-#include "VectorSpace.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-template<class Type> class Field;
+// Forward Declarations
 template<class Type> class SubField;
 
 /*---------------------------------------------------------------------------*\
@@ -62,13 +58,19 @@ template<class Type> class SubField;
 template<class Type>
 class SubField
 :
-    public refCount,
+    public FieldBase,
     public SubList<Type>
 {
 public:
 
     //- Component type
     typedef typename pTraits<Type>::cmptType cmptType;
+
+
+    // Static Member Functions
+
+        //- Return nullObject reference SubField
+        inline static const SubField<Type>& null();
 
 
     // Constructors
@@ -119,9 +121,6 @@ public:
 
 
     // Member Functions
-
-        //- Return a null SubField
-        static inline const SubField<Type>& null();
 
         //- Return a component field of the field
         inline tmp<Field<cmptType>> component(const direction) const;

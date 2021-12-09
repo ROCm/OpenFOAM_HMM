@@ -47,10 +47,10 @@ SourceFiles
 
 #include "tmp.H"
 #include "direction.H"
-#include "VectorSpace.H"
-#include "scalarList.H"
 #include "labelList.H"
+#include "scalarList.H"
 #include "FieldBase.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,11 +92,8 @@ public:
 
     // Static Member Functions
 
-        //- Return nullObject reference field
-        inline static const Field<Type>& null()
-        {
-            return NullObjectRef<Field<Type>>();
-        }
+        //- Return nullObject reference Field
+        inline static const Field<Type>& null();
 
 
     // Constructors

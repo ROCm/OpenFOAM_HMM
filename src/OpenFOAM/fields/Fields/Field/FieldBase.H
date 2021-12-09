@@ -27,7 +27,7 @@ Class
     Foam::FieldBase
 
 Description
-    Template invariant parts for Field
+    Template invariant parts for Field and SubField
 
 SourceFiles
     FieldBase.C
@@ -54,17 +54,19 @@ class FieldBase
 {
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Typename for Field
         static const char* const typeName;
 
+        //- Permit read construct from a larger size.
+        //  Mostly required for things like column mesh, for example.
         static bool allowConstructFromLargerSize;
 
 
     // Constructors
 
-        //- Construct null, with refCount zero
+        //- Default construct, refCount zero
         constexpr FieldBase() noexcept
         :
             refCount()
