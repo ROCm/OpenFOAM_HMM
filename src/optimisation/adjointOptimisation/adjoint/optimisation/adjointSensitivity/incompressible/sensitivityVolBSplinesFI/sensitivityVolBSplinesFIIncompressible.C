@@ -56,19 +56,10 @@ sensitivityVolBSplinesFI::sensitivityVolBSplinesFI
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    FIBase
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    FIBase(mesh, dict, adjointSolver),
     volBSplinesBase_
     (
         const_cast<volBSplinesBase&>(volBSplinesBase::New(mesh))

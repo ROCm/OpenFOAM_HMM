@@ -54,19 +54,10 @@ sensitivityMultiple::sensitivityMultiple
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    adjointSensitivity
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    adjointSensitivity(mesh, dict, adjointSolver),
     sensTypes_(dict.subDict("sensTypes").toc()),
     sens_(sensTypes_.size())
 {
@@ -79,9 +70,7 @@ sensitivityMultiple::sensitivityMultiple
             (
                 mesh,
                 dict.subDict("sensTypes").subDict(sensTypes_[sI]),
-                primalVars,
-                adjointVars,
-                objectiveManager
+                adjointSolver
             )
         );
     }

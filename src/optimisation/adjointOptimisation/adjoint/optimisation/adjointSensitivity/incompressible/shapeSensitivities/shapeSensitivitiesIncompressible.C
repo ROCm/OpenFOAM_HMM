@@ -132,19 +132,10 @@ shapeSensitivities::shapeSensitivities
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    adjointSensitivity
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    adjointSensitivity(mesh, dict, adjointSolver),
     shapeSensitivitiesBase(mesh, dict),
     dSfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),
     dnfdbMult_(createZeroBoundaryPtr<vector>(mesh_)),

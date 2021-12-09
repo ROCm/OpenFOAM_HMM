@@ -66,6 +66,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration
+class incompressibleAdjointSolver;
+
 namespace incompressible
 {
 
@@ -82,7 +85,8 @@ protected:
     // Protected data
 
         scalarField derivatives_;
-        incompressibleVars& primalVars_;
+        incompressibleAdjointSolver& adjointSolver_;
+        const incompressibleVars& primalVars_;
         incompressibleAdjointVars& adjointVars_;
         objectiveManager& objectiveManager_;
 
@@ -114,16 +118,12 @@ public:
             (
                 const fvMesh& mesh,
                 const dictionary& dict,
-                incompressibleVars& primalVars,
-                incompressibleAdjointVars& adjointVars,
-                objectiveManager& objectiveManager
+                incompressibleAdjointSolver& adjointSolver
             ),
             (
                 mesh,
                 dict,
-                primalVars,
-                adjointVars,
-                objectiveManager
+                adjointSolver
             )
         );
 
@@ -135,9 +135,7 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            incompressibleVars& primalVars,
-            incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager
+            incompressibleAdjointSolver& adjointSolver
         );
 
     // Selectors
@@ -147,9 +145,7 @@ public:
         (
             const fvMesh& mesh,
             const dictionary& dict,
-            incompressibleVars& primalVars,
-            incompressibleAdjointVars& adjointVars,
-            objectiveManager& objectiveManager
+            incompressibleAdjointSolver& adjointSolver
         );
 
 

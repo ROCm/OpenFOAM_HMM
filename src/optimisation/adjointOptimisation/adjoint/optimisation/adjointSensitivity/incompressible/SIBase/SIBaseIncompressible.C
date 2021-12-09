@@ -79,19 +79,10 @@ SIBase::SIBase
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    shapeSensitivities
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    shapeSensitivities(mesh, dict, adjointSolver),
     surfaceSensitivity_
     (
         mesh,
@@ -100,9 +91,7 @@ SIBase::SIBase
         // and the dict returned by subOrEmptyDict (if found)
         // does not know its parent, optionalSubDict is used
         dict.optionalSubDict("surfaceSensitivities"),
-        primalVars,
-        adjointVars,
-        objectiveManager
+        adjointSolver
     ),
     includeObjective_(true),
     writeSensitivityMap_(true)

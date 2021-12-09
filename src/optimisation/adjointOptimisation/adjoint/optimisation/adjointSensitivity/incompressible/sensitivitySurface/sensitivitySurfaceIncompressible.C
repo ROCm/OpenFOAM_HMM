@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sensitivitySurfaceIncompressible.H"
+#include "incompressibleAdjointSolver.H"
 #include "PrimitivePatchInterpolation.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
@@ -405,19 +406,10 @@ sensitivitySurface::sensitivitySurface
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    adjointSensitivity
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    adjointSensitivity(mesh, dict, adjointSolver),
     shapeSensitivitiesBase(mesh, dict),
     includeSurfaceArea_(false),
     includePressureTerm_(false),
@@ -797,6 +789,10 @@ void sensitivitySurface::accumulateIntegrand(const scalar dt)
           + dxdbMultiplierTot
         )*dt;
     }
+
+    // Add terms from physics other than the typical incompressible flow eqns
+    adjointSolver_.additionalSensitivityMapTerms
+        (wallFaceSensVecPtr_(), sensitivityPatchIDs_, dt);
 
     // Add the sensitivity part corresponding to changes of the normal vector
     // Computed at points and mapped to faces

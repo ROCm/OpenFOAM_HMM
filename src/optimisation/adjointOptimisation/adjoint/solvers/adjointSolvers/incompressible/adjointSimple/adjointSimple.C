@@ -146,9 +146,7 @@ Foam::adjointSimple::adjointSimple
             (
                 mesh,
                 optDict.subDict("optimisation").subDict("sensitivities"),
-                primalVars_,
-                adjointVars_,
-                objectiveManagerPtr_()
+                *this
             ).ptr()
         );
         // Read stored sensitivities, if they exist

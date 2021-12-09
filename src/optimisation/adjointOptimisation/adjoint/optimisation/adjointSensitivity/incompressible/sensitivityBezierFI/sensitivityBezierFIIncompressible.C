@@ -122,19 +122,10 @@ sensitivityBezierFI::sensitivityBezierFI
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    FIBase
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    FIBase(mesh, dict, adjointSolver),
     //Bezier_(mesh, dict), // AJH Read locally?
     Bezier_(mesh, mesh.lookupObject<IOdictionary>("optimisationDict")),
     flowSens_(3*Bezier_.nBezier(), Zero),

@@ -28,6 +28,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "sensitivitySurfacePointsIncompressible.H"
+#include "incompressibleAdjointSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "syncTools.H"
 
@@ -333,19 +334,10 @@ sensitivitySurfacePoints::sensitivitySurfacePoints
 (
     const fvMesh& mesh,
     const dictionary& dict,
-    incompressibleVars& primalVars,
-    incompressibleAdjointVars& adjointVars,
-    objectiveManager& objectiveManager
+    incompressibleAdjointSolver& adjointSolver
 )
 :
-    adjointSensitivity
-    (
-        mesh,
-        dict,
-        primalVars,
-        adjointVars,
-        objectiveManager
-    ),
+    adjointSensitivity(mesh, dict, adjointSolver),
     shapeSensitivitiesBase(mesh, dict),
     includeSurfaceArea_(false),
     includePressureTerm_(false),
@@ -611,6 +603,10 @@ void sensitivitySurfacePoints::accumulateIntegrand(const scalar dt)
           + dxdbMultiplierTot
         )*dt;
     }
+
+    // Add terms from physics other than the typical incompressible flow eqns
+    adjointSolver_.additionalSensitivityMapTerms
+        (wallFaceSens_(), sensitivityPatchIDs_, dt);
 }
 
 
