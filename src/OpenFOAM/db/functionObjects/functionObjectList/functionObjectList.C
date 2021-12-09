@@ -34,6 +34,7 @@ License
 #include "timeControlFunctionObject.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
+#include "Switch.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
@@ -1009,10 +1010,27 @@ bool Foam::functionObjectList::read()
 
             if (!dEntry.isDict())
             {
-                if (key != "errors" && key != "libs")
+                // Handle or ignore some known/expected keywords
+
+                if (key == "useNamePrefix")  // As per functionObject
+                {
+                    Switch sw(dEntry.stream().peekFirst());
+                    if (sw.good())
+                    {
+                        functionObject::defaultUseNamePrefix = sw;
+                    }
+                    else
+                    {
+                        IOWarningInFunction(parentDict_)
+                            << "Entry '" << key << "' is not a valid switch"
+                            << endl;
+                    }
+                }
+                else if (key != "errors" && key != "libs")
                 {
                     IOWarningInFunction(parentDict_)
-                        << "Entry " << key << " is not a dictionary" << endl;
+                        << "Entry '" << key << "' is not a dictionary"
+                        << endl;
                 }
 
                 continue;

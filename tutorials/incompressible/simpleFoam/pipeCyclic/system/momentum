@@ -5,6 +5,7 @@ momentum
     type    momentum;
     libs    (fieldFunctionObjects);
     log     true;
+    useNamePrefix   true;
 
     executeInterval 10;
     writeControl    writeTime;

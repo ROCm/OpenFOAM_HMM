@@ -58,6 +58,7 @@ Description
         Property | Description                            | Type | Reqd | Deflt
         libs     | Preloaded library names                | words | no  | -
         errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
+        useNamePrefix | Default enable/disable scoping prefix | bool | no | no-op
     \endtable
 
     The optional \c errors entry controls how FatalError is caught

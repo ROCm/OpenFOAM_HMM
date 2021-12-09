@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -33,10 +33,13 @@ momentum1
     log             true;
     timeStart       0;
     timeEnd         1000;
+
     executeControl  timeStep;
     executeInterval 1;
     writeControl    writeTime;
     writeInterval   -1;
+
+    useNamePrefix   true;
 }
 
 

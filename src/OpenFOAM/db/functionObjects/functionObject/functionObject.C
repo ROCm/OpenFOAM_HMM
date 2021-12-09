@@ -41,6 +41,8 @@ namespace Foam
 
 bool Foam::functionObject::postProcess(false);
 
+bool Foam::functionObject::defaultUseNamePrefix(false);
+
 Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
 
@@ -48,7 +50,7 @@ Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
 Foam::word Foam::functionObject::scopedName(const word& name) const
 {
-    if (scopedNames_)
+    if (useNamePrefix_)
     {
         return IOobject::scopedName(name_, name);
     }
@@ -62,11 +64,11 @@ Foam::word Foam::functionObject::scopedName(const word& name) const
 Foam::functionObject::functionObject
 (
     const word& name,
-    const bool scopedNames
+    const bool withNamePrefix
 )
 :
     name_(name),
-    scopedNames_(scopedNames),
+    useNamePrefix_(withNamePrefix),
     log(postProcess)
 {}
 
@@ -144,17 +146,36 @@ const Foam::word& Foam::functionObject::name() const noexcept
 }
 
 
-bool Foam::functionObject::scopedNames() const noexcept
+bool Foam::functionObject::useNamePrefix() const noexcept
 {
-    return scopedNames_;
+    return useNamePrefix_;
+}
+
+
+bool Foam::functionObject::useNamePrefix(bool on) noexcept
+{
+    bool old(useNamePrefix_);
+    useNamePrefix_ = on;
+    return old;
 }
 
 
 bool Foam::functionObject::read(const dictionary& dict)
 {
+// OR
+// useNamePrefix_ = Switch("useNamePrefix", dict, defaultUseNamePrefix);
+
+    useNamePrefix_ =
+        dict.getOrDefault
+        (
+            "useNamePrefix",
+            defaultUseNamePrefix,
+            keyType::LITERAL
+        );
+
+
     if (!postProcess)
     {
-        scopedNames_ = dict.getOrDefault("scopedNames", true);
         log = dict.getOrDefault("log", true);
     }
 
