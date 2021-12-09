@@ -151,6 +151,16 @@ Foam::objectiveManager& Foam::adjointSolver::getObjectiveManager()
 }
 
 
+void Foam::adjointSolver::postLoop()
+{
+    computeObjectiveSensitivities();
+    // The solver dictionary has been already written after the termination
+    // of the adjoint loop. Force re-writing it to include the sensitivities
+    // as well
+    regIOobject::write(true);
+}
+
+
 bool Foam::adjointSolver::isConstraint()
 {
     return isConstraint_;
@@ -166,6 +176,16 @@ void Foam::adjointSolver::clearSensitivities()
 void Foam::adjointSolver::updatePrimalBasedQuantities()
 {
     // Does nothing in base
+}
+
+
+bool Foam::adjointSolver::writeData(Ostream& os) const
+{
+    if (sensitivities_.valid())
+    {
+        sensitivities_().writeEntry("sensitivities", os);
+    }
+    return true;
 }
 
 

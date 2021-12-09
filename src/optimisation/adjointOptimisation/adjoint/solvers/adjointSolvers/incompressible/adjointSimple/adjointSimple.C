@@ -151,6 +151,19 @@ Foam::adjointSimple::adjointSimple
                 objectiveManagerPtr_()
             ).ptr()
         );
+        // Read stored sensitivities, if they exist
+        // Need to know the size of the sensitivity field, retrieved after the
+        // allocation of the corresponding object
+        if (dictionary::found("sensitivities"))
+        {
+            sensitivities_ =
+                tmp<scalarField>::New
+                (
+                    "sensitivities",
+                    *this,
+                    adjointSensitivity_().getSensitivities().size()
+                );
+        }
     }
 }
 
@@ -336,6 +349,7 @@ void Foam::adjointSimple::solve()
         {
             solveIter();
         }
+        postLoop();
     }
 }
 
@@ -363,7 +377,7 @@ void Foam::adjointSimple::computeObjectiveSensitivities()
         {
             sensitivities_.reset(new scalarField(sens.size(), Zero));
         }
-        *sensitivities_ = sens;
+        sensitivities_.ref() = sens;
     }
     else
     {
@@ -433,8 +447,7 @@ void Foam::adjointSimple::updatePrimalBasedQuantities()
 bool Foam::adjointSimple::writeData(Ostream& os) const
 {
     os.writeEntry("averageIter", solverControl_().averageIter());
-
-    return true;
+    return adjointSolver::writeData(os);
 }
 
 

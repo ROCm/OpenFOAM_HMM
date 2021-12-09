@@ -81,7 +81,7 @@ protected:
         autoPtr<objectiveManager> objectiveManagerPtr_;
 
         //- Sensitivities field
-        autoPtr<scalarField> sensitivities_;
+        tmp<scalarField> sensitivities_;
 
         //- Are sensitivities computed
         bool computeSensitivities_;
@@ -172,6 +172,10 @@ public:
 
         // Evolution
 
+            //- Functions to be called after loop
+            //  Computes adjoint sensitivities
+            virtual void postLoop();
+
             //- Compute sensitivities of the underlaying objectives
             virtual void computeObjectiveSensitivities() = 0;
 
@@ -191,6 +195,9 @@ public:
             //- in adjoint turbulence models
             //  Does nothing in the base
             virtual void updatePrimalBasedQuantities();
+
+            //- Write the sensitivity derivatives
+            virtual bool writeData(Ostream& os) const;
 };
 
 
