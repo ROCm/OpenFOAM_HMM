@@ -87,37 +87,30 @@ castellatedMeshControls
                 FAN_SHROUD
                 {
                     level (2 2);
-                    status 1;
                 }
                 OUTLET_01
                 {
                     level (0 0);
-                    status 1;
                 }
                 OUTLET_02
                 {
                     level (0 0);
-                    status 1;
                 }
                 CABINET
                 {
                     level (0 0);
-                    status 1;
                 }
                 FINS
                 {
                     level (3 3);
-                    status 1;
                 }
                 PROCESSOR
                 {
                     level (3 3);
-                    status 1;
                 }
                 FAN
                 {
                     level (3 3);
-                    status 1;
                 }
             }
         }
@@ -130,7 +123,6 @@ castellatedMeshControls
                 MRF_region
                 {
                     level (2 2);
-                    status 1;
                 }
             }
         }
