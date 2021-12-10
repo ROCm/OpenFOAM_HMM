@@ -23,7 +23,7 @@ boundaryField
     fuel
     {
         type            fixedValue;
-        value           uniform 10;
+        value           uniform 1;
     }
 
     air
