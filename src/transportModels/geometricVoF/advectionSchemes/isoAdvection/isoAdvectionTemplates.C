@@ -8,6 +8,7 @@
     Copyright (C) 2016-2017 DHI
     Modified code Copyright (C) 2016-2017 OpenCFD Ltd.
     Modified code Copyright (C) 2019-2020 DLR
+    Modified code Copyright (C) 2021 Johan Roenby
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,14 +163,23 @@ void Foam::isoAdvection::limitFluxes
                 {
                     checkIfOnProcPatch(facei);
                     const label own = owner[facei];
+                    scalar Vown = mesh_.V()[own];
+                    if (porosityEnabled_)
+                    {
+                        Vown *= porosityPtr_->primitiveField()[own];
+                    }
+                    alpha1_[own] -= faceValue(dVfcorrectionValues, facei)/Vown;
 
-                    alpha1_[own] -=
-                        faceValue(dVfcorrectionValues, facei)/mesh_.V()[own];
                     if (mesh_.isInternalFace(facei))
                     {
                         const label nei = neighbour[facei];
+                        scalar Vnei = mesh_.V()[nei];
+                        if (porosityEnabled_)
+                        {
+                            Vnei *= porosityPtr_->primitiveField()[nei];
+                        }
                         alpha1_[nei] +=
-                            faceValue(dVfcorrectionValues, facei)/mesh_.V()[nei];
+                            faceValue(dVfcorrectionValues, facei)/Vnei;
                     }
 
                     // Change to treat boundaries consistently
@@ -242,7 +252,12 @@ void Foam::isoAdvection::boundFlux
     {
         if (alpha1_[celli] < -aTol || alpha1_[celli] > 1 + aTol)
         {
-            const scalar Vi = meshV[celli];
+            scalar Vi = meshV[celli];
+            if (porosityEnabled_)
+            {
+                Vi *= porosityPtr_->primitiveField()[celli];
+            }
+
             scalar alphaOvershoot =
                 pos0(alpha1_[celli] - 1)*(alpha1_[celli] - 1)
               + neg0(alpha1_[celli])*alpha1_[celli];
@@ -409,21 +424,30 @@ void Foam::isoAdvection::advect(const SpType& Sp, const SuType& Su)
     }
 
     // Advect the free surface
-    alpha1_.primitiveFieldRef() =
-    (
-        alpha1_.oldTime().primitiveField()*rDeltaT
-      + Su.field()
-      - fvc::surfaceIntegrate(dVf_)().primitiveField()*rDeltaT
-    )/(rDeltaT - Sp.field());
+    if (porosityEnabled_)
+    {
+        // Should Su and Sp also be divided by porosity?
+        alpha1_.primitiveFieldRef() =
+        (
+            alpha1_.oldTime().primitiveField()*rDeltaT + Su.field()
+          - fvc::surfaceIntegrate(dVf_)().primitiveField()*rDeltaT
+            /porosityPtr_->primitiveField()
+        )/(rDeltaT - Sp.field());
+    }
+    else
+    {
+        alpha1_.primitiveFieldRef() =
+        (
+            alpha1_.oldTime().primitiveField()*rDeltaT
+          + Su.field()
+          - fvc::surfaceIntegrate(dVf_)().primitiveField()*rDeltaT
+        )/(rDeltaT - Sp.field());
+    }
 
     alpha1_.correctBoundaryConditions();
 
     // Adjust dVf for unbounded cells
-    limitFluxes
-    (
-        Sp,
-        Su
-    );
+    limitFluxes(Sp, Su);
 
     scalar maxAlphaMinus1 = gMax(alpha1In_) - 1;
     scalar minAlpha = gMin(alpha1In_);

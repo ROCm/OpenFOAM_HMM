@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     #include "initCorrectPhi.H"
     #include "createUfIfPresent.H"
 
-    #include "CourantNo.H"
+    #include "porousCourantNo.H"
     #include "setInitialDeltaT.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readDyMControls.H"
-        #include "CourantNo.H"
-        #include "alphaCourantNo.H"
+        #include "porousCourantNo.H"
+        #include "porousAlphaCourantNo.H"
         #include "setDeltaT.H"
 
         ++runTime;
