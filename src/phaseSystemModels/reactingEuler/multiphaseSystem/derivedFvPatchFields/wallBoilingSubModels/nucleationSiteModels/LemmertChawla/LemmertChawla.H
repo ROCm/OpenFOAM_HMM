@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +28,11 @@ Class
     Foam::wallBoilingModels::nucleationSiteModels::LemmertChawla
 
 Description
-    Lemmert & Chawla function for nucleation site density,
-    correlation by Egorov & Menter.
+    A model for nucleation site density based on
+    Lemmert-Chawla (1977) function and
+    Egorov-Menter (2004) correlation for boiling flows.
 
-    References:
+    Reference:
     \verbatim
         Lemmert, M., & Chawla, J. M. (1977).
         Influence of flow velocity on surface boiling heat transfer coefficient.
@@ -41,6 +43,26 @@ Description
         Staudenfeldweg, 12, 83624.
         Technical Report ANSYS/TR-04-10, ANSYS Gmbh.
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    nucleationSiteModel
+    {
+        // Mandatory entries
+        type            LemmertChawla;
+
+        // Optional entries
+        Cn              <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: LemmertChawla            | word | yes  | -
+      Cn  | Coefficient for nucleation site density | scalar | no   | 1.0
+    \endtable
 
 SourceFiles
     LemmertChawla.C

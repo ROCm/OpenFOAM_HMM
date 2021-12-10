@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,16 +24,42 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:filmBoilingModels:::Bromley
+    Foam::wallBoilingModels::filmBoilingModels::Bromley
 
 Description
-    Boiling film correlation.
+    A correlation for boiling film modelling
+    based on Bromley (1950) for boiling flows.
 
-    References:
+    Reference:
     \verbatim
-        A. Bromley, Heat transfer in stable film boiling,
-        Chem. Eng. Prog. 58 (1950) 67–72.
+        Bromley, L. A. (1950).
+        Heat transfer in stable film boiling.
+        Chemical Engineering Progress, 46, 221-227.
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    filmBoilingModel
+    {
+        // Mandatory entries
+        type            Bromley;
+        L               <scalar>;
+
+        // Optional entries
+        Cn              <scalar>;
+        emissivity      <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: Bromley                  | word | yes  | -
+      L         | Characteristic length scale       | scalar | yes  | -
+      Cn  | Coefficient for nucleation site density | scalar | no   | 0.62
+      emissivity | Wall emissivity                  | scalar | no   | 1.0
+    \endtable
 
 SourceFiles
     Bromley.C

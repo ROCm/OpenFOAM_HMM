@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,16 +28,34 @@ Class
     Foam::wallBoilingModels::departureDiameterModels::KocamustafaogullariIshii
 
 Description
-    A correlation for bubble departure diameter.
-
-    Requires model parameter 'phi': contact angle in degrees.
+    A correlation for bubble departure diameter modelling
+    based on Kocamustafaogullari-Ishii (1983) for boiling flows.
 
     Reference:
     \verbatim
         Kocamustafaogullari, G., & Ishii, M. (1983).
         Interfacial area and nucleation site density in boiling systems.
         International Journal of Heat and Mass Transfer, 26(9), 1377-1387.
+        DOI:10.1016/S0017-9310(83)80069-6
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    departureDiameterModel
+    {
+        // Mandatory entries
+        type            KocamustafaogullariIshii;
+        phi             <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: KocamustafaogullariIshii | word | yes  | -
+      phi       | Contact angle [deg]                 | scalar | yes  | -
+    \endtable
 
 SourceFiles
     KocamustafaogullariIshii.C

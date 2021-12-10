@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ Class
     Foam::filmBoilingModels::filmBoilingModel
 
 Description
-    Base class for nucleation site density models
+    Base class for film boiling models.
 
 SourceFiles
     filmBoilingModel.C

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +29,43 @@ Class
         alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 
 Description
-    A simple alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField with
+    A simple \c alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField with
     a fixed volumetric phase-change mass flux.
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patch>
+    {
+        // Mandatory entries
+        type         compressible::alphatFixedDmdtWallBoilingWallFunction;
+        vaporPhase   <word>;
+
+        // Optional entries
+        relax        <scalar>;
+        fixedDmdt    <scalar>;
+        L            <scalar>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type | Reqd | Deflt
+      type      | Type name:                             <!--
+      -->  compressible::alphatFixedDmdtWallBoilingWallFunction <!--
+      -->                                                 | word | yes  | -
+      vaporPhase | Name of the vapor phase                | word | yes  | -
+      relax      | Relaxation factor for dmdt           | scalar | no   | 1.0
+      fixedDmdt  | Volumetric phase-change mass flux in near wall cells <!--
+      -->                                               | scalar | no   | 0.0
+      L          | Latent heat                          | scalar | no   | 0.0
+    \endtable
+
+    The inherited entries are elaborated in:
+     -\link alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField.H\endlink
 
 See also
     Foam::compressible::

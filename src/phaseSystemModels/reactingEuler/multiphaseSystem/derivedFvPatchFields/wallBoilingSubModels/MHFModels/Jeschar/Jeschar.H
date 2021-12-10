@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,17 +24,41 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:MHFModels:::Jeschar
+    Foam::wallBoilingModels::MHFModels::Jeschar
 
 Description
-    Minimum heat flux (MHF) model.
+    A model for minimum heat flux based on
+    Jeschar et al. (1992) for boiling flows.
 
-    References:
+    Reference:
     \verbatim
-        Jeschar, E. Specht, C. Kohler, Heat Transfer during Cooling of
-        Heated Metallic Objects with Evaporating Liquids,
-        Theory and Technology in Quenching, Springer, 1992. Chapter 4.
+        Jeschar, R., Specht, E., & Köhler, C. (1992).
+        Heat transfer during cooling of heated
+        metallic objects with evaporating liquids.
+        In Theory and Technology of Quenching (pp. 73-92).
+        Springer, Berlin, Heidelberg.
+        DOI:10.1007/978-3-662-01596-4_4
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    MHFModel
+    {
+        // Mandatory entries
+        type            Jeschar;
+
+        // Optional entries
+        Kmhf            <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: Jeschar                  | word | yes  | -
+      Kmhf      | Burn out factor                   | scalar | no   | 1.0
+    \endtable
 
 SourceFiles
     Jeschar.C

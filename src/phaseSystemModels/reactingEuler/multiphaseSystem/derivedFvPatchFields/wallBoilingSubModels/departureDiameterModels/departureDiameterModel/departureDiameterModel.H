@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::wallBoilingModels::departureDiameterModel
 
 Description
-    Base class for bubble departure diameter models
+    Base class for bubble departure diameter models for boiling flows.
 
 SourceFiles
     departureDiameterModel.C

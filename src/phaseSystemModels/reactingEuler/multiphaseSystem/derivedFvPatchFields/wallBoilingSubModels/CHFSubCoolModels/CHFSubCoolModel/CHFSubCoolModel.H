@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,8 @@ Class
     Foam::CHFModels::CHFSubCoolModel
 
 Description
-    Base class for nucleation site density models
+    Base class for critical heat flux (CHF)
+    sub-cooling correlation models for boiling flows.
 
 SourceFiles
     CHFSubCoolModel.C

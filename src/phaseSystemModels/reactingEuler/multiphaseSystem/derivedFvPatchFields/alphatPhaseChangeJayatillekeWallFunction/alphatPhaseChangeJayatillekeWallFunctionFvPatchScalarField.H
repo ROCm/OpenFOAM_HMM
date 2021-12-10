@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,25 +34,38 @@ Description
     the Eulerian multiphase solvers.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Prt          | Turbulent Prandtl number | no         | 0.85
-        Cmu          | Model coefficient       | no          | 0.09
-        kappa        | von Karman constant     | no          | 0.41
-        E            | Model coefficient       | no          | 9.8
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
+        // Mandatory entries
         type            alphatPhaseChangeJayatillekeWallFunction;
-        Prt             0.85;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0; // optional value entry
+
+        // Optional entries
+        Prt             <scalar>;
+        Cmu             <scalar>;
+        kappa           <scalar>;
+        E               <scalar>;
+
+        // Inherited entries
+        ...
     }
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type | Reqd | Deflt
+      type      | Type name:                             <!--
+      -->  compressible::alphatPhaseChangeJayatillekeWallFunction <!--
+      -->                                                 | word | yes  | -
+      Prt       | Turbulent Prandtl number              | scalar | no   | 0.85
+      Cmu       | Empirical model coefficient           | scalar | no   | 0.09
+      kappa     | Von Karman constant                   | scalar | no   | 0.41
+      E         | Wall roughness parameter              | scalar | no   | 9.8
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link alphatPhaseChangeWallFunctionFvPatchScalarField.H \endlink
 
 See also
     Foam::compressible::alphatPhaseChangeWallFunctionFvPatchScalarField

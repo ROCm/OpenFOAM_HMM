@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,17 +24,40 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:LeidenfrostModels:::Spiegler
+    Foam::wallBoilingModels::LeidenfrostModels::Spiegler
 
 Description
-    Leidenfrost temperature model.
+    A model for Leidenfrost effects based on
+    Spiegler et al. (1963) for boiling flows.
 
-    References:
+    Reference:
     \verbatim
-        SPIEGLER P., HOPENFELD J., SILBERBERG M., BUMPUS J. and NORMAN A.,
-        Onset of stable film boiling and the foam limit, International
-        Journal of Heat and Mass Transfer, 6,11, pp.987-989, 1963
+        Spiegler, P., Hopenfeld, J., Silberberg, M.,
+        Bumpus Jr, C. F., & Norman, A. (1963).
+        Onset of stable film boiling and the foam limit.
+        International Journal of Heat and Mass Transfer, 6(11), 987-989.
+        DOI:10.1016/0017-9310(63)90053-X
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    LeidenfrostModel
+    {
+        // Mandatory entries
+        type            Spiegler;
+
+        // Optional entries
+        Tcrit            <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: Spiegler                 | word | yes  | -
+      Tcrit     | Critical temperature [K]          | scalar | no   | 374.0
+    \endtable
 
 SourceFiles
     Spiegler.C

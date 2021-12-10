@@ -31,27 +31,30 @@ Description
     A thermal wall function for simulation of boiling wall.
 
     This alpha wall function can handle the following regimes:
-        single phase
-        subcooled nucleate wall boiling
-        transitional boiling
-        film boiling.
+      - single phase
+      - subcooled nucleate wall boiling
+      - transitional boiling
+      - film boiling
 
     The wall function uses a partition method to transfer heat either
     to the liquid or vapor phase. At the moment, this function works
-    in a wall temperature fixed mode. i.e, there is no consideration
+    in a wall temperature fixed mode, i.e. there is no consideration
     for the sudden change of heat transfer coefficient (htc) after
     reaching TDBN (deviation from nucleate boiling temperature).
 
-     References:
+    References:
     \verbatim
-        Numerical simulation of immersion quenching process of an engine cylinder head
-        Vedanth Srinivasan, Kil-Min Moon, David Greif, De Ming Wang, Myung-hwan Kim
-        Applied Mathematical Modelling 34 (2010) 2111-2128
+        Srinivasan, V., Moon, K. M., Greif, D.,
+        Wang, D. M., & Kim, M. H. (2010).
+        Numerical simulation of immersion quenching
+        process of an engine cylinder head.
+        Applied Mathematical Modelling, 34(8), 2111-2128.
+        DOI:10.1016/j.apm.2009.10.023
     \endverbatim
 
 
     For the single phase non-boiling regime the standard
-    JayatillekeWallFunction is used.
+    \c JayatillekeWallFunction is used.
 
     For the sub-cool nucleate boiling regime the following runtime
     selectable submodels are used:
@@ -66,19 +69,17 @@ Description
 
     References:
     \verbatim
-        "On the modeling of multidimensional effects in boiling channels"
-        Kurul, N., Podowski, M.Z.,
-        ANS Proceedings, National Heat Transfer Conference,
-        Minneapolis, Minnesota, USA, July 28-31, 1991,
+        Kurul, N., & Podowski, M. Z. (1991).
+        On the modeling of multidimensional effects in boiling channels.
+        Proceedings of the 27th National Heat Transfer Conference.
+        Minneapolis, Minn, USA, July 28-31, 1991.
         ISBN: 0-89448-162-1, pp. 30-40
-    \endverbatim
 
-    \verbatim
-        "Development and validation of a boiling model for OpenFOAM
-        multiphase solver"
-        Peltola, J., Pättikangas, T.J.H.,
-        CFD4NRS-4 Conference Proceedings, paper 59,
-        Daejeon, Korea, September 10-12 2012
+        Peltola, J., & Pättikangas, T. (2012).
+        Development and validation of a boiling model
+        for OpenFOAM multiphase solver.
+        Proceedings of the CFD4NRS-4. p. 59.
+        Daejeon, Democratic People's Republic of Korea, September 10-12, 2012.
     \endverbatim
 
 
@@ -93,126 +94,179 @@ Description
     (TLeiden) a linear interpolation is used between CHF and MHF.
 
     Thus, the following models are required:
-        LeidenfrostModel
-        CHFModel
-        CHFSubCoolModel
-        MHFModel
-        TDNBModel
-        filmBoilingModel
+      - LeidenfrostModel
+      - CHFModel
+      - CHFSubCoolModel
+      - MHFModel
+      - TDNBModel
+      - filmBoilingModel
 
     The linear interpolation is as follows:
 
-        TBF = CHF*phi + (1 - phi)*MHF
+    \f[
+        TBF = CHF*\phi + (1 - \phi)*MHF
+    \f]
 
-        where phi:
+    with
+    \f[
+        \phi = w_p*(T_w - T_{DNB})/(T_{Leiden} - T_{DNB})
+    \f]
 
-            phi = wp*(Tw - TDNB)/(TLeiden - TDNB),
+    where:
+    \vartable
+        w_p | Model constant
+        T_w | Wall temperature [K]
+    \endvartable
 
-        where:
-            wp model constant
-            Tw wall temperature
 
+    The film boiling regime is applied when \f$T_w\f$ is larger than
+    \f$T_{Leiden}\f$. In this regime the correlation from the
+    \c filmBoilingModel is used for calculating the cht from the wall.
 
-    The film boiling regime is applied when Tw is larger than TLeiden. In
-    this regime the correlation from the filmBoilingModel is used for
-    calculating the cht from the wall.
+    The \c filmBoilingModel is needed in the vapor field in order to calculate
+    the heat transfer to the vapor phase in film boiling regime.
 
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        phaseType    | 'vapor' or 'liquid'     | yes         |
-        relax        |wall boiling model relaxation| yes     |
-        Prt          | inherited from alphatPhaseChangeJayatillekeWallFunction
-        Cmu          | inherited from alphatPhaseChangeJayatillekeWallFunction
-        kappa        | inherited from alphatPhaseChangeJayatillekeWallFunction
-        E            | inherited from alphatPhaseChangeJayatillekeWallFunction
-        dmdt         | phase change mass flux  | no         |
-        value        | initial alphat value    | yes         |
-
-        if phaseType 'vapor':
-
-        partitioningModel|                     | yes        |
-
-        if phaseType 'liquid':
-
-        partitioningModel|                     | yes        |
-        nucleationSiteModel|                     | yes      |
-        departureDiamModel|                     | yes       |
-        departureFreqModel|                     | yes       |
-        K                | bubbles area constant| no       | 4
-        nucleatingModel  | nucleating Model     | no       |
-
-        LeidenfrostModel |                      | no       |
-        CHFModel         |                      | no       |
-        CHFSubCoolModel  |                      | no       |
-        MHFModel         |                      | no       |
-        TDNBModel        |                      | no       |
-        filmBoilingModel |                      | no       |
-        wp               |                      | no       | 1
-    \endtable
-
-    NOTE: Runtime selectabale submodels may require model specific entries
-
-    Example usage:
+    Example of the boundary condition specification:
     \verbatim
-    hotWall
+    <patchName>
     {
+        // Mandatory entries
         type            compressible::alphatWallBoilingWallFunction;
-        phaseType       liquid;
-        Prt             0.85;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        relax           0.1;
-        dmdt            uniform 0;
+        phaseType       <word>;
+        otherPhase      <word>;
+        relax           <Function1<scalar>>;
+
         partitioningModel
         {
             type        Lavieville;
             alphaCrit   0.2;
         }
-        nucleationSiteModel
-        {
-            type        LemmertChawla;
-        }
-        departureDiamModel
-        {
-            type        TolubinskiKostanchuk;
-        }
-        departureFreqModel
-        {
-            type        Cole;
-        }
 
-        LeidenfrostModel
-        {
-            type        Spiegler;
-            Tcrit       647;
-        }
-        CHFModel
-        {
-            type        Zuber;
-        }
-        CHFSubCoolModel
-        {
-            type        HuaXu;
-            Kburn       0.5;
-        }
-        MHFModel
-        {
-            type        Jeschar;
-            Kmhf        1;
-        }
-        TDNBModel
-        {
-            type        Schroeder;
-        }
-        filmBoilingModel
-        {
-            type        Bromley;
-        }
-        value           uniform 0.01;
+        // Conditional entries
+
+            // Option-1: phaseType=vapor
+
+                // Optional entries
+                LeidenfrostModel
+                {
+                    type        Spiegler;
+                    Tcrit       647;
+                }
+
+                filmBoilingModel
+                {
+                    type        Bromley;
+                }
+
+
+            // Option-2: phaseType=liquid
+            nucleationSiteModel
+            {
+                type        LemmertChawla;
+            }
+
+            departureDiamModel
+            {
+                type        TolubinskiKostanchuk;
+            }
+
+            departureFreqModel
+            {
+                type        Cole;
+            }
+
+                // Optional entries
+                LeidenfrostModel
+                {
+                    type        Spiegler;
+                    Tcrit       647;
+                }
+
+                CHFModel
+                {
+                    type        Zuber;
+                }
+
+                CHFSubCoolModel
+                {
+                    type        HuaXu;
+                    Kburn       0.5;
+                }
+
+                MHFModel
+                {
+                    type        Jeschar;
+                    Kmhf        1;
+                }
+
+                TDNBModel
+                {
+                    type        Schroeder;
+                }
+
+                filmBoilingModel
+                {
+                    type        Bromley;
+                }
+
+                dDep    <scalarField>;
+                K       <scalar>;
+                wp      <scalar>;
+                qQuenching <scalarField>;
+
+
+        // Optional entries
+        alphatConv      <scalarField>;
+
+        //Inherited entries
+        ...
     \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                            | Type | Reqd | Deflt
+      type      | compressible::alphatWallBoilingWallFunction | word | yes | -
+      phaseType | Name of phase type                     | word | yes  | -
+      otherPhase | Name of other phase                   | word | yes  | -
+      relax     | Relaxation factor for dmdt | Function1\<scalar\> <!--
+                -->                                              | yes | -
+      alphatConv | Convective turbulent thermal diffusivity    <!--
+                -->                                 | scalarField | no | 0
+      partitioningModel | Run-time selected heat flux partitioning model <!--
+                -->                                      | dict | yes  | -
+    \endtable
+
+    Options for the \c phaseType and \c otherPhase entries:
+    \verbatim
+      vapor       | Vapor phase
+      liquid      | Liquid phase
+    \endverbatim
+
+    when \c phaseType=liquid:
+    \table
+      Property  | Description                             | Type | Reqd | Deflt
+      nucleationSiteModel | Nucleation site density model | dict | yes  | -
+      departureDiamModel  | Bubble departure diameter model     <!--
+                        -->                               | dict | yes  | -
+      departureFreqModel | Bubble departure frequency model | dict | yes | -
+      LeidenfrostModel   | Leidenfrost temperature model  | dict | no   | -
+      CHFModel | Critical heat flux model                 | dict | no   | -
+      CHFSubCoolModel | CHF sub-cool model                | dict | no   | -
+      MHFModel        | Minium heat flux model            | dict | no   | -
+      TDNBModel       | Departure from nulceate boiling model | dict | no | -
+      filmBoilingModel | Film boiling model               | dict | no   | -
+      K | Model constant for area of bubbles            | scalar | no   | 4.0
+      wp | Wetting parameter for transient boiling      | scalar | no   | 1.0
+    \endtable
+
+    The inherited entries are elaborated in:
+     -\link alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField.H\endlink
+
+Notes
+  - Runtime selectabale submodels may require model specific entries
+  - \c phaseType and \c otherPhase entries should be the opposite of each other.
 
 See also
     Foam::alphatPhaseChangeJayatillekeWallFunctionFvPatchField
