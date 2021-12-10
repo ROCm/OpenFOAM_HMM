@@ -24,4 +24,42 @@ derivedFields
 }
 
 
+exprField1
+{
+    // Mandatory entries
+    type     exprField;
+    libs     (fieldFunctionObjects);
+    field    pTot;
+    /// action new;
+    ///autowrite       false;
+    ///store           true;
+    useNamePrefix   false;
+
+    // Use expression to define total pressure
+
+    executeControl  timeStep;
+    writeControl    none;
+
+    expression  "p + 0.5*(rho * magSqr(U))";
+    dimensions  [ Pa ];
+}
+
+
+exprField1.mod0
+{
+    // Mandatory entries
+    type    exprField;
+    libs    (fieldFunctionObjects);
+    field   pTot;
+    action  modify;
+
+    executeControl  timeStep;
+    writeControl    writeTime;
+
+    // Static pressure only in these regions
+    fieldMask   "(mag(pos()) < 0.05) && (pos().y() > 0) || cellZone(inlet)";
+    expression  "p";
+}
+
+
 // ************************************************************************* //
