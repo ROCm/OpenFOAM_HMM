@@ -48,20 +48,30 @@ void Foam::expressions::exprString::inplaceExpand
 
 
 Foam::expressions::exprString
-Foam::expressions::exprString::getExpression
+Foam::expressions::exprString::getEntry
 (
-    const word& name,
+    const word& key,
     const dictionary& dict,
     const bool stripComments
 )
 {
-    string orig(dict.get<string>(name));
+    exprString expr;
+    expr.readEntry(key, dict, true, stripComments);  // mandatory
 
-    // No validation
-    expressions::exprString expr;
-    expr.assign(std::move(orig));
+    return expr;
+}
 
-    inplaceExpand(expr, dict, stripComments);
+
+Foam::expressions::exprString
+Foam::expressions::exprString::getOptional
+(
+    const word& key,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    exprString expr;
+    expr.readEntry(key, dict, false, stripComments);  // optional
 
     return expr;
 }
@@ -69,8 +79,7 @@ Foam::expressions::exprString::getExpression
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::expressions::exprString&
-Foam::expressions::exprString::expand
+void Foam::expressions::exprString::expand
 (
     const dictionary& dict,
     const bool stripComments
@@ -81,8 +90,35 @@ Foam::expressions::exprString::expand
     #ifdef FULLDEBUG
     (void)valid();
     #endif
+}
 
-    return *this;
+
+void Foam::expressions::exprString::trim()
+{
+    stringOps::inplaceTrim(*this);
+}
+
+
+bool Foam::expressions::exprString::readEntry
+(
+    const word& keyword,
+    const dictionary& dict,
+    bool mandatory,
+    const bool stripComments
+)
+{
+    const bool ok = dict.readEntry(keyword, *this, keyType::LITERAL, mandatory);
+
+    if (ok && !empty())
+    {
+        this->expand(dict, stripComments);  // strip comments
+    }
+    else
+    {
+        clear();
+    }
+
+    return ok;
 }
 
 

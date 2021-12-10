@@ -231,18 +231,21 @@ int main(int argc, char *argv[])
 
                 dictionary& patchDict = boundaryFieldDict.subDict(patchName);
 
-                expressions::exprString expr
+                auto valueExpr_
                 (
-                    currDict.get<string>("expression"),
-                    currDict,
-                    true  // strip comments
+                    expressions::exprString::getEntry
+                    (
+                        "expression",
+                        currDict,
+                        true  // strip comments
+                    )
                 );
 
                 Info<< "Set boundaryField/" << patchName << '/'
                     << targetName << nl
                     << "with expression" << nl
                     << "<<<<" << nl
-                    << expr.c_str() << nl
+                    << valueExpr_.c_str() << nl
                     << ">>>>" << nl;
 
                 expressions::patchExprDriver driver(currDict, mesh);
@@ -255,7 +258,7 @@ int main(int argc, char *argv[])
                 );
 
                 driver.clearVariables();
-                driver.parse(expr);
+                driver.parse(valueExpr_);
 
                 // Serializing via Field::writeEntry etc
                 OStringStream serialize;

@@ -118,13 +118,13 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return size_;
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return size_;

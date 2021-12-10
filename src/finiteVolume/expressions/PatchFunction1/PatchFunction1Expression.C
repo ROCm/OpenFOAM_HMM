@@ -50,9 +50,7 @@ Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
         debug |= 1;
     }
 
-    string expr;
-    dict_.readEntry("expression", expr);
-    valueExpr_ = expressions::exprString(std::move(expr), dict_);
+    valueExpr_.readEntry("expression", dict_);
 
     // Basic sanity
     if (valueExpr_.empty())

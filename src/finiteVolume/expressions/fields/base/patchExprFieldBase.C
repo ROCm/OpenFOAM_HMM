@@ -57,18 +57,21 @@ void Foam::expressions::patchExprFieldBase::readExpressions
     if (expectedTypes::VALUE_TYPE == expectedType)
     {
         // Mandatory
-        evalValue = dict.readEntry("valueExpr", exprValue);
+        evalValue = dict.readEntry("valueExpr", exprValue, keyType::LITERAL);
     }
     else if (expectedTypes::GRADIENT_TYPE == expectedType)
     {
         // Mandatory
-        evalGrad = dict.readEntry("gradientExpr", exprGrad);
+        evalGrad = dict.readEntry("gradientExpr", exprGrad, keyType::LITERAL);
     }
     else
     {
         // MIXED_TYPE
-        evalValue = dict.readIfPresent("valueExpr", exprValue);
-        evalGrad = dict.readIfPresent("gradientExpr", exprGrad);
+        evalValue =
+            dict.readIfPresent("valueExpr", exprValue, keyType::LITERAL);
+
+        evalGrad =
+            dict.readIfPresent("gradientExpr", exprGrad, keyType::LITERAL);
 
         if (!evalValue && !evalGrad)
         {

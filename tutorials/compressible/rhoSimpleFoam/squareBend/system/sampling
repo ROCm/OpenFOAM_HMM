@@ -69,7 +69,7 @@ sampled
 
     surfaceFormat   none;
 
-    fields      (p rho U T rhoU pTotal);
+    fields      (p rho U T rhoU pTotal pTot);
 
     // Remove derived fields we created prior
     removeFieldsOnExecute   (rhoU pTotal);
@@ -182,7 +182,7 @@ areaAverage
     operation       weightedAreaAverage;
     weightField     rhoU;
     weightFields    ( rho U none );  // 2012 and later
-    fields          ( p pTotal );
+    fields          ( p pTotal pTot );
 }
 
 areaIntegrate

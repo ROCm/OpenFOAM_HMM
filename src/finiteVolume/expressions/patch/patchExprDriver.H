@@ -179,13 +179,13 @@ public:
             return patch_.boundaryMesh().mesh();
         }
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return patch_.patch().size();
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return patch_.patch().nPoints();

@@ -126,11 +126,14 @@ protected:
         //- A logical (bool-like) field (but actually a scalar)
         bool isLogical_;
 
+        //- Requested use of dimensions
+        bool hasDimensions_;
+
         //- A volume/surface/point field
         expressions::FieldAssociation fieldGeoType_;
 
         //- The result dimensions
-        dimensionSet resultDimension_;
+        dimensionSet resultDimensions_;
 
 
     // Protected Member Functions
@@ -217,13 +220,13 @@ public:
             return mesh_;
         }
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return mesh_.nCells();
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return mesh_.nPoints();
@@ -231,6 +234,16 @@ public:
 
         //- Field size associated with different geometric field types
         inline label size(const FieldAssociation geoType) const;
+
+        //- Apply dimensions() to geometric fields
+        inline bool hasDimensions() const noexcept;
+
+        //- The preferred result dimensions (if any)
+        inline const dimensionSet& dimensions() const noexcept;
+
+
+        //- Clear out local copies of the field
+        void clearField();
 
 
     // Reading
@@ -303,6 +316,9 @@ public:
         //- and matches the specified logical type
         template<class GeoField>
         const GeoField* isResultType(bool logical, bool dieOnNull=false) const;
+
+        //- A zero-initialized field with the same type as the result field.
+        autoPtr<regIOobject> dupZeroField() const;
 
 
     // Set Fields

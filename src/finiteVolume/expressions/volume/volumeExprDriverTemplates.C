@@ -68,17 +68,17 @@ void Foam::expressions::volumeExpr::parseDriver::setResult
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    resultField_.clear();
+    resultField_.reset(nullptr);
 
     // Characteristics
     resultType_ = pTraits<fieldType>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = VOLUME_DATA;
 
-    // Always strip out dimensions?
-    if (!resultDimension_.dimensionless())
+    // Assign dimensions
+    if (hasDimensions_ && !logical)
     {
-        ptr->dimensions().reset(resultDimension_);
+        ptr->dimensions().reset(resultDimensions_);
     }
 
     setInternalFieldResult(ptr->primitiveField());
@@ -97,17 +97,17 @@ void Foam::expressions::volumeExpr::parseDriver::setResult
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> fieldType;
 
-    resultField_.clear();
+    resultField_.reset(nullptr);
 
     // Characteristics
     resultType_ = pTraits<fieldType>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = FACE_DATA;
 
-    // Always strip out dimensions?
-    if (!resultDimension_.dimensionless())
+    // Assign dimensions
+    if (hasDimensions_ && !logical)
     {
-        ptr->dimensions().reset(resultDimension_);
+        ptr->dimensions().reset(resultDimensions_);
     }
 
     setInternalFieldResult(ptr->primitiveField());
@@ -126,17 +126,17 @@ void Foam::expressions::volumeExpr::parseDriver::setResult
 {
     typedef GeometricField<Type, pointPatchField, pointMesh> fieldType;
 
-    resultField_.clear();
+    resultField_.reset(nullptr);
 
     // Characteristics
     resultType_ = pTraits<fieldType>::typeName;
     isLogical_ = logical;
     fieldGeoType_ = POINT_DATA;
 
-    // Always strip out dimensions?
-    if (!resultDimension_.dimensionless())
+    // Assign dimensions
+    if (hasDimensions_ && !logical)
     {
-        ptr->dimensions().reset(resultDimension_);
+        ptr->dimensions().reset(resultDimensions_);
     }
 
     setInternalFieldResult(ptr->primitiveField());
@@ -164,7 +164,7 @@ Foam::expressions::volumeExpr::parseDriver::isResultType
 {
     const regIOobject* ptr = resultField_.get();
 
-    if (dieOnNull && ptr != nullptr)
+    if (dieOnNull && !ptr)
     {
         FatalErrorInFunction
             << "No result available. Requested "

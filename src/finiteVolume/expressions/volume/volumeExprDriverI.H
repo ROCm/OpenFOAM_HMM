@@ -50,6 +50,20 @@ inline Foam::label Foam::expressions::volumeExpr::parseDriver::size
 }
 
 
+inline bool Foam::expressions::volumeExpr::parseDriver::hasDimensions()
+const noexcept
+{
+    return hasDimensions_;
+}
+
+
+inline const Foam::dimensionSet&
+Foam::expressions::volumeExpr::parseDriver::dimensions() const noexcept
+{
+    return resultDimensions_;
+}
+
+
 inline Foam::tmp<Foam::volScalarField>
 Foam::expressions::volumeExpr::parseDriver::parseDriver::field_cellSet
 (

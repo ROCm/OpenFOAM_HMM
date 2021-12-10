@@ -189,8 +189,8 @@ Foam::expressions::exprDriver::exprDriver
     stashedTokenId_(0),
 
     // Controls
-    debugScanner_(dict.getOrDefault("debugScanner", false)),
-    debugParser_(dict.getOrDefault("debugParser", false)),
+    debugScanner_(dict.getOrDefault("debug.scanner", false)),
+    debugParser_(dict.getOrDefault("debug.parser", false)),
     allowShadowing_(dict.getOrDefault("allowShadowing", false)),
     prevIterIsOldTime_(dict.getOrDefault("prevIterIsOldTime", false)),
     searchCtrl_(search)
@@ -298,7 +298,7 @@ bool Foam::expressions::exprDriver::readDict
     const dictionary& dict
 )
 {
-    dict.readIfPresent("debugBaseDriver", debug);
+    dict.readIfPresent("debug.driver", debug);
 
     // Regular variables
     variableStrings_ = readVariableStrings(dict);
