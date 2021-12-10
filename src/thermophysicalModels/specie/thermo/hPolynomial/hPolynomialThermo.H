@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,6 +140,18 @@ class hPolynomialThermo
 
         //- Specific heat at constant pressure polynomial coeffs
         Polynomial<PolySize> CpCoeffs_;
+
+        //- Reference temperature
+        scalar Tref_;
+
+        //- Reference enthalphy
+        scalar Href_;
+
+        //- Reference entropy
+        scalar Sref_;
+
+        //- Reference pressure
+        scalar Pref_;
 
         //- Enthalpy polynomial coeffs - derived from cp [J/kg]
         //  NOTE: relative to Tstd
