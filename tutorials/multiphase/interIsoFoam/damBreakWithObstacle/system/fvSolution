@@ -29,9 +29,8 @@ solvers
         writeIsoFaces   false;
         reconstructionScheme plicRDF; // isoAlpha
 
-        nAlphaCorr      1;
         nAlphaSubCycles 1;
-        cAlpha          1;
+        cAlpha          1; // Read by interIsoFoam but not used
     }
 
     p_rgh

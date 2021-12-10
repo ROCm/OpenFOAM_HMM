@@ -20,7 +20,7 @@ solvers
     "alpha.water.*"
     {
         nAlphaSubCycles 1;
-        cAlpha          1;
+        cAlpha          1; // Read by interIsoFoam but not used
         reconstructionScheme isoAlpha; // plicRDF
         isoFaceTol      1e-8;
         surfCellTol     1e-6;

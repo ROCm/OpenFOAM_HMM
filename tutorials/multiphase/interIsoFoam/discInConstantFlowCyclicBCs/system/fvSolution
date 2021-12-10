@@ -27,17 +27,8 @@ solvers
         clip            true;
         reconstructionScheme isoAlpha; // isoAlpha
 
-        nAlphaCorr      2;
         nAlphaSubCycles 1;
-        cAlpha          1;
-
-        MULESCorr       yes;
-        nLimiterIter    3;
-
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-8;
-        relTol          0;
+        cAlpha          1; // Read but not used by interIsoFoam
     }
 
     "pcorr.*"

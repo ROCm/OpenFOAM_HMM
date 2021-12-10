@@ -18,9 +18,8 @@ solvers
 {
     alpha.water
     {
-        nAlphaCorr      1;
         nAlphaSubCycles 3;
-        cAlpha          1.5;
+        cAlpha          1; // Read by interIsoFoam but not used
 
         isoFaceTol      1e-10;
         surfCellTol     1e-6;
