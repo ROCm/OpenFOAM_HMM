@@ -63,12 +63,6 @@ Foam::wallBoilingModels::CHFModels::Zuber::Zuber
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::CHFModels::Zuber::~Zuber()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -82,7 +76,7 @@ Foam::wallBoilingModels::CHFModels::Zuber::CHF
     const scalarField& L
 ) const
 {
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();

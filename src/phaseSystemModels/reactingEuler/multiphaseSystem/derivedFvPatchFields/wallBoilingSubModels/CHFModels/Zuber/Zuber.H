@@ -85,16 +85,26 @@ class Zuber
 :
     public CHFModel
 {
+    // Private Data
 
-    // Private data:
-
-        //- Coefficient constant
+        //- Model coefficient
         scalar Cn_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        Zuber(const Zuber&) = delete;
+
+        //- No copy assignment
+        void operator=(const Zuber&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("Zuber");
+
 
     // Constructors
 
@@ -103,7 +113,7 @@ public:
 
 
     //- Destructor
-    virtual ~Zuber();
+    virtual ~Zuber() = default;
 
 
     // Member Functions
@@ -119,7 +129,10 @@ public:
             const scalarField& L
         ) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            // Write
+            virtual void write(Ostream& os) const;
 };
 
 

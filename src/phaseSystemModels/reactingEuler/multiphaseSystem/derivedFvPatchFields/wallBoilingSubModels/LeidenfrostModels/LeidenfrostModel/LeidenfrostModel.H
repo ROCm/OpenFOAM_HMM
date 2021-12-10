@@ -92,7 +92,7 @@ public:
 
     // Member Functions
 
-        //- Calculate temperature
+        //- Calculate and return the Leidenfrost temperature
         virtual tmp<scalarField> TLeid
         (
             const phaseModel& liquid,
@@ -103,7 +103,10 @@ public:
             const scalarField& L
         ) const = 0;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

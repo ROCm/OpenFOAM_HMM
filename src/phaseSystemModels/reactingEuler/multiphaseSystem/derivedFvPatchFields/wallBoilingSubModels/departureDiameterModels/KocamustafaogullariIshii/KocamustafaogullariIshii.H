@@ -77,17 +77,26 @@ namespace departureDiameterModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class KocamustafaogullariIshii Declaration
+                  Class KocamustafaogullariIshii Declaration
 \*---------------------------------------------------------------------------*/
 
 class KocamustafaogullariIshii
 :
     public departureDiameterModel
 {
-    // Private data
+    // Private Data
 
         //- Contact angle
         scalar phi_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        KocamustafaogullariIshii(const KocamustafaogullariIshii&) = delete;
+
+        //- No copy assignment
+        void operator=(const KocamustafaogullariIshii&) = delete;
 
 
 public:
@@ -102,7 +111,7 @@ public:
 
 
     //- Destructor
-    virtual ~KocamustafaogullariIshii();
+    virtual ~KocamustafaogullariIshii() = default;
 
 
     // Member Functions
@@ -118,7 +127,10 @@ public:
             const scalarField& L
         ) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

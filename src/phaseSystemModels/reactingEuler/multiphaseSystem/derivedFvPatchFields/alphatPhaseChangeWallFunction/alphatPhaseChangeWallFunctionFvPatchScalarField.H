@@ -119,8 +119,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatPhaseChangeWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatPhaseChangeWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatPhaseChangeWallFunctionFvPatchScalarField
         (
             const alphatPhaseChangeWallFunctionFvPatchScalarField&,
@@ -190,9 +190,9 @@ public:
         }
 
 
-        // Evaluation Functions
+        // Evaluation
 
-        //- Update the coefficients associated with the patch field
+            //- Update the coefficients associated with the patch field
             virtual void updateCoeffs() = 0;
 
 

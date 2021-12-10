@@ -86,17 +86,26 @@ class Spiegler
 :
     public LeidenfrostModel
 {
+    // Private Data
 
-private:
+        //- Critical temperature
+        scalar Tcrit_;
 
-    //- Critical temperature
-    scalar Tcrit_;
+
+    // Private Member Functions
+
+        //- No copy construct
+        Spiegler(const Spiegler&) = delete;
+
+        //- No copy assignment
+        void operator=(const Spiegler&) = delete;
 
 
 public:
 
     //- Runtime type information
     TypeName("Spiegler");
+
 
     // Constructors
 
@@ -105,12 +114,12 @@ public:
 
 
     //- Destructor
-    virtual ~Spiegler();
+    virtual ~Spiegler() = default;
 
 
     // Member Functions
 
-        //- Calculate and return the nucleation-site density
+        //- Calculate and return the Leidenfrost temperature
         virtual tmp<scalarField> TLeid
         (
             const phaseModel& liquid,
@@ -121,8 +130,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

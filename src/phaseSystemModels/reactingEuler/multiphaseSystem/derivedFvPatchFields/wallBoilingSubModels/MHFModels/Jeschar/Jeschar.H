@@ -87,16 +87,26 @@ class Jeschar
 :
     public MHFModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Burn out factor
         scalar Kmhf_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        Jeschar(const Jeschar&) = delete;
+
+        //- No copy assignment
+        void operator=(const Jeschar&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("Jeschar");
+
 
     // Constructors
 
@@ -105,12 +115,12 @@ public:
 
 
     //- Destructor
-    virtual ~Jeschar();
+    virtual ~Jeschar() = default;
 
 
     // Member Functions
 
-        //- Calculate and return the nucleation-site density
+        //- Calculate and return the minimum heat flux
         virtual tmp<scalarField> MHF
         (
             const phaseModel& liquid,
@@ -121,8 +131,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

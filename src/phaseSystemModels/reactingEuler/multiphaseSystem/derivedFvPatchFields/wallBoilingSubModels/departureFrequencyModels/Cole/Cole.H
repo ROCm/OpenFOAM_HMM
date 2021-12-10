@@ -83,6 +83,14 @@ class Cole
 :
     public departureFrequencyModel
 {
+    // Private Member Functions
+
+        //- No copy construct
+        Cole(const Cole&) = delete;
+
+        //- No copy assignment
+        void operator=(const Cole&) = delete;
+
 
 public:
 
@@ -97,7 +105,7 @@ public:
 
 
     //- Destructor
-    virtual ~Cole();
+    virtual ~Cole() = default;
 
 
     // Member Functions

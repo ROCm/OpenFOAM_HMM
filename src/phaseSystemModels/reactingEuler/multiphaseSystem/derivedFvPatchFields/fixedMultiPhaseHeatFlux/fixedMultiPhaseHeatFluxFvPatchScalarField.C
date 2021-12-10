@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,7 +144,7 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
 
         if (debug)
         {
-            scalarField q0(T.snGrad()*alpha*kappaEff);
+            const scalarField q0(T.snGrad()*alpha*kappaEff);
             Q += q0;
 
             Info<< patch().name() << " " << phase.name()
@@ -162,7 +162,7 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
             << gSum(patch().magSf()*Q) << " W" << endl;
     }
 
-    operator==((1 - relax_)*Tp + relax_*max(Tmin_,(q_ + A)/(B)));
+    operator==((scalar(1) - relax_)*Tp + relax_*max(Tmin_,(q_ + A)/(B)));
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }

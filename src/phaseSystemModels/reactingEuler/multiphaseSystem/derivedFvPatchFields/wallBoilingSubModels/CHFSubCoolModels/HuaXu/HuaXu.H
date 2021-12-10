@@ -86,16 +86,26 @@ class HuaXu
 :
     public CHFSubCoolModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Burn out factor
         scalar Kburn_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        HuaXu(const HuaXu&) = delete;
+
+        //- No copy assignment
+        void operator=(const HuaXu&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("HuaXu");
+
 
     // Constructors
 
@@ -104,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~HuaXu();
+    virtual ~HuaXu() = default;
 
 
     // Member Functions
@@ -120,8 +130,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

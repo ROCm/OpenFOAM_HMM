@@ -67,13 +67,6 @@ KocamustafaogullariIshii::KocamustafaogullariIshii
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::departureDiameterModels::
-KocamustafaogullariIshii::~KocamustafaogullariIshii()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -89,7 +82,7 @@ KocamustafaogullariIshii::dDeparture
 ) const
 {
     // Gravitational acceleration
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const scalarField rhoLiquid(liquid.thermo().rho(patchi));
@@ -97,10 +90,9 @@ KocamustafaogullariIshii::dDeparture
 
     const scalarField rhoM((rhoLiquid - rhoVapor)/rhoVapor);
 
-    const tmp<volScalarField>& tsigma
-    (
-        liquid.fluid().sigma(phasePairKey(liquid.name(), vapor.name()))
-    );
+    const tmp<volScalarField>& tsigma =
+        liquid.fluid().sigma(phasePairKey(liquid.name(), vapor.name()));
+
     const volScalarField& sigma = tsigma();
     const fvPatchScalarField& sigmaw = sigma.boundaryField()[patchi];
 

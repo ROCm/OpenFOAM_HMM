@@ -96,11 +96,22 @@ class linear
 :
     public partitioningModel
 {
-    // Private data
+    // Private Data
 
-        //- Model parameters, threshold liquid phase fractions
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid1_;
+
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid0_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        linear(const linear&) = delete;
+
+        //- No copy assignment
+        void operator=(const linear&) = delete;
 
 
 public:
@@ -116,7 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~linear();
+    virtual ~linear() = default;
 
 
     // Member Functions
@@ -124,7 +135,10 @@ public:
         //- Calculate and return the wall heat-flux partitioning
         virtual tmp<scalarField> fLiquid(const scalarField& alphaLiquid) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

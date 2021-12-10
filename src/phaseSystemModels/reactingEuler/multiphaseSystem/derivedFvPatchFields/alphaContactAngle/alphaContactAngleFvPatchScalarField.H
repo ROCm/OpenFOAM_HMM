@@ -81,7 +81,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class alphaContactAngleFvPatch Declaration
+                    Class alphaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphaContactAngleFvPatchScalarField
@@ -108,13 +108,16 @@ public:
     public:
 
         // Constructors
+
+            //- Default construct
             interfaceThetaProps()
             {}
 
+            //- Construct from Istream
             interfaceThetaProps(Istream&);
 
 
-        // Member functions
+        // Member Functions
 
             //- Return the equilibrium contact angle theta0
             scalar theta0(bool matched=true) const
@@ -124,7 +127,7 @@ public:
             }
 
             //- Return the dynamic contact angle velocity scale
-            scalar uTheta() const
+            scalar uTheta() const noexcept
             {
                 return uTheta_;
             }
@@ -144,7 +147,7 @@ public:
             }
 
 
-        // IO functions
+        // IOstream operators
 
             friend Istream& operator>>(Istream&, interfaceThetaProps&);
             friend Ostream& operator<<(Ostream&, const interfaceThetaProps&);
@@ -160,8 +163,9 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
+        //- Interface properties
         thetaPropsTable thetaProps_;
 
 
@@ -189,7 +193,7 @@ public:
         );
 
         //- Construct by mapping given alphaContactAngleFvPatchScalarField
-        //  onto a new patch
+        //- onto a new patch
         alphaContactAngleFvPatchScalarField
         (
             const alphaContactAngleFvPatchScalarField&,
@@ -227,10 +231,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the contact angle properties
-        const thetaPropsTable& thetaProps() const
+        const thetaPropsTable& thetaProps() const noexcept
         {
             return thetaProps_;
         }

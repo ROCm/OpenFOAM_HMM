@@ -64,13 +64,6 @@ TolubinskiKostanchuk::TolubinskiKostanchuk
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::departureDiameterModels::
-TolubinskiKostanchuk::~TolubinskiKostanchuk()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -85,7 +78,7 @@ TolubinskiKostanchuk::dDeparture
     const scalarField& L
 ) const
 {
-    return max(min(dRef_*exp(-(Tsatw - Tl)/45), dMax_), dMin_);
+    return max(min(dRef_*exp(-(Tsatw - Tl)/scalar(45)), dMax_), dMin_);
 }
 
 

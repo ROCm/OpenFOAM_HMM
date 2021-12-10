@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +57,14 @@ class phaseFraction
 :
     public partitioningModel
 {
+    // Private Member Functions
+
+        //- No copy construct
+        phaseFraction(const phaseFraction&) = delete;
+
+        //- No copy assignment
+        void operator=(const phaseFraction&) = delete;
+
 
 public:
 
@@ -70,7 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~phaseFraction();
+    virtual ~phaseFraction() = default;
 
 
     // Member Functions

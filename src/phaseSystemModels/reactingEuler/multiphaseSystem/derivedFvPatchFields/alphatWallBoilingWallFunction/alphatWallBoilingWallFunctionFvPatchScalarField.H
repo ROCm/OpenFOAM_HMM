@@ -312,7 +312,7 @@ class alphatWallBoilingWallFunctionFvPatchScalarField
 {
 public:
 
-    // Data types
+    // Public Enumerations
 
         //- Enumeration listing the possible operational modes
         enum phaseType
@@ -324,7 +324,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Enumeration of regimes per face
         enum regimeType
@@ -335,16 +335,16 @@ private:
             nonBoiling
         };
 
-        //- name of the other phase (vapor/liquid phase)
+        //- Name of the other phase (vapor/liquid phase)
         word otherPhaseName_;
 
-        //- Heat source type names
+        //- Names of heat source types
         static const Enum<phaseType> phaseTypeNames_;
 
         //- Heat source type
         phaseType phaseType_;
 
-        //- dmdt relaxationFactor
+        //- Relaxation factor for dmdt
         autoPtr<Function1<scalar>> relax_;
 
         //- Patch face area by cell volume
@@ -390,6 +390,7 @@ private:
             //- Run-time selected for filmBoiling model
             autoPtr<wallBoilingModels::filmBoilingModel>
                 filmBoilingModel_;
+
 
         // Transition boiling model
 
@@ -443,8 +444,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatWallBoilingWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatWallBoilingWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatWallBoilingWallFunctionFvPatchScalarField
         (
             const alphatWallBoilingWallFunctionFvPatchScalarField&,
@@ -488,7 +489,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         using alphatPhaseChangeWallFunctionFvPatchScalarField::dmdt;
 
@@ -525,7 +526,7 @@ public:
             return regimeTypes_;
         }
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

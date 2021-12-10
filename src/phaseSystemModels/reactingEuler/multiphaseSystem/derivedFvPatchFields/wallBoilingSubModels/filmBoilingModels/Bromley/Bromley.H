@@ -88,8 +88,7 @@ class Bromley
 :
     public filmBoilingModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Coefficient for nucleation site density
         scalar Cn_;
@@ -97,8 +96,18 @@ class Bromley
         //- Wall emissivity
         scalar emissivity_;
 
-        //- Characteristic lenght-scale
+        //- Characteristic length scale
         scalar L_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        Bromley(const Bromley&) = delete;
+
+        //- No copy assignment
+        void operator=(const Bromley&) = delete;
+
 
 public:
 
@@ -112,12 +121,12 @@ public:
 
 
     //- Destructor
-    virtual ~Bromley();
+    virtual ~Bromley() = default;
 
 
     // Member Functions
 
-        //- Calculate and return the nucleation-site density
+        //- Calculate and return the film boiling correlation
         virtual tmp<scalarField> htcFilmBoil
         (
             const phaseModel& liquid,
@@ -128,8 +137,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

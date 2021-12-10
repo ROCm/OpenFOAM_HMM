@@ -63,12 +63,6 @@ Foam::wallBoilingModels::CHFModels::Jeschar::Jeschar
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::CHFModels::Jeschar::~Jeschar()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>

@@ -90,8 +90,7 @@ class TolubinskiKostanchuk
 :
     public departureDiameterModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Coefficient of the temperature term
         scalar dRef_;
@@ -101,6 +100,16 @@ class TolubinskiKostanchuk
 
         //- Minimum diameter
         scalar dMin_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        TolubinskiKostanchuk(const TolubinskiKostanchuk&) = delete;
+
+        //- No copy assignment
+        void operator=(const TolubinskiKostanchuk&) = delete;
+
 
 public:
 
@@ -115,7 +124,7 @@ public:
 
 
     //- Destructor
-    virtual ~TolubinskiKostanchuk();
+    virtual ~TolubinskiKostanchuk() = default;
 
 
     // Member Functions
@@ -131,7 +140,10 @@ public:
             const scalarField& L
         ) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            // Write
+            virtual void write(Ostream& os) const;
 };
 
 

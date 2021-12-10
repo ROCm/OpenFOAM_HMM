@@ -95,27 +95,28 @@ class alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
 :
     public alphatPhaseChangeWallFunctionFvPatchScalarField
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Turbulent Prandtl number
         scalar Prt_;
 
-        //- Cmu coefficient
+        //- Empirical model coefficient
         scalar Cmu_;
 
         //- Von Karman constant
         scalar kappa_;
 
-        //- E coefficient
+        //- Wall roughness parameter
         scalar E_;
 
         // Solution parameters
 
-            static scalar maxExp_;
+            //- Absolute tolerance
             static scalar tolerance_;
+
+            //- Maximum number of iterations
             static label maxIters_;
 
 
@@ -165,8 +166,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
         (
             const alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField&,
@@ -217,9 +218,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

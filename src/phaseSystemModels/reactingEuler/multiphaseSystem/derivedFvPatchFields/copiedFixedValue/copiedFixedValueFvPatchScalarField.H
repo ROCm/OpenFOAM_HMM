@@ -84,6 +84,7 @@ protected:
 
     // Protected Data
 
+        //- Name of the source field
         word sourceFieldName_;
 
 public:
@@ -110,8 +111,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  copiedFixedValueFvPatchScalarField
-        //  onto a new patch
+        //- copiedFixedValueFvPatchScalarField
+        //- onto a new patch
         copiedFixedValueFvPatchScalarField
         (
             const copiedFixedValueFvPatchScalarField&,
@@ -157,7 +158,7 @@ public:
 
     // Member Functions
 
-        // Evaluation Functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

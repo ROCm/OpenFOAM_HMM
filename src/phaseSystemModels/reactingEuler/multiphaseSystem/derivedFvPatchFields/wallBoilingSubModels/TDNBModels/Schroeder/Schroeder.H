@@ -91,18 +91,28 @@ class Schroeder
 :
     public TDNBModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Isoentropic expansion factor for ideal gases
         // 5/3 monoatomic
         // 7/5 diatomic
         scalar kg_;
 
+
+    // Private Member Functions
+
+        //- No copy construct
+        Schroeder(const Schroeder&) = delete;
+
+        //- No copy assignment
+        void operator=(const Schroeder&) = delete;
+
+
 public:
 
     //- Runtime type information
     TypeName("Schroeder");
+
 
     // Constructors
 
@@ -111,12 +121,12 @@ public:
 
 
     //- Destructor
-    virtual ~Schroeder();
+    virtual ~Schroeder() = default;
 
 
     // Member Functions
 
-        //- Calculate and return the nucleation-site density
+        //- Calculate and return the departure from nulceate boiling correlation
         virtual tmp<scalarField> TDNB
         (
             const phaseModel& liquid,
@@ -127,8 +137,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

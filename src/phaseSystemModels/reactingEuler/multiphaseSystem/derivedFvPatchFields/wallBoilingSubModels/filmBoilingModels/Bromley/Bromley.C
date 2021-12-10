@@ -66,12 +66,6 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::Bromley
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::filmBoilingModels::Bromley::~Bromley()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -87,8 +81,7 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
 {
     const fvPatchScalarField& Tw =
         liquid.thermo().T().boundaryField()[patchi];
-
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
@@ -117,14 +110,13 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
     );
 
     return
-        Cn_*pow
+        Cn_*pow025
         (
             pow3(kappaVapor)
            *rhoVapor*(rhoLiq - rhoVapor)*mag(g.value())
-           *(L + 0.4*CpVapor*max((Tw-Tsatw), scalar(0)))
-           /(L_*muVapor*max((Tw-Tsatw), scalar(1e-4))),
-            0.25
-        ) + 0.75*htcRad;
+           *(L + scalar(0.4)*CpVapor*max((Tw-Tsatw), scalar(0)))
+           /(L_*muVapor*max((Tw-Tsatw), scalar(1e-4)))
+        ) + scalar(0.75)*htcRad;
 }
 
 

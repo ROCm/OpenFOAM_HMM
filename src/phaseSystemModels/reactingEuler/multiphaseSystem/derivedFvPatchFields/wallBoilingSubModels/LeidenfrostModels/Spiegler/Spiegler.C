@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,12 +61,6 @@ Foam::wallBoilingModels::LeidenfrostModels::Spiegler::Spiegler
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::LeidenfrostModels::Spiegler::~Spiegler()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -80,13 +74,10 @@ Foam::wallBoilingModels::LeidenfrostModels::Spiegler::TLeid
     const scalarField& L
 ) const
 {
-    return tmp<scalarField>
+    return tmp<scalarField>::New
     (
-        new scalarField
-        (
-            liquid.thermo().p().boundaryField()[patchi].size(),
-            27*Tcrit_/32
-        )
+        liquid.thermo().p().boundaryField()[patchi].size(),
+        scalar(27)*Tcrit_/scalar(32)
     );
 }
 
@@ -99,5 +90,6 @@ void Foam::wallBoilingModels::LeidenfrostModels::Spiegler::write
     LeidenfrostModel::write(os);
     os.writeEntry("Tcrit", Tcrit_);
 }
+
 
 // ************************************************************************* //

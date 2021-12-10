@@ -129,8 +129,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  fixedMultiPhaseHeatFluxFvPatchScalarField
-        //  onto a new patch
+        //- fixedMultiPhaseHeatFluxFvPatchScalarField
+        //- onto a new patch
         fixedMultiPhaseHeatFluxFvPatchScalarField
         (
             const fixedMultiPhaseHeatFluxFvPatchScalarField&,
@@ -176,7 +176,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             //  Used to update fields following mesh topology change
@@ -187,7 +187,7 @@ public:
             virtual void rmap(const fvPatchScalarField&, const labelList&);
 
 
-        // Evaluation Functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

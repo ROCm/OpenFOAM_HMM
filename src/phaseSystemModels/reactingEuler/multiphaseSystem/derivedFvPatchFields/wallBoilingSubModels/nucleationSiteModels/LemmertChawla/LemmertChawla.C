@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,12 +61,6 @@ Foam::wallBoilingModels::nucleationSiteModels::LemmertChawla::LemmertChawla
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::nucleationSiteModels::LemmertChawla::~LemmertChawla()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -83,7 +77,17 @@ Foam::wallBoilingModels::nucleationSiteModels::LemmertChawla::N
     const fvPatchScalarField& Tw =
         liquid.thermo().T().boundaryField()[patchi];
 
-    return Cn_*9.922e5*pow(max((Tw - Tsatw)/10, scalar(0)), 1.805);
+    return Cn_*9.922e5*pow(max((Tw - Tsatw)/scalar(10), scalar(0)), 1.805);
+}
+
+
+void Foam::wallBoilingModels::nucleationSiteModels::LemmertChawla::write
+(
+    Ostream& os
+) const
+{
+    nucleationSiteModel::write(os);
+    os.writeEntry("Cn", Cn_);
 }
 
 

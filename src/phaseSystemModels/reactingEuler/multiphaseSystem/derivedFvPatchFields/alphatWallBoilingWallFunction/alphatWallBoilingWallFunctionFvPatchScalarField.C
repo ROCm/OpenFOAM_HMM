@@ -395,10 +395,8 @@ activePhasePair(const phasePairKey& phasePair) const
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 const scalarField& alphatWallBoilingWallFunctionFvPatchScalarField::
@@ -408,14 +406,12 @@ dmdt(const phasePairKey& phasePair) const
     {
         return dmdt_;
     }
-    else
-    {
-        FatalErrorInFunction
-            << " dmdt requested for invalid phasePair!"
-            << abort(FatalError);
 
-        return dmdt_;
-    }
+    FatalErrorInFunction
+        << " dmdt requested for invalid phasePair!"
+        << abort(FatalError);
+
+    return dmdt_;
 }
 
 const scalarField& alphatWallBoilingWallFunctionFvPatchScalarField::
@@ -425,19 +421,17 @@ mDotL(const phasePairKey& phasePair) const
     {
         return mDotL_;
     }
-    else
-    {
-        FatalErrorInFunction
-            << " mDotL requested for invalid phasePair!"
-            << abort(FatalError);
 
-        return mDotL_;
-    }
+    FatalErrorInFunction
+        << " mDotL requested for invalid phasePair!"
+        << abort(FatalError);
+
+    return mDotL_;
 }
+
 
 void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
 {
-
     if (updated())
     {
         return;
@@ -458,13 +452,13 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             db().lookupObject<phaseSystem>("phaseProperties")
         );
 
-    const saturationModel& satModel =
+    const auto& satModel =
         db().lookupObject<saturationModel>("saturationModel");
 
     const label patchi = patch().index();
 
     const scalar t = this->db().time().timeOutputValue();
-    scalar relax = relax_->value(t);
+    const scalar relax = relax_->value(t);
 
     switch (phaseType_)
     {
@@ -562,7 +556,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             const phaseModel& vapor(fluid.phases()[otherPhaseName_]);
 
             // Retrieve turbulence properties from models
-            const phaseCompressibleTurbulenceModel& turbModel =
+            const auto& turbModel =
                 db().lookupObject<phaseCompressibleTurbulenceModel>
                 (
                     IOobject::groupName
@@ -571,7 +565,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         liquid.name()
                     )
                 );
-            const phaseCompressibleTurbulenceModel& vaporTurbModel =
+            const auto& vaporTurbModel =
                 db().lookupObject<phaseCompressibleTurbulenceModel>
                 (
                     IOobject::groupName
@@ -583,7 +577,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
 
             const tmp<scalarField> tnutw = turbModel.nut(patchi);
 
-            const scalar Cmu25(pow025(Cmu_));
+            const scalar Cmu25 = pow025(Cmu_);
 
             const scalarField& y = turbModel.y()[patchi];
 
@@ -636,7 +630,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                 satModel.Tsat(liquid.thermo().p());
 
             const volScalarField& Tsat = tTsat();
-            const fvPatchScalarField& Tsatw(Tsat.boundaryField()[patchi]);
+            const fvPatchScalarField& Tsatw = Tsat.boundaryField()[patchi];
             const scalarField Tsatc(Tsatw.patchInternalField());
 
             const fvPatchScalarField& pw =
@@ -1322,6 +1316,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
     }
 
     os.writeEntry("otherPhase", otherPhaseName_);
+
     dmdt_.writeEntry("dmdt", os);
     dDep_.writeEntry("dDep", os);
     qq_.writeEntry("qQuenching", os);

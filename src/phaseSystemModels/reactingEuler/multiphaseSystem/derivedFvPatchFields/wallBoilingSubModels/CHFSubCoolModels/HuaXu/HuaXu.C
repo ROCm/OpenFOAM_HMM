@@ -63,12 +63,6 @@ Foam::wallBoilingModels::CHFModels::HuaXu::HuaXu
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::CHFModels::HuaXu::~HuaXu()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -82,7 +76,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
     const scalarField& L
 ) const
 {
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const scalarField alphaLiq(liquid.alpha(patchi));
@@ -114,7 +108,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
        /
         (
             alphaLiq
-          * pow(mag(g.value())*(rhoLiq-rhoVapor), 0.25)
+          * pow025(mag(g.value())*(rhoLiq-rhoVapor))
           * sqrt(rhoVapor)
         )
     );
@@ -124,8 +118,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
         rhoLiq*Cpw*max(Tsatw - Tl, scalar(0))/(rhoVapor*L)
     );
 
-    return
-        Kburn_*(1 + 0.345*Ja/pow(Pe, 0.25));
+    return Kburn_*(scalar(1) + 0.345*Ja/pow025(Pe));
 }
 
 

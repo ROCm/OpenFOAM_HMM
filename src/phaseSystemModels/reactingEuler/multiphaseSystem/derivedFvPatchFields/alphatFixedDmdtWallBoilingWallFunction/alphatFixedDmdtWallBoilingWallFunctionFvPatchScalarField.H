@@ -96,12 +96,12 @@ class alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 :
     public alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField
 {
-    // Private data
+    // Private Data
 
-        //- name on the phase
+        //- Name of the vapor phase
         word vaporPhaseName_;
 
-        //- dmdt relaxationFactor
+        //- Relaxation factor for dmdt
         scalar relax_;
 
         //- Volumetric phase-change mass flux in near wall cells
@@ -135,8 +135,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
         (
             const alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField&,
@@ -187,7 +187,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Is there phase change mass transfer for this phasePair
         virtual bool activePhasePair(const phasePairKey&) const;
@@ -198,7 +198,8 @@ public:
         //- Return the rate of phase-change for specific phase pair
         virtual const scalarField& mDotL(const phasePairKey&) const;
 
-        // Evaluation functions
+
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

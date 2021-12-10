@@ -65,7 +65,7 @@ alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
-    vaporPhaseName_(dict.lookup("vaporPhase")),
+    vaporPhaseName_(dict.get<word>("vaporPhase")),
     relax_(dict.getOrDefault<scalar>("relax", 1)),
     fixedDmdt_(dict.getOrDefault<scalar>("fixedDmdt", 0)),
     L_(dict.getOrDefault<scalar>("L", 0))
@@ -88,6 +88,8 @@ alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
         iF,
         mapper
     ),
+    vaporPhaseName_(psf.vaporPhaseName_),
+    relax_(psf.relax_),
     fixedDmdt_(psf.fixedDmdt_),
     L_(psf.L_)
 {}
@@ -100,6 +102,7 @@ alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(psf),
+    vaporPhaseName_(psf.vaporPhaseName_),
     relax_(psf.relax_),
     fixedDmdt_(psf.fixedDmdt_),
     L_(psf.L_)
@@ -114,6 +117,7 @@ alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(psf, iF),
+    vaporPhaseName_(psf.vaporPhaseName_),
     relax_(psf.relax_),
     fixedDmdt_(psf.fixedDmdt_),
     L_(psf.L_)
@@ -129,10 +133,8 @@ activePhasePair(const phasePairKey& phasePair) const
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -143,14 +145,12 @@ dmdt(const phasePairKey& phasePair) const
     {
         return dmdt_;
     }
-    else
-    {
-        FatalErrorInFunction
-            << " dmdt requested for invalid phasePair!"
-            << abort(FatalError);
 
-        return mDotL_;
-    }
+    FatalErrorInFunction
+        << " dmdt requested for invalid phasePair!"
+        << abort(FatalError);
+
+    return mDotL_;
 }
 
 
@@ -161,14 +161,12 @@ mDotL(const phasePairKey& phasePair) const
     {
         return mDotL_;
     }
-    else
-    {
-        FatalErrorInFunction
-            << " mDotL requested for invalid phasePair!"
-            << abort(FatalError);
 
-        return mDotL_;
-    }
+    FatalErrorInFunction
+        << " mDotL requested for invalid phasePair!"
+        << abort(FatalError);
+
+    return mDotL_;
 }
 
 
@@ -179,7 +177,9 @@ void alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    dmdt_ = (1 - relax_)*dmdt_ + relax_*fixedDmdt_;
+    dmdt_ *= (scalar(1) - relax_);
+    dmdt_ += relax_*fixedDmdt_;
+
     mDotL_ = dmdt_*L_;
 
     operator==(calcAlphat(*this));

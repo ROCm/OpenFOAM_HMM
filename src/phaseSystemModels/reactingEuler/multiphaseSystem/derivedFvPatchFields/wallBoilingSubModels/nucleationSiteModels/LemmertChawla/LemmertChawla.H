@@ -91,16 +91,26 @@ class LemmertChawla
 :
     public nucleationSiteModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Coefficient for nucleation site density
         scalar Cn_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        LemmertChawla(const LemmertChawla&) = delete;
+
+        //- No copy assignment
+        void operator=(const LemmertChawla&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("LemmertChawla");
+
 
     // Constructors
 
@@ -109,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~LemmertChawla();
+    virtual ~LemmertChawla() = default;
 
 
     // Member Functions
@@ -124,6 +134,11 @@ public:
             const scalarField& Tsatw,
             const scalarField& L
         ) const;
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 
