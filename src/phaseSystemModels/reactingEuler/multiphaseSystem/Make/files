@@ -210,6 +210,7 @@ $(CHFModels)/Zuber/Zuber.C
 CHFSubCoolModels = $(wallBoilingSubModels)/CHFSubCoolModels
 $(CHFSubCoolModels)/CHFSubCoolModel/CHFSubCoolModel.C
 $(CHFSubCoolModels)/HuaXu/HuaXu.C
+$(CHFSubCoolModels)/Tatsumoto/Tatsumoto.C
 
 filmBoiling = $(wallBoilingSubModels)/filmBoilingModels
 $(filmBoiling)/filmBoilingModel/filmBoilingModel.C
