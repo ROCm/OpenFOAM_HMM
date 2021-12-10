@@ -228,6 +228,10 @@ TDNBModels = $(wallBoilingSubModels)/TDNBModels
 $(TDNBModels)/TDNBModel/TDNBModel.C
 $(TDNBModels)/Schroeder/Schroeder.C
 
+nucleateFluxModels = $(wallBoilingSubModels)/nucleateFluxModels
+$(nucleateFluxModels)/nucleateFluxModel/nucleateFluxModel.C
+$(nucleateFluxModels)/Kutadeladze/Kutadeladze.C
+
 /* Turbulence */
 turbulence/multiphaseCompressibleTurbulenceModels.C
 
