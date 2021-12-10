@@ -228,6 +228,7 @@ $(MHFModels)/Jeschar/Jeschar.C
 TDNBModels = $(wallBoilingSubModels)/TDNBModels
 $(TDNBModels)/TDNBModel/TDNBModel.C
 $(TDNBModels)/Schroeder/Schroeder.C
+$(TDNBModels)/Shirai/Shirai.C
 
 nucleateFluxModels = $(wallBoilingSubModels)/nucleateFluxModels
 $(nucleateFluxModels)/nucleateFluxModel/nucleateFluxModel.C
