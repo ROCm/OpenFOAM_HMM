@@ -147,7 +147,7 @@ void createTimeDirs(const fileName& path)
 
     // Just to make sure remove all state and re-scan
     fileHandler().flush();
-    (void)fileHandler().findTimes(path, "constant");
+    (void)Time::findTimes(path, "constant");
 }
 
 
@@ -2665,9 +2665,11 @@ int main(int argc, char *argv[])
     // e.g. latestTime will pick up a different time (which causes createTime.H
     // to abort). So for now make sure to have master times on all
     // processors
-    Info<< "Creating time directories on all processors" << nl << endl;
-    createTimeDirs(args.path());
-
+    if (!reconstruct)
+    {
+        Info<< "Creating time directories on all processors" << nl << endl;
+        createTimeDirs(args.path());
+    }
 
     // Construct time
     // ~~~~~~~~~~~~~~
@@ -2931,6 +2933,10 @@ int main(int argc, char *argv[])
                     );
                 }
             }
+
+            // Make sure all is finished writing until re-reading in pass2
+            // below
+            fileHandler().flush();
 
 
             // Pass2 : read mesh and addressing and reconstruct fields

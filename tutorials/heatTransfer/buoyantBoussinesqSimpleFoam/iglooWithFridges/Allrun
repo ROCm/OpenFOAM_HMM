@@ -27,8 +27,8 @@ cp -f \
 if [ "$parallel" = true ]
 then
 
-    runApplication decomposePar $fileHandler
-    #runParallel -s decompose redistributePar -decompose $fileHandler
+    #runApplication decomposePar $fileHandler
+    runParallel -s decompose redistributePar -decompose $fileHandler
 
     runParallel snappyHexMesh -overwrite $fileHandler
 
@@ -43,10 +43,10 @@ then
 
     ## Run reconstructParMesh with collated as well since writes
     ##     constant/polyMesh/cellProcAddressing
-    runApplication reconstructParMesh -constant $fileHandler
-    runApplication reconstructPar
+    #runApplication reconstructParMesh -constant $fileHandler
+    #runApplication reconstructPar
 
-    #runParallel -s reconstruct redistributePar -reconstruct $fileHandler
+    runParallel -s reconstruct redistributePar -reconstruct $fileHandler
 
 else
 
