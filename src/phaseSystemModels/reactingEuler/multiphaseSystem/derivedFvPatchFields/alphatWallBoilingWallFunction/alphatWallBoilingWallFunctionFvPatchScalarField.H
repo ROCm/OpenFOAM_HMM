@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,10 @@ Description
     \endverbatim
 
 
+    Alternatively a correlation can be used instead of the RPI wall boiling model.
+    If the keyword nucleatingModel a model is provided the BC uses it
+    instead of the RPI model.
+
     The transition boiling regime flux (TBF) is modelled following
     a temperature based linear interpolation between the critical heat flux
     (CHF) and the minimum heat flux (MHF) in such a way that when the wall
@@ -110,11 +114,8 @@ Description
 
 
     The film boiling regime is applied when Tw is larger than TLeiden. In
-    this regime the corrlation from the filmBoilingModel is used for
+    this regime the correlation from the filmBoilingModel is used for
     calculating the cht from the wall.
-
-    The filmBoilingModel is needed in the vapor field in order to calculate
-    the heat transfer to the vapor phase in film boiling regime.
 
 
 Usage
@@ -132,8 +133,6 @@ Usage
         if phaseType 'vapor':
 
         partitioningModel|                     | yes        |
-        filmBoilingModel |                     | yes        |
-        LeidenfrostModel |                     | yes        |
 
         if phaseType 'liquid':
 
@@ -142,6 +141,7 @@ Usage
         departureDiamModel|                     | yes       |
         departureFreqModel|                     | yes       |
         K                | bubbles area constant| no       | 4
+        nucleatingModel  | nucleating Model     | no       |
 
         LeidenfrostModel |                      | no       |
         CHFModel         |                      | no       |
@@ -232,6 +232,7 @@ SourceFiles
 #include "nucleationSiteModel.H"
 #include "departureDiameterModel.H"
 #include "departureFrequencyModel.H"
+#include "nucleateFluxModel.H"
 
 #include "LeidenfrostModel.H"
 #include "filmBoilingModel.H"
@@ -248,7 +249,7 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-            Class alphatWallBoilingWallFunctionFvPatchScalarField Declaration
+        Class alphatWallBoilingWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphatWallBoilingWallFunctionFvPatchScalarField
@@ -325,6 +326,10 @@ private:
             autoPtr<wallBoilingModels::departureFrequencyModel>
                 departureFreqModel_;
 
+            //- Run-time sub-cooling heat flux correlatiom
+            autoPtr<wallBoilingModels::nucleateFluxModel>
+                nucleatingModel_;
+
 
         // Film boiling model
 
@@ -352,6 +357,12 @@ private:
 
             //- Wetting parameter for transient boiling
             scalar wp_;
+
+            //- Use Liquid temperature at y+=250
+            bool liquidTatYplus_;
+
+            //- Face regime
+            labelField regimeTypes_;
 
 
 public:
@@ -452,6 +463,12 @@ public:
         tmp<scalarField> qe() const
         {
             return mDotL_/AbyV_;
+        }
+
+        //- Return const reference to the face regime
+        const labelField& regimeTypes() const noexcept
+        {
+            return regimeTypes_;
         }
 
         // Evaluation functions
