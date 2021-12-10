@@ -351,6 +351,14 @@ public:
             const label patchi
         ) const;
 
+        //- Heat capacity using pressure and temperature
+        virtual tmp<scalarField> CpThermo
+        (
+            const scalarField& T,
+            const scalarField& p,
+            const labelList& cells
+        ) const;
+
         //- Return Cv of the mixture
         virtual tmp<volScalarField> Cv() const;
 
@@ -360,6 +368,14 @@ public:
             const scalarField& p,
             const scalarField& T,
             const label patchI
+        ) const;
+
+        //- Density from pressure and temperature
+        virtual tmp<scalarField> rhoEoS
+        (
+            const scalarField& T,
+            const scalarField& p,
+            const labelList& cells
         ) const;
 
         //- Gamma = Cp/Cv []

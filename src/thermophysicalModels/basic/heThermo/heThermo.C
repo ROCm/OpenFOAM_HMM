@@ -377,6 +377,28 @@ Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::Cp
 
 
 template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::CpThermo
+(
+    const scalarField& T,
+    const scalarField& p,
+    const labelList& cells
+) const
+{
+    auto tCp = tmp<scalarField>::New(T.size());
+    auto& Cp = tCp.ref();
+
+    forAll(cells, i)
+    {
+        const label celli = cells[i];
+        Cp[i] = this->cellMixture(celli).Cp(p[i], T[i]);
+    }
+
+    return tCp;
+}
+
+
+template<class BasicThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
 Foam::heThermo<BasicThermo, MixtureType>::Cp() const
 {
@@ -446,6 +468,28 @@ Foam::heThermo<BasicThermo, MixtureType>::Cv
     }
 
     return tCv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::rhoEoS
+(
+    const scalarField& T,
+    const scalarField& p,
+    const labelList& cells
+) const
+{
+    auto tRho = tmp<scalarField>::New(T.size());
+    auto& rho = tRho.ref();
+
+    forAll(cells, i)
+    {
+        const label celli = cells[i];
+        rho[i] = this->cellMixture(celli).rho(p[i], T[i]);
+    }
+
+    return tRho;
 }
 
 
