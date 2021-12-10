@@ -214,6 +214,7 @@ $(CHFSubCoolModels)/HuaXu/HuaXu.C
 filmBoiling = $(wallBoilingSubModels)/filmBoilingModels
 $(filmBoiling)/filmBoilingModel/filmBoilingModel.C
 $(filmBoiling)/Bromley/Bromley.C
+$(filmBoiling)/BreenWestwater/BreenWestwater.C
 
 Leidenfrost = $(wallBoilingSubModels)/LeidenfrostModels
 $(Leidenfrost)/LeidenfrostModel/LeidenfrostModel.C
