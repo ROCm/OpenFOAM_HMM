@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,18 +85,23 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
     const scalarField& L
 ) const
 {
-
     const fvPatchScalarField& Tw =
         liquid.thermo().T().boundaryField()[patchi];
+
     const uniformDimensionedVectorField& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
-    const fvPatchScalarField& rhoVaporw
-    (
-        vapor.thermo().rho()().boundaryField()[patchi]
-    );
+    const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
 
-    const scalarField rhoLiq(liquid.thermo().rho(patchi));
+    const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
+
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pw, cells);
+    const scalarField& rhoVapor = trhoVapor.ref();
+
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pw, cells);
+    const scalarField& rhoLiq = trhoLiq.ref();
+
+
     const scalarField kappaVapor(vapor.kappa(patchi));
 
     tmp<volScalarField> tCp = vapor.thermo().Cp();
@@ -104,7 +109,6 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
     const scalarField& CpVapor = Cp.boundaryField()[patchi];
 
     const scalarField muVapor(vapor.mu(patchi));
-    //const scalarField dbVapor(vapor.d()().boundaryField()[patchi]);
 
     const scalarField htcRad
     (
@@ -116,7 +120,7 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
         Cn_*pow
         (
             pow3(kappaVapor)
-           *rhoVaporw*(rhoLiq - rhoVaporw)*mag(g.value())
+           *rhoVapor*(rhoLiq - rhoVapor)*mag(g.value())
            *(L + 0.4*CpVapor*max((Tw-Tsatw), scalar(0)))
            /(L_*muVapor*max((Tw-Tsatw), scalar(1e-4))),
             0.25

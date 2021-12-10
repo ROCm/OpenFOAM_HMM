@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,8 +87,17 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
 
     const scalarField alphaLiq(liquid.alpha(patchi));
 
-    const scalarField rhoVapor(vapor.thermo().rho(patchi));
-    const scalarField rhoLiq(liquid.thermo().rho(patchi));
+    const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
+
+    const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
+
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pw, cells);
+    const scalarField& rhoVapor = trhoVapor.ref();
+
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pw, cells);
+    const scalarField& rhoLiq = trhoLiq.ref();
+
+
     tmp<volScalarField> tCp = liquid.thermo().Cp();
     const volScalarField& Cp = tCp();
     const fvPatchScalarField& Cpw = Cp.boundaryField()[patchi];
