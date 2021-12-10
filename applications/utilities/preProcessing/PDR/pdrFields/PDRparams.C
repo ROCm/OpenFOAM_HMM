@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ void Foam::PDRparams::readDefaults(const dictionary& dict)
 
     outer_orthog = dict.found("outer_orthog");
 
-    dict.readIfPresent("debugLevel", debugLevel);
+    dict.readIfPresent("debug.level", debugLevel);
     dict.readIfPresent("nFacesToBlockC", nFacesToBlockC);
     dict.readIfPresent("nPairsToBlockC", nPairsToBlockC);
     dict.readIfPresent("overlaps", overlaps);
