@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,8 +142,16 @@ void Foam::mixedEnergyFvPatchScalarField::manipulateMatrix
 
     label index = this->patch().index();
 
+    const label nbrPatchId =  this->patch().patch().neighbPolyPatchID();
+
     const label globalPatchID =
         matrix.lduMeshAssembly().patchLocalToGlobalMap()[mat][index];
+
+    const label meshNrbId = matrix.lduMeshAssembly().findNbrMeshId
+    (
+        this->patch().patch(),
+        mat
+    );
 
     const mixedFvPatchField<scalar>& fPatch =
         refCast<const mixedFvPatchField>(thermo.T().boundaryField()[index]);
@@ -154,37 +163,82 @@ void Foam::mixedEnergyFvPatchScalarField::manipulateMatrix
 
     const scalarField sourceCorr(fPatch.source());
 
-    const labelUList& u = matrix.lduAddr().upperAddr();
-    const labelUList& l = matrix.lduAddr().lowerAddr();
-
     const labelList& faceMap =
         matrix.lduMeshAssembly().faceBoundMap()[mat][index];
+
+    const labelList& myCells =
+        matrix.lduMeshAssembly().cellBoundMap()[meshNrbId][nbrPatchId];
+
+    const labelList& nbrCells =
+        matrix.lduMeshAssembly().cellBoundMap()[mat][index];
 
     forAll(faceMap, j)
     {
         label globalFaceI = faceMap[j];
 
-        if (globalFaceI != -1)
-        {
-            const scalar intCorr = -intCoeffsCmpt[j];
-            const scalar srcCorr = -sourceCorr[j];
+        label myCellI = myCells[j];
+        label nbrCellI = nbrCells[j];
 
-            if (this->patch().patch().masterImplicit())
+        const scalar intCorr = -intCoeffsCmpt[j];
+        const scalar srcCorr = -sourceCorr[j];
+
+        if (this->patch().patch().masterImplicit())
+        {
+            if (myCellI > nbrCellI)
             {
-                matrix.diag()[u[globalFaceI]] -= intCorr;
                 if (matrix.asymmetric())
                 {
                     matrix.lower()[globalFaceI] += intCorr;
                 }
-                matrix.source()[u[globalFaceI]] += srcCorr;
             }
             else
             {
-                matrix.diag()[l[globalFaceI]] -= intCorr;
                 matrix.upper()[globalFaceI] += intCorr;
-                matrix.source()[l[globalFaceI]] += srcCorr;
             }
+
+            matrix.diag()[myCellI] -= intCorr;
+            matrix.source()[myCellI] += srcCorr;
         }
+        else
+        {
+            if (myCellI < nbrCellI)
+            {
+                matrix.upper()[globalFaceI] += intCorr;
+            }
+            else
+            {
+                if (matrix.asymmetric())
+                {
+                    matrix.lower()[globalFaceI] += intCorr;
+                }
+            }
+
+            matrix.diag()[myCellI] -= intCorr;
+            matrix.source()[myCellI] += srcCorr;
+        }
+
+
+//         if (globalFaceI != -1)
+//         {
+//             const scalar intCorr = -intCoeffsCmpt[j];
+//             const scalar srcCorr = -sourceCorr[j];
+//
+//             if (this->patch().patch().masterImplicit())
+//             {
+//                 matrix.diag()[u[globalFaceI]] -= intCorr;
+//                 if (matrix.asymmetric())
+//                 {
+//                     matrix.lower()[globalFaceI] += intCorr;
+//                 }
+//                 matrix.source()[u[globalFaceI]] += srcCorr;
+//             }
+//             else
+//             {
+//                 matrix.diag()[l[globalFaceI]] -= intCorr;
+//                 matrix.upper()[globalFaceI] += intCorr;
+//                 matrix.source()[l[globalFaceI]] += srcCorr;
+//             }
+//         }
     }
 }
 

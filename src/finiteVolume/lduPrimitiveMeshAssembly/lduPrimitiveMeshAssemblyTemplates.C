@@ -420,6 +420,7 @@ void Foam::lduPrimitiveMeshAssembly::update
                             faceBoundMap_[meshNrbId][nbrPatchId][subFaceI] =
                                 nFaces;
 
+
                             ++subFaceI;
                             ++nFaces;
                         }
