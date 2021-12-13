@@ -54,6 +54,7 @@ functions
     #include "surfaces"
     #include "forces"
     #include "AMIWeights"
+    #include "propellerInfo"
 }
 
 
