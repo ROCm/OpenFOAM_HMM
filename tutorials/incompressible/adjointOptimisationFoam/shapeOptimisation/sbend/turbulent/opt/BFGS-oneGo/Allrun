@@ -11,10 +11,6 @@ cp -rf "$resourcesDir"/meshes/sbend/polyMesh/ constant/
 
 runApplication decomposePar
 
-runParallel -s adjointOptimisationFoamFirstPhase $(getApplication)
-
-foamDictionary system/controlDict -entry endTime -set 10
-
 runParallel $(getApplication)
 
 runParallel cumulativeDisplacement

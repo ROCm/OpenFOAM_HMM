@@ -1,0 +1,137 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2106                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      optimisationDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+optimisationManager     steadyOptimisation;
+
+primalSolvers
+{
+    p1
+    {
+        active                 true;
+        type                   incompressible;
+        solver                 simple;
+        solutionControls
+        {
+            nIters 3000;
+            residualControl
+            {
+                "p.*"       1.e-7;
+                "U.*"       1.e-7;
+                "nuTilda.*" 1.e-7;
+            }
+        }
+    }
+}
+
+adjointManagers
+{
+    am1
+    {
+        primalSolver             p1;
+        adjointSolvers
+        {
+            as1
+            {
+                // choose adjoint solver
+                //----------------------
+                active                 true;
+                type                   incompressible;
+                solver                 adjointSimple;
+
+                // manage objectives
+                //------------------
+                objectives
+                {
+                    type                incompressible;
+                    objectiveNames
+                    {
+                        losses
+                        {
+                            weight              1;
+                            type                PtLosses;
+                            patches             (Inlet Outlet);
+                        }
+                    }
+                }
+
+                // ATC treatment
+                //--------------
+                ATCModel
+                {
+                    ATCModel        standard;
+                }
+
+                // solution control
+                //------------------
+                solutionControls
+                {
+                    nIters 3000;
+                    residualControl
+                    {
+                        "pa.*"       1.e-7;
+                        "Ua.*"       1.e-7;
+                    }
+                }
+            }
+        }
+    }
+}
+
+optimisation
+{
+    optimisationType
+    {
+        type             shapeOptimisation;
+        writeEachMesh    true;
+    }
+
+    sensitivities
+    {
+        type                volumetricBSplinesFI;
+        patches             (lower upper);
+    }
+    updateMethod
+    {
+        method BFGS;
+        BFGS
+        {
+            etaHessian        0.8;
+            scaleFirstHessian true;
+            /*
+            activeDesignVariables
+            (
+                141	142 144	145 147	148
+                150	151 153	154 168	169
+                171	172 174	175 177	178
+                180	181 195	196 198	199
+                201	202 204	205 207	208
+                222	223 225	226 228	229
+                231	232 234	235 249	250
+                252	253 255	256 258	259
+                261	262
+            );
+            */
+        }
+    }
+    meshMovement
+    {
+        type                   volumetricBSplines;
+        maxAllowedDisplacement 2.e-3;
+    }
+}
+
+
+// ************************************************************************* //
