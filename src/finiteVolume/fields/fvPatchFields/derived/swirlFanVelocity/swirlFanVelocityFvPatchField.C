@@ -270,7 +270,7 @@ void Foam::swirlFanVelocityFvPatchField::write(Ostream& os) const
             rpm_->writeData(os);
         }
 
-        os.writeEntryIfDifferent<scalar>("fanEff", 1, rEff_);
+        os.writeEntryIfDifferent<scalar>("fanEff", 1, fanEff_);
 
         if (useRealRadius_)
         {
