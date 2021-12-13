@@ -343,7 +343,7 @@ plot_yPlus_vs_uPlus_all_setups() {
         # few manipulations
         endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
         nu=$(foamDictionary results/$setup/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
-        tau=$(foamDictionary results/$setup/$endTime/wallShearStress1:wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
+        tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
         sampleFiles[$n]="results/$setup/postProcessing/sample/$endTime/y_U.xy"
@@ -398,7 +398,7 @@ plot_yPlus_vs_R_all_setups() {
         # few manipulations
         endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
         nu=$(foamDictionary results/$setup/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
-        tau=$(foamDictionary results/$setup/$endTime/wallShearStress1:wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
+        tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
         sampleFiles[$n]="results/$setup/postProcessing/sample/$endTime/y_turbulenceProperties:R.xy"
@@ -500,7 +500,7 @@ plot_yPlus_vs_epsilonPlus_all_setups() {
         # few manipulations
         endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
         nu=$(foamDictionary results/$setup/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
-        tau=$(foamDictionary results/$setup/$endTime/wallShearStress1:wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
+        tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
         sampleFiles[$n]="results/$setup/postProcessing/sampleEpsilon/$endTime/y_turbulenceProperties:epsilon.xy"
@@ -555,7 +555,7 @@ plot_yPlus_vs_productionRatePlus_all_setups() {
         # few manipulations
         endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
         nu=$(foamDictionary results/$setup/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
-        tau=$(foamDictionary results/$setup/$endTime/wallShearStress1:wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
+        tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
         uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
         sampleFiles[$n]="results/$setup/postProcessing/sampleG/$endTime/y_productionRate.xy"
@@ -634,7 +634,7 @@ do
     # few manipulations
     endTime=$(foamDictionary results/$setup/system/controlDict -entry endTime -value)
     nu=$(foamDictionary results/$setup/constant/transportProperties -entry nu | sed 's|^.*\s\(.*\);|\1|g')
-    tau=$(foamDictionary results/$setup/$endTime/wallShearStress1:wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
+    tau=$(foamDictionary results/$setup/$endTime/wallShearStress -entry boundaryField.bottom.value -value | sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' | cut -d' ' -f6)
     uTau=$(awk -v tau="$tau" 'BEGIN { printf "%.16f", sqrt(-1*tau) }')
 
     plot_yPlus_vs_uPlus "$setup" "$endTime" "$nu" "$uTau"
