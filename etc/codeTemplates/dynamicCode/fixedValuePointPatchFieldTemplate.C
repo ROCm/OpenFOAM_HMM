@@ -144,7 +144,8 @@ ${typeName}FixedValuePointPatch${FieldType}
     const ${typeName}FixedValuePointPatch${FieldType}& rhs
 )
 :
-    parent_bctype(rhs)
+    parent_bctype(rhs),
+    dictionaryContent(rhs)
 {
     if (${verbose:-false})
     {

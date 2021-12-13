@@ -143,7 +143,8 @@ ${typeName}MixedValueFvPatch${FieldType}
     const ${typeName}MixedValueFvPatch${FieldType}& rhs
 )
 :
-    parent_bctype(rhs)
+    parent_bctype(rhs),
+    dictionaryContent(rhs)
 {
     if (${verbose:-false})
     {
