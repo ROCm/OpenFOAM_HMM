@@ -66,7 +66,7 @@ T
 
         "bottomWater_to_.*"
         {
-            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            type            compressible::turbulentTemperatureRadCoupledMixed;
             Tnbr            T;
             kappaMethod     fluidThermo;
             value           uniform 300;

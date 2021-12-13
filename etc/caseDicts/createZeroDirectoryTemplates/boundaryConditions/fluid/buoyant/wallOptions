@@ -40,7 +40,7 @@ heatTransfer
     {
         T
         {
-            type        compressible::turbulentTemperatureCoupledBaffleMixed;
+            type        compressible::turbulentTemperatureRadCoupledMixed;
             value       ${:VALUE.T};
             Tnbr        T;
             kappaMethod fluidThermo;

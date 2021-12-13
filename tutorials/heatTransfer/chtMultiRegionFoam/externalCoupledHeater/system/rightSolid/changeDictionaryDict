@@ -39,7 +39,7 @@ T
         }
         "rightSolid_to_.*"
         {
-            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            type            compressible::turbulentTemperatureRadCoupledMixed;
             Tnbr            T;
             kappaMethod     solidThermo;
             value           uniform 300;

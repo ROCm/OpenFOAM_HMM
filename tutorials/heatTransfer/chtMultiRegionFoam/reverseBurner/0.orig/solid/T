@@ -34,7 +34,7 @@ boundaryField
 
     solid_to_gas
     {
-        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        type            compressible::turbulentTemperatureRadCoupledMixed;
         value           $internalField;
         Tnbr            T;
         kappaMethod     solidThermo;
