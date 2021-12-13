@@ -29,7 +29,13 @@ rigidBodyMotionCoeffs
         type Newmark;
     }
 
-    accelerationRelaxation 0.7;
+    accelerationRelaxation table
+    (
+        // time     relaxation-factor
+        (0          0)
+        (3.99999    0)
+        (4          0.7)
+    );
 
     bodies
     {
