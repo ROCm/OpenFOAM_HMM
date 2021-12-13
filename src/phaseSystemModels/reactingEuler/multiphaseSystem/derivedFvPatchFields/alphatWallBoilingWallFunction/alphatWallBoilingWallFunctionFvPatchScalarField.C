@@ -639,18 +639,19 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
             const fvPatchScalarField& hew =
                 liquid.thermo().he().boundaryField()[patchi];
 
-            const scalarField hw
+            const scalarField hwLiqSat
             (
                 liquid.thermo().he().member() == "e"
-              ? hew.patchInternalField() + pw/rhow.patchInternalField()
-              : hew.patchInternalField()
+              ? liquid.thermo().he(pw, Tsatc, patchi)
+                    + pw/rhow.patchInternalField()
+              : liquid.thermo().he(pw, Tsatc, patchi)
             );
 
             const scalarField L
             (
                 vapor.thermo().he().member() == "e"
-              ? vapor.thermo().he(pw, Tsatc, patchi) + pw/rhoVaporw - hw
-              : vapor.thermo().he(pw, Tsatc, patchi) - hw
+              ? vapor.thermo().he(pw, Tsatc, patchi) + pw/rhoVaporw - hwLiqSat
+              : vapor.thermo().he(pw, Tsatc, patchi) - hwLiqSat
             );
 
             // Liquid phase fraction at the wall

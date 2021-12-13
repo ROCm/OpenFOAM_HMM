@@ -99,7 +99,7 @@ Foam::wallBoilingModels::CHFModels::Jeschar::MHF
         Kmhf_*rhoVapor*L
        *(
             pow(sigma/(mag(g.value())*(rhoLiq - rhoVapor)), 0.25)
-          * sqrt(mag(g.value())*(rhoLiq - rhoVapor)/(rhoLiq + rhoVapor))
+          * sqrt(mag(g.value())*(rhoLiq - rhoVapor)/(rhoLiq + rhoVapor + VSMALL))
         );
 }
 
