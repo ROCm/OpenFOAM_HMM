@@ -32,7 +32,7 @@ runParallel -s eager $(getApplication)
 
 #- Run with processorAgglomerator
 foamDictionary -entry solvers.p.processorAgglomerator -set 'manual' system/fvSolution
-foamDictionary -entry solvers.p.processorAgglomeration -set '((9 ((0 1 2 3)(4 5 6))))' system/fvSolution
+foamDictionary -entry solvers.p.processorAgglomeration -set '((9 ((0 1 2 3)(4 5 6 7))))' system/fvSolution
 runParallel -s manual $(getApplication)
 
 #------------------------------------------------------------------------------
