@@ -84,16 +84,16 @@ Foam::wallBoilingModels::filmBoilingModels::BreenWestwater::htcFilmBoil
     const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
     const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
 
-    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pw, Tsatw, cells);
     const scalarField& rhoVapor = trhoVapor.ref();
 
-    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pw, Tsatw, cells);
     const scalarField& rhoLiq = trhoLiq.ref();
 
 
     const scalarField kappaLiquid(liquid.kappa(patchi));
 
-    tmp<scalarField> tCp = vapor.thermo().CpThermo(Tsatw, pw, cells);
+    tmp<scalarField> tCp = vapor.thermo().Cp(pw, Tsatw, cells);
     const scalarField& CpVapor = tCp();
 
     const scalarField nuLiquid(liquid.nu(patchi));

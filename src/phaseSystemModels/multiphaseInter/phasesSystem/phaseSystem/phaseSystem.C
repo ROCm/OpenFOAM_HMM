@@ -455,18 +455,6 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::phaseSystem::CpThermo
-(
-    const scalarField& T,
-    const scalarField& p,
-    const labelList& cells
-) const
-{
-    NotImplemented;
-    return nullptr;
-}
-
-
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cv() const
 {
     auto iter = phaseModels_.cbegin();
@@ -510,8 +498,8 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
 
 Foam::tmp<Foam::scalarField> Foam::phaseSystem::rhoEoS
 (
-    const scalarField& T,
     const scalarField& p,
+    const scalarField& T,
     const labelList& cells
 ) const
 {

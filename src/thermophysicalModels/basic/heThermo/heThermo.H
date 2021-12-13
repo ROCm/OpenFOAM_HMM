@@ -229,10 +229,10 @@ public:
             ) const;
 
             //- Heat capacity using pressure and temperature
-            virtual tmp<scalarField> CpThermo
+            virtual tmp<scalarField> Cp
             (
-                const scalarField& T,
                 const scalarField& p,
+                const scalarField& T,
                 const labelList& cells
             ) const;
 
@@ -250,8 +250,8 @@ public:
             //- Density from pressure and temperature
             virtual tmp<scalarField> rhoEoS
             (
-                const scalarField& T,
                 const scalarField& p,
+                const scalarField& T,
                 const labelList& cells
             ) const;
 

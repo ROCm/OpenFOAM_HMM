@@ -443,11 +443,11 @@ public:
                 const label patchi
             ) const = 0;
 
-            //- Heat capacity using pressure and temperature
-            virtual tmp<scalarField> CpThermo
+            //- Heat capacity using pressure and temperature [J/kg/K]
+            virtual tmp<scalarField> Cp
             (
-                const scalarField& T,
                 const scalarField& p,
+                const scalarField& T,
                 const labelList& cells
             ) const = 0;
 
@@ -462,11 +462,11 @@ public:
                 const label patchi
             ) const = 0;
 
-            //- Density from pressure and temperature
+            //- Density from pressure and temperature from EoS
             virtual tmp<scalarField> rhoEoS
             (
-                const scalarField& T,
                 const scalarField& p,
+                const scalarField& T,
                 const labelList& cells
             ) const = 0;
 

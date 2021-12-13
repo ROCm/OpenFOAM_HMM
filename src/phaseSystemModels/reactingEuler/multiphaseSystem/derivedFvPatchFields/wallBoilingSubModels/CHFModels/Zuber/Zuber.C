@@ -83,10 +83,10 @@ Foam::wallBoilingModels::CHFModels::Zuber::CHF
 
     const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
 
-    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pw ,Tsatw, cells);
     const scalarField& rhoVapor = trhoVapor.ref();
 
-    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pw, Tsatw, cells);
     const scalarField& rhoLiq = trhoLiq.ref();
     const phasePairKey pair(liquid.name(), vapor.name());
     const scalarField sigma

@@ -88,18 +88,17 @@ Foam::wallBoilingModels::filmBoilingModels::Bromley::htcFilmBoil
 
     const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
 
-    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pw, Tsatw, cells);
     const scalarField& rhoVapor = trhoVapor.ref();
 
-    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pw, cells);
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pw, Tsatw, cells);
     const scalarField& rhoLiq = trhoLiq.ref();
 
 
     const scalarField kappaVapor(vapor.kappa(patchi));
 
-    tmp<volScalarField> tCp = vapor.thermo().Cp();
-    const volScalarField& Cp = tCp();
-    const scalarField& CpVapor = Cp.boundaryField()[patchi];
+    tmp<scalarField> tCp = vapor.thermo().Cp(pw, Tsatw, cells);
+    const scalarField& CpVapor = tCp();
 
     const scalarField muVapor(vapor.mu(patchi));
 

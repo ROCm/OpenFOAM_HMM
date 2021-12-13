@@ -83,10 +83,10 @@ Foam::wallBoilingModels::nucleateFluxModels::Kutadeladze::qNucleate
 
     const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
 
-    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(Tsatw, pb, cells);
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pb, Tsatw, cells);
     const scalarField& rhoVapor = trhoVapor.ref();
 
-    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(Tsatw, pb, cells);
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pb, Tsatw, cells);
     const scalarField& rhoLiq = trhoLiq.ref();
 
     const phasePairKey pair(liquid.name(), vapor.name());
@@ -100,9 +100,8 @@ Foam::wallBoilingModels::nucleateFluxModels::Kutadeladze::qNucleate
 
     const scalarField kappaLiquid(liquid.kappa(patchi));
 
-    tmp<volScalarField> tCpliq = liquid.thermo().Cp();
-    const volScalarField& Cpliq = tCpliq();
-    const scalarField& Cpliquid = Cpliq.boundaryField()[patchi];
+    tmp<scalarField> tCpliq = liquid.thermo().Cp(pb, Tsatw, cells);
+    const scalarField& Cpliquid = tCpliq();
 
     const scalarField muLiquid(liquid.mu(patchi));
 

@@ -378,10 +378,10 @@ Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::Cp
 
 template<class BasicThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heThermo<BasicThermo, MixtureType>::CpThermo
+Foam::heThermo<BasicThermo, MixtureType>::Cp
 (
-    const scalarField& T,
     const scalarField& p,
+    const scalarField& T,
     const labelList& cells
 ) const
 {
@@ -475,8 +475,8 @@ template<class BasicThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
 Foam::heThermo<BasicThermo, MixtureType>::rhoEoS
 (
-    const scalarField& T,
     const scalarField& p,
+    const scalarField& T,
     const labelList& cells
 ) const
 {
