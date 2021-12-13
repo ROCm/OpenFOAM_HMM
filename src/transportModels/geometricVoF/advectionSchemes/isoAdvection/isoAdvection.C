@@ -7,8 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
     Modified code Copyright (C) 2016-2017 OpenCFD Ltd.
-    Modified code Copyright (C) 2019 Johan Roenby
     Modified code Copyright (C) 2019-2020 DLR
+    Modified code Copyright (C) 2018, 2021 Johan Roenby
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ License
 #include "meshTools.H"
 #include "OBJstream.H"
 #include "syncTools.H"
+#include "profiling.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -108,6 +109,10 @@ Foam::isoAdvection::isoAdvection
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),
 
+    // Porosity
+    porosityEnabled_(dict_.getOrDefault<bool>("porosityEnabled", false)),
+    porosityPtr_(nullptr),
+
     // Parallel run data
     procPatchLabels_(mesh_.boundary().size()),
     surfaceCellFacesOnProcPatches_(0)
@@ -131,6 +136,48 @@ Foam::isoAdvection::isoAdvection
 
         // Get boundary mesh and resize the list for parallel comms
         setProcessorPatches();
+    }
+
+    // Reading porosity properties from constant directory
+    IOdictionary porosityProperties
+    (
+        IOobject
+        (
+            "porosityProperties",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        )
+    );
+
+    porosityEnabled_ =
+        porosityProperties.getOrDefault<bool>("porosityEnabled", false);
+
+    if (porosityEnabled_)
+    {
+        if (mesh_.foundObject<volScalarField>("porosity"))
+        {
+            porosityPtr_ = mesh_.getObjectPtr<volScalarField>("porosity");
+
+            if
+            (
+                gMin(porosityPtr_->primitiveField()) <= 0
+             || gMax(porosityPtr_->primitiveField()) > 1 + SMALL
+            )
+            {
+                FatalErrorInFunction
+                    << "Porosity field has values <= 0 or > 1"
+                    << exit(FatalError);
+            }
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Porosity enabled in constant/porosityProperties "
+                << "but no porosity field is found in object registry."
+                << exit(FatalError);
+        }
     }
 }
 
@@ -195,6 +242,7 @@ void Foam::isoAdvection::extendMarkedCells
 
 void Foam::isoAdvection::timeIntegratedFlux()
 {
+    addProfilingInFunction(geometricVoF);
     // Get time step
     const scalar dt = mesh_.time().deltaTValue();
 
@@ -222,6 +270,26 @@ void Foam::isoAdvection::timeIntegratedFlux()
     DynamicList<List<point>> isoFacePts;
     const DynamicField<label>& interfaceLabels = surf_->interfaceLabels();
 
+    // Calculating isoface normal velocity
+    scalarField Un0(interfaceLabels.size());
+    forAll(Un0, i)
+    {
+        const label celli = interfaceLabels[i];
+        const point x0(surf_->centre()[celli]);
+        const vector n0(normalised(-surf_->normal()[celli]));
+        Un0[i] = UInterp.interpolate(x0, celli) & n0;
+    }
+
+    // Taking acount of porosity if enabled
+    if (porosityEnabled_)
+    {
+        forAll(Un0, i)
+        {
+            const label celli = interfaceLabels[i];
+            Un0[i] /= porosityPtr_->primitiveField()[celli];
+        }
+    }
+
     // Loop through cells
     forAll(interfaceLabels, i)
     {
@@ -232,25 +300,14 @@ void Foam::isoAdvection::timeIntegratedFlux()
             // This is a surface cell, increment counter, append and mark cell
             nSurfaceCells++;
             surfCells_.append(celli);
+            const point x0(surf_->centre()[celli]);
+            const vector n0(normalised(-surf_->normal()[celli]));
 
             DebugInfo
                 << "\n------------ Cell " << celli << " with alpha1 = "
                 << alpha1In_[celli] << " and 1-alpha1 = "
                 << 1.0 - alpha1In_[celli] << " ------------"
                 << endl;
-
-            // Cell is cut
-            const point x0 = surf_->centre()[celli];
-            const vector n0(normalised(-surf_->normal()[celli]));
-
-            // Get the speed of the isoface by interpolating velocity and
-            // dotting it with isoface unit normal
-            const scalar Un0 = UInterp.interpolate(x0, celli) & n0;
-
-            DebugInfo
-                << "calcIsoFace gives initial surface: \nx0 = " << x0
-                << ", \nn0 = " << n0 << ", \nUn0 = "
-                << Un0 << endl;
 
             // Estimate time integrated flux through each downwind face
             // Note: looping over all cell faces - in reduced-D, some of
@@ -284,7 +341,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
                             facei,
                             x0,
                             n0,
-                            Un0,
+                            Un0[i],
                             dt,
                             phiIn[facei],
                             magSfIn[facei]
@@ -297,7 +354,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
                     bsFaces_.append(facei);
                     bsx0_.append(x0);
                     bsn0_.append(n0);
-                    bsUn0_.append(Un0);
+                    bsUn0_.append(Un0[i]);
 
                     // Note: we must not check if the face is on the
                     // processor patch here.
@@ -552,6 +609,7 @@ void Foam::isoAdvection::checkIfOnProcPatch(const label facei)
 
 void Foam::isoAdvection::applyBruteForceBounding()
 {
+    addProfilingInFunction(geometricVoF);
     bool alpha1Changed = false;
 
     const scalar snapAlphaTol = dict_.getOrDefault<scalar>("snapTol", 0);

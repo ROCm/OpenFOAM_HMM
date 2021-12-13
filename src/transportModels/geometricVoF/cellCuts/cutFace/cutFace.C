@@ -275,10 +275,10 @@ void Foam::cutFace::calcSubFaceCentreAndArea
     if (nPoints == 3)
     {
         subFaceCentre =
-                (1.0 / 3.0) * (subFacePoints[0] + subFacePoints[1] + subFacePoints[2]);
+            (1.0/3.0)*(subFacePoints[0] + subFacePoints[1] + subFacePoints[2]);
 
-        subFaceArea = 0.5 * ((subFacePoints[1] - subFacePoints[0]) ^
-                             (subFacePoints[2] - subFacePoints[0]));
+        subFaceArea = 0.5*((subFacePoints[1] - subFacePoints[0]) ^
+            (subFacePoints[2] - subFacePoints[0]));
     }
     else if (nPoints > 0)
     {

@@ -7,8 +7,8 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 DHI
     Modified code Copyright (C) 2016-2019 OpenCFD Ltd.
-    Modified code Copyright (C) 2018 Johan Roenby
     Modified code Copyright (C) 2019 DLR
+    Modified code Copyright (C) 2018, 2021 Johan Roenby
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,19 +30,32 @@ Class
     Foam::isoAdvection
 
 Description
-    Calculates the new VOF (alpha) field after time step dt given the initial
-    VOF field and a velocity field U and face fluxes phi. The fluid transport
-    calculation is based on an idea of using isosurfaces to estimate the
-    internal distribution of fluid in cells and advecting such isosurfaces
-    across the mesh faces with the velocity field interpolated to the
-    isosurfaces.
+    An implementation of the isoAdvector geometric Volume-of-Fluid method
+    advancing the provided volume fraction field (alpha1) in time using the
+    given velocity field, U, and corresponding face fluxes, phi.
 
-    Reference:
+    References:
+
+    Main isoAdvector idea:
     \verbatim
         Roenby, J., Bredmose, H. and Jasak, H. (2016).
         A computational method for sharp interface advection
         Royal Society Open Science, 3
         doi 10.1098/rsos.160405
+    \endverbatim
+
+    Calculation of rhoPhi:
+    \verbatim
+        Roenby, J., Bredmose, H., & Jasak, H. (2019).
+        IsoAdvector: Geometric VOF on general meshes.
+        OpenFOAM® (pp. 281-296). Springer, Cham.
+    \endverbatim
+
+    Extension to porous media flows:
+    \verbatim
+        Missios, K., Jacobsen, N. G., Moeller, K., & Roenby, J.
+        Using the isoAdvector Geometric VOF Method for Interfacial Flows 
+        Through Porous Media. MARINE 2021.
     \endverbatim
 
     Original code supplied by Johan Roenby, DHI (2016)
@@ -157,7 +170,11 @@ class isoAdvection
             //- Storage for boundary surface iso face speed
             DynamicScalarList bsUn0_;
 
+            //- Switch telling if porosity is enabled
+            bool porosityEnabled_;
 
+            //- Pointer to porosity field (read from objectRegistry if exists)
+            volScalarField* porosityPtr_;
 
         // Additional data for parallel runs
 

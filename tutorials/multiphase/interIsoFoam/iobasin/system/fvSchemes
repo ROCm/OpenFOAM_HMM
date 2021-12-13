@@ -29,8 +29,6 @@ divSchemes
 {
     default             none;
     div(rhoPhi,U)       Gauss limitedLinearV 1;
-    div(phi,alpha)      Gauss vanLeer;
-    div(phirb,alpha)    Gauss linear;
 
     "div\(phi,(k|omega)\)"      Gauss upwind;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;

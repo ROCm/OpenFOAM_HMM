@@ -25,7 +25,7 @@ solvers
         nAlphaBounds    3;
         clip            false;
         nAlphaSubCycles 1;
-        cAlpha          1;
+        cAlpha          1; // Read by interIsoFoam but not used
         reconstructionScheme isoAlpha; // plicRDF
     }
 }
