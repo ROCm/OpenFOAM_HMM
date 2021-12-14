@@ -97,8 +97,7 @@ public:
     enum class injectionMethod
     {
         imPoint,
-        imDisc,
-        imMovingPoint
+        imDisc
     };
 
     static const Enum<injectionMethod> injectionMethodNames;
@@ -136,19 +135,22 @@ private:
         //- Position relative to SOI []
         autoPtr<Function1<vector>> positionVsTime_;
 
-        //- Injector position [m]
+        //- Static injector - position [m]
         vector position_;
 
-        //- Cell containing injector position []
+        //- Static injector - cell containing injector position []
         label injectorCell_;
 
-        //- Index of tet face for injector cell
+        //- Static injector - index of tet face for injector cell
         label tetFacei_;
 
-        //- Index of tet point for injector cell
+        //- Static injector - index of tet point for injector cell
         label tetPti_;
 
         //- Injector direction []
+        autoPtr<Function1<vector>> directionVsTime_;
+
+        //- Cached direction vector
         vector direction_;
 
         //- Number of parcels to introduce per second []
@@ -193,8 +195,8 @@ private:
 
     // Private Member Functions
 
-        //- Set the injection type
-        void setInjectionMethod();
+        //- Set the injection position and direction
+        void setInjectionGeometry();
 
         //- Set the injection flow type
         void setFlowType();
@@ -230,7 +232,7 @@ public:
 
 
     //- Destructor
-    virtual ~ConeNozzleInjection();
+    virtual ~ConeNozzleInjection() = default;
 
 
     // Member Functions

@@ -43,7 +43,6 @@ Foam::ConeNozzleInjection<CloudType>::injectionMethodNames
 ({
     { injectionMethod::imPoint, "point" },
     { injectionMethod::imDisc, "disc" },
-    { injectionMethod::imMovingPoint, "movingPoint" },
 });
 
 template<class CloudType>
@@ -62,37 +61,52 @@ Foam::ConeNozzleInjection<CloudType>::flowTypeNames
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::ConeNozzleInjection<CloudType>::setInjectionMethod()
+void Foam::ConeNozzleInjection<CloudType>::setInjectionGeometry()
 {
-    switch (injectionMethod_)
+    const auto& mesh = this->owner().mesh();
+
+    // Position
+    positionVsTime_.reset
+    (
+        Function1<vector>::New("position", this->coeffDict(), &mesh)
+    );
+
+    positionVsTime_->userTimeToTime(this->owner().time());
+
+    if (positionVsTime_->constant())
     {
-        case injectionMethod::imPoint:
-        case injectionMethod::imDisc:
+        position_ = positionVsTime_->value(0);
+    }
+
+    // Direction
+    directionVsTime_.reset
+    (
+        Function1<vector>::New("direction", this->coeffDict(), &mesh)
+    );
+
+    directionVsTime_->userTimeToTime(this->owner().time());
+
+    if (directionVsTime_->constant())
+    {
+        direction_ = directionVsTime_->value(0);
+        direction_.normalise();
+
+        Random& rndGen = this->owner().rndGen();
+
+        // Determine direction vectors tangential to direction
+        vector tangent = Zero;
+        scalar magTangent = 0.0;
+
+        while(magTangent < SMALL)
         {
-            this->coeffDict().readEntry("position", position_);
-            break;
+            vector v = rndGen.globalSample01<vector>();
+
+            tangent = v - (v & direction_)*direction_;
+            magTangent = mag(tangent);
         }
-        case injectionMethod::imMovingPoint:
-        {
-            positionVsTime_.reset
-            (
-                Function1<vector>::New
-                (
-                    "position",
-                    this->coeffDict(),
-                    &this->owner().mesh()
-                )
-            );
-            positionVsTime_->userTimeToTime(this->owner().time());
-            break;
-        }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled injection method "
-                << injectionMethodNames[injectionMethod_]
-                << exit(FatalError);
-        }
+
+        tanVec1_ = tangent/magTangent;
+        tanVec2_ = direction_^tanVec1_;
     }
 }
 
@@ -170,7 +184,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     injectorCell_(-1),
     tetFacei_(-1),
     tetPti_(-1),
-    direction_(this->coeffDict().lookup("direction")),
+    directionVsTime_(nullptr),
+    direction_(Zero),
     parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
@@ -231,29 +246,10 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     thetaInner_->userTimeToTime(time);
     thetaOuter_->userTimeToTime(time);
 
-    setInjectionMethod();
+    setInjectionGeometry();
 
     setFlowType();
 
-    Random& rndGen = this->owner().rndGen();
-
-    // Normalise direction vector
-    direction_.normalise();
-
-    // Determine direction vectors tangential to direction
-    vector tangent = Zero;
-    scalar magTangent = 0.0;
-
-    while(magTangent < SMALL)
-    {
-        vector v = rndGen.globalSample01<vector>();
-
-        tangent = v - (v & direction_)*direction_;
-        magTangent = mag(tangent);
-    }
-
-    tanVec1_ = tangent/magTangent;
-    tanVec2_ = direction_^tanVec1_;
 
     // Set total volume to inject
     this->volumeTotal_ = flowRateProfile_->integrate(0.0, duration_);
@@ -279,6 +275,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     injectorCell_(im.injectorCell_),
     tetFacei_(im.tetFacei_),
     tetPti_(im.tetPti_),
+    directionVsTime_(im.directionVsTime_.clone()),
     direction_(im.direction_),
     parcelsPerSecond_(im.parcelsPerSecond_),
     flowRateProfile_(im.flowRateProfile_.clone()),
@@ -294,37 +291,23 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ConeNozzleInjection<CloudType>::~ConeNozzleInjection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::ConeNozzleInjection<CloudType>::updateMesh()
 {
     // Set/cache the injector cell info for static methods
-
-    switch (injectionMethod_)
+    if (positionVsTime_->constant())
     {
-        case injectionMethod::imPoint:
-        {
-            this->findCellAtPosition
-            (
-                injectorCell_,
-                tetFacei_,
-                tetPti_,
-                position_
-            );
-            break;
-        }
-        default:
-        {
-            // Do nothing for the other methods
-        }
+        position_ = positionVsTime_->value(0);
+
+        this->findCellAtPosition
+        (
+            injectorCell_,
+            tetFacei_,
+            tetPti_,
+            position_
+        );
     }
 }
 
@@ -381,6 +364,28 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
 )
 {
     Random& rndGen = this->owner().rndGen();
+    const scalar t = time - this->SOI_;
+
+    if (!directionVsTime_->constant())
+    {
+        direction_ = directionVsTime_->value(t);
+        direction_.normalise();
+
+        // Determine direction vectors tangential to direction
+        vector tangent = Zero;
+        scalar magTangent = 0.0;
+
+        while(magTangent < SMALL)
+        {
+            vector v = rndGen.globalSample01<vector>();
+
+            tangent = v - (v & direction_)*direction_;
+            magTangent = mag(tangent);
+        }
+
+        tanVec1_ = tangent/magTangent;
+        tanVec2_ = direction_^tanVec1_;
+    }
 
     scalar beta = mathematical::twoPi*rndGen.globalSample01<scalar>();
     normal_ = tanVec1_*cos(beta) + tanVec2_*sin(beta);
@@ -389,25 +394,25 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
     {
         case injectionMethod::imPoint:
         {
-            position = position_;
-            cellOwner = injectorCell_;
-            tetFacei = tetFacei_;
-            tetPti = tetPti_;
+            if (positionVsTime_->constant())
+            {
+                position = position_;
+                cellOwner = injectorCell_;
+                tetFacei = tetFacei_;
+                tetPti = tetPti_;
+            }
+            else
+            {
+                position = positionVsTime_->value(t);
 
-            break;
-        }
-        case injectionMethod::imMovingPoint:
-        {
-            position = positionVsTime_->value(time - this->SOI_);
-
-            this->findCellAtPosition
-            (
-                cellOwner,
-                tetFacei,
-                tetPti,
-                position
-            );
-
+                this->findCellAtPosition
+                (
+                    cellOwner,
+                    tetFacei,
+                    tetPti,
+                    position
+                );
+            }
             break;
         }
         case injectionMethod::imDisc:
@@ -416,7 +421,7 @@ void Foam::ConeNozzleInjection<CloudType>::setPositionAndCell
             scalar dr = outerDiameter_ - innerDiameter_;
             scalar r = 0.5*(innerDiameter_ + frac*dr);
 
-            position = position_ + r*normal_;
+            position = positionVsTime_->value(t) + r*normal_;
 
             this->findCellAtPosition
             (
