@@ -110,7 +110,7 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
                 IOobject::AUTO_WRITE
             ),
             mesh,
-            dimensionedScalar(dimLength, Zero)
+            dimensionedScalar(dimless, Zero)
         );
 
         ptr->store();
@@ -568,7 +568,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                 RH[faceI] = min(Xv*pf/pSat, 1.0);
 
                 scalar RHmin = 0.01;
-                Tdew[faceI] = -GREAT;
+                Tdew[faceI] = 0.0;
 
                 if (RH[faceI] > RHmin)
                 {
@@ -679,14 +679,25 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
             // Heat flux due to change of phase [W/m2]
             dmHfg_ = dm*hfg;
 
-            // Output RH and Tdew
-            scalarField& bRH =
-                thicknessField("RH", refCast<const fvMesh>(mesh));
-            bRH = RH;
+            if (debug)
+            {
+                // Output RH and Tdew
+                scalarField& bRH =
+                    thicknessField
+                    (
+                        "RH",
+                        refCast<const fvMesh>(mesh)
+                    ).boundaryFieldRef()[patch().index()];
+                bRH = RH;
 
-            scalarField& bTdew =
-                thicknessField("Tdew", refCast<const fvMesh>(mesh));
-            bTdew = Tdew;
+                scalarField& bTdew =
+                    thicknessField
+                    (
+                        "Tdew",
+                        refCast<const fvMesh>(mesh)
+                    ).boundaryFieldRef()[patch().index()];
+                bTdew = Tdew;
+            }
         }
         else
         {
