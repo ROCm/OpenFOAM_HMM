@@ -233,7 +233,9 @@ Foam::expressions::volumeExpr::parseDriver::dupZeroField() const
                     (                                                         \
                         word(pTraits<Type>::typeName) + word("(zero)"),       \
                         (*ptr).mesh(),                                        \
-                        dimensioned<Type>(Zero)                               \
+                        dimensioned<Type>(Zero),                              \
+                        /* zeroGradient (volume) or calculated (other) */     \
+                        defaultBoundaryType(*ptr)                             \
                     ).ptr()                                                   \
                 );                                                            \
                 break;                                                        \
