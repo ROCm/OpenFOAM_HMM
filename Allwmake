@@ -70,15 +70,16 @@ applications/Allwmake $targetType $*
 
 
 # Additional components/modules
-if [ "$FOAM_MODULE_PREFIX" = false ] || [ "$FOAM_MODULE_PREFIX" = none ]
-then
+case "$FOAM_MODULE_PREFIX" in
+(false | none)
     echo ========================================
     echo "OpenFOAM modules disabled (prefix=${FOAM_MODULE_PREFIX})"
     echo
-else
+    ;;
+(*)
     # Use wmake -all instead of Allwmake to allow for overrides
-    (cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all)
-fi
+    ( cd "$WM_PROJECT_DIR/modules" 2>/dev/null && wmake -all )
+esac
 
 # Count files in given directory. Ignore "Test-*" binaries.
 _foamCountDirEntries()

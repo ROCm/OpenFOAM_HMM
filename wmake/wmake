@@ -59,8 +59,8 @@ Usage: $Script [OPTION] [dir]
 
 options:
   -s | -silent      Silent mode (do not echo commands)
-  -a | -all         wmake all sub-directories, running Allwmake if present
-  -q | -queue       wmakeCollect sub-directories, running Allwmake if present
+  -a | -all         wmake all sub-directories, runs Allwmake if present
+  -q | -queue       Collect as single Makefile, runs Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
   -j | -jN | -j N   Compile using all or specified N cores/hyperthreads
   -update           Update lnInclude, dep files, remove deprecated files/dirs
@@ -559,13 +559,31 @@ if [ "$optAll" = queue ]
 then
     [ "$optUpdate" = true ] || wmakeLnIncludeAll $parOpt
 
+    if [ -n "$FOAM_BUILDROOT" ] && [ -w "$FOAM_BUILDROOT" ]
+    then
+        buildRoot="${FOAM_BUILDROOT}/build/${WM_OPTIONS}"
+    else
+        # Assumed to be writable
+        buildRoot="${WM_PROJECT_DIR}/build/${WM_OPTIONS}"
+    fi
+
+    # Use relative dirname if possible (reproducible names)
+    if [ "${PWD}" = "${WM_PROJECT_DIR}" ]
+    then
+        collectName="_project_"
+    else
+        collectName="_${PWD#${WM_PROJECT_DIR}/}"
+        collectName="${collectName////_}"  # Path as unique name
+    fi
+
+    ## echo "collect: $buildRoot/$collectName" 1>&2
     (
-        export WM_COLLECT_DIR="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}"
+        export WM_COLLECT_DIR="$buildRoot/$collectName"
         export WM_SCHEDULER="$WM_DIR/wmakeCollect"
         trap '$WM_SCHEDULER -kill' TERM INT
         "$WM_SCHEDULER" -clean \
-     && wmake -all objects   \
-     && "$WM_SCHEDULER"
+     && wmake -all objects \
+     && "$WM_SCHEDULER"  # Make with assembled makefile
     ) && wmake -all
     exit $?
 fi

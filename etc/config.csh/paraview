@@ -169,7 +169,7 @@ default:
             endsw
             foreach libDir ("lib$WM_COMPILER_LIB_ARCH" "lib")
                 if ( -d "${qtDir}/${libDir}" ) then
-                    set pv_libdirs="${qtDir}/${libDir}:${pv_libdirs}"
+                    set pv_libdirs="${qtDir}/${libDir}"
                     break
                 endif
             end
