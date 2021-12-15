@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
     const dictionary& formatOptions
 )
 {
-    auto ctorPtr = dictConstructorTable(writeType);
+    auto* ctorPtr = dictConstructorTable(writeType);
 
     if (!ctorPtr)
     {
