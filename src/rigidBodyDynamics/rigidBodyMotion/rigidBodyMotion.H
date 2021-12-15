@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +53,7 @@ SourceFiles
 #include "rigidBodyModelState.H"
 #include "pointField.H"
 #include "Switch.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,7 +91,7 @@ class rigidBodyMotion
         List<spatialTransform> X00_;
 
         //- Acceleration relaxation coefficient
-        scalar aRelax_;
+        autoPtr<Function1<scalar>> aRelax_;
 
         //- Acceleration damping coefficient (for steady-state simulations)
         scalar aDamp_;

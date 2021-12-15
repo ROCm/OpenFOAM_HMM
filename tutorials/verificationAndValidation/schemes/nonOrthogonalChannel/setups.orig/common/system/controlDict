@@ -100,49 +100,36 @@ functions
 
         codeExecute
         #{
-            static autoPtr<volScalarField> productionRate;
-            if
-            (
-                mesh().time().timeIndex() == 1
-                ||
-                mesh().time().startTimeIndex() == mesh().time().timeIndex() - 1
-            )
+            auto* prodPtr =
+                mesh().getObjectPtr<volScalarField>("productionRate");
+
+            if (!prodPtr)
             {
                 Info<< "Create production rate field" << nl;
-                productionRate.set
+                prodPtr = new volScalarField
                 (
-                    new volScalarField
+                    IOobject
                     (
-                        IOobject
-                        (
-                            "productionRate",
-                            mesh().time().timeName(),
-                            mesh(),
-                            IOobject::NO_READ,
-                            IOobject::AUTO_WRITE
-                        ),
+                        "productionRate",
+                        mesh().time().timeName(),
                         mesh(),
-                        sqr(dimLength)/pow(dimTime, 3)
-                    )
+                        IOobject::NO_READ,
+                        IOobject::AUTO_WRITE
+                    ),
+                    mesh(),
+                    sqr(dimLength)/pow3(dimTime)
                 );
+
+                regIOobject::store(prodPtr);
             }
+            auto& prod = *prodPtr;
 
-            if
-            (
-                mesh().time().timeIndex() != 1
-             && mesh().time().timeIndex() > 1 // = timeStart
-            )
-            {
-                Info<< "Computing production rate field\n" << endl;
+            Info<< "Computing production rate field\n" << endl;
 
-                auto& prod =
-                    mesh().lookupObjectRef<volScalarField>("productionRate");
+            const auto& nut = mesh().lookupObject<volScalarField>("nut");
+            const auto& U = mesh().lookupObject<volVectorField>("U");
 
-                const auto& nut = mesh().lookupObject<volScalarField>("nut");
-                const auto& U = mesh().lookupObject<volVectorField>("U");
-
-                prod = 2*nut*(symm(fvc::grad(U)) && symm(fvc::grad(U)));
-            }
+            prod = 2*nut*(symm(fvc::grad(U)) && symm(fvc::grad(U)));
         #};
     }
 }
