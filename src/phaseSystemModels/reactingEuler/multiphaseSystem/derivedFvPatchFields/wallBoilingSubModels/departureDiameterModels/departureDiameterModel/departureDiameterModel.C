@@ -76,4 +76,5 @@ void Foam::wallBoilingModels::departureDiameterModel::write(Ostream& os) const
     os.writeEntry("type", this->type());
 }
 
+
 // ************************************************************************* //

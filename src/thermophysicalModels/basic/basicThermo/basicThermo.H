@@ -443,6 +443,14 @@ public:
                 const label patchi
             ) const = 0;
 
+            //- Heat capacity using pressure and temperature [J/kg/K]
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
+            ) const = 0;
+
             //- Heat capacity at constant volume [J/kg/K]
             virtual tmp<volScalarField> Cv() const = 0;
 
@@ -452,6 +460,14 @@ public:
                 const scalarField& p,
                 const scalarField& T,
                 const label patchi
+            ) const = 0;
+
+            //- Density from pressure and temperature from EoS
+            virtual tmp<scalarField> rhoEoS
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
             ) const = 0;
 
             //- Gamma = Cp/Cv []

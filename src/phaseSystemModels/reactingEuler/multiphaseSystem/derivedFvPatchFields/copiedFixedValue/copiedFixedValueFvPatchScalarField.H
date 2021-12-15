@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,30 @@ Class
 
 Description
     Copies the boundary values from a user specified field.
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type                copiedFixedValue;
+        sourceFieldName     <word>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                       | Type | Reqd | Deflt
+      type      | Type name: copiedFixedValue       | word | yes  | -
+      sourceFieldName | Name of the source field    | word | yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 See also
     Foam::fixedValueFvPatchField
@@ -60,6 +84,7 @@ protected:
 
     // Protected Data
 
+        //- Name of the source field
         word sourceFieldName_;
 
 public:
@@ -86,8 +111,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  copiedFixedValueFvPatchScalarField
-        //  onto a new patch
+        //- copiedFixedValueFvPatchScalarField
+        //- onto a new patch
         copiedFixedValueFvPatchScalarField
         (
             const copiedFixedValueFvPatchScalarField&,
@@ -133,7 +158,7 @@ public:
 
     // Member Functions
 
-        // Evaluation Functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

@@ -496,6 +496,18 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::phaseSystem::rhoEoS
+(
+    const scalarField& p,
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    NotImplemented;
+    return nullptr;
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::gamma() const
 {
     auto iter = phaseModels_.cbegin();

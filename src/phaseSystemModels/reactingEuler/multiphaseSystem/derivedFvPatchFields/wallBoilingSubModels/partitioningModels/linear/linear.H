@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,20 +28,46 @@ Class
     Foam::wallBoilingModels::partitioningModels::linear
 
 Description
-    Linear wall heat flux partitioning model.
+    A linear model for wall heat flux partitioning based on
+    Ioilev et al. (2007) for boiling flows.
 
-    Proposed threshold liquid fractions:
-      - alphaLiquid1 0.1
-      - alphaLiquid0 0.05
-
+    Reference:
     \verbatim
-        Ioilev, A., Samigulin, M., Ustinenko (2007).
+        Ioilev, A., Samigulin, M., Ustinenko, V.,
+        Kucherova, P., Tentner, A., Lo, S., & Splawski, A. (2007).
         Advances in the modeling of cladding heat transfer
         and critical heat flux in boiling water reactor fuel assemblies.
-        In Proc. 12th International Topical Meeting on
-        Nuclear Reactor Thermal Hydraulics (NURETH-12),
+        In Proc. 12th International Topical Meeting on Nuclear Reactor
+        Thermal Hydraulics (NURETH-12).
         Pittsburgh, Pennsylvania, USA.
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    partitioningModel
+    {
+        // Mandatory entries
+        type            linear;
+        alphaLiquid1    <scalar>;
+        alphaLiquid0    <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property      | Description                       | Type | Reqd | Deflt
+      type          | Type name: linear                 | word | yes  | -
+      alphaLiquid1  | Model parameters for threshold liquid phase fraction <!--
+                    -->                               | scalar | yes  | -
+      alphaLiquid0  | Model parameters for threshold liquid phase fraction <!--
+                    -->                               | scalar | yes  | -
+    \endtable
+
+Note
+  - Proposed threshold liquid fractions:
+      - alphaLiquid1 0.1
+      - alphaLiquid0 0.05
 
 SourceFiles
     linear.C
@@ -69,11 +96,22 @@ class linear
 :
     public partitioningModel
 {
-    // Private data
+    // Private Data
 
-        //- Model parameters, threshold liquid phase fractions
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid1_;
+
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid0_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        linear(const linear&) = delete;
+
+        //- No copy assignment
+        void operator=(const linear&) = delete;
 
 
 public:
@@ -89,7 +127,7 @@ public:
 
 
     //- Destructor
-    virtual ~linear();
+    virtual ~linear() = default;
 
 
     // Member Functions
@@ -97,7 +135,10 @@ public:
         //- Calculate and return the wall heat-flux partitioning
         virtual tmp<scalarField> fLiquid(const scalarField& alphaLiquid) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

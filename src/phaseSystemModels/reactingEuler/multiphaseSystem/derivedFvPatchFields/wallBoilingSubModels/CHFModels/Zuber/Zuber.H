@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,16 +24,39 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:CHFModels:::Zuber
+    Foam::wallBoilingModels::CHFModels::Zuber
 
 Description
-    Critical heat flux (CHF) correlation
+    A critical heat flux (CHF) correlation model
+    based on Zuber (1958) for boiling flows.
 
-    References:
+    Reference:
     \verbatim
-        N. Zuber, On the stability of boiling heat transfer,
-        Trans. ASME 80 (1958) 711
+        Zuber, N. (1958).
+        On the stability of boiling heat transfer.
+        Trans. Am. Soc. Mech. Engrs., 80.
+        URL:https://www.osti.gov/biblio/4326542
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    CHFModel
+    {
+        // Mandatory entries
+        type            Zuber;
+
+        // Optional entries
+        Cn              <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: Zuber                    | word | yes  | -
+      Cn        | Model coefficient                 | scalar | no   | 0.131
+    \endtable
 
 SourceFiles
     Zuber.C
@@ -62,16 +85,26 @@ class Zuber
 :
     public CHFModel
 {
+    // Private Data
 
-    // Private data:
-
-        //- Coefficient constant
+        //- Model coefficient
         scalar Cn_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        Zuber(const Zuber&) = delete;
+
+        //- No copy assignment
+        void operator=(const Zuber&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("Zuber");
+
 
     // Constructors
 
@@ -80,7 +113,7 @@ public:
 
 
     //- Destructor
-    virtual ~Zuber();
+    virtual ~Zuber() = default;
 
 
     // Member Functions
@@ -96,7 +129,10 @@ public:
             const scalarField& L
         ) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            // Write
+            virtual void write(Ostream& os) const;
 };
 
 

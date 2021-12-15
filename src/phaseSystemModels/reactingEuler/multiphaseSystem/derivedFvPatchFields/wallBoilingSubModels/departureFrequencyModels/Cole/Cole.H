@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +28,33 @@ Class
     Foam::wallBoilingModels::departureFrequencyModels::Cole
 
 Description
-    Cole correlation for bubble departure frequency.
+    A correlation for bubble departure frequency modelling
+    based on Cole (1960) for boiling flows.
 
     Reference:
     \verbatim
         Cole, R. (1960).
-        A photographic study of pool boiling in the region of the critical heat
-        flux.
+        A photographic study of pool boiling
+        in the region of the critical heat flux.
         AIChE Journal, 6(4), 533-538.
+        DOI:10.1002/aic.690060405
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    departureFrequencyModel
+    {
+        // Mandatory entries
+        type            Cole;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: Cole                     | word | yes  | -
+    \endtable
 
 SourceFiles
     Cole.C
@@ -64,6 +83,14 @@ class Cole
 :
     public departureFrequencyModel
 {
+    // Private Member Functions
+
+        //- No copy construct
+        Cole(const Cole&) = delete;
+
+        //- No copy assignment
+        void operator=(const Cole&) = delete;
+
 
 public:
 
@@ -78,7 +105,7 @@ public:
 
 
     //- Destructor
-    virtual ~Cole();
+    virtual ~Cole() = default;
 
 
     // Member Functions

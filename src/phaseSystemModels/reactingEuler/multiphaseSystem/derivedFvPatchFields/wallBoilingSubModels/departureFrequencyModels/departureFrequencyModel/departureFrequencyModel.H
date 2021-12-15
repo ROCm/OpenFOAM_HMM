@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::wallBoilingModels::departureFrequencyModel
 
 Description
-    Base class for bubble departure frequency models
+    Base class for bubble departure frequency models for boiling flows.
 
 SourceFiles
     departureFrequencyModel.C
@@ -102,7 +102,10 @@ public:
             const scalarField& dDep
         ) const = 0;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

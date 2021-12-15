@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,13 +60,6 @@ cosine::cosine(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::partitioningModels::
-cosine::~cosine()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -81,9 +74,9 @@ cosine::fLiquid
        *(
             neg(alphaLiquid0_ - alphaLiquid)
            *(
-                0.5
+                scalar(0.5)
                *(
-                    1 - cos
+                    scalar(1) - cos
                     (
                         constant::mathematical::pi
                        *(alphaLiquid - alphaLiquid0_)

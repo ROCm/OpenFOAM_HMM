@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +28,34 @@ Class
     Foam::wallBoilingModels::partitioningModels::Lavieville
 
 Description
-    Lavieville wall heat flux partitioning model.
-
-    Model parameters:
-        alphaCrit: critical liquid fraction
+    A model for wall heat flux partitioning based on
+    Lavieville et al. (2006) for boiling flows.
 
     Reference:
     \verbatim
-        Lavieville, J., Quemerais, E., Mimouni, S., Boucker, M., &
-        Mechitoua, N. (2006).
-        NEPTUNE CFD V1. 0 theory manual.
+        Lavieville, J., Quemerais, E., Mimouni, S.,
+        Boucker, M., & Mechitoua, N. (2006).
+        NEPTUNE CFD V1.0 theory manual.
         NEPTUNE report Nept_2004_L1, 2(3).
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    partitioningModel
+    {
+        // Mandatory entries
+        type            Lavieville;
+        alphaCrit       <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property      | Description                       | Type | Reqd | Deflt
+      type          | Type name: Lavieville             | word | yes  | -
+      alphaCrit     | Critical liquid fraction        | scalar | yes  | -
+    \endtable
 
 SourceFiles
     Lavieville.C

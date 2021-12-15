@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +29,40 @@ Class
 
 Description
     Contact-angle boundary condition for multi-phase interface-capturing
-    simulations.  Used in conjunction with multiphaseSystem.
+    simulations.  Used in conjunction with \c multiphaseSystem.
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patch>
+    {
+        // Mandatory entries
+        type                      alphaContactAngle;
+        thetaProperties
+        (
+            (<phase1> <phase2>) <scalar1> <scalar2> <scalar3> <scalar4>
+            (<phase3> <phase2>) <scalar1> <scalar2> <scalar3> <scalar4>
+            ...
+        );
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                             | Type | Reqd | Deflt
+      type      | Type name: alphaContactAngle            | word | yes  | -
+      thetaProperties | Contact-angle properties          | dict | yes  | -
+      \<scalar1\>  | Equilibrium contact angle            | scalar | yes  |-
+      \<scalar2\>  | Dynamic contact angle velocity scale | scalar | yes  |-
+      \<scalar3\>  | Limiting advancing contact angle     | scalar | yes  |-
+      \<scalar4\>  | Limiting receding contact angle      | scalar | yes  |-
+    \endtable
+
+    The inherited entries are elaborated in:
+     - \link zeroGradientFvPatchFields.H \endlink
 
 SourceFiles
     alphaContactAngleFvPatchScalarField.C
@@ -47,7 +81,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class alphaContactAngleFvPatch Declaration
+                    Class alphaContactAngleFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphaContactAngleFvPatchScalarField
@@ -74,13 +108,16 @@ public:
     public:
 
         // Constructors
+
+            //- Default construct
             interfaceThetaProps()
             {}
 
+            //- Construct from Istream
             interfaceThetaProps(Istream&);
 
 
-        // Member functions
+        // Member Functions
 
             //- Return the equilibrium contact angle theta0
             scalar theta0(bool matched=true) const
@@ -90,7 +127,7 @@ public:
             }
 
             //- Return the dynamic contact angle velocity scale
-            scalar uTheta() const
+            scalar uTheta() const noexcept
             {
                 return uTheta_;
             }
@@ -110,7 +147,7 @@ public:
             }
 
 
-        // IO functions
+        // IOstream operators
 
             friend Istream& operator>>(Istream&, interfaceThetaProps&);
             friend Ostream& operator<<(Ostream&, const interfaceThetaProps&);
@@ -126,8 +163,9 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
+        //- Interface properties
         thetaPropsTable thetaProps_;
 
 
@@ -155,7 +193,7 @@ public:
         );
 
         //- Construct by mapping given alphaContactAngleFvPatchScalarField
-        //  onto a new patch
+        //- onto a new patch
         alphaContactAngleFvPatchScalarField
         (
             const alphaContactAngleFvPatchScalarField&,
@@ -193,10 +231,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the contact angle properties
-        const thetaPropsTable& thetaProps() const
+        const thetaPropsTable& thetaProps() const noexcept
         {
             return thetaProps_;
         }

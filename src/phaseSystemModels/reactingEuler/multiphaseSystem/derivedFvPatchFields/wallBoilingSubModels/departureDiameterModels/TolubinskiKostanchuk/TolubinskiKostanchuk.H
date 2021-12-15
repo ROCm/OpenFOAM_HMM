@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +28,40 @@ Class
     Foam::wallBoilingModels::departureDiameterModels::TolubinskiKostanchuk
 
 Description
-    Tolubinski-Kostanchuk correlation for bubble departure diameter.
+    A correlation for bubble departure diameter modelling
+    based on Tolubinski-Kostanchuk (1970) for boiling flows.
 
     Reference:
     \verbatim
         Tolubinsky, V. I., & Kostanchuk, D. M. (1970).
-        Vapour bubbles growth rate and heat transfer intensity at subcooled
-        water boiling.
-        In International Heat Transfer Conference 4 (Vol. 23). Begel House Inc.
+        Vapour bubbles growth rate and heat transfer
+        intensity at subcooled water boiling.
+        In International Heat Transfer Conference 4 (Vol. 23). Begel House Inc..
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    departureDiameterModel
+    {
+        // Mandatory entries
+        type            TolubinskiKostanchuk;
+
+        // Optional entries
+        dRef            <scalar>;
+        dMax            <scalar>;
+        dMin            <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: TolubinskiKostanchuk     | word | yes  | -
+      dRef      | Coefficient of the temperature term | scalar | no | 6e-4
+      dMax      | Maximum diameter                    | scalar | no | 0.0014
+      dMin      | Minimum diameter                    | scalar | no | 1e-6
+    \endtable
 
 SourceFiles
     TolubinskiKostanchuk.C
@@ -64,8 +90,7 @@ class TolubinskiKostanchuk
 :
     public departureDiameterModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Coefficient of the temperature term
         scalar dRef_;
@@ -75,6 +100,16 @@ class TolubinskiKostanchuk
 
         //- Minimum diameter
         scalar dMin_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        TolubinskiKostanchuk(const TolubinskiKostanchuk&) = delete;
+
+        //- No copy assignment
+        void operator=(const TolubinskiKostanchuk&) = delete;
+
 
 public:
 
@@ -89,7 +124,7 @@ public:
 
 
     //- Destructor
-    virtual ~TolubinskiKostanchuk();
+    virtual ~TolubinskiKostanchuk() = default;
 
 
     // Member Functions
@@ -105,7 +140,10 @@ public:
             const scalarField& L
         ) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            // Write
+            virtual void write(Ostream& os) const;
 };
 
 

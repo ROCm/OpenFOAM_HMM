@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2020 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +28,44 @@ Class
     Foam::fixedMultiPhaseHeatFluxFvPatchScalarField
 
 Description
-    Calculates a wall temperature that produces the specified overall wall heat
-    flux across all the phases in an Eulerian multi-phase simulation.
+    Calculates a wall temperature that produces
+    the specified overall wall heat flux across
+    all the phases in an Eulerian multi-phase simulation.
 
-    Intended to be used with copiedFixedValue to ensure that phase wall
-    temperature are consistent:
-        - Set 'fixedMultiPhaseHeatFlux' boundary for one of the phases
-        - Use 'copiedFixedValue' for all the other phases.
+    Intended to be used with \c copiedFixedValue
+    to ensure that phase wall temperature are consistent:
+        - Set \c fixedMultiPhaseHeatFlux boundary for one of the phases
+        - Use \c copiedFixedValue for all the other phases.
+
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type            fixedMultiPhaseHeatFlux;
+        q               <scalarField>;
+
+        // Optional entries
+        relax           <scalar>;
+        Tmin            <scalar>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: fixedMultiPhaseHeatFlux  | word | yes  | -
+      q         | Heat power [W] or flux [W/m2]       | scalarField | yes | -
+      relax     | Relaxation factor                   | scalar | no | 1.0
+      Tmin      | Minimum temperature limit [K]       | scalar | no | 273.0
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
 
 See also
     Foam::fixedValueFvPatchField
@@ -97,8 +129,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  fixedMultiPhaseHeatFluxFvPatchScalarField
-        //  onto a new patch
+        //- fixedMultiPhaseHeatFluxFvPatchScalarField
+        //- onto a new patch
         fixedMultiPhaseHeatFluxFvPatchScalarField
         (
             const fixedMultiPhaseHeatFluxFvPatchScalarField&,
@@ -144,7 +176,7 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             //  Used to update fields following mesh topology change
@@ -155,7 +187,7 @@ public:
             virtual void rmap(const fvPatchScalarField&, const labelList&);
 
 
-        // Evaluation Functions
+        // Evaluation
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

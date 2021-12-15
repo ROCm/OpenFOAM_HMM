@@ -45,14 +45,12 @@ namespace compressible
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-scalar alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::maxExp_
-    = 50.0;
 scalar alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::tolerance_
     = 0.01;
 label alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::maxIters_
     = 10;
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::checkType()
 {
@@ -83,18 +81,18 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::yPlusTherm
     const scalarField& Prat
 ) const
 {
-    tmp<scalarField> typsf(new scalarField(this->size()));
-    scalarField& ypsf = typsf.ref();
+    auto typsf = tmp<scalarField>::New(this->size());
+    auto& ypsf = typsf.ref();
 
     forAll(ypsf, facei)
     {
         scalar ypt = 11.0;
 
-        for (int i=0; i<maxIters_; i++)
+        for (int i = 0; i < maxIters_; ++i)
         {
-            scalar f = ypt - (log(E_*ypt)/kappa_ + P[facei])/Prat[facei];
-            scalar df = 1 - 1.0/(ypt*kappa_*Prat[facei]);
-            scalar yptNew = ypt - f/df;
+            const scalar f = ypt - (log(E_*ypt)/kappa_ + P[facei])/Prat[facei];
+            const scalar df = 1.0 - 1.0/(ypt*kappa_*Prat[facei]);
+            const scalar yptNew = ypt - f/df;
 
             if (yptNew < VSMALL)
             {
@@ -116,26 +114,23 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::yPlusTherm
     return typsf;
 }
 
+
 tmp<scalarField>
 alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::calcAlphat
 (
     const scalarField& prevAlphat
 ) const
 {
-
     // Lookup the fluid model
     const phaseSystem& fluid =
         db().lookupObject<phaseSystem>("phaseProperties");
 
-    const phaseModel& phase
-    (
-        fluid.phases()[internalField().group()]
-    );
+    const phaseModel& phase = fluid.phases()[internalField().group()];
 
     const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const phaseCompressibleTurbulenceModel& turbModel =
+    const auto& turbModel =
         db().lookupObject<phaseCompressibleTurbulenceModel>
         (
             IOobject::groupName(turbulenceModel::propertiesName, phase.name())
@@ -163,11 +158,6 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::calcAlphat
     const fvPatchScalarField& hew =
         phase.thermo().he().boundaryField()[patchi];
 
-    const fvPatchScalarField& Tw =
-        phase.thermo().T().boundaryField()[patchi];
-
-    scalarField Tp(Tw.patchInternalField());
-
     // Heat flux [W/m2] - lagging alphatw
     const scalarField qDot
     (
@@ -178,18 +168,19 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::calcAlphat
 
     scalarField yPlus(uTau*y/(muw/rhow));
 
-    scalarField Pr(muw/alphaw);
+    const scalarField Pr(muw/alphaw);
 
     // Molecular-to-turbulent Prandtl number ratio
-    scalarField Prat(Pr/Prt_);
+    const scalarField Prat(Pr/Prt_);
 
     // Thermal sublayer thickness
-    scalarField P(this->Psmooth(Prat));
+    const scalarField P(this->Psmooth(Prat));
 
-    scalarField yPlusTherm(this->yPlusTherm(P, Prat));
+    tmp<scalarField> tyPlusTherm = this->yPlusTherm(P, Prat);
+    const scalarField& yPlusTherm = tyPlusTherm.cref();
 
-    tmp<scalarField> talphatConv(new scalarField(this->size()));
-    scalarField& alphatConv = talphatConv.ref();
+    auto talphatConv = tmp<scalarField>::New(this->size());
+    auto& alphatConv = talphatConv.ref();
 
     // Populate boundary values
     forAll(alphatConv, facei)
@@ -198,19 +189,20 @@ alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField::calcAlphat
         scalar alphaEff = 0.0;
         if (yPlus[facei] < yPlusTherm[facei])
         {
-            scalar A = qDot[facei]*rhow[facei]*uTau[facei]*y[facei];
-            scalar B = qDot[facei]*Pr[facei]*yPlus[facei];
-            scalar C = Pr[facei]*0.5*rhow[facei]*uTau[facei]*sqr(magUp[facei]);
+            const scalar A = qDot[facei]*rhow[facei]*uTau[facei]*y[facei];
+            const scalar B = qDot[facei]*Pr[facei]*yPlus[facei];
+            const scalar C =
+                Pr[facei]*0.5*rhow[facei]*uTau[facei]*sqr(magUp[facei]);
             alphaEff = A/(B + C + VSMALL);
         }
         else
         {
-            scalar A = qDot[facei]*rhow[facei]*uTau[facei]*y[facei];
-            scalar B =
+            const scalar A = qDot[facei]*rhow[facei]*uTau[facei]*y[facei];
+            const scalar B =
                 qDot[facei]*Prt_*(1.0/kappa_*log(E_*yPlus[facei]) + P[facei]);
-            scalar magUc =
+            const scalar magUc =
                 uTau[facei]/kappa_*log(E_*yPlusTherm[facei]) - mag(Uw[facei]);
-            scalar C =
+            const scalar C =
                 0.5*rhow[facei]*uTau[facei]
                *(Prt_*sqr(magUp[facei]) + (Pr[facei] - Prt_)*sqr(magUc));
             alphaEff = A/(B + C + VSMALL);

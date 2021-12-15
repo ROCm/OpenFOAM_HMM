@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,6 +204,18 @@ public:
                 const label patchi
             ) const;
 
+            //- Heat capacity using pressure and temperature
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
+            ) const
+            {
+                NotImplemented;
+                return tmp<scalarField>::New(p);
+            }
+
             //- Heat capacity at constant volume [J/kg/K]
             virtual tmp<volScalarField> Cv() const;
 
@@ -213,6 +226,18 @@ public:
                 const scalarField& T,
                 const label patchi
             ) const;
+
+            //- Density from pressure and temperature
+            virtual tmp<scalarField> rhoEoS
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
+            ) const
+            {
+                NotImplemented;
+                return tmp<scalarField>::New(p);
+            }
 
             //- Gamma = Cp/Cv []
             virtual tmp<volScalarField> gamma() const;

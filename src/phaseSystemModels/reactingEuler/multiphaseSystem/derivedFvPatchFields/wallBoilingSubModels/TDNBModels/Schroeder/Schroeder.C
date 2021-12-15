@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,12 +64,6 @@ Foam::wallBoilingModels::TDNBModels::Schroeder::Schroeder
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::TDNBModels::Schroeder::~Schroeder()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -92,7 +86,7 @@ Foam::wallBoilingModels::TDNBModels::Schroeder::TDNB
         Tsatw
         /
         (
-            1 - log(2*kg_ + 1)*(R.value()*Tsatw)/(W*L)
+            scalar(1) - log(scalar(2)*kg_ + scalar(1))*(R.value()*Tsatw)/(W*L)
         );
 }
 
@@ -105,5 +99,6 @@ void Foam::wallBoilingModels::TDNBModels::Schroeder::write
     TDNBModel::write(os);
     os.writeEntry("kg", kg_);
 }
+
 
 // ************************************************************************* //

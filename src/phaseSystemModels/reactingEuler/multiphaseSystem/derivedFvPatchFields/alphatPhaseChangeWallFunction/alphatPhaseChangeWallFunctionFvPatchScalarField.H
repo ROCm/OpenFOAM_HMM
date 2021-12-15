@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +30,33 @@ Class
 Description
     Abstract base-class for all alphatWallFunctions supporting phase-change.
 
+Usage
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Optional entries
+        dmdt        <scalarField>;
+        mDotL       <scalarField>;
+
+        // Inherited entries
+        ...
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                            | Type | Reqd | Deflt
+      dmdt      | Rate of phase-change            | scalarField | no   | 0.0
+      mDotL     | Latent heat of the phase-change | scalarField | no   | 0.0
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link fixedValueFvPatchFields.H \endlink
+
 See also
-    Foam::fixedValueFvPatchScalarField
-    Foam::alphatWallFunctionFvPatchScalarField
+  - Foam::fixedValueFvPatchScalarField
+  - Foam::alphatWallFunctionFvPatchScalarField
 
 SourceFiles
     alphatPhaseChangeWallFunctionFvPatchScalarField.C
@@ -94,8 +119,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  alphatPhaseChangeWallFunctionFvPatchScalarField
-        //  onto a new patch
+        //- alphatPhaseChangeWallFunctionFvPatchScalarField
+        //- onto a new patch
         alphatPhaseChangeWallFunctionFvPatchScalarField
         (
             const alphatPhaseChangeWallFunctionFvPatchScalarField&,
@@ -165,9 +190,9 @@ public:
         }
 
 
-        // Evaluation Functions
+        // Evaluation
 
-        //- Update the coefficients associated with the patch field
+            //- Update the coefficients associated with the patch field
             virtual void updateCoeffs() = 0;
 
 
