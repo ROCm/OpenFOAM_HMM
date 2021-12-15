@@ -154,7 +154,7 @@ case openmpi:
 case openmpi-[1-9]*:
 case OPENMPI:
 case OPENMPI-[1-9]*:
-    setenv FOAM_MPI openmpi-4.0.3
+    setenv FOAM_MPI openmpi-4.1.2
 
     ## Add version embedded in the naming
     set _foamMpiVersion=`echo "$WM_MPLIB" | sed -e 's#[^-]*-##'`

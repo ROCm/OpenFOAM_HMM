@@ -169,7 +169,7 @@ SYSTEMOPENMPI | SYSTEMOPENMPI[1-9] | SYSTEMOPENMPI-[1-9]*)
 # ----
 openmpi | openmpi-[1-9]* |\
 OPENMPI | OPENMPI-[1-9]* )
-    export FOAM_MPI=openmpi-4.0.3
+    export FOAM_MPI=openmpi-4.1.2
 
     _foamMpiEmbedVersion openmpi OPENMPI
     _foamEtc -config prefs.openmpi  ## Optional adjustments
