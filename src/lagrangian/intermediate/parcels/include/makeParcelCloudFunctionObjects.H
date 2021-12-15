@@ -31,6 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "FaceInteraction.H"
 #include "FacePostProcessing.H"
 #include "ParticleCollector.H"
 #include "ParticleErosion.H"
@@ -50,6 +51,7 @@ License
                                                                                \
     makeCloudFunctionObject(CloudType);                                        \
                                                                                \
+    makeCloudFunctionObjectType(FaceInteraction, CloudType);                   \
     makeCloudFunctionObjectType(FacePostProcessing, CloudType);                \
     makeCloudFunctionObjectType(ParticleCollector, CloudType);                 \
     makeCloudFunctionObjectType(ParticleErosion, CloudType);                   \

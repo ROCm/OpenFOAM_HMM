@@ -144,7 +144,7 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
 }
 
 
-void Foam::patchInjectionBase::setPositionAndCell
+Foam::label Foam::patchInjectionBase::setPositionAndCell
 (
     const fvMesh& mesh,
     const scalar fraction01,
@@ -155,6 +155,8 @@ void Foam::patchInjectionBase::setPositionAndCell
     label& tetPti
 )
 {
+    label facei = -1;
+
     if (cellOwners_.size() > 0)
     {
         // Determine which processor to inject from
@@ -177,7 +179,7 @@ void Foam::patchInjectionBase::setPositionAndCell
             }
 
             // Set cellOwner
-            label facei = triToFace_[trii];
+            facei = triToFace_[trii];
             cellOwner = cellOwners_[facei];
 
             // Find random point in triangle
@@ -261,10 +263,12 @@ void Foam::patchInjectionBase::setPositionAndCell
         // Dummy position
         position = pTraits<vector>::max;
     }
+
+    return facei;
 }
 
 
-void Foam::patchInjectionBase::setPositionAndCell
+Foam::label Foam::patchInjectionBase::setPositionAndCell
 (
     const fvMesh& mesh,
     Random& rnd,
@@ -276,7 +280,7 @@ void Foam::patchInjectionBase::setPositionAndCell
 {
     scalar fraction01 = rnd.globalSample01<scalar>();
 
-    setPositionAndCell
+    return setPositionAndCell
     (
         mesh,
         fraction01,
