@@ -28,6 +28,8 @@ MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
 // Update the pressure BCs to ensure flux consistency
 constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
 
+fvc::makeRelative(phiHbyA, rho, U);
+
 fvScalarMatrix p_rghDDtEqn
 (
     fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
@@ -104,7 +106,15 @@ else
 
 rho = thermo.rho();
 
+// Correct rhoUf if the mesh is moving
+fvc::correctRhoUf(rhoUf, rho, U, phi);
+
 if (thermo.dpdt())
 {
     dpdt = fvc::ddt(p);
+
+    if (mesh.moving())
+    {
+        dpdt -= fvc::div(fvc::meshPhi(rho, U), p);
+    }
 }
