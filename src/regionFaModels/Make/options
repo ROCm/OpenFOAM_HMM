@@ -17,6 +17,10 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lfiniteArea \
     -lmeshTools \
+    -lfluidThermophysicalModels \
+    -lincompressibleTransportModels -lcompressibleTransportModels \
+    -lturbulenceModels \
+    -lincompressibleTurbulenceModels -lcompressibleTurbulenceModels \
     -lthermophysicalProperties \
     -lspecie \
     -lfaOptions \
