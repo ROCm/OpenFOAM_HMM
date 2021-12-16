@@ -11,14 +11,14 @@
         fvOptions(rho, h)
     );
 
-    if (mesh.changing())
+    if (meshFluxCorr)
     {
         surfaceScalarField phihMesh
         (
             fvc::interpolate(betav*rho*h)*mesh.phi()
         );
 
-        hEqn -= fvc::div(phihMesh);
+       hEqn -= fvc::div(phihMesh);
     }
 
     hEqn.relax();

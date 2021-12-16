@@ -90,5 +90,24 @@ else
     );
 }
 
+// Consider mesh flux to correct for mesh deformation
+bool meshFluxCorr(false);
+if (mesh.solutionDict().found("SIMPLE"))
+{
+    meshFluxCorr =
+        mesh.solutionDict().subDict("SIMPLE").getOrDefault<bool>
+        (
+            "meshFluxCorrection", false
+        );
+}
+else if (mesh.solutionDict().found("PIMPLE"))
+{
+    meshFluxCorr =
+        mesh.solutionDict().subDict("PIMPLE").getOrDefault<bool>
+        (
+            "meshFluxCorrection", false
+        );
+}
+
 #include "createRadiationModel.H"
 #include "createFvOptions.H"
