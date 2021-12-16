@@ -1216,6 +1216,15 @@ void Foam::UPstream::allocatePstreamCommunicator
            &PstreamGlobals::MPIGroups_[index]
         );
 
+        #if defined(MSMPI_VER)
+        // ms-mpi (10.0 and others?) does not have MPI_Comm_create_group
+        MPI_Comm_create
+        (
+            PstreamGlobals::MPICommunicators_[parentIndex],
+            PstreamGlobals::MPIGroups_[index],
+            &PstreamGlobals::MPICommunicators_[index]
+        );
+        #else
         // Create new communicator for this group
         MPI_Comm_create_group
         (
@@ -1224,6 +1233,7 @@ void Foam::UPstream::allocatePstreamCommunicator
             Pstream::msgType(),
            &PstreamGlobals::MPICommunicators_[index]
         );
+        #endif
 
         if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
         {
