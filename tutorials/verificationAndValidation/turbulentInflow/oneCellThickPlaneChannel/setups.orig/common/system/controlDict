@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,7 +22,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         30.0;
+endTime         30;
 
 deltaT          2e-3;
 
@@ -51,6 +51,31 @@ timeStart       #eval{ 0.1 * ${/endTime} };
 
 functions
 {
+    fieldMinMax1
+    {
+        type            fieldMinMax;
+        libs            (fieldFunctionObjects);
+        writeToFile     no;
+        log             yes;
+        location        yes;
+        mode            magnitude;
+        fields          ( p U );
+    }
+
+    scalarTransport1
+    {
+        type            scalarTransport;
+        libs            (solverFunctionObjects);
+        field           T;
+        alphaD          0;
+        alphaDt         0;
+        resetOnStartUp  false;
+        timeStart       0;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+    }
+
     fieldAverage1
     {
         type                fieldAverage;
@@ -61,6 +86,12 @@ functions
         fields
         (
             U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+            T
             {
                 mean        on;
                 prime2Mean  on;

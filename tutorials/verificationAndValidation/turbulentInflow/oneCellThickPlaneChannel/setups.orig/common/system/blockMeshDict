@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,33 +16,43 @@ FoamFile
 
 scale   1;
 
-// L:length, H:height, W:width
-L       0.125664;
-H       1.0;
-H2      #eval{ 2*$H };
-W       #eval{ pi() };
+nx      2;
+ny      82;
+nz      23;
+
+xMin    0.0;
+xMax    0.125664;
+yMin    0.0;
+yMax    #eval{ pi() };
+zMin    0.0;
+z1Max   1.0;
+z2Max   #eval{ 2*$z1Max };
+
+z1Exp   10.7028;
+z2Exp   -10.7028;
 
 vertices
 (
-    ( 0   0   0)
-    ($L   0   0)
-    ($L  $H   0)
-    ($L $H2   0)
-    ( 0 $H2   0)
-    ( 0  $H   0)
+    ($xMin   $yMin   $zMin)
+    ($xMax   $yMin   $zMin)
+    ($xMax   $yMax   $zMin)
+    ($xMin   $yMax   $zMin)
 
-    ( 0   0  $W)
-    ($L   0  $W)
-    ($L  $H  $W)
-    ($L $H2  $W)
-    ( 0 $H2  $W)
-    ( 0  $H  $W)
+    ($xMin   $yMin   $z1Max) //4
+    ($xMax   $yMin   $z1Max)
+    ($xMax   $yMax   $z1Max)
+    ($xMin   $yMax   $z1Max)
+
+    ($xMin   $yMin   $z2Max) // 8
+    ($xMax   $yMin   $z2Max)
+    ($xMax   $yMax   $z2Max)
+    ($xMin   $yMax   $z2Max)
 );
 
 blocks
 (
-    hex ( 0  1  2  5  6  7  8 11) (1 23 82) simpleGrading (1  10.7028 1)
-    hex ( 5  2  3  4 11  8  9 10) (1 23 82) simpleGrading (1 -10.7028 1)
+    hex (0  1  2  3  4  5  6  7) ($nx $ny $nz) simpleGrading (1 1 $z1Exp)
+    hex (4  5  6  7  8  9  10 11) ($nx $ny $nz) simpleGrading (1 1 $z2Exp)
 );
 
 boundary
@@ -50,34 +60,34 @@ boundary
     bottom
     {
         type            wall;
-        faces           ((0 6 7 1));
+        faces           ((0 3 2 1));
     }
     top
     {
         type            wall;
-        faces           ((4 3 9 10));
+        faces           ((8 11 10 9));
     }
     left
     {
         type            cyclic;
         neighbourPatch  right;
-        faces           ((1 2 5 0)(2 3 4 5));
+        faces           ((3 2 6 7)(7 6 10 11));
     }
     right
     {
         type            cyclic;
         neighbourPatch  left;
-        faces           ((6 11 8 7)(11 10 9 8));
+        faces           ((0 4 5 1)(4 8 9 5));
     }
     inlet
     {
         type            patch;
-        faces           ((0 5 11 6)(5 4 10 11));
+        faces           ((0 3 7 4)(4 7 11 8));
     }
     outlet
     {
         type            patch;
-        faces           ((1 7 8 2)(2 8 9 3));
+        faces           ((1 5 6 2)(5 9 10 6));
     }
 );
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,6 +29,9 @@ divSchemes
     default         none;
 
     div(phi,U)      Gauss linear;
+
+    turbulence      Gauss limitedLinear 1;
+    div(phi,T)      $turbulence;
 
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }

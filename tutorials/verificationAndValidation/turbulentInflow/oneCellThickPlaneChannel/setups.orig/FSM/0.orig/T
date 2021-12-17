@@ -9,52 +9,54 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform (17.55 0 0);
+internalField   uniform 0;
 
 boundaryField
 {
     inlet
     {
-        type            turbulentDFSEMInlet;
-        delta           1;
-        U
+        type            turbulentDigitalFilterInlet;
+        fsm             true;
+        n               ( 70 64 );
+        L
+        (
+            0.04446467692
+            0.172787596
+            0.1728125
+        );
+        mean
         {
             type        mappedFile;
             mapMethod   nearest;
+            fieldTable  TMean;
         }
         R
         {
             type        mappedFile;
             mapMethod   nearest;
+            fieldTable  TR;
         }
-        L
-        {
-            type        mappedFile;
-            mapMethod   nearest;
-        }
-
-        d               1;
-        nCellPerEddy    1;
-        scale           1;
+        AMIMethod       nearestFaceAMI;
         value           $internalField;
     }
 
     outlet
     {
-        type            advective;
-        value           $internalField;
+        type            inletOutlet;
+        inletValue      uniform 0;
+        value           uniform 0;
     }
 
     "(bottom|top)"
     {
-        type            noSlip;
+        type            zeroGradient;
     }
 
     "(left|right)"
