@@ -33,7 +33,7 @@ Description
     \f[
         C_1 (v_i^{2/3} + v_j^{2/3}) (v_i^{2/9} + v_j^{2/9})^{1/2}
         \frac{\epsilon_c^{1/3}}{1 + \alpha_d}
-        \text{exp}
+        \textrm{exp}
         \left[
           - C_2 \frac{\mu_c \rho_c}{\sigma^2}
             \frac{\epsilon_c}{(1 + \alpha_d)^{3}}

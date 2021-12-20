@@ -95,7 +95,7 @@ Usage
       Entry    | Description                | Type     | Req'd  | Dflt
       sets     | Names of input pointSets   | wordList | cond'l | -
       set      | Name of input pointSet     | word     | cond'l | -
-    \verbatim
+    \endverbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the

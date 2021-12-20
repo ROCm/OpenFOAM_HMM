@@ -38,13 +38,13 @@ Description
     The Nu number is calculated as:
 
     \f[
-        Nu = a \, \text{Re}^b \, \text{Pr}^c
+        Nu = a \, \textrm{Re}^b \, \textrm{Pr}^c
     \f]
 
     and the heat transfer coefficient as:
 
     \f[
-        htc = \frac{\text{Nu} \, K}{ds}
+        htc = \frac{\textrm{Nu} \, K}{ds}
     \f]
 
     where

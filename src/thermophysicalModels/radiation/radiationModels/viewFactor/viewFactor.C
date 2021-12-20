@@ -613,7 +613,7 @@ void Foam::radiation::viewFactor::calculate()
         if (pp.size() > 0)
         {
             scalarField& qrp = qrBf[patchID];
-            const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
+            //const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
             const labelList& agglom = finalAgglom_[patchID];
             label nAgglom = max(agglom)+1;
 

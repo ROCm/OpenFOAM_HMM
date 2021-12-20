@@ -97,7 +97,7 @@ Usage
       min      | Minimum point (single box)     | vector     | cond'l | -
       max      | Maximum point (single box)     | vector     | cond'l | -
       span     | Box width (single box)         | vector     | cond'l | -
-    \verbatim
+    \endverbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the

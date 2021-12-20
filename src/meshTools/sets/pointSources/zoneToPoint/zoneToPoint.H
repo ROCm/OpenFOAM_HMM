@@ -86,7 +86,7 @@ Usage
       Entry    | Description                | Type     | Req'd  | Dflt
       zones    | Names of input pointZones  | wordRes  | cond'l | -
       zone     | Name of input pointZone    | wordRe   | cond'l | -
-    \verbatim
+    \endverbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the

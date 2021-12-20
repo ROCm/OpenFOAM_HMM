@@ -36,11 +36,11 @@ Description
 
     \f[
         \frac{d c}{d t} =
-            k_{abs} w (c_{int} - c_{p_{w}}) + k_{des} (c_{p_{w} - c_{int}})
+            k_{abs} w (c_{int} - c_{p_{w}}) + k_{des} (c_{p_{w}} - c_{int})
     \f]
 
     \f[
-        w = max(1 - c_{p_{w}/max, 0);
+        w = \max(1 - c_{p_{w}}/max, 0)
     \f]
 
     where
