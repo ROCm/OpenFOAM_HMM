@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,6 @@ class fvMesh;
 
 class patchDistMethod
 {
-
 protected:
 
     // Protected Member Data
@@ -70,9 +69,8 @@ protected:
         //- Set of patch IDs
         const labelHashSet patchIDs_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         patchDistMethod(const patchDistMethod&) = delete;
@@ -114,19 +112,13 @@ public:
 
     // Selectors
 
-        static autoPtr<patchDistMethod> New
-        (
-            const dictionary& dict,
-            const fvMesh& mesh,
-            const labelHashSet& patchIDs
-        );
-
+        // Use "method" from dictionary, or defaultPatchDistMethod
         static autoPtr<patchDistMethod> New
         (
             const dictionary& dict,
             const fvMesh& mesh,
             const labelHashSet& patchIDs,
-            const word& defaultPatchDistMethod
+            const word& defaultPatchDistMethod = word::null
         );
 
 

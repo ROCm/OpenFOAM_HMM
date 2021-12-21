@@ -54,7 +54,7 @@ Foam::fv::tabulatedAccelerationSource::tabulatedAccelerationSource
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    fv::option(name, modelType, dict, mesh),
     motion_(coeffs_, mesh.time()),
     UName_(coeffs_.getOrDefault<word>("U", "U")),
     g0_("g0", dimAcceleration, Zero)
@@ -94,7 +94,7 @@ void Foam::fv::tabulatedAccelerationSource::addSup
 
 bool Foam::fv::tabulatedAccelerationSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         return motion_.read(coeffs_);
     }

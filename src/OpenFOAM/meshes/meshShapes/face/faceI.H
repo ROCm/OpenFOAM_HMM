@@ -122,15 +122,9 @@ inline Foam::label Foam::face::nEdges() const noexcept
 }
 
 
-inline Foam::edge Foam::face::faceEdge(const label edgei) const
-{
-    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
-}
-
-
 inline Foam::edge Foam::face::edge(const label edgei) const
 {
-    return faceEdge(edgei);
+    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
 }
 
 
@@ -161,7 +155,7 @@ inline Foam::vector Foam::face::rcEdge
 {
     // Edge 0 (forward and reverse) always starts at [0]
     // for consistency with face flipping
-    const label pointi = edgei ? (3 - edgei) : 0;
+    const label pointi = edgei ? (nEdges() - edgei) : 0;
     return vector(pts[prevLabel(pointi)] - pts[thisLabel(pointi)]);
 }
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,20 +42,6 @@ namespace regionModels
 defineTypeNameAndDebug(vibrationShellModel, 0);
 
 defineRunTimeSelectionTable(vibrationShellModel, dictionary);
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-bool vibrationShellModel::read(const dictionary& dict)
-{
-    if (regionFaModel::read(dict))
-    {
-        return true;
-    }
-
-    return false;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -108,36 +94,6 @@ vibrationShellModel::vibrationShellModel
 
 void vibrationShellModel::preEvolveRegion()
 {}
-
-
-const Foam::volScalarField& vibrationShellModel::pa() const
-{
-    return pa_;
-}
-
-
-const Foam::areaScalarField& vibrationShellModel::w() const
-{
-    return w_;
-}
-
-
-const Foam::areaScalarField& vibrationShellModel::a() const
-{
-    return a_;
-}
-
-
-Foam::fa::options& vibrationShellModel::faOptions()
-{
-     return faOptions_;
-}
-
-
-const Foam::solidProperties& vibrationShellModel::solid() const
-{
-     return solid_;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

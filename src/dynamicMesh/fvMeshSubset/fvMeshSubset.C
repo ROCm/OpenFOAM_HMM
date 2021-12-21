@@ -32,7 +32,6 @@ License
 #include "pointIndList.H"
 #include "Pstream.H"
 #include "emptyPolyPatch.H"
-#include "demandDrivenData.H"
 #include "cyclicPolyPatch.H"
 #include "removeCells.H"
 #include "polyTopoChange.H"

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,9 +67,9 @@ Foam::searchableSurfaceModifier::New
     const dictionary& dict
 )
 {
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = dictionaryConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -80,7 +80,7 @@ Foam::searchableSurfaceModifier::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<searchableSurfaceModifier>(cstrIter()(geometry, dict));
+    return autoPtr<searchableSurfaceModifier>(ctorPtr(geometry, dict));
 }
 
 

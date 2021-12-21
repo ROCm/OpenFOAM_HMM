@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,17 +41,22 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
     Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
     Sf_(dict.subDict("thermodynamics").get<scalar>("Sf")),
     CpCoeffs_(dict.subDict("thermodynamics").lookup(coeffsName("Cp"))),
+    Tref_(dict.subDict("thermodynamics").getOrDefault<scalar>("Tref", Tstd)),
+    Href_(dict.subDict("thermodynamics").getOrDefault<scalar>("Href", 0)),
+    Sref_(dict.subDict("thermodynamics").getOrDefault<scalar>("Sref", 0)),
+    Pref_(dict.subDict("thermodynamics").getOrDefault<scalar>("Pref", Pstd)),
     hCoeffs_(),
     sCoeffs_()
 {
     hCoeffs_ = CpCoeffs_.integral();
     sCoeffs_ = CpCoeffs_.integralMinus1();
+    // Offset h poly so that it is relative to the enthalpy at Tref
+    hCoeffs_[0] +=
+        Href_ - hCoeffs_.value(Tref_) - EquationOfState::H(Pstd, Tref_);
 
-    // Offset h poly so that it is relative to the enthalpy at Tstd
-    hCoeffs_[0] += Hf_ - hCoeffs_.value(Tstd);
-
-    // Offset s poly so that it is relative to the entropy at Tstd
-    sCoeffs_[0] += Sf_ - sCoeffs_.value(Tstd);
+    // Offset s poly so that it is relative to the entropy at Tref
+    sCoeffs_[0] +=
+        Sref_ - sCoeffs_.value(Tref_) - EquationOfState::S(Pstd, Tref_);
 }
 
 
@@ -70,6 +75,10 @@ void Foam::hPolynomialThermo<EquationOfState, PolySize>::write
         os.beginBlock("thermodynamics");
         os.writeEntry("Hf", Hf_);
         os.writeEntry("Sf", Sf_);
+        os.writeEntry("Tref", Tref_);
+        os.writeEntry("Hsref", Href_);
+        os.writeEntry("Sref", Sref_);
+        os.writeEntry("Pref", Pref_);
         os.writeEntry(coeffsName("Cp"), CpCoeffs_);
         os.endBlock();
     }

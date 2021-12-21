@@ -28,7 +28,7 @@ Class
     Foam::lduPrimitiveMesh
 
 Description
-    Simplest contrete lduMesh which stores the addressing needed by lduMatrix.
+    Simplest concrete lduMesh that stores the addressing needed by lduMatrix.
 
 SourceFiles
     lduPrimitiveMesh.C
@@ -99,6 +99,9 @@ public:
 
     // Constructors
 
+        //- Construct from number of cells
+        explicit lduPrimitiveMesh(const label nCells);
+
         //- Construct from components but without interfaces. Add interfaces
         //  separately using addInterfaces
         lduPrimitiveMesh
@@ -109,6 +112,7 @@ public:
             const label comm,
             bool reuse
         );
+
 
         //- Add interfaces to a mesh constructed without
         void addInterfaces
@@ -186,11 +190,30 @@ public:
                 return *this;
             }
 
+            //- Return non-const ldu addressing
+            virtual lduAddressing& lduAddr()
+            {
+                return *this;
+            }
+
             //- Return a list of pointers for each patch
-            //  with only those pointing to interfaces being set
+            //- with only those pointing to interfaces being set
             virtual lduInterfacePtrsList interfaces() const
             {
                 return interfaces_;
+            }
+
+            //- Return a non-const list of pointers for each patch
+            //- with only those pointing to interfaces being set
+            virtual lduInterfacePtrsList& interfaces()
+            {
+                return interfaces_;
+            }
+
+            //- Return a non-const list of primitive interfaces
+            PtrList<const lduInterface>& primitiveInterfaces()
+            {
+                return primitiveInterfaces_;
             }
 
             //- Return a list of pointers for each patch
@@ -215,6 +238,18 @@ public:
 
             //- Return Upper addressing
             virtual const labelUList& upperAddr() const
+            {
+                return upperAddr_;
+            }
+
+            //- Return non-const Lower addressing
+            virtual labelList& lowerAddr()
+            {
+                return lowerAddr_;
+            }
+
+            //- Return non-const Upper addressing
+            virtual labelList& upperAddr()
             {
                 return upperAddr_;
             }
@@ -270,6 +305,13 @@ public:
                 const label size,
                 const labelUList& l,
                 const labelUList& u
+            );
+
+            //- Calculate global cell-cells
+            static labelListList globalCellCells
+            (
+                const lduMesh& mesh,
+                const globalIndex& globalNumbering
             );
 };
 

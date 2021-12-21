@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::noFunctionObjects();
     argList::addArgument("start size .. startN sizeN");
-    argList::addOption("verbose");
+    argList::addVerbose("enable labelRange::debug");
     argList::addNote
     (
         "The default is to add ranges, use 'add' and 'del' to toggle\n\n"
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    if (args.found("verbose"))
+    if (args.verbose())
     {
         labelRange::debug = 1;
     }

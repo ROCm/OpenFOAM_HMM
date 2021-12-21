@@ -31,6 +31,25 @@ License
 #include "token.H"
 #include <cctype>
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Return the position with word boundary alignment
+inline static label byteAlign(const label pos, const size_t align)
+{
+    return
+    (
+        (align > 1)
+      ? (align + ((pos - 1) & ~(align - 1)))
+      : pos
+    );
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::UOPstream::prepareBuffer
@@ -44,14 +63,8 @@ inline void Foam::UOPstream::prepareBuffer
         return;
     }
 
-    // The current output position
-    label pos = sendBuf_.size();
-
-    if (align > 1)
-    {
-        // Align output position. Pads sendBuf_.size() - oldPos characters.
-        pos = align + ((pos - 1) & ~(align - 1));
-    }
+    // Align for the next output position
+    const label pos = byteAlign(sendBuf_.size(), align);
 
     // Extend buffer (as required)
     sendBuf_.reserve(max(1000, label(pos + count)));
@@ -65,16 +78,6 @@ template<class T>
 inline void Foam::UOPstream::writeToBuffer(const T& val)
 {
     writeToBuffer(&val, sizeof(T), sizeof(T));
-}
-
-
-inline void Foam::UOPstream::writeToBuffer(const char& c)
-{
-    if (!sendBuf_.capacity())
-    {
-        sendBuf_.setCapacity(1000);
-    }
-    sendBuf_.append(c);
 }
 
 
@@ -98,7 +101,7 @@ inline void Foam::UOPstream::writeToBuffer
     // Extend the addressable range for direct pointer access
     sendBuf_.resize(pos + count);
 
-    char* const __restrict__ buf = (sendBuf_.begin() + pos);
+    char* const __restrict__ buf = (sendBuf_.data() + pos);
     const char* const __restrict__ input = reinterpret_cast<const char*>(data);
 
     for (size_t i = 0; i < count; ++i)
@@ -108,11 +111,21 @@ inline void Foam::UOPstream::writeToBuffer
 }
 
 
-inline void Foam::UOPstream::writeStringToBuffer(const std::string& str)
+inline void Foam::UOPstream::putChar(const char c)
+{
+    if (!sendBuf_.capacity())
+    {
+        sendBuf_.setCapacity(1000);
+    }
+    sendBuf_.append(c);
+}
+
+
+inline void Foam::UOPstream::putString(const std::string& str)
 {
     const size_t len = str.size();
     writeToBuffer(len);
-    writeToBuffer(str.data(), len, 1);
+    writeToBuffer(str.data(), len, 1);  // no-op when len == 0
 }
 
 
@@ -126,12 +139,11 @@ Foam::UOPstream::UOPstream
     const int tag,
     const label comm,
     const bool sendAtDestruct,
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver
+    IOstreamOption::streamFormat fmt
 )
 :
     UPstream(commsType),
-    Ostream(fmt, ver),
+    Ostream(fmt, IOstreamOption::currentVersion),
     toProcNo_(toProcNo),
     sendBuf_(sendBuf),
     tag_(tag),
@@ -146,7 +158,7 @@ Foam::UOPstream::UOPstream
 Foam::UOPstream::UOPstream(const int toProcNo, PstreamBuffers& buffers)
 :
     UPstream(buffers.commsType_),
-    Ostream(buffers.format_, buffers.version_),
+    Ostream(buffers.format_, IOstreamOption::currentVersion),
     toProcNo_(toProcNo),
     sendBuf_(buffers.sendBuf_[toProcNo]),
     tag_(buffers.tag_),
@@ -196,8 +208,8 @@ bool Foam::UOPstream::write(const token& tok)
     {
         case token::tokenType::FLAG :
         {
-            writeToBuffer(char(token::tokenType::FLAG));
-            writeToBuffer(char(tok.flagToken()));
+            putChar(token::tokenType::FLAG);
+            putChar(tok.flagToken());
 
             return true;
         }
@@ -206,8 +218,8 @@ bool Foam::UOPstream::write(const token& tok)
         case token::tokenType::WORD :
         case token::tokenType::DIRECTIVE :
         {
-            writeToBuffer(char(tok.type()));
-            writeStringToBuffer(tok.wordToken());
+            putChar(tok.type());
+            putString(tok.wordToken());
 
             return true;
         }
@@ -218,8 +230,8 @@ bool Foam::UOPstream::write(const token& tok)
         case token::tokenType::VARIABLE :
         case token::tokenType::VERBATIM :
         {
-            writeToBuffer(char(tok.type()));
-            writeStringToBuffer(tok.stringToken());
+            putChar(tok.type());
+            putString(tok.stringToken());
 
             return true;
         }
@@ -236,7 +248,7 @@ Foam::Ostream& Foam::UOPstream::write(const char c)
 {
     if (!isspace(c))
     {
-        writeToBuffer(c);
+        putChar(c);
     }
 
     return *this;
@@ -262,8 +274,8 @@ Foam::Ostream& Foam::UOPstream::write(const char* str)
 
 Foam::Ostream& Foam::UOPstream::write(const word& str)
 {
-    writeToBuffer(char(token::tokenType::WORD));
-    writeStringToBuffer(str);
+    putChar(token::tokenType::WORD);
+    putString(str);
 
     return *this;
 }
@@ -271,8 +283,8 @@ Foam::Ostream& Foam::UOPstream::write(const word& str)
 
 Foam::Ostream& Foam::UOPstream::write(const string& str)
 {
-    writeToBuffer(char(token::tokenType::STRING));
-    writeStringToBuffer(str);
+    putChar(token::tokenType::STRING);
+    putString(str);
 
     return *this;
 }
@@ -286,13 +298,13 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 {
     if (quoted)
     {
-        writeToBuffer(char(token::tokenType::STRING));
+        putChar(token::tokenType::STRING);
     }
     else
     {
-        writeToBuffer(char(token::tokenType::WORD));
+        putChar(token::tokenType::WORD);
     }
-    writeStringToBuffer(str);
+    putString(str);
 
     return *this;
 }
@@ -300,7 +312,7 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 
 Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 {
-    writeToBuffer(char(token::tokenType::LABEL));
+    putChar(token::tokenType::LABEL);
     writeToBuffer(val);
     return *this;
 }
@@ -308,7 +320,7 @@ Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 {
-    writeToBuffer(char(token::tokenType::LABEL));
+    putChar(token::tokenType::LABEL);
     writeToBuffer(val);
     return *this;
 }
@@ -316,7 +328,7 @@ Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 {
-    writeToBuffer(char(token::tokenType::FLOAT));
+    putChar(token::tokenType::FLOAT);
     writeToBuffer(val);
     return *this;
 }
@@ -324,7 +336,7 @@ Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 
 Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 {
-    writeToBuffer(char(token::tokenType::DOUBLE));
+    putChar(token::tokenType::DOUBLE);
     writeToBuffer(val);
     return *this;
 }
@@ -339,6 +351,7 @@ Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
             << Foam::abort(FatalError);
     }
 
+    // Align on word boundary (64-bit)
     writeToBuffer(data, count, 8);
 
     return *this;
@@ -370,7 +383,8 @@ bool Foam::UOPstream::beginRawWrite(std::streamsize count)
             << Foam::abort(FatalError);
     }
 
-    // Alignment = 8, as per write(const char*, streamsize)
+    // Align on word boundary (64-bit)
+    // - as per write(const char*, streamsize)
     prepareBuffer(count, 8);
 
     return true;

@@ -88,11 +88,7 @@ Foam::Istream& Foam::PackedList<Width>::readList(Istream& is)
             if (len)
             {
                 // NOTE: independent of WM_LABEL_SIZE
-                is.read
-                (
-                    reinterpret_cast<char*>(list.data()),
-                    list.size_bytes()
-                );
+                is.read(list.data_bytes(), list.size_bytes());
 
                 is.fatalCheck
                 (
@@ -197,11 +193,7 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
         if (len)
         {
             // write(...) includes surrounding start/end delimiters
-            os.write
-            (
-                reinterpret_cast<const char*>(list.cdata()),
-                list.size_bytes()
-            );
+            os.write(list.cdata_bytes(), list.size_bytes());
         }
     }
     else if (len > 1 && list.uniform())

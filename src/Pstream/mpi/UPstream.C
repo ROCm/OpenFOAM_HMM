@@ -279,7 +279,15 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
     if (debug)
     {
-        Pout<< "UPstream::init : procs:" << numprocs
+        Pout<< "UPstream::init :"
+            << " thread-support : wanted:" << needsThread
+            << " obtained:"
+            <<  (
+                    provided_thread_support == MPI_THREAD_MULTIPLE
+                  ? "MPI_THREAD_MULTIPLE"
+                  : "MPI_THREAD_SINGLE"
+                )
+            << " procs:" << numprocs
             << " rank:" << myRank
             << " world:" << world << endl;
     }
@@ -805,7 +813,7 @@ void Foam::UPstream::allToAll
 
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** allToAll :"
+        Pout<< "** MPI_Alltoallv :"
             << " sendSizes:" << sendSizes
             << " sendOffsets:" << sendOffsets
             << " with comm:" << communicator
@@ -852,12 +860,12 @@ void Foam::UPstream::allToAll
             MPI_Alltoallv
             (
                 const_cast<char*>(sendData),
-                const_cast<int*>(sendSizes.begin()),
-                const_cast<int*>(sendOffsets.begin()),
+                const_cast<int*>(sendSizes.cdata()),
+                const_cast<int*>(sendOffsets.cdata()),
                 MPI_BYTE,
                 recvData,
-                const_cast<int*>(recvSizes.begin()),
-                const_cast<int*>(recvOffsets.begin()),
+                const_cast<int*>(recvSizes.cdata()),
+                const_cast<int*>(recvOffsets.cdata()),
                 MPI_BYTE,
                 PstreamGlobals::MPICommunicators_[communicator]
             )
@@ -871,6 +879,122 @@ void Foam::UPstream::allToAll
         }
 
         profilingPstream::addAllToAllTime();
+    }
+}
+
+
+void Foam::UPstream::mpiGather
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** MPI_Gather :"
+            << " np:" << np
+            << " recvSize:" << recvSize
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+    if (!UPstream::parRun())
+    {
+        std::memmove(recvData, sendData, recvSize);
+    }
+    else
+    {
+        profilingPstream::beginTiming();
+
+        if
+        (
+            MPI_Gather
+            (
+                const_cast<char*>(sendData),
+                sendSize,
+                MPI_BYTE,
+                recvData,
+                recvSize,
+                MPI_BYTE,
+                0,
+                MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Gather failed for sendSize " << sendSize
+                << " recvSize " << recvSize
+                << " communicator " << communicator
+                << Foam::abort(FatalError);
+        }
+
+        profilingPstream::addGatherTime();
+    }
+}
+
+
+void Foam::UPstream::mpiScatter
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    const label np = nProcs(communicator);
+
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** MPI_Scatter :"
+            << " np:" << np
+            << " recvSize:" << recvSize
+            << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+    if (!UPstream::parRun())
+    {
+        std::memmove(recvData, sendData, recvSize);
+    }
+    else
+    {
+        profilingPstream::beginTiming();
+
+        if
+        (
+            MPI_Scatter
+            (
+                const_cast<char*>(sendData),
+                sendSize,
+                MPI_BYTE,
+                recvData,
+                recvSize,
+                MPI_BYTE,
+                0,
+                MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Scatter failed for sendSize " << sendSize
+                << " recvSize " << recvSize
+                << " communicator " << communicator
+                << Foam::abort(FatalError);
+        }
+
+        profilingPstream::addScatterTime();
     }
 }
 
@@ -890,7 +1014,7 @@ void Foam::UPstream::gather
 
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** allToAll :"
+        Pout<< "** MPI_Gatherv :"
             << " np:" << np
             << " recvSizes:" << recvSizes
             << " recvOffsets:" << recvOffsets
@@ -919,6 +1043,7 @@ void Foam::UPstream::gather
 
     if (!UPstream::parRun())
     {
+        // recvSizes[0] may be invalid - use sendSize instead
         std::memmove(recvData, sendData, sendSize);
     }
     else
@@ -933,8 +1058,8 @@ void Foam::UPstream::gather
                 sendSize,
                 MPI_BYTE,
                 recvData,
-                const_cast<int*>(recvSizes.begin()),
-                const_cast<int*>(recvOffsets.begin()),
+                const_cast<int*>(recvSizes.cdata()),
+                const_cast<int*>(recvOffsets.cdata()),
                 MPI_BYTE,
                 0,
                 MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
@@ -968,7 +1093,7 @@ void Foam::UPstream::scatter
 
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** allToAll :"
+        Pout<< "** MPI_Scatterv :"
             << " np:" << np
             << " sendSizes:" << sendSizes
             << " sendOffsets:" << sendOffsets
@@ -1005,8 +1130,8 @@ void Foam::UPstream::scatter
             MPI_Scatterv
             (
                 const_cast<char*>(sendData),
-                const_cast<int*>(sendSizes.begin()),
-                const_cast<int*>(sendOffsets.begin()),
+                const_cast<int*>(sendSizes.cdata()),
+                const_cast<int*>(sendOffsets.cdata()),
                 MPI_BYTE,
                 recvData,
                 recvSize,
@@ -1091,13 +1216,24 @@ void Foam::UPstream::allocatePstreamCommunicator
            &PstreamGlobals::MPIGroups_[index]
         );
 
-        // Create new communicator
+        #if defined(MSMPI_VER)
+        // ms-mpi (10.0 and others?) does not have MPI_Comm_create_group
         MPI_Comm_create
         (
             PstreamGlobals::MPICommunicators_[parentIndex],
             PstreamGlobals::MPIGroups_[index],
+            &PstreamGlobals::MPICommunicators_[index]
+        );
+        #else
+        // Create new communicator for this group
+        MPI_Comm_create_group
+        (
+            PstreamGlobals::MPICommunicators_[parentIndex],
+            PstreamGlobals::MPIGroups_[index],
+            Pstream::msgType(),
            &PstreamGlobals::MPICommunicators_[index]
         );
+        #endif
 
         if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
         {

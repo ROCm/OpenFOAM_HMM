@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ Description
     addressing information.
 
 SourceFiles
+    ijkMesh.C
     ijkMeshI.H
 
 \*---------------------------------------------------------------------------*/
@@ -46,6 +47,9 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
+class hexCell;
 
 /*---------------------------------------------------------------------------*\
                            Class ijkMesh Declaration
@@ -116,6 +120,15 @@ public:
         //- The linear point index for an i-j-k position.
         //  Addressable in the range (ni+1, nj+1, nk+1).
         inline label pointLabel(const labelVector& ijk) const;
+
+
+    // Mesh Components
+
+        //- The hex cell vertices for an i-j-k position
+        hexCell vertLabels(const label i, const label j, const label k) const;
+
+        //- The hex cell vertices for an i-j-k position
+        hexCell vertLabels(const labelVector& ijk) const;
 };
 
 

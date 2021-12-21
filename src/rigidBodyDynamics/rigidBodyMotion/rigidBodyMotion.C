@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion(const Time& time)
     rigidBodyModel(time),
     motionState_(*this),
     motionState0_(*this),
-    aRelax_(1.0),
+    aRelax_(nullptr),
     aDamp_(1.0),
     report_(false),
     solver_(nullptr)
@@ -66,7 +66,16 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
     motionState_(*this, dict),
     motionState0_(motionState_),
     X00_(X0_.size()),
-    aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
+    aRelax_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "accelerationRelaxation",
+            dict,
+            word::null,
+            &time
+        )
+    ),
     aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
     report_(dict.getOrDefault<Switch>("report", false)),
     solver_(rigidBodySolver::New(*this, dict.subDict("solver")))
@@ -91,7 +100,16 @@ Foam::RBD::rigidBodyMotion::rigidBodyMotion
     motionState_(*this, stateDict),
     motionState0_(motionState_),
     X00_(X0_.size()),
-    aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
+    aRelax_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "accelerationRelaxation",
+            dict,
+            word::null,
+            &time
+        )
+    ),
     aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
     report_(dict.getOrDefault<Switch>("report", false)),
     solver_(rigidBodySolver::New(*this, dict.subDict("solver")))
@@ -139,7 +157,14 @@ void Foam::RBD::rigidBodyMotion::forwardDynamics
 {
     scalarField qDdotPrev = state.qDdot();
     rigidBodyModel::forwardDynamics(state, tau, fx);
-    state.qDdot() = aDamp_*(aRelax_*state.qDdot() + (1 - aRelax_)*qDdotPrev);
+
+    scalar aRelax = 1;
+    if (aRelax_)
+    {
+        aRelax = aRelax_->value(motionState_.t());
+    }
+
+    state.qDdot() = aDamp_*(aRelax*state.qDdot() + (1 - aRelax)*qDdotPrev);
 }
 
 

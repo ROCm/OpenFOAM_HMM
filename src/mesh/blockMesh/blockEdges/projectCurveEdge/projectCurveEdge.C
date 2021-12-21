@@ -115,14 +115,12 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
     auto tpoints = tmp<pointField>::New(lambdas.size());
     auto& points = tpoints.ref();
 
-    const point& startPt = points_[start_];
-    const point& endPt = points_[end_];
-    const vector d = endPt-startPt;
+    const scalar distSqr = Foam::magSqr(lastPoint()-firstPoint());
 
     // Initial guess
     forAll(lambdas, i)
     {
-        points[i] = startPt+lambdas[i]*d;
+        points[i] = blockEdge::linearPosition(lambdas[i]);
     }
 
     // Use special interpolation to keep initial guess on same position on
@@ -142,7 +140,7 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
                 points[0],
                 points.last(),
                 scalarField(lambdas),
-                scalarField(points.size(), magSqr(d)),
+                scalarField(points.size(), distSqr),
                 nearInfo
             );
             forAll(nearInfo, i)
@@ -179,7 +177,7 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
                 geometry_,
                 surfaces_,
                 start,
-                scalarField(start.size(), magSqr(d)),
+                scalarField(start.size(), distSqr),
                 points,
                 constraints
             );
@@ -187,11 +185,11 @@ Foam::blockEdges::projectCurveEdge::position(const scalarList& lambdas) const
             // Reset start and end point
             if (lambdas[0] < SMALL)
             {
-                points[0] = startPt;
+                points[0] = firstPoint();
             }
             if (lambdas.last() > 1.0-SMALL)
             {
-                points.last() = endPt;
+                points.last() = lastPoint();
             }
 
             if (debugStr)

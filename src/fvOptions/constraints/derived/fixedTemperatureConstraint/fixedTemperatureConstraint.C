@@ -69,7 +69,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     mode_(temperatureModeNames_.get("mode", coeffs_)),
     Tuniform_(nullptr),
     TName_("T")
@@ -80,7 +80,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
         {
             Tuniform_.reset
             (
-                Function1<scalar>::New("temperature", coeffs_).ptr()
+                Function1<scalar>::New("temperature", coeffs_, &mesh_)
             );
             break;
         }
@@ -146,13 +146,13 @@ void Foam::fv::fixedTemperatureConstraint::constrain
 
 bool Foam::fv::fixedTemperatureConstraint::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         if (coeffs_.found(Tuniform_->name()))
         {
             Tuniform_.reset
             (
-                Function1<scalar>::New(Tuniform_->name(), dict).ptr()
+                Function1<scalar>::New(Tuniform_->name(), dict, &mesh_)
             );
         }
 

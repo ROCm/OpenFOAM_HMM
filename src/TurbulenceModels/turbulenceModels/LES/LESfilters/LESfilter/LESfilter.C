@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,9 +49,9 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
 {
     const word filterType(dict.get<word>(filterDictName));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(filterType);
+    auto* ctorPtr = dictionaryConstructorTable(filterType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<LESfilter>(cstrIter()(mesh, dict));
+    return autoPtr<LESfilter>(ctorPtr(mesh, dict));
 }
 
 

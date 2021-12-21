@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,9 @@ SeeAlso
 namespace Foam
 {
 
+// Forward Declarations
+class OStringStream;
+
 /*---------------------------------------------------------------------------*\
                             Class error Declaration
 \*---------------------------------------------------------------------------*/
@@ -75,8 +78,8 @@ class error
 {
     // Private Member Functions
 
-        //- Common code for exit or abort
-        void exitOrAbort(const int errNo, const bool isAbort);
+        //- Exit or abort code, with exception and jobinfo handling
+        void exiting(const int errNo, const bool isAbort);
 
 
 protected:
@@ -88,6 +91,12 @@ protected:
         label sourceFileLineNumber_;
         bool throwing_;
         std::unique_ptr<OStringStream> messageStreamPtr_;
+
+
+    // Protected Member Functions
+
+        //- Exit or abort, without throwing or job control handling
+        void simpleExit(const int errNo, const bool isAbort);
 
 
 public:
@@ -110,12 +119,25 @@ public:
 
     // Static Functions
 
+        //- Like Pstream::master but with a Pstream::parRun guard in case
+        //- Pstream has not yet been initialised.
+        //
+        //  \param communicator is the numbered MPI communicator.
+        //      By default it uses UPstream::worldComm
+        static bool master(const label communicator = -1);
+
+        //- Test if an age warning should be emitted.
+        //  \param version is the old version (YYMM) for determining the
+        //      age in months compared to the current OpenFOAM version
+        //      as conveyed by the \c foamVersion::api value.
+        static bool warnAboutAge(const int version) noexcept;
+
         //- Emit warning on stderr about something being old.
         //  \param what description for the warning
         //  \param version is the old version (YYMM) for determining the
         //      age in months compared to the current OpenFOAM version
         //      as conveyed by the \c foamVersion::api value.
-        static void warnAboutAge(const char* what, const int version);
+        static bool warnAboutAge(const char* what, const int version);
 
 
     // Member Functions
@@ -126,59 +148,66 @@ public:
         //- Clear any messages
         void clear() const;
 
-        const string& functionName() const
+        //- The currently defined function name for output messages
+        const string& functionName() const noexcept
         {
             return functionName_;
         }
 
-        const string& sourceFileName() const
+        //- The currently defined source-file name for output messages
+        const string& sourceFileName() const noexcept
         {
             return sourceFileName_;
         }
 
-        label sourceFileLineNumber() const
+        //- The currently defined source-file line number for output messages
+        label sourceFileLineNumber() const noexcept
         {
             return sourceFileLineNumber_;
         }
 
-        //- Return the current exception throwing (on or off)
-        bool throwing() const
+        //- Return the current exception throwing state (on or off)
+        bool throwing() const noexcept
         {
             return throwing_;
         }
 
-        //- Activate/deactivate exception throwing
+        //- Specify exception throwing state (on or off)
         //  \return the previous throwing state
-        inline bool throwExceptions(bool doThrow)
+        bool throwing(const bool on) noexcept
         {
-            const bool prev = throwing_;
-            throwing_ = doThrow;
-            return prev;
+            bool old(throwing_);
+            throwing_ = on;
+            return old;
         }
 
-        //- Activate exception throwing
-        //  \return the previous throwing state
-        inline bool throwExceptions()
+
+    // Output
+
+        //- Return OSstream for output operations
+        OSstream& stream();
+
+        //- Implicit cast to OSstream for << operations
+        operator OSstream&()
         {
-            return throwExceptions(true);
+            return this->stream();
         }
 
-        //- Deactivate exception throwing
-        //  \return the previous throwing state
-        inline bool dontThrowExceptions()
+        //- Explicit convert to OSstream for << operations
+        OSstream& operator()()
         {
-            return throwExceptions(false);
+            return this->stream();
         }
 
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName
         );
 
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -187,7 +216,7 @@ public:
         );
 
         //- Define basic print message
-        //  \return OSstream for further info.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const string& functionName,
@@ -195,16 +224,10 @@ public:
             const int sourceFileLineNumber = 0
         );
 
-        //- Explicit convert to OSstream for << operations
-        OSstream& operator()()
-        {
-            return operator OSstream&();
-        }
 
-        //- Convert to OSstream
-        operator OSstream&();
+    // Other
 
-        //- Create and return a dictionary representation of the error
+        //- Extract a dictionary representation of the error information
         operator dictionary() const;
 
 
@@ -218,6 +241,7 @@ public:
         //- True if FOAM_ABORT is on.
         static bool useAbort();
 
+
         //- Exit : can be called for any error to exit program.
         //  Redirects to abort() when FOAM_ABORT is on.
         void exit(const int errNo = 1);
@@ -227,7 +251,24 @@ public:
         void abort();
 
         //- Print error message
-        void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool withTitle = true) const;
+
+
+    // Housekeeping
+
+        //- Specify exception throwing state (default is \b on)
+        //  \return the previous throwing state
+        bool throwExceptions(const bool on = true) noexcept
+        {
+            return throwing(on);
+        }
+
+        //- Deactivate exception throwing
+        //  \return the previous throwing state
+        bool dontThrowExceptions() noexcept
+        {
+            return throwExceptions(false);
+        }
 };
 
 
@@ -249,8 +290,8 @@ class IOerror
 
     // Private Member Functions
 
-        //- Common code for exit or abort
-        void exitOrAbort(const int errNo, const bool isAbort);
+        //- Exit or abort code, with exception and jobinfo handling
+        void exiting(const int errNo, const bool isAbort);
 
 
 public:
@@ -270,23 +311,29 @@ public:
 
     // Member Functions
 
-        const string& ioFileName() const
+        //- The currently defined IO name for output messages
+        const string& ioFileName() const noexcept
         {
             return ioFileName_;
         }
 
-        label ioStartLineNumber() const
+        //- The currently defined IO start-line number for output messages
+        label ioStartLineNumber() const noexcept
         {
             return ioStartLineNumber_;
         }
 
-        label ioEndLineNumber() const
+        //- The currently defined IO end-line number
+        label ioEndLineNumber() const noexcept
         {
             return ioEndLineNumber_;
         }
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+
+    // Output
+
+        //- Define basic print message
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -297,8 +344,8 @@ public:
             const label ioEndLineNumber = -1
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message for IO stream
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -307,8 +354,9 @@ public:
             const IOstream& ioStream
         );
 
-        //- Convert to OSstream
-        //  Prints basic message and returns OSstream for further info.
+        //- Define basic print message for dictionary entries.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
         OSstream& operator()
         (
             const char* functionName,
@@ -316,6 +364,28 @@ public:
             const int sourceFileLineNumber,
             const dictionary& dict
         );
+
+
+        //- Define basic print message for IO stream,
+        //- independent of a source-file reference.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
+        OSstream& operator()
+        (
+            const std::string& where,
+            const IOstream& ioStream
+        );
+
+        //- Define basic print message for dictionary entries,
+        //- independent of a source-file reference.
+        //- Uses the dictionary::relativeName() on output.
+        //  \return OSstream for further operations
+        OSstream& operator()
+        (
+            const std::string& where,
+            const dictionary& dict
+        );
+
 
         //- Print basic message and exit.
         //  Uses cerr if streams not yet constructed (at startup).
@@ -329,9 +399,11 @@ public:
             const string& msg
         );
 
-        //- Create and return a dictionary representation of the error
-        operator dictionary() const;
 
+    // Other
+
+        //- Extract a dictionary representation of the error information
+        operator dictionary() const;
 
         //- Exit : can be called for any error to exit program
         void exit(const int errNo = 1);
@@ -340,7 +412,7 @@ public:
         void abort();
 
         //- Print error message
-        void write(Ostream& os, const bool includeTitle = true) const;
+        virtual void write(Ostream& os, const bool withTitle = true) const;
 };
 
 
@@ -356,11 +428,11 @@ Ostream& operator<<(Ostream& os, const IOerror& err);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error declarations: defined in error.C
 
-//- Error stream (uses stdout - output on all processes),
+//- Error stream (stdout output on all processes),
 //- with additional 'FOAM FATAL ERROR' header text and stack trace.
 extern error   FatalError;
 
-//- Error stream (uses stdout - output on all processes),
+//- Error stream (stdout output on all processes),
 //- with additional 'FOAM FATAL IO ERROR' header text and stack trace.
 extern IOerror FatalIOError;
 

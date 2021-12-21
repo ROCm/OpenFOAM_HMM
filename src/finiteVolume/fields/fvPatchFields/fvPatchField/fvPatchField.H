@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,24 +57,17 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 
 class objectRegistry;
 class dictionary;
 class fvPatchFieldMapper;
 class volMesh;
 
+template<class Type> class fvPatchField;
+template<class Type> class calculatedFvPatchField;
+template<class Type> class fvMatrix;
 
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class fvPatchField;
-
-template<class Type>
-class calculatedFvPatchField;
-
-template<class Type>
-class fvMatrix;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const fvPatchField<Type>&);
@@ -89,7 +82,7 @@ class fvPatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to patch
         const fvPatch& patch_;
@@ -98,12 +91,15 @@ class fvPatchField
         const DimensionedField<Type, volMesh>& internalField_;
 
         //- Update index used so that updateCoeffs is called only once during
-        //  the construction of the matrix
+        //- the construction of the matrix
         bool updated_;
 
         //- Update index used so that manipulateMatrix is called only once
-        //  during the construction of the matrix
+        //- during the construction of the matrix
         bool manipulatedMatrix_;
+
+        //- Use implicit formulation
+        bool useImplicit_;
 
         //- Optional patch type, used to allow specified boundary conditions
         //  to be applied to constraint patches by providing the constraint
@@ -306,7 +302,25 @@ public:
     virtual ~fvPatchField<Type>() = default;
 
 
-    // Member functions
+    // Member Functions
+
+        // Implicit Functions
+
+            //- Use implicit formulation for coupled patches only
+            bool useImplicit() const noexcept
+            {
+                return useImplicit_;
+            }
+
+            //- Set useImplicit on/off
+            //  \return old value
+            bool useImplicit(bool on) noexcept
+            {
+                bool old(useImplicit_);
+                useImplicit_ = on;
+                return old;
+            }
+
 
         // Attributes
 
@@ -383,7 +397,7 @@ public:
             }
 
 
-        // Mapping functions
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -399,7 +413,7 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation Functions
 
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
@@ -527,6 +541,14 @@ public:
                 const scalarField& weights
             );
 
+            //- Manipulate fvMatrix
+            virtual void manipulateMatrix
+            (
+                fvMatrix<Type>& matrix,
+                const label iMatrix,
+                const direction cmp
+            );
+
 
         // I-O
 
@@ -540,7 +562,7 @@ public:
             void check(const fvPatchField<Type>&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&);
 

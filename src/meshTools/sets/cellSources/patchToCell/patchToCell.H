@@ -84,7 +84,7 @@ Usage
       Entry    | Description                   | Type     | Req'd  | Dflt
       patches  | Names of patches or wildcards | wordList | cond'l | -
       patch    | Name of patch or wildcard     | word     | cond'l | -
-    \verbatim
+    \endverbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the

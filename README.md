@@ -40,9 +40,9 @@ Violations of the Trademark are monitored, and will be duly prosecuted.
 
 If OpenFOAM has already been compiled on your system, simply source
 the appropriate `etc/bashrc` or `etc/cshrc` file and get started.
-For example, for the OpenFOAM-v2106 version:
+For example, for the OpenFOAM-v2112 version:
 ```
-source /installation/path/OpenFOAM-v2106/etc/bashrc
+source /installation/path/OpenFOAM-v2112/etc/bashrc
 ```
 
 ## Compiling OpenFOAM
@@ -127,8 +127,8 @@ These 3rd-party sources are normally located in a directory parallel
 to the OpenFOAM directory. For example,
 ```
 /path/parent
-|-- OpenFOAM-v2106
-\-- ThirdParty-v2106
+|-- OpenFOAM-v2112
+\-- ThirdParty-v2112
 ```
 There are, however, many cases where this simple convention is inadequate:
 
@@ -136,7 +136,7 @@ There are, however, many cases where this simple convention is inadequate:
   operating system or cluster installation provides it)
 
 * When we have changed the OpenFOAM directory name to some arbitrary
-  directory name, e.g. openfoam-sandbox2106, etc..
+  directory name, e.g. openfoam-sandbox2112, etc..
 
 * When we would like any additional 3rd party software to be located
   inside of the OpenFOAM directory to ensure that the installation is
@@ -156,9 +156,9 @@ when locating the ThirdParty directory with the following precedence:
 2. PREFIX/ThirdParty-VERSION
    * this corresponds to the traditional approach
 3. PREFIX/ThirdParty-vAPI
-   * allows for an updated value of VERSION, *eg*, `v2106-myCustom`,
+   * allows for an updated value of VERSION, *eg*, `v2112-myCustom`,
      without requiring a renamed ThirdParty. The API value would still
-     be `2106` and the original `ThirdParty-v2106/` would be found.
+     be `2112` and the original `ThirdParty-v2112/` would be found.
 4. PREFIX/ThirdParty-API
    * same as the previous example, but using an unadorned API value.
 5. PREFIX/ThirdParty-common

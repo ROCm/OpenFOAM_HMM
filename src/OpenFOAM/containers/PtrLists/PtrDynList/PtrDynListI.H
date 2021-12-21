@@ -98,32 +98,16 @@ inline const T* Foam::PtrDynList<T, SizeMin>::get(const label i) const
 
 
 template<class T, int SizeMin>
-inline void Foam::PtrDynList<T, SizeMin>::setCapacity(const label newCapacity)
-{
-    label currLen = PtrList<T>::size();
-    capacity_ = newCapacity;
-
-    if (currLen > capacity_)
-    {
-        // Truncate addressed sizes too
-        currLen = capacity_;
-    }
-
-    PtrList<T>::resize(capacity_);
-    PtrList<T>::setAddressableSize(currLen);
-}
-
-
-template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::reserve(const label len)
 {
     if (capacity_ < len)
     {
-        // Increase capacity (doubling)
-        capacity_ = max(SizeMin, max(len, label(2 * capacity_)));
-
-        // Adjust allocated size, leave addressed size untouched
+        // Preserve addressed size
         const label currLen = PtrList<T>::size();
+
+        // Increase capacity (doubling)
+        capacity_ = max(SizeMin, max(len, label(2*capacity_)));
+
         PtrList<T>::resize(capacity_);
         PtrList<T>::setAddressableSize(currLen);
     }
@@ -140,7 +124,7 @@ inline void Foam::PtrDynList<T, SizeMin>::resize(const label newLen)
     if (capacity_ < newLen)
     {
         // Increase capacity (doubling)
-        capacity_ = max(SizeMin, max(newLen, label(2 * capacity_)));
+        capacity_ = max(SizeMin, max(newLen, label(2*capacity_)));
 
         PtrList<T>::resize(capacity_);
     }
@@ -193,13 +177,11 @@ inline void Foam::PtrDynList<T, SizeMin>::shrink()
     const label currLen = PtrList<T>::size();
     if (currLen < capacity_)
     {
-        // Use the full list when resizing
-        PtrList<T>::setAddressableSize(capacity_);
+        // Adjust addressable size to trigger proper resizing
+        PtrList<T>::setAddressableSize(currLen+1);
 
-        // Capacity and size are identical
-        capacity_ = currLen;
         PtrList<T>::resize(currLen);
-        // Redundant: PtrList<T>::setAddressableSize(currLen);
+        capacity_ = PtrList<T>::size();
     }
 }
 

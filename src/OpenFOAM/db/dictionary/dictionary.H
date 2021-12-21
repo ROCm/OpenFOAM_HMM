@@ -97,6 +97,7 @@ SeeAlso
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
+#include "refPtr.H"
 
 // Some common data types
 #include "label.H"
@@ -110,6 +111,7 @@ namespace Foam
 
 // Forward Declarations
 class dictionary;
+class OSstream;
 class SHA1Digest;
 
 Istream& operator>>(Istream& is, dictionary& dict);
@@ -171,7 +173,8 @@ public:
             pointer eptr_;
 
 
-            //- Construct for the given dictionary context
+            //- Construct for the given dictionary context.
+            //  Allow implicit conversion
             Searcher(dict_pointer dict)
             :
                 dict_(dict),
@@ -196,62 +199,62 @@ public:
 
 
             //- True if entry was found
-            inline bool good() const
+            bool good() const noexcept
             {
                 return eptr_;
             }
 
             //- True if entry was found
-            inline bool found() const
+            bool found() const noexcept
             {
                 return eptr_;
             }
 
             //- The containing dictionary context
-            inline dict_reference context() const
+            dict_reference context() const
             {
                 return *dict_;
             }
 
             //- A pointer to the entry (nullptr if not found)
-            inline pointer ptr() const
+            pointer ptr() const noexcept
             {
                 return eptr_;
             }
 
             //- A reference to the entry (Error if not found)
-            inline reference ref() const
+            reference ref() const
             {
                 return *eptr_;
             }
 
             //- True if found entry is a dictionary.
-            inline bool isDict() const
+            bool isDict() const noexcept
             {
-                return eptr_ && eptr_->isDict();
+                return (eptr_ && eptr_->dictPtr());
             }
 
-            //- Pointer to the found entry as a dictionary or nullptr otherwise.
-            inline dict_pointer dictPtr() const
+            //- Pointer to the found entry as a dictionary, nullptr otherwise
+            dict_pointer dictPtr() const noexcept
             {
-                return eptr_ && eptr_->isDict() ? eptr_->dictPtr() : nullptr;
+                return eptr_ ? eptr_->dictPtr() : nullptr;
             }
 
             //- Reference the found entry as a dictionary.
             //  (Error if not found, or not a dictionary).
-            inline dict_reference dict() const
+            dict_reference dict() const
             {
                 return eptr_->dict();
             }
 
             //- Permit an explicit cast to the other (const/non-const) searcher
-            inline explicit operator const Searcher<!Const>&() const
+            explicit operator const Searcher<!Const>&() const
             {
                 return *reinterpret_cast<const Searcher<!Const>*>(this);
             }
 
             //- A pointer to the entry (nullptr if not found)
-            pointer operator->() const
+            pointer operator->() const noexcept
             {
                 return eptr_;
             }
@@ -313,7 +316,7 @@ private:
         //
         //  \param recursive search parent dictionaries
         //  \param pattern match using regular expressions as well
-        static inline enum keyType::option
+        inline static enum keyType::option
         matchOpt(bool recursive, bool pattern)
         {
             return
@@ -359,16 +362,18 @@ private:
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is, const word& keyword) const;
 
-        //- The case-relative dictionary name. Uses FOAM_CASE
-        fileName relativeName(const bool caseTag=false) const;
+        //- The currently known executable name,
+        //- obtained from argList envExecutable
+        static word executableName();
 
-        //- Report (on stderr) that the keyword default value was used
+        //- Report (usually stderr) that the keyword default value was used,
+        //- or FatalIOError when writeOptionalEntries greater than 1
         template<class T>
         void reportDefault
         (
             const word& keyword,
             const T& deflt,
-            const bool added = false
+            const bool added = false  // Value was added to the dictionary
         ) const;
 
 
@@ -377,13 +382,30 @@ public:
     // Declare name of the class and its debug switch
     ClassName("dictionary");
 
-    //- Report optional keywords and values if not present in dictionary
-    //  For value greater than 1: fatal.
-    //  Set/unset via an InfoSwitch
-    static int writeOptionalEntries;
+    // Static Data
 
-    //- An empty dictionary, which is also the parent for all dictionaries
-    static const dictionary null;
+        //- Report optional keywords and values if not present in dictionary
+        //  For value greater than 1: fatal.
+        //  Set/unset via an InfoSwitch or -info-switch at the command-line
+        static int writeOptionalEntries;
+
+        //- An empty dictionary, which is also the parent for all dictionaries
+        static const dictionary null;
+
+        //- Output location when reporting default values
+        static refPtr<OSstream> reportingOutput;
+
+
+    // Static Member Functions
+
+        //- Return the state of reporting optional (default) entries
+        //  0: no reporting, 1: report, 2: fatal if not set
+        inline static int reportOptional() noexcept;
+
+        //- Change the state of reporting optional (default) entries
+        //  0: no reporting, 1: report, 2: fatal if not set
+        //  \return old level
+        inline static int reportOptional(const int level) noexcept;
 
 
     // Constructors
@@ -445,36 +467,27 @@ public:
     // Access
 
         //- The dictionary name
-        const fileName& name() const
-        {
-            return name_;
-        }
+        inline const fileName& name() const noexcept;
 
         //- The dictionary name for modification (use with caution).
-        fileName& name()
-        {
-            return name_;
-        }
+        inline fileName& name() noexcept;
 
         //- The local dictionary name (final part of scoped name)
-        word dictName() const
-        {
-            word scopedName(name_.name());
+        inline word dictName() const;
 
-            const auto i = scopedName.rfind('.');
-            if (i == std::string::npos)
-            {
-                return scopedName;
-            }
+        //- The dictionary name relative to the case.
+        //  Uses argList::envRelativePath to obtain FOAM_CASE
+        //
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        fileName relativeName(const bool caseTag = false) const;
 
-            return scopedName.substr(i+1);
-        }
+        //- The dictionary is actually dictionary::null (root dictionary)
+        inline bool isNullDict() const noexcept;
 
         //- Return the parent dictionary
-        const dictionary& parent() const
-        {
-            return parent_;
-        }
+        inline const dictionary& parent() const noexcept;
 
         //- Return the top of the tree
         const dictionary& topDict() const;
@@ -499,7 +512,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return True if entry was found
-        bool found
+        inline bool found
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -510,7 +523,7 @@ public:
         //  \param matchOpt the search mode
         //
         //  \return the entry pointer found or a nullptr.
-        entry* findEntry
+        inline entry* findEntry
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -521,7 +534,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return the entry pointer found or a nullptr.
-        const entry* findEntry
+        inline const entry* findEntry
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -535,7 +548,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return the entry pointer found or a nullptr.
-        const entry* findScoped
+        inline const entry* findScoped
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -545,7 +558,7 @@ public:
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  \param matchOpt the default search is non-recursive with patterns
-        dictionary* findDict
+        inline dictionary* findDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -555,7 +568,7 @@ public:
         //  (and a sub-dictionary) otherwise return nullptr.
         //
         //  \param matchOpt the default search is non-recursive with patterns
-        const dictionary* findDict
+        inline const dictionary* findDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -737,7 +750,7 @@ public:
         //  \param matchOpt the default search is non-recursive with patterns
         //
         //  \return true if the entry was found.
-        bool isDict
+        inline bool isDict
         (
             const word& keyword,
             enum keyType::option matchOpt = keyType::REGEX
@@ -1522,6 +1535,10 @@ dictionary operator|(const dictionary& dict1, const dictionary& dict2);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "dictionaryI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

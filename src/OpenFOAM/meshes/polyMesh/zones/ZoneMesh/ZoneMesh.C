@@ -28,7 +28,7 @@ License
 
 #include "ZoneMesh.H"
 #include "entry.H"
-#include "demandDrivenData.H"
+#include "DynamicList.H"
 #include "Pstream.H"
 #include "PtrListOps.H"
 
@@ -67,8 +67,8 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
             nObjects += zn.size();
         }
 
-        zoneMapPtr_ = new Map<label>(2*nObjects);
-        Map<label>& zm = *zoneMapPtr_;
+        zoneMapPtr_.reset(new Map<label>(2*nObjects));
+        auto& zm = *zoneMapPtr_;
 
         // Fill in objects of all zones into the map.
         // The key is the global object index, value is the zone index
@@ -85,6 +85,67 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcZoneMap() const
             }
 
             ++zonei;
+        }
+    }
+}
+
+
+template<class ZoneType, class MeshType>
+bool Foam::ZoneMesh<ZoneType, MeshType>::hasGroupIDs() const
+{
+    if (groupIDsPtr_)
+    {
+        // Use existing cache
+        return !groupIDsPtr_->empty();
+    }
+
+    const PtrList<ZoneType>& zones = *this;
+
+    for (const ZoneType& zn : zones)
+    {
+        if (!zn.inGroups().empty())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+template<class ZoneType, class MeshType>
+void Foam::ZoneMesh<ZoneType, MeshType>::calcGroupIDs() const
+{
+    if (groupIDsPtr_)
+    {
+        return;  // Or FatalError
+    }
+
+    groupIDsPtr_.reset(new HashTable<labelList>(16));
+    auto& groupLookup = *groupIDsPtr_;
+
+    const PtrList<ZoneType>& zones = *this;
+
+    forAll(zones, zonei)
+    {
+        const wordList& groups = zones[zonei].inGroups();
+
+        for (const word& groupName : groups)
+        {
+            groupLookup(groupName).append(zonei);
+        }
+    }
+
+    // Remove groups that clash with zone names
+    forAll(zones, zonei)
+    {
+        if (groupLookup.erase(zones[zonei].name()))
+        {
+            WarningInFunction
+                << "Removed group '" << zones[zonei].name()
+                << "' which clashes with zone " << zonei
+                << " of the same name."
+                << endl;
         }
     }
 }
@@ -150,8 +211,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 :
     PtrList<ZoneType>(),
     regIOobject(io),
-    mesh_(mesh),
-    zoneMapPtr_(nullptr)
+    mesh_(mesh)
 {
     read();
 }
@@ -167,8 +227,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 :
     PtrList<ZoneType>(size),
     regIOobject(io),
-    mesh_(mesh),
-    zoneMapPtr_(nullptr)
+    mesh_(mesh)
 {
     // Optionally read contents, otherwise keep size
     read();
@@ -185,8 +244,7 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 :
     PtrList<ZoneType>(),
     regIOobject(io),
-    mesh_(mesh),
-    zoneMapPtr_(nullptr)
+    mesh_(mesh)
 {
     if (!read())
     {
@@ -311,28 +369,120 @@ const
 template<class ZoneType, class MeshType>
 Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
 (
-    const wordRe& matcher
+    const wordRe& matcher,
+    const bool useGroups
 ) const
 {
     if (matcher.empty())
     {
         return labelList();
     }
-    return PtrListOps::findMatching(*this, matcher);
+
+    // Only check groups if requested and they exist
+    const bool checkGroups = (useGroups && this->hasGroupIDs());
+
+    labelHashSet ids;
+
+    if (checkGroups)
+    {
+        ids.resize(2*this->size());
+    }
+
+    if (matcher.isPattern())
+    {
+        if (checkGroups)
+        {
+            const auto& groupLookup = groupZoneIDs();
+            forAllConstIters(groupLookup, iter)
+            {
+                if (matcher.match(iter.key()))
+                {
+                    // Hash ids associated with the group
+                    ids.insert(iter.val());
+                }
+            }
+        }
+
+        if (ids.empty())
+        {
+            return PtrListOps::findMatching(*this, matcher);
+        }
+        else
+        {
+            ids.insert(PtrListOps::findMatching(*this, matcher));
+        }
+    }
+    else
+    {
+        // Literal string.
+        // Special version of above for reduced memory footprint
+
+        const label zoneId = PtrListOps::firstMatching(*this, matcher);
+
+        if (zoneId >= 0)
+        {
+            return labelList(one{}, zoneId);
+        }
+        else if (checkGroups)
+        {
+            const auto iter = groupZoneIDs().cfind(matcher);
+
+            if (iter.found())
+            {
+                // Hash ids associated with the group
+                ids.insert(iter.val());
+            }
+        }
+    }
+
+    return ids.sortedToc();
 }
 
 
 template<class ZoneType, class MeshType>
 Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
 (
-    const wordRes& matcher
+    const wordRes& matcher,
+    const bool useGroups
 ) const
 {
     if (matcher.empty())
     {
         return labelList();
     }
-    return PtrListOps::findMatching(*this, matcher);
+    else if (matcher.size() == 1)
+    {
+        return this->indices(matcher.first(), useGroups);
+    }
+
+    labelHashSet ids;
+
+    // Only check groups if requested and they exist
+    if (useGroups && this->hasGroupIDs())
+    {
+        ids.resize(2*this->size());
+
+        const auto& groupLookup = groupZoneIDs();
+        forAllConstIters(groupLookup, iter)
+        {
+            if (matcher.match(iter.key()))
+            {
+                // Hash the ids associated with the group
+                ids.insert(iter.val());
+            }
+        }
+    }
+
+    if (ids.empty())
+    {
+        return PtrListOps::findMatching(*this, matcher);
+    }
+    else
+    {
+        ids.insert(PtrListOps::findMatching(*this, matcher));
+    }
+
+    return ids.sortedToc();
 }
 
 
@@ -477,29 +627,89 @@ Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 template<class ZoneType, class MeshType>
 Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 (
-    const wordRe& matcher
+    const wordRe& matcher,
+    const bool useGroups
 ) const
 {
     // matcher.empty() is handled by indices()
-    return this->selection(this->indices(matcher));
+    return this->selection(this->indices(matcher, useGroups));
 }
 
 
 template<class ZoneType, class MeshType>
 Foam::bitSet Foam::ZoneMesh<ZoneType, MeshType>::selection
 (
-    const wordRes& matcher
+    const wordRes& matcher,
+    const bool useGroups
 ) const
 {
     // matcher.empty() is handled by indices()
-    return this->selection(this->indices(matcher));
+    return this->selection(this->indices(matcher, useGroups));
+}
+
+
+template<class ZoneType, class MeshType>
+const Foam::HashTable<Foam::labelList>&
+Foam::ZoneMesh<ZoneType, MeshType>::groupZoneIDs() const
+{
+    if (!groupIDsPtr_)
+    {
+        calcGroupIDs();
+    }
+
+    return *groupIDsPtr_;
+}
+
+
+template<class ZoneType, class MeshType>
+void Foam::ZoneMesh<ZoneType, MeshType>::setGroup
+(
+    const word& groupName,
+    const labelUList& zoneIDs
+)
+{
+    groupIDsPtr_.clear();
+
+    PtrList<ZoneType>& zones = *this;
+
+    boolList doneZone(zones.size(), false);
+
+    // Add to specified zones
+    for (const label zonei : zoneIDs)
+    {
+        zones[zonei].inGroups().appendUniq(groupName);
+        doneZone[zonei] = true;
+    }
+
+    // Remove from other zones
+    forAll(zones, zonei)
+    {
+        if (!doneZone[zonei])
+        {
+            wordList& groups = zones[zonei].inGroups();
+
+            if (groups.found(groupName))
+            {
+                label newi = 0;
+                forAll(groups, i)
+                {
+                    if (groups[i] != groupName)
+                    {
+                        groups[newi++] = groups[i];
+                    }
+                }
+                groups.resize(newi);
+            }
+        }
+    }
 }
 
 
 template<class ZoneType, class MeshType>
 void Foam::ZoneMesh<ZoneType, MeshType>::clearAddressing()
 {
-    deleteDemandDrivenData(zoneMapPtr_);
+    zoneMapPtr_.clear();
+    groupIDsPtr_.clear();
 
     PtrList<ZoneType>& zones = *this;
 
@@ -524,16 +734,16 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkDefinition
     const bool report
 ) const
 {
-    bool inError = false;
+    bool hasError = false;
 
     const PtrList<ZoneType>& zones = *this;
 
     for (const ZoneType& zn : zones)
     {
-        inError |= zn.checkDefinition(report);
+        hasError |= zn.checkDefinition(report);
     }
 
-    return inError;
+    return hasError;
 }
 
 

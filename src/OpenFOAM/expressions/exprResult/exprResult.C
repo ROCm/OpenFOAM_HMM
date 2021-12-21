@@ -213,8 +213,7 @@ Foam::expressions::exprResult::exprResult()
     needsReset_(false),
     size_(0),
     single_(),
-    fieldPtr_(nullptr),
-    objectPtr_(nullptr)
+    fieldPtr_(nullptr)
 {
     clear();
 }
@@ -251,8 +250,7 @@ Foam::expressions::exprResult::exprResult
     needsReset_(false),
     size_(0),
     single_(),
-    fieldPtr_(nullptr),
-    objectPtr_(nullptr)
+    fieldPtr_(nullptr)
 {
     DebugInFunction << nl;
 
@@ -286,16 +284,16 @@ Foam::expressions::exprResult::exprResult
                 valType_ = "none";
             }
 
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Do not know how to read data type " << valType_
                 << (uniform ? " as a single value." : ".") << nl
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
     }
     else if (needsValue)
     {
         FatalIOErrorInFunction(dict)
-            << "No entry 'value' defined in " << dict.name() << nl
+            << "No entry 'value' defined" << nl
             << exit(FatalIOError);
     }
 }
@@ -314,9 +312,9 @@ Foam::expressions::exprResult::New
 
     if (dict.getOrDefault("unsetValue", false))
     {
-        auto cstrIter = emptyConstructorTablePtr_->cfind(resultType);
+        auto* ctorPtr = emptyConstructorTable(resultType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -330,13 +328,13 @@ Foam::expressions::exprResult::New
         DebugInfo
             << "Creating unset result of type " << resultType << nl;
 
-        return autoPtr<exprResult>(cstrIter()());
+        return autoPtr<exprResult>(ctorPtr());
     }
 
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(resultType);
+    auto* ctorPtr = dictionaryConstructorTable(resultType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -350,7 +348,7 @@ Foam::expressions::exprResult::New
     DebugInfo
         << "Creating result of type " << resultType << nl;
 
-    return autoPtr<exprResult>(cstrIter()(dict));
+    return autoPtr<exprResult>(ctorPtr(dict));
 }
 
 
@@ -399,7 +397,6 @@ void Foam::expressions::exprResult::clear()
 {
     uglyDelete();
     valType_.clear();
-    objectPtr_.reset(nullptr);
     size_ = 0;
 }
 
@@ -533,12 +530,6 @@ void Foam::expressions::exprResult::operator=(const exprResult& rhs)
                 << exit(FatalError);
         }
     }
-    else if (objectPtr_)
-    {
-        FatalErrorInFunction
-            << "Assignment with general content not possible" << nl
-            << exit(FatalError);
-    }
 }
 
 
@@ -560,8 +551,6 @@ void Foam::expressions::exprResult::operator=(exprResult&& rhs)
 
     single_ = rhs.single_;
     fieldPtr_ = rhs.fieldPtr_;
-
-    objectPtr_.reset(rhs.objectPtr_.release());
 
     rhs.fieldPtr_ = nullptr;  // Took ownership of field pointer
     rhs.clear();
@@ -707,13 +696,6 @@ Foam::expressions::exprResult::operator*=
     const scalar& b
 )
 {
-    if (isObject())
-    {
-        FatalErrorInFunction
-            << "Can only multiply Field-type exprResult. Not "
-            << valType_ << nl
-            << exit(FatalError);
-    }
     if (!fieldPtr_)
     {
         FatalErrorInFunction
@@ -748,13 +730,6 @@ Foam::expressions::exprResult::operator+=
     const exprResult& b
 )
 {
-    if (isObject())
-    {
-        FatalErrorInFunction
-            << "Can only add Field-type, not type: "
-            << valType_ << nl
-            << exit(FatalError);
-    }
     if (!fieldPtr_)
     {
         FatalErrorInFunction

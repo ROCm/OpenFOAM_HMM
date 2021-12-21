@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     heatSource_(heatSourceType::POWER),
     alphaEffName_("undefinedAlphaEff"),
-    Cp0_(db().time(), "Cp0"),
+    Cp0_(nullptr),
     q_(nullptr)
 {}
 
@@ -79,7 +79,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
     heatSource_(ptf.heatSource_),
     alphaEffName_(ptf.alphaEffName_),
-    Cp0_(ptf.Cp0_),
+    Cp0_(ptf.Cp0_.clone()),
     q_(ptf.q_.clone(p.patch()))
 {}
 
@@ -103,7 +103,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
         )
     ),
     alphaEffName_(dict.get<word>("alphaEff")),
-    Cp0_(TimeFunction1<scalar>(db().time(), "Cp0", dict)),
+    Cp0_(Function1<scalar>::New("Cp0", dict, &db())),
     q_(PatchFunction1<scalar>::New(p.patch(), "q", dict))
 {
     if (dict.found("value") && dict.found("gradient"))
@@ -189,7 +189,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
 
     const scalar t = db().time().timeOutputValue();
-    const scalar Cp0 = Cp0_.value(t);
+    const scalar Cp0 = Cp0_->value(t);
 
     if (Cp0 < SMALL)
     {
@@ -233,7 +233,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::write(Ostream& os) const
     fixedGradientFvPatchScalarField::write(os);
     os.writeEntry("heatSource", heatSourceTypeNames[heatSource_]);
     os.writeEntry("alphaEff", alphaEffName_);
-    Cp0_.writeData(os);
+    Cp0_->writeData(os);
     q_->writeData(os);
     writeEntry("value", os);
 }

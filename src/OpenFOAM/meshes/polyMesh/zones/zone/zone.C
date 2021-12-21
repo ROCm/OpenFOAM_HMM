@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "zone.H"
+#include "dictionary.H"
+#include "HashSet.H"
 #include "IOstream.H"
 #include "demandDrivenData.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,51 +40,20 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-
-const Foam::Map<Foam::label>& Foam::zone::lookupMap() const
-{
-    if (!lookupMapPtr_)
-    {
-        calcLookupMap();
-    }
-
-    return *lookupMapPtr_;
-}
-
-
-void Foam::zone::calcLookupMap() const
-{
-    DebugInFunction << "Calculating lookup map" << endl;
-
-    if (lookupMapPtr_)
-    {
-        FatalErrorInFunction
-            << "Lookup map already calculated" << nl
-            << abort(FatalError);
-    }
-
-    const labelList& addr = *this;
-
-    lookupMapPtr_ = new Map<label>(2*addr.size());
-    Map<label>& lm = *lookupMapPtr_;
-
-    forAll(addr, i)
-    {
-        lm.insert(addr[i], i);
-    }
-
-    DebugInfo << "Finished calculating lookup map" << endl;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::zone::zone()
+:
+    zoneIdentifier(),
+    labelList(),
+    lookupMapPtr_(nullptr)
+{}
+
 
 Foam::zone::zone(const word& name, const label index)
 :
+    zoneIdentifier(name, index),
     labelList(),
-    name_(name),
-    index_(index),
     lookupMapPtr_(nullptr)
 {}
 
@@ -95,9 +65,8 @@ Foam::zone::zone
     const label index
 )
 :
+    zoneIdentifier(name, index),
     labelList(addr),
-    name_(name),
-    index_(index),
     lookupMapPtr_(nullptr)
 {}
 
@@ -109,9 +78,8 @@ Foam::zone::zone
     const label index
 )
 :
+    zoneIdentifier(name, index),
     labelList(std::move(addr)),
-    name_(name),
-    index_(index),
     lookupMapPtr_(nullptr)
 {}
 
@@ -124,10 +92,7 @@ Foam::zone::zone
     const label index
 )
 :
-    labelList(dict.lookup(labelsName)),
-    name_(name),
-    index_(index),
-    lookupMapPtr_(nullptr)
+    zone(name, dict.get<labelList>(labelsName), index)
 {}
 
 
@@ -138,10 +103,7 @@ Foam::zone::zone
     const label index
 )
 :
-    labelList(addr),
-    name_(origZone.name()),
-    index_(index),
-    lookupMapPtr_(nullptr)
+    zone(origZone.name(), addr, index)
 {}
 
 
@@ -152,10 +114,7 @@ Foam::zone::zone
     const label index
 )
 :
-    labelList(std::move(addr)),
-    name_(origZone.name()),
-    index_(index),
-    lookupMapPtr_(nullptr)
+    zone(origZone.name(), std::move(addr), index)
 {}
 
 
@@ -169,9 +128,30 @@ Foam::zone::~zone()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::zone::localID(const label globalCellID) const
+const Foam::Map<Foam::label>& Foam::zone::lookupMap() const
 {
-    return lookupMap().lookup(globalCellID, -1);
+    if (!lookupMapPtr_)
+    {
+        DebugInFunction << "Calculating lookup map" << endl;
+
+        const labelList& addr = *this;
+
+        lookupMapPtr_ = new Map<label>(2*addr.size());
+        auto& lm = *lookupMapPtr_;
+
+        forAll(addr, i)
+        {
+            lm.insert(addr[i], i);
+        }
+    }
+
+    return *lookupMapPtr_;
+}
+
+
+Foam::label Foam::zone::localID(const label globalID) const
+{
+    return lookupMap().lookup(globalID, -1);
 }
 
 
@@ -199,7 +179,7 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
             if (report)
             {
                 SeriousErrorInFunction
-                    << "Zone " << name_
+                    << "Zone " << this->name()
                     << " contains invalid index label " << idx << nl
                     << "Valid index labels are 0.."
                     << maxSize-1 << endl;
@@ -215,7 +195,7 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
             if (report)
             {
                 WarningInFunction
-                    << "Zone " << name_
+                    << "Zone " << this->name()
                     << " contains duplicate index label " << idx << endl;
             }
         }
@@ -227,7 +207,7 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
 
 void Foam::zone::write(Ostream& os) const
 {
-    os  << nl << name_
+    os  << nl << this->name()
         << nl << static_cast<const labelList&>(*this);
 }
 

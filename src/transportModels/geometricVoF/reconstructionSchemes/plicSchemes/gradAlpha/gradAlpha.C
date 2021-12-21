@@ -29,7 +29,7 @@ License
 #include "fvc.H"
 #include "leastSquareGrad.H"
 #include "addToRunTimeSelectionTable.H"
-
+#include "profiling.H"
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -46,6 +46,7 @@ namespace reconstruction
 
 void Foam::reconstruction::gradAlpha::gradSurf(const volScalarField& phi)
 {
+    addProfilingInFunction(geometricVoF);
     leastSquareGrad<scalar> lsGrad("polyDegree1",mesh_.geometricD());
 
     zoneDistribute& exchangeFields = zoneDistribute::New(mesh_);
@@ -123,6 +124,7 @@ Foam::reconstruction::gradAlpha::gradAlpha
 
 void Foam::reconstruction::gradAlpha::reconstruct(bool forceUpdate)
 {
+    addProfilingInFunction(geometricVoF);
     const bool uptodate = alreadyReconstructed(forceUpdate);
 
     if (uptodate && !forceUpdate)

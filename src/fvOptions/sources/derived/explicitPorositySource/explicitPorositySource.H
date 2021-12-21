@@ -136,7 +136,7 @@ namespace fv
 
 class explicitPorositySource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

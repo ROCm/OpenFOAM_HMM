@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,9 +79,9 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
 {
     const word bodyType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(bodyType);
+    auto* ctorPtr = dictionaryConstructorTable(bodyType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -92,7 +92,7 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<rigidBody>(cstrIter()(name, dict));
+    return autoPtr<rigidBody>(ctorPtr(name, dict));
 }
 
 

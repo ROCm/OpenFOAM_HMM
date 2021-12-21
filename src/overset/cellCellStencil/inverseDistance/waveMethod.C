@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +129,7 @@ void Foam::waveMethod::calculate
                 changedFacesInfo,
                 faceData,
                 cellData,
-                src.globalData().nTotalCells(),   // max iterations
+                src.globalData().nTotalCells()+1,   // max iterations
                 td
             );
         }

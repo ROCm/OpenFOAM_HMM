@@ -432,7 +432,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 
     if (this->size() != GeoMesh::size(this->mesh()))
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "   number of field elements = " << this->size()
             << " number of mesh elements = " << GeoMesh::size(this->mesh())
             << exit(FatalIOError);

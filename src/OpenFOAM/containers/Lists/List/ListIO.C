@@ -32,7 +32,7 @@ License
 #include "SLList.H"
 #include "contiguous.H"
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
 Foam::List<T>::List(Istream& is)
@@ -42,6 +42,8 @@ Foam::List<T>::List(Istream& is)
     this->readList(is);
 }
 
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T>
 Foam::Istream& Foam::List<T>::readList(Istream& is)
@@ -87,7 +89,7 @@ Foam::Istream& Foam::List<T>::readList(Istream& is)
                 Detail::readContiguous<T>
                 (
                     is,
-                    reinterpret_cast<char*>(list.data()),
+                    list.data_bytes(),
                     list.size_bytes()
                 );
 
@@ -161,13 +163,6 @@ Foam::Istream& Foam::List<T>::readList(Istream& is)
     }
 
     return is;
-}
-
-
-template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
-{
-    return list.readList(is);
 }
 
 

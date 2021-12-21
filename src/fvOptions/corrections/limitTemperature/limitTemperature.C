@@ -53,7 +53,7 @@ Foam::fv::limitTemperature::limitTemperature
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     Tmin_(coeffs_.get<scalar>("min")),
     Tmax_(coeffs_.get<scalar>("max")),
     phase_(coeffs_.getOrDefault<word>("phase", word::null))
@@ -76,7 +76,7 @@ Foam::fv::limitTemperature::limitTemperature
 
 bool Foam::fv::limitTemperature::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("min", Tmin_);
         coeffs_.readEntry("max", Tmax_);
@@ -162,8 +162,8 @@ void Foam::fv::limitTemperature::correct(volScalarField& he)
     Info<< type() << " " << name_ << " Unlimited Tmax " << Tmax0 << nl
         <<  "Unlimited Tmin " << Tmin0 << endl;
 
-    // handle boundaries in the case of 'all'
-    if (selectionMode_ == smAll)
+    // Handle boundaries in the case of 'all'
+    if (!cellSetOption::useSubMesh())
     {
         volScalarField::Boundary& bf = he.boundaryFieldRef();
 

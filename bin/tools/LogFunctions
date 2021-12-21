@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2019 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -114,7 +114,7 @@ removeLogs()
         -name '*.pvs' -o -name '*.foam' -o -name '*.OpenFOAM' \
         \) -type f -delete
 
-    rm -f logs testLoopReport
+    rm -f logs testLoopReport log.Allrun log.Alltest
 }
 
 

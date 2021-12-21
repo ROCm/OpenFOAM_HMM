@@ -53,7 +53,6 @@ Description
 #include "faceSet.H"
 #include "pointSet.H"
 #include "IOobjectList.H"
-#include "SortableList.H"
 #include "timeSelector.H"
 
 using namespace Foam;
@@ -114,7 +113,7 @@ int main(int argc, char *argv[])
     {
         // Not in memory. Load it.
         pointSet set(*iter());
-        SortableList<label> pointLabels(set.toc());
+        labelList pointLabels(set.sortedToc());
 
         // The original number of zones
         const label nOrigZones = mesh.pointZones().size();
@@ -150,7 +149,7 @@ int main(int argc, char *argv[])
     {
         // Not in memory. Load it.
         faceSet set(*iter());
-        SortableList<label> faceLabels(set.toc());
+        labelList faceLabels(set.sortedToc());
 
         DynamicList<label> addressing(set.size());
         DynamicList<bool> flipMap(set.size());
@@ -278,7 +277,7 @@ int main(int argc, char *argv[])
         {
             // Not in memory. Load it.
             cellSet set(*iter());
-            SortableList<label> cellLabels(set.toc());
+            labelList cellLabels(set.sortedToc());
 
             // The original number of zones
             const label nOrigZones = mesh.cellZones().size();

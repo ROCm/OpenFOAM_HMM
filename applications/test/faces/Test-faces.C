@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     #if 0
     // Expect failure, but triggers abort which cannot be caught
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
     try
     {
         labelledTri l1({1, 2, 3, 10, 24});
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
         WarningInFunction
             << "Caught FatalError " << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
     #endif
 
     labelledTri l2({1, 2, 3});

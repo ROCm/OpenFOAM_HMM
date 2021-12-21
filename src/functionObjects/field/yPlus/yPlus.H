@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,9 @@ Usage
         type        yPlus;
         libs        (fieldFunctionObjects);
 
+        // Optional entries
+        useWallFunction    true;
+
         // Optional (inherited) entries
         ...
     }
@@ -60,6 +63,10 @@ Usage
       Property   | Description                        | Type | Req'd | Dflt
       type       | Type name: yPlus                   | word |  yes  | -
       libs       | Library name: fieldFunctionObjects | word |  yes  | -
+      useWallFunction | Flag to use the local expressions of <!--
+                      --> the selected nut wall function to compute yPlus, <!--
+                      --> otherwise directly compute yPlus from flow field <!--
+                      -->                             | bool | no    | true
     \endtable
 
     The inherited entries are elaborated in:
@@ -106,6 +113,12 @@ class yPlus
     public fvMeshFunctionObject,
     public writeFile
 {
+    // Private Data
+
+        //- Flag to use the wall function expressions to compute yPlus
+        bool useWallFunction_;
+
+
     // Private Member Functions
 
         //- File header information

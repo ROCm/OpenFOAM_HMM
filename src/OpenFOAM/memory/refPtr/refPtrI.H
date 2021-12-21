@@ -167,6 +167,8 @@ inline Foam::refPtr<T>::refPtr(const refPtr<T>& rhs, bool reuse)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 template<class T>
 inline Foam::refPtr<T>::~refPtr()
 {
@@ -186,41 +188,35 @@ inline bool Foam::refPtr<T>::movable() const noexcept
 template<class T>
 inline const T& Foam::refPtr<T>::cref() const
 {
-    if (type_ == PTR)
+    if (type_ == PTR && !ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
-    return *ptr_; // const reference
+    return *ptr_;  // const reference
 }
 
 
 template<class T>
 inline T& Foam::refPtr<T>::ref() const
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
-            << "Attempted non-const reference to const object from a "
+            << "Attempted non-const reference to const object: "
             << this->typeName()
             << abort(FatalError);
     }
+    else if (type_ == PTR && !ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
+    }
 
-    return *ptr_; // non-const reference
+    return *ptr_;  // non-const reference
 }
 
 
@@ -228,6 +224,35 @@ template<class T>
 inline T& Foam::refPtr<T>::constCast() const
 {
     return const_cast<T&>(cref());
+}
+
+
+template<class T>
+inline Foam::refPtr<T> Foam::refPtr<T>::shallowClone() const noexcept
+{
+    refPtr<T> dup;
+
+    if (ptr_)
+    {
+        dup.ptr_ = ptr_;
+        dup.type_ = (is_const() ? CREF : REF);
+    }
+
+    return dup;
+}
+
+
+template<class T>
+inline T* Foam::refPtr<T>::release() noexcept
+{
+    if (type_ == PTR)
+    {
+        T* p = ptr_;
+        ptr_ = nullptr;
+        return p;
+    }
+
+    return nullptr;
 }
 
 
@@ -288,6 +313,20 @@ inline void Foam::refPtr<T>::reset(refPtr<T>&& other) noexcept
 
     other.ptr_ = nullptr;
     other.type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::refPtr<T>::cref(const refPtr<T>& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = (ptr_ ? CREF : PTR);
 }
 
 
@@ -360,10 +399,10 @@ inline const T& Foam::refPtr<T>::operator*() const
 template<class T>
 inline T& Foam::refPtr<T>::operator*()
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a "
+            << "Attempt to cast const object to non-const: "
             << this->typeName()
             << abort(FatalError);
     }
@@ -395,10 +434,10 @@ inline const T* Foam::refPtr<T>::operator->() const
 template<class T>
 inline T* Foam::refPtr<T>::operator->()
 {
-    if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a "
+            << "Attempt to cast const object to non-const: "
             << this->typeName()
             << abort(FatalError);
     }

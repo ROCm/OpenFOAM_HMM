@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calcEntry_H
-#define calcEntry_H
+#ifndef functionEntries_calcEntry_H
+#define functionEntries_calcEntry_H
 
 #include "codeStream.H"
 

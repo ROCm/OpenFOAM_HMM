@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ void Foam::processorLduInterface::send
         (
             commsType,
             neighbProcNo(),
-            reinterpret_cast<const char*>(f.cdata()),
+            f.cdata_bytes(),
             nBytes,
             tag(),
             comm()
@@ -113,7 +113,7 @@ void Foam::processorLduInterface::receive
         (
             commsType,
             neighbProcNo(),
-            reinterpret_cast<char*>(f.data()),
+            f.data_bytes(),
             f.byteSize(),
             tag(),
             comm()

@@ -142,6 +142,7 @@ $(constraintFvPatchFields)/jumpCyclicAMI/jumpCyclicAMIFvPatchFields.C
 $(constraintFvPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
+$(constraintFvPatchFields)/calculatedProcessor/calculatedProcessorFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
 $(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
@@ -240,6 +241,7 @@ $(derivedFvPatchFields)/swirlFanVelocity/swirlFanVelocityFvPatchField.C
 $(derivedFvPatchFields)/acousticWaveTransmissive/acousticWaveTransmissiveFvPatchFields.C
 $(derivedFvPatchFields)/prghPermeableAlphaTotalPressure/prghPermeableAlphaTotalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/pressurePermeableAlphaInletOutletVelocity/pressurePermeableAlphaInletOutletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/electrostaticDeposition/electrostaticDepositionFvPatchScalarField.C
 
 $(derivedFvPatchFields)/mappedMixed/mappedMixedFvPatchFields.C
 $(derivedFvPatchFields)/mappedField/Sampled/makeSampledPatchFunction1s.C
@@ -431,6 +433,7 @@ $(divSchemes)/gaussDivScheme/gaussDivSchemes.C
 gradSchemes = finiteVolume/gradSchemes
 $(gradSchemes)/gradScheme/gradSchemes.C
 $(gradSchemes)/gaussGrad/gaussGrads.C
+$(gradSchemes)/iterativeGaussGrad/iterativeGaussGrads.C
 
 $(gradSchemes)/leastSquaresGrad/leastSquaresVectors.C
 $(gradSchemes)/leastSquaresGrad/leastSquaresGrads.C
@@ -453,6 +456,7 @@ $(snGradSchemes)/orthogonalSnGrad/orthogonalSnGrads.C
 $(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
 $(snGradSchemes)/linearFitSnGrad/linearFitSnGrads.C
 $(snGradSchemes)/skewCorrectedSnGrad/skewCorrectedSnGrads.C
+$(snGradSchemes)/relaxedSnGrad/relaxedSnGrads.C
 
 convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C
@@ -463,6 +467,7 @@ $(convectionSchemes)/boundedConvectionScheme/boundedConvectionSchemes.C
 laplacianSchemes = finiteVolume/laplacianSchemes
 $(laplacianSchemes)/laplacianScheme/laplacianSchemes.C
 $(laplacianSchemes)/gaussLaplacianScheme/gaussLaplacianSchemes.C
+$(laplacianSchemes)/relaxedNonOrthoGaussLaplacianScheme/relaxedNonOrthoGaussLaplacianSchemes.C
 
 finiteVolume/fvc/fvcFlux.C
 finiteVolume/fvc/fvcMeshPhi.C
@@ -515,5 +520,10 @@ $(fvOptions)/fvOption.C
 $(fvOptions)/fvOptionIO.C
 $(fvOptions)/fvOptionList.C
 $(fvOptions)/fvOptions.C
+
+lduPrimitiveMeshAssembly/AssemblyFvPatches.C
+lduPrimitiveMeshAssembly/lduPrimitiveMeshAssembly.C
+lduPrimitiveMeshAssembly/assemblyFaceAreaPairGAMGAgglomeration/assemblyFaceAreaPairGAMGAgglomeration.C
+
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

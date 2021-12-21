@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,17 +39,43 @@ void Foam::dictionary::reportDefault
     const bool added
 ) const
 {
-    InfoErr
-        << "Dictionary: " << relativeName(true).c_str()
-        << " Entry: " << keyword;
+    if (writeOptionalEntries > 1)
+    {
+        FatalIOError(dictionary::executableName(), *this)
+            << "No optional entry: " << keyword
+            << " Default: " << deflt << nl
+            << exit(FatalIOError);
+    }
+
+    OSstream& os = InfoErr.stream(reportingOutput.get());
+
+    // Tag with "-- " prefix to make the message stand out
+    os  << "-- Executable: "
+        << dictionary::executableName()
+        << " Dictionary: ";
+
+    // Double-quote dictionary and entry for more reliably parsing,
+    // especially if the keyword contains regular expressions.
+
+    if (this->isNullDict())
+    {
+        // Output as "", but could have "(null)" etc
+        os << token::DQUOTE << token::DQUOTE;
+    }
+    else
+    {
+        os.writeQuoted(this->relativeName(), true);
+    }
+
+    os  << " Entry: ";
+    os.writeQuoted(keyword, true);
+    os  << " Default: " << deflt;
 
     if (added)
     {
-        InfoErr
-            << " Added";
+        os  << " Added: true";
     }
-    InfoErr
-        << " Default: " << deflt << nl;
+    os  << nl;
 }
 
 
@@ -140,17 +166,7 @@ T Foam::dictionary::getOrDefault
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;
@@ -180,17 +196,7 @@ T Foam::dictionary::getOrAdd
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt, true);
-        }
+        reportDefault(keyword, deflt, true);  // Added
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -207,14 +213,15 @@ T Foam::dictionary::getCheckOrDefault
     enum keyType::option matchOpt
 ) const
 {
+    #ifdef FULLDEBUG
     if (!pred(deflt))
     {
-        // Could be as FULLDEBUG instead?
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' with invalid default in dictionary "
             << name()
             << exit(FatalIOError);
     }
+    #endif
 
     const const_searcher finder(csearch(keyword, matchOpt));
 
@@ -236,17 +243,7 @@ T Foam::dictionary::getCheckOrDefault
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;
@@ -262,14 +259,15 @@ T Foam::dictionary::getCheckOrAdd
     enum keyType::option matchOpt
 )
 {
+    #ifdef FULLDEBUG
     if (!pred(deflt))
     {
-        // Could be as FULLDEBUG instead?
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' with invalid default in dictionary "
             << name()
             << exit(FatalIOError);
     }
+    #endif
 
     const const_searcher finder(csearch(keyword, matchOpt));
 
@@ -291,17 +289,7 @@ T Foam::dictionary::getCheckOrAdd
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt, true);
-        }
+        reportDefault(keyword, deflt, true);  // Added
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -463,17 +451,7 @@ T Foam::dictionary::getOrDefaultCompat
     }
     else if (writeOptionalEntries)
     {
-        if (writeOptionalEntries > 1)
-        {
-            FatalIOErrorInFunction(*this)
-                << "No optional entry: " << keyword
-                << " Default: " << deflt << nl
-                << exit(FatalIOError);
-        }
-        else
-        {
-            reportDefault(keyword, deflt);
-        }
+        reportDefault(keyword, deflt);
     }
 
     return deflt;

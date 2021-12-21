@@ -57,12 +57,8 @@ SourceFiles
 #ifndef expressions_exprResult_H
 #define expressions_exprResult_H
 
-#include "vector.H"
-#include "tensor.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
+#include "exprTraits.H"
 #include "dimensionedType.H"
-#include "IOField.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -148,9 +144,6 @@ class exprResult
 
         //- Allocated plain field (eg, scalarField)
         void *fieldPtr_;
-
-        //- Alternative storage for non-plain fields (eg, volScalarField)
-        autoPtr<regIOobject> objectPtr_;
 
 
     // Private Member Functions
@@ -250,9 +243,6 @@ class exprResult
 
         template<class Type>
         inline void setSingleValueImpl(const Type& val);
-
-        template<class Type>
-        inline void setObjectResultImpl(Type* ptr);
 
 
 protected:
@@ -408,10 +398,7 @@ public:
         inline Type getValue() const;
 
         //- True if valueType is a bool
-        inline bool isBool() const;
-
-        //- True if the object pointer is being used
-        inline bool isObject() const;
+        inline bool is_bool() const;
 
         //- The field or object size
         inline label size() const;
@@ -428,10 +415,10 @@ public:
         void clear();
 
         //- Change reset behaviour
-        void noReset() { noReset_ = true; }
+        void noReset() noexcept { noReset_ = true; }
 
         //- Change reset behaviour
-        void allowReset() { noReset_ = false; }
+        void allowReset() noexcept { noReset_ = false; }
 
         //- Test if field corresponds to a single-value and thus uniform.
         //  Uses field min/max to establish uniformity.
@@ -461,10 +448,6 @@ public:
         template<class Type>
         inline void setSingleValue(const Type& val);
 
-        //- Set result object
-        template<class Type>
-        inline void setObjectResult(autoPtr<Type>&& obj);
-
 
     // Access/Get results
 
@@ -478,17 +461,12 @@ public:
 
         //- Return non-const reference to the field, casting away constness
         template<class Type>
-        inline Field<Type>& getRef() const;
+        inline Field<Type>& constCast() const;
 
         //- Return tmp field of the contents,
         //- optionally keeping a copy in cache
         template<class Type>
         inline tmp<Field<Type>> getResult(bool cacheCopy=false);
-
-        //- Get object result (Caution - potentially fragile)
-        //- optionally keeping a copy in cache
-        template<class Type>
-        inline tmp<Type> getObjectResult(bool cacheCopy=false);
 
         //- Construct a uniform field from the current results
         //  Uses the field average. Optionally warning if the min/max

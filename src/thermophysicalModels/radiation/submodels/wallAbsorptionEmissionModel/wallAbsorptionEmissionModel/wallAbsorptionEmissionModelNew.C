@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +39,9 @@ wallAbsorptionEmissionModel::New
 {
     const word modelType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -52,7 +52,7 @@ wallAbsorptionEmissionModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<wallAbsorptionEmissionModel>(cstrIter()(dict, pp));
+    return autoPtr<wallAbsorptionEmissionModel>(ctorPtr(dict, pp));
 }
 
 

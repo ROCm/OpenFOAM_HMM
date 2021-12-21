@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,14 +228,12 @@ int main(int argc, char *argv[])
         "In serial mode use times from processor0/ directory, but operate on "
         "processor\\d+ directories"
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Report action without moving/renaming"
     );
-    argList::addBoolOption
+    argList::addVerboseOption
     (
-        "verbose",
         "Additional verbosity"
     );
 
@@ -247,8 +245,8 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    dryrun = args.found("dry-run");
-    verbose = args.found("verbose");
+    dryrun = args.dryRun();
+    verbose = args.verbose();
 
 
     // Construct time

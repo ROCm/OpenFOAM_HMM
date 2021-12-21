@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,9 +83,9 @@ Foam::incompressiblePrimalSolver::New
 )
 {
     const word solverType(dict.get<word>("solver"));
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
+    auto* ctorPtr = dictionaryConstructorTable(solverType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -99,7 +99,7 @@ Foam::incompressiblePrimalSolver::New
     return
         autoPtr<incompressiblePrimalSolver>
         (
-            cstrIter()(mesh, managerType, dict)
+            ctorPtr(mesh, managerType, dict)
         );
 }
 

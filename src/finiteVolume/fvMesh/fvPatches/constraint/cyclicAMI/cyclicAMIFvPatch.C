@@ -51,6 +51,38 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+// void Foam::cyclicAMIFvPatch::newInternalProcFaces
+// (
+//     label& newFaces,
+//     label& newProcFaces
+// ) const
+// {
+//     const labelListList& addSourceFaces = AMI().srcAddress();
+//
+//     // Add new faces as many weights for AMI
+//     forAll (addSourceFaces, faceI)
+//     {
+//         const labelList& nbrFaceIs = addSourceFaces[faceI];
+//
+//         forAll (nbrFaceIs, j)
+//         {
+//             label nbrFaceI = nbrFaceIs[j];
+//
+//             if (nbrFaceI < neighbPatch().size())
+//             {
+//                 // local faces
+//                 newFaces++;
+//             }
+//             else
+//             {
+//                 // Proc faces
+//                 newProcFaces++;
+//             }
+//         }
+//     }
+// }
+
+
 bool Foam::cyclicAMIFvPatch::coupled() const
 {
     return
@@ -190,6 +222,16 @@ Foam::tmp<Foam::labelField> Foam::cyclicAMIFvPatch::interfaceInternalField
 }
 
 
+Foam::tmp<Foam::labelField> Foam::cyclicAMIFvPatch::interfaceInternalField
+(
+    const labelUList& internalData,
+    const labelUList& faceCells
+) const
+{
+    return patchInternalField(internalData, faceCells);
+}
+
+
 Foam::tmp<Foam::labelField> Foam::cyclicAMIFvPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
@@ -269,6 +311,5 @@ void Foam::cyclicAMIFvPatch::movePoints()
             << endl;
     }
 }
-
 
 // ************************************************************************* //

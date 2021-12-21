@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +66,13 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        stepFunction(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        stepFunction
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
 
     //- Destructor

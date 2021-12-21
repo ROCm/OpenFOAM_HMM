@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,20 +48,30 @@ void Foam::expressions::exprString::inplaceExpand
 
 
 Foam::expressions::exprString
-Foam::expressions::exprString::getExpression
+Foam::expressions::exprString::getEntry
 (
-    const word& name,
+    const word& key,
     const dictionary& dict,
     const bool stripComments
 )
 {
-    string orig(dict.get<string>(name));
+    exprString expr;
+    expr.readEntry(key, dict, true, stripComments);  // mandatory
 
-    // No validation
-    expressions::exprString expr;
-    expr.assign(std::move(orig));
+    return expr;
+}
 
-    inplaceExpand(expr, dict, stripComments);
+
+Foam::expressions::exprString
+Foam::expressions::exprString::getOptional
+(
+    const word& key,
+    const dictionary& dict,
+    const bool stripComments
+)
+{
+    exprString expr;
+    expr.readEntry(key, dict, false, stripComments);  // optional
 
     return expr;
 }
@@ -69,8 +79,7 @@ Foam::expressions::exprString::getExpression
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::expressions::exprString&
-Foam::expressions::exprString::expand
+void Foam::expressions::exprString::expand
 (
     const dictionary& dict,
     const bool stripComments
@@ -81,8 +90,67 @@ Foam::expressions::exprString::expand
     #ifdef FULLDEBUG
     (void)valid();
     #endif
+}
 
-    return *this;
+
+void Foam::expressions::exprString::trim()
+{
+    stringOps::inplaceTrim(*this);
+}
+
+
+bool Foam::expressions::exprString::readEntry
+(
+    const word& keyword,
+    const dictionary& dict,
+    bool mandatory,
+    const bool stripComments
+)
+{
+    const bool ok = dict.readEntry(keyword, *this, keyType::LITERAL, mandatory);
+
+    if (ok && !empty())
+    {
+        this->expand(dict, stripComments);  // strip comments
+    }
+    else
+    {
+        clear();
+    }
+
+    return ok;
+}
+
+
+bool Foam::expressions::exprString::writeEntry
+(
+    const word& keyword,
+    Ostream& os,
+    bool writeEmpty
+) const
+{
+    const bool ok = (writeEmpty || !empty());
+
+    if (ok)
+    {
+        if (!keyword.empty())
+        {
+            os.writeKeyword(keyword);
+        }
+
+        // Write as regular or verbatim string
+
+        token tok(*this);
+        if (!empty())
+        {
+            tok.setType(token::tokenType::VERBATIM);
+        }
+
+        os.write(tok);
+        os.endEntry();
+    }
+
+    return ok;
 }
 
 

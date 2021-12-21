@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,12 +157,12 @@ Usage
     where the entries mean:
     \table
       Property  | Description              | Type          | Reqd  | Deflt
-      flowDir   | Flow direction           | TimeFunction1<vector> | yes | -
-      zDir      | Ground-normal direction  | TimeFunction1<vector> | yes | -
+      flowDir   | Flow direction           | Function1<vector> | yes | -
+      zDir      | Ground-normal direction  | Function1<vector> | yes | -
       Uref      | Reference mean streamwise flow speed being used in <!--
-             --> \f$u^*\f$ estimations [m/s] | TimeFunction1<scalar> | yes | -
+             --> \f$u^*\f$ estimations [m/s] | Function1<scalar> | yes | -
       Zref      | Reference height being used in \f$u^*\f$ estimations [m]  <!--
-                                       --> | TimeFunction1<scalar> | yes | -
+                                       --> | Function1<scalar> | yes | -
       z0        | Surface roughness length [m] <!--
                                        --> | PatchFunction1<scalar> | yes | -
       d         | Displacement height [m] - see Notes <!--
@@ -217,7 +217,7 @@ SourceFiles
 #define atmBoundaryLayer_H
 
 #include "fvPatchFields.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 #include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -266,16 +266,16 @@ private:
         const polyPatch& patch_;
 
         //- Streamwise flow direction
-        TimeFunction1<vector> flowDir_;
+        autoPtr<Function1<vector>> flowDir_;
 
         //- Direction of the ground-normal coordinate
-        TimeFunction1<vector> zDir_;
+        autoPtr<Function1<vector>> zDir_;
 
         //- Reference mean streamwise flow speed being used in Ustar estimations
-        TimeFunction1<scalar> Uref_;
+        autoPtr<Function1<scalar>> Uref_;
 
         //- Reference height being used in Ustar estimations
-        TimeFunction1<scalar> Zref_;
+        autoPtr<Function1<scalar>> Zref_;
 
         //- Surface roughness length
         autoPtr<PatchFunction1<scalar>> z0_;

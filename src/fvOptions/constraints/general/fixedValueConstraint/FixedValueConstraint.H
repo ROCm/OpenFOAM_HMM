@@ -116,7 +116,7 @@ namespace fv
 template<class Type>
 class FixedValueConstraint
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

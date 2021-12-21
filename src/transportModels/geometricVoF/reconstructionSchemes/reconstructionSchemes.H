@@ -41,6 +41,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "dimensionedScalar.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 #include "IOdictionary.H"
 #include "DynamicField.H"
 #include "MeshedSurface.H"

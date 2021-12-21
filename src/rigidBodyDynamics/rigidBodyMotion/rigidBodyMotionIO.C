@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,23 @@ License
 
 bool Foam::RBD::rigidBodyMotion::read(const dictionary& dict)
 {
-    rigidBodyModel::read(dict);
+    if (rigidBodyModel::read(dict))
+    {
+        aRelax_ =
+            Function1<scalar>::NewIfPresent
+            (
+                "accelerationRelaxation",
+                dict,
+                word::null,
+                &time()
+            );
+        aDamp_ = dict.getOrDefault<scalar>("accelerationDamping", 1);
+        report_ = dict.getOrDefault<Switch>("report", false);
 
-    aRelax_ = dict.getOrDefault<scalar>("accelerationRelaxation", 1);
-    aDamp_ = dict.getOrDefault<scalar>("accelerationDamping", 1);
-    report_ = dict.getOrDefault<Switch>("report", false);
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 
@@ -47,7 +57,10 @@ void Foam::RBD::rigidBodyMotion::write(Ostream& os) const
 {
     rigidBodyModel::write(os);
 
-    os.writeEntry("accelerationRelaxation", aRelax_);
+    if (aRelax_)
+    {
+        aRelax_->writeData(os);
+    }
     os.writeEntry("accelerationDamping", aDamp_);
     os.writeEntry("report", report_);
 }

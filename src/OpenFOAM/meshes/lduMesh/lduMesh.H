@@ -89,7 +89,7 @@ public:
             virtual const lduAddressing& lduAddr() const = 0;
 
             //- Return a list of pointers for each patch
-            //  with only those pointing to interfaces being set
+            //- with only those pointing to interfaces being set
             virtual lduInterfacePtrsList interfaces() const = 0;
 
             //- Return communicator used for parallel communication

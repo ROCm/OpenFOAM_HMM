@@ -161,12 +161,11 @@
 
         surfaceScalarField phir(phic*mixture.nHatf());
 
-        tmp<surfaceScalarField> talphaPhi1Un
-        (
+        alphaPhiUn =
             fvc::flux
             (
-                phiCN(),
-                cnCoeff*alpha1 + (1.0 - cnCoeff)*alpha1.oldTime(),
+                phi,
+                alpha1,
                 alphaScheme
             )
           + fvc::flux
@@ -174,19 +173,18 @@
                -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
-            )
-        );
+            );
 
         if (MULESCorr)
         {
-            tmp<surfaceScalarField> talphaPhi1Corr(talphaPhi1Un() - alphaPhi10);
+            tmp<surfaceScalarField> talphaPhi1Corr(alphaPhiUn - alphaPhi10);
             volScalarField alpha10("alpha10", alpha1);
 
             MULES::correct
             (
                 geometricOneField(),
                 alpha1,
-                talphaPhi1Un(),
+                alphaPhiUn,
                 talphaPhi1Corr.ref(),
                 Sp,
                 (-Sp*alpha1)(),
@@ -207,7 +205,7 @@
         }
         else
         {
-            alphaPhi10 = talphaPhi1Un;
+            alphaPhi10 = alphaPhiUn;
 
             MULES::explicitSolve
             (

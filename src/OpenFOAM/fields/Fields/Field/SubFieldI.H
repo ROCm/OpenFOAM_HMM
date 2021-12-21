@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
+{
+    return NullObjectRef<SubField<Type>>();
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -54,7 +63,7 @@ inline Foam::SubField<Type>::SubField
     const UList<Type>& list
 )
 :
-    SubList<Type>(list, list.size())
+    SubList<Type>(list)
 {}
 
 
@@ -104,13 +113,6 @@ inline Foam::SubField<Type>::SubField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-inline const Foam::SubField<Type>& Foam::SubField<Type>::null()
-{
-    return NullObjectRef<SubField<Type>>();
-}
-
 
 template<class Type>
 inline Foam::tmp<Foam::Field<typename Foam::SubField<Type>::cmptType>>

@@ -167,22 +167,22 @@ checkUserShell
 checkHostName
 checkOS
 
-# check user name
-USER_NAME="$LOGNAME"
-if [ $(length $USER_NAME) -eq 0 ]
-then
-    USER_NAME="$USER"
-fi
-
-echo "$(fixlen User: $WIDTH) ${USER_NAME}"
-if [ $(length $USER_NAME) -eq 0 ]
-then
-    echo "ERROR: Cannot stat user name $USER_NAME."
-    echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid user name."
-    echo "       Contact your system administrator. "
-    echo
-    fatalError="x${fatalError}"
-fi
+## # check user name
+## USER_NAME="$LOGNAME"
+## if [ $(length $USER_NAME) -eq 0 ]
+## then
+##     USER_NAME="$USER"
+## fi
+##
+## echo "$(fixlen User: $WIDTH) ${USER_NAME}"
+## if [ $(length $USER_NAME) -eq 0 ]
+## then
+##     echo "ERROR: Cannot stat user name $USER_NAME."
+##     echo "       OpenFOAM $WM_PROJECT_VERSION needs a valid user name."
+##     echo "       Contact your system administrator. "
+##     echo
+##     fatalError="x${fatalError}"
+## fi
 
 echo
 if [ -n "$fatalError" ]

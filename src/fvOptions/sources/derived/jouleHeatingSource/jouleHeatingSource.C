@@ -109,7 +109,7 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh),
+    fv::option(sourceName, modelType, dict, mesh),
     TName_("T"),
     V_
     (
@@ -203,7 +203,7 @@ void Foam::fv::jouleHeatingSource::addSup
 
 bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         coeffs_.readIfPresent("T", TName_);
 

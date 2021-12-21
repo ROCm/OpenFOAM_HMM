@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     );
 
     Info<< "create field phi\n" << endl;
-    surfaceScalarField phi = fvc::interpolate(U) & mesh.Sf();
+    surfaceScalarField phi(fvc::interpolate(U) & mesh.Sf());
 
     dictionary dict = mesh.solverDict(alpha1.name());
 
@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time " << runTime.cpuTimeIncrement()  << endl;
 
+        #if 0
         distFunc.constructRDF
         (
             surf->interfaceCell(),
@@ -128,6 +129,7 @@ int main(int argc, char *argv[])
             2,
             exchangeFields_
         );
+        #endif
     }
 
     runTime.write();

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,17 +90,19 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
         this->valueFraction() = 1.0;
     }
 
-    // Store patch value as initial guess when running in database mode
-    mappedPatchFieldBase<Type>::initRetrieveField
-    (
-        this->internalField().name(),
-        *this
-    );
-    mappedPatchFieldBase<Type>::initRetrieveField
-    (
-        this->internalField().name() + "_weights",
-        this->patch().deltaCoeffs()
-    );
+// This blocks (crashes) with more than two worlds!
+//
+///    // Store patch value as initial guess when running in database mode
+///    mappedPatchFieldBase<Type>::initRetrieveField
+///    (
+///        this->internalField().name(),
+///        *this
+///    );
+///    mappedPatchFieldBase<Type>::initRetrieveField
+///    (
+///        this->internalField().name() + "_weights",
+///        this->patch().deltaCoeffs()
+///    );
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,6 +55,7 @@ SourceFiles
 #include "polyBoundaryMesh.H"
 #include "coupleGroupIdentifier.H"
 #include "faceAreaWeightAMI.H"
+#include "cylindricalCS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,6 +125,15 @@ protected:
                 vector separationVector_;
 
 
+            // Triggering periodic interpolation
+
+                //- Periodic patch name
+                word periodicPatchName_;
+
+                //- Periodic patch
+                mutable label periodicPatchID_;
+
+
         //- AMI interpolation class
         mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
@@ -176,6 +186,9 @@ protected:
 
         //- Create and return pointer to the projection surface
         const autoPtr<searchableSurface>& surfPtr() const;
+
+        //- Create a coordinate system from the periodic patch (or nullptr)
+        autoPtr<coordSystem::cylindrical> cylindricalCS() const;
 
         //- Reset the AMI interpolator, supply patch points
         virtual void resetAMI(const UList<point>& points) const;
@@ -326,6 +339,38 @@ public:
 
     // Member Functions
 
+        // Implicit treatment functions
+
+            //- Return number of new internal of this polyPatch faces
+            virtual void newInternalProcFaces(label&, label&) const;
+
+
+            //- Return nbrCells
+            virtual const labelUList& nbrCells() const
+            {
+                return neighbPatch().faceCells();
+            }
+
+            //- Return nbr patch ID
+            virtual label neighbPolyPatchID() const
+            {
+                return neighbPatch().index();
+            }
+
+            //- Return collocated faces map
+            virtual refPtr<labelListList> mapCollocatedFaces() const
+            {
+                const labelListList& sourceFaces = AMI().srcAddress();
+                return refPtr<labelListList>(new labelListList(sourceFaces));
+            }
+
+            //- Return implicit master
+            virtual bool masterImplicit() const
+            {
+                return owner();
+            }
+
+
         // Access
 
             //- Tolerance used e.g. for area calculations/limits
@@ -368,6 +413,9 @@ public:
 
             //- Return a reference to the neighbour patch
             virtual const cyclicAMIPolyPatch& neighbPatch() const;
+
+            //- Periodic patch ID (or -1)
+            label periodicPatchID() const;
 
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;
@@ -418,7 +466,8 @@ public:
                     const label facei
                 ) const;
 
-                //- Transform a patch-based direction from this side to nbr side
+                //- Transform a patch-based direction from this side to
+                //  nbr side
                 virtual void reverseTransformDirection
                 (
                     vector& d,
@@ -442,6 +491,14 @@ public:
                 (
                     const tmp<Field<Type>>& tFld,
                     const UList<Type>& defaultValues = UList<Type>()
+                ) const;
+
+                //- Interpolate without periodic
+                template<class Type>
+                tmp<Field<Type>> interpolateUntransformed
+                (
+                    const Field<Type>& fld,
+                    const UList<Type>& defaultValues
                 ) const;
 
                 //- Low-level interpolate List

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +49,9 @@ autoPtr<filmThermoModel> filmThermoModel::New
 
     Info<< "    Selecting filmThermoModel " << modelType << endl;
 
-    auto cstrIter =
-        dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -63,7 +62,7 @@ autoPtr<filmThermoModel> filmThermoModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<filmThermoModel>(cstrIter()(model, dict));
+    return autoPtr<filmThermoModel>(ctorPtr(model, dict));
 }
 
 

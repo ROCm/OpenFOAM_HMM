@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,8 +123,8 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
             (
                 commsType,
                 procPatch_.neighbProcNo(),
-                reinterpret_cast<char*>(receiveBuf_.data()),
-                receiveBuf_.byteSize(),
+                receiveBuf_.data_bytes(),
+                receiveBuf_.size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );
@@ -133,8 +133,8 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
         (
             commsType,
             procPatch_.neighbProcNo(),
-            reinterpret_cast<const char*>(pf.cdata()),
-            pf.byteSize(),
+            pf.cdata_bytes(),
+            pf.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
@@ -159,8 +159,8 @@ void Foam::processorCyclicPointPatchField<Type>::swapAddSeparated
             (
                 commsType,
                 procPatch_.neighbProcNo(),
-                reinterpret_cast<char*>(receiveBuf_.data()),
-                receiveBuf_.byteSize(),
+                receiveBuf_.data_bytes(),
+                receiveBuf_.size_bytes(),
                 procPatch_.tag(),
                 procPatch_.comm()
             );

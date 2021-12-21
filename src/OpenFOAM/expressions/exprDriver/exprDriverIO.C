@@ -130,7 +130,7 @@ Foam::Ostream& Foam::expressions::exprDriver::writeVariableStrings
 
     if (keyword.size())
     {
-        os << token::END_STATEMENT << nl;
+        os.endEntry();
     }
 
     return os;

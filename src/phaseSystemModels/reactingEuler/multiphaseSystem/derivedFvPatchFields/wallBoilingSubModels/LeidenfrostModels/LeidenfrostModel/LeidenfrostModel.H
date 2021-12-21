@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ Class
     Foam::wallBoilingModels::LeidenfrostModel
 
 Description
-    Base class for nucleation site density models
+    Base class for Leidenfrost-effect models.
 
 SourceFiles
     LeidenfrostModel.C
@@ -92,7 +92,7 @@ public:
 
     // Member Functions
 
-        //- Calculate temperature
+        //- Calculate and return the Leidenfrost temperature
         virtual tmp<scalarField> TLeid
         (
             const phaseModel& liquid,
@@ -103,7 +103,10 @@ public:
             const scalarField& L
         ) const = 0;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

@@ -203,26 +203,28 @@ void Foam::solarCalculator::initialise()
         {
             directSolarRads_.reset
             (
-                new TimeFunction1<scalar>
+                Function1<scalar>::New
                 (
-                    mesh_.time(),
                     "directSolarRad",
-                    dict_
+                    dict_,
+                    &mesh_
                 )
             );
 
             diffuseSolarRads_.reset
             (
-                new TimeFunction1<scalar>
+                Function1<scalar>::New
                 (
-                    mesh_.time(),
                     "diffuseSolarRad",
-                    dict_
+                    dict_,
+                    &mesh_
                 )
             );
 
-            directSolarRad_ = directSolarRads_->value(mesh_.time().value());
-            diffuseSolarRad_ = diffuseSolarRads_->value(mesh_.time().value());
+            directSolarRad_ =
+                directSolarRads_->value(mesh_.time().timeOutputValue());
+            diffuseSolarRad_ =
+                diffuseSolarRads_->value(mesh_.time().timeOutputValue());
             break;
         }
         case mSunLoadFairWeatherConditions:

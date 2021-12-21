@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,17 @@ Class
     Foam::ParRunControl
 
 Description
-    Helper class for initializing parallel jobs from the command arguments.
+    Helper class for initializing parallel jobs from the command arguments,
+    storing 'dry-run' state etc.
     Also handles cleanup of parallel (or serial) jobs.
+
+Note
+    In the meantime the class name may be slightly misleading.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parRun_H
-#define parRun_H
+#ifndef argListRunControl_H
+#define argListRunControl_H
 
 #include "Pstream.H"
 #include "IOstreams.H"
@@ -45,11 +49,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ParRunControl Declaration
+                      Class ParRunControl Declaration
 \*---------------------------------------------------------------------------*/
 
 class ParRunControl
 {
+    int dryRun_;
+    int verbose_;
     bool parallel_;
     bool distributed_;
 
@@ -58,6 +64,8 @@ public:
     //- Default construct
     ParRunControl()
     :
+        dryRun_(0),
+        verbose_(0),
         parallel_(false),
         distributed_(false)
     {}
@@ -69,39 +77,72 @@ public:
         {
             Info<< "Finalising parallel run" << endl;
         }
-
-        Pstream::shutdown();
+        UPstream::shutdown();
     }
 
 
-    //- Initialize Pstream for a parallel run
-    void runPar(int& argc, char**& argv, bool needsThread)
-    {
-        if (!Pstream::init(argc, argv, needsThread))
+    // Parallel Control
+
+        //- Initialize Pstream for a parallel run
+        void runPar(int& argc, char**& argv, bool needsThread)
         {
-            Info<< "Failed to start parallel run" << endl;
-            Pstream::exit(1);
+            if (!UPstream::init(argc, argv, needsThread))
+            {
+                Info<< "Failed to start parallel run" << endl;
+                UPstream::exit(1);
+            }
+            parallel_ = true;
         }
-        parallel_ = true;
-    }
 
-    //- True if this is parallel run.
-    bool parRun() const
-    {
-        return parallel_;
-    }
 
-    //- True if this is a parallel run and uses distributed roots.
-    bool distributed() const
-    {
-        return parallel_ && distributed_;
-    }
+        //- True if this is a parallel run
+        bool parRun() const noexcept
+        {
+            return parallel_;
+        }
 
-    //- Set use of distributed roots.
-    void distributed(bool on)
-    {
-        distributed_ = (parallel_ ? on : false);
-    }
+        //- True if this is a parallel run and uses distributed roots.
+        bool distributed() const noexcept
+        {
+            return (parallel_ && distributed_);
+        }
+
+        //- Set use of distributed roots, but only if actually parallel
+        void distributed(bool on) noexcept
+        {
+            distributed_ = (parallel_ && on);
+        }
+
+
+    // General Control
+
+        //- Non-zero if set as 'dry-run'
+        int dryRun() const noexcept
+        {
+            return dryRun_;
+        }
+
+        //- Change 'dry-run', return old value
+        int dryRun(const int level) noexcept
+        {
+            int old(dryRun_);
+            dryRun_ = level;
+            return old;
+        }
+
+        //- Non-zero if set as 'verbose'
+        int verbose() const noexcept
+        {
+            return verbose_;
+        }
+
+        //- Change 'verbose', return old value
+        int verbose(const int level) noexcept
+        {
+            int old(verbose_);
+            verbose_ = level;
+            return old;
+        }
 };
 
 

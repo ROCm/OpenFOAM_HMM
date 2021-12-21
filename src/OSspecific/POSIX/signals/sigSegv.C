@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ void Foam::sigSegv::sigHandler(int)
 {
     resetHandler("SIGSEGV", SIGSEGV);
 
-    jobInfo.signalEnd();        // Update jobInfo file
+    JobInfo::shutdown();        // From running -> finished
     error::printStack(Perr);
     ::raise(SIGSEGV);           // Throw signal (to old handler)
 }

@@ -53,7 +53,7 @@ Foam::fv::buoyancyForce::buoyancyForce
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh),
+    fv::option(sourceName, modelType, dict, mesh),
     g_(meshObjects::gravity::New(mesh.time()))
 {
     coeffs_.readEntry("fields", fieldNames_);

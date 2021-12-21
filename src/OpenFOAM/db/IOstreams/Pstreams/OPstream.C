@@ -37,12 +37,20 @@ Foam::OPstream::OPstream
     const label bufSize,
     const int tag,
     const label comm,
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver
+    IOstreamOption::streamFormat fmt
 )
 :
     Pstream(commsType, bufSize),
-    UOPstream(commsType, toProcNo, buf_, tag, comm, true, fmt, ver)
+    UOPstream
+    (
+        commsType,
+        toProcNo,
+        Pstream::transferBuf_,
+        tag,
+        comm,
+        true,  // sendAtDestruct
+        fmt
+    )
 {}
 
 

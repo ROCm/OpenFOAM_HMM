@@ -201,13 +201,23 @@ Foam::RASModels::phasePressureModel::pPrimef() const
 Foam::tmp<Foam::volSymmTensorField>
 Foam::RASModels::phasePressureModel::devRhoReff() const
 {
+    return devRhoReff(U_);
+}
+
+
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::phasePressureModel::devRhoReff
+(
+    const volVectorField& U
+) const
+{
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
         (
             IOobject
             (
-                IOobject::groupName("devRhoReff", U_.group()),
+                IOobject::groupName("devRhoReff", U.group()),
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,

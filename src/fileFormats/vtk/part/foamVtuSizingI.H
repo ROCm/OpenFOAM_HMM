@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,75 +29,82 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::vtk::vtuSizing::decompose() const
+inline bool Foam::vtk::vtuSizing::decompose() const noexcept
 {
     return decompose_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nCells() const
+inline Foam::vtk::vtuSizing::selectionModeType
+Foam::vtk::vtuSizing::selectionMode() const noexcept
+{
+    return selectionMode_;
+}
+
+
+inline Foam::label Foam::vtk::vtuSizing::nCells() const noexcept
 {
     return nCells_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nPoints() const noexcept
 {
     return nPoints_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nVertLabels() const
+inline Foam::label Foam::vtk::vtuSizing::nVertLabels() const noexcept
 {
     return nVertLabels_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nFaceLabels() const
+inline Foam::label Foam::vtk::vtuSizing::nFaceLabels() const noexcept
 {
     return nFaceLabels_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nCellsPoly() const
+inline Foam::label Foam::vtk::vtuSizing::nCellsPoly() const noexcept
 {
     return nCellsPoly_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nVertPoly() const
+inline Foam::label Foam::vtk::vtuSizing::nVertPoly() const noexcept
 {
     return nVertPoly_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nAddCells() const
+inline Foam::label Foam::vtk::vtuSizing::nAddCells() const noexcept
 {
     return nAddCells_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nAddPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nAddPoints() const noexcept
 {
     return nAddPoints_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nAddVerts() const
+inline Foam::label Foam::vtk::vtuSizing::nAddVerts() const noexcept
 {
     return nAddVerts_;
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nFieldCells() const
+inline Foam::label Foam::vtk::vtuSizing::nFieldCells() const noexcept
 {
-    return nCells_ + nAddCells_;
+    return (nCells_ + nAddCells_);
 }
 
 
-inline Foam::label Foam::vtk::vtuSizing::nFieldPoints() const
+inline Foam::label Foam::vtk::vtuSizing::nFieldPoints() const noexcept
 {
-    return nPoints_ + nAddPoints_;
+    return (nPoints_ + nAddPoints_);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,7 +170,7 @@ bool Foam::functionEntries::includeEntry::execute
     FatalIOErrorInFunction(is)
         << "Cannot open include file "
         << (ifs.name().size() ? ifs.name() : rawName)
-        << " while reading dictionary " << parentDict.name()
+        << " while reading dictionary " << parentDict.relativeName()
         << exit(FatalIOError);
 
     return false;
@@ -222,7 +222,7 @@ bool Foam::functionEntries::includeEntry::execute
     FatalIOErrorInFunction(is)
         << "Cannot open include file "
         << (ifs.name().size() ? ifs.name() : rawName)
-        << " while reading dictionary " << parentDict.name()
+        << " while reading dictionary " << parentDict.relativeName()
         << exit(FatalIOError);
 
     return false;

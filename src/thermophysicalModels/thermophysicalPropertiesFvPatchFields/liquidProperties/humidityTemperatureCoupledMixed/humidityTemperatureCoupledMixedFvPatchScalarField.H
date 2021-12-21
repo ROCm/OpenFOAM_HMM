@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,8 @@ Description
     - The boundary condition of this specie on the coupled wall must be
       fixedGradient in order to allow condensation or evaporation of the
       vapour in or out of this wall
+    - Addition of extra layers in possible using thicknessLayers and
+      kappaLayers
 
 
     Example usage:
@@ -126,6 +128,9 @@ Description
                 defaultCoeffs       yes;
             }
         }
+
+        thicknessLayers (0.1 0.2 0.3 0.4);
+        kappaLayers     (1 2 3 4);
 
         // thickness, density and cp required for inert and condensation
         // modes
@@ -266,6 +271,12 @@ private:
 
         //- Density field for inert mode
         scalarField rho_;
+
+        //- Thickness of layers
+        scalarList thicknessLayers_;
+
+        //- Conductivity of layers
+        scalarList kappaLayers_;
 
 
     // Private members

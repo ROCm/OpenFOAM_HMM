@@ -98,7 +98,7 @@ Usage
       Entry    | Description                | Type     | Req'd  | Dflt
       sets     | Names of input faceSets    | wordList | cond'l | -
       set      | Name of input faceSet      | word     | cond'l | -
-    \verbatim
+    \endverbatim
 
 Note
     The order of precedence among the conditional mandatory entries from the

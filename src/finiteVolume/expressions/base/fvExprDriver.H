@@ -44,10 +44,10 @@ Description
 
     Debug Properties
     \table
-        Property     | Description                          | Required | Default
-        debugBaseDriver | Debug level (int) for base driver | no  |
-        debugScanner | Add debug for scanner                | no  | false
-        debugParser  | Add debug for parser                 | no  | false
+        Property      | Description                         | Required | Default
+        debug.driver  | Debug level (int) for base driver   | no  |
+        debug.scanner | Add debug for scanner               | no  | false
+        debug.parser  | Add debug for parser                | no  | false
     \endtable
 
 SourceFiles
@@ -365,19 +365,18 @@ public:
         (
             enum exprDriver::searchControls search =
                 exprDriver::searchControls::DEFAULT_SEARCH,
-            const dictionary& dict = dictionary::null,
-            const TimeState* ts = nullptr
+            const dictionary& dict = dictionary::null
         );
 
-        //- Copy construct
-        fvExprDriver(const fvExprDriver&);
-
-        //- Construct from a dictionary
+        //- Copy construct with dictionary reference
         explicit fvExprDriver
         (
-            const dictionary& dict,
-            const TimeState* ts = nullptr
+            const fvExprDriver& rhs,
+            const dictionary& dict
         );
+
+        //- Construct from a dictionary
+        explicit fvExprDriver(const dictionary& dict);
 
 
         //- Return a reference to the selected value driver
@@ -401,8 +400,8 @@ public:
             const fvMesh& mesh
         );
 
-        //- Clone
-        virtual autoPtr<fvExprDriver> clone() const = 0;
+        //- Not generally clonable
+        virtual autoPtr<fvExprDriver> clone() = delete;
 
 
     //- Destructor
@@ -411,10 +410,10 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const = 0;
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const = 0;
 
 
@@ -426,7 +425,7 @@ public:
 
     // Variables
 
-        //- Clear temporary variables and resets from expression strings
+        //- Clear temporary variables, reset from expression strings
         virtual void clearVariables();
 
         //- True if named variable exists
@@ -476,8 +475,8 @@ public:
         //- Return cell/face/point zone/set type or unknown
         topoSetSource::sourceType topoSourceType(const word& name) const;
 
-        //- Read and return labels associated with the topo set
-        labelList getTopoSetLabels
+        //- Get the labels associated with the topo set
+        refPtr<labelList> getTopoSetLabels
         (
             const word& name,
             enum topoSetSource::sourceType setType

@@ -326,6 +326,16 @@ public:
             const isoSurfaceParams& params = isoSurfaceParams()
         );
 
+        distanceSurface
+        (
+            const polyMesh& mesh,
+            const bool interpolate,
+            autoPtr<searchableSurface>&& surface,
+            const scalar distance,
+            const bool useSignedDistance,
+            const isoSurfaceParams& params = isoSurfaceParams()
+        );
+
 
     //- Destructor
     virtual ~distanceSurface() = default;
@@ -392,7 +402,7 @@ public:
     // Output
 
         //- Print information
-        void print(Ostream& os) const;
+        void print(Ostream& os, int level=0) const;
 };
 
 

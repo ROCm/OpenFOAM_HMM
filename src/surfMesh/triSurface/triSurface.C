@@ -637,16 +637,16 @@ void Foam::triSurface::swapPoints(pointField& pts)
 
 void Foam::triSurface::scalePoints(const scalar scaleFactor)
 {
-    // Avoid bad scaling
-    if (scaleFactor > SMALL && scaleFactor != 1.0)
+    // Avoid bad or no scaling
+    if (scaleFactor > SMALL && !equal(scaleFactor, 1))
     {
         // Remove all geometry dependent data
-        clearTopology();
+        this->clearTopology();
 
         // Adapt for new point positions
         MeshReference::movePoints(pointField());
 
-        storedPoints() *= scaleFactor;
+        this->storedPoints() *= scaleFactor;
     }
 }
 
@@ -663,6 +663,45 @@ void Foam::triSurface::cleanup(const bool verbose)
     checkTriangles(verbose);
 
     checkEdges(verbose);
+}
+
+
+void Foam::triSurface::compactPoints(labelList& pointMap)
+{
+    this->clearOut();   // Topology changes
+
+    // Remove unused points while walking and renumbering faces
+    // in visit order - walk order as per localFaces()
+
+    labelList oldToCompact(this->points().size(), -1);
+    DynamicList<label> compactPointMap(oldToCompact.size());
+
+    for (auto& f : this->storedFaces())
+    {
+        for (label& pointi : f)
+        {
+            label compacti = oldToCompact[pointi];
+            if (compacti == -1)
+            {
+                compacti = compactPointMap.size();
+                oldToCompact[pointi] = compacti;
+                compactPointMap.append(pointi);
+            }
+            pointi = compacti;
+        }
+    }
+
+    pointField newPoints
+    (
+        UIndirectList<point>(this->points(), compactPointMap)
+    );
+
+    this->swapPoints(newPoints);
+
+    if (notNull(pointMap))
+    {
+        pointMap.transfer(compactPointMap);
+    }
 }
 
 

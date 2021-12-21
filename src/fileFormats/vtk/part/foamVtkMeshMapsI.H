@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,24 +27,6 @@ License
 
 #include "foamVtkMeshMaps.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::foamVtkMeshMaps::foamVtkMeshMaps()
-:
-    cellMap_(0),
-    pointMap_(0),
-    additionalIds_(0)
-{}
-
-
-inline Foam::foamVtkMeshMaps::foamVtkMeshMaps(const label size)
-:
-    cellMap_(size),
-    pointMap_(size),
-    additionalIds_(size)
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline void Foam::foamVtkMeshMaps::clear()
@@ -56,42 +38,42 @@ inline void Foam::foamVtkMeshMaps::clear()
 
 
 inline const Foam::labelList&
-Foam::foamVtkMeshMaps::cellMap() const
+Foam::foamVtkMeshMaps::cellMap() const noexcept
 {
     return cellMap_;
 }
 
 
 inline Foam::DynamicList<Foam::label>&
-Foam::foamVtkMeshMaps::cellMap()
+Foam::foamVtkMeshMaps::cellMap() noexcept
 {
     return cellMap_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkMeshMaps::pointMap() const
+Foam::foamVtkMeshMaps::pointMap() const noexcept
 {
     return pointMap_;
 }
 
 
 inline Foam::DynamicList<Foam::label>&
-Foam::foamVtkMeshMaps::pointMap()
+Foam::foamVtkMeshMaps::pointMap() noexcept
 {
     return pointMap_;
 }
 
 
 inline const Foam::labelList&
-Foam::foamVtkMeshMaps::additionalIds() const
+Foam::foamVtkMeshMaps::additionalIds() const noexcept
 {
     return additionalIds_;
 }
 
 
 inline Foam::DynamicList<Foam::label>&
-Foam::foamVtkMeshMaps::additionalIds()
+Foam::foamVtkMeshMaps::additionalIds() noexcept
 {
     return additionalIds_;
 }

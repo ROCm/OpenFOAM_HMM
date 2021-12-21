@@ -134,14 +134,13 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
     const dictionary& dict
 )
 :
-    cv2Dmesh_(cv2Dmesh),
     shortEdgeFilterFactor_(dict.get<scalar>("shortEdgeFilterFactor")),
     edgeAttachedToBoundaryFactor_
     (
         dict.getOrDefault<scalar>("edgeAttachedToBoundaryFactor", 2.0)
     ),
-    patchNames_(wordList()),
-    patchSizes_(labelList()),
+    patchNames_(),
+    patchSizes_(),
     mapEdgesRegion_(),
     indirectPatchEdge_()
 {
@@ -199,12 +198,6 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
         ms_.write("MeshedSurface_preFilter.obj");
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::shortEdgeFilter2D::~shortEdgeFilter2D()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +83,7 @@ public:
     MRFZoneList(const fvMesh& mesh, const dictionary& dict);
 
     //- Destructor
-    ~MRFZoneList();
+    ~MRFZoneList() = default;
 
 
     // Member Functions
@@ -92,6 +93,9 @@ public:
 
         //- Reset the source list
         void reset(const dictionary& dict);
+
+        //- Return the MRF with a given name
+        const MRFZone& getFromName(const word& name) const;
 
         //- Add the frame acceleration
         void addAcceleration

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,7 @@ void predicateTests_label(const word& optName, const argList& args)
 {
     Info<< "predicate tests for " << optName << nl;
 
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
     try
     {
         label val;
@@ -52,7 +52,7 @@ void predicateTests_label(const word& optName, const argList& args)
             << err << nl << endl;
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 
@@ -60,7 +60,7 @@ void predicateTests_scalar(const word& optName, const argList& args)
 {
     Info<< "predicate tests for " << optName << nl;
 
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
     try
     {
         scalar val;
@@ -72,7 +72,7 @@ void predicateTests_scalar(const word& optName, const argList& args)
             << err << nl << endl;
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 
@@ -121,6 +121,9 @@ int main(int argc, char *argv[])
     argList::addArgument("label");
     argList::noMandatoryArgs();
 
+    argList::addDryRunOption("Just for testing");
+    argList::addVerboseOption("Increase verbosity");
+
     #include "setRootCase.H"
 
     Pout<< "command-line ("
@@ -132,6 +135,10 @@ int main(int argc, char *argv[])
         << "globalCase: " << args.globalCaseName() << nl
         << "globalPath: " << args.globalPath() << nl
         << nl;
+
+    Pout<< "dry-run: " << args.dryRun()
+        << " verbose: " << args.verbose() << nl;
+
 
     if (args.found("relative"))
     {

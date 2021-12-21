@@ -50,11 +50,18 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
-    d_(distributionModelDict_.get<scalar>("d")),
+    lambda_(distributionModelDict_.getCompat<scalar>("lambda", {{"d", 2112}})),
     n_(distributionModelDict_.get<scalar>("n"))
 {
+    if (lambda_ < VSMALL || n_ < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Scale/Shape parameter cannot be equal to or less than zero:"
+            << "    lambda = " << lambda_
+            << "    n = " << n_
+            << exit(FatalError);
+    }
+
     check();
 }
 
@@ -65,16 +72,8 @@ Foam::distributionModels::massRosinRammler::massRosinRammler
 )
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
-    d_(p.d_),
+    lambda_(p.lambda_),
     n_(p.n_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::massRosinRammler::~massRosinRammler()
 {}
 
 
@@ -82,36 +81,28 @@ Foam::distributionModels::massRosinRammler::~massRosinRammler()
 
 Foam::scalar Foam::distributionModels::massRosinRammler::sample() const
 {
-    scalar d;
-
-    // Re-sample if the calculated d is out of the physical range
+    scalar d = 0;
     do
     {
-        const scalar a = 3/n_ + 1;
-        const scalar P = rndGen_.sample01<scalar>();
-        const scalar x = Math::invIncGamma(a, P);
-        d = d_*pow(x, 1/n_);
-    } while (d < minValue_ || d > maxValue_);
+        // (YHD:Inverse of Eq. 10)
+        const scalar a = scalar(3)/n_ + scalar(1);
+        const scalar cdfA = Math::incGamma_P(a, pow(minValue_/lambda_, n_) );
+        const scalar cdfB = Math::incGamma_P(a, pow(maxValue_/lambda_, n_) );
+
+        const scalar u = rndGen_.position<scalar>(cdfA, cdfB);
+        const scalar x = Math::invIncGamma(a, u);
+        d = lambda_*pow(x, scalar(1)/n_);
+
+    } while (std::isnan(d));
 
     return d;
 }
 
 
-Foam::scalar Foam::distributionModels::massRosinRammler::minValue() const
-{
-    return minValue_;
-}
-
-
-Foam::scalar Foam::distributionModels::massRosinRammler::maxValue() const
-{
-    return maxValue_;
-}
-
-
 Foam::scalar Foam::distributionModels::massRosinRammler::meanValue() const
 {
-    return d_;
+    // (YHD:Eqs. 11-12)
+    return lambda_*tgamma(scalar(1)/n_ + scalar(1));
 }
 
 

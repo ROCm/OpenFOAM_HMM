@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,9 +64,9 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 
-    auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = meshConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -77,7 +77,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<pyrolysisModel>(cstrIter()(modelType, mesh, regionType));
+    return autoPtr<pyrolysisModel>(ctorPtr(modelType, mesh, regionType));
 }
 
 
@@ -93,9 +93,9 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -108,7 +108,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     return autoPtr<pyrolysisModel>
     (
-        cstrIter()
+        ctorPtr
         (
             modelType,
             mesh,

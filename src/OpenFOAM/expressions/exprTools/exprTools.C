@@ -178,7 +178,7 @@ Foam::exprTools::getList
         FatalIOErrorInFunction(dict)
             << " Entry '"<< keyword
             << "' not a string or list of strings" << nl
-            << exit(FatalError);
+            << exit(FatalIOError);
 
         return result;
     }

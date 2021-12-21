@@ -125,6 +125,8 @@ int main(int argc, char *argv[])
 
     // ------------------------------------------------------------------------
 
+    #include "createNamedMeshes.H"
+
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
@@ -165,8 +167,6 @@ int main(int argc, char *argv[])
     }
 
     instantList timeDirs = timeSelector::select0(runTime, args);
-
-    #include "createNamedMeshes.H"
 
     forAll(timeDirs, timei)
     {

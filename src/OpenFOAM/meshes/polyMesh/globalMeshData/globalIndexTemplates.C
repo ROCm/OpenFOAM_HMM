@@ -28,14 +28,54 @@ License
 
 #include "globalIndex.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class SubListType>
+Foam::labelList
+Foam::globalIndex::calcListOffsets
+(
+    const List<SubListType>& lists,
+    const bool checkOverflow
+)
+{
+    labelList values;
+
+    const label len = lists.size();
+
+    if (len)
+    {
+        values.resize(len+1);
+
+        label start = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            values[i] = start;
+            start += lists[i].size();
+
+            if (checkOverflow && start < values[i])
+            {
+                FatalErrorInFunction
+                    << "Overflow : sum of sizes exceeds labelMax ("
+                    << labelMax << ") after index " << i << nl
+                    << "Please recompile with larger datatype for label." << nl
+                    << exit(FatalError);
+            }
+        }
+        values[len] = start;
+    }
+
+    return values;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Container, class Type>
+template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::gather
 (
     const labelUList& off,
     const label comm,
-    const Container& procIDs,
+    const ProcIDsContainer& procIDs,
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag,
@@ -56,10 +96,15 @@ void Foam::globalIndex::gather
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.resize(off.last());
+        allFld.resize_nocopy(off.last());
 
-        // Assign my local data
-        SubList<Type>(allFld, fld.size(), 0) = fld;
+        // Assign my local data - respect offset information
+        // so that we can request 0 entries to be copied.
+        // Also handle the case where we have a slice of the full
+        // list.
+
+        SubList<Type>(allFld, off[1]-off[0], off[0]) =
+           SubList<Type>(fld, off[1]-off[0]);
 
         if
         (
@@ -77,7 +122,7 @@ void Foam::globalIndex::gather
                     (
                         commsType,
                         procIDs[i],
-                        reinterpret_cast<char*>(procSlot.data()),
+                        procSlot.data_bytes(),
                         procSlot.size_bytes(),
                         tag,
                         comm
@@ -112,7 +157,7 @@ void Foam::globalIndex::gather
                 (
                     commsType,
                     procIDs[i],
-                    reinterpret_cast<char*>(procSlot.data()),
+                    procSlot.data_bytes(),
                     procSlot.size_bytes(),
                     tag,
                     comm
@@ -137,7 +182,7 @@ void Foam::globalIndex::gather
                 (
                     commsType,
                     procIDs[0],
-                    reinterpret_cast<const char*>(fld.cdata()),
+                    fld.cdata_bytes(),
                     fld.size_bytes(),
                     tag,
                     comm
@@ -167,7 +212,7 @@ void Foam::globalIndex::gather
             (
                 commsType,
                 procIDs[0],
-                reinterpret_cast<const char*>(fld.cdata()),
+                fld.cdata_bytes(),
                 fld.size_bytes(),
                 tag,
                 comm
@@ -202,10 +247,16 @@ void Foam::globalIndex::gather
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        allFld.resize(off.last());
+        allFld.resize_nocopy(off.last());
 
-        // Assign my local data
-        SubList<Type>(allFld, fld.size(), 0) = fld;
+        // Assign my local data - respect offset information
+        // so that we can request 0 entries to be copied
+
+        SubList<Type> localSlot(allFld, off[1]-off[0], off[0]);
+        if (!localSlot.empty())
+        {
+            localSlot = fld;
+        }
 
         // Already verified commsType != nonBlocking
         for (label i = 1; i < procIDs.size(); ++i)
@@ -244,13 +295,14 @@ void Foam::globalIndex::gather
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 ) const
 {
     gather
     (
-        UPstream::worldComm,
-        UPstream::procID(UPstream::worldComm),
+        comm,
+        UPstream::procID(comm),
         fld,
         allFld,
         tag,
@@ -265,14 +317,15 @@ void Foam::globalIndex::gather
     const IndirectListBase<Type, Addr>& fld,
     List<Type>& allFld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 ) const
 {
     gather
     (
         offsets_,
-        UPstream::worldComm,
-        UPstream::procID(UPstream::worldComm),
+        comm,
+        UPstream::procID(comm),
         fld,
         allFld,
         tag,
@@ -281,25 +334,12 @@ void Foam::globalIndex::gather
 }
 
 
-template<class Type>
-void Foam::globalIndex::gatherOp
-(
-    const UList<Type>& fld,
-    List<Type>& allFld,
-    const int tag,
-    const Pstream::commsTypes commsType
-)
-{
-    globalIndex(fld.size()).gather(fld, allFld, tag, commsType);
-}
-
-
-template<class Container, class Type>
+template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::gather
 (
     const labelUList& off,
     const label comm,
-    const Container& procIDs,
+    const ProcIDsContainer& procIDs,
     List<Type>& fld,
     const int tag,
     const Pstream::commsTypes commsType
@@ -321,22 +361,23 @@ void Foam::globalIndex::gather
 (
     List<Type>& fld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 ) const
 {
     List<Type> allFld;
 
     gather
     (
-        UPstream::worldComm,
-        UPstream::procID(UPstream::worldComm),
+        comm,
+        UPstream::procID(comm),
         fld,
         allFld,
         tag,
         commsType
     );
 
-    if (Pstream::master(UPstream::worldComm))
+    if (Pstream::master(comm))
     {
         fld.transfer(allFld);
     }
@@ -344,6 +385,98 @@ void Foam::globalIndex::gather
     {
         fld.clear();
     }
+}
+
+
+template<class Type, class OutputContainer>
+void Foam::globalIndex::mpiGather
+(
+    const UList<Type>& sendData,
+    OutputContainer& allValues,
+    const label comm
+) const
+{
+    if (!is_contiguous<Type>::value)
+    {
+        FatalErrorInFunction
+            << "Cannot be called for non-contiguous data" << nl
+            << abort(FatalError);
+    }
+
+    const label proci = Pstream::myProcNo(comm);
+
+    const globalIndex& globalAddr = *this;
+
+    // Must be the same as Pstream::nProcs(comm), at least on master!!
+    const label nproc = globalAddr.nProcs();
+
+    auto nSendBytes = sendData.size_bytes();
+
+    // Respect local size information so that we can request
+    // 0 entries to be sent on master
+
+    if (proci < nproc && !globalAddr.localSize(proci))
+    {
+        nSendBytes = 0;
+    }
+
+    List<int> recvSizes;
+    List<int> recvOffsets;
+
+    if (Pstream::master(comm))
+    {
+        allValues.resize_nocopy(globalAddr.size());
+
+        recvSizes.resize(nproc);
+        recvOffsets.resize(nproc+1);
+
+        for (label proci = 0; proci < nproc; ++proci)
+        {
+            recvSizes[proci] = globalAddr.localSize(proci) * sizeof(Type);
+            recvOffsets[proci] = globalAddr.localStart(proci) * sizeof(Type);
+        }
+        recvOffsets[nproc] = globalAddr.size() * sizeof(Type);
+    }
+    else
+    {
+        allValues.clear();
+    }
+
+    UPstream::gather
+    (
+        sendData.cdata_bytes(),
+        nSendBytes,
+        allValues.data_bytes(),
+        recvSizes,
+        recvOffsets,
+        comm
+    );
+}
+
+
+template<class Type, class OutputContainer>
+OutputContainer Foam::globalIndex::mpiGather
+(
+    const UList<Type>& sendData,
+    const label comm
+) const
+{
+    OutputContainer allValues;
+    mpiGather<Type, OutputContainer>(sendData, allValues, comm);
+    return allValues;
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherOp
+(
+    const UList<Type>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    globalIndex(fld.size()).gather(fld, allFld, tag, commsType);
 }
 
 
@@ -359,12 +492,12 @@ void Foam::globalIndex::gatherOp
 }
 
 
-template<class Container, class Type>
+template<class ProcIDsContainer, class Type>
 void Foam::globalIndex::scatter
 (
     const labelUList& off,
     const label comm,
-    const Container& procIDs,
+    const ProcIDsContainer& procIDs,
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag,
@@ -385,7 +518,12 @@ void Foam::globalIndex::scatter
 
     if (Pstream::myProcNo(comm) == procIDs[0])
     {
-        fld.deepCopy(SubList<Type>(allFld, off[1]-off[0]));
+        const SubList<Type> localSlot(allFld, off[1]-off[0], off[0]);
+
+        if (!localSlot.empty())
+        {
+            fld.deepCopy(localSlot);
+        }
 
         if
         (
@@ -403,7 +541,7 @@ void Foam::globalIndex::scatter
                     (
                         commsType,
                         procIDs[i],
-                        reinterpret_cast<const char*>(procSlot.cdata()),
+                        procSlot.cdata_bytes(),
                         procSlot.size_bytes(),
                         tag,
                         comm
@@ -438,7 +576,7 @@ void Foam::globalIndex::scatter
                 (
                     commsType,
                     procIDs[i],
-                    reinterpret_cast<const char*>(procSlot.cdata()),
+                    procSlot.cdata_bytes(),
                     procSlot.size_bytes(),
                     tag,
                     comm
@@ -463,7 +601,7 @@ void Foam::globalIndex::scatter
                 (
                     commsType,
                     procIDs[0],
-                    reinterpret_cast<char*>(fld.data()),
+                    fld.data_bytes(),
                     fld.size_bytes(),
                     tag,
                     comm
@@ -493,7 +631,7 @@ void Foam::globalIndex::scatter
             (
                 commsType,
                 procIDs[0],
-                reinterpret_cast<char*>(fld.data()),
+                fld.data_bytes(),
                 fld.size_bytes(),
                 tag,
                 comm
@@ -512,14 +650,15 @@ void Foam::globalIndex::scatter
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag,
-    const Pstream::commsTypes commsType
+    const Pstream::commsTypes commsType,
+    const label comm
 ) const
 {
     scatter
     (
         offsets_,
-        UPstream::worldComm,
-        UPstream::procID(UPstream::worldComm),
+        comm,
+        UPstream::procID(comm),
         allFld,
         fld,
         tag,
@@ -538,7 +677,7 @@ void Foam::globalIndex::get
     const int tag
 ) const
 {
-    allFld.resize(globalIds.size());
+    allFld.resize_nocopy(globalIds.size());
     if (globalIds.size())
     {
         // Sort according to processor

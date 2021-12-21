@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
 void Foam::edgeMesh::scalePoints(const scalar scaleFactor)
 {
     // avoid bad scaling
-    if (scaleFactor > 0 && scaleFactor != 1.0)
+    if (scaleFactor > VSMALL && !equal(scaleFactor, 1))
     {
         points_ *= scaleFactor;
     }

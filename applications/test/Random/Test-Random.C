@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 
 
     // This should fail (in FULLDEBUG)
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
     try
     {
         Info<<"Random position(10,5): "
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
         Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 
     Info<< "\nDone" << nl << endl;
 

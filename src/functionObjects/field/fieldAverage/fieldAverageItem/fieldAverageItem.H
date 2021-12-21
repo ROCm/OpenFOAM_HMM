@@ -236,6 +236,9 @@ public:
             //- Return const access to the mean field name
             inline const word& meanFieldName() const;
 
+            //- Set the mean field name
+            inline void setMeanFieldName(const word& name);
+
             //- Return const access to the prime-squared mean flag
             inline bool prime2Mean() const;
 
@@ -244,6 +247,9 @@ public:
 
             //- Return const access to the prime-squared mean field name
             inline const word& prime2MeanFieldName() const;
+
+            //- Set the prime-squared mean field name
+            inline void setPrime2MeanFieldName(const word& name);
 
             //- Return averaging base type name
             inline const word& base() const;

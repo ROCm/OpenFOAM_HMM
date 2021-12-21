@@ -36,8 +36,6 @@ Foam::cv2DControls::cv2DControls
     const boundBox& bb
 )
 :
-    dict_(controlDict),
-
     motionControl_(controlDict.subDict("motionControl")),
     conformationControl_(controlDict.subDict("surfaceConformation")),
 

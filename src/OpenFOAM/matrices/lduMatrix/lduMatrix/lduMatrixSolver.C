@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,9 +70,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.symmetric())
     {
-        auto cstrIter = symMatrixConstructorTablePtr_->cfind(name);
+        auto* ctorPtr = symMatrixConstructorTable(name);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -85,7 +85,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -98,9 +98,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.asymmetric())
     {
-        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(name);
+        auto* ctorPtr = asymMatrixConstructorTable(name);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -113,7 +113,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -162,8 +162,9 @@ Foam::lduMatrix::solver::solver
 
 void Foam::lduMatrix::solver::readControls()
 {
-    maxIter_ = controlDict_.getOrDefault<label>("maxIter", defaultMaxIter_);
+    log_ = controlDict_.getOrDefault<int>("log", 1);
     minIter_ = controlDict_.getOrDefault<label>("minIter", 0);
+    maxIter_ = controlDict_.getOrDefault<label>("maxIter", defaultMaxIter_);
     tolerance_ = controlDict_.getOrDefault<scalar>("tolerance", 1e-6);
     relTol_ = controlDict_.getOrDefault<scalar>("relTol", 0);
 }
@@ -204,13 +205,13 @@ Foam::solveScalarField::cmptType Foam::lduMatrix::solver::normFactor
     // --- Calculate A dot reference value of psi
     matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
 
-    tmpField *= gAverage(psi, matrix_.lduMesh_.comm());
+    tmpField *= gAverage(psi, matrix_.mesh().comm());
 
     return
         gSum
         (
             (mag(Apsi - tmpField) + mag(source - tmpField))(),
-            matrix_.lduMesh_.comm()
+            matrix_.mesh().comm()
         )
       + solverPerformance::small_;
 

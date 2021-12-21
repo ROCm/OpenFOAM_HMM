@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,6 +187,14 @@ protected:
 
         //- Current open files
         HashPtrTable<OFstream> probeFilePtrs_;
+
+        // Additional fields for patchProbes
+
+            //- Patch IDs on which the new probes are located
+            labelList patchIDList_;
+
+            //- Original probes location (only used for patchProbes)
+            pointField oldPoints_;
 
 
     // Protected Member Functions

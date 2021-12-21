@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,30 @@ Foam::sampledDistanceSurface::sampledDistanceSurface
     sampledSurface(name, mesh, dict),
     distanceSurface(name, mesh, dict),
     average_(dict.getOrDefault("average", false)),
+    needsUpdate_(true)
+{}
+
+
+Foam::sampledDistanceSurface::sampledDistanceSurface
+(
+    const word name,
+    const polyMesh& mesh,
+    const bool interpolate,
+    autoPtr<searchableSurface>&& surface,
+    const scalar distance,
+    const bool useSignedDistance
+)
+:
+    sampledSurface(name, mesh, interpolate),
+    distanceSurface
+    (
+        mesh,
+        interpolate,
+        std::move(surface),
+        distance,
+        useSignedDistance
+    ),
+    average_(false), // pass as param?
     needsUpdate_(true)
 {}
 
@@ -203,10 +227,10 @@ Foam::tmp<Foam::tensorField> Foam::sampledDistanceSurface::interpolate
 }
 
 
-void Foam::sampledDistanceSurface::print(Ostream& os) const
+void Foam::sampledDistanceSurface::print(Ostream& os, int level) const
 {
     os  << "distanceSurface: " << name() << " :";
-    distanceSurface::print(os);
+    distanceSurface::print(os, level);
 }
 
 

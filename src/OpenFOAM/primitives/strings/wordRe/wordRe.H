@@ -70,6 +70,10 @@ class wordRe;
 Istream& operator>>(Istream& is, wordRe& val);
 Ostream& operator<<(Ostream& os, const wordRe& val);
 
+//- Hashing for wordRe
+template<> struct Hash<wordRe> : string::hasher {};
+
+
 /*---------------------------------------------------------------------------*\
                            Class wordRe Declaration
 \*---------------------------------------------------------------------------*/
@@ -248,6 +252,8 @@ public:
         inline void operator=(wordRe&& str);
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // IOstream Operators
 

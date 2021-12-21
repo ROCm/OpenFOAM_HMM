@@ -47,8 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// forward declaration of classes
-
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -57,7 +56,6 @@ class fvMesh;
 
 class helpType
 {
-
 protected:
 
     //- Return file path to the Doxygen sources (if available)
@@ -97,14 +95,14 @@ public:
     );
 
 
-    //- Constructor
-    helpType();
+    //- Default construct
+    helpType() = default;
 
     //- Selector
     static autoPtr<helpType> New(const word& helpTypeName);
 
     //- Destructor
-    virtual ~helpType();
+    virtual ~helpType() = default;
 
 
     // Member Functions

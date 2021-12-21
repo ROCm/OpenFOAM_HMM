@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,9 @@ Foam::wallBoilingModels::CHFModel::New
 
     Info<< "Selecting CHFModel: " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -64,7 +64,7 @@ Foam::wallBoilingModels::CHFModel::New
         ) << abort(FatalIOError);
     }
 
-    return cstrIter()(dict);
+    return ctorPtr(dict);
 }
 
 

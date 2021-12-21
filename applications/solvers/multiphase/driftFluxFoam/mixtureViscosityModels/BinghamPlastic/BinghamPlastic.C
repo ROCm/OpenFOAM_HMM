@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +131,9 @@ bool Foam::mixtureViscosityModels::BinghamPlastic::read
 {
     plastic::read(viscosityProperties);
 
-    plasticCoeffs_.readEntry("yieldStressCoeff", yieldStressCoeff_);
-    plasticCoeffs_.readEntry("yieldStressExponent", yieldStressExponent_);
-    plasticCoeffs_.readEntry("yieldStressOffset", yieldStressOffset_);
+    plasticCoeffs_.readEntry("BinghamCoeff", yieldStressCoeff_);
+    plasticCoeffs_.readEntry("BinghamExponent", yieldStressExponent_);
+    plasticCoeffs_.readEntry("BinghamOffset", yieldStressOffset_);
 
     return true;
 }

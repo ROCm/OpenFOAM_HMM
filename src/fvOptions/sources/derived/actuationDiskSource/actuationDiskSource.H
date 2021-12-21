@@ -227,7 +227,7 @@ namespace fv
 
 class actuationDiskSource
 :
-    public cellSetOption,
+    public fv::cellSetOption,
     public functionObjects::writeFile
 {
 protected:

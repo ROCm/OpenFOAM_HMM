@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,9 +71,9 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
 {
     const word modelType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -84,7 +84,7 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<faceSelection>(cstrIter()(name, mesh, dict));
+    return autoPtr<faceSelection>(ctorPtr(name, mesh, dict));
 }
 
 

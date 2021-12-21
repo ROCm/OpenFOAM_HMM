@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,7 +203,7 @@ bool Foam::sampledPlane::update()
 
     if (debug)
     {
-        print(Pout);
+        print(Pout, debug);
         Pout<< endl;
     }
 
@@ -301,14 +301,18 @@ Foam::tmp<Foam::tensorField> Foam::sampledPlane::interpolate
 }
 
 
-void Foam::sampledPlane::print(Ostream& os) const
+void Foam::sampledPlane::print(Ostream& os, int level) const
 {
     os  << "sampledPlane: " << name() << " :"
         << " origin:" << plane::origin()
         << " normal:" << plane::normal()
-        << " triangulate:" << triangulate_
-        << " faces:" << faces().size()
-        << " points:" << points().size();
+        << " triangulate:" << triangulate_;
+
+    if (level)
+    {
+        os << " faces:" << faces().size()
+           << " points:" << points().size();
+    }
 }
 
 

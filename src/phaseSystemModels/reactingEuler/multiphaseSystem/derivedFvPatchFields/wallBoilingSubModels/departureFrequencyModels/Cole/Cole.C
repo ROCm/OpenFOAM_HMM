@@ -62,13 +62,6 @@ Cole::Cole(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::departureFrequencyModels::
-Cole::~Cole()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -82,7 +75,7 @@ Cole::fDeparture
 ) const
 {
     // Gravitational acceleration
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const scalarField rhoLiquid(liquid.thermo().rho(patchi));
@@ -90,9 +83,9 @@ Cole::fDeparture
 
     return sqrt
     (
-        4*mag(g).value()
+        scalar(4)*mag(g).value()
        *max(rhoLiquid - rhoVapor, scalar(0.1))
-       /(3*dDep*rhoLiquid)
+       /(scalar(3)*dDep*rhoLiquid)
     );
 }
 

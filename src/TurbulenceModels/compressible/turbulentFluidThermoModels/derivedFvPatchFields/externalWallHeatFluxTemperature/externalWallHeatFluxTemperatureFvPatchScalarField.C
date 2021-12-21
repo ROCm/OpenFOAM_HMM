@@ -110,7 +110,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     {
         case fixedPower:
         {
-            Q_ = Function1<scalar>::New("Q", dict);
+            Q_ = Function1<scalar>::New("Q", dict, &db());
             break;
         }
         case fixedHeatFlux:
@@ -121,7 +121,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         case fixedHeatTransferCoeff:
         {
             h_ = PatchFunction1<scalar>::New(patch().patch(), "h", dict);
-            Ta_ = Function1<scalar>::New("Ta", dict);
+            Ta_ = Function1<scalar>::New("Ta", dict, &db());
 
             if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
             {
@@ -261,6 +261,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::autoMap
 )
 {
     mixedFvPatchScalarField::autoMap(mapper);
+    temperatureCoupledBase::autoMap(mapper);
 
     if (q_)
     {
@@ -288,6 +289,9 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::rmap
 
     const auto& rhs =
         refCast<const externalWallHeatFluxTemperatureFvPatchScalarField>(ptf);
+
+    temperatureCoupledBase::rmap(rhs, addr);
+
 
     if (q_)
     {

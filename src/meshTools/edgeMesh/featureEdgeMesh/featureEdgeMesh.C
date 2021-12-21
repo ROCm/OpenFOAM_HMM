@@ -40,7 +40,7 @@ namespace Foam
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 :
     regIOobject(io),
-    edgeMesh(pointField(0), edgeList(0))
+    edgeMesh()
 {
     if
     (
@@ -76,11 +76,10 @@ Foam::featureEdgeMesh::featureEdgeMesh
 {}
 
 
-// Construct as copy
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const IOobject& io,
-    const featureEdgeMesh& em
+    const edgeMesh& em
 )
 :
     regIOobject(io),

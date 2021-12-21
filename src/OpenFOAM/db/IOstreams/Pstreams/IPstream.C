@@ -37,8 +37,7 @@ Foam::IPstream::IPstream
     const label bufSize,
     const int tag,
     const label comm,
-    IOstreamOption::streamFormat fmt,
-    IOstreamOption::versionNumber ver
+    IOstreamOption::streamFormat fmt
 )
 :
     Pstream(commsType, bufSize),
@@ -46,15 +45,14 @@ Foam::IPstream::IPstream
     (
         commsType,
         fromProcNo,
-        buf_,
-        externalBufPosition_,
-        tag,                        // tag
+        Pstream::transferBuf_,
+        transferBufPosition_,
+        tag,
         comm,
-        false,                      // do not clear buf_ if at end
-        fmt,
-        ver
+        false,  // Do not clear Pstream::transferBuf_ if at end
+        fmt
     ),
-    externalBufPosition_(0)
+    transferBufPosition_(0)
 {}
 
 

@@ -120,7 +120,7 @@ bool Foam::functionObjects::particleDistribution::write()
     (
         IOobject
         (
-            name() & "CloudRegistry",
+            scopedName("CloudRegistry"),
             mesh_.time().timeName(),
             cloud::prefix,
             mesh_.time(),

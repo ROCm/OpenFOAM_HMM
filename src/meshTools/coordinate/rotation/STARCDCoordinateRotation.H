@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ Description
     - the rotation angles are in degrees, unless otherwise explicitly specified:
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type    starcd;
         angles  (0 0 180);
@@ -94,7 +94,7 @@ public:
 
     // Constructors
 
-        //- Construct null - an identity transform
+        //- Default construct - an identity transform
         starcd();
 
         //- Copy construct
@@ -149,7 +149,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace coordinateRotations
-
 
 //- Compatibility typedef 1806
 typedef coordinateRotations::starcd STARCDCoordinateRotation;

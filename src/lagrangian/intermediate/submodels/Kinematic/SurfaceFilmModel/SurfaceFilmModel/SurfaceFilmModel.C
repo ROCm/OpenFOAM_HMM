@@ -27,8 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SurfaceFilmModel.H"
-#include "surfaceFilmRegionModel.H"
 #include "mathematicalConstants.H"
+#include "surfaceFilmRegionModel.H"
+#include "liquidFilmBase.H"
 
 using namespace Foam::constant;
 
@@ -40,13 +41,16 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel(CloudType& owner)
     CloudSubModelBase<CloudType>(owner),
     g_(owner.g()),
     ejectedParcelType_(0),
+    injectionOffset_(1.1),
+    minDiameter_(0),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
     UFilmPatch_(0),
     rhoFilmPatch_(0),
     deltaFilmPatch_(0),
     nParcelsTransferred_(0),
-    nParcelsInjected_(0)
+    nParcelsInjected_(0),
+    totalMassTransferred_(0)
 {}
 
 
@@ -62,7 +66,15 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     g_(owner.g()),
     ejectedParcelType_
     (
-        this->coeffDict().getOrDefault("ejectedParcelType", -1)
+        this->coeffDict().template getOrDefault<label>("ejectedParcelType", -1)
+    ),
+    injectionOffset_
+    (
+        this->coeffDict().template getOrDefault<scalar>("injectionOffset", 1.1)
+    ),
+    minDiameter_
+    (
+        this->coeffDict().template getOrDefault<scalar>("minDiameter", -1)
     ),
     massParcelPatch_(0),
     diameterParcelPatch_(0),
@@ -70,7 +82,8 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     rhoFilmPatch_(0),
     deltaFilmPatch_(owner.mesh().boundary().size()),
     nParcelsTransferred_(0),
-    nParcelsInjected_(0)
+    nParcelsInjected_(0),
+    totalMassTransferred_()
 {}
 
 
@@ -83,13 +96,16 @@ Foam::SurfaceFilmModel<CloudType>::SurfaceFilmModel
     CloudSubModelBase<CloudType>(sfm),
     g_(sfm.g_),
     ejectedParcelType_(sfm.ejectedParcelType_),
+    injectionOffset_(sfm.injectionOffset_),
+    minDiameter_(sfm.minDiameter_),
     massParcelPatch_(sfm.massParcelPatch_),
     diameterParcelPatch_(sfm.diameterParcelPatch_),
     UFilmPatch_(sfm.UFilmPatch_),
     rhoFilmPatch_(sfm.rhoFilmPatch_),
     deltaFilmPatch_(sfm.deltaFilmPatch_),
     nParcelsTransferred_(sfm.nParcelsTransferred_),
-    nParcelsInjected_(sfm.nParcelsInjected_)
+    nParcelsInjected_(sfm.nParcelsInjected_),
+    totalMassTransferred_(sfm.totalMassTransferred_)
 {}
 
 
@@ -103,6 +119,63 @@ Foam::SurfaceFilmModel<CloudType>::~SurfaceFilmModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+template<class CloudTrackType>
+void Foam::SurfaceFilmModel<CloudType>::injectParticles
+(
+    const label primaryPatchi,
+    const labelList& injectorCellsPatch,
+    CloudTrackType& cloud
+)
+{
+    const fvMesh& mesh = this->owner().mesh();
+    const vectorField& Cf = mesh.C().boundaryField()[primaryPatchi];
+    const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchi];
+    const scalarField& magSf =
+        mesh.magSf().boundaryField()[primaryPatchi];
+
+    forAll(injectorCellsPatch, j)
+    {
+        if (diameterParcelPatch_[j] > 0)
+        {
+            const label celli = injectorCellsPatch[j];
+
+            const scalar offset =
+                max
+                (
+                    diameterParcelPatch_[j],
+                    deltaFilmPatch_[primaryPatchi][j]
+                );
+            const point pos = Cf[j] - injectionOffset_*offset*Sf[j]/magSf[j];
+
+            // Create a new parcel
+            parcelType* pPtr =
+                new parcelType(this->owner().pMesh(), pos, celli);
+
+            // Check/set new parcel thermo properties
+            cloud.setParcelThermoProperties(*pPtr, 0.0);
+
+            setParcelProperties(*pPtr, j);
+
+            if (pPtr->nParticle() > 0.001)
+            {
+                // Check new parcel properties
+                cloud.checkParcelProperties(*pPtr, 0.0, false);
+
+                // Add the new parcel to the cloud
+                cloud.addParticle(pPtr);
+
+                nParcelsInjected_++;
+            }
+            else
+            {
+                // TODO: cache mass and re-distribute?
+                delete pPtr;
+            }
+        }
+    }
+}
+
+template<class CloudType>
 template<class TrackCloudType>
 void Foam::SurfaceFilmModel<CloudType>::inject(TrackCloudType& cloud)
 {
@@ -111,76 +184,77 @@ void Foam::SurfaceFilmModel<CloudType>::inject(TrackCloudType& cloud)
         return;
     }
 
+    const fvMesh& mesh = this->owner().mesh();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
     // Retrieve the film model from the owner database
-    const regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel =
-        this->owner().mesh().time().objectRegistry::template lookupObject
+    const regionModels::surfaceFilmModels::surfaceFilmRegionModel* filmModel =
+        mesh.time().objectRegistry::template findObject
         <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
         (
             "surfaceFilmProperties"
         );
 
-    if (!filmModel.active())
+    // Check the singleLayer type of films
+    if (filmModel && filmModel->active())
     {
-        return;
+
+        const labelList& filmPatches = filmModel->intCoupledPatchIDs();
+        const labelList& primaryPatches = filmModel->primaryPatchIDs();
+
+        forAll(filmPatches, i)
+        {
+            const label filmPatchi = filmPatches[i];
+            const label primaryPatchi = primaryPatches[i];
+
+            const labelList& injectorCellsPatch = pbm[primaryPatchi].faceCells();
+
+            cacheFilmFields(filmPatchi, primaryPatchi, *filmModel);
+
+            injectParticles(primaryPatchi, injectorCellsPatch, cloud);
+        }
     }
 
-    const labelList& filmPatches = filmModel.intCoupledPatchIDs();
-    const labelList& primaryPatches = filmModel.primaryPatchIDs();
+    // Check finite area films
+    wordList names =
+        mesh.time().objectRegistry::template
+            sortedNames<regionModels::regionFaModel>();
 
-    const fvMesh& mesh = this->owner().mesh();
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
-
-    forAll(filmPatches, i)
+    forAll (names, i)
     {
-        const label filmPatchi = filmPatches[i];
-        const label primaryPatchi = primaryPatches[i];
+        const regionModels::regionFaModel* regionFa =
+            mesh.time().objectRegistry::template cfindObject
+            <
+                regionModels::regionFaModel
+            >(names[i]);
 
-        const labelList& injectorCellsPatch = pbm[primaryPatchi].faceCells();
-
-        cacheFilmFields(filmPatchi, primaryPatchi, filmModel);
-
-        const vectorField& Cf = mesh.C().boundaryField()[primaryPatchi];
-        const vectorField& Sf = mesh.Sf().boundaryField()[primaryPatchi];
-        const scalarField& magSf = mesh.magSf().boundaryField()[primaryPatchi];
-
-        forAll(injectorCellsPatch, j)
+        // Check that it is a type areaFilm
+        if (regionFa && isA<areaFilm>(*regionFa) && regionFa->active())
         {
-            if (diameterParcelPatch_[j] > 0)
+            areaFilm& film =
+                const_cast<areaFilm&>(refCast<const areaFilm>(*regionFa));
+
+            const label patchId = regionFa->patchID();
+
+            const labelList& injectorCellsPatch = pbm[patchId].faceCells();
+
+            cacheFilmFields(patchId, film);
+
+            injectParticles(patchId, injectorCellsPatch, cloud);
+
+            forAll(injectorCellsPatch, facei)
             {
-                const label celli = injectorCellsPatch[j];
-
-                const scalar offset =
-                    max
+                if (diameterParcelPatch_[facei] > 0)
+                {
+                    film.addSources
                     (
-                        diameterParcelPatch_[j],
-                        deltaFilmPatch_[primaryPatchi][j]
+                        patchId,
+                        facei,
+                       -massParcelPatch_[facei],    // mass
+                        Zero,                       // tangential momentum
+                        Zero,                       // impingement
+                        Zero                        // energy
                     );
-                const point pos = Cf[j] - 1.1*offset*Sf[j]/magSf[j];
-
-                // Create a new parcel
-                parcelType* pPtr =
-                    new parcelType(this->owner().pMesh(), pos, celli);
-
-                // Check/set new parcel thermo properties
-                cloud.setParcelThermoProperties(*pPtr, 0.0);
-
-                setParcelProperties(*pPtr, j);
-
-                if (pPtr->nParticle() > 0.001)
-                {
-                    // Check new parcel properties
-    //                cloud.checkParcelProperties(*pPtr, 0.0, true);
-                    cloud.checkParcelProperties(*pPtr, 0.0, false);
-
-                    // Add the new parcel to the cloud
-                    cloud.addParticle(pPtr);
-
-                    nParcelsInjected_++;
-                }
-                else
-                {
-                    // TODO: cache mass and re-distribute?
-                    delete pPtr;
                 }
             }
         }
@@ -216,6 +290,39 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 
 
 template<class CloudType>
+void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
+(
+    const label filmPatchi,
+    const regionModels::areaSurfaceFilmModels::liquidFilmBase& filmModel
+)
+{
+    const volSurfaceMapping& map = filmModel.region().vsm();
+
+    massParcelPatch_.setSize(filmModel.Uf().size(), Zero);
+
+    const scalarField& massParcelPatch =
+        filmModel.cloudMassTrans().boundaryField()[filmPatchi];
+
+    map.mapToField(massParcelPatch, massParcelPatch_);
+
+    const scalarField&  diameterParcelPatch =
+        filmModel.cloudDiameterTrans().boundaryField()[filmPatchi];
+
+    diameterParcelPatch_.setSize(filmModel.Uf().size(), Zero);
+    map.mapToField(diameterParcelPatch, diameterParcelPatch_);
+
+    UFilmPatch_.setSize(filmModel.Uf().size(), vector::zero);
+    map.mapToField(filmModel.Uf(), UFilmPatch_);
+
+    rhoFilmPatch_.setSize(UFilmPatch_.size(), Zero);
+    map.mapToField(filmModel.rho(), rhoFilmPatch_);
+
+    deltaFilmPatch_[filmPatchi].setSize(UFilmPatch_.size(), Zero);
+    map.mapToField(filmModel.h(), deltaFilmPatch_[filmPatchi]);
+}
+
+
+template<class CloudType>
 void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
 (
     parcelType& p,
@@ -229,6 +336,14 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
     p.rho() = rhoFilmPatch_[filmFacei];
 
     p.nParticle() = massParcelPatch_[filmFacei]/p.rho()/vol;
+
+    if (minDiameter_ != -1)
+    {
+        if (p.d() < minDiameter_)
+        {
+            p.nParticle() = 0;
+        }
+    }
 
     if (ejectedParcelType_ >= 0)
     {
@@ -246,22 +361,33 @@ void Foam::SurfaceFilmModel<CloudType>::info(Ostream& os)
     label nInject0 =
         this->template getModelProperty<label>("nParcelsInjected");
 
+    scalar massTransferred0 =
+        this->template getModelProperty<scalar>("massTransferred");
+
     label nTransTotal =
         nTrans0 + returnReduce(nParcelsTransferred_, sumOp<label>());
 
     label nInjectTotal =
         nInject0 + returnReduce(nParcelsInjected_, sumOp<label>());
 
+    scalar massTransferredTotal =
+        massTransferred0 + returnReduce(totalMassTransferred_, sumOp<scalar>());
+
+
     os  << "    Surface film:" << nl
         << "      - parcels absorbed            = " << nTransTotal << nl
+        << "      - mass absorbed               = " << massTransferredTotal << nl
         << "      - parcels ejected             = " << nInjectTotal << endl;
 
     if (this->writeTime())
     {
         this->setModelProperty("nParcelsTransferred", nTransTotal);
         this->setModelProperty("nParcelsInjected", nInjectTotal);
+        this->setModelProperty("massTransferred", massTransferredTotal);
+
         nParcelsTransferred_ = 0;
         nParcelsInjected_ = 0;
+        totalMassTransferred_ = 0;
     }
 }
 

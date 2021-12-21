@@ -112,7 +112,7 @@ class CodedField
         //- Dictionary contents for the function
         const dictionary dict_;
 
-        const word name_;
+        const word redirectName_;
 
         mutable autoPtr<PatchFunction1<Type>> redirectFunctionPtr_;
 
@@ -216,22 +216,14 @@ public:
 
     // Member Functions
 
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual inline bool uniform() const { return false; }
+
+
         // Evaluation
 
             //- Return CodedField value
             virtual tmp<Field<Type>> value(const scalar x) const;
-
-            //- Is value constant (i.e. independent of x)
-            virtual inline bool constant() const
-            {
-                return false;
-            }
-
-            //- Is value uniform (i.e. independent of coordinate)
-            virtual inline bool uniform() const
-            {
-                return false;
-            }
 
             //- Integrate between two values
             virtual tmp<Field<Type>> integrate

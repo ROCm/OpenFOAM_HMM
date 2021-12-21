@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -397,18 +397,18 @@ public:
 
     // Access
 
-        const geometricSurfacePatchList& patches() const
+        const geometricSurfacePatchList& patches() const noexcept
         {
             return patches_;
         }
 
-        geometricSurfacePatchList& patches()
+        geometricSurfacePatchList& patches() noexcept
         {
             return patches_;
         }
 
         //- Return const access to the faces
-        inline const List<labelledTri>& surfFaces() const
+        const List<labelledTri>& surfFaces() const noexcept
         {
             return static_cast<const List<labelledTri>&>(*this);
         }
@@ -427,19 +427,19 @@ public:
 
 
         //- Face area vectors (normals)
-        inline const vectorField& Sf() const
+        const vectorField& Sf() const
         {
             return MeshReference::faceAreas();
         }
 
         //- Face area magnitudes
-        inline const scalarField& magSf() const
+        const scalarField& magSf() const
         {
             return MeshReference::magFaceAreas();
         }
 
         //- Face centres
-        inline const vectorField& Cf() const
+        const vectorField& Cf() const
         {
             return MeshReference::faceCentres();
         }
@@ -475,6 +475,14 @@ public:
 
         //- Remove non-valid triangles
         void cleanup(const bool verbose);
+
+        //- Remove unused points and renumber faces in local visit order
+        //
+        //  \param[out] pointMap from new to old points (optional)
+        void compactPoints
+        (
+            labelList& pointMap = const_cast<labelList&>(labelList::null())
+        );
 
         //- Fill faceZone with currentZone for every face reachable
         //  from facei without crossing edge marked in borderEdge.

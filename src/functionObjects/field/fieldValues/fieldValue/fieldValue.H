@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,16 +186,16 @@ public:
     // Member Functions
 
         //- Return the reference to the construction dictionary
-        inline const dictionary& dict() const;
+        inline const dictionary& dict() const noexcept;
 
         //- Return the region name
-        inline const word& regionName() const;
+        inline const word& regionName() const noexcept;
 
         //- Return the list of field names
-        inline const wordList& fields() const;
+        inline const wordList& fields() const noexcept;
 
         //- Return the output field values flag
-        inline bool writeFields() const;
+        inline bool writeFields() const noexcept;
 
         //- Read from dictionary
         virtual bool read(const dictionary& dict);

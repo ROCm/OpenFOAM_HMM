@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -44,7 +44,7 @@ T
         }
         "heater_to_.*"
         {
-            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            type            compressible::turbulentTemperatureRadCoupledMixed;
             Tnbr            T;
             kappaMethod     solidThermo;
             value           uniform 300;
@@ -52,7 +52,7 @@ T
 
         heater_to_leftSolid
         {
-            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            type            compressible::turbulentTemperatureRadCoupledMixed;
             Tnbr            T;
             kappaMethod     solidThermo;
             thicknessLayers (1e-3);

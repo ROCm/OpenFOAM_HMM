@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicThermo.H"
+#include "stringOps.H"
+#include "wordIOList.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedEnergyFvPatchScalarField.H"
 #include "gradientEnergyFvPatchScalarField.H"
@@ -36,8 +38,7 @@ License
 #include "energyJumpFvPatchScalarField.H"
 #include "energyJumpAMIFvPatchScalarField.H"
 
-
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -48,6 +49,115 @@ namespace Foam
 
 const Foam::word Foam::basicThermo::dictName("thermophysicalProperties");
 
+const Foam::wordList Foam::basicThermo::componentHeader4
+({
+    "type",
+    "mixture",
+    "properties",
+    "energy"
+});
+
+const Foam::wordList Foam::basicThermo::componentHeader7
+({
+    "type",
+    "mixture",
+    "transport",
+    "thermo",
+    "equationOfState",
+    "specie",
+    "energy"
+});
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::basicThermo::printThermoNames
+(
+    Ostream& os,
+    const wordList& cmptNames,
+    const wordList& thermoNames
+)
+{
+    const int nCmpt = cmptNames.size();
+
+    // Build a table of constituent parts by split name into constituent parts
+    // - remove incompatible entries from the list
+    // - note: row-0 contains the names of constituent parts (ie, the header)
+
+    DynamicList<wordList> outputTbl;
+    outputTbl.resize(thermoNames.size()+1);
+
+    label rowi = 0;
+
+    // Header
+    outputTbl[rowi] = cmptNames;
+    if (!outputTbl[rowi].empty())
+    {
+        ++rowi;
+    }
+
+    for (const word& thermoName : thermoNames)
+    {
+        outputTbl[rowi] = basicThermo::splitThermoName(thermoName, nCmpt);
+        if (!outputTbl[rowi].empty())
+        {
+            ++rowi;
+        }
+    }
+
+    if (rowi > 1)
+    {
+        outputTbl.resize(rowi);
+        Foam::printTable(outputTbl, os);
+    }
+
+    return os;
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::basicThermo::makeThermoName
+(
+    const dictionary& thermoTypeDict,
+    const wordList*& cmptHeaderPtr
+)
+{
+    if (thermoTypeDict.found("properties"))
+    {
+        if (cmptHeaderPtr)
+        {
+            cmptHeaderPtr = &(componentHeader4);
+        }
+
+        return word
+        (
+            thermoTypeDict.get<word>("type") + '<'
+          + thermoTypeDict.get<word>("mixture") + '<'
+          + thermoTypeDict.get<word>("properties") + ','
+          + thermoTypeDict.get<word>("energy") + ">>"
+        );
+    }
+    else
+    {
+        if (cmptHeaderPtr)
+        {
+            cmptHeaderPtr = &(componentHeader7);
+        }
+
+        return word
+        (
+            thermoTypeDict.get<word>("type") + '<'
+          + thermoTypeDict.get<word>("mixture") + '<'
+          + thermoTypeDict.get<word>("transport") + '<'
+          + thermoTypeDict.get<word>("thermo") + '<'
+          + thermoTypeDict.get<word>("equationOfState") + '<'
+          + thermoTypeDict.get<word>("specie") + ">>,"
+          + thermoTypeDict.get<word>("energy") + ">>>"
+        );
+    }
+}
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -55,20 +165,23 @@ Foam::wordList Foam::basicThermo::heBoundaryBaseTypes()
 {
     const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
-    wordList hbt(tbf.size(), word::null);
+    wordList hbt(tbf.size());
 
     forAll(tbf, patchi)
     {
         if (isA<fixedJumpFvPatchScalarField>(tbf[patchi]))
         {
-            const fixedJumpFvPatchScalarField& pf =
-                dynamic_cast<const fixedJumpFvPatchScalarField&>(tbf[patchi]);
+            const auto& pf =
+                dynamic_cast<const fixedJumpFvPatchScalarField&>
+                (
+                    tbf[patchi]
+                );
 
             hbt[patchi] = pf.interfaceFieldType();
         }
         else if (isA<fixedJumpAMIFvPatchScalarField>(tbf[patchi]))
         {
-            const fixedJumpAMIFvPatchScalarField& pf =
+            const auto& pf =
                 dynamic_cast<const fixedJumpAMIFvPatchScalarField&>
                 (
                     tbf[patchi]
@@ -86,7 +199,7 @@ Foam::wordList Foam::basicThermo::heBoundaryTypes()
 {
     const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
-    wordList hbt = tbf.types();
+    wordList hbt(tbf.types());
 
     forAll(tbf, patchi)
     {
@@ -120,17 +233,16 @@ Foam::wordList Foam::basicThermo::heBoundaryTypes()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 (
     const fvMesh& mesh,
-    const word& name,
+    const word& fieldName,
     bool& isOwner
 )
 {
-    volScalarField* ptr =
-        mesh.objectRegistry::getObjectPtr<volScalarField>(name);
+    auto* ptr = mesh.objectRegistry::getObjectPtr<volScalarField>(fieldName);
 
     isOwner = !ptr;
 
@@ -140,7 +252,7 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
         (
             IOobject
             (
-                name,
+                fieldName,
                 mesh.time().timeName(),
                 mesh,
                 IOobject::MUST_READ,
@@ -156,6 +268,8 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
     return *ptr;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicThermo::basicThermo
 (
@@ -177,10 +291,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -194,10 +310,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
-{}
+    )
+{
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+}
 
 
 Foam::basicThermo::basicThermo
@@ -222,10 +338,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, phasePropertyName("T"), TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -239,10 +357,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
-{}
+    )
+{
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+}
 
 
 Foam::basicThermo::basicThermo
@@ -266,10 +384,12 @@ Foam::basicThermo::basicThermo
 
     phaseName_(phaseName),
 
-    p_(lookupOrConstruct(mesh, "p", pOwner_)),
+    pOwner_(false),
+    TOwner_(false),
+    dpdt_(getOrDefault<bool>("dpdt", true)),
 
+    p_(lookupOrConstruct(mesh, "p", pOwner_)),
     T_(lookupOrConstruct(mesh, "T", TOwner_)),
-    TOwner_(getOrDefault<Switch>("updateT", TOwner_)),
 
     alpha_
     (
@@ -283,10 +403,10 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    ),
-
-    dpdt_(getOrDefault<Switch>("dpdt", true))
+    )
 {
+    this->readIfPresent("updateT", TOwner_);  // Manual override
+
     if (debug)
     {
         Pout<< "Constructed shared thermo : mesh:" << mesh.name()
@@ -339,13 +459,14 @@ const Foam::basicThermo& Foam::basicThermo::lookupThermo
 
     forAllConstIters(thermos, iter)
     {
+        thermo = iter.val();
         if
         (
-            &(iter()->he().internalField())
+            &(thermo->he().internalField())
          == &(pf.internalField())
         )
         {
-            return *iter();
+            return *thermo;
         }
     }
 
@@ -384,7 +505,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << " and " << phasePropertyName(b)
             << ", thermodynamics package provides " << he().name()
             << exit(FatalError);
@@ -409,7 +530,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << ", " << phasePropertyName(b)
             << " and " << phasePropertyName(c)
             << ", thermodynamics package provides " << he().name()
@@ -437,7 +558,7 @@ void Foam::basicThermo::validate
     )
     {
         FatalErrorInFunction
-            << "Supported energy types are " << phasePropertyName(a)
+            << "Supported energy types: " << phasePropertyName(a)
             << ", " << phasePropertyName(b)
             << ", " << phasePropertyName(c)
             << " and " << phasePropertyName(d)
@@ -449,60 +570,29 @@ void Foam::basicThermo::validate
 
 Foam::wordList Foam::basicThermo::splitThermoName
 (
-    const word& thermoName,
-    const int nCmpt
+    const std::string& thermoName,
+    const int nExpectedCmpts
 )
 {
-    wordList cmpts(nCmpt);
+    // Split on ",<>" but include space for good measure.
+    // Splits things like
+    // "hePsiThermo<pureMixture<const<hConst<perfectGas<specie>>,enthalpy>>>"
 
-    string::size_type beg=0, end=0, endb=0, endc=0;
-    int i = 0;
+    const auto parsed = stringOps::splitAny<std::string>(thermoName, " ,<>");
+    const int nParsed(parsed.size());
 
-    while
-    (
-        (endb = thermoName.find('<', beg)) != string::npos
-     || (endc = thermoName.find(',', beg)) != string::npos
-    )
+    wordList cmpts;
+
+    if (!nExpectedCmpts || nParsed == nExpectedCmpts)
     {
-        if (endb == string::npos)
-        {
-            end = endc;
-        }
-        else if ((endc = thermoName.find(',', beg)) != string::npos)
-        {
-            end = std::min(endb, endc);
-        }
-        else
-        {
-            end = endb;
-        }
+        cmpts.resize(nParsed);
 
-        if (beg < end)
+        auto iter = cmpts.begin();
+        for (const auto& sub : parsed)
         {
-            cmpts[i] = thermoName.substr(beg, end-beg);
-            cmpts[i++].replaceAll(">","");
-
-            // If the number of number of components in the name
-            // is greater than nCmpt return an empty list
-            if (i == nCmpt)
-            {
-                return wordList::null();
-            }
+            *iter = word(sub.str());
+            ++iter;
         }
-        beg = end + 1;
-    }
-
-    // If the number of number of components in the name is not equal to nCmpt
-    // return an empty list
-    if (i + 1 != nCmpt)
-    {
-        return wordList::null();
-    }
-
-    if (beg < thermoName.size())
-    {
-        cmpts[i] = thermoName.substr(beg, string::npos);
-        cmpts[i].replaceAll(">","");
     }
 
     return cmpts;

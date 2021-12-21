@@ -27,6 +27,84 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "globalIndex.H"
+#include "labelRange.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::labelList
+Foam::globalIndex::calcOffsets
+(
+    const labelUList& localSizes,
+    const bool checkOverflow
+)
+{
+    labelList values;
+
+    const label len = localSizes.size();
+
+    if (len)
+    {
+        values.resize(len+1);
+
+        label start = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            values[i] = start;
+            start += localSizes[i];
+
+            if (checkOverflow && start < values[i])
+            {
+                FatalErrorInFunction
+                    << "Overflow : sum of sizes exceeds labelMax ("
+                    << labelMax << ") after index " << i << " of "
+                    << flatOutput(localSizes) << nl
+                    << "Please recompile with larger datatype for label." << nl
+                    << exit(FatalError);
+            }
+        }
+        values[len] = start;
+    }
+
+    return values;
+}
+
+
+Foam::List<Foam::labelRange>
+Foam::globalIndex::calcRanges
+(
+    const labelUList& localSizes,
+    const bool checkOverflow
+)
+{
+    List<labelRange> values;
+
+    const label len = localSizes.size();
+
+    if (len)
+    {
+        values.resize(len);
+
+        label start = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            values[i].reset(start, localSizes[i]);
+            start += localSizes[i];
+
+            if (checkOverflow && start < values[i].start())
+            {
+                FatalErrorInFunction
+                    << "Overflow : sum of sizes exceeds labelMax ("
+                    << labelMax << ") after index " << i << " of "
+                    << flatOutput(localSizes) << nl
+                    << "Please recompile with larger datatype for label." << nl
+                    << exit(FatalError);
+            }
+        }
+    }
+
+    return values;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,8 +130,8 @@ void Foam::globalIndex::bin
     bins.m() = UIndirectList<label>(globalIds, order);
 
     labelList& binOffsets = bins.offsets();
-    binOffsets.setSize(offsets.size());
-    binOffsets = 0;
+    binOffsets.resize_nocopy(offsets.size());
+    binOffsets = Zero;
 
     validBins.clear();
 
@@ -106,33 +184,80 @@ void Foam::globalIndex::reset
     const bool parallel
 )
 {
-    offsets_.resize(Pstream::nProcs(comm)+1);
+    const label len = Pstream::nProcs(comm);
 
-    labelList localSizes(Pstream::nProcs(comm), Zero);
-    localSizes[Pstream::myProcNo(comm)] = localSize;
-
-    if (parallel)
+    if (len)
     {
-        Pstream::gatherList(localSizes, tag, comm);
-        Pstream::scatterList(localSizes, tag, comm);
-    }
+        // Seed with localSize, zero elsewhere (for non-parallel branch)
+        labelList localSizes(len, Zero);
+        localSizes[Pstream::myProcNo(comm)] = localSize;
 
-    label offset = 0;
-    offsets_[0] = 0;
-    for (const int proci : Pstream::allProcs(comm))
-    {
-        const label oldOffset = offset;
-        offset += localSizes[proci];
-
-        if (offset < oldOffset)
+        if (parallel)
         {
-            FatalErrorInFunction
-                << "Overflow : sum of sizes " << localSizes
-                << " exceeds capability of label (" << labelMax
-                << "). Please recompile with larger datatype for label."
-                << exit(FatalError);
+            Pstream::gatherList(localSizes, tag, comm);
+            Pstream::scatterList(localSizes, tag, comm);
         }
-        offsets_[proci+1] = offset;
+
+        reset(localSizes, true);  // checkOverflow = true
+    }
+    else
+    {
+        offsets_.clear();
+    }
+}
+
+
+void Foam::globalIndex::reset
+(
+    const labelUList& localSizes,
+    const bool checkOverflow
+)
+{
+    const label len = localSizes.size();
+
+    if (len)
+    {
+        offsets_.resize_nocopy(len+1);
+
+        label start = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            offsets_[i] = start;
+            start += localSizes[i];
+
+            if (checkOverflow && start < offsets_[i])
+            {
+                FatalErrorInFunction
+                    << "Overflow : sum of sizes exceeds labelMax ("
+                    << labelMax << ") after index " << i << " of "
+                    << flatOutput(localSizes) << nl
+                    << "Please recompile with larger datatype for label." << nl
+                    << exit(FatalError);
+            }
+        }
+        offsets_[len] = start;
+    }
+    else
+    {
+        offsets_.clear();
+    }
+}
+
+
+void Foam::globalIndex::setLocalSize(const label proci, const label len)
+{
+    if (proci >= 0 && proci+1 < offsets_.size() && len >= 0)
+    {
+        const label delta = (len - (offsets_[proci+1] - offsets_[proci]));
+
+        // TBD: additional overflow check
+        if (delta)
+        {
+            for (label i = proci+1; i < offsets_.size(); ++i)
+            {
+                offsets_[i] += delta;
+            }
+        }
     }
 }
 
@@ -153,6 +278,33 @@ Foam::labelList Foam::globalIndex::sizes() const
     for (label proci=0; proci < len; ++proci)
     {
         values[proci] = offsets_[proci+1] - offsets_[proci];
+    }
+
+    return values;
+}
+
+
+Foam::List<Foam::labelRange>
+Foam::globalIndex::ranges() const
+{
+    List<labelRange> values;
+
+    const label len = (offsets_.size() - 1);
+
+    if (len < 1)
+    {
+        return values;
+    }
+
+    values.resize(len);
+
+    for (label proci=0; proci < len; ++proci)
+    {
+        values[proci].reset
+        (
+            offsets_[proci],
+            (offsets_[proci+1] - offsets_[proci])
+        );
     }
 
     return values;

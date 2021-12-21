@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
 
             scalar totProfile = returnReduce(profile, sumOp<scalar>());
 
-            int oldPrecision = Info().precision(4);
+            const int oldPrecision = Info.stream().precision(4);
 
             Info<< setw(8) << levelI
                 << setw(8) << totNprocs
@@ -200,7 +200,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
                 << setw(12) << totProfile/totNprocs
                 << nl;
 
-            Info().precision(oldPrecision);
+            Info.stream().precision(oldPrecision);
         }
         Info<< endl;
     }
@@ -295,13 +295,17 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
     const dictionary& controlDict
 )
 {
-    if
-    (
-        !mesh.thisDb().foundObject<GAMGAgglomeration>
+    const GAMGAgglomeration* agglomPtr =
+        mesh.thisDb().cfindObject<GAMGAgglomeration>
         (
             GAMGAgglomeration::typeName
-        )
-    )
+        );
+
+    if (agglomPtr)
+    {
+        return *agglomPtr;
+    }
+
     {
         const word agglomeratorType
         (
@@ -315,9 +319,9 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             lduMeshConstructorTablePtr_
         );
 
-        auto cstrIter = lduMeshConstructorTablePtr_->cfind(agglomeratorType);
+        auto* ctorPtr = lduMeshConstructorTable(agglomeratorType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalErrorInFunction
                 << "Unknown GAMGAgglomeration type "
@@ -329,14 +333,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 << exit(FatalError);
         }
 
-        return store(cstrIter()(mesh, controlDict).ptr());
-    }
-    else
-    {
-        return mesh.thisDb().lookupObject<GAMGAgglomeration>
-        (
-            GAMGAgglomeration::typeName
-        );
+        return store(ctorPtr(mesh, controlDict).ptr());
     }
 }
 
@@ -349,13 +346,17 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 {
     const lduMesh& mesh = matrix.mesh();
 
-    if
-    (
-        !mesh.thisDb().foundObject<GAMGAgglomeration>
+    const GAMGAgglomeration* agglomPtr =
+        mesh.thisDb().cfindObject<GAMGAgglomeration>
         (
             GAMGAgglomeration::typeName
-        )
-    )
+        );
+
+    if (agglomPtr)
+    {
+        return *agglomPtr;
+    }
+
     {
         const word agglomeratorType
         (
@@ -369,33 +370,21 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             lduMatrixConstructorTablePtr_
         );
 
-        if
-        (
-            !lduMatrixConstructorTablePtr_
-         || !lduMatrixConstructorTablePtr_->found(agglomeratorType)
-        )
+        auto* ctorPtr = lduMatrixConstructorTable(agglomeratorType);
+
+        if (!ctorPtr)
         {
             return New(mesh, controlDict);
         }
         else
         {
-            auto cstrIter =
-                lduMatrixConstructorTablePtr_->cfind(agglomeratorType);
-
-            return store(cstrIter()(matrix, controlDict).ptr());
+            return store(ctorPtr(matrix, controlDict).ptr());
         }
-    }
-    else
-    {
-        return mesh.thisDb().lookupObject<GAMGAgglomeration>
-        (
-            GAMGAgglomeration::typeName
-        );
     }
 }
 
 
-Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
+const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 (
     const lduMesh& mesh,
     const scalarField& cellVolumes,
@@ -403,40 +392,54 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
     const dictionary& controlDict
 )
 {
-    const word agglomeratorType
-    (
-        controlDict.getOrDefault<word>("agglomerator", "faceAreaPair")
-    );
 
-    mesh.thisDb().time().libs().open
-    (
-        controlDict,
-        "geometricGAMGAgglomerationLibs",
-        geometryConstructorTablePtr_
-    );
+    const GAMGAgglomeration* agglomPtr =
+        mesh.thisDb().cfindObject<GAMGAgglomeration>
+        (
+            GAMGAgglomeration::typeName
+        );
 
-    auto cstrIter = geometryConstructorTablePtr_->cfind(agglomeratorType);
-
-    if (!cstrIter.found())
+    if (agglomPtr)
     {
-        FatalErrorInFunction
-            << "Unknown GAMGAgglomeration type "
-            << agglomeratorType << ".\n"
-            << "Valid geometric GAMGAgglomeration types :"
-            << geometryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        return *agglomPtr;
     }
 
-    return autoPtr<GAMGAgglomeration>
-    (
-        cstrIter()
+    {
+        const word agglomeratorType
         (
-            mesh,
-            cellVolumes,
-            faceAreas,
-            controlDict
-        )
-    );
+            controlDict.lookupOrDefault<word>("agglomerator", "faceAreaPair")
+        );
+
+        const_cast<Time&>(mesh.thisDb().time()).libs().open
+        (
+            controlDict,
+            "geometricGAMGAgglomerationLibs",
+            geometryConstructorTablePtr_
+        );
+
+        auto* ctorPtr = geometryConstructorTable(agglomeratorType);
+
+        if (!ctorPtr)
+        {
+            FatalErrorInFunction
+                << "Unknown GAMGAgglomeration type "
+                << agglomeratorType << ".\n"
+                << "Valid geometric GAMGAgglomeration types :"
+                << geometryConstructorTablePtr_->sortedToc()
+                << exit(FatalError);
+        }
+
+        return store
+        (
+            ctorPtr
+            (
+                mesh,
+                cellVolumes,
+                faceAreas,
+                controlDict
+            ).ptr()
+        );
+    }
 }
 
 
@@ -609,8 +612,8 @@ bool Foam::GAMGAgglomeration::checkRestriction
 
         forAll(lower, facei)
         {
-            label own = lower[facei];
-            label nei = upper[facei];
+            const label own = lower[facei];
+            const label nei = upper[facei];
 
             if (restriction[own] == restriction[nei])
             {
@@ -683,7 +686,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
         {
             const label coarseI = restriction[celli];
 
-            label index = coarseToMasters[coarseI].find(master[celli]);
+            const label index = coarseToMasters[coarseI].find(master[celli]);
             newRestrict[celli] = coarseToNewCoarse[coarseI][index];
         }
 

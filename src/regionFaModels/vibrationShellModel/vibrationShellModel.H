@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,10 +34,10 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory/Optional (inherited) entries
+        // Mandatory/Optional entries
         ...
 
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         vibrationShellModel     <thermalShellModelName>;
         p                       <pName>;
 
@@ -53,7 +53,7 @@ Usage
 
     where the entries mean:
     \table
-      Property   | Description                            | Type  | Reqd | Dflt
+      Property   | Description                            | Type  | Reqd | Deflt
       vibrationShellModel | Name of vibration-shell model | word | yes | -
       p          | Name of the coupled field in the primary <!--
                  --> region                               | word | yes | -
@@ -94,15 +94,6 @@ class vibrationShellModel
 :
     public regionFaModel
 {
-    // Private Member Functions
-
-        //- No copy construct
-        vibrationShellModel(const vibrationShellModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const vibrationShellModel&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -124,12 +115,6 @@ protected:
 
         //- Solid properties
         solidProperties solid_;
-
-
-    // Protected Member Functions
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary&);
 
 
 public:
@@ -164,6 +149,12 @@ public:
             const dictionary& dict
         );
 
+        //- No copy construct
+        vibrationShellModel(const vibrationShellModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const vibrationShellModel&) = delete;
+
 
     // Selectors
 
@@ -184,19 +175,34 @@ public:
         // Access
 
             //- Return primary region pa
-            const volScalarField& pa() const;
+            const volScalarField& pa() const noexcept
+            {
+                return pa_;
+            }
 
             //- Return shell displacement
-            const areaScalarField& w() const;
+            const areaScalarField& w() const noexcept
+            {
+                return w_;
+            }
 
             //- Return shell acceleration
-            const areaScalarField& a() const;
+            const areaScalarField& a() const noexcept
+            {
+                return a_;
+            }
 
             //- Return faOptions
-            Foam::fa::options& faOptions();
+            Foam::fa::options& faOptions() noexcept
+            {
+                return faOptions_;
+            }
 
             //- Return solid properties
-            const solidProperties& solid() const;
+            const solidProperties& solid() const noexcept
+            {
+                return solid_;
+            }
 
 
         // Evolution

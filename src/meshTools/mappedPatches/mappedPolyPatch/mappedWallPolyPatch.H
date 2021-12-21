@@ -149,7 +149,7 @@ public:
         );
 
         //- Construct given the original patch and resetting the
-        //  face list and boundary mesh information
+        //- face list and boundary mesh information
         mappedWallPolyPatch
         (
             const mappedWallPolyPatch& pp,
@@ -176,7 +176,7 @@ public:
         }
 
         //- Construct and return a clone, resetting the face list
-        //  and boundary mesh
+        //- and boundary mesh
         virtual autoPtr<polyPatch> clone
         (
             const polyBoundaryMesh& bm,
@@ -199,7 +199,7 @@ public:
         }
 
         //- Construct and return a clone, resetting the face list
-        //  and boundary mesh
+        //- and boundary mesh
         virtual autoPtr<polyPatch> clone
         (
             const polyBoundaryMesh& bm,
@@ -220,6 +220,55 @@ public:
                 )
             );
         }
+
+        // Implicit treatment functions
+
+            //- Return number of new internal of this polyPatch faces
+            virtual void newInternalProcFaces(label& iFaces, label& pFaces) const
+            {
+                label nbrFaces = lookupPatch(sampleRegion_, samplePatch_).size();
+                iFaces = patch_.size();
+                pFaces = max(iFaces - nbrFaces, 0);
+            }
+
+
+            //- Return nbrCells
+            virtual const labelUList& nbrCells() const
+            {
+                return lookupPatch(sampleRegion_, samplePatch_).faceCells();
+            }
+
+            //- Return nbr patch ID
+            virtual label neighbPolyPatchID() const
+            {
+                return lookupPatch(sampleRegion_, samplePatch_).index();
+            }
+
+            //- Return collocated faces map
+            virtual refPtr<labelListList> mapCollocatedFaces() const
+            {
+                refPtr<labelListList> tMap(new labelListList(patch_.size()));
+                labelListList& map = tMap.ref();
+                forAll (map, i)
+                {
+                    labelList& subMap = map[i];
+                    subMap.setSize(1);
+                    subMap[0] = i;
+                }
+                return tMap;
+            }
+
+            //- Return implicit master
+            virtual bool masterImplicit() const
+            {
+                return owner();
+            }
+
+            //- Return neigh region ID
+            virtual word neighbRegionID() const
+            {
+                return sampleRegion_;
+            }
 
 
     //- Destructor

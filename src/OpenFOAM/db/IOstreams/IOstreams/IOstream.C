@@ -28,6 +28,7 @@ License
 
 #include "IOstream.H"
 #include "error.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,6 +49,12 @@ Foam::fileName& Foam::IOstream::name()
 }
 
 
+Foam::fileName Foam::IOstream::relativeName() const
+{
+    return argList::envRelativePath(this->name());
+}
+
+
 bool Foam::IOstream::check(const char* operation) const
 {
     return fatalCheck(operation);
@@ -61,7 +68,8 @@ bool Foam::IOstream::fatalCheck(const char* operation) const
     if (!ok)
     {
         FatalIOErrorInFunction(*this)
-            << "error in IOstream " << name() << " for operation " << operation
+            << "error in IOstream " << relativeName()
+            << " for operation " << operation
             << exit(FatalIOError);
     }
 

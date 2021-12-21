@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,21 +80,27 @@ Foam::fvPatch::~fvPatch()
 
 bool Foam::fvPatch::constraintType(const word& pt)
 {
-    return fvPatchField<scalar>::patchConstructorTablePtr_->found(pt);
+    return
+    (
+        fvPatchField<scalar>::patchConstructorTablePtr_
+     && fvPatchField<scalar>::patchConstructorTablePtr_->found(pt)
+    );
 }
 
 
 Foam::wordList Foam::fvPatch::constraintTypes()
 {
-    wordList cTypes(polyPatchConstructorTablePtr_->size());
+    const auto& cnstrTable = *polyPatchConstructorTablePtr_;
+
+    wordList cTypes(cnstrTable.size());
 
     label i = 0;
 
-    forAllConstIters(*polyPatchConstructorTablePtr_, cstrIter)
+    forAllConstIters(cnstrTable, iter)
     {
-        if (constraintType(cstrIter.key()))
+        if (constraintType(iter.key()))
         {
-            cTypes[i++] = cstrIter.key();
+            cTypes[i++] = iter.key();
         }
     }
 

@@ -41,15 +41,15 @@ void Foam::decompositionInformation::populate
     nDomains_ = nDomain;
 
     distrib_.clear();
-    distrib_.setSize(nDomain);
+    distrib_.resize(nDomain);
 
     for (labelList& subdist : distrib_)
     {
         subdist.clear();
-        subdist.setSize(nDomain, Zero);
+        subdist.resize(nDomain, Zero);
     }
 
-    const label nCells = xadj.size()-1;
+    const label nCells = max(0, xadj.size()-1);
     for (label celli = 0; celli < nCells; ++celli)
     {
         const label ownProc = decomp[celli];
@@ -167,7 +167,7 @@ void Foam::decompositionInformation::printSummary(Ostream& os) const
 void Foam::decompositionInformation::printDetails(Ostream& os) const
 {
     os  << "Decomposition details with (proc faces) "
-        "for each processor connection"<< nl << nl;
+        "for each processor connection" << nl << nl;
 
     forAll(distrib_, ownProc)
     {
@@ -195,7 +195,7 @@ void Foam::decompositionInformation::printDetails(Ostream& os) const
         // Second pass with details:
         if (facesCount)
         {
-            Info<< " ";
+            os  << ' ';
 
             forAll(subdist, neiProc)
             {
@@ -203,7 +203,7 @@ void Foam::decompositionInformation::printDetails(Ostream& os) const
 
                 if (n && ownProc != neiProc)
                 {
-                    os  << " (" << neiProc << " " << n << ")";
+                    os  << " (" << neiProc << ' ' << n << ')';
                 }
             }
         }

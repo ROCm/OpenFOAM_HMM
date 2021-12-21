@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,8 @@ Foam::functionObjects::yPlus::yPlus
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name, typeName, dict)
+    writeFile(obr_, name, typeName, dict),
+    useWallFunction_(true)
 {
     read(dict);
 
@@ -82,7 +83,7 @@ Foam::functionObjects::yPlus::yPlus
         (
             IOobject
             (
-                typeName,
+                scopedName(typeName),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -101,17 +102,20 @@ Foam::functionObjects::yPlus::yPlus
 
 bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
-    writeFile::read(dict);
+    if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
+    {
+        useWallFunction_ = dict.getOrDefault("useWallFunction", true);
 
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 
 bool Foam::functionObjects::yPlus::execute()
 {
-    volScalarField& yPlus =
-        lookupObjectRef<volScalarField>(typeName);
+    auto& yPlus = lookupObjectRef<volScalarField>(scopedName(typeName));
 
     if (foundObject<turbulenceModel>(turbulenceModel::propertiesName))
     {
@@ -139,7 +143,11 @@ bool Foam::functionObjects::yPlus::execute()
         {
             const fvPatch& patch = patches[patchi];
 
-            if (isA<nutWallFunctionFvPatchScalarField>(nutBf[patchi]))
+            if
+            (
+                isA<nutWallFunctionFvPatchScalarField>(nutBf[patchi])
+             && useWallFunction_
+            )
             {
                 const nutWallFunctionFvPatchScalarField& nutPf =
                     dynamic_cast<const nutWallFunctionFvPatchScalarField&>
@@ -166,6 +174,14 @@ bool Foam::functionObjects::yPlus::execute()
         WarningInFunction
             << "Unable to find turbulence model in the "
             << "database: yPlus will not be calculated" << endl;
+
+        if (postProcess)
+        {
+            WarningInFunction
+                << "Please try to use the solver option -postProcess, e.g.:"
+                << " <solver> -postProcess -func yPlus" << endl;
+        }
+
         return false;
     }
 
@@ -175,8 +191,7 @@ bool Foam::functionObjects::yPlus::execute()
 
 bool Foam::functionObjects::yPlus::write()
 {
-    const volScalarField& yPlus =
-        obr_.lookupObject<volScalarField>(type());
+    const auto& yPlus = obr_.lookupObject<volScalarField>(scopedName(typeName));
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing field " << yPlus.name() << endl;

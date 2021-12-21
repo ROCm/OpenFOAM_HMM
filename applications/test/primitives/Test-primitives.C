@@ -144,8 +144,8 @@ unsigned testParsing
     string errMsg;
 
     // Expect some failures
-    const bool prev1 = FatalError.throwExceptions();
-    const bool prev2 = FatalIOError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOErr = FatalIOError.throwing(true);
 
     for (const std::pair<bool, std::string>& test : tests)
     {
@@ -169,8 +169,8 @@ unsigned testParsing
         hadParsingError(test, result, errMsg);
     }
 
-    FatalError.throwExceptions(prev1);
-    FatalIOError.throwExceptions(prev2);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOErr);
 
     return nFail;
 }

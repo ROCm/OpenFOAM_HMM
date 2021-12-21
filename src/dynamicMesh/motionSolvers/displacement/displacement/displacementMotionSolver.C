@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,9 +108,9 @@ Foam::displacementMotionSolver::New
             << exit(FatalError);
     }
 
-    auto cstrIter = displacementConstructorTablePtr_->cfind(solverTypeName);
+    auto* ctorPtr = displacementConstructorTable(solverTypeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -123,7 +123,7 @@ Foam::displacementMotionSolver::New
 
     return autoPtr<displacementMotionSolver>
     (
-        cstrIter()
+        ctorPtr
         (
             mesh,
             solverDict,

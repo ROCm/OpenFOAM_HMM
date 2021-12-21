@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,7 +82,7 @@ class objectRegistry
 
         //- Is the objectRegistry parent_ different from time_
         //  Used to terminate searching within the ancestors
-        bool parentNotTime() const;
+        bool parentNotTime() const noexcept;
 
         //- Templated implementation for count()
         //  The number of items with a matching class
@@ -138,20 +138,6 @@ class objectRegistry
         void operator=(const objectRegistry&) = delete;
 
 
-    // Protected Member Functions
-
-        //- Return const pointer to the regIOobject.
-        //
-        //  \param recursive search parent registries
-        //
-        //  \return nullptr if the object was not found.
-        const regIOobject* cfindIOobject
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-
 public:
 
     //- Declare type name for this IOobject
@@ -178,22 +164,25 @@ public:
     // Access
 
         //- Return the object registry
-        const objectRegistry& thisDb() const
+        const objectRegistry& thisDb() const noexcept
         {
             return *this;
         }
 
-        //- Return time
-        const Time& time() const
+        //- Return the parent objectRegistry
+        const objectRegistry& parent() const noexcept
+        {
+            return parent_;
+        }
+
+        //- Return time registry
+        const Time& time() const noexcept
         {
             return time_;
         }
 
-        //- Return the parent objectRegistry
-        const objectRegistry& parent() const
-        {
-            return parent_;
-        }
+        //- True if the registry is Time
+        bool isTimeDb() const noexcept;
 
         //- Local directory path of this objectRegistry relative to the time
         virtual const fileName& dbDir() const
@@ -355,6 +344,16 @@ public:
         template<class Type>
         HashTable<Type*> lookupClass(const bool strict = false);
 
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* cfindIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
 
         //- Can the regIOobject object be found (by name).
         //

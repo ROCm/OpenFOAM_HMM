@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "chemkinReader.H"
-#include <fstream>
+#include "IFstream.H"
 #include "atomicWeights.H"
 #include "IrreversibleReaction.H"
 #include "ReversibleReaction.H"

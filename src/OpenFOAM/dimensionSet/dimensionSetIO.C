@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,21 +26,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "dictionary.H"
 #include "dimensionSet.H"
-#include "IOstreams.H"
 #include "dimensionedScalar.H"
+#include "IOstreams.H"
 #include <limits>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dimensionSet::dimensionSet(const dictionary& dict, const word& entryName)
+Foam::dimensionSet::dimensionSet
+(
+    const word& entryName,
+    const dictionary& dict,
+    const bool mandatory
+)
+:
+    exponents_(Zero)
 {
-    const entry& e = dict.lookupEntry(entryName, keyType::LITERAL);
-    ITstream& is = e.stream();
+    this->readEntry(entryName, dict, mandatory);
+}
 
-    is >> *this;
 
-    e.checkITstream(is);
+Foam::dimensionSet::dimensionSet
+(
+    const dictionary& dict,
+    const word& entryName,
+    const bool mandatory
+)
+:
+    exponents_(Zero)
+{
+    this->readEntry(entryName, dict, mandatory);
 }
 
 
@@ -122,26 +138,24 @@ bool Foam::dimensionSet::tokeniser::valid(char c)
 
 Foam::label Foam::dimensionSet::tokeniser::priority(const token& t)
 {
-    if (!t.isPunctuation())
+    if (t.isPunctuation())
     {
-        return 0;
+        if
+        (
+            t.pToken() == token::MULTIPLY
+         || t.pToken() == token::DIVIDE
+        )
+        {
+            return 2;
+        }
+        else if (t.pToken() == '^')
+        {
+            return 3;
+        }
     }
-    else if
-    (
-        t.pToken() == token::MULTIPLY
-     || t.pToken() == token::DIVIDE
-    )
-    {
-        return 2;
-    }
-    else if (t.pToken() == '^')
-    {
-        return 3;
-    }
-    else
-    {
-        return 0;
-    }
+
+    // Default priority
+    return 0;
 }
 
 
@@ -230,6 +244,8 @@ void Foam::dimensionSet::tokeniser::putBack(const token& t)
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::dimensionSet::round(const scalar tol)
 {
     scalar integralPart;
@@ -260,7 +276,7 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
     const HashTable<dimensionedScalar>& readSet
 ) const
 {
-    dimensionedScalar ds("", dimless, 1.0);
+    dimensionedScalar ds("", dimless, 1);
 
     // Get initial token
     token nextToken(tis.nextToken());
@@ -359,12 +375,12 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
             {
                 if (nextPrior > lastPrior)
                 {
-                    dimensionedScalar exp(parse(nextPrior, tis, readSet));
+                    dimensionedScalar expon(parse(nextPrior, tis, readSet));
 
-                    ds.dimensions().reset(pow(ds.dimensions(), exp.value()));
+                    ds.dimensions().reset(pow(ds.dimensions(), expon.value()));
                     // Round to nearest integer if close to it
                     ds.dimensions().round(10*smallExponent);
-                    ds.value() = Foam::pow(ds.value(), exp.value());
+                    ds.value() = Foam::pow(ds.value(), expon.value());
                 }
                 else
                 {
@@ -406,6 +422,38 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
     }
 
     return ds;
+}
+
+
+bool Foam::dimensionSet::readEntry
+(
+    const word& entryName,
+    const dictionary& dict,
+    const bool mandatory
+)
+{
+    const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
+
+    if (eptr)
+    {
+        const entry& e = *eptr;
+        ITstream& is = e.stream();
+
+        is >> *this;
+
+        e.checkITstream(is);
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Entry '" << entryName << "' not found in dictionary "
+            << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
 }
 
 
@@ -533,7 +581,7 @@ Foam::Istream& Foam::dimensionSet::read
 
 
             // Parse unit
-            dimensionSet symbolSet(dimless);
+            dimensionSet symbolSet;  // dimless
 
             const auto index = symbolPow.find('^');
             if (index != std::string::npos)
@@ -542,7 +590,7 @@ Foam::Istream& Foam::dimensionSet::read
                 const scalar exponent = readScalar(symbolPow.substr(index+1));
 
                 dimensionedScalar s;
-                s.read(readSet.lookup(symbol), readSet);
+                s.read(readSet.lookup(symbol, keyType::LITERAL), readSet);
 
                 symbolSet.reset(pow(s.dimensions(), exponent));
 
@@ -553,7 +601,7 @@ Foam::Istream& Foam::dimensionSet::read
             else
             {
                 dimensionedScalar s;
-                s.read(readSet.lookup(symbolPow), readSet);
+                s.read(readSet.lookup(symbolPow, keyType::LITERAL), readSet);
 
                 symbolSet.reset(s.dimensions());
                 multiplier *= s.value();

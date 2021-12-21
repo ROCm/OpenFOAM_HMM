@@ -75,10 +75,13 @@ extern "C" void ${typeName}_${SHA1sum}(bool load)
 ${localCode}
 //}}} end localCode
 
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const fvMesh& ${typeName}FunctionObject::mesh() const
+const Foam::fvMesh&
+Foam::${typeName}FunctionObject::mesh() const
 {
     return refCast<const fvMesh>(obr_);
 }
@@ -86,7 +89,9 @@ const fvMesh& ${typeName}FunctionObject::mesh() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-${typeName}FunctionObject::${typeName}FunctionObject
+Foam::
+${typeName}FunctionObject::
+${typeName}FunctionObject
 (
     const word& name,
     const Time& runTime,
@@ -101,13 +106,16 @@ ${typeName}FunctionObject::${typeName}FunctionObject
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-${typeName}FunctionObject::~${typeName}FunctionObject()
+Foam::
+${typeName}FunctionObject::
+~${typeName}FunctionObject()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool
+Foam::
 ${typeName}FunctionObject::read(const dictionary& dict)
 {
     if (${verbose:-false})
@@ -124,6 +132,7 @@ ${typeName}FunctionObject::read(const dictionary& dict)
 
 
 bool
+Foam::
 ${typeName}FunctionObject::execute()
 {
     if (${verbose:-false})
@@ -140,6 +149,7 @@ ${typeName}FunctionObject::execute()
 
 
 bool
+Foam::
 ${typeName}FunctionObject::write()
 {
     if (${verbose:-false})
@@ -156,6 +166,7 @@ ${typeName}FunctionObject::write()
 
 
 bool
+Foam::
 ${typeName}FunctionObject::end()
 {
     if (${verbose:-false})
@@ -170,9 +181,5 @@ ${typeName}FunctionObject::end()
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

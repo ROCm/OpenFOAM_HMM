@@ -54,37 +54,12 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::ptscotchDecomp::graphPath(const polyMesh& unused) const {}
-void Foam::ptscotchDecomp::check(const int retVal, const char* str) {}
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
     const labelList& adjncy,
     const labelList& xadj,
-    const List<scalar>& cWeights,
-    labelList& finalDecomp
-) const
-{
-    FatalErrorInFunction
-        << notImplementedMessage << exit(FatalError);
-
-    return -1;
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::ptscotchDecomp::decompose
-(
-    const label adjncySize,
-    const label adjncy[],
-    const label xadjSize,
-    const label xadj[],
     const List<scalar>& cWeights,
     labelList& finalDecomp
 ) const

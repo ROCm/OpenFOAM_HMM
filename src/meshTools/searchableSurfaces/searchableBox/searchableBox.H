@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +34,14 @@ Description
     \table
         Property    | Description                       | Required | Default
         type        | box                               | selector |
-        min         | minimum point for bounding box    | yes   |
-        max         | maximum point for bounding box    | yes   |
+        min         | Minimum point for bounding box    | yes   |
+        max         | Maximum point for bounding box    | yes   |
+        span        | Box width                         | cond'l |
     \endtable
+
+Note
+    The order of precedence from the highest to the lowest is
+    \c min-max or \c min-span pair
 
 Note
     Longer type name : \c searchableBox

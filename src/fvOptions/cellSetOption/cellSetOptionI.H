@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +28,19 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::fv::cellSetOption::timeStart() const
+inline Foam::scalar Foam::fv::cellSetOption::timeStart() const noexcept
 {
     return timeStart_;
 }
 
 
-inline Foam::scalar Foam::fv::cellSetOption::duration() const
+inline Foam::scalar Foam::fv::cellSetOption::duration() const noexcept
 {
     return duration_;
 }
 
 
-inline bool Foam::fv::cellSetOption::inTimeLimits(const scalar time) const
+inline bool Foam::fv::cellSetOption::inTimeLimits(const scalar timeValue) const
 {
     return
     (
@@ -53,40 +54,50 @@ inline bool Foam::fv::cellSetOption::inTimeLimits(const scalar time) const
 }
 
 
-inline const Foam::fv::cellSetOption::selectionModeType&
-Foam::fv::cellSetOption::selectionMode() const
+inline Foam::fv::cellSetOption::selectionModeType
+Foam::fv::cellSetOption::selectionMode() const noexcept
 {
     return selectionMode_;
 }
 
 
-inline const Foam::word& Foam::fv::cellSetOption::cellSetName() const
+inline bool Foam::fv::cellSetOption::useSubMesh() const noexcept
+{
+    return selectionMode_ != selectionModeType::smAll;
+}
+
+
+inline const Foam::word& Foam::fv::cellSetOption::cellSetName() const noexcept
 {
     return cellSetName_;
 }
 
 
-inline Foam::scalar Foam::fv::cellSetOption::V() const
+inline Foam::scalar Foam::fv::cellSetOption::V() const noexcept
 {
     return V_;
 }
 
 
-inline const Foam::labelList& Foam::fv::cellSetOption::cells() const
+inline const Foam::labelList& Foam::fv::cellSetOption::cells() const noexcept
 {
     return cells_;
 }
 
 
-inline Foam::scalar& Foam::fv::cellSetOption::timeStart()
+inline Foam::scalar Foam::fv::cellSetOption::timeStart(scalar val) noexcept
 {
-    return timeStart_;
+    scalar old(timeStart_);
+    timeStart_ = val;
+    return old;
 }
 
 
-inline Foam::scalar& Foam::fv::cellSetOption::duration()
+inline Foam::scalar Foam::fv::cellSetOption::duration(scalar val) noexcept
 {
-    return duration_;
+    scalar old(duration_);
+    duration_ = val;
+    return old;
 }
 
 

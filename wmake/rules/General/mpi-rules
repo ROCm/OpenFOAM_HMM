@@ -5,20 +5,27 @@ PFLAGS  =
 PINC    =
 PLIBS   =
 
-# The stem name. Eg, SYSTEMOPENMPI4 -> SYSTEMOPENMPI
-MPLIB_STEMNAME = $(shell echo "$(WM_MPLIB)" | sed -e 's/[-.0-9]*$$//')
+# Extract the family name. For example,
+# SYSTEMOPENMPI4 -> SYSTEMOPENMPI
+# OPENMPI-4.0.6 -> OPENMPI
+#
+MPLIB_FAMILY = $(shell echo "$(WM_MPLIB)" | sed -e 's/[-+.0-9~].*//')
 
-ifneq ("$(MPLIB_STEMNAME)","$(WM_MPLIB)")
-    sinclude $(GENERAL_RULES)/mplib$(MPLIB_STEMNAME)
-    sinclude $(DEFAULT_RULES)/mplib$(MPLIB_STEMNAME)
+# Base rules
+ifneq ("$(MPLIB_FAMILY)","$(WM_MPLIB)")
+    sinclude $(GENERAL_RULES)/mplib$(MPLIB_FAMILY)
+    sinclude $(DEFAULT_RULES)/mplib$(MPLIB_FAMILY)
+    # system-specific
     ifneq ("$(RULES)","$(DEFAULT_RULES)")
-        sinclude $(RULES)/mplib$(MPLIB_STEMNAME)
+        sinclude $(RULES)/mplib$(MPLIB_FAMILY)
     endif
 endif
 
+# Specific rules
 ifneq ("","$(WM_MPLIB)")
     sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
     sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
+    # system-specific
     ifneq ("$(RULES)","$(DEFAULT_RULES)")
         sinclude $(RULES)/mplib$(WM_MPLIB)
     endif

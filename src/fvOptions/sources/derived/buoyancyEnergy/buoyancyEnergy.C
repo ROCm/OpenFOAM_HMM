@@ -53,7 +53,7 @@ Foam::fv::buoyancyEnergy::buoyancyEnergy
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh),
+    fv::option(sourceName, modelType, dict, mesh),
     UName_(coeffs_.getOrDefault<word>("U", "U"))
 {
     coeffs_.readEntry("fields", fieldNames_);
@@ -88,7 +88,7 @@ void Foam::fv::buoyancyEnergy::addSup
 
 bool Foam::fv::buoyancyEnergy::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         coeffs_.readIfPresent("UName", UName_);
 

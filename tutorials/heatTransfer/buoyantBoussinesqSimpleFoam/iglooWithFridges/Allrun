@@ -6,8 +6,11 @@ cd "${0%/*}" || exit                                # Run from this directory
 # settings
 
     # flag to enable computations in parallel mode
-    parallel=false
+    parallel=true
 
+    # flag to set up collated writing and threaded writing (with 1Gb write
+    # buffer)
+    fileHandler="-fileHandler collated -opt-switch maxThreadFileBufferSize=-1E9"
 
 #------------------------------------------------------------------------------
 
@@ -24,22 +27,26 @@ cp -f \
 if [ "$parallel" = true ]
 then
 
-    runApplication decomposePar -fileHandler collated
+    #runApplication decomposePar $fileHandler
+    runParallel -s decompose redistributePar -decompose $fileHandler
 
-    runParallel snappyHexMesh -overwrite -fileHandler collated
+    runParallel snappyHexMesh -overwrite $fileHandler
 
     ## Remove any include files from the field dictionaries
-    (   mkdir -p processors/0 && \
+    (   mkdir -p processors2/0 && \
         cd 0 && \
         for f in *; do [ -f "$f" ] && \
-        foamDictionary "$f" > "../processors/0/$f"; done \
+        foamDictionary "$f" > "../processors2/0/$f"; done \
     )
 
-    runParallel $(getApplication) -fileHandler collated
+    runParallel $(getApplication) $fileHandler
 
-    runApplication reconstructParMesh -constant
+    ## Run reconstructParMesh with collated as well since writes
+    ##     constant/polyMesh/cellProcAddressing
+    #runApplication reconstructParMesh -constant $fileHandler
+    #runApplication reconstructPar
 
-    runApplication reconstructPar
+    runParallel -s reconstruct redistributePar -reconstruct $fileHandler
 
 else
 

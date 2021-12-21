@@ -124,10 +124,19 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData
+            ) const = 0;
+
+
+            //- Return the values of the given internal data adjacent to
+            //- the interface as a field using a mapping faceCell
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData,
+                const labelUList& faceCell
             ) const = 0;
 
             //- Inherit initInternalFieldTransfer from lduInterface
@@ -138,6 +147,15 @@ public:
             (
                 const Pstream::commsTypes commsType,
                 labelUList& iF
+            ) const
+            {}
+
+            //- Initialise neighbour field transfer using faceCells map
+            virtual void initInternalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                labelUList& iF,
+                const labelUList& faceCell
             ) const
             {}
 

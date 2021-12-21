@@ -59,6 +59,7 @@ options:
   -with-api=NUM     Specify alternative api value for packaging
   -tgz, -xz, -zstd  Alias for -compress=tgz, -compress=xz, -compress=zstd
   -debian           Auto (debian) naming with -no-prefix, -xz
+  -debian=NUM       Auto (debian) naming with specified debian patch value
   -debian=NAME      Short-cut for -name=NAME.orig, -no-prefix, -xz
   -help             Print help
 
@@ -119,8 +120,8 @@ do
     -h | -help*)
         printHelp
         ;;
-    -debian)
-        tarName="debian"     # Special placeholder
+    -debian | -debian=[0-9]*)
+        tarName="$1"         # Leave as special placeholder
         prefixDir=false      # No prefix directory
         : "${compress:=xz}"  # Default 'xz' compression
         ;;
@@ -273,8 +274,8 @@ patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/^patch=//p)"
 [ -n "$api" ] || die "Could resolve api value"
 : "${patch:=0}"  # Treat missing patch number as '0'
 
-# Determine the BUILD information from git, as per `wmake -build-info`
-build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' 2>/dev/null|sed 's/-//g;s/=/-/')"
+# Determine BUILD information from git, as per `wmake -build-info` but for given HEAD
+build="$(git --git-dir="$gitbase/.git" log -1 --date=short --format='%h=%ad' "$head" 2>/dev/null|sed 's/-//g;s/=/-/')"
 
 echo "Detected api, patch, build as '$api', '$patch', '$build'" 1>&2
 if [ -n "$packageApi" ]
@@ -300,7 +301,7 @@ then
 fi
 
 case "$tarName" in
-(debian)
+(-debian)
     tarName="openfoam_${packageApi}"
 
     if [ "$withPatchNum" = false ]
@@ -311,6 +312,10 @@ case "$tarName" in
         tarName="${tarName}.${patch}"
     fi
     tarName="${tarName}.orig"  # Append .orig
+    ;;
+
+(-debian=[0-9]*)
+    tarName="openfoam_${packageApi}.${tarName#*=}.orig"
     ;;
 
 ('')

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -13,20 +13,25 @@ License
 Description
     VTK output of blockMesh topology blocks
 
+    Always write in ASCII since the mesh is small and we want easily
+    readable output for inspection.
+
 \*---------------------------------------------------------------------------*/
 
-{
-    // Non-legacy and ASCII (mesh is small, want readable output)
-    const vtk::outputOptions writeOpts = vtk::formatType::INLINE_ASCII;
+// Common
 
-    const polyMesh& topoMesh = blocks.topology();
-    const vtk::vtuCells topoCells(topoMesh, writeOpts);
+refPtr<polyMesh> topoMeshPtr(blocks.topology(true));
+const polyMesh& topoMesh = topoMeshPtr();
+
+// Internal mesh - ie, the blocks
+{
+    const vtk::vtuCells topoCells(topoMesh, vtk::formatType::INLINE_ASCII);
 
     vtk::internalMeshWriter writer
     (
         topoMesh,
         topoCells,
-        writeOpts,
+        vtk::formatType::INLINE_ASCII,
         runTime.path()/"blockTopology"
     );
 
@@ -94,6 +99,66 @@ Description
     // {
     //     Info<< "Warning: indicated normals may be incorrect" << nl;
     // }
+}
+
+
+// Block boundary faces
+{
+    const label nIntFaces = topoMesh.nInternalFaces();
+    const label nBndFaces = topoMesh.nBoundaryFaces();
+
+    faceList bndFaces
+    (
+        faceList::subList(topoMesh.faces(), nBndFaces, nIntFaces)
+    );
+
+    vtk::surfaceWriter writer
+    (
+        topoMesh.points(),
+        bndFaces,
+        vtk::formatType::INLINE_ASCII,
+        runTime.path()/"blockFaces"
+    );
+
+
+    labelList blockIds(nBndFaces, -1);
+    labelList cellFaceIds(nBndFaces, -1);
+    labelList patchIds(nBndFaces, -1);
+
+    {
+        const labelList& own = topoMesh.faceOwner();
+        const cellList& cells = topoMesh.cells();
+        const polyPatchList& patches = topoMesh.boundaryMesh();
+
+        for (const polyPatch& pp : patches)
+        {
+            label bndFacei = pp.start() - nIntFaces;
+            label meshFacei = pp.start();
+
+            forAll(pp, bfacei)
+            {
+                const label celli = own[meshFacei];
+                const label cellFacei = cells[celli].find(meshFacei);
+
+                blockIds[bndFacei] = celli;
+                cellFaceIds[bndFacei] = cellFacei;
+                patchIds[bndFacei] = pp.index();
+
+                ++bndFacei;
+                ++meshFacei;
+            }
+        }
+    }
+
+    Info<< "Writing block boundary faces in vtk format: "
+        << args.relativePath(writer.output()).c_str() << endl;
+
+    writer.writeGeometry();
+
+    writer.beginCellData();
+    writer.writeCellData("block", blockIds);
+    writer.writeCellData("face", cellFaceIds);
+    writer.writeCellData("patch", patchIds);
 }
 
 

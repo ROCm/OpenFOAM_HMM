@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -525,9 +525,9 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 {
     const word sampleType(dict.get<word>("type"));
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
+    auto* ctorPtr = wordConstructorTable(sampleType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -540,7 +540,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 
     return autoPtr<sampledSet>
     (
-        cstrIter()
+        ctorPtr
         (
             name,
             mesh,

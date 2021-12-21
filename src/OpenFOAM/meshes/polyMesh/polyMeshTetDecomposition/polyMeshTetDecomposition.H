@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,10 +59,9 @@ namespace Foam
 
 class polyMeshTetDecomposition
 {
-
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Minimum tetrahedron quality
         static const scalar minTetQuality;
@@ -70,13 +70,22 @@ public:
     // Member Functions
 
         //- Given a face and cc and starting index for triangulation determine
-        //  the worst tet quality.
+        //- the worst tet quality.
         static scalar minQuality
         (
             const polyMesh& mesh,
             const point& cC,
             const label fI,
             const bool isOwner,
+            const label faceBasePtI
+        );
+
+        //- Given a face and starting index for triangulation determine
+        //- the worst tet quality (owner or neighbour)
+        static scalar minQuality
+        (
+            const polyMesh& mesh,
+            const label facei,
             const label faceBasePtI
         );
 
@@ -117,7 +126,7 @@ public:
         );
 
         //- Find a suitable base point for each face for decomposition
-        //  into tets
+        //- into tets
         static labelList findFaceBasePts
         (
             const polyMesh& mesh,
@@ -157,6 +166,14 @@ public:
             const polyMesh& mesh,
             label cI,
             const point& pt
+        );
+
+
+        //- Return an adjusted list of tet base points
+        static labelList adjustTetBasePtIs
+        (
+            const polyMesh& mesh,
+            const bool report = false
         );
 };
 

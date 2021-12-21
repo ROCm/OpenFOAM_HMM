@@ -62,15 +62,14 @@ template<>
 const char* const
 Foam::ensightPTraits<Foam::sphericalTensor>::typeName = "scalar";
 
-
 template<>
 const Foam::direction
 Foam::ensightPTraits<Foam::sphericalTensor>::componentOrder[] = {0};
 
+
 template<>
 const char* const
 Foam::ensightPTraits<Foam::symmTensor>::typeName = "tensor symm";
-
 
 template<>
 const Foam::direction

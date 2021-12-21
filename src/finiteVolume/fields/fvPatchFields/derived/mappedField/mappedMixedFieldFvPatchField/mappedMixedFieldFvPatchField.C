@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,39 +61,7 @@ Foam::mappedMixedFieldFvPatchField<Type>::mappedMixedFieldFvPatchField
     mappedPatchBase(p.patch(), dict),
     mappedPatchFieldBase<Type>(*this, *this, dict),
     weightFieldName_(dict.getOrDefault<word>("weightField", word::null))
-{
-    mixedFvPatchField<Type>::operator=
-    (
-        Field<Type>("value", dict, p.size())
-    );
-
-    if (dict.found("refValue"))
-    {
-        // Full restart
-        this->refValue() = Field<Type>("refValue", dict, p.size());
-        this->refGrad() = Field<Type>("refGradient", dict, p.size());
-        this->valueFraction() = scalarField("valueFraction", dict, p.size());
-    }
-    else
-    {
-        // Start from user entered data. Assume fixedValue.
-        this->refValue() = *this;
-        this->refGrad() = Zero;
-        this->valueFraction() = 1.0;
-    }
-
-    // Store patch value as initial guess when running in database mode
-    mappedPatchFieldBase<Type>::initRetrieveField
-    (
-        this->internalField().name(),
-        *this
-    );
-    mappedPatchFieldBase<Type>::initRetrieveField
-    (
-        this->internalField().name() + "_weights",
-        this->patch().deltaCoeffs()
-    );
-}
+{}
 
 
 template<class Type>

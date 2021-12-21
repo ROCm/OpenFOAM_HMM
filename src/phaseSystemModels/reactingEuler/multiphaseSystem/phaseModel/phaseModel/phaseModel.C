@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,9 +102,9 @@ Foam::phaseModel::New
     Info<< "Selecting phaseModel for "
         << phaseName << ": " << modelType << endl;
 
-    auto cstrIter = phaseSystemConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = phaseSystemConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -115,7 +115,7 @@ Foam::phaseModel::New
         ) << abort(FatalIOError);
     }
 
-    return cstrIter()(fluid, phaseName, index);
+    return ctorPtr(fluid, phaseName, index);
 }
 
 

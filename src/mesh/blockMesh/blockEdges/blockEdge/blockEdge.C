@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,13 +44,12 @@ namespace Foam
 Foam::blockEdge::blockEdge
 (
     const pointField& points,
-    const label start,
-    const label end
+    const edge& fromTo
 )
 :
     points_(points),
-    start_(start),
-    end_(end)
+    start_(fromTo.first()),
+    end_(fromTo.last())
 {}
 
 
@@ -88,9 +87,9 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
     const word edgeType(is);
 
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(edgeType);
+    auto* ctorPtr = IstreamConstructorTable(edgeType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -101,7 +100,7 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<blockEdge>(cstrIter()(dict, index, geometry, points, is));
+    return autoPtr<blockEdge>(ctorPtr(dict, index, geometry, points, is));
 }
 
 
@@ -109,13 +108,13 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
 Foam::pointField Foam::blockEdge::appendEndPoints
 (
-    const pointField& pts,
-    const label start,
-    const label end,
+    const pointField& p,
+    const label from,
+    const label to,
     const pointField& intermediate
 )
 {
-    return pointField(polyLine::concat(pts[start], intermediate, pts[end]));
+    return pointField(polyLine::concat(p[from], intermediate, p[to]));
 }
 
 

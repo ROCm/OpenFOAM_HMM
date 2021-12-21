@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,7 @@ Class
     Foam::wallBoilingModels::nucleationSiteModel
 
 Description
-    Base class for nucleation site density models
+    Base class for nucleation site density models.
 
 SourceFiles
     nucleationSiteModel.C
@@ -105,7 +106,10 @@ public:
             const scalarField& L
         ) const = 0;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

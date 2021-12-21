@@ -30,7 +30,6 @@ License
 #include "processorPolyPatch.H"
 #include "processorCyclicPolyPatch.H"
 #include "Time.H"
-//#include "IOPtrList.H"
 #include "polyBoundaryMeshEntries.H"
 #include "IOobjectList.H"
 #include "pointSet.H"
@@ -38,20 +37,15 @@ License
 #include "cellSet.H"
 #include "basicFvGeometryScheme.H"
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-//namespace Foam
-//{
-//    defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
-//}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Read mesh if available. Otherwise create empty mesh with same non-proc
-// patches as proc0 mesh. Requires all processors to have all patches
-// (and in same order).
+// patches as proc0 mesh. Requires:
+//  - all processors to have all patches (and in same order).
+//  - io.instance() set to facesInstance
 Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
 (
+    const bool decompose,
     const IOobject& io
 )
 {
@@ -77,45 +71,14 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     PtrList<entry> patchEntries;
     if (Pstream::master())
     {
-        //// Read PtrList of dictionary as dictionary.
-        //const word oldTypeName = IOPtrList<entry>::typeName;
-        //const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
-        //IOPtrList<entry> dictList
-        //(
-        //    IOobject
-        //    (
-        //        "boundary",
-        //        io.time().findInstance
-        //        (
-        //            meshSubDir,
-        //            "boundary",
-        //            IOobject::MUST_READ
-        //        ),
-        //        meshSubDir,
-        //        io.db(),
-        //        IOobject::MUST_READ,
-        //        IOobject::NO_WRITE,
-        //        false
-        //    )
-        //);
-        //const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
-        //// Fake type back to what was in field
-        //const_cast<word&>(dictList.type()) = dictList.headerClassName();
-        //
-        //patchEntries.transfer(dictList);
-        const fileName facesInstance = io.time().findInstance
-        (
-            meshSubDir,
-            "faces",
-            IOobject::MUST_READ
-        );
+        const bool oldParRun = Pstream::parRun(false);
 
         patchEntries = polyBoundaryMeshEntries
         (
             IOobject
             (
                 "boundary",
-                facesInstance,
+                io.instance(),  //facesInstance,
                 meshSubDir,
                 io.db(),
                 IOobject::MUST_READ,
@@ -123,6 +86,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
                 false
             )
         );
+
+        Pstream::parRun(oldParRun);
 
         // Send patches
         for (const int slave : Pstream::subProcs())
@@ -148,13 +113,25 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     // ~~~~~~~~~~~~
 
     // Check who has a mesh
-    const bool haveMesh = fileHandler().isFile
-    (
-        fileHandler().filePath
+    bool haveMesh;
+    if (decompose)
+    {
+        // Mesh needs to be present on the master only
+        haveMesh = Pstream::master();
+    }
+    else
+    {
+        const fileName facesFile
         (
-            io.time().path()/io.instance()/meshSubDir/"faces"
-        )
-    );
+            io.time().path()
+           /io.instance()   //facesInstance
+           /meshSubDir
+           /"faces"
+        );
+
+        // Check presence of the searched-for faces file
+        haveMesh = fileHandler().isFile(fileHandler().filePath(facesFile));
+    }
 
     if (!haveMesh)
     {
@@ -285,7 +262,11 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             const word type(e.dict().get<word>("type"));
             const word& name = e.keyword();
 
-            if (type == processorPolyPatch::typeName)
+            if
+            (
+                type == processorPolyPatch::typeName
+             || type == processorCyclicPolyPatch::typeName
+            )
             {
                 break;
             }
@@ -384,7 +365,10 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     if (Pstream::master())
     {
         // Read sets
+        const bool oldParRun = Pstream::parRun(false);
         IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        Pstream::parRun(oldParRun);
+
         pointSetNames = objects.sortedNames(pointSet::typeName);
         faceSetNames = objects.sortedNames(faceSet::typeName);
         cellSetNames = objects.sortedNames(cellSet::typeName);
@@ -410,17 +394,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     }
 
 
-//    if (!haveMesh)
-//    {
-//        // We created a dummy mesh file above. Delete it.
-//        const fileName meshFiles = io.time().path()/io.instance()/meshSubDir;
-//        //Pout<< "Removing dummy mesh " << meshFiles << endl;
-//        mesh.removeFiles();
-//        rmDir(meshFiles);
-//    }
-//
     // Force recreation of globalMeshData.
-//    mesh.clearOut();
     mesh.globalData();
 
 
@@ -439,6 +413,112 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     mesh.pointZones().checkParallelSync(true);
 
     return meshPtr;
+}
+
+
+bool Foam::removeEmptyDir(const fileName& path)
+{
+    // Return true if empty directory. Note bypass of fileHandler to be
+    // consistent with polyMesh.removeFiles for now.
+
+    {
+        fileNameList files
+        (
+            Foam::readDir
+            (
+                path,
+                fileName::FILE,
+                false,                  // filterGz
+                false                   // followLink
+            )
+        );
+        if (files.size())
+        {
+            return false;
+        }
+    }
+    {
+        fileNameList dirs
+        (
+            Foam::readDir
+            (
+                path,
+                fileName::DIRECTORY,
+                false,                  // filterGz
+                false                   // followLink
+            )
+        );
+        if (dirs.size())
+        {
+            return false;
+        }
+    }
+    {
+        fileNameList links
+        (
+            Foam::readDir
+            (
+                path,
+                fileName::LINK,
+                false,                  // filterGz
+                false                   // followLink
+            )
+        );
+        if (links.size())
+        {
+            return false;
+        }
+    }
+    {
+        fileNameList other
+        (
+            Foam::readDir
+            (
+                path,
+                fileName::UNDEFINED,
+                false,                  // filterGz
+                false                   // followLink
+            )
+        );
+        if (other.size())
+        {
+            return false;
+        }
+    }
+
+    // Avoid checking success of deletion since initial path might not
+    // exist (e.g. contain 'region0'). Will stop when trying to delete
+    // parent directory anyway since now not empty.
+    Foam::rm(path);
+    return true;
+}
+
+
+void Foam::removeEmptyDirs(const fileName& meshPath)
+{
+    // Delete resulting directory if empty
+    fileName path(meshPath);
+    path.clean();
+
+    // Do subdirectories
+    {
+        const fileNameList dirs
+        (
+            Foam::readDir
+            (
+                path,
+                fileName::DIRECTORY,
+                false,                  // filterGz
+                false                   // followLink
+            )
+        );
+        for (const auto& dir : dirs)
+        {
+            removeEmptyDirs(path/dir);
+        }
+    }
+
+    removeEmptyDir(path);
 }
 
 

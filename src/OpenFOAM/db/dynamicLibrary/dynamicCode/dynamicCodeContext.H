@@ -176,6 +176,9 @@ public:
 
     // Reading
 
+        //- Locate literal dictionary entry, nullptr if not found
+        const entry* findEntry(const word& key) const;
+
         //- Read string entry from context dictionary
         //- append content to SHA1 hashing and add line number etc.
         //

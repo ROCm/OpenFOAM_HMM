@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +41,6 @@ namespace Foam
     addToRunTimeSelectionTable(sampledSet, uniformSet, word);
 }
 
-const Foam::scalar Foam::uniformSet::tol = 1e-3;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -56,14 +55,14 @@ bool Foam::uniformSet::nextSample
 {
     bool pointFound = false;
 
-    const vector normOffset = offset/mag(offset);
+    const vector normOffset(offset/mag(offset));
 
     samplePt += offset;
     ++sampleI;
 
     for (; sampleI < nPoints_; ++sampleI)
     {
-        scalar s = (samplePt - currentPt) & normOffset;
+        const scalar s = (samplePt - currentPt) & normOffset;
 
         if (s > -smallDist)
         {
@@ -92,9 +91,8 @@ bool Foam::uniformSet::trackToBoundary
 ) const
 {
     // distance vector between sampling points
-    const vector offset = (end_ - start_)/(nPoints_ - 1);
-    const vector smallVec = tol*offset;
-    const scalar smallDist = mag(smallVec);
+    const vector offset((end_ - start_)/(nPoints_ - 1));
+    const scalar smallDist = mag(tol_*offset);
 
     point trackPt = singleParticle.position();
 
@@ -205,9 +203,9 @@ void Foam::uniformSet::calcSamples
             << exit(FatalError);
     }
 
-    const vector offset = (end_ - start_)/(nPoints_ - 1);
-    const vector normOffset = offset/mag(offset);
-    const vector smallVec = tol*offset;
+    const vector offset((end_ - start_)/(nPoints_ - 1));
+    const vector normOffset(offset/mag(offset));
+    const vector smallVec(tol_*offset);
     const scalar smallDist = mag(smallVec);
 
     // Force calculation of cloud addressing on all processors
@@ -236,7 +234,7 @@ void Foam::uniformSet::calcSamples
     label trackCelli = -1;
     label trackFacei = -1;
 
-    bool isSample =
+    const bool isSample =
         getTrackingPoint
         (
             start_,
@@ -325,7 +323,7 @@ void Foam::uniformSet::calcSamples
 
         while (bHitI < bHits.size())
         {
-            scalar dist =
+            const scalar dist =
                 (bHits[bHitI].hitPoint() - singleParticle.position())
               & normOffset;
 
@@ -341,6 +339,8 @@ void Foam::uniformSet::calcSamples
             if (dist > smallDist)
             {
                 // hitpoint is past tracking position
+                bPoint = bHits[bHitI].hitPoint();
+                bFacei = bHits[bHitI].index();
                 foundValidB = true;
                 break;
             }
@@ -427,6 +427,7 @@ Foam::uniformSet::uniformSet
     sampledSet(name, mesh, searchEngine, axis),
     start_(start),
     end_(end),
+    tol_(1e-3),
     nPoints_(nPoints)
 {
     genSamples();
@@ -444,6 +445,7 @@ Foam::uniformSet::uniformSet
     sampledSet(name, mesh, searchEngine, dict),
     start_(dict.get<point>("start")),
     end_(dict.get<point>("end")),
+    tol_(dict.getCheckOrDefault<scalar>("tol", 1e-3, scalarMinMax::ge(0))),
     nPoints_(dict.get<label>("nPoints"))
 {
     genSamples();

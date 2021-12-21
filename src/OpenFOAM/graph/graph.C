@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,9 +219,9 @@ Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
             << exit(FatalError);
     }
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(graphFormat);
+    auto* ctorPtr = wordConstructorTable(graphFormat);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -231,7 +231,7 @@ Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<graph::writer>(cstrIter()());
+    return autoPtr<graph::writer>(ctorPtr());
 }
 
 

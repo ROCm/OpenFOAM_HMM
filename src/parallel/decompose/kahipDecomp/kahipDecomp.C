@@ -94,37 +94,72 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     }
     #endif
 
-    int numCells = xadj.size()-1;
+    int numCells = max(0, (xadj.size()-1));
+
+    // Addressing
+    ConstPrecisionAdaptor<int, label, List> adjncy_param(adjncy);
+    ConstPrecisionAdaptor<int, label, List> xadj_param(xadj);
+
+    // Output: cell -> processor addressing
+    decomp.resize(numCells);
+    decomp = 0;
+    PrecisionAdaptor<int, label, List> decomp_param(decomp, false);
+
+    // Avoid potential nullptr issues with zero-sized arrays
+    labelList adjncy_dummy, xadj_dummy, decomp_dummy;
+    if (!numCells)
+    {
+        adjncy_dummy.resize(1, 0);
+        adjncy_param.set(adjncy_dummy);
+
+        xadj_dummy.resize(2, 0);
+        xadj_param.set(xadj_dummy);
+
+        decomp_dummy.resize(1, 0);
+        decomp_param.clear();  // Avoid propagating spurious values
+        decomp_param.set(decomp_dummy);
+    }
+
+
+    // Graph
+    // ~~~~~
+
+    // Check for externally provided cellweights and if so initialise weights
+
+    bool hasWeights = !cWeights.empty();
+
+    // Note: min, not gMin since routine runs on master only.
+    const scalar minWeights = hasWeights ? min(cWeights) : scalar(1);
+
+    if (minWeights <= 0)
+    {
+        hasWeights = false;
+        WarningInFunction
+            << "Illegal minimum weight " << minWeights
+            << " ... ignoring"
+            << endl;
+    }
+    else if (hasWeights && (cWeights.size() != numCells))
+    {
+        FatalErrorInFunction
+            << "Number of cell weights " << cWeights.size()
+            << " does not equal number of cells " << numCells
+            << exit(FatalError);
+    }
 
     // Cell weights (so on the vertices of the dual)
     List<int> cellWeights;
 
-    // Check for externally provided cellweights and if so initialise weights
-    // Note: min, not gMin since routine runs on master only.
-    const scalar minWeights = min(cWeights);
-
-    if (!cWeights.empty())
+    if (hasWeights)
     {
-        if (minWeights <= 0)
-        {
-            WarningInFunction
-                << "Illegal minimum weight " << minWeights
-                << endl;
-        }
-
-        if (cWeights.size() != numCells)
-        {
-            FatalErrorInFunction
-                << "Number of cell weights " << cWeights.size()
-                << " does not equal number of cells " << numCells
-                << exit(FatalError);
-        }
-
         // Convert to integers.
-        cellWeights.setSize(cWeights.size());
+        cellWeights.resize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(cWeights[i]/minWeights);
+            cellWeights[i] = static_cast<int>
+            (
+                cWeights[i]/minWeights
+            );
         }
     }
 
@@ -215,20 +250,12 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     // Output: number of cut edges
     int edgeCut = 0;
 
-    // Addressing
-    ConstPrecisionAdaptor<int, label, List> xadj_param(xadj);
-    ConstPrecisionAdaptor<int, label, List> adjncy_param(adjncy);
-
-    // Output: cell -> processor addressing
-    decomp.resize(numCells);
-    PrecisionAdaptor<int, label, List> decomp_param(decomp, false);
-
 
 #if 0 // WIP: #ifdef KAFFPA_CPP_INTERFACE
     kaffpa_cpp
     (
         &numCells,          // num vertices in graph
-        (cellWeights.size() ? cellWeights.begin() : nullptr), // vertex wts
+        (cellWeights.empty() ? nullptr : cellWeights.data()), // vertex wts
         xadj_param.constCast().data(),          // indexing into adjncy
         nullptr,            // edge wts
         adjncy_param.constCast().data(),        // neighbour info
@@ -245,7 +272,7 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     kaffpa
     (
         &numCells,          // num vertices in graph
-        (cellWeights.size() ? cellWeights.begin() : nullptr), // vertex wts
+        (cellWeights.empty() ? nullptr : cellWeights.data()), // vertex wts
         xadj_param.constCast().data(),          // indexing into adjncy
         nullptr,            // edge wts
         adjncy_param.constCast().data(),        // neighbour info

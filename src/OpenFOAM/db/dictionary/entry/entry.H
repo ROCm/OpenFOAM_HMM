@@ -87,7 +87,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Keyword of entry
         keyType keyword_;
@@ -112,6 +112,14 @@ private:
 
         //- Emit IOError about bad input for the entry
         void raiseBadInput(const ITstream& is) const;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Report a read warning (on std::cerr)
+        static void reportReadWarning(const IOstream&, const std::string&);
 
 
 public:
@@ -202,6 +210,9 @@ public:
         //- Return the entry name for modification
         virtual fileName& name() = 0;
 
+        //- Return the entry name relative to the current case
+        virtual fileName relativeName() const = 0;
+
         //- Return line number of first token in dictionary
         virtual label startLineNumber() const = 0;
 
@@ -210,7 +221,7 @@ public:
 
 
         //- Return true if this entry is a stream
-        virtual bool isStream() const
+        virtual bool isStream() const noexcept
         {
             return false;
         }
@@ -220,21 +231,21 @@ public:
 
 
         //- Return true if this entry is a dictionary
-        virtual bool isDict() const
+        virtual bool isDict() const noexcept
         {
             return this->dictPtr();
         }
 
         //- Return pointer to dictionary, if entry is a dictionary.
         //  Return nullptr if the entry is not a dictionary.
-        virtual const dictionary* dictPtr() const
+        virtual const dictionary* dictPtr() const noexcept
         {
             return nullptr;
         }
 
         //- Return non-const pointer to dictionary, if entry is a dictionary
         //  Return nullptr if the entry is not a dictionary.
-        virtual dictionary* dictPtr()
+        virtual dictionary* dictPtr() noexcept
         {
             return nullptr;
         }

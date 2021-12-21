@@ -73,11 +73,11 @@ Usage
         p            | pressure field name     | no          | p
         origin       | fan centre              | no          | calculated
         rpm          | RPM of the fan          | yes
-        rEff         | Effective radius        | no          | 0.0
-        fanEff       | Fan efficiency          | no          | 1.0
+        fanEff       | Fan efficiency          | no          | 1
+        rEff         | Effective radius        | no          | 0
         useRealRadius| Use inner/outer radii   | no          | false
-        rInner       | Inner radius            | no          | 0.0
-        rOuter       | Outer radius            | no          | 0.0
+        rInner       | Inner radius            | no          | 0
+        rOuter       | Outer radius            | no          | 0
     \endtable
 
     Example of the boundary condition specification:
@@ -137,11 +137,11 @@ class swirlFanVelocityFvPatchField
         //- Fan rpm
         autoPtr<Function1<scalar>> rpm_;
 
-        //- Effective fan radius
-        scalar rEff_;
-
         //- Fan efficiency
         scalar fanEff_;
+
+        //- Effective fan radius
+        scalar rEff_;
 
         //- Inner radius
         scalar rInner_;

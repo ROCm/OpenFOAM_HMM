@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,17 +36,31 @@ inline Foam::label Foam::expressions::volumeExpr::parseDriver::size
     {
         case FieldAssociation::POINT_DATA :
             return mesh_.nPoints();
-            break;
-        case FieldAssociation::SURFACE_DATA :
+
+        case FieldAssociation::FACE_DATA :
             return mesh_.nInternalFaces();
-            break;
+
         case FieldAssociation::VOLUME_DATA :
             return mesh_.nCells();
-            break;
+
         default:
             break;
     }
     return 0;
+}
+
+
+inline bool Foam::expressions::volumeExpr::parseDriver::hasDimensions()
+const noexcept
+{
+    return hasDimensions_;
+}
+
+
+inline const Foam::dimensionSet&
+Foam::expressions::volumeExpr::parseDriver::dimensions() const noexcept
+{
+    return resultDimensions_;
 }
 
 

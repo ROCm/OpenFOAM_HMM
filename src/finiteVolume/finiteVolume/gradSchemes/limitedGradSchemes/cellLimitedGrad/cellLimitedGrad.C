@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,8 +108,8 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
         const Type& vsfOwn = vsf[own];
         const Type& vsfNei = vsf[nei];
@@ -135,7 +136,7 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
                 const Type& vsfNei = psfNei[pFacei];
 
                 maxVsf[own] = max(maxVsf[own], vsfNei);
@@ -146,7 +147,7 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         {
             forAll(pOwner, pFacei)
             {
-                label own = pOwner[pFacei];
+                const label own = pOwner[pFacei];
                 const Type& vsfNei = psf[pFacei];
 
                 maxVsf[own] = max(maxVsf[own], vsfNei);
@@ -172,8 +173,8 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
         // owner side
         limitFace
@@ -201,7 +202,7 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
         forAll(pOwner, pFacei)
         {
-            label own = pOwner[pFacei];
+            const label own = pOwner[pFacei];
 
             limitFace
             (

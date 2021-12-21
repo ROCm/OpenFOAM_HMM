@@ -737,6 +737,28 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 Foam::cyclicPolyPatch::cyclicPolyPatch
 (
     const cyclicPolyPatch& pp,
+    const label nrbPatchID,
+    const labelList& faceCells
+)
+:
+    coupledPolyPatch(pp, faceCells),
+    neighbPatchName_(pp.neighbPatchName_),
+    coupleGroup_(pp.coupleGroup_),
+    neighbPatchID_(nrbPatchID),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_),
+    separationVector_(pp.separationVector_),
+    coupledPointsPtr_(nullptr),
+    coupledEdgesPtr_(nullptr)
+{
+    // Neighbour patch might not be valid yet so no transformation
+    // calculation possible.
+}
+
+
+Foam::cyclicPolyPatch::cyclicPolyPatch
+(
+    const cyclicPolyPatch& pp,
     const polyBoundaryMesh& bm,
     const label index,
     const label newSize,

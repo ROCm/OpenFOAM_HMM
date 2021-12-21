@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -27,6 +27,7 @@
 #     SCOTCH_ARCH_PATH
 #     SCOTCH_INC_DIR
 #     SCOTCH_LIB_DIR
+#     SCOTCH_LIBNAME_SUFFIX [optional]
 #
 # Functions provided [Must call have_scotch first]
 #     have_ptscotch, search_ptscotch
@@ -70,6 +71,10 @@
 # when MPI_ARCH_PATH=/usr/lib64/openmpi
 # and mpicc --showme:compile -> -I/usr/include/openmpi-x86_64
 #
+# NB: for RedHat (8+) /usr/include/scotch.h is a wrapper that includes
+#    /usr/include/scotch-64.h  (LP64 mode)
+# or /usr/include/scotch-32.h  (ILP32 mode)
+# In either case, int is 32 bits
 #
 # openSUSE
 # --------
@@ -90,7 +95,7 @@
 no_scotch()
 {
     unset HAVE_SCOTCH SCOTCH_ARCH_PATH SCOTCH_INC_DIR SCOTCH_LIB_DIR
-    unset SCOTCH_VERSION
+    unset SCOTCH_VERSION SCOTCH_LIBNAME_SUFFIX
     unset HAVE_PTSCOTCH PTSCOTCH_ARCH_PATH PTSCOTCH_INC_DIR PTSCOTCH_LIB_DIR
 }
 
@@ -102,11 +107,19 @@ echo_scotch()
     echo "root=\"$SCOTCH_ARCH_PATH\""
     echo "include=\"$SCOTCH_INC_DIR\""
     echo "library=\"$SCOTCH_LIB_DIR\""
+    if [ -n "$SCOTCH_LIBNAME_SUFFIX" ]
+    then
+        echo "libsuffix=\"$SCOTCH_LIBNAME_SUFFIX\""
+    fi
     echo
     echo "ptscotch=${HAVE_PTSCOTCH:-false}"
     echo "root=\"$PTSCOTCH_ARCH_PATH\""
     echo "include=\"$PTSCOTCH_INC_DIR\""
     echo "library=\"$PTSCOTCH_LIB_DIR\""
+    if [ -n "$SCOTCH_LIBNAME_SUFFIX" ]
+    then
+        echo "libsuffix=\"$SCOTCH_LIBNAME_SUFFIX\""
+    fi
 }
 
 
@@ -137,7 +150,7 @@ search_scotch()
             "$prefix/include/scotch/$incName" \
             "$prefix/include/$incName" \
         )
-        library=$(findExtLib "$libName")
+        library="-extlib"  # Delay search...
     elif isSystem "$prefix"
     then
         header=$(findFirstFile \
@@ -161,6 +174,41 @@ search_scotch()
         return 2
     }
 
+    # ----------------------------------
+    # Extract 'typedef int64_t SCOTCH_Num' etc from header file
+    # - ensure consistent size between OpenFOAM and scotch header
+    # - for some systems, scotch.h includes scotch-64.h (for example).
+
+    local label
+    for hdr in \
+        "$header" \
+        "${header%/*}"/scotch-64.h \
+        "${header%/*}"/scotch-32.h \
+    ;
+    do
+        if [ -f "$hdr" ]
+        then
+            label=$(sed -ne \
+                's/^.*typedef *\([^ ]*\) *SCOTCH_Num.*/\1/p' \
+                "$hdr")
+
+            if [ -n "$label" ]
+            then
+                header="$hdr"  # Appears successful
+                break
+            fi
+        fi
+    done
+    : "${label:=unknown}"  # Safety
+
+    # Transform (int32_t | int64_t) -> (int32 | int64)
+    case "$label" in (int32_t | int64_t) label="${label%_t}" ;; esac
+
+    if [ "$library" = "-extlib" ]
+    then
+        library=$(findExtLib "${libName}-${label}" "$libName")
+    fi
+
     # Library
     [ -n "$library" ] \
     || library=$(findLibrary -prefix="$prefix" -name="$libName" -local="$localDir") \
@@ -170,16 +218,6 @@ search_scotch()
     }
 
     # ----------------------------------
-
-    local label
-
-    # Ensure consistent sizes between OpenFOAM and scotch header
-    # extract 'typedef int64_t SCOTCH_Num' or equivalent
-    label=$(sed -ne \
-        's/^.*typedef *\([^ ]*\) *SCOTCH_Num.*/\1/p' \
-        "$header")
-    : "${label:=unknown}"
-
 
     # No SCOTCH_VERSION set? Try to obtain from header
     # extract #define SCOTCH_VERSION, SCOTCH_RELEASE, SCOTCH_PATCHLEVEL
@@ -197,8 +235,12 @@ search_scotch()
     )
     : "${SCOTCH_VERSION:=scotch}"  # Failsafe value
 
+    # Accept widening of OpenFOAM label to scotch label (SCOTCH_Num)
+    # but reject narrowing here instead of in the code
     case "$WM_LABEL_SIZE:$label" in
-    (32:int32_t | 32:int | 64:int64_t | 64:long)
+    ( 32:int32 | 32:int \
+    | 32:int64 | 32:long \
+    | 64:int64 | 64:long )
         ;;
 
     (*)
@@ -211,13 +253,22 @@ search_scotch()
         ;;
     esac
 
+    # Library name suffix (-int32 | -int64)
+    case "${library##*/}" in
+    (*-int32.*) export SCOTCH_LIBNAME_SUFFIX="-int32" ;;
+    (*-int64.*) export SCOTCH_LIBNAME_SUFFIX="-int64" ;;
+    esac
+
     # OK
-    echo "scotch (label=$label) - $prefix"
+    echo "scotch ($label) - $prefix"
     export HAVE_SCOTCH=true
     export SCOTCH_ARCH_PATH="$prefix"
     export SCOTCH_INC_DIR="${header%/*}"     # Basename
     export SCOTCH_LIB_DIR="${library%/*}"    # Basename
     export SCOTCH_VERSION
+
+    ##echo "DEBUG: header=$header" 1>&2
+    ##echo "DEBUG: library=$library" 1>&2
 }
 
 
@@ -256,7 +307,11 @@ search_ptscotch()
             "$prefix/include/$mpiName/$incName" \
             "$prefix/include/${mpiName}-$(uname -m)/$incName" \
         )
-        library="$(findExtLib $FOAM_MPI/$libName $libName)"
+        library=$(findExtLib \
+            "$FOAM_MPI/$libName${SCOTCH_LIBNAME_SUFFIX}" \
+            "$libName${SCOTCH_LIBNAME_SUFFIX}" \
+            "$FOAM_MPI/$libName${SCOTCH_LIBNAME_SUFFIX}" \
+        )
     elif isSystem "$prefix"
     then
         header=$(findFirstFile \
@@ -302,6 +357,9 @@ search_ptscotch()
     export PTSCOTCH_ARCH_PATH="$prefix"
     export PTSCOTCH_INC_DIR="${header%/*}"     # Basename
     export PTSCOTCH_LIB_DIR="${library%/*}"    # Basename
+
+    ##echo "DEBUG: header=$header" 1>&2
+    ##echo "DEBUG: library=$library" 1>&2
 }
 
 
@@ -366,8 +424,10 @@ no_scotch
 
 # Test/query
 case "$1" in
--test)
+-test | -debug-test)
+    [ "$1" = "-debug-test" ] && set -x
     have_scotch && have_ptscotch
+    [ "$1" = "-debug-test" ] && set +x
     echo_scotch
     ;;
 -query)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "int32.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<int32_t>::componentNames[] = { "" };
 
@@ -39,7 +39,10 @@ const int32_t Foam::pTraits<int32_t>::max = INT32_MAX;
 const int32_t Foam::pTraits<int32_t>::rootMin = pTraits<int32_t>::min;
 const int32_t Foam::pTraits<int32_t>::rootMax = pTraits<int32_t>::max;
 
-Foam::pTraits<int32_t>::pTraits(const int32_t& val)
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pTraits<int32_t>::pTraits(const int32_t& val) noexcept
 :
     p_(val)
 {}

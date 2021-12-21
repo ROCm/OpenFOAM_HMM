@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -227,6 +228,12 @@ public:
         {
             return this->nut(patchi) + this->nu(patchi);
         }
+
+        //- Return the turbulence kinetic energy dissipation rate
+        virtual tmp<volScalarField> epsilon() const;
+
+        //- Return the specific dissipation rate
+        virtual tmp<volScalarField> omega() const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();

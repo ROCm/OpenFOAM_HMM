@@ -44,13 +44,13 @@ bool Foam::regIOobject::masterOnlyReading = false;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
+Foam::regIOobject::regIOobject(const IOobject& io, const bool isTimeObject)
 :
     IOobject(io),
     registered_(false),
     ownedByRegistry_(false),
     watchIndices_(),
-    eventNo_(isTime ? 0 : db().getEvent()), // No event for top-level Time
+    eventNo_(isTimeObject ? 0 : db().getEvent()), // No event for top-level Time
     metaDataPtr_(nullptr),
     isPtr_(nullptr)
 {

@@ -86,17 +86,8 @@ bool Foam::regIOobject::readHeaderOk
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::regIOobject::readStream(const bool valid)
+void Foam::regIOobject::readStream(const bool valid)
 {
-    if (IFstream::debug)
-    {
-        Pout<< "regIOobject::readStream() : "
-            << "reading object " << name()
-            << " (global " << global() << ")"
-            << " from file " << objectPath()
-            << endl;
-    }
-
     if (readOpt() == NO_READ)
     {
         FatalErrorInFunction
@@ -131,8 +122,6 @@ Foam::Istream& Foam::regIOobject::readStream(const bool valid)
 
         isPtr_ = fileHandler().readStream(*this, objPath, type(), valid);
     }
-
-    return *isPtr_;
 }
 
 

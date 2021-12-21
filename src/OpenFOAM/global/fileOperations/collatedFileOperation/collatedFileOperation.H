@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,12 @@ Description
     Version of masterUncollatedFileOperation that collates regIOobjects
     into a container in the processors/ subdirectory.
 
-    Uses threading if maxThreadFileBufferSize > 0.
+    Uses threading if maxThreadFileBufferSize != 0.
+        > 0 : Can use mpi inside thread to collect data if buffer is not
+              large enough. Does need full thread support inside MPI.
+
+        < 0 : special : -maxThreadFileBufferSize is guaranteed large enough
+              for all writing. Initialises MPI without thread support.
 
 See also
     masterUncollatedFileOperation

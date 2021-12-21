@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "globalIndex.H"
 #include "Pstream.H"
 #include "ListOps.H"
 
@@ -123,38 +124,96 @@ void Foam::vtk::writeLists
 
 
 template<class Type>
+void Foam::vtk::writeValueParallel
+(
+    vtk::formatter& fmt,
+    const Type& val,
+    const label count
+)
+{
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+    // Gather [count, value] tuples, including from master
+    const List<std::pair<label, Type>> countValues
+    (
+        UPstream::listGatherValues<std::pair<label, Type>>
+        (
+            std::pair<label, Type>(count, val)
+        )
+    );
+
+    if (Pstream::master())
+    {
+        for (const auto& countVal : countValues)
+        {
+            // Write [count, value] tuple
+            vtk::write(fmt, countVal.first, countVal.second);
+        }
+    }
+}
+
+
+template<class Type>
 void Foam::vtk::writeListParallel
 (
     vtk::formatter& fmt,
     const UList<Type>& values
 )
 {
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(values.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values);
 
-        List<Type> recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<Type> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
         }
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        // Send
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values.cdata_bytes(),
+            values.size_bytes()
         );
-
-        toMaster << values;
     }
 }
 
@@ -167,32 +226,59 @@ void Foam::vtk::writeListParallel
     const labelUList& addressing
 )
 {
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+
+    List<Type> sendData;
+    if (!Pstream::master())
+    {
+        sendData = UIndirectList<Type>(values, addressing);
+    }
+
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(sendData.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values, addressing);
 
-        List<Type> recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<Type> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
         }
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            sendData.cdata_bytes(),
+            sendData.size_bytes()
         );
-
-        toMaster << List<Type>(values, addressing);
     }
 }
 
@@ -205,32 +291,59 @@ void Foam::vtk::writeListParallel
     const bitSet& selected
 )
 {
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+
+    List<Type> sendData;
+    if (!Pstream::master())
+    {
+        sendData = subset(selected, values);
+    }
+
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(sendData.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values, selected);
 
-        List<Type> recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<Type> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
         }
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            sendData.cdata_bytes(),
+            sendData.size_bytes()
         );
-
-        toMaster << subset(selected, values);
     }
 }
 
@@ -243,34 +356,82 @@ void Foam::vtk::writeListsParallel
     const UList<Type>& values2
 )
 {
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+
+    // Gather sizes - master information and offsets are irrelevant
+    const globalIndex procAddr1
+    (
+        UPstream::listGatherValues<label>(values1.size()),
+        globalIndex::SIZES
+    );
+    const globalIndex procAddr2
+    (
+        UPstream::listGatherValues<label>(values2.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
+        // Write master data
         vtk::writeList(fmt, values1);
         vtk::writeList(fmt, values2);
 
-        List<Type> recv1, recv2;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<Type> recvData
+        (
+            max(procAddr1.maxNonLocalSize(), procAddr2.maxNonLocalSize())
+        );
+
+        for (const label proci : procAddr1.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            // values1
+            recvData.resize_nocopy(procAddr1.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
 
-            fromSlave >> recv1 >> recv2;
-
-            vtk::writeList(fmt, recv1);
-            vtk::writeList(fmt, recv2);
+            // values2
+            recvData.resize_nocopy(procAddr2.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
         }
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values1.cdata_bytes(),
+            values1.size_bytes()
         );
 
-        toMaster << values1 << values2;
+        UOPstream::write
+        (
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values2.cdata_bytes(),
+            values2.size_bytes()
+        );
     }
 }
 
@@ -284,34 +445,90 @@ void Foam::vtk::writeListsParallel
     const labelUList& addressing
 )
 {
+    if (!is_contiguous<Type>::value)
+    {
+        // Non-contiguous data does not make sense
+        FatalErrorInFunction
+            << "Contiguous data only" << endl
+            << Foam::exit(FatalError);
+    }
+
+
+    List<Type> sendData2;
+    if (!Pstream::master())
+    {
+        sendData2 = UIndirectList<Type>(values2, addressing);
+    }
+
+
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr1
+    (
+        UPstream::listGatherValues<label>(values1.size()),
+        globalIndex::SIZES
+    );
+    const globalIndex procAddr2
+    (
+        UPstream::listGatherValues<label>(sendData2.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
+        // Write master data
+
         vtk::writeList(fmt, values1);
         vtk::writeList(fmt, values2, addressing);
 
-        List<Type> recv1, recv2;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<Type> recvData
+        (
+            max(procAddr1.maxNonLocalSize(), procAddr2.maxNonLocalSize())
+        );
+
+        for (const label proci : procAddr1.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            // values1
+            recvData.resize_nocopy(procAddr1.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
 
-            fromSlave >> recv1 >> recv2;
-
-            vtk::writeList(fmt, recv1);
-            vtk::writeList(fmt, recv2);
+            // values2
+            recvData.resize_nocopy(procAddr2.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
+            vtk::writeList(fmt, recvData);
         }
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values1.cdata_bytes(),
+            values1.size_bytes()
         );
 
-        toMaster << values1 << List<Type>(values2, addressing);
+        UOPstream::write
+        (
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            sendData2.cdata_bytes(),
+            sendData2.size_bytes()
+        );
     }
 }
 

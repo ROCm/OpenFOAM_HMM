@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1243,6 +1243,11 @@ const
 void Foam::AMIInterpolation::write(Ostream& os) const
 {
     os.writeEntry("AMIMethod", type());
+
+    if (!requireMatch_)
+    {
+        os.writeEntry("requireMatch", requireMatch_);
+    }
 
     if (reverseTarget_)
     {

@@ -58,9 +58,14 @@ namespace Foam
 // Forward Declarations
 class fileName;
 class token;
+
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
+
+//- Hashing for fileName
+template<> struct Hash<fileName> : string::hasher {};
+
 
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration
@@ -358,7 +363,8 @@ public:
         // \endverbatim
         wordList components(const char delim = '/') const;
 
-        //- Return a single component of the path
+        //- Return a single component of the path or empty if out of range
+        //  The location \c npos returns the last component
         word component(const size_type cmpt, const char delim = '/') const;
 
 

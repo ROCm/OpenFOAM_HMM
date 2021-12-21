@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2020 PCOpt/NTUA
     Copyright (C) 2020 FOSS GP
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,9 +121,9 @@ Foam::autoPtr<Foam::controlPointsDefinition> Foam::controlPointsDefinition::New
 
     Info<< "controlPointsDefinition type : " << type << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = dictionaryConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -133,7 +134,7 @@ Foam::autoPtr<Foam::controlPointsDefinition> Foam::controlPointsDefinition::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<controlPointsDefinition>(cstrIter()(box));
+    return autoPtr<controlPointsDefinition>(ctorPtr(box));
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,8 +88,10 @@ class MRFZone
         //- Cell zone ID
         label cellZoneID_;
 
-        const wordRes excludedPatchNames_;
+        //- Non-rotating patches
+        wordRes excludedPatchNames_;
 
+        //- Indices of non-rotating patches
         labelList excludedPatchLabels_;
 
         //- Internal faces that are part of MRF
@@ -101,7 +104,7 @@ class MRFZone
         labelListList excludedFaces_;
 
         //- Origin of the axis
-        const vector origin_;
+        vector origin_;
 
         //- Axis vector
         vector axis_;
@@ -187,6 +190,12 @@ public:
 
         //- Return const access to the MRF active flag
         inline bool active() const;
+
+        //- Return const access to the MRF origin
+        inline const vector& origin() const;
+
+        //- Return const access to the MRF axis
+        inline const vector& axis() const;
 
         //- Return the current Omega vector
         vector Omega() const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,35 +32,55 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::MeshedSurface<Face>::checkZones()
+void Foam::MeshedSurface<Face>::checkZones(const bool verbose)
 {
-    // extra safety, ensure we have at some zones
-    // and they cover all the faces - fix start silently
-
     auto& zones = this->storedZones();
 
-    label count = 0;
+    // Check that zones (if any) they cover the faces
+    // - fix the start silently
+
+    bool zonesTooBig(false);
+
+    const label maxCount = this->size();
+
+    label start = 0;
     for (surfZone& zn : zones)
     {
-        zn.start() = count;
-        count += zn.size();
+        zn.start() = start;
+        start += zn.size();
+        if (start > maxCount)
+        {
+            zonesTooBig = true;  // Zones exceed what is required
+            zn.size() = (maxCount - zn.start());
+            start = (zn.start() + zn.size());
+        }
     }
 
     if (!zones.empty())
     {
-        if (count < this->size())
-        {
-            WarningInFunction
-                << "more faces " << this->size() << " than zones " << count
-                << " ... extending final zone" << nl;
+        surfZone& zn = zones.last();
 
-            zones.last().size() += count - this->size();
-        }
-        else if (count > this->size())
+        if ((zn.start() + zn.size()) < maxCount)
         {
-            FatalErrorInFunction
-                << "more zones " << count << " than faces " << this->size()
-                << exit(FatalError);
+            // Zones address less than expected - extend final zone
+            zn.size() += maxCount - zn.start();
+
+            if (verbose)
+            {
+                WarningInFunction
+                    << "Surface has more faces " << maxCount
+                    << " than zone addressing ... extending final zone" << nl;
+            }
+        }
+        else if (zonesTooBig)
+        {
+            if (verbose)
+            {
+                WarningInFunction
+                    << "Surface has more zone addressing than faces "
+                    << maxCount
+                    << " ... trucated/resized accordingly" << nl;
+            }
         }
     }
 }

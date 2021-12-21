@@ -118,15 +118,12 @@ void Foam::GAMGPreconditioner::precondition
         finestCorrectionScratch
     );
 
-
-    // Storage area when solveScalar != scalar
-    scalarField rA_s;
+    // Adapt solveScalarField back to scalarField (as required)
+    ConstPrecisionAdaptor<scalar, solveScalar> rA_adaptor(rA_ss);
+    const scalarField& rA = rA_adaptor.cref();
 
     for (label cycle=0; cycle<nVcycles_; cycle++)
     {
-        const scalarField& rA =
-            ConstPrecisionAdaptor<scalar, solveScalar>::get(rA_ss, rA_s);
-
         Vcycle
         (
             smoothers,

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,8 @@ SourceFiles
 #include "PtrList.H"
 #include "SLPtrList.H"
 #include "speciesTable.H"
-#include "HashPtrTable.H"
-#include "Reaction.H"
 #include "fileName.H"
+#include "Reaction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,13 +58,13 @@ class ReactionList
 :
     public SLPtrList<Reaction<ThermoType>>
 {
-    // Private data
+    // Private Data
 
         //- Reference to the table of species
         const speciesTable& species_;
 
         //- Reference to the thermo database
-        const HashPtrTable<ThermoType>& thermoDb_;
+        const ReactionTable<ThermoType>& thermoDb_;
 
         //- The dictionary used for construction
         const dictionary dict_;
@@ -81,18 +80,18 @@ public:
 
     // Constructors
 
-        //- Default construct
+        //- Construct empty list
         ReactionList
         (
             const speciesTable& species,
-            const HashPtrTable<ThermoType>& thermoDatabase
+            const ReactionTable<ThermoType>& thermoDatabase
         );
 
         //- Construct from dictionary
         ReactionList
         (
             const speciesTable& species,
-            const HashPtrTable<ThermoType>& thermoDatabase,
+            const ReactionTable<ThermoType>& thermoDatabase,
             const dictionary& dict
         );
 

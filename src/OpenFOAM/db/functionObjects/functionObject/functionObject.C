@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,8 @@ namespace Foam
 
 bool Foam::functionObject::postProcess(false);
 
+bool Foam::functionObject::defaultUseNamePrefix(false);
+
 Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
 
@@ -48,15 +50,25 @@ Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
 Foam::word Foam::functionObject::scopedName(const word& name) const
 {
-    return name_ + ":" + name;
+    if (useNamePrefix_)
+    {
+        return IOobject::scopedName(name_, name);
+    }
+
+    return name;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObject::functionObject(const word& name)
+Foam::functionObject::functionObject
+(
+    const word& name,
+    const bool withNamePrefix
+)
 :
     name_(name),
+    useNamePrefix_(withNamePrefix),
     log(postProcess)
 {}
 
@@ -108,9 +120,9 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
             << exit(FatalError);
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
+    auto* ctorPtr = dictionaryConstructorTable(functionType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         // FatalError (not FatalIOError) to ensure it can be caught
         // as an exception and ignored
@@ -122,20 +134,46 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<functionObject>(cstrIter()(name, runTime, dict));
+    return autoPtr<functionObject>(ctorPtr(name, runTime, dict));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::word& Foam::functionObject::name() const
+const Foam::word& Foam::functionObject::name() const noexcept
 {
     return name_;
 }
 
 
+bool Foam::functionObject::useNamePrefix() const noexcept
+{
+    return useNamePrefix_;
+}
+
+
+bool Foam::functionObject::useNamePrefix(bool on) noexcept
+{
+    bool old(useNamePrefix_);
+    useNamePrefix_ = on;
+    return old;
+}
+
+
 bool Foam::functionObject::read(const dictionary& dict)
 {
+// OR
+// useNamePrefix_ = Switch("useNamePrefix", dict, defaultUseNamePrefix);
+
+    useNamePrefix_ =
+        dict.getOrDefault
+        (
+            "useNamePrefix",
+            defaultUseNamePrefix,
+            keyType::LITERAL
+        );
+
+
     if (!postProcess)
     {
         log = dict.getOrDefault("log", true);

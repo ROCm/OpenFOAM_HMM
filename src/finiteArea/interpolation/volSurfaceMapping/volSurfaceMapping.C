@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,36 @@ Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
             faceID = bm[patchID].whichFace(faceLabels[i]);
 
             result[i] = df[patchID][faceID];
+        }
+    }
+
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
+(
+    const Field<Type>& f
+) const
+{
+    const labelList& faceLabels = mesh_.faceLabels();
+
+    auto tresult = tmp<Field<Type>>::New(faceLabels.size(), Zero);
+    auto& result = tresult.ref();
+
+    const polyMesh& pMesh = mesh_();
+    const polyBoundaryMesh& bm = pMesh.boundaryMesh();
+    label patchID, faceID;
+
+    forAll(faceLabels, i)
+    {
+        if (faceLabels[i] < pMesh.nFaces())
+        {
+            patchID = bm.whichPatch(faceLabels[i]);
+            faceID = bm[patchID].whichFace(faceLabels[i]);
+
+            result[i] = f[faceID];
         }
     }
 
@@ -152,13 +182,24 @@ void Foam::volSurfaceMapping::mapToField
     Field<Type>& f
 ) const
 {
+    const Field<Type>& afi = af.internalField();
+
+    mapToField(afi, f);
+}
+
+
+template<class Type>
+void Foam::volSurfaceMapping::mapToField
+(
+    const Field<Type>& af,
+    Field<Type>& f
+) const
+{
     const labelList& faceLabels = mesh_.faceLabels();
 
     const polyMesh& pMesh = mesh_();
     const polyBoundaryMesh& bm = pMesh.boundaryMesh();
     label patchID, faceID;
-
-    const Field<Type>& afi = af.internalField();
 
     forAll(faceLabels, i)
     {
@@ -166,7 +207,7 @@ void Foam::volSurfaceMapping::mapToField
         {
             patchID = bm.whichPatch(faceLabels[i]);
             faceID = bm[patchID].whichFace(faceLabels[i]);
-            f[faceID] = afi[i];
+            f[faceID] = af[i];
         }
     }
 }

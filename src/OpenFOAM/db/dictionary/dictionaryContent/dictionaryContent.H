@@ -87,6 +87,19 @@ public:
     // Member Functions
 
         //- Copy construct a dictionary,
+        //- filtered by simple allow/deny lists
+        //
+        //  An empty 'allow' list accepts everything not in the 'deny' list.
+        //
+        //  \return filtered dictionary copy
+        static dictionary copyDict
+        (
+            const dictionary& input,
+            const wordList& allow = wordList(),
+            const wordList& deny = wordList()
+        );
+
+        //- Copy construct a dictionary,
         //- filtered by a combination of allow/deny lists
         //
         //  An empty 'allow' list accepts everything not in the 'deny' list.
@@ -104,9 +117,10 @@ public:
         static dictionary copyDict
         (
             const dictionary& input,
-            const wordRes& allow = wordRes(),
+            const wordRes& allow,
             const wordRes& deny = wordRes()
         );
+
 
         //- Read-access to the content
         const dictionary& dict() const noexcept

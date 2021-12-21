@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,19 +34,19 @@ inline Foam::scalar Foam::TimeState::timeOutputValue() const
 }
 
 
-inline Foam::label Foam::TimeState::timeIndex() const
+inline Foam::label Foam::TimeState::timeIndex() const noexcept
 {
     return timeIndex_;
 }
 
 
-inline Foam::scalar Foam::TimeState::deltaTValue() const
+inline Foam::scalar Foam::TimeState::deltaTValue() const noexcept
 {
     return deltaT_;
 }
 
 
-inline Foam::scalar Foam::TimeState::deltaT0Value() const
+inline Foam::scalar Foam::TimeState::deltaT0Value() const noexcept
 {
     return deltaT0_;
 }
@@ -63,7 +64,7 @@ inline Foam::dimensionedScalar Foam::TimeState::deltaT0() const
 }
 
 
-inline bool Foam::TimeState::writeTime() const
+inline bool Foam::TimeState::writeTime() const noexcept
 {
     return writeTime_;
 }

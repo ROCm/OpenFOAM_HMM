@@ -134,7 +134,7 @@ Foam::fv::buoyancyTurbSource::buoyancyTurbSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     isEpsilon_(false),
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     alphatName_(coeffs_.getOrDefault<word>("alphat", "alphat")),

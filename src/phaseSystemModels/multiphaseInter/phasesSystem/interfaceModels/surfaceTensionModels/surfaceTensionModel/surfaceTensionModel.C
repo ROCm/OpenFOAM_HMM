@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,14 +32,17 @@ License
 
 namespace Foam
 {
+namespace multiphaseInter
+{
     defineTypeNameAndDebug(surfaceTensionModel, 0);
     defineRunTimeSelectionTable(surfaceTensionModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModel::surfaceTensionModel
+Foam::multiphaseInter::surfaceTensionModel::surfaceTensionModel
 (
     const dictionary& dict,
     const phasePair& pair,
@@ -64,8 +67,8 @@ Foam::surfaceTensionModel::surfaceTensionModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::surfaceTensionModel>
-Foam::surfaceTensionModel::New
+Foam::autoPtr<Foam::multiphaseInter::surfaceTensionModel>
+Foam::multiphaseInter::surfaceTensionModel::New
 (
     const dictionary& dict,
     const phasePair& pair
@@ -76,9 +79,9 @@ Foam::surfaceTensionModel::New
     Info<< "Selecting surfaceTensionModel for "
         << pair << ": " << modelType << endl;
 
-    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -89,13 +92,13 @@ Foam::surfaceTensionModel::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(dict, pair, true);
+    return ctorPtr(dict, pair, true);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfaceTensionModel::writeData(Ostream& os) const
+bool Foam::multiphaseInter::surfaceTensionModel::writeData(Ostream& os) const
 {
     return os.good();
 }

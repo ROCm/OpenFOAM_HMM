@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -211,9 +211,9 @@ autoPtr<objective> objective::New
     const word& primalSolverName
 )
 {
-    auto cstrIter = objectiveConstructorTablePtr_->cfind(objectiveType);
+    auto* ctorPtr = objectiveConstructorTable(objectiveType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -226,7 +226,7 @@ autoPtr<objective> objective::New
 
     return autoPtr<objective>
     (
-        cstrIter()
+        ctorPtr
         (
             mesh,
             dict,

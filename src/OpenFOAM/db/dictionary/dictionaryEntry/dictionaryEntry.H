@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,6 +125,12 @@ public:
             return dictionary::name();
         }
 
+        //- Return scoped dictionary name relative to the current case
+        virtual fileName relativeName() const
+        {
+            return dictionary::relativeName();
+        }
+
         //- Return line number of first token in dictionary
         virtual label startLineNumber() const;
 
@@ -132,21 +138,21 @@ public:
         virtual label endLineNumber() const;
 
         //- This entry is not a primitive,
-        //  calling this function generates a FatalError
+        //- calling this function generates a FatalError
         virtual ITstream& stream() const;
 
 
         //- Return pointer to this dictionary
-        virtual const dictionary* dictPtr() const;
+        virtual const dictionary* dictPtr() const noexcept;
 
         //- Return non-const pointer to this dictionary
-        virtual dictionary* dictPtr();
+        virtual dictionary* dictPtr() noexcept;
 
-        //- Return dictionary
-        virtual const dictionary& dict() const;
+        //- Return dictionary (ie, this)
+        virtual const dictionary& dict() const noexcept;
 
         //- Return non-const access to dictionary
-        virtual dictionary& dict();
+        virtual dictionary& dict() noexcept;
 
 
         //- Write
@@ -160,7 +166,7 @@ public:
         }
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 };

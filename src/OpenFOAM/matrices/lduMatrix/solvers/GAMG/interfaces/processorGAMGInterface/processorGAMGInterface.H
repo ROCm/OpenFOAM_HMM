@@ -90,7 +90,7 @@ public:
     // Constructors
 
         //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
+        //- local and neighbour restrict addressing
         processorGAMGInterface
         (
             const label index,
@@ -140,6 +140,15 @@ public:
                 const labelUList& iF
             ) const;
 
+
+            //- Initialise neighbour field transfer using faceCells mapping
+            virtual void initInternalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const labelUList& iF,
+                const labelUList& faceCells
+            ) const;
+
             //- Transfer and return internal field adjacent to the interface
             virtual tmp<labelField> internalFieldTransfer
             (
@@ -184,7 +193,7 @@ public:
         // I/O
 
             //- Write to stream
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 };
 
 

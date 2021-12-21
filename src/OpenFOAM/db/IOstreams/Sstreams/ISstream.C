@@ -37,6 +37,7 @@ License
 // Truncate error message for readability
 static constexpr const unsigned errLen = 80;
 
+
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace
@@ -53,6 +54,21 @@ inline Foam::word charToWord(char c)
 inline bool validVariableChar(char c)
 {
     return (Foam::word::valid(c) || c == '/');
+}
+
+
+inline void inplaceTrimRight(std::string& s)
+{
+    auto end = s.length();
+    if (end)
+    {
+        while (end && Foam::isspace(s[end-1]))
+        {
+            --end;
+        }
+
+        s.erase(end);
+    }
 }
 
 } // End anonymous namespace
@@ -123,7 +139,7 @@ char Foam::ISstream::nextValid()
                 // C-style comment: discard through to "*/" ending
                 if (!seekCommentEnd_Cstyle())
                 {
-                    return 0;
+                    return 0;  // Premature end of stream
                 }
             }
             else
@@ -390,17 +406,133 @@ static token::tokenType readVariable
     return token::tokenType::ERROR;
 }
 
+
+// Raw, low-level get into a string.
+// Continues reading after an initial opening delimiter (eg, '{')
+// until it finds the matching closing delimiter (eg, '}')
+static bool readUntilBalancedDelimiter
+(
+    ISstream& is,
+    std::string& str,
+    const bool stripComments,
+    const char delimOpen,
+    const char delimClose
+)
+{
+    constexpr const unsigned bufLen = 1024;
+    static char buf[bufLen];
+
+    unsigned nChar = 0;
+    unsigned depth = 1;  // Initial '{' already seen by caller
+    char c = 0;
+
+    str.clear();
+    while (is.get(c))
+    {
+        if ((str.empty() && !nChar) && isspace(c))
+        {
+            continue;  // Ignore leading whitespace
+        }
+
+        buf[nChar++] = c;
+
+        // Note: no '\' escape handling needed at the moment
+
+        if (c == delimOpen)
+        {
+            ++depth;
+        }
+        else if (c == delimClose)
+        {
+            --depth;
+            if (!depth)
+            {
+                // Closing character - do not include in output
+                --nChar;
+                str.append(buf, nChar);
+                inplaceTrimRight(str);  // Remove trailing whitespace
+                return true;
+            }
+        }
+        else if (stripComments && c == '/')
+        {
+            // Strip C/C++ comments from expressions
+            // Note: could also peek instead of get/putback
+
+            if (!is.get(c))
+            {
+                break;  // Premature end of stream
+            }
+            else if (c == '/')
+            {
+                --nChar;  // Remove initial '/' from buffer
+
+                // C++ comment: discard through newline
+                (void) is.getLine(nullptr, '\n');
+            }
+            else if (c == '*')
+            {
+                --nChar;  // Remove initial '/' from buffer
+
+                // C-style comment: discard through to "*/" ending
+                if (!is.seekCommentEnd_Cstyle())
+                {
+                    break;  // Premature end of stream
+                }
+            }
+            else
+            {
+                // Reanalyze the char
+                is.putback(c);
+            }
+        }
+
+        if (nChar == bufLen)
+        {
+            str.append(buf, nChar);  // Flush full buffer
+            nChar = 0;
+        }
+    }
+
+
+    // Abnormal exit of the loop
+
+    str.append(buf, nChar);  // Finalize pending content
+    inplaceTrimRight(str);   // Remove trailing whitespace
+
+    // Exhausted stream without finding closing sequence
+    return false;
+}
+
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::ISstream::continueReadUntilRightBrace
+(
+    std::string& str,
+    const bool stripComments
+)
+{
+    return
+        readUntilBalancedDelimiter
+        (
+            *this,
+            str,
+            stripComments,
+            token::BEGIN_BLOCK,
+            token::END_BLOCK
+        );
+}
+
 
 Foam::Istream& Foam::ISstream::read(token& t)
 {
     constexpr const unsigned bufLen = 128; // Max length for labels/scalars
     static char buf[bufLen];
 
-    // Return the put back token if it exists
+    // Return the putback token if it exists
     if (Istream::getBack(t))
     {
         return *this;

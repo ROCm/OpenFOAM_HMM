@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,54 +65,96 @@ class basicThermo
 :
     public IOdictionary
 {
+    // Private Data
+
+        //- Components names/order
+        static const wordList componentHeader4;
+
+        //- Components names/order
+        static const wordList componentHeader7;
+
+
+    // Private Member Functions
+
+        //- Construct name of thermo package from dictionary components
+        static word makeThermoName
+        (
+            const dictionary& dict,
+            const wordList*& cmptHeaderPtr
+        );
+
+        //- Look up field from registry or construct and store
+        static volScalarField& lookupOrConstruct
+        (
+            const fvMesh& mesh,
+            const word& fieldName,
+            bool& isOwner  //!< Stored to registry by this instance
+        );
+
+        //- Generic lookup for thermodynamics package thermoTypeName
+        //  \return constructor pointer, or FatalError
+        template<class Thermo, class ThermoConstructTable>
+        static typename ThermoConstructTable::mapped_type
+        getThermoOrDie
+        (
+            const dictionary& thermoTypeDict,
+            ThermoConstructTable& thermoTable,
+            const word& thermoTypeName,
+            const wordList& cmptNames
+        );
+
+        //- Generic lookup for each of the related thermodynamics packages
+        //  \return constructor pointer, or FatalError
+        template<class Thermo, class ThermoConstructTable>
+        static typename ThermoConstructTable::mapped_type
+        getThermoOrDie
+        (
+            const dictionary& thermoDict,
+            ThermoConstructTable& thermoTable
+        );
+
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Phase-name
         const word& phaseName_;
 
+        //- Pressure created and stored by this instance
+        bool pOwner_;
 
-        // Fields
+        //- Temperature created and stored by this instance
+        bool TOwner_;
 
-            //- Pressure [Pa]
-            volScalarField& p_;
+        //- Include dpdt term in the enthalpy equation?
+        bool dpdt_;
 
-            bool pOwner_;
 
-            //- Temperature [K]
-            volScalarField& T_;
+    // Fields
 
-            bool TOwner_;
+        //- Pressure [Pa]
+        volScalarField& p_;
 
-            //- Laminar thermal diffusivity [kg/m/s]
-            volScalarField alpha_;
+        //- Temperature [K]
+        volScalarField& T_;
 
-        //- Should the dpdt term be included in the enthalpy equation
-        Switch dpdt_;
+        //- Laminar thermal diffusivity [kg/m/s]
+        volScalarField alpha_;
 
 
     // Protected Member Functions
 
-        //- Construct as copy (not implemented)
-        basicThermo(const basicThermo&);
-
-        //- Look up or construct field
-        static volScalarField& lookupOrConstruct
-        (
-            const fvMesh& mesh,
-            const word&,
-            bool& isOwner
-        );
-
         //- Return the enthalpy/internal energy field boundary types
-        //  by interrogating the temperature field boundary types
+        //- by interrogating the temperature field boundary types
         wordList heBoundaryTypes();
 
         //- Return the enthalpy/internal energy field boundary base types
-        //  by interrogating the temperature field boundary types
+        //- by interrogating the temperature field boundary types
         wordList heBoundaryBaseTypes();
+
+        //- No copy construct
+        basicThermo(const basicThermo&) = delete;
 
 
 public:
@@ -161,7 +203,7 @@ public:
         );
 
         //- Construct from mesh, phase name and explicit naming of the
-        //  dictionary (so it can be shared amongst phases).
+        //- dictionary (so it can be shared amongst phases).
         basicThermo
         (
             const fvMesh&,
@@ -171,24 +213,6 @@ public:
 
 
     // Selectors
-
-        //- Generic lookup for thermodynamics package thermoTypeName
-        template<class Thermo, class Table>
-        static typename Table::iterator lookupThermo
-        (
-            const dictionary& thermoTypeDict,
-            Table* tablePtr,
-            std::initializer_list<const char*> cmptNames,
-            const word& thermoTypeName
-        );
-
-        //- Generic lookup for each of the related thermodynamics packages
-        template<class Thermo, class Table>
-        static typename Table::iterator lookupThermo
-        (
-            const dictionary& thermoDict,
-            Table* tablePtr
-        );
 
         //- Generic New for each of the related thermodynamics packages
         template<class Thermo>
@@ -228,7 +252,7 @@ public:
     virtual ~basicThermo();
 
 
-    // Member functions
+    // Member Functions
 
         static const word dictName;
 
@@ -243,11 +267,19 @@ public:
 
         word phasePropertyName(const word& name) const
         {
-            return basicThermo::phasePropertyName(name, phaseName_);
+            return IOobject::groupName(name, phaseName_);
         }
 
         static const basicThermo& lookupThermo(const fvPatchScalarField& pf);
 
+        //- Print (filtered) table of thermo names, splits on \c " ,<>"
+        static Ostream& printThermoNames
+        (
+            Ostream& os,
+            const wordList& cmptNames,
+            const wordList& thermoNames
+        );
+
         //- Check that the thermodynamics package is consistent
         //  with energy forms supported by the application
         void validate
@@ -286,11 +318,14 @@ public:
             const word&
         ) const;
 
-        //- Split name of thermo package into a list of the components names
+        //- Split thermo package name into a list of components names
+        //  Splits on \c " ,<>"
+        //  \return empty list if the split name does not have the
+        //  expected number of components (non-zero).
         static wordList splitThermoName
         (
-            const word& thermoName,
-            const int nCmpt
+            const std::string& thermoName,
+            const int nExpectedCmpts
         );
 
         //- Update properties
@@ -307,14 +342,14 @@ public:
         //  i.e. rho = const
         virtual bool isochoric() const = 0;
 
-        //- Should the dpdt term be included in the enthalpy equation
-        Switch dpdt() const
+        //- True if dpdt term should be included in enthalpy equation
+        bool dpdt() const noexcept
         {
             return dpdt_;
         }
 
-        //- Should T be updated
-        Switch updateT() const
+        //- True if T should be updated
+        bool updateT() const noexcept
         {
             return TOwner_;
         }
@@ -408,6 +443,14 @@ public:
                 const label patchi
             ) const = 0;
 
+            //- Heat capacity using pressure and temperature [J/kg/K]
+            virtual tmp<scalarField> Cp
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
+            ) const = 0;
+
             //- Heat capacity at constant volume [J/kg/K]
             virtual tmp<volScalarField> Cv() const = 0;
 
@@ -417,6 +460,14 @@ public:
                 const scalarField& p,
                 const scalarField& T,
                 const label patchi
+            ) const = 0;
+
+            //- Density from pressure and temperature from EoS
+            virtual tmp<scalarField> rhoEoS
+            (
+                const scalarField& p,
+                const scalarField& T,
+                const labelList& cells
             ) const = 0;
 
             //- Gamma = Cp/Cv []

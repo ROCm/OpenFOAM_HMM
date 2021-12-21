@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,10 @@ public:
     // Member Functions
 
         //- The points
-        const pointField& points() const;
+        const pointField& points() const noexcept;
 
         //- The list of lambda values
-        const scalarList& lambdaDivisions() const;
+        const scalarList& lambdaDivisions() const noexcept;
 };
 
 

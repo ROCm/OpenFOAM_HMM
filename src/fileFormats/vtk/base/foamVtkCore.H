@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,8 +183,12 @@ namespace legacy
     //- Legacy content names (POLYDATA, UNSTRUCTURED_GRID)
     extern const Foam::Enum<vtk::fileTag> contentNames;
 
-    //- Legacy data type names (CELL_DATA, POINT_DATA)
-    extern const Foam::Enum<vtk::fileTag> dataTypeNames;
+    //- Legacy file tags (eg, LINES, CELL_DATA, POINT_DATA, ...)
+    extern const Foam::Enum<vtk::fileTag> fileTagNames;
+
+    //- Legacy attributes (eg, OFFSETS)
+    extern const Foam::Enum<dataArrayAttr> dataArrayAttrNames;
+
 
 } // End namespace legacy
 

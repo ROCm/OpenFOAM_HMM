@@ -46,12 +46,15 @@
 #     The '-show-api' and '-show-patch' options extract values from
 #     the "META-INFO/api-info" file
 #
+#     The '-show-build' options extract values from
+#     the "META-INFO/build-info" file
+#
 # SeeAlso
 #     META-INFO/README.md for other routines that also use META-INFO.
 #
 #-------------------------------------------------------------------------------
 printHelp() {
-    cat<<USAGE
+    cat<<HELP_HEAD
 
 Usage: ${0##*/} [OPTION] fileName [-- args]
        ${0##*/} [OPTION] [-list|-list-test] [fileName]
@@ -71,26 +74,43 @@ options:
   -etc=[DIR]        set/unset FOAM_CONFIG_ETC for alternative etc directory
   -show-api         Print META-INFO api value and exit
   -show-patch       Print META-INFO patch value and exit
+  -show-build       Print META-INFO build value and exit
   -with-api=NUM     Specify alternative api value to search with
   -quiet (-q)       Suppress all normal output
   -silent (-s)      Suppress stderr, except -csh-verbose, -sh-verbose output
   -version | --version  Print version (same as -show-api)
-  -help             Print the usage
+  -help             Display short help and exit
+  -help-full        Display full help and exit
 
 Locate user/group/other file as per '#includeEtc'
-
 Do not group single character options.
+HELP_HEAD
+
+if [ -n "$1" ]
+then
+cat<<HELP_FULL
+
 Equivalent options:
   |  -mode=MODE     | -mode MODE  | -m MODE
   |  -prefix=DIR    [obsolete 1812]
   |  -version=VER   [obsolete 1812]
 
+Environment
+    FOAM_CONFIG_ETC  : ${FOAM_CONFIG_ETC:-[]}
+    FOAM_CONFIG_MODE : ${FOAM_CONFIG_MODE:-[]}
+    WM_PROJECT_SITE  : ${WM_PROJECT_SITE:-[PROJECT/site]}
+HELP_FULL
+fi
+
+
+cat<<HELP_TAIL
+
 Exit status
     0  when the file is found. Print resolved path to stdout.
     1  for miscellaneous errors.
     2  when the file is not found.
+HELP_TAIL
 
-USAGE
     exit 0  # A clean exit
 }
 
@@ -139,6 +159,14 @@ getApiInfo()
 }
 
 
+# Get 'build' from META-INFO/build-info
+getBuildValue()
+{
+    value="$(sed -ne 's@^build *= *\([^ ]*\).*@\1@p' "$projectDir"/META-INFO/build-info 2>/dev/null)"
+    echo "$value"
+}
+
+
 #-------------------------------------------------------------------------------
 unset shellOutput verboseOutput
 unset optAll optConfig optList projectApi
@@ -147,7 +175,10 @@ unset optAll optConfig optList projectApi
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help*)
+    -help-f*)   # Full help
+        printHelp -full
+        ;;
+    -h | -help*) # Short help
         printHelp
         ;;
     -show-api | -version | --version)  # Show API and exit
@@ -156,6 +187,10 @@ do
         ;;
     -show-patch)  # Show patch level and exit
         getApiInfo patch
+        exit $?
+        ;;
+    -show-build)  # Show build information and exit
+        getBuildValue
         exit $?
         ;;
     -with-api=*)

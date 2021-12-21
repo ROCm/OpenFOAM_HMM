@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,14 +101,21 @@ void Foam::cellAspectRatio::calcAspectRatio()
         }
         sumA /= cFaces.size();
 
-        // Local length scale
-        const scalar length = cellVolumes[celli]/sumA;
+        aRatio[celli] = 1.0;
+        if (sumA > ROOTVSMALL)
+        {
+            // Local length scale
+            const scalar length = cellVolumes[celli]/sumA;
 
-        // Max edge length
-        maxMag = Foam::sqrt(maxMag);
+            if (length > ROOTVSMALL)
+            {
+                // Max edge length
+                maxMag = Foam::sqrt(maxMag);
 
-        //aRatio[celli] = Foam::sqrt(4.0/3.0)*maxMag/length;
-        aRatio[celli] = 2.0*maxMag/length;
+                //aRatio[celli] = Foam::sqrt(4.0/3.0)*maxMag/length;
+                aRatio[celli] = 2.0*maxMag/length;
+            }
+        }
     }
 
     if (debug)

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,33 +24,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:TDNBModels:::Schroeder
+    Foam::wallBoilingModels::TDNBModels::Schroeder
 
 Description
-    Departure from nulceate boiling correlation.
+    A model for departure from nucleation boiling based on
+    Schroeder-Richter and Bartsch (1994) for boiling flows.
 
-    References:
+    Reference:
     \verbatim
-        Schroeder-Richter D. and Bartsch G. Analytical calculation of
-        DNB-superheating by a pos-tulated thermo-mechanical effect of
-        nucleate boiling.
-        International Journal of Multiphase Flow, 20(6):1143–1167, 1994.
+        Schroeder-Richter, D., & Bartsch, G. (1994).
+        Analytical calculation of DNB-superheating by a postulated
+        thermo-mechanical effect of nucleate boiling.
+        International journal of multiphase flow, 20(6), 1143-1167.
+        DOI:10.1016/0301-9322(94)90060-4
 
+        Theler, G., & Freis, D. (2011).
+        Theoretical critical heat flux prediction based on non-equilibrium
+        thermodynamics considerations of the subcooled boiling phenomenon.
+        Mecánica Computacional, 30(19), 1713-1732.
     \endverbatim
 
-
+Usage
+    Example of the model specification:
     \verbatim
-        THEORETICAL CRITICAL HEAT FLUX PREDICTION BASEDNON-EQUILIBRIUM
-        THERMODYNAMICS CONSIDERATIONSTHE SUBCOOLED BOILING PHENOMENON
+    TDNBModel
+    {
+        // Mandatory entries
+        type            Schroeder;
 
-        Germán Thelera and Daniel Freisba TECNA
-        Estudios y Proyectos de Ingenierı́a S.A.
-        Encarnación Ezcurra 365, C1107CLA Buenos Aires, Argentina
-        Westinghouse
-        Electric Germany GmbH
-        Dudenstraße 44, 68167 Mannheim, Germany
+        // Optional entries
+        kg              <scalar>;
+    }
     \endverbatim
 
+    where the entries mean:
+    \table
+      Property   | Description                       | Type | Reqd | Deflt
+      type       | Type name: Schroeder              | word | yes  | -
+      kg  | Isoentropic expansion factor for ideal gases | scalar | no  | 1.666
+    \endtable
 
 SourceFiles
     Schroeder.C
@@ -79,18 +91,28 @@ class Schroeder
 :
     public TDNBModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Isoentropic expansion factor for ideal gases
         // 5/3 monoatomic
         // 7/5 diatomic
         scalar kg_;
 
+
+    // Private Member Functions
+
+        //- No copy construct
+        Schroeder(const Schroeder&) = delete;
+
+        //- No copy assignment
+        void operator=(const Schroeder&) = delete;
+
+
 public:
 
     //- Runtime type information
     TypeName("Schroeder");
+
 
     // Constructors
 
@@ -99,12 +121,12 @@ public:
 
 
     //- Destructor
-    virtual ~Schroeder();
+    virtual ~Schroeder() = default;
 
 
     // Member Functions
 
-        //- Calculate and return the nucleation-site density
+        //- Calculate and return the departure from nulceate boiling correlation
         virtual tmp<scalarField> TDNB
         (
             const phaseModel& liquid,
@@ -115,8 +137,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

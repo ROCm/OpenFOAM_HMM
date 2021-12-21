@@ -435,6 +435,40 @@ protected:
         autoPtr<surfaceWriter> surfaceWriterPtr_;
 
 
+    // Static Member Functions
+
+        //- Weighting factor.
+        //  Possibly applies mag() depending on the operation type.
+        template<class WeightType>
+        static tmp<scalarField> weightingFactor
+        (
+            const Field<WeightType>& weightField,
+            const bool useMag
+        );
+
+        //- Weighting factor, weight field projected onto unit-normal.
+        //  Possibly applies mag() depending on the operation type.
+        //  Reverts to 'one' if the weight field is unavailable.
+        template<class WeightType>
+        static tmp<scalarField> weightingFactor
+        (
+            const Field<WeightType>& weightField,
+            const vectorField& Sf,
+            const bool useMag
+        );
+
+        //- Weighting factor, weight field with area factor.
+        //  Possibly applies mag() depending on the operation type.
+        //  Reverts to mag(Sf) if the weight field is unavailable.
+        template<class WeightType>
+        static tmp<scalarField> areaWeightingFactor
+        (
+            const Field<WeightType>& weightField,
+            const vectorField& Sf,
+            const bool useMag
+        );
+
+
     // Protected Member Functions
 
         //- The volume mesh or surface registry being used
@@ -444,30 +478,29 @@ protected:
         inline bool withSurfaceFields() const;
 
         //- Can use mesh topological merge?
-        inline bool withTopologicalMerge() const;
+        inline bool withTopologicalMerge() const noexcept;
 
         //- Return the local list of face IDs
-        inline const labelList& faceId() const;
+        inline const labelList& faceId() const noexcept;
 
         //- Return the local list of patch ID per face
-        inline const labelList& facePatch() const;
+        inline const labelList& facePatch() const noexcept;
 
         //- Return the local true/false list representing the face flip map
-        inline const boolList& faceFlip() const;
+        inline const boolList& faceFlip() const noexcept;
 
         //- True if the operation needs a surface Sf
-        bool usesSf() const;
+        bool usesSf() const noexcept;
 
         //- True if the operation variant uses mag
-        inline bool usesMag() const;
+        inline bool is_magOp() const noexcept;
 
         //- True if the operation variant uses a weight-field
-        inline bool usesWeight() const;
+        inline bool is_weightedOp() const noexcept;
 
-        //- True if operation variant uses a weight-field that is available.
-        //  Checks for availability on any processor.
+        //- True if field is non-empty on any processor.
         template<class WeightType>
-        inline bool canWeight(const Field<WeightType>& weightField) const;
+        inline bool canWeight(const Field<WeightType>& fld) const;
 
         //- Update the surface and surface information as required.
         //  Do nothing (and return false) if no update was required
@@ -518,26 +551,6 @@ protected:
         (
             const GeometricField<Type, fvPatchField, volMesh>& field
         ) const;
-
-
-        //- Weighting factor.
-        //  Possibly applies mag() depending on the operation type.
-        template<class WeightType>
-        tmp<scalarField> weightingFactor
-        (
-            const Field<WeightType>& weightField
-        ) const;
-
-        //- Weighting factor, weight field with the area.
-        //  Possibly applies mag() depending on the operation type.
-        //  Reverts to mag(Sf) if the weight field is not available.
-        template<class WeightType>
-        tmp<scalarField> weightingFactor
-        (
-            const Field<WeightType>& weightField,
-            const vectorField& Sf
-        ) const;
-
 
         //- Templated helper function to output field values
         template<class WeightType>
@@ -597,13 +610,13 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceFieldValue() = default;
+    virtual ~surfaceFieldValue();
 
 
     // Member Functions
 
         //- Return the region type
-        inline regionTypes regionType() const;
+        inline regionTypes regionType() const noexcept;
 
         //- Return the output directory
         inline fileName outputDir() const;
@@ -646,26 +659,46 @@ vector surfaceFieldValue::processValues
 template<>
 tmp<scalarField> surfaceFieldValue::weightingFactor
 (
-    const Field<scalar>& weightField
-) const;
+    const Field<scalar>& weightField,
+    const bool useMag
+);
 
-
-//- Specialisation for scalar - scalar * Area
+//- Specialisation for scalar - pass through
 template<>
 tmp<scalarField> surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField,
-    const vectorField& Sf
-) const;
+    const vectorField& Sf /* unused */,
+    const bool useMag
+);
+
+//- Specialisation for scalar - scalar * Area
+template<>
+tmp<scalarField> surfaceFieldValue::areaWeightingFactor
+(
+    const Field<scalar>& weightField,
+    const vectorField& Sf,
+    const bool useMag
+);
 
 
-//- Specialisation for vector - vector (dot) Area
+//- Specialisation for vector - vector (dot) unit-normal
 template<>
 tmp<scalarField> surfaceFieldValue::weightingFactor
 (
     const Field<vector>& weightField,
-    const vectorField& Sf
-) const;
+    const vectorField& Sf,
+    const bool useMag
+);
+
+//- Specialisation for vector - vector (dot) Area
+template<>
+tmp<scalarField> surfaceFieldValue::areaWeightingFactor
+(
+    const Field<vector>& weightField,
+    const vectorField& Sf,
+    const bool useMag
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

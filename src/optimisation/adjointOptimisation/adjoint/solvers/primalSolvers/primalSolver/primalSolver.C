@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,9 +64,9 @@ Foam::autoPtr<Foam::primalSolver> Foam::primalSolver::New
 {
     const word solverType(dict.get<word>("type"));
 
-    auto cstrIter = primalSolverConstructorTablePtr_->cfind(solverType);
+    auto* ctorPtr = primalSolverConstructorTable(solverType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -77,7 +77,7 @@ Foam::autoPtr<Foam::primalSolver> Foam::primalSolver::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<primalSolver>(cstrIter()(mesh, managerType, dict));
+    return autoPtr<primalSolver>(ctorPtr(mesh, managerType, dict));
 }
 
 

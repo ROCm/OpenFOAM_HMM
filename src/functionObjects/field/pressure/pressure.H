@@ -96,7 +96,7 @@ Usage
         mode            \<option\>;
 
         // Optional entries (runtime modifiable)
-        p               \<pName\>;
+        field           \<pName\>;
         U               \<UName\>;
         rho             <rhoName>;
         rhoInf          1.0; // enabled if rho=rhoInf
@@ -118,7 +118,7 @@ Usage
       type         | Type name: pressure                | word |  yes  | -
       libs         | Library name: fieldFunctionObjects | word |  yes  | -
       mode         | Calculation mode (see below)       | word |  yes  | -
-      p            | Name of the pressure field         | word |  no   | p
+      field        | Name of the pressure field         | word |  no   | p
       U            | Name of the velocity field         | word |  no   | U
       rho          | Name of the density field          | word |  no   | rho
       rhoInf | Freestream density for coefficient calculation | scalar <!--

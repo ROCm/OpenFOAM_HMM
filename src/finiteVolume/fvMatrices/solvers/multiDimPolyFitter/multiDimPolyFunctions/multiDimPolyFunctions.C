@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +46,9 @@ Foam::autoPtr<Foam::multiDimPolyFunctions> Foam::multiDimPolyFunctions::New
     const labelVector& dirs
 )
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(multiDimPolyFunctionsType);
+    auto* ctorPtr = wordConstructorTable(multiDimPolyFunctionsType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -57,7 +58,7 @@ Foam::autoPtr<Foam::multiDimPolyFunctions> Foam::multiDimPolyFunctions::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<multiDimPolyFunctions>(cstrIter()(dirs));
+    return autoPtr<multiDimPolyFunctions>(ctorPtr(dirs));
 }
 
 

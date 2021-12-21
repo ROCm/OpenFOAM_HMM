@@ -2,6 +2,7 @@ global/foamConfig.Cver
 global/globals.C
 /* global/constants/constants.C in globals.C */
 /* global/constants/dimensionedConstants.C in globals.C */
+/* global/JobInfo/JobInfo.C in globals.C */
 global/argList/argList.C
 global/argList/argListHelp.C
 global/clock/clock.C
@@ -161,9 +162,13 @@ $(expr)/exprResult/exprResultStored.C
 $(expr)/exprResult/exprResultStoredStack.C
 $(expr)/exprString/exprString.C
 $(expr)/exprTools/exprTools.C
+$(expr)/scanToken/exprScanToken.C
+
+$(expr)/traits/exprTraits.C
 
 $(expr)/exprDriver/exprDriver.C
 $(expr)/exprDriver/exprDriverFields.C
+$(expr)/exprDriver/exprDriverFunctions.C
 $(expr)/exprDriver/exprDriverIO.C
 
 fieldExpr = $(expr)/fields
@@ -300,13 +305,15 @@ $(functionEntries)/calcEntry/calcEntry.C
 $(functionEntries)/codeStream/codeStream.C
 $(functionEntries)/evalEntry/evalEntry.C
 $(functionEntries)/functionEntry/functionEntry.C
+$(functionEntries)/ifEntry/ifEntry.C
+$(functionEntries)/ifeqEntry/ifeqEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/inputMode/inputMode.C
+$(functionEntries)/message/messageDirective.C
 $(functionEntries)/removeEntry/removeEntry.C
-$(functionEntries)/ifeqEntry/ifeqEntry.C
-$(functionEntries)/ifEntry/ifEntry.C
+$(functionEntries)/word/wordDirective.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/baseIOdictionary.C
@@ -349,6 +356,7 @@ $(dll)/codedBase/codedBase.C
 funcObjs = db/functionObjects
 
 $(funcObjs)/functionObject/functionObject.C
+$(funcObjs)/functionObjectProperties/functionObjectProperties.C
 $(funcObjs)/functionObjectList/functionObjectList.C
 $(funcObjs)/stateFunctionObject/stateFunctionObject.C
 $(funcObjs)/timeFunctionObject/timeFunctionObject.C
@@ -430,6 +438,7 @@ $(lduAddressing)/lduAddressing.C
 $(lduAddressing)/lduInterface/lduInterface.C
 $(lduAddressing)/lduInterface/processorLduInterface.C
 $(lduAddressing)/lduInterface/cyclicLduInterface.C
+$(lduAddressing)/lduInterface/lduPrimitiveProcessorInterface.C
 
 lduInterfaceFields = $(lduAddressing)/lduInterfaceFields
 $(lduInterfaceFields)/lduInterfaceField/lduInterfaceField.C
@@ -490,6 +499,8 @@ procFacesGAMGProcAgglomeration = $(GAMGProcAgglomerations)/procFacesGAMGProcAggl
 $(procFacesGAMGProcAgglomeration)/procFacesGAMGProcAgglomeration.C
 
 
+meshes/ijkMesh/ijkMesh.C
+
 meshes/lduMesh/lduMesh.C
 meshes/lduMesh/lduPrimitiveMesh.C
 
@@ -524,6 +535,9 @@ $(cell)/cell.C
 $(cell)/oppositeCellFace.C
 $(cell)/cellIOList.C
 
+hexCell = $(meshShapes)/hexCell
+$(hexCell)/hexCell.C
+
 tetCell = $(meshShapes)/tetCell
 $(tetCell)/tetCell.C
 
@@ -542,6 +556,7 @@ meshes/Identifiers/patch/patchIdentifier.C
 meshes/Identifiers/patch/coupleGroupIdentifier.C
 meshes/Identifiers/surface/geometricSurfacePatch.C
 meshes/Identifiers/surface/surfZoneIdentifier.C
+meshes/Identifiers/zone/zoneIdentifier.C
 
 meshes/MeshObject/meshObject.C
 

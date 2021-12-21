@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +28,45 @@ Class
     Foam::wallBoilingModels::partitioningModels::cosine
 
 Description
-    Cosine wall heat flux partitioning model.
+    A cosine model for wall heat flux partitioning based on
+    Tentner et al. (2006) for boiling flows.
 
-    Proposed threshold liquid fractions:
+    Reference:
+    \verbatim
+        Tentner, A., Lo, S., Ioilev, A., Samigulin, M.,
+        Ustinenko, V., Melnikov, V., Kozlov, V. (2006).
+        Advances in computational fluid dynamics modeling
+        of two phase flow in a boiling water reactor fuel assembly.
+        In: Proc. Int. Conf. Nuclear Engineering ICONE-14.
+        Miami, Florida, USA, July 17–20.
+    \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    partitioningModel
+    {
+        // Mandatory entries
+        type            cosine;
+        alphaLiquid1    <scalar>;
+        alphaLiquid0    <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property      | Description                       | Type | Reqd | Deflt
+      type          | Type name: cosine                 | word | yes  | -
+      alphaLiquid1  | Model parameters for threshold liquid phase fraction <!--
+                    -->                               | scalar | yes  | -
+      alphaLiquid0  | Model parameters for threshold liquid phase fraction <!--
+                    -->                               | scalar | yes  | -
+    \endtable
+
+Note
+  - Proposed threshold liquid fractions:
       - alphaLiquid1 0.1
       - alphaLiquid0 0.05
-
-    \verbatim
-        Tentner, A., Lo, S., & Kozlov, V. (2006).
-        Advances in computational fluid dynamics modeling
-        of two-phase flow in boiling water reactor fuel assemblies.
-        In International Conference of Nuclear Engineering,
-        Miami, Florida, USA.
-    \endverbatim
 
 SourceFiles
     cosine.C
@@ -68,11 +95,22 @@ class cosine
 :
     public partitioningModel
 {
-    // Private data
+    // Private Data
 
-        // Model parameters, threshold liquid phase fractions
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid1_;
+
+        //- Model parameters for threshold liquid phase fraction
         scalar alphaLiquid0_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        cosine(const cosine&) = delete;
+
+        //- No copy assignment
+        void operator=(const cosine&) = delete;
 
 
 public:
@@ -88,7 +126,7 @@ public:
 
 
     //- Destructor
-    virtual ~cosine();
+    virtual ~cosine() = default;
 
 
     // Member Functions
@@ -96,7 +134,10 @@ public:
         //- Calculate and return the wall heat-flux partitioning
         virtual tmp<scalarField> fLiquid(const scalarField& alphaLiquid) const;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

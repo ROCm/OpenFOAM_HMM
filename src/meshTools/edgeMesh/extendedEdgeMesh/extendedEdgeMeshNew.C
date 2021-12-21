@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,9 +44,9 @@ Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
     const word& fileType
 )
 {
-    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(fileType);
+    auto* ctorPtr = fileExtensionConstructorTable(fileType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInFunction
             << "Unknown edge format " << fileType
@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::New
             << exit(FatalError);
     }
 
-    return autoPtr<extendedEdgeMesh>(cstrIter()(name));
+    return autoPtr<extendedEdgeMesh>(ctorPtr(name));
 }
 
 

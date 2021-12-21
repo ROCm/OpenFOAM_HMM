@@ -854,11 +854,12 @@ Foam::sampledIsoSurface::interpolate
 }
 
 
-void Foam::sampledIsoSurface::print(Ostream& os) const
+void Foam::sampledIsoSurface::print(Ostream& os, int level) const
 {
-    os  << "isoSurfacePoint: " << name() << " :"
-        << "  field   :" << isoField_
-        << "  value   :" << flatOutput(isoValues_);
+    os  << "isoSurface: " << name() << " :";
+    isoParams_.print(os);
+    os  << " field:" << isoField_
+        << " value:" << flatOutput(isoValues_);
 }
 
 

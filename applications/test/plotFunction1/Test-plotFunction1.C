@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     const scalar incrTime = args.getOrDefault<scalar>("incr", 0.1);
     const scalar timeBase = args.getOrDefault<scalar>("timeBase", 1);
 
-    Info().precision(10);
+    Info.stream().precision(10);
 
     for (label argi=1; argi < args.size(); ++argi)
     {

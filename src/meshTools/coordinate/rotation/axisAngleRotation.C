@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,20 +90,9 @@ Foam::coordinateRotations::axisAngle::axisAngle()
 
 Foam::coordinateRotations::axisAngle::axisAngle(const axisAngle& crot)
 :
-    coordinateRotation(crot),
+    coordinateRotation(),
     axis_(crot.axis_),
     angle_(crot.angle_),
-    degrees_(crot.degrees_)
-{
-    checkSpec();
-}
-
-
-Foam::coordinateRotations::axisAngle::axisAngle(axisAngle&& crot)
-:
-    coordinateRotation(std::move(crot)),
-    axis_(std::move(crot.axis_)),
-    angle_(std::move(crot.angle_)),
     degrees_(crot.degrees_)
 {
     checkSpec();

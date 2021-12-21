@@ -75,18 +75,16 @@ class UOPstream
 
     // Private Member Functions
 
-        //- Prepare buffer for count bytes of output at specified alignment.
+        //- Prepare send buffer for count bytes of output,
+        //- with specified alignment.
         inline void prepareBuffer(const size_t count, const size_t align);
 
-        //- Write data to the transfer buffer
+        //- Generic write data to the send buffer, aligned by sizeof(T)
         template<class T>
         inline void writeToBuffer(const T& val);
 
-        //- Write a char to the transfer buffer
-        inline void writeToBuffer(const char& c);
-
-        //- Write count bytes of data to the transfer buffer
-        //  using align byte alignment
+        //- Write count bytes of data to the send buffer,
+        //- using align byte alignment
         inline void writeToBuffer
         (
             const void* data,
@@ -94,17 +92,21 @@ class UOPstream
             const size_t align
         );
 
-        //- Write string length and content.
+        //- Add a single char to the send buffer. No alignment needed
+        inline void putChar(const char c);
+
+        //- Write string length and string content.
         //  The content includes the trailing nul char.
-        inline void writeStringToBuffer(const std::string& str);
+        inline void putString(const std::string& str);
 
 
 public:
 
     // Constructors
 
-        //- Construct given process index to send to and optional buffer size,
-        //- write format and IO version
+        //- Construct given process index to write to using the given
+        //- attached send buffer, optional communication characteristics
+        //- and IO format
         UOPstream
         (
             const commsTypes commsType,
@@ -113,15 +115,14 @@ public:
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
-            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 
         //- Construct given buffers
         UOPstream(const int toProcNo, PstreamBuffers& buffers);
 
 
-    //- Destructor
+    //- Destructor.
     ~UOPstream();
 
 

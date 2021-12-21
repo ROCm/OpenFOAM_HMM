@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,9 @@ Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
 {
     DebugInfo << "Selecting model " << modelName << endl;
 
-    auto cstrIter = dictConstructorTablePtr_->cfind(modelName);
+    auto* ctorPtr = dictConstructorTable(modelName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -50,7 +50,7 @@ Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<AMIInterpolation>(cstrIter()(dict, reverseTarget));
+    return autoPtr<AMIInterpolation>(ctorPtr(dict, reverseTarget));
 }
 
 
@@ -64,9 +64,9 @@ Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
 {
     DebugInfo << "Selecting model " << modelName << endl;
 
-    auto cstrIter = componentConstructorTablePtr_->cfind(modelName);
+    auto* ctorPtr = componentConstructorTable(modelName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -78,7 +78,7 @@ Foam::autoPtr<Foam::AMIInterpolation> Foam::AMIInterpolation::New
 
     return autoPtr<AMIInterpolation>
     (
-        cstrIter()
+        ctorPtr
         (
             requireMatch,
             reverseTarget,

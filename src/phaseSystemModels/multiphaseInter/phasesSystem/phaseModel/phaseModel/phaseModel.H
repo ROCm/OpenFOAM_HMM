@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ class phaseModel
 :
     public volScalarField
 {
-    // Private data
+    // Private Data
 
         //- Reference to the phaseSystem to which this phase belongs
         const phaseSystem& fluid_;
@@ -209,8 +209,8 @@ public:
             const label patchi
         ) const;
 
-        //- Query each thermo for dpdt
-        Switch dpdt() const
+        //- Query thermo for dpdt
+        bool dpdt() const
         {
              return thermo().dpdt();
         }

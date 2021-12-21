@@ -40,9 +40,9 @@ inline constexpr Foam::UList<T>::UList() noexcept
 
 
 template<class T>
-inline Foam::UList<T>::UList(T* __restrict__ v, label size) noexcept
+inline Foam::UList<T>::UList(T* __restrict__ v, const label len) noexcept
 :
-    size_(size),
+    size_(len),
     v_(v)
 {}
 
@@ -105,7 +105,8 @@ inline void Foam::UList<T>::checkStart(const label start) const
     {
         // Note: accept start=0 for zero-sized lists
         FatalErrorInFunction
-            << "start " << start << " out of range [0," << size_ << "]"
+            << "start " << start << " out of range [0,"
+            << size_ << "]\n"
             << abort(FatalError);
     }
 }
@@ -117,8 +118,39 @@ inline void Foam::UList<T>::checkSize(const label size) const
     if (size < 0 || size > size_)
     {
         FatalErrorInFunction
-            << "size " << size << " out of range [0," << size_ << "]"
+            << "size " << size << " out of range [0,"
+            << size_ << "]\n"
             << abort(FatalError);
+    }
+}
+
+
+template<class T>
+inline void Foam::UList<T>::checkRange
+(
+    const label start,
+    const label len
+) const
+{
+    // Artificially allow the start of a zero-sized subList to be
+    // one past the end of the original list.
+    if (len)
+    {
+        if (len < 0)
+        {
+            FatalErrorInFunction
+                << "size " << len << " is negative, out of range [0,"
+                << size_ << "]\n"
+                << abort(FatalError);
+        }
+        this->checkStart(start);
+        this->checkSize(start + len);
+    }
+    else
+    {
+        // Start index needs to fall between 0 and size.  One position
+        // behind the last element is allowed
+        this->checkSize(start);
     }
 }
 
@@ -135,7 +167,8 @@ inline void Foam::UList<T>::checkIndex(const label i) const
     else if (i < 0 || i >= size_)
     {
         FatalErrorInFunction
-            << "index " << i << " out of range [0," << size_ << "]"
+            << "index " << i << " out of range [0,"
+            << size_ << "]\n"
             << abort(FatalError);
     }
 }
@@ -204,6 +237,20 @@ template<class T>
 inline T* Foam::UList<T>::data() noexcept
 {
     return v_;
+}
+
+
+template<class T>
+inline const char* Foam::UList<T>::cdata_bytes() const noexcept
+{
+    return reinterpret_cast<const char*>(v_);
+}
+
+
+template<class T>
+inline char* Foam::UList<T>::data_bytes() noexcept
+{
+    return reinterpret_cast<char*>(v_);
 }
 
 

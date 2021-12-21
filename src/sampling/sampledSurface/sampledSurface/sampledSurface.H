@@ -54,15 +54,16 @@ Description
         Property    | Description                           | Required | Default
         name        | Alternative name                      | no  |
         enabled     | Enable/disable the surface?           | no  | yes
-        interpolate | Sample to nodes instead of faces      | no  | false
+        interpolate | Interpolate to nodes instead of faces | no  | false
         invariant   | Invariant with geometry change (use with caution!) | no  | false
     \endtable
 
 Note
-    The invariant switch is an advanced feature to declare that the surface is
-    unaffected by changes in the general mesh geometry.  For example, if sampling
-    on a static patch while some other motion occurs elsewhere. If used improperly,
-    there is a significant possibility for problems (caveat emptor).
+    The invariant switch is an advanced feature to declare that the surface
+    is unaffected by changes in the general mesh geometry. For example, if
+    sampling on a static patch while some other motion occurs elsewhere. If
+    used improperly, there is a significant possibility for problems
+    (caveat emptor).
 
 SourceFiles
     sampledSurface.C
@@ -288,31 +289,31 @@ public:
     // Access
 
         //- Access to the underlying mesh
-        const polyMesh& mesh() const
+        const polyMesh& mesh() const noexcept
         {
             return mesh_;
         }
 
         //- Name of surface
-        const word& name() const
+        const word& name() const noexcept
         {
             return name_;
         }
 
         //- Surface is enabled
-        bool enabled() const
+        bool enabled() const noexcept
         {
             return enabled_;
         }
 
         //- Surface is invariant with geometry change (caution)
-        bool invariant() const
+        bool invariant() const noexcept
         {
             return invariant_;
         }
 
         //- Using interpolation to surface points
-        bool isPointData() const
+        bool isPointData() const noexcept
         {
             return isPointData_;
         }
@@ -564,13 +565,13 @@ public:
     // Write
 
         //- Print information
-        virtual void print(Ostream& os) const;
+        virtual void print(Ostream& os, int level=0) const;
 
 
     // Housekeeping
 
         //- Same as isPointData()
-        bool interpolate() const { return isPointData_; }
+        bool interpolate() const noexcept { return isPointData_; }
 };
 
 

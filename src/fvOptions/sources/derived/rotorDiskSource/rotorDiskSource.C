@@ -108,7 +108,6 @@ void Foam::fv::rotorDiskSource::checkData()
                 }
             }
 
-
             break;
         }
         default:
@@ -452,7 +451,7 @@ Foam::fv::rotorDiskSource::rotorDiskSource
 
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     rhoRef_(1.0),
     omega_(0.0),
     nBlades_(0),
@@ -545,7 +544,7 @@ void Foam::fv::rotorDiskSource::addSup
 
 bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("fields", fieldNames_);
         fv::option::resetApplied();

@@ -141,6 +141,18 @@ public:
         );
 
 
+        sampledDistanceSurface
+        (
+            const word name,
+            const polyMesh& mesh,
+            const bool interpolate,
+            autoPtr<searchableSurface>&& surface,
+            const scalar distance,
+            const bool useSignedDistance
+            //const isoSurfaceParams& params = isoSurfaceParams()
+        );
+
+
     //- Destructor
     virtual ~sampledDistanceSurface() = default;
 
@@ -265,7 +277,7 @@ public:
     // Output
 
         //- Print information
-        virtual void print(Ostream& os) const;
+        virtual void print(Ostream& os, int level=0) const;
 };
 
 

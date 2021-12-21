@@ -146,31 +146,57 @@ bool Foam::expressions::fvExprDriver::foundField
             << " disk:" << searchFiles() << endl;
     }
 
-    // if (std::is_void<Type>::value) ...
 
-    if (searchRegistry())
+    for (int checki = 0; checki < 2; ++checki)
     {
-        const regIOobject* ioptr =
-            this->mesh().cfindObject<regIOobject>(name);
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+        const regIOobject* ioptr = nullptr;
 
-        if (this->mesh().foundObject<Type>(name))
+        if (checki == 0)
+        {
+            ioptr = exprDriver::cfindContextIOobject(name);
+        }
+        else if (searchRegistry())
+        {
+            ioptr = this->mesh().cfindIOobject(name);
+        }
+        if (!ioptr) continue;
+
+        const Type* fldPtr = dynamic_cast<const Type*>(ioptr);
+
+        if (fldPtr)
         {
             if (debug)
             {
-                Info<< "Found registered: " << name << endl;
+                if (checki)
+                {
+                    Info<< "Found registered:";
+                }
+                else
+                {
+                    Info<< "Found context object:";
+                }
+                Info<< name << endl;
             }
             return true;
         }
-
-        if (debug)
+        else if (ioptr)
         {
-            Info<< "Registered " << name;
-
-            if (ioptr)
+            if (debug)
             {
-                Info<< " type:" << ioptr->headerClassName();
+                if (checki)
+                {
+                    Info<< "Registered:";
+                }
+                else
+                {
+                    Info<< "Context object:";
+                }
+                Info<< name << " type:"
+                    << ioptr->headerClassName() << " != type:"
+                    << Type::typeName << nl;
             }
-            Info<< ", not type:" << Type::typeName << nl;
         }
     }
 
@@ -183,14 +209,11 @@ bool Foam::expressions::fvExprDriver::foundField
         }
         return true;
     }
-    else
-    {
-        if (debug)
-        {
-            Info<< name << " not found" << endl;
-        }
-    }
 
+    if (debug)
+    {
+        Info<< name << " not found" << endl;
+    }
     return false;
 }
 
@@ -236,11 +259,17 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
 {
     typedef typename GeomField::value_type Type;
 
+    tmp<GeomField> tfield;
+
     if (debug)
     {
         Info<< "fvExprDriver::getOrReadField <" << name
             << "> Type: " << GeomField::typeName << endl;
     }
+
+
+    // Handle variables
+    // ~~~~~~~~~~~~~~~~
 
     refPtr<expressions::exprResult> tvar;
 
@@ -252,9 +281,6 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
     {
         tvar.cref(lookupGlobal(name));
     }
-
-
-    tmp<GeomField> tfield;
 
     if (tvar.valid())
     {
@@ -327,24 +353,45 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
     }
 
 
-    const objectRegistry& obr = meshRef.thisDb();
+    // Find context or registered field
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    const GeomField* origFldPtr;
+    const GeomField* origFldPtr = nullptr;
 
-    if
-    (
-        searchRegistry()
-     && (origFldPtr = obr.cfindObject<GeomField>(name)) != nullptr
-    )
+    for (int checki = 0; !origFldPtr && checki < 2; ++checki)
     {
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+
+        if (checki == 0)
+        {
+            origFldPtr = exprDriver::cfindContextObject<GeomField>(name);
+        }
+        else if (searchRegistry())
+        {
+            origFldPtr =
+                meshRef.thisDb().template cfindObject<GeomField>(name);
+        }
+    }
+
+    if (origFldPtr)
+    {
+        // Found from context or registry
+
         if (debug)
         {
-            Info<< "Retrieve registered: " << name << nl;
+            Info<< "Retrieve context/registered:" << name << nl;
         }
 
         const GeomField& origFld = *origFldPtr;
 
-        // Avoid shadowing the original object
+        // Make a deep copy of the data to return. Avoids shadowing
+        // the original object, but most importantly the backend
+        // parser (eg, lemon) will be working with combining via plain
+        // pointers. We thus lose any of the tmp<> shallow copy semantics
+        // anyhow. Additionally, need to disable dimension checking here or
+        // elsewhere too.
+
         tfield = GeomField::New(name + "_exprDriverCopy", origFld);
 
         if (getOldTime)
@@ -405,8 +452,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             }
 
             // Switch dimension checking off
-            const int oldDebug = dimensionSet::debug;
-            dimensionSet::debug = 0;
+            const bool oldDimChecking = dimensionSet::checking(false);
 
             // go through ALL old times
             GeomField* fp = &(fld);
@@ -418,7 +464,7 @@ Foam::tmp<GeomField> Foam::expressions::fvExprDriver::getOrReadFieldImpl
             }
 
             // Restore old value of dimension checking
-            dimensionSet::debug = oldDebug;
+            dimensionSet::checking(oldDimChecking);
         }
     }
     else if (mandatory)
@@ -446,9 +492,8 @@ Foam::autoPtr<T> Foam::expressions::fvExprDriver::getTopoSet
 
     if (debug)
     {
-        Info<< "Looking for " << T::typeName << " named " << name;
-
-        Info<< " or registered as " << regName << " with mesh "
+        Info<< "Looking for " << T::typeName << " named " << name
+            << " or registered as " << regName << " with mesh "
             << "Caching:" << cacheSets()
             << " Found:" << (mesh.foundObject<T>(name))
             << " Found registered:" << mesh.foundObject<T>(regName)
@@ -495,7 +540,7 @@ Foam::autoPtr<T> Foam::expressions::fvExprDriver::getTopoSet
     }
     else
     {
-        const T* ptr = mesh.thisDb().cfindObject<T>(name);
+        const T* ptr = mesh.thisDb().template cfindObject<T>(name);
 
         if (ptr)
         {

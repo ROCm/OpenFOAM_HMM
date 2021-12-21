@@ -30,6 +30,7 @@ License
 #include "volFields.H"
 #include "cellSet.H"
 #include "cylindricalRotation.H"
+#include "emptyPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -556,6 +557,11 @@ bool Foam::functionObjects::momentum::write()
 
             forAll(pbm, patchi)
             {
+                if (isA<emptyPolyPatch>(pbm[patchi]))
+                {
+                    continue;
+                }
+
                 const auto& pts = pbm[patchi].faceCentres();
                 const label len = pts.size();
 

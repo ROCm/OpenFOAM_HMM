@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +78,7 @@ namespace Foam
 // Forward declaration of classes
 
 template<class Type>
-class TimeFunction1;
+class Function1;
 
 class distributionModel;
 
@@ -97,8 +97,7 @@ public:
     enum class injectionMethod
     {
         imPoint,
-        imDisc,
-        imMovingPoint
+        imDisc
     };
 
     static const Enum<injectionMethod> injectionMethodNames;
@@ -134,37 +133,40 @@ private:
         scalar duration_;
 
         //- Position relative to SOI []
-        TimeFunction1<vector> positionVsTime_;
+        autoPtr<Function1<vector>> positionVsTime_;
 
-        //- Injector position [m]
+        //- Static injector - position [m]
         vector position_;
 
-        //- Cell containing injector position []
+        //- Static injector - cell containing injector position []
         label injectorCell_;
 
-        //- Index of tet face for injector cell
+        //- Static injector - index of tet face for injector cell
         label tetFacei_;
 
-        //- Index of tet point for injector cell
+        //- Static injector - index of tet point for injector cell
         label tetPti_;
 
         //- Injector direction []
+        autoPtr<Function1<vector>> directionVsTime_;
+
+        //- Cached direction vector
         vector direction_;
 
         //- Number of parcels to introduce per second []
         const label parcelsPerSecond_;
 
         //- Flow rate profile relative to SOI []
-        const TimeFunction1<scalar> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Inner half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaInner_;
+        autoPtr<Function1<scalar>> thetaInner_;
 
         //- Outer half-cone angle relative to SOI [deg]
-        const TimeFunction1<scalar> thetaOuter_;
+        autoPtr<Function1<scalar>> thetaOuter_;
 
         //- Parcel size PDF model
-        const autoPtr<distributionModel> sizeDistribution_;
+        autoPtr<distributionModel> sizeDistribution_;
 
 
         // Tangential vectors to the direction vector
@@ -185,16 +187,16 @@ private:
             scalar UMag_;
 
             //- Discharge coefficient, relative to SOI [m/s]
-            TimeFunction1<scalar> Cd_;
+            autoPtr<Function1<scalar>> Cd_;
 
             //- Injection pressure [Pa]
-            TimeFunction1<scalar> Pinj_;
+            autoPtr<Function1<scalar>> Pinj_;
 
 
     // Private Member Functions
 
-        //- Set the injection type
-        void setInjectionMethod();
+        //- Set the injection position and direction
+        void setInjectionGeometry();
 
         //- Set the injection flow type
         void setFlowType();
@@ -230,7 +232,7 @@ public:
 
 
     //- Destructor
-    virtual ~ConeNozzleInjection();
+    virtual ~ConeNozzleInjection() = default;
 
 
     // Member Functions

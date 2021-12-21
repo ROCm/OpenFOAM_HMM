@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,7 +113,23 @@ inline void Foam::vtk::legacy::fileHeader
 inline void Foam::vtk::legacy::beginPoints(std::ostream& os, label nPoints)
 {
     os  << nl
-        << "POINTS " << nPoints << " float" << nl;
+        << legacy::fileTagNames[vtk::fileTag::POINTS]
+        << ' ' << nPoints
+        << " float" << nl;
+}
+
+
+inline void Foam::vtk::legacy::beginLines
+(
+    std::ostream& os,
+    label nLines,
+    label nConnectivity
+)
+{
+    os  << nl
+        << legacy::fileTagNames[vtk::fileTag::LINES]
+        << ' ' << nLines
+        << ' ' << (nLines + nConnectivity) << nl;
 }
 
 
@@ -125,7 +141,9 @@ inline void Foam::vtk::legacy::beginPolys
 )
 {
     os  << nl
-        << "POLYGONS " << nPolys << ' ' << (nPolys + nConnectivity) << nl;
+        << legacy::fileTagNames[vtk::fileTag::POLYS]
+        << ' ' << nPolys
+        << ' ' << (nPolys + nConnectivity) << nl;
 }
 
 
@@ -159,7 +177,7 @@ inline void Foam::vtk::legacy::beginCellData
 {
     fmt.os()
         << nl
-        << legacy::dataTypeNames[vtk::fileTag::CELL_DATA]
+        << legacy::fileTagNames[vtk::fileTag::CELL_DATA]
         << ' ' << nCells << nl;
     legacy::fieldData(fmt, nFields);
 }
@@ -174,7 +192,7 @@ inline void Foam::vtk::legacy::beginPointData
 {
     fmt.os()
         << nl
-        << legacy::dataTypeNames[vtk::fileTag::POINT_DATA]
+        << legacy::fileTagNames[vtk::fileTag::POINT_DATA]
         << ' ' << nPoints << nl;
     legacy::fieldData(fmt, nFields);
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,9 +114,9 @@ bool Foam::operator==
 {
     return
     (
-        (a.geometricType() == b.geometricType())
-     && (a.size() == b.size())
+        (a.size() == b.size())
      && (a.start() == b.start())
+     && (a.geometricType() == b.geometricType())
     );
 }
 
@@ -142,21 +142,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const surfacePatch& obj)
     os.check(FUNCTION_NAME);
     return os;
 }
-
-
-// * * * * * * * * * * * * * * * Housekeeping  * * * * * * * * * * * * * * * //
-
-Foam::surfacePatch::surfacePatch
-(
-    const word& geometricType,
-    const word& name,
-    const label size,
-    const label start,
-    const label index
-)
-:
-    surfacePatch(name, size, start, index, geometricType)
-{}
 
 
 // ************************************************************************* //

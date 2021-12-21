@@ -29,6 +29,28 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class UnaryMatchPredicate, class StringType>
+Foam::label Foam::firstMatchingString
+(
+    const UnaryMatchPredicate& matcher,
+    const UList<StringType>& input,
+    const bool invert
+)
+{
+    const label len = input.size();
+
+    for (label i=0; i < len; ++i)
+    {
+        if (matcher(input[i]) ? !invert : invert)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+template<class UnaryMatchPredicate, class StringType>
 Foam::labelList Foam::findMatchingStrings
 (
     const UnaryMatchPredicate& matcher,

@@ -204,7 +204,7 @@ namespace fv
 
 class rotorDiskSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 public:
 

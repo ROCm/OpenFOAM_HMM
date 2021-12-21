@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,8 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
         (
             entryName,
             dict,
-            redirectType
+            redirectType,
+            patchFunction1Base::whichDb()  // mesh registry
         )
     )
 {}
@@ -72,7 +73,12 @@ Foam::PatchFunction1Types::UniformValueField<Type>::UniformValueField
 :
     PatchFunction1<Type>(rhs, pp),
     uniformValuePtr_(rhs.uniformValuePtr_.clone())
-{}
+{
+    if (uniformValuePtr_)
+    {
+        uniformValuePtr_->resetDb(patchFunction1Base::whichDb());
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -101,9 +107,8 @@ void Foam::PatchFunction1Types::UniformValueField<Type>::writeData
 ) const
 {
     PatchFunction1<Type>::writeData(os);
-    //os  << token::END_STATEMENT << nl;
+
     uniformValuePtr_->writeData(os);
-    //os  << endl;
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Original code Copyright (C) 2014-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,9 +119,9 @@ Foam::exprTools::expressionEntry::New
     const word& name
 )
 {
-    auto cstrIter = emptyConstructorTablePtr_->cfind(name);
+    auto* ctorPtr = emptyConstructorTable(name);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -131,7 +131,7 @@ Foam::exprTools::expressionEntry::New
         )  << exit(FatalError);
     }
 
-    return autoPtr<expressionEntry>(cstrIter()());
+    return autoPtr<expressionEntry>(ctorPtr());
 }
 
 

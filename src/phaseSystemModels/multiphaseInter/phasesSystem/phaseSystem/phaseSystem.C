@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -265,7 +265,6 @@ Foam::phaseSystem::phaseSystem
         generatePairsAndSubModels
         (
             "surfaceTension",
-            mesh_,
             surfaceTensionModels_
         );
     }
@@ -494,6 +493,18 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
     }
 
     return tmpCv;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::phaseSystem::rhoEoS
+(
+    const scalarField& p,
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    NotImplemented;
+    return nullptr;
 }
 
 

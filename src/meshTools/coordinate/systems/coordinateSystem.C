@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,6 +87,10 @@ void Foam::coordinateSystem::assign(const dictionary& dict)
     if (finder.isDict())
     {
         spec_ = coordinateRotation::New(finder.dict());
+    }
+    else if (finder.good() && (finder->stream().peek().isWord("none")))
+    {
+        spec_.reset(new coordinateRotations::identity());
     }
     else
     {

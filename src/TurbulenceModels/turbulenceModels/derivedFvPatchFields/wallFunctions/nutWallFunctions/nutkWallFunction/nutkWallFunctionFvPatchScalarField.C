@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016, 2019 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,6 @@ License
 #include "volFields.H"
 #include "wallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -142,7 +141,7 @@ yPlus() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -153,12 +152,39 @@ yPlus() const
 
     const scalarField& y = turbModel.y()[patchi];
 
-    const tmp<volScalarField> tk = turbModel.k();
+    tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
-    tmp<scalarField> kwc = k.boundaryField()[patchi].patchInternalField();
-    tmp<scalarField> nuw = turbModel.nu(patchi);
+    tmp<scalarField> tkwc = k.boundaryField()[patchi].patchInternalField();
+    const scalarField& kwc = tkwc();
 
-    return pow025(Cmu_)*y*sqrt(kwc)/nuw;
+    tmp<scalarField> tnuw = turbModel.nu(patchi);
+    const scalarField& nuw = tnuw();
+
+    tmp<scalarField> tnuEff = turbModel.nuEff(patchi);
+    const scalarField& nuEff = tnuEff();
+
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
+    const scalarField magGradUw(mag(Uw.snGrad()));
+
+    const scalar Cmu25 = pow025(Cmu_);
+
+    auto tyPlus = tmp<scalarField>::New(patch().size(), Zero);
+    auto& yPlus = tyPlus.ref();
+
+    forAll(yPlus, facei)
+    {
+        // inertial sublayer
+        yPlus[facei] = Cmu25*y[facei]*sqrt(kwc[facei])/nuw[facei];
+
+        if (yPlusLam_ > yPlus[facei])
+        {
+            // viscous sublayer
+            yPlus[facei] =
+                y[facei]*sqrt(nuEff[facei]*magGradUw[facei])/nuw[facei];
+        }
+    }
+
+    return tyPlus;
 }
 
 

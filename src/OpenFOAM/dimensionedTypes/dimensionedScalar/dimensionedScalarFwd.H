@@ -39,8 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-class dimensioned;
+template<class Type> class dimensioned;
 
 typedef dimensioned<scalar> dimensionedScalar;
 

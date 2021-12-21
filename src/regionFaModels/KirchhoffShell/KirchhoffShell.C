@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,14 +44,15 @@ defineTypeNameAndDebug(KirchhoffShell, 0);
 
 addToRunTimeSelectionTable(vibrationShellModel, KirchhoffShell, dictionary);
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool KirchhoffShell::read(const dictionary& dict)
+bool KirchhoffShell::init(const dictionary& dict)
 {
     this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return true;
 }
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void KirchhoffShell::solveDisplacement()
 {
@@ -107,8 +108,6 @@ void KirchhoffShell::solveDisplacement()
 
         wEqn.solve();
 
-        Info<< "w min/max   = " << min(w_) << ", " << max(w_) << endl;
-
         if (wSubCycle.index() >= wSubCycle.nSubCycles())
         {
             // Cache oldTimes inside the sub-cycling
@@ -121,6 +120,10 @@ void KirchhoffShell::solveDisplacement()
             a_ = fac::d2dt2(w_);
         }
     }
+
+    Info<< "ws_vibrationShell: "
+        << "min = " << min(w_).value() << ", "
+        << "max = " << max(w_).value() << endl;
 
     // Restore old time in main time
     w_.oldTime() = w0;
@@ -249,15 +252,10 @@ KirchhoffShell::KirchhoffShell
         dimensionedScalar(inv(pow3(dimLength)), Zero)
     )
 {
-    init();
+    init(dict);
 }
 
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-void KirchhoffShell::init()
-{}
-
 
 void KirchhoffShell::preEvolveRegion()
 {}
@@ -306,10 +304,8 @@ const tmp<areaScalarField> KirchhoffShell::rho() const
     );
 }
 
-
 void KirchhoffShell::info()
 {}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,57 @@ Class
     Foam::distributionModels::binned
 
 Description
-    A binned distribution model where the random sample is taken from a
-    discrete set of bins
+    Particle-size distribution model wherein random samples are
+    drawn from a given discrete set of (\c bin, \c probability) pairs,
+    where in terms of its meaning, \c bins correspond to particle sizes
+    and \c probabilities correspond to (relative) probability of occurrences.
+
+    The second column (i.e. \c probability) are normalised by the sum of all
+    its values, resulting in a normalised column in the domain of [0,1].
+    To generate a sample, first a sample drawn from the uniform probability
+    density function on the unit interval (i.e. \c u), and then, the \c bin
+    corresponding to the first \c probability larger than \c u is fetched
+    as the particle size to be further processed.
+
+Usage
+    Minimal example by using \c constant/\<CloudProperties\>:
+    \verbatim
+    subModels
+    {
+        injectionModels
+        {
+            <name>
+            {
+                ...
+
+                sizeDistribution
+                {
+                    type        binned;
+                    binnedDistribution
+                    {
+                        distribution
+                        (
+                            (<bin1>    <probability1>)
+                            (<bin2>    <probability2>)
+                            ...
+                            (<binN>    <probabilityN>)
+                        );
+                    }
+                }
+            }
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                       | Type | Reqd | Deflt
+      type         | Type name: binned                 | word | yes  | -
+      binnedDistribution | Distribution settings       | dict | yes  | -
+      distribution | \<bin\>-\<probability\> pairs     | dict | yes  | -
+      \<bin\>      | Particle size                     | scalar | yes | -
+      \<probability\> | Probability of occurrence      | scalar | yes | -
+    \endtable
 
 SourceFiles
     binned.C
@@ -70,18 +119,18 @@ class binned
 :
     public distributionModel
 {
-    // Private data
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    // Private Data
 
-        // List of (bin probability)
+        // List of (bin probability) pairs
         List<pair> xy_;
 
-        //- Distribution mean value
+        //- Mean of the distribution
         scalar meanValue_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Initialise the distribution parameters
         void initialise();
@@ -101,6 +150,7 @@ public:
         binned(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
+        //  Allows negative entries
         binned
         (
             const UList<scalar>& sampleData,
@@ -108,7 +158,7 @@ public:
             Random& rndGen
         );
 
-        //- Construct copy
+        //- Copy construct
         binned(const binned& p);
 
         //- Construct and return a clone
@@ -117,23 +167,20 @@ public:
             return autoPtr<distributionModel>(new binned(*this));
         }
 
+        //- No copy assignment
+        void operator=(const binned&) = delete;
+
 
     //- Destructor
-    virtual ~binned();
+    virtual ~binned() = default;
 
 
     // Member Functions
 
-        //- Sample the distributionModel
+        //- Sample the distribution
         virtual scalar sample() const;
 
-        //- Return the minimum value
-        virtual scalar minValue() const;
-
-        //- Return the maximum value
-        virtual scalar maxValue() const;
-
-        //- Return the mean value
+        //- Return the arithmetic mean of the distribution data
         virtual scalar meanValue() const;
 
         //- Write data to stream

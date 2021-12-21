@@ -52,7 +52,7 @@ Foam::fv::limitVelocity::limitVelocity
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     UName_(coeffs_.getOrDefault<word>("U", "U")),
     max_(coeffs_.get<scalar>("max"))
 {
@@ -65,7 +65,7 @@ Foam::fv::limitVelocity::limitVelocity
 
 bool Foam::fv::limitVelocity::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("max", max_);
 
@@ -92,15 +92,11 @@ void Foam::fv::limitVelocity::correct(volVectorField& U)
         }
     }
 
-    // handle boundaries in the case of 'all'
-    if (selectionMode_ == smAll)
+    // Handle boundaries in the case of 'all'
+    if (!cellSetOption::useSubMesh())
     {
-        volVectorField::Boundary& Ubf = U.boundaryFieldRef();
-
-        forAll(Ubf, patchi)
+        for (fvPatchVectorField& Up : U.boundaryFieldRef())
         {
-            fvPatchVectorField& Up = Ubf[patchi];
-
             if (!Up.fixesValue())
             {
                 forAll(Up, facei)

@@ -2,6 +2,7 @@
 // Generic handling of floating point exceptions
 //
 // 2018 Alexey Matveichev
+// 2021 Tatsuya Shimizu - ARM64 support
 // ----------------------------------------------------------------------------
 //
 // Original Author
@@ -36,11 +37,21 @@ inline int feenableexcept(unsigned int excepts)
     {
         return -1;
     }
+
+#if defined __arm64__
+    old_excepts = fenv.__fpcr & FE_ALL_EXCEPT;
+#else
     old_excepts = fenv.__control & FE_ALL_EXCEPT;
+#endif
 
     // unmask
+#if defined __arm64__
+    fenv.__fpcr &= ~new_excepts;
+    fenv.__fpsr &= ~(new_excepts << 7);
+#else
     fenv.__control &= ~new_excepts;
     fenv.__mxcsr   &= ~(new_excepts << 7);
+#endif
 
     return fesetenv(&fenv) ? -1 : old_excepts;
 }
@@ -57,11 +68,20 @@ inline int fedisableexcept(unsigned int excepts)
         return -1;
     }
 
+#if defined __arm64__
+    old_excepts = fenv.__fpcr & FE_ALL_EXCEPT;
+#else
     old_excepts = fenv.__control & FE_ALL_EXCEPT;
+#endif
 
     // mask
+#if defined __arm64__
+    fenv.__fpcr |= new_excepts;
+    fenv.__fpsr |= new_excepts << 7;
+#else
     fenv.__control |= new_excepts;
     fenv.__mxcsr   |= new_excepts << 7;
+#endif
 
     return fesetenv(&fenv) ? -1 : old_excepts;
 }

@@ -28,7 +28,6 @@ License
 
 #include "sampledSurface.H"
 #include "polyMesh.H"
-#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,7 +46,6 @@ const Foam::wordList Foam::sampledSurface::surfaceFieldTypes
     "surfaceSymmTensorField",
     "surfaceTensorField"
 });
-
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -72,9 +70,9 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
     DebugInfo
         << "Selecting sampledType " << sampleType << endl;
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
+    auto* ctorPtr = wordConstructorTable(sampleType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -85,7 +83,7 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));
+    return autoPtr<sampledSurface>(ctorPtr(name, mesh, dict));
 }
 
 
@@ -219,7 +217,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledSurface::sample
 }
 
 
-void Foam::sampledSurface::print(Ostream& os) const
+void Foam::sampledSurface::print(Ostream& os, int level) const
 {
     os << type();
 }
@@ -229,7 +227,8 @@ void Foam::sampledSurface::print(Ostream& os) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const sampledSurface& s)
 {
-    s.print(os);
+    // Print with more information
+    s.print(os, 1);
     os.check(FUNCTION_NAME);
     return os;
 }

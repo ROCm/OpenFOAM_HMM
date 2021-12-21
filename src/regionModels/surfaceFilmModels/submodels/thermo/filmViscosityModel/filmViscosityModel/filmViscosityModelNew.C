@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
 
     Info<< "    Selecting filmViscosityModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -63,7 +63,7 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<filmViscosityModel>(cstrIter()(model, dict, mu));
+    return autoPtr<filmViscosityModel>(ctorPtr(model, dict, mu));
 }
 
 

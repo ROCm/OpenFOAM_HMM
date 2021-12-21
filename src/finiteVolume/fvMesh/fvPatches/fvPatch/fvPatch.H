@@ -258,6 +258,15 @@ public:
             tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
 
             //- Return given internal field next to patch as patch field
+            //- using faceCells mapping
+            template<class Type>
+            tmp<Field<Type>> patchInternalField
+            (
+                const UList<Type>&,
+                const labelUList& faceCells
+            ) const;
+
+            //- Return given internal field next to patch as patch field
             template<class Type>
             void patchInternalField(const UList<Type>&, Field<Type>&) const;
 

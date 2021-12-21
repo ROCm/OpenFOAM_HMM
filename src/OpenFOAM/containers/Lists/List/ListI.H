@@ -120,14 +120,13 @@ inline void Foam::List<T>::clear()
         delete[] this->v_;
         this->v_ = nullptr;
     }
-
     this->size_ = 0;
 }
 
 
 namespace Foam
 {
-    // Template specialization for bool. Fills with false
+    // Template specialization for bool. Fills new entries with false
     template<>
     inline void List<bool>::resize(const label newLen)
     {
@@ -137,9 +136,16 @@ namespace Foam
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label newLen)
+inline void Foam::List<T>::resize(const label len)
 {
-    this->doResize(newLen);
+    this->doResize(len);
+}
+
+
+template<class T>
+inline void Foam::List<T>::resize_nocopy(const label len)
+{
+    this->reAlloc(len);
 }
 
 
@@ -168,7 +174,10 @@ inline T& Foam::List<T>::newElmt(const label i)
 template<class T>
 inline void Foam::List<T>::append(const T& val)
 {
-    resize(this->size() + 1, val);  // copy element
+    const label idx = this->size();
+    resize(idx + 1);
+
+    this->operator[](idx) = val;  // copy element
 }
 
 

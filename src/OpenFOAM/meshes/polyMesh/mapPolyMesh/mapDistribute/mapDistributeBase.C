@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -960,8 +960,8 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<char*>(recvFields[domain].data()),
-                    recvFields[domain].size()*sizeof(bool),
+                    recvFields[domain].data_bytes(),
+                    recvFields[domain].size_bytes(),
                     tag,
                     comm_
                 );
@@ -994,8 +994,8 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<const char*>(subField.cdata()),
-                    subField.size()*sizeof(bool),
+                    subField.cdata_bytes(),
+                    subField.size_bytes(),
                     tag,
                     comm_
                 );
@@ -1132,8 +1132,8 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<char*>(recvFields[domain].data()),
-                    recvFields[domain].size()*sizeof(bool),
+                    recvFields[domain].data_bytes(),
+                    recvFields[domain].size_bytes(),
                     tag,
                     comm_
                 );
@@ -1165,8 +1165,8 @@ void Foam::mapDistributeBase::compact
                 (
                     Pstream::commsTypes::nonBlocking,
                     domain,
-                    reinterpret_cast<const char*>(subField.cdata()),
-                    subField.size()*sizeof(bool),
+                    subField.cdata_bytes(),
+                    subField.size_bytes(),
                     tag,
                     comm_
                 );

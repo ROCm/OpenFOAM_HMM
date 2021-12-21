@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +58,7 @@ Description
         Property | Description                            | Type | Reqd | Deflt
         libs     | Preloaded library names                | words | no  | -
         errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
+        useNamePrefix | Default enable/disable scoping prefix | bool | no | no-op
     \endtable
 
     The optional \c errors entry controls how FatalError is caught
@@ -87,6 +88,7 @@ SourceFiles
 #include "HashTable.H"
 #include "IOdictionary.H"
 #include "HashSet.H"
+#include "functionObjectProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -145,7 +147,7 @@ class functionObjectList
         const dictionary& parentDict_;
 
         //- Function object properties - stores state information
-        mutable autoPtr<IOdictionary> stateDictPtr_;
+        mutable autoPtr<functionObjects::properties> propsDictPtr_;
 
         //- Function objects output registry
         mutable autoPtr<objectRegistry> objectsRegistryPtr_;
@@ -165,8 +167,8 @@ class functionObjectList
         //- List of functions
         PtrList<functionObject>& functions() { return *this; }
 
-        //- Create state dictionary - attached to Time.
-        void createStateDict() const;
+        //- Create properties dictionary - attached to Time.
+        void createPropertiesDict() const;
 
         //- Create registry for output objects - attached to Time.
         void createOutputRegistry() const;
@@ -262,19 +264,19 @@ public:
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
 
-        //- Return the current trigger index (read from the stateDict)
+        //- Return the current trigger index (read from the propsDict)
         label triggerIndex() const;
 
-        //- Reset/read state dictionary for current time
-        void resetState();
+        //- Reset/read properties dictionary for current time
+        void resetPropertiesDict();
 
-        //- Write access to the state dictionary ("functionObjectProperties")
-        //- registered on Time
-        IOdictionary& stateDict();
+        //- Write access to the properties dictionary
+        //- ("functionObjectProperties") registered on Time
+        functionObjects::properties& propsDict();
 
-        //- Const access to the state dictionary ("functionObjectProperties")
-        //- registered on Time
-        const IOdictionary& stateDict() const;
+        //- Const access to the properties dictionary
+        //- ("functionObjectProperties") registered on Time
+        const Foam::functionObjects::properties& propsDict() const;
 
         //- Write access to the output objects ("functionObjectObjects")
         //- registered on Time

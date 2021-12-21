@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class blockDescriptor;
 class blockFace;
 
@@ -91,7 +91,7 @@ public:
     // Constructors
 
         //- Construct from face vertices
-        blockFace(const face& vertices);
+        explicit blockFace(const face& vertices);
 
         //- Construct from Istream
         blockFace
@@ -163,7 +163,7 @@ public:
         void write(Ostream&, const dictionary&) const;
 
 
-    // Ostream operator
+    // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const blockFace&);
 };

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,7 +156,6 @@ protected:
             const label refineIter,
             const label nSrcFaces,
             const List<labelList>& refineFlags,
-            const labelList& nElems,
             List<DynamicList<treeBoundBox>>& fixedBoxes
         );
 

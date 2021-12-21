@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,7 +148,7 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
                 tetPti
             );
 
-            if (celli > 0)
+            if (celli >= 0)
             {
                 proci = Pstream::myProcNo();
             }
@@ -267,7 +266,7 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     SOI_(0.0),
     volumeTotal_(this->template getModelProperty<scalar>("volumeTotal")),
     massTotal_(0),
-    massFlowRate_(owner.db().time(), "massFlowRate"),
+    massFlowRate_(nullptr),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<label>("nInjections")),
     parcelsAddedTotal_
@@ -298,7 +297,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     SOI_(0.0),
     volumeTotal_(this->template getModelProperty<scalar>("volumeTotal")),
     massTotal_(0),
-    massFlowRate_(owner.db().time(), "massFlowRate"),
+    massFlowRate_(nullptr),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<scalar>("nInjections")),
     parcelsAddedTotal_
@@ -340,8 +339,17 @@ Foam::InjectionModel<CloudType>::InjectionModel
         }
         else
         {
-            massFlowRate_.reset(this->coeffDict());
-            massTotal_ = massFlowRate_.value(owner.db().time().value());
+            massFlowRate_.reset
+            (
+                Function1<scalar>::New
+                (
+                    "massFlowRate",
+                    this->coeffDict(),
+                    &owner.mesh()
+                )
+            );
+            massFlowRate_->userTimeToTime(owner.db().time());
+            massTotal_ = massFlowRate_->value(owner.db().time().value());
             this->coeffDict().readIfPresent("SOI", SOI_);
         }
     }
@@ -386,7 +394,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     SOI_(im.SOI_),
     volumeTotal_(im.volumeTotal_),
     massTotal_(im.massTotal_),
-    massFlowRate_(im.massFlowRate_),
+    massFlowRate_(im.massFlowRate_.clone()),
     massInjected_(im.massInjected_),
     nInjections_(im.nInjections_),
     parcelsAddedTotal_(im.parcelsAddedTotal_),
@@ -578,7 +586,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
 
     const polyMesh& mesh = this->owner().mesh();
 
-    massTotal_ = massFlowRate_.value(mesh.time().value());
+    massTotal_ = massFlowRate_->value(mesh.time().value());
 
     // Reset counters
     time0_ = 0.0;

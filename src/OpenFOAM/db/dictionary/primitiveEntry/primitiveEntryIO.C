@@ -30,27 +30,6 @@ License
 #include "functionEntry.H"
 #include "evalEntry.H"
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace
-{
-    // This is akin to a SafeIOWarning, which does not yet exist
-    inline void safeIOWarning
-    (
-        const Foam::IOstream& is,
-        const std::string& msg
-    )
-    {
-        std::cerr
-            << "--> FOAM Warning :\n"
-            << "    Reading \"" << is.name() << "\" at line "
-            << is.lineNumber() << '\n'
-            << "    " << msg << std::endl;
-    }
-
-} // End anonymous namespace
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::primitiveEntry::acceptToken
@@ -182,7 +161,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
                     --depth;
                     if (depth < 0)
                     {
-                        safeIOWarning
+                        reportReadWarning
                         (
                             is,
                             "Too many closing ')' ... was a ';' forgotten?"
@@ -191,7 +170,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
                     else if (depth < 61 && ((balanced >> depth) & 1u))
                     {
                         // Bit was set, but expected it to be unset.
-                        safeIOWarning(is, "Imbalanced '{' with ')'");
+                        reportReadWarning(is, "Imbalanced '{' with ')'");
                     }
                 }
                 break;
@@ -201,7 +180,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
                     --depth;
                     if (depth < 0)
                     {
-                        safeIOWarning
+                        reportReadWarning
                         (
                             is,
                             "Too many closing '}' ... was a ';' forgotten?"
@@ -210,7 +189,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
                     else if (depth < 61 && !((balanced >> depth) & 1u))
                     {
                         // Bit was unset, but expected it to be set.
-                        safeIOWarning(is, "Imbalanced '(' with '}'");
+                        reportReadWarning(is, "Imbalanced '(' with '}'");
                     }
                 }
                 break;
@@ -230,7 +209,7 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
 
     if (depth)
     {
-        safeIOWarning(is, "Imbalanced brackets");
+        reportReadWarning(is, "Imbalanced brackets");
     }
 
     is.fatalCheck(FUNCTION_NAME);

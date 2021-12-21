@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ uniformNormalFixedValueFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF, dict, false),
     uniformValue_(PatchFunction1<scalar>::New(p.patch(), "uniformValue", dict)),
-    ramp_(Function1<scalar>::NewIfPresent("ramp", dict))
+    ramp_(Function1<scalar>::NewIfPresent("ramp", dict, word::null, &db()))
 {
     if (dict.found("value"))
     {

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +47,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "CloudSubModelBase.H"
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -59,6 +61,15 @@ namespace regionModels
         class surfaceFilmRegionModel;
     }
 }
+
+namespace regionModels
+{
+    namespace areaSurfaceFilmModels
+    {
+        class liquidFilmBase;
+    }
+}
+
 
 /*---------------------------------------------------------------------------*\
                       Class SurfaceFilmModel Declaration
@@ -76,6 +87,9 @@ protected:
         //- Convenience typedef to the cloud's parcel type
         typedef typename CloudType::parcelType parcelType;
 
+        typedef typename
+            regionModels::areaSurfaceFilmModels::liquidFilmBase areaFilm;
+
         //- Gravitational acceleration constant
         const dimensionedVector& g_;
 
@@ -84,23 +98,29 @@ protected:
         //  type
         label ejectedParcelType_;
 
+        //- Injection offset position
+        scalar injectionOffset_;
+
+        //- Minimum diameter particle injection
+        scalar minDiameter_;
+
 
         // Cached injector fields per film patch
 
             //- Parcel mass / patch face
-            scalarList massParcelPatch_;
+            scalarField massParcelPatch_;
 
             //- Parcel diameter / patch face
-            scalarList diameterParcelPatch_;
+            scalarField diameterParcelPatch_;
 
             //- Film velocity / patch face
-            List<vector> UFilmPatch_;
+            Field<vector> UFilmPatch_;
 
             //- Film density / patch face
-            scalarList rhoFilmPatch_;
+            scalarField rhoFilmPatch_;
 
             //- Film height of all film patches / patch face
-            scalarListList deltaFilmPatch_;
+            Field<scalarField> deltaFilmPatch_;
 
 
         // Counters
@@ -112,6 +132,12 @@ protected:
             label nParcelsInjected_;
 
 
+        // Total mass info
+
+            //- Total mass transferred to the film
+            scalar totalMassTransferred_;
+
+
     // Protected functions
 
         //- Cache the film fields in preparation for injection
@@ -120,6 +146,22 @@ protected:
             const label filmPatchi,
             const label primaryPatchi,
             const regionModels::surfaceFilmModels::surfaceFilmRegionModel&
+        );
+
+        //- Cache the finite area film fields in preparation for injection
+        virtual void cacheFilmFields
+        (
+            const label primaryPatchi,
+            const areaFilm&
+        );
+
+        //- Inject particles in cloud
+        template<class TrackCloudType>
+        void injectParticles
+        (
+            const label primaryPatchi,
+            const labelList& injectorCellsPatch,
+            TrackCloudType& cloud
         );
 
         //- Set the individual parcel properties
@@ -203,6 +245,12 @@ public:
             //- Return non-const access to the number of parcels injected from
             //  the film model
             inline label& nParcelsInjected();
+
+            //- Return non-const total mass transferred
+            inline scalar& totalMassTransferred();
+
+            //- Return consr access to mass transferred
+            inline scalar totalMassTransferred() const;
 
 
         // Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 #include "error.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<bool>::typeName = "bool";
 const char* const Foam::pTraits<bool>::componentNames[] = { "" };
@@ -40,7 +40,9 @@ const bool Foam::pTraits<bool>::zero = false;
 const bool Foam::pTraits<bool>::one = true;
 
 
-Foam::pTraits<bool>::pTraits(const bool& p)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pTraits<bool>::pTraits(const bool& p) noexcept
 :
     p_(p)
 {}
@@ -51,6 +53,8 @@ Foam::pTraits<bool>::pTraits(Istream& is)
     is >> p_;
 }
 
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 {

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,8 @@ Foam::vtk::dataArrayAttrNames
 });
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // Legacy
 
 const Foam::word Foam::vtk::legacy::fileExtension("vtk");
@@ -132,10 +134,26 @@ const Foam::Enum
 <
     Foam::vtk::fileTag
 >
-Foam::vtk::legacy::dataTypeNames
+Foam::vtk::legacy::fileTagNames
 ({
-    { vtk::fileTag::CELL_DATA,  "CELL_DATA" },
+    { vtk::fileTag::POINTS, "POINTS" },
+    { vtk::fileTag::CELLS, "CELLS" },
+    { vtk::fileTag::POLYS, "POLYGONS" },
+    { vtk::fileTag::VERTS, "VERTICES" },
+    { vtk::fileTag::LINES, "LINES" },
+    { vtk::fileTag::CELL_DATA, "CELL_DATA" },
     { vtk::fileTag::POINT_DATA, "POINT_DATA" },
+});
+
+
+const Foam::Enum
+<
+    Foam::vtk::dataArrayAttr
+>
+Foam::vtk::legacy::dataArrayAttrNames
+({
+    { vtk::dataArrayAttr::OFFSETS, "OFFSETS" },
+    { vtk::dataArrayAttr::CONNECTIVITY, "CONNECTIVITY" },
 });
 
 

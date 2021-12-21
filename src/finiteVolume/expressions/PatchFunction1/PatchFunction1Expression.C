@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +41,7 @@ Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    dict_(dict),
+    dict_(dict),  // Deep copy
     valueExpr_(),
     driver_(fvPatch::lookupPatch(this->patch()), dict_)
 {
@@ -50,9 +50,7 @@ Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
         debug |= 1;
     }
 
-    string expr;
-    dict.readEntry("expression", expr);
-    valueExpr_ = expressions::exprString(expr, dict);
+    valueExpr_.readEntry("expression", dict_);
 
     // Basic sanity
     if (valueExpr_.empty())
@@ -84,9 +82,9 @@ Foam::PatchFunction1Types::PatchExprField<Type>::PatchExprField
 )
 :
     PatchFunction1<Type>(rhs, pp),
-    dict_(rhs.dict_),
+    dict_(rhs.dict_),  // Deep copy
     valueExpr_(rhs.valueExpr_),
-    driver_(fvPatch::lookupPatch(this->patch()), rhs.driver_)
+    driver_(fvPatch::lookupPatch(this->patch()), rhs.driver_, dict_)
 {}
 
 

@@ -1,3 +1,20 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+
+Description
+    Search for the appropriate blockMeshDict dictionary...
+
+\*---------------------------------------------------------------------------*/
+
 // Search for the appropriate blockMesh dictionary....
 const word dictName("blockMeshDict");
 
@@ -64,9 +81,12 @@ autoPtr<IOdictionary> meshDictPtr;
     }
 
     Info<< "Creating block mesh from "
-        << runTime.relativePath(meshDictIO.objectPath()) << endl;
+        << meshDictIO.objectRelPath() << endl;
 
     meshDictPtr = autoPtr<IOdictionary>::New(meshDictIO);
 }
 
 const IOdictionary& meshDict = *meshDictPtr;
+
+
+// ************************************************************************* //

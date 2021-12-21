@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Class
     Foam::wallBoilingModels::partitioningModel
 
 Description
-    Base class for wall heat flux partitioning models
+    Base class for wall heat flux partitioning models.
 
 SourceFiles
     partitioningModel.C
@@ -98,7 +98,10 @@ public:
             const scalarField& alphaLiquid
         ) const = 0;
 
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +37,8 @@ namespace Foam
 
 #define defineSetWriterType(dataType)                                          \
     defineNamedTemplateTypeNameAndDebug(writer<dataType >, 0);                 \
-    defineTemplatedRunTimeSelectionTable(writer, word, dataType);
+    defineTemplatedRunTimeSelectionTable(writer, word, dataType);              \
+    defineTemplatedRunTimeSelectionTable(writer, dict, dataType);
 
 defineSetWriterType(scalar);
 defineSetWriterType(vector);

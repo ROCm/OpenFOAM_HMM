@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,8 @@ Foam::temperatureCoupledBase::KMethodTypeNames_
     { KMethodType::mtFluidThermo, "fluidThermo" },
     { KMethodType::mtSolidThermo, "solidThermo" },
     { KMethodType::mtDirectionalSolidThermo, "directionalSolidThermo" },
-    { KMethodType::mtLookup, "lookup" }
+    { KMethodType::mtLookup, "lookup" },
+    { KMethodType::mtFunction, "function" }
 };
 
 
@@ -74,9 +75,9 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 :
     patch_(patch),
     method_(KMethodTypeNames_.get("kappaMethod", dict)),
-    kappaName_(dict.getOrDefault<word>("kappa", "none")),
-    alphaAniName_(dict.getOrDefault<word>("alphaAni", "none")),
-    alphaName_(dict.getOrDefault<word>("alpha", "none"))
+    kappaName_(dict.getOrDefault<word>("kappa", word::null)),
+    alphaAniName_(dict.getOrDefault<word>("alphaAni", word::null)),
+    alphaName_(dict.getOrDefault<word>("alpha", word::null))
 {
     switch (method_)
     {
@@ -110,12 +111,43 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
             break;
         }
 
+        case mtFunction:
+        {
+            kappaFunction1_ = PatchFunction1<scalar>::New
+            (
+                patch.patch(),
+                "kappaValue",
+                dict
+            );
+            alphaFunction1_ = PatchFunction1<scalar>::New
+            (
+                patch.patch(),
+                "alphaValue",
+                dict
+            );
+        }
+
         default:
         {
             break;
         }
     }
 }
+
+
+Foam::temperatureCoupledBase::temperatureCoupledBase
+(
+    const temperatureCoupledBase& base
+)
+:
+    patch_(base.patch_),
+    method_(base.method_),
+    kappaName_(base.kappaName_),
+    alphaAniName_(base.alphaAniName_),
+    alphaName_(base.alphaName_),
+    kappaFunction1_(base.kappaFunction1_.clone(patch_.patch())),
+    alphaFunction1_(base.alphaFunction1_.clone(patch_.patch()))
+{}
 
 
 Foam::temperatureCoupledBase::temperatureCoupledBase
@@ -128,11 +160,51 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
     method_(base.method_),
     kappaName_(base.kappaName_),
     alphaAniName_(base.alphaAniName_),
-    alphaName_(base.alphaName_)
+    alphaName_(base.alphaName_),
+    kappaFunction1_(base.kappaFunction1_.clone(patch_.patch())),
+    alphaFunction1_(base.alphaFunction1_.clone(patch_.patch()))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::temperatureCoupledBase::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
+{
+    if (kappaFunction1_)
+    {
+        kappaFunction1_().autoMap(mapper);
+    }
+    if (alphaFunction1_)
+    {
+        alphaFunction1_().autoMap(mapper);
+    }
+}
+
+
+void Foam::temperatureCoupledBase::rmap
+(
+    const fvPatchField<scalar>& ptf,
+    const labelList& addr
+)
+{
+    const auto* tcb = isA<temperatureCoupledBase>(ptf);
+
+    if (tcb)
+    {
+        if (kappaFunction1_)
+        {
+            kappaFunction1_().rmap(tcb->kappaFunction1_(), addr);
+        }
+        if (alphaFunction1_)
+        {
+            alphaFunction1_().rmap(tcb->alphaFunction1_(), addr);
+        }
+    }
+}
+
 
 Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 (
@@ -259,6 +331,13 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << " or volSymmTensorField."
                     << exit(FatalError);
             }
+            break;
+        }
+
+        case KMethodType::mtFunction:
+        {
+            const auto& tm = patch_.patch().boundaryMesh().mesh().time();
+            return kappaFunction1_->value(tm.timeOutputValue());
             break;
         }
 
@@ -405,6 +484,13 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::alpha
             break;
         }
 
+        case KMethodType::mtFunction:
+        {
+            const auto& tm = patch_.patch().boundaryMesh().mesh().time();
+            return alphaFunction1_->value(tm.timeOutputValue());
+            break;
+        }
+
         default:
         {
             FatalErrorInFunction
@@ -426,9 +512,26 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::alpha
 void Foam::temperatureCoupledBase::write(Ostream& os) const
 {
     os.writeEntry("kappaMethod", KMethodTypeNames_[method_]);
-    os.writeEntry("kappa", kappaName_);
-    os.writeEntry("alphaAni", alphaAniName_);
-    os.writeEntry("alpha", alphaName_);
+    if (!kappaName_.empty())
+    {
+        os.writeEntry("kappa", kappaName_);
+    }
+    if (!alphaAniName_.empty())
+    {
+        os.writeEntry("alphaAni", alphaAniName_);
+    }
+    if (!alphaName_.empty())
+    {
+        os.writeEntry("alpha", alphaName_);
+    }
+    if (kappaFunction1_)
+    {
+        kappaFunction1_->writeData(os);
+    }
+    if (alphaFunction1_)
+    {
+        alphaFunction1_->writeData(os);
+    }
 }
 
 

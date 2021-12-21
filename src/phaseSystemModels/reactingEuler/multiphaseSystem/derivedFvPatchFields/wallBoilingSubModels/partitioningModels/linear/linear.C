@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2019 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,13 +57,6 @@ linear::linear(const dictionary& dict)
     partitioningModel(),
     alphaLiquid1_(dict.get<scalar>("alphaLiquid1")),
     alphaLiquid0_(dict.get<scalar>("alphaLiquid0"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::partitioningModels::
-linear::~linear()
 {}
 
 

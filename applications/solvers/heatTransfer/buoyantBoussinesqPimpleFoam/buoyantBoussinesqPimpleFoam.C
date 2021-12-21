@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +31,8 @@ Group
     grpHeatTransferSolvers
 
 Description
-    Transient solver for buoyant, turbulent flow of incompressible fluids.
+    Transient solver for buoyant, turbulent flow of incompressible fluids,
+    with optional mesh motion and mesh topology changes.
 
     Uses the Boussinesq approximation:
     \f[
@@ -51,9 +53,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
 #include "turbulentTransportModel.H"
 #include "radiationModel.H"
+#include "CorrectPhi.H"
 #include "fvOptions.H"
 #include "pimpleControl.H"
 
@@ -64,7 +68,8 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Transient solver for buoyant, turbulent flow"
-        " of incompressible fluids.\n"
+        " of incompressible fluids, with optional mesh"
+        " motion and mesh topology changes.\n"
         "Uses the Boussinesq approximation."
     );
 
@@ -73,10 +78,10 @@ int main(int argc, char *argv[])
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
+    #include "createDynamicFvMesh.H"
+    #include "createDyMControls.H"
     #include "createFields.H"
-    #include "createTimeControls.H"
+    #include "createUfIfPresent.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
     #include "initContinuityErrs.H"
@@ -89,7 +94,7 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readTimeControls.H"
+        #include "readDyMControls.H"
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
@@ -100,6 +105,34 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
+            {
+                // Do any mesh changes
+                mesh.controlledUpdate();
+
+                if (mesh.changing())
+                {
+                    MRF.update();
+
+                    if (correctPhi)
+                    {
+                        // Calculate absolute flux
+                        // from the mapped surface velocity
+                        phi = mesh.Sf() & Uf();
+
+                        #include "correctPhi.H"
+
+                        // Make the flux relative to the mesh motion
+                        fvc::makeRelative(phi, U);
+                    }
+
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
+                }
+            }
+
             #include "UEqn.H"
             #include "TEqn.H"
 

@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
+#     Copyright (C) 2020-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -256,16 +256,25 @@ echo "Third-party libraries in platforms/$targetPlatform$compOptions" >| "$tmpTa
 echo "Copy common files" 1>&2
 rsync -a --exclude .gitignore COPYING META-INFO README.md bin etc "$tmpTarget"
 
-if [ -n "$FOAM_CONFIG_ETC" ]
+# Remove branch info (probably spurious)
+if [ -f "$tmpTarget/META-INFO/build-info" ]
 then
-    etcDir="${FOAM_CONFIG_ETC##*/}"
-    if [ "$WM_PROJECT_DIR/$etcDir" = "$FOAM_CONFIG_ETC" ]
-    then
-        echo "Copy additional config dir: $etcDir" 1>&2
-        rsync -a "$etcDir" "$tmpTarget"
-    else
+    sed -i -e '/^branch=/d' "$tmpTarget/META-INFO/build-info"
+fi
+
+# One-level only?
+configEtcDir="${FOAM_CONFIG_ETC##*/}"
+if [ -n "$configEtcDir" ]
+then
+    case "$FOAM_CONFIG_ETC" in
+    ("$configEtcDir" | "$WM_PROJECT_DIR/$configEtcDir")
+        echo "Copy config dir: $configEtcDir" 1>&2
+        rsync -a "$configEtcDir" "$tmpTarget"
+        ;;
+    (*)
         echo "Do not know how to copy additional config dir: $FOAM_CONFIG_ETC" 1>&2
-    fi
+        ;;
+    esac
 else
     echo "No additional config dir" 1>&2
 fi
@@ -295,11 +304,26 @@ rsync -a "$root"/bin/*.exe "$root"/lib/*.dll "$binDir"
 
 # Pstream .dll into bin directory
 other="$root/lib/$FOAM_MPI"
-if [ -d "$other" ] && [ -n "$FOAM_MPI" ]
+if [ -d "$other" ] && [ -n "$FOAM_MPI" ] && [ "$FOAM_MPI" != dummy ]
 then
-    echo "Copy ($FOAM_MPI) libPstream.dll -> platforms bin/" 1>&2
+    echo "Copy ($FOAM_MPI) *.dll -> platforms bin/" 1>&2
     rsync -a "$other"/*.dll "$binDir"
+
+    ending="$(echo "$FOAM_MPI" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^A-Za-z].*//')"
+    [ -n "$ending" ] || continue
+
+    for name in libPstream.dll
+    do
+        if [ -f "$other/$name" ]
+        then
+            # Keep duplicate for manual replacement if needed
+            newName="$name-$ending"
+            echo "    [copy] $FOAM_MPI/$name -> $newName" 1>&2
+            cp -p "$other/$name" "$binDir/$newName"
+        fi
+   done
 fi
+
 
 # Various dummy (stub) libraries
 other="$root/lib/dummy"
@@ -308,16 +332,25 @@ then
     echo "Copy (dummy) *.dll -> platforms bin/" 1>&2
     for fullpath in "$other"/*.dll
     do
+        [ -f "$fullpath" ] || continue;
         name="${fullpath##*/}"
-        if [ -f "$fullpath" ]
+
+        if [ -f "$binDir/$name" ]
         then
-            if [ -f "$binDir/$name" ]
-            then
-                echo "    [skip dummy/$name]" 1>&2
-            else
-                echo "    dummy/$name" 1>&2
-                cp -p "$fullpath" "$binDir"
-            fi
+            case "$name" in
+            (libPstream*)
+                # Keep for manual replacement if needed
+                newName="$name-dummy"
+                echo "    [copy] dummy/$name -> $newName" 1>&2
+                cp -p "$fullpath" "$binDir/$newName"
+                ;;
+            (*)
+                echo "    [skip] dummy/$name" 1>&2
+                ;;
+            esac
+        else
+            echo "    dummy/$name" 1>&2
+            cp -p "$fullpath" "$binDir"
         fi
     done
 fi

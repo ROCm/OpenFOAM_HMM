@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ Foam::coordinateRotations::cylindrical::cylindrical(const dictionary& dict)
 
 void Foam::coordinateRotations::cylindrical::write(Ostream& os) const
 {
-    os << type() << " axis: " << axis1_;
+    os << type() << " axis: " << axis1_;  // primary axis
 }
 
 
@@ -94,7 +94,7 @@ void Foam::coordinateRotations::cylindrical::writeEntry
     os.beginBlock(keyword);
 
     os.writeEntry("type", type());
-    os.writeEntry("axis", axis1_);
+    os.writeEntry("axis", axis1_);  // primary axis
 
     os.endBlock();
 }

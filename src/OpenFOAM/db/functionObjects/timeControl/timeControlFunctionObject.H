@@ -80,8 +80,7 @@ class timeControl
 {
 public:
 
-
-    // Public enumerations
+    // Public Enumerations
 
         //- Control mode
         enum class controlMode
@@ -97,7 +96,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Input dictionary
         dictionary dict_;
@@ -108,13 +107,13 @@ private:
             //- Control mode (combination of time/trigger behaviour)
             controlMode controlMode_;
 
-            //- Activation time - defaults to -VGREAT
+            //- Activation time - defaults to -VGREAT (ie, active)
             scalar timeStart_;
 
             //- De-activation time - defaults to VGREAT
             scalar timeEnd_;
 
-            //- Activation trigger index - defaults to labelMin
+            //- Activation trigger index - defaults to labelMax (ie, inactive)
             label triggerStart_;
 
             //- De-activation trigger index - defaults to labelMax

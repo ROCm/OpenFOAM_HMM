@@ -113,7 +113,7 @@ bool Foam::cyclicAMIPointPatch::coupled() const
 {
     return
         Pstream::parRun()
-     || !this->boundaryMesh().mesh().mesh().time().processorCase();
+     || !this->boundaryMesh().mesh().time().processorCase();
 }
 
 

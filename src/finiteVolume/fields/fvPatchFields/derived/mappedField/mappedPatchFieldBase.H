@@ -67,9 +67,9 @@ namespace Foam
 {
 
 // Forward Declarations
-class mappedPatchBase;
 template<class> class interpolation;
 class mapDistribute;
+class mappedPatchBase;
 
 /*---------------------------------------------------------------------------*\
                     Class mappedPatchFieldBase Declaration
@@ -86,7 +86,7 @@ class mappedPatchFieldBase
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Mapping engine
         const mappedPatchBase& mapper_;
@@ -129,11 +129,50 @@ protected:
         bool storeAndRetrieveField
         (
             const word& fieldName,
+            const label myComm,
             const labelListList& subMap,
             const label constructSize,
             const labelListList& constructMap,
             const labelListList& address,
             const scalarListList& weights,
+            Field<T>& fld
+        ) const;
+
+
+        //- Initialise field to retrieve (e.g. when value read from dictionary)
+        template<class T>
+        void initRetrieveField
+        (
+            const word& fieldName,
+            const Field<T>& fld
+        ) const;
+
+
+        //- Store elements of field onto (sub) registry
+        template<class T>
+        void storeField
+        (
+            const objectRegistry& obr,
+            const word& region,
+            const word& patch,
+            const label myComm,
+            const labelListList& procToMap,
+            const word& fieldName,
+            const Field<T>& fld
+        ) const;
+
+        //- Construct field from registered elements.
+        //  \return true if successful
+        template<class T>
+        bool retrieveField
+        (
+            const bool allowUnset,
+            const objectRegistry& obr,
+            const word& region,
+            const word& patch,
+            const label myComm,
+            const labelListList& procToMap,
+            const word& fieldName,
             Field<T>& fld
         ) const;
 
@@ -230,54 +269,19 @@ public:
         virtual void write(Ostream& os) const;
 
 
-        // Helpers
+    // Helpers
 
-            //- Check that patch is of correct type
-            static const mappedPatchBase& mapper
-            (
-                const fvPatch& p,
-                const DimensionedField<Type, volMesh>& iF
-            );
+        //- Check that patch is of correct type
+        static const mappedPatchBase& mapper
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF
+        );
 
-            //- Initialise field to retrieve (used e.g. when value read from
-            //  dictionary)
-            template<class T>
-            void initRetrieveField
-            (
-                const word& fieldName,
-                const Field<T>& fld
-            ) const;
-
-            //- Store elements of field onto (sub) registry
-            template<class T>
-            void storeField
-            (
-                const objectRegistry& obr,
-                const word& region,
-                const word& patch,
-                const labelListList& procToMap,
-                const word& fieldName,
-                const Field<T>& fld
-            ) const;
-
-            //- Construct field from registered elements. Return true if
-            //  successful
-            template<class T>
-            bool retrieveField
-            (
-                const bool allowUnset,
-                const objectRegistry& obr,
-                const word& region,
-                const word& patch,
-                const labelListList& procToMap,
-                const word& fieldName,
-                Field<T>& fld
-            ) const;
-
-            //- Wrapper for mapDistribute::distribute that knows about
-            //- dabase mapping
-            template<class T>
-            void distribute(const word& fieldName, Field<T>& newValues) const;
+        //- Wrapper for mapDistribute::distribute that knows about
+        //- dabase mapping
+        template<class T>
+        void distribute(const word& fieldName, Field<T>& newValues) const;
 };
 
 

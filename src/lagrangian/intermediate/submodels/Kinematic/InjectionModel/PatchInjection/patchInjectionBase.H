@@ -118,7 +118,8 @@ public:
 
         //- Set the injection position and owner cell, tetFace and tetPt
         //  Supply the fraction used to determine the location on the patch
-        void setPositionAndCell
+        //  Returns the seed patch face index
+        label setPositionAndCell
         (
             const fvMesh& mesh,
             const scalar fraction01,
@@ -130,7 +131,8 @@ public:
         );
 
         //- Set the injection position and owner cell, tetFace and tetPt
-        virtual void setPositionAndCell
+        //  Returns the seed patch face index
+        virtual label setPositionAndCell
         (
             const fvMesh& mesh,
             Random& rnd,

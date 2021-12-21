@@ -1,7 +1,10 @@
+#------------------------------------------------------------------------------
 # Cray compiler - a gcc variant/wrapper
+# presumably new enough to support c++14
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Gcc/c++
 
-CC          = CC -std=c++11
+CC          = CC -std=c++14
 
 c++ARCH     = -m64 -pthread
 
@@ -10,8 +13,10 @@ include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
-cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
+cxxtoo      = $(Ctoo)
 
 include $(GENERAL_RULES)/Gcc/link-c++
+
+#------------------------------------------------------------------------------

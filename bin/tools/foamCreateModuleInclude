@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2016-2017 CINECA
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -327,14 +327,14 @@ fi
 foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
 if [ -x "$foamClean" ]
 then
-    eval $("$foamClean" -sh-env=PATH "$foamOldDirs")
+    eval $("$foamClean" -sh-path "$foamOldDirs")
+    eval $("$foamClean" -sh-lib "$foamOldDirs")
     eval $("$foamClean" -sh-env=MANPATH "$foamOldDirs")
-    eval $("$foamClean" -sh-env=LD_LIBRARY_PATH "$foamOldDirs")
 
     # May not have/need any third party at all
     if [ -n "$FOAM_EXT_LIBBIN" ] && [ ! -d "$FOAM_EXT_LIBBIN" ]
     then
-        eval $("$foamClean" -sh-env=LD_LIBRARY_PATH "$FOAM_EXT_LIBBIN")
+        eval $("$foamClean" -sh-lib "$FOAM_EXT_LIBBIN")
         unset FOAM_EXT_LIBBIN
     fi
 fi

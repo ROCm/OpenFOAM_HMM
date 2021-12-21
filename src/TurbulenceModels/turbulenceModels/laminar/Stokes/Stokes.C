@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,90 +142,6 @@ Stokes<BasicTurbulenceModel>::nuEff
 ) const
 {
     return this->nu(patchi);
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField>
-Stokes<BasicTurbulenceModel>::k() const
-{
-    return tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("k", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh_,
-        dimensionedScalar(sqr(this->U_.dimensions()), Zero)
-    );
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField>
-Stokes<BasicTurbulenceModel>::epsilon() const
-{
-    return tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh_,
-        dimensionedScalar(sqr(this->U_.dimensions())/dimTime, Zero)
-    );
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField>
-Stokes<BasicTurbulenceModel>::omega() const
-{
-    return tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh_,
-        dimensionedScalar(dimless/dimTime, Zero)
-    );
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volSymmTensorField>
-Stokes<BasicTurbulenceModel>::R() const
-{
-    return tmp<volSymmTensorField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("R", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh_,
-        dimensionedSymmTensor(sqr(this->U_.dimensions()), Zero)
-    );
 }
 
 

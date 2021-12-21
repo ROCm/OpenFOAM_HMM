@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -742,7 +742,8 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
             scalarFormatterPtr_().write
             (
-                true,           // writeTracks
+                true,                   // writeTracks
+                List<scalarField>(),    // times
                 tracks,
                 scalarNames_,
                 scalarValues,
@@ -782,7 +783,8 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
             vectorFormatterPtr_().write
             (
-                true,           // writeTracks
+                true,                   // writeTracks
+                List<scalarField>(),    // times
                 tracks,
                 vectorNames_,
                 vectorValues,
@@ -911,8 +913,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
         if (dict.found("direction"))
         {
-            FatalIOErrorInFunction(dict) << "Cannot specify both "
-                << "\"trackForward\" and \"direction\""
+            FatalIOErrorInFunction(dict)
+                << "Cannot specify both 'trackForward' and 'direction'" << nl
                 << exit(FatalIOError);
         }
     }
@@ -923,9 +925,9 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     dict.readEntry("lifeTime", lifeTime_);
     if (lifeTime_ < 1)
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "Illegal value " << lifeTime_ << " for lifeTime"
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
 

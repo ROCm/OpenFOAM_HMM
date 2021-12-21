@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,9 +67,16 @@ class exprFixedValueFvPatchField
     public fixedValueFvPatchField<Type>,
     public expressions::patchExprFieldBase
 {
+    //- The parent boundary condition type
+    typedef fixedValueFvPatchField<Type> parent_bctype;
+
+
 protected:
 
     // Protected Data
+
+        //- Dictionary contents for the boundary condition
+        dictionary dict_;
 
         //- The expression driver
         expressions::patchExpr::parseDriver driver_;

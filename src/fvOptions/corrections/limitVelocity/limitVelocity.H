@@ -98,7 +98,7 @@ namespace fv
 
 class limitVelocity
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

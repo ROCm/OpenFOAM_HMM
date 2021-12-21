@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2020 OpenCFD Ltd.
+    Copyright (C) 2014-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +59,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class polyMesh;
-
 namespace vtk
 {
 // Forward Declarations
@@ -110,9 +107,14 @@ class vtuCells
 
     // Private Member Functions
 
-        //- Create the geometry using the previously requested output and
-        //- decomposition types.
-        void repopulate(const polyMesh& mesh);
+        //- Resize storage
+        void resize_all();
+
+        //- Create the geometry entries
+        void populateOutput(const polyMesh& mesh);
+
+        //- Create the geometry entries from shapes
+        void populateOutput(const UList<cellShape>& shapes);
 
         //- No copy construct
         vtuCells(const vtuCells&) = delete;
@@ -162,10 +164,10 @@ public:
     // Access
 
         //- The output content type
-        inline enum contentType content() const;
+        inline enum contentType content() const noexcept;
 
         //- Query the polyhedral decompose requested flag.
-        inline bool decomposeRequested() const;
+        inline bool decomposeRequested() const noexcept;
 
         //- True if no cellTypes are populated.
         inline bool empty() const noexcept;
@@ -183,6 +185,14 @@ public:
         //- decomposition types.
         void reset(const polyMesh& mesh);
 
+        //- Create the geometry for a mesh subset,
+        //- using previously requested output and decomposition types.
+        void reset
+        (
+            const polyMesh& mesh,
+            const labelUList& subsetCellsIds
+        );
+
         //- Respecify requested output and decomposition type prior to
         //- creating the geometry
         void reset
@@ -192,35 +202,42 @@ public:
             const bool decompose
         );
 
+        //- Reset sizing using primitive shapes only (ADVANCED USAGE)
+        //  Effectively removes any polyhedrals!
+        void resetShapes(const UList<cellShape>& shapes);
+
         //- Renumber cell ids to account for subset meshes
         void renumberCells(const labelUList& mapping);
 
         //- Renumber point ids to account for subset meshes
         void renumberPoints(const labelUList& mapping);
 
+        //- Define which additional cell-centres are to be used (ADVANCED!)
+        void addPointCellLabels(const labelUList& cellIds);
+
 
     // Storage Access
 
         //- Values for "types" (XML) and "CELL_TYPES" (legacy)
-        inline const List<uint8_t>& cellTypes() const;
+        inline const List<uint8_t>& cellTypes() const noexcept;
 
         //- Values for "connectivity" (XML) or "CELLS" (legacy)
-        inline const labelList& vertLabels() const;
+        inline const labelList& vertLabels() const noexcept;
 
         //- Values for "offsets" (XML only)
-        inline const labelList& vertOffsets() const;
+        inline const labelList& vertOffsets() const noexcept;
 
         //- Values for "faces" (XML only)
-        inline const labelList& faceLabels() const;
+        inline const labelList& faceLabels() const noexcept;
 
         //- Values for "faceoffset" (XML only)
-        inline const labelList& faceOffsets() const;
+        inline const labelList& faceOffsets() const noexcept;
 
         //- Additional point addressing (from added point to original cell)
-        inline const labelList& addPointCellLabels() const;
+        inline const labelList& addPointCellLabels() const noexcept;
 
         //- Original cell ids for all cells (regular and decomposed).
-        inline const labelList& cellMap() const;
+        inline const labelList& cellMap() const noexcept;
 };
 
 

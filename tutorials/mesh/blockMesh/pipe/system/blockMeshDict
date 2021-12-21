@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -13,6 +13,20 @@ FoamFile
     object      blockMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// local coordinate stretching
+prescale    (1.25 1 1);
+
+transform
+{
+    origin  (0 0 0);
+    rotation
+    {
+        type    axisAngle;
+        axis    (1 0 0);
+        angle   45;
+    }
+}
 
 geometry
 {
@@ -72,12 +86,11 @@ vertices
 
 blocks
 (
-    hex (v0 v1 v2 v3 v4 v5 v6 v7) (8 8 8) simpleGrading (1 1 1)
-    name sideBlock hex (v0 v3 v9 v8 v4 v7 v11 v10) (8 20 8)
-        simpleGrading (1 1 1)
+    hex (v0 v1 v2 v3 v4 v5 v6 v7) (8 8 8) grading (1 1 1)
+    name sideBlock hex (v0 v3 v9 v8 v4 v7 v11 v10) (8 20 8) grading (1 1 1)
 
-    hex ( v7 v6 v2 v3 v15 v14 v13 v12) (8 8 8) simpleGrading (1 1 1)
-    hex (v16 v19 v18 v17 v0 v4 v5 v1) (8 8 8) simpleGrading (1 1 1)
+    hex ( v7 v6 v2 v3 v15 v14 v13 v12) (8 8 8) grading (1 1 1)
+    hex (v16 v19 v18 v17 v0 v4 v5 v1) (8 8 8) grading (1 1 1)
 );
 
 edges

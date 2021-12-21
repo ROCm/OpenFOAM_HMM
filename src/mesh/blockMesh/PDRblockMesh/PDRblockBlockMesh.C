@@ -27,7 +27,6 @@ License
 
 #include "PDRblock.H"
 #include "ListOps.H"
-#include "cellModeller.H"
 #include "gradingDescriptors.H"
 #include "objectRegistry.H"
 #include "Time.H"

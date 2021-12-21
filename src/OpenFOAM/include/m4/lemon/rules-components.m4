@@ -9,8 +9,7 @@ divert(-1)dnl
 #     Copyright (C) 2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, distributed under GNU General Public
-#     License GPL-3.0 or later <https://www.gnu.org/licenses/gpl-3.0>
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Collection of VectorSpace `component' functions

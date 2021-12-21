@@ -63,5 +63,18 @@ Foam::label Foam::SurfaceFilmModel<CloudType>::nParcelsInjected() const
     return nParcelsInjected_;
 }
 
+template<class CloudType>
+Foam::scalar& Foam::SurfaceFilmModel<CloudType>::totalMassTransferred()
+{
+    return totalMassTransferred_;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::SurfaceFilmModel<CloudType>::totalMassTransferred() const
+{
+    return totalMassTransferred_;
+}
+
 
 // ************************************************************************* //

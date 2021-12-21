@@ -68,6 +68,12 @@ Ostream& operator<<(Ostream& os, const globalIndex& gi);
 
 class globalIndex
 {
+    // Private Data
+
+        //- Start of proci. Size is nProcs()+1. (so like CompactListList)
+        labelList offsets_;
+
+
     // Private Member Functions
 
         //- Sort and bin. validBins contains bins with non-zero size.
@@ -80,26 +86,42 @@ class globalIndex
             DynamicList<label>& validBins
         );
 
-
-    // Private Data
-
-        //- Start of proci. Size is nProcs()+1. (so like CompactListList)
-        labelList offsets_;
-
-
 public:
+
+    // Public Data Types
+
+        //- Disambiguation tag (list construction dispatch)
+        enum accessType : char { OFFSETS, SIZES };
+
 
     // Constructors
 
         //- Default construct
         globalIndex() = default;
 
-        //- Construct from local max size.
-        //  Does communication with default communicator and message tag.
+        //- Copy construct from a list of offsets.
+        //- No communication required
+        inline explicit globalIndex(const labelUList& listOffsets);
+
+        //- Move construct from a list of offsets.
+        //- No communication required
+        inline explicit globalIndex(labelList&& listOffsets);
+
+        //- Copy construct from a list of offsets or sizes.
+        //- No communication required
+        inline globalIndex
+        (
+            const labelUList& offsetsOrSizes,
+            enum accessType accType
+        );
+
+        //- Construct from local size.
+        //  Communication with default communicator and message tag.
         inline explicit globalIndex(const label localSize);
 
-        //- Construct from local max size.
-        //  Does communication with given communicator and message tag
+        //- Construct from local size.
+        //  Communication with given communicator and message tag,
+        //  unless parallel == false
         inline globalIndex
         (
             const label localSize,
@@ -108,13 +130,8 @@ public:
             const bool parallel     //!< use parallel comms
         );
 
-        //- Copy construct from list of labels
-        inline explicit globalIndex(const labelUList& offsets);
-
-        //- Move construct from list of labels
-        inline explicit globalIndex(labelList&& offsets);
-
-        //- Construct from Istream
+        //- Construct from Istream.
+        //- No communication required
         explicit globalIndex(Istream& is);
 
 
@@ -129,11 +146,26 @@ public:
         //- The local sizes
         labelList sizes() const;
 
+        //- The local starts
+        inline const labelUList localStarts() const;
+
         //- Global max of localSizes
         inline label maxSize() const;
 
         //- Const-access to the offsets
         inline const labelList& offsets() const noexcept;
+
+
+    // Dimensions
+
+        //- The number of processors covered by the offsets
+        inline label nProcs() const noexcept;
+
+        //- Range of process indices for all addressed offsets (processes)
+        inline labelRange allProcs() const noexcept;
+
+        //- Range of process indices for addressed sub-offsets (processes)
+        inline labelRange subProcs() const noexcept;
 
 
     // Edit
@@ -146,7 +178,8 @@ public:
         inline void reset(const label localSize);
 
         //- Reset from local size.
-        //  Does communication with given communicator and message tag
+        //  Does communication with given communicator and message tag,
+        //  unless parallel == false
         void reset
         (
             const label localSize,
@@ -155,8 +188,20 @@ public:
             const bool parallel     //!< use parallel comms
         );
 
+        //- Reset from list of local sizes,
+        //- with optional check for label overflow.
+        //- No communication required
+        void reset
+        (
+            const labelUList& sizes,
+            const bool checkOverflow = false
+        );
 
-        // Queries
+        //- Alter local size for given processor
+        void setLocalSize(const label proci, const label len);
+
+
+    // Queries
 
         // Queries relating to my processor (using world communicator)
 
@@ -171,6 +216,9 @@ public:
 
             //- Return start/size range of local processor data
             inline labelRange range() const;
+
+            //- Return start/size ranges for all data
+            List<labelRange> ranges() const;
 
             //- Is on local processor
             inline bool isLocal(const label i) const;
@@ -234,16 +282,111 @@ public:
             inline label whichProcID(const label i) const;
 
 
-        // Other
+    // Iteration
+
+        //- Forward input iterator with const access
+        class const_iterator
+        {
+            //- The parent class for which this is an iterator
+            const globalIndex* parent_;
+
+            //- The index into the parent
+            label proci_;
+
+
+        public:
+
+        // Constructors
+
+            //- Construct from globalIndex list at given index
+            explicit const_iterator
+            (
+                const globalIndex* globalIdx,
+                const label proci = 0
+            ) noexcept;
+
+
+        // Member Operators
+
+            //- The associated local proc
+            inline label proci() const noexcept;
+
+            //- The local start
+            inline label start() const;
+
+            //- The local size
+            inline label size() const;
+
+            //- The local range
+            inline labelRange range() const;
+
+            //- The local range
+            inline labelRange operator*() const;
+
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
+
+            inline const_iterator& operator--();
+            inline const_iterator operator--(int);
+
+            inline bool operator==(const const_iterator& iter) const noexcept;
+            inline bool operator!=(const const_iterator& iter) const noexcept;
+        };
+
+
+        //- A const_iterator set to the beginning
+        inline const_iterator cbegin() const noexcept;
+
+        //- A const_iterator set to beyond the end
+        inline const const_iterator cend() const noexcept;
+
+        //- A const_iterator set to the beginning
+        inline const_iterator begin() const noexcept;
+
+        //- A const_iterator set to beyond the end
+        inline const const_iterator end() const noexcept;
+
+
+    // Helper Functions
+
+        //- Calculate offsets from a list of local sizes,
+        //- with optional check for label overflow
+        static labelList calcOffsets
+        (
+            const labelUList& localSizes,
+            const bool checkOverflow = false
+        );
+
+        //- Calculate offsets from list of lists,
+        //- with optional check for label overflow
+        template<class SubListType>
+        static labelList calcListOffsets
+        (
+            const List<SubListType>& lists,
+            const bool checkOverflow = false
+        );
+
+        //- Calculate ranges (offset/size) from a list of local sizes,
+        //- with optional check for label overflow
+        static List<labelRange> calcRanges
+        (
+            const labelUList& localSizes,
+            const bool checkOverflow = false
+        );
+
+
+    // Other
+
+        // Gather
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Offsets needed on master only.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -256,7 +399,7 @@ public:
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
+                const label comm,       //!< communicator
                 const UList<int>& procIDs,
                 const IndirectListBase<Type, Addr>& fld,
                 List<Type>& allFld,
@@ -266,11 +409,11 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Offsets needed on master only.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void gather
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -289,7 +432,8 @@ public:
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
 
             //- Collect data indirectly in processor order on master.
@@ -300,29 +444,18 @@ public:
                 const IndirectListBase<Type, Addr>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::scheduled
+                const Pstream::commsTypes = Pstream::commsTypes::scheduled,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
-
-            //- Collect data in processor order on master.
-            //  Does communication with default communicator and message tag.
-            template<class Type>
-            static void gatherOp
-            (
-                const UList<Type>& fld,
-                List<Type>& allFld,
-                const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
-            );
-
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void gather
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
@@ -330,11 +463,11 @@ public:
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void gather
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
@@ -352,8 +485,42 @@ public:
             (
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
+
+            //- Collect \em contiguous data using a MPI_Gatherv call
+            //  \attention The nProcs for globalIndex and communicator
+            //      must match!!
+            template<class Type, class OutputContainer = List<Type>>
+            void mpiGather
+            (
+                const UList<Type>& sendData,
+                OutputContainer& allValues,
+                const label comm = UPstream::worldComm  //!< communicator
+            ) const;
+
+            //- Collect \em contiguous data using a MPI_Gatherv call
+            //  \attention The nProcs for globalIndex and communicator
+            //      must match!!
+            template<class Type, class OutputContainer = List<Type>>
+            OutputContainer mpiGather
+            (
+                const UList<Type>& sendData,
+                const label comm = UPstream::worldComm  //!< communicator
+            ) const;
+
+
+            //- Collect data in processor order on master.
+            //  Does communication with default communicator and message tag.
+            template<class Type>
+            static void gatherOp
+            (
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+            );
 
             //- Inplace collect data in processor order on master
             //  Does communication with default communicator and message tag.
@@ -367,13 +534,15 @@ public:
             );
 
 
+        // Scatter
+
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             static void scatter
             (
                 const labelUList& offsets,
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -381,11 +550,11 @@ public:
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Container, class Type>
+            template<class ProcIDsContainer, class Type>
             void scatter
             (
-                const label comm,
-                const Container& procIDs,
+                const label comm,       //!< communicator
+                const ProcIDsContainer& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -404,18 +573,22 @@ public:
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
-                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking
+                const Pstream::commsTypes = Pstream::commsTypes::nonBlocking,
+                const label comm = UPstream::worldComm  //!< communicator
             ) const;
 
-            //- Get (potentially remote) data. Elements required given as
-            //  global indices
+
+        // Scatter
+
+            //- Get (potentially remote) data.
+            //- Elements required given as global indices
             template<class Type, class CombineOp>
             void get
             (
                 List<Type>& allFld,
                 const labelUList& globalIds,
                 const CombineOp& cop,
-                const label comm = Pstream::worldComm,
+                const label comm = UPstream::worldComm,  //!< communicator
                 const int tag = UPstream::msgType()
             ) const;
 

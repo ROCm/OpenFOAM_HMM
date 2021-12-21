@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
     about that axis.
 
     \verbatim
-    coordinateRotation
+    rotation
     {
         type        axisAngle;
         axis        (1 0 0);
@@ -99,16 +99,14 @@ public:
     //- Runtime type information
     TypeNameNoDebug("axisAngle");
 
+
     // Constructors
 
-        //- Construct null
+        //- Default construct. Axis = Z, angle = 0.
         axisAngle();
 
         //- Copy construct
         axisAngle(const axisAngle& crot);
-
-        //- Move construct
-        axisAngle(axisAngle&& crot);
 
         //- Construct from axis and angle
         axisAngle(const vector& axis, scalar angle, bool degrees);

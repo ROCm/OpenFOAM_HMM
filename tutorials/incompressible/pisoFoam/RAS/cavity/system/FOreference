@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -13,10 +13,12 @@ reference1
     libs            (fieldFunctionObjects);
     field           U;
 
+    refValue        sample;  // Function1 type
+    position        (0 0 0); // Needed by sample Function1
+
     // Optional entries
     scale           1.0;
     offset          (0.0 0.0 0.0);
-    position        (0 0 0);
     interpolationScheme    cell;
 
     // Optional (inherited) entries
@@ -40,10 +42,12 @@ reference2
     libs            (fieldFunctionObjects);
     field           p;
 
+    refValue        sample;  // Function1 type
+    position        (0 0 0); // Needed by sample Function1
+
     // Optional entries
     scale           -2.0;
     offset          1.5;
-    position        (0 0 0);
     interpolationScheme    cellPoint;
 
     // Optional (inherited) entries

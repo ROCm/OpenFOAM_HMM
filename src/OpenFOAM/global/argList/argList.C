@@ -28,6 +28,7 @@ License
 
 #include "argList.H"
 #include "OSspecific.H"
+#include "Switch.H"
 #include "clock.H"
 #include "dictionary.H"
 #include "IOobject.H"
@@ -110,7 +111,7 @@ Foam::argList::initValidTables::initValidTables()
     (
         "opt-switch",
         "name=val",
-        "Specify the value of a registered optimisation switch (int/bool)."
+        "Specify the value of a registered optimisation switch."
         " Default is 1 if the value is omitted."
         " (Can be used multiple times)",
         true  // advanced option
@@ -193,21 +194,6 @@ Foam::argList::initValidTables dummyInitValidTables;
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace
-{
-
-// Should issue warning if there is +ve versioning (+ve version number)
-// and the this version number is older than the current OpenFOAM version
-// as conveyed by the OPENFOAM compiler define.
-
-static inline constexpr bool shouldWarnVersion(const int version)
-{
-    return (version > 0 && version < OPENFOAM);
-}
-
-} // End anonymous namespace
-
 
 namespace Foam
 {
@@ -341,7 +327,7 @@ void Foam::argList::addBoolOption
     bool advanced
 )
 {
-    addOption(optName, "", usage, advanced);
+    argList::addOption(optName, "", usage, advanced);
 }
 
 
@@ -464,6 +450,26 @@ bool Foam::argList::bannerEnabled()
 }
 
 
+void Foam::argList::addDryRunOption
+(
+    const string& usage,
+    bool advanced
+)
+{
+    argList::addBoolOption("dry-run", usage, advanced);
+}
+
+
+void Foam::argList::addVerboseOption
+(
+    const string& usage,
+    bool advanced
+)
+{
+    argList::addBoolOption("verbose", usage, advanced);
+}
+
+
 void Foam::argList::noFunctionObjects(bool addWithOption)
 {
     removeOption("noFunctionObjects");
@@ -474,7 +480,7 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
 
     if (addWithOption)
     {
-        addBoolOption
+        argList::addBoolOption
         (
             "withFunctionObjects",
             "Execute functionObjects",
@@ -486,13 +492,13 @@ void Foam::argList::noFunctionObjects(bool addWithOption)
 
 void Foam::argList::noJobInfo()
 {
-    JobInfo::writeJobInfo = false;
+    JobInfo::disable();
 }
 
 
 void Foam::argList::noLibs()
 {
-    addBoolOption
+    argList::addBoolOption
     (
         "no-libs",
         "Disable use of the controlDict libs entry",
@@ -534,9 +540,30 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+Foam::word Foam::argList::envExecutable()
+{
+    return Foam::getEnv("FOAM_EXECUTABLE");
+}
+
+
 Foam::fileName Foam::argList::envGlobalPath()
 {
     return Foam::getEnv("FOAM_CASE");
+}
+
+
+Foam::fileName Foam::argList::envRelativePath
+(
+    const fileName& input,
+    const bool caseTag
+)
+{
+    if (input.isAbsolute())
+    {
+        return input.relative(envGlobalPath(), caseTag);
+    }
+
+    return input;
 }
 
 
@@ -553,22 +580,23 @@ Foam::word Foam::argList::optionCompat(const word& optName)
 
         if (fnd.found())
         {
-            const auto& iter = *fnd;
+            const auto& alt = fnd.val();
 
-            if (shouldWarnVersion(iter.second))
+            // No error::master() guard - only called on master anyhow
+            if (error::warnAboutAge(alt.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Found [v" << iter.second << "] '"
+                    << "    Found [v" << alt.second << "] '"
                     << optName << "' instead of '-"
-                    << iter.first << "' option"
+                    << alt.first << "' option"
                     << nl
                     << std::endl;
 
-                error::warnAboutAge("option", iter.second);
+                error::warnAboutAge("option", alt.second);
             }
 
-            return "-" + iter.first;
+            return "-" + alt.first;
         }
     }
 
@@ -587,23 +615,24 @@ int Foam::argList::optionIgnore(const word& optName)
 
         if (fnd.found())
         {
-            const auto& iter = *fnd;
+            const auto& alt = fnd.val();
 
             // Number to skip (including the option itself)
             // '-option ARG' or '-option'
-            const int nskip = (iter.first ? 2 : 1);
+            const int nskip = (alt.first ? 2 : 1);
 
-            if (shouldWarnVersion(iter.second))
+            // No error::master() guard - only called on master anyhow
+            if (error::warnAboutAge(alt.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Ignoring [v" << iter.second << "] '-"
+                    << "    Ignoring [v" << alt.second << "] '-"
                     << optName << (nskip > 1 ? " ARG" : "")
                     << "' option"
                     << nl
                     << std::endl;
 
-                error::warnAboutAge("option", iter.second);
+                error::warnAboutAge("option", alt.second);
             }
 
             return nskip;
@@ -793,7 +822,7 @@ Foam::argList::argList
     }
 
     // Detect any parallel options
-    bool needsThread = fileOperations::fileOperationInitialise::New
+    const bool needsThread = fileOperations::fileOperationInitialise::New
     (
         handlerType,
         argc,
@@ -811,7 +840,7 @@ Foam::argList::argList
 
             if (validParOptions.found(optName))
             {
-                parRunControl_.runPar(argc, argv, needsThread);
+                runControl_.runPar(argc, argv, needsThread);
                 break;
             }
         }
@@ -823,6 +852,9 @@ Foam::argList::argList
 
     // Set executable name immediately - useful when emitting errors.
     executable_ = fileName(args_[0]).name();
+
+    // Count -dry-run and -verbose switches
+    int numDryRun = 0, numVerbose = 0;
 
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
@@ -839,20 +871,36 @@ Foam::argList::argList
             {
                 Warning
                     << "Ignoring lone '-' on the command-line" << endl;
+                continue;
             }
-            else if
+
+            // Option known and expects an argument?
+            // - use Switch for a tri-state
+            //   True  : known option, expects a parameter
+            //   False : known option, no parameter
+            //   bad() : unknown option
+
+            Switch wantArg(Switch::INVALID);
+            auto optIter = validOptions.cfind(optName);
+            if
             (
-                validOptions.lookup(optName, "").size()
-             || validParOptions.lookup(optName, "").size()
+                optIter.found()
+             || (optIter = validParOptions.cfind(optName)).found()
             )
             {
-                // If the option is known to require an argument,
-                // get it or emit a FatalError.
+                wantArg = !optIter.val().empty();
+            }
+
+
+            if (wantArg)
+            {
+                // Known option and expects a parameter
+                // - get it or emit a FatalError.
 
                 ++argi;
                 if (argi >= args_.size())
                 {
-                    foamVersion::printBuildInfo(Info().stdStream(), false);
+                    foamVersion::printBuildInfo(Info.stdStream(), false);
 
                     Info<< nl
                         <<"Error: option '-" << optName
@@ -860,11 +908,15 @@ Foam::argList::argList
                         << "See '" << executable_ << " -help' for usage"
                         << nl << nl;
 
-                    Pstream::exit(1); // works for serial and parallel
+                    Pstream::exit(1);  // works for serial and parallel
                 }
 
                 commandLine_ += ' ';
                 commandLine_ += args_[argi];
+
+                //
+                // Special handling of these options
+                //
 
                 if (strcmp(optName, "lib") == 0)
                 {
@@ -878,7 +930,7 @@ Foam::argList::argList
                     // change registered debug switch
                     DetailInfo << "debug-switch ";
                     debug::debugObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else if (strcmp(optName, "info-switch") == 0)
                 {
@@ -886,7 +938,7 @@ Foam::argList::argList
                     // change registered info switch
                     DetailInfo << "info-switch ";
                     debug::infoObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else if (strcmp(optName, "opt-switch") == 0)
                 {
@@ -894,11 +946,11 @@ Foam::argList::argList
                     // change registered optimisation switch
                     DetailInfo << "opt-switch ";
                     debug::optimisationObjects()
-                        .setNamedInt(args_[argi], 1, true);
+                        .setNamedValue(args_[argi], 1, true);
                 }
                 else
                 {
-                    // Regular option:
+                    // Regular option (with a parameter):
                     // Duplicates handled by using the last -option specified
                     options_.set(optName, args_[argi]);
                 }
@@ -909,6 +961,19 @@ Foam::argList::argList
                 // registered as existing.
 
                 options_.insert(optName, "");
+
+                // Special increment handling for some known flags
+                if (wantArg.good())
+                {
+                    if (strcmp(optName, "dry-run") == 0)
+                    {
+                        ++numDryRun;
+                    }
+                    else if (strcmp(optName, "verbose") == 0)
+                    {
+                        ++numVerbose;
+                    }
+                }
             }
         }
         else
@@ -920,6 +985,10 @@ Foam::argList::argList
             ++nArgs;
         }
     }
+
+    // Commit number of -dry-run and -verbose flag occurrences
+    runControl_.dryRun(numDryRun);
+    runControl_.verbose(numVerbose);
 
     args_.resize(nArgs);
 
@@ -936,7 +1005,7 @@ Foam::argList::argList
     bool initialise
 )
 :
-    parRunControl_(args.parRunControl_),
+    runControl_(args.runControl_),
     args_(args.args_),
     options_(options),
     libs_(),
@@ -972,11 +1041,7 @@ void Foam::argList::parse
             displayDoc(false);
             quickExit = true;
         }
-        else if
-        (
-            options_.found("doc-source")
-         || options_.found("srcDoc")  // Compat 1706
-        )
+        else if (options_.found("doc-source"))
         {
             displayDoc(true);
             quickExit = true;
@@ -1021,10 +1086,10 @@ void Foam::argList::parse
     // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        foamVersion::printBuildInfo(Info().stdStream(), false);
+        foamVersion::printBuildInfo(Info.stdStream(), false);
         FatalError.write(Info, false);
 
-        Pstream::exit(1); // works for serial and parallel
+        Pstream::exit(1);  // works for serial and parallel
     }
 
     if (initialise)
@@ -1051,6 +1116,8 @@ void Foam::argList::parse
                 Info<< " patch=" << foamVersion::patch.c_str();
             }
 
+            Info<< " version=" << foamVersion::version.c_str();
+
             Info<< nl
                 << "Arch   : " << foamVersion::buildArch << nl
                 << "Exec   : " << commandLine_.c_str() << nl
@@ -1063,12 +1130,9 @@ void Foam::argList::parse
         jobInfo.add("startDate", dateString);
         jobInfo.add("startTime", timeString);
         jobInfo.add("userName", userName());
+
+        jobInfo.add("foamApi", foamVersion::api);
         jobInfo.add("foamVersion", word(foamVersion::version));
-        jobInfo.add("code", executable_);
-        jobInfo.add("argList", commandLine_);
-        jobInfo.add("currentDir", cwd());
-        jobInfo.add("PPID", ppid());
-        jobInfo.add("PGID", pgid());
 
         // Add build information - only use the first word
         {
@@ -1080,6 +1144,12 @@ void Foam::argList::parse
             }
             jobInfo.add("foamBuild", build);
         }
+
+        jobInfo.add("code", executable_);
+        jobInfo.add("argList", commandLine_);
+        jobInfo.add("currentDir", cwd());
+        jobInfo.add("PPID", ppid());
+        jobInfo.add("PGID", pgid());
 
         // Load additional libraries (verbosity according to banner setting)
         libs().open(bannerEnabled());
@@ -1113,7 +1183,7 @@ void Foam::argList::parse
     const int writeHostsSwitch = Foam::debug::infoSwitch("writeHosts", 1);
 
     // Collect machine/pid, and check that the build is identical
-    if (parRunControl_.parRun())
+    if (runControl_.parRun())
     {
         if (Pstream::master())
         {
@@ -1161,7 +1231,7 @@ void Foam::argList::parse
     fileNameList roots;
 
     // If this actually is a parallel run
-    if (parRunControl_.parRun())
+    if (runControl_.parRun())
     {
         // For the master
         if (Pstream::master())
@@ -1202,7 +1272,8 @@ void Foam::argList::parse
             if (this->readListIfPresent("roots", roots))
             {
                 source = "-roots";
-                parRunControl_.distributed(true);
+                runControl_.distributed(true);
+
                 if (roots.empty())
                 {
                     FatalErrorInFunction
@@ -1217,7 +1288,7 @@ void Foam::argList::parse
             else if (options_.found("hostRoots"))
             {
                 source = "-hostRoots";
-                parRunControl_.distributed(true);
+                runControl_.distributed(true);
 
                 ITstream is(this->lookup("hostRoots"));
 
@@ -1302,7 +1373,7 @@ void Foam::argList::parse
                     if (decompDict.getOrDefault("distributed", false))
                     {
                         nDomainsMandatory = true;
-                        parRunControl_.distributed(true);
+                        runControl_.distributed(true);
                         decompDict.readEntry("roots", roots);
 
                         if (roots.empty())
@@ -1415,7 +1486,12 @@ void Foam::argList::parse
                     options_.set("case", roots[subproci-1]/globalCase_);
 
                     OPstream toProc(Pstream::commsTypes::scheduled, subproci);
-                    toProc << args_ << options_ << parRunControl_.distributed();
+
+                    toProc
+                        << args_ << options_
+                        << runControl_.distributed()
+                        << label(runControl_.dryRun())
+                        << label(runControl_.verbose());
                 }
                 options_.erase("case");
 
@@ -1463,7 +1539,12 @@ void Foam::argList::parse
                 for (const int subproci : Pstream::subProcs())
                 {
                     OPstream toProc(Pstream::commsTypes::scheduled, subproci);
-                    toProc << args_ << options_ << parRunControl_.distributed();
+
+                    toProc
+                        << args_ << options_
+                        << runControl_.distributed()
+                        << label(runControl_.dryRun())
+                        << label(runControl_.verbose());
                 }
             }
         }
@@ -1471,15 +1552,22 @@ void Foam::argList::parse
         {
             // Collect the master's argument list
             bool isDistributed;
+            label numDryRun, numVerbose;
 
             IPstream fromMaster
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo()
             );
-            fromMaster >> args_ >> options_ >> isDistributed;
 
-            parRunControl_.distributed(isDistributed);
+            fromMaster
+                >> args_ >> options_
+                >> isDistributed
+                >> numDryRun >> numVerbose;
+
+            runControl_.distributed(isDistributed);
+            runControl_.dryRun(numDryRun);
+            runControl_.verbose(numVerbose);
 
             // Establish rootPath_/globalCase_/case_ for sub-process
             setCasePaths();
@@ -1503,7 +1591,7 @@ void Foam::argList::parse
     }
 
     // If needed, adjust fileHandler for distributed roots
-    if (parRunControl_.distributed())
+    if (runControl_.distributed())
     {
         if (fileOperation::fileHandlerPtr_)
         {
@@ -1512,7 +1600,7 @@ void Foam::argList::parse
     }
 
     // Keep/discard sub-process host/root information for reporting:
-    if (Pstream::master() && parRunControl_.parRun())
+    if (Pstream::master() && runControl_.parRun())
     {
         if (!writeHostsSwitch)
         {
@@ -1530,7 +1618,7 @@ void Foam::argList::parse
         Info<< "Case   : " << (rootPath_/globalCase_).c_str() << nl
             << "nProcs : " << nProcs << nl;
 
-        if (parRunControl_.parRun())
+        if (runControl_.parRun())
         {
             if (hostProcs.size())
             {
@@ -1658,7 +1746,7 @@ void Foam::argList::parse
 
 Foam::argList::~argList()
 {
-    jobInfo.end();
+    jobInfo.stop();     // Normal job termination
 
     // Delete file handler to flush any remaining IO
     Foam::fileHandler(nullptr);

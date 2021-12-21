@@ -95,6 +95,9 @@ public:
         //- Locate the first null entry, -1 if there are not any
         label findNull() const;
 
+        //- Assign all pointers to nullptr, without deleting.
+        void setNull();
+
         //- Delete the allocated entries, but retain the list size.
         void free();
 
@@ -129,6 +132,9 @@ public:
         void setSize(const label) = delete;
         void setSize(const label, const T&) = delete;
         void setSize(const label, const T*) = delete;
+
+        // Too fragile or dangerous
+        void resize_nocopy(const label) = delete;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

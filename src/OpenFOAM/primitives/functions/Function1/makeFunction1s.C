@@ -26,10 +26,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "CodedFunction1.H"
 #include "Constant.H"
 #include "Uniform.H"
 #include "ZeroConstant.H"
 #include "OneConstant.H"
+#include "NoneFunction1.H"
 #include "PolynomialEntry.H"
 #include "Sine.H"
 #include "Cosine.H"
@@ -38,15 +40,19 @@ License
 #include "Table.H"
 #include "TableFile.H"
 #include "Scale.H"
-#include "LimitRange.H"
+#include "InputValueMapper.H"
+#include "FunctionObjectTrigger.H"
+#include "FunctionObjectValue.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeFunction1s(Type)                                                   \
     makeFunction1(Type);                                                       \
+    makeFunction1Type(CodedFunction1, Type);                                   \
     makeFunction1Type(Constant, Type);                                         \
     makeFunction1Type(Uniform, Type);                                          \
+    makeFunction1Type(None, Type);                                             \
     makeFunction1Type(ZeroConstant, Type);                                     \
     makeFunction1Type(OneConstant, Type);                                      \
     makeFunction1Type(Polynomial, Type);                                       \
@@ -57,7 +63,8 @@ License
     makeFunction1Type(Table, Type);                                            \
     makeFunction1Type(TableFile, Type);                                        \
     makeFunction1Type(Scale, Type);                                            \
-    makeFunction1Type(LimitRange, Type);
+    makeFunction1Type(InputValueMapper, Type);                                 \
+    makeFunction1Type(FunctionObjectValue, Type);
 
 #define makeFieldFunction1s(Type)                                              \
     makeFunction1(Type);                                                       \
@@ -70,6 +77,11 @@ namespace Foam
 {
     makeFunction1(label);
     makeFunction1Type(Constant, label);
+    makeFunction1Type(None, label);
+
+    makeFunction1Type(FunctionObjectTrigger, label);
+    makeFunction1Type(FunctionObjectTrigger, scalar);
+    // Only (label/scalar) makes sense for triggers
 
     makeFunction1s(scalar);
     makeFunction1s(vector);

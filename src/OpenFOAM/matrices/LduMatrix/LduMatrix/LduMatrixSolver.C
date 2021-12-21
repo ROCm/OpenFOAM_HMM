@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +56,9 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.symmetric())
     {
-        auto cstrIter = symMatrixConstructorTablePtr_->cfind(solverName);
+        auto* ctorPtr = symMatrixConstructorTable(solverName);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -71,7 +71,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -81,9 +81,9 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.asymmetric())
     {
-        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(solverName);
+        auto* ctorPtr = asymMatrixConstructorTable(solverName);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -96,7 +96,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            cstrIter()
+            ctorPtr
             (
                 fieldName,
                 matrix,
@@ -129,8 +129,9 @@ Foam::LduMatrix<Type, DType, LUType>::solver::solver
 
     controlDict_(solverDict),
 
-    maxIter_(defaultMaxIter_),
+    log_(1),
     minIter_(0),
+    maxIter_(defaultMaxIter_),
     tolerance_(1e-6*pTraits<Type>::one),
     relTol_(Zero)
 {
@@ -143,10 +144,11 @@ Foam::LduMatrix<Type, DType, LUType>::solver::solver
 template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::solver::readControls()
 {
-    readControl(controlDict_, maxIter_, "maxIter");
-    readControl(controlDict_, minIter_, "minIter");
-    readControl(controlDict_, tolerance_, "tolerance");
-    readControl(controlDict_, relTol_, "relTol");
+    controlDict_.readIfPresent("log", log_);
+    controlDict_.readIfPresent("minIter", minIter_);
+    controlDict_.readIfPresent("maxIter", maxIter_);
+    controlDict_.readIfPresent("tolerance", tolerance_);
+    controlDict_.readIfPresent("relTol", relTol_);
 }
 
 

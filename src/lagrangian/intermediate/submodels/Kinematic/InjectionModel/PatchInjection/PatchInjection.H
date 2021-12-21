@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,9 +60,6 @@ SourceFiles
 namespace Foam
 {
 
-template<class Type>
-class TimeFunction1;
-
 class distributionModel;
 
 /*---------------------------------------------------------------------------*\
@@ -74,6 +72,24 @@ class PatchInjection
     public InjectionModel<CloudType>,
     public patchInjectionBase
 {
+public:
+
+    // Public Data Types
+
+        //- Velocity type enumeration
+        enum velocityType
+        {
+            vtFixedValue,   //!< User supplied fixed value
+            vtPatchValue,   //!< Patch face values
+            vtZeroGradient  //!< Patch internal cell values
+        };
+
+        //- Velocity type names
+        static const Enum<velocityType> velocityTypeNames_;
+
+
+private:
+
     // Private data
 
         //- Injection duration [s]
@@ -82,14 +98,24 @@ class PatchInjection
         //- Number of parcels to introduce per second []
         const label parcelsPerSecond_;
 
+        //- Velocity type
+        const velocityType velocityType_;
+
         //- Initial parcel velocity [m/s]
+        //  Note: Only used for vtFixedValue
         const vector U0_;
 
         //- Flow rate profile relative to SOI []
-        const TimeFunction1<scalar> flowRateProfile_;
+        autoPtr<Function1<scalar>> flowRateProfile_;
 
         //- Parcel size distribution model
         const autoPtr<distributionModel> sizeDistribution_;
+
+        //- Current parcel being processed
+        label currentParceli_;
+
+        //- Current face being processed
+        label currentFacei_;
 
 
 public:
@@ -122,7 +148,7 @@ public:
 
 
     //- Destructor
-    virtual ~PatchInjection();
+    virtual ~PatchInjection() = default;
 
 
     // Member Functions

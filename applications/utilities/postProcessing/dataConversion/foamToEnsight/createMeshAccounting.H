@@ -67,7 +67,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
         {
             autoPtr<faMesh> faMeshPtr;
 
-            const bool throwing = FatalError.throwExceptions();
+            const bool oldThrowingError = FatalError.throwing(true);
             try
             {
                 faMeshPtr.reset(new faMesh(mesh));
@@ -76,7 +76,7 @@ PtrList<ensightFaMesh> ensightMeshesFa(regionNames.size());
             {
                 faMeshPtr.reset(nullptr);
             }
-            FatalError.throwExceptions(throwing);
+            FatalError.throwing(oldThrowingError);
 
             if (faMeshPtr)
             {

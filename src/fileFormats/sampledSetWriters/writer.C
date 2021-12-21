@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 #include "OFstream.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
@@ -39,9 +39,9 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
     const word& writeType
 )
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
+    auto* ctorPtr = wordConstructorTable(writeType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -51,7 +51,30 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<writer<Type>>(cstrIter()());
+    return autoPtr<writer<Type>>(ctorPtr());
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
+(
+    const word& writeType,
+    const dictionary& formatOptions
+)
+{
+    auto* ctorPtr = dictConstructorTable(writeType);
+
+    if (!ctorPtr)
+    {
+        FatalErrorInLookup
+        (
+            "writer",
+            writeType,
+            *dictConstructorTablePtr_
+        ) << exit(FatalError);
+    }
+
+    return autoPtr<writer<Type>>(ctorPtr(formatOptions));
 }
 
 
@@ -143,10 +166,8 @@ Foam::writer<Type>::writer()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::writer<Type>::~writer()
+Foam::writer<Type>::writer(const dictionary& dict)
 {}
 
 

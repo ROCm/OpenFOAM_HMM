@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,10 +53,9 @@ namespace Foam
 
 class LESdelta
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         const turbulenceModel& turbulenceModel_;
 
@@ -121,7 +120,7 @@ public:
             const word& name,
             const turbulenceModel& turbulence,
             const dictionary& dict,
-            const dictionaryConstructorTable& additionalConstructors,
+            const dictionaryConstructorTableType& additionalConstructors,
             const word& lookupName = "delta"
         );
 

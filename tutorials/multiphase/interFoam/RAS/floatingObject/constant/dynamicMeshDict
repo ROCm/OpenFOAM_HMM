@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,7 +29,13 @@ rigidBodyMotionCoeffs
         type Newmark;
     }
 
-    accelerationRelaxation 0.7;
+    accelerationRelaxation table
+    (
+        // time     relaxation-factor
+        (0          0)
+        (3.99999    0)
+        (4          0.7)
+    );
 
     bodies
     {

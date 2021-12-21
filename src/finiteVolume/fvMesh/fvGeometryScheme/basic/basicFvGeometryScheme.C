@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,15 @@ Foam::tmp<Foam::surfaceScalarField> Foam::basicFvGeometryScheme::weights() const
         // but the result will be poor.
         scalar SfdOwn = mag(Sf[facei] & (Cf[facei] - C[owner[facei]]));
         scalar SfdNei = mag(Sf[facei] & (C[neighbour[facei]] - Cf[facei]));
-        w[facei] = SfdNei/(SfdOwn + SfdNei);
+
+        if (mag(SfdOwn + SfdNei) > ROOTVSMALL)
+        {
+            w[facei] = SfdNei/(SfdOwn + SfdNei);
+        }
+        else
+        {
+            w[facei] = 0.5;
+        }
     }
 
     surfaceScalarField::Boundary& wBf = weights.boundaryFieldRef();

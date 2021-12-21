@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,8 +82,16 @@ public:
         splineEdge
         (
             const pointField& points,   //!< Referenced point field
-            const label start,      //!< Start point in referenced point field
-            const label end,        //!< End point in referenced point field
+            const edge& fromTo,         //!< Start/end in point field
+            const pointField& internalPoints
+        );
+
+        //- Construct from components
+        splineEdge
+        (
+            const pointField& points,   //!< Referenced point field
+            const label from,           //!< Start point in point field
+            const label to,             //!< End point in point field
             const pointField& internalPoints
         );
 
@@ -92,8 +100,8 @@ public:
         (
             const dictionary& dict,
             const label index,
-            const searchableSurfaces& geometry,
-            const pointField& points,   //!< Referenced point field
+            const searchableSurfaces&  /*unused*/,
+            const pointField& points,  //!< Referenced point field
             Istream&
         );
 

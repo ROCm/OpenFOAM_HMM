@@ -34,7 +34,7 @@ License
 
 inline void Foam::prefixOSstream::checkWritePrefix()
 {
-    if (printPrefix_ && prefix_.size())
+    if (printPrefix_ && !prefix_.empty())
     {
         OSstream::write(prefix_.c_str());
         printPrefix_ = false;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ Description
     Encapsulates using "patchGroups" to specify coupled patch
 
 SourceFiles
-    coupleGroupIdentifierI.H
     coupleGroupIdentifier.C
 
 \*---------------------------------------------------------------------------*/
@@ -85,8 +84,11 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        inline explicit coupleGroupIdentifier(const word& patchGroupName);
+        //- Construct from patchGroup name
+        explicit coupleGroupIdentifier(const word& patchGroupName)
+        :
+            name_(patchGroupName)
+        {}
 
         //- Construct from dictionary
         explicit coupleGroupIdentifier(const dictionary& dict);
@@ -95,10 +97,16 @@ public:
     // Member Functions
 
         //- Name of patchGroup
-        inline const word& name() const;
+        const word& name() const noexcept
+        {
+            return name_;
+        }
 
-        //- Is a valid patchGroup
-        inline bool valid() const;
+        //- Is a valid patchGroup (non-empty) name
+        bool valid() const noexcept
+        {
+            return !name_.empty();
+        }
 
         //- Find other patch in same region.
         //  \return index of patch or -1.
@@ -121,16 +129,12 @@ public:
 // Global Operators
 
 //- Write the coupleGroup dictionary entry
-Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& p);
+Ostream& operator<<(Ostream& os, const coupleGroupIdentifier& ident);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "coupleGroupIdentifierI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

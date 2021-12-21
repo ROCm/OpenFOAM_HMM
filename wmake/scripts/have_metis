@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -27,6 +27,7 @@
 #     METIS_ARCH_PATH
 #     METIS_INC_DIR
 #     METIS_LIB_DIR
+#     METIS_LIBNAME_SUFFIX [optional]
 #
 #------------------------------------------------------------------------------
 . ${WM_PROJECT_DIR:?}/wmake/scripts/sysFunctions    # General system functions
@@ -37,7 +38,7 @@
 no_metis()
 {
     unset HAVE_METIS METIS_ARCH_PATH METIS_INC_DIR METIS_LIB_DIR
-    unset METIS_VERSION
+    unset METIS_VERSION METIS_LIBNAME_SUFFIX
 }
 
 
@@ -48,6 +49,10 @@ echo_metis()
     echo "root=\"$METIS_ARCH_PATH\""
     echo "include=\"$METIS_INC_DIR\""
     echo "library=\"$METIS_LIB_DIR\""
+    if [ -n "$METIS_LIBNAME_SUFFIX" ]
+    then
+        echo "libsuffix=\"$METIS_LIBNAME_SUFFIX\""
+    fi
 }
 
 
@@ -73,7 +78,7 @@ search_metis()
     elif hasAbsdir "$prefix"
     then
         header=$(findFirstFile "$prefix/include/$incName")
-        library=$(findExtLib "$libName")
+        library="-extlib"  # Delay search...
     elif isSystem "$prefix"
     then
         header=$(findSystemInclude -name="$incName")
@@ -89,6 +94,27 @@ search_metis()
         return 2
     }
 
+    # ----------------------------------
+    # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty makeMETIS
+    # - ensure consistent size between OpenFOAM and metis header
+
+    local label
+    if [ -f "$header" ]
+    then
+        label=$(sed -ne \
+            's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' \
+            "$header")
+    fi
+    : "${label:=unknown}"  # Safety
+
+    # Transform (32 | 64) -> (int32 | int64)
+    case "$label" in (32|64) label="int${label}" ;; esac
+
+    if [ "$library" = "-extlib" ]
+    then
+        library=$(findExtLib "${libName}-${label}" "$libName")
+    fi
+
     # Library
     [ -n "$library" ] \
     || library=$(findLibrary -prefix="$prefix" -name="$libName") \
@@ -97,23 +123,21 @@ search_metis()
         return 2
     }
 
-    # ----------------------------------
-
-    local label
-
-    # Ensure consistent sizes between OpenFOAM and metis header
-    # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
-    label=$(sed -ne \
-        's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' \
-        "$header")
-    : "${label:=unknown}"
+    # Library name suffix (-int32 | -int64)
+    case "${library##*/}" in
+    (*-int32.*) export METIS_LIBNAME_SUFFIX="-int32" ;;
+    (*-int64.*) export METIS_LIBNAME_SUFFIX="-int64" ;;
+    esac
 
     # OK
-    echo "metis (label=$label) - $prefix"
+    echo "metis (${label}) - $prefix"
     export HAVE_METIS=true
     export METIS_ARCH_PATH="$prefix"
     export METIS_INC_DIR="${header%/*}"     # Basename
     export METIS_LIB_DIR="${library%/*}"    # Basename
+
+    ##echo "DEBUG: header=$header" 1>&2
+    ##echo "DEBUG: library=$library" 1>&2
 }
 
 
@@ -160,8 +184,10 @@ no_metis
 
 # Test/query
 case "$1" in
--test)
+-test | -debug-test)
+    [ "$1" = "-debug-test" ] && set -x
     have_metis
+    [ "$1" = "-debug-test" ] && set +x
     echo_metis
     ;;
 -query)

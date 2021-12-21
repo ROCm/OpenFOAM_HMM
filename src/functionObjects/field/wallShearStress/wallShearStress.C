@@ -102,7 +102,7 @@ Foam::functionObjects::wallShearStress::wallShearStress
         (
             IOobject
             (
-                typeName,
+                scopedName(typeName),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -176,8 +176,8 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
 
 bool Foam::functionObjects::wallShearStress::execute()
 {
-    volVectorField& wallShearStress =
-        mesh_.lookupObjectRef<volVectorField>(type());
+    auto& wallShearStress =
+        mesh_.lookupObjectRef<volVectorField>(scopedName(typeName));
 
     // Compressible
     {
@@ -217,8 +217,8 @@ bool Foam::functionObjects::wallShearStress::execute()
 
 bool Foam::functionObjects::wallShearStress::write()
 {
-    const volVectorField& wallShearStress =
-        obr_.lookupObject<volVectorField>(type());
+    const auto& wallShearStress =
+        obr_.lookupObject<volVectorField>(scopedName(typeName));
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing field " << wallShearStress.name() << endl;

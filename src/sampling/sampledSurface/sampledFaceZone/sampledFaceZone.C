@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -390,12 +390,16 @@ Foam::tmp<Foam::tensorField> Foam::sampledFaceZone::interpolate
 }
 
 
-void Foam::sampledFaceZone::print(Ostream& os) const
+void Foam::sampledFaceZone::print(Ostream& os, int level) const
 {
     os  << "faceZone: " << name() << " :"
-        << "  zones: " << flatOutput(selectionNames_)
-        << "  faces:" << faces().size()
-        << "  points:" << points().size();
+        << " zones:" << flatOutput(selectionNames_);
+
+    if (level)
+    {
+        os  << "  faces:" << faces().size()
+            << "  points:" << points().size();
+    }
 }
 
 

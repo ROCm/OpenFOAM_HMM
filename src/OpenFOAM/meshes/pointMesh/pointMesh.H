@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +54,7 @@ class pointMesh
     public MeshObject<polyMesh, UpdateableMeshObject, pointMesh>,
     public GeoMesh<polyMesh>
 {
-    // Permanent data
+    // Permanent Data
 
         //- Boundary mesh
         pointBoundaryMesh boundary_;
@@ -121,6 +122,12 @@ public:
         const objectRegistry& thisDb() const
         {
             return GeoMesh<polyMesh>::mesh_.thisDb();
+        }
+
+        //- Return Time from polyMesh.
+        const Time& time() const
+        {
+            return GeoMesh<polyMesh>::mesh_.time();
         }
 
 

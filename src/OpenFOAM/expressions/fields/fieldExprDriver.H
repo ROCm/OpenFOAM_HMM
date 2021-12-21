@@ -82,8 +82,11 @@ protected:
         //- The field size
         label size_;
 
+public:
 
-    // Protected Member Functions
+    ClassName("fieldExpr::driver");
+
+    // Generated Methods
 
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
@@ -91,10 +94,6 @@ protected:
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("fieldExpr::driver");
 
     // Constructors
 
@@ -104,8 +103,13 @@ public:
         //- Construct for specified size with given dictionary
         parseDriver(const label len, const dictionary& dict);
 
-        //- Construct for specified size with copy of driver context
-        parseDriver(const label len, const parseDriver& rhs);
+        //- Construct for specified size, copy of driver context
+        parseDriver
+        (
+            const label len,
+            const parseDriver& rhs,
+            const dictionary& dict
+        );
 
 
     //- Destructor
@@ -114,13 +118,13 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return size_;
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return size_;
@@ -156,8 +160,7 @@ public:
 
         //- Return named field (variable) if available
         template<class Type>
-        tmp<Field<Type>>
-        getField(const word& fieldName) const;
+        tmp<Field<Type>> getField(const word& fieldName) const;
 
 
     // Custom Field Functions

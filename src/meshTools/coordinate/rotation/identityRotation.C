@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,21 +48,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::coordinateRotations::identity::identity()
-:
-    coordinateRotation()
-{}
-
-
-Foam::coordinateRotations::identity::identity(const identity&)
-:
-    identity()
-{}
-
-
 Foam::coordinateRotations::identity::identity(const dictionary&)
-:
-    identity()
 {}
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
     solveScalar normFactor =
         this->normFactor(psi, tsource(), Apsi, finestCorrection);
 
-    if (debug >= 2)
+    if ((log_ >= 2) || (debug >= 2))
     {
         Pout<< "   Normalisation factor = " << normFactor << endl;
     }
@@ -87,7 +87,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
     if
     (
         minIter_ > 0
-     || !solverPerf.checkConvergence(tolerance_, relTol_)
+     || !solverPerf.checkConvergence(tolerance_, relTol_, log_)
     )
     {
         // Create coarse grid correction fields
@@ -144,7 +144,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
                 matrix().mesh().comm()
             )/normFactor;
 
-            if (debug >= 2)
+            if ((log_ >= 2) || (debug >= 2))
             {
                 solverPerf.print(Info.masterStream(matrix().mesh().comm()));
             }
@@ -152,7 +152,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
         (
             (
               ++solverPerf.nIterations() < maxIter_
-            && !solverPerf.checkConvergence(tolerance_, relTol_)
+            && !solverPerf.checkConvergence(tolerance_, relTol_, log_)
             )
          || solverPerf.nIterations() < minIter_
         );
@@ -193,7 +193,7 @@ void Foam::GAMGSolver::Vcycle
     // Restrict finest grid residual for the next level up.
     agglomeration_.restrictField(coarseSources[0], finestResidual, 0, true);
 
-    if (debug >= 2 && nPreSweeps_)
+    if (nPreSweeps_ && ((log_ >= 2) || (debug >= 2)))
     {
         Pout<< "Pre-smoothing scaling factors: ";
     }
@@ -274,7 +274,7 @@ void Foam::GAMGSolver::Vcycle
         }
     }
 
-    if (debug >= 2 && nPreSweeps_)
+    if (nPreSweeps_ && ((log_ >= 2) || (debug >= 2)))
     {
         Pout<< endl;
     }
@@ -290,7 +290,7 @@ void Foam::GAMGSolver::Vcycle
         );
     }
 
-    if (debug >= 2)
+    if ((log_ >= 2) || (debug >= 2))
     {
         Pout<< "Post-smoothing scaling factors: ";
     }
@@ -703,7 +703,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
             )
         );
 
-        if (debug)
+        if ((log_ >= 2) || debug)
         {
             coarseSolverPerf.print(Info.masterStream(coarseComm));
         }

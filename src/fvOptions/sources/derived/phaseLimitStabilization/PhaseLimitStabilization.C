@@ -42,7 +42,7 @@ Foam::fv::PhaseLimitStabilization<Type>::PhaseLimitStabilization
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    fv::option(name, modelType, dict, mesh),
     fieldName_(coeffs_.get<word>("field")),
     rateName_(coeffs_.get<word>("rate")),
     residualAlpha_(coeffs_.get<scalar>("residualAlpha"))
@@ -75,7 +75,7 @@ void Foam::fv::PhaseLimitStabilization<Type>::addSup
 template<class Type>
 bool Foam::fv::PhaseLimitStabilization<Type>::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fv::option::read(dict))
     {
         coeffs_.readEntry("residualAlpha", residualAlpha_);
 

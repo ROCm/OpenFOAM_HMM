@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,18 +50,16 @@ int main(int argc, char *argv[])
     argList::addArgument("string .. stringN");
     argList::addOption("file", "name");
     argList::addOption("repeat", "count");
-    argList::addBoolOption("verbose", "report for each repeat");
+    argList::addVerboseOption("report each repeat");
 
     argList args(argc, argv, false, true);
 
     const label repeat = args.getOrDefault<label>("repeat", 1);
 
-    const bool optVerbose = args.found("verbose");
-
     cpuTime timer;
     for (label count = 0; count < repeat; ++count)
     {
-        const bool verbose = (optVerbose || count == 0);
+        const bool verbose = (args.verbose() || count == 0);
 
         for (label argI=1; argI < args.size(); ++argI)
         {
@@ -120,7 +118,7 @@ int main(int argc, char *argv[])
 
         for (label count = 0; count < repeat; ++count)
         {
-            const bool verbose = (optVerbose || count == 0);
+            const bool verbose = (args.verbose() || count == 0);
             label nTokens = 0;
 
             if (count)

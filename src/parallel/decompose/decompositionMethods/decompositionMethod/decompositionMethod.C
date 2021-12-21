@@ -351,9 +351,9 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
     const dictionary& regionDict = optionalRegionDict(decompDict, regionName);
     regionDict.readIfPresent("method", methodType);
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
+    auto* ctorPtr = dictionaryConstructorTable(methodType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -376,7 +376,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
         Info<< endl;
     }
 
-    return autoPtr<decompositionMethod>(cstrIter()(decompDict, regionName));
+    return autoPtr<decompositionMethod>(ctorPtr(decompDict, regionName));
 }
 
 

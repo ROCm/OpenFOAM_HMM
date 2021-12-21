@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,9 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
 {
     DebugInFunction << "Constructing faePatchField" << endl;
 
-    auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
+    auto* ctorPtr = patchConstructorTable(patchFieldType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -50,15 +50,15 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         ) << exit(FatalError);
     }
 
-    auto patchTypeCstrIter = patchConstructorTablePtr_->cfind(p.type());
+    auto* patchTypeCtor = patchConstructorTable(p.type());
 
-    if (patchTypeCstrIter.found())
+    if (patchTypeCtor)
     {
-        return patchTypeCstrIter()(p, iF);
+        return patchTypeCtor(p, iF);
     }
     else
     {
-        return cstrIter()(p, iF);
+        return ctorPtr(p, iF);
     }
 }
 
@@ -75,16 +75,16 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
 
     const word patchFieldType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
+    auto* ctorPtr = dictionaryConstructorTable(patchFieldType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         if (!disallowGenericFaePatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->cfind("generic");
+            ctorPtr = dictionaryConstructorTable("generic");
         }
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown patchField type " << patchFieldType
@@ -95,9 +95,9 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         }
     }
 
-    auto patchTypeCstrIter = dictionaryConstructorTablePtr_->cfind(p.type());
+    auto* patchTypeCtor = dictionaryConstructorTable(p.type());
 
-    if (patchTypeCstrIter.found() && *patchTypeCstrIter != *cstrIter)
+    if (patchTypeCtor && patchTypeCtor != ctorPtr)
     {
         FatalIOErrorInFunction(dict)
             << "inconsistent patch and patchField types for \n"
@@ -106,7 +106,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
             << exit(FatalIOError);
     }
 
-    return cstrIter()(p, iF, dict);
+    return ctorPtr(p, iF, dict);
 }
 
 
@@ -121,9 +121,9 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
 {
     DebugInFunction << "Constructing faePatchField<Type>" << endl;
 
-    auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
+    auto* ctorPtr = patchMapperConstructorTable(ptf.type());
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -133,14 +133,14 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         ) << exit(FatalError);
     }
 
-    auto patchTypeCstrIter = patchMapperConstructorTablePtr_->cfind(p.type());
+    auto* patchTypeCtor = patchMapperConstructorTable(p.type());
 
-    if (patchTypeCstrIter.found())
+    if (patchTypeCtor)
     {
-        return patchTypeCstrIter()(ptf, p, iF, pfMapper);
+        return patchTypeCtor(ptf, p, iF, pfMapper);
     }
 
-    return cstrIter()(ptf, p, iF, pfMapper);
+    return ctorPtr(ptf, p, iF, pfMapper);
 }
 
 

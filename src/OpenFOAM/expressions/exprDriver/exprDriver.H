@@ -36,21 +36,29 @@ Description
     \table
         Property     | Description                          | Required | Default
         variables    | List of variables for expressions    | no  | ()
+        lookup\<scalar\> | Dictionary of scalar Function1     | no  | {}
+        lookup\<vector\> | Dictionary of vector Function1     | no  | {}
         allowShadowing | Allow variables to shadow field names | no  | false
     \endtable
 
     Debug Properties
     \table
-        Property     | Description                          | Required | Default
-        debugBaseDriver | Debug level (int) for base driver | no  |
-        debugScanner | Add debug for scanner                | no  | false
-        debugParser  | Add debug for parser                 | no  | false
+        Property      | Description                         | Required | Default
+        debug.driver  | Debug level (int) for base driver   | no  |
+        debug.scanner | Add debug for scanner               | no  | false
+        debug.parser  | Add debug for parser                | no  | false
     \endtable
+
+    The \c lookup<scalar> and \c lookup<vector> are dictionaries
+    of Function1 definitions that can either be used to establish
+    a time-varying quantity, to remap a field of scalar values, or both.
 
 SourceFiles
     exprDriverI.H
+    exprDriverContextI.H
     exprDriver.C
     exprDriverFields.C
+    exprDriverFunctions.C
     exprDriverIO.C
     exprDriverTemplates.C
 
@@ -59,10 +67,15 @@ SourceFiles
 #ifndef expressions_exprDriver_H
 #define expressions_exprDriver_H
 
-#include "exprString.H"
 #include "exprResult.H"
+#include "exprString.H"
+#include "exprTraits.H"
 #include "pointField.H"
 #include "primitiveFields.H"
+#include "objectRegistry.H"
+#include "HashTable.H"
+#include "HashSet.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,12 +109,28 @@ public:
         };
 
 
+    //- Externally defined context fields
+    typedef HashTable<const regIOobject*> contextObjectTableType;
+
+
 private:
 
     // Private Member Functions
 
         //- Get search/caching controls from dictionary entries
         static int getSearchControls(const dictionary& dict);
+
+        //- Read/reset Function1 entries
+        void resetFunctions(const dictionary& dict);
+
+        //- Helper for lookup of Function1 in table
+        template<class Type>
+        static const Function1<Type>* getFunction1Ptr
+        (
+            const word& name,
+            const HashTable<refPtr<Function1<Type>>>& tbl,
+            wordList* listFailure = nullptr
+        );
 
 
 protected:
@@ -122,11 +151,25 @@ protected:
         //- The variables table
         HashTable<exprResult> variables_;
 
+        //- Function1 mappings/timelines (scalar),
+        //- evaluated at the simulation time or with arbitrary scalars
+        HashTable<refPtr<Function1<scalar>>> scalarFuncs_;
+
+        //- Function1 mappings/timelines (vector),
+        //- evaluated at the simulation time or with arbitrary scalars
+        HashTable<refPtr<Function1<vector>>> vectorFuncs_;
+
+        //- Externally defined context fields
+        contextObjectTableType contextObjects_;
+
         //- Special-purpose scalar reference argument
         scalar arg1Value_;
 
         //- Reference to the time-state
         mutable const TimeState* timeStatePtr_;
+
+        //- Pointer to an object registry (for functions etc).
+        const objectRegistry* obrPtr_;
 
 
     // Controls, tracing etc.
@@ -162,30 +205,8 @@ protected:
         //- Reset the time-state reference
         void resetTimeReference(const TimeState& ts);
 
-        //- Lookup field object.
-        //  \return const-ref tmp or invalid if not found
-        template<class GeoField>
-        static tmp<GeoField>
-        cfindFieldObject(const objectRegistry& obr, const word& fldName);
-
-        //- Read an interpolation table
-        template<typename TableType>
-        static bool readTable
-        (
-            const word& name,
-            const dictionary& dict,
-            HashTable<TableType>& tbl,
-            bool clear=true
-        );
-
-        //- Write an interpolation table
-        template<class TableType>
-        static void writeTable
-        (
-            Ostream& os,
-            const word& name,
-            const HashTable<TableType>& tbl
-        );
+        //- Write scalar/vector Function1 entries in dictionary format
+        void writeFunctions(Ostream& os) const;
 
 
     // Variables
@@ -256,14 +277,19 @@ protected:
         virtual exprResult getRemoteResult(const exprDriver& other) const;
 
 
-        //- No copy assignment
-        void operator=(const exprDriver&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("exprDriver");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        exprDriver(const exprDriver&) = delete;
+
+        //- No copy assignment
+        void operator=(const exprDriver&) = delete;
 
 
     // Constructors
@@ -272,19 +298,14 @@ public:
         explicit exprDriver
         (
             enum searchControls search = searchControls::DEFAULT_SEARCH,
-            const dictionary& dict = dictionary::null,
-            const TimeState* ts = nullptr
+            const dictionary& dict = dictionary::null
         );
 
-        //- Copy construct
-        exprDriver(const exprDriver& rhs);
+        //- Copy construct with new dictionary reference
+        exprDriver(const exprDriver& rhs, const dictionary& dict);
 
         //- Construct from a dictionary
-        explicit exprDriver
-        (
-            const dictionary& dict,
-            const TimeState* ts = nullptr
-        );
+        explicit exprDriver(const dictionary& dict);
 
 
     //- Destructor
@@ -293,20 +314,20 @@ public:
 
     // Public Member Functions
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return 1;
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return 1;
         }
 
         //- Reference to the current time-state (can be nullptr)
-        const TimeState* timeState() const;
+        const TimeState* timeState() const noexcept;
 
         //- The current time value
         virtual scalar timeValue() const;
@@ -337,6 +358,7 @@ public:
         void clearResult();
 
         //- Return the expression result as a tmp field
+        //  This also clears the result and associated memory.
         template<class Type>
         tmp<Field<Type>> getResult(bool wantPointData=false);
 
@@ -345,6 +367,15 @@ public:
         {
             return result_.valueType();
         }
+
+
+    // External References
+
+        //- Reset the objectRegistry (for functions)
+        void resetDb(const objectRegistry* obrPtr = nullptr);
+
+        //- Reset the objectRegistry (for functions)
+        void resetDb(const objectRegistry& db);
 
 
     // Specials
@@ -396,7 +427,7 @@ public:
 
     // Variables
 
-        //- Clear temporary variables and resets from expression strings
+        //- Clear temporary variables, reset from expression strings
         virtual void clearVariables();
 
         //- Set special-purpose scalar reference argument.
@@ -433,6 +464,59 @@ public:
             const word& name,
             const T& val
         );
+
+
+    // Context fields (similar to objectRegistry)
+
+        //- True if any context fields are defined
+        inline bool hasContextObjects() const;
+
+        //- Find named context field, if it exists
+        inline const regIOobject* cfindContextIOobject(const word& name) const;
+
+        //- Find context field object of specified type
+        //  \return nullptr if not found
+        template<class ObjType>
+        const ObjType* cfindContextObject(const word& name) const;
+
+        //- Add the object to the context
+        inline void addContextObject(const word& name, const regIOobject*);
+
+        //- Add the object to the context
+        inline void addContextObject(const regIOobject*);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const word& name);
+
+        //- Remove the object from the context
+        inline void removeContextObject(const regIOobject*);
+
+        //- Read access to the object context
+        inline const contextObjectTableType& contextObjects() const noexcept;
+
+        //- Write access to the object context
+        inline contextObjectTableType& contextObjects() noexcept;
+
+
+    // Scalar mappings (timelines / lookups)
+
+        //- Named mapping with given type exists
+        template<class Type>
+        bool isFunction(const word& name) const;
+
+        //- Evaluate named mapping for the given time/value.
+        //- Zero for undefined/unknown
+        template<class Type>
+        Type getFunctionValue(const word& name, const scalar x) const;
+
+        //- Fill result with values remapped according to the named Function1
+        template<class Type>
+        void fillFunctionValues
+        (
+            Field<Type>& result,
+            const word& name,
+            const scalarField& input
+        ) const;
 
 
     // Fields
@@ -472,7 +556,8 @@ public:
             size_t len = std::string::npos
         ) = 0;
 
-        //- Evaluate the expression and return the field
+        //- Evaluate the expression and return the field.
+        //  This also clears the result and associated memory.
         template<class Type>
         inline tmp<Field<Type>>
         evaluate
@@ -481,7 +566,8 @@ public:
             bool wantPointData = false
         );
 
-        //- Evaluate the expression and return a single value
+        //- Evaluate the expression and return a single value.
+        //  Does not clear the result.
         template<class Type>
         inline Type evaluateUniform
         (
@@ -576,6 +662,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "exprDriverI.H"
+#include "exprDriverContextI.H"
 
 #ifdef NoRepository
     #include "exprDriverTemplates.C"

@@ -292,7 +292,7 @@ protected:
             (
                 const volScalarField& pu,
                 const volScalarField& pp,
-                const fvVectorMatrix& UEqn
+                fvVectorMatrix& UEqn
             );
 
 

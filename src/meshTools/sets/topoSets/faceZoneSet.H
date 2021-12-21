@@ -39,7 +39,6 @@ SourceFiles
 #define faceZoneSet_H
 
 #include "faceSet.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

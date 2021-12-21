@@ -50,6 +50,7 @@ SourceFiles
 #include "ListOps.H"
 #include "ListListOps.H"
 #include "IndirectList.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -260,14 +261,24 @@ labelList getPolysNFaces(const polyMesh& mesh, const labelUList& addr);
 labelList getPolysNPointsPerFace(const polyMesh& mesh, const labelUList& addr);
 
 
-//- Copy specified field component into a scalarField
-//  works for various lists types
+//- Copy specified field component into a scalar buffer
+//- works for various lists types. Must be adequately sized before calling
 template<template<typename> class FieldContainer, class Type>
 void copyComponent
 (
-    scalarField& res,
+    List<scalar>& cmptBuffer,
     const FieldContainer<Type>& input,
     const direction cmpt
+);
+
+
+//- Write field content (component-wise)
+template<template<typename> class FieldContainer, class Type>
+void writeFieldContent
+(
+    ensightFile& os,
+    const FieldContainer<Type>& fld,
+    bool parallel  //!< Collective write?
 );
 
 

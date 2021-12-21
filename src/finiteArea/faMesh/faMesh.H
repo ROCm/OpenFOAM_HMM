@@ -33,6 +33,9 @@ Description
 SourceFiles
     faMesh.C
     faMeshDemandDrivenData.C
+    faMeshPatches.C
+    faMeshTopology.C
+    faMeshUpdate.C
 
 Author
     Zeljko Tukovic, FMENA
@@ -68,10 +71,10 @@ namespace Foam
 {
 
 // Forward Declarations
+class faMeshBoundaryHalo;
 class faMeshLduAddressing;
 class faMeshMapper;
 class faPatchData;
-template<class T> class LabelledItem;
 
 /*---------------------------------------------------------------------------*\
                            Class faMesh Declaration
@@ -86,6 +89,107 @@ class faMesh
     public faSolution,
     public data
 {
+    // Private (internal) classes/structures
+
+        //- A (proc, patchi, patchEdgei) tuple used internally for managing
+        //- patch/patch bookkeeping during construction.
+        //  Finite-area patches are stored with negated indices, which makes
+        //  them readily identifiable and always sort before normal patches.
+        //  Note
+        struct patchTuple
+        :
+            public FixedList<label, 4>
+        {
+
+        // Constructors
+
+            // Inherit constructors
+            using FixedList<label, 4>::FixedList;
+
+            //- Default construct as 'invalid'
+            patchTuple()
+            {
+                clear();
+            }
+
+
+        // Static Member Functions
+
+            // Globally consistent ordering
+            //
+            // 1. sort left/right as lower/higher processor connection
+            // 2. sort by proc/patch/patch index
+            static void sort(UList<Pair<patchTuple>>& list)
+            {
+                for (auto& tuples : list)
+                {
+                    tuples.sort();
+                }
+                Foam::stableSort(list);
+            }
+
+
+        // Member Functions
+
+            //- Reset to 'invalid'
+            void clear()
+            {
+                procNo(-1);
+                patchi(labelMax);
+                patchEdgei(-1);
+                meshFacei(-1);
+            }
+
+            //- Valid if proc and edge are non-negative
+            bool valid() const noexcept
+            {
+                return (procNo() >= 0 && patchEdgei() >= 0);
+            }
+
+            // Processor is the first sort index
+            label procNo() const { return (*this)[0]; }
+            void procNo(label val) { (*this)[0] = val; }
+
+            // PatchId (-ve for finiteArea patches) is the second sort index
+            label patchi() const { return (*this)[1]; }
+            void patchi(label val) { (*this)[1] = val; }
+
+            // The patch edge index (on the finiteArea patch)
+            // is the third sort index
+            label patchEdgei() const { return (*this)[2]; }
+            void patchEdgei(label val) { (*this)[2] = val; }
+
+            // The processor-local mesh face is the fourth sort index
+            label meshFacei() const { return (*this)[3]; }
+            void meshFacei(label val) { (*this)[3] = val; }
+
+            //- Return the real patchId
+            label realPatchi() const
+            {
+                const label id = patchi();
+                return (id < 0 ? -(id + 1) : id);
+            }
+
+            //- Set patchId as finiteArea
+            void faPatchi(label val)
+            {
+                patchi(-(val + 1));
+            }
+
+            //- Considered to be finiteArea if patchi < 0
+            bool is_finiteArea() const noexcept
+            {
+                return (patchi() < 0);
+            }
+
+            //- Considered to be processor local
+            bool is_localProc() const noexcept
+            {
+                return (procNo() == Pstream::myProcNo());
+            }
+        };
+
+
     // Private Data
 
         //- Face labels
@@ -131,7 +235,10 @@ class faMesh
     // Demand-driven data
 
         //- Primitive patch
-        mutable uindirectPrimitivePatch* patchPtr_;
+        mutable std::unique_ptr<uindirectPrimitivePatch> patchPtr_;
+
+        //- List of proc/mesh-face for boundary edge neighbours
+        mutable std::unique_ptr<List<labelPair>> bndConnectPtr_;
 
         //- Ldu addressing data
         mutable faMeshLduAddressing* lduPtr_;
@@ -172,8 +279,8 @@ class faMesh
         //- Edge area normals
         mutable edgeVectorField* edgeAreaNormalsPtr_;
 
-        //- Edge area normals
-        mutable vectorField* pointAreaNormalsPtr_;
+        //- Point area normals
+        mutable std::unique_ptr<vectorField> pointAreaNormalsPtr_;
 
         //- Face curvatures
         mutable areaScalarField* faceCurvaturesPtr_;
@@ -185,13 +292,25 @@ class faMesh
         mutable boolList* correctPatchPointNormalsPtr_;
 
 
-        // Other mesh-related data
+    // Other mesh-related data
 
         //- Parallel info
         mutable autoPtr<faGlobalMeshData> globalMeshDataPtr_;
 
+        //- Mapping/swapping for boundary edge halo neighbours
+        mutable std::unique_ptr<faMeshBoundaryHalo> haloMapPtr_;
+
+        //- Face centres for boundary edge halo neighbours
+        mutable std::unique_ptr<pointField> haloFaceCentresPtr_;
+
+        //- Face normals for boundary edge halo neighbours
+        mutable std::unique_ptr<vectorField> haloFaceNormalsPtr_;
+
 
     // Static Private Data
+
+        //- Use the original method for point normals
+        static int origPointAreaMethod_;
 
         //- Use quadrics fit
         static const int quadricsFit_;
@@ -210,6 +329,20 @@ class faMesh
 
         //- Set primitive mesh data
         void setPrimitiveMeshData();
+
+        //- Get list of (proc/patchi/patchEdgei/meshFacei) tuple pairs in an
+        //- globally consistent ordering
+        List<Pair<patchTuple>> getBoundaryEdgeConnections() const;
+
+        //- Determine the boundary edge neighbour connections
+        void calcBoundaryConnections() const;
+
+        //- Define boundary edge neighbours (proc/face) based on
+        //- gathered topology information
+        void setBoundaryConnections
+        (
+            const List<Pair<patchTuple>>& bndEdgeConnections
+        ) const;
 
 
         // Private member functions to calculate demand driven data
@@ -242,10 +375,13 @@ class faMesh
             void calcEdgeAreaNormals() const;
 
             //- Calculate point area normals
-            void calcPointAreaNormals() const;
+            void calcPointAreaNormals_orig(vectorField& result) const;
+
+            //- Calculate point area normals
+            void calcPointAreaNormals(vectorField& result) const;
 
             //- Calculate point area normals by quadrics fit
-            void calcPointAreaNormalsByQuadricsFit() const;
+            void calcPointAreaNormalsByQuadricsFit(vectorField& result) const;
 
             //- Calculate face curvatures
             void calcFaceCurvatures() const;
@@ -255,6 +391,9 @@ class faMesh
 
             //- Clear geometry but not the face areas
             void clearGeomNotAreas() const;
+
+            //- Clear boundary halo information
+            void clearHalo() const;
 
             //- Clear geometry
             void clearGeom() const;
@@ -266,10 +405,13 @@ class faMesh
             void clearOut() const;
 
 
-    // Helpers
+    // Halo handling
 
-        //- Get the polyPatch pairs for the boundary edges (natural order)
-        List<LabelledItem<edge>> getBoundaryEdgePatchPairs() const;
+        //- Calculate halo centres/normals
+        void calcHaloFaceGeometry() const;
+
+
+    // Helpers
 
         //- Create a single patch
         PtrList<faPatch> createOnePatch
@@ -286,13 +428,30 @@ class faMesh
             const dictionary* defaultPatchDefinition = nullptr
         ) const;
 
-        //- Reorder processor edges using order of the
-        //- neighbour processorPolyPatch
-        void reorderProcEdges
+
+        //- Fatal error if edge labels are out of range
+        void checkBoundaryEdgeLabelRange(const labelUList& edgeLabels) const;
+
+        //- Extract list from contiguous (unordered) boundary data
+        //- to the locally sorted order.
+        template<class T>
+        List<T> boundarySubset
         (
-            faPatchData& patchDef,
-            const List<LabelledItem<edge>>& bndEdgePatchPairs
-        ) const;
+            const UList<T>& bndField,
+            const labelUList& edgeLabels
+        ) const
+        {
+            #ifdef FULLDEBUG
+            checkBoundaryEdgeLabelRange(edgeLabels);
+            #endif
+            // Like UIndirectList but with an offset
+            List<T> result(edgeLabels.size());
+            forAll(edgeLabels, i)
+            {
+                result[i] = bndField[edgeLabels[i] - nInternalEdges_];
+            }
+            return result;
+        }
 
 
 public:
@@ -451,7 +610,7 @@ public:
             //- Return constant reference to boundary mesh
             inline const faBoundaryMesh& boundary() const noexcept;
 
-            //- Return faMesh face labels
+            //- Return the underlying polyMesh face labels
             inline const labelList& faceLabels() const noexcept;
 
 
@@ -485,6 +644,33 @@ public:
             {
                 return (edgeIndex < nInternalEdges_);
             }
+
+            //- List of proc/face for the boundary edge neighbours
+            //- using primitive patch edge numbering.
+            inline const List<labelPair>& boundaryConnections() const;
+
+            //- Boundary edge neighbour processors
+            //- (does not include own proc)
+            labelList boundaryProcs() const;
+
+            //- List of proc/size for the boundary edge neighbour processors
+            //- (does not include own proc)
+            List<labelPair> boundaryProcSizes() const;
+
+            //- Mapping/swapping for boundary halo neighbours
+            const faMeshBoundaryHalo& boundaryHaloMap() const;
+
+            //- Face centres of boundary halo neighbours
+            const pointField& haloFaceCentres() const;
+
+            //- Face normals of boundary halo neighbours
+            const vectorField& haloFaceNormals() const;
+
+            //- Face centres of boundary halo neighbours for specified patch
+            tmp<pointField> haloFaceCentres(const label patchi) const;
+
+            //- Face normals of boundary halo neighbours for specified patch
+            tmp<vectorField> haloFaceNormals(const label patchi) const;
 
 
         // Mesh motion and morphing
@@ -589,6 +775,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -145,9 +145,9 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     Info<< "Selecting RAS turbulence model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -160,7 +160,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     return autoPtr<RASModel>
     (
-        cstrIter()(alpha, rho, U, alphaRhoPhi, phi, transport, propertiesName)
+        ctorPtr(alpha, rho, U, alphaRhoPhi, phi, transport, propertiesName)
     );
 }
 
@@ -185,6 +185,44 @@ bool Foam::RASModel<BasicTurbulenceModel>::read()
     }
 
     return false;
+}
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::RASModel<BasicTurbulenceModel>::epsilon() const
+{
+    const scalar Cmu = 0.09;
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        Cmu*this->k()*this->omega()
+    );
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volScalarField>
+Foam::RASModel<BasicTurbulenceModel>::omega() const
+{
+    const scalar betaStar = 0.09;
+    const dimensionedScalar k0(sqr(dimLength/dimTime), SMALL);
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
+        (
+            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
+            this->mesh_.time().timeName(),
+            this->mesh_
+        ),
+        this->epsilon()/(betaStar*(this->k() + k0))
+    );
 }
 
 

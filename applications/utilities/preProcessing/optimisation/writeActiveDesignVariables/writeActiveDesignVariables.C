@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     // Back-up old optimisationDict, to maintain potential comments in it
     if (Pstream::master())
     {
-        cp(optDict.objectPath(), optDict.objectPath() + ".org");
+        Foam::cp(optDict.objectPath(), optDict.objectPath() + ".org");
     }
 
     // Construct mesh movement object and grab active design variables

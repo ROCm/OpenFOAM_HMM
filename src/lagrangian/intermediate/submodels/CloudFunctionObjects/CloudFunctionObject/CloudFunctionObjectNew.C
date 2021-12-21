@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,9 +43,9 @@ Foam::CloudFunctionObject<CloudType>::New
     Info<< "    Selecting cloud function " << modelName << " of type "
         << objectType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(objectType);
+    auto* ctorPtr = dictionaryConstructorTable(objectType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -58,7 +58,7 @@ Foam::CloudFunctionObject<CloudType>::New
 
     return autoPtr<CloudFunctionObject<CloudType>>
     (
-        cstrIter()
+        ctorPtr
         (
             dict,
             owner,

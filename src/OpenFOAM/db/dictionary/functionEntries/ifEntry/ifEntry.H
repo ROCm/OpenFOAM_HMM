@@ -54,8 +54,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ifEntry_H
-#define ifEntry_H
+#ifndef functionEntries_ifEntry_H
+#define functionEntries_ifEntry_H
 
 #include "ifeqEntry.H"
 

@@ -38,7 +38,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const std::vector<T>& list)
     auto iter = list.cbegin();
     const auto last = list.cend();
 
-    // Write ascii list contents, no breaks
+    // Write ascii list contents, no line breaks
 
     os << label(list.size()) << token::BEGIN_LIST;
 

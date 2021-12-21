@@ -82,7 +82,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class argList;
 class Time;
 
@@ -98,11 +98,11 @@ public:
 
     // Constructors
 
-        //- Construct null
-        timeSelector();
+        //- Default construct
+        timeSelector() = default;
 
         //- Construct by parsing string for time ranges
-        timeSelector(const std::string& str);
+        explicit timeSelector(const std::string& str);
 
 
     // Member Functions
@@ -165,7 +165,6 @@ public:
             Time& runTime,
             const argList& args
         );
-
 };
 
 

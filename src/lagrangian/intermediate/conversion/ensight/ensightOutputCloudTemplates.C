@@ -27,6 +27,42 @@ License
 
 #include "ensightOutputCloud.H"
 #include "ensightPTraits.H"
+#include "globalIndex.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::label Foam::ensightOutput::Detail::writeCloudFieldContent
+(
+    ensightFile& os,
+    const UList<Type>& field,
+    label count
+)
+{
+    // Write master data
+    for (Type val : field)          // <-- working on a copy!
+    {
+        if (mag(val) < 1e-90)       // approximately root(ROOTVSMALL)
+        {
+            val = Zero;
+        }
+
+        for (direction d=0; d < pTraits<Type>::nComponents; ++d)
+        {
+            const direction cmpt = ensightPTraits<Type>::componentOrder[d];
+
+            os.write(component(val, cmpt));
+
+            if (++count % 6 == 0)
+            {
+                os.newline();
+            }
+        }
+    }
+
+    return count;
+}
+
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -34,8 +70,7 @@ template<class Type>
 bool Foam::ensightOutput::writeCloudField
 (
     const IOField<Type>& field,
-    ensightFile& os,
-    Pstream::commsTypes comm
+    ensightFile& os
 )
 {
     if (returnReduce(field.empty(), andOp<bool>()))
@@ -43,59 +78,51 @@ bool Foam::ensightOutput::writeCloudField
         return false;
     }
 
+    // Size information (offsets are irrelevant)
+    globalIndex procAddr;
+    if (Pstream::parRun())
+    {
+        procAddr.reset(UPstream::listGatherValues<label>(field.size()));
+    }
+    else
+    {
+        procAddr.reset(labelList(Foam::one{}, field.size()));
+    }
+
+
     if (Pstream::master())
     {
         // 6 values per line
         label count = 0;
 
-        // Master
-        for (Type val : field)          // <-- working on a copy
+        // Write master data
+        count = ensightOutput::Detail::writeCloudFieldContent
+        (
+            os,
+            field,
+            count
+        );
+
+        // Receive and write
+        DynamicList<Type> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            if (mag(val) < 1e-90)       // approximately root(ROOTVSMALL)
-            {
-                val = Zero;
-            }
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
 
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-            {
-                const direction cmpt =
-                    ensightPTraits<Type>::componentOrder[d];
-
-                os.write(component(val, cmpt));
-
-                if (++count % 6 == 0)
-                {
-                    os.newline();
-                }
-            }
-        }
-
-        // Slaves
-        for (const int slave : Pstream::subProcs())
-        {
-            IPstream fromSlave(comm, slave);
-            Field<Type> recv(fromSlave);
-
-            for (Type val : recv)       // <-- working on a copy
-            {
-                if (mag(val) < 1e-90)   // approximately root(ROOTVSMALL)
-                {
-                    val = Zero;
-                }
-
-                for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-                {
-                    const direction cmpt =
-                        ensightPTraits<Type>::componentOrder[d];
-
-                    os.write(component(val, cmpt));
-
-                    if (++count % 6 == 0)
-                    {
-                        os.newline();
-                    }
-                }
-            }
+            count = ensightOutput::Detail::writeCloudFieldContent
+            (
+                os,
+                recvData,
+                count
+            );
         }
 
         // Add final newline if required
@@ -106,8 +133,14 @@ bool Foam::ensightOutput::writeCloudField
     }
     else
     {
-        OPstream toMaster(comm, Pstream::masterNo());
-        toMaster << field;
+        // Send
+        UOPstream::write
+        (
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            field.cdata_bytes(),
+            field.size_bytes()
+        );
     }
 
     return true;
@@ -119,8 +152,7 @@ bool Foam::ensightOutput::writeCloudField
 (
     const IOobject& io,
     const bool exists,
-    autoPtr<ensightFile>& output,
-    Pstream::commsTypes comm
+    autoPtr<ensightFile>& output
 )
 {
     if (exists)
@@ -134,7 +166,7 @@ bool Foam::ensightOutput::writeCloudField
 
         IOField<Type> field(fieldObj);
 
-        writeCloudField(field, output.ref(), comm);
+        writeCloudField(field, output.ref());
     }
 
     return true;

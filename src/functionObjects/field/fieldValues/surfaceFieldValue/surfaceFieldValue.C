@@ -543,9 +543,10 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldValues::surfaceFieldValue::usesSf() const
+bool Foam::functionObjects::fieldValues::surfaceFieldValue::usesSf()
+const noexcept
 {
-    // Only a few operations do not require the Sf field
+    // Few operations do not require the Sf field
     switch (operation_)
     {
         case opNone:
@@ -554,13 +555,10 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::usesSf() const
         case opSum:
         case opSumMag:
         case opAverage:
-        {
             return false;
-        }
+
         default:
-        {
             return true;
-        }
     }
 }
 
@@ -703,11 +701,14 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 
             scalar mean, numer;
 
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 // Weighted quantity = (Weight * phi * dA)
 
-                tmp<scalarField> weight(weightingFactor(weightField));
+                tmp<scalarField> weight
+                (
+                    weightingFactor(weightField, is_magOp())
+                );
 
                 // Mean weighted value (area-averaged)
                 mean = gSum(weight()*areaVal()) / areaTotal;
@@ -786,11 +787,14 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 
             scalar mean, numer;
 
-            if (canWeight(weightField))
+            if (is_weightedOp() && canWeight(weightField))
             {
                 // Weighted quantity = (Weight * phi . dA)
 
-                tmp<scalarField> weight(weightingFactor(weightField));
+                tmp<scalarField> weight
+                (
+                    weightingFactor(weightField, is_magOp())
+                );
 
                 // Mean weighted value (area-averaged)
                 mean = gSum(weight()*areaVal()) / areaTotal;
@@ -824,14 +828,17 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 template<>
 Foam::tmp<Foam::scalarField>
 Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
-    const Field<scalar>& weightField
-) const
+    const Field<scalar>& weightField,
+    const bool useMag
+)
 {
-    if (usesMag())
+    if (useMag)
     {
         return mag(weightField);
     }
@@ -846,17 +853,48 @@ Foam::tmp<Foam::scalarField>
 Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField,
-    const vectorField& Sf
-) const
+    const vectorField& Sf,
+    const bool useMag
+)
+{
+    // scalar * unit-normal
+
+    // Can skip this check - already used canWeight()
+    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// {
+    ///     // No weight field - revert to unweighted form?
+    ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
+    /// }
+
+    if (useMag)
+    {
+        return mag(weightField);
+    }
+
+    // pass through
+    return weightField;
+}
+
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
+(
+    const Field<scalar>& weightField,
+    const vectorField& Sf,
+    const bool useMag
+)
 {
     // scalar * Area
 
-    if (returnReduce(weightField.empty(), andOp<bool>()))
-    {
-        // No weight field - revert to unweighted form
-        return mag(Sf);
-    }
-    else if (usesMag())
+    // Can skip this check - already used canWeight()
+    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// {
+    ///     // No weight field - revert to unweighted form
+    ///     return mag(Sf);
+    /// }
+
+    if (useMag)
     {
         return mag(weightField * mag(Sf));
     }
@@ -870,17 +908,61 @@ Foam::tmp<Foam::scalarField>
 Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<vector>& weightField,
-    const vectorField& Sf
-) const
+    const vectorField& Sf,
+    const bool useMag
+)
+{
+    // vector (dot) unit-normal
+
+    // Can skip this check - already used canWeight()
+    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// {
+    ///     // No weight field - revert to unweighted form
+    ///     return tmp<scalarField>::New(Sf.size(), scalar(1));
+    /// }
+
+    const label len = weightField.size();
+
+    auto tresult = tmp<scalarField>::New(weightField.size());
+    auto& result = tresult.ref();
+
+    for (label facei=0; facei < len; ++facei)
+    {
+        const vector unitNormal(normalised(Sf[facei]));
+        result[facei] = (weightField[facei] & unitNormal);
+    }
+
+    if (useMag)
+    {
+        for (scalar& val : result)
+        {
+            val = mag(val);
+        }
+    }
+
+    return tresult;
+}
+
+
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::fieldValues::surfaceFieldValue::areaWeightingFactor
+(
+    const Field<vector>& weightField,
+    const vectorField& Sf,
+    const bool useMag
+)
 {
     // vector (dot) Area
 
-    if (returnReduce(weightField.empty(), andOp<bool>()))
-    {
-        // No weight field - revert to unweighted form
-        return mag(Sf);
-    }
-    else if (usesMag())
+    // Can skip this check - already used canWeight()
+    /// if (returnReduce(weightField.empty(), andOp<bool>()))
+    /// {
+    ///     // No weight field - revert to unweighted form
+    ///     return mag(Sf);
+    /// }
+
+    if (useMag)
     {
         return mag(weightField & Sf);
     }
@@ -957,6 +1039,13 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 {
     read(dict);
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+// Needs completed sampledSurface, surfaceWriter
+Foam::functionObjects::fieldValues::surfaceFieldValue::~surfaceFieldValue()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -1048,7 +1137,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
         Info<< operationTypeNames_[operation_] << nl;
     }
 
-    if (usesWeight())
+    if (is_weightedOp())
     {
         // Can have "weightFields" or "weightField"
 
@@ -1093,6 +1182,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
         {
             Info<< flatOutput(weightFieldNames_) << nl;
         }
+    }
+
+    if (stSampled == regionType_ && sampledPtr_)
+    {
+        Info<< "    sampled surface: ";
+        sampledPtr_->print(Info, 0);
+        Info<< nl;
     }
 
     if (writeFields_)

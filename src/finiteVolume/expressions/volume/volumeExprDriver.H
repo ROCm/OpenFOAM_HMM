@@ -84,6 +84,7 @@ SourceFiles
 
 #include "volumeExprFwd.H"
 #include "fvExprDriver.H"
+#include "exprFieldAssociation.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "pointFields.H"
@@ -125,11 +126,14 @@ protected:
         //- A logical (bool-like) field (but actually a scalar)
         bool isLogical_;
 
+        //- Requested use of dimensions
+        bool hasDimensions_;
+
         //- A volume/surface/point field
-        enum FieldAssociation fieldGeoType_;
+        expressions::FieldAssociation fieldGeoType_;
 
         //- The result dimensions
-        dimensionSet resultDimension_;
+        dimensionSet resultDimensions_;
 
 
     // Protected Member Functions
@@ -164,16 +168,18 @@ protected:
         ) const;
 
 
+public:
+
+    ClassName("volumeExpr::driver");
+
+    // Generated Methods
+
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
 
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("volumeExpr::driver");
 
     // Constructors
 
@@ -185,7 +191,12 @@ public:
         );
 
         //- Construct for specified mesh with copy of driver context
-        parseDriver(const fvMesh& mesh, const parseDriver& driver);
+        parseDriver
+        (
+            const fvMesh& mesh,
+            const parseDriver& driver,
+            const dictionary& dict
+        );
 
         //- Construct with meshName for the given mesh
         parseDriver(const word& meshName, const fvMesh& mesh);
@@ -194,14 +205,7 @@ public:
         parseDriver(const dictionary& dict, const fvMesh& mesh);
 
 
-        //- Clone
-        virtual autoPtr<expressions::fvExprDriver> clone() const
-        {
-            return autoPtr<expressions::fvExprDriver>
-            (
-                new parseDriver(this->mesh_, *this)
-            );
-        }
+    // Not generally clonable
 
 
     //- Destructor
@@ -216,13 +220,13 @@ public:
             return mesh_;
         }
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return mesh_.nCells();
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return mesh_.nPoints();
@@ -230,6 +234,16 @@ public:
 
         //- Field size associated with different geometric field types
         inline label size(const FieldAssociation geoType) const;
+
+        //- Apply dimensions() to geometric fields
+        inline bool hasDimensions() const noexcept;
+
+        //- The preferred result dimensions (if any)
+        inline const dimensionSet& dimensions() const noexcept;
+
+
+        //- Clear out local copies of the field
+        void clearField();
 
 
     // Reading
@@ -259,37 +273,37 @@ public:
         //- The result type-name.
         //  Normally volScalarField, surfaceVectorField etc,
         //  but Scalar is modified for logical as volScalarField etc
-        const word& resultType() const
+        const word& resultType() const noexcept
         {
             return resultType_;
         }
 
         //- The geometric field association
-        FieldAssociation fieldAssociation() const
+        FieldAssociation fieldAssociation() const noexcept
         {
             return fieldGeoType_;
         }
 
         //- A logical (bool-like) field. Actually stored as a scalar.
-        bool isLogical() const
+        bool isLogical() const noexcept
         {
             return isLogical_;
         }
 
         //- A volume field
-        bool isVolumeData() const
+        bool isVolumeData() const noexcept
         {
             return fieldGeoType_ == FieldAssociation::VOLUME_DATA;
         }
 
         //- A surface field
-        bool isSurfaceData() const
+        bool isFaceData() const noexcept
         {
-            return fieldGeoType_ == FieldAssociation::SURFACE_DATA;
+            return fieldGeoType_ == FieldAssociation::FACE_DATA;
         }
 
         //- A point field
-        bool isPointData() const
+        bool isPointData() const noexcept
         {
             return fieldGeoType_ == FieldAssociation::POINT_DATA;
         }
@@ -302,6 +316,9 @@ public:
         //- and matches the specified logical type
         template<class GeoField>
         const GeoField* isResultType(bool logical, bool dieOnNull=false) const;
+
+        //- A zero-initialized field with the same type as the result field.
+        autoPtr<regIOobject> dupZeroField() const;
 
 
     // Set Fields

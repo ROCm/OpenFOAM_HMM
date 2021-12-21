@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ SourceFiles
 
 #include "pointField.H"
 #include "edgeList.H"
+#include "dictionary.H"
 #include "edgeMeshFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -93,10 +94,10 @@ protected:
     // Protected Member Functions
 
         //- Non-const access to global points
-        inline pointField& storedPoints();
+        inline pointField& storedPoints() noexcept;
 
         //- Non-const access to the edges
-        inline edgeList& storedEdges();
+        inline edgeList& storedEdges() noexcept;
 
 
 public:
@@ -141,7 +142,7 @@ public:
         inline edgeMesh(pointField&& pointLst, edgeList&& edgeLst);
 
         //- Construct from file name (uses extension to determine type)
-        edgeMesh(const fileName& name);
+        explicit edgeMesh(const fileName& name);
 
         //- Construct from file name with specified type
         edgeMesh(const fileName& name, const word& fileType);
@@ -188,16 +189,20 @@ public:
             fileExtension,
             (
                 const fileName& name,
-                const edgeMesh& mesh
+                const edgeMesh& mesh,
+                IOstreamOption streamOpt,
+                const dictionary& options
             ),
-            (name, mesh)
+            (name, mesh, streamOpt, options)
         );
 
         //- Write to file (format implicit in the extension)
         static void write
         (
             const fileName& name,
-            const edgeMesh& mesh
+            const edgeMesh& mesh,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         );
 
         //- Write to file, with given format
@@ -205,7 +210,9 @@ public:
         (
             const fileName& name,
             const word& fileType,
-            const edgeMesh& mesh
+            const edgeMesh& mesh,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
         );
 
 
@@ -227,10 +234,10 @@ public:
     // Access
 
         //- Return points
-        inline const pointField& points() const;
+        inline const pointField& points() const noexcept;
 
         //- Return edges
-        inline const edgeList& edges() const;
+        inline const edgeList& edges() const noexcept;
 
         //- Return edges
         inline const labelListList& pointEdges() const;
@@ -260,16 +267,28 @@ public:
 
         virtual void writeStats(Ostream&) const;
 
-        //- Generic write routine. Chooses writer based on extension.
-        virtual void write(const fileName& name) const
+        //- Write to file, choosing writer based on the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, *this);
+            write(name, *this, streamOpt, options);
         }
 
-        //- Generic write routine. Chooses writer based on extension.
-        virtual void write(const fileName& name, const word& fileType) const
+        //- Write to file with given format type.
+        //  If the format type is "", uses the file extension.
+        virtual void write
+        (
+            const fileName& name,
+            const word& fileType,
+            IOstreamOption streamOpt = IOstreamOption(),
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, fileType, *this);
+            write(name, fileType, *this, streamOpt, options);
         }
 
 

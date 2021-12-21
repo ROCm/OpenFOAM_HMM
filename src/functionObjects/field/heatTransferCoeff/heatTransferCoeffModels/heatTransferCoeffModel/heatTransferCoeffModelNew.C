@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::autoPtr<Foam::heatTransferCoeffModel> Foam::heatTransferCoeffModel::New
 
     Info<< "Selecting heat transfer coefficient model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::heatTransferCoeffModel> Foam::heatTransferCoeffModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<heatTransferCoeffModel>(cstrIter()(dict, mesh, TName));
+    return autoPtr<heatTransferCoeffModel>(ctorPtr(dict, mesh, TName));
 }
 
 

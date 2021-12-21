@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -82,32 +82,26 @@ castellatedMeshControls
                 body_bottom
                 {
                     level (2  2);
-                    status 1 ;
                 }
                 solarpanel_body_left
                 {
                     level (3  3);
-                    status 1 ;
                 }
                 solarpanel_body_right
                 {
                     level (3  3);
-                    status 1 ;
                 }
                 solarpanel_body_top
                 {
                     level (3  3);
-                    status 1 ;
                 }
                 solarpanel_body_back
                 {
                     level (3  3);
-                    status 1 ;
                 }
                 ref_wall
                 {
                     level (2  2);
-                    status 1 ;
                 }
             }
         }

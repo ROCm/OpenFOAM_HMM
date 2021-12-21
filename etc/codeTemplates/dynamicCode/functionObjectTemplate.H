@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjectTemplate_H
-#define functionObjectTemplate_H
+#ifndef coded_functionObjectTemplate_H
+#define coded_functionObjectTemplate_H
 
 #include "regionFunctionObject.H"
 #include "dictionaryContent.H"
@@ -116,7 +116,7 @@ public:
     // Member Functions
 
         //- Code context as a dictionary
-        const dictionary& codeContext() const
+        const dictionary& codeContext() const noexcept
         {
             return dictionaryContent::dict();
         }

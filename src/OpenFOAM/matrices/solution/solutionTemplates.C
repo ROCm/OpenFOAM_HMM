@@ -27,8 +27,7 @@ License
 
 #include "solution.H"
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class FieldType>
 void Foam::solution::cachePrintMessage
@@ -46,9 +45,6 @@ void Foam::solution::cachePrintMessage
             << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -69,8 +69,8 @@ Usage
         rho         | density field name                    | no  | rho
         uniformJump | apply uniform pressure based on avg velocity | no | false
         nonDimensional | use non-dimensional table          | no | false
-        rpm         | fan rpm (non-dimensional table)       | no | 0
-        dm          | mean diameter (non-dimensional table) | no | 0
+        rpm         | fan rpm (non-dimensional table)       | no |
+        dm          | mean diameter (non-dimensional table) | no |
     \endtable
 
     Example of the boundary condition specification:
@@ -115,6 +115,7 @@ SourceFiles
 #define fanFvPatchField_H
 
 #include "uniformJumpFvPatchField.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,7 +131,7 @@ class fanFvPatchField
 :
     public uniformJumpFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Name of the flux transporting the field
         word phiName_;
@@ -144,13 +145,11 @@ class fanFvPatchField
         //- Use non-dimensional curve
         bool nonDimensional_;
 
-        // Parameters for non-dimensional table
+        //- Fan rpm (for non-dimensional curve)
+        autoPtr<Function1<scalar>> rpm_;
 
-        //- Fan rpm
-        scalar rpm_;
-
-        //- Fan mean diameter
-        scalar dm_;
+        //- Fan mean diameter (for non-dimensional curve)
+        autoPtr<Function1<scalar>> dm_;
 
 
     // Private Member Functions

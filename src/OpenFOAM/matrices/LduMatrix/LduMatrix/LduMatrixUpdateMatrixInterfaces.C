@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +54,8 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                 (
                     result,
                     add,
+                    lduMesh_.lduAddr(),
+                    interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -80,6 +83,8 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                 (
                     result,
                     add,
+                    lduMesh_.lduAddr(),
+                    interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -128,6 +133,8 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                 (
                     result,
                     add,
+                    lduMesh_.lduAddr(),
+                    interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -153,6 +160,8 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     (
                         result,
                         add,
+                        lduMesh_.lduAddr(),
+                        interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -165,6 +174,8 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     (
                         result,
                         add,
+                        lduMesh_.lduAddr(),
+                        interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
                       //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
@@ -189,6 +200,8 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                 (
                     result,
                     add,
+                    lduMesh_.lduAddr(),
+                    interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
                     //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),

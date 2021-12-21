@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,26 @@ Foam::topoSetSource::addToUsageTable Foam::boxToFace::usage_
     "\n    Usage: boxToFace ((minx miny minz) (maxx maxy maxz))\n\n"
     "    Select all face with faceCentre within bounding box\n\n"
 );
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Read min/max or min/span
+static void readBoxDim(const dictionary& dict, treeBoundBox& bb)
+{
+    dict.readEntry<point>("min", bb.min());
+
+    const bool hasSpan = dict.found("span");
+    if (!dict.readEntry<point>("max", bb.max(), keyType::REGEX, !hasSpan))
+    {
+        bb.max() = bb.min() + dict.get<vector>("span");
+    }
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -123,8 +143,7 @@ Foam::boxToFace::boxToFace
         bbs_.resize(1);
         if (!dict.readIfPresent("box", bbs_.first()))
         {
-            dict.readEntry<point>("min", bbs_.first().min());
-            dict.readEntry<point>("max", bbs_.first().max());
+            readBoxDim(dict, bbs_.first());
         }
     }
 }

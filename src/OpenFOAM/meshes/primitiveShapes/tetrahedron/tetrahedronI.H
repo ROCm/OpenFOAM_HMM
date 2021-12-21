@@ -127,7 +127,7 @@ inline Foam::triPointRef Foam::tetrahedron<Point, PointRef>::tri
     }
 
     FatalErrorInFunction
-        << "index out of range 0 -> 3. facei = " << facei
+        << "Face index (" << facei << ") out of range 0..3\n"
         << abort(FatalError);
     return triPointRef(b_, c_, d_);
 }

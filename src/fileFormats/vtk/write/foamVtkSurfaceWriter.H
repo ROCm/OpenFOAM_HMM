@@ -42,7 +42,6 @@ Note
 
 SourceFiles
     foamVtkSurfaceWriter.C
-    foamVtkSurfaceWriterTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -152,8 +151,20 @@ public:
         //- Write the currently set time as "TimeValue" FieldData
         void writeTimeValue();
 
-        //- Reset point, face references to begin a new piece
+        //- Reset point/face references to begin a new piece
         void piece(const pointField& points, const faceList& faces);
+
+
+        //- Write processor ids for each poly as CellData
+        //- (no-op in serial)
+        bool writeProcIDs();
+
+        //- Write a uniform field of Cell (Poly) or Point values
+        template<class Type>
+        void writeUniform(const word& fieldName, const Type& val)
+        {
+            polyWriter::writeUniformValue<Type>(nLocalPolys_, fieldName, val);
+        }
 };
 
 

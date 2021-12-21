@@ -306,7 +306,7 @@ public:
         );
 
         //- Return the selected geometric agglomerator
-        static autoPtr<GAMGAgglomeration> New
+        static const GAMGAgglomeration& New
         (
             const lduMesh& mesh,
             const scalarField& cellVolumes,

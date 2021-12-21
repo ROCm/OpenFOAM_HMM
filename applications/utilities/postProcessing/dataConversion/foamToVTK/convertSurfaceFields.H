@@ -194,11 +194,8 @@ Description
                 continue;
             }
 
-            uindirectPrimitivePatch pp
-            (
-                UIndirectList<face>(mesh.faces(), fz),
-                mesh.points()
-            );
+            // Retrieve as primitiveFacePatch with faces properly flipped
+            const primitiveFacePatch& pp = fz();
 
             vtkWriterType_faceZone writer
             (
@@ -224,11 +221,11 @@ Description
 
             for (const auto& fld : sScalars)
             {
-                writer.write(fld);
+                writer.write(fld, fz.addressing());
             }
             for (const auto& fld : sVectors)
             {
-                writer.write(fld);
+                writer.write(fld, fz.addressing());
             }
 
             fileName outputName(writer.output());

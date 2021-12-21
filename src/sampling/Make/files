@@ -80,5 +80,6 @@ meshToMesh0/meshToMesh0.C
 meshToMesh0/calculateMeshToMesh0Addressing.C
 meshToMesh0/calculateMeshToMesh0Weights.C
 
+functions/Function1/makeFunction1s.C
 
 LIB = $(FOAM_LIBBIN)/libsampling

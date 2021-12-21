@@ -53,7 +53,7 @@ Foam::fv::radiation::radiation
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh)
+    fv::option(sourceName, modelType, dict, mesh)
 {
     const auto& thermo = mesh_.lookupObject<basicThermo>(basicThermo::dictName);
 

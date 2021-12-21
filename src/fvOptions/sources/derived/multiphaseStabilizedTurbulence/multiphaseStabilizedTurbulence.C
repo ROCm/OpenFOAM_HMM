@@ -57,7 +57,7 @@ Foam::fv::multiphaseStabilizedTurbulence::multiphaseStabilizedTurbulence
     const fvMesh& mesh
 )
 :
-    option(sourceName, modelType, dict, mesh),
+    fv::option(sourceName, modelType, dict, mesh),
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     Cmu_
     (

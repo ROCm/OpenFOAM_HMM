@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PatchInjection.H"
-#include "TimeFunction1.H"
 #include "distributionModel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class CloudType>
+const Foam::Enum<typename Foam::PatchInjection<CloudType>::velocityType>
+Foam::PatchInjection<CloudType>::velocityTypeNames_
+({
+    { vtFixedValue, "fixedValue" },
+    { vtPatchValue, "patchValue" },
+    { vtZeroGradient, "zeroGradient" },
+});
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -47,14 +57,28 @@ Foam::PatchInjection<CloudType>::PatchInjection
     (
         this->coeffDict().getScalar("parcelsPerSecond")
     ),
-    U0_(this->coeffDict().lookup("U0")),
+    velocityType_
+    (
+        velocityTypeNames_.getOrDefault
+        (
+            "velocityType",
+            this->coeffDict(),
+            vtFixedValue
+        )
+    ),
+    U0_
+    (
+        velocityType_ == vtFixedValue
+      ? this->coeffDict().template get<vector>("U0")
+      : Zero
+    ),
     flowRateProfile_
     (
-        TimeFunction1<scalar>
+        Function1<scalar>::New
         (
-            owner.db().time(),
             "flowRateProfile",
-            this->coeffDict()
+            this->coeffDict(),
+            &owner.mesh()
         )
     ),
     sizeDistribution_
@@ -64,14 +88,19 @@ Foam::PatchInjection<CloudType>::PatchInjection
             this->coeffDict().subDict("sizeDistribution"),
             owner.rndGen()
         )
-    )
+    ),
+    currentParceli_(-1),
+    currentFacei_(-1)
 {
-    duration_ = owner.db().time().userTimeToTime(duration_);
+    // Convert from user time to reduce the number of time conversion calls
+    const Time& time = owner.db().time();
+    duration_ = time.userTimeToTime(duration_);
+    flowRateProfile_->userTimeToTime(time);
 
     patchInjectionBase::updateMesh(owner.mesh());
 
     // Set total volume/mass to inject
-    this->volumeTotal_ = flowRateProfile_.integrate(0.0, duration_);
+    this->volumeTotal_ = flowRateProfile_->integrate(0.0, duration_);
 }
 
 
@@ -85,16 +114,12 @@ Foam::PatchInjection<CloudType>::PatchInjection
     patchInjectionBase(im),
     duration_(im.duration_),
     parcelsPerSecond_(im.parcelsPerSecond_),
+    velocityType_(im.velocityType_),
     U0_(im.U0_),
-    flowRateProfile_(im.flowRateProfile_),
-    sizeDistribution_(im.sizeDistribution_.clone())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PatchInjection<CloudType>::~PatchInjection()
+    flowRateProfile_(im.flowRateProfile_.clone()),
+    sizeDistribution_(im.sizeDistribution_.clone()),
+    currentParceli_(im.currentParceli_),
+    currentFacei_(im.currentFacei_)
 {}
 
 
@@ -155,7 +180,7 @@ Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return flowRateProfile_.integrate(time0, time1);
+        return flowRateProfile_->integrate(time0, time1);
     }
 
     return 0.0;
@@ -165,16 +190,18 @@ Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
 template<class CloudType>
 void Foam::PatchInjection<CloudType>::setPositionAndCell
 (
-    const label,
-    const label,
-    const scalar,
+    const label parcelI,
+    const label nParcels,
+    const scalar time,
     vector& position,
     label& cellOwner,
     label& tetFacei,
     label& tetPti
 )
 {
-    patchInjectionBase::setPositionAndCell
+    currentParceli_ = parcelI;
+
+    currentFacei_ = patchInjectionBase::setPositionAndCell
     (
         this->owner().mesh(),
         this->owner().rndGen(),
@@ -189,16 +216,74 @@ void Foam::PatchInjection<CloudType>::setPositionAndCell
 template<class CloudType>
 void Foam::PatchInjection<CloudType>::setProperties
 (
-    const label,
-    const label,
-    const scalar,
+    const label parcelI,
+    const label nParcels,
+    const scalar time,
     typename CloudType::parcelType& parcel
 )
 {
-    // set particle velocity
-    parcel.U() = U0_;
+    // Set particle velocity
+    switch (velocityType_)
+    {
+        case vtFixedValue:
+        {
+            parcel.U() = U0_;
+            break;
+        }
+        case vtPatchValue:
+        {
+            if (parcelI != currentParceli_)
+            {
+                WarningInFunction
+                    << "Synchronisation problem: "
+                    << "attempting to set injected parcel " << parcelI
+                    << " properties using cached parcel " << currentParceli_
+                    << " properties" << endl;
+            }
 
-    // set particle diameter
+            const label patchFacei = currentFacei_;
+
+            if (patchFacei < 0)
+            {
+                FatalErrorInFunction
+                    << "Unable to set parcel velocity using patch value "
+                    << "due to missing face index: patchFacei=" << patchFacei
+                    << abort(FatalError);
+            }
+
+            const volVectorField& U = this->owner().U();
+            const label patchi = this->patchId_;
+            parcel.U() = U.boundaryField()[patchi][patchFacei];
+            break;
+        }
+        case vtZeroGradient:
+        {
+            const label celli = parcel.cell();
+
+            if (celli < 0)
+            {
+                FatalErrorInFunction
+                    << "Unable to set parcel velocity using zeroGradient "
+                    << "due to missing cell index"
+                    << abort(FatalError);
+            }
+
+            const volVectorField& U = this->owner().U();
+            parcel.U() = U[celli];
+            break;
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled velocityType "
+                << velocityTypeNames_[velocityType_]
+                << ". Available options are:"
+                << velocityTypeNames_.sortedToc()
+                << abort(FatalError);
+        }
+    }
+
+    // Set particle diameter
     parcel.d() = sizeDistribution_->sample();
 }
 

@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -55,7 +55,7 @@
 
 # [WM_PROJECT_VERSION] - A human-readable version name
 # A development version is often named 'com' - as in www.openfoam.com
-export WM_PROJECT_VERSION=v2106
+export WM_PROJECT_VERSION=v2112
 
 #------------------------------------------------------------------------------
 # Configuration environment variables.
@@ -66,8 +66,9 @@ export WM_PROJECT_VERSION=v2106
 export WM_COMPILER_TYPE=system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Clang | Icc | Icx | Cray | Amd | Arm | Pgi | Fujitsu |
+# = Gcc | Clang | Icc | Icx | Amd | Arm | Cray | Fujitsu |
 #   Gcc<digits> | Clang<digits>
+#   [Not well tested: Pgi | Nvidia]
 export WM_COMPILER=Gcc
 
 # [WM_PRECISION_OPTION] - Floating-point precision:
@@ -86,6 +87,7 @@ export WM_COMPILE_OPTION=Opt
 # [WM_COMPILE_CONTROL] - additional control for compiler rules
 #   +gold   : with gold linker
 #   ~openmp : without openmp
+#   version=... : compiler suffix (eg, "11" for gcc-11)
 #export WM_COMPILE_CONTROL="+gold"
 
 # [WM_MPLIB] - MPI implementation:
@@ -162,7 +164,7 @@ unset FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
 
 # Capture values of old directories to be cleaned from PATH, LD_LIBRARY_PATH
 foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
-    $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
+    $HOME/$WM_PROJECT/${USER:-user} $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
     $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN \
     $FOAM_MODULE_APPBIN $FOAM_MODULE_LIBBIN"
 
@@ -170,7 +172,7 @@ foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
 export WM_PROJECT_DIR="$projectDir"
 
 # [WM_PROJECT_USER_DIR] - Location of user files
-export WM_PROJECT_USER_DIR="$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION"
+export WM_PROJECT_USER_DIR="$HOME/$WM_PROJECT/${USER:-user}-$WM_PROJECT_VERSION"
 
 # [WM_PROJECT_SITE] - Location of site-specific (group) files
 # Default (unset) implies WM_PROJECT_DIR/site

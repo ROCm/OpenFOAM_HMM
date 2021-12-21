@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,7 +26,7 @@ solvers
         clip            false;
 
         nAlphaSubCycles 1;
-        cAlpha          1;
+        cAlpha          1; // Read by interIsoFoam but not used
         reconstructionScheme plicRDF; // isoAlpha
     }
 }

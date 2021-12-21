@@ -45,13 +45,13 @@ Foam::expressions::volumeExpr::parseDriver::field_cellSelection
         dimensionedScalar(Zero)
     );
 
-    labelList selected;
+    refPtr<labelList> tselected;
     switch (setType)
     {
         case topoSetSource::sourceType::CELLZONE_SOURCE:
         case topoSetSource::sourceType::CELLSET_SOURCE:
         {
-            selected = getTopoSetLabels(name, setType);
+            tselected = getTopoSetLabels(name, setType);
             break;
         }
 
@@ -63,6 +63,7 @@ Foam::expressions::volumeExpr::parseDriver::field_cellSelection
             break;
         }
     }
+    const auto& selected = tselected();
 
     auto& fld = tresult.ref().primitiveFieldRef();
     UIndirectList<scalar>(fld, selected) = scalar(1);
@@ -85,13 +86,13 @@ Foam::expressions::volumeExpr::parseDriver::field_faceSelection
         dimensionedScalar(Zero)
     );
 
-    labelList selected;
+    refPtr<labelList> tselected;
     switch (setType)
     {
         case topoSetSource::sourceType::FACESET_SOURCE:
         case topoSetSource::sourceType::FACEZONE_SOURCE:
         {
-            selected = getTopoSetLabels(name, setType);
+            tselected = getTopoSetLabels(name, setType);
             break;
         }
 
@@ -103,6 +104,7 @@ Foam::expressions::volumeExpr::parseDriver::field_faceSelection
             break;
         }
     }
+    const auto& selected = tselected();
 
     const auto& bmesh = mesh().boundaryMesh();
 
@@ -160,13 +162,13 @@ Foam::expressions::volumeExpr::parseDriver::field_pointSelection
         dimensionedScalar(Zero)
     );
 
-    labelList selected;
+    refPtr<labelList> tselected;
     switch (setType)
     {
         case topoSetSource::sourceType::POINTSET_SOURCE:
         case topoSetSource::sourceType::POINTZONE_SOURCE:
         {
-            selected = getTopoSetLabels(name, setType);
+            tselected = getTopoSetLabels(name, setType);
             break;
         }
 
@@ -178,6 +180,7 @@ Foam::expressions::volumeExpr::parseDriver::field_pointSelection
             break;
         }
     }
+    const auto& selected = tselected();
 
     auto& fld = tresult.ref().primitiveFieldRef();
     UIndirectList<scalar>(fld, selected) = scalar(1);

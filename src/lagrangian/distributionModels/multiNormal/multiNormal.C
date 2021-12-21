@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +27,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "multiNormal.H"
+#include "mathematicalConstants.H"
+#include "MathFunctions.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -48,37 +52,67 @@ Foam::distributionModels::multiNormal::multiNormal
 )
 :
     distributionModel(typeName, dict, rndGen),
-    minValue_(distributionModelDict_.get<scalar>("minValue")),
-    maxValue_(distributionModelDict_.get<scalar>("maxValue")),
-    range_(maxValue_ - minValue_),
-    expectation_(distributionModelDict_.lookup("expectation")),
-    variance_(distributionModelDict_.lookup("variance")),
-    strength_(distributionModelDict_.lookup("strength"))
+    mu_
+    (
+        distributionModelDict_.lookupCompat
+        (
+            "mu",
+            {{"expectation", 2112}}
+        )
+    ),
+    sigma_
+    (
+        distributionModelDict_.lookupCompat
+        (
+            "sigma",
+            {{"variance", 2112}}
+        )
+    ),
+    weight_
+    (
+        distributionModelDict_.lookupCompat
+        (
+            "weight",
+            {{"strength", 2112}}
+        )
+    )
 {
     check();
 
-    scalar sMax = 0;
-    label n = strength_.size();
-    for (label i=0; i<n; i++)
+    scalar sum = 0;
+    for (label i = 0; i < weight_.size(); ++i)
     {
-        scalar x = expectation_[i];
-        scalar s = strength_[i];
-        for (label j=0; j<n; j++)
+        if (i > 0 && weight_[i] < weight_[i-1])
         {
-            if (i!=j)
-            {
-                scalar x2 = (x - expectation_[j])/variance_[j];
-                scalar y = exp(-0.5*x2*x2);
-                s += strength_[j]*y;
-            }
+            FatalErrorInFunction
+                << type() << "distribution: "
+                << "Weights must be specified in a monotonic order." << nl
+                << "Please see the row i = " << i << nl
+                << "weight[i-1] = " << weight_[i-1] << nl
+                << "weight[i] = " << weight_[i]
+                << exit(FatalError);
         }
 
-        sMax = max(sMax, s);
+        sum += weight_[i];
     }
 
-    for (label i=0; i<n; i++)
+    if (sum < VSMALL)
     {
-        strength_[i] /= sMax;
+        FatalErrorInFunction
+            << type() << "distribution: "
+            << "The sum of weights cannot be zero." << nl
+            << "weight = " << weight_
+            << exit(FatalError);
+    }
+
+    for (label i = 1; i < weight_.size(); ++i)
+    {
+        weight_[i] += weight_[i-1];
+    }
+
+    for (auto& w : weight_)
+    {
+        w /= sum;
     }
 }
 
@@ -86,18 +120,9 @@ Foam::distributionModels::multiNormal::multiNormal
 Foam::distributionModels::multiNormal::multiNormal(const multiNormal& p)
 :
     distributionModel(p),
-    minValue_(p.minValue_),
-    maxValue_(p.maxValue_),
-    range_(p.range_),
-    expectation_(p.expectation_),
-    variance_(p.variance_),
-    strength_(p.strength_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::distributionModels::multiNormal::~multiNormal()
+    mu_(p.mu_),
+    sigma_(p.sigma_),
+    weight_(p.weight_)
 {}
 
 
@@ -105,54 +130,54 @@ Foam::distributionModels::multiNormal::~multiNormal()
 
 Foam::scalar Foam::distributionModels::multiNormal::sample() const
 {
-    scalar y = 0;
-    scalar x = 0;
-    label n = expectation_.size();
-    bool success = false;
+    const scalar u = rndGen_.sample01<scalar>();
 
-    while (!success)
+    for (label i = 0; i < weight_.size(); ++i)
     {
-        x = minValue_ + range_*rndGen_.sample01<scalar>();
-        y = rndGen_.sample01<scalar>();
-        scalar p = 0.0;
-
-        for (label i=0; i<n; i++)
+        if (weight_[i] > u)
         {
-            scalar nu = expectation_[i];
-            scalar sigma = variance_[i];
-            scalar s = strength_[i];
-            scalar v = (x - nu)/sigma;
-            p += s*exp(-0.5*v*v);
-        }
-
-        if (y<p)
-        {
-            success = true;
+            return sample(mu_[i], sigma_[i]);
         }
     }
 
-    return x;
+    const label last = weight_.size() - 1;
+
+    return sample(mu_[last], sigma_[last]);
 }
 
 
-Foam::scalar Foam::distributionModels::multiNormal::minValue() const
+Foam::scalar Foam::distributionModels::multiNormal::sample
+(
+    const scalar mu,
+    const scalar sigma
+) const
 {
-    return minValue_;
-}
+    const scalar a = (minValue_ - mu)/sigma;
+    const scalar b = (maxValue_ - mu)/sigma;
 
+    const scalar aPhi = 0.5*(1.0 + erf(a/Foam::sqrt(2.0)));
+    const scalar bPhi = 0.5*(1.0 + erf(b/Foam::sqrt(2.0)));
 
-Foam::scalar Foam::distributionModels::multiNormal::maxValue() const
-{
-    return maxValue_;
+    const scalar u = rndGen_.sample01<scalar>();
+    const scalar p = u*(bPhi - aPhi) + aPhi;
+
+    // (B:p. 20-24)
+    const scalar x =
+        mu + sigma*Foam::sqrt(2.0)*Math::erfInv(2.0*p - 1.0);
+
+    // Note: numerical approximation of the inverse function yields slight
+    //       inaccuracies
+
+    return min(max(x, minValue_), maxValue_);
 }
 
 
 Foam::scalar Foam::distributionModels::multiNormal::meanValue() const
 {
-    scalar mean = 0.0;
-    forAll(strength_, i)
+    scalar mean = 0;
+    forAll(weight_, i)
     {
-        mean += strength_[i]*expectation_[i];
+        mean += weight_[i]*mu_[i];
     }
 
     return mean;

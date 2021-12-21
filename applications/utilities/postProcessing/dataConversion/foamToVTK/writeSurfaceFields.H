@@ -38,7 +38,8 @@ SourceFiles
 #define writeSurfaceFields_H
 
 #include "readFields.H"
-#include "foamVtkUIndPatchGeoFieldsWriter.H"
+#include "primitiveFacePatch.H"
+#include "foamVtkGenericPatchGeoFieldsWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +47,9 @@ namespace Foam
 {
 
 // Writer type for face zones + fields
-typedef vtk::uindirectPatchGeoFieldsWriter vtkWriterType_faceZone;
+typedef
+    vtk::GenericPatchGeoFieldsWriter<primitiveFacePatch>
+    vtkWriterType_faceZone;
 
 } // End namespace Foam
 

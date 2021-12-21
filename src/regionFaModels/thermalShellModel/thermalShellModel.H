@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,23 +34,23 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory/Optional (inherited) entries
+        // Mandatory/Optional entries
         ...
 
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         T                     <Tname>;
 
-        // Optional entries (unmodifiable)
+        // Optional entries
         thermalShellModel     <thermalShellModelName>;
 
-        // Mandatory/Optional (derived) entries
+        // Derived entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property   | Description                       | Type  | Reqd | Dflt
+      Property   | Description                       | Type  | Reqd | Deflt
       T          | Name of operand temperature field | word  | yes  | -
       thermalShellModel | Name of thermal-shell model <!--
                         -->                      | word | no | thermalShell
@@ -90,12 +90,6 @@ class thermalShellModel
 :
     public regionFaModel
 {
-    // Private Member Functions
-
-        //- Initialize thermal Baffle
-        void init();
-
-
 protected:
 
     // Protected Data
@@ -111,12 +105,6 @@ protected:
 
         //- Pointer to faOptions
         Foam::fa::options& faOptions_;
-
-
-    // Protected Member Functions
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary&);
 
 
 public:
@@ -177,13 +165,22 @@ public:
         // Access
 
             //- Return primary region temperature
-            const volScalarField& Tp() const;
+            const volScalarField& Tp() const noexcept
+            {
+                return Tp_;
+            }
 
             //- Return shell temperature
-            const areaScalarField& T() const;
+            const areaScalarField& T() const noexcept
+            {
+                return T_;
+            }
 
             //- Return faOptions
-            Foam::fa::options& faOptions();
+            Foam::fa::options& faOptions() noexcept
+            {
+                return faOptions_;
+            }
 
 
         // Evolution

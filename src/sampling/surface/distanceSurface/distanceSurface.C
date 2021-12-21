@@ -279,6 +279,7 @@ Foam::distanceSurface::distanceSurface
      || (distance_ < 0)
      || dict.getOrDefault<bool>("signed", true)
     ),
+
     isoParams_
     (
         dict,
@@ -348,9 +349,10 @@ Foam::distanceSurface::distanceSurface
     const isoSurfaceParams& params
 )
 :
-    mesh_(mesh),
-    geometryPtr_
+    distanceSurface
     (
+        mesh,
+        interpolate,
         searchableSurface::New
         (
             surfaceType,
@@ -364,8 +366,26 @@ Foam::distanceSurface::distanceSurface
                 IOobject::NO_WRITE
             ),
             dictionary()
-        )
-    ),
+        ),
+        distance,
+        useSignedDistance,
+        params
+    )
+{}
+
+
+Foam::distanceSurface::distanceSurface
+(
+    const polyMesh& mesh,
+    const bool interpolate,
+    autoPtr<searchableSurface>&& surface,
+    const scalar distance,
+    const bool useSignedDistance,
+    const isoSurfaceParams& params
+)
+:
+    mesh_(mesh),
+    geometryPtr_(surface),
     distance_(distance),
     withZeroDistance_(equal(distance_, 0)),
     withSignDistance_
@@ -374,6 +394,7 @@ Foam::distanceSurface::distanceSurface
      || (distance_ < 0)
      || useSignedDistance
     ),
+
     isoParams_(params),
     topoFilter_(topologyFilterType::NONE),
     nearestPoints_(),
@@ -732,18 +753,25 @@ void Foam::distanceSurface::createGeometry()
 
     if (debug)
     {
-        print(Pout);
+        print(Pout, debug);
         Pout<< endl;
     }
 }
 
 
-void Foam::distanceSurface::print(Ostream& os) const
+void Foam::distanceSurface::print(Ostream& os, int level) const
 {
-    os  << "  surface:" << surfaceName()
-        << "  distance:" << distance()
-        << "  faces:" << surface().surfFaces().size()
-        << "  points:" << surface().points().size();
+    os  << " surface:" << surfaceName()
+        << " distance:" << distance()
+        << " topology:" << topoFilterNames_[topoFilter_];
+
+    isoParams_.print(os);
+
+    if (level)
+    {
+        os  << "  faces:" << surface().surfFaces().size()
+            << "  points:" << surface().points().size();
+    }
 }
 
 

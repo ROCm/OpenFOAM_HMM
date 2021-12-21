@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,23 +37,33 @@ void Foam::vtk::patchMeshWriter::writeUniform
     const Type& val
 )
 {
+    label nValues(0);
+
     if (isState(outputState::CELL_DATA))
     {
         ++nCellData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+        nValues = nLocalPolys_;
     }
     else if (isState(outputState::POINT_DATA))
     {
         ++nPointData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+        nValues = nLocalPoints_;
     }
     else
     {
-        WarningInFunction
-            << "Ignore bad writer state (" << stateNames[state_]
-            << ") for field " << fieldName << nl << endl
+        reportBadState
+        (
+            FatalErrorInFunction,
+            outputState::CELL_DATA,
+            outputState::POINT_DATA
+        )
+            << " for uniform field " << fieldName << nl << endl
             << exit(FatalError);
+
+        return;
     }
+
+    vtk::fileWriter::writeUniform<Type>(fieldName, val, nValues);
 }
 
 

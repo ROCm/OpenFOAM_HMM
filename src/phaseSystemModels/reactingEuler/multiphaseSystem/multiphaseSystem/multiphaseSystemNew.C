@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2018 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,9 +52,9 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
 
     Info<< "Selecting multiphaseSystem " << systemType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(systemType);
+    auto* ctorPtr = dictionaryConstructorTable(systemType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -65,7 +65,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(mesh);
+    return ctorPtr(mesh);
 }
 
 // ************************************************************************* //

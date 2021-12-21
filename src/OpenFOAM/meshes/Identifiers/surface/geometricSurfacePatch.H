@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ Class
     Foam::geometricSurfacePatch
 
 Description
-    The geometricSurfacePatch is like patchIdentifier but for surfaces.
-    Holds type, name and index.
+    Identifies a surface patch/zone by name and index,
+    with geometric type.
 
 SourceFiles
     geometricSurfacePatch.C
@@ -40,6 +40,7 @@ SourceFiles
 #define geometricSurfacePatch_H
 
 #include "surfZoneIdentifier.H"
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,13 +55,13 @@ class geometricSurfacePatch
 {
     // Private Data
 
-        //- Name of patch
+        //- Patch/zone name
         word name_;
 
-        //- Index of patch in boundary
+        //- Patch/zone index in meshed surface
         label index_;
 
-        //- Type name of patch
+        //- Patch/zone type
         word geometricType_;
 
 public:
@@ -90,8 +91,10 @@ public:
         //- Helper to convert identifier types as an operation
         struct fromIdentifier
         {
-            geometricSurfacePatch
-            operator()(const surfZoneIdentifier& ident) const
+            geometricSurfacePatch operator()
+            (
+                const surfZoneIdentifier& ident
+            ) const
             {
                 return geometricSurfacePatch(ident);
             }
@@ -110,13 +113,15 @@ public:
 
     // Constructors
 
-        //- Default construct, use index=0, name="patch"
+        //- Default construct.
+        //- Uses name="patch", index=0, type=""
         geometricSurfacePatch();
 
-        //- Construct null with specified index
+        //- Construct null with specified index.
+        //- Uses name="patch", type=""
         explicit geometricSurfacePatch(const label index);
 
-        //- Construct from mandatory components
+        //- Construct from mandatory components, type=""
         geometricSurfacePatch(const word& name, const label index);
 
         //- Construct from components
@@ -142,39 +147,39 @@ public:
     // Member Functions
 
         //- The patch/zone name
-        const word& name() const
+        const word& name() const noexcept
         {
             return name_;
         }
 
         //- Modifiable patch/zone name
-        word& name()
+        word& name() noexcept
         {
             return name_;
         }
 
-        //- The geometric type of the patch/zone
-        const word& geometricType() const
-        {
-            return geometricType_;
-        }
-
-        //- Modifiable geometric type of the patch/zone
-        word& geometricType()
-        {
-            return geometricType_;
-        }
-
         //- The index of this patch/zone in the surface mesh
-        label index() const
+        label index() const noexcept
         {
             return index_;
         }
 
         //- Modifiable index of this patch/zone in the surface mesh
-        label& index()
+        label& index() noexcept
         {
             return index_;
+        }
+
+        //- The geometric type of the patch/zone
+        const word& geometricType() const noexcept
+        {
+            return geometricType_;
+        }
+
+        //- Modifiable geometric type of the patch/zone
+        word& geometricType() noexcept
+        {
+            return geometricType_;
         }
 
         //- Write (geometricType) dictionary entry
@@ -197,7 +202,10 @@ public:
             const word& geometricType,
             const word& name,
             const label index
-        );
+        )
+        :
+            geometricSurfacePatch(name, index, geometricType)
+        {}
 
         //- Deprecated(2020-01) Write dictionary
         //  \deprecated(2020-01) - Write dictionary

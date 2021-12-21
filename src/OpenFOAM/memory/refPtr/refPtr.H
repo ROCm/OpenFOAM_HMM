@@ -59,12 +59,12 @@ class refPtr
 {
     // Private Data
 
-        //- Object types
+        //- The stored reference type
         enum refType
         {
-            PTR,    //!< Managing a pointer (not ref-counted)
-            CREF,   //!< Using (const) reference to an object
-            REF     //!< Using (non-const) reference to an object
+            PTR,        //!< A managed pointer (not ref-counted)
+            CREF,       //!< A const reference to an object
+            REF         //!< A non-const reference to an object
         };
 
         //- The managed pointer or address of the object (reference)
@@ -111,10 +111,10 @@ public:
 
     // Constructors
 
-        //- Default construct, no managed pointer.
+        //- Construct with no managed pointer.
         inline constexpr refPtr() noexcept;
 
-        //- Construct with no managed pointer.
+        //- Construct with no managed pointer (literal nullptr).
         inline constexpr refPtr(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
@@ -151,20 +151,14 @@ public:
 
     // Query
 
-        //- Deprecated(2020-07) True if a null managed pointer
-        //
-        //  \deprecated(2020-07) - use bool operator
-        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
-        bool empty() const noexcept { return !ptr_; }
+        //- True if pointer/reference is non-null.
+        bool good() const noexcept { return bool(ptr_); }
 
-        //- True for non-null pointer/reference
-        bool valid() const noexcept { return ptr_; }
+        //- If the stored/referenced content is const
+        bool is_const() const noexcept { return type_ == CREF; }
 
         //- True if this is a managed pointer (not a reference)
         bool is_pointer() const noexcept { return type_ == PTR; }
-
-        //- Identical to is_pointer()
-        bool isTmp() const noexcept { return type_ == PTR; }
 
         //- True if this is a non-null managed pointer
         inline bool movable() const noexcept;
@@ -193,17 +187,31 @@ public:
         //  Fatal for a null managed pointer.
         inline T& constCast() const;
 
+        //- Return a shallow copy as a wrapped reference, preserving the
+        //- const/non-const status.
+        inline refPtr<T> shallowClone() const noexcept;
+
 
     // Edit
 
+        //- Release ownership and return the pointer.
+        //- A no-op for reference objects (returns nullptr).
+        //  \remark Method naming consistent with std::unique_ptr
+        inline T* release() noexcept;
+
         //- Return managed pointer for reuse, or clone() the object reference.
+        //  \remark Method naming consistent with Foam::tmp
         inline T* ptr() const;
 
         //- If object pointer points to valid object:
         //- delete object and set pointer to nullptr
         inline void clear() const noexcept;
 
-        //- Delete managed temporary object and set to new given pointer
+
+        //- Clear existing and transfer ownership.
+        inline void reset(refPtr<T>&& other) noexcept;
+
+        //- Delete managed pointer and set to new given pointer
         inline void reset(T* p = nullptr) noexcept;
 
         //- Clear existing and transfer ownership from autoPtr.
@@ -212,22 +220,25 @@ public:
         //- Clear existing and transfer ownership from unique_ptr
         void reset(std::unique_ptr<T>&& other) { reset(other.release()); }
 
-        //- Clear existing and transfer ownership.
-        inline void reset(refPtr<T>&& other) noexcept;
+
+        //- Clear existing and set (const) reference from other
+        inline void cref(const refPtr<T>& other) noexcept;
 
         //- Clear existing and set (const) reference
         inline void cref(const T& obj) noexcept;
 
         //- Clear existing and set (const) reference to pointer content.
-        //  A null pointer is permitted (treated as a managed pointer).
+        //  The pointer can be null, which is handled like a clear().
         inline void cref(const T* p) noexcept;
+
 
         //- Clear existing and set (non-const) reference
         inline void ref(T& obj) noexcept;
 
         //- Clear existing and set (non-const) reference to pointer content.
-        //  A null pointer is permitted (treated as a managed pointer).
+        //  The pointer can be null, which is handled like a clear().
         inline void ref(T* p) noexcept;
+
 
         //- Swaps the managed object with other.
         inline void swap(refPtr<T>& other) noexcept;
@@ -254,11 +265,17 @@ public:
         //- Return const reference to the object - same as cref() method.
         const T& operator()() const { return cref(); }
 
+
+    // Casting
+
+        //- True if pointer/reference is non-null. Same as good()
+        explicit operator bool() const noexcept { return bool(ptr_); }
+
         //- Cast to underlying data type, using the cref() method.
         operator const T&() const { return cref(); }
 
-        //- Non-null pointer/reference : valid()
-        explicit operator bool() const noexcept { return ptr_; }
+
+    // Assignment
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
@@ -276,8 +293,22 @@ public:
 
         //- Conversion to tmp, releases pointer or shallow-copies reference
         inline operator tmp<T>();
+
+
+    // Housekeeping
+
+        //- Identical to good(), or bool operator
+        bool valid() const noexcept { return bool(ptr_); }
+
+        //- Deprecated(2020-07) True if a null managed pointer
+        //
+        //  \deprecated(2020-07) - use bool operator
+        FOAM_DEPRECATED_FOR(2020-07, "bool operator")
+        bool empty() const noexcept { return !ptr_; }
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Global Functions
 

@@ -16,6 +16,8 @@ PtrList<multivariateSurfaceInterpolationScheme<scalar>::fieldTable>
     fieldsFluid(fluidRegions.size());
 PtrList<volScalarField> QdotFluid(fluidRegions.size());
 
+PtrList<fvVectorMatrix> UEqFluid(fluidRegions.size());
+
 List<scalar> initialMassFluid(fluidRegions.size());
 List<bool> frozenFlowFluid(fluidRegions.size(), false);
 
@@ -291,6 +293,12 @@ forAll(fluidRegions, i)
     (
         i,
         new fv::options(fluidRegions[i])
+    );
+
+    UEqFluid.set
+    (
+        i,
+        new fvVectorMatrix(UFluid[i], dimForce)
     );
 
     turbulenceFluid[i].validate();

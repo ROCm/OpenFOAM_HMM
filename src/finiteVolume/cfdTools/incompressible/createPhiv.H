@@ -45,7 +45,7 @@ surfaceScalarField phiv
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    flux(U)
+    fvc::flux(U)
 );
 
 

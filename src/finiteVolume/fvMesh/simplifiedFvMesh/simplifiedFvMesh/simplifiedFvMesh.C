@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ defineRunTimeSelectionTable(simplifiedFvMesh, time);
 
 bool Foam::simplifiedFvMesh::fvPatchFieldExists(const word& patchType)
 {
-    if
+    return
     (
         fvPatchField<scalar>::dictionaryConstructorTablePtr_->found(patchType)
      || fvPatchField<vector>::dictionaryConstructorTablePtr_->found(patchType)
@@ -51,12 +51,7 @@ bool Foam::simplifiedFvMesh::fvPatchFieldExists(const word& patchType)
      || fvPatchField<symmTensor>::
             dictionaryConstructorTablePtr_->found(patchType)
      || fvPatchField<tensor>::dictionaryConstructorTablePtr_->found(patchType)
-    )
-    {
-        return true;
-    }
-
-    return false;
+    );
 }
 
 
@@ -90,9 +85,9 @@ Foam::autoPtr<Foam::simplifiedFvMesh> Foam::simplifiedFvMesh::New
 {
     Info<< "Selecting simplified mesh model " << modelType << endl;
 
-    auto cstrIter = timeConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = timeConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -102,7 +97,7 @@ Foam::autoPtr<Foam::simplifiedFvMesh> Foam::simplifiedFvMesh::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<simplifiedFvMesh>(cstrIter()(runTime));
+    return autoPtr<simplifiedFvMesh>(ctorPtr(runTime));
 }
 
 

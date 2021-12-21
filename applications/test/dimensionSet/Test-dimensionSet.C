@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +94,7 @@ unsigned checkDimensions
     std::string errMsg;
 
     // Expect some failures
-    const bool prev = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
 
     for
     (
@@ -127,7 +127,7 @@ unsigned checkDimensions
         hadDimensionError(test, dimsOk, errMsg);
     }
 
-    FatalError.throwExceptions(prev);
+    FatalError.throwing(oldThrowingError);
 
     return nFail;
 }

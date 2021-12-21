@@ -104,7 +104,7 @@ namespace fv
 
 class limitTemperature
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

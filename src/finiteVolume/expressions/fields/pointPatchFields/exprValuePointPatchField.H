@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +63,16 @@ class exprValuePointPatchField
     public valuePointPatchField<Type>,
     public expressions::patchExprFieldBase
 {
+    //- The parent boundary condition type
+    typedef valuePointPatchField<Type> parent_bctype;
+
+
 protected:
 
     // Protected Data
+
+        //- Dictionary contents for the boundary condition
+        dictionary dict_;
 
         //- The expression driver
         expressions::patchExpr::parseDriver driver_;
@@ -128,7 +135,6 @@ public:
                 )
             );
         }
-
 
         //- Construct and return a clone setting internal field reference
         virtual autoPtr<pointPatchField<Type>> clone

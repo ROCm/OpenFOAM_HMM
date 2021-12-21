@@ -280,15 +280,23 @@ int main(int argc, char *argv[])
 
 
     List<label> list3{0, 1, 2, 3};
-    FixedList<label, 4> list4(list3.begin(), list3.end());
+    FixedList<label, 4> list4(list3);
     Info<< "list3: " << list3 << nl
         << "list4: " << list4 << nl;
 
-    list4 = {1, 2, 3, 5};
+    list4 = {1, 20, 3, 40};
     Info<< "list4: " << list4 << nl;
 
     FixedList<label, 5> list5{0, 1, 2, 3, 4};
     Info<< "list5: " << list5 << nl;
+
+    {
+        const FixedList<label, 2> indices({3, 1});
+        FixedList<label, 2> list4b(list4, indices);
+
+        Info<< "subset " << list4 << " with " << indices << " -> "
+            << list4b << nl;
+    }
 
     List<FixedList<label, 2>> list6{{0, 1}, {2, 3}};
     Info<< "list6: " << list6 << nl;

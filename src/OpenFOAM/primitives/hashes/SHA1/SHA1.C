@@ -312,7 +312,7 @@ void Foam::SHA1::calcDigest(SHA1Digest& dig) const
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::SHA1::clear()
+void Foam::SHA1::clear() noexcept
 {
     hashsumA_ = 0x67452301;
     hashsumB_ = 0xefcdab89;

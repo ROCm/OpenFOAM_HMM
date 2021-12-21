@@ -49,7 +49,7 @@ void printInfo(const SortableList<T>& list)
 
 int main(int argc, char *argv[])
 {
-    const labelList orig{7, 9, 1, 2, 4, 7, 4, 0};
+    const labelList orig({7, 9, 1, 2, 4, 7, 4, 0});
 
     labelList order;
 

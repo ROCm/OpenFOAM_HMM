@@ -34,6 +34,7 @@ License
 #include "timeControlFunctionObject.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
+#include "Switch.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
@@ -97,13 +98,13 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void Foam::functionObjectList::createStateDict() const
+void Foam::functionObjectList::createPropertiesDict() const
 {
-    // Cannot set the state dictionary on construction since Time has not
+    // Cannot set the properties dictionary on construction since Time has not
     // been fully initialised
-    stateDictPtr_.reset
+    propsDictPtr_.reset
     (
-        new IOdictionary
+        new functionObjects::properties
         (
             IOobject
             (
@@ -412,7 +413,7 @@ Foam::functionObjectList::functionObjectList
     warnings_(),
     time_(runTime),
     parentDict_(parentDict),
-    stateDictPtr_(nullptr),
+    propsDictPtr_(nullptr),
     objectsRegistryPtr_(nullptr),
     execution_(execution),
     updated_(false)
@@ -509,37 +510,38 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
 Foam::label Foam::functionObjectList::triggerIndex() const
 {
-    return stateDict().getOrDefault<label>("triggerIndex", labelMin);
+    return propsDict().getTrigger();
 }
 
 
-void Foam::functionObjectList::resetState()
+void Foam::functionObjectList::resetPropertiesDict()
 {
-    // Reset (re-read) the state dictionary
-    stateDictPtr_.reset(nullptr);
-    createStateDict();
+    // Reset (re-read) the properties dictionary
+    propsDictPtr_.reset(nullptr);
+    createPropertiesDict();
 }
 
 
-Foam::IOdictionary& Foam::functionObjectList::stateDict()
+Foam::functionObjects::properties& Foam::functionObjectList::propsDict()
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
-    return *stateDictPtr_;
+    return *propsDictPtr_;
 }
 
 
-const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
+const Foam::functionObjects::properties&
+Foam::functionObjectList::propsDict() const
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
-    return *stateDictPtr_;
+    return *propsDictPtr_;
 }
 
 
@@ -647,8 +649,8 @@ bool Foam::functionObjectList::execute()
             {
                 // Throw FatalError, FatalIOError as exceptions
 
-                const bool throwingError = FatalError.throwExceptions();
-                const bool throwingIOerr = FatalIOError.throwExceptions();
+                const bool oldThrowingError = FatalError.throwing(true);
+                const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
                 bool hadError = false;
 
@@ -693,8 +695,8 @@ bool Foam::functionObjectList::execute()
                 if (hadError)
                 {
                     // Restore previous state
-                    FatalError.throwExceptions(throwingError);
-                    FatalIOError.throwExceptions(throwingIOerr);
+                    FatalError.throwing(oldThrowingError);
+                    FatalIOError.throwing(oldThrowingIOerr);
                     continue;
                 }
 
@@ -736,8 +738,8 @@ bool Foam::functionObjectList::execute()
                 }
 
                 // Restore previous state
-                FatalError.throwExceptions(throwingError);
-                FatalIOError.throwExceptions(throwingIOerr);
+                FatalError.throwing(oldThrowingError);
+                FatalIOError.throwing(oldThrowingIOerr);
             }
             else
             {
@@ -768,13 +770,13 @@ bool Foam::functionObjectList::execute()
         }
     }
 
-    // Force writing of state dictionary after function object execution
+    // Force writing of properties dictionary after function object execution
     if (time_.writeTime())
     {
         const auto oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
 
-        stateDictPtr_->writeObject
+        propsDictPtr_->writeObject
         (
             IOstreamOption(IOstream::ASCII, time_.writeCompression()),
             true
@@ -853,8 +855,8 @@ bool Foam::functionObjectList::end()
             // Ignore failure on end() - not much we can do anyhow
 
             // Throw FatalError, FatalIOError as exceptions
-            const bool throwingError = FatalError.throwExceptions();
-            const bool throwingIOerr = FatalIOError.throwExceptions();
+            const bool oldThrowingError = FatalError.throwing(true);
+            const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
             try
             {
@@ -888,8 +890,8 @@ bool Foam::functionObjectList::end()
             }
 
             // Restore previous state
-            FatalError.throwExceptions(throwingError);
-            FatalIOError.throwExceptions(throwingIOerr);
+            FatalError.throwing(oldThrowingError);
+            FatalIOError.throwing(oldThrowingIOerr);
         }
     }
 
@@ -930,9 +932,9 @@ bool Foam::functionObjectList::adjustTimeStep()
 
 bool Foam::functionObjectList::read()
 {
-    if (!stateDictPtr_)
+    if (!propsDictPtr_)
     {
-        createStateDict();
+        createPropertiesDict();
     }
 
     updated_ = execution_;
@@ -1008,10 +1010,27 @@ bool Foam::functionObjectList::read()
 
             if (!dEntry.isDict())
             {
-                if (key != "errors" && key != "libs")
+                // Handle or ignore some known/expected keywords
+
+                if (key == "useNamePrefix")  // As per functionObject
+                {
+                    Switch sw(dEntry.stream().peekFirst());
+                    if (sw.good())
+                    {
+                        functionObject::defaultUseNamePrefix = sw;
+                    }
+                    else
+                    {
+                        IOWarningInFunction(parentDict_)
+                            << "Entry '" << key << "' is not a valid switch"
+                            << endl;
+                    }
+                }
+                else if (key != "errors" && key != "libs")
                 {
                     IOWarningInFunction(parentDict_)
-                        << "Entry " << key << " is not a dictionary" << endl;
+                        << "Entry '" << key << "' is not a dictionary"
+                        << endl;
                 }
 
                 continue;
@@ -1083,8 +1102,8 @@ bool Foam::functionObjectList::read()
             if (enabled && !objPtr)
             {
                 // Throw FatalError, FatalIOError as exceptions
-                const bool throwingError = FatalError.throwExceptions();
-                const bool throwingIOerr = FatalIOError.throwExceptions();
+                const bool oldThrowingError = FatalError.throwing(true);
+                const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
                 try
                 {
@@ -1148,8 +1167,8 @@ bool Foam::functionObjectList::read()
                 }
 
                 // Restore previous state
-                FatalError.throwExceptions(throwingError);
-                FatalIOError.throwExceptions(throwingIOerr);
+                FatalError.throwing(oldThrowingError);
+                FatalIOError.throwing(oldThrowingIOerr);
 
                 // Require valid functionObject on all processors
                 if (!returnReduce(bool(objPtr), andOp<bool>()))

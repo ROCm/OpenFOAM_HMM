@@ -29,7 +29,7 @@ License
 #include "exprDriver.H"
 #include "expressionEntry.H"
 #include "stringOps.H"
-#include "TimeState.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -98,6 +98,30 @@ static string getEntryString
     return exprTools::expressionEntry::evaluate(*eptr);
 }
 #endif
+
+
+template<class Type>
+static void shallowCloneFunctions
+(
+    HashTable<refPtr<Function1<Type>>>& dest,
+    const HashTable<refPtr<Function1<Type>>>& rhs
+)
+{
+    // Add in shallow copy for other functions
+    forAllConstIters(rhs, iter)
+    {
+        const word& key = iter.key();
+
+        if (!dest.found(key))
+        {
+            refPtr<Function1<Type>> func;
+            func.cref(iter.val().shallowClone());
+
+            dest.emplace_set(key, std::move(func));
+        }
+    }
+}
+
 } // End namespace Foam
 
 
@@ -115,71 +139,110 @@ void Foam::expressions::exprDriver::resetTimeReference(const TimeState& ts)
 }
 
 
+void Foam::expressions::exprDriver::resetDb(const objectRegistry* obrPtr)
+{
+    obrPtr_ = obrPtr;
+
+    forAllIters(scalarFuncs_, iter)
+    {
+        auto& funcPtr = iter.val();
+        if (funcPtr && !funcPtr.is_const())
+        {
+            (*funcPtr).resetDb(obrPtr_);
+        }
+    }
+    forAllIters(vectorFuncs_, iter)
+    {
+        auto& funcPtr = iter.val();
+        if (funcPtr && !funcPtr.is_const())
+        {
+            (*funcPtr).resetDb(obrPtr_);
+        }
+    }
+}
+
+
+void Foam::expressions::exprDriver::resetDb(const objectRegistry& db)
+{
+    resetDb(&db);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::exprDriver::exprDriver
 (
     enum searchControls search,
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
     dict_(dict),
     result_(),
     variableStrings_(),
-    variables_(),
+    variables_(16),
+    scalarFuncs_(0),
+    vectorFuncs_(0),
+    contextObjects_(0),
     arg1Value_(0),
-    timeStatePtr_(ts),
+    timeStatePtr_(nullptr),
+    obrPtr_(nullptr),
     stashedTokenId_(0),
 
     // Controls
-    debugScanner_(dict.getOrDefault("debugScanner", false)),
-    debugParser_(dict.getOrDefault("debugParser", false)),
-    allowShadowing_
-    (
-        dict.getOrDefault("allowShadowing", false)
-    ),
-    prevIterIsOldTime_
-    (
-        dict.getOrDefault("prevIterIsOldTime", false)
-    ),
+    debugScanner_(dict.getOrDefault("debug.scanner", false)),
+    debugParser_(dict.getOrDefault("debug.parser", false)),
+    allowShadowing_(dict.getOrDefault("allowShadowing", false)),
+    prevIterIsOldTime_(dict.getOrDefault("prevIterIsOldTime", false)),
     searchCtrl_(search)
 {}
 
 
 Foam::expressions::exprDriver::exprDriver
 (
-    const exprDriver& rhs
+    const exprDriver& rhs,
+    const dictionary& dict
 )
 :
-    dict_(rhs.dict_),
+    dict_(dict),
     result_(rhs.result_),
     variableStrings_(rhs.variableStrings_),
     variables_(rhs.variables_),
+    scalarFuncs_(0),
+    vectorFuncs_(0),
+    contextObjects_(rhs.contextObjects_),
     arg1Value_(rhs.arg1Value_),
     timeStatePtr_(rhs.timeStatePtr_),
+    obrPtr_(rhs.obrPtr_),
     stashedTokenId_(0),
 
+    // Controls
     debugScanner_(rhs.debugScanner_),
     debugParser_(rhs.debugParser_),
     allowShadowing_(rhs.allowShadowing_),
     prevIterIsOldTime_(rhs.prevIterIsOldTime_),
 
     searchCtrl_(rhs.searchCtrl_)
-{}
+{
+    // Partially like readDict()
+
+    // Create Function1s from dictionary content
+    resetFunctions(dict_);
+
+    // Add in shallow copy for other functions
+    shallowCloneFunctions(scalarFuncs_, rhs.scalarFuncs_);
+    shallowCloneFunctions(vectorFuncs_, rhs.vectorFuncs_);
+}
 
 
 Foam::expressions::exprDriver::exprDriver
 (
-    const dictionary& dict,
-    const TimeState* ts
+    const dictionary& dict
 )
 :
     exprDriver
     (
         searchControls(exprDriver::getSearchControls(dict)),
-        dict,
-        ts
+        dict
     )
 {
     readDict(dict);
@@ -188,9 +251,17 @@ Foam::expressions::exprDriver::exprDriver
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::TimeState* Foam::expressions::exprDriver::timeState() const
+const Foam::TimeState* Foam::expressions::exprDriver::timeState() const noexcept
 {
-    return timeStatePtr_;
+    if (timeStatePtr_)
+    {
+        return timeStatePtr_;
+    }
+    else if (obrPtr_)
+    {
+        return &(obrPtr_->time());
+    }
+    return nullptr;
 }
 
 
@@ -199,6 +270,10 @@ Foam::scalar Foam::expressions::exprDriver::timeValue() const
     if (timeStatePtr_)
     {
         return timeStatePtr_->value();
+    }
+    else if (obrPtr_)
+    {
+        return obrPtr_->time().value();
     }
     return 0;
 }
@@ -210,6 +285,10 @@ Foam::scalar Foam::expressions::exprDriver::deltaT() const
     {
         return timeStatePtr_->deltaT().value();
     }
+    else if (obrPtr_)
+    {
+        return obrPtr_->time().deltaT().value();
+    }
     return 0;
 }
 
@@ -219,14 +298,14 @@ bool Foam::expressions::exprDriver::readDict
     const dictionary& dict
 )
 {
-    dict.readIfPresent("debugBaseDriver", debug);
+    dict.readIfPresent("debug.driver", debug);
 
     // Regular variables
     variableStrings_ = readVariableStrings(dict);
 
-    // Other tables?
-    // readTable("timelines", dict, lines_);
-    // readTable("lookuptables", dict, lookup_);
+    // Create Function1s from dictionary content
+    resetFunctions(dict);
+
     // readTable("lookuptables2D", dict, lookup2D_);
 
     return true;

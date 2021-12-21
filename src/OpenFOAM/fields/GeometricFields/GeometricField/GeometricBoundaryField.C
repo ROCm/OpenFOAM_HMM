@@ -504,24 +504,20 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::LduInterfaceFieldPtrsList<Type>
 Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::interfaces() const
 {
-    LduInterfaceFieldPtrsList<Type> interfaces(this->size());
+    LduInterfaceFieldPtrsList<Type> list(this->size());
 
-    forAll(interfaces, patchi)
+    forAll(list, patchi)
     {
-        if (isA<LduInterfaceField<Type>>(this->operator[](patchi)))
+        const LduInterfaceField<Type>* lduPtr =
+            isA<LduInterfaceField<Type>>(this->operator[](patchi));
+
+        if (lduPtr)
         {
-            interfaces.set
-            (
-                patchi,
-                &refCast<const LduInterfaceField<Type>>
-                (
-                    this->operator[](patchi)
-                )
-            );
+            list.set(patchi, lduPtr);
         }
     }
 
-    return interfaces;
+    return list;
 }
 
 
@@ -530,24 +526,20 @@ Foam::lduInterfaceFieldPtrsList
 Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 scalarInterfaces() const
 {
-    lduInterfaceFieldPtrsList interfaces(this->size());
+    lduInterfaceFieldPtrsList list(this->size());
 
-    forAll(interfaces, patchi)
+    forAll(list, patchi)
     {
-        if (isA<lduInterfaceField>(this->operator[](patchi)))
+        const lduInterfaceField* lduPtr =
+            isA<lduInterfaceField>(this->operator[](patchi));
+
+        if (lduPtr)
         {
-            interfaces.set
-            (
-                patchi,
-                &refCast<const lduInterfaceField>
-                (
-                    this->operator[](patchi)
-                )
-            );
+            list.set(patchi, lduPtr);
         }
     }
 
-    return interfaces;
+    return list;
 }
 
 

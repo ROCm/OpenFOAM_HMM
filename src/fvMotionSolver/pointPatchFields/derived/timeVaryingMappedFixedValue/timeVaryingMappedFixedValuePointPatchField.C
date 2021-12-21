@@ -85,7 +85,10 @@ timeVaryingMappedFixedValuePointPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_(Function1<Type>::NewIfPresent("offset", dict))
+    offset_
+    (
+        Function1<Type>::NewIfPresent("offset", dict, word::null, &this->db())
+    )
 {
     if
     (

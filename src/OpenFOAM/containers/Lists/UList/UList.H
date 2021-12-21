@@ -119,8 +119,7 @@ protected:
 
         //- Return a validated (start,size) subset range, which means that it
         //- always addresses a valid section of the list.
-        labelRange validateRange(const labelRange& range) const;
-
+        labelRange validateRange(const labelRange& requestedRange) const;
 
         //- No copy assignment (default: shallow copy)
         //
@@ -230,7 +229,7 @@ public:
         inline constexpr UList() noexcept;
 
         //- Construct from components
-        inline UList(T* __restrict__ v, label size) noexcept;
+        inline UList(T* __restrict__ v, const label len) noexcept;
 
 
     // Member Functions
@@ -257,15 +256,21 @@ public:
             //- Return reverse circular value (ie, previous value in the list)
             inline T& rcValue(const label i);
 
-            //- Return a const pointer to the first data element.
-            //  Similar to the STL front() method and the string::data() method
-            //  This can be used (with caution) when interfacing with C code
+            //- Return pointer to the underlying array serving as data storage.
             inline const T* cdata() const noexcept;
 
-            //- Return a pointer to the first data element.
-            //  Similar to the STL front() method and the string::data() method
-            //  This can be used (with caution) when interfacing with C code
+            //- Return pointer to the underlying array serving as data storage.
             inline T* data() noexcept;
+
+            //- Return pointer to the underlying array serving as data storage,
+            //  reinterpreted as byte data
+            //  \note Only meaningful for contiguous data
+            inline const char* cdata_bytes() const noexcept;
+
+            //- Return pointer to the underlying array serving as data storage,
+            //  reinterpreted as byte data
+            //  \note Only meaningful for contiguous data
+            inline char* data_bytes() noexcept;
 
             //- Return the first element of the list
             inline T& first();
@@ -279,12 +284,12 @@ public:
             //- Return the last element of the list
             inline const T& last() const;
 
-            //- Number of contiguous bytes for the List data,
-            //- no runtime check that the type is actually contiguous
+            //- Number of contiguous bytes for the List data.
+            //  \note Only meaningful for contiguous data
             inline std::streamsize size_bytes() const noexcept;
 
             //- Number of contiguous bytes for the List data,
-            //- with runtime check that the type is actually contiguous
+            //- runtime FatalError if type is not contiguous
             std::streamsize byteSize() const;
 
 
@@ -295,6 +300,9 @@ public:
 
         //- Check size is within valid range [0,size]
         inline void checkSize(const label size) const;
+
+        //- Check that start and length define a valid range
+        inline void checkRange(const label start, const label len) const;
 
         //- Check index is within valid range [0,size)
         inline void checkIndex(const label i) const;
@@ -341,15 +349,34 @@ public:
 
     // Copy
 
-        //- Copy the pointer held by the given UList
+        //- Copy the pointer and size held by the given UList
         inline void shallowCopy(const UList<T>& list);
 
-        //- Copy elements of the given UList
+        //- Copy elements of the given UList. Sizes must match!
         void deepCopy(const UList<T>& list);
 
-        //- Copy elements of the given indirect list
+        //- Copy elements of the given indirect list. Sizes must match!
         template<class Addr>
         void deepCopy(const IndirectListBase<T, Addr>& list);
+
+
+    // Other Access
+
+        //- Return SubList slice (non-const access) - no range checking
+        SubList<T> slice(const label pos, label len = -1);
+
+        //- Return SubList slice (const access) - no range checking
+        const SubList<T> slice(const label pos, label len = -1) const;
+
+        //- Return SubList slice (non-const access) - with range checking.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        SubList<T> slice(const labelRange& range);
+
+        //- Return SubList slice (const access) - with range checking.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        const SubList<T> slice(const labelRange& range) const;
 
 
     // Member Operators
@@ -358,19 +385,9 @@ public:
         inline T& operator[](const label i);
 
         //- Return element of constant UList
-        //  Note that the bool specialization adds lazy evaluation so reading
-        //  an out-of-range element returns false without any ill-effects
+        //  \note bool specialization adds lazy evaluation so reading an
+        //       out-of-range element returns false without ill-effects
         inline const T& operator[](const label i) const;
-
-        //- Return (start,size) subset from UList with non-const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        UList<T> operator[](const labelRange& range);
-
-        //- Return (start,size) subset from UList with const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        const UList<T> operator[](const labelRange& range) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
@@ -484,8 +501,7 @@ public:
 
     // IOstream Operators
 
-        //- Read List contents from Istream.
-        //  The List must have the proper size before calling
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T>
         (
             Istream& os,
@@ -586,6 +602,14 @@ Ostream& UList<char>::writeList(Ostream& os, const label /*unused*/) const;
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+//- Read List contents from Istream, list must have the proper size!
+template<class T>
+Istream& operator>>(Istream& is, UList<T>& list)
+{
+    return list.readList(is);
+}
+
+
 //- Write List to Ostream, as per UList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
 template<class T>
@@ -594,7 +618,7 @@ Ostream& operator<<(Ostream& os, const UList<T>& list)
     return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
 }
 
-//- Write std::vector to Ostream
+//- Write std::vector to Ostream. ASCII only, no line-breaks
 template<class T>
 Ostream& operator<<(Ostream& os, const std::vector<T>& list);
 
@@ -646,7 +670,7 @@ struct accessOp
 {
     const T& operator()(const T& obj) const
     {
-        return obj;
+        return obj;  // Default is pass-through
     }
 };
 
@@ -655,7 +679,7 @@ struct accessOp
 template<class T>
 struct emptyOp
 {
-    inline bool operator()(const T& obj) const
+    bool operator()(const T& obj) const
     {
         return obj.empty();
     }
@@ -666,7 +690,7 @@ struct emptyOp
 template<class T>
 struct sizeOp
 {
-    inline label operator()(const T& obj) const
+    label operator()(const T& obj) const
     {
         return obj.size();
     }
@@ -685,6 +709,7 @@ struct sizeOp
 
 #ifdef NoRepository
     #include "UList.C"
+    #include "UListIO.C"
     #include "stdVectorIO.C"
 #endif
 

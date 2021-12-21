@@ -110,7 +110,7 @@ void generalTests()
     string me("Mark");
 
     // Expect some failures:
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
 
     try
     {
@@ -214,7 +214,7 @@ void generalTests()
         Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 
@@ -224,7 +224,7 @@ void testExpressions(const UList<regexTest>& tests)
     typename RegexType::results_type match;
 
     // Expect some failures:
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
 
     // Report matches:
     for (const auto& testseq : tests)
@@ -252,11 +252,15 @@ void testExpressions(const UList<regexTest>& tests)
             }
             else if (re.search(str))
             {
-                Info<< "partial match";
+                Info<< "partial";
             }
             else
             {
                 Info<< "false";
+            }
+            if (re.negated())
+            {
+                Info<< " (negated)";
             }
             Info<< endl;
         }
@@ -282,7 +286,7 @@ void testExpressions(const UList<regexTest>& tests)
         }
     }
 
-    FatalError.throwExceptions(throwingError);
+    FatalError.throwing(oldThrowingError);
 }
 
 
@@ -328,6 +332,15 @@ int main(int argc, char *argv[])
         Info<< "Foam::regExp uses POSIX regex" << nl;
     }
     #endif
+
+    Info<< "sizeof std::regex:  " << sizeof(std::regex) << nl;
+    Info<< "sizeof regex C++11: " << sizeof(regExpCxx) << nl;
+    #ifndef _WIN32
+    Info<< "sizeof regex POSIX: " << sizeof(regExpPosix) << nl;
+    #endif
+    Info<< "sizeof word: " << sizeof(Foam::word) << nl;
+    Info<< "sizeof wordRe: " << sizeof(Foam::wordRe) << nl;
+    Info<< "sizeof keyType: " << sizeof(Foam::keyType) << nl;
 
     if (!args.count({"cxx", "posix"}))
     {

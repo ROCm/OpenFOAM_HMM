@@ -119,7 +119,7 @@ namespace fv
 
 class fixedTemperatureConstraint
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 public:
 

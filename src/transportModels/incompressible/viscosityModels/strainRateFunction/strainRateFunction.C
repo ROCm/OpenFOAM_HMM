@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,12 @@ Foam::viscosityModels::strainRateFunction::strainRateFunction
     ),
     strainRateFunction_
     (
-        Function1<scalar>::New("function", strainRateFunctionCoeffs_)
+        Function1<scalar>::New
+        (
+            "function",
+            strainRateFunctionCoeffs_,
+            &U_.db()
+        )
     ),
     nu_
     (
@@ -134,7 +139,8 @@ bool Foam::viscosityModels::strainRateFunction::read
     strainRateFunction_ = Function1<scalar>::New
     (
         "function",
-        strainRateFunctionCoeffs_
+        strainRateFunctionCoeffs_,
+        &U_.db()
     );
 
     return true;

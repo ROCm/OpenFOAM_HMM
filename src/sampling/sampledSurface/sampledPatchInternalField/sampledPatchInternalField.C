@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,12 +228,16 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatchInternalField::interpolate
 }
 
 
-void Foam::sampledPatchInternalField::print(Ostream& os) const
+void Foam::sampledPatchInternalField::print(Ostream& os, int level) const
 {
     os  << "sampledPatchInternalField: " << name() << " :"
-        << "  patches:" << patchNames()
-        << "  faces:" << faces().size()
-        << "  points:" << points().size();
+        << " patches:" << patchNames();
+
+    if (level)
+    {
+        os  << "  faces:" << faces().size()
+            << "  points:" << points().size();
+    }
 }
 
 

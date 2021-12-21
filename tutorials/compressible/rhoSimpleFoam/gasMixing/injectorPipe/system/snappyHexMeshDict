@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -262,10 +262,6 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        "blade."
-        {
-            nSurfaceLayers 2;
-        }
     }
 
     // Expansion factor for layer mesh

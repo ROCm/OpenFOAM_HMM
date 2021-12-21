@@ -11,14 +11,16 @@ License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Decompose area fields, when mesh was generated in parallel
+    Write proc addressing and decompose area fields (parallel only).
 
 \*---------------------------------------------------------------------------*/
 
-if (Pstream::parRun())
+if (doDecompose && Pstream::parRun())
 {
-    faMeshReconstructor reconstructor(areaMesh);
+    faMeshReconstructor reconstructor(aMesh);
     reconstructor.writeAddressing();
+
+    Info<< "Wrote proc-addressing" << nl << endl;
 
     // Handle area fields
     // ------------------
@@ -41,24 +43,42 @@ if (Pstream::parRun())
 
         reconstructor.writeMesh();
 
-        const bool oldDistributed = fileHandler().distributed();
-        auto oldHandler = fileHandler(fileOperation::NewUncollated());
-        fileHandler().distributed(true);
-
-        IOobjectList objects(fullMesh.time(), runTime.timeName());
-
-        faFieldDecomposer::readFields(fullMesh, objects, areaScalarFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaVectorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaSphTensorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaSymmTensorFields);
-        faFieldDecomposer::readFields(fullMesh, objects, areaTensorFields);
-
-        // Restore old settings
-        if (oldHandler)
+        if (doDecompFields)
         {
-            fileHandler(std::move(oldHandler));
+            const bool oldDistributed = fileHandler().distributed();
+            auto oldHandler = fileHandler(fileOperation::NewUncollated());
+            fileHandler().distributed(true);
+
+            IOobjectList objects(fullMesh.time(), runTime.timeName());
+
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaScalarFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaVectorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaSphTensorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaSymmTensorFields
+            );
+            faFieldDecomposer::readFields
+            (
+                fullMesh, objects, areaTensorFields
+            );
+
+            // Restore old settings
+            if (oldHandler)
+            {
+                fileHandler(std::move(oldHandler));
+            }
+            fileHandler().distributed(oldDistributed);
         }
-        fileHandler().distributed(oldDistributed);
     }
 
     const label nAreaFields =
@@ -72,23 +92,55 @@ if (Pstream::parRun())
 
     if (nAreaFields)
     {
-        Info<< "Decomposing " << nAreaFields << " area fields" << nl << endl;
+        Info<< "Decomposing " << nAreaFields << " area fields" << nl;
 
         faFieldDecomposer fieldDecomposer
         (
             fullMesh,
-            areaMesh,
+            aMesh,
             reconstructor.edgeProcAddressing(),
             reconstructor.faceProcAddressing(),
             reconstructor.boundaryProcAddressing()
         );
 
-        fieldDecomposer.decomposeFields(areaScalarFields);
-        fieldDecomposer.decomposeFields(areaVectorFields);
-        fieldDecomposer.decomposeFields(areaSphTensorFields);
-        fieldDecomposer.decomposeFields(areaSymmTensorFields);
-        fieldDecomposer.decomposeFields(areaTensorFields);
+        if (areaScalarFields.size())
+        {
+            Info<< "  scalars: "
+                << flatOutput(PtrListOps::names(areaScalarFields)) << nl;
+            fieldDecomposer.decomposeFields(areaScalarFields);
+        }
+
+        if (areaVectorFields.size())
+        {
+            Info<< "  vectors: "
+                << flatOutput(PtrListOps::names(areaVectorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaVectorFields);
+        }
+
+        if (areaSphTensorFields.size())
+        {
+            Info<< "  sphTensors: "
+                << flatOutput(PtrListOps::names(areaSphTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaSphTensorFields);
+        }
+
+        if (areaSymmTensorFields.size())
+        {
+            Info<< "  symmTensors: "
+                << flatOutput(PtrListOps::names(areaSymmTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaSymmTensorFields);
+        }
+
+        if (areaTensorFields.size())
+        {
+            Info<< "  tensors: "
+                << flatOutput(PtrListOps::names(areaTensorFields)) << nl;
+            fieldDecomposer.decomposeFields(areaTensorFields);
+        }
+
+        Info<< endl;
     }
 }
+
 
 // ************************************************************************* //

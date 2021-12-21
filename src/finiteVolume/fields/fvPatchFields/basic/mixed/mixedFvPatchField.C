@@ -39,7 +39,8 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     fvPatchField<Type>(p, iF),
     refValue_(p.size()),
     refGrad_(p.size()),
-    valueFraction_(p.size())
+    valueFraction_(p.size()),
+    source_(p.size(), Zero)
 {}
 
 
@@ -54,7 +55,8 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     fvPatchField<Type>(p, iF, dict, false),
     refValue_("refValue", dict, p.size()),
     refGrad_("refGradient", dict, p.size()),
-    valueFraction_("valueFraction", dict, p.size())
+    valueFraction_("valueFraction", dict, p.size()),
+    source_(p.size(), Zero)
 {
     // Could also check/clip fraction to 0-1 range
     evaluate();
@@ -73,7 +75,8 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     fvPatchField<Type>(ptf, p, iF, mapper),
     refValue_(ptf.refValue_, mapper),
     refGrad_(ptf.refGrad_, mapper),
-    valueFraction_(ptf.valueFraction_, mapper)
+    valueFraction_(ptf.valueFraction_, mapper),
+    source_(ptf.source_, mapper)
 {
     if (notNull(iF) && mapper.hasUnmapped())
     {
@@ -96,7 +99,8 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     fvPatchField<Type>(ptf),
     refValue_(ptf.refValue_),
     refGrad_(ptf.refGrad_),
-    valueFraction_(ptf.valueFraction_)
+    valueFraction_(ptf.valueFraction_),
+    source_(ptf.source_)
 {}
 
 
@@ -110,7 +114,8 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
     fvPatchField<Type>(ptf, iF),
     refValue_(ptf.refValue_),
     refGrad_(ptf.refGrad_),
-    valueFraction_(ptf.valueFraction_)
+    valueFraction_(ptf.valueFraction_),
+    source_(ptf.source_)
 {}
 
 
@@ -126,6 +131,7 @@ void Foam::mixedFvPatchField<Type>::autoMap
     refValue_.autoMap(m);
     refGrad_.autoMap(m);
     valueFraction_.autoMap(m);
+    source_.autoMap(m);
 }
 
 
@@ -144,12 +150,14 @@ void Foam::mixedFvPatchField<Type>::rmap
     refValue_.rmap(mptf.refValue_, addr);
     refGrad_.rmap(mptf.refGrad_, addr);
     valueFraction_.rmap(mptf.valueFraction_, addr);
+    source_.rmap(mptf.source_, addr);
 }
 
 
 template<class Type>
 void Foam::mixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
+
     if (!this->updated())
     {
         this->updateCoeffs();
@@ -158,9 +166,8 @@ void Foam::mixedFvPatchField<Type>::evaluate(const Pstream::commsTypes)
     Field<Type>::operator=
     (
         valueFraction_*refValue_
-      +
-        (1.0 - valueFraction_)*
-        (
+      + (1.0 - valueFraction_)
+       *(
             this->patchInternalField()
           + refGrad_/this->patch().deltaCoeffs()
         )
@@ -190,7 +197,6 @@ Foam::mixedFvPatchField<Type>::valueInternalCoeffs
 ) const
 {
     return Type(pTraits<Type>::one)*(1.0 - valueFraction_);
-
 }
 
 
@@ -202,8 +208,8 @@ Foam::mixedFvPatchField<Type>::valueBoundaryCoeffs
 ) const
 {
     return
-         valueFraction_*refValue_
-       + (1.0 - valueFraction_)*refGrad_/this->patch().deltaCoeffs();
+        valueFraction_*refValue_
+      + (1.0 - valueFraction_)*refGrad_/this->patch().deltaCoeffs();
 }
 
 
@@ -232,6 +238,7 @@ void Foam::mixedFvPatchField<Type>::write(Ostream& os) const
     refValue_.writeEntry("refValue", os);
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
+    source_.writeEntry("source", os);
     this->writeEntry("value", os);
 }
 

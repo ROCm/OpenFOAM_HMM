@@ -153,7 +153,7 @@ namespace fv
 
 class solidificationMeltingSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 public:
 

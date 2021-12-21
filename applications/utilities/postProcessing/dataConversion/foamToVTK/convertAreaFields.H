@@ -46,7 +46,7 @@ if (doFiniteArea)
 
     if (nAreaFields)
     {
-        const bool throwing = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
         try
         {
             faMeshPtr.reset(new faMesh(meshProxy.baseMesh()));
@@ -55,7 +55,7 @@ if (doFiniteArea)
         {
             faMeshPtr.clear();
         }
-        FatalError.throwExceptions(throwing);
+        FatalError.throwing(oldThrowingError);
     }
 
     if (faMeshPtr && nAreaFields)

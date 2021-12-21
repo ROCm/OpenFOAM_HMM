@@ -63,7 +63,8 @@ Foam::heatTransferCoeffModel::q() const
         const auto& turb =
             mesh_.lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
 
-        const volScalarField& he = turb.transport().he();
+        // Note: calling he(p,T) instead of he()
+        const volScalarField he(turb.transport().he(turb.transport().p(), T));
         const volScalarField::Boundary& hebf = he.boundaryField();
 
         const volScalarField alphaEff(turb.alphaEff());
@@ -79,7 +80,8 @@ Foam::heatTransferCoeffModel::q() const
         const auto& thermo =
             mesh_.lookupObject<fluidThermo>(fluidThermo::dictName);
 
-        const volScalarField& he = thermo.he();
+        // Note: calling he(p,T) instead of he()
+        const volScalarField he(thermo.he(thermo.p(), T));
         const volScalarField::Boundary& hebf = he.boundaryField();
 
         const volScalarField& alpha(thermo.alpha());
@@ -93,7 +95,8 @@ Foam::heatTransferCoeffModel::q() const
     else
     {
         FatalErrorInFunction
-            << "Unable to find a valid thermo model to evaluate q" << nl
+            << "Unable to find a valid thermo model to evaluate q. " << nl
+            << "Database contents are: " << mesh_.objectRegistry::sortedToc()
             << exit(FatalError);
     }
 

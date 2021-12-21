@@ -6,11 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
-#   Copyright (C) 2019 OpenCFD Ltd.
+#   Copyright (C) 2019-2021 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wrap-bison
@@ -53,15 +52,14 @@
 # Note
 #     General idea lifted from swak
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
     cat<<USAGE
 
 Usage: ${0##*/} [options] [bison args/options]
 
 options:
   -dry-run          Process m4 only (output on stdout)
+  -grammar          Output grammar tables (ignored)
   -no-tmp           Do not retain temporary m4 processed files
   -output=NAME      Request renaming actions
   -h, -help         Print the usage
@@ -69,7 +67,7 @@ options:
 A bison wrapper with renaming of skeleton files
 
 USAGE
-    exit 1
+    exit 0  # A clean exit
 }
 
 # File extensions used (may need adjustment)
@@ -81,13 +79,14 @@ extHead="hh"
 #------------------------------------------------------------------------------
 
 # wrap-bison -output=...
-unset outputFile optDryRun optRemoveTmp m4Flags
+unset outputFile optDryRun optGrammar optRemoveTmp m4Flags
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     (-h | -help*) usage ;;
 
     (-dry-run)      optDryRun=true ;;
+    (-gram*)        optGrammar=true ;;  # currently ignored
     (-no-tmp)       optRemoveTmp=true ;;
     (-output=*)     outputFile="${1#*=}" ;;
 

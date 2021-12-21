@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,9 +103,9 @@ void Foam::MeshedSurfaceProxy<Face>::write
 
     DebugInFunction << "Writing to " << name << nl;
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(fileType);
+    auto* mfuncPtr = writefileExtensionMemberFunctionTable(fileType);
 
-    if (!mfIter.found())
+    if (!mfuncPtr)
     {
         FatalErrorInFunction
             << "Unknown file type " << fileType << nl << nl
@@ -114,7 +114,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
             << exit(FatalError);
     }
 
-    mfIter()(name, surf, streamOpt, options);
+    mfuncPtr(name, surf, streamOpt, options);
 }
 
 

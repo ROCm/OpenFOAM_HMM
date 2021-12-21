@@ -9,20 +9,7 @@
 #     Copyright (C) 2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wmakeCollect
@@ -95,7 +82,7 @@ done
 
 if [ -z "$WM_COLLECT_DIR" ]
 then
-    echo "$Script error: WM_COLLECT_DIR not set"
+    echo "$Script error: WM_COLLECT_DIR not set" 1>&2
     exit 1
 fi
 
@@ -143,7 +130,7 @@ then
     echo -e "\t$E cd $PWD && \\" >> $file
     echo -e "\t${@:1:($#-1)} $objectFile" >> $file
     echo >> $file
-elif [ -d $WM_COLLECT_DIR ]
+elif [ -d "$WM_COLLECT_DIR" ]
 then
     # Collect all the makefiles into a single makefiles for this build
     (cd $WM_COLLECT_DIR && ls -1rt | xargs cat > $makefile)

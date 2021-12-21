@@ -64,6 +64,15 @@ Foam::functionObjects::fieldAverageItem::meanFieldName() const
 }
 
 
+void Foam::functionObjects::fieldAverageItem::setMeanFieldName
+(
+    const word& name
+)
+{
+    meanFieldName_ = name;
+}
+
+
 bool Foam::functionObjects::fieldAverageItem::prime2Mean() const
 {
     return prime2Mean_;
@@ -76,9 +85,19 @@ bool& Foam::functionObjects::fieldAverageItem::prime2Mean()
 }
 
 
-const Foam::word& Foam::functionObjects::fieldAverageItem::prime2MeanFieldName() const
+const Foam::word&
+Foam::functionObjects::fieldAverageItem::prime2MeanFieldName() const
 {
     return prime2MeanFieldName_;
+}
+
+
+void Foam::functionObjects::fieldAverageItem::setPrime2MeanFieldName
+(
+    const word& name
+)
+{
+    prime2MeanFieldName_ = name;
 }
 
 

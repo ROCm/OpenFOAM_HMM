@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ void testExtraction(const std::string& str)
 int main()
 {
     Info<< "\nVersion information (function)" << nl;
-    foamVersion::printBuildInfo(Info().stdStream());
+    foamVersion::printBuildInfo(Info.stdStream());
 
     Info
         << "\nVersion information (macros)" << nl

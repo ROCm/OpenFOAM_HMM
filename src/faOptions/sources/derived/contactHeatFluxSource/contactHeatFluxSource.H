@@ -164,6 +164,28 @@ public:
 
     // Member Functions
 
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper& mapper
+            )
+            {
+                temperatureCoupledBase::autoMap(mapper);
+            }
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<scalar>& fld,
+                const labelList& map
+            )
+            {
+                temperatureCoupledBase::rmap(fld, map);
+            }
+
+
         // Evaluation
 
             //- Add explicit contribution to compressible momentum equation

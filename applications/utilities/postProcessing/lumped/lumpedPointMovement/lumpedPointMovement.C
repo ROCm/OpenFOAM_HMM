@@ -119,9 +119,8 @@ int main(int argc, char *argv[])
         "len",
         "Visualization length for planes (visualized as triangles)"
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Test movement without a mesh"
     );
     argList::addBoolOption
@@ -142,7 +141,7 @@ int main(int argc, char *argv[])
     const label span   = Foam::max(1, args.getOrDefault<label>("span", 1));
 
     // Control parameters
-    const bool dryrun = args.found("dry-run");
+    const bool dryrun = args.dryRun();
     const bool slave = args.found("slave");
     const bool removeLock = args.found("removeLock");
 

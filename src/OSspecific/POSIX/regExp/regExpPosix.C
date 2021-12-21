@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,16 +49,98 @@ static inline bool fullMatch(const regmatch_t& m, const regoff_t len)
 } // End anonymous namespace
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::regExpPosix::set_pattern
+(
+    const char* pattern,
+    size_t len,
+    bool ignoreCase
+)
+{
+    clear();  // Also sets ctrl_ = 0
+
+    const char* pat = pattern;
+    bool doNegate = false;
+
+    // Handle known embedded prefixes
+    if (len > 2 && pat[0] == '(' && pat[1] == '?')
+    {
+        pat += 2;
+        len -= 2;
+
+        for (bool done = false; !done && len; ++pat, --len)
+        {
+            switch (*pat)
+            {
+                case '!':
+                {
+                    // Negated (inverted) match
+                    doNegate = true;
+                    break;
+                }
+                case 'i':
+                {
+                    // Ignore-case
+                    ignoreCase = true;
+                    break;
+                }
+                case ')':
+                {
+                    // End of prefix parsing
+                    done = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Avoid zero-length patterns
+    if (len)
+    {
+        int flags = REG_EXTENDED;
+        if (ignoreCase)
+        {
+            flags |= REG_ICASE;
+        }
+
+        {
+            preg_ = new regex_t;
+            int err = regcomp(preg_, pat, flags);
+
+            if (err == 0)
+            {
+                ctrl_ = (doNegate ? ctrlType::NEGATED : ctrlType::NORMAL);
+                return true;
+            }
+            else
+            {
+                char errbuf[200];
+                regerror(err, preg_, errbuf, sizeof(errbuf));
+
+                FatalErrorInFunction
+                    << "Failed to compile regular expression '"
+                    << pattern << "'\n" << errbuf
+                    << exit(FatalError);
+            }
+        }
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::regExpPosix::clear()
 {
+    ctrl_ = 0;
+
     if (preg_)
     {
         regfree(preg_);
         delete preg_;
         preg_ = nullptr;
-
         return true;
     }
 
@@ -66,71 +148,40 @@ bool Foam::regExpPosix::clear()
 }
 
 
-bool Foam::regExpPosix::set(const char* pattern, bool ignoreCase)
-{
-    clear();
-
-    // Avoid nullptr and zero-length patterns
-    if (pattern && *pattern)
-    {
-        int cflags = REG_EXTENDED;
-        if (ignoreCase)
-        {
-            cflags |= REG_ICASE;
-        }
-
-        const char* pat = pattern;
-
-        // Check for embedded prefix for ignore-case
-        // this is the only embedded prefix we support
-        // - a simple check is sufficient
-        if (!strncmp(pattern, "(?i)", 4))
-        {
-            cflags |= REG_ICASE;
-            pat += 4;
-
-            // avoid zero-length patterns
-            if (!*pat)
-            {
-                return false;
-            }
-        }
-
-        preg_ = new regex_t;
-        int err = regcomp(preg_, pat, cflags);
-
-        if (err != 0)
-        {
-            char errbuf[200];
-            regerror(err, preg_, errbuf, sizeof(errbuf));
-
-            FatalErrorInFunction
-                << "Failed to compile regular expression '" << pattern << "'"
-                << nl << errbuf
-                << exit(FatalError);
-        }
-
-        return true;
-    }
-
-    return false;  // Was cleared and nothing was set
-}
-
-
-bool Foam::regExpPosix::set(const std::string& pattern, bool ignoreCase)
-{
-    return set(pattern.c_str(), ignoreCase);
-}
-
-
 std::string::size_type Foam::regExpPosix::find(const std::string& text) const
 {
-    if (preg_ && !text.empty())
+    // Find with negated is probably not very reliable...
+    if (!preg_ || !ctrl_)
+    {
+        // Undefined: never matches
+        return std::string::npos;
+    }
+    else if (text.empty())
+    {
+        if (ctrl_ == ctrlType::NEGATED)
+        {
+            return 0;  // No match - pretend it starts at position 0
+        }
+        else
+        {
+            return std::string::npos;
+        }
+    }
+    else
     {
         const size_t nmatch = 1;
         regmatch_t pmatch[1];
 
-        if (regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0)
+        const bool ok = (regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0);
+
+        if (ctrl_ == ctrlType::NEGATED)
+        {
+            if (!ok)
+            {
+                return 0;  // No match - claim that is starts at position 0
+            }
+        }
+        else if (ok)
         {
             return pmatch[0].rm_so;
         }
@@ -142,23 +193,31 @@ std::string::size_type Foam::regExpPosix::find(const std::string& text) const
 
 bool Foam::regExpPosix::match(const std::string& text) const
 {
-    const auto len = text.size();
+    bool ok = false;
 
-    if (preg_ && len)
+    if (!preg_ || !ctrl_)
+    {
+        // Undefined: never matches
+        return false;
+    }
+
+    const auto len = text.length();
+
+    if (len)
     {
         const size_t nmatch = 1;
         regmatch_t pmatch[1];
 
         // Verify that the entire string was matched
         // - [0] is the entire match result
-        return
+        ok =
         (
             regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
          && fullMatch(pmatch[0], len)
         );
     }
 
-    return false;
+    return (ctrl_ == ctrlType::NEGATED ? !ok : ok);
 }
 
 
@@ -169,6 +228,12 @@ bool Foam::regExpPosix::match
 ) const
 {
     matches.clear();
+
+    // Probably does not make sense for negated pattern...
+    if (negated())
+    {
+        return match(text);
+    }
 
     const auto len = text.size();
     if (preg_ && len)

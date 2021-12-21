@@ -29,9 +29,12 @@ License
 #include "char.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<char>::typeName = "char";
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pTraits<char>::pTraits(const char p) noexcept
 :
@@ -44,6 +47,8 @@ Foam::pTraits<char>::pTraits(Istream& is)
     is >> p_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 char Foam::readChar(Istream& is)
 {

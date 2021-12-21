@@ -89,14 +89,25 @@ void Foam::vtk::fileWriter::writeUniform
 (
     const word& fieldName,
     const Type& val,
-    const label nValues
+    const label nLocalValues
 )
 {
-    this->beginDataArray<Type>(fieldName, nValues);
+    label nTotal = nLocalValues;
 
-    if (format_)
+    if (parallel_)
     {
-        vtk::write(format(), val, nValues);
+        reduce(nTotal, sumOp<label>());
+    }
+
+    this->beginDataArray<Type>(fieldName, nTotal);
+
+    if (parallel_)
+    {
+        vtk::writeValueParallel(format_.ref(), val, nLocalValues);
+    }
+    else
+    {
+        vtk::write(format(), val, nLocalValues);
     }
 
     this->endDataArray();

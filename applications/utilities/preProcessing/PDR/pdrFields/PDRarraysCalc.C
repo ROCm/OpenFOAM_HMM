@@ -203,7 +203,8 @@ static inline scalar averageSurrounding
 template<class Type>
 static inline Ostream& putUniform(Ostream& os, const word& key, const Type& val)
 {
-    os.writeKeyword(key) << word("uniform") << token::SPACE
+    os.writeKeyword(key)
+        << word("uniform") << token::SPACE
         << val << token::END_STATEMENT << nl;
     return os;
 }

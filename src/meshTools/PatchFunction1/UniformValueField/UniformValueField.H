@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,7 @@ class UniformValueField
         //- Source of uniform values (in local coordinate system)
         autoPtr<Foam::Function1<Type>> uniformValuePtr_;
 
+
 public:
 
     // Runtime type information
@@ -126,19 +127,23 @@ public:
 
     // Member Functions
 
+        //- Is value constant (i.e. independent of x)
+        virtual inline bool constant() const
+        {
+            return uniformValuePtr_ && uniformValuePtr_->constant();
+        }
+
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual inline bool uniform() const
+        {
+            return PatchFunction1<Type>::uniform();
+        }
+
+
         // Evaluation
 
             //- Return UniformValueField value
             virtual inline tmp<Field<Type>> value(const scalar x) const;
-
-            //- Is value constant (i.e. independent of x)
-            virtual inline bool constant() const;
-
-            //- Is value uniform (i.e. independent of coordinate)
-            virtual inline bool uniform() const
-            {
-                return PatchFunction1<Type>::uniform();
-            }
 
             //- Integrate between two values
             virtual inline tmp<Field<Type>> integrate
@@ -172,6 +177,17 @@ public:
 
 } // End namespace PatchFunction1Types
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Macros
+
+#undef  addUniformValueFieldFunction1s
+#define addUniformValueFieldFunction1s(F1Name, Type)                           \
+    PatchFunction1<Type>::adddictionaryConstructorToTable                      \
+    <PatchFunction1Types::UniformValueField<Type>>                             \
+        add##F1Name##UniformValueField##Type##ConstructorToTable_(#F1Name);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

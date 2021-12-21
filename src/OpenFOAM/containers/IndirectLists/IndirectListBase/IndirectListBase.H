@@ -147,7 +147,7 @@ public:
         }
 
         //- The addressing used for the list
-        inline const Addr& addressing() const
+        inline const Addr& addressing() const noexcept
         {
             return addr_;
         }

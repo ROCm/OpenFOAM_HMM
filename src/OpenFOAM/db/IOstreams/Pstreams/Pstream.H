@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 SourceFiles
     Pstream.C
-    gatherScatter.C
     combineGatherScatter.C
+    gatherScatter.C
     gatherScatterList.C
     exchange.C
 
@@ -92,10 +92,10 @@ class Pstream
 
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Transfer buffer
-        DynamicList<char> buf_;
+        //- Allocated transfer buffer (can be used for send or receive)
+        DynamicList<char> transferBuf_;
 
 
 public:
@@ -107,26 +107,25 @@ public:
     // Constructors
 
         //- Construct given optional buffer size
-        Pstream
+        explicit Pstream
         (
             const commsTypes commsType,
             const label bufSize = 0
         )
         :
-            UPstream(commsType),
-            buf_(0)
+            UPstream(commsType)
         {
             if (bufSize)
             {
-                buf_.setCapacity(bufSize + 2*sizeof(scalar) + 1);
+                transferBuf_.setCapacity(bufSize + 2*sizeof(scalar) + 1);
             }
         }
 
 
         // Gather and scatter
 
-            //- Gather data. Apply bop to combine Value
-            //  from different processors
+            //- Gather data.
+            //- Apply bop to combine Value from different processors
             template<class T, class BinaryOp>
             static void gather
             (
@@ -165,6 +164,7 @@ public:
                 const int tag = Pstream::msgType(),
                 const label comm = Pstream::worldComm
             );
+
 
         // Combine variants. Inplace combine values from processors.
         // (Uses construct from Istream instead of <<)
@@ -208,6 +208,7 @@ public:
                 const label comm = Pstream::worldComm
             );
 
+
         // Combine variants working on whole List at a time.
 
             template<class T, class CombineOp>
@@ -248,6 +249,7 @@ public:
                 const int tag = Pstream::msgType(),
                 const label comm = Pstream::worldComm
             );
+
 
         // Combine variants working on whole map at a time. Container needs to
         // have iterators and find() defined.

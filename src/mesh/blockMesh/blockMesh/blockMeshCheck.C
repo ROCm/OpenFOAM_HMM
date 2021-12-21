@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,10 +27,43 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blockMesh.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
+bool Foam::blockMesh::checkDegenerate() const
+{
+    const blockList& blocks = *this;
+
+    for (const block& blk : blocks)
+    {
+        const cellShape& shape = blk.blockShape();
+
+        if (shape.model().index() == cellModel::HEX)
+        {
+            // Check for collapsed edges
+            // - limit to HEX only for now.
+            for (label edgei = 0; edgei < shape.nEdges(); ++edgei)
+            {
+                edge e(shape.edge(edgei));
+
+                if (!e.valid())
+                {
+                    return true;  // Looks like a collapsed edge
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
+void Foam::blockMesh::check
+(
+    const polyMesh& bm,
+    const dictionary& dict
+) const
 {
     Info<< nl << "Check topology" << endl;
 
@@ -44,8 +78,8 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
             {
                 Info<< "    Curved edge ";
                 edges_[cej].write(Info, dict);
-                Info<< "    is a duplicate of curved edge " << edges_[cei]
-                    << endl;
+                Info<< "    is a duplicate of curved edge "
+                    << edges_[cei] << endl;
                 ok = false;
                 break;
             }
@@ -59,17 +93,15 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     // repeated point labels
     const blockList& blocks = *this;
 
-    forAll(edges_, cei)
+    for (const blockEdge& curvEdge : edges_)
     {
         bool found = false;
 
-        forAll(blocks, blocki)
+        for (const block& blk : blocks)
         {
-            edgeList edges = blocks[blocki].blockShape().edges();
-
-            forAll(edges, ei)
+            for (const edge& blkEdge : blk.blockShape().edges())
             {
-                found = edges_[cei].compare(edges[ei][0], edges[ei][1]) != 0;
+                found = curvEdge.compare(blkEdge) != 0;
                 if (found) break;
             }
             if (found) break;
@@ -78,7 +110,7 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
         if (!found)
         {
             Info<< "    Curved edge ";
-            edges_[cei].write(Info, dict);
+            curvEdge.write(Info, dict);
             Info<< "    does not correspond to a block edge." << endl;
             ok = false;
         }
@@ -105,41 +137,58 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     }
 
     // Check curved-face/block-face correspondence
-    forAll(faces_, cfi)
+    for (const blockFace& cface : faces_)
     {
+        const face& cf = cface.vertices();
+
         bool found = false;
 
-        forAll(faces, fi)
+        if (cf.size() == 2)
         {
-            found = faces_[cfi].compare(faces[fi]) != 0;
-            if (found) break;
+            const label bi = cf[0];
+            const label fi = cf[1];
+
+            found =
+            (
+                bi >= 0 && bi < blocks.size()
+             && fi >= 0 && fi < blocks[bi].blockShape().nFaces()
+            );
+        }
+
+        if (!found)
+        {
+            for (const face& bf : faces)
+            {
+                found = cface.compare(bf) != 0;
+                if (found) break;
+            }
         }
 
         if (!found)
         {
             Info<< "    Curved face ";
-            faces_[cfi].write(Info, dict);
+            cface.write(Info, dict);
             Info<< "    does not correspond to a block face." << endl;
             ok = false;
         }
     }
+
 
     const pointField& points = bm.points();
     const cellList& cells = bm.cells();
     const polyPatchList& patches = bm.boundaryMesh();
 
     label nBoundaryFaces = 0;
-    forAll(cells, celli)
+    for (const cell& c : cells)
     {
-        nBoundaryFaces += cells[celli].nFaces();
+        nBoundaryFaces += c.nFaces();
     }
-
     nBoundaryFaces -= 2*bm.nInternalFaces();
 
     label nDefinedBoundaryFaces = 0;
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        nDefinedBoundaryFaces += patches[patchi].size();
+        nDefinedBoundaryFaces += pp.size();
     }
 
 
@@ -166,22 +215,21 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     }
 
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const faceList& Patch = patches[patchi];
-
-        forAll(Patch, patchFacei)
+        forAll(pp, patchFacei)
         {
-            const face& patchFace = Patch[patchFacei];
+            const face& patchFace = pp[patchFacei];
+
             bool patchFaceOK = false;
 
-            forAll(cells, celli)
+            for (const labelList& cellFaces : cells)
             {
-                const labelList& cellFaces = cells[celli];
-
-                forAll(cellFaces, cellFacei)
+                for (const label cellFacei : cellFaces)
                 {
-                    if (patchFace == faces[cellFaces[cellFacei]])
+                    const face& cellFace = faces[cellFacei];
+
+                    if (patchFace == cellFace)
                     {
                         patchFaceOK = true;
 
@@ -189,14 +237,14 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
                         (
                             (
                                 patchFace.areaNormal(points)
-                              & faces[cellFaces[cellFacei]].areaNormal(points)
+                              & cellFace.areaNormal(points)
                             ) < 0
                         )
                         {
                             Info<< tab << tab
                                 << "Face " << patchFacei
-                                << " of patch " << patchi
-                                << " (" << patches[patchi].name() << ")"
+                                << " of patch " << pp.index()
+                                << " (" << pp.name() << ')'
                                 << " points inwards"
                                 << endl;
 
@@ -210,8 +258,8 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
             {
                 Info<< tab << tab
                     << "Face " << patchFacei
-                    << " of patch " << patchi
-                    << " (" << patches[patchi].name() << ")"
+                    << " of patch " << pp.index()
+                    << " (" << pp.name() << ')'
                     << " does not match any block faces" << endl;
 
                 ok = false;
@@ -222,6 +270,42 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
     if (verbose_)
     {
         Info<< endl;
+    }
+
+    // Report patch block/face correspondence
+    if (verbose_ > 1)
+    {
+        const labelList& own = bm.faceOwner();
+
+        Info.stream().setf(ios_base::left);
+
+        Info<< setw(20) << "patch" << "block/face" << nl
+            << setw(20) << "-----" << "----------" << nl;
+
+        for (const polyPatch& pp : patches)
+        {
+            Info<< setw(20) << pp.name();
+
+            label meshFacei = pp.start();
+
+            forAll(pp, bfacei)
+            {
+                const label celli = own[meshFacei];
+                const label cellFacei = cells[celli].find(meshFacei);
+
+                if (bfacei) Info<< token::SPACE;
+
+                Info<< token::BEGIN_LIST
+                    << celli << ' ' << cellFacei
+                    << token::END_LIST;
+
+                ++meshFacei;
+            }
+            Info<< nl;
+        }
+
+        Info<< setw(20) << "-----" << "----------" << nl
+            << nl;
     }
 
     if (!ok)

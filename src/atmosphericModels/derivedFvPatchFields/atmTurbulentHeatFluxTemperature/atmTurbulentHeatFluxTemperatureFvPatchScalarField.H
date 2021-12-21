@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,14 +67,14 @@ Usage
       alphaEff     | Name of turbulent thermal diff. field [kg/m/s] <!--
                                                      --> | word | yes   | -
       Cp0          | Specific heat capacity [m2/s2/K] <!--
-                                     --> | TimeFunction1<scalar>  | yes | -
+                                     --> | Function1<scalar>  | yes | -
       q            | Heat source value [W (power) or W/m2 (flux)] <!--
                                      --> | PatchFunction1<scalar> | yes | -
     \endtable
 
     The inherited entries are elaborated in:
      - \link fixedGradientFvPatchScalarField.H \endlink
-     - \link TimeFunction1.H \endlink
+     - \link Function1.H \endlink
      - \link PatchFunction1.H \endlink
 
     Options for the \c heatSource entry:
@@ -93,7 +93,7 @@ SourceFiles
 
 #include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 #include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -131,7 +131,7 @@ class atmTurbulentHeatFluxTemperatureFvPatchScalarField
         word alphaEffName_;
 
         //- Specific heat capacity [m2/s2/K]
-        TimeFunction1<scalar> Cp0_;
+        autoPtr<Function1<scalar>> Cp0_;
 
         //- Heat power [W] or flux [W/m2]
         //  Divided by density, rho, if used in kinematic form

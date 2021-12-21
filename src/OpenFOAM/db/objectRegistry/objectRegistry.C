@@ -71,32 +71,9 @@ static label eraseImpl(objectRegistry& obr, InputIter first, InputIter last)
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::objectRegistry::parentNotTime() const
+bool Foam::objectRegistry::parentNotTime() const noexcept
 {
-    return (&parent_ != dynamic_cast<const objectRegistry*>(&time_));
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
-(
-    const word& name,
-    const bool recursive
-) const
-{
-    const_iterator iter = cfind(name);
-
-    if (iter.found())
-    {
-        return iter.val();
-    }
-    else if (recursive && this->parentNotTime())
-    {
-        return parent_.cfindIOobject(name, recursive);
-    }
-
-    return nullptr;
+    return (&parent_ != static_cast<const objectRegistry*>(&time_));
 }
 
 
@@ -147,6 +124,12 @@ Foam::objectRegistry::~objectRegistry()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::objectRegistry::isTimeDb() const noexcept
+{
+    return (this == &static_cast<const objectRegistry&>(time_));
+}
+
 
 Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classes() const
 {
@@ -421,6 +404,27 @@ void Foam::objectRegistry::rename(const word& newName)
     {
         dbDir_.replace(i+1, string::npos, newName);
     }
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = cfind(name);
+
+    if (iter.found())
+    {
+        return iter.val();
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.cfindIOobject(name, recursive);
+    }
+
+    return nullptr;
 }
 
 

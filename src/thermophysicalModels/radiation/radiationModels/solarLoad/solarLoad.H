@@ -76,7 +76,7 @@ Usage
       Property     | Description                      | Type  | Reqd   | Deflt
       useReflectedRays | Flag to use reflected rays   | bool  | yes    | -
       spectralDistribution | Spectral distribution for the integrated <!--
-                   --> solar heat flux | TimeFunction1\<scalarField\> | yes | -
+                   --> solar heat flux | Function1\<scalarField\> | yes | -
       solidCoupled     | Flag to couple solids through mapped         <!--
                    --> boundary patch using qr        | bool  | no     | true
       wallCoupled      | Flag to couple wall patches using qr         <!--
@@ -88,7 +88,7 @@ Usage
     The inherited entries are elaborated in:
      - \link radiationModel.H \endlink
      - \link solarCalculator.H \endlink
-     - \link TimeFunction1.H \endlink
+     - \link Function1.H \endlink
 
 SourceFiles
     solarLoad.C
@@ -103,7 +103,7 @@ SourceFiles
 #include "faceShading.H"
 #include "faceReflecting.H"
 #include "solarCalculator.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -148,7 +148,7 @@ class solarLoad
         scalarList spectralDistribution_;
 
         //- Time-dependent spectral distributions
-        autoPtr<TimeFunction1<scalarField>> spectralDistributions_;
+        autoPtr<Function1<scalarField>> spectralDistributions_;
 
         //- Primary solar radiative heat flux per band [W/m2]
         PtrList<volScalarField> qprimaryRad_;

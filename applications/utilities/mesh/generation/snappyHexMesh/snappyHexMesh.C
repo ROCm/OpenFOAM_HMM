@@ -756,9 +756,8 @@ int main(int argc, char *argv[])
         "checkGeometry",
         "Check all surface geometry for quality"
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Check case set-up only using a single time step"
     );
     argList::addOption
@@ -789,7 +788,7 @@ int main(int argc, char *argv[])
     const bool overwrite = args.found("overwrite");
     const bool checkGeometry = args.found("checkGeometry");
     const bool surfaceSimplify = args.found("surfaceSimplify");
-    const bool dryRun = args.found("dry-run");
+    const bool dryRun = args.dryRun();
 
     if (dryRun)
     {

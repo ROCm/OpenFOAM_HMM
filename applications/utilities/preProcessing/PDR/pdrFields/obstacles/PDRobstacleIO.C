@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,18 +41,20 @@ bool Foam::PDRobstacle::read(Istream& is)
     const word obsType(is);
     const dictionary dict(is);
 
-    const auto mfIter = readdictReadMemberFunctionTablePtr_->cfind(obsType);
+    auto* mfuncPtr = readdictionaryMemberFunctionTable(obsType);
 
-    if (!mfIter.good())
+    if (!mfuncPtr)
     {
-        FatalIOErrorInFunction(is)
-            << "Unknown obstacle type: " << obsType << nl
-            << "Valid types:" << nl
-            << readdictReadMemberFunctionTablePtr_->sortedToc() << nl
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            is,
+            "obstacle",
+            obsType,
+            *readdictionaryMemberFunctionTablePtr_
+        ) << exit(FatalIOError);
     }
 
-    mfIter()(*this, dict);
+    mfuncPtr(*this, dict);
 
     return true;
 }

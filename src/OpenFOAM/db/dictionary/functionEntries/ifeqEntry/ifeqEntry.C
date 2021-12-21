@@ -391,8 +391,8 @@ bool Foam::functionEntries::ifeqEntry::execute
 
                 if (ifEntry::isTrue(e.stream()))
                 {
-                    // Info<< "Using #elif " << doIf << " at line " << lineNo
-                    //     << " in file " << is.name() << endl;
+                    // Info<< "Using #elif " << doIf << " - line " << lineNo
+                    //     << " in file " << is.relativeName() << endl;
                     break;
                 }
             }

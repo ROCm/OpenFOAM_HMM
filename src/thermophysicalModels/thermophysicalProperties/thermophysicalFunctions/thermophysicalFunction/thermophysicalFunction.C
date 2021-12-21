@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     const word functionType(is);
 
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(functionType);
+    auto* ctorPtr = IstreamConstructorTable(functionType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
         ) << abort(FatalError);
     }
 
-    return autoPtr<thermophysicalFunction>(cstrIter()(is));
+    return autoPtr<thermophysicalFunction>(ctorPtr(is));
 }
 
 
@@ -75,9 +75,9 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     const word functionType(dict.get<word>("functionType"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
+    auto* ctorPtr = dictionaryConstructorTable(functionType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -88,7 +88,7 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<thermophysicalFunction>(cstrIter()(dict));
+    return autoPtr<thermophysicalFunction>(ctorPtr(dict));
 }
 
 

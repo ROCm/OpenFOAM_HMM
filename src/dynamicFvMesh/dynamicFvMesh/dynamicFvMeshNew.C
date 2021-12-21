@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,8 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
                 << exit(FatalError);
         }
 
-        auto doInitCstrIter = doInitConstructorTablePtr_->cfind(modelType);
-
-        if (doInitCstrIter.found())
+        auto* doInitCtor = doInitConstructorTable(modelType);
+        if (doInitCtor)
         {
             DebugInfo
                 << "Constructing dynamicFvMesh with explicit initialisation"
@@ -82,7 +81,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 
             // Two-step constructor
             // 1. Construct mesh, do not initialise
-            autoPtr<dynamicFvMesh> meshPtr(doInitCstrIter()(io, false));
+            autoPtr<dynamicFvMesh> meshPtr(doInitCtor(io, false));
 
             // 2. Initialise parents and itself
             meshPtr().init(true);
@@ -90,9 +89,9 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
             return meshPtr;
         }
 
-        auto cstrIter = IOobjectConstructorTablePtr_->cfind(modelType);
+        auto* ctorPtr = IOobjectConstructorTable(modelType);
 
-        if (!cstrIter.found())
+        if (!ctorPtr)
         {
             FatalIOErrorInLookup
             (
@@ -103,7 +102,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
             ) << exit(FatalIOError);
         }
 
-        return autoPtr<dynamicFvMesh>(cstrIter()(io));
+        return autoPtr<dynamicFvMesh>(ctorPtr(io));
     }
 
     DebugInfo
@@ -125,7 +124,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New
     const Time& runTime
 )
 {
-    if (args.found("dry-run") || args.found("dry-run-write"))
+    if (args.dryRun() || args.found("dry-run-write"))
     {
         Info
             << "Operating in 'dry-run' mode: case will run for 1 time step.  "

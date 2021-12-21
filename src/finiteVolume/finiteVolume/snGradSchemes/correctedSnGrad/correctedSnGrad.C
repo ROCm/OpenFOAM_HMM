@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,13 +32,6 @@ License
 #include "linear.H"
 #include "fvcGrad.H"
 #include "gaussGrad.H"
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::fv::correctedSnGrad<Type>::~correctedSnGrad()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -96,7 +90,7 @@ Foam::fv::correctedSnGrad<Type>::correction
     GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tssf.ref();
     ssf.setOriented();
 
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
     {
         ssf.replace
         (

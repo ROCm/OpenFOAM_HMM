@@ -56,117 +56,6 @@ namespace functionEntries
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace
-{
-    // This is akin to a SafeIOWarning, which does not yet exist
-    inline void safeIOWarning
-    (
-        const Foam::IOstream& is,
-        const std::string& msg
-    )
-    {
-        std::cerr
-            << "--> FOAM Warning :\n"
-            << "    Reading \"" << is.name() << "\" at line "
-            << is.lineNumber() << '\n'
-            << "    " << msg << std::endl;
-    }
-
-} // End anonymous namespace
-
-
-namespace Foam
-{
-
-// Slurp a string until a closing '}' is found.
-// Track balanced bracket/brace pairs, with max stack depth of 60.
-static bool slurpUntilBalancedBrace(ISstream& is, std::string& str)
-{
-    constexpr const unsigned bufLen = 1024;
-    static char buf[bufLen];
-
-    is.fatalCheck(FUNCTION_NAME);
-
-    unsigned nChar = 0;
-    unsigned depth = 1; // Initial '{' already seen by caller
-    char c;
-
-    str.clear();
-    while (is.get(c))
-    {
-        buf[nChar++] = c;
-
-        if (c == token::BEGIN_BLOCK)
-        {
-            ++depth;
-        }
-        else if (c == token::END_BLOCK)
-        {
-            --depth;
-            if (!depth)
-            {
-                // Closing '}' character - do not include in output
-                --nChar;
-                str.append(buf, nChar);
-                return true;
-            }
-        }
-        else if (c == '/')
-        {
-            // Strip C/C++ comments from expressions
-            // Note: could also peek instead of get/putback
-
-            if (!is.get(c))
-            {
-                break;  // Premature end of stream
-            }
-            else if (c == '/')
-            {
-                --nChar;  // Remove initial '/' from buffer
-
-                // C++ comment: discard through newline
-                (void) is.getLine(nullptr, '\n');
-            }
-            else if (c == '*')
-            {
-                --nChar;  // Remove initial '/' from buffer
-
-                // C-style comment: discard through to "*/" ending
-                if (!is.seekCommentEnd_Cstyle())
-                {
-                    break;  // Premature end of stream
-                }
-            }
-            else
-            {
-                // Reanalyze the char
-                is.putback(c);
-            }
-        }
-
-        if (nChar == bufLen)
-        {
-            str.append(buf, nChar);  // Flush full buffer
-            nChar = 0;
-        }
-    }
-
-
-    // Abnormal exit of the loop
-
-    str.append(buf, nChar);  // Finalize pending content
-
-    safeIOWarning(is, "Premature end while reading expression - missing '}'?");
-
-    is.fatalCheck(FUNCTION_NAME);
-    return false;
-}
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::tokenList Foam::functionEntries::evalEntry::evaluate
@@ -252,7 +141,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     {
         InfoErr
             << "Empty #eval - line "
-            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+            << is.lineNumber() << " in file "
+            << parentDict.relativeName() << nl;
 
         return tokenList();
     }
@@ -268,7 +158,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     {
         InfoErr
             << "Failed #eval - line "
-            << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+            << is.lineNumber() << " in file "
+            << parentDict.relativeName() << nl;
 
         return tokenList();
     }
@@ -296,7 +187,8 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     #ifdef FULLDEBUG
     DetailInfo
         << "Using #eval - line "
-        << is.lineNumber() << " in file " <<  parentDict.name() << nl;
+        << is.lineNumber() << " in file "
+        << parentDict.relativeName() << nl;
     #endif
 
     token tok(is);
@@ -310,8 +202,11 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
         is >> tok;
     }
 
-    string str;  // The string to evaluate
-    if (tok.isString())
+
+    // The string to evaluate
+    string str;
+
+    if (tok.isStringType())  // Also accepts a single bare word
     {
         // - #eval "expr"
         // - #eval #{ expr #}
@@ -321,7 +216,15 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
     else if (tok.isPunctuation(token::BEGIN_BLOCK))
     {
         // - #eval { expr }
-        slurpUntilBalancedBrace(dynamic_cast<ISstream&>(is), str);
+        // strip comments
+        if (!continueReadUntilRightBrace(is, str, true))
+        {
+            reportReadWarning
+            (
+                is,
+                "Premature end while reading #eval - missing '}'?"
+            );
+        }
     }
     else
     {

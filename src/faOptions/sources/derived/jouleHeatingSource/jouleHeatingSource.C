@@ -52,7 +52,7 @@ Foam::fa::jouleHeatingSource::jouleHeatingSource
     const fvPatch& patch
 )
 :
-    faceSetOption(sourceName, modelType, dict, patch),
+    fa::faceSetOption(sourceName, modelType, dict, patch),
     TName_(dict.getOrDefault<word>("T", "T")),
     V_
     (
@@ -174,7 +174,7 @@ void Foam::fa::jouleHeatingSource::addSup
 
 bool Foam::fa::jouleHeatingSource::read(const dictionary& dict)
 {
-    if (option::read(dict))
+    if (fa::option::read(dict))
     {
         dict.readIfPresent("T", TName_);
 

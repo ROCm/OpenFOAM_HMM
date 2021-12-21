@@ -27,6 +27,7 @@ License
 
 #include "ensightSurfaceReader.H"
 #include "stringOps.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

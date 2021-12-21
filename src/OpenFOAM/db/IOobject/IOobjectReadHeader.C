@@ -84,7 +84,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
         {
             FatalIOErrorInFunction(is)
                 << " stream not open for reading essential object from file "
-                << is.name()
+                << is.relativeName()
                 << exit(FatalIOError);
         }
 
@@ -92,7 +92,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
         {
             SeriousIOErrorInFunction(is)
                 << " stream not open for reading from file "
-                << is.name() << endl;
+                << is.relativeName() << endl;
         }
 
         return false;
@@ -135,8 +135,8 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
             FatalIOErrorInFunction(is)
                 << " stream failure while reading header"
                 << " on line " << is.lineNumber()
-                << " of file " << is.name()
-                << " for essential object" << name()
+                << " of file " << is.relativeName()
+                << " for essential object:" << name()
                 << exit(FatalIOError);
         }
 
@@ -145,7 +145,7 @@ bool Foam::IOobject::readHeader(dictionary& headerDict, Istream& is)
             InfoInFunction
                 << "Stream failure while reading header"
                 << " on line " << is.lineNumber()
-                << " of file " << is.name() << endl;
+                << " of file " << is.relativeName() << endl;
         }
 
         objState_ = BAD;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +39,9 @@ Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
 {
     DebugInFunction << "Constructing fvPatch" << endl;
 
-    auto cstrIter = polyPatchConstructorTablePtr_->cfind(patch.type());
+    auto* ctorPtr = polyPatchConstructorTable(patch.type());
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -51,7 +51,7 @@ Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<fvPatch>(cstrIter()(patch, bm));
+    return autoPtr<fvPatch>(ctorPtr(patch, bm));
 }
 
 

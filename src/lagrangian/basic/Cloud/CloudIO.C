@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,7 @@ License
 #include "Time.H"
 #include "IOPosition.H"
 #include "IOdictionary.H"
+#include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -239,6 +240,80 @@ void Foam::Cloud<ParticleType>::checkFieldFieldIOobject
             << " field " << data.size()
             << " does not match the number of particles " << c.size()
             << abort(FatalError);
+    }
+}
+
+
+template<class ParticleType>
+template<class Type>
+bool Foam::Cloud<ParticleType>::readStoreFile
+(
+    const IOobject& io,
+    const IOobject& ioNew
+) const
+{
+    if (io.headerClassName() == IOField<Type>::typeName)
+    {
+        IOField<Type> fld(io);
+        auto* fldNewPtr = new IOField<Type>(ioNew, std::move(fld));
+        return fldNewPtr->store();
+    }
+
+    return false;
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::readFromFiles
+(
+    objectRegistry& obr,
+    const wordRes& selectFields
+) const
+{
+    IOobjectList cloudObjects
+    (
+        *this,
+        time().timeName(),
+        "",
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    forAllIters(cloudObjects, iter)
+    {
+        if (selectFields.size() && !selectFields.match(iter()->name()))
+        {
+            continue;
+        }
+
+        IOobject ioNew
+        (
+            iter()->name(),
+            time().timeName(),
+            obr,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        );
+
+        auto& object = *iter();
+
+        const bool stored
+        (
+            readStoreFile<label>(object, ioNew)
+         || readStoreFile<scalar>(object, ioNew)
+         || readStoreFile<vector>(object, ioNew)
+         || readStoreFile<sphericalTensor>(object, ioNew)
+         || readStoreFile<symmTensor>(object, ioNew)
+         || readStoreFile<tensor>(object, ioNew)
+        );
+
+        if (!stored)
+        {
+            DebugInfo
+                << "Unhandled field type " << iter()->headerClassName()
+                << endl;
+        }
     }
 }
 

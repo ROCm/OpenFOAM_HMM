@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2016-2020 OpenCFD Ltd.
+#     Copyright (C) 2016-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -78,11 +78,15 @@ Linux)
     esac
     ;;
 
-# Presume x86_64, with clang (not gcc) as system compiler
+# arm64 or x86_64 architectures
 Darwin)
     WM_ARCH=darwin64
-    [ "$WM_COMPILER" = Gcc ] && WM_COMPILER=Clang
-    echo "openfoam: darwin support is clang/llvm only" 1>&2
+    # Defult to clang (not gcc) as system compiler
+    if [ "$WM_COMPILER" = Gcc ]
+    then
+        WM_COMPILER=Clang
+        echo "openfoam (darwin): using clang instead of gcc" 1>&2
+    fi
     ;;
 
 # Presume x86_64, with mingw cross-compiled
@@ -143,14 +147,14 @@ export FOAM_USER_LIBBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib"
 
 
 # Prepend wmake to the path - not required for runtime-only environment
-foundDir="$WM_PROJECT_DIR/wmake"
+_foamFoundDir="$WM_PROJECT_DIR/wmake"
 if [ -d "$WM_DIR" ]
 then
-    foundDir="${WM_DIR}"
+    _foamFoundDir="${WM_DIR}"
 fi
-if [ -d "$foundDir" ]
+if [ -d "$_foamFoundDir" ]
 then
-    PATH="$foundDir:$PATH"
+    PATH="$_foamFoundDir:$PATH"
 else
     unset WM_DIR
 fi
@@ -178,13 +182,9 @@ _foamAddLib  "$FOAM_LIBBIN/dummy"
 if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
     export FOAM_EXT_LIBBIN="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib"
-    _foamAddLib "$FOAM_EXT_LIBBIN"
 else
     unset FOAM_EXT_LIBBIN
 fi
-
-# OpenFOAM libraries (user, group, standard)
-_foamAddLib  "$FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN"
 
 
 #------------------------------------------------------------------------------
@@ -264,7 +264,7 @@ GCC_NOT_FOUND
     if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
-        echo "    ${gccDir##*/}  (${gmpDir##*/}  $${mpfrDir##*/}  ${mpcDir##*/})"
+        echo "    ${gccDir##*/}  (${gmpDir##*/}  ${mpfrDir##*/}  ${mpcDir##*/})"
     fi
     ;;
 
@@ -312,7 +312,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir archOption
+unset archOption archDir siteDir _foamFoundDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

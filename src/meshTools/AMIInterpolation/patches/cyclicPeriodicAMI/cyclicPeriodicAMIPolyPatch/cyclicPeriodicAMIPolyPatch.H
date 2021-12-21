@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,12 +57,6 @@ class cyclicPeriodicAMIPolyPatch
 private:
 
     // Private data
-
-        //- Periodic patch name
-        mutable word periodicPatchName_;
-
-        //- Periodic patch ID
-        mutable label periodicPatchID_;
 
         //- Current number of transformations (+ve forward, -ve backward)
         mutable label nTransforms_;
@@ -208,9 +202,6 @@ public:
 
 
     // Member Functions
-
-        //- Periodic patch ID
-        virtual label periodicPatchID() const;
 
         //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;

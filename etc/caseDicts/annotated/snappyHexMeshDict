@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -28,6 +28,11 @@ addLayers       false;
 // Optional: avoid patch-face merging. Allows mesh to be used for
 //           refinement/unrefinement
 // mergePatchFaces    false; // default true
+
+// Optional: allow patch-face merging even if differing patches. This avoids
+// splitting boundary faces and might benefit layer coverage.
+// (Note: only applicable if mergePatchFaces true)
+// mergeAcrossPatches   true;   // default false
 
 // Optional: preserve all generated patches. Default is to remove
 //          zero-sized patches.
@@ -214,6 +219,13 @@ castellatedMeshControls
             //      boundary : create free-standing boundary faces (baffles
             //                 but without the shared points)
             //faceType baffle;
+
+            //- Optional automatic gap refinement. See section in
+            //  refinementRegions ('gapLevel', 'gapMode')
+
+            //- Optional removal of cells in thin gaps. Start removing cells
+            //  if at refinement level 10 we're detecting thin gaps.
+            //blockLevel 10;
         }
     }
 

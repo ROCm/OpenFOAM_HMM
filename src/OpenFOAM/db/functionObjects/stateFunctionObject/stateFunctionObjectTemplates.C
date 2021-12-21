@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,15 +87,7 @@ bool Foam::functionObjects::stateFunctionObject::getObjectProperty
     Type& value
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(objectName))
-    {
-        const dictionary& baseDict = stateDict.subDict(objectName);
-        return baseDict.readIfPresent(entryName, value);
-    }
-
-    return false;
+    return stateDict().getObjectProperty(objectName, entryName, value);
 }
 
 
@@ -107,15 +99,7 @@ void Foam::functionObjects::stateFunctionObject::setObjectProperty
     const Type& value
 )
 {
-    IOdictionary& stateDict = this->stateDict();
-
-    if (!stateDict.found(objectName))
-    {
-        stateDict.add(objectName, dictionary());
-    }
-
-    dictionary& baseDict = stateDict.subDict(objectName);
-    baseDict.add(entryName, value, true);
+    stateDict().setObjectProperty(objectName, entryName, value);
 }
 
 
@@ -138,32 +122,7 @@ void Foam::functionObjects::stateFunctionObject::setObjectResult
     const Type& value
 )
 {
-    IOdictionary& stateDict = this->stateDict();
-
-    if (!stateDict.found(resultsName_))
-    {
-        stateDict.add(resultsName_, dictionary());
-    }
-
-    dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-    if (!resultsDict.found(objectName))
-    {
-        resultsDict.add(name(), dictionary());
-    }
-
-    dictionary& objectDict = resultsDict.subDict(objectName);
-
-    const word& dictTypeName = pTraits<Type>::typeName;
-
-    if (!objectDict.found(dictTypeName))
-    {
-        objectDict.add(dictTypeName, dictionary());
-    }
-
-    dictionary& resultTypeDict = objectDict.subDict(dictTypeName);
-
-    resultTypeDict.add(entryName, value, true);
+    stateDict().setObjectResult(objectName, entryName, value);
 }
 
 
@@ -200,29 +159,7 @@ bool Foam::functionObjects::stateFunctionObject::getObjectResult
     Type& value
 ) const
 {
-    const IOdictionary& stateDict = this->stateDict();
-
-    if (stateDict.found(resultsName_))
-    {
-        const dictionary& resultsDict = stateDict.subDict(resultsName_);
-
-        if (resultsDict.found(objectName))
-        {
-            const dictionary& objectDict = resultsDict.subDict(objectName);
-
-            const word& dictTypeName = pTraits<Type>::typeName;
-
-            if (objectDict.found(dictTypeName))
-            {
-                const dictionary& resultTypeDict =
-                    objectDict.subDict(dictTypeName);
-
-                return resultTypeDict.readIfPresent<Type>(entryName, value);
-            }
-        }
-    }
-
-    return false;
+    return stateDict().getObjectResult(objectName, entryName, value);
 }
 
 

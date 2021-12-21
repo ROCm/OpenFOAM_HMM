@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,11 +75,8 @@ public:
 
     // Constructors
 
-        //- Default construct: zero-sized, no reserved size
-        inline foamVtkMeshMaps();
-
-        //- Construct with reserved size
-        inline explicit foamVtkMeshMaps(const label size);
+        //- Default construct: zero-sized, no reserved sizes
+        foamVtkMeshMaps() = default;
 
 
     // Member Functions
@@ -87,26 +84,26 @@ public:
     // Access
 
         //- Original cell ids for all cells (regular and decomposed).
-        //  A regular mesh comprising only primitive cell types, this will just
+        //  For regular mesh comprising only primitive cell types, this will
         //  be an identity list. However, for subsetted meshes and decomposed
         //  cells this becomes a useful means of mapping from the original mesh.
-        inline const labelList& cellMap() const;
+        inline const labelList& cellMap() const noexcept;
 
         //- Write access to original cell ids
-        inline DynamicList<label>& cellMap();
+        inline DynamicList<label>& cellMap() noexcept;
 
         //- Point labels for subsetted meshes
-        inline const labelList& pointMap() const;
+        inline const labelList& pointMap() const noexcept;
 
         //- Write access to point labels for subsetted meshes
-        inline DynamicList<label>& pointMap();
+        inline DynamicList<label>& pointMap() noexcept;
 
         //- Any additional (user) labels.
         //  Eg, cell-centre labels for additional points of decomposed cells
-        inline const labelList& additionalIds() const;
+        inline const labelList& additionalIds() const noexcept;
 
         //- Write access to additional (user) labels.
-        inline DynamicList<label>& additionalIds();
+        inline DynamicList<label>& additionalIds() noexcept;
 
 
     // Edit
@@ -115,7 +112,7 @@ public:
         inline void clear();
 
         //- Renumber cell ids (cellMap and additionalIds) to account for
-        //  subset meshes
+        //- subset meshes
         void renumberCells(const labelUList& mapping);
 
         //- Renumber point ids (pointMap) to account for subset meshes

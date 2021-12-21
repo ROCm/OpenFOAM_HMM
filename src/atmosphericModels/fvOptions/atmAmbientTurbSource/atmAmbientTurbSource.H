@@ -130,7 +130,7 @@ namespace fv
 
 class atmAmbientTurbSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

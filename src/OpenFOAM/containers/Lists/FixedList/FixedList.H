@@ -69,6 +69,9 @@ template<class T> class UList;
 template<class T, unsigned N>
 Istream& operator>>(Istream& is, FixedList<T, N>& list);
 
+template<class T, unsigned N>
+Ostream& operator<<(Ostream& os, const FixedList<T, N>& list);
+
 
 /*---------------------------------------------------------------------------*\
                            Class FixedList Declaration
@@ -152,7 +155,7 @@ public:
         //- Construct and initialize all entries to zero
         inline explicit FixedList(const Foam::zero);
 
-        //- Copy construct from C-array
+        //- Copy construct from C-array (deprecated)
         inline explicit FixedList(const T list[N]);
 
         //- Copy construct
@@ -162,25 +165,28 @@ public:
         //- list elements
         inline FixedList(FixedList<T, N>&& list);
 
-        //- Construct given begin/end iterators
-        //  Uses std::distance when verifying the size.
-        template<class InputIterator>
-        inline FixedList(InputIterator begIter, InputIterator endIter);
-
-        //- Construct from an initializer list
+        //- Construct from an initializer list. Runtime size check
         inline FixedList(std::initializer_list<T> list);
 
-        //- Construct from UList
+        //- Construct from UList. Runtime size check
         inline explicit FixedList(const UList<T>& list);
 
-        //- Copy construct from a subset of the input
+        //- Copy construct from a subset of the input. No size check
+        template<unsigned AnyNum>
+        inline FixedList
+        (
+            const FixedList<T, AnyNum>& list,
+            const FixedList<label, N>& indices
+        );
+
+        //- Copy construct from a subset of the input. No size check
         inline FixedList
         (
             const UList<T>& list,
             const FixedList<label, N>& indices
         );
 
-        //- Construct from SLList
+        //- Construct from SLList. Runtime size check
         inline explicit FixedList(const SLList<T>& list);
 
         //- Construct from Istream
@@ -194,15 +200,22 @@ public:
 
     // Access
 
-        //- Return a const pointer to the first data element.
-        //  Similar to the STL front() method and the string::data() method
-        //  This can be used (with caution) when interfacing with C code
+        //- Return pointer to the underlying array serving as data storage.
         inline const T* cdata() const noexcept;
 
-        //- Return a pointer to the first data element.
-        //  Similar to the STL front() method and the string::data() method
-        //  This can be used (with caution) when interfacing with C code
+        //- Return pointer to the underlying array serving as data storage.
         inline T* data() noexcept;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        inline const char* cdata_bytes() const noexcept;
+
+        //- Return pointer to the underlying array serving as data storage,
+        //  reinterpreted as byte data
+        //  \note Only meaningful for contiguous data
+        inline char* data_bytes() noexcept;
+
 
         //- The first element of the list, position [0]
         inline T& first() noexcept;
@@ -217,12 +230,12 @@ public:
         inline const T& last() const noexcept;
 
         //- Number of contiguous bytes for the list data,
-        //- no runtime check that the type is actually contiguous
+        //  \note Only meaningful for contiguous data
         inline static std::streamsize size_bytes() noexcept;
 
         //- Number of contiguous bytes for the list data,
-        //- with runtime check that the type is actually contiguous
-        std::streamsize byteSize() const;
+        //- runtime FatalError if type is not contiguous
+        static std::streamsize byteSize();
 
         //- Return the forward circular index, i.e. next index
         //- which returns to the first at the end of the list
@@ -284,6 +297,9 @@ public:
 
         //- Dummy function, to make FixedList consistent with List
         inline void resize(const label n);
+
+        //- Dummy function, to make FixedList consistent with List
+        inline void resize_nocopy(const label n);
 
         //- Dummy function, to make FixedList consistent with List
         void setSize(const label n) { this->resize(n); }
@@ -445,7 +461,7 @@ public:
 
     // IOstream Operators
 
-        //- Read from Istream, discarding contents of existing List
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T, N>
         (
             Istream& is,
@@ -520,6 +536,14 @@ inline void Swap(FixedList<T, N>& a, FixedList<T, N>& b)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
+//- Read List contents from Istream, list must have the proper size!
+template<class T, unsigned N>
+Istream& operator>>(Istream& is, FixedList<T, N>& list)
+{
+    return list.readList(is);
+}
+
+
 //- Write List to Ostream, as per FixedList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
 template<class T, unsigned N>
@@ -542,6 +566,7 @@ Ostream& operator<<(Ostream& os, const FixedList<T, N>& list)
 
 #ifdef NoRepository
     #include "FixedList.C"
+    #include "FixedListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

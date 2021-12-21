@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -39,6 +39,16 @@ boundaryField
 
         // For general testing purposes:
         type            exprFixedValue;
+
+        functions<scalar>
+        {
+            trigger
+            {
+                type     functionObjectTrigger;
+                triggers (2 4);
+                defaultValue true;
+            }
+        }
 
         variables
         (

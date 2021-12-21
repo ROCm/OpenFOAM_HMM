@@ -1,5 +1,6 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/finiteArea/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/conversion/lnInclude \
@@ -9,7 +10,9 @@ EXE_INC = \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
     -I$(LIB_SRC)/lagrangian/DSMC/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
-    -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude
+    -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
+    -I$(LIB_SRC)/regionFaModels/lnInclude \
+    -I$(LIB_SRC)/faOptions/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
@@ -21,4 +24,8 @@ LIB_LIBS = \
     -llagrangianIntermediate \
     -llagrangianTurbulence \
     -lregionModels \
-    -lsurfaceFilmModels
+    -lsurfaceFilmModels \
+    -lregionFaModels \
+    -lfiniteArea \
+    -lfaOptions
+

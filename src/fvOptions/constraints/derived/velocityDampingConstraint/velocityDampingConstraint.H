@@ -118,7 +118,7 @@ namespace fv
 
 class velocityDampingConstraint
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

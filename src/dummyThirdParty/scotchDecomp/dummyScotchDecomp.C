@@ -53,12 +53,6 @@ namespace Foam
     );
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::scotchDecomp::graphPath(const polyMesh& unused) const {}
-
-void Foam::scotchDecomp::check(const int retVal, const char* str) {}
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 

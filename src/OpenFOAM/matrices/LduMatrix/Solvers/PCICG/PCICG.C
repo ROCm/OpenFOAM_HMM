@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +87,7 @@ Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     // --- Calculate normalisation factor
     Type normFactor = this->normFactor(psi, wA, pA);
 
-    if (LduMatrix<Type, DType, LUType>::debug >= 2)
+    if ((this->log_ >= 2) || (LduMatrix<Type, DType, LUType>::debug >= 2))
     {
         Info<< "   Normalisation factor = " << normFactor << endl;
     }
@@ -99,7 +100,12 @@ Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     if
     (
         this->minIter_ > 0
-     || !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+     || !solverPerf.checkConvergence
+        (
+            this->tolerance_,
+            this->relTol_,
+            this->log_
+        )
     )
     {
         // --- Select and construct the preconditioner
@@ -184,7 +190,12 @@ Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
         (
             (
                 nIter++ < this->maxIter_
-            && !solverPerf.checkConvergence(this->tolerance_, this->relTol_)
+            && !solverPerf.checkConvergence
+                (
+                    this->tolerance_,
+                    this->relTol_,
+                    this->log_
+                )
             )
          || nIter < this->minIter_
         );

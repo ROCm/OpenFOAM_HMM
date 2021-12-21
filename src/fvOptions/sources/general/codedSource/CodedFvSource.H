@@ -43,13 +43,20 @@ Description
 
     codeAddSup
     (
-        fvMatrix<Type}>& eqn,
+        fvMatrix<Type>& eqn,
+        const label fieldi
+    )
+
+    codeAddSupRho
+    (
+        const volScalarField& rho,
+        fvMatrix<Type>& eqn,
         const label fieldi
     )
 
     codeConstrain
     (
-        fvMatrix<Type}>& eqn,
+        fvMatrix<Type>& eqn,
         const label fieldi
     )
     \endverbatim
@@ -141,6 +148,7 @@ protected:
 
         string codeCorrect_;
         string codeAddSup_;
+        string codeAddSupRho_;
         string codeConstrain_;
 
         //- Underlying code

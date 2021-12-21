@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +63,11 @@ template<class Type>
 bool Foam::SolverPerformance<Type>::checkConvergence
 (
     const Type& Tolerance,
-    const Type& RelTolerance
+    const Type& RelTolerance,
+    const int logLevel
 )
 {
-    if (debug >= 2)
+    if ((logLevel >= 2) || (debug >= 2))
     {
         Info<< solverName_
             << ":  Iteration " << nIterations_
@@ -73,22 +75,14 @@ bool Foam::SolverPerformance<Type>::checkConvergence
             << endl;
     }
 
-    if
+    converged_ =
     (
         finalResidual_ < Tolerance
      || (
-            RelTolerance
-          > small_*pTraits<Type>::one
+            RelTolerance > small_*pTraits<Type>::one
          && finalResidual_ < cmptMultiply(RelTolerance, initialResidual_)
         )
-    )
-    {
-        converged_ = true;
-    }
-    else
-    {
-        converged_ = false;
-    }
+    );
 
     return converged_;
 }
@@ -102,15 +96,14 @@ void Foam::SolverPerformance<Type>::print
 {
     for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
+        os  << solverName_ << ":  Solving for ";
         if (pTraits<Type>::nComponents == 1)
         {
-            os  << solverName_ << ":  Solving for " << fieldName_;
-
+            os  << fieldName_;
         }
         else
         {
-            os  << solverName_ << ":  Solving for "
-                << word(fieldName_ + pTraits<Type>::componentNames[cmpt]);
+            os  << word(fieldName_ + pTraits<Type>::componentNames[cmpt]);
         }
 
         if (singular_[cmpt])

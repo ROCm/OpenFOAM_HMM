@@ -1,3 +1,5 @@
+#include "createRDeltaT.H"
+
 Info<< "Reading thermophysical properties\n" << endl;
 
 autoPtr<rhoThermo> pThermo(rhoThermo::New(mesh));

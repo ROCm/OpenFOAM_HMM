@@ -57,7 +57,7 @@ temperatureDependentContactAngleForce::temperatureDependentContactAngleForce
 )
 :
     contactAngleForce(typeName, film, dict),
-    thetaPtr_(Function1<scalar>::New("theta", coeffDict_))
+    thetaPtr_(Function1<scalar>::New("theta", coeffDict_, &film.regionMesh()))
 {}
 
 

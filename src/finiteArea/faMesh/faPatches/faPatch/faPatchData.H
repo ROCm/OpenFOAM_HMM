@@ -98,6 +98,9 @@ public:
         //- Clear and populate with values from finiteArea patch
         void assign(const faPatch& fap);
 
+        //- Set values consistent with a processor coupling
+        bool assign_coupled(int ownProci, int neiProci);
+
         //- True if owner/neighbour processor ids are non-equal
         bool coupled() const noexcept
         {

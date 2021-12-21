@@ -71,6 +71,17 @@ template<class BasicTurbulenceModel>
 Foam::tmp<Foam::volSymmTensorField>
 Foam::linearViscousStress<BasicTurbulenceModel>::devRhoReff() const
 {
+    return devRhoReff(this->U_);
+}
+
+
+template<class BasicTurbulenceModel>
+Foam::tmp<Foam::volSymmTensorField>
+Foam::linearViscousStress<BasicTurbulenceModel>::devRhoReff
+(
+    const volVectorField& U
+) const
+{
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
@@ -84,7 +95,7 @@ Foam::linearViscousStress<BasicTurbulenceModel>::devRhoReff() const
                 IOobject::NO_WRITE
             ),
             (-(this->alpha_*this->rho_*this->nuEff()))
-           *dev(twoSymm(fvc::grad(this->U_)))
+           *dev(twoSymm(fvc::grad(U)))
         )
     );
 }

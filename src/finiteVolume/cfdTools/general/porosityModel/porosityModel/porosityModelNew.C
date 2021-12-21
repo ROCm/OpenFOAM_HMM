@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,9 +43,9 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
     Info<< "Porosity region " << name << ":" << nl
         << "    selecting model: " << modelType << endl;
 
-    auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = meshConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -58,7 +58,7 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
 
     return autoPtr<porosityModel>
     (
-        cstrIter()
+        ctorPtr
         (
             name,
             modelType,

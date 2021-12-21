@@ -67,6 +67,7 @@ SourceFiles
 
 #include "patchExprFwd.H"
 #include "fvExprDriver.H"
+#include "exprFieldAssociation.H"
 #include "Enum.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -110,16 +111,33 @@ protected:
 
     // Protected Member Functions
 
+        //- Cell selections (as logical)
+        tmp<boolField> field_cellSelection
+        (
+            const word& name,
+            enum topoSetSource::sourceType setType
+        ) const;
+
+        //- Face selections (as logical)
+        tmp<boolField> field_faceSelection
+        (
+            const word& name,
+            enum topoSetSource::sourceType setType
+        ) const;
+
+
+public:
+
+    ClassName("patchExpr::driver");
+
+    // Generated Methods
+
         // No copy copy construct
         parseDriver(const parseDriver&) = delete;
 
         // No copy assignment
         void operator=(const parseDriver&) = delete;
 
-
-public:
-
-    ClassName("patchExpr::driver");
 
     // Constructors
 
@@ -131,7 +149,12 @@ public:
         );
 
         //- Construct for specified patch with copy of driver context
-        parseDriver(const fvPatch& p, const parseDriver& driver);
+        parseDriver
+        (
+            const fvPatch& p,
+            const parseDriver& driver,
+            const dictionary& dict  // = dictionary::null
+        );
 
         //- Construct with patchName for the given mesh
         parseDriver(const word& patchName, const fvMesh& mesh);
@@ -141,14 +164,7 @@ public:
         parseDriver(const dictionary& dict, const fvMesh& mesh);
 
 
-        //- Clone
-        virtual autoPtr<expressions::fvExprDriver> clone() const
-        {
-            return autoPtr<expressions::fvExprDriver>
-            (
-                new parseDriver(this->patch_, *this)
-            );
-        }
+    // Not generally clonable
 
 
     //- Destructor
@@ -163,13 +179,13 @@ public:
             return patch_.boundaryMesh().mesh();
         }
 
-        //- The underlying field size for the expression
+        //- The natural field size for the expression
         virtual label size() const
         {
             return patch_.patch().size();
         }
 
-        //- The underlying point field size for the expression
+        //- The point field size for the expression
         virtual label pointSize() const
         {
             return patch_.patch().nPoints();
@@ -279,6 +295,20 @@ public:
 
         //- The patch point locations - (swak = pts)
         tmp<vectorField> field_pointField() const;
+
+
+        //- Cell selection (set)
+        inline tmp<boolField> field_cellSet(const word& name) const;
+
+        //- Cell selection (zone)
+        inline tmp<boolField> field_cellZone(const word& name) const;
+
+        //- Face selection (set)
+        inline tmp<boolField> field_faceSet(const word& name) const;
+
+        //- Face selection (zone)
+        inline tmp<boolField> field_faceZone(const word& name) const;
+
 
         //- A uniform random field
         tmp<scalarField> field_rand(label seed=0, bool gaussian=false) const;

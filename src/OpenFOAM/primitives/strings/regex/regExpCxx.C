@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,42 +106,66 @@ static std::string error_string(const std::regex_error& err)
 } // End anonymous namespace
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
+bool Foam::regExpCxx::set_pattern
+(
+    const char* pattern,
+    size_t len,
+    bool ignoreCase
+)
 {
-    clear();  // Also sets ok_ = false
-
-    size_t len = (pattern ? strlen(pattern) : 0);
-
-    // Avoid nullptr and zero-length patterns
-    if (!len)
-    {
-        return false;
-    }
-
-    std::regex::flag_type flags = syntax();
-    if (ignoreCase)
-    {
-        flags |= std::regex::icase;
-    }
+    clear();  // Also sets ctrl_ = 0
 
     const char* pat = pattern;
+    bool doNegate = false;
 
-    // Has embedded ignore-case prefix?
-    if (len >= 4 && !strncmp(pattern, "(?i)", 4))
+    // Handle known embedded prefixes
+    if (len > 2 && pat[0] == '(' && pat[1] == '?')
     {
-        flags |= std::regex::icase;
-        pat += 4;
-        len -= 4;
+        pat += 2;
+        len -= 2;
+
+        for (bool done = false; !done && len; ++pat, --len)
+        {
+            switch (*pat)
+            {
+                case '!':
+                {
+                    // Negated (inverted) match
+                    doNegate = true;
+                    break;
+                }
+                case 'i':
+                {
+                    // Ignore-case
+                    ignoreCase = true;
+                    break;
+                }
+                case ')':
+                {
+                    // End of prefix parsing
+                    done = true;
+                    break;
+                }
+            }
+        }
     }
 
+    // Avoid zero-length patterns
     if (len)
     {
+        std::regex::flag_type flags = syntax();
+        if (ignoreCase)
+        {
+            flags |= std::regex::icase;
+        }
+
         try
         {
-            re_.assign(pat, flags);
-            ok_ = true;
+            re_.assign(pat, len, flags);
+            ctrl_ = (doNegate ? ctrlType::NEGATED : ctrlType::NORMAL);
+            return true;
         }
         catch (const std::regex_error& err)
         {
@@ -153,56 +177,7 @@ bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
         }
     }
 
-    return ok_;
-}
-
-
-bool Foam::regExpCxx::set(const std::string& pattern, bool ignoreCase)
-{
-    clear();  // Also sets ok_ = false
-
-    auto len = pattern.size();
-
-    // Avoid zero-length patterns
-    if (!len)
-    {
-        return false;
-    }
-
-    std::regex::flag_type flags = syntax();
-    if (ignoreCase)
-    {
-        flags |= std::regex::icase;
-    }
-
-    auto pat = pattern.begin();
-
-    // Has embedded ignore-case prefix?
-    if (len >= 4 && !pattern.compare(0, 4, "(?i)"))
-    {
-        flags |= std::regex::icase;
-        pat += 4;
-        len -= 4;
-    }
-
-    if (len)
-    {
-        try
-        {
-            re_.assign(pat, pattern.end(), flags);
-            ok_ = true;
-        }
-        catch (const std::regex_error& err)
-        {
-            FatalErrorInFunction
-                << "Failed to compile regular expression '"
-                << pattern.c_str() << "'" << nl
-                << err.what() << ": " << error_string(err).c_str() << nl
-                << exit(FatalError);
-        }
-    }
-
-    return ok_;
+    return false;
 }
 
 

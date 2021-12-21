@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,18 +24,40 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wallBoilingModels:CHFModels:::HuaXu
+    Foam::wallBoilingModels::CHFModels::HuaXu
 
 Description
+    A critical heat flux (CHF) sub-cooling correlation model
+    based on Hua-Xu (2000) for boiling flows.
 
-    Critical heat flux for soob cool boiling flows.
-
-    References:
+    Reference:
     \verbatim
-        T.C. Hua, J.J. Xu, Quenching boiling in subcooled liquid nitrogen
-        for solidification of aqueous materials, Mater.
-        Sci. Eng. A 292 (2000) 169–172.
+        Hua, T. C., & Xu, J. J. (2000).
+        Quenching boiling in subcooled liquid nitrogen
+        for solidification of aqueous materials.
+        Materials Science and Engineering: A, 292(2), 169-172.
+        DOI:10.1016/S0921-5093(00)01004-2
     \endverbatim
+
+Usage
+    Example of the model specification:
+    \verbatim
+    CHFSubCoolModel
+    {
+        // Mandatory entries
+        type            HuaXu;
+
+        // Optional entries
+        Kburn           <scalar>;
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property  | Description                         | Type | Reqd | Deflt
+      type      | Type name: HuaXu                    | word | yes  | -
+      Kburn     | Burn out factor                   | scalar | no   | 1.5
+    \endtable
 
 SourceFiles
     HuaXu.C
@@ -64,16 +86,26 @@ class HuaXu
 :
     public CHFSubCoolModel
 {
-
-    // Private data:
+    // Private Data
 
         //- Burn out factor
         scalar Kburn_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        HuaXu(const HuaXu&) = delete;
+
+        //- No copy assignment
+        void operator=(const HuaXu&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("HuaXu");
+
 
     // Constructors
 
@@ -82,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~HuaXu();
+    virtual ~HuaXu() = default;
 
 
     // Member Functions
@@ -98,8 +130,10 @@ public:
             const scalarField& L
         ) const;
 
+        // I-O
 
-        virtual void write(Ostream& os) const;
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

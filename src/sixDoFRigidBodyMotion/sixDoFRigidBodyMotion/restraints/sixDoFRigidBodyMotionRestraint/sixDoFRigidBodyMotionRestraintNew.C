@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::sixDoFRigidBodyMotionRestraint::New
         dict.get<word>("sixDoFRigidBodyMotionRestraint")
     );
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -57,7 +57,7 @@ Foam::sixDoFRigidBodyMotionRestraint::New
 
     return autoPtr<sixDoFRigidBodyMotionRestraint>
     (
-        cstrIter()(name, dict)
+        ctorPtr(name, dict)
     );
 }
 

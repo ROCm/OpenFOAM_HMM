@@ -45,7 +45,6 @@ Description
 #include "pointSet.H"
 #include "topoSetSource.H"
 #include "Fstream.H"
-#include "demandDrivenData.H"
 #include "foamVtkWriteTopoSet.H"
 #include "IOobjectList.H"
 #include "cellZoneSet.H"
@@ -813,8 +812,8 @@ int main(int argc, char *argv[])
         // Whether to quit
         bool quit = false;
 
-        FatalError.throwExceptions();
-        FatalIOError.throwExceptions();
+        FatalError.throwing(true);
+        FatalIOError.throwing(true);
 
         do
         {

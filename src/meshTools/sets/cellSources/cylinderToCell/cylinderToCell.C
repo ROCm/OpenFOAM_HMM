@@ -114,9 +114,9 @@ Foam::cylinderToCell::cylinderToCell
     if (innerRadius_ > radius_)
     {
         FatalErrorInFunction
-            << "inner radius = " << innerRadius_ << "cannot be larger than "
+            << "inner radius = " << innerRadius_ << " cannot be larger than "
             << "outer radius = " << radius_
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 

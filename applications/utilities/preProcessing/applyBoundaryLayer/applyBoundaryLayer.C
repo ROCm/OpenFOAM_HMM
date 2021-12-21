@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -333,10 +333,10 @@ int main(int argc, char *argv[])
     // u/U0 = (y/ybl)^(1/7)
     // assumes U0 is the same as the current cell velocity
     Info<< "Setting boundary layer velocity" << nl << endl;
-    scalar yblv = ybl.value();
+    const scalar yblv = ybl.value();
     forAll(U, celli)
     {
-        if (y[celli] <= yblv)
+        if ((y[celli] > 0) && (y[celli] <= yblv))
         {
             mask[celli] = 1;
             U[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));

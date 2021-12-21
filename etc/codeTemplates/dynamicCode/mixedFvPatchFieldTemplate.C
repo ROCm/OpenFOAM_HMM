@@ -77,9 +77,12 @@ makeRemovablePatchTypeField
     ${typeName}MixedValueFvPatch${FieldType}
 );
 
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
@@ -96,6 +99,7 @@ ${typeName}MixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
@@ -114,6 +118,7 @@ ${typeName}MixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
@@ -131,13 +136,15 @@ ${typeName}MixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
     const ${typeName}MixedValueFvPatch${FieldType}& rhs
 )
 :
-    parent_bctype(rhs)
+    parent_bctype(rhs),
+    dictionaryContent(rhs)
 {
     if (${verbose:-false})
     {
@@ -146,6 +153,7 @@ ${typeName}MixedValueFvPatch${FieldType}
 }
 
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ${typeName}MixedValueFvPatch${FieldType}
 (
@@ -164,6 +172,7 @@ ${typeName}MixedValueFvPatch${FieldType}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::
 ~${typeName}MixedValueFvPatch${FieldType}()
 {
@@ -177,6 +186,7 @@ ${typeName}MixedValueFvPatch${FieldType}::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void
+Foam::
 ${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
@@ -196,9 +206,5 @@ ${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
     this->parent_bctype::updateCoeffs();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

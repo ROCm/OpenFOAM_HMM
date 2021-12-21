@@ -62,10 +62,11 @@ template<class Type>
 Foam::Function1Types::TableBase<Type>::TableBase
 (
     const word& name,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(name, dict),
+    Function1<Type>(name, dict, obrPtr),
     bounding_
     (
         bounds::repeatableBoundingNames.getOrDefault
@@ -78,7 +79,12 @@ Foam::Function1Types::TableBase<Type>::TableBase
     ),
     interpolationScheme_
     (
-        dict.getOrDefault<word>("interpolationScheme", "linear")
+        dict.getOrDefault<word>
+        (
+            "interpolationScheme",
+            "linear",
+            keyType::LITERAL
+        )
     ),
     table_(),
     tableSamplesPtr_(nullptr),
@@ -98,17 +104,10 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Function1Types::TableBase<Type>::~TableBase()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::TableBase<Type>::check() const
+void Foam::Function1Types::TableBase<Type>::initialise()
 {
     if (!table_.size())
     {
@@ -255,7 +254,7 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
 
 
 template<class Type>
-void Foam::Function1Types::TableBase<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::TableBase<Type>::userTimeToTime(const Time& t)
 {
     for (auto& item : table_)
     {
@@ -370,7 +369,10 @@ template<class Type>
 void Foam::Function1Types::TableBase<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+
+    os  << nl << indent << table_;
+    os.endEntry();
+
     writeEntries(os);
 }
 

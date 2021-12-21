@@ -29,6 +29,7 @@ License
 
 #include "displacementMethodlaplacianMotionSolver.H"
 #include "laplacianMotionSolver.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

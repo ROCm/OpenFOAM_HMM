@@ -6,7 +6,7 @@ cd "${0%/*}" || exit                            # Run from this directory
 echo "--------"
 
 # Remove old build/ directory
-buildDir="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD##*/}"
+buildDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${PWD##*/}"
 if [ -d "$buildDir" ]
 then
     echo "Removing old build directory: $buildDir" 1>&2
@@ -16,7 +16,7 @@ fi
 removeLogs
 
 echo "Cleaning tutorials ..."
-foamCleanTutorials -self
+foamCleanTutorials -self    # Run recursively but avoid self
 
 echo "--------"
 

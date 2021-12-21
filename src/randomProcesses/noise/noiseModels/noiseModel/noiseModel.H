@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +63,7 @@ Description
         startTime    | Start time                    | no        | 0
         outputPrefix | Prefix applied to output files| no        | ''
         SPLweighting | Weighting: dBA, dBB, dBC, DBD | no        | none
+        dBRef        | Reference for dB calculation  | no        | 2e-5
         graphFormat  | Graph format                  | no        | raw
         writePrmsf   | Write Prmsf data              | no        | yes
         writeSPL     | Write SPL data                | no        | yes
@@ -177,6 +178,9 @@ protected:
 
         //- Weighting
         weightingType SPLweighting_;
+
+        //- Reference for dB calculation, default = 2e-5
+        scalar dBRef_;
 
 
         // Data validation

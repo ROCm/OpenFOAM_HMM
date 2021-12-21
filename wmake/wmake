@@ -10,20 +10,7 @@
 #     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Script
 #     wmake
@@ -50,6 +37,7 @@
 #     3. (OR) descend into each sub-directory and repeat.
 #
 # Environment
+#     FOAM_BUILDROOT
 #     FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
 #     FOAM_MODULE_PREFIX
 #
@@ -71,8 +59,8 @@ Usage: $Script [OPTION] [dir]
 
 options:
   -s | -silent      Silent mode (do not echo commands)
-  -a | -all         wmake all sub-directories, running Allwmake if present
-  -q | -queue       wmakeCollect sub-directories, running Allwmake if present
+  -a | -all         wmake all sub-directories, runs Allwmake if present
+  -q | -queue       Collect as single Makefile, runs Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
   -j | -jN | -j N   Compile using all or specified N cores/hyperthreads
   -update           Update lnInclude, dep files, remove deprecated files/dirs
@@ -82,6 +70,7 @@ if [ -n "$1" ]
 then
 cat<<HELP_FULL
   -debug            Define c++DBUG='-DFULLDEBUG -g' as override
+  -build-root=PATH  Specify FOAM_BUILDROOT for compilation intermediates
   -module-prefix=PATH   Specify FOAM_MODULE_PREFIX as absolute/relative path
   -module-prefix=TYPE   Specify FOAM_MODULE_PREFIX as predefined type
                         (u,user | g,group | o,openfoam)
@@ -139,15 +128,16 @@ cat<<HELP_TAIL_FULL
 Makefile targets:   platforms/linux64GccDPInt32Opt/.../fvMesh.o (for example)
 Special targets:
   all | queue       Same as -all | -queue options
-  exe               Compile statically linked executable
-  lib               Compile statically linked archive lib (.a)
-  libo              Compile statically linked lib (.o)
-  libso             Compile dynamically linked lib (.so)
+  exe               Create executable
+  lib               Create statically linked archive lib (.a)
+  libo              Create statically linked lib (.o)
+  libso             Create dynamically linked lib (.so)
   dep               Create lnInclude and dependencies only
   updatedep         Create dependencies only (in case of broken dependencies)
   objects           Compile but not link
 
 Environment
+  FOAM_BUILDROOT
   FOAM_EXTRA_CFLAGS FOAM_EXTRA_CXXFLAGS FOAM_EXTRA_LDFLAGS
   FOAM_MODULE_PREFIX
 
@@ -157,8 +147,8 @@ cat<<HELP_TAIL_BRIEF
 
 Some special targets (see -help-full for details):
   all | queue       Same as -all | -queue options
-  exe               Executables
-  lib libo libso    Libraries
+  exe               Executable
+  lib libo libso    Libraries (.a .o .so)
 
 HELP_TAIL_BRIEF
 fi
@@ -261,6 +251,11 @@ do
             ;;
         -debug)
             optDebug=true
+            ;;
+
+        -build-root=*)
+            export FOAM_BUILDROOT="${1#*=}"
+            echo "Build-root = ${FOAM_BUILDROOT:-[]}" 1>&2
             ;;
 
         -module-prefix=*)
@@ -564,13 +559,31 @@ if [ "$optAll" = queue ]
 then
     [ "$optUpdate" = true ] || wmakeLnIncludeAll $parOpt
 
+    if [ -n "$FOAM_BUILDROOT" ] && [ -w "$FOAM_BUILDROOT" ]
+    then
+        buildRoot="${FOAM_BUILDROOT}/build/${WM_OPTIONS}"
+    else
+        # Assumed to be writable
+        buildRoot="${WM_PROJECT_DIR}/build/${WM_OPTIONS}"
+    fi
+
+    # Use relative dirname if possible (reproducible names)
+    if [ "${PWD}" = "${WM_PROJECT_DIR}" ]
+    then
+        collectName="_project_"
+    else
+        collectName="_${PWD#${WM_PROJECT_DIR}/}"
+        collectName="${collectName////_}"  # Path as unique name
+    fi
+
+    ## echo "collect: $buildRoot/$collectName" 1>&2
     (
-        export WM_COLLECT_DIR="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}"
+        export WM_COLLECT_DIR="$buildRoot/$collectName"
         export WM_SCHEDULER="$WM_DIR/wmakeCollect"
         trap '$WM_SCHEDULER -kill' TERM INT
         "$WM_SCHEDULER" -clean \
-     && wmake -all objects   \
-     && "$WM_SCHEDULER"
+     && wmake -all objects \
+     && "$WM_SCHEDULER"  # Make with assembled makefile
     ) && wmake -all
     exit $?
 fi
@@ -612,15 +625,20 @@ fi
 # files and options being built in parallel
 #------------------------------------------------------------------------------
 
-# Mini-version of findObjectDir
+# Mini-version of findObjectDir (from wmakeFunctions)
 unset objectsDir
 
-# Handle project/{applications,src} as out-of-source build
+# Handle project/{applications,src} as out-of-source build.
 relativeDir="${PWD#${WM_PROJECT_DIR}/}"
 if [ "$relativeDir" != "$PWD" ]
 then
-    [ -w "$WM_PROJECT_DIR" ] && \
+    if [ -n "$FOAM_BUILDROOT" ] && [ -w "$FOAM_BUILDROOT" ]
+    then
+        objectsDir="${FOAM_BUILDROOT}/build/${WM_OPTIONS}/${relativeDir}"
+    elif [ -w "$WM_PROJECT_DIR" ]
+    then
         objectsDir="${WM_PROJECT_DIR}/build/${WM_OPTIONS}/${relativeDir}"
+    fi
 fi
 
 # Default (local) build directory

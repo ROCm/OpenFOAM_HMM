@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,9 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
 
     Info<< "Selecting scatterModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<scatterModel>(cstrIter()(dict, mesh));
+    return autoPtr<scatterModel>(ctorPtr(dict, mesh));
 }
 
 

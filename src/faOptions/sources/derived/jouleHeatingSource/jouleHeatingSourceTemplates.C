@@ -41,7 +41,7 @@ void Foam::fa::jouleHeatingSource::initialiseSigma
     if (dict.found("sigma"))
     {
         // Sigma to be defined using a Function1 type
-        sigmaVsTPtr = Function1<Type>::New("sigma", dict);
+        sigmaVsTPtr = Function1<Type>::New("sigma", dict, &mesh_);
 
         auto tsigma = tmp<AreaFieldType>::New
         (

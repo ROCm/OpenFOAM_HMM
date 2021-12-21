@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "DeardorffDiffStress.H"
 #include "fvOptions.H"
+#include "calculatedFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -137,48 +138,6 @@ bool DeardorffDiffStress<BasicTurbulenceModel>::read()
     }
 
     return false;
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> DeardorffDiffStress<BasicTurbulenceModel>::epsilon() const
-{
-    volScalarField k(this->k());
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->Ce_*k*sqrt(k)/this->delta()
-        )
-    );
-}
-
-
-template<class BasicTurbulenceModel>
-tmp<volScalarField> DeardorffDiffStress<BasicTurbulenceModel>::omega() const
-{
-    volScalarField k(this->k());
-    volScalarField epsilon(this->Ce_*k*sqrt(k)/this->delta());
-
-    return tmp<volScalarField>::New
-    (
-        IOobject
-        (
-            IOobject::groupName("omega", this->alphaRhoPhi_.group()),
-            this->runTime_.timeName(),
-            this->mesh_
-        ),
-        epsilon/(0.09*k)
-    );
 }
 
 

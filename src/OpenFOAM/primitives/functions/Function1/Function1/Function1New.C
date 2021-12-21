@@ -38,6 +38,7 @@ Foam::Function1<Type>::New
     const entry* eptr,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -86,7 +87,12 @@ Foam::Function1<Type>::New
 
             return autoPtr<Function1<Type>>
             (
-                new Function1Types::Constant<Type>(entryName, constValue)
+                new Function1Types::Constant<Type>
+                (
+                    entryName,
+                    constValue,
+                    obrPtr
+                )
             );
         }
 
@@ -123,9 +129,9 @@ Foam::Function1<Type>::New
     }
 
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInFunction(dict)
             << "Unknown Function1 type "
@@ -135,7 +141,7 @@ Foam::Function1<Type>::New
             << exit(FatalIOError);
     }
 
-    return cstrIter()(entryName, *coeffs);
+    return ctorPtr(entryName, *coeffs, obrPtr);
 }
 
 
@@ -146,6 +152,7 @@ Foam::Function1<Type>::New
     const word& entryName,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -155,6 +162,7 @@ Foam::Function1<Type>::New
         dict.findEntry(entryName, keyType::LITERAL),
         dict,
         redirectType,
+        obrPtr,
         mandatory
     );
 }
@@ -168,6 +176,7 @@ Foam::Function1<Type>::NewCompat
     std::initializer_list<std::pair<const char*,int>> compat,
     const dictionary& dict,
     const word& redirectType,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
@@ -177,6 +186,7 @@ Foam::Function1<Type>::NewCompat
         dict.findCompat(entryName, compat, keyType::LITERAL),
         dict,
         redirectType,
+        obrPtr,
         mandatory
     );
 }
@@ -188,10 +198,11 @@ Foam::Function1<Type>::New
 (
     const word& entryName,
     const dictionary& dict,
+    const objectRegistry* obrPtr,
     const bool mandatory
 )
 {
-    return Function1<Type>::New(entryName, dict, word::null, mandatory);
+    return Function1<Type>::New(entryName, dict, word::null, obrPtr, mandatory);
 }
 
 
@@ -201,12 +212,115 @@ Foam::Function1<Type>::NewIfPresent
 (
     const word& entryName,
     const dictionary& dict,
-    const word& redirectType
+    const word& redirectType,
+    const objectRegistry* obrPtr
 )
 {
     // mandatory = false
-    return Function1<Type>::New(entryName, dict, redirectType, false);
+    return Function1<Type>::New(entryName, dict, redirectType, obrPtr, false);
 }
 
+
+template<class Type>
+Foam::refPtr<Foam::Function1<Type>>
+Foam::Function1<Type>::New
+(
+    HashPtrTable<Function1<Type>>& cache,
+
+    const word& entryName,
+    const dictionary& dict,
+    enum keyType::option matchOpt,
+    const objectRegistry* obrPtr,
+    const bool mandatory
+)
+{
+    // Use the dictionary to find the keyword (allowing wildcards).
+    // Alternative would be to have
+    // a HashTable where the key type uses a wildcard match
+
+
+    refPtr<Function1<Type>> fref;  // return value
+
+    // Try for direct cache hit
+    fref.cref(cache.get(entryName));
+
+    if (fref)
+    {
+        return fref;
+    }
+
+
+    // Lookup from dictionary
+    const entry* eptr = dict.findEntry(entryName, matchOpt);
+
+    if (eptr)
+    {
+        // Use keyword (potentially a wildcard) instead of entry name
+        const auto& kw = eptr->keyword();
+
+        // Try for a cache hit
+        fref.cref(cache.get(kw));
+
+        if (!fref)
+        {
+            // Create new entry
+            auto fauto
+            (
+                Function1<Type>::New
+                (
+                    kw,
+                    eptr,  // Already resolved
+                    dict,
+                    word::null,
+                    obrPtr,
+                    mandatory
+                )
+            );
+
+            if (fauto)
+            {
+                // Cache the newly created function
+                fref.cref(fauto.get());
+                cache.set(kw, fauto);
+            }
+        }
+    }
+
+    if (mandatory && !fref)
+    {
+        FatalIOErrorInFunction(dict)
+            << "No match for " << entryName << nl
+            << exit(FatalIOError);
+    }
+
+    return fref;
+}
+
+
+/// template<class Type>
+/// Foam::refPtr<Foam::Function1<Type>>
+/// Foam::Function1<Type>::NewOrDefault
+/// (
+///     HashPtrTable<Function1<Type>>& cache,
+///
+///     const word& entryName,
+///     const dictionary& dict,
+///     const Type& deflt,
+///     enum keyType::option matchOpt,
+///     const objectRegistry* obrPtr
+/// )
+/// {
+///     auto fref
+///     (
+///         Function1<Type>::New(entryName, dict, cache, matchOpt, obrPtr,false)
+///     );
+///
+///     if (!fref)
+///     {
+///         fref.reset(new Function1Types::Constant<Type>("default", deflt));
+///     }
+///
+///     return fref;
+/// }
 
 // ************************************************************************* //

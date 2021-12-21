@@ -80,6 +80,13 @@ Foam::PatchFunction1<Type>::PatchFunction1
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+bool Foam::PatchFunction1<Type>::uniform() const
+{
+    return !coordSys_.active();
+}
+
+
+template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::value
 (
     const scalar x
@@ -87,12 +94,6 @@ Foam::tmp<Foam::Field<Type>> Foam::PatchFunction1<Type>::value
 {
     NotImplemented;
     return nullptr;
-}
-
-template<class Type>
-bool Foam::PatchFunction1<Type>::uniform() const
-{
-    return !coordSys_.active();
 }
 
 

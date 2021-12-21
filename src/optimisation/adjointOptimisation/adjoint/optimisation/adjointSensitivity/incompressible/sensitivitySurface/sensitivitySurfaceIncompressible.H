@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2020 PCOpt/NTUA
-    Copyright (C) 2013-2020 FOSS GP
+    Copyright (C) 2007-2021 PCOpt/NTUA
+    Copyright (C) 2013-2021 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,27 @@ Class
 Description
     Calculation of adjoint based sensitivities at wall faces
 
+    Reference:
+    \verbatim
+        The computation of the sensitivity derivatives  follows the (E-)SI
+        formulation of
+
+            Kavvadias, I. S., Papoutsis-Kiachagias, E. M., 
+            Giannakoglou, K. C. (2015).
+            On the proper treatment of grid sensitivities in continuous adjoint
+            methods for shape optimization.
+            Journal of computational physics, 301, 1-18.
+            https://doi.org/10.1016/j.jcp.2015.08.012
+
+        whereas their smoothing based on the computation of the 'Sobolev
+        gradient' is derived from
+    
+            Vassberg J. C., Jameson A. (2006).
+            Aerodynamic Shape Optimization Part I: Theoretical Background.
+            VKI Lecture Series, Introduction to Optimization and
+            Multidisciplinary Design, Brussels, Belgium, 8 March, 2006.
+    \endverbatim
+
 SourceFiles
     sensitivitySurface.C
 
@@ -44,6 +65,7 @@ SourceFiles
 #include "adjointEikonalSolverIncompressible.H"
 #include "adjointMeshMovementSolverIncompressible.H"
 #include "deltaBoundary.H"
+#include "faMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +119,10 @@ protected:
         //- Write geometric info for use by external programs
         bool writeGeometricInfo_;
 
+        //- Smooth sensitivity derivatives based on the computation of the 
+        //- 'Sobolev gradient'
+        bool smoothSensitivities_;
+
         autoPtr<adjointEikonalSolver> eikonalSolver_;
 
         autoPtr<adjointMeshMovementSolver> meshMovementSolver_;
@@ -115,6 +141,14 @@ protected:
 
         //- Set suffix name for sensitivity fields
         void setSuffixName();
+
+        //- Smooth sensitivity derivatives based on the computation of the 
+        //- 'Sobolev gradient'
+        void smoothSensitivities();
+
+        //- Compute the physical smoothing radius based on the average boundary
+        //- face 'length'
+        scalar computeRadius(const faMesh& aMesh);
 
 
 private:
@@ -177,7 +211,7 @@ public:
        //- Write sensitivity maps
        virtual void write(const word& baseName = word::null);
 
-       // Inline geters and setters
+       // Inline getters and setters
 
            //- Get access to the includeObjective bool
            inline bool getIncludeObjective() const;

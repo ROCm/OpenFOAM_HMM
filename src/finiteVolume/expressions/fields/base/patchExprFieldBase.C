@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 Bernhard Gschaider
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,18 +57,21 @@ void Foam::expressions::patchExprFieldBase::readExpressions
     if (expectedTypes::VALUE_TYPE == expectedType)
     {
         // Mandatory
-        evalValue = dict.readEntry("valueExpr", exprValue);
+        evalValue = dict.readEntry("valueExpr", exprValue, keyType::LITERAL);
     }
     else if (expectedTypes::GRADIENT_TYPE == expectedType)
     {
         // Mandatory
-        evalGrad = dict.readEntry("gradientExpr", exprGrad);
+        evalGrad = dict.readEntry("gradientExpr", exprGrad, keyType::LITERAL);
     }
     else
     {
         // MIXED_TYPE
-        evalValue = dict.readIfPresent("valueExpr", exprValue);
-        evalGrad = dict.readIfPresent("gradientExpr", exprGrad);
+        evalValue =
+            dict.readIfPresent("valueExpr", exprValue, keyType::LITERAL);
+
+        evalGrad =
+            dict.readIfPresent("gradientExpr", exprGrad, keyType::LITERAL);
 
         if (!evalValue && !evalGrad)
         {
@@ -170,18 +173,10 @@ void Foam::expressions::patchExprFieldBase::write(Ostream& os) const
 
     // Do not emit debug_ value
 
-    if (!valueExpr_.empty())
-    {
-        os.writeEntry("valueExpr", valueExpr_);
-    }
-    if (!gradExpr_.empty())
-    {
-        os.writeEntry("gradientExpr", gradExpr_);
-    }
-    if (!fracExpr_.empty())
-    {
-        os.writeEntry("fractionExpr", fracExpr_);
-    }
+    // Write expression, but not empty ones
+    valueExpr_.writeEntry("valueExpr", os, false);
+    gradExpr_.writeEntry("gradientExpr", os, false);
+    fracExpr_.writeEntry("fractionExpr", os, false);
 }
 
 

@@ -18,15 +18,20 @@ else
     #include "YEqn.H"
     #include "EEqn.H"
 
-    // --- PISO loop
-    for (int corr=0; corr<nCorr; corr++)
+    if (!coupled)
     {
-        #include "pEqn.H"
+        Info<< "\nSolving for fluid region " << fluidRegions[i].name() << endl;
+
+        // --- PISO loop
+        for (int corr=0; corr<nCorr; corr++)
+        {
+            #include "pEqn.H"
+        }
+
+        turbulence.correct();
+
+        rho = thermo.rho();
     }
-
-    turbulence.correct();
-
-    rho = thermo.rho();
 }
 
 if (finalIter)

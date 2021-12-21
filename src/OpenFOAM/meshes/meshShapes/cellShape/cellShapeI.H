@@ -129,9 +129,9 @@ inline const Foam::cellModel& Foam::cellShape::model() const
 }
 
 
-inline Foam::label Foam::cellShape::nPoints() const
+inline Foam::label Foam::cellShape::nPoints() const noexcept
 {
-    return size();
+    return labelList::size();
 }
 
 
@@ -300,6 +300,24 @@ inline void Foam::cellShape::reset
 (
     const cellModel& model,
     const labelUList& labels,
+    const bool doCollapse
+)
+{
+    static_cast<labelList&>(*this) = labels;
+    m = &model;
+
+    if (doCollapse)
+    {
+        collapse();
+    }
+}
+
+
+template<unsigned N>
+inline void Foam::cellShape::reset
+(
+    const cellModel& model,
+    const FixedList<label, N>& labels,
     const bool doCollapse
 )
 {

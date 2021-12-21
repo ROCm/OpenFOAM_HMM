@@ -62,10 +62,12 @@ class GenericPatchGeoFieldsWriter
     // Private Member Functions
 
         //- Get face field (internal face or boundary face)
+        //- at specified face locations
         template<class Type>
         tmp<Field<Type>> getFaceField
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& sfld,
+            const labelUList& faceAddr
         ) const;
 
 
@@ -88,11 +90,14 @@ public:
 
     // Member Functions
 
-        //- Write volume-mesh surface field (CellData)
+        //- Write volume-mesh surface field (CellData) from specified mesh
+        //- faces.
+        //  For an indirect patch this will often simply be its addressing()
         template<class Type>
         void write
         (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& field
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& field,
+            const labelUList& faceAddr
         );
 
         //- Write area-mesh surface field (CellData)

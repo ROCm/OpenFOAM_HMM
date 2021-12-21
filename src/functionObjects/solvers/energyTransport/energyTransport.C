@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,7 +120,8 @@ Foam::functionObjects::energyTransport::rho() const
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         rho_
@@ -156,7 +157,8 @@ Foam::functionObjects::energyTransport::Cp() const
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         Cp_
@@ -186,7 +188,8 @@ Foam::functionObjects::energyTransport::kappa() const
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         kappa_
@@ -228,7 +231,8 @@ Foam::functionObjects::energyTransport::energyTransport
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         dimensionedScalar(dimEnergy/dimTemperature/dimVolume, Zero)

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2014-2020 OpenCFD Ltd.
+    Copyright (C) 2014-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,7 +275,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
     // Get addressing and interfaces of all interfaces
 
 
-    List<const labelUList*> patchAddr;
+    UPtrList<const labelUList> patchAddr;
     {
         const fvBoundaryMesh& fvp = boundary();
 
@@ -285,24 +285,24 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
         allInterfaces_ = dynamicFvMesh::interfaces();
         allInterfaces_.setSize(patchAddr.size());
 
-        forAll(fvp, patchI)
+        forAll(fvp, patchi)
         {
-            patchAddr[patchI] = &fvp[patchI].faceCells();
+            patchAddr.set(patchi, &fvp[patchi].faceCells());
         }
         forAll(remoteStencilInterfaces_, i)
         {
-            label patchI = fvp.size()+i;
+            const label patchi = fvp.size()+i;
             const lduPrimitiveProcessorInterface& pp =
                 remoteStencilInterfaces_[i];
 
-            //Pout<< "at patch:" << patchI
+            //Pout<< "at patch:" << patchi
             //    << " have procPatch:" << pp.type()
             //    << " from:" << pp.myProcNo()
             //    << " to:" << pp.neighbProcNo()
             //    << " with fc:" << pp.faceCells().size() << endl;
 
-            patchAddr[patchI] = &pp.faceCells();
-            allInterfaces_.set(patchI, &pp);
+            patchAddr.set(patchi, &pp.faceCells());
+            allInterfaces_.set(patchi, &pp);
         }
     }
     const lduSchedule ps

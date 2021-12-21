@@ -145,9 +145,9 @@ Foam::PatchFunction1<Type>::New
     }
 
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInFunction(dict)
             << "Unknown PatchFunction1 type "
@@ -157,7 +157,7 @@ Foam::PatchFunction1<Type>::New
             << exit(FatalIOError);
     }
 
-    return cstrIter()(pp, modelType, entryName, *coeffs, faceValues);
+    return ctorPtr(pp, modelType, entryName, *coeffs, faceValues);
 }
 
 
@@ -220,6 +220,80 @@ Foam::PatchFunction1<Type>::NewIfPresent
 {
     // mandatory = false
     return PatchFunction1<Type>::New(pp, entryName, dict, faceValues, false);
+}
+
+
+template<class Type>
+Foam::refPtr<Foam::PatchFunction1<Type>>
+Foam::PatchFunction1<Type>::New
+(
+    HashPtrTable<PatchFunction1<Type>>& cache,
+
+    const polyPatch& pp,
+    const word& entryName,
+    const dictionary& dict,
+    enum keyType::option matchOpt,
+    const bool faceValues,
+    const bool mandatory
+)
+{
+    // See corresponding comments in Function1::New (caching version)
+
+    refPtr<PatchFunction1<Type>> fref;  // return value
+
+    // Try for direct cache hit
+    fref.cref(cache.get(entryName));
+
+    if (fref)
+    {
+        return fref;
+    }
+
+
+    // Lookup from dictionary
+    const entry* eptr = dict.findEntry(entryName, matchOpt);
+
+    if (eptr)
+    {
+        // Use keyword (potentially a wildcard) instead of entry name
+        const auto& kw = eptr->keyword();
+
+        // Try for a cache hit
+        fref.cref(cache.get(kw));
+
+        if (!fref)
+        {
+            // Create new entry
+            auto fauto
+            (
+                PatchFunction1<Type>::New
+                (
+                    pp,
+                    kw,
+                    eptr,  // Already resolved
+                    dict,
+                    faceValues,
+                    mandatory
+                )
+            );
+
+            if (fauto)
+            {
+                // Cache the newly created function
+                fref.cref(fauto.get());
+                cache.set(kw, fauto);
+            }
+        }
+    }
+
+    if (mandatory && !fref)
+    {
+        FatalIOErrorInFunction(dict)
+            << "No match for " << entryName << nl
+            << exit(FatalIOError);
+    }
+
+    return fref;
 }
 
 

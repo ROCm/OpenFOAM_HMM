@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2106                                 |
+|  \\    /   O peration     | Version:  v2112                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -57,7 +57,7 @@ heatTransfer
     {
         T
         {
-            type        compressible::turbulentTemperatureCoupledBaffleMixed;
+            type        compressible::turbulentTemperatureRadCoupledMixed;
             value       ${:VALUE.T};
             Tnbr        T;
             kappaMethod fluidThermo;

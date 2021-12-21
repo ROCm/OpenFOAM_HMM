@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,7 +110,7 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const Scalar& val);
+        explicit pTraits(const Scalar& val) noexcept;
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);
@@ -119,13 +119,13 @@ public:
     // Member Functions
 
         //- Access to the value
-        operator Scalar() const
+        operator Scalar() const noexcept
         {
             return p_;
         }
 
         //- Access to the value
-        operator Scalar&()
+        operator Scalar&() noexcept
         {
             return p_;
         }
@@ -143,7 +143,7 @@ word name(const Scalar val);
 template<>
 struct nameOp<Scalar>
 {
-    inline word operator()(const Scalar val) const
+    word operator()(const Scalar val) const
     {
         return Foam::name(val);
     }

@@ -61,6 +61,9 @@ void Foam::functionObjects::volRegion::calculateCache()
     regionID_ = -1;
     cellIds_.clear();
 
+    // Update now. Need a valid state for the cellIDs() call
+    requireUpdate_ = false;
+
     switch (regionType_)
     {
         case vrtAll:
@@ -93,15 +96,18 @@ void Foam::functionObjects::volRegion::calculateCache()
         }
     }
 
-    // Cached value for nCells()
-    nCells_ = returnReduce(cellIDs().size(), sumOp<label>());
 
-    // Cached value for V()
+    // Calculate cache value for nCells() and V()
+    const labelList& selected = this->cellIDs();
+
+    nCells_ = selected.size();
     V_ = 0;
-    for (const label celli : cellIDs())
+    for (const label celli : selected)
     {
         V_ += volMesh_.V()[celli];
     }
+
+    reduce(nCells_, sumOp<label>());
     reduce(V_, sumOp<scalar>());
 
     if (!nCells_)
@@ -112,8 +118,6 @@ void Foam::functionObjects::volRegion::calculateCache()
             << "    Region has no cells" << nl
             << exit(FatalError);
     }
-
-    requireUpdate_ = false;
 }
 
 

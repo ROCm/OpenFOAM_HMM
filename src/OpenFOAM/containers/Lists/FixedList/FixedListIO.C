@@ -45,6 +45,15 @@ void Foam::FixedList<T, N>::writeEntry(Ostream& os) const
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class T, unsigned N>
+Foam::FixedList<T, N>::FixedList(Istream& is)
+{
+    this->readList(is);
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
@@ -81,11 +90,7 @@ Foam::Ostream& Foam::FixedList<T, N>::writeList
         // Binary and contiguous. Size is always non-zero
 
         // write(...) includes surrounding start/end delimiters
-        os.write
-        (
-            reinterpret_cast<const char*>(list.cdata()),
-            list.size_bytes()
-        );
+        os.write(list.cdata_bytes(), list.size_bytes());
     }
     else if
     (
@@ -155,7 +160,7 @@ Foam::Istream& Foam::FixedList<T, N>::readList
         Detail::readContiguous<T>
         (
             is,
-            reinterpret_cast<char*>(list.data()),
+            list.data_bytes(),
             list.size_bytes()
         );
 
@@ -244,22 +249,6 @@ Foam::Istream& Foam::FixedList<T, N>::readList
     }
 
     return is;
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class T, unsigned N>
-Foam::FixedList<T, N>::FixedList(Istream& is)
-{
-    this->readList(is);
-}
-
-
-template<class T, unsigned N>
-Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, N>& list)
-{
-    return list.readList(is);
 }
 
 

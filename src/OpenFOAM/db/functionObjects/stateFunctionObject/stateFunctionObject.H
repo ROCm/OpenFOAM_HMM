@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,12 +50,14 @@ SourceFiles
 #define functionObjects_stateFunctionObject_H
 
 #include "timeFunctionObject.H"
+#include "functionObjectProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class IOdictionary;
 
 namespace functionObjects
@@ -80,10 +82,10 @@ protected:
     // Protected Member Functions
 
         //- Return a const reference to the state dictionary
-        const IOdictionary& stateDict() const;
+        const functionObjects::properties& stateDict() const;
 
         //- Return non-const access to the state dictionary
-        IOdictionary& stateDict();
+        functionObjects::properties& stateDict();
 
 
         //- No copy construct
@@ -116,11 +118,20 @@ public:
             //- Return true if the property exists
             bool foundProperty(const word& entryName) const;
 
+            //- Remove the trigger index from the properties
+            void clearTrigger();
+
             //- Get the current trigger index
             label getTrigger() const;
 
-            //- Set the current trigger index
-            bool setTrigger(const label triggeri);
+            //- Set the trigger index. Normally only if greater than current
+            //
+            //  \param triggeri the new trigger index
+            //  \param increaseOnly (default) only change if new index
+            //      is greater than the current index.
+            //
+            //  \return True if the index changed
+            bool setTrigger(const label triggeri, bool increaseOnly = true);
 
             //- Set dictionary, return true if set
             bool getDict
@@ -237,10 +248,10 @@ public:
             ) const;
 
             //- Retrieve the result entries
-            List<word> objectResultEntries() const;
+            wordList objectResultEntries() const;
 
             //- Return result entries for named object
-            List<word> objectResultEntries(const word& objectName) const;
+            wordList objectResultEntries(const word& objectName) const;
 
             //- Write the results entries for all objects to stream
             void writeResultEntries(Ostream& os) const;

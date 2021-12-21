@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,6 @@ class movingWallVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-
 public:
 
     //- Runtime type information
@@ -140,7 +139,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
+
+        //- Return wall velocity field
+        tmp<vectorField> Uwall() const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

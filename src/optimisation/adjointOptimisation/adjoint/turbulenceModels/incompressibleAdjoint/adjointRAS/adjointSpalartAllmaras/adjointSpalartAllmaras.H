@@ -317,6 +317,8 @@ public:
 
         virtual tmp<volSymmTensorField> devReff() const;
 
+        virtual tmp<volSymmTensorField> devReff(const volVectorField& U) const;
+
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
 
         virtual tmp<volVectorField> adjointMeanFlowSource();

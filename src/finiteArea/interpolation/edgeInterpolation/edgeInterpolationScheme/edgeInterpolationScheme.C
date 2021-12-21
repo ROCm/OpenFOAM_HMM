@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,9 +61,9 @@ Foam::edgeInterpolationScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    auto cstrIter = MeshConstructorTablePtr_->cfind(schemeName);
+    auto* ctorPtr = MeshConstructorTable(schemeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -74,7 +74,7 @@ Foam::edgeInterpolationScheme<Type>::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(mesh, schemeData);
+    return ctorPtr(mesh, schemeData);
 }
 
 
@@ -106,9 +106,9 @@ Foam::edgeInterpolationScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    auto cstrIter = MeshFluxConstructorTablePtr_->cfind(schemeName);
+    auto* ctorPtr = MeshFluxConstructorTable(schemeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -119,7 +119,7 @@ Foam::edgeInterpolationScheme<Type>::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(mesh, faceFlux, schemeData);
+    return ctorPtr(mesh, faceFlux, schemeData);
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,6 @@ Note
 #define expressions_fieldExprScanner_H
 
 #include "fieldExprFwd.H"
-#include "scalar.H"
 
 namespace Foam
 {
@@ -46,21 +45,6 @@ namespace expressions
 {
 namespace fieldExpr
 {
-
-/*---------------------------------------------------------------------------*\
-                          Class scanToken Declaration
-\*---------------------------------------------------------------------------*/
-
-union scanToken
-{
-    Foam::label  ivalue;
-    Foam::scalar svalue;
-    Foam::word*  name;
-
-    //- Default construct, bit-wise zero for union content
-    scanToken() : ivalue(0) {}
-};
-
 
 /*---------------------------------------------------------------------------*\
                          Class scanner Declaration
@@ -83,16 +67,14 @@ class scanner
         bool dispatch_method
         (
             const parseDriver& driver_,
-            scanToken& scanTok,
-            word&& ident
+            word ident  // Receives a copy
         ) const;
 
         //- Dispatch identifier to parser (if possible) or Fatal
         bool dispatch_ident
         (
             const parseDriver& driver_,
-            scanToken& scanTok,
-            word&& ident
+            word ident  // Receives a copy
         ) const;
 
 

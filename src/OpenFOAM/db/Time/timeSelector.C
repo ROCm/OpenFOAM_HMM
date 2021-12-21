@@ -33,12 +33,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::timeSelector::timeSelector()
-:
-    scalarRanges()
-{}
-
-
 Foam::timeSelector::timeSelector(const std::string& str)
 :
     scalarRanges(str)

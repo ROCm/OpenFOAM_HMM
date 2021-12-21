@@ -1052,7 +1052,7 @@ void Foam::syncTools::syncBoundaryFaceList
                     (
                         Pstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
-                        reinterpret_cast<char*>(fld.data()),
+                        fld.data_bytes(),
                         fld.size_bytes()
                     );
                 }
@@ -1078,7 +1078,7 @@ void Foam::syncTools::syncBoundaryFaceList
                     (
                         Pstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
-                        reinterpret_cast<const char*>(fld.cdata()),
+                        fld.cdata_bytes(),
                         fld.size_bytes()
                     );
                 }
@@ -1279,7 +1279,7 @@ void Foam::syncTools::syncFaceList
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<char*>(recvInfo.data()),
+                    recvInfo.data_bytes(),
                     recvInfo.size_bytes()
                 );
             }
@@ -1314,7 +1314,7 @@ void Foam::syncTools::syncFaceList
                 (
                     Pstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
-                    reinterpret_cast<const char*>(sendInfo.cdata()),
+                    sendInfo.cdata_bytes(),
                     sendInfo.size_bytes()
                 );
             }

@@ -1,3 +1,4 @@
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Gcc/c++
 
 c++ARCH     = -m32 -pthread
@@ -7,9 +8,9 @@ include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
-cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
+cxxtoo      = $(Ctoo)
 
 ifneq (,$(findstring +gold,$(WM_COMPILE_CONTROL)))
     include $(GENERAL_RULES)/Gcc/link-gold-c++

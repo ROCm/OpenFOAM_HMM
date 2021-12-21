@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,13 +30,13 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline enum Foam::vtk::vtuCells::contentType
-Foam::vtk::vtuCells::content() const
+Foam::vtk::vtuCells::content() const noexcept
 {
     return output_;
 }
 
 
-inline bool Foam::vtk::vtuCells::decomposeRequested() const
+inline bool Foam::vtk::vtuCells::decomposeRequested() const noexcept
 {
     return decomposeRequest_;
 }
@@ -55,49 +55,49 @@ inline Foam::label Foam::vtk::vtuCells::size() const noexcept
 
 
 inline const Foam::List<uint8_t>&
-Foam::vtk::vtuCells::cellTypes() const
+Foam::vtk::vtuCells::cellTypes() const noexcept
 {
     return cellTypes_;
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::vertLabels() const
+Foam::vtk::vtuCells::vertLabels() const noexcept
 {
     return vertLabels_;
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::vertOffsets() const
+Foam::vtk::vtuCells::vertOffsets() const noexcept
 {
     return vertOffset_;
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::faceLabels() const
+Foam::vtk::vtuCells::faceLabels() const noexcept
 {
     return faceLabels_;
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::faceOffsets() const
+Foam::vtk::vtuCells::faceOffsets() const noexcept
 {
     return faceOffset_;
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::addPointCellLabels() const
+Foam::vtk::vtuCells::addPointCellLabels() const noexcept
 {
     return maps_.additionalIds();
 }
 
 
 inline const Foam::labelList&
-Foam::vtk::vtuCells::cellMap() const
+Foam::vtk::vtuCells::cellMap() const noexcept
 {
     return maps_.cellMap();
 }

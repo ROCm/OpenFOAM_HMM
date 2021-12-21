@@ -1,2 +1,0 @@
--np 1 ./run_left.sh
--np 1 ./run_right.sh

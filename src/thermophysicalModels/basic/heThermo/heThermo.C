@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2017 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,8 @@ void Foam::heThermo<BasicThermo, MixtureType>::init
             T.boundaryField()[patchi],
             patchi
         );
+
+        heBf[patchi].useImplicit(T.boundaryField()[patchi].useImplicit());
     }
 
     this->heBoundaryCorrection(he);
@@ -375,6 +377,28 @@ Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::Cp
 
 
 template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::Cp
+(
+    const scalarField& p,
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    auto tCp = tmp<scalarField>::New(T.size());
+    auto& Cp = tCp.ref();
+
+    forAll(cells, i)
+    {
+        const label celli = cells[i];
+        Cp[i] = this->cellMixture(celli).Cp(p[i], T[i]);
+    }
+
+    return tCp;
+}
+
+
+template<class BasicThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
 Foam::heThermo<BasicThermo, MixtureType>::Cp() const
 {
@@ -444,6 +468,28 @@ Foam::heThermo<BasicThermo, MixtureType>::Cv
     }
 
     return tCv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::rhoEoS
+(
+    const scalarField& p,
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    auto tRho = tmp<scalarField>::New(T.size());
+    auto& rho = tRho.ref();
+
+    forAll(cells, i)
+    {
+        const label celli = cells[i];
+        rho[i] = this->cellMixture(celli).rho(p[i], T[i]);
+    }
+
+    return tRho;
 }
 
 

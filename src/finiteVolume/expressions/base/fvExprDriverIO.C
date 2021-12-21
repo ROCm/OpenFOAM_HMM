@@ -34,13 +34,17 @@ License
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
+Foam::refPtr<Foam::labelList>
+Foam::expressions::fvExprDriver::getTopoSetLabels
 (
     const word& name,
     enum topoSetSource::sourceType setType
 ) const
 {
-    // Zones first - they are cheap to handle (no IO)
+    refPtr<labelList> selected;
+
+    // Zones first
+    // - cheap to handle (no IO) and can simply reference their labels
 
     switch (setType)
     {
@@ -58,7 +62,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
                     << exit(FatalError);
             }
 
-            return zones[zoneID];
+            selected.cref(zones[zoneID]);
             break;
         }
 
@@ -76,7 +80,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
                     << exit(FatalError);
             }
 
-            return zones[zoneID];
+            selected.cref(zones[zoneID]);
             break;
         }
 
@@ -94,12 +98,18 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
                     << exit(FatalError);
             }
 
-            return zones[zoneID];
+            selected.cref(zones[zoneID]);
             break;
         }
 
         default:
             break;
+    }
+
+
+    if (selected.valid())
+    {
+        return selected;
     }
 
 
@@ -121,7 +131,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
             }
 
             classType set(io);
-            return set.sortedToc();
+            selected.reset(refPtr<labelList>::New(set.sortedToc()));
             break;
         }
 
@@ -139,7 +149,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
             }
 
             classType set(io);
-            return set.sortedToc();
+            selected.reset(refPtr<labelList>::New(set.sortedToc()));
             break;
         }
 
@@ -157,7 +167,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
             }
 
             classType set(io);
-            return set.sortedToc();
+            selected.reset(refPtr<labelList>::New(set.sortedToc()));
             break;
         }
 
@@ -171,7 +181,7 @@ Foam::labelList Foam::expressions::fvExprDriver::getTopoSetLabels
         }
     }
 
-    return labelList::null();
+    return selected;
 }
 
 
@@ -251,9 +261,8 @@ Foam::Ostream& Foam::expressions::fvExprDriver::writeCommon
         os.writeEntry("globalScopes", globalScopes_);
     }
 
-    // writeTable(os, "timelines", lines_);
-    // writeTable(os, "lookuptables", lookup_);
-    // writeTable(os, "lookuptables2D", lookup2D_);
+    // Write "functions<scalar>" ...
+    writeFunctions(os);
 
     return os;
 }

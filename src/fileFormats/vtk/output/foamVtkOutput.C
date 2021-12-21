@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ void Foam::vtk::writeIdentity
     label start
 )
 {
-    // No nComponents for label, so use fmt.write() directly
+    // No nComponents for label, can use fmt.write() directly
     for (label i=0; i < len; ++i)
     {
         fmt.write(start);
@@ -114,46 +114,10 @@ void Foam::vtk::writeList
     const UList<uint8_t>& values
 )
 {
-    // No nComponents for char, so use fmt.write() directly
+    // No nComponents for char, can use fmt.write() directly
     for (const uint8_t val : values)
     {
         fmt.write(val);
-    }
-}
-
-
-void Foam::vtk::writeListParallel
-(
-    vtk::formatter& fmt,
-    const UList<uint8_t>& values
-)
-{
-    if (Pstream::master())
-    {
-        vtk::writeList(fmt, values);
-
-        List<uint8_t> recv;
-
-        // Receive and write
-        for (const int slave : Pstream::subProcs())
-        {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
-
-            fromSlave >> recv;
-
-            vtk::writeList(fmt, recv);
-        }
-    }
-    else
-    {
-        // Send to master
-        OPstream toMaster
-        (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
-        );
-
-        toMaster << values;
     }
 }
 
@@ -165,29 +129,40 @@ void Foam::vtk::writeListParallel
     const globalIndex& procOffset
 )
 {
+    // Gather sizes - master information, offsets are irrelevant
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(values.size()),
+        globalIndex::SIZES
+    );
+
+
     if (Pstream::master())
     {
-        // Write with offset
+        // Write master data - with value offset
         const label offsetId = procOffset.offset(0);
-
         for (const label val : values)
         {
             vtk::write(fmt, val + offsetId);
         }
 
-        labelList recv;
-
         // Receive and write
-        for (const int slave : Pstream::subProcs())
+        DynamicList<label> recvData(procAddr.maxNonLocalSize());
+
+        for (const label proci : procAddr.subProcs())
         {
-            IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+            recvData.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                recvData.data_bytes(),
+                recvData.size_bytes()
+            );
 
-            fromSlave >> recv;
-
-            const label offsetId = procOffset.offset(slave);
-
-            // Write with offset
-            for (const label val : recv)
+            // With value offset
+            const label offsetId = procOffset.offset(proci);
+            for (const label val : recvData)
             {
                 vtk::write(fmt, val + offsetId);
             }
@@ -195,14 +170,14 @@ void Foam::vtk::writeListParallel
     }
     else
     {
-        // Send to master
-        OPstream toMaster
+        // Send
+        UOPstream::write
         (
-            Pstream::commsTypes::blocking,
-            Pstream::masterNo()
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            values.cdata_bytes(),
+            values.size_bytes()
         );
-
-        toMaster << values;
     }
 }
 
@@ -218,6 +193,9 @@ void Foam::vtk::legacy::fileHeader
 {
     // Line 1:
     os  << "# vtk DataFile Version 2.0" << nl;
+
+    // OR
+    // os  << "# vtk DataFile Version 5.1" << nl;
 
     // Line 2: title
 

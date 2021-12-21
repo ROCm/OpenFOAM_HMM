@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ void Foam::sigQuit::sigHandler(int)
 {
     resetHandler("SIGBREAK", SIGBREAK);
 
-    jobInfo.signalEnd();        // Update jobInfo file
+    JobInfo::shutdown();        // From running -> finished
     error::printStack(Perr);
     ::raise(SIGBREAK);          // Throw signal (to old handler)
 }

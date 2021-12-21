@@ -94,7 +94,7 @@ bool Foam::pointMesh::movePoints()
 {
     if (debug)
     {
-        Pout<< "pointMesh::movePoints(const pointField&): "
+        Pout<< "pointMesh::movePoints(): "
             << "Moving points." << endl;
     }
 

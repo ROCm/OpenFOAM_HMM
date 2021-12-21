@@ -56,8 +56,6 @@ Foam::cellShapeControl::cellShapeControl
     (
         foamyHexMeshControls.foamyHexMeshDict().subDict("motionControl")
     ),
-    runTime_(runTime),
-    allGeometry_(allGeometry),
     geometryToConformTo_(geometryToConformTo),
     defaultCellSize_(foamyHexMeshControls.defaultCellSize()),
     minimumCellSize_(foamyHexMeshControls.minimumCellSize()),
@@ -70,12 +68,6 @@ Foam::cellShapeControl::cellShapeControl
         geometryToConformTo_,
         defaultCellSize_
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellShapeControl::~cellShapeControl()
 {}
 
 

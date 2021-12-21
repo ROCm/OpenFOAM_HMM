@@ -27,7 +27,6 @@ License
 
 #include "helpType.H"
 #include "doxygenXmlParser.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -95,7 +94,7 @@ void Foam::helpType::displayDocOptions
         Info<< parser;
     }
 
-    Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
+    Info<< "Valid types:" << nl << parser.sortedToc();
 }
 
 
@@ -168,22 +167,10 @@ void Foam::helpType::displayDoc
     {
         FatalErrorInFunction
             << "No help for type " << className << " found."
-            << "  Valid options include:" << SortableList<word>(parser.toc())
+            << "  Valid options:" << parser.sortedToc()
             << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::helpType::helpType()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::helpType::~helpType()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

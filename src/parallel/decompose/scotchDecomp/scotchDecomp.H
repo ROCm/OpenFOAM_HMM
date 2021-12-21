@@ -238,15 +238,6 @@ class scotchDecomp
         mutable fileName graphPath_;
 
 
-    // Private Member Functions
-
-        //- Set graph path and name (mutable)
-        void graphPath(const polyMesh& mesh) const;
-
-        //- Check and print error message
-        static void check(const int, const char*);
-
-
 protected:
 
     // Protected Member Functions

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,18 +136,34 @@ public:
         arcEdge
         (
             const pointField& points,   //!< Referenced point field
-            const point& origin,    //!< The origin of the circle
-            const label start,      //!< Start point in referenced point field
-            const label end         //!< End point in referenced point field
+            const point& origin,        //!< The origin of the circle
+            const edge& fromTo          //!< Start/end in point field
         );
 
         //- Construct from components, using a point on the circumference
         arcEdge
         (
             const pointField& points,   //!< Referenced point field
-            const label start,      //!< Start point in referenced point field
-            const label end,        //!< End point in referenced point field
-            const point& midPoint   //!< A point on the circumference
+            const edge& fromTo,         //!< Start/end in point field
+            const point& midPoint       //!< A point on the circumference
+        );
+
+        //- Construct from components, given the origin of the circle
+        arcEdge
+        (
+            const pointField& points,   //!< Referenced point field
+            const point& origin,        //!< The origin of the circle
+            const label from,           //!< Start point in point field
+            const label to              //!< End point in point field
+        );
+
+        //- Construct from components, using a point on the circumference
+        arcEdge
+        (
+            const pointField& points,   //!< Referenced point field
+            const label from,           //!< Start point in point field
+            const label to,             //!< End point in point field
+            const point& midPoint       //!< A point on the circumference
         );
 
         //- Construct from Istream and point field.
@@ -157,8 +173,8 @@ public:
         (
             const dictionary& dict,
             const label index,
-            const searchableSurfaces& geometry, // unsed
-            const pointField& points,   //!< Referenced point field
+            const searchableSurfaces&  /*unused*/,
+            const pointField& points,  //!< Referenced point field
             Istream& is
         );
 

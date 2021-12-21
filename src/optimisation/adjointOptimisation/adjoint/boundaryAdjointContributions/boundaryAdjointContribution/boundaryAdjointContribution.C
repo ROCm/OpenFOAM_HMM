@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,9 +63,9 @@ autoPtr<boundaryAdjointContribution> boundaryAdjointContribution::New
     const fvPatch& patch
 )
 {
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(simulationType);
+    auto* ctorPtr = dictionaryConstructorTable(simulationType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -78,7 +78,7 @@ autoPtr<boundaryAdjointContribution> boundaryAdjointContribution::New
     return
         autoPtr<boundaryAdjointContribution>
         (
-            cstrIter()
+            ctorPtr
             (
                 managerName,
                 adjointSolverName,

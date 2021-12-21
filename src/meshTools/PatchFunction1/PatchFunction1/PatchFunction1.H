@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,7 @@ SeeAlso
 #include "patchFunction1Base.H"
 #include "coordinateScaling.H"
 #include "Field.H"
+#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,7 +90,7 @@ protected:
 
     // Protected Data
 
-        //- Optional local co-ordinate system and scaling
+        //- Optional local coordinate system and scaling
         coordinateScaling<Type> coordSys_;
 
 
@@ -192,22 +193,39 @@ public:
         );
 
 
+    // Caching Selectors - accept wildcards in dictionary
+
+        //- Selector with external storage.
+        //- This also allows wildcard matches in a dictionary
+        static refPtr<PatchFunction1<Type>> New
+        (
+            HashPtrTable<PatchFunction1<Type>>& cache,
+            const polyPatch& pp,
+            const word& entryName,
+            const dictionary& dict,
+            enum keyType::option matchOpt = keyType::LITERAL,
+            const bool faceValues = true,
+            const bool mandatory = true
+        );
+
+
     //- Destructor
     virtual ~PatchFunction1() = default;
 
 
     // Member Functions
 
+        //- Is value constant (i.e. independent of x)
+        virtual bool constant() const { return false; }
+
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual bool uniform() const = 0;
+
+
         // Evaluation
 
             //- Return value as a function of (scalar) independent variable
             virtual tmp<Field<Type>> value(const scalar x) const;
-
-            //- Is value constant (i.e. independent of x)
-            virtual bool constant() const = 0;
-
-            //- Is value uniform (i.e. independent of coordinate)
-            virtual bool uniform() const = 0;
 
             //- Integrate between two (scalar) values
             virtual tmp<Field<Type>> integrate

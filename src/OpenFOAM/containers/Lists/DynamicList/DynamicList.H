@@ -36,8 +36,9 @@ Description
     SizeMin template parameter dictating a lower bound.
 
 SourceFiles
-    DynamicListI.H
     DynamicList.C
+    DynamicListI.H
+    DynamicListIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +46,6 @@ SourceFiles
 #define DynamicList_H
 
 #include "List.H"
-#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,10 +56,10 @@ namespace Foam
 template<class T, int SizeMin> class DynamicList;
 
 template<class T, int SizeMin>
-inline Istream& operator>>(Istream&, DynamicList<T, SizeMin>&);
+Istream& operator>>(Istream& is, DynamicList<T, SizeMin>& list);
 
 template<class T, int SizeMin>
-inline Ostream& operator<<(Ostream&, const DynamicList<T, SizeMin>&);
+Ostream& operator<<(Ostream& os, const DynamicList<T, SizeMin>& list);
 
 
 /*---------------------------------------------------------------------------*\
@@ -91,6 +91,21 @@ class DynamicList
         template<class ListType>
         inline void assignDynList(const ListType& list);
 
+        //- Alter the size of the underlying storage
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doCapacity(const bool nocopy, const label len);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doReserve(const bool nocopy, const label len);
+
+        //- Reserve allocation space for at least this size.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        //  The 'nocopy' option will not attempt to recover old content
+        inline void doResize(const bool nocopy, const label len);
+
+
 public:
 
     // Constructors
@@ -120,7 +135,7 @@ public:
 
         //- Construct from a FixedList
         template<unsigned N>
-        inline DynamicList(const FixedList<T, N>& lst);
+        inline explicit DynamicList(const FixedList<T, N>& lst);
 
         //- Construct from an initializer list. Size set to list size.
         inline explicit DynamicList(std::initializer_list<T> lst);
@@ -156,6 +171,10 @@ public:
         //- Size of the underlying storage.
         inline label capacity() const noexcept;
 
+        //- Number of contiguous bytes of the underlying storage.
+        //  \note Only meaningful for contiguous data
+        inline std::streamsize capacity_bytes() const noexcept;
+
 
     // Sizing
 
@@ -163,23 +182,49 @@ public:
         //  The addressed size will be truncated if needed to fit, but will
         //  remain otherwise untouched.
         //  Use this or reserve() in combination with append().
-        inline void setCapacity(const label newCapacity);
+        inline void setCapacity(const label len);
 
-        //- Reserve allocation space for at least this size.
+        //- Alter the size of the underlying storage,
+        //- \em without retaining old content.
+        //  The addressed size will be truncated if needed to fit, but will
+        //  remain otherwise untouched.
+        inline void setCapacity_nocopy(const label len);
+
+        //- Change the value for the list capacity directly (ADVANCED, UNSAFE)
+        //- Does not perform any memory management or resizing.
+        inline void setCapacity_unsafe(const label len) noexcept;
+
+        //- Reserve allocation space for at least this size, allocating new
+        //- space if required and \em retaining old content.
         //  Never shrinks the allocated size, use setCapacity() for that.
         inline void reserve(const label len);
 
-        //- Alter addressable size.
-        //  New space will be allocated if required.
-        inline void resize(const label newLen);
+        //- Reserve allocation space for at least this size, allocating new
+        //- space if required \em without retaining old content.
+        //  Never shrinks the allocated size, use setCapacity() for that.
+        inline void reserve_nocopy(const label len);
 
-        //- Alter addressable size and fill new space with constant value
-        inline void resize(const label newLen, const T& val);
+        //- Alter addressable list size, allocating new space if required
+        //- while \em recovering old content.
+        //  If no reallocation is required, the contents remain untouched.
+        //  Otherwise new entries will be uninitialized.
+        //  Use this to resize the list prior to using the operator[] for
+        //  setting values (as per List usage).
+        inline void resize(const label len);
 
-        //- Alias for resize()
+        //- Alter addressable size and fill new entries with constant value
+        inline void resize(const label len, const T& val);
+
+        //- Alter addressable list size, allocating new space if required
+        //- \em without necessarily recovering old content.
+        //  If no reallocation is required, the contents remain untouched.
+        //  Otherwise all entries will be uninitialized.
+        inline void resize_nocopy(const label len);
+
+        //- Same as resize()
         void setSize(const label n) { this->resize(n); }
 
-        //- Alias for resize()
+        //- Same as resize()
         void setSize(const label n, const T& val) { this->resize(n, val); }
 
         //- Clear the addressed list, i.e. set the size to zero.
@@ -192,6 +237,9 @@ public:
         //- Expand the addressable size to fit the allocated capacity.
         //  Returns the previous addressable size.
         inline label expandStorage() noexcept;
+
+        //- Shrink the allocated space to the number of elements used.
+        inline void shrinkStorage();
 
         //- Shrink the allocated space to the number of elements used.
         //  Returns a reference to the DynamicList.
@@ -336,12 +384,12 @@ public:
     // Reading/writing
 
         //- Read from Istream, discarding existing contents
-        inline Istream& readList(Istream& is);
+        Istream& readList(Istream& is);
 
 
     // IOstream Operators
 
-        //- Read from Istream, discarding existing contents
+        //- Use the readList() method to read contents from Istream.
         friend Istream& operator>> <T, SizeMin>
         (
             Istream& is,
@@ -357,6 +405,24 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read List contents from Istream
+template<class T, int SizeMin>
+Istream& operator>>(Istream& is, DynamicList<T, SizeMin>& list)
+{
+    return list.readList(is);
+}
+
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+template<class T, int SizeMin>
+Ostream& operator<<(Ostream& os, const DynamicList<T, SizeMin>& list)
+{
+    return (os << static_cast<const UList<T>&>(list));
+}
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 // Exchange contents of lists - see DynamicList::swap().
@@ -366,6 +432,8 @@ inline void Swap(DynamicList<T, SizeMinA>& a, DynamicList<T, SizeMinB>& b)
     a.swap(b);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Hashing for List data
 template<class T, int SizeMin>
@@ -384,6 +452,7 @@ struct Hash<DynamicList<T, SizeMin>> : List<T>::hasher {};
 
 #ifdef NoRepository
     #include "DynamicList.C"
+    #include "DynamicListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

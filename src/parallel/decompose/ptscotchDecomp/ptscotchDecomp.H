@@ -81,32 +81,14 @@ class ptscotchDecomp
 
     // Private Member Functions
 
-        //- Set graph path and name (mutable)
-        void graphPath(const polyMesh& mesh) const;
-
-        //- Check and print error message
-        static void check(const int, const char*);
-
         //- Decompose. Handles size 0 arrays
         label decompose
         (
             const labelList& adjncy,
             const labelList& xadj,
             const List<scalar>& cWeights,
-            labelList& finalDecomp
+            labelList& decomp
         ) const;
-
-        //- Low level decompose
-        label decompose
-        (
-            const label adjncySize,
-            const label adjncy[],
-            const label xadjSize,
-            const label xadj[],
-            const List<scalar>& cWeights,
-            labelList& finalDecomp
-        ) const;
-
 
         //- No copy construct
         ptscotchDecomp(const ptscotchDecomp&) = delete;

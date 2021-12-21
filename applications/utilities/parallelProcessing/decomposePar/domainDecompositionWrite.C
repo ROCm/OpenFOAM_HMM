@@ -52,7 +52,7 @@ void Foam::domainDecomposition::writeVolField
             false
         ),
         this->mesh(),
-        dimensionedScalar(dimless, Zero),
+        dimensionedScalar("cellDist", dimless, -1),
         zeroGradientFvPatchScalarField::typeName
     );
 
@@ -65,7 +65,7 @@ void Foam::domainDecomposition::writeVolField
     cellDist.write();
 
     Info<< nl << "Wrote decomposition to "
-        << this->mesh().time().relativePath(cellDist.objectPath())
+        << cellDist.objectRelPath()
         << " (volScalarField) for visualization."
         << endl;
 }

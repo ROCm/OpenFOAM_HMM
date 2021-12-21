@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2020 PCOpt/NTUA
     Copyright (C) 2013-2020 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,18 +86,17 @@ optimisationType::optimisationType
      && !isA<constrainedOptimisationMethod>(updateMethod_())
     )
     {
+        const auto& cnstrTable =
+            *(constrainedOptimisationMethod::dictionaryConstructorTablePtr_);
+
         // Has constraints but is not a constraint optimisation method
-        auto cstTablePtr
-        (
-            constrainedOptimisationMethod::dictionaryConstructorTablePtr_
-        );
         FatalErrorInFunction
             << "Found " << nConstraints << " adjoint solvers corresponding to "
-            << "constraints but the optimisation method used "
-            << "(" << updateMethod_().type() << ") "
-            << "is not a constrainedOptimisationMethod. " << nl
-            << "Available constrainedOptimisationMethods are :" << nl
-            << cstTablePtr->sortedToc()
+            << "constraints but the optimisation method ("
+            << updateMethod_().type()
+            << ") is not a constrainedOptimisationMethod." << nl
+            << "Available constrainedOptimisationMethods:" << nl
+            << cnstrTable.sortedToc()
             << exit(FatalError);
     }
     else if
@@ -109,9 +108,9 @@ optimisationType::optimisationType
         // Does not have constraints but is a constrained optimisation method
         WarningInFunction
             << "Did not find any adjoint solvers corresponding to "
-            << "constraints but the optimisation method used "
-            << "(" << updateMethod_().type() << ") "
-            << "is a constrainedOptimisationMethod. " << nl << nl
+            << "constraints but the optimisation method ("
+            << updateMethod_().type()
+            << ") is a constrainedOptimisationMethod." << nl << nl
             << "This can cause some constraintOptimisationMethods to misbehave."
             << nl << nl
             << "Either the isConstraint bool is not set in one of the adjoint "
@@ -135,9 +134,9 @@ autoPtr<optimisationType> optimisationType::New
 
     Info<< "optimisationType type : " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -150,7 +149,7 @@ autoPtr<optimisationType> optimisationType::New
 
     return autoPtr<optimisationType>
     (
-        cstrIter()(mesh, dict, adjointSolverManagers)
+        ctorPtr(mesh, dict, adjointSolverManagers)
     );
 }
 

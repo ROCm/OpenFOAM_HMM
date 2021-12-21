@@ -1126,7 +1126,7 @@ void setCouplingInfo
 
     forAll(zoneToPatch, zoneI)
     {
-        label patchi = zoneToPatch[zoneI];
+        const label patchi = zoneToPatch[zoneI];
 
         if (patchi != -1)
         {
@@ -1139,50 +1139,38 @@ void setCouplingInfo
                 const scalar mergeSqrDist =
                     gMax(magSqr(offsets[zoneI]-avgOffset));
 
+                // Create with uniform offset initially
+                auto mappedPtr = autoPtr<mappedWallPolyPatch>::New
+                (
+                    pp.name(),
+                    pp.size(),
+                    pp.start(),
+                    patchi,
+                    sampleRegion,       // sampleRegion
+                    mode,               // sampleMode
+                    pp.name(),          // samplePatch
+
+                    avgOffset,          // uniform offset
+                    patches
+                );
+
+                Info<< "Adding on " << mesh.name() << " coupling patch "
+                    << pp.name() << " with ";
+
                 // Verify uniformity of offset
                 // (same check as blockMesh geom merge)
                 if (mergeSqrDist < magSqr(10*SMALL*bb.span()))
                 {
-                    Info<< "Adding on " << mesh.name()
-                        << " coupling patch " << pp.name()
-                        << " with uniform offset " << avgOffset << endl;
-
-                    // Uniform offset
-                    newPatches[patchi] = new mappedWallPolyPatch
-                    (
-                        pp.name(),
-                        pp.size(),
-                        pp.start(),
-                        patchi,
-                        sampleRegion,       // sampleRegion
-                        mode,               // sampleMode
-                        pp.name(),          // samplePatch
-
-                        avgOffset,          // uniform offset
-                        patches
-                    );
+                    Info<< "uniform offset " << avgOffset << endl;
                 }
                 else
                 {
-                    Info<< "Adding on " << mesh.name()
-                        << " coupling patch " << pp.name()
-                        << " with non-uniform offset" << endl;
+                    Info<< "non-uniform offset" << endl;
 
-                    // Uniform offset
-                    newPatches[patchi] = new mappedWallPolyPatch
-                    (
-                        pp.name(),
-                        pp.size(),
-                        pp.start(),
-                        patchi,
-                        sampleRegion,       // sampleRegion
-                        mode,               // sampleMode
-                        pp.name(),          // samplePatch
-
-                        offsets[zoneI],     // non-uniform offsets
-                        patches
-                    );
+                    (*mappedPtr).setOffset(offsets[zoneI]);
                 }
+
+                newPatches[patchi] = mappedPtr.release();
             }
         }
     }

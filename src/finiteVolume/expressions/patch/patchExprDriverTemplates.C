@@ -125,28 +125,43 @@ Foam::expressions::patchExpr::parseDriver::getField(const word& name)
     typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
 
     // Local, temporary storage and/or lookup values
-    bool findField = true;
+    bool found = false;
     tmp<vfieldType> vfield;
     tmp<sfieldType> sfield;
     tmp<pfieldType> pfield;
 
-    if (findField)
+    for (int checki = 0; !found && checki < 2; ++checki)
     {
-        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
-        findField = !vfield.valid();
-    }
-    if (findField)
-    {
-        sfield = exprDriver::cfindFieldObject<sfieldType>(obr, name);
-        findField = !sfield.valid();
-    }
-    if (findField)
-    {
-        pfield = exprDriver::cfindFieldObject<pfieldType>(obr, name);
-        findField = !pfield.valid();
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+        const regIOobject* ioptr =
+        (
+            (checki == 0)
+          ? exprDriver::cfindContextIOobject(name)
+          : obr.cfindIOobject(name)
+        );
+        if (!ioptr) continue;
+
+        if (!found)
+        {
+            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            found = vfield.valid();
+        }
+        if (!found)
+        {
+            sfield.cref(dynamic_cast<const sfieldType*>(ioptr));
+            found = sfield.valid();
+        }
+        if (!found)
+        {
+            pfield.cref(dynamic_cast<const pfieldType*>(ioptr));
+            found = pfield.valid();
+        }
     }
 
-    if (findField && searchFiles())
+
+    // Finally, search files if necessary (and permitted)
+    if (!found && searchFiles())
     {
         const word fldType = this->getTypeOfField(name);
 
@@ -236,22 +251,37 @@ Foam::expressions::patchExpr::parseDriver::patchInternalField
     typedef GeometricField<Type, pointPatchField, pointMesh> pfieldType;
 
     // Local, temporary storage and/or lookup values
-    bool findField = true;
+    bool found = false;
     tmp<vfieldType> vfield;
     tmp<pfieldType> pfield;
 
-    if (findField)
+    for (int checki = 0; !found && checki < 2; ++checki)
     {
-        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
-        findField = !vfield.valid();
-    }
-    if (findField)
-    {
-        pfield = exprDriver::cfindFieldObject<pfieldType>(obr, name);
-        findField = !pfield.valid();
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+        const regIOobject* ioptr =
+        (
+            (checki == 0)
+          ? exprDriver::cfindContextIOobject(name)
+          : obr.cfindIOobject(name)
+        );
+        if (!ioptr) continue;
+
+        if (!found)
+        {
+            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            found = vfield.valid();
+        }
+        if (!found)
+        {
+            pfield.cref(dynamic_cast<const pfieldType*>(ioptr));
+            found = pfield.valid();
+        }
     }
 
-    if (findField && searchFiles())
+
+    // Finally, search files if necessary (and permitted)
+    if (!found && searchFiles())
     {
         const word fldType = this->getTypeOfField(name);
 
@@ -322,16 +352,31 @@ Foam::expressions::patchExpr::parseDriver::patchNeighbourField
     typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
 
     // Local, temporary storage and/or lookup values
-    bool findField = true;
+    bool found = false;
     tmp<vfieldType> vfield;
 
-    if (findField)
+    for (int checki = 0; !found && checki < 2; ++checki)
     {
-        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
-        findField = !vfield.valid();
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+        const regIOobject* ioptr =
+        (
+            (checki == 0)
+          ? exprDriver::cfindContextIOobject(name)
+          : obr.cfindIOobject(name)
+        );
+        if (!ioptr) continue;
+
+        if (!found)
+        {
+            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            found = vfield.valid();
+        }
     }
 
-    if (findField && searchFiles())
+
+    // Finally, search files if necessary (and permitted)
+    if (!found && searchFiles())
     {
         const word fldType = this->getTypeOfField(name);
 
@@ -386,16 +431,31 @@ Foam::expressions::patchExpr::parseDriver::patchNormalField
     typedef GeometricField<Type, fvPatchField, volMesh> vfieldType;
 
     // Local, temporary storage and/or lookup values
+    bool found = false;
     tmp<vfieldType> vfield;
-    bool findField = true;
 
-    if (findField)
+    for (int checki = 0; !found && checki < 2; ++checki)
     {
-        vfield = exprDriver::cfindFieldObject<vfieldType>(obr, name);
-        findField = !vfield.valid();
+        // Check 0: object context (first)
+        // Check 1: regular objectRegistry
+        const regIOobject* ioptr =
+        (
+            (checki == 0)
+          ? exprDriver::cfindContextIOobject(name)
+          : obr.cfindIOobject(name)
+        );
+        if (!ioptr) continue;
+
+        if (!found)
+        {
+            vfield.cref(dynamic_cast<const vfieldType*>(ioptr));
+            found = vfield.valid();
+        }
     }
 
-    if (findField && searchFiles())
+
+    // Finally, search files if necessary (and permitted)
+    if (!found && searchFiles())
     {
         const word fldType = this->getTypeOfField(name);
 

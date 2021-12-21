@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018-2020 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,45 +154,6 @@ generalizedNewtonian<BasicMomentumTransportModel>::nuEff
 ) const
 {
     return nu_.boundaryField()[patchi];
-}
-
-
-template<class BasicMomentumTransportModel>
-tmp<volScalarField>
-generalizedNewtonian<BasicMomentumTransportModel>::k() const
-{
-    return volScalarField::New
-    (
-        IOobject::groupName("k", this->alphaRhoPhi_.group()),
-        this->mesh_,
-        dimensionedScalar(sqr(this->U_.dimensions()), Zero)
-    );
-}
-
-
-template<class BasicMomentumTransportModel>
-tmp<volScalarField>
-generalizedNewtonian<BasicMomentumTransportModel>::epsilon() const
-{
-    return volScalarField::New
-    (
-        IOobject::groupName("epsilon", this->alphaRhoPhi_.group()),
-        this->mesh_,
-        dimensionedScalar(sqr(this->U_.dimensions())/dimTime, Zero)
-    );
-}
-
-
-template<class BasicMomentumTransportModel>
-tmp<volSymmTensorField>
-generalizedNewtonian<BasicMomentumTransportModel>::R() const
-{
-    return volSymmTensorField::New
-    (
-        IOobject::groupName("R", this->alphaRhoPhi_.group()),
-        this->mesh_,
-        dimensionedSymmTensor(sqr(this->U_.dimensions()), Zero)
-    );
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,36 +29,11 @@ License
 #include "surfZoneIdentifier.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-static inline word readOptionalWord(Istream& is)
-{
-    token tok(is);
-
-    if (tok.isWord())
-    {
-        return tok.wordToken();
-    }
-    else
-    {
-        // Allow empty words
-        return word::validate(tok.stringToken());
-    }
-}
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfZoneIdentifier::surfZoneIdentifier()
 :
-    name_(),
-    index_(0),
-    geometricType_()
+    surfZoneIdentifier(0)
 {}
 
 
@@ -112,13 +87,13 @@ Foam::surfZoneIdentifier::surfZoneIdentifier
 
 Foam::surfZoneIdentifier::surfZoneIdentifier
 (
-    const surfZoneIdentifier& p,
+    const surfZoneIdentifier& ident,
     const label index
 )
 :
-    name_(p.name()),
+    name_(ident.name_),
     index_(index),
-    geometricType_(p.geometricType())
+    geometricType_(ident.geometricType_)
 {}
 
 
@@ -126,7 +101,7 @@ Foam::surfZoneIdentifier::surfZoneIdentifier
 
 void Foam::surfZoneIdentifier::write(Ostream& os) const
 {
-    if (geometricType_.size())
+    if (!geometricType_.empty())
     {
         os.writeEntry("geometricType", geometricType_);
     }
@@ -164,8 +139,9 @@ bool Foam::operator!=
 
 Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 {
-    obj.name() = readOptionalWord(is);
-    obj.geometricType() = readOptionalWord(is);
+    // Also read "" for empty words
+    obj.name() = word::validate(token(is).stringToken());
+    obj.geometricType() = word::validate(token(is).stringToken());
 
     return is;
 }
@@ -178,6 +154,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& obj)
     os << nl;
 
     // Empty words are double-quoted so they are treated as 'string'
+    // and not simply lost
 
     os.writeQuoted(obj.name(), obj.name().empty()) << token::SPACE;
     os.writeQuoted(obj.geometricType(), obj.geometricType().empty());

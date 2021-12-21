@@ -169,7 +169,7 @@ Foam::fv::actuationDiskSource::actuationDiskSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     writeFile(mesh, name, modelType, coeffs_),
     forceMethod_
     (
@@ -213,8 +213,8 @@ Foam::fv::actuationDiskSource::actuationDiskSource
             [&](const vector& vec){ return mag(vec) > VSMALL; }
         ).normalise()
     ),
-    UvsCpPtr_(Function1<scalar>::New("Cp", coeffs_)),
-    UvsCtPtr_(Function1<scalar>::New("Ct", coeffs_)),
+    UvsCpPtr_(Function1<scalar>::New("Cp", coeffs_, &mesh)),
+    UvsCtPtr_(Function1<scalar>::New("Ct", coeffs_, &mesh)),
     monitorCells_()
 {
     setMonitorCells(coeffs_);
@@ -278,7 +278,7 @@ void Foam::fv::actuationDiskSource::addSup
 
 bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict) && writeFile::read(dict))
+    if (fv::cellSetOption::read(dict) && writeFile::read(dict))
     {
         dict.readIfPresent("sink", sink_);
         dict.readIfPresent("writeFileStart", writeFileStart_);

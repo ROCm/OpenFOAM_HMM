@@ -87,7 +87,7 @@ Foam::fv::atmLengthScaleTurbSource::atmLengthScaleTurbSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(sourceName, modelType, dict, mesh),
+    fv::cellSetOption(sourceName, modelType, dict, mesh),
     isEpsilon_(true),
     rhoName_(coeffs_.getOrDefault<word>("rho", "rho")),
     Lmax_

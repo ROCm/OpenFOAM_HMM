@@ -210,10 +210,12 @@ $(CHFModels)/Zuber/Zuber.C
 CHFSubCoolModels = $(wallBoilingSubModels)/CHFSubCoolModels
 $(CHFSubCoolModels)/CHFSubCoolModel/CHFSubCoolModel.C
 $(CHFSubCoolModels)/HuaXu/HuaXu.C
+$(CHFSubCoolModels)/Tatsumoto/Tatsumoto.C
 
 filmBoiling = $(wallBoilingSubModels)/filmBoilingModels
 $(filmBoiling)/filmBoilingModel/filmBoilingModel.C
 $(filmBoiling)/Bromley/Bromley.C
+$(filmBoiling)/BreenWestwater/BreenWestwater.C
 
 Leidenfrost = $(wallBoilingSubModels)/LeidenfrostModels
 $(Leidenfrost)/LeidenfrostModel/LeidenfrostModel.C
@@ -226,6 +228,12 @@ $(MHFModels)/Jeschar/Jeschar.C
 TDNBModels = $(wallBoilingSubModels)/TDNBModels
 $(TDNBModels)/TDNBModel/TDNBModel.C
 $(TDNBModels)/Schroeder/Schroeder.C
+$(TDNBModels)/Shirai/Shirai.C
+
+nucleateFluxModels = $(wallBoilingSubModels)/nucleateFluxModels
+$(nucleateFluxModels)/nucleateFluxModel/nucleateFluxModel.C
+$(nucleateFluxModels)/Kutadeladze/Kutadeladze.C
+$(nucleateFluxModels)/exponential/exponential.C
 
 /* Turbulence */
 turbulence/multiphaseCompressibleTurbulenceModels.C

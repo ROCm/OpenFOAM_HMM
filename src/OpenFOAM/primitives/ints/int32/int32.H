@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ inline word name(const int32_t val)
 template<>
 struct nameOp<int32_t>
 {
-    inline word operator()(const int32_t val) const
+    word operator()(const int32_t val) const
     {
         return word(std::to_string(val), false); // Needs no stripping
     }
@@ -175,7 +175,7 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const int32_t& val);
+        explicit pTraits(const int32_t& val) noexcept;
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);
@@ -184,13 +184,13 @@ public:
     // Member Functions
 
         //- Access to the value
-        operator int32_t() const
+        operator int32_t() const noexcept
         {
             return p_;
         }
 
         //- Access to the value
-        operator int32_t&()
+        operator int32_t&() noexcept
         {
             return p_;
         }

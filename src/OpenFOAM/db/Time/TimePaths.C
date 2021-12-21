@@ -72,8 +72,8 @@ Foam::TimePaths::TimePaths
     const word& constantName
 )
 :
-    processorCase_(args.parRunControl().parRun()),
-    distributed_(args.parRunControl().distributed()),
+    processorCase_(args.runControl().parRun()),
+    distributed_(args.runControl().distributed()),
     rootPath_(args.rootPath()),
     globalCaseName_(args.globalCaseName()),
     case_(args.caseName()),

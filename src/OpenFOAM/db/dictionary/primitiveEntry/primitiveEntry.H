@@ -155,6 +155,12 @@ public:
             return ITstream::name();
         }
 
+        //- Return token stream name relative to the current case
+        virtual fileName relativeName() const
+        {
+            return ITstream::relativeName();
+        }
+
         //- Return line number of first token in dictionary
         virtual label startLineNumber() const;
 
@@ -162,7 +168,7 @@ public:
         virtual label endLineNumber() const;
 
         //- Return true - this entry is a stream
-        virtual bool isStream() const
+        virtual bool isStream() const noexcept
         {
             return true;
         }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class instant;
 class globalIndex;
 
@@ -94,13 +94,19 @@ namespace vtk
     //  The output does not include the payload size.
     void writeList(vtk::formatter& fmt, const UList<uint8_t>& values);
 
-    //- Write a list of uint8_t values.
-    //  The output does not include the payload size.
-    void writeListParallel(vtk::formatter& fmt, const UList<uint8_t>& values);
-
     //- Component-wise write of a value (N times)
     template<class Type>
     inline void write(vtk::formatter& fmt, const Type& val, const label n=1);
+
+    //- Component-wise write of a value (N times) in parallel
+    //  The value and count may differ on each processor
+    template<class Type>
+    inline void writeValueParallel
+    (
+        vtk::formatter& fmt,
+        const Type& val,
+        const label count=1
+    );
 
 
     //- Write a list of values.
@@ -215,7 +221,7 @@ namespace legacy
 
 // Functions
 
-    //- Emit header for legacy file.
+    //- Emit header for legacy file (vtk DataFile Version 2.0)
     //  Writes "ASCII" or "BINARY" depending on specified type.
     void fileHeader(std::ostream& os, const std::string& title, bool binary);
 
@@ -247,6 +253,12 @@ namespace legacy
 
     //- Emit header for POINTS (with trailing newline).
     inline void beginPoints(std::ostream& os, label nPoints);
+
+    //- Emit header for LINES (with trailing newline).
+    //  The nConnectivity is the sum of all connectivity points used,
+    //  but \b without additional space for the size prefixes.
+    //  The additional prefix sizes are added internally.
+    inline void beginLines(std::ostream& os, label nLines, label nConnectivity);
 
     //- Emit header for POLYGONS (with trailing newline).
     //  The nConnectivity is the sum of all connectivity points used,

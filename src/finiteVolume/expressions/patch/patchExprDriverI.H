@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,14 +36,70 @@ inline Foam::label Foam::expressions::patchExpr::parseDriver::size
     {
         case FieldAssociation::POINT_DATA :
             return patch_.patch().nPoints();
-            break;
-        case FieldAssociation::SURFACE_DATA :
+
+        case FieldAssociation::FACE_DATA :
             return patch_.patch().size();
-            break;
+
         default:
             break;
     }
     return 0;
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::parseDriver::field_cellSet
+(
+    const word& name
+) const
+{
+    return field_cellSelection
+    (
+        name,
+        topoSetSource::sourceType::CELLSET_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_cellZone
+(
+    const word& name
+) const
+{
+    return field_cellSelection
+    (
+        name,
+        topoSetSource::sourceType::CELLZONE_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_faceSet
+(
+    const word& name
+) const
+{
+    return field_faceSelection
+    (
+        name,
+        topoSetSource::sourceType::FACESET_SOURCE
+    );
+}
+
+
+inline Foam::tmp<Foam::boolField>
+Foam::expressions::patchExpr::parseDriver::field_faceZone
+(
+    const word& name
+) const
+{
+    return field_faceSelection
+    (
+        name,
+        topoSetSource::sourceType::FACEZONE_SOURCE
+    );
 }
 
 

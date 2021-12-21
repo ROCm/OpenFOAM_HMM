@@ -61,7 +61,7 @@ Foam::threadedCollatedOFstream::~threadedCollatedOFstream()
         IOstreamOption(IOstream::BINARY, version(), compression_),
         false,  // append=false
         useThread_,
-        &headerEntries_
+        headerEntries_
     );
 }
 

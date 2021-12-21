@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,10 +33,10 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory/Optional (inherited) entries
+        // Mandatory/Optional entries
         ...
 
-        // Mandatory entries (unmodifiable)
+        // Mandatory entries
         vibrationShellModel   KirchhoffShell;
         f0                    0.04;
         f1                    0.0;
@@ -46,7 +46,7 @@ Usage
 
     where the entries mean:
     \table
-      Property   | Description                         | Type  | Reqd | Dflt
+      Property   | Description                         | Type  | Reqd | Deflt
       vibrationShellModel | Type name: KirchhoffShell  | word  | yes  | -
       f0         | Damping coefficient [1/s]           | scalar | yes | -
       f1         | Damping coefficient [1/s]           | scalar | yes | -
@@ -94,8 +94,8 @@ class KirchhoffShell
 
     // Private Member Functions
 
-        //- Initialize KirchhoffShell
-        void init();
+        //- Initialise KirchhoffShell
+        bool init(const dictionary& dict);
 
 
 protected:
@@ -139,10 +139,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary& dict);
-
 
         // Equations
 

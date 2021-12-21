@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,13 +59,7 @@ Foam::wallBoilingModels::CHFModels::Jeschar::Jeschar
 )
 :
     MHFModel(),
-    Kmhf_(dict.getOrDefault<scalar>("Kmhf", 1))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::CHFModels::Jeschar::~Jeschar()
+    Kmhf_(dict.getOrDefault<scalar>("Kmhf", 0.16))
 {}
 
 
@@ -85,8 +79,15 @@ Foam::wallBoilingModels::CHFModels::Jeschar::MHF
     const uniformDimensionedVectorField& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
-    const scalarField rhoVapor(vapor.thermo().rho(patchi));
-    const scalarField rhoLiq(liquid.thermo().rho(patchi));
+    const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
+
+    const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
+
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pw, Tsatw, cells);
+    const scalarField& rhoVapor = trhoVapor.ref();
+
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pw, Tsatw, cells);
+    const scalarField& rhoLiq = trhoLiq.ref();
 
     const phasePairKey pair(liquid.name(), vapor.name());
     const scalarField sigma
@@ -95,10 +96,13 @@ Foam::wallBoilingModels::CHFModels::Jeschar::MHF
     );
 
     return
-        Kmhf_*0.09*rhoVapor*L
+        Kmhf_*rhoVapor*L
        *(
             pow(sigma/(mag(g.value())*(rhoLiq - rhoVapor)), 0.25)
-          * sqrt(mag(g.value())*(rhoLiq - rhoVapor)/(rhoLiq + rhoVapor))
+          * sqrt
+            (
+                mag(g.value())*(rhoLiq - rhoVapor)/(rhoLiq + rhoVapor + VSMALL)
+            )
         );
 }
 

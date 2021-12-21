@@ -1,22 +1,23 @@
 ## Getting the code
 
-Links to all code packs are available on https://dl.openfoam.com. For OpenFOAM-v2106:
+Links to all code packs are available on https://dl.openfoam.com. For OpenFOAM-v2112:
 
-- Source: https://dl.openfoam.com/source/v2106/OpenFOAM-v2106.tgz
-- ThirdParty: https://dl.openfoam.com/source/v2106/ThirdParty-v2106.tgz
+- https://dl.openfoam.com/source/latest/
+- Source: https://dl.openfoam.com/source/v2112/OpenFOAM-v2112.tgz
+- ThirdParty: https://dl.openfoam.com/source/v2112/ThirdParty-v2112.tgz
 
 ## OpenFOAM&reg; Quick Build Guide
 
 Prior to building, ensure that the [system requirements][link openfoam-require]
 are satisfied (including any special [cross-compiling][wiki-cross-compile]
 considerations), and source the correct OpenFOAM environment.
-For example, for the OpenFOAM-v2106 version:
+For example, for the OpenFOAM-v2112 version:
 ```
-source <installation path>/OpenFOAM-v2106/etc/bashrc
+source <installation path>/OpenFOAM-v2112/etc/bashrc
 ```
 e.g. if installed under the `~/openfoam` directory
 ```
-source ~/openfoam/OpenFOAM-v2106/etc/bashrc
+source ~/openfoam/OpenFOAM-v2112/etc/bashrc
 ```
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,9 +57,9 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 
     Info<< "Selecting motion diffusion: " << modelType << endl;
 
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = IstreamConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -70,7 +70,7 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<motionDiffusivity>(cstrIter()(mesh, is));
+    return autoPtr<motionDiffusivity>(ctorPtr(mesh, is));
 }
 
 

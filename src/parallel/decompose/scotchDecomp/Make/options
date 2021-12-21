@@ -3,9 +3,9 @@ EXE_INC = \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN) -ldecompositionMethods \
     -L$(SCOTCH_LIB_DIR) \
-    -lscotch
+    -lscotch$(SCOTCH_LIBNAME_SUFFIX)
 
 /* errexit, except for windows compile (already in library) */
 ifeq (,$(findstring windows,$(WM_OSTYPE)))

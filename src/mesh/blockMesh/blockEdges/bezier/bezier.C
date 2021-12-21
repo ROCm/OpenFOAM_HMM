@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,13 +47,24 @@ namespace blockEdges
 Foam::blockEdges::bezier::bezier
 (
     const pointField& points,
-    const label start,
-    const label end,
+    const edge& fromTo,
     const pointField& control
 )
 :
-    blockEdge(points, start, end),
+    blockEdge(points, fromTo),
     control_(control)
+{}
+
+
+Foam::blockEdges::bezier::bezier
+(
+    const pointField& points,
+    const label from,
+    const label to,
+    const pointField& control
+)
+:
+    bezier(points, edge(from, to), control)
 {}
 
 
@@ -61,7 +72,7 @@ Foam::blockEdges::bezier::bezier
 (
     const dictionary& dict,
     const label index,
-    const searchableSurfaces& geometry,
+    const searchableSurfaces&,
     const pointField& points,
     Istream& is
 )
@@ -69,7 +80,7 @@ Foam::blockEdges::bezier::bezier
     blockEdge(dict, index, points, is),
     control_
     (
-        polyLine::concat(points[start_], pointField(is), points[end_])
+        polyLine::concat(firstPoint(), pointField(is), lastPoint())
     )
 {}
 

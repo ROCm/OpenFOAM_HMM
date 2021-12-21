@@ -85,7 +85,7 @@ class TDACChemistryModel
 :
     public StandardChemistryModel<ReactionThermo, ThermoType>
 {
-    // Private member data
+    // Private Member Data
 
         bool variableTimeStep_;
 

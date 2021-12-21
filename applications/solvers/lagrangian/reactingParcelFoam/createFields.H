@@ -11,7 +11,11 @@ basicSpecieMixture& composition = thermo.composition();
 PtrList<volScalarField>& Y = composition.Y();
 
 const word inertSpecie(thermo.get<word>("inertSpecie"));
-if (!composition.species().found(inertSpecie))
+if
+(
+    !composition.species().found(inertSpecie)
+  && composition.species().size() > 0
+)
 {
     FatalIOErrorIn(args.executable().c_str(), thermo)
         << "Inert specie " << inertSpecie << " not found in available species "

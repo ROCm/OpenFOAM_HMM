@@ -71,6 +71,15 @@ adjointLaminar::adjointLaminar
 tmp<volSymmTensorField> adjointLaminar::devReff() const
 {
     const volVectorField& Ua = adjointVars_.Ua();
+    return devReff(Ua);
+}
+
+
+tmp<volSymmTensorField> adjointLaminar::devReff
+(
+    const volVectorField& U
+) const
+{
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
@@ -83,7 +92,7 @@ tmp<volSymmTensorField> adjointLaminar::devReff() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nu()*dev(twoSymm(fvc::grad(Ua)))
+           -nu()*dev(twoSymm(fvc::grad(U)))
         )
     );
 }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ scalar try_readScalar(const dictionary& dict, const word& k)
 {
     scalar val(-GREAT);
 
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
     try
     {
@@ -75,8 +75,8 @@ scalar try_readScalar(const dictionary& dict, const word& k)
         Info<< "readScalar(" << k << ") Caught FatalError "
             << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOerr);
 
     return val;
 }
@@ -87,8 +87,8 @@ scalar try_getScalar(const dictionary& dict, const word& k)
 {
     scalar val(-GREAT);
 
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
     try
     {
@@ -105,8 +105,8 @@ scalar try_getScalar(const dictionary& dict, const word& k)
         Info<< "get<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOerr);
 
     return val;
 }
@@ -123,8 +123,8 @@ scalar try_getCheckScalar
 {
     scalar val(-GREAT);
 
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
     try
     {
@@ -141,8 +141,8 @@ scalar try_getCheckScalar
         Info<< "getCheck<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOerr);
 
     return val;
 }
@@ -159,8 +159,8 @@ scalar try_getScalar(const entry* eptr, const word& k)
         return val;
     }
 
-    const bool throwingIOError = FatalIOError.throwExceptions();
-    const bool throwingError = FatalError.throwExceptions();
+    const bool oldThrowingError = FatalError.throwing(true);
+    const bool oldThrowingIOerr = FatalIOError.throwing(true);
 
     try
     {
@@ -177,8 +177,8 @@ scalar try_getScalar(const entry* eptr, const word& k)
         Info<< "entry get<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
     }
-    FatalError.throwExceptions(throwingError);
-    FatalIOError.throwExceptions(throwingIOError);
+    FatalError.throwing(oldThrowingError);
+    FatalIOError.throwing(oldThrowingIOerr);
 
     return val;
 }

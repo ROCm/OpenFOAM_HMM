@@ -1,3 +1,4 @@
+#------------------------------------------------------------------------------
 include $(GENERAL_RULES)/Icc/c++
 
 c++ARCH     = -pthread -fp-trap=common -fp-model precise
@@ -7,10 +8,12 @@ include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
-cxxtoo      = $(Ctoo)
 cctoo       = $(Ctoo)
 cpptoo      = $(Ctoo)
+cxxtoo      = $(Ctoo)
 
 include $(GENERAL_RULES)/Icc/link-c++
 
 LINK_LIBS   += -L$(IA32ROOT)/lib
+
+#------------------------------------------------------------------------------

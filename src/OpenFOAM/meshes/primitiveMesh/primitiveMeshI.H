@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,13 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::primitiveMesh::nInternalPoints() const
+inline Foam::label Foam::primitiveMesh::nInternalPoints() const noexcept
 {
     return nInternalPoints_;
 }
 
 
-inline Foam::label Foam::primitiveMesh::nPoints() const
+inline Foam::label Foam::primitiveMesh::nPoints() const noexcept
 {
     return nPoints_;
 }
@@ -75,133 +75,136 @@ inline Foam::label Foam::primitiveMesh::nEdges() const
 }
 
 
-inline Foam::label Foam::primitiveMesh::nInternalFaces() const
+inline Foam::label Foam::primitiveMesh::nInternalFaces() const noexcept
 {
     return nInternalFaces_;
 }
 
 
-inline Foam::label Foam::primitiveMesh::nBoundaryFaces() const
+inline Foam::label Foam::primitiveMesh::nBoundaryFaces() const noexcept
 {
     return (nFaces_ - nInternalFaces_);
 }
 
 
-inline Foam::label Foam::primitiveMesh::nFaces() const
+inline Foam::label Foam::primitiveMesh::nFaces() const noexcept
 {
     return nFaces_;
 }
 
 
-inline Foam::label Foam::primitiveMesh::nCells() const
+inline Foam::label Foam::primitiveMesh::nCells() const noexcept
 {
     return nCells_;
 }
 
 
-inline bool Foam::primitiveMesh::isInternalFace(const label faceIndex) const
+inline bool Foam::primitiveMesh::isInternalFace
+(
+    const label faceIndex
+) const noexcept
 {
     return faceIndex < nInternalFaces_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellShapes() const
+inline bool Foam::primitiveMesh::hasCellShapes() const noexcept
 {
     return cellShapesPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasEdges() const
+inline bool Foam::primitiveMesh::hasEdges() const noexcept
 {
     return edgesPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellCells() const
+inline bool Foam::primitiveMesh::hasCellCells() const noexcept
 {
     return ccPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasEdgeCells() const
+inline bool Foam::primitiveMesh::hasEdgeCells() const noexcept
 {
     return ecPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasPointCells() const
+inline bool Foam::primitiveMesh::hasPointCells() const noexcept
 {
     return pcPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCells() const
+inline bool Foam::primitiveMesh::hasCells() const noexcept
 {
     return cfPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasEdgeFaces() const
+inline bool Foam::primitiveMesh::hasEdgeFaces() const noexcept
 {
     return efPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasPointFaces() const
+inline bool Foam::primitiveMesh::hasPointFaces() const noexcept
 {
     return pfPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellEdges() const
+inline bool Foam::primitiveMesh::hasCellEdges() const noexcept
 {
     return cePtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasFaceEdges() const
+inline bool Foam::primitiveMesh::hasFaceEdges() const noexcept
 {
     return fePtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasPointEdges() const
+inline bool Foam::primitiveMesh::hasPointEdges() const noexcept
 {
     return pePtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasPointPoints() const
+inline bool Foam::primitiveMesh::hasPointPoints() const noexcept
 {
     return ppPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellPoints() const
+inline bool Foam::primitiveMesh::hasCellPoints() const noexcept
 {
     return cpPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellCentres() const
+inline bool Foam::primitiveMesh::hasCellCentres() const noexcept
 {
     return cellCentresPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasFaceCentres() const
+inline bool Foam::primitiveMesh::hasFaceCentres() const noexcept
 {
     return faceCentresPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasCellVolumes() const
+inline bool Foam::primitiveMesh::hasCellVolumes() const noexcept
 {
     return cellVolumesPtr_;
 }
 
 
-inline bool Foam::primitiveMesh::hasFaceAreas() const
+inline bool Foam::primitiveMesh::hasFaceAreas() const noexcept
 {
     return faceAreasPtr_;
 }

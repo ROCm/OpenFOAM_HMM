@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
     // Fatal with FULLDEBUG
     {
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         const label nx = mesh.sizes().x();
         const label ny = mesh.sizes().y();
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
                 << err.message().c_str() << nl;
         }
 
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
     }
 
 

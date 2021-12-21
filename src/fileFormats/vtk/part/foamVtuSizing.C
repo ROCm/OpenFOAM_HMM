@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 #include "cellShape.H"
 
 // Only used in this file
-#include "foamVtuSizingTemplates.C"
+#include "foamVtuSizingImpl.C"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -39,6 +39,162 @@ void Foam::vtk::vtuSizing::presizeMaps(foamVtkMeshMaps& maps) const
 {
     maps.cellMap().resize(this->nFieldCells());
     maps.additionalIds().resize(this->nAddPoints());
+}
+
+
+void Foam::vtk::vtuSizing::checkSizes
+(
+    const vtk::vtuSizing& sizing,
+
+    const label cellTypes_size,
+    const label vertLabels_size,
+    const label vertOffset_size,
+    const label faceLabels_size,
+    const label faceOffset_size,
+
+    const enum contentType output,
+    const label cellMap_size,
+    const label addPointsIds_size
+)
+{
+    label nErrors = 0;
+
+    #undef  CHECK_SIZING
+    #define CHECK_SIZING(what, sizeInput, sizeExpected)        \
+    if (sizeInput != sizeExpected)                             \
+    {                                                          \
+        if (!nErrors++)                                        \
+        {                                                      \
+            FatalErrorInFunction << "VTK sizing error" << nl;  \
+        }                                                      \
+        FatalError                                             \
+            << "    " << what << " size=" << sizeInput         \
+            << " expected " << sizeExpected << nl;             \
+    }
+
+
+    CHECK_SIZING("cellTypes", cellTypes_size, sizing.nFieldCells());
+    CHECK_SIZING("cellMap", cellMap_size, sizing.nFieldCells());
+    CHECK_SIZING("addPointsIds", addPointsIds_size, sizing.nAddPoints());
+
+    switch (output)
+    {
+        case contentType::LEGACY:
+        {
+            CHECK_SIZING("legacy", vertLabels_size, sizing.sizeLegacy());
+            break;
+        }
+
+        case contentType::XML:
+        {
+            // XML uses connectivity/offset pair.
+            CHECK_SIZING
+            (
+                "connectivity",
+                vertLabels_size,
+                sizing.sizeXml(slotType::CELLS)
+            );
+            CHECK_SIZING
+            (
+                "offsets",
+                vertOffset_size,
+                sizing.sizeXml(slotType::CELLS_OFFSETS)
+            );
+            if (sizing.nFaceLabels())
+            {
+                CHECK_SIZING
+                (
+                    "faces",
+                    faceLabels_size,
+                    sizing.sizeXml(slotType::FACES)
+                );
+
+                CHECK_SIZING
+                (
+                    "faceOffsets",
+                    faceOffset_size,
+                    sizing.sizeXml(slotType::FACES_OFFSETS)
+                );
+            }
+            break;
+        }
+
+        case contentType::INTERNAL1:
+        {
+            // VTK-internal1 connectivity/offset pair.
+            CHECK_SIZING
+            (
+                "connectivity",
+                vertLabels_size,
+                sizing.sizeInternal1(slotType::CELLS)
+            );
+            CHECK_SIZING
+            (
+                "offsets",
+                vertOffset_size,
+                sizing.sizeInternal1(slotType::CELLS_OFFSETS)
+            );
+            if (sizing.nFaceLabels())
+            {
+                CHECK_SIZING
+                (
+                    "faces",
+                    faceLabels_size,
+                    sizing.sizeInternal1(slotType::FACES)
+                );
+                CHECK_SIZING
+                (
+                    "faceOffsets",
+                    faceOffset_size,
+                    sizing.sizeInternal1(slotType::FACES_OFFSETS)
+                );
+            }
+            break;
+        }
+
+        case contentType::INTERNAL2:
+        {
+            // VTK-internal2 connectivity/offset pair.
+            CHECK_SIZING
+            (
+                "connectivity",
+                vertLabels_size,
+                sizing.sizeInternal2(slotType::CELLS)
+            );
+            CHECK_SIZING
+            (
+                "offsets",
+                vertOffset_size,
+                sizing.sizeInternal2(slotType::CELLS_OFFSETS)
+            );
+            if (sizing.nFaceLabels())
+            {
+                CHECK_SIZING
+                (
+                    "faces",
+                    faceLabels_size,
+                    sizing.sizeInternal2(slotType::FACES)
+                );
+                CHECK_SIZING
+                (
+                    "faceOffsets",
+                    faceOffset_size,
+                    sizing.sizeInternal2(slotType::FACES_OFFSETS)
+                );
+            }
+            break;
+        }
+    }
+
+    if (nErrors)
+    {
+        FatalError
+            << nl
+            << "Total of " << nErrors << " sizing errors encountered!"
+            << exit(FatalError);
+    }
+
+    #undef CHECK_SIZING
 }
 
 
@@ -66,6 +222,7 @@ Foam::vtk::vtuSizing::vtuSizing
 void Foam::vtk::vtuSizing::clear() noexcept
 {
     decompose_   = false;
+    selectionMode_ = FULL_MESH;
     nCells_      = 0;
     nPoints_     = 0;
     nVertLabels_ = 0;
@@ -86,20 +243,56 @@ void Foam::vtk::vtuSizing::reset
     const bool decompose
 )
 {
-    const cellModel& tet      = cellModel::ref(cellModel::TET);
-    const cellModel& pyr      = cellModel::ref(cellModel::PYR);
-    const cellModel& prism    = cellModel::ref(cellModel::PRISM);
+    reset(mesh, labelUList::null(), decompose);
+}
+
+
+void Foam::vtk::vtuSizing::reset
+(
+    const polyMesh& mesh,
+    const labelUList& subsetCellsIds,
+    const bool decompose
+)
+{
+    // References to cell shape models
+    const cellModel& tet   = cellModel::ref(cellModel::TET);
+    const cellModel& pyr   = cellModel::ref(cellModel::PYR);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& hex   = cellModel::ref(cellModel::HEX);
     const cellModel& wedge    = cellModel::ref(cellModel::WEDGE);
     const cellModel& tetWedge = cellModel::ref(cellModel::TETWEDGE);
-    const cellModel& hex      = cellModel::ref(cellModel::HEX);
 
     const cellShapeList& shapes = mesh.cellShapes();
 
     // Unique vertex labels per polyhedral
     labelHashSet hashUniqId(2*256);
 
-    decompose_ = decompose;
-    nCells_    = mesh.nCells();
+
+    // Special treatment for mesh subsets.
+    const bool isSubsetMesh
+    (
+        notNull(subsetCellsIds)
+    );
+
+    if (isSubsetMesh)
+    {
+        decompose_  = false;  // Disallow decomposition for subset mode
+        selectionMode_ = selectionModeType::SUBSET_MESH;
+    }
+    else
+    {
+        decompose_  = decompose;  // Disallow decomposition
+        selectionMode_ = selectionModeType::FULL_MESH;
+    }
+
+    const label nInputCells =
+    (
+        isSubsetMesh
+      ? subsetCellsIds.size()
+      : shapes.size()
+    );
+
+    nCells_    = nInputCells;
     nPoints_   = mesh.nPoints();
     nAddCells_ = 0;
     nAddVerts_ = 0;
@@ -109,10 +302,10 @@ void Foam::vtk::vtuSizing::reset
     nFaceLabels_ = 0;
     nVertPoly_   = 0;
 
-    const label len = mesh.nCells();
-
-    for (label celli=0; celli < len; ++celli)
+    for (label inputi = 0; inputi < nInputCells; ++inputi)
     {
+        const label celli(isSubsetMesh ? subsetCellsIds[inputi] : inputi);
+
         const cellShape& shape = shapes[celli];
         const cellModel& model = shape.model();
 
@@ -128,15 +321,15 @@ void Foam::vtk::vtuSizing::reset
             --nCellsPoly_;
             nVertLabels_ += shape.size();
         }
-        else if (model == tetWedge && decompose)
+        else if (model == tetWedge && decompose_)
         {
             nVertLabels_ += 6;  // Treat as squeezed prism (VTK_WEDGE)
         }
-        else if (model == wedge && decompose)
+        else if (model == wedge && decompose_)
         {
             nVertLabels_ += 8;  // Treat as squeezed hex
         }
-        else if (decompose)
+        else if (decompose_)
         {
             // Polyhedral: Decompose into tets + pyramids.
             ++nAddPoints_;
@@ -199,7 +392,78 @@ void Foam::vtk::vtuSizing::reset
     }
 
     // Requested and actually required
-    decompose_ = (decompose && nCellsPoly_);
+    decompose_ = (decompose_ && nCellsPoly_);
+}
+
+
+// Synchronize changes here with the following:
+// - vtuSizing::resetShapes
+// - vtuSizing::populateArrays
+//
+void Foam::vtk::vtuSizing::resetShapes
+(
+    const UList<cellShape>& shapes
+)
+{
+    const cellModel& tet      = cellModel::ref(cellModel::TET);
+    const cellModel& pyr      = cellModel::ref(cellModel::PYR);
+    const cellModel& prism    = cellModel::ref(cellModel::PRISM);
+    const cellModel& hex      = cellModel::ref(cellModel::HEX);
+
+    decompose_ = false;  // Disallow decomposition
+    selectionMode_ = SHAPE_MESH;
+
+    const label nInputCells = shapes.size();
+
+    nCells_    = nInputCells;
+    nPoints_   = 0;
+    nAddCells_ = 0;
+    nAddVerts_ = 0;
+
+    nCellsPoly_  = 0;
+    nVertLabels_ = 0;
+    nFaceLabels_ = 0;
+    nVertPoly_   = 0;
+
+    label nIgnored = 0;
+
+    for (label inputi = 0; inputi < nInputCells; ++inputi)
+    {
+        const cellShape& shape = shapes[inputi];
+        const cellModel& model = shape.model();
+
+        if
+        (
+            model == tet
+         || model == pyr
+         || model == prism
+         || model == hex
+        )
+        {
+            nVertLabels_ += shape.size();
+
+            // Guess for number of addressed points
+            nPoints_ = max(nPoints_, max(shape));
+        }
+        else
+        {
+            --nCells_;
+            ++nIgnored;
+        }
+    }
+
+    if (nIgnored)
+    {
+        FatalErrorInFunction
+            << "Encountered " << nIgnored << " unsupported cell shapes"
+            << " ... this is likely not good" << nl
+            << exit(FatalError);
+    }
+
+    if (nCells_)
+    {
+        ++nPoints_;
+    }
 }
 
 
@@ -339,6 +603,35 @@ void Foam::vtk::vtuSizing::populateLegacy
 }
 
 
+void Foam::vtk::vtuSizing::populateShapesLegacy
+(
+    const UList<cellShape>& shapes,
+    UList<uint8_t>& cellTypes,
+    labelUList& vertLabels,
+    foamVtkMeshMaps& maps
+) const
+{
+    // Leave as zero-sized so that populateArrays doesn't fill it.
+    List<label> unused;
+
+    presizeMaps(maps);
+
+    populateArrays
+    (
+        shapes,
+        *this,
+        cellTypes,
+        vertLabels,
+        unused, // offsets
+        unused, // faces
+        unused, // facesOffsets
+        contentType::LEGACY,
+        maps.cellMap(),
+        maps.additionalIds()
+    );
+}
+
+
 void Foam::vtk::vtuSizing::populateXml
 (
     const polyMesh& mesh,
@@ -361,6 +654,38 @@ void Foam::vtk::vtuSizing::populateXml
         offsets,
         faces,
         facesOffsets,
+        contentType::XML,
+        maps.cellMap(),
+        maps.additionalIds()
+    );
+}
+
+
+void Foam::vtk::vtuSizing::populateShapesXml
+(
+    const UList<cellShape>& shapes,
+    UList<uint8_t>& cellTypes,
+    labelUList& connectivity,
+    labelUList& offsets,
+    labelUList& faces,
+    labelUList& facesOffsets,
+    foamVtkMeshMaps& maps
+) const
+{
+    // Leave as zero-sized so that populateArrays doesn't fill it.
+    List<label> unused;
+
+    presizeMaps(maps);
+
+    populateArrays
+    (
+        shapes,
+        *this,
+        cellTypes,
+        connectivity,
+        offsets,
+        unused, // faces
+        unused, // facesOffsets
         contentType::XML,
         maps.cellMap(),
         maps.additionalIds()

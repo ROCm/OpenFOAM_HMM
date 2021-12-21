@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,9 +269,9 @@ Foam::autoPtr<Foam::updateMethod> Foam::updateMethod::New
 
     Info<< "updateMethod type : " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -282,7 +282,7 @@ Foam::autoPtr<Foam::updateMethod> Foam::updateMethod::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<updateMethod>(cstrIter()(mesh, dict));
+    return autoPtr<updateMethod>(ctorPtr(mesh, dict));
 }
 
 

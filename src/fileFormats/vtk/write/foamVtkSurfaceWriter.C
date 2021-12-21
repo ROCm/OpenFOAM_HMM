@@ -88,7 +88,7 @@ bool Foam::vtk::surfaceWriter::beginFile(std::string title)
         return vtk::fileWriter::beginFile(title);
     }
 
-    if (instant_.name().size())
+    if (!instant_.name().empty())
     {
         return vtk::fileWriter::beginFile
         (
@@ -126,6 +126,12 @@ void Foam::vtk::surfaceWriter::piece
 
     points_ = std::cref<pointField>(points);
     faces_ = std::cref<faceList>(faces);
+}
+
+
+bool Foam::vtk::surfaceWriter::writeProcIDs()
+{
+    return vtk::fileWriter::writeProcIDs(nLocalPolys_);
 }
 
 

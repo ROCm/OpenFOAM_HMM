@@ -81,22 +81,6 @@ addNamedToRunTimeSelectionTable
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-static inline const TimeState* lookupTimeState
-(
-    const polyMesh& m
-)
-{
-    return &static_cast<const TimeState&>(m.time());
-}
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
@@ -106,30 +90,37 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
+    expressions::fvExprDriver(dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
+    hasDimensions_(false),
     fieldGeoType_(NO_DATA),
-    resultDimension_()
-{}
+    resultDimensions_()
+{
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
+}
 
 
 Foam::expressions::volumeExpr::parseDriver::parseDriver
 (
     const fvMesh& mesh,
-    const parseDriver& driver
+    const parseDriver& rhs,
+    const dictionary& dict
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(driver),
+    expressions::fvExprDriver(rhs, dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
+    hasDimensions_(false),
     fieldGeoType_(NO_DATA),
-    resultDimension_()
+    resultDimensions_()
 {
-    resetTimeReference(mesh_.time());  // Extra safety
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
 }
 
 
@@ -152,13 +143,16 @@ Foam::expressions::volumeExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict, lookupTimeState(mesh)),
+    expressions::fvExprDriver(dict),
     mesh_(mesh),
     resultType_(),
     isLogical_(false),
     fieldGeoType_(NO_DATA),
-    resultDimension_()
-{}
+    resultDimensions_()
+{
+    resetTimeReference(nullptr);
+    resetDb(mesh_.thisDb());
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -169,7 +163,15 @@ bool Foam::expressions::volumeExpr::parseDriver::readDict
 )
 {
     expressions::fvExprDriver::readDict(dict);
-    dict.readIfPresent("dimensions", resultDimension_);
+
+    resultDimensions_.clear();  // Avoid stickiness
+
+    hasDimensions_ = resultDimensions_.readEntry
+    (
+        "dimensions",
+        dict,
+        false  // mandatory=false
+    );
 
     return true;
 }
@@ -189,6 +191,94 @@ unsigned Foam::expressions::volumeExpr::parseDriver::parse
     scan.process(expr, pos, len, *this);
 
     return 0;
+}
+
+
+void Foam::expressions::volumeExpr::parseDriver::clearField()
+{
+    resultField_.reset(nullptr);
+
+    // Characteristics
+    resultType_.clear();
+    isLogical_ = false;
+    fieldGeoType_ = NO_DATA;
+}
+
+
+Foam::autoPtr<Foam::regIOobject>
+Foam::expressions::volumeExpr::parseDriver::dupZeroField() const
+{
+    const auto* regIOobjectPtr = resultField_.get();
+
+    if (!regIOobjectPtr)
+    {
+        return nullptr;
+    }
+
+    autoPtr<regIOobject> zField;
+
+    switch (fieldGeoType_)
+    {
+        #undef  doLocalCode
+        #define doLocalCode(GeoField)                                         \
+        {                                                                     \
+            const auto* ptr = dynamic_cast<const GeoField*>(regIOobjectPtr);  \
+            typedef typename GeoField::value_type Type;                       \
+                                                                              \
+            if (ptr)                                                          \
+            {                                                                 \
+                zField.reset                                                  \
+                (                                                             \
+                    GeoField::New                                             \
+                    (                                                         \
+                        word(pTraits<Type>::typeName) + word("(zero)"),       \
+                        (*ptr).mesh(),                                        \
+                        dimensioned<Type>(Zero),                              \
+                        /* zeroGradient (volume) or calculated (other) */     \
+                        defaultBoundaryType(*ptr)                             \
+                    ).ptr()                                                   \
+                );                                                            \
+                break;                                                        \
+            }                                                                 \
+        }
+
+        case FieldAssociation::VOLUME_DATA:
+        {
+            doLocalCode(volScalarField);
+            doLocalCode(volVectorField);
+            doLocalCode(volTensorField);
+            doLocalCode(volSymmTensorField);
+            doLocalCode(volSphericalTensorField);
+            break;
+        }
+        case FieldAssociation::FACE_DATA:
+        {
+            doLocalCode(surfaceScalarField);
+            doLocalCode(surfaceVectorField);
+            doLocalCode(surfaceTensorField);
+            doLocalCode(surfaceSymmTensorField);
+            doLocalCode(surfaceSphericalTensorField);
+            break;
+        }
+        case FieldAssociation::POINT_DATA:
+        {
+            doLocalCode(pointScalarField);
+            doLocalCode(pointVectorField);
+            doLocalCode(pointTensorField);
+            doLocalCode(pointSymmTensorField);
+            doLocalCode(pointSphericalTensorField);
+            break;
+        }
+        default: break;
+        #undef doLocalCode
+    }
+
+    // if (!zField)
+    // {
+    //     // Report
+    // }
+
+    return zField;
 }
 
 

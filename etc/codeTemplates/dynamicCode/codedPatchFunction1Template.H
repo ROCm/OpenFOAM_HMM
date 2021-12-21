@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedPatchFunction1Template${FieldType}_H
-#define codedPatchFunction1Template${FieldType}_H
+#ifndef dynamicCode_codedPatchFunction1_${typeName}_${FieldType}_H
+#define dynamicCode_codedPatchFunction1_${typeName}_${FieldType}_H
 
 #include "PatchFunction1.H"
 #include "dictionaryContent.H"
@@ -126,20 +126,11 @@ public:
 
     // Member Functions
 
+        //- Is value uniform (i.e. independent of coordinate)
+        virtual bool uniform() const { return false; }
+
         //- Return value as a function of (scalar) independent variable
         virtual tmp<Field<${TemplateType}>> value(const scalar x) const;
-
-        //- Is value constant (i.e. independent of x)
-        virtual bool constant() const
-        {
-            return false;
-        }
-
-        //- Is value uniform (i.e. independent of coordinate)
-        virtual bool uniform() const
-        {
-            return false;
-        }
 };
 
 

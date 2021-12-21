@@ -16,15 +16,18 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    Info<< "Writing edges in obj format" << endl;
+    Info<< nl
+        << "Writing edges in obj format" << endl;
 
-    word outputName("faMesh-edges.obj");
+    word outputName("finiteArea-edges.obj");
 
     if (Pstream::parRun())
     {
         outputName = word
         (
-            "faMesh-edges-" + Foam::name(Pstream::myProcNo()) + ".obj"
+            "finiteArea-edges-proc"
+          + Foam::name(Pstream::myProcNo())
+          + ".obj"
         );
     }
 
@@ -36,7 +39,7 @@ Description
         false
     );
 
-    os.write(areaMesh.patch().edges(), areaMesh.patch().localPoints());
+    os.write(aMesh.patch().edges(), aMesh.patch().localPoints());
 }
 
 

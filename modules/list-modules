@@ -6,9 +6,10 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     SPDX-License-Identifier: (GPL-3.0+)
 #     Copyright (C) 2020 OpenCFD Ltd.
 #------------------------------------------------------------------------------
+# SPDX-License-Identifier: (GPL-3.0+)
+#
 # Script
 #     list-modules
 #

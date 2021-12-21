@@ -13,8 +13,7 @@ cp -rf ../common/0.orig 0
 
 cp -rf ../common/constant constant
 
-m4 system/blockMeshDict.m4 > system/blockMeshDict
-runApplication blockMesh
+runApplication blockMesh -dict ../common/blockMeshDict
 
 runApplication $(getApplication)
 

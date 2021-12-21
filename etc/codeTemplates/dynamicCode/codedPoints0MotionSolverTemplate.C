@@ -75,10 +75,14 @@ extern "C" void ${typeName}_${SHA1sum}(bool load)
 ${localCode}
 //}}} end localCode
 
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-${typeName}Points0MotionSolver::${typeName}Points0MotionSolver
+Foam::
+${typeName}Points0MotionSolver::
+${typeName}Points0MotionSolver
 (
     const polyMesh& mesh,
     const IOdictionary& dict
@@ -90,13 +94,16 @@ ${typeName}Points0MotionSolver::${typeName}Points0MotionSolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-${typeName}Points0MotionSolver::~${typeName}Points0MotionSolver()
+Foam::
+${typeName}Points0MotionSolver::
+~${typeName}Points0MotionSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<pointField> ${typeName}Points0MotionSolver::curPoints() const
+Foam::tmp<Foam::pointField>
+Foam::${typeName}Points0MotionSolver::curPoints() const
 {
     if (${verbose:-false})
     {
@@ -108,9 +115,5 @@ tmp<pointField> ${typeName}Points0MotionSolver::curPoints() const
 //}}} end code
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,10 +41,11 @@ Foam::vtkSetWriter<Type>::vtkSetWriter()
     writer<Type>()
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::vtkSetWriter<Type>::~vtkSetWriter()
+Foam::vtkSetWriter<Type>::vtkSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
@@ -111,6 +112,7 @@ template<class Type>
 void Foam::vtkSetWriter<Type>::write
 (
     const bool writeTracks,
+    const List<scalarField>& times,
     const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,

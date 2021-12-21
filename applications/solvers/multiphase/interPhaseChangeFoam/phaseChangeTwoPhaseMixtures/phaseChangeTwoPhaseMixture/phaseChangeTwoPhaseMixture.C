@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "phaseChangeTwoPhaseMixture.H"
+#include "surfaceMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

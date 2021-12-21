@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2020 OpenCFD Ltd.
+#     Copyright (C) 2017-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -43,22 +43,31 @@
 #       eval "$(foamCleanPath -sh=PATH "$PATH" dir1:dir2)"
 #       eval "$(foamCleanPath -sh=PATH -env=PATH dir1:dir2)"
 #       eval "$(foamCleanPath -sh-env=PATH dir1:dir2)"
+#       eval "$(foamCleanPath -sh-path dir1:dir2)"
 #
 #     - Similarly for c-shell
-#       eval `foamCleanPath -csh-env=PATH dir1:dir2`
+#       eval `foamCleanPath -csh-path dir1:dir2`
+#
+# For library paths, it is suggested to use -sh-lib, or -csh-lib.
+# The will use DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH on Darwin.
 #
 #------------------------------------------------------------------------------
 printHelp() {
     cat<<USAGE
 
-Usage: foamCleanPath [OPTION] path [filter] .. [filter]
+Usage: foamCleanPath [OPTION] ENV [filter] .. [filter]
        foamCleanPath [OPTION] -env=name [filter] .. [filter]
 options:
-  -env=NAME         Evaluate NAME to obtain initial content
-  -csh=NAME         Produce 'setenv NAME ...' output for csh eval
-  -csh-env=NAME     Like -csh=NAME, with -env for initial content
+  -env=NAME         Evaluate NAME to obtain initial content,
+                    Accepts "-env=-path", "-env=-lib" shortcuts for PATH
+                    and LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on Darwin)
   -sh=NAME          Produce 'NAME=...' output for sh eval
-  -sh-env=NAME      Like -sh=NAME, with -env for initial content
+  -csh=NAME         Produce 'setenv NAME ...' output for csh eval
+  -sh-env=NAME      Same as -sh=NAME -env=NAME
+  -csh-env=NAME     Same as -csh=NAME -env=NAME
+  -sh-path | -csh-path  Same as -[c]sh-env=PATH
+  -sh-lib  | -csh-lib   Same as -[c]sh-env=LD_LIBRARY_PATH
+                        or DYLD_LIBRARY_PATH on Darwin
   -debug            Print debug information to stderr
   -strip            Remove inaccessible directories
   -verbose          Report some progress (input, output, ...)
@@ -94,7 +103,7 @@ die()
 #-------------------------------------------------------------------------------
 
 # Input and outputs
-unset dirList shellOutput
+unset dirList shellOutput shellFlavour
 unset optDebug optEnvName optStrip optVerbose
 
 # Parse options
@@ -106,31 +115,56 @@ do
         ;;
 
     -env=*)
-        optEnvName="${1#*=}"
-        [ -n "$optEnvName" ] || die "Option '$1' missing an ENVNAME"
-        ;;
-
-    -csh=* | -sh=* | -csh-env=* | -sh-env=*)
         name="${1#*=}"
         [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
 
-        # For (-csh-env | -sh-env) also use name for input evaluation
-        case "$1" in
-        *-env=*)
-            optEnvName="$name"
-            name="$optEnvName"
+        # Accept aliases
+        case "$name" in
+        (-path) name='PATH';;
+        (-lib)
+            case "$(uname -s 2>/dev/null)" in
+                (Darwin) name='DYLD_LIBRARY_PATH';;
+                (*) name='LD_LIBRARY_PATH';;
+            esac
             ;;
-        esac
+         esac
+         optEnvName="$name"     # Use for input evaluation
+         ;;
 
-        # Shell-specific output prefix ("setenv ENVNAME xyz" or "ENVNAME=xyz")
-        case "$1" in
-        -csh*)
-            shellOutput="setenv $name "
-            ;;
-        *)
-            shellOutput="$name="
+    -csh-path | -sh-path)
+        shellFlavour="$1"
+        name='PATH'
+        optEnvName="$name"      # Use for input evaluation
+        shellOutput="$name"     # Use for output
+        ;;
+
+    -csh-lib | -sh-lib)
+        shellFlavour="$1"
+        case "$(uname -s 2>/dev/null)" in
+            (Darwin) name='DYLD_LIBRARY_PATH';;
+            (*) name='LD_LIBRARY_PATH';;
+        esac
+        optEnvName="$name"      # Use for input evaluation
+        shellOutput="$name"     # Use for output
+        ;;
+
+    -csh=* | -sh=* | -csh-env=* | -sh-env=*)
+        shellFlavour="$1"
+        name="${1#*=}"
+        [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
+        # Accept aliases
+        case "$name" in
+        (-path) name='PATH';;
+        (-lib)
+            case "$(uname -s 2>/dev/null)" in
+                (Darwin) name='DYLD_LIBRARY_PATH';;
+                (*) name='LD_LIBRARY_PATH';;
+            esac
             ;;
         esac
+        shellOutput="$name"     # Use for output
+        # Use for input evaluation
+        case "$1" in (*-env=*) optEnvName="$name";; esac
         ;;
 
     -debug)
@@ -148,6 +182,17 @@ do
     esac
     shift
 done
+
+# Set the output prefix
+#    c-shell:  setenv ENVNAME ...
+#    POSIX  :  ENVNAME=...
+if [ -n "$shellOutput" ]
+then
+    case "$shellFlavour" in
+    (-csh*) shellOutput="setenv ${shellOutput} " ;;
+    (*)     shellOutput="${shellOutput}=" ;;
+    esac
+fi
 
 
 # Basic checks

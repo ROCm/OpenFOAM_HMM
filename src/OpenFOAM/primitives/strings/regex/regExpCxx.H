@@ -27,9 +27,23 @@ Class
     Foam::regExpCxx
 
 Description
-    Wrapper around C++11 regular expressions.
+    Wrapper around C++11 regular expressions
+    with some additional prefix-handling. The prefix-handling is loosely
+    oriented on PCRE regular expressions and provides a simple means of
+    tuning the expressions.
 
-    Using either POSIX extended regular expressions or
+    The prefixes are detected as \c (?...) at the beginning of
+    the regular expression. Any unknown/unsupported prefixes are silently
+    ignored.
+
+    - "(?!i)" :
+       one or more embedded pattern-match modifiers for the entire pattern.
+    - the \c 'i' indicates ignore-case
+    - the \c '!' (exclamation) indicates negated (inverted) matching
+    .
+
+Note
+    Uses either POSIX extended regular expressions or
     <a href=
     "http://www.cplusplus.com/reference/regex/ECMAScript"
     >modified ECMAScript regular expression grammar</a>
@@ -37,10 +51,6 @@ Description
     Since ECMAScript grammar may not work correctly on all installations,
     the current default is to use extended regular expressions.
 
-    The JAVA/PCRE '(?i)' extension is supported as a prefix to compile the
-    regular expression as being case-insensitive.
-
-Note
     The C++11 regular expressions may be broken on some compilers.
     For example, gcc 4.8 is known to fail.
     For these systems the POSIX implementation or alternative must be used.
@@ -50,8 +60,8 @@ Warning
     Use the Foam::regExp typedef instead.
 
 SourceFiles
-    regExpCxxI.H
     regExpCxx.C
+    regExpCxxI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,13 +82,19 @@ namespace Foam
 
 class regExpCxx
 {
+    // Data Types
+
+        //- Simple control types
+        enum ctrlType { EMPTY = 0, NORMAL = 1, NEGATED = 2 };
+
+
     // Private Data
 
         //- Regular expression (using char type)
         std::regex re_;
 
-        //- Track if input pattern was OK - ie, has a length
-        bool ok_;
+        //- Track if input pattern is non-empty, negated etc.
+        unsigned char ctrl_;
 
 
     // Private Member Functions
@@ -86,6 +102,10 @@ class regExpCxx
         //- Select grammar based on regExpCxx optimisationSwitch
         //  0 = extended, 1 = ECMAScript
         static inline std::regex::flag_type syntax();
+
+        //- Assign pattern
+        bool set_pattern(const char* pattern, size_t len, bool ignoreCase);
+
 
 public:
 
@@ -174,13 +194,20 @@ public:
 
     // Access
 
-        //- Return true if expression is empty
+        //- True if expression is empty
         inline bool empty() const noexcept;
 
-        //- Return true if expression is non-empty
+        //- True if expression is non-empty
         inline bool exists() const noexcept;
 
-        //- The number of capture groups for a non-empty expression
+        //- True if pattern matching is negated
+        inline bool negated() const noexcept;
+
+        //- Change pattern negation, return previous value
+        inline bool negate(bool on) noexcept;
+
+        //- The number of capture groups for a non-empty,
+        //- non-negated expressions
         inline unsigned ngroups() const;
 
         //  \return True if the pattern was set with ignore-case.
@@ -198,17 +225,19 @@ public:
 
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
-        bool set(const char* pattern, bool ignoreCase=false);
+        inline bool set(const char* pattern, bool ignoreCase=false);
 
         //- Compile pattern into a regular expression, optionally ignore case.
         //  \return True if the pattern was compiled
-        bool set(const std::string& pattern, bool ignoreCase=false);
+        inline bool set(const std::string& pattern, bool ignoreCase=false);
 
 
     // Matching/Searching
 
         //- Find position within the text.
         //  \return The index where it begins or string::npos if not found
+        //
+        //  \note does not properly work with negated regex!
         inline std::string::size_type find(const std::string& text) const;
 
         //- True if the regex matches the entire text.
@@ -218,6 +247,8 @@ public:
         //- True if the regex matches the text, set the matches.
         //  The first group starts at index 1 (0 is the entire match).
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
+        //
+        //  \note does not properly work with negated regex!
         inline bool match(const std::string& text, results_type& matches) const;
 
         //- Return true if the regex was found within the text

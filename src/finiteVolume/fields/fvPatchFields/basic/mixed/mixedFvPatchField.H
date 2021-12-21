@@ -100,6 +100,9 @@ class mixedFvPatchField
         //- Fraction (0-1) of value used for boundary condition
         scalarField valueFraction_;
 
+        //- Source field
+        Field<Type> source_;
+
 
 public:
 
@@ -217,6 +220,16 @@ public:
             virtual const scalarField& valueFraction() const
             {
                 return valueFraction_;
+            }
+
+            virtual Field<Type>& source()
+            {
+                return source_;
+            }
+
+            virtual const Field<Type>& source() const
+            {
+                return source_;
             }
 
 

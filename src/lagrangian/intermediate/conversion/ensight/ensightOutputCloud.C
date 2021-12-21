@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,17 +29,17 @@ License
 #include "fvMesh.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
-#include "pointField.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     //- Binary output
-    static inline void writeMeasured
+    static inline void writeMeasured_binary
     (
         ensightFile& os,
-        const pointField& points
+        const UList<point>& points
     )
     {
         for (const point& p : points)
@@ -51,11 +51,11 @@ namespace Foam
     }
 
     //- ASCII output. Id + position together
-    static inline label writeMeasured
+    static inline label writeMeasured_ascii
     (
         ensightFile& os,
         label pointId,
-        const pointField& points
+        const UList<point>& points
     )
     {
         for (const point& p : points)
@@ -80,17 +80,50 @@ bool Foam::ensightOutput::writeCloudPositions
     const fvMesh& mesh,
     const word& cloudName,
     bool exists,
-    autoPtr<ensightFile>& output,
-    Pstream::commsTypes comm
+    autoPtr<ensightFile>& output
 )
 {
-    pointField positions;
+    label nLocalParcels(0);
+    autoPtr<Cloud<passiveParticle>> parcelsPtr;
 
     if (exists)
     {
-        Cloud<passiveParticle> parcels(mesh, cloudName, false);
+        parcelsPtr.reset(new Cloud<passiveParticle>(mesh, cloudName, false));
+        nLocalParcels = parcelsPtr().size();
+    }
 
-        positions.resize(parcels.size());
+    // Total number of parcels on all processes
+    const label nTotParcels = returnReduce(nLocalParcels, sumOp<label>());
+
+    if (Pstream::master())
+    {
+        ensightFile& os = output();
+        os.beginParticleCoordinates(nTotParcels);
+    }
+
+    if (!nTotParcels)
+    {
+        return false;  // DONE
+    }
+
+
+    // Size information (offsets are irrelevant)
+    const globalIndex procAddr
+    (
+        UPstream::listGatherValues<label>(nLocalParcels),
+        globalIndex::SIZES
+    );
+
+
+    DynamicList<point> positions;
+    positions.reserve(Pstream::master() ? procAddr.maxSize() : nLocalParcels);
+
+    // Extract positions
+    if (parcelsPtr)
+    {
+        const auto& parcels = *parcelsPtr;
+
+        positions.resize_nocopy(parcels.size());  // same as nLocalParcels
 
         auto outIter = positions.begin();
 
@@ -99,75 +132,74 @@ bool Foam::ensightOutput::writeCloudPositions
             *outIter = p.position();
             ++outIter;
         }
+
+        parcelsPtr.reset(nullptr);
     }
-
-
-    // Total number of parcels on all processes
-    const label nTotParcels = returnReduce(positions.size(), sumOp<label>());
-
-    // Update the exists/not exists information (for return value)
-    exists = nTotParcels;
 
     if (Pstream::master())
     {
         ensightFile& os = output();
+        const bool isBinaryOutput = (os.format() == IOstream::BINARY);
 
-        os.beginParticleCoordinates(nTotParcels);
-        if (!exists)
-        {
-            return exists;  // DONE
-        }
+        label parcelId = 0;
 
-        if (os.format() == IOstream::BINARY)
+        if (isBinaryOutput)
         {
-            // binary write is Ensight6 - first ids, then positions
+            // NB: binary write is Ensight6 - first ids, then positions
 
             // 1-index
-            for (label parcelId = 1; parcelId <= nTotParcels; ++parcelId)
+            for (label id = 1; id <= nTotParcels; ++id)
             {
-                os.write(parcelId);
+                os.write(id);
             }
 
-            // Master
-            writeMeasured(os, positions);
-
-            // Slaves
-            for (const int slave : Pstream::subProcs())
-            {
-                IPstream fromSlave(comm, slave);
-                pointField recv(fromSlave);
-
-                writeMeasured(os, recv);
-            }
+            // Write master data
+            writeMeasured_binary(os, positions);
         }
         else
         {
-            // ASCII id + position together
-            label parcelId = 0;
+            // NB: ascii write is (id + position) together
 
-            // Master
-            parcelId = writeMeasured(os, parcelId, positions);
+            // Write master data
+            parcelId = writeMeasured_ascii(os, parcelId, positions);
+        }
 
-            // Slaves
-            for (const int slave : Pstream::subProcs())
+
+        // Receive and write
+        for (const label proci : procAddr.subProcs())
+        {
+            positions.resize_nocopy(procAddr.localSize(proci));
+            UIPstream::read
+            (
+                UPstream::commsTypes::scheduled,
+                proci,
+                positions.data_bytes(),
+                positions.size_bytes()
+            );
+
+            if (isBinaryOutput)
             {
-                IPstream fromSlave(comm, slave);
-                pointField recv(fromSlave);
-
-                parcelId = writeMeasured(os, parcelId, recv);
+                writeMeasured_binary(os, positions);
+            }
+            else
+            {
+                parcelId = writeMeasured_ascii(os, parcelId, positions);
             }
         }
     }
-    else if (nTotParcels)
+    else
     {
-        // SLAVE, and data exist
-        OPstream toMaster(comm, Pstream::masterNo());
-
-        toMaster
-            << positions;
+        // Send
+        UOPstream::write
+        (
+            UPstream::commsTypes::scheduled,
+            Pstream::masterNo(),
+            positions.cdata_bytes(),
+            positions.size_bytes()
+        );
     }
 
-    return exists;
+    return true;
 }
 
 

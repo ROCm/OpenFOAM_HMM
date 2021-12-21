@@ -112,7 +112,7 @@ namespace fv
 
 class meanVelocityForce
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

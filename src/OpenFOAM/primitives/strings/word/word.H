@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,6 +54,10 @@ namespace Foam
 class word;
 Istream& operator>>(Istream& is, word& val);
 Ostream& operator<<(Ostream& os, const word& val);
+
+//- Hashing for word
+template<> struct Hash<word> : string::hasher {};
+
 
 /*---------------------------------------------------------------------------*\
                            Class word Declaration
@@ -204,6 +208,8 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // IOstream Operators
 
 //- Read operator
@@ -231,7 +237,7 @@ word name(const void* ptr);
 template<class T>
 struct nameOp
 {
-    inline word operator()(const T& obj) const
+    word operator()(const T& obj) const
     {
         return obj.name();
     }
@@ -242,7 +248,7 @@ struct nameOp
 template<class T>
 struct typeOp
 {
-    inline word operator()(const T& obj) const
+    word operator()(const T& obj) const
     {
         return obj.type();
     }

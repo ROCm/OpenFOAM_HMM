@@ -32,14 +32,22 @@ struct myScalarField : public scalarField
 template<class T>
 void printInfo(const refPtr<T>& item, const bool verbose = false)
 {
-    Info<< "refPtr valid:" << Switch::name(item.valid())
+    Info<< "refPtr good:" << Switch::name(item.good())
         << " pointer:" << Switch::name(item.is_pointer())
-        << " addr: " << name(item.get())
+        << " addr: " << Foam::name(item.get())
         << " movable:" << Switch(item.movable());
 
-    Info<< nl;
+    Info<< " move-constructible:"
+        << std::is_move_constructible<refPtr<T>>::value
+        << " move-assignable:"
+        << std::is_move_assignable<refPtr<T>>::value
+        << " nothrow:"
+        << std::is_nothrow_move_assignable<refPtr<T>>::value
+        << " trivially:"
+        << std::is_trivially_move_assignable<refPtr<T>>::value
+        << nl;
 
-    if (verbose && item.valid())
+    if (verbose && item)
     {
         Info<< "content: " << item() << nl;
     }
@@ -94,6 +102,8 @@ int main()
     }
 
     Info<< "\nEnd" << endl;
+
+    return 0;
 }
 
 

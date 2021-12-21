@@ -96,7 +96,7 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh)
+    fv::cellSetOption(name, modelType, dict, mesh)
 {
     read(dict);
 }
@@ -122,7 +122,7 @@ void Foam::fv::velocityDampingConstraint::writeData(Ostream& os) const
 
 bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         coeffs_.readEntry("UMax", UMax_);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,10 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline Foam::line<Point, PointRef>::line(const Point& start, const Point& end)
+inline Foam::line<Point, PointRef>::line(const Point& from, const Point& to)
 :
-    a_(start),
-    b_(end)
+    a_(from),
+    b_(to)
 {}
 
 
@@ -61,34 +61,34 @@ inline Foam::line<Point, PointRef>::line(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::first() const
+inline PointRef Foam::line<Point, PointRef>::first() const noexcept
 {
     return a_;
 }
 
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::second() const
+inline PointRef Foam::line<Point, PointRef>::second() const noexcept
 {
     return b_;
 }
 
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::last() const
+inline PointRef Foam::line<Point, PointRef>::last() const noexcept
 {
     return b_;
 }
 
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::start() const
+inline PointRef Foam::line<Point, PointRef>::start() const noexcept
 {
     return first();
 }
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::end() const
+inline PointRef Foam::line<Point, PointRef>::end() const noexcept
 {
     return second();
 }
@@ -171,7 +171,7 @@ Foam::scalar Foam::line<Point, PointRef>::nearestDist
     Point c(edge.start() - start());
 
     Point crossab = a ^ b;
-    scalar magCrossSqr = magSqr(crossab);
+    const scalar magCrossSqr = Foam::magSqr(crossab);
 
     if (magCrossSqr > VSMALL)
     {

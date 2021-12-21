@@ -56,16 +56,17 @@ class IPstream
     public Pstream,
     public UIPstream
 {
+    // Private Data
 
-    //- Receive index
-    label externalBufPosition_;
+        //- Receive index into Pstream::transferBuf_
+        label transferBufPosition_;
 
 public:
 
     // Constructors
 
-        //- Construct given process index to read from and optional buffer size,
-        //- read format and IO version
+        //- Construct given process index to read from
+        //- and optional buffer size, read format
         IPstream
         (
             const commsTypes commsType,
@@ -73,8 +74,7 @@ public:
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
             const label comm = UPstream::worldComm,
-            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY,
-            IOstreamOption::versionNumber ver = IOstreamOption::currentVersion
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
         );
 };
 

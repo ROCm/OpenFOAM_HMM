@@ -25,206 +25,146 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Macros to enable the easy declaration of member function selection tables.
+    Macros to ease declaration of member function selection tables.
+
+Note
+    Uses macros from runTimeSelectionTables.H
 
 \*---------------------------------------------------------------------------*/
-
-#include "token.H"
 
 #ifndef memberFunctionSelectionTables_H
 #define memberFunctionSelectionTables_H
 
-#include "HashTable.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Declare a run-time selection:
-#define declareMemberFunctionSelectionTable(                                   \
-    returnType,baseType,memberFunction,argNames,argList,parList)               \
+//
+// Declaration Macros
+//
+
+//- Declare a run-time member-function selection (variables and adder classes)
+#define declareMemberFunctionSelectionTable\
+(returnType,baseType,funcName,argNames,argList,parListUnused)                  \
                                                                                \
-    /* Construct from argList function pointer type */                         \
-    typedef returnType (*memberFunction##argNames##MemberFunctionPtr)argList;  \
+    declareRunTimeSelectionTableBase(                                          \
+        returnType, funcName##argNames##MemberFunction, argList);              \
                                                                                \
-    /* Construct from argList function table type */                           \
-    typedef HashTable                                                          \
-    <                                                                          \
-        memberFunction##argNames##MemberFunctionPtr,                           \
-        ::Foam::word,                                                          \
-        ::Foam::string::hasher                                                 \
-    > memberFunction##argNames##MemberFunctionTable;                           \
-                                                                               \
-    /* Construct from argList function pointer table pointer */                \
-    static memberFunction##argNames##MemberFunctionTable*                      \
-        memberFunction##argNames##MemberFunctionTablePtr_;                     \
-                                                                               \
-    /* Class to add constructor from argList to table */                       \
+    /* Helper to add funcName to table */                                      \
     template<class baseType##Type>                                             \
-    class add##memberFunction##argNames##MemberFunctionToTable                 \
+    struct add##funcName##argNames##MemberFunctionToTable                      \
     {                                                                          \
-    public:                                                                    \
-                                                                               \
-        explicit add##memberFunction##argNames##MemberFunctionToTable          \
+        explicit add##funcName##argNames##MemberFunctionToTable                \
         (                                                                      \
-            const ::Foam::word& lookup = baseType##Type::typeName              \
+            const ::Foam::word& k = baseType##Type::typeName                   \
         )                                                                      \
         {                                                                      \
-            construct##memberFunction##argNames##MemberFunctionTables();       \
-            memberFunction##argNames##MemberFunctionTablePtr_->insert          \
+            funcName##argNames##MemberFunctionTablePtr_construct(true);        \
+            if                                                                 \
             (                                                                  \
-                lookup,                                                        \
-                baseType##Type::memberFunction                                 \
-            );                                                                 \
+                !funcName##argNames##MemberFunctionTablePtr_                   \
+                   ->insert(k, baseType##Type::funcName)                       \
+            )                                                                  \
+            {                                                                  \
+                std::cerr                                                      \
+                    << "Duplicate entry " << k << " in member table "          \
+                    << #baseType << std::endl;                                 \
+                ::Foam::error::safePrintStack(std::cerr);                      \
+            }                                                                  \
         }                                                                      \
                                                                                \
-        ~add##memberFunction##argNames##MemberFunctionToTable()                \
+        ~add##funcName##argNames##MemberFunctionToTable()                      \
         {                                                                      \
-            destroy##memberFunction##argNames##MemberFunctionTables();         \
+            funcName##argNames##MemberFunctionTablePtr_construct(false);       \
         }                                                                      \
+                                                                               \
+        add##funcName##argNames##MemberFunctionToTable                         \
+            (const add##funcName##argNames##MemberFunctionToTable&)            \
+            = delete;                                                          \
+        void operator=                                                         \
+            (const add##funcName##argNames##MemberFunctionToTable&)            \
+            = delete;                                                          \
     };                                                                         \
                                                                                \
-    /* Table memberFunction called from the table add function */              \
-    static void construct##memberFunction##argNames##MemberFunctionTables();   \
-                                                                               \
-    /* Table destructor called from the table add function destructor */       \
-    static void destroy##memberFunction##argNames##MemberFunctionTables()
-
-
-// Constructor aid
-#define defineMemberFunctionSelectionTableMemberFunction(                      \
-    baseType,memberFunction,argNames)                                          \
-                                                                               \
-    /* Table memberFunction called from the table add function */              \
-    void baseType::construct##memberFunction##argNames##MemberFunctionTables() \
+    /* Helper to add funcName to table */                                      \
+    template<class baseType##Type>                                             \
+    struct addRemovable##funcName##argNames##MemberFunctionToTable             \
     {                                                                          \
-        static bool constructed = false;                                       \
-        if (!constructed)                                                      \
-        {                                                                      \
-            constructed = true;                                                \
-            baseType::memberFunction##argNames##MemberFunctionTablePtr_        \
-                = new baseType::memberFunction##argNames##MemberFunctionTable; \
-        }                                                                      \
-    }
-
-
-// Destructor aid
-#define defineMemberFunctionSelectionTableDestructor(                          \
-    baseType,memberFunction,argNames)                                          \
+        const ::Foam::word name;  /* Retain name for later removal */          \
                                                                                \
-    /* Table destructor called from the table add function destructor */       \
-    void baseType::destroy##memberFunction##argNames##MemberFunctionTables()   \
+        explicit addRemovable##funcName##argNames##MemberFunctionToTable       \
+        (                                                                      \
+            const ::Foam::word& k = baseType##Type::typeName                   \
+        )                                                                      \
+        :                                                                      \
+            name(k)                                                            \
+        {                                                                      \
+            funcName##argNames##MemberFunctionTablePtr_construct(true);        \
+            funcName##argNames##MemberFunctionTablePtr_                        \
+               ->set(k, baseType##Type::funcName);                             \
+        }                                                                      \
+                                                                               \
+        ~addRemovable##funcName##argNames##MemberFunctionToTable()             \
+        {                                                                      \
+            if (funcName##argNames##MemberFunctionTablePtr_)                   \
+            {                                                                  \
+                funcName##argNames##MemberFunctionTablePtr_->erase(name);      \
+            }                                                                  \
+        }                                                                      \
+                                                                               \
+        addRemovable##funcName##argNames##MemberFunctionToTable                \
+            (const addRemovable##funcName##argNames##MemberFunctionToTable&)   \
+            = delete;                                                          \
+        void operator=                                                         \
+            (const addRemovable##funcName##argNames##MemberFunctionToTable&)   \
+            = delete;                                                          \
+    };                                                                         \
+                                                                               \
+    /* Helper to add alias for funcName to table */                            \
+    template<class baseType##Type>                                             \
+    struct addAlias##funcName##argNames##MemberFunctionToTable                 \
     {                                                                          \
-        if (baseType::memberFunction##argNames##MemberFunctionTablePtr_)       \
+        explicit addAlias##funcName##argNames##MemberFunctionToTable           \
+        (                                                                      \
+            const ::Foam::word& k,                                             \
+            const ::Foam::word& alias,                                         \
+            const int ver                                                      \
+        )                                                                      \
         {                                                                      \
-            delete baseType::memberFunction##argNames##                        \
-                MemberFunctionTablePtr_;                                       \
-            baseType::memberFunction##argNames##                               \
-                MemberFunctionTablePtr_ = nullptr;                             \
+            funcName##argNames##MemberFunctionCompatTable()                    \
+                .set(alias, std::pair<::Foam::word,int>(k,ver));               \
         }                                                                      \
-    }
-
-
-// Create pointer to hash-table of functions
-#define defineMemberFunctionSelectionTablePtr(baseType,memberFunction,argNames)\
-                                                                               \
-    /* Define the memberFunction table */                                      \
-    baseType::memberFunction##argNames##MemberFunctionTable*                   \
-        baseType::memberFunction##argNames##MemberFunctionTablePtr_(nullptr)
+    };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//
+// Definition Macros
+//
+
 //- Define run-time selection table
-#define defineMemberFunctionSelectionTable(baseType,memberFunction,argNames)   \
+#define defineMemberFunctionSelectionTable(baseType,funcName,argNames)         \
                                                                                \
-    defineMemberFunctionSelectionTablePtr                                      \
-        (baseType,memberFunction,argNames);                                    \
-    defineMemberFunctionSelectionTableMemberFunction                           \
-        (baseType,memberFunction,argNames)                                     \
-    defineMemberFunctionSelectionTableDestructor                               \
-        (baseType,memberFunction,argNames)
+    defineRunTimeSelectionTableBase(                                           \
+        baseType,baseType::funcName##argNames##MemberFunction,)
 
 
 //- Define run-time selection table for template classes
 //  use when baseType doesn't need a template argument (eg, is a typedef)
-#define defineTemplateMemberFunctionSelectionTable(                            \
-    baseType,memberFunction,argNames)                                          \
+#define defineTemplateMemberFunctionSelectionTable(baseType,funcName,argNames) \
                                                                                \
-    template<>                                                                 \
-    defineMemberFunctionSelectionTablePtr                                      \
-        (baseType,memberFunction,argNames);                                    \
-    template<>                                                                 \
-    defineMemberFunctionSelectionTableMemberFunction                           \
-        (baseType,memberFunction,argNames)                                     \
-    template<>                                                                 \
-    defineMemberFunctionSelectionTableDestructor                               \
-        (baseType,memberFunction,argNames)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Constructor aid: use when baseType requires the Targ template argument
-#define defineTemplatedMemberFunctionSelectionTableMemberFunction(             \
-    baseType,memberFunction,argNames,Targ)                                     \
-                                                                               \
-    /* Table memberFunction called from the table add function */              \
-    void baseType<Targ>::construct##memberFunction##argNames##                 \
-    MemberFunctionTables()                                                     \
-    {                                                                          \
-        static bool constructed = false;                                       \
-        if (!constructed)                                                      \
-        {                                                                      \
-            constructed = true;                                                \
-            baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_  \
-                = new baseType<Targ>::memberFunction##argNames##               \
-                  MemberFunctionTable;                                         \
-        }                                                                      \
-    }
-
-
-// Destructor aid
-// use when baseType requires the Targ template argument
-#define defineTemplatedMemberFunctionSelectionTableDestructor(                 \
-    baseType,memberFunction,argNames,Targ)                                     \
-                                                                               \
-    /* Table destructor called from the table add function destructor */       \
-    void baseType<Targ>::destroy##memberFunction##argNames##                   \
-    MemberFunctionTables()                                                     \
-    {                                                                          \
-        if (baseType<Targ>::memberFunction##argNames##MemberFunctionTablePtr_) \
-        {                                                                      \
-            delete baseType<Targ>::memberFunction##argNames##                  \
-                MemberFunctionTablePtr_;                                       \
-            baseType<Targ>::memberFunction##argNames##                         \
-                MemberFunctionTablePtr_ = nullptr;                             \
-        }                                                                      \
-    }
-
-
-// Create pointer to hash-table of functions
-// use when baseType requires the Targ template argument
-#define defineTemplatedMemberFunctionSelectionTablePtr(                        \
-    baseType,memberFunction,argNames,Targ)                                     \
-                                                                               \
-    /* Define the memberFunction table */                                      \
-    baseType<Targ>::memberFunction##argNames##MemberFunctionTable*             \
-        baseType<Targ>::memberFunction##argNames##                             \
-        MemberFunctionTablePtr_(nullptr)
+    defineRunTimeSelectionTableBase(                                           \
+        baseType,baseType::funcName##argNames##MemberFunction,template<>)
 
 
 //- Define run-time selection table for template classes
 //  use when baseType requires the Targ template argument
-#define defineTemplatedMemberFunctionSelectionTable(                           \
-    baseType,memberFunction,argNames,Targ)                                     \
+#define defineTemplatedMemberFunctionSelectionTable\
+(baseType,funcName,argNames,Targ)                                              \
                                                                                \
-    template<>                                                                 \
-    defineTemplatedMemberFunctionSelectionTablePtr                             \
-        (baseType,memberFunction,argNames,Targ);                               \
-    template<>                                                                 \
-    defineTemplatedMemberFunctionSelectionTableMemberFunction                  \
-        (baseType,memberFunction,argNames,Targ)                                \
-    template<>                                                                 \
-    defineTemplatedMemberFunctionSelectionTableDestructor                      \
-        (baseType,memberFunction,argNames,Targ)
+    defineRunTimeSelectionTableBase(                                           \
+        baseType,baseType<Targ>::funcName##argNames##MemberFunction,template<>)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

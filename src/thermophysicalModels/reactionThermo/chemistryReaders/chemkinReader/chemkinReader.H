@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +45,6 @@ SourceFiles
 #include "chemistryReader.H"
 #include "fileName.H"
 #include "typeInfo.H"
-#include "HashPtrTable.H"
-#include "ReactionList.H"
 #include "DynamicList.H"
 #include "labelList.H"
 #include "speciesTable.H"
@@ -68,10 +67,9 @@ class chemkinReader
     public chemistryReader<gasHThermoPhysics>,
     public yyFlexLexer
 {
-
 public:
 
-    // Public data types
+    // Public Data Types
 
         enum phase
         {
@@ -176,7 +174,7 @@ private:
         HashTable<phase> speciePhase_;
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        HashPtrTable<gasHThermoPhysics> speciesThermo_;
+        ReactionTable<gasHThermoPhysics> speciesThermo_;
 
         //- Table of species composition
         speciesCompositionTable speciesComposition_;
@@ -357,7 +355,7 @@ public:
         }
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        const HashPtrTable<gasHThermoPhysics>& speciesThermo() const
+        const ReactionTable<gasHThermoPhysics>& speciesThermo() const
         {
             return speciesThermo_;
         }

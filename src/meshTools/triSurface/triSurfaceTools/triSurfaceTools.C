@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2201,19 +2201,16 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
     // Storage for surfaceMesh. Size estimate.
     List<labelledTri> triangles;
 
-    // Calculate number of faces and triangles
-    label nFaces = 0;
+    // Calculate number of triangles
     label nTris = 0;
 
     for (const label patchi : includePatches)
     {
         const polyPatch& patch = bMesh[patchi];
         const pointField& points = patch.points();
-        nFaces += patch.size();
         for (const face& f :  patch)
         {
-            faceList triFaces(f.nTriangles(points));
-            nTris += triFaces.size();
+            nTris += f.nTriangles(points);
         }
     }
 
@@ -2230,7 +2227,7 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
         label nTriTotal = 0;
 
         label faceI = 0;
-        for (const face& f :  patch)
+        for (const face& f : patch)
         {
             faceList triFaces(f.nTriangles(points));
 

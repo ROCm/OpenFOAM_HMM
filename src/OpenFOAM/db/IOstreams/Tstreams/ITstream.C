@@ -31,34 +31,31 @@ License
 #include "StringStream.H"
 #include "UIListStream.H"
 
-
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-namespace
+namespace Foam
 {
 
 // Failsafe read-access.
 // Return the token at location, or undefinedToken.
-inline static const Foam::token& peekTokenAt
+inline static const token& peekTokenAt
 (
-    const Foam::UList<Foam::token>& list,
-    const Foam::label i
+    const UList<token>& list,
+    const label i
 )
 {
     return
     (
         i >= 0 && i < list.size()
       ? list[i]
-      : Foam::token::undefinedToken
+      : token::undefinedToken
     );
 }
 
-} // End anonymous namespace
 
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
+// Convert input sequence into a list of tokens.
+// Return the number of tokens in the resulting list.
+static label parseStream(ISstream& is, tokenList& tokens)
 {
     label nTok = 0;
 
@@ -76,6 +73,10 @@ Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
     return nTok;
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::tokenList Foam::ITstream::parse
 (

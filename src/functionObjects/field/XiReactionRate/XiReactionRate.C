@@ -74,20 +74,17 @@ bool Foam::functionObjects::XiReactionRate::execute()
 
 bool Foam::functionObjects::XiReactionRate::write()
 {
-    const volScalarField& b =
-        mesh_.lookupObject<volScalarField>("b");
+    const volScalarField& b = mesh_.lookupObject<volScalarField>("b");
 
-    const volScalarField& Su =
-        mesh_.lookupObject<volScalarField>("Su");
+    const volScalarField& Su = mesh_.lookupObject<volScalarField>("Su");
 
-    const volScalarField& Xi =
-        mesh_.lookupObject<volScalarField>("Xi");
+    const volScalarField& Xi = mesh_.lookupObject<volScalarField>("Xi");
 
     const volScalarField St
     (
         IOobject
         (
-            "St",
+            scopedName("St"),
             time_.timeName(),
             mesh_
         ),
@@ -103,7 +100,7 @@ bool Foam::functionObjects::XiReactionRate::write()
     (
         IOobject
         (
-            "wdot",
+            scopedName("wdot"),
             time_.timeName(),
             mesh_
         ),

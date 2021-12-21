@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,6 @@ Description
     A class for storing list addressing (labels, slices etc), which are
     normally to used by IndirectList.
     Private inheritance is often used by any inheriting classes.
-
-SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,13 +74,13 @@ public:
     // Member Functions
 
         //- Const access to the addressing
-        const Addr& addressing() const
+        const Addr& addressing() const noexcept
         {
             return storedAddr_;
         }
 
         //- Non-const access to the addressing
-        Addr& addressing()
+        Addr& addressing() noexcept
         {
             return storedAddr_;
         }

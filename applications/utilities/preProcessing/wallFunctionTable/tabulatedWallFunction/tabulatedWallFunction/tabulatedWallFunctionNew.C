@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,9 @@ Foam::tabulatedWallFunctions::tabulatedWallFunction::New
 
     Info<< "Selecting tabulatedWallFunction " << functionName << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionName);
+    auto* ctorPtr = dictionaryConstructorTable(functionName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -54,7 +54,7 @@ Foam::tabulatedWallFunctions::tabulatedWallFunction::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<tabulatedWallFunction>(cstrIter()(dict, mesh));
+    return autoPtr<tabulatedWallFunction>(ctorPtr(dict, mesh));
 }
 
 

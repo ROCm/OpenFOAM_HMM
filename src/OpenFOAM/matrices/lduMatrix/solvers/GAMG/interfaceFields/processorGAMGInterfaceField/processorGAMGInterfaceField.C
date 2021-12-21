@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
     solveScalarField&,
     const bool,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -112,8 +114,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<char*>(scalarReceiveBuf_.data()),
-            scalarReceiveBuf_.byteSize(),
+            scalarReceiveBuf_.data_bytes(),
+            scalarReceiveBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );
@@ -123,8 +125,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         (
             Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            reinterpret_cast<const char*>(scalarSendBuf_.cdata()),
-            scalarSendBuf_.byteSize(),
+            scalarSendBuf_.cdata_bytes(),
+            scalarSendBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );
@@ -142,6 +144,8 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
@@ -152,6 +156,8 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     {
         return;
     }
+
+    const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
     if
     (
@@ -178,7 +184,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         transformCoupleField(scalarReceiveBuf_, cmpt);
 
         // Multiply the field by coefficients and add into the result
-        addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
+        addToInternalField(result, !add, faceCells, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -192,7 +198,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         );
         transformCoupleField(pnf, cmpt);
 
-        addToInternalField(result, !add, coeffs, pnf);
+        addToInternalField(result, !add, faceCells, coeffs, pnf);
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;

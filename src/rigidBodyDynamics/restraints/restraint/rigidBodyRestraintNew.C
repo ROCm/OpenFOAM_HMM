@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,9 @@ Foam::RBD::restraint::New
 {
     const word restraintType(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(restraintType);
+    auto* ctorPtr = dictionaryConstructorTable(restraintType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -53,7 +53,7 @@ Foam::RBD::restraint::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<restraint>(cstrIter()(name, dict, model));
+    return autoPtr<restraint>(ctorPtr(name, dict, model));
 }
 
 

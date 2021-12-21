@@ -34,10 +34,11 @@ template<class Type>
 Foam::Function1Types::Constant<Type>::Constant
 (
     const word& entryName,
-    const Type& value
+    const Type& value,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName),
+    Function1<Type>(entryName, obrPtr),
     value_(value)
 {}
 
@@ -46,10 +47,11 @@ template<class Type>
 Foam::Function1Types::Constant<Type>::Constant
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict),
+    Function1<Type>(entryName, dict, obrPtr),
     value_(Zero)
 {
     const entry* eptr = dict.findEntry(entryName, keyType::LITERAL);
@@ -115,7 +117,8 @@ void Foam::Function1Types::Constant<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
 
-    os  << token::SPACE << value_ << token::END_STATEMENT << nl;
+    os  << token::SPACE << value_;
+    os.endEntry();
 }
 
 

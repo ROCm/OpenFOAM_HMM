@@ -76,7 +76,7 @@ void Foam::LUscalarMatrix::solve
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo(),
-                reinterpret_cast<const char*>(x.cdata()),
+                x.cdata_bytes(),
                 x.byteSize(),
                 Pstream::msgType(),
                 comm_
@@ -111,7 +111,7 @@ void Foam::LUscalarMatrix::solve
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo(),
-                reinterpret_cast<char*>(x.data()),
+                x.data_bytes(),
                 x.byteSize(),
                 Pstream::msgType(),
                 comm_

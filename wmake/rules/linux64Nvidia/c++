@@ -1,0 +1,17 @@
+#------------------------------------------------------------------------------
+include $(GENERAL_RULES)/Nvidia/c++
+
+c++ARCH     = -m64
+
+include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
+
+c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
+
+Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
+cctoo       = $(Ctoo)
+cpptoo      = $(Ctoo)
+cxxtoo      = $(Ctoo)
+
+include $(GENERAL_RULES)/Nvidia/link-c++
+
+#------------------------------------------------------------------------------

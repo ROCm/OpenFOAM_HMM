@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,10 +115,10 @@ public:
     // Member Functions
 
         //- Return const-access to the control-points
-        const pointField& points() const;
+        const pointField& points() const noexcept;
 
         //- The number of line segments
-        label nSegments() const;
+        label nSegments() const noexcept;
 
         //- The point position corresponding to the curve parameter
         //  0 <= lambda <= 1
@@ -129,7 +129,7 @@ public:
         point position(const label segment, const scalar) const;
 
         //- The length of the curve
-        scalar length() const;
+        scalar length() const noexcept;
 };
 
 

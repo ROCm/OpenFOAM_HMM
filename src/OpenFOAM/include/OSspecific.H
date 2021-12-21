@@ -82,8 +82,8 @@ FOAM_DEPRECATED_FOR(2020-05, "hasEnv() function")
 inline bool env(const std::string& envName) { return Foam::hasEnv(envName); }
 
 //- Return the system's host name, as per hostname(1)
-//  Optionally with the full name (as per the '-f' option)
-string hostName(const bool full=false);
+//  \note the full name (as per the '-f' option) may be unreliable
+string hostName(bool full=false);
 
 //- Return the system's domain name, as per hostname(1) with the '-d' option
 string domainName();

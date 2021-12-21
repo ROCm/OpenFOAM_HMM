@@ -85,9 +85,9 @@ Foam::fileOperations::fileOperationInitialise::New
 {
     DebugInFunction << "Constructing fileOperationInitialise" << endl;
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(type);
+    auto* ctorPtr = wordConstructorTable(type);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -97,7 +97,7 @@ Foam::fileOperations::fileOperationInitialise::New
         ) << abort(FatalError);
     }
 
-    return autoPtr<fileOperationInitialise>(cstrIter()(argc, argv));
+    return autoPtr<fileOperationInitialise>(ctorPtr(argc, argv));
 }
 
 

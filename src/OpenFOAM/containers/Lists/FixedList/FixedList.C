@@ -29,10 +29,10 @@ License
 #include "FixedList.H"
 #include "ListLoopM.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class T, unsigned N>
-std::streamsize Foam::FixedList<T, N>::byteSize() const
+std::streamsize Foam::FixedList<T, N>::byteSize()
 {
     if (!is_contiguous<T>::value)
     {
@@ -40,9 +40,11 @@ std::streamsize Foam::FixedList<T, N>::byteSize() const
             << "Invalid for non-contiguous data types"
             << abort(FatalError);
     }
-    return this->size_bytes();
+    return FixedList<T, N>::size_bytes();
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
 Foam::label Foam::FixedList<T, N>::find(const T& val, label pos) const
@@ -214,9 +216,5 @@ bool Foam::FixedList<T, N>::operator>=(const FixedList<T, N>& list) const
     return !operator<(list);
 }
 
-
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
-
-#include "FixedListIO.C"
 
 // ************************************************************************* //

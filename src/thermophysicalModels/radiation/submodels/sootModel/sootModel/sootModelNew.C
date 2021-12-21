@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,9 @@ Foam::radiation::sootModel::New
         Info<< "Selecting sootModel " << modelType << endl;
     }
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -60,7 +60,7 @@ Foam::radiation::sootModel::New
 
     const word className = modelType.substr(0, modelType.find('<'));
 
-    return autoPtr<sootModel>(cstrIter()(dict, mesh, className));
+    return autoPtr<sootModel>(ctorPtr(dict, mesh, className));
 }
 
 

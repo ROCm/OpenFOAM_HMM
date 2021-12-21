@@ -99,11 +99,6 @@ public:
         //- Move construct from List, sorting immediately
         inline SortableList(List<T>&& values);
 
-        //- Construct given begin/end iterators.
-        //  Uses std::distance to determine the size.
-        template<class InputIterator>
-        inline SortableList(InputIterator begIter, InputIterator endIter);
-
         //- Construct from an initializer list, sorting immediately
         inline SortableList(std::initializer_list<T> values);
 

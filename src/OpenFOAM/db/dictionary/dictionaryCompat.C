@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,23 +28,6 @@ License
 #include "dictionary.H"
 #include "Pstream.H"
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace
-{
-
-// Should issue warning if there is +ve versioning (+ve version number)
-// and the this version number is older than the current OpenFOAM version
-// as conveyed by the OPENFOAM compiler define.
-
-static inline constexpr bool shouldWarnVersion(const int version)
-{
-    return (version > 0 && version < OPENFOAM);
-}
-
-} // End anonymous namespace
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
@@ -61,30 +44,23 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
         return finder;
     }
 
-    for (const std::pair<const char*,int>& iter : compat)
+    for (const std::pair<const char*,int>& alt : compat)
     {
-        finder = csearch(word::validate(iter.first), matchOpt);
+        finder = csearch(word::validate(alt.first), matchOpt);
 
         if (finder.good())
         {
-            // Want single warning (on master), but guard with parRun to avoid
-            // Pstream::master() when Pstream has not yet been initialized
-            if
-            (
-                shouldWarnVersion(iter.second)
-             && (Pstream::parRun() ? Pstream::master() : true)
-            )
+            if (error::warnAboutAge(alt.second) && error::master())
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
-                    << "    Found [v" << iter.second << "] '"
-                    << iter.first << "' entry instead of '"
+                    << "    Found [v" << alt.second << "] '"
+                    << alt.first << "' entry instead of '"
                     << keyword.c_str() << "' in dictionary \""
-                    << name().c_str() << "\" "
-                    << nl
+                    << relativeName() << '"' << nl
                     << std::endl;
 
-                error::warnAboutAge("keyword", iter.second);
+                error::warnAboutAge("keyword", alt.second);
             }
 
             break;
@@ -130,7 +106,7 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << relativeName()
             << exit(FatalIOError);
     }
 

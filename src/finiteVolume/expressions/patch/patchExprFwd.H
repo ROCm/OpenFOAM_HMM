@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,20 +47,9 @@ namespace patchExpr
 class parser;
 class scanner;
 class parseDriver;
-union scanToken;
 
 //- Static debugging option
 extern int debug;
-
-
-//- The field association for patch expressions (mutually exclusive)
-enum FieldAssociation : unsigned char
-{
-    NO_DATA = 0,         //!< No data
-    POINT_DATA = 1,      //!< Point data
-    SURFACE_DATA = 2     //!< Surface data
-};
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,6 +62,7 @@ typedef patchExpr::parseDriver patchExprDriver;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace expressions
 } // End namespace Foam
 

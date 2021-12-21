@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +40,10 @@ Foam::rawSetWriter<Type>::rawSetWriter()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::rawSetWriter<Type>::~rawSetWriter()
+Foam::rawSetWriter<Type>::rawSetWriter(const dictionary& dict)
+:
+    writer<Type>(dict)
 {}
 
 
@@ -84,7 +85,8 @@ template<class Type>
 void Foam::rawSetWriter<Type>::write
 (
     const bool writeTracks,
-    const PtrList<coordSet>& points,
+    const List<scalarField>& times,
+    const PtrList<coordSet>& tracks,
     const wordList& valueSetNames,
     const List<List<Field<Type>>>& valueSets,
     Ostream& os
@@ -100,7 +102,7 @@ void Foam::rawSetWriter<Type>::write
 
     List<const List<Type>*> columns(valueSets.size());
 
-    forAll(points, trackI)
+    forAll(tracks, trackI)
     {
         // Collect sets into columns
         forAll(valueSets, i)
@@ -108,7 +110,7 @@ void Foam::rawSetWriter<Type>::write
             columns[i] = &valueSets[i][trackI];
         }
 
-        this->writeTable(points[trackI], columns, os);
+        this->writeTable(tracks[trackI], columns, os);
         os  << nl << nl;
     }
 }

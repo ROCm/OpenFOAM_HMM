@@ -39,6 +39,7 @@ Description
 #define SprayCloud_H
 
 #include "sprayCloud.H"
+#include "SortableList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

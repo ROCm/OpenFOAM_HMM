@@ -82,7 +82,6 @@ inline void Foam::expressions::exprDriver::addUniformVariable
 }
 
 
-
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::expressions::exprDriver::evaluate
 (

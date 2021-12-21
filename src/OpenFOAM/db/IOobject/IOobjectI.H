@@ -43,18 +43,13 @@ inline Foam::word Foam::IOobject::groupName
 }
 
 
-template<class StringType>
 inline Foam::word Foam::IOobject::scopedName
 (
-    StringType scope,
+    const std::string& scope,
     const word& name
 )
 {
-    if (name.empty())
-    {
-        return scope;
-    }
-    else if (scope.empty())
+    if (scope.empty())
     {
         return name;
     }

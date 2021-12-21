@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,13 +79,10 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregatedOrCoupled
             << endl;
     }
 
-    label maxIter = -1;
-    if (solverControls.readIfPresent("maxIter", maxIter))
+    // Do not solve if maxIter == 0
+    if (solverControls.getOrDefault<label>("maxIter", -1) == 0)
     {
-        if (maxIter == 0)
-        {
-            return SolverPerformance<Type>();
-        }
+        return SolverPerformance<Type>();
     }
 
     word type(solverControls.getOrDefault<word>("type", "segregated"));
@@ -116,6 +113,13 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
     const dictionary& solverControls
 )
 {
+    if (useImplicit_)
+    {
+        FatalErrorInFunction
+            << "Implicit option is not allowed for type: " << Type::typeName
+            << exit(FatalError);
+    }
+
     if (debug)
     {
         Info.masterStream(this->mesh().comm())
@@ -124,6 +128,13 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
                "solving fvMatrix<Type>"
             << endl;
     }
+
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
 
     auto& psi =
         const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
@@ -216,7 +227,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        if (SolverPerformance<Type>::debug)
+        if (logLevel)
         {
             solverPerf.print(Info.masterStream(this->mesh().comm()));
         }
@@ -251,6 +262,13 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
             << endl;
     }
 
+    const int logLevel =
+        solverControls.getOrDefault<int>
+        (
+            "log",
+            SolverPerformance<Type>::debug
+        );
+
     auto& psi =
         const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 
@@ -283,7 +301,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveCoupled
         coupledMatrixSolver->solve(psi)
     );
 
-    if (SolverPerformance<Type>::debug)
+    if (logLevel)
     {
         solverPerf.print(Info.masterStream(this->mesh().comm()));
     }

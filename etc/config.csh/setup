@@ -30,7 +30,7 @@
 setenv FOAM_API `$WM_PROJECT_DIR/bin/foamEtcFile -show-api`
 
 # The installation parent directory
-set prefixDir="${WM_PROJECT_DIR:h}"
+set _foamPrefixDir="${WM_PROJECT_DIR:h}"
 
 # Load shell "functions" (actually aliases)
 source "$WM_PROJECT_DIR/etc/config.csh/functions"
@@ -52,16 +52,16 @@ if ( -e "$WM_PROJECT_DIR/ThirdParty" ) then
     setenv WM_THIRD_PARTY_DIR "$WM_PROJECT_DIR/ThirdParty"
 else
     _foamEcho "Locating ThirdParty directory"
-    foreach foundDir (\
-        "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
-        "$prefixDir/ThirdParty-v$FOAM_API" \
-        "$prefixDir/ThirdParty-$FOAM_API" \
-        "$prefixDir/ThirdParty-common" \
+    foreach _foamFoundDir (\
+        "$_foamPrefixDir/ThirdParty-$WM_PROJECT_VERSION" \
+        "$_foamPrefixDir/ThirdParty-v$FOAM_API" \
+        "$_foamPrefixDir/ThirdParty-$FOAM_API" \
+        "$_foamPrefixDir/ThirdParty-common" \
     )
-        _foamEcho "... $foundDir"
-        if ( -d "$foundDir" ) then
-            if ( -f "$foundDir/Allwmake" || -d "$foundDir/platforms" ) then
-                setenv WM_THIRD_PARTY_DIR "$foundDir"
+        _foamEcho "... $_foamFoundDir"
+        if ( -d "$_foamFoundDir" ) then
+            if ( -f "$_foamFoundDir/Allwmake" || -d "$_foamFoundDir/platforms" ) then
+                setenv WM_THIRD_PARTY_DIR "$_foamFoundDir"
                 break
             else
                 _foamEcho "    does not have Allwmake or platforms/"
@@ -133,6 +133,9 @@ while ( $#argv > 0 )
     shift
 end
 
+
+#----------------------------------------------------------------------------
+
 # Verify FOAM_CONFIG_ETC (from calling environment or from prefs)
 if ( $?FOAM_CONFIG_ETC ) then
     if ( "$FOAM_CONFIG_ETC" == "etc" || "$FOAM_CONFIG_ETC" == "$WM_PROJECT_DIR/etc" ) then
@@ -142,29 +145,55 @@ if ( $?FOAM_CONFIG_ETC ) then
 endif
 
 
-# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Prevent local variables from shadowing setenv variables
+# Clean standard environment variables (PATH, MANPATH, [DY]LD_LIBRARY_PATH)
+# - avoid local variables shadowing setenv variables
+
 unset PATH MANPATH LD_LIBRARY_PATH DYLD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
+if ("${_foam_uname_s}" == "Darwin" ) then
+    if (! $?DYLD_LIBRARY_PATH ) setenv DYLD_LIBRARY_PATH
+endif
 
 _foamClean PATH "$foamOldDirs"
 _foamClean MANPATH "$foamOldDirs"
-_foamClean LD_LIBRARY_PATH "$foamOldDirs"
+_foamClean -lib "$foamOldDirs"
 
-# Setup for OpenFOAM compilation etc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#------------------------------------------------------------------------------
+# Base setup (OpenFOAM compilation), MPI and third-party packages
+
 _foamEtc -config  settings
-
-# Setup for third-party packages
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc -config  mpi
 _foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
 _foamEtc -config  vtk
 _foamEtc -config  adios2
 _foamEtc -config  CGAL
 _foamEtc -config  FFTW
+
+if (! $?FOAM_MPI ) then
+    setenv FOAM_MPI dummy  # Fallback value
+endif
+
+# Finalize library paths
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+# ThirdParty serial and mpi-specific libraries
+if ( $?FOAM_EXT_LIBBIN ) then
+    _foamAddLib "${FOAM_EXT_LIBBIN}"
+    if ( "$FOAM_MPI" != dummy ) then
+        _foamAddLib "${FOAM_EXT_LIBBIN}/${FOAM_MPI}"
+    endif
+endif
+
+# OpenFOAM serial and mpi-specific libraries
+_foamAddLib  "$FOAM_LIBBIN"
+if ( "$FOAM_MPI" != dummy ) then
+    _foamAddLib "${FOAM_LIBBIN}/${FOAM_MPI}"
+endif
+
+# OpenFOAM user, group libraries
+_foamAddLib  "${FOAM_USER_LIBBIN}:${FOAM_SITE_LIBBIN}"
 
 if ( -d "$WM_PROJECT_DIR/doc/man1" ) then
     _foamAddMan "$WM_PROJECT_DIR/doc"
@@ -177,12 +206,13 @@ if ($?prompt) then
 endif
 
 
-# Clean environment paths again. Only remove duplicates
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#------------------------------------------------------------------------------
 
-_foamClean PATH
-_foamClean MANPATH
-_foamClean LD_LIBRARY_PATH
+# Remove duplicates from environment paths
+
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean -lib
 
 # Add trailing ':' for system manpages
 if ( $?MANPATH ) then
@@ -212,6 +242,6 @@ unalias _foamAddLib
 unalias _foamAddLibAuto
 
 # Variables (done as final statement for a clean exit code)
-unset cleaned foamOldDirs foundDir prefixDir
+unset cleaned foamOldDirs _foam_uname_s _foamFoundDir _foamPrefixDir
 
 #------------------------------------------------------------------------------

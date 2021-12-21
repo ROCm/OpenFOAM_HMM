@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +27,7 @@ Class
     Foam::function1Base
 
 Description
-    Top level data entry class for use in dictionaries. Provides a mechanism
-    to specify a variable as a certain type, e.g. constant or time varying, and
-    provide functions to return the (interpolated) value, and integral between
-    limits.
-
-    Extends the Function1 class by adding autoMap and rMap functions
+    Base class for template-invariant parts of Function1
 
 SourceFiles
     function1Base.C
@@ -43,6 +38,7 @@ SourceFiles
 #define function1Base_H
 
 #include "dictionary.H"
+#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +46,7 @@ namespace Foam
 {
 
 // Forward Declarations
-class Time;
+template<class Type> class Function1;
 
 /*---------------------------------------------------------------------------*\
                      Class function1Base Declaration
@@ -60,12 +56,21 @@ class function1Base
 :
     public refCount
 {
+    // Private Member Functions
+
+        //- The associated registry, the time registry or nullptr
+        const objectRegistry* whichDb(const bool useTime) const noexcept;
+
+
 protected:
 
     // Protected Data
 
         //- Name of entry
         const word name_;
+
+        //- Pointer to an object registry
+        const objectRegistry* obrPtr_;
 
 
     // Protected Member Functions
@@ -78,18 +83,27 @@ public:
 
     // Constructors
 
-        //- Construct from entry name
-        explicit function1Base(const word& entryName);
+        //- Construct from entry name and optional registry
+        explicit function1Base
+        (
+            const word& entryName,
+            const objectRegistry* obrPtr = nullptr
+        );
 
-        //- Construct from entry name and dictionary (unused)
-        function1Base(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary (unused) and optional registry
+        function1Base
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
         //- Copy construct
         explicit function1Base(const function1Base& rhs);
 
 
     //- Destructor
-    virtual ~function1Base() = default;
+    virtual ~function1Base();
 
 
     // Member Functions
@@ -97,16 +111,63 @@ public:
     // Access
 
         //- The name of the entry
-        const word& name() const
+        const word& name() const noexcept
         {
             return name_;
+        }
+
+        //- Return the associated registry or nullptr.
+        const objectRegistry* whichDb() const noexcept
+        {
+            return obrPtr_;
+        }
+
+        //- Reset the associated objectRegistry
+        void resetDb(const objectRegistry* obrPtr = nullptr) noexcept;
+
+        //- Reset the associated objectRegistry
+        void resetDb(const objectRegistry& db) noexcept;
+
+        //- Return the object registry
+        //  FatalError if object registry is not set
+        const objectRegistry& obr() const;
+
+        //- Return true if this function was created with the time database
+        bool isTime() const noexcept;
+
+        //- Return the time database
+        //  FatalError if object registry is not set
+        const Time& time() const;
+
+        //- Return the mesh database if this Function1 was created using a mesh
+        //  Note: relies on refCast failure if the type is not correct
+        template<class MeshType>
+        const MeshType& mesh(const word& regionName = word::null) const
+        {
+            const objectRegistry* ptr = whichDb(!regionName.empty());
+
+            if (!ptr)
+            {
+                FatalErrorInFunction
+                    << "Object registry not set"
+                    << abort(FatalError);
+            }
+
+            if (regionName.empty())
+            {
+                return refCast<const MeshType>(*ptr);
+            }
+            else
+            {
+                return ptr->lookupObject<MeshType>(regionName);
+            }
         }
 
 
     // Manipulation
 
         //- Convert time
-        virtual void convertTimeBase(const Time& t);
+        virtual void userTimeToTime(const Time& t);
 };
 
 

@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkFileWriter.H"
+#include "globalIndex.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -47,6 +48,18 @@ Foam::vtk::fileWriter::stateNames
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::vtk::fileWriter::checkFormatterValidity() const
+{
+    // In parallel can be unallocated on non-master nodes
+    if ((parallel_ ? Pstream::master() : true) && !format_)
+    {
+        FatalErrorInFunction
+            << "unallocated formatter" << endl
+            << exit(FatalError);
+    }
+}
+
 
 Foam::Ostream& Foam::vtk::fileWriter::reportBadState
 (
@@ -284,7 +297,7 @@ Foam::vtk::fileWriter::fileWriter
     nCellData_(0),
     nPointData_(0),
     outputFile_(),
-    format_(),
+    format_(nullptr),
     os_()
 {
     // We do not currently support append mode at all
@@ -312,7 +325,7 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
 
     if (format_)
     {
-        format_.clear();
+        format_.reset(nullptr);
         os_.close();
     }
     nCellData_ = nPointData_ = 0;
@@ -342,7 +355,7 @@ bool Foam::vtk::fileWriter::open(const fileName& file, bool parallel)
 
     // Open a file and attach a formatter
     // - on master (always)
-    // - on slave if not parallel
+    // - on subproc (if not parallel)
     //
     // This means we can always check if format_ is defined to know if output
     // is desired on any particular process.
@@ -367,7 +380,7 @@ void Foam::vtk::fileWriter::close()
 
     if (format_)
     {
-        format_.clear();
+        format_.reset(nullptr);
         os_.close();
     }
 
@@ -515,7 +528,7 @@ void Foam::vtk::fileWriter::writeTimeValue(scalar timeValue)
             << exit(FatalError);
     }
 
-    // No collectives - can skip on slave processors
+    // No collectives - can skip on sub-procs
     if (!format_) return;
 
     if (legacy())
@@ -526,6 +539,68 @@ void Foam::vtk::fileWriter::writeTimeValue(scalar timeValue)
     {
         format().writeTimeValue(timeValue);
     }
+}
+
+
+bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
+{
+    // Write procIDs whenever running in parallel
+
+    if (!Pstream::parRun())
+    {
+        return false;  // Non-parallel: skip
+    }
+
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+    }
+    else
+    {
+        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
+            << " for procID field" << nl << endl
+            << exit(FatalError);
+
+        return false;
+    }
+
+
+    const globalIndex procSizes
+    (
+        parallel_
+      ? globalIndex(nValues)
+      : globalIndex()
+    );
+
+    const label totalCount = (parallel_ ? procSizes.size() : nValues);
+
+    this->beginDataArray<label>("procID", totalCount);
+
+    bool good = false;
+
+    if (parallel_)
+    {
+        if (Pstream::master())
+        {
+            // Per-processor ids
+            for (const int proci : Pstream::allProcs())
+            {
+                vtk::write(format(), label(proci), procSizes.localSize(proci));
+            }
+            good = true;
+        }
+    }
+    else
+    {
+        vtk::write(format(), label(Pstream::myProcNo()), totalCount);
+        good = true;
+    }
+
+
+    this->endDataArray();
+
+    // MPI barrier
+    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
 }
 
 

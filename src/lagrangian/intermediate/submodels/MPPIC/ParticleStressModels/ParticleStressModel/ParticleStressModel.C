@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,9 +68,9 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
 
     Info<< "Selecting particle stress model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = dictionaryConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -81,7 +81,7 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<ParticleStressModel>(cstrIter()(dict));
+    return autoPtr<ParticleStressModel>(ctorPtr(dict));
 }
 
 

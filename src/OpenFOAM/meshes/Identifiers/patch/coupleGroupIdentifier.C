@@ -131,8 +131,6 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coupleGroupIdentifier::coupleGroupIdentifier(const dictionary& dict)
-:
-    name_()
 {
     dict.readIfPresent("coupleGroup", name_);
 }
@@ -212,18 +210,18 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
 
 void Foam::coupleGroupIdentifier::write(Ostream& os) const
 {
-    if (valid())
+    if (!name_.empty())
     {
-        os.writeEntry("coupleGroup", name());
+        os.writeEntry("coupleGroup", name_);
     }
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const coupleGroupIdentifier& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const coupleGroupIdentifier& ident)
 {
-    p.write(os);
+    ident.write(os);
     os.check(FUNCTION_NAME);
     return os;
 }

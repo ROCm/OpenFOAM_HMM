@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,7 @@ License
 
 template<class ReactionThermo>
 Foam::label Foam::Reaction<ReactionThermo>::nUnNamedReactions = 0;
+
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -111,7 +112,7 @@ Foam::string Foam::Reaction<ReactionThermo>::reactionStr
 template<class ReactionThermo>
 void Foam::Reaction<ReactionThermo>::setThermo
 (
-    const HashPtrTable<ReactionThermo>& thermoDatabase
+    const ReactionTable<ReactionThermo>& thermoDatabase
 )
 {
 
@@ -158,7 +159,7 @@ Foam::Reaction<ReactionThermo>::Reaction
     const speciesTable& species,
     const List<specieCoeffs>& lhs,
     const List<specieCoeffs>& rhs,
-    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const ReactionTable<ReactionThermo>& thermoDatabase,
     bool initReactionThermo
 )
 :
@@ -321,7 +322,7 @@ template<class ReactionThermo>
 Foam::Reaction<ReactionThermo>::Reaction
 (
     const speciesTable& species,
-    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const ReactionTable<ReactionThermo>& thermoDatabase,
     const dictionary& dict,
     bool initReactionThermo
 )
@@ -352,15 +353,15 @@ Foam::autoPtr<Foam::Reaction<ReactionThermo>>
 Foam::Reaction<ReactionThermo>::New
 (
     const speciesTable& species,
-    const HashPtrTable<ReactionThermo>& thermoDatabase,
+    const ReactionTable<ReactionThermo>& thermoDatabase,
     const dictionary& dict
 )
 {
     const word reactionTypeName(dict.get<word>("type"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(reactionTypeName);
+    auto* ctorPtr = dictionaryConstructorTable(reactionTypeName);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -373,7 +374,7 @@ Foam::Reaction<ReactionThermo>::New
 
     return autoPtr<Reaction<ReactionThermo>>
     (
-        cstrIter()(species, thermoDatabase, dict)
+        ctorPtr(species, thermoDatabase, dict)
     );
 }
 
@@ -422,13 +423,6 @@ Foam::scalar Foam::Reaction<ReactionThermo>::kr
 ) const
 {
     return 0.0;
-}
-
-
-template<class ReactionThermo>
-const Foam::speciesTable& Foam::Reaction<ReactionThermo>::species() const
-{
-    return species_;
 }
 
 

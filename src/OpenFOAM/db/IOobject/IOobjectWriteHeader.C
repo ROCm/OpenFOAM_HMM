@@ -83,14 +83,16 @@ Foam::IOobject::writeBanner(Ostream& os, const bool noSyntaxHint)
     {
         // Populate: like strncpy but without trailing '\0'
 
-        std::size_t len = foamVersion::version.length();
+        const std::string apiValue(std::to_string(Foam::foamVersion::api));
+
+        std::size_t len = apiValue.length();
         if (len > 38)
         {
             len = 38;
         }
 
         std::memset(paddedVersion, ' ', 38);
-        std::memcpy(paddedVersion, foamVersion::version.c_str(), len);
+        std::memcpy(paddedVersion, apiValue.c_str(), len);
         paddedVersion[38] = '\0';
     }
 

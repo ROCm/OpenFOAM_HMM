@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,26 @@ namespace Foam
         box
     );
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Read min/max or min/span
+static void readBoxDim(const dictionary& dict, treeBoundBox& bb)
+{
+    dict.readEntry<point>("min", bb.min());
+
+    const bool hasSpan = dict.found("span");
+    if (!dict.readEntry<point>("max", bb.max(), keyType::REGEX, !hasSpan))
+    {
+        bb.max() = bb.min() + dict.get<vector>("span");
+    }
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -200,12 +220,21 @@ Foam::searchableBox::searchableBox
     const dictionary& dict
 )
 :
-    searchableBox
-    (
-        io,
-        treeBoundBox(dict.get<point>("min"), dict.get<point>("max"))
-    )
-{}
+    searchableSurface(io),
+    treeBoundBox()
+{
+    readBoxDim(dict, *this);
+
+    if (!treeBoundBox::valid())
+    {
+        FatalErrorInFunction
+            << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << nl
+            << exit(FatalError);
+    }
+
+    bounds() = static_cast<treeBoundBox>(*this);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -214,7 +243,7 @@ const Foam::wordList& Foam::searchableBox::regions() const
 {
     if (regions_.empty())
     {
-        regions_.setSize(1);
+        regions_.resize(1);
         regions_[0] = "region0";
     }
     return regions_;

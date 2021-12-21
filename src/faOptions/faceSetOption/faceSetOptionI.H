@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +27,19 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::fa::faceSetOption::timeStart() const
+inline Foam::scalar Foam::fa::faceSetOption::timeStart() const noexcept
 {
     return timeStart_;
 }
 
 
-inline Foam::scalar Foam::fa::faceSetOption::duration() const
+inline Foam::scalar Foam::fa::faceSetOption::duration() const noexcept
 {
     return duration_;
 }
 
 
-inline bool Foam::fa::faceSetOption::inTimeLimits(const scalar time) const
+inline bool Foam::fa::faceSetOption::inTimeLimits(const scalar timeValue) const
 {
     return
     (
@@ -53,40 +53,50 @@ inline bool Foam::fa::faceSetOption::inTimeLimits(const scalar time) const
 }
 
 
-inline const Foam::fa::faceSetOption::selectionModeType&
-Foam::fa::faceSetOption::selectionMode() const
+inline Foam::fa::faceSetOption::selectionModeType
+Foam::fa::faceSetOption::selectionMode() const noexcept
 {
     return selectionMode_;
 }
 
 
-inline const Foam::word& Foam::fa::faceSetOption::faceSetName() const
+inline bool Foam::fa::faceSetOption::useSubMesh() const noexcept
+{
+    return selectionMode_ != selectionModeType::smAll;
+}
+
+
+inline const Foam::word& Foam::fa::faceSetOption::faceSetName() const noexcept
 {
     return faceSetName_;
 }
 
 
-inline Foam::scalar Foam::fa::faceSetOption::A() const
+inline Foam::scalar Foam::fa::faceSetOption::A() const noexcept
 {
     return A_;
 }
 
 
-inline const Foam::labelList& Foam::fa::faceSetOption::faces() const
+inline const Foam::labelList& Foam::fa::faceSetOption::faces() const noexcept
 {
     return faces_;
 }
 
 
-inline Foam::scalar& Foam::fa::faceSetOption::timeStart()
+inline Foam::scalar Foam::fa::faceSetOption::timeStart(scalar val) noexcept
 {
-    return timeStart_;
+    scalar old(timeStart_);
+    timeStart_ = val;
+    return old;
 }
 
 
-inline Foam::scalar& Foam::fa::faceSetOption::duration()
+inline Foam::scalar Foam::fa::faceSetOption::duration(scalar val) noexcept
 {
-    return duration_;
+    scalar old(duration_);
+    duration_ = val;
+    return old;
 }
 
 

@@ -1,0 +1,143 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# settings
+
+    # operand setups
+    setups="
+    0
+    10
+    20
+    30
+    40
+    50
+    60
+    70
+    80
+    85
+    "
+
+    # flag to enable computations in parallel mode
+    parallel=true
+
+
+#------------------------------------------------------------------------------
+
+#######################################
+# Collect results into a given path
+# and clean the case for the next run
+# Arguments:
+#    $1 = Path to move results
+# Outputs:
+#    Writes info to stdout
+#######################################
+collect() {
+
+    [ $# -eq 0 ] && { echo "Usage: $0 dir-model"; exit 1; }
+
+    collection="$1"
+
+    dirResult=results/"$collection"
+    dirSettings="$dirResult"/system
+
+    if [ ! -d "$dirResult" ]
+    then
+
+        echo "      # Collecting results and settings into $dirResult"
+
+        mkdir -p "$dirSettings"
+
+        mv -f $(foamListTimes) "$dirResult"
+        [ -d postProcessing ] && mv -f postProcessing "$dirResult"
+        [ -d processor0 ] && mv -f processor* "$dirResult"
+        mv -f log.* "$dirResult"
+        mv -f logs "$dirResult"
+        mv -f constant "$dirResult"/
+        cp -f system/fv* system/controlDict "$dirSettings"
+        mv -f 0/ "$dirSettings"
+
+        echo "      # Cleaning up the case"
+
+        cleanTimeDirectories
+        cleanPostProcessing
+
+    else
+
+        echo "      # Directory $dirResult already exists"
+        echo "      # Skipping the computation"
+
+    fi
+
+}
+
+
+#------------------------------------------------------------------------------
+
+for setup in $setups
+do
+
+    echo ""
+    echo "# Computations for the setup: $setup"
+    echo ""
+
+    dirSetup="setups.orig/$setup"
+
+    if [ ! -d "$dirSetup" ]
+    then
+        echo "Setup directory: $dirSetup" \
+             "could not be found - skipping execution" 1>&2
+        exit 1
+    fi
+
+    cp -rfL "$dirSetup/0.orig" .
+    cp -rfL "$dirSetup/constant" .
+    cp -rfL "$dirSetup/system" .
+    cp -rf 0.orig/ 0/
+
+    runApplication blockMesh
+
+    runApplication renumberMesh -overwrite -constant
+
+    runApplication checkMesh \
+        -allTopology -allGeometry -constant \
+        -writeAllFields -writeAllSurfaceFields
+
+
+    if [ "$parallel" = true ]
+    then
+
+        runApplication decomposePar
+
+        runParallel -s parallel renumberMesh -overwrite
+
+        runParallel $(getApplication)
+
+        runApplication reconstructPar
+
+    else
+
+        runApplication $(getApplication)
+
+    fi
+
+    # runtime sampling has problems in parallel mode (Apr 2021)
+    runApplication \
+        postProcess -func sample -latestTime
+
+    runApplication -s "epsilon" \
+        postProcess -func sampleEpsilon -latestTime
+
+    runApplication -s "G"\
+        postProcess -func sampleG -latestTime
+
+    runApplication foamLog log.$(getApplication)
+
+    collect "$setup"
+
+done
+
+
+#------------------------------------------------------------------------------

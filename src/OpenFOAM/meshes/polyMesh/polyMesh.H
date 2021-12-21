@@ -478,19 +478,19 @@ public:
             const indexedOctree<treeDataCell>& cellTree() const;
 
             //- Return point zone mesh
-            const pointZoneMesh& pointZones() const
+            const pointZoneMesh& pointZones() const noexcept
             {
                 return pointZones_;
             }
 
             //- Return face zone mesh
-            const faceZoneMesh& faceZones() const
+            const faceZoneMesh& faceZones() const noexcept
             {
                 return faceZones_;
             }
 
             //- Return cell zone mesh
-            const cellZoneMesh& cellZones() const
+            const cellZoneMesh& cellZones() const noexcept
             {
                 return cellZones_;
             }
@@ -499,13 +499,13 @@ public:
             const globalMeshData& globalData() const;
 
             //- Return communicator used for parallel communication
-            label comm() const;
+            label comm() const noexcept;
 
             //- Return communicator used for parallel communication
-            label& comm();
+            label& comm() noexcept;
 
             //- Return the object registry
-            const objectRegistry& thisDb() const
+            const objectRegistry& thisDb() const noexcept
             {
                 return *this;
             }
@@ -520,37 +520,37 @@ public:
             }
 
             //- Is mesh moving
-            bool moving() const
+            bool moving() const noexcept
             {
                 return moving_;
             }
 
             //- Set the mesh to be moving
-            bool moving(const bool m)
+            bool moving(const bool on) noexcept
             {
-                bool m0 = moving_;
-                moving_ = m;
-                return m0;
+                bool old(moving_);
+                moving_ = on;
+                return old;
             }
 
             //- Is mesh topology changing
-            bool topoChanging() const
+            bool topoChanging() const noexcept
             {
                 return topoChanging_;
             }
 
             //- Set the mesh topology to be changing
-            bool topoChanging(const bool c)
+            bool topoChanging(const bool on) noexcept
             {
-                bool c0 = topoChanging_;
-                topoChanging_ = c;
-                return c0;
+                bool old(topoChanging_);
+                topoChanging_ = on;
+                return old;
             }
 
             //- Is mesh changing (topology changing and/or moving)
-            bool changing() const
+            bool changing() const noexcept
             {
-                return moving()||topoChanging();
+                return (moving() || topoChanging());
             }
 
             //- Move points, returns volumes swept by faces in motion
@@ -563,19 +563,19 @@ public:
         // Topological change
 
             //- Return non-const access to the pointZones
-            pointZoneMesh& pointZones()
+            pointZoneMesh& pointZones() noexcept
             {
                 return pointZones_;
             }
 
             //- Return non-const access to the faceZones
-            faceZoneMesh& faceZones()
+            faceZoneMesh& faceZones() noexcept
             {
                 return faceZones_;
             }
 
             //- Return non-const access to the cellZones
-            cellZoneMesh& cellZones()
+            cellZoneMesh& cellZones() noexcept
             {
                 return cellZones_;
             }
@@ -667,6 +667,9 @@ public:
 
             //- Remove all files from mesh instance()
             void removeFiles() const;
+
+
+            bool hasTetBasePtIs() const { return bool(tetBasePtIsPtr_); }
 
 
         // Geometric checks. Selectively override primitiveMesh functionality.

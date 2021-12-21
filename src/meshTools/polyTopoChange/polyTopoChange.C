@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polyTopoChange.H"
-#include "SortableList.H"
 #include "polyMesh.H"
 #include "polyAddPoint.H"
 #include "polyModifyPoint.H"
@@ -40,7 +39,6 @@ License
 #include "polyRemoveCell.H"
 #include "objectMap.H"
 #include "processorPolyPatch.H"
-#include "CompactListList.H"
 #include "ListOps.H"
 #include "mapPolyMesh.H"
 
@@ -585,7 +583,7 @@ void Foam::polyTopoChange::makeCellCells
 // Handles removed cells. Returns number of remaining cells.
 Foam::label Foam::polyTopoChange::getCellOrder
 (
-    const CompactListList<label, labelList>& cellCellAddressing,
+    const CompactListList<label>& cellCellAddressing,
     labelList& oldToNew
 ) const
 {

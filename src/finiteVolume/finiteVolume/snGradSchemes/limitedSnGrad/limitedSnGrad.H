@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,20 +31,26 @@ Group
     grpFvSnGradSchemes
 
 Description
-    Run-time selected snGrad scheme with limited non-orthogonal correction.
+    Surface gradient scheme with limited explicit non-orthogonal correction.
 
     The limiter is controlled by a coefficient with a value between 0 and 1
     which when 0 switches the correction off and the scheme behaves as
-    uncorrectedSnGrad, when set to 1 the full correction of the selected scheme
-    is used and when set to 0.5 the limiter is calculated such that the
-    non-orthogonal contribution does not exceed the orthogonal part.
+    \c uncorrected \c snGrad, when set to 1 the full correction of the
+    selected scheme is used and the scheme behaves as \c corrected \c snGrad,
+    and when set to 0.5 the limiter is calculated such that the non-orthogonal
+    component does not exceed the orthogonal component.
 
-    Format:
-        limited \<corrected scheme\> \<coefficient\>;
+Usage
+    Minimal example by using \c system/fvSchemes:
+    \verbatim
+    snGradSchemes
+    {
+        snGrad(<term>)       limited <corrected scheme> <coefficient>;
 
-        or
-
-        limited \<coefficient\>;  // Backward compatibility
+        // Backward compatibility
+        snGrad(<term>)       limited <coefficient>;
+    }
+    \endverbatim
 
 SourceFiles
     limitedSnGrad.C
@@ -66,7 +73,7 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class limitedSnGrad Declaration
+                        Class limitedSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -74,10 +81,12 @@ class limitedSnGrad
 :
     public snGradScheme<Type>
 {
-    // Private data
+    // Private Data
 
+        //- Type of correction scheme
         tmp<snGradScheme<Type>> correctedScheme_;
 
+        //- Limiter coefficient
         scalar limitCoeff_;
 
 
@@ -87,7 +96,7 @@ class limitedSnGrad
         void operator=(const limitedSnGrad&) = delete;
 
         //- Lookup function for the corrected to support backward compatibility
-        //  of dictionary specification
+        //- of dictionary specification
         tmp<snGradScheme<Type>> lookupCorrectedScheme(Istream& schemeData)
         {
             token nextToken(schemeData);
@@ -131,7 +140,6 @@ public:
             limitCoeff_(1)
         {}
 
-
         //- Construct from mesh and data stream
         limitedSnGrad(const fvMesh& mesh, Istream& schemeData)
         :
@@ -149,7 +157,7 @@ public:
 
 
     //- Destructor
-    virtual ~limitedSnGrad();
+    virtual ~limitedSnGrad() = default;
 
 
     // Member Functions
@@ -164,13 +172,13 @@ public:
         }
 
         //- Return true if this scheme uses an explicit correction
-        virtual bool corrected() const
+        virtual bool corrected() const noexcept
         {
             return true;
         }
 
         //- Return the explicit correction to the limitedSnGrad
-        //  for the given field
+        //- for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const;
 };

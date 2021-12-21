@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,26 +92,26 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         overallBb.min() -= point::uniform(ROOTVSMALL);
         overallBb.max() += point::uniform(ROOTVSMALL);
 
+
         const indexedOctree<treeDataFace> boundaryTree
         (
             treeDataFace    // all information needed to search faces
             (
-                false,                      // do not cache bb
+                false,      // do not cache bb
                 mesh,
-                bndFaces                    // patch faces only
+                bndFaces    // patch faces only
             ),
-            overallBb,                      // overall search domain
-            8,                              // maxLevel
-            10,                             // leafsize
-            3.0                             // duplicity
+            overallBb,      // overall search domain
+            8,              // maxLevel
+            10,             // leafsize
+            3.0             // duplicity
         );
-
 
         forAll(probeLocations(), probei)
         {
             const point sample = probeLocations()[probei];
 
-            scalar span = boundaryTree.bb().mag();
+            const scalar span = boundaryTree.bb().mag();
 
             pointIndexHit info = boundaryTree.findNearest
             (
@@ -169,13 +169,14 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
+    oldPoints_.resize(this->size());
 
-    // Update actual probe locations
+    // Update actual probe locations and store old ones
     forAll(nearest, samplei)
     {
+        oldPoints_[samplei] = operator[](samplei);
         operator[](samplei) = nearest[samplei].first().rawPoint();
     }
-
 
     if (debug)
     {
@@ -193,29 +194,39 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
         }
     }
 
-
-    // Extract any local faces to sample
+    // Extract any local faces to sample:
+    // - operator[] : actual point to sample (=nearest point on patch)
+    // - oldPoints_ : original provided point (might be anywhere in the mesh)
+    // - elementList_   : cells, not used
+    // - faceList_      : faces (now patch faces)
+    // - patchIDList_   : patch corresponding to faceList
+    // - processor_     : processor
     elementList_.setSize(nearest.size());
     elementList_ = -1;
     faceList_.setSize(nearest.size());
     faceList_ = -1;
     processor_.setSize(nearest.size());
     processor_ = -1;
-
-    processor_.setSize(size());
-    processor_ = -1;
+    patchIDList_.setSize(nearest.size());
+    patchIDList_ = -1;
 
     forAll(nearest, sampleI)
     {
         processor_[sampleI] = nearest[sampleI].second().second();
+
         if (nearest[sampleI].second().second() == Pstream::myProcNo())
         {
             // Store the face to sample
             faceList_[sampleI] = nearest[sampleI].first().index();
-            label facei = faceList_[sampleI];
-            processor_[sampleI] = (facei != -1 ? Pstream::myProcNo() : -1);
+            const label facei = faceList_[sampleI];
+            if (facei != -1)
+            {
+                processor_[sampleI] = Pstream::myProcNo();
+                patchIDList_[sampleI] = bm.whichPatch(facei);
+            }
         }
         reduce(processor_[sampleI], maxOp<label>());
+        reduce(patchIDList_[sampleI], maxOp<label>());
     }
 }
 

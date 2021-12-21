@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,13 +140,13 @@ Foam::lineDivide::lineDivide
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::pointField& Foam::lineDivide::points() const
+const Foam::pointField& Foam::lineDivide::points() const noexcept
 {
     return points_;
 }
 
 
-const Foam::scalarList& Foam::lineDivide::lambdaDivisions() const
+const Foam::scalarList& Foam::lineDivide::lambdaDivisions() const noexcept
 {
     return divisions_;
 }

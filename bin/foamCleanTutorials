@@ -75,6 +75,7 @@ cleanType=auto
 
 if [ "$#" -gt 0 ]
 then
+    unset caseDir
     case "$1" in
     (- | --)
         shift
@@ -102,31 +103,32 @@ then
         ;;
 
     -case=*)
-        caseName="${1#*=}"
-        cd "$caseName" 2>/dev/null || {
-            echo "${0##*}: No such directory $caseName" 1>&2
-            exit 2
-        }
+        caseDir="${1#*=}"
         ;;
     -case)
+        caseDir="$2"
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         shift
-        cd "$1" 2>/dev/null || {
-            echo "${0##*}: No such directory $1" 1>&2
-            exit 2
-        }
         ;;
     -self* | -skipFirst)
         skipSelf=true
         ;;
+
+    -*) die "unknown option: $1" ;;
+
     *)
-        cd "$1" 2>/dev/null || {
-            echo "${0##*}: No such directory $1" 1>&2
-            exit 2
-        }
+        caseDir="$1"
         ;;
     esac
     shift
+
+    if [ -n "$caseDir" ]
+    then
+        cd "$caseDir" 2>/dev/null || {
+            echo "${0##*/}: No such directory $caseDir" 1>&2
+            exit 2
+        }
+    fi
 fi
 
 

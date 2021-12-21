@@ -484,7 +484,11 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     ),
     residualName_
     (
-        dict.getOrDefault<word>("residual", "initialResidual:p")
+        dict.getOrDefault<word>
+        (
+            "residual",
+            IOobject::scopedName("initialResidual", "p")
+        )
     ),
     UName_
     (

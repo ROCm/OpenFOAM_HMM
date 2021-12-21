@@ -114,7 +114,7 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
         (
             IOobject
             (
-                type(),
+                scopedName(typeName),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -194,7 +194,7 @@ bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
 
 bool Foam::functionObjects::wallHeatFlux::execute()
 {
-    volScalarField& wallHeatFlux = lookupObjectRef<volScalarField>(type());
+    auto& wallHeatFlux = lookupObjectRef<volScalarField>(scopedName(typeName));
 
     if
     (
@@ -284,7 +284,8 @@ bool Foam::functionObjects::wallHeatFlux::execute()
 
 bool Foam::functionObjects::wallHeatFlux::write()
 {
-    const volScalarField& wallHeatFlux = lookupObject<volScalarField>(type());
+    const auto& wallHeatFlux =
+        lookupObject<volScalarField>(scopedName(typeName));
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing field " << wallHeatFlux.name() << endl;

@@ -78,6 +78,7 @@ unset passArgs runTests runType skipSelf
 
 while [ "$#" -gt 0 ]
 do
+    unset caseDir
     case "$1" in
     (- | --)
         shift
@@ -106,19 +107,12 @@ do
         ;;
 
     -case=*)
-        caseName="${1#*=}"
-        cd "$caseName" 2>/dev/null || {
-            echo "${0##*}: No such directory $caseName" 1>&2
-            exit 2
-        }
+        caseDir="${1#*=}"
         ;;
     -case)
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        caseDir="$2"
+        [ -n "$#" -ge 2 ] || die "'$1' option requires an argument"
         shift
-        cd "$1" 2>/dev/null || {
-            echo "${0##*}: No such directory $1" 1>&2
-            exit 2
-        }
         ;;
 
     # Avoid infinite recursion when invoked from an Allrun/Alltest script
@@ -130,6 +124,14 @@ do
         ;;
     esac
     shift
+
+    if [ -n "$caseDir" ]
+    then
+        cd "$caseDir" 2>/dev/null || {
+            echo "${0##*/}: No such directory $caseDir" 1>&2
+            exit 2
+        }
+    fi
 done
 
 

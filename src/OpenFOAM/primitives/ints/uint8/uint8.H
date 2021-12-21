@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ inline word name(const uint8_t val)
 template<>
 struct nameOp<uint8_t>
 {
-    inline word operator()(const uint8_t val) const
+    word operator()(const uint8_t val) const
     {
         return word(std::to_string(int(val)), false); // Needs no stripping
     }
@@ -126,7 +126,7 @@ public:
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(const uint8_t& val);
+        explicit pTraits(const uint8_t& val) noexcept;
 
         //- Read construct from Istream
         explicit pTraits(Istream& is);

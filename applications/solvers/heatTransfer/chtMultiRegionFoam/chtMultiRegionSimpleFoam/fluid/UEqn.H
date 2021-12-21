@@ -2,7 +2,7 @@
 
     MRF.correctBoundaryVelocity(U);
 
-    tmp<fvVectorMatrix> tUEqn
+    UEqn =
     (
         fvm::div(phi, U)
       + MRF.DDt(rho, U)
@@ -10,7 +10,6 @@
      ==
         fvOptions(rho, U)
     );
-    fvVectorMatrix& UEqn = tUEqn.ref();
 
     UEqn.relax();
 

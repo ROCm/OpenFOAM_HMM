@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
     // Info<< list5 << " indices: " << list5.toc() << nl;
 
     Info<< "\nassign from indices\n";
-    list4.read
+    list4.readList
     (
         IStringStream
         (

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ License
 
 namespace Foam
 {
+namespace multiphaseInter
+{
 namespace surfaceTensionModels
 {
     defineTypeNameAndDebug(constantSurfaceTensionCoefficient, 0);
@@ -44,11 +46,12 @@ namespace surfaceTensionModels
     );
 }
 }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::
+Foam::multiphaseInter::surfaceTensionModels::constantSurfaceTensionCoefficient::
 constantSurfaceTensionCoefficient
 (
     const dictionary& dict,
@@ -64,7 +67,8 @@ constantSurfaceTensionCoefficient
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::surfaceTensionModels::constantSurfaceTensionCoefficient::sigma() const
+Foam::multiphaseInter::surfaceTensionModels::constantSurfaceTensionCoefficient::
+sigma() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 

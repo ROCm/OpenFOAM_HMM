@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 #include "uint64.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::pTraits<uint64_t>::componentNames[] = { "" };
 
@@ -39,7 +39,10 @@ const uint64_t Foam::pTraits<uint64_t>::max = UINT64_MAX;
 const uint64_t Foam::pTraits<uint64_t>::rootMin = 0;
 const uint64_t Foam::pTraits<uint64_t>::rootMax = pTraits<uint64_t>::max;
 
-Foam::pTraits<uint64_t>::pTraits(const uint64_t& val)
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pTraits<uint64_t>::pTraits(const uint64_t& val) noexcept
 :
     p_(val)
 {}

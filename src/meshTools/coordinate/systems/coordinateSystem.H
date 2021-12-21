@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,16 @@ Description
             e1      (0 1 0);
             e3      (1 0 0);
         }
+    }
+    \endverbatim
+
+    For an identity rotation, can use a slightly more compact format:
+    \verbatim
+    coordinateSystem
+    {
+        type        cartesian;
+        origin      (0 0 0);
+        rotation    none;
     }
     \endverbatim
 
@@ -429,7 +439,7 @@ public:
         //- Considered valid if it has a specification
         virtual bool valid() const
         {
-            return spec_;
+            return bool(spec_);
         }
 
         //- True if the rotation tensor is uniform for all locations
@@ -495,7 +505,7 @@ public:
             name_ = newName;
         }
 
-        //- Provide non-constant access to the optional note
+        //- Edit access to optional note
         virtual string& note()
         {
             return note_;

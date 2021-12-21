@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,17 +222,16 @@ protected:
     // Protected Member Functions
 
         //- True if the operation needs the cell-volume
-        bool usesVol() const;
+        bool usesVol() const noexcept;
 
         //- True if the operation variant uses mag
-        bool usesMag() const;
+        inline bool is_magOp() const noexcept;
 
         //- True if the operation variant uses a weight-field
-        bool usesWeight() const;
+        inline bool is_weightedOp() const noexcept;
 
-        //- True if operation variant uses a weight-field that is available.
-        //  Checks for availability on any processor.
-        inline bool canWeight(const scalarField& weightField) const;
+        //- True if field is non-empty on any processor.
+        inline bool canWeight(const scalarField& fld) const;
 
         //- Return true if the field name is valid
         template<class Type>
@@ -329,6 +328,10 @@ public:
 } // End namespace fieldValues
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "volFieldValueI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

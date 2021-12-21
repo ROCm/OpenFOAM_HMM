@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,14 +45,25 @@ namespace blockEdges
 
 Foam::blockEdges::polyLineEdge::polyLineEdge
 (
-    const pointField& ps,
-    const label start,
-    const label end,
+    const pointField& points,
+    const edge& fromTo,
     const pointField& intermediate
 )
 :
-    blockEdge(ps, start, end),
-    polyLine(ps[start_], intermediate, ps[end_])
+    blockEdge(points, fromTo),
+    polyLine(firstPoint(), intermediate, lastPoint())
+{}
+
+
+Foam::blockEdges::polyLineEdge::polyLineEdge
+(
+    const pointField& points,
+    const label from,
+    const label to,
+    const pointField& intermediate
+)
+:
+    polyLineEdge(points, edge(from, to), intermediate)
 {}
 
 
@@ -60,13 +71,13 @@ Foam::blockEdges::polyLineEdge::polyLineEdge
 (
     const dictionary& dict,
     const label index,
-    const searchableSurfaces& geometry,
-    const pointField& ps,
+    const searchableSurfaces&,
+    const pointField& points,
     Istream& is
 )
 :
-    blockEdge(dict, index, ps, is),
-    polyLine(ps[start_], pointField(is), ps[end_])
+    blockEdge(dict, index, points, is),
+    polyLine(firstPoint(), pointField(is), lastPoint())
 {}
 
 

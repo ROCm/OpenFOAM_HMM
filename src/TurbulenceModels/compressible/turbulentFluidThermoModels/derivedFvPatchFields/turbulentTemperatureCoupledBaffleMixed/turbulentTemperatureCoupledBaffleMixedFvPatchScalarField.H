@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +50,8 @@ Usage
         Tnbr         | name of the field    | no | T
         thicknessLayers | list of thicknesses per layer [m] | no |
         kappaLayers  | list of thermal conductivities per layer [W/m/K] | no |
+        thicknessLayer | single thickness of layer [m] | no |
+        kappaLayer  | corresponding thermal conductivity [W/m/K] | no |
         kappaMethod  | inherited from temperatureCoupledBase | inherited |
         kappa        | inherited from temperatureCoupledBase | inherited |
     \endtable
@@ -109,12 +112,22 @@ class turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
         //- Thickness of layers
         scalarList thicknessLayers_;
+        autoPtr<PatchFunction1<scalar>> thicknessLayer_;
 
         //- Conductivity of layers
         scalarList kappaLayers_;
+        autoPtr<PatchFunction1<scalar>> kappaLayer_;
 
-        //- Total contact resistance
-        scalar contactRes_;
+
+    // Private member functions
+
+        //- Calculate coefficients for assembly matrix
+        tmp<Field<scalar>> coeffs
+        (
+            fvMatrix<scalar>& matrix,
+            const Field<scalar>&,
+            const label
+        ) const;
 
 
 public:
@@ -193,13 +206,43 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<scalar>&,
+                const labelList&
+            );
+
+
+        //- Given patch temperature calculate corresponding K field. Override
+        //- temperatureCoupledBase::kappa to includes effect of any
+        //- explicit kappaThickness
+        virtual tmp<scalarField> kappa(const scalarField& Tp) const;
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
+        //- Manipulate matrix
+        virtual void manipulateMatrix
+        (
+            fvMatrix<scalar>& m,
+            const label iMatrix,
+            const direction cmpt
+        );
+
+
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

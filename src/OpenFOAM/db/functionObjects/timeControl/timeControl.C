@@ -124,15 +124,15 @@ void Foam::timeControl::read(const dictionary& dict)
         {
             // Accept deprecated 'outputControl' instead of 'writeControl'
 
-            IOWarningInFunction(dict)
-                << "Using deprecated 'outputControl'" << nl
-                << "    Please use 'writeControl' with 'writeInterval'"
-                << endl;
-            error::warnAboutAge("outputControl", 1606);
-
             // Change to the old names for this option
             controlName = "outputControl";
             intervalName = "outputInterval";
+
+            IOWarningInFunction(dict)
+                << "Found deprecated 'outputControl'" << nl
+                << "    Use 'writeControl' with 'writeInterval'"
+                << endl;
+            error::warnAboutAge("keyword", 1606);
         }
     }
 

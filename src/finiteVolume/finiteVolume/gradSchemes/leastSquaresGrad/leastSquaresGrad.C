@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,12 +54,13 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
 ) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
     const fvMesh& mesh = vsf.mesh();
 
-    tmp<GeometricField<GradType, fvPatchField, volMesh>> tlsGrad
+    tmp<GradFieldType> tlsGrad
     (
-        new GeometricField<GradType, fvPatchField, volMesh>
+        new GradFieldType
         (
             IOobject
             (
@@ -73,7 +75,7 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );
-    GeometricField<GradType, fvPatchField, volMesh>& lsGrad = tlsGrad.ref();
+    GradFieldType& lsGrad = tlsGrad.ref();
 
     // Get reference to least square vectors
     const leastSquaresVectors& lsv = leastSquaresVectors::New(mesh);
@@ -86,10 +88,10 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
 
     forAll(own, facei)
     {
-        label ownFacei = own[facei];
-        label neiFacei = nei[facei];
+        const label ownFacei = own[facei];
+        const label neiFacei = nei[facei];
 
-        Type deltaVsf = vsf[neiFacei] - vsf[ownFacei];
+        const Type deltaVsf(vsf[neiFacei] - vsf[ownFacei]);
 
         lsGrad[ownFacei] += ownLs[facei]*deltaVsf;
         lsGrad[neiFacei] -= neiLs[facei]*deltaVsf;

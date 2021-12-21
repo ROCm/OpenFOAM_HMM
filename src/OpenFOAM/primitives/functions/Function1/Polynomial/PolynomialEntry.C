@@ -65,10 +65,11 @@ template<class Type>
 Foam::Function1Types::Polynomial<Type>::Polynomial
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName, dict),
+    Function1<Type>(entryName, dict, obrPtr),
     coeffs_(),
     canIntegrate_(true)
 {
@@ -89,7 +90,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial
     }
     else
     {
-        // Dictionary format - "values" lookup. Eg,
+        // Dictionary format - "coeffs" lookup. Eg,
         //
         // key { type polynomial; coeffs ((0 0) (10 1)); }
 
@@ -104,10 +105,11 @@ template<class Type>
 Foam::Function1Types::Polynomial<Type>::Polynomial
 (
     const word& entryName,
-    const List<Tuple2<Type, Type>>& coeffs
+    const List<Tuple2<Type, Type>>& coeffs,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName),
+    Function1<Type>(entryName, obrPtr),
     coeffs_(coeffs),
     canIntegrate_(true)
 {
@@ -127,7 +129,7 @@ Foam::Function1Types::Polynomial<Type>::Polynomial(const Polynomial& poly)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::Function1Types::Polynomial<Type>::convertTimeBase(const Time& t)
+void Foam::Function1Types::Polynomial<Type>::userTimeToTime(const Time& t)
 {
     forAll(coeffs_, i)
     {
@@ -201,7 +203,8 @@ void Foam::Function1Types::Polynomial<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
 
-    os  << nl << indent << coeffs_ << token::END_STATEMENT << nl;
+    os  << nl << indent << coeffs_;
+    os.endEntry();
 }
 
 

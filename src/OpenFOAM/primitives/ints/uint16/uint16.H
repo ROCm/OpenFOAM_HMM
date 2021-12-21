@@ -62,7 +62,7 @@ inline word name(const uint16_t val)
 template<>
 struct nameOp<uint16_t>
 {
-    inline word operator()(const uint16_t val) const
+    word operator()(const uint16_t val) const
     {
         return word(std::to_string(int(val)), false); // Needs no stripping
     }

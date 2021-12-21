@@ -74,6 +74,9 @@ int main(void)
     Info.operator Foam::OSstream&() << "stop" << endl;
 
     static_cast<OSstream&>(Info) << "\nEnd\n" << nl;
+
+    return 0;
 }
+
 
 // ************************************************************************* //

@@ -102,7 +102,7 @@ protected:
         const bool reverseTarget_;
 
         //- Threshold weight below which interpolation is deactivated
-        scalar lowWeightCorrection_;
+        const scalar lowWeightCorrection_;
 
         //- Index of processor that holds all of both sides. -1 in all other
         //- cases
@@ -135,6 +135,7 @@ protected:
 
             //- Source map pointer - parallel running only
             autoPtr<mapDistribute> srcMapPtr_;
+
 
 
         // Target patch

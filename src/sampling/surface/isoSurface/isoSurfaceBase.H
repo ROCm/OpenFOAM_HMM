@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,26 +126,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Check for tet values above/below given (iso) value
-        //  Result encoded as a single integer
-        inline static constexpr int getTetCutIndex
-        (
-            const scalar a,
-            const scalar b,
-            const scalar c,
-            const scalar d,
-            const scalar isoval
-        ) noexcept
-        {
-            return
-            (
-                (a < isoval ? 1 : 0)
-              | (b < isoval ? 2 : 0)
-              | (c < isoval ? 4 : 0)
-              | (d < isoval ? 8 : 0)
-            );
-        }
 
         //- Count the number of cuts matching the mask type
         //  Checks as bitmask or as zero.

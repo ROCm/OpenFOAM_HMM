@@ -191,6 +191,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>& rhs, bool reuse)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 template<class T>
 inline Foam::tmp<T>::~tmp()
 {
@@ -210,41 +212,35 @@ inline bool Foam::tmp<T>::movable() const noexcept
 template<class T>
 inline const T& Foam::tmp<T>::cref() const
 {
-    if (type_ == PTR)
+    if (type_ == PTR && !ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
-    return *ptr_; // const reference
+    return *ptr_;  // const reference
 }
 
 
 template<class T>
 inline T& Foam::tmp<T>::ref() const
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
-            << "Attempted non-const reference to const object from a "
+            << "Attempted non-const reference to const object: "
             << this->typeName()
             << abort(FatalError);
     }
+    else if (type_ == PTR && !ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
+    }
 
-    return *ptr_; // non-const reference
+    return *ptr_;  // non-const reference
 }
 
 
@@ -332,6 +328,20 @@ inline void Foam::tmp<T>::reset(tmp<T>&& other) noexcept
 
 
 template<class T>
+inline void Foam::tmp<T>::cref(const tmp<T>& other) noexcept
+{
+    if (&other == this)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    clear();
+    ptr_ = other.ptr_;
+    type_ = (ptr_ ? CREF : PTR);
+}
+
+
+template<class T>
 inline void Foam::tmp<T>::cref(const T& obj) noexcept
 {
     clear();
@@ -387,14 +397,11 @@ inline void Foam::tmp<T>::swap(tmp<T>& other) noexcept
 template<class T>
 inline const T* Foam::tmp<T>::operator->() const
 {
-    if (type_ == PTR)
+    if (type_ == PTR && !ptr_)
     {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
+            << abort(FatalError);
     }
 
     return ptr_;
@@ -404,20 +411,17 @@ inline const T* Foam::tmp<T>::operator->() const
 template<class T>
 inline T* Foam::tmp<T>::operator->()
 {
-    if (type_ == PTR)
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << this->typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else if (type_ == CREF)
+    if (is_const())
     {
         FatalErrorInFunction
-            << "Attempt to cast const object to non-const for a "
+            << "Attempt to cast const object to non-const: "
             << this->typeName()
+            << abort(FatalError);
+    }
+    else if (type_ == PTR && !ptr_)
+    {
+        FatalErrorInFunction
+            << this->typeName() << " deallocated"
             << abort(FatalError);
     }
 

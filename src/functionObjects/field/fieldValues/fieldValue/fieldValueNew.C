@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,9 +46,9 @@ Foam::functionObjects::fieldValue::New
         Info<< "Selecting " << typeName << ' ' << modelType << endl;
     }
 
-    auto cstrIter = runTimeConstructorTablePtr_->cfind(modelType);
+    auto* ctorPtr = runTimeConstructorTable(modelType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -59,7 +59,7 @@ Foam::functionObjects::fieldValue::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<fieldValue>(cstrIter()(name, runTime, dict));
+    return autoPtr<fieldValue>(ctorPtr(name, runTime, dict));
 }
 
 

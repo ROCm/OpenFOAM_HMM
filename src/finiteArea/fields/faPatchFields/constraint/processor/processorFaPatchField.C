@@ -79,7 +79,7 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 
@@ -192,6 +192,8 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction,
@@ -211,6 +213,8 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
 (
     solveScalarField& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
@@ -251,6 +255,8 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 (
     Field<Type>& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes commsType
@@ -269,6 +275,8 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const bool add,
+    const lduAddressing& lduAddr,
+    const label patchId,
     const Field<Type>&,
     const scalarField& coeffs,
     const Pstream::commsTypes commsType

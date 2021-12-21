@@ -100,6 +100,12 @@ bool Foam::dynamicCodeContext::valid() const noexcept
 }
 
 
+const Foam::entry* Foam::dynamicCodeContext::findEntry(const word& key) const
+{
+    return this->dict().findEntry(key, keyType::LITERAL);
+}
+
+
 bool Foam::dynamicCodeContext::readEntry
 (
     const word& key,

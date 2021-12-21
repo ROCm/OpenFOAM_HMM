@@ -258,7 +258,7 @@ Foam::coordinateRotations::euler::euler()
 
 Foam::coordinateRotations::euler::euler(const euler& crot)
 :
-    coordinateRotation(crot),
+    coordinateRotation(),
     angles_(crot.angles_),
     degrees_(crot.degrees_),
     order_(crot.order_)
@@ -296,7 +296,7 @@ Foam::coordinateRotations::euler::euler
 Foam::coordinateRotations::euler::euler(const dictionary& dict)
 :
     coordinateRotation(),
-    angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
+    angles_(dict.get<vector>("angles")),
     degrees_(dict.getOrDefault("degrees", true)),
     order_
     (

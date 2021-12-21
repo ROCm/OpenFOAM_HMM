@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +67,7 @@ Usage
     \table
       Property | Description                       | Type   | Reqd     | Dflt
       type     | Type name: atmAlphatkWallFunction | word   | yes      | -
-      Pr       | Molecular Prandtl number     | TimeFunction1<scalar>  | yes | -
+      Pr       | Molecular Prandtl number     | Function1<scalar>  | yes | -
       Prt      | Turbulent Prandtl number     | PatchFunction1<scalar> | yes | -
       z0       | Surface roughness length [m] | PatchFunction1<scalar> | yes | -
       Cmu      | Empirical model constant         | scalar | no        | 0.09
@@ -76,7 +76,7 @@ Usage
 
     The inherited entries are elaborated in:
       - \link fixedValueFvPatchField.H \endlink
-      - \link TimeFunction1.H \endlink
+      - \link Function1.H \endlink
       - \link PatchFunction1.H \endlink
 
 See also
@@ -91,7 +91,7 @@ SourceFiles
 #define atmAlphatkWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "TimeFunction1.H"
+#include "Function1.H"
 #include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,7 +120,7 @@ protected:
         const scalar kappa_;
 
         //- Molecular Prandtl number
-        TimeFunction1<scalar> Pr_;
+        autoPtr<Function1<scalar>> Pr_;
 
         //- Turbulent Prandtl number field
         autoPtr<PatchFunction1<scalar>> Prt_;

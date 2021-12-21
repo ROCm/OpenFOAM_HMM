@@ -58,9 +58,9 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
     Istream& is
 )
 {
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(compoundType);
+    auto* ctorPtr = IstreamConstructorTable(compoundType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -71,7 +71,7 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
         ) << abort(FatalIOError);
     }
 
-    return autoPtr<Foam::token::compound>(cstrIter()(is));
+    return autoPtr<Foam::token::compound>(ctorPtr(is));
 }
 
 

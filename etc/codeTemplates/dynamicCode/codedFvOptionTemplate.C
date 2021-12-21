@@ -83,9 +83,13 @@ addRemovableToRunTimeSelectionTable
     dictionary
 );
 
+} // End namespace fv
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::fv::
 ${typeName}FvOption${SourceType}::
 ${typeName}FvOption${SourceType}
 (
@@ -106,6 +110,7 @@ ${typeName}FvOption${SourceType}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+Foam::fv::
 ${typeName}FvOption${SourceType}::
 ~${typeName}FvOption${SourceType}()
 {
@@ -119,6 +124,7 @@ ${typeName}FvOption${SourceType}::
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void
+Foam::fv::
 ${typeName}FvOption${SourceType}::correct
 (
     GeometricField<${TemplateType}, fvPatchField, volMesh>& fld
@@ -136,6 +142,7 @@ ${typeName}FvOption${SourceType}::correct
 
 
 void
+Foam::fv::
 ${typeName}FvOption${SourceType}::addSup
 (
     fvMatrix<${TemplateType}>& eqn,
@@ -147,13 +154,14 @@ ${typeName}FvOption${SourceType}::addSup
         Info<< "${typeName}FvOption${SourceType}::addSup()\n";
     }
 
-//{{{ begin code
+//{{{ begin code - warn/fatal if not implemented?
     ${codeAddSup}
 //}}} end code
 }
 
 
 void
+Foam::fv::
 ${typeName}FvOption${SourceType}::addSup
 (
     const volScalarField& rho,
@@ -163,16 +171,17 @@ ${typeName}FvOption${SourceType}::addSup
 {
     if (${verbose:-false})
     {
-        Info<< "${typeName}FvOption${SourceType}::addSup()\n";
+        Info<< "${typeName}FvOption${SourceType}::addSup(rho)\n";
     }
 
-//{{{ begin code
-    ${codeAddSup}
+//{{{ begin code - warn/fatal if not implemented?
+    ${codeAddSupRho}
 //}}} end code
 }
 
 
 void
+Foam::fv::
 ${typeName}FvOption${SourceType}::constrain
 (
     fvMatrix<${TemplateType}>& eqn,
@@ -189,10 +198,5 @@ ${typeName}FvOption${SourceType}::constrain
 //}}} end code
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fv
-} // End namespace Foam
 
 // ************************************************************************* //

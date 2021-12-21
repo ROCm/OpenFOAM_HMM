@@ -47,17 +47,17 @@ SourceFiles
 
 #include "tmp.H"
 #include "direction.H"
-#include "VectorSpace.H"
-#include "scalarList.H"
 #include "labelList.H"
+#include "scalarList.H"
 #include "FieldBase.H"
+#include "VectorSpace.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class FieldMapper;
 class dictionary;
 
@@ -92,11 +92,8 @@ public:
 
     // Static Member Functions
 
-        //- Return nullObject reference field
-        inline static const Field<Type>& null()
-        {
-            return NullObjectRef<Field<Type>>();
-        }
+        //- Return nullObject reference Field
+        inline static const Field<Type>& null();
 
 
     // Constructors
@@ -367,6 +364,21 @@ public:
 
         //- Write the field as a dictionary entry
         void writeEntry(const word& keyword, Ostream& os) const;
+
+
+    // Other Access
+
+        //- Return SubField slice (non-const access) - no range checking
+        SubField<Type> slice(const label pos, label len = -1);
+
+        //- Return SubField slice (const access) - no range checking
+        const SubField<Type> slice(const label pos, label len = -1) const;
+
+        //- Return SubField slice (non-const access) - with range checking
+        SubField<Type> slice(const labelRange& range);
+
+        //- Return SubField slice (const access) - with range checking
+        const SubField<Type> slice(const labelRange& range) const;
 
 
     // Member Operators

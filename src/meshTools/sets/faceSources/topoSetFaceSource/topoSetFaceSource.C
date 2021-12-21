@@ -65,9 +65,9 @@ Foam::topoSetFaceSource::New
     const dictionary& dict
 )
 {
-    auto cstrIter = wordConstructorTablePtr_->cfind(sourceType);
+    auto* ctorPtr = wordConstructorTable(sourceType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -78,7 +78,7 @@ Foam::topoSetFaceSource::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<topoSetFaceSource>(cstrIter()(mesh, dict));
+    return autoPtr<topoSetFaceSource>(ctorPtr(mesh, dict));
 }
 
 
@@ -90,9 +90,9 @@ Foam::topoSetFaceSource::New
     Istream& is
 )
 {
-    auto cstrIter = istreamConstructorTablePtr_->cfind(sourceType);
+    auto* ctorPtr = istreamConstructorTable(sourceType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -102,7 +102,7 @@ Foam::topoSetFaceSource::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<topoSetFaceSource>(cstrIter()(mesh, is));
+    return autoPtr<topoSetFaceSource>(ctorPtr(mesh, is));
 }
 
 

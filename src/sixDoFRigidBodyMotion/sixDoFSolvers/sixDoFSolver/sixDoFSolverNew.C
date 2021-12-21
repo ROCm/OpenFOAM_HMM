@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,9 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
 
     Info<< "Selecting sixDoFSolver " << solverType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
+    auto* ctorPtr = dictionaryConstructorTable(solverType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -53,7 +53,7 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
         ) << exit(FatalIOError);
     }
 
-    return cstrIter()(dict, body);
+    return ctorPtr(dict, body);
 }
 
 

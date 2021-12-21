@@ -103,8 +103,8 @@ int main(int argc, char *argv[])
                 {
                     string str(t.stringToken());
 
-                    const bool throwingErr = FatalError.throwExceptions();
-                    const bool throwingIOErr = FatalIOError.throwExceptions();
+                    const bool oldThrowingError = FatalError.throwing(true);
+                    const bool oldThrowingIOErr = FatalIOError.throwing(true);
 
                     try
                     {
@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
                         Info<< err.message().c_str() << nl;
                     }
 
-                    FatalError.throwExceptions(throwingErr);
-                    FatalIOError.throwExceptions(throwingIOErr);
+                    FatalError.throwing(oldThrowingError);
+                    FatalIOError.throwing(oldThrowingIOErr);
                     Info<< nl;
                 }
             }

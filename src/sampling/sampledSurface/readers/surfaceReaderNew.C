@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2019 OpenCFD Ltd.
+    Copyright (C) 2015-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,9 @@ Foam::autoPtr<Foam::surfaceReader> Foam::surfaceReader::New
     const fileName& fName
 )
 {
-    auto cstrIter = fileNameConstructorTablePtr_->cfind(readerType);
+    auto* ctorPtr = fileNameConstructorTable(readerType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -47,7 +47,7 @@ Foam::autoPtr<Foam::surfaceReader> Foam::surfaceReader::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<surfaceReader>(cstrIter()(fName));
+    return autoPtr<surfaceReader>(ctorPtr(fName));
 }
 
 

@@ -86,7 +86,7 @@ Foam::faceZoneSet::faceZoneSet
     )
     {
         const faceZone& fz = faceZones[zoneID];
-        addressing_ = fz;
+        addressing_ = fz.addressing();
         flipMap_ = fz.flipMap();
     }
 

@@ -312,20 +312,30 @@ Foam::RASModels::kineticTheoryModel::pPrimef() const
 Foam::tmp<Foam::volSymmTensorField>
 Foam::RASModels::kineticTheoryModel::devRhoReff() const
 {
+    return devRhoReff(U_);
+}
+
+
+Foam::tmp<Foam::volSymmTensorField>
+Foam::RASModels::kineticTheoryModel::devRhoReff
+(
+    const volVectorField& U
+) const
+{
     return tmp<volSymmTensorField>
     (
         new volSymmTensorField
         (
             IOobject
             (
-                IOobject::groupName("devRhoReff", U_.group()),
+                IOobject::groupName("devRhoReff", U.group()),
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
           - (rho_*nut_)
-           *dev(twoSymm(fvc::grad(U_)))
+           *dev(twoSymm(fvc::grad(U)))
           - ((rho_*lambda_)*fvc::div(phi_))*symmTensor::I
         )
     );

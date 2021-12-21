@@ -135,7 +135,7 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
     const fvMesh& mesh
 )
 :
-    cellSetOption(name, modelType, dict, mesh),
+    fv::cellSetOption(name, modelType, dict, mesh),
     secondaryMassFlowRate_(0),
     secondaryInletT_(0),
     primaryInletT_(0),
@@ -306,7 +306,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
 bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    if (fv::cellSetOption::read(dict))
     {
         UName_ = coeffs_.getOrDefault<word>("U", "U");
         TName_ = coeffs_.getOrDefault<word>("T", "T");

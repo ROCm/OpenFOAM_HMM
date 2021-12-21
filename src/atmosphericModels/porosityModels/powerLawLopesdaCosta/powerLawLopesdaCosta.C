@@ -76,7 +76,7 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
     // function of the normalized vertical position
     autoPtr<Function1<scalar>> SigmaFunc
     (
-        Function1<scalar>::New("Sigma", dict)
+        Function1<scalar>::New("Sigma", dict, &mesh)
     );
 
     // Searchable triSurface for the top of the porous region

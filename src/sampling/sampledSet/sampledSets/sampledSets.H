@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
 class objectRegistry;
 class dictionary;
@@ -68,7 +68,7 @@ class sampledSets
     public functionObjects::regionFunctionObject,
     public PtrList<sampledSet>
 {
-    // Private classes
+    // Private Classes
 
         //- Class used for grouping field types
         template<class Type>
@@ -82,18 +82,7 @@ class sampledSets
             autoPtr<writer<Type>> formatter;
 
             //- Construct null
-            fieldGroup()
-            :
-                DynamicList<word>(0),
-                formatter(nullptr)
-            {}
-
-            //- Construct for a particular format
-            fieldGroup(const word& writeFormat)
-            :
-                DynamicList<word>(0),
-                formatter(writer<Type>::New(writeFormat))
-            {}
+            fieldGroup() = default;
 
             //- Reset format and field list
             void clear()
@@ -102,10 +91,9 @@ class sampledSets
                 formatter.clear();
             }
 
-            //- Assign a new formatter
-            void operator=(const word& writeFormat)
+            void setFormatter(const word& writeFormat, const dictionary& dict)
             {
-                formatter = writer<Type>::New(writeFormat);
+                formatter = writer<Type>::New(writeFormat, dict);
             }
         };
 
@@ -151,13 +139,13 @@ class sampledSets
         };
 
 
-    // Static data members
+    // Static Data Members
 
         //- Output verbosity
         static bool verbose_;
 
 
-    // Private data
+    // Private Data
 
         //- Const reference to fvMesh
         const fvMesh& mesh_;
@@ -175,7 +163,7 @@ class sampledSets
         meshSearch searchEngine_;
 
 
-      // Read from dictonary
+    // Read from dictionary
 
         //- Names of fields to sample
         wordRes fieldSelection_;
@@ -186,8 +174,11 @@ class sampledSets
         //- Output format to use
         word writeFormat_;
 
+        //- Dictionary containing writer options
+        dictionary writeFormatOptions_;
 
-      // Categorized scalar/vector/tensor fields
+
+    // Categorized scalar/vector/tensor fields
 
         fieldGroup<scalar> scalarFields_;
         fieldGroup<vector> vectorFields_;
@@ -196,7 +187,7 @@ class sampledSets
         fieldGroup<tensor> tensorFields_;
 
 
-      // Merging structures
+    // Merging structures
 
         PtrList<coordSet> masterSampledSets_;
         labelListList indexSets_;
@@ -211,7 +202,7 @@ class sampledSets
         label classifyFields();
 
         //- Combine points from all processors. Sort by curveDist and produce
-        //  index list. Valid result only on master processor.
+        //- index list. Valid result only on master processor.
         void combineSampledSets
         (
             PtrList<coordSet>& masterSampledSets,

@@ -31,7 +31,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-inline Type Foam::Function1Types::Constant<Type>::value(const scalar x) const
+inline void Foam::Function1Types::Constant<Type>::reset(const Type& val)
+{
+    value_ = val;
+}
+
+
+template<class Type>
+inline Type Foam::Function1Types::Constant<Type>::value(const scalar) const
 {
     return value_;
 }

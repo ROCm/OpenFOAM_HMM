@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Original code Copyright (C) 2012-2018 Bernhard Gschaider
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2012-2018 Bernhard Gschaider
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Default construct
         exprString() = default;
 
         //- Copy construct
@@ -135,13 +135,22 @@ public:
 
         //- Get and expand expression with dictionary entries,
         //- optionally strip C/C++ comments from the input.
-        //
         // Expansion behaviour as per inplaceExpand
-        static exprString getExpression
+        static exprString getEntry
         (
-            const word& name,
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict,
-            const bool stripComments = false
+            const bool stripComments = true
+        );
+
+        //- Get and expand expression with dictionary entries,
+        //- optionally strip C/C++ comments from the input.
+        // Expansion behaviour as per inplaceExpand
+        static exprString getOptional
+        (
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict,
+            const bool stripComments = true
         );
 
         //- Copy convert string to exprString.
@@ -155,16 +164,25 @@ public:
 
     // Member Functions
 
-        //- Inplace expansion with dictionary variables,
-        //- and strip C/C++ comments from the input
-        exprString& expand
-        (
-            const dictionary& dict,
-            const bool stripComments = true
-        );
-
         //- Check for unexpanded '$' entries. Fatal if any exist.
         inline bool valid() const;
+
+        //- Inplace expansion with dictionary variables,
+        //- and strip C/C++ comments from the input
+        void expand(const dictionary& dict, const bool stripComments = true);
+
+        //- Inplace trim leading and trailing whitespace
+        void trim();
+
+        //- Read/expand entry with dictionary variables,
+        //- and strip C/C++ comments from the input
+        bool readEntry
+        (
+            const word& keyword,  //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict,
+            bool mandatory = true,
+            const bool stripComments = true
+        );
 
 
     // Member Operators
@@ -183,12 +201,35 @@ public:
 
         //- Move assign from string. No expansions, no comment stripping
         inline exprString& operator=(std::string&& str);
+
+
+    // Write
+
+        //- Dictionary entry for expression string, normally suppressing
+        //- empty strings. Generally used verbatim output (readability)
+        //  \return true if entry was written
+        bool writeEntry
+        (
+            const word& keyword,
+            Ostream& os,
+            bool writeEmpty = false
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace expressions
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hashing for exprString is the same as string
+template<> struct Hash<expressions::exprString> : string::hasher {};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

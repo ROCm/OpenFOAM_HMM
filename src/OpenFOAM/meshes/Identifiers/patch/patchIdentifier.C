@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,14 +80,14 @@ Foam::patchIdentifier::patchIdentifier
 
 Foam::patchIdentifier::patchIdentifier
 (
-    const patchIdentifier& p,
+    const patchIdentifier& ident,
     const label index
 )
 :
-    name_(p.name_),
+    name_(ident.name_),
     index_(index),
-    physicalType_(p.physicalType_),
-    inGroups_(p.inGroups_)
+    physicalType_(ident.physicalType_),
+    inGroups_(ident.inGroups_)
 {}
 
 
@@ -95,15 +95,15 @@ Foam::patchIdentifier::patchIdentifier
 
 void Foam::patchIdentifier::write(Ostream& os) const
 {
-    if (physicalType_.size())
+    if (!physicalType_.empty())
     {
         os.writeEntry("physicalType", physicalType_);
     }
 
-    if (inGroups_.size())
+    if (!inGroups_.empty())
     {
         os.writeKeyword("inGroups");
-        // Write list with flatOutput
+        // Flat output of list
         inGroups_.writeList(os, 0) << token::END_STATEMENT << nl;
     }
 }
@@ -111,9 +111,9 @@ void Foam::patchIdentifier::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const patchIdentifier& ident)
 {
-    p.write(os);
+    ident.write(os);
     os.check(FUNCTION_NAME);
     return os;
 }

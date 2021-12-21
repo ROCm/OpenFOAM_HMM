@@ -88,6 +88,8 @@ namespace regionModels
 \*---------------------------------------------------------------------------*/
 
 class regionFaModel
+:
+    public IOdictionary
 {
     // Private Member Functions
 
@@ -96,6 +98,9 @@ class regionFaModel
 
         //- Initialise the region
         void initialise();
+
+        //- Read control parameters from dictionary
+        bool init(const dictionary& dict);
 
 
 protected:
@@ -126,6 +131,9 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffs_;
 
+        //- Dictionary of output properties
+        autoPtr<IOdictionary> outputPropertiesPtr_;
+
         //-Volume-to surface mapping
         autoPtr<volSurfaceMapping> vsmPtr_;
 
@@ -140,17 +148,14 @@ protected:
         word regionName_;
 
 
-    // Protected Member Functions
-
-        //- Read control parameters from dictionary
-        virtual bool read(const dictionary& dict);
-
-
 public:
 
     //- Runtime type information
     TypeName("regionFaModel");
 
+
+    //- Default name regionFaModel
+    static const word regionFaModelName;
 
     // Constructors
 
@@ -203,18 +208,23 @@ public:
             //- Return the model coefficients dictionary
             inline const dictionary& coeffs() const;
 
+            //- Return const access to the output properties dictionary
+            inline const IOdictionary& outputProperties() const;
+
+            //- Return output properties dictionary
+            inline IOdictionary& outputProperties();
+
             //- Return the solution dictionary
             inline const dictionary& solution() const;
 
-            //- Return volSurfaceMapping
+            //- Return patch ID
+            inline label patchID() const;
+
+
+        // Help Functions
+
+            //- Return mapping between surface and volume fields
             const volSurfaceMapping& vsm() const;
-
-
-        // Addressing
-
-            //- Return the list of patch IDs on the primary region coupled
-            //- to this region
-            inline label patchID();
 
 
         // Evolution
@@ -231,11 +241,14 @@ public:
             //- Post-evolve region
             virtual void postEvolveRegion();
 
+            //- Courant number of the region
+            virtual scalar CourantNumber() const;
+
 
         // IO
 
             //- Provide some feedback
-            virtual void info();
+            virtual void info() = 0;
 };
 
 

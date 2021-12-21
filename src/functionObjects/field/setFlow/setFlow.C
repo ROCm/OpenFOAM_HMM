@@ -155,18 +155,18 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
         }
 
         // Scaling is applied across all modes
-        scalePtr_ = Function1<scalar>::New("scale", dict);
+        scalePtr_ = Function1<scalar>::New("scale", dict, &mesh_);
 
         switch (mode_)
         {
             case modeType::FUNCTION:
             {
-                velocityPtr_ = Function1<vector>::New("velocity", dict);
+                velocityPtr_ = Function1<vector>::New("velocity", dict, &mesh_);
                 break;
             }
             case modeType::ROTATION:
             {
-                omegaPtr_ = Function1<scalar>::New("omega", dict);
+                omegaPtr_ = Function1<scalar>::New("omega", dict, &mesh_);
 
                 dict.readEntry("origin", origin_);
                 const vector refDir(dict.get<vector>("refDir").normalise());

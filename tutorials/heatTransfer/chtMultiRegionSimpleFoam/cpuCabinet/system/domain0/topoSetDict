@@ -1,0 +1,40 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+    {
+        name            v_MRF_set;
+        type            cellSet;
+        action          new;
+        source          searchableSurfaceToCell;
+        surfaceType     searchableCylinder;
+        point1          (-0.0032 0.037517 -0.058);
+        point2          (-0.015 0.037517 -0.058);
+        radius          0.021;
+    }
+
+    {
+        name            v_MRF;
+        type            cellZoneSet;
+        action          new;
+        source          setToCellZone;
+        set             v_MRF_set;
+    }
+);
+
+// ************************************************************************* //

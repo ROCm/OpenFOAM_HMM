@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,11 +100,11 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
-        symmTensor wdd = sqr(d)/magSqr(d);
+        const vector d(C[nei] - C[own]);
+        const symmTensor wdd(sqr(d)/magSqr(d));
         dd[own] += wdd;
         dd[nei] += wdd;
     }
@@ -121,7 +121,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const labelUList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd(p.delta());
+        const vectorField pd(p.delta());
 
         forAll(pd, patchFacei)
         {
@@ -139,10 +139,10 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
     // Revisit all faces and calculate the pVectors_ and nVectors_ vectors
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
+        const vector d(C[nei] - C[own]);
 
         pVectors_[facei] = (invDd[own] & d)/magSqr(d);
         nVectors_[facei] = -(invDd[nei] & d)/magSqr(d);
@@ -156,7 +156,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd(p.delta());
+        const vectorField pd(p.delta());
 
         forAll(pd, patchFacei)
         {

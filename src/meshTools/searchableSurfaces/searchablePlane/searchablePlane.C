@@ -27,7 +27,6 @@ License
 
 #include "searchablePlane.H"
 #include "addToRunTimeSelectionTable.H"
-#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

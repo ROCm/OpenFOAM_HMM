@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,16 +83,16 @@ void Foam::sixDoFRigidBodyMotionRestraints::linearSpringDamper::restrain
     {
         anchor_.reset
         (
-            new TimeFunction1<vector>
+            Function1<vector>::New
             (
-                motion.time(),
                 "anchor",
-                coeffDict()
+                coeffDict(),
+                &motion.time()
             )
         );
     }
 
-    scalar t = motion.time().value();
+    scalar t = motion.time().timeOutputValue();
 
     restraintPosition = motion.transform(refAttachmentPt_);
 

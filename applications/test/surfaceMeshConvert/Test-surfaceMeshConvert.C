@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
             // UnsortedMeshedSurface<face> surf2;
             // is >> surf2;
 
-            // surf2.read(is);  // FAIL: private method
+            // surf2.readIstream(is);  // FAIL: private method
         }
 
         if (args.found("orient"))

@@ -60,10 +60,9 @@ Ostream& operator<<(Ostream&, const cv2DControls&);
 
 class cv2DControls
 {
-    // Private data
+    // Private Data
 
-        //- Description of data_
-        const dictionary& dict_;
+        //- Description of data
 
         const dictionary& motionControl_;
 

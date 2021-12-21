@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,7 +183,8 @@ Foam::tmp<Foam::scalarField>
 Foam::nutUWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchi = patch().index();
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -191,10 +192,33 @@ Foam::nutUWallFunctionFvPatchScalarField::yPlus() const
             internalField().group()
         )
     );
+
+    const scalarField& y = turbModel.y()[patchi];
+
+    tmp<scalarField> tnuw = turbModel.nu(patchi);
+    const scalarField& nuw = tnuw();
+
+    tmp<scalarField> tnuEff = turbModel.nuEff(patchi);
+    const scalarField& nuEff = tnuEff();
+
     const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
+    const scalarField magGradUw(mag(Uw.snGrad()));
 
-    return calcYPlus(magUp);
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus.ref();
+
+    forAll(yPlus, facei)
+    {
+        if (yPlusLam_ > yPlus[facei])
+        {
+            // viscous sublayer
+            yPlus[facei] =
+                y[facei]*sqrt(nuEff[facei]*magGradUw[facei])/nuw[facei];
+        }
+    }
+
+    return tyPlus;
 }
 
 

@@ -68,6 +68,15 @@ protected:
 
     // Protected Member Functions
 
+        //- Get minimum label across coupled boundary faces
+        void getMinBoundaryValue
+        (
+            const polyMesh& mesh,
+            const labelList& decomposition,
+            labelList& destProc
+        ) const;
+
+
         //- No copy construct
         decompositionConstraint(const decompositionConstraint&) = delete;
 

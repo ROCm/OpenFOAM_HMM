@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,11 +84,20 @@ public:
 
     // Constructors
 
-        //- Construct from entry name
-        explicit ZeroConstant(const word& entryName);
+        //- Construct from entry name and optional registry
+        explicit ZeroConstant
+        (
+            const word& entryName,
+            const objectRegistry* obrPtr = nullptr
+        );
 
-        //- Construct from entry name and dictionary
-        ZeroConstant(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        ZeroConstant
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
 
     //- Destructor
@@ -96,6 +105,9 @@ public:
 
 
     // Member Functions
+
+        //- Value is independent of x
+        virtual inline bool constant() const { return true; }
 
         //- Return constant value
         virtual inline Type value(const scalar) const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,10 +103,11 @@ Description
         Property | Description                            | Type | Reqd | Deflt
         type     | Type name of function object           | word |  yes  | -
         libs     | Library name(s) for implementation     | words | no  | -
-        errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
-        region   | Name of region for multi-region cases  | word | no | region0
         enabled  | Switch to turn function object on/off  | bool | no | true
+        errors   | Error handling (default/warn/ignore/strict) | word | no | inherits
         log     | Switch to write log info to standard output | bool | no | true
+        useNamePrefix | Add scoping prefix to names       | bool | no | inherits
+        region   | Name of region for multi-region cases  | word | no | region0
         timeStart | Start time for function object execution | scalar | no | 0
         timeEnd   | End time for function object execution   | scalar | no | inf
         executeControl  | See time controls below     | word | no    | timeStep
@@ -117,6 +118,10 @@ Description
 
     If the \c errors entry is missing, it uses the value (if any)
     specified within the top-level functionObjectList.
+
+    If the \c useNamePrefix entry is missing, it uses the value (if any)
+    specified within the top-level functionObjectList or otherwise
+    uses the current value of functionObject::defaultUseNamePrefix
 
     Time controls:
     \table
@@ -218,37 +223,47 @@ class functionObject
 {
     // Private Data
 
-        //- Name
+        //- Function object name
         const word name_;
+
+        //- Flag to indicate that names should be prefixed
+        bool useNamePrefix_;
 
 
 protected:
 
     // Protected Member Functions
 
-        //- Return a scoped name, e.g. used to construct local field names
+        //- Return a scoped (prefixed) name
+        //  Used to construct local field names, controlled by useNamePrefix_
         word scopedName(const word& name) const;
 
 
 public:
 
-    // Forward declarations
+    // Forward Declarations
     class unavailableFunctionObject;
 
-    //- Runtime type information
-    virtual const word& type() const = 0;
 
-    //- Flag to execute debug content
-    static int debug;
+    // Public Data
 
-    //- Global post-processing mode switch
-    static bool postProcess;
+        //- Flag to write log into Info
+        bool log;
 
-    //- Directory prefix
-    static word outputPrefix;
 
-    //- Flag to write log into Info
-    bool log;
+    // Static Data Members
+
+        //- Flag to execute debug content
+        static int debug;
+
+        //- Global post-processing mode switch
+        static bool postProcess;
+
+        //- Global default for useNamePrefix
+        static bool defaultUseNamePrefix;
+
+        //- Directory prefix
+        static word outputPrefix;
 
 
     // Declare run-time constructor selection tables
@@ -266,7 +281,11 @@ public:
     // Constructors
 
         //- Construct from components
-        functionObject(const word& name);
+        explicit functionObject
+        (
+            const word& name,
+            const bool withNamePrefix = defaultUseNamePrefix
+        );
 
         //- Return clone
         autoPtr<functionObject> clone() const
@@ -293,8 +312,18 @@ public:
 
     // Member Functions
 
+        //- Runtime type information
+        virtual const word& type() const = 0;
+
         //- Return the name of this functionObject
-        const word& name() const;
+        const word& name() const noexcept;
+
+        //- Return the flag for adding a scoping name prefix
+        bool useNamePrefix() const noexcept;
+
+        //- Modify the flag for adding a scoping name prefix
+        //  \return previous value.
+        bool useNamePrefix(bool on) noexcept;
 
         //- Read and set the function object if its data have changed
         virtual bool read(const dictionary& dict);
@@ -347,7 +376,7 @@ class functionObject::unavailableFunctionObject
 protected:
 
     //- Construct with name
-    unavailableFunctionObject(const word& name);
+    explicit unavailableFunctionObject(const word& name);
 
     //- Report it is unavailable, emitting a FatalError for try/catch
     //- in the caller

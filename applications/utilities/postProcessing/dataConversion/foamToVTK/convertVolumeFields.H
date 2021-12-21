@@ -264,7 +264,7 @@ Description
         // Begin CellData
         if (internalWriter)
         {
-            // Optionally with cellID and procID fields
+            // Optionally with (cellID, procID) fields
             internalWriter->beginCellData
             (
                 (withMeshIds ? 1 + (internalWriter->parallel() ? 1 : 0) : 0)
@@ -278,20 +278,21 @@ Description
             }
         }
 
-        if (nVolFields)
+        if (nVolFields || withMeshIds)
         {
             for (vtk::patchWriter& writer : patchWriters)
             {
-                // Optionally with patchID field
+                // Optionally with (patchID, procID) fields
                 writer.beginCellData
                 (
-                    (withMeshIds ? 1 : 0)
+                    (withMeshIds ? 2 : 0)
                   + nVolFields
                 );
 
                 if (withMeshIds)
                 {
                     writer.writePatchIDs();
+                    writer.writeProcIDs();
                 }
             }
         }

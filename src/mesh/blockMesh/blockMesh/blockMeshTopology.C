@@ -33,17 +33,27 @@ License
 #include "emptyPolyPatch.H"
 #include "cyclicPolyPatch.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Replace (<block> <face>) face description
+// with the corresponding block face
+// - otherwise check point labels are in range
 
 template<class Source>
-void Foam::blockMesh::checkPatchLabels
+static void rewritePatchLabels
 (
     const Source& source,
     const word& patchName,
-    const pointField& points,
+    const PtrList<block>& blocks,
+    const label nPoints,
     faceList& patchFaces
-) const
+)
 {
+    const label nBlocks = blocks.size();
+
     forAll(patchFaces, facei)
     {
         face& f = patchFaces[facei];
@@ -55,40 +65,41 @@ void Foam::blockMesh::checkPatchLabels
             const label bi = f[0];
             const label fi = f[1];
 
-            if (bi >= size())
+            if (bi < 0 || bi >= nBlocks)
             {
                 FatalIOErrorInFunction(source)
-                    << "Block index out of range for patch face " << f << nl
-                    << "    Number of blocks = " << size()
-                    << ", index = " << f[0] << nl
+                    << "Block index out of range."
+                    << " Patch face (" << bi << ' ' << fi << ")\n"
+                    << "    Number of blocks = " << nBlocks
+                    << ", block index = " << bi << nl
                     << "    on patch " << patchName << ", face " << facei
                     << exit(FatalIOError);
             }
-            else if (fi >= operator[](bi).blockShape().faces().size())
+            else if (fi >= blocks[bi].blockShape().nFaces())
             {
                 FatalIOErrorInFunction(source)
-                    << "Block face index out of range for patch face " << f
-                    << nl
+                    << "Block face index out of range."
+                    << " Patch face (" << bi << ' ' << fi << ")\n"
                     << "    Number of block faces = "
-                    << operator[](bi).blockShape().faces().size()
-                    << ", index = " << f[1] << nl
+                    << blocks[bi].blockShape().nFaces()
+                    << ", face index = " << fi << nl
                     << "    on patch " << patchName << ", face " << facei
                     << exit(FatalIOError);
             }
             else
             {
-                f = operator[](bi).blockShape().faces()[fi];
+                f = blocks[bi].blockShape().face(fi);
             }
         }
         else
         {
             for (const label pointi : f)
             {
-                if (pointi < 0 || pointi >= points.size())
+                if (pointi < 0 || pointi >= nPoints)
                 {
                     FatalIOErrorInFunction(source)
                         << "Point label " << pointi
-                        << " out of range 0.." << points.size() - 1 << nl
+                        << " out of range 0.." << (nPoints - 1) << nl
                         << "    on patch " << patchName << ", face " << facei
                         << exit(FatalIOError);
                 }
@@ -97,6 +108,10 @@ void Foam::blockMesh::checkPatchLabels
     }
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::blockMesh::readPatches
 (
@@ -112,25 +127,19 @@ void Foam::blockMesh::readPatches
     varDict.merge(meshDescription.subOrEmptyDict("namedBlocks"));
 
 
-    ITstream& patchStream(meshDescription.lookup("patches"));
+    ITstream& patchStream = meshDescription.lookup("patches");
 
     // Read number of patches in mesh
     label nPatches = 0;
 
-    token firstToken(patchStream);
-
-    if (firstToken.isLabel())
+    if (patchStream.peek().isLabel())
     {
-        nPatches = firstToken.labelToken();
+        patchStream >> nPatches;
 
         tmpBlocksPatches.setSize(nPatches);
         patchNames.setSize(nPatches);
         patchTypes.setSize(nPatches);
         nbrPatchNames.setSize(nPatches);
-    }
-    else
-    {
-        patchStream.putBack(firstToken);
     }
 
     // Read beginning of blocks
@@ -175,15 +184,16 @@ void Foam::blockMesh::readPatches
             }
         }
 
-        checkPatchLabels
+        rewritePatchLabels
         (
             patchStream,
             patchNames[nPatches],
-            vertices_,
+            *this,
+            vertices_.size(),
             tmpBlocksPatches[nPatches]
         );
 
-        nPatches++;
+        ++nPatches;
 
 
         // Split old style cyclics
@@ -298,67 +308,57 @@ void Foam::blockMesh::readBoundary
         );
 
 
-        checkPatchLabels
+        rewritePatchLabels
         (
             patchInfo.dict(),
             patchNames[patchi],
-            vertices_,
+            *this,
+            vertices_.size(),
             tmpBlocksPatches[patchi]
         );
     }
 }
 
 
-void Foam::blockMesh::createCellShapes
-(
-    cellShapeList& tmpBlockCells
-)
+Foam::cellShapeList Foam::blockMesh::getBlockShapes() const
 {
     const blockMesh& blocks = *this;
 
-    tmpBlockCells.setSize(blocks.size());
+    cellShapeList shapes(blocks.size());
+
     forAll(blocks, blocki)
     {
-        tmpBlockCells[blocki] = blocks[blocki].blockShape();
+        shapes[blocki] = blocks[blocki].blockShape();
     }
+
+    return shapes;
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
+Foam::autoPtr<Foam::polyMesh>
+Foam::blockMesh::createTopology
 (
     const IOdictionary& meshDescription,
     const word& regionName
 )
 {
-    blockList& blocks = *this;
-
     word defaultPatchName = "defaultFaces";
     word defaultPatchType = emptyPolyPatch::typeName;
 
     // Read the names/types for the unassigned patch faces
     // this is a bit heavy handed (and ugly), but there is currently
     // no easy way to rename polyMesh patches subsequently
-    if (const dictionary* dictPtr = meshDescription.findDict("defaultPatch"))
+    if (const dictionary* dictptr = meshDescription.findDict("defaultPatch"))
     {
-        dictPtr->readIfPresent("name", defaultPatchName);
-        dictPtr->readIfPresent("type", defaultPatchType);
+        dictptr->readIfPresent("name", defaultPatchName);
+        dictptr->readIfPresent("type", defaultPatchType);
     }
 
-    // Optional 'scale' factor. Was 'convertToMeters' until OCT-2008
-    meshDescription.readIfPresentCompat
-    (
-        "scale",
-        {{"convertToMeters", 1012}},  // Mark as changed from 2010 onwards
-        scaleFactor_
-    );
 
-    // Treat (scale <= 0) as scaling == 1 (no scaling).
-    if (scaleFactor_ <= 0)
-    {
-        scaleFactor_ = 1.0;
-    }
+    // Scaling, transformations
+    readPointTransforms(meshDescription);
 
     // Read the block edges
     if (meshDescription.found("edges"))
@@ -376,9 +376,13 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 
         edges_.transfer(edges);
     }
-    else if (verbose_)
+    else
     {
-        Info<< "No non-linear block edges defined" << endl;
+        edges_.clear();
+        if (verbose_)
+        {
+            Info<< "No non-linear block edges defined" << endl;
+        }
     }
 
 
@@ -398,9 +402,13 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 
         faces_.transfer(faces);
     }
-    else if (verbose_)
+    else
     {
-        Info<< "No non-planar block faces defined" << endl;
+        faces_.clear();
+        if (verbose_)
+        {
+            Info<< "No non-planar block faces defined" << endl;
+        }
     }
 
 
@@ -420,21 +428,25 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
     }
 
 
-    autoPtr<polyMesh> blockMeshPtr;
+    // Create patch information
 
-    // Create the patches
+    faceListList tmpBlocksPatches;
+    wordList patchNames;
+    PtrList<dictionary> patchDicts;
+
 
     if (verbose_)
     {
-        Info<< "Creating topology patches" << endl;
+        Info<< nl << "Creating topology patches - ";
     }
 
     if (meshDescription.found("patches"))
     {
-        Info<< nl << "Reading patches section" << endl;
+        if (verbose_)
+        {
+            Info<< "from patches section" << endl;
+        }
 
-        faceListList tmpBlocksPatches;
-        wordList patchNames;
         wordList patchTypes;
         wordList nbrPatchNames;
 
@@ -447,16 +459,13 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
             nbrPatchNames
         );
 
-        Info<< nl << "Creating block mesh topology" << endl;
+        if (verbose_)
+        {
+            Info<< nl
+                << "Reading physicalType from existing boundary file" << endl;
+        }
 
-        cellShapeList tmpBlockCells(blocks.size());
-        createCellShapes(tmpBlockCells);
-
-
-        Info<< nl << "Reading physicalType from existing boundary file" << endl;
-
-        PtrList<dictionary> patchDicts(patchNames.size());
-        word defaultFacesType;
+        patchDicts.resize(patchNames.size());
 
         preservePatchTypes
         (
@@ -495,38 +504,19 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
                     << exit(FatalIOError);
             }
 
-            // Override neighbourpatch name
-            if (nbrPatchNames[patchi] != word::null)
+            // Override neighbour patch name
+            if (!nbrPatchNames[patchi].empty())
             {
                 dict.set("neighbourPatch", nbrPatchNames[patchi]);
             }
         }
-
-        blockMeshPtr = autoPtr<polyMesh>::New
-        (
-            IOobject
-            (
-                regionName,
-                meshDescription.time().constant(),
-                meshDescription.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            pointField(vertices_),   // Copy these points, do NOT move
-            tmpBlockCells,
-            tmpBlocksPatches,
-            patchNames,
-            patchDicts,
-            defaultPatchName,
-            defaultPatchType
-        );
     }
     else if (meshDescription.found("boundary"))
     {
-        wordList patchNames;
-        faceListList tmpBlocksPatches;
-        PtrList<dictionary> patchDicts;
+        if (verbose_)
+        {
+            Info<< "from boundary section" << endl;
+        }
 
         readBoundary
         (
@@ -535,32 +525,45 @@ Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
             tmpBlocksPatches,
             patchDicts
         );
-
-        Info<< nl << "Creating block mesh topology" << endl;
-
-        cellShapeList tmpBlockCells(blocks.size());
-        createCellShapes(tmpBlockCells);
-
-        blockMeshPtr = autoPtr<polyMesh>::New
-        (
-            IOobject
-            (
-                regionName,
-                meshDescription.time().constant(),
-                meshDescription.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            pointField(vertices_),   // Copy these points, do NOT move
-            tmpBlockCells,
-            tmpBlocksPatches,
-            patchNames,
-            patchDicts,
-            defaultPatchName,
-            defaultPatchType
-        );
     }
+    else
+    {
+        if (verbose_)
+        {
+            Info<< "with default boundary only!!" << endl;
+        }
+    }
+
+
+    if (verbose_)
+    {
+        Info<< nl << "Creating block mesh topology";
+        if (hasPointTransforms())
+        {
+            Info<< " - scaling/transform applied later";
+        }
+        Info<< endl;
+    }
+
+    auto blockMeshPtr = autoPtr<polyMesh>::New
+    (
+        IOobject
+        (
+            regionName,
+            meshDescription.time().constant(),
+            meshDescription.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        pointField(vertices_),   // Use a copy of vertices
+        getBlockShapes(),
+        tmpBlocksPatches,
+        patchNames,
+        patchDicts,
+        defaultPatchName,
+        defaultPatchType
+    );
 
     check(*blockMeshPtr, meshDescription);
 

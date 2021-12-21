@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ namespace
 {
 
 // Write environment entry
-inline static void printEnv
+inline void printEnv
 (
     Foam::Ostream& os,
     const Foam::word& key,
@@ -61,7 +61,7 @@ Foam::Ostream& Foam::profilingSysInfo::write
     Ostream& os
 ) const
 {
-    os.writeEntry("host",       Foam::hostName(false)); // short name
+    os.writeEntry("host",       Foam::hostName()); // short name
     os.writeEntry("date",       Foam::clock::dateTime());
 
     // compile-time information

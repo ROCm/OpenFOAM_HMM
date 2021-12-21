@@ -13,4 +13,33 @@ KirchhoffShell/KirchhoffShell.C
 derivedFvPatchFields/thermalShell/thermalShellFvPatchScalarField.C
 derivedFvPatchFields/vibrationShell/vibrationShellFvPatchScalarField.C
 
+/* Sub-Model */
+
+liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModel.C
+liquidFilm/subModels/kinematic/filmTurbulenceModel/filmTurbulenceModel/filmTurbulenceModelNew.C
+liquidFilm/subModels/kinematic/filmTurbulenceModel/laminar/laminar.C
+
+liquidFilm/subModels/kinematic/injectionModel/injectionModelList/injectionModelList.C
+liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModel.C
+liquidFilm/subModels/kinematic/injectionModel/injectionModel/injectionModelNew.C
+
+liquidFilm/subModels/kinematic/injectionModel/curvatureSeparation/curvatureSeparation.C
+
+liquidFilm/subModels/kinematic/force/forceList/forceList.C
+liquidFilm/subModels/kinematic/force/force/force.C
+liquidFilm/subModels/kinematic/force/force/forceNew.C
+liquidFilm/subModels/kinematic/force/contactAngleForces/contactAngleForce/contactAngleForce.C
+liquidFilm/subModels/kinematic/force/contactAngleForces/perturbedTemperatureDependent/perturbedTemperatureDependentContactAngleForce.C
+
+liquidFilm/subModels/filmSubModelBase.C
+
+liquidFilm/liquidFilmBase.C
+liquidFilm/liquidFilmBaseNew.C
+
+liquidFilm/liquidFilmModel/liquidFilmModel.C
+liquidFilm/kinematicThinFilm/kinematicThinFilm.C
+derivedFvPatchFields/filmShell/velocityFilmShellFvPatchVectorField.C
+
+functionObjects/setTimeStep/setTimeStepFaRegionsFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libregionFaModels

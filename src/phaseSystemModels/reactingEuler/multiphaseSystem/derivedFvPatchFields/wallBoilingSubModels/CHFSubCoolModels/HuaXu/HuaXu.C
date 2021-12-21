@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2021 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +63,6 @@ Foam::wallBoilingModels::CHFModels::HuaXu::HuaXu
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallBoilingModels::CHFModels::HuaXu::~HuaXu()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -82,13 +76,22 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
     const scalarField& L
 ) const
 {
-    const uniformDimensionedVectorField& g =
+    const auto& g =
         liquid.mesh().time().lookupObject<uniformDimensionedVectorField>("g");
 
     const scalarField alphaLiq(liquid.alpha(patchi));
 
-    const scalarField rhoVapor(vapor.thermo().rho(patchi));
-    const scalarField rhoLiq(liquid.thermo().rho(patchi));
+    const labelUList& cells = liquid.mesh().boundary()[patchi].faceCells();
+
+    const scalarField& pw = liquid.thermo().p().boundaryField()[patchi];
+
+    tmp<scalarField> trhoVapor = vapor.thermo().rhoEoS(pw, Tsatw, cells);
+    const scalarField& rhoVapor = trhoVapor.ref();
+
+    tmp<scalarField> trhoLiq = liquid.thermo().rhoEoS(pw, Tsatw, cells);
+    const scalarField& rhoLiq = trhoLiq.ref();
+
+
     tmp<volScalarField> tCp = liquid.thermo().Cp();
     const volScalarField& Cp = tCp();
     const fvPatchScalarField& Cpw = Cp.boundaryField()[patchi];
@@ -105,7 +108,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
        /
         (
             alphaLiq
-          * pow(mag(g.value())*(rhoLiq-rhoVapor), 0.25)
+          * pow025(mag(g.value())*(rhoLiq-rhoVapor))
           * sqrt(rhoVapor)
         )
     );
@@ -115,8 +118,7 @@ Foam::wallBoilingModels::CHFModels::HuaXu::CHFSubCool
         rhoLiq*Cpw*max(Tsatw - Tl, scalar(0))/(rhoVapor*L)
     );
 
-    return
-        Kburn_*(1 + 0.345*Ja/pow(Pe, 0.25));
+    return Kburn_*(scalar(1) + 0.345*Ja/pow025(Pe));
 }
 
 

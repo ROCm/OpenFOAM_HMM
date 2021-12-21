@@ -75,7 +75,7 @@ Foam::TDACChemistryModel<ReactionThermo, ThermoType>::TDACChemistryModel
     // Store the species composition according to the species index
     speciesTable speciesTab = composition.species();
 
-    autoPtr<HashTable<List<specieElement>>> specCompPtr
+    autoPtr<speciesCompositionTable> specCompPtr
     (
         dynamicCast<const reactingMixture<ThermoType>>(this->thermo())
        .specieComposition()

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,19 +177,19 @@ public:
     // Member Functions
 
         //- Return interface size
-        virtual label interfaceSize() const
+        virtual label interfaceSize() const noexcept
         {
             return size();
         }
 
         //- Return processor number
-        int myProcNo() const
+        int myProcNo() const noexcept
         {
             return myProcNo_;
         }
 
         //- Return neighbour processor number
-        int neighbProcNo() const
+        int neighbProcNo() const noexcept
         {
             return neighbProcNo_;
         }
@@ -196,18 +197,11 @@ public:
         //- Return true if running parallel
         virtual bool coupled() const
         {
-            if (Pstream::parRun())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return Pstream::parRun();
         }
 
         //- Is this the master side?
-        virtual bool master() const
+        virtual bool master() const noexcept
         {
             return (myProcNo_ < neighbProcNo_);
         }
@@ -264,10 +258,18 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData
+            ) const;
+
+            //- Return the values of the given internal data adjacent to
+            //- the interface as a field using edgeFaces
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData,
+                const labelUList& edgeFaces
             ) const;
 
             //- Initialise interface data transfer
@@ -298,8 +300,16 @@ public:
                 const labelUList& internalData
             ) const;
 
+            //- Return neighbour field using mapping
+            virtual tmp<labelField> internalFieldTransfer
+            (
+                const Pstream::commsTypes commsType,
+                const labelUList& internalData,
+                const labelUList& edgeCells
+            ) const;
+
             //- Write the patch data as a dictionary
-            virtual void write(Ostream&) const;
+            virtual void write(Ostream& os) const;
 };
 
 

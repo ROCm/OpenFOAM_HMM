@@ -91,16 +91,15 @@ int main(int argc, char *argv[])
         "Preserve sub-entry as .backup",
         true // Advanced
     );
-    argList::addBoolOption
+    argList::addDryRunOption
     (
-        "dry-run",
         "Evaluate but do not write"
     );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    const bool dryrun      = args.found("dry-run");
+    const bool dryrun      = args.dryRun();
     const bool backup      = args.found("backup");
     const bool cacheFields = args.found("cache-fields");
 
@@ -232,18 +231,21 @@ int main(int argc, char *argv[])
 
                 dictionary& patchDict = boundaryFieldDict.subDict(patchName);
 
-                expressions::exprString expr
+                auto valueExpr_
                 (
-                    currDict.get<string>("expression"),
-                    currDict,
-                    true  // strip comments
+                    expressions::exprString::getEntry
+                    (
+                        "expression",
+                        currDict,
+                        true  // strip comments
+                    )
                 );
 
                 Info<< "Set boundaryField/" << patchName << '/'
                     << targetName << nl
                     << "with expression" << nl
                     << "<<<<" << nl
-                    << expr.c_str() << nl
+                    << valueExpr_.c_str() << nl
                     << ">>>>" << nl;
 
                 expressions::patchExprDriver driver(currDict, mesh);
@@ -256,7 +258,7 @@ int main(int argc, char *argv[])
                 );
 
                 driver.clearVariables();
-                driver.parse(expr);
+                driver.parse(valueExpr_);
 
                 // Serializing via Field::writeEntry etc
                 OStringStream serialize;

@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2018 OpenFOAM Foundation
-#     Copyright (C) 2019-2020 OpenCFD Ltd.
+#     Copyright (C) 2019-2021 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -204,11 +204,19 @@ findFiles()
     then
         # No extension
         findFilesInDirs "$prefix"
+        if [[ "$prefix" == topoSet* ]]
+        then
+            findFilesInDirs "topoSetSourcesDict"
+        fi
     elif [ "$searchExt" = "<any>" ]
     then
         # No extension or any extension
         findFilesInDirs "$prefix"
         findFilesInDirs "${prefix}.*"
+        if [[ "$prefix" == topoSet* ]]
+        then
+            findFilesInDirs "topoSetSourcesDict"
+        fi
     else
         # With specific extension
         findFilesInDirs "${prefix}.$searchExt"

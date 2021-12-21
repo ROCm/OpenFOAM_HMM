@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,9 @@ Foam::autoPtr<Foam::interpolation<Type>> Foam::interpolation<Type>::New
     const GeometricField<Type, fvPatchField, volMesh>& psi
 )
 {
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(interpolationType);
+    auto* ctorPtr = dictionaryConstructorTable(interpolationType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalErrorInLookup
         (
@@ -50,7 +50,7 @@ Foam::autoPtr<Foam::interpolation<Type>> Foam::interpolation<Type>::New
         ) << exit(FatalError);
     }
 
-    return autoPtr<interpolation<Type>>(cstrIter()(psi));
+    return autoPtr<interpolation<Type>>(ctorPtr(psi));
 }
 
 

@@ -697,9 +697,17 @@ const Foam::lduAddressing& Foam::fvMesh::lduAddr() const
             << nFaces() << endl;
 
         lduPtr_ = new fvMeshLduAddressing(*this);
+
+        return *lduPtr_;
     }
 
     return *lduPtr_;
+}
+
+
+Foam::lduInterfacePtrsList Foam::fvMesh::interfaces() const
+{
+    return boundary().interfaces();
 }
 
 

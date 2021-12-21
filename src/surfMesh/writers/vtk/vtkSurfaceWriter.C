@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +66,7 @@ Foam::surfaceWriters::vtkWriter::vtkWriter()
     surfaceWriter(),
     fmtType_(static_cast<unsigned>(vtk::formatType::INLINE_BASE64)),
     precision_(IOstream::defaultPrecision()),
+    writeNormal_(false),
     fieldScale_(),
     writer_(nullptr)
 {}
@@ -79,6 +80,7 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
     surfaceWriter(),
     fmtType_(static_cast<unsigned>(opts.fmt())),
     precision_(opts.precision()),
+    writeNormal_(false),
     fieldScale_(),
     writer_(nullptr)
 {}
@@ -95,6 +97,7 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
     (
         options.getOrDefault("precision", IOstream::defaultPrecision())
     ),
+    writeNormal_(options.getOrDefault("normal", false)),
     fieldScale_(options.subOrEmptyDict("fieldScale")),
     writer_(nullptr)
 {
@@ -241,6 +244,29 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::write()
         }
 
         writer_->writeGeometry();
+
+        if (writeNormal_)
+        {
+            const faceList& fcs = surf.faces();
+            const pointField& pts = surf.points();
+
+            Field<vector> normals(fcs.size());
+            forAll(fcs, facei)
+            {
+                normals[facei] = fcs[facei].areaNormal(pts);
+            }
+
+            label nCellData = 1;
+
+            if (!this->isPointData())
+            {
+                // Ill-defined with legacy() if nFields_ not properly set...
+                nCellData += nFields_;
+            }
+
+            writer_->beginCellData(nCellData);
+            writer_->write("area-normal", normals);
+        }
     }
 
     wroteGeom_ = true;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,25 +106,25 @@ public:
     // Member Functions
 
         //- Return start label of this patch in the face list
-        label start() const
+        label start() const noexcept
         {
             return start_;
         }
 
         //- Return start label of this patch in the face list
-        label& start()
+        label& start() noexcept
         {
             return start_;
         }
 
         //- Return size of this patch in the face list
-        label size() const
+        label size() const noexcept
         {
             return size_;
         }
 
         //- Return size of this patch in the face list
-        label& size()
+        label& size() noexcept
         {
             return size_;
         }
@@ -156,7 +156,10 @@ public:
             const label size,
             const label start,
             const label index
-        );
+        )
+        :
+            surfacePatch(name, size, start, index, geometricType)
+        {}
 
         //- Deprecated(2020-01) Ostream output
         //  \deprecated(2020-01) - Ostream output

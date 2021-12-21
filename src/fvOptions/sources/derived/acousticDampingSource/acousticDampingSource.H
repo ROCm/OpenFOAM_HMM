@@ -120,7 +120,7 @@ namespace fv
 
 class acousticDampingSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
 protected:
 

@@ -28,7 +28,6 @@ License
 
 #include "UList.H"
 #include "SLList.H"
-#include <type_traits>
 #include <utility>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -87,24 +86,6 @@ inline Foam::FixedList<T, N>::FixedList(FixedList<T, N>&& list)
 
 
 template<class T, unsigned N>
-template<class InputIterator>
-inline Foam::FixedList<T, N>::FixedList
-(
-    InputIterator begIter,
-    InputIterator endIter
-)
-{
-    checkSize(std::distance(begIter, endIter));
-
-    for (unsigned i=0; i<N; ++i)
-    {
-        v_[i] = *begIter;
-        ++begIter;
-    }
-}
-
-
-template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(std::initializer_list<T> list)
 {
     checkSize(list.size());
@@ -126,6 +107,21 @@ inline Foam::FixedList<T, N>::FixedList(const UList<T>& list)
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = list[i];
+    }
+}
+
+
+template<class T, unsigned N>
+template<unsigned AnyNum>
+inline Foam::FixedList<T, N>::FixedList
+(
+    const FixedList<T, AnyNum>& list,
+    const FixedList<label, N>& indices
+)
+{
+    for (unsigned i=0; i<N; ++i)
+    {
+        v_[i] = list[indices[i]];
     }
 }
 
@@ -181,6 +177,22 @@ inline T*
 Foam::FixedList<T, N>::data() noexcept
 {
     return v_;
+}
+
+
+template<class T, unsigned N>
+inline const char*
+Foam::FixedList<T, N>::cdata_bytes() const noexcept
+{
+    return reinterpret_cast<const char*>(v_);
+}
+
+
+template<class T, unsigned N>
+inline char*
+Foam::FixedList<T, N>::data_bytes() noexcept
+{
+    return reinterpret_cast<char*>(v_);
 }
 
 
@@ -333,6 +345,16 @@ inline void Foam::FixedList<T, N>::resize(const label n)
     checkSize(n);
     #endif
 }
+
+
+template<class T, unsigned N>
+inline void Foam::FixedList<T, N>::resize_nocopy(const label n)
+{
+    #ifdef FULLDEBUG
+    checkSize(n);
+    #endif
+}
+
 
 template<class T, unsigned N>
 inline void Foam::FixedList<T, N>::fill(const T& val)

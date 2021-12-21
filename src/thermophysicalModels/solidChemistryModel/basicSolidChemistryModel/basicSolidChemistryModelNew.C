@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,23 +50,6 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
         chemistryDict.subDict("chemistryType");
 
     Info<< "Selecting chemistry type " << chemistryTypeDict << endl;
-
-    std::initializer_list<const char*> cmptNames
-    {
-        "chemistrySolver",
-        "chemistryThermo",
-        "baseChemistry",
-        "transport",
-        "thermo",
-        "equationOfState",
-        "specie",
-        "energy",
-        "transport",
-        "thermo",
-        "equationOfState",
-        "specie",
-        "energy"
-    };
 
     const IOdictionary thermoDict
     (
@@ -112,48 +95,48 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
 
     Info<< "chemistryTypeName " << chemistryTypeName << endl;
 
-    auto cstrIter = thermoConstructorTablePtr_->cfind(chemistryTypeName);
+    const auto& cnstrTable = *(thermoConstructorTablePtr_);
 
-    if (!cstrIter.found())
+    auto* ctorPtr = cnstrTable.lookup(chemistryTypeName, nullptr);
+
+    if (!ctorPtr)
     {
-        const int nCmpt = cmptNames.size();
-
-        // Build a table of the thermo packages constituent parts
-        // Note: row-0 contains the names of constituent parts
-        List<wordList> validCmpts(thermoConstructorTablePtr_->size()+1);
-
-        // Header (row 0)
-        validCmpts[0].resize(nCmpt);
-        std::copy(cmptNames.begin(), cmptNames.end(), validCmpts[0].begin());
-
-        label rowi = 1;
-        for (const word& validName : thermoConstructorTablePtr_->sortedToc())
-        {
-            validCmpts[rowi] = basicThermo::splitThermoName(validName, nCmpt);
-
-            if (validCmpts[rowi].size())
-            {
-                ++rowi;
-            }
-        }
-        validCmpts.resize(rowi);
-
-
         FatalIOErrorInLookup
         (
             chemistryTypeDict,
             typeName,
             word::null, // Suppress long name? Just output dictionary (above)
-            *thermoConstructorTablePtr_
+            cnstrTable
         );
 
         // Table of available packages (as constituent parts)
-        printTable(validCmpts, FatalIOError)
+        basicThermo::printThermoNames
+        (
+            FatalIOError,
+            wordList
+            ({
+                "chemistrySolver",
+                "chemistryThermo",
+                "baseChemistry",
+                "transport",
+                "thermo",  // solid
+                "equationOfState",
+                "specie",
+                "energy",
+                "transport",
+                "thermo",  // gas
+                "equationOfState",
+                "specie",
+                "energy"
+            }),
+            cnstrTable.sortedToc()
+        );
+
+        FatalIOError
             << exit(FatalIOError);
     }
 
-    return
-        autoPtr<basicSolidChemistryModel>(cstrIter()(thermo));
+    return autoPtr<basicSolidChemistryModel>(ctorPtr(thermo));
 }
 
 

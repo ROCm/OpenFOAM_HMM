@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,20 +29,19 @@ License
 #include "fieldTypes.H"
 #include "ConstantField.H"
 #include "UniformValueField.H"
+#include "FunctionObjectValue.H"
+#include "NoneFunction1.H"
 #include "MappedFile.H"
-#include "addToRunTimeSelectionTable.H"
 #include "Table.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makePatchFunction1s(Type)                                              \
     makePatchFunction1(Type);                                                  \
     makePatchFunction1Type(ConstantField, Type);                               \
     makePatchFunction1Type(MappedFile, Type);                                  \
     makePatchFunction1Type(UniformValueField, Type);
-
-#define addUniformValueFieldFunction1s(F1Type, Type)                           \
-    PatchFunction1<Type>::adddictionaryConstructorToTable                      \
-    <PatchFunction1Types::UniformValueField<Type>>                             \
-        add##F1Type##UniformValueField##Type##ConstructorToTable_(#F1Type);
 
 namespace Foam
 {
@@ -59,6 +58,14 @@ namespace Foam
     //- Option1 : add UniformFieldValue under the same name as Function1
     //            See makeFunction1s.C. Note that we do not need
     //            Constant & Uniform
+
+/// Undecided if we actually need 'none':
+/// addUniformValueFieldFunction1s(none, scalar);
+/// addUniformValueFieldFunction1s(none, vector);
+/// addUniformValueFieldFunction1s(none, sphericalTensor);
+/// addUniformValueFieldFunction1s(none, symmTensor);
+/// addUniformValueFieldFunction1s(none, tensor);
+
     addUniformValueFieldFunction1s(zero, scalar);
     addUniformValueFieldFunction1s(zero, vector);
     addUniformValueFieldFunction1s(zero, sphericalTensor);
@@ -119,47 +126,41 @@ namespace Foam
     addUniformValueFieldFunction1s(scale, symmTensor);
     addUniformValueFieldFunction1s(scale, tensor);
 
+    addUniformValueFieldFunction1s(functionObjectValue, scalar);
+    addUniformValueFieldFunction1s(functionObjectValue, vector);
+    addUniformValueFieldFunction1s(functionObjectValue, sphericalTensor);
+    addUniformValueFieldFunction1s(functionObjectValue, symmTensor);
+    addUniformValueFieldFunction1s(functionObjectValue, tensor);
+
 
     ////- Option2 : at static initialisation add all Function1 types.
     ////  This does not work because we cannot guarantee that the Function1
     ////  static initialisation has happened already.
     //template<class Type>
-    //class addToUniform
+    //struct addToUniform
     //{
-    //public:
     //    addToUniform()
     //    {
     //        // Get the Function1 table
-    //        typedef typename Function1<Type>::dictionaryConstructorTable
-    //            F1Type;
     //        Function1<Type>::constructdictionaryConstructorTables();
-    //        const F1Type& F1Table =
+    //        const auto& F1Table =
     //            *Function1<Type>::dictionaryConstructorTablePtr_;
     //
     //        // Get the PatchFunction1 table
-    //        typedef typename PatchFunction1<Type>::dictionaryConstructorTable
-    //            PF1Type;
-    //
     //        PatchFunction1<Type>::constructdictionaryConstructorTables();
-    //        PF1Type& PF1Table =
+    //        auto& PF1Table =
     //            *PatchFunction1<Type>::dictionaryConstructorTablePtr_;
     //
     //        // Get the UniformValueField constructor
-    //        auto cstrIter =
-    //            PatchFunction1<Type>::dictionaryConstructorTablePtr_->cfind
-    //            (
-    //                PatchFunction1Types::UniformValueField<Type>::typeName
-    //            );
+    //        auto ctorIter = PF1Table.cfind
+    //        (
+    //            PatchFunction1Types::UniformValueField<Type>::typeName
+    //        );
     //
     //        // Add the UniformValueField under the Function1 name
     //        forAllConstIters(F1Table, iter)
     //        {
-    //            //bool ok =
-    //            PF1Table.insert(iter.key(), cstrIter());
-    //            //if (!ok)
-    //            //{
-    //            //    std::cout<< "** problem" << std::endl;
-    //            //}
+    //            PF1Table.insert(iter.key(), ctorIter.val());
     //        }
     //    }
     //};

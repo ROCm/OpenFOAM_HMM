@@ -43,7 +43,7 @@ template<class Type>
 Foam::string
 Foam::PatchFunction1Types::CodedField<Type>::description() const
 {
-    return "CodedField " + name_;
+    return "CodedField " + redirectName_;
 }
 
 
@@ -77,7 +77,7 @@ Foam::PatchFunction1Types::CodedField<Type>::codeDict
     (
         dict.found("code")
       ? dict
-      : dict.subDict(name_)
+      : dict.subDict(redirectName_)
     );
 }
 
@@ -102,12 +102,12 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
         FatalIOErrorInFunction(dict_)
             << "No code section in input dictionary for patch "
             << this->patch_.name()
-            << " name " << name_
+            << " name " << redirectName_
             << exit(FatalIOError);
     }
 
-    // Take no chances - typeName must be identical to name_
-    dynCode.setFilterVariable("typeName", name_);
+    // Take no chances - typeName must be identical to redirectName_
+    dynCode.setFilterVariable("typeName", redirectName_);
 
     // Set TemplateType and FieldType filter variables
     dynCode.setFieldTemplates<Type>();
@@ -121,7 +121,7 @@ void Foam::PatchFunction1Types::CodedField<Type>::prepare
     #ifdef FULLDEBUG
     dynCode.setFilterVariable("verbose", "true");
     DetailInfo
-        <<"compile " << name_ << " sha1: " << context.sha1() << endl;
+        <<"compile " << redirectName_ << " sha1: " << context.sha1() << endl;
     #endif
 
     // Define Make/options
@@ -155,13 +155,13 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     codedBase(),
     dict_(dict),
-    name_(dict.getOrDefault<word>("name", entryName))
+    redirectName_(dict.getOrDefault<word>("name", entryName))
 {
     this->codedBase::setCodeContext(dict_);
 
     // No additional code chunks...
 
-    updateLibrary(name_);
+    updateLibrary(redirectName_);
 }
 
 
@@ -185,7 +185,7 @@ Foam::PatchFunction1Types::CodedField<Type>::CodedField
     PatchFunction1<Type>(rhs, pp),
     codedBase(),
     dict_(rhs.dict_),
-    name_(rhs.name_)
+    redirectName_(rhs.redirectName_)
 {}
 
 
@@ -198,19 +198,19 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
     if (!redirectFunctionPtr_)
     {
         dictionary constructDict;
-        // Force 'name_' sub-dictionary into existence
-        dictionary& coeffs = constructDict.subDictOrAdd(name_);
+        // Force 'redirectName_' sub-dictionary into existence
+        dictionary& coeffs = constructDict.subDictOrAdd(redirectName_);
 
         coeffs = dict_;  // Copy input code and coefficients
         coeffs.remove("name");      // Redundant
-        coeffs.set("type", name_);  // Specify our new (redirect) type
+        coeffs.set("type", redirectName_);  // Specify our new (redirect) type
 
         redirectFunctionPtr_.reset
         (
             PatchFunction1<Type>::New
             (
                 this->patch(),
-                name_,
+                redirectName_,
                 constructDict,
                 this->faceValues()
             )
@@ -227,7 +227,7 @@ Foam::PatchFunction1Types::CodedField<Type>::redirectFunction() const
         else
         {
             WarningInFunction
-                << name_ << " Did not derive from dictionaryContent"
+                << redirectName_ << " Did not derive from dictionaryContent"
                 << nl << nl;
         }
     }
@@ -243,7 +243,7 @@ Foam::PatchFunction1Types::CodedField<Type>::value
 ) const
 {
     // Ensure library containing user-defined code is up-to-date
-    updateLibrary(name_);
+    updateLibrary(redirectName_);
 
     return redirectFunction().value(x);
 }
@@ -258,7 +258,7 @@ Foam::PatchFunction1Types::CodedField<Type>::integrate
 ) const
 {
     // Ensure library containing user-defined code is up-to-date
-    updateLibrary(name_);
+    updateLibrary(redirectName_);
 
     return redirectFunction().integrate(x1, x2);
 }

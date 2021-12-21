@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,24 +28,27 @@ License
 
 #include "Scale.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
 void Foam::Function1Types::Scale<Type>::read(const dictionary& coeffs)
 {
-    scale_ = Function1<scalar>::New("scale", coeffs);
-    value_ = Function1<Type>::New("value", coeffs);
+    scale_ = Function1<scalar>::New("scale", coeffs, this->obrPtr_);
+    value_ = Function1<Type>::New("value", coeffs, this->obrPtr_);
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::Function1Types::Scale<Type>::Scale
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const objectRegistry* obrPtr
 )
 :
-    Function1<Type>(entryName)
+    Function1<Type>(entryName, obrPtr)
 {
     read(dict);
 }
@@ -74,7 +77,7 @@ template<class Type>
 void Foam::Function1Types::Scale<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
-    os  << token::END_STATEMENT << nl;
+    os.endEntry();
 
     os.beginBlock(word(this->name() + "Coeffs"));
     writeEntries(os);

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +29,16 @@ License
 template<class Type>
 void Foam::mappedPatchBase::distribute(List<Type>& lst) const
 {
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
+    const label myComm = getCommunicator();  // Get or create
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
+
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
-            const label oldWorldComm = Pstream::worldComm;
-            Pstream::worldComm = comm_;
+            const label oldWorldComm(Pstream::worldComm);
+            Pstream::worldComm = myComm;
 
             if (sameWorld())
             {
@@ -90,7 +93,8 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
             map().distribute(lst);
         }
     }
-    Pstream::warnComm = oldComm;
+
+    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -101,14 +105,16 @@ void Foam::mappedPatchBase::distribute
     const CombineOp& cop
 ) const
 {
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
+    const label myComm = getCommunicator();  // Get or create
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
+
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
-            const label oldWorldComm = Pstream::worldComm;
-            Pstream::worldComm = comm_;
+            const label oldWorldComm(Pstream::worldComm);
+            Pstream::worldComm = myComm;
             lst = AMI().interpolateToSource(Field<Type>(std::move(lst)), cop);
             Pstream::worldComm = oldWorldComm;
             break;
@@ -129,25 +135,28 @@ void Foam::mappedPatchBase::distribute
                 cop,
                 flipOp(),
                 UPstream::msgType(),
-                comm_
+                myComm
             );
         }
     }
-    Pstream::warnComm = oldComm;
+
+    Pstream::warnComm = oldWarnComm;
 }
 
 
 template<class Type>
 void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
 {
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
+    const label myComm = getCommunicator();  // Get or create
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
+
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
-            const label oldWorldComm = Pstream::worldComm;
-            Pstream::worldComm = comm_;
+            const label oldWorldComm(Pstream::worldComm);
+            Pstream::worldComm = myComm;
             lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)));
             Pstream::worldComm = oldWorldComm;
             break;
@@ -158,7 +167,8 @@ void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
             break;
         }
     }
-    Pstream::warnComm = oldComm;
+
+    Pstream::warnComm = oldWarnComm;
 }
 
 
@@ -169,14 +179,16 @@ void Foam::mappedPatchBase::reverseDistribute
     const CombineOp& cop
 ) const
 {
-    const label oldComm(Pstream::warnComm);
-    Pstream::warnComm = comm_;
+    const label myComm = getCommunicator();  // Get or create
+    const label oldWarnComm(Pstream::warnComm);
+    Pstream::warnComm = myComm;
+
     switch (mode_)
     {
         case NEARESTPATCHFACEAMI:
         {
-            const label oldWorldComm = Pstream::worldComm;
-            Pstream::worldComm = comm_;
+            const label oldWorldComm(Pstream::worldComm);
+            Pstream::worldComm = myComm;
             lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)), cop);
             Pstream::worldComm = oldWorldComm;
             break;
@@ -198,12 +210,13 @@ void Foam::mappedPatchBase::reverseDistribute
                 cop,
                 flipOp(),
                 UPstream::msgType(),
-                comm_
+                myComm
             );
             break;
         }
     }
-    Pstream::warnComm = oldComm;
+
+    Pstream::warnComm = oldWarnComm;
 }
 
 

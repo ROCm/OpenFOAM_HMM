@@ -54,8 +54,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     rhoName_("rho"),
     uniformJump_(false),
     nonDimensional_(false),
-    rpm_(0),
-    dm_(0)
+    rpm_(nullptr),
+    dm_(nullptr)
 {}
 
 
@@ -72,19 +72,19 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     uniformJump_(dict.getOrDefault("uniformJump", false)),
     nonDimensional_(dict.getOrDefault("nonDimensional", false)),
-    rpm_(0),
-    dm_(0)
+    rpm_(nullptr),
+    dm_(nullptr)
 {
     // Note that we've not read jumpTable_ etc
     if (nonDimensional_)
     {
-        dict.readEntry("rpm", rpm_);
-        dict.readEntry("dm", dm_);
+        rpm_.reset(Function1<scalar>::New("rpm", dict, &this->db()));
+        dm_.reset(Function1<scalar>::New("dm", dict, &this->db()));
     }
 
     if (this->cyclicPatch().owner())
     {
-        this->jumpTable_ = Function1<Type>::New("jumpTable", dict);
+        this->jumpTable_ = Function1<Type>::New("jumpTable", dict, &this->db());
     }
 
     if (dict.found("value"))
@@ -104,52 +104,52 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 template<class Type>
 Foam::fanFvPatchField<Type>::fanFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const fanFvPatchField<Type>& rhs,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    uniformJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_),
-    nonDimensional_(ptf.nonDimensional_),
-    rpm_(ptf.rpm_),
-    dm_(ptf.dm_)
+    uniformJumpFvPatchField<Type>(rhs, p, iF, mapper),
+    phiName_(rhs.phiName_),
+    rhoName_(rhs.rhoName_),
+    uniformJump_(rhs.uniformJump_),
+    nonDimensional_(rhs.nonDimensional_),
+    rpm_(rhs.rpm_.clone()),
+    dm_(rhs.dm_.clone())
 {}
 
 
 template<class Type>
 Foam::fanFvPatchField<Type>::fanFvPatchField
 (
-    const fanFvPatchField<Type>& ptf
+    const fanFvPatchField<Type>& rhs
 )
 :
-    uniformJumpFvPatchField<Type>(ptf),
-    phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_),
-    nonDimensional_(ptf.nonDimensional_),
-    rpm_(ptf.rpm_),
-    dm_(ptf.dm_)
+    uniformJumpFvPatchField<Type>(rhs),
+    phiName_(rhs.phiName_),
+    rhoName_(rhs.rhoName_),
+    uniformJump_(rhs.uniformJump_),
+    nonDimensional_(rhs.nonDimensional_),
+    rpm_(rhs.rpm_.clone()),
+    dm_(rhs.dm_.clone())
 {}
 
 
 template<class Type>
 Foam::fanFvPatchField<Type>::fanFvPatchField
 (
-    const fanFvPatchField<Type>& ptf,
+    const fanFvPatchField<Type>& rhs,
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    uniformJumpFvPatchField<Type>(ptf, iF),
-    phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_),
-    nonDimensional_(ptf.nonDimensional_),
-    rpm_(ptf.rpm_),
-    dm_(ptf.dm_)
+    uniformJumpFvPatchField<Type>(rhs, iF),
+    phiName_(rhs.phiName_),
+    rhoName_(rhs.rhoName_),
+    uniformJump_(rhs.uniformJump_),
+    nonDimensional_(rhs.nonDimensional_),
+    rpm_(rhs.rpm_.clone()),
+    dm_(rhs.dm_.clone())
 {}
 
 
@@ -176,13 +176,17 @@ void Foam::fanFvPatchField<Type>::write(Ostream& os) const
     uniformJumpFvPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    os.writeEntryIfDifferent<bool>("uniformJump", false, uniformJump_);
+
+    if (uniformJump_)
+    {
+        os.writeEntry("uniformJump", "true");
+    }
 
     if (nonDimensional_)
     {
-        os.writeEntry("nonDimensional", nonDimensional_);
-        os.writeEntry("rpm", rpm_);
-        os.writeEntry("dm", dm_);
+        os.writeEntry("nonDimensional", "true");
+        rpm_->writeData(os);
+        dm_->writeData(os);
     }
 }
 

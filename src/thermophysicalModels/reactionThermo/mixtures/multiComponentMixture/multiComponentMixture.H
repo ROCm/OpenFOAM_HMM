@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +42,7 @@ SourceFiles
 #define multiComponentMixture_H
 
 #include "basicSpecieMixture.H"
-#include "HashPtrTable.H"
+#include "Reaction.H"  // For ReactionTable
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +58,7 @@ class multiComponentMixture
 :
     public basicSpecieMixture
 {
-    // Private data
+    // Private Data
 
         //- Species data
         PtrList<ThermoType> speciesData_;
@@ -92,12 +93,12 @@ public:
     // Constructors
 
         //- Construct from dictionary, specie names, thermo database,
-        //  mesh and phase name
+        //- mesh and phase name
         multiComponentMixture
         (
             const dictionary&,
             const wordList& specieNames,
-            const HashPtrTable<ThermoType>& thermoData,
+            const ReactionTable<ThermoType>& thermoData,
             const fvMesh& mesh,
             const word& phaseName
         );

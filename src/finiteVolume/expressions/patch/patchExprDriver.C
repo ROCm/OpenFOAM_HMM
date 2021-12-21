@@ -28,9 +28,8 @@ License
 #include "patchExprDriver.H"
 #include "patchExprScanner.H"
 #include "error.H"
-#include "fvPatch.H"
 #include "fvMesh.H"
-#include "className.H"
+#include "fvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -70,14 +69,6 @@ addNamedToRunTimeSelectionTable
 namespace Foam
 {
 
-static inline const TimeState* lookupTimeState
-(
-    const fvPatch& p
-)
-{
-    return &static_cast<const TimeState&>(p.boundaryMesh().mesh().time());
-}
-
 static inline const fvPatch& lookupFvPatch
 (
     const fvMesh& mesh,
@@ -115,21 +106,28 @@ Foam::expressions::patchExpr::parseDriver::parseDriver
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(dict, lookupTimeState(p)),
+    expressions::fvExprDriver(dict),
     patch_(p)
-{}
+{
+    resetTimeReference(nullptr);
+    resetDb(patch_.boundaryMesh().mesh().thisDb());
+}
 
 
 Foam::expressions::patchExpr::parseDriver::parseDriver
 (
     const fvPatch& p,
-    const parseDriver& rhs
+    const parseDriver& rhs,
+    const dictionary& dict
 )
 :
     parsing::genericRagelLemonDriver(),
-    expressions::fvExprDriver(rhs),
+    expressions::fvExprDriver(rhs, dict),
     patch_(p)
-{}
+{
+    resetTimeReference(nullptr);
+    resetDb(patch_.boundaryMesh().mesh().thisDb());
+}
 
 
 Foam::expressions::patchExpr::parseDriver::parseDriver

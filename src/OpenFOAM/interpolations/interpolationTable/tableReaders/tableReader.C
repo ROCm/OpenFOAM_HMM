@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
         "openFoam"
     );
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(readerType);
+    auto* ctorPtr = dictionaryConstructorTable(readerType);
 
-    if (!cstrIter.found())
+    if (!ctorPtr)
     {
         FatalIOErrorInLookup
         (
@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
         ) << exit(FatalIOError);
     }
 
-    return autoPtr<tableReader<Type>>(cstrIter()(spec));
+    return autoPtr<tableReader<Type>>(ctorPtr(spec));
 }
 
 

@@ -140,7 +140,7 @@ public:
         explicit sutherlandTransport(const dictionary& dict);
 
         //- Construct from base thermo and dictionary
-        sutherlandTransport(const Thermo& t,const dictionary& dict);
+        sutherlandTransport(const Thermo& t, const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<sutherlandTransport> clone() const;

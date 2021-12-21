@@ -68,6 +68,7 @@ SourceFiles
 
 #include "DynamicList.H"
 #include "labelList.H"
+#include "CompactListList.H"
 #include "pointField.H"
 #include "Map.H"
 #include "HashSet.H"
@@ -78,7 +79,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class face;
 class primitiveMesh;
 class polyMesh;
@@ -91,7 +92,6 @@ class topoAction;
 class objectMap;
 class IOobject;
 class mapPolyMesh;
-template<class T, class Container> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
                        Class polyTopoChange Declaration
@@ -294,13 +294,13 @@ class polyTopoChange
         void makeCellCells
         (
             const label nActiveFaces,
-            CompactListList<label, labelList>& cellCells
+            CompactListList<label>& cellCells
         ) const;
 
         //- Cell ordering (bandCompression). Returns number of remaining cells.
         label getCellOrder
         (
-            const CompactListList<label, labelList>& cellCellAddressing,
+            const CompactListList<label>& cellCellAddressing,
             labelList& oldToNew
         ) const;
 

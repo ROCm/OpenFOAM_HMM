@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,12 +149,6 @@ public:
 
         //- Read model coefficients if they have changed
         virtual bool read();
-
-        //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const;
-
-        //- Return the specific dissipation rate
-        virtual tmp<volScalarField> omega() const;
 
         //- Correct sub-grid stress, eddy-Viscosity and related properties
         virtual void correct();

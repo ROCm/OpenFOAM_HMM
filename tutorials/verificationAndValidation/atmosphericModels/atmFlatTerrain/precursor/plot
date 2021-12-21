@@ -7,8 +7,9 @@ cd "${0%/*}" || exit                                # Run from this directory
 
     # operand setups
     setups="
-    kEpsilon-neutral-stability
-    kOmegaSST-neutral-stability
+    kEpsilon
+    kOmegaSST
+    kL
     "
 
 

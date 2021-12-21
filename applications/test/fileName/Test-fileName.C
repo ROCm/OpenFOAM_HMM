@@ -224,7 +224,8 @@ void testDirname(const fileName& input)
         << "   path:" << input.path()
         << "   name:\"" << input.name() << '"'
         << "   ext:\"" << input.ext()  << '"'
-        << "   components: " << flatOutput(input.components()) << nl;
+        << "   components: " << flatOutput(input.components())
+        << "   last: " << input.component(string::npos) << nl;
 }
 
 
@@ -778,7 +779,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Expect a FatalError for findEtcFile() with a bad name:"
             << nl;
 
-        const bool throwingError = FatalError.throwExceptions();
+        const bool oldThrowingError = FatalError.throwing(true);
 
         try
         {
@@ -791,7 +792,7 @@ int main(int argc, char *argv[])
             Info<< nl << "findEtcFile() Caught FatalError "
                 << err << nl << endl;
         }
-        FatalError.throwExceptions(throwingError);
+        FatalError.throwing(oldThrowingError);
     }
 
 

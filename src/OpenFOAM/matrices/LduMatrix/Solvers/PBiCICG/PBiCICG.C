@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +96,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     // --- Calculate normalisation factor
     Type normFactor = this->normFactor(psi, wA, pA);
 
-    if (LduMatrix<Type, DType, LUType>::debug >= 2)
+    if ((this->log_ >= 2) || (LduMatrix<Type, DType, LUType>::debug >= 2))
     {
         Info<< "   Normalisation factor = " << normFactor << endl;
     }
@@ -105,7 +106,15 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+    if
+    (
+        !solverPerf.checkConvergence
+        (
+            this->tolerance_,
+            this->relTol_,
+            this->log_
+        )
+    )
     {
         // --- Select and construct the preconditioner
         autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
@@ -192,7 +201,12 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
         } while
         (
             nIter++ < this->maxIter_
-        && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
+        && !solverPerf.checkConvergence
+            (
+                this->tolerance_,
+                this->relTol_,
+                this->log_
+            )
         );
     }
 

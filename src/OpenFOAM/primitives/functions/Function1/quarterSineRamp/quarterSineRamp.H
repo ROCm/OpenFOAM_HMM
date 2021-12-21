@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +67,13 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and dictionary
-        quarterSineRamp(const word& entryName, const dictionary& dict);
+        //- Construct from entry name, dictionary and optional registry
+        quarterSineRamp
+        (
+            const word& entryName,
+            const dictionary& dict,
+            const objectRegistry* obrPtr = nullptr
+        );
 
 
     //- Destructor

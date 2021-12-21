@@ -94,7 +94,7 @@ Usage
       Entry    | Description                    | Type     | Req'd  | Dflt
       sets     | Names of input cellSets        | wordList | cond'l | -
       set      | Name of input cellSet          | word     | cond'l | -
-    \verbatim
+    \endverbatm
 
 Note
     The order of precedence among the conditional mandatory entries from the

@@ -371,15 +371,9 @@ inline Foam::label Foam::triFace::nEdges() const noexcept
 }
 
 
-inline Foam::edge Foam::triFace::faceEdge(const label edgei) const
-{
-    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
-}
-
-
 inline Foam::edge Foam::triFace::edge(const label edgei) const
 {
-    return faceEdge(edgei);
+    return Foam::edge(thisLabel(edgei), nextLabel(edgei));
 }
 
 

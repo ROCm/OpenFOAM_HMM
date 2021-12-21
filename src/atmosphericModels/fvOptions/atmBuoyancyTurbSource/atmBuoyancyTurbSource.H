@@ -145,7 +145,7 @@ namespace fv
 
 class atmBuoyancyTurbSource
 :
-    public cellSetOption
+    public fv::cellSetOption
 {
     // Private Data
 

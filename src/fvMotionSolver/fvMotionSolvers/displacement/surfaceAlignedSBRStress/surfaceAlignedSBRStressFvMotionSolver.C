@@ -384,11 +384,9 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
         sigmaD_ = magNewSigmaD;
     }
 
-    const surfaceScalarField Df
-    (
-        dimensionedScalar("viscosity", dimViscosity, 1.0)
-       *diffusivity().operator()()
-    );
+    const dimensionedScalar oneViscosity("viscosity", dimViscosity, 1.0);
+
+    const surfaceScalarField Df(oneViscosity*diffusivity().operator()());
 
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
@@ -417,7 +415,7 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
                 )
             )
           ==
-            fvc::div(sigmaD_)
+            oneViscosity*fvc::div(sigmaD_)
           + fvOptions(cellDisp)
         );
 

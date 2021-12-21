@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,13 +103,13 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
-        symmTensor wdd = (magSf[facei]/magSqr(d))*sqr(d);
+        const vector d(C[nei] - C[own]);
+        const symmTensor wdd((magSf[facei]/magSqr(d))*sqr(d));
 
-        dd[own] += (1 - w[facei])*wdd;
+        dd[own] += (1.0 - w[facei])*wdd;
         dd[nei] += w[facei]*wdd;
     }
 
@@ -126,7 +126,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const labelUList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd(p.delta());
+        const vectorField pd(p.delta());
 
         if (pw.coupled())
         {
@@ -158,13 +158,13 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
     // Revisit all faces and calculate the pVectors_ and nVectors_ vectors
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
-        scalar magSfByMagSqrd = magSf[facei]/magSqr(d);
+        const vector d(C[nei] - C[own]);
+        const scalar magSfByMagSqrd = magSf[facei]/magSqr(d);
 
-        pVectors_[facei] = (1 - w[facei])*magSfByMagSqrd*(invDd[own] & d);
+        pVectors_[facei] = (1.0 - w[facei])*magSfByMagSqrd*(invDd[own] & d);
         nVectors_[facei] = -w[facei]*magSfByMagSqrd*(invDd[nei] & d);
     }
 
@@ -179,7 +179,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd(p.delta());
+        const vectorField pd(p.delta());
 
         if (pw.coupled())
         {
@@ -188,7 +188,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
                 const vector& d = pd[patchFacei];
 
                 patchLsP[patchFacei] =
-                    ((1 - pw[patchFacei])*pMagSf[patchFacei]/magSqr(d))
+                    ((1.0 - pw[patchFacei])*pMagSf[patchFacei]/magSqr(d))
                    *(invDd[faceCells[patchFacei]] & d);
             }
         }

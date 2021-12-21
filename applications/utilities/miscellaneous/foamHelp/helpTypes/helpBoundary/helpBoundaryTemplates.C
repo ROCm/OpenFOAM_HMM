@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,8 +106,8 @@ void Foam::helpTypes::helpBoundary::fixedValueFieldConditions
 
     // throw exceptions to avoid fatal errors when casting from generic patch
     // type to incompatible patch type
-    FatalIOError.throwExceptions();
-    FatalError.throwExceptions();
+    FatalIOError.throwing(true);
+    FatalError.throwing(true);
 
     bool foundFixed = false;
     forAll(types, i)
