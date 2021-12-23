@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -24,38 +23,80 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::NoPair
+
+Description
+    Placeholder for 'none' option
+
+SourceFiles
+    NoPair.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelCollisionModels_H
-#define makeParcelCollisionModels_H
+#ifndef NoPair_H
+#define NoPair_H
+
+#include "PairModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NoCollision.H"
-#include "PairCollision.H"
+namespace Foam
+{
+/*---------------------------------------------------------------------------*\
+                            Class NoPair Declaration
+\*---------------------------------------------------------------------------*/
 
-#include "NoPair.H"
-#include "PairSpringSliderDashpot.H"
+template<class CloudType>
+class NoPair
+:
+    public PairModel<CloudType>
+{
+public:
 
-#include "WallSpringSliderDashpot.H"
-#include "WallLocalSpringSliderDashpot.H"
+    //- Runtime type information
+    TypeName("none");
+
+
+    // Constructors
+
+        //- Construct from dictionary and cloud owner
+        NoPair(const dictionary& dict, CloudType& cloud);
+
+
+    //- Destructor
+    virtual ~NoPair() = default;
+
+
+    // Member Functions
+
+        //- Whether the PairModel has a timestep limit that will
+        //- require subCycling
+        virtual bool controlsTimestep() const;
+
+        //- For PairModels that control the timestep, calculate the
+        //- number of subCycles needed to satisfy the minimum
+        //- allowable timestep
+        virtual label nSubCycles() const;
+
+        //- Calculate the pair interaction between parcels
+        virtual void evaluatePair
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelCollisionModels(CloudType)                                   \
-                                                                               \
-    makeCollisionModel(CloudType);                                             \
-    makeCollisionModelType(NoCollision, CloudType);                            \
-    makeCollisionModelType(PairCollision, CloudType);                          \
-                                                                               \
-    makePairModel(CloudType);                                                  \
-    makePairModelType(NoPair, CloudType);                                      \
-    makePairModelType(PairSpringSliderDashpot, CloudType);                     \
-                                                                               \
-    makeWallModel(CloudType);                                                  \
-    makeWallModelType(WallSpringSliderDashpot, CloudType);                     \
-    makeWallModelType(WallLocalSpringSliderDashpot, CloudType);
+} // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "NoPair.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

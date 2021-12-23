@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,90 +25,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PairModel.H"
+#include "NoPair.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PairModel<CloudType>::PairModel
-(
-    CloudType& owner
-)
-:
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null),
-    forceRampTime_(-1)
-{}
-
-
-template<class CloudType>
-Foam::PairModel<CloudType>::PairModel
+Foam::NoPair<CloudType>::NoPair
 (
     const dictionary& dict,
-    CloudType& owner,
-    const word& type
+    CloudType& cloud
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    forceRampTime_
-    (
-        this->coeffDict().template getOrDefault<scalar>("forceRampTime", -1)
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PairModel<CloudType>::~PairModel()
+    PairModel<CloudType>(cloud)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType&
-Foam::PairModel<CloudType>::owner() const
+bool Foam::NoPair<CloudType>::controlsTimestep() const
 {
-    return owner_;
+    return true;
 }
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::PairModel<CloudType>::dict() const
+Foam::label Foam::NoPair<CloudType>::nSubCycles() const
 {
-    return dict_;
+    return label(1);
 }
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::PairModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::PairModel<CloudType>::forceCoeff
+void Foam::NoPair<CloudType>::evaluatePair
 (
     typename CloudType::parcelType& pA,
     typename CloudType::parcelType& pB
 ) const
-{
-    if (forceRampTime_ < 0)
-    {
-        return 1;
-    }
+{}
 
-    return min(min(pA.age(), pB.age())/forceRampTime_, 1);
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "PairModelNew.C"
 
 // ************************************************************************* //
