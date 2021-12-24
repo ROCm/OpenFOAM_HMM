@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,15 +32,17 @@ Group
 
 Description
     The \c outletMappedUniformInlet is an inlet boundary condition that
-    - averages the patch field of \<Type\> over a specified "outlet" patch
+    - averages patch fields of specified "outlet" patches
     and uniformly applies the averaged value over a specified inlet patch.
     - optionally, the averaged value can be scaled
-    and/or offset by a pair of specified values.
+    and/or offset by a specified value,
+    and/or mapped by a specified time delay.
 
     The governing equation of the boundary condition is:
 
     \f[
-        \phi_{inlet} = f \phi_{outlet} + \phi_{offset}
+        \phi_{inlet} =
+            \sum_i \left( f_i \phi_{{outlet}_i} + \phi_{{offset}_i} \right)
     \f]
 
     where
@@ -49,6 +51,7 @@ Description
       \phi_{outlet}  | Averaged patch-field value at an outlet patch
       f              | User-defined fraction value
       \phi_{offset}  | User-defined offset value
+      i              | Outlet-patch index
     \endvartable
 
 Usage
@@ -56,32 +59,55 @@ Usage
     \verbatim
     <patchName>
     {
-        // Mandatory entries (unmodifiable)
-        type            outletMappedFilterInlet;
-        outletPatch     <outletPatchName>;
+        // Mandatory entries
+        type            outletMappedUniformInlet;
 
-        // Optional entries (unmodifiable)
-        fraction        0.1;
-        offset          10;    // (1 0 0);
+        outlets
+        {
+            <outletName.1>
+            {
+                fraction    <Function1<scalar>>;
+                offset      <Function1<Type>>;
+                timeDelay   <Function1<scalar>>;
+            }
+            <outletName.2>
+            {
+                fraction    <Function1<scalar>>;
+                offset      <Function1<Type>>;
+                timeDelay   <Function1<scalar>>;
+            }
+            ...
+        }
+
+        // Optional entries
+        uniformValue    <PatchFunction1<Type>>;
         phi             phi;
 
-        // Optional (inherited) entries
+        // Inherited entries
         ...
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property    | Description                          | Type   | Reqd | Dflt
+      Property    | Description                          | Type   | Reqd | Deflt
       type        | Type name: outletMappedUniformInlet  | word   | yes  | -
-      outletPatch | Name of patch to be mapped           | word   | yes  | -
-      fraction    | Fraction value                       | scalar | no   | 1
-      offset      | Offset value                         | Type   | no   | Zero
+      outlets     | Dictionary name: outlets             | dict   | yes  | -
+      fraction    | Fraction value          | Function1\<scalar\> | no   | 1
+      offset      | Offset value            | Function1\<Type\>   | no   | Zero
+      timeDelay   | Time delay              | Function1\<scalar\> | no   | 0
+      uniformValue | Base inlet patch field | PatchFunction1\<Type\> | no | Zero
       phi         | Name of operand flux field           | word   | no   | phi
     \endtable
 
     The inherited entries are elaborated in:
       - \link fixedValueFvPatchFields.H \endlink
+      - \link PatchFunction1.H \endlink
+      - \link Function1.H \endlink
+
+Note
+  - Any negative input of \c timeDelay entry
+    is forced to be zero without emitting any warnings.
 
 See also
   - Foam::fixedValueFvPatchField
@@ -98,6 +124,7 @@ SourceFiles
 #define outletMappedUniformInletFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,17 +142,32 @@ class outletMappedUniformInletFvPatchField
 {
     // Private Data
 
-        //- Name of the outlet patch to be mapped
-        word outletPatchName_;
+        //- Base inlet patch field
+        autoPtr<PatchFunction1<Type>> uniformValuePtr_;
 
-       //- Name of operand flux field
+        //- List of outlet-patch names
+        wordList outletNames_;
+
+        //- List of outlet-patch field offsets
+        PtrList<Function1<Type>> offsets_;
+
+        //- List of outlet-patch field fractions
+        PtrList<Function1<scalar>> fractions_;
+
+        //- List of outlet-patch field time delays
+        PtrList<Function1<scalar>> timeDelays_;
+
+        //- List of outlet-patch mapping fields
+        List<DynamicList<Type>> mapFields_;
+
+        //- List of outlet-patch mapping times
+        List<DynamicList<scalar>> mapTimes_;
+
+        //- Name of operand flux field
         word phiName_;
 
-        //- Fraction value
-        scalar fraction_;
-
-        //- Offset value
-        Type offset_;
+        //- Current time index
+        label curTimeIndex_;
 
 
 public:
@@ -198,13 +240,20 @@ public:
 
     // Member Functions
 
-        // Access
+        // Mapping
 
-            //- Name of the outlet patch to be mapped
-            const word& outletPatchName() const
-            {
-                return outletPatchName_;
-            }
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<Type>&,
+                const labelList&
+            );
 
 
         // Evaluation
