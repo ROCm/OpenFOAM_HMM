@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,19 +68,21 @@ Foam::Istream& Foam::LList<LListBase, T>::readList(Istream& is)
             {
                 for (label i=0; i<len; ++i)
                 {
-                    T element;
-                    is >> element;
-                    list.append(element);
+                    T elem;
+                    is >> elem;
+                    list.append(std::move(elem));
                 }
             }
             else
             {
-                T element;
-                is >> element;
+                // Uniform content (delimiter == token::BEGIN_BLOCK)
+
+                T elem;
+                is >> elem;
 
                 for (label i=0; i<len; ++i)
                 {
-                    list.append(element);
+                    list.append(elem);
                 }
             }
         }
@@ -97,9 +99,9 @@ Foam::Istream& Foam::LList<LListBase, T>::readList(Istream& is)
         {
             is.putBack(tok);
 
-            T element;
-            is >> element;
-            list.append(element);
+            T elem;
+            is >> elem;
+            list.append(std::move(elem));
 
             is >> tok;
             is.fatalCheck(FUNCTION_NAME);

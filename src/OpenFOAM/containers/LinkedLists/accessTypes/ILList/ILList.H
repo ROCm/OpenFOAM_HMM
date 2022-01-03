@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ILList_H
-#define ILList_H
+#ifndef Foam_ILList_H
+#define Foam_ILList_H
 
 #include "UILList.H"
 
@@ -82,14 +82,14 @@ public:
         //- Default construct
         ILList() = default;
 
-        //- Construct and insert the initial T item pointer
+        //- Construct and add initial item pointer
         explicit ILList(T* item)
         :
             UILList<LListBase, T>(item)
         {}
 
         //- Construct from Istream
-        ILList(Istream& is);
+        explicit ILList(Istream& is);
 
         //- Copy construct using the 'clone()' method for each element
         ILList(const ILList<LListBase, T>& lst);

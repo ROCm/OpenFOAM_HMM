@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ISLList_H
-#define ISLList_H
+#ifndef Foam_ISLList_H
+#define Foam_ISLList_H
 
 #include "ILList.H"
 #include "SLListBase.H"

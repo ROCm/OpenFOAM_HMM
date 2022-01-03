@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SLListBase_H
-#define SLListBase_H
+#ifndef Foam_SLListBase_H
+#define Foam_SLListBase_H
 
 #include "label.H"
 #include "uLabel.H"
@@ -157,13 +157,13 @@ public:
         inline const link* last() const;
 
 
-        //- Add at head of list
-        void insert(link* item);
+        //- Add at front of list
+        void prepend(link* item);
 
-        //- Add at tail of list
+        //- Add at back of list
         void append(link* item);
 
-        //- Remove and return head
+        //- Remove and return first entry
         link* removeHead();
 
         // Remove and return element
@@ -212,18 +212,10 @@ public:
             inline iterator(SLListBase* list, link* item);
 
             //- The storage node
-            inline link* get_node() const;
+            inline link* get_node() const noexcept;
 
             //- Pointing at a valid storage node
-            inline bool good() const;
-
-            //- Deprecated(2019-01) Pointing at a valid storage node
-            //  \deprecated(2019-01) - use good() method
-            FOAM_DEPRECATED_FOR(2019-01, "good() method")
-            bool found() const
-            {
-                return this->good();
-            }
+            inline bool good() const noexcept;
 
             //- Cannot move backward through list
             inline void prev() = delete;
@@ -265,18 +257,10 @@ public:
             inline const_iterator(const SLListBase::iterator& iter);
 
             //- The storage node
-            inline const link* get_node() const;
+            inline const link* get_node() const noexcept;
 
             //- Pointing at a valid storage node
-            inline bool good() const;
-
-            //- Deprecated(2019-01) Pointing at a valid storage node
-            //  \deprecated(2019-01) - use good() method
-            FOAM_DEPRECATED_FOR(2019-01, "good() method")
-            bool found() const
-            {
-                return this->good();
-            }
+            inline bool good() const noexcept;
 
             //- Cannot move backward through list
             inline void prev() = delete;

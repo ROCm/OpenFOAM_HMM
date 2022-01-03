@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -274,9 +274,9 @@ int main(int argc, char *argv[])
 
     {
         DLPtrList<Scalar> llist1;
-        llist1.insert(new Scalar(100));
-        llist1.insert(new Scalar(200));
-        llist1.insert(new Scalar(300));
+        llist1.prepend(new Scalar(100));
+        llist1.prepend(new Scalar(200));
+        llist1.prepend(new Scalar(300));
 
         auto citer = llist1.begin();
 
@@ -305,9 +305,9 @@ int main(int argc, char *argv[])
     // Same but as SLPtrList
     {
         SLPtrList<Scalar> llist1;
-        llist1.insert(new Scalar(100));
-        llist1.insert(new Scalar(200));
-        llist1.insert(new Scalar(300));
+        llist1.prepend(new Scalar(100));
+        llist1.prepend(new Scalar(200));
+        llist1.prepend(new Scalar(300));
 
         for (const auto& it : llist1)
         {

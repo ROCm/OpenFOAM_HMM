@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DLList_H
-#define DLList_H
+#ifndef Foam_DLList_H
+#define Foam_DLList_H
 
 #include "LList.H"
 #include "DLListBase.H"

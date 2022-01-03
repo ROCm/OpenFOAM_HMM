@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IDLList_H
-#define IDLList_H
+#ifndef Foam_IDLList_H
+#define Foam_IDLList_H
 
 #include "ILList.H"
 #include "DLListBase.H"

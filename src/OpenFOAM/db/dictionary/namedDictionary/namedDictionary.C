@@ -30,12 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::namedDictionary::namedDictionary()
-:
-    Tuple2<keyType, dictionary>()
-{}
-
-
 Foam::namedDictionary::namedDictionary(Istream& is)
 {
     is >> *this;

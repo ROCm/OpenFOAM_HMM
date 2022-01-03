@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,8 +61,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef namedDictionary_H
-#define namedDictionary_H
+#ifndef Foam_namedDictionary_H
+#define Foam_namedDictionary_H
 
 #include "dictionary.H"
 #include "Tuple2.H"
@@ -74,6 +74,7 @@ namespace Foam
 
 // Forward Declarations
 class namedDictionary;
+
 Istream& operator>>(Istream&, namedDictionary&);
 Ostream& operator<<(Ostream&, const namedDictionary&);
 
@@ -93,7 +94,7 @@ public:
         using Tuple2<keyType, dictionary>::Tuple2;
 
         //- Default construct
-        namedDictionary();
+        namedDictionary() = default;
 
         //- Construct from Istream
         explicit namedDictionary(Istream& is);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DLListBase_H
-#define DLListBase_H
+#ifndef Foam_DLListBase_H
+#define Foam_DLListBase_H
 
 #include "label.H"
 #include "uLabel.H"
@@ -76,10 +76,10 @@ public:
         link() = default;
 
         //- Check if the node is registered with the list
-        inline bool registered() const;
+        inline bool registered() const noexcept;
 
         //- Deregister the node after removal
-        inline void deregister();
+        inline void deregister() noexcept;
     };
 
 
@@ -88,10 +88,10 @@ private:
     // Private Data
 
        //- Pointer to first element
-       link *first_ = nullptr;
+       link* first_ = nullptr;
 
        //- Pointer to last element
-       link *last_ = nullptr;
+       link* last_ = nullptr;
 
        //- Number of elements in the list
        label size_ = 0;
@@ -169,10 +169,10 @@ public:
         inline const link* last() const;
 
 
-        //- Add at head of list
-        void insert(link* item);
+        //- Add at front of list
+        void prepend(link* item);
 
-        //- Add at tail of list
+        //- Add at back of list
         void append(link* item);
 
         //- Swap this element with the one above unless it is at the top
@@ -181,13 +181,13 @@ public:
         //- Swap this element with the one below unless it is at the bottom
         bool swapDown(link* item);
 
-        //- Remove and return head
+        //- Remove and return first entry
         link* removeHead();
 
         //- Remove and return element
         link* remove(link* item);
 
-        // Remove and return element specified by iterator
+        //- Remove and return element specified by iterator
         inline link* remove(iterator& iter);
 
         //- Replace oldLink with newLink and return element
@@ -236,18 +236,10 @@ public:
             inline iterator(DLListBase* list, link* item);
 
             //- The storage node
-            inline link* get_node() const;
+            inline link* get_node() const noexcept;
 
             //- Pointing at a valid storage node
-            inline bool good() const;
-
-            //- Deprecated(2019-01) Pointing at a valid storage node
-            //  \deprecated(2019-01) - use good() method
-            FOAM_DEPRECATED_FOR(2019-01, "good() method")
-            bool found() const
-            {
-                return this->good();
-            }
+            inline bool good() const noexcept;
 
             //- Move backward through list
             inline void prev();
@@ -290,18 +282,10 @@ public:
             inline const_iterator(const DLListBase::iterator& iter);
 
             //- The storage node
-            inline const link* get_node() const;
+            inline const link* get_node() const noexcept;
 
             //- Pointing at a valid storage node
-            inline bool good() const;
-
-            //- Deprecated(2019-01) Pointing at a valid storage node
-            //  \deprecated(2019-01) - use good() method
-            FOAM_DEPRECATED_FOR(2019-01, "good() method")
-            bool found() const
-            {
-                return this->good();
-            }
+            inline bool good() const noexcept;
 
             //- Move backward through list
             inline void prev();

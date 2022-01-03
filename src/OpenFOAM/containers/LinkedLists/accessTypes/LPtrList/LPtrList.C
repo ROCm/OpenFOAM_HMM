@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,22 +66,17 @@ template<class LListBase, class T>
 bool Foam::LPtrList<LListBase, T>::eraseHead()
 {
     T* p = this->removeHead();
-
-    if (p)
-    {
-        delete p;
-        return true;
-    }
-
-    return false;
+    delete p;
+    return bool(p);
 }
 
 
 template<class LListBase, class T>
 void Foam::LPtrList<LListBase, T>::clear()
 {
-    const label len = this->size();
-    for (label i=0; i<len; ++i)
+    label len = this->size();
+
+    while (len--)
     {
         eraseHead();
     }

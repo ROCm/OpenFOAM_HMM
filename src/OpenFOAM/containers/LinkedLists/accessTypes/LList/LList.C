@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,10 +77,11 @@ Foam::LList<LListBase, T>::~LList()
 template<class LListBase, class T>
 void Foam::LList<LListBase, T>::clear()
 {
-    const label len = this->size();
-    for (label i=0; i<len; ++i)
+    label len = this->size();
+
+    while (len--)
     {
-        this->removeHead();
+        this->eraseHead();
     }
 
     LListBase::clear();

@@ -652,12 +652,9 @@ void Foam::List<T>::operator=(SLList<T>&& list)
 
     reAlloc(len);
 
-    T* iter = this->begin();
-
-    while (len--)
+    for (T* iter = this->begin(); len--; ++iter)
     {
         *iter = std::move(list.removeHead());
-        ++iter;
     }
 
     list.clear();
