@@ -51,7 +51,7 @@ Description
       Operand        | Type         | Location
       input          | -            | -
       output file    | -            | -
-      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/thermoRe
+      output field   | scalarField  | \<time\>/lagrangian/\<cloud\>/Re
     \endtable
 
 Usage
@@ -62,22 +62,22 @@ Usage
         ThermoReynoldsNumber1
         {
             // Mandatory entries
-            type             ThermoReynoldsNumber;
+            type             ReynoldsNumber;
         }
     }
     \endverbatim
 
     where the entries mean:
     \table
-      Property     | Description                      | Type   | Reqd | Deflt
-      type         | Type name: ThermoReynoldsNumber  | word   | yes  | -
+      Property     | Description                | Type   | Reqd | Deflt
+      type         | Type name: ReynoldsNumber  | word   | yes  | -
     \endtable
 
 Note
   - Normalisation factors \c rhoc and \c muc are based on temperature
-   dependent values calculated inside the film surrounding the particle
-   rather than freestream values; therefore, \c ThermoReynoldsNumber should not
-   be expected to operate with kinematic (non-thermo) applications.
+    dependent values calculated inside the film surrounding the particle
+    rather than freestream values; therefore, the thermo \c ReynoldsNumber
+    should not be expected to operate with kinematic (non-thermo) applications.
 
 See also
   - Foam::KinematicReynoldsNumber
