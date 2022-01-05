@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +59,8 @@ template<class Type>
 Type interpolateXY
 (
     const scalar x,
-    const scalarField& xOld,
-    const Field<Type>& yOld
+    const UList<scalar>& xOld,
+    const UList<Type>& yOld
 )
 {
     label n = xOld.size();
