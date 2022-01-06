@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,6 +138,10 @@ public:
 
         //- Write the processorID field
         virtual bool write();
+
+        //- Update for changes of mesh
+        //  The base implementation is a no-op.
+        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 

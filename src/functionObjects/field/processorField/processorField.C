@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,11 +68,11 @@ Foam::functionObjects::processorField::processorField
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar(dimless, Zero)
+            dimensionedScalar(dimless, Pstream::myProcNo())
         )
     );
 
-    mesh_.objectRegistry::store(procFieldPtr);
+    mesh_.thisDb().store(procFieldPtr);
 }
 
 
@@ -106,6 +106,31 @@ bool Foam::functionObjects::processorField::write()
     procField.write();
 
     return true;
+}
+
+
+void Foam::functionObjects::processorField::updateMesh(const mapPolyMesh& mpm)
+{
+    const_cast<objectRegistry&>(mesh_.thisDb()).erase("processorID");
+
+    volScalarField* procFieldPtr
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "processorID",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Pstream::myProcNo())
+        )
+    );
+
+    mesh_.thisDb().store(procFieldPtr);
 }
 
 
