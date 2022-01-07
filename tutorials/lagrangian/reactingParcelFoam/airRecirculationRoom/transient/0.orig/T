@@ -62,32 +62,52 @@ boundaryField
     exhaust_maxX
     {
         type            outletMappedUniformInlet;
-        outletPatch     intake3;
-        offset          20;
+        outlets
+        {
+            intake3
+            {
+                offset    20;
+            }
+        }
         value           $internalField;
     }
 
     exhaust_minX
     {
         type            outletMappedUniformInlet;
-        outletPatch     intake1;
-        offset          20;
+        outlets
+        {
+            intake1
+            {
+                offset    20;
+            }
+        }
         value           $internalField;
     }
 
     exhaust_maxY
     {
         type            outletMappedUniformInlet;
-        outletPatch     intake4;
-        offset          20;
+        outlets
+        {
+            intake4
+            {
+                offset    20;
+            }
+        }
         value           $internalField;
     }
 
     exhaust_minY
     {
         type            outletMappedUniformInlet;
-        outletPatch     intake2;
-        offset          20;
+        outlets
+        {
+            intake2
+            {
+                offset    20;
+            }
+        }
         value           $internalField;
     }
 }
