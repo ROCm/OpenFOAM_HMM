@@ -77,7 +77,7 @@ PIMPLE
 
     maxCo           2.5;
     rDeltaTSmoothingCoeff 0.5;
-    alphaTemp       1;
+    alphaTemp       0.05;
     maxDeltaT       1;
 }
 

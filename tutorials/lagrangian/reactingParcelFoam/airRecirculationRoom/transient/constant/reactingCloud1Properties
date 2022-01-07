@@ -55,7 +55,7 @@ solution
 constantProperties
 {
     rho0            1000;
-    T0              300;
+    T0              310;
     Cp0             4100;
 
     constantVolume  false;
@@ -510,7 +510,7 @@ proteinB 0.3;
 
     liquidEvaporationCoeffs
     {
-        enthalpyTransfer enthalpyDifference;
+        enthalpyTransfer latentHeat;//enthalpyDifference;
 
         activeLiquids   ( H2O );
     }

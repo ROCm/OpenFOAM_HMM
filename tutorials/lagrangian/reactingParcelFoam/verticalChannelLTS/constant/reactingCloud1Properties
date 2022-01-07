@@ -169,7 +169,7 @@ subModels
 
     liquidEvaporationCoeffs
     {
-        enthalpyTransfer enthalpyDifference;
+        enthalpyTransfer latentHeat;//enthalpyDifference;
         activeLiquids   ( H2O );
     }
 }
