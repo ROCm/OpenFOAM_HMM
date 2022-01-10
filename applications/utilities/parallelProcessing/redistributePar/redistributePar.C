@@ -827,7 +827,12 @@ void readFields
 
     fields.setSize(masterNames.size());
 
-    // Have master send all fields to processors that don't have a mesh
+    // Have master send all fields to processors that don't have a mesh. The
+    // issue is if a patchField does any parallel operations inside its
+    // construct-from-dictionary. This will not work when going to more
+    // processors (e.g. decompose = 1 -> many) ! We could make a special
+    // exception for decomposePar but nicer would be to have read-communicator
+    // ...
     if (Pstream::master())
     {
         forAll(masterNames, i)
