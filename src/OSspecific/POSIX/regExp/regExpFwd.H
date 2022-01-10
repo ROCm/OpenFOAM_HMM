@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regExpFwd_H
-#define regExpFwd_H
+#ifndef Foam_regExpFwd_H
+#define Foam_regExpFwd_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

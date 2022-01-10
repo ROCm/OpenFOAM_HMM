@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,8 @@ const Foam::wordRe Foam::wordRe::null;
 
 Foam::wordRe::wordRe(const keyType& str)
 :
-    word(str, false)  // No stripping
+    word(str, false),  // No stripping
+    regexPtr_(nullptr)
 {
     if (str.isPattern())
     {
@@ -50,6 +51,9 @@ Foam::wordRe::wordRe(const keyType& str)
 
 
 Foam::wordRe::wordRe(Istream& is)
+:
+    word(),
+    regexPtr_(nullptr)
 {
     is >> *this;
 }

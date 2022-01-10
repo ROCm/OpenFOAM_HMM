@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regExp_H
-#define regExp_H
+#ifndef Foam_regExp_H
+#define Foam_regExp_H
 
 #include "regExpCxx.H"
 #include "regExpFwd.H"
