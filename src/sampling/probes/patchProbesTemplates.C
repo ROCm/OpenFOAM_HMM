@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,12 +50,18 @@ void Foam::patchProbes::sampleAndWrite
             << setw(w)
             << vField.time().timeOutputValue();
 
-        forAll(values, probei)
+        for (const auto& v : values)
         {
-            probeStream << ' ' << setw(w) << values[probei];
+            probeStream << ' ' << setw(w) << v;
         }
         probeStream << endl;
     }
+
+    const word& fieldName = vField.name();
+    this->setResult("average(" + fieldName + ")", average(values));
+    this->setResult("min(" + fieldName + ")", min(values));
+    this->setResult("max(" + fieldName + ")", max(values));
+    this->setResult("size(" + fieldName + ")", values.size());
 }
 
 
@@ -75,12 +82,18 @@ void Foam::patchProbes::sampleAndWrite
             << setw(w)
             << sField.time().timeOutputValue();
 
-        forAll(values, probei)
+        for (const auto& v : values)
         {
-            probeStream << ' ' << setw(w) << values[probei];
+            probeStream << ' ' << setw(w) << v;
         }
         probeStream << endl;
     }
+
+    const word& fieldName = sField.name();
+    this->setResult("average(" + fieldName + ")", average(values));
+    this->setResult("min(" + fieldName + ")", min(values));
+    this->setResult("max(" + fieldName + ")", max(values));
+    this->setResult("size(" + fieldName + ")", values.size());
 }
 
 
@@ -90,17 +103,19 @@ void Foam::patchProbes::sampleAndWrite
     const fieldGroup<Type>& fields
 )
 {
-    forAll(fields, fieldi)
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
+    for (const auto& fieldName : fields)
     {
         if (loadFromFiles_)
         {
             sampleAndWrite
             (
-                GeometricField<Type, fvPatchField, volMesh>
+                VolFieldType
                 (
                     IOobject
                     (
-                        fields[fieldi],
+                        fieldName,
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -113,23 +128,11 @@ void Foam::patchProbes::sampleAndWrite
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
+            objectRegistry::const_iterator iter = mesh_.find(fieldName);
 
-            if
-            (
-                iter.found()
-             && iter()->type()
-             == GeometricField<Type, fvPatchField, volMesh>::typeName
-            )
+            if (iter.found() && iter()->type() == VolFieldType::typeName)
             {
-                sampleAndWrite
-                (
-                    mesh_.lookupObject
-                    <GeometricField<Type, fvPatchField, volMesh>>
-                    (
-                        fields[fieldi]
-                    )
-                );
+                sampleAndWrite(mesh_.lookupObject<VolFieldType>(fieldName));
             }
         }
     }
@@ -142,17 +145,19 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
     const fieldGroup<Type>& fields
 )
 {
-    forAll(fields, fieldi)
+    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
+
+    for (const auto& fieldName : fields)
     {
         if (loadFromFiles_)
         {
             sampleAndWrite
             (
-                GeometricField<Type, fvsPatchField, surfaceMesh>
+                SurfaceFieldType
                 (
                     IOobject
                     (
-                        fields[fieldi],
+                        fieldName,
                         mesh_.time().timeName(),
                         mesh_,
                         IOobject::MUST_READ,
@@ -165,23 +170,11 @@ void Foam::patchProbes::sampleAndWriteSurfaceFields
         }
         else
         {
-            objectRegistry::const_iterator iter = mesh_.find(fields[fieldi]);
+            objectRegistry::const_iterator iter = mesh_.find(fieldName);
 
-            if
-            (
-                iter.found()
-             && iter()->type()
-             == GeometricField<Type, fvsPatchField, surfaceMesh>::typeName
-            )
+            if (iter.found() && iter()->type() == SurfaceFieldType::typeName)
             {
-                sampleAndWrite
-                (
-                    mesh_.lookupObject
-                    <GeometricField<Type, fvsPatchField, surfaceMesh>>
-                    (
-                        fields[fieldi]
-                    )
-                );
+                sampleAndWrite(mesh_.lookupObject<SurfaceFieldType>(fieldName));
             }
         }
     }
@@ -199,12 +192,8 @@ Foam::patchProbes::sample
 {
     const Type unsetVal(-VGREAT*pTraits<Type>::one);
 
-    tmp<Field<Type>> tValues
-    (
-        new Field<Type>(this->size(), unsetVal)
-    );
-
-    Field<Type>& values = tValues.ref();
+    auto tValues = tmp<Field<Type>>::New(Field<Type>(this->size(), unsetVal));
+    auto& values = tValues.ref();
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -250,12 +239,8 @@ Foam::patchProbes::sample
 {
     const Type unsetVal(-VGREAT*pTraits<Type>::one);
 
-    tmp<Field<Type>> tValues
-    (
-        new Field<Type>(this->size(), unsetVal)
-    );
-
-    Field<Type>& values = tValues.ref();
+    auto tValues = tmp<Field<Type>>::New(Field<Type>(this->size(), unsetVal));
+    auto& values = tValues.ref();
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
