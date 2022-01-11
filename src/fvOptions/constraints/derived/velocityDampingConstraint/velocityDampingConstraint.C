@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,14 +64,14 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 
     label nDamped = 0;
 
-    forAll(U, cellI)
+    for (label celli : cells_)
     {
-        const scalar magU = mag(U[cellI]);
+        const scalar magU = mag(U[celli]);
         if (magU > UMax_)
         {
-            const scalar scale = sqr(Foam::cbrt(vol[cellI]));
+            const scalar scale = sqr(Foam::cbrt(vol[celli]));
 
-            diag[cellI] += scale*(magU-UMax_);
+            diag[celli] += scale*(magU-UMax_);
 
             ++nDamped;
         }
