@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PtrListDictionary_H
-#define PtrListDictionary_H
+#ifndef Foam_PtrListDictionary_H
+#define Foam_PtrListDictionary_H
 
 #include "DictionaryBase.H"
 #include "PtrList.H"
@@ -57,13 +57,12 @@ class PtrListDictionary
 :
     public DictionaryBase<PtrList<T>, T>
 {
-
 public:
 
     // Constructors
 
         //- Construct given initial list size
-        PtrListDictionary(const label size);
+        explicit PtrListDictionary(const label size);
 
         //- Copy construct
         PtrListDictionary(const PtrListDictionary& dict);
@@ -73,19 +72,19 @@ public:
         PtrListDictionary(Istream& is, const INew& inew);
 
         //- Construct from Istream
-        PtrListDictionary(Istream& is);
+        explicit PtrListDictionary(Istream& is);
 
 
     // Member functions
 
         //- Set element to pointer provided and return old element
-        autoPtr<T> set(const label, const word& key, T*);
+        autoPtr<T> set(const label i, const word& key, T* ptr);
 
         //- Set element to autoPtr value provided and return old element
-        autoPtr<T> set(const label, const word& key, autoPtr<T>&);
+        autoPtr<T> set(const label i, const word& key, autoPtr<T>& aptr);
 
         //- Set element to tmp value provided and return old element
-        autoPtr<T> set(const label, const word& key, tmp<T>&);
+        autoPtr<T> set(const label i, const word& key, tmp<T>& t);
 
 
     // Member operators

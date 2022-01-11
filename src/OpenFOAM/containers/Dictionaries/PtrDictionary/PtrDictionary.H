@@ -32,13 +32,10 @@ Description
     It is derived from DictionaryBase instantiated on a memory managed form of
     intrusive doubly-linked list of \<T\>.
 
-SourceFiles
-    PtrDictionary.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef PtrDictionary_H
-#define PtrDictionary_H
+#ifndef Foam_PtrDictionary_H
+#define Foam_PtrDictionary_H
 
 #include "DictionaryBase.H"
 #include "DLPtrList.H"
@@ -57,26 +54,37 @@ class PtrDictionary
 :
     public DictionaryBase<DLPtrList<T>, T>
 {
-
 public:
 
     // Constructors
 
         //- Construct given initial table size
-        PtrDictionary(const label size = 128);
+        explicit PtrDictionary(const label size = 128)
+        :
+            DictionaryBase<DLPtrList<T>, T>(size)
+        {}
 
         //- Copy construct
-        PtrDictionary(const PtrDictionary& dict);
+        PtrDictionary(const PtrDictionary& dict)
+        :
+            DictionaryBase<DLPtrList<T>, T>(dict)
+        {}
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        PtrDictionary(Istream& is, const INew& inew);
+        PtrDictionary(Istream& is, const INew& inew)
+        :
+            DictionaryBase<DLPtrList<T>, T>(is, inew)
+        {}
 
         //- Construct from Istream
-        PtrDictionary(Istream& is);
+        explicit PtrDictionary(Istream& is)
+        :
+            DictionaryBase<DLPtrList<T>, T>(is)
+        {}
 
 
-    // Member operators
+    // Member Operators
 
         //- Find and return entry
         const T& operator[](const word& key) const
@@ -95,14 +103,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "PtrDictionary.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
