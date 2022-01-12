@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2019,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,9 @@ Foam::particle::particle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields,
-    bool newFormat
+    const bool readFields,
+    const bool newFormat,
+    const bool doLocate
 )
 :
     mesh_(mesh),
@@ -63,6 +64,22 @@ Foam::particle::particle
     stepFraction_(0.0),
     origProc_(Pstream::myProcNo()),
     origId_(-1)
+{
+    point position;
+    readData(is, position, readFields, newFormat, doLocate);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::particle::readData
+(
+    Istream& is,
+    point& position,
+    const bool readFields,
+    const bool newFormat,
+    const bool doLocate
+)
 {
     if (newFormat)
     {
@@ -178,14 +195,20 @@ Foam::particle::particle
             origId_ = p.origId;
         }
 
-        locate
-        (
-            p.position,
-            nullptr,
-            p.celli,
-            false,
-            "Particle initialised with a location outside of the mesh."
-        );
+        // Preserve read position
+        position = p.position;
+
+        if (doLocate)
+        {
+            locate
+            (
+                p.position,
+                nullptr,
+                p.celli,
+                false,
+                "Particle initialised with a location outside of the mesh."
+            );
+        }
     }
 
     // Check state of Istream

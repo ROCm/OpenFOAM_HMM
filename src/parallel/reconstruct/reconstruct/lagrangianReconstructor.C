@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018,2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "lagrangianReconstructor.H"
-#include "labelIOList.H"
-#include "passiveParticleCloud.H"
+#include "passivePositionParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -54,11 +53,11 @@ Foam::label Foam::lagrangianReconstructor::reconstructPositions
     const word& cloudName
 ) const
 {
-    passiveParticleCloud lagrangianPositions
+    passivePositionParticleCloud lagrangianPositions
     (
         mesh_,
         cloudName,
-        IDLList<passiveParticle>()
+        IDLList<passivePositionParticle>()
     );
 
     forAll(procMeshes_, meshi)
@@ -66,38 +65,73 @@ Foam::label Foam::lagrangianReconstructor::reconstructPositions
         const labelList& cellMap = cellProcAddressing_[meshi];
         const labelList& faceMap = faceProcAddressing_[meshi];
 
-        Cloud<passiveParticle> lpi(procMeshes_[meshi], cloudName, false);
+        // Use a special particle that does not try to find the particle on
+        // the mesh. This is to be able to handle particles originating
+        // from a different processor. This can happen with some
+        // functionObjects - e.g. extractEulerianParticles.
+        // These particles should be
+        // - written in the old format
+        passivePositionParticleCloud lpi(procMeshes_[meshi], cloudName, false);
 
         forAllConstIters(lpi, iter)
         {
-            const passiveParticle& ppi = *iter;
+            const passivePositionParticle& ppi = *iter;
 
-            const label mappedCell = cellMap[ppi.cell()];
+            const label mappedCell =
+            (
+                (ppi.cell() >= 0)
+              ? cellMap[ppi.cell()]
+              : -1
+            );
 
             // Inverting sign if necessary and subtracting 1 from
             // faceProcAddressing
-            const label mappedTetFace = mag(faceMap[ppi.tetFace()]) - 1;
-
-            lagrangianPositions.append
+            const label mappedTetFace =
             (
-                new passiveParticle
-                (
-                    mesh_,
-                    ppi.coordinates(),
-                    mappedCell,
-                    mappedTetFace,
-                    ppi.procTetPt(mesh_, mappedCell, mappedTetFace)
-                )
+                (ppi.tetFace() >= 0)
+              ? mag(faceMap[ppi.tetFace()]) - 1
+              : -1
             );
+
+            if ((ppi.cell() >= 0) && (ppi.tetFace() >= 0))
+            {
+                // cell,face succesfully mapped. Coordinates inside the cell
+                // should be same
+                lagrangianPositions.append
+                (
+                    new passivePositionParticle
+                    (
+                        mesh_,
+                        ppi.coordinates(),
+                        mappedCell,
+                        mappedTetFace,
+                        ppi.procTetPt(mesh_, mappedCell, mappedTetFace)
+                    )
+                );
+            }
+            else
+            {
+                // No valid coordinates. Use built-in locating from cell -1
+                lagrangianPositions.append
+                (
+                    new passivePositionParticle
+                    (
+                        mesh_,
+                        ppi.location(),
+                        mappedCell
+                    )
+                );
+            }
         }
     }
 
-    IOPosition<Cloud<passiveParticle>>(lagrangianPositions).write();
+
+    IOPosition<passivePositionParticleCloud>(lagrangianPositions).write();
 
     // Force writing of "positions" too, if specified via the InfoSwitch
     if (particle::writeLagrangianPositions)
     {
-        IOPosition<Cloud<passiveParticle>>
+        IOPosition<passivePositionParticleCloud>
         (
             lagrangianPositions,
             cloud::geometryType::POSITIONS

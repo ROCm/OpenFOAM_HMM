@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -295,6 +295,17 @@ protected:
 
     // Patch interactions
 
+        //- Read particle from stream. Optionally (for old format) return
+        //  read position. Used by construct-from-Istream
+        void readData
+        (
+            Istream& is,
+            point& position,
+            const bool readFields,
+            const bool newFormat,
+            const bool doLocate
+        );
+
         //- Overridable function to handle the particle hitting a patch.
         //  Executed before other patch-hitting functions.
         template<class TrackCloudType>
@@ -399,8 +410,9 @@ public:
         (
             const polyMesh& mesh,
             Istream&,
-            bool readFields = true,
-            bool newFormat = true
+            const bool readFields = true,
+            const bool newFormat = true,
+            const bool doLocate = true
         );
 
         //- Construct as a copy
