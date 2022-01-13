@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -258,6 +258,9 @@ public:
 
         //- Write
         virtual void write(Ostream& os) const;
+
+        //- Write 'coordinateSystem' dictionary entry
+        virtual void writeEntry(Ostream& os) const;
 
         //- Write dictionary entry
         virtual void writeEntry(const word& keyword, Ostream& os) const;

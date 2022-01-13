@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -244,7 +244,10 @@ void Foam::engineValve::writeDict(Ostream& os) const
 {
     os  << nl << name() << nl << token::BEGIN_BLOCK;
 
-    cs().writeEntry(coordinateSystem::typeName_(), os);
+    if (csysPtr_)
+    {
+        csysPtr_->writeEntry(os);
+    }
 
     os  << "bottomPatch " << bottomPatch_.name() << token::END_STATEMENT << nl
         << "poppetPatch " << poppetPatch_.name() << token::END_STATEMENT << nl

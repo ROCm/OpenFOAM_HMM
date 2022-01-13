@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -423,6 +423,12 @@ void Foam::coordinateSystem::write(Ostream& os) const
 
     os << "origin: " << origin_ << ' ';
     spec_->write(os);
+}
+
+
+void Foam::coordinateSystem::writeEntry(Ostream& os) const
+{
+    writeEntry(coordinateSystem::typeName_(), os);
 }
 
 

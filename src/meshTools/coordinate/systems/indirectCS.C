@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,12 @@ Foam::coordSystem::indirect::indirect
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::coordSystem::indirect::write(Ostream& os) const
+{
+    writeEntry(coordinateSystem::typeName_(), os);
+}
+
+
+void Foam::coordSystem::indirect::writeEntry(Ostream& os) const
 {
     writeEntry(coordinateSystem::typeName_(), os);
 }
