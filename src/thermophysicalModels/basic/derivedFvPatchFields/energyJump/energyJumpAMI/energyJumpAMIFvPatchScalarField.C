@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,7 +126,9 @@ void Foam::energyJumpAMIFvPatchScalarField::updateCoeffs()
 
         const labelUList& faceCells = this->patch().faceCells();
 
-        jump_ = thermo.he(pp, Tbp.jump(), faceCells);
+        jump_ =
+            thermo.he(pp, Tbp+Tbp.jump(), faceCells)
+          - thermo.he(pp, Tbp, faceCells);
     }
 
     fixedJumpAMIFvPatchField<scalar>::updateCoeffs();
