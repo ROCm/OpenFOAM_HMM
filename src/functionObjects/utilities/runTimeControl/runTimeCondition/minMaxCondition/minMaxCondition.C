@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2016 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,6 +161,12 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
 
 
 void Foam::functionObjects::runTimeControls::minMaxCondition::write()
+{
+    // do nothing
+}
+
+
+void Foam::functionObjects::runTimeControls::minMaxCondition::reset()
 {
     // do nothing
 }

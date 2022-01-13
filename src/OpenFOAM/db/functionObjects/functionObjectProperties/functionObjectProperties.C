@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,13 +96,10 @@ Foam::label Foam::functionObjects::properties::getTrigger() const
 
 bool Foam::functionObjects::properties::setTrigger
 (
-    const label triggeri,
-    bool increaseOnly
+    const label triggeri
 )
 {
-    const label currTriggeri = getTrigger();
-
-    if (increaseOnly ? (triggeri > currTriggeri) : (triggeri != currTriggeri))
+    if (triggeri != getTrigger())
     {
         set("triggerIndex", triggeri);
         return true;

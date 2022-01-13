@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,6 +163,13 @@ bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()
 
 
 void Foam::functionObjects::runTimeControls::equationMaxIterCondition::write()
+{
+    // do nothing
+}
+
+
+
+void Foam::functionObjects::runTimeControls::equationMaxIterCondition::reset()
 {
     // do nothing
 }

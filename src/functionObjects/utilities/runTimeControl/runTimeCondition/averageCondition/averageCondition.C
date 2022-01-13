@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,17 +83,18 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
     iter_(-1)
 {
     dictionary& conditionDict = this->conditionDict();
+    conditionDict.readIfPresent("iter", iter_);
 
-    forAll(fieldNames_, fieldi)
+    if (resetOnRestart_)
     {
-        const word& fieldName = fieldNames_[fieldi];
+        reset();
+    }
+    else
+    {
+        forAll(fieldNames_, fieldi)
+        {
+            const word& fieldName = fieldNames_[fieldi];
 
-        if (resetOnRestart_)
-        {
-            conditionDict.set(fieldName, dictionary());
-        }
-        else
-        {
             if (conditionDict.found(fieldName))
             {
                 const dictionary& valueDict = conditionDict.subDict(fieldName);
@@ -105,8 +106,6 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
             }
         }
     }
-
-    conditionDict.readIfPresent("iter", iter_);
 }
 
 
@@ -190,6 +189,23 @@ void Foam::functionObjects::runTimeControls::averageCondition::write()
         }
     }
 
+    conditionDict.set("iter", iter_);
+}
+
+
+void Foam::functionObjects::runTimeControls::averageCondition::reset()
+{
+    dictionary& conditionDict = this->conditionDict();
+
+    forAll(fieldNames_, fieldi)
+    {
+        const word& fieldName = fieldNames_[fieldi];
+
+        conditionDict.set(fieldName, dictionary());
+        totalTime_[fieldi] = 0;
+    }
+
+    iter_ = -1;
     conditionDict.set("iter", iter_);
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,11 +88,10 @@ Foam::label Foam::functionObjects::stateFunctionObject::getTrigger() const
 
 bool Foam::functionObjects::stateFunctionObject::setTrigger
 (
-    const label triggeri,
-    bool increaseOnly
+    const label triggeri
 )
 {
-    return stateDict().setTrigger(triggeri, increaseOnly);
+    return stateDict().setTrigger(triggeri);
 }
 
 

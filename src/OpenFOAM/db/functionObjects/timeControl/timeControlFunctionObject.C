@@ -64,11 +64,10 @@ void Foam::functionObjects::timeControl::readControls()
         timeEnd_ = time_.userTimeToTime(timeEnd_);
     }
 
-    if (dict_.readIfPresent("triggerStart", triggerStart_))
-    {
-        dict_.readIfPresent("triggerEnd", triggerEnd_);
-        controlMode_ = controlModeNames_.get("controlMode", dict_);
-    }
+    controlMode_ =
+        controlModeNames_.getOrDefault("controlMode", dict_, controlMode::TIME);
+    dict_.readIfPresent("triggerStart", triggerStart_);
+    dict_.readIfPresent("triggerEnd", triggerEnd_);
 
     deltaTCoeff_ = GREAT;
     if (dict_.readIfPresent("deltaTCoeff", deltaTCoeff_))
@@ -96,6 +95,18 @@ bool Foam::functionObjects::timeControl::active() const
      && time_.value() <= (timeEnd_ + 0.5*time_.deltaTValue());
 
     bool inTrigger = triggeri >= triggerStart_ && triggeri <= triggerEnd_;
+
+    DebugInFunction
+        << name() << " mode:" << controlModeNames_[controlMode_] << nl
+        << " - time:" << time_.value()
+        << " timeStart:" << timeStart_
+        << " timeEnd:" << timeEnd_
+        << " inTime:" << inTime << nl
+        << " - triggeri:" << triggeri
+        << " triggerStart:" << triggerStart_
+        << " triggerEnd:" << triggerEnd_
+        << " inTrigger:" << inTrigger
+        << endl;
 
     switch (controlMode_)
     {
@@ -454,7 +465,7 @@ Foam::functionObjects::timeControl::timeControl
     controlMode_(controlMode::TIME),
     timeStart_(-VGREAT),
     timeEnd_(VGREAT),
-    triggerStart_(labelMax),
+    triggerStart_(labelMin),
     triggerEnd_(labelMax),
     nStepsToStartTimeChange_(labelMax),
     executeControl_(runTime, dict, "execute"),

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,8 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     writeStepI_(0),
     satisfiedAction_(satisfiedAction::END),
     triggerIndex_(labelMin),
-    active_(getObjectProperty(name, "active", true))
+    active_(getProperty("active", true)),
+    canRestart_(getProperty("canRestart", false))
 {
     read(dict);
 }
@@ -177,6 +178,12 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 {
+    if (canRestart_)
+    {
+        active_ = true;
+        canRestart_ = false;
+    }
+
     if (!active_)
     {
         return true;
@@ -199,7 +206,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
         {
             bool conditionSatisfied = condition.apply();
 
-            label groupi = condition.groupID();
+            const label groupi = condition.groupID();
 
             auto conditionIter = groupMap_.cfind(groupi);
 
@@ -271,14 +278,10 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
                     if (nWriteStep_ != 0)
                     {
-                        Info<< " - final step" << nl;
-                    }
-                    else
-                    {
-                        Info<< nl;
+                        Info<< " - final step";
                     }
 
-                    Info<< endl;
+                    Info<< nl << endl;
                     active_ = false;
 
                     // Write any registered objects and set the end-time
@@ -299,11 +302,25 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
             case satisfiedAction::SET_TRIGGER:
             {
                 Info<< "    Setting trigger " << triggerIndex_ << nl;
+
                 setTrigger(triggerIndex_);
 
                 // Deactivate the model
                 active_ = false;
                 setProperty("active", active_);
+
+                // Can be restarted
+                canRestart_ = true;
+                setProperty("canRestart", canRestart_);
+
+                // Reset all conditions in case the control is recycled/trigger
+                // index is set to a smaller value
+                forAll(conditions_, conditioni)
+                {
+                    runTimeCondition& condition = conditions_[conditioni];
+                    condition.reset();
+                }
+
                 break;
             }
         }

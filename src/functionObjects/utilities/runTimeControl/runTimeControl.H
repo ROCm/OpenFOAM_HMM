@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,6 +110,11 @@ private:
         //  Used in the trigger case to bypass any evaluations after the
         //  trigger has been set
         bool active_;
+
+        //- Can be restarted flag
+        //  Used in the trigger case after the trigger has been set to allow
+        //  this object to be restarted/reset the active flag
+        bool canRestart_;
 
 
     // Private Member Functions

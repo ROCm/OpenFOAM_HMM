@@ -230,4 +230,11 @@ equationInitialResidualCondition::write()
 }
 
 
+void Foam::functionObjects::runTimeControls::
+equationInitialResidualCondition::reset()
+{
+    // do nothing
+}
+
+
 // ************************************************************************* //

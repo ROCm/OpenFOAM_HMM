@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of function object to retrieve data from
         word functionObjectName_;
@@ -143,6 +143,9 @@ public:
 
         //- Write
         virtual void write();
+
+        //- Reset
+        virtual void reset();
 };
 
 
