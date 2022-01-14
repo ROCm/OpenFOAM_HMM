@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1284,12 +1284,13 @@ Foam::Time& Foam::Time::operator++()
         // Adjust the precision of the time directory name if necessary
         if (writeTime_)
         {
+            // User-time equivalent of deltaT
+            const scalar userDeltaT =
+                timeToUserTime(value()) - timeToUserTime(value() - deltaT_);
+
             // Tolerance used when testing time equivalence
             const scalar timeTol =
-                max(min(pow(10.0, -precision_), 0.1*deltaT_), SMALL);
-
-            // User-time equivalent of deltaT
-            const scalar userDeltaT = timeToUserTime(deltaT_);
+                max(min(pow(scalar(10), -precision_), 0.1*userDeltaT), SMALL);
 
             // Time value obtained by reading timeName
             scalar timeNameValue = -VGREAT;
