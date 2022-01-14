@@ -13,4 +13,4 @@ against the data from Weighardt.
 
 For further information please visit:
 
-    openfoam.com/documentation/cpp-guide/html/verification-validation-turbulent-flat-plate-zpg.html
+    openfoam.com/documentation/guides/latest/doc/verification-validation-turbulent-flat-plate-zpg.html

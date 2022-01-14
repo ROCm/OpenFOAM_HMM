@@ -14,4 +14,4 @@ scalar profile against the exact solution.
 
 For more information, see:
 
-https://www.openfoam.com/documentation/cpp-guide/html/guide-schemes-divergence-example.html
+https://www.openfoam.com/documentation/guides/latest/doc/guide-schemes-divergence-example.html

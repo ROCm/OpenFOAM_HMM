@@ -10,7 +10,7 @@ table 3).
 
 For more information, see:
 
-    https://www.openfoam.com/documentation/cpp-guide/html/verification-validation-turbulent-decay-homogeneous-isotropic-turbulence.html
+    https://www.openfoam.com/documentation/guides/latest/doc/verification-validation-turbulent-decay-homogeneous-isotropic-turbulence.html
 
 [1] G. Comte-Bellot and S. Corrsin, "The use of a contraction to improve the
     isotropy of grid-generated turbulence," J. Fluid Mech. 25, 657 (1966).
