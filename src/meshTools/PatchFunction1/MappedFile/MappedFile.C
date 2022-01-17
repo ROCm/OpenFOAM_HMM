@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
     dictConstructed_(true),
     setAverage_(dict.getOrDefault("setAverage", false)),
-    fieldTableName_(entryName),
+    fieldTableName_(dict.getOrDefault<word>("fieldTable", entryName)),
     perturb_(dict.getOrDefault<scalar>("perturb", 1e-5)),
     pointsName_(dict.getOrDefault<word>("points", "points")),
     mapMethod_
@@ -74,8 +74,6 @@ Foam::PatchFunction1Types::MappedFile<Type>::MappedFile
             << "mapMethod should be one of 'planarInterpolation'"
             << ", 'nearest'" << exit(FatalIOError);
     }
-
-    dict.readIfPresent("fieldTable", fieldTableName_);
 }
 
 
@@ -236,7 +234,8 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
         const fileName samplePointsFile
         (
             time.globalPath()
-           /time.constant()
+           /time.constant()         // instance
+           /mesh.dbDir()            // region
            /"boundaryData"
            /this->patch_.name()
            /pointsName_
@@ -329,7 +328,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             << "Have sampling values for "
             << pointToPointPlanarInterpolation::timeNames(sampleTimes_) << nl
             << "In directory "
-            <<  time.constant()/"boundaryData"/this->patch_.name()
+            <<  time.constant()/mesh.dbDir()/"boundaryData"/this->patch_.name()
             << "\n    on patch " << this->patch_.name()
             << " of field " << fieldTableName_
             << exit(FatalError);
@@ -364,15 +363,16 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
                     << "boundaryData"
                       /this->patch_.name()
                       /sampleTimes_[lo].name()
+                      /fieldTableName_
                     << endl;
             }
-
 
             // Reread values and interpolate
             const fileName valsFile
             (
                 time.globalPath()
                /time.constant()
+               /mesh.dbDir()            // region
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[startSampleTime_].name()
@@ -437,6 +437,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::checkTable
             (
                 time.globalPath()
                /time.constant()
+               /mesh.dbDir()            // region
                /"boundaryData"
                /this->patch_.name()
                /sampleTimes_[endSampleTime_].name()
@@ -603,6 +604,13 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeEntries
     Ostream& os
 ) const
 {
+    os.writeEntryIfDifferent
+    (
+        "fieldTable",
+        this->name(),
+        fieldTableName_
+    );
+
     if (setAverage_)
     {
         os.writeEntry("setAverage", setAverage_);
@@ -640,19 +648,16 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeData
     {
         os.writeEntry(this->name(), type());
 
-        os.writeEntryIfDifferent
-        (
-            "fieldTable",
-            this->name(),
-            fieldTableName_
-        );
-
         os.beginBlock(word(this->name() + "Coeffs"));
         writeEntries(os);
         os.endBlock();
     }
     else
     {
+        // Note that usually dictConstructed = true. The
+        // construct-from-dictionary (dictConstructed_ = false)
+        // should only be used if there is only
+        // a single potential MappedFile in the local scope.
         writeEntries(os);
     }
 }

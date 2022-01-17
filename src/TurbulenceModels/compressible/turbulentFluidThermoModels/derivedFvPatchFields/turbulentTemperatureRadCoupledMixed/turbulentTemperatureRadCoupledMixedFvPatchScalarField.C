@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,19 +181,22 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     {
         dict.readEntry("kappaLayers", kappaLayers_);
     }
-    // Read single additional PatchFunction1
+    // Read single additional layer as PatchFunction1
     thicknessLayer_ = PatchFunction1<scalar>::NewIfPresent
     (
         p.patch(),
         "thicknessLayer",
         dict
     );
-    kappaLayer_ = PatchFunction1<scalar>::NewIfPresent
-    (
-        p.patch(),
-        "kappaLayer",
-        dict
-    );
+    if (thicknessLayer_)
+    {
+        kappaLayer_ = PatchFunction1<scalar>::New
+        (
+            p.patch(),
+            "kappaLayer",
+            dict
+        );
+    }
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
