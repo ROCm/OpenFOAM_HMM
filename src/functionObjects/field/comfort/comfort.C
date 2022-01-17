@@ -455,15 +455,20 @@ bool Foam::functionObjects::comfort::execute()
     tmp<volScalarField> DR =
         correctUnit*(factor12 - T)*pow(Umag - Umin, 0.62)*(pre*Umag*TI + C1);
 
+    // Calculate the operative temperature
+    tmp<volScalarField> Top = (T + Trad)/2;
+
     // Workaround
     word fieldNamePMV = "PMV";
     word fieldNamePPD = "PPD";
     word fieldNameDR = "DR";
+    word fieldNameTop = "Top";
 
     return
         store(fieldNamePMV, PMV)
      && store(fieldNamePPD, PPD)
-     && store(fieldNameDR, DR);
+     && store(fieldNameDR, DR)
+     && store(fieldNameDR, Top);
 }
 
 bool Foam::functionObjects::comfort::write()
@@ -471,7 +476,8 @@ bool Foam::functionObjects::comfort::write()
     return
         writeObject("PMV")
      && writeObject("PPD")
-     && writeObject("DR");
+     && writeObject("DR")
+     && writeObject("Top");
 }
 
 
