@@ -435,7 +435,7 @@ bool Foam::functionObjects::comfort::execute()
             mesh_
         ),
         mesh_,
-        dimensionedScalar(dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
 
     if (foundObject<volScalarField>("k"))
@@ -456,28 +456,33 @@ bool Foam::functionObjects::comfort::execute()
         correctUnit*(factor12 - T)*pow(Umag - Umin, 0.62)*(pre*Umag*TI + C1);
 
     // Calculate the operative temperature
-    tmp<volScalarField> Top = (T + Trad)/2;
+    tmp<volScalarField> Top = 0.5*(T + Trad);
 
-    // Workaround
+    // Need modifiable field names:
     word fieldNamePMV = "PMV";
     word fieldNamePPD = "PPD";
     word fieldNameDR = "DR";
     word fieldNameTop = "Top";
 
     return
+    (
         store(fieldNamePMV, PMV)
      && store(fieldNamePPD, PPD)
      && store(fieldNameDR, DR)
-     && store(fieldNameDR, Top);
+     && store(fieldNameTop, Top)
+    );
 }
+
 
 bool Foam::functionObjects::comfort::write()
 {
     return
+    (
         writeObject("PMV")
      && writeObject("PPD")
      && writeObject("DR")
-     && writeObject("Top");
+     && writeObject("Top")
+    );
 }
 
 
