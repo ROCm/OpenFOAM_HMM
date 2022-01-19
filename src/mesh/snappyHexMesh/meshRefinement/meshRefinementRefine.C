@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -914,6 +914,9 @@ Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
 
     const labelList& surfIndex = surfaceIndex();
 
+    labelList boundaryRefineCell;
+    syncTools::swapBoundaryCellList(mesh_, refineCell, boundaryRefineCell);
+
     forAll(surfIndex, faceI)
     {
         if (surfIndex[faceI] != -1)
@@ -931,7 +934,8 @@ Foam::labelList Foam::meshRefinement::getRefineCandidateFaces
             }
             else
             {
-                if (refineCell[own] == -1)
+                const label bFacei = faceI - mesh_.nInternalFaces();
+                if (refineCell[own] == -1 || boundaryRefineCell[bFacei] == -1)
                 {
                     testFaces[nTest++] = faceI;
                 }

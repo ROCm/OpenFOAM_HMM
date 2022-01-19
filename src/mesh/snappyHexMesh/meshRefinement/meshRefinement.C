@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,6 +128,57 @@ static const Foam::polyMesh::cellDecomposition
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::label Foam::meshRefinement::globalFaceCount(const labelList& elems) const
+{
+    //- Check for duplicates
+    const bitSet isElem(mesh_.nFaces(), elems);
+    if (label(isElem.count()) != elems.size())
+    {
+        FatalErrorInFunction << "Problem Duplicates:"
+            << " isElem:" << isElem.count()
+            << " elems:" << elems.size()
+            << exit(FatalError);
+    }
+
+    //- Check for same entries on coupled faces
+    {
+        bitSet isElem2(isElem);
+        syncTools::swapFaceList(mesh_, isElem2);
+
+        for
+        (
+            label facei = mesh_.nInternalFaces();
+            facei < mesh_.nFaces();
+            facei++
+        )
+        {
+            if (isElem2[facei] != isElem[facei])
+            {
+                FatalErrorInFunction
+                    << "at face:" << facei
+                    << " at:" << mesh_.faceCentres()[facei]
+                    << " patch:" << mesh_.boundaryMesh().whichPatch(facei)
+                    << " isElem:" << isElem[facei]
+                    << " isElem2:" << isElem2[facei]
+                    << exit(FatalError);
+            }
+        }
+    }
+
+    //- Count number of master elements
+    const bitSet isMaster(syncTools::getMasterFaces(mesh_));
+    label count = 0;
+    for (const label i : isElem)
+    {
+        if (isMaster[i])
+        {
+            count++;
+        }
+    }
+    return returnReduce(count, sumOp<label>());
+}
+
 
 void Foam::meshRefinement::calcNeighbourData
 (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,6 +228,10 @@ private:
             const mapPolyMesh&,
             const labelList& oldCellsToRefine
         );
+
+        // Debug: count number of master-faces (and do some checking
+        // for consistency)
+        label globalFaceCount(const labelList& elems) const;
 
         //- Calculate coupled boundary end vector and refinement level
         void calcNeighbourData(labelList& neiLevel, pointField& neiCc) const;

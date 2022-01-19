@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1423,6 +1423,14 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
         // Spread it
         if (spreadGapSize)
         {
+            scalarField boundaryGapSize;
+            syncTools::swapBoundaryCellList
+            (
+                mesh_,
+                detectedGapSize,
+                boundaryGapSize
+            );
+
             // Field on cells and faces
             List<transportData> cellData(mesh_.nCells());
             List<transportData> faceData(mesh_.nFaces());
@@ -1466,7 +1474,13 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
             {
                 label own = mesh_.faceOwner()[faceI];
 
-                if (detectedGapSize[own] < GREAT)
+                scalar minSize = min
+                (
+                    detectedGapSize[own],
+                    boundaryGapSize[faceI-mesh_.nInternalFaces()]
+                );
+
+                if (minSize < GREAT)
                 {
                     frontFaces.append(faceI);
                     frontData.append
@@ -1474,7 +1488,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                         transportData
                         (
                             faceCentres[faceI],
-                            detectedGapSize[own],
+                            minSize,
                             0.0
                         )
                     );
