@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -385,7 +385,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     labelList cellAddr(mesh_.nCells(), -1);
     const labelList& cellIDs = mesh_.cellZones()[cellZonei];
     labelUIndList(cellAddr, cellIDs) = identity(cellIDs.size());
-    labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
+    labelList nbrFaceCellAddr(mesh_.nBoundaryFaces(), -1);
 
     forAll(pbm, patchi)
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2019 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,14 +236,14 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
 
     labelList tetBasePtIs(mesh.nFaces(), -1);
 
-    label nInternalFaces = mesh.nInternalFaces();
+    const label nInternalFaces = mesh.nInternalFaces();
 
     for (label fI = 0; fI < nInternalFaces; ++fI)
     {
         tetBasePtIs[fI] = findSharedBasePoint(mesh, fI, tol, report);
     }
 
-    pointField neighbourCellCentres(mesh.nFaces() - nInternalFaces);
+    pointField neighbourCellCentres(mesh.nBoundaryFaces());
 
     for (label facei = nInternalFaces; facei < mesh.nFaces(); ++facei)
     {
@@ -257,8 +257,8 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
     SubList<label> boundaryFaceTetBasePtIs
     (
         tetBasePtIs,
-        mesh.nFaces() - nInternalFaces,
-        nInternalFaces
+        mesh.nBoundaryFaces(),
+        mesh.nInternalFaces()
     );
 
     for

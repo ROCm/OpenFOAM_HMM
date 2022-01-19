@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -727,8 +728,8 @@ void Foam::polyDualMesh::calcDual
         SubList<face>
         (
             mesh.faces(),
-            mesh.nFaces() - nIntFaces,
-            nIntFaces
+            mesh.nBoundaryFaces(),
+            mesh.nInternalFaces()
         ),
         mesh.points()
     );
@@ -781,7 +782,7 @@ void Foam::polyDualMesh::calcDual
     pointField dualPoints
     (
         mesh.nCells()                           // cell centres
-      + mesh.nFaces() - nIntFaces               // boundary face centres
+      + mesh.nBoundaryFaces()                   // boundary face centres
       + featureEdges.size()                     // additional boundary edges
       + featurePoints.size()                    // additional boundary points
     );
@@ -803,7 +804,7 @@ void Foam::polyDualMesh::calcDual
     // Boundary faces centres
     const pointField& faceCentres = mesh.faceCentres();
 
-    boundaryFacePoint_.setSize(mesh.nFaces() - nIntFaces);
+    boundaryFacePoint_.setSize(mesh.nBoundaryFaces());
 
     for (label facei = nIntFaces; facei < mesh.nFaces(); facei++)
     {

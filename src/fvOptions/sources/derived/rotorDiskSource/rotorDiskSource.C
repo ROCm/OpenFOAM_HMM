@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +141,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
     // Calculate cell addressing for selected cells
     labelList cellAddr(mesh_.nCells(), -1);
     labelUIndList(cellAddr, cells_) = identity(cells_.size());
-    labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
+    labelList nbrFaceCellAddr(mesh_.nBoundaryFaces(), -1);
     forAll(pbm, patchi)
     {
         const polyPatch& pp = pbm[patchi];
