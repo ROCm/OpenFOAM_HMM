@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,6 +176,12 @@ void Foam::globalIndex::bin
 }
 
 
+void Foam::globalIndex::reset(const label localSize)
+{
+    reset(localSize, Pstream::msgType(), UPstream::worldComm, true);
+}
+
+
 void Foam::globalIndex::reset
 (
     const label localSize,
@@ -189,6 +195,8 @@ void Foam::globalIndex::reset
     if (len)
     {
         // Seed with localSize, zero elsewhere (for non-parallel branch)
+        // NB: can consider UPstream::listGatherValues
+
         labelList localSizes(len, Zero);
         localSizes[Pstream::myProcNo(comm)] = localSize;
 
@@ -202,6 +210,7 @@ void Foam::globalIndex::reset
     }
     else
     {
+        // Nothing to do
         offsets_.clear();
     }
 }

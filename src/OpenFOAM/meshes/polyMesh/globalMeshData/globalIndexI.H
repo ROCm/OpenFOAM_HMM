@@ -154,12 +154,6 @@ inline Foam::label Foam::globalIndex::size() const
 }
 
 
-inline void Foam::globalIndex::reset(const label localSize)
-{
-    reset(localSize, Pstream::msgType(), UPstream::worldComm, true);
-}
-
-
 inline Foam::label Foam::globalIndex::offset(const label proci) const
 {
     return offsets_[proci];

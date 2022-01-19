@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,15 +198,15 @@ int main(int argc, char *argv[])
 
     // Do the brute-force method as well : collect all cell centres on all
     // processors
-    pointField allCcs(globalNumbering.size());
-    globalNumbering.gather
-    (
-        Pstream::worldComm,
-        Pstream::procID(Pstream::worldComm),
-        mesh.cellCentres(),
-        allCcs
-    );
+
+    Info<< "Gathered/scattered cell centres:" << endl;
+
+    labelPair inOut;
+    pointField allCcs(globalNumbering.gather(mesh.cellCentres()));
+    inOut[0] = allCcs.size();
     Pstream::scatter(allCcs);
+    inOut[1] = allCcs.size();
+    Pout<< "    " << inOut << endl;
 
     // Compare
     forAll(ccs, i)
@@ -239,10 +239,13 @@ int main(int argc, char *argv[])
 
         Info<< "local-sizes: " << globalPointsPtr().sizes() << nl;
 
-        UIndirectList<point> procPoints(mesh.points(), uniqueMeshPointLabels);
-        pointField patchPoints;
-
-        globalPointsPtr().gather(procPoints, patchPoints);
+        pointField patchPoints
+        (
+            globalPointsPtr().gather
+            (
+                UIndirectList<point>(mesh.points(), uniqueMeshPointLabels)
+            )
+        );
 
         Info<< "gathered point field = " << patchPoints.size() << " points\n";
     }
