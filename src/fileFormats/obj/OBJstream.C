@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -281,9 +281,7 @@ Foam::Ostream& Foam::OBJstream::write
     const bool lines
 )
 {
-    SubList<face> allFcs(faces, faces.size());
-
-    primitivePatch pp(allFcs, points);
+    primitivePatch pp(SubList<face>(faces), points);
 
     const pointField& localPoints = pp.localPoints();
     const faceList& localFaces = pp.localFaces();
