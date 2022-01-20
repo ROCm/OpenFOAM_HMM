@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ bool writeAreaField
     const tmp<GeoField>& tfield
 )
 {
-    if (tfield.valid())
+    if (tfield)
     {
         writer.write(tfield());
         tfield.clear();

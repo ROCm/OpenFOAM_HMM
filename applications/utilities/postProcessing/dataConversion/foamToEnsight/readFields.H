@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ makeZeroGradientField
     >& tdf
 )
 {
-    if (tdf.valid())
+    if (tdf)
     {
         auto& df = tdf.ref();
 
@@ -125,7 +125,7 @@ makeZeroGradientField
     const tmp<GeometricField<Type, fvPatchField, volMesh>>& tdf
 )
 {
-    if (tdf.valid())
+    if (tdf)
     {
         auto& df = tdf.ref();
 

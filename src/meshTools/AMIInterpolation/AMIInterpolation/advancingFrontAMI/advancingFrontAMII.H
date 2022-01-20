@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ License
 
 inline const Foam::primitivePatch& Foam::advancingFrontAMI::srcPatch() const
 {
-    if (!tsrcPatch0_.valid())
+    if (!tsrcPatch0_)
     {
         FatalErrorInFunction
             << "tsrcPatch0_ not allocated"
@@ -45,7 +45,7 @@ inline const Foam::primitivePatch& Foam::advancingFrontAMI::tgtPatch() const
         return extendedTgtPatchPtr_();
     }
 
-    if (!ttgtPatch0_.valid())
+    if (!ttgtPatch0_)
     {
         FatalErrorInFunction
             << "srcPatch0Ptr not allocated"

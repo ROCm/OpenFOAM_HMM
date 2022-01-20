@@ -29,7 +29,7 @@ License
 #include "error.H"
 #include <typeinfo>
 
-// * * * * * * * * * * * * * Private Member Operators  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T>
 inline void Foam::tmp<T>::incrCount()
@@ -50,6 +50,13 @@ inline void Foam::tmp<T>::incrCount()
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class T>
+inline Foam::word Foam::tmp<T>::typeName()
+{
+    return "tmp<" + word(typeid(T).name()) + '>';
+}
+
+
+template<class T>
 template<class... Args>
 inline Foam::tmp<T> Foam::tmp<T>::New(Args&&... args)
 {
@@ -62,13 +69,6 @@ template<class U, class... Args>
 inline Foam::tmp<T> Foam::tmp<T>::NewFrom(Args&&... args)
 {
     return tmp<T>(new U(std::forward<Args>(args)...));
-}
-
-
-template<class T>
-inline Foam::word Foam::tmp<T>::typeName()
-{
-    return "tmp<" + word(typeid(T).name()) + '>';
 }
 
 

@@ -79,7 +79,7 @@ bool Foam::patchDistMethods::Poisson::correct
     volVectorField& n
 )
 {
-    if (!tyPsi_.valid())
+    if (!tyPsi_)
     {
         tyPsi_ = tmp<volScalarField>
         (

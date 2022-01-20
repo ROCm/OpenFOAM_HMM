@@ -32,6 +32,13 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class T>
+inline Foam::word Foam::refPtr<T>::typeName()
+{
+    return "refPtr<" + word(typeid(T).name()) + '>';
+}
+
+
+template<class T>
 template<class... Args>
 inline Foam::refPtr<T> Foam::refPtr<T>::New(Args&&... args)
 {
@@ -44,13 +51,6 @@ template<class U, class... Args>
 inline Foam::refPtr<T> Foam::refPtr<T>::NewFrom(Args&&... args)
 {
     return refPtr<T>(new U(std::forward<Args>(args)...));
-}
-
-
-template<class T>
-inline Foam::word Foam::refPtr<T>::typeName()
-{
-    return "refPtr<" + word(typeid(T).name()) + '>';
 }
 
 

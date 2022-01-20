@@ -39,8 +39,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef refPtr_H
-#define refPtr_H
+#ifndef Foam_refPtr_H
+#define Foam_refPtr_H
 
 #include "autoPtr.H"
 #include "tmp.H"

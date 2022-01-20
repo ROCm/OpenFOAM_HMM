@@ -60,7 +60,7 @@ Foam::tmp<Foam::Field<Type>> Foam::cyclicAMIPolyPatch::interpolate
     else
     {
         autoPtr<coordSystem::cylindrical> cs(cylindricalCS());
-        if (!cs.valid())
+        if (!cs)
         {
             return interpolateUntransformed(fld, defaultValues);
         }
@@ -173,7 +173,7 @@ void Foam::cyclicAMIPolyPatch::interpolate
     /*
     autoPtr<coordSystem::cylindrical> cs(cylindricalCS());
 
-    if (cs.valid() && pTraits<Type>::rank > 0)
+    if (cs && pTraits<Type>::rank > 0)
     {
         const cyclicAMIPolyPatch& nbrPp = this->neighbPatch();
 

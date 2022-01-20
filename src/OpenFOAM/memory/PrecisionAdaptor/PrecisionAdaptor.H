@@ -36,8 +36,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PrecisionAdaptor_H
-#define PrecisionAdaptor_H
+#ifndef Foam_PrecisionAdaptor_H
+#define Foam_PrecisionAdaptor_H
 
 #include <algorithm>    // For std::copy
 #include <type_traits>  // For std::is_same

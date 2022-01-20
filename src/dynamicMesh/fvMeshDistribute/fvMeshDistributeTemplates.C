@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,14 +148,14 @@ void Foam::fvMeshDistribute::saveBoundaryFields
         mesh_.objectRegistry::lookupClass<const fldType>()
     );
 
-    bflds.setSize(flds.size());
+    bflds.resize(flds.size());
 
     label i = 0;
     forAllConstIters(flds, iter)
     {
         const fldType& fld = *iter();
 
-        bflds.set(i, fld.boundaryField().clone().ptr());
+        bflds.set(i, fld.boundaryField().clone());
 
         ++i;
     }
@@ -236,7 +236,7 @@ void Foam::fvMeshDistribute::saveInternalFields
         mesh_.objectRegistry::lookupClass<const fldType>()
     );
 
-    iflds.setSize(flds.size());
+    iflds.resize(flds.size());
 
     label i = 0;
 

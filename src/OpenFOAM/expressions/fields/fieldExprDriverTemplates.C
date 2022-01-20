@@ -45,7 +45,7 @@ Foam::expressions::fieldExpr::parseDriver::getField
     }
 
 
-    if (tvar.valid())
+    if (tvar)
     {
         const auto& var = tvar.cref();
         const Field<Type>& vals = var.cref<Type>();

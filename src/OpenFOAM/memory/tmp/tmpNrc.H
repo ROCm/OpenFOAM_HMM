@@ -18,8 +18,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tmpNrc_H
-#define tmpNrc_H
+#ifndef Foam_tmpNrc_H
+#define Foam_tmpNrc_H
 
 #include "refPtr.H"
 

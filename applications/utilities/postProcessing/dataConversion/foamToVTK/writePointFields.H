@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ bool writePointField
     const fvMeshSubsetProxy& proxy
 )
 {
-    if (!tfield.valid())
+    if (!tfield)
     {
         return false;
     }
@@ -73,7 +73,7 @@ bool writePointField
         tproxied = tfield;
     }
 
-    if (!tproxied.valid())
+    if (!tproxied)
     {
         // Or Error?
         return false;

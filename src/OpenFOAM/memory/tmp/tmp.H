@@ -45,8 +45,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tmp_H
-#define tmp_H
+#ifndef Foam_tmp_H
+#define Foam_tmp_H
 
 #include "refCount.H"
 #include "word.H"
@@ -81,7 +81,7 @@ class tmp
         mutable refType type_;
 
 
-    // Private Member Operators
+    // Private Member Functions
 
         //- Increment the ref-count for a managed pointer
         //- and check that it is not oversubscribed

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,7 +118,7 @@ Foam::PtrList<const GeoField> Foam::readFields
         auto tfield =
             getField<GeoField>(mesh, objects, fieldName, syncPar);
 
-        if (tfield.valid())
+        if (tfield)
         {
             fields.set(nFields++, tfield.ptr());
         }
@@ -157,7 +157,7 @@ Foam::PtrList<const GeoField> Foam::readFields
         auto tfield =
             getField<GeoField>(proxy, objects, fieldName, syncPar);
 
-        if (tfield.valid())
+        if (tfield)
         {
             fields.set(nFields++, tfield.ptr());
         }

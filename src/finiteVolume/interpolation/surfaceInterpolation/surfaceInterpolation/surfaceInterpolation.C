@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,6 +60,7 @@ void Foam::surfaceInterpolation::clearOut()
 Foam::surfaceInterpolation::surfaceInterpolation(const fvMesh& fvm)
 :
     mesh_(fvm),
+    geometryPtr_(nullptr),
     weights_(nullptr),
     deltaCoeffs_(nullptr),
     nonOrthDeltaCoeffs_(nullptr),
@@ -79,7 +80,7 @@ Foam::surfaceInterpolation::~surfaceInterpolation()
 
 const Foam::fvGeometryScheme& Foam::surfaceInterpolation::geometry() const
 {
-    if (!geometryPtr_.valid())
+    if (!geometryPtr_)
     {
         geometryPtr_ = fvGeometryScheme::New
         (
@@ -101,9 +102,9 @@ void Foam::surfaceInterpolation::geometry(tmp<fvGeometryScheme>& schemePtr)
 
 const Foam::surfaceScalarField& Foam::surfaceInterpolation::weights() const
 {
-    if (!weights_.valid())
+    if (!weights_)
     {
-        weights_.set(geometry().weights().ptr());
+        weights_.reset(geometry().weights().ptr());
     }
 
     return weights_();
@@ -112,9 +113,9 @@ const Foam::surfaceScalarField& Foam::surfaceInterpolation::weights() const
 
 const Foam::surfaceScalarField& Foam::surfaceInterpolation::deltaCoeffs() const
 {
-    if (!deltaCoeffs_.valid())
+    if (!deltaCoeffs_)
     {
-        deltaCoeffs_.set(geometry().deltaCoeffs().ptr());
+        deltaCoeffs_.reset(geometry().deltaCoeffs().ptr());
     }
 
     return deltaCoeffs_();
@@ -124,9 +125,9 @@ const Foam::surfaceScalarField& Foam::surfaceInterpolation::deltaCoeffs() const
 const Foam::surfaceScalarField&
 Foam::surfaceInterpolation::nonOrthDeltaCoeffs() const
 {
-    if (!nonOrthDeltaCoeffs_.valid())
+    if (!nonOrthDeltaCoeffs_)
     {
-        nonOrthDeltaCoeffs_.set(geometry().nonOrthDeltaCoeffs().ptr());
+        nonOrthDeltaCoeffs_.reset(geometry().nonOrthDeltaCoeffs().ptr());
     }
 
     return nonOrthDeltaCoeffs_();
@@ -136,9 +137,9 @@ Foam::surfaceInterpolation::nonOrthDeltaCoeffs() const
 const Foam::surfaceVectorField&
 Foam::surfaceInterpolation::nonOrthCorrectionVectors() const
 {
-    if (!nonOrthCorrectionVectors_.valid())
+    if (!nonOrthCorrectionVectors_)
     {
-        nonOrthCorrectionVectors_.set
+        nonOrthCorrectionVectors_.reset
         (
             geometry().nonOrthCorrectionVectors().ptr()
         );

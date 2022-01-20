@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -716,7 +716,7 @@ void writeProcAddressing
     }
 
     autoPtr<fileOperation> defaultHandler;
-    if (writeHandler.valid())
+    if (writeHandler)
     {
         defaultHandler = fileHandler(std::move(writeHandler));
     }
@@ -726,7 +726,7 @@ void writeProcAddressing
     const bool pointOk = pointMap.write();
     const bool patchOk = patchMap.write();
 
-    if (defaultHandler.valid())
+    if (defaultHandler)
     {
         writeHandler = fileHandler(std::move(defaultHandler));
     }
@@ -1412,14 +1412,14 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     else
     {
         autoPtr<fileOperation> defaultHandler;
-        if (writeHandler.valid())
+        if (writeHandler)
         {
             defaultHandler = fileHandler(std::move(writeHandler));
         }
 
         mesh.write();
 
-        if (defaultHandler.valid())
+        if (defaultHandler)
         {
             writeHandler = fileHandler(std::move(defaultHandler));
         }
@@ -2543,7 +2543,7 @@ int main(int argc, char *argv[])
     // File handler to be used for writing
     const fileOperation& fh
     (
-        writeHandler.valid()
+        writeHandler
       ? writeHandler()
       : fileHandler()
     );
@@ -2989,7 +2989,7 @@ int main(int argc, char *argv[])
             );
             fvMesh& mesh = meshPtr();
 
-            if (writeHandler.valid() && Pstream::master())
+            if (writeHandler && Pstream::master())
             {
                 // Remove any left-over empty processor directories created
                 // by loadOrCreateMesh to get around e.g. collated start-up
@@ -3290,7 +3290,7 @@ int main(int argc, char *argv[])
             );
             fvMesh& mesh = meshPtr();
 
-            if (writeHandler.valid())
+            if (writeHandler)
             {
                 // Remove any left-over empty processor directories created
                 // by loadOrCreateMesh to get around the collated start-up

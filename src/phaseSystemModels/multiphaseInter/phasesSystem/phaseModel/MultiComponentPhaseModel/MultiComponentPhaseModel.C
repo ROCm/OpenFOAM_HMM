@@ -55,14 +55,14 @@ MultiComponentPhaseModel
     species_(),
     inertIndex_(-1)
 {
-    thermoPtr_.set
+    thermoPtr_.reset
     (
         phaseThermo::New
         (
             fluid.mesh(),
             phaseName,
             basicThermo::phasePropertyName(basicThermo::dictName, phaseName)
-        ).ptr()
+        )
     );
 
     if (thermoPtr_->composition().species().empty())

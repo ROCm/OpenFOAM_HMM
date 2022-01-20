@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ bool Foam::cyclicACMIPolyPatch::updateAreas() const
     // Check if scaling enabled (and necessary)
     if
     (
-        srcScalePtr_.valid()
+        srcScalePtr_
      && (updated || prevTimeIndex_ != mesh.time().timeIndex())
     )
     {
@@ -103,7 +103,7 @@ bool Foam::cyclicACMIPolyPatch::updateAreas() const
             );
 
 
-        if (!tgtScalePtr_.valid())
+        if (!tgtScalePtr_)
         {
             tgtScalePtr_= srcScalePtr_.clone(neighbPatch());
         }
@@ -361,7 +361,7 @@ void Foam::cyclicACMIPolyPatch::scalePatchFaceAreas()
     const cyclicACMIPolyPatch& nbrPatch = this->neighbPatch();
     const polyPatch& nbrNonOverlapPatch = nbrPatch.nonOverlapPatch();
 
-    if (srcScalePtr_.valid())
+    if (srcScalePtr_)
     {
         // Save overlap geometry for later scaling
         thisSf_ = this->faceAreas();
@@ -476,7 +476,7 @@ void Foam::cyclicACMIPolyPatch::clearGeom()
 
 const Foam::scalarField& Foam::cyclicACMIPolyPatch::srcMask() const
 {
-    if (srcScalePtr_.valid())
+    if (srcScalePtr_)
     {
         // Make sure areas are up-to-date
         updateAreas();
@@ -492,7 +492,7 @@ const Foam::scalarField& Foam::cyclicACMIPolyPatch::srcMask() const
 
 const Foam::scalarField& Foam::cyclicACMIPolyPatch::tgtMask() const
 {
-    if (tgtScalePtr_.valid())
+    if (tgtScalePtr_)
     {
         // Make sure areas are up-to-date
         updateAreas();
@@ -619,12 +619,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchID_(-1),
     srcMask_(),
     tgtMask_(),
-    srcScalePtr_
-    (
-        pp.srcScalePtr_.valid()
-      ? pp.srcScalePtr_.clone(*this)
-      : nullptr
-    ),
+    srcScalePtr_(pp.srcScalePtr_.clone(*this)),
     AMITime_
     (
         IOobject
@@ -663,12 +658,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchID_(-1),
     srcMask_(),
     tgtMask_(),
-    srcScalePtr_
-    (
-        pp.srcScalePtr_.valid()
-      ? pp.srcScalePtr_.clone(*this)
-      : nullptr
-    ),
+    srcScalePtr_(pp.srcScalePtr_.clone(*this)),
     AMITime_
     (
         IOobject
@@ -713,12 +703,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchID_(-1),
     srcMask_(),
     tgtMask_(),
-    srcScalePtr_
-    (
-        pp.srcScalePtr_.valid()
-      ? pp.srcScalePtr_.clone(*this)
-      : nullptr
-    ),
+    srcScalePtr_(pp.srcScalePtr_.clone(*this)),
     AMITime_
     (
         IOobject
@@ -804,7 +789,7 @@ const Foam::cyclicACMIPolyPatch& Foam::cyclicACMIPolyPatch::neighbPatch() const
     const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
 
     // Bit of checking now we know neighbour patch
-    if (!owner() && srcScalePtr_.valid())
+    if (!owner() && srcScalePtr_)
     {
         WarningInFunction
             << "Ignoring \"scale\" setting in slave patch " << name()
@@ -911,7 +896,7 @@ void Foam::cyclicACMIPolyPatch::write(Ostream& os) const
 
     os.writeEntry("nonOverlapPatch", nonOverlapPatchName_);
 
-    if (owner() && srcScalePtr_.valid())
+    if (owner() && srcScalePtr_)
     {
         srcScalePtr_->writeData(os);
     }

@@ -36,8 +36,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef refCount_H
-#define refCount_H
+#ifndef Foam_refCount_H
+#define Foam_refCount_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

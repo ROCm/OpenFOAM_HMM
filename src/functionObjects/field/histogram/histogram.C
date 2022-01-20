@@ -160,9 +160,9 @@ bool Foam::functionObjects::histogram::write()
 
     const volScalarField& field =
     (
-         fieldPtr.valid()
-       ? fieldPtr()
-       : obr_.lookupObject<volScalarField>(fieldName_)
+        fieldPtr
+      ? fieldPtr()
+      : obr_.lookupObject<volScalarField>(fieldName_)
     );
 
 

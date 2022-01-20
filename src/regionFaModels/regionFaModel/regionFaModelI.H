@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ inline const Foam::faMesh& Foam::regionModels::regionFaModel::regionMesh() const
     {
         return *regionPtr;
     }
-    else if (!regionMeshPtr_.valid())
+    else if (!regionMeshPtr_)
     {
         FatalErrorInFunction
             << "Region mesh not available" << abort(FatalError);
@@ -86,7 +86,7 @@ inline Foam::faMesh& Foam::regionModels::regionFaModel::regionMesh()
     {
         return *regionPtr;
     }
-    else if (!regionMeshPtr_.valid())
+    else if (!regionMeshPtr_)
     {
         FatalErrorInFunction
             << "Region mesh not available" << abort(FatalError);

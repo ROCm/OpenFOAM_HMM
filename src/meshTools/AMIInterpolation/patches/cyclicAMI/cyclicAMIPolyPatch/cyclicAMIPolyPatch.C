@@ -290,8 +290,6 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 Foam::autoPtr<Foam::coordSystem::cylindrical>
 Foam::cyclicAMIPolyPatch::cylindricalCS() const
 {
-    autoPtr<coordSystem::cylindrical> csPtr;
-
     const label periodicID = periodicPatchID();
     if (periodicID != -1)
     {
@@ -328,10 +326,10 @@ Foam::cyclicAMIPolyPatch::cylindricalCS() const
                     << exit(FatalError);
             }
 
-            csPtr.set(new coordSystem::cylindrical(axisPoint, axis));
+            return autoPtr<coordSystem::cylindrical>::New(axisPoint, axis);
         }
     }
-    return csPtr;
+    return nullptr;
 }
 
 

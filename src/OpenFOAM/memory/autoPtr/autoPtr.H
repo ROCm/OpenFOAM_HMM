@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,13 +43,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef autoPtr_H
-#define autoPtr_H
+#ifndef Foam_autoPtr_H
+#define Foam_autoPtr_H
 
 // Transitional features/misfeatures
 #define Foam_autoPtr_copyConstruct
 #define Foam_autoPtr_castOperator
-// #define Foam_autoPtr_deprecate_setMethod
+// #define Foam_autoPtr_nodeprecate_setMethod
 
 #include "stdFoam.H"
 
@@ -283,8 +283,8 @@ public:
         //      enforced a run-time check (Fatal if pointer was already set)
         //      but this was rarely used.
         //  \deprecated(2018-02) Identical to reset().
-        #ifdef Foam_autoPtr_deprecate_setMethod
-        FOAM_DEPRECATED_FOR(2018-02, "reset() - same behaviour")
+        #ifndef Foam_autoPtr_nodeprecate_setMethod
+        FOAM_DEPRECATED_FOR(2022-01, "reset() - same behaviour")
         #endif
         void set(T* p) noexcept { reset(p); }
 };

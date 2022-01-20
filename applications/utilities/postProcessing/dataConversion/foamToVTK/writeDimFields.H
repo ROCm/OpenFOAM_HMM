@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ bool writeDimField
     const tmp<GeoField>& tfield
 )
 {
-    if (!tfield.valid())
+    if (!tfield)
     {
         return false;
     }
@@ -78,7 +78,7 @@ bool writeDimField
     const tmp<GeoField>& tfield
 )
 {
-    if (!tfield.valid())
+    if (!tfield)
     {
         return false;
     }

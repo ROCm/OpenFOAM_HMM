@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -198,7 +198,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
         Istream& is = readStream(typeName);
 
         PtrList<entry> patchEntries(is);
-        patches.setSize(patchEntries.size());
+        patches.resize(patchEntries.size());
 
         forAll(patches, patchi)
         {
@@ -225,7 +225,7 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
         patches.setSize(ppl.size());
         forAll(patches, patchi)
         {
-            patches.set(patchi, ppl[patchi].clone(*this).ptr());
+            patches.set(patchi, ppl[patchi].clone(*this));
         }
     }
 }

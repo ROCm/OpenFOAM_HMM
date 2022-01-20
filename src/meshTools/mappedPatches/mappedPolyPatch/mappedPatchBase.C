@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,32 +91,26 @@ Foam::autoPtr<Foam::fileName> Foam::mappedPatchBase::readDatabase
     const dictionary& dict
 )
 {
-    autoPtr<fileName> dbNamePtr_;
-
     if (dict.found("sampleDatabase"))
     {
-        const bool useDb = dict.get<bool>("sampleDatabase");
-        if (useDb)
+        if (dict.get<bool>("sampleDatabase"))
         {
-            dbNamePtr_.set
+            return autoPtr<fileName>::New
             (
-                new fileName
+                dict.lookupOrDefault<fileName>
                 (
-                    dict.lookupOrDefault<fileName>
-                    (
-                        "sampleDatabasePath",
-                        fileName::null
-                    )
+                    "sampleDatabasePath",
+                    fileName::null
                 )
             );
         }
     }
     else if (dict.found("sampleDatabasePath"))
     {
-        dbNamePtr_.set(new fileName(dict.get<fileName>("sampleDatabasePath")));
+        return autoPtr<fileName>::New(dict.get<fileName>("sampleDatabasePath"));
     }
 
-    return dbNamePtr_;
+    return nullptr;
 }
 
 

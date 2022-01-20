@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 
 inline const Foam::primitivePatch& Foam::AMIInterpolation::srcPatch0() const
 {
-    if (!tsrcPatch0_.valid())
+    if (!tsrcPatch0_)
     {
         FatalErrorInFunction
             << "tsrcPatch0Ptr_ not set"
@@ -42,7 +42,7 @@ inline const Foam::primitivePatch& Foam::AMIInterpolation::srcPatch0() const
 inline const Foam::primitivePatch& Foam::AMIInterpolation::tgtPatch0() const
 {
 
-    if (!ttgtPatch0_.valid())
+    if (!ttgtPatch0_)
     {
         FatalErrorInFunction
             << "ttgtPatch0Ptr_ not set"
