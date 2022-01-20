@@ -128,62 +128,62 @@ private:
         //- Edges of the patch; address into local point list;
         //  sorted with internal edges first in upper-triangular order
         //  and external edges last.
-        mutable unique_ptr<edgeList> edgesPtr_;
+        mutable std::unique_ptr<edgeList> edgesPtr_;
 
         //- Which part of edgesPtr_ is internal edges.
         mutable label nInternalEdges_;
 
         //- Boundary point labels, addressing into local point list
-        mutable unique_ptr<labelList> boundaryPointsPtr_;
+        mutable std::unique_ptr<labelList> boundaryPointsPtr_;
 
         //- Face-face addressing
-        mutable unique_ptr<labelListList> faceFacesPtr_;
+        mutable std::unique_ptr<labelListList> faceFacesPtr_;
 
         //- Edge-face addressing
-        mutable unique_ptr<labelListList> edgeFacesPtr_;
+        mutable std::unique_ptr<labelListList> edgeFacesPtr_;
 
         //- Face-edge addressing
-        mutable unique_ptr<labelListList> faceEdgesPtr_;
+        mutable std::unique_ptr<labelListList> faceEdgesPtr_;
 
         //- Point-edge addressing
-        mutable unique_ptr<labelListList> pointEdgesPtr_;
+        mutable std::unique_ptr<labelListList> pointEdgesPtr_;
 
         //- Point-face addressing
-        mutable unique_ptr<labelListList> pointFacesPtr_;
+        mutable std::unique_ptr<labelListList> pointFacesPtr_;
 
         //- Faces addressing into local point list
-        mutable unique_ptr<List<face_type>> localFacesPtr_;
+        mutable std::unique_ptr<List<face_type>> localFacesPtr_;
 
         //- Labels of mesh points
-        mutable unique_ptr<labelList> meshPointsPtr_;
+        mutable std::unique_ptr<labelList> meshPointsPtr_;
 
         //- Mesh point map. Given the global point index find its
         //- location in the patch
-        mutable unique_ptr<Map<label>> meshPointMapPtr_;
+        mutable std::unique_ptr<Map<label>> meshPointMapPtr_;
 
         //- Outside edge loops
-        mutable unique_ptr<labelListList> edgeLoopsPtr_;
+        mutable std::unique_ptr<labelListList> edgeLoopsPtr_;
 
         //- Points local to patch
-        mutable unique_ptr<Field<point_type>> localPointsPtr_;
+        mutable std::unique_ptr<Field<point_type>> localPointsPtr_;
 
         //- Local point order for most efficient search
-        mutable unique_ptr<labelList> localPointOrderPtr_;
+        mutable std::unique_ptr<labelList> localPointOrderPtr_;
 
         //- Face centres
-        mutable unique_ptr<Field<point_type>> faceCentresPtr_;
+        mutable std::unique_ptr<Field<point_type>> faceCentresPtr_;
 
         //- Face area vectors
-        mutable unique_ptr<Field<point_type>> faceAreasPtr_;
+        mutable std::unique_ptr<Field<point_type>> faceAreasPtr_;
 
         //- Mag face area
-        mutable unique_ptr<Field<scalar>> magFaceAreasPtr_;
+        mutable std::unique_ptr<Field<scalar>> magFaceAreasPtr_;
 
         //- Face unit normals
-        mutable unique_ptr<Field<point_type>> faceNormalsPtr_;
+        mutable std::unique_ptr<Field<point_type>> faceNormalsPtr_;
 
         //- Point unit normals
-        mutable unique_ptr<Field<point_type>> pointNormalsPtr_;
+        mutable std::unique_ptr<Field<point_type>> pointNormalsPtr_;
 
 
     // Private Member Functions

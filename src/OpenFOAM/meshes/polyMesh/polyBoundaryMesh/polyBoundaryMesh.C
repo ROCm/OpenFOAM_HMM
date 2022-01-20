@@ -608,19 +608,19 @@ Foam::List<Foam::labelRange> Foam::polyBoundaryMesh::patchRanges() const
 }
 
 
-Foam::label Foam::polyBoundaryMesh::start() const
+Foam::label Foam::polyBoundaryMesh::start() const noexcept
 {
     return mesh_.nInternalFaces();
 }
 
 
-Foam::label Foam::polyBoundaryMesh::nFaces() const
+Foam::label Foam::polyBoundaryMesh::nFaces() const noexcept
 {
     return mesh_.nBoundaryFaces();
 }
 
 
-Foam::labelRange Foam::polyBoundaryMesh::range() const
+Foam::labelRange Foam::polyBoundaryMesh::range() const noexcept
 {
     return labelRange(mesh_.nInternalFaces(), mesh_.nBoundaryFaces());
 }

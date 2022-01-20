@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyBoundaryMesh_H
-#define polyBoundaryMesh_H
+#ifndef Foam_polyBoundaryMesh_H
+#define Foam_polyBoundaryMesh_H
 
 #include "polyPatchList.H"
 #include "regIOobject.H"
@@ -188,17 +188,17 @@ public:
         //- Return a list of patch ranges
         List<labelRange> patchRanges() const;
 
-        //- The start label of the boundary faces in the polyMesh face list
-        //  Same as mesh.nInternalFaces()
-        label start() const;
+        //- The start label of boundary faces in the polyMesh face list
+        //  Same as polyMesh::nInternalFaces()
+        label start() const noexcept;
 
         //- The number of boundary faces in the underlying mesh
-        //  Same as mesh.nBoundaryFaces()
-        label nFaces() const;
+        //  Same as polyMesh::nBoundaryFaces()
+        label nFaces() const noexcept;
 
         //- The face range for all boundary faces
         //  Spans [nInternalFaces, nFaces) of the underlying mesh
-        labelRange range() const;
+        labelRange range() const noexcept;
 
         //- Return the range used for boundary faces on patchi.
         //  Always returns an empty range for negative values of patchi,
