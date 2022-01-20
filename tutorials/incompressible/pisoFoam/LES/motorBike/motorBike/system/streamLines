@@ -13,7 +13,7 @@ streamLines
     // Time control etc
     ${_visualization};
 
-    setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot; //csv; //ensight;
+    setFormat       vtk; // csv | raw | gnuplot | ensight | xmgr
 
     // Velocity field to use for tracking.
     U               U;

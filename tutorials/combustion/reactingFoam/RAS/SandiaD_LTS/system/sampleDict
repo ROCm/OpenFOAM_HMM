@@ -16,14 +16,13 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Set output format : choice of
-//      xmgr
-//      jplot
-//      gnuplot
 //      raw
+//      gnuplot
+//      xmgr
 setFormat raw;
 
 // Surface output format. Choice of
-//      null        : suppress output
+//      none        : suppress output
 //      foam        : separate points, faces and values file
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.

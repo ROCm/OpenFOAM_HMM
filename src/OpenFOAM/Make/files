@@ -819,7 +819,6 @@ writers = graph/writers
 $(writers)/rawGraph/rawGraph.C
 $(writers)/gnuplotGraph/gnuplotGraph.C
 $(writers)/xmgrGraph/xmgrGraph.C
-$(writers)/jplotGraph/jplotGraph.C
 
 meshes/data/data.C
 

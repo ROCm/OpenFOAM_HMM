@@ -112,7 +112,6 @@ Usage
         csv
         ensight
         gnuplot
-        jplot
         nastran
         raw
         vtk

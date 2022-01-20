@@ -17,7 +17,7 @@ streamLines
     writeControl    writeTime;
     // writeInterval 10;
 
-    setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot; //csv; //ensight;
+    setFormat       vtk; // csv | raw | gnuplot | ensight
 
     // Tracked forwards (+U) or backwards (-U)
     trackForward    true;

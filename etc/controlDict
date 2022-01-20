@@ -656,7 +656,6 @@ DebugSwitches
     isoSurfaceCell      0;
     isoSurfacePoint     0;
     isoSurfaceTopo      0;
-    jplot               0;
     jumpCyclic          0;
     kEpsilon            0;
     kOmega              0;

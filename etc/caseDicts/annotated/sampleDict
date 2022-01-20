@@ -16,7 +16,6 @@ FoamFile
 
 // Set output format : choice of
 //      xmgr
-//      jplot
 //      gnuplot
 //      raw
 //      vtk
@@ -25,7 +24,7 @@ FoamFile
 setFormat raw;
 
 // Surface output format. Choice of
-//      null        : suppress output
+//      none        : suppress output
 //      ensight     : Ensight Gold format, one field per case file
 //      foamFile    : separate points, faces and values file
 //      dx          : DX scalar or vector format
