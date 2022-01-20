@@ -1,11 +1,12 @@
 #include "label.H"
 #include "autoPtr.H"
-#include "writer.H"
 
 namespace Foam
 {
+    // Forward Declarations
     class polyMesh;
     class pointSet;
+    template<class T> class writer;
     class surfaceWriter;
 
     template<class PatchType>

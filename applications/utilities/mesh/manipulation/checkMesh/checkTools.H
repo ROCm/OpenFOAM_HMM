@@ -1,15 +1,16 @@
 #include "scalar.H"
 #include "indirectPrimitivePatch.H"
-#include "writer.H"
 
 namespace Foam
 {
+    // Forward Declarations
     class polyMesh;
     class pointSet;
     class faceSet;
     class cellSet;
     class fileName;
     class polyMesh;
+    template<class T> class writer;
     class surfaceWriter;
 
     void printMeshStats(const polyMesh& mesh, const bool allTopology);

@@ -56,19 +56,19 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef searchableSurfaces_H
-#define searchableSurfaces_H
+#ifndef Foam_searchableSurfaces_H
+#define Foam_searchableSurfaces_H
 
 #include "searchableSurface.H"
 #include "labelPair.H"
-#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
+template<class T> class writer;
 class triSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -292,8 +292,6 @@ public:
 
         //- Return reference to searchableSurface by name.
         searchableSurface& operator[](const word&);
-
-
 };
 
 

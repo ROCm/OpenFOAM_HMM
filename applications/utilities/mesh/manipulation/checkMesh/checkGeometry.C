@@ -11,8 +11,8 @@
 #include "checkTools.H"
 #include "functionObject.H"
 
+#include "vtkSetWriter.H"
 #include "vtkSurfaceWriter.H"
-#include "writer.H"
 
 #include "cyclicACMIPolyPatch.H"
 #include "Time.H"

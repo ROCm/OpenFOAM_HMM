@@ -32,6 +32,7 @@ License
 #include "Time.H"
 #include "DynamicField.H"
 #include "PatchTools.H"
+#include "writer.H"
 #include "triSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,12 +1,13 @@
 #include "label.H"
 #include "HashSet.H"
 #include "labelVector.H"
-#include "writer.H"
 
 namespace Foam
 {
+    // Forward Declarations
     class polyMesh;
     class wedgePolyPatch;
+    template<class T> class writer;
     class surfaceWriter;
 
     label findOppositeWedge(const polyMesh&, const wedgePolyPatch&);
