@@ -233,7 +233,8 @@ class sampledSurfaces
         bool performAction(unsigned request);
 
         //- Count selected/sampled fields per surface
-        void countFields();
+        //  Returns empty IOobjectList if loadFromFiles_ is not active
+        IOobjectList preCheckFields();
 
         //- Write sampled fieldName on surface and on outputDir path
         template<class Type>
@@ -261,6 +262,7 @@ class sampledSurfaces
         );
 
         //- Sample and write all applicable sampled fields
+        //  Only uses IOobjectList when loadFromFiles_ is active
         template<class GeoField>
         void performAction
         (

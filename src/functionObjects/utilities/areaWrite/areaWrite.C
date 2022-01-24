@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "mapPolyMesh.H"
 #include "areaFields.H"
 #include "HashOps.H"
+#include "ListOps.H"
 #include "Time.H"
 #include "UIndirectList.H"
 #include "addToRunTimeSelectionTable.H"
@@ -273,7 +274,7 @@ bool Foam::areaWrite::write()
         // Detect missing fields
         forAll(fieldSelection_, i)
         {
-            if (findStrings(fieldSelection_[i], allFields).empty())
+            if (!ListOps::found(allFields, fieldSelection_[i]))
             {
                 missed.append(i);
             }

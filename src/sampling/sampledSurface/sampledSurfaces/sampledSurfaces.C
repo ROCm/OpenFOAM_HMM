@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,15 +95,17 @@ bool Foam::sampledSurfaces::removeRegistrySurface
 }
 
 
-void Foam::sampledSurfaces::countFields()
+Foam::IOobjectList Foam::sampledSurfaces::preCheckFields()
 {
     wordList allFields;    // Just needed for warnings
     HashTable<wordHashSet> selected;
 
+    IOobjectList objects(0);
+
     if (loadFromFiles_)
     {
         // Check files for a particular time
-        IOobjectList objects(obr_, obr_.time().timeName());
+        objects = IOobjectList(obr_, obr_.time().timeName());
 
         allFields = objects.names();
         selected = objects.classes(fieldSelection_);
@@ -127,7 +129,7 @@ void Foam::sampledSurfaces::countFields()
     // Detect missing fields
     forAll(fieldSelection_, i)
     {
-        if (findStrings(fieldSelection_[i], allFields).empty())
+        if (!ListOps::found(allFields, fieldSelection_[i]))
         {
             missed.append(i);
         }
@@ -183,6 +185,8 @@ void Foam::sampledSurfaces::countFields()
             )
         );
     }
+
+    return objects;
 }
 
 
@@ -543,10 +547,11 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     }
 
 
-    // Determine the per-surface number of fields, including Ids etc.
-    // Only seems to be needed for VTK legacy
-    countFields();
+    // Determine availability of fields.
+    // Count per-surface number of fields, including Ids etc
+    // which only seems to be needed for VTK legacy
 
+    IOobjectList objects = preCheckFields();
 
     // Update writers
 
@@ -595,8 +600,6 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     }
 
     // Sample fields
-
-    const IOobjectList objects(obr_, obr_.time().timeName());
 
     performAction<volScalarField>(objects, request);
     performAction<volVectorField>(objects, request);
