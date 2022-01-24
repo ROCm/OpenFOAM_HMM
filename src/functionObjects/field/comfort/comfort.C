@@ -99,7 +99,7 @@ Foam::dimensionedScalar Foam::functionObjects::comfort::Trad() const
             << "The calculated mean wall radiation temperature is out of the\n"
             << "bounds specified in EN ISO 7730:2005\n"
             << "Valid range is 10 degC < T < 40 degC\n"
-            << "The actual value is: " << Trad - 273.15 << nl << endl;
+            << "The actual value is: " << (Trad.value() - 273.15) << nl << endl;
     }
 
     return Trad;

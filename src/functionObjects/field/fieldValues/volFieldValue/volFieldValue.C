@@ -279,9 +279,9 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
         {
             Info<< flatOutput(weightFieldNames_) << nl;
         }
-    }
 
-    Info<< nl << endl;
+        Info<< nl << endl;
+    }
 
     return true;
 }
