@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef char_H
-#define char_H
+#ifndef Foam_primitives_char_H
+#define Foam_primitives_char_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -111,13 +111,13 @@ public:
 
     // Member Functions
 
-        //- Read access to primitive value
+        //- Return the value
         operator char() const noexcept
         {
             return p_;
         }
 
-        //- Write access to primitive value
+        //- Access the value
         operator char&() noexcept
         {
             return p_;

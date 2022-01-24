@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef int_H
-#define int_H
+#ifndef Foam_primitives_int_H
+#define Foam_primitives_int_H
 
 #include "int16.H"
 #include "int32.H"

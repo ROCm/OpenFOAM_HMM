@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelListIOList_H
-#define labelListIOList_H
+#ifndef Foam_labelListIOList_H
+#define Foam_labelListIOList_H
 
 #include "labelList.H"
 #include "CompactIOList.H"

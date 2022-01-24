@@ -117,13 +117,13 @@ public:
 
     // Member Functions
 
-        //- Access to the value
+        //- Return the value
         operator bool() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
+        //- Access the value
         operator bool&() noexcept
         {
             return p_;

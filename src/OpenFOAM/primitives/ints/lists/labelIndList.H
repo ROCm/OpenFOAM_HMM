@@ -37,8 +37,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIndList_H
-#define labelIndList_H
+#ifndef Foam_labelIndList_H
+#define Foam_labelIndList_H
 
 // Include all normal list typedefs as well
 #include "labelList.H"

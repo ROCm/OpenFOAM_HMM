@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uint32_H
-#define uint32_H
+#ifndef Foam_primitives_uint32_H
+#define Foam_primitives_uint32_H
 
 #include <cstdint>
 #include <climits>
@@ -169,13 +169,13 @@ public:
 
     // Member Functions
 
-        //- Access to the value
+        //- Return the value
         operator uint32_t() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
+        //- Access the value
         operator uint32_t&() noexcept
         {
             return p_;

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uint16_H
-#define uint16_H
+#ifndef Foam_primitives_uint16_H
+#define Foam_primitives_uint16_H
 
 #include <cstdint>
 #include "word.H"

@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef primitives_uint8_H
-#define primitives_uint8_H
+#ifndef Foam_primitives_uint8_H
+#define Foam_primitives_uint8_H
 
 #include <cstdint>
 #include <climits>
@@ -134,14 +134,14 @@ public:
 
     // Member Functions
 
-        //- Access to the value
-        operator uint8_t() const
+        //- Return the value
+        operator uint8_t() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
-        operator uint8_t&()
+        //- Access the value
+        operator uint8_t&() noexcept
         {
             return p_;
         }

@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelFwd_H
-#define labelFwd_H
+#ifndef Foam_primitives_labelFwd_H
+#define Foam_primitives_labelFwd_H
 
 #include <cstdint>
 

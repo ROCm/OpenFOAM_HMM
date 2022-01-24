@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uLabel_H
-#define uLabel_H
+#ifndef Foam_primitives_uLabel_H
+#define Foam_primitives_uLabel_H
 
 #include "uint.H"
 #include "labelFwd.H"
@@ -109,14 +109,17 @@ uLabel pow(uLabel a, uLabel b);
 uLabel factorial(uLabel n);
 
 
-inline uLabel& setComponent(uLabel& l, const direction)
+//- Non-const access to unsigned-type (has no components)
+inline uLabel& setComponent(uLabel& val, const direction) noexcept
 {
-    return l;
+    return val;
 }
 
-inline uLabel component(const uLabel l, const direction)
+
+//- Return unsigned value (has no components)
+inline constexpr uLabel component(const uLabel val, const direction) noexcept
 {
-    return l;
+    return val;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

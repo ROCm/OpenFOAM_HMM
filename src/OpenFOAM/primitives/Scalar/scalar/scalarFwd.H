@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarFwd_H
-#define scalarFwd_H
+#ifndef Foam_scalarFwd_H
+#define Foam_scalarFwd_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

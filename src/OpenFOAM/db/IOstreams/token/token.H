@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef token_H
-#define token_H
+#ifndef Foam_token_H
+#define Foam_token_H
 
 #include "label.H"
 #include "uLabel.H"

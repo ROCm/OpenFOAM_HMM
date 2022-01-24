@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complex_H
-#define complex_H
+#ifndef Foam_primitives_complex_H
+#define Foam_primitives_complex_H
 
 #include "scalar.H"
 #include "word.H"
@@ -307,14 +307,14 @@ public:
 
     // Member Functions
 
-        //- Access to the value
-        operator complex() const
+        //- Return the value
+        operator complex() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
-        operator complex&()
+        //- Access the value
+        operator complex&() noexcept
         {
             return p_;
         }

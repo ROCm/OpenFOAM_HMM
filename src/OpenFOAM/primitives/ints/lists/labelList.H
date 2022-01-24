@@ -38,8 +38,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelList_H
-#define labelList_H
+#ifndef Foam_labelList_H
+#define Foam_labelList_H
 
 #include "label.H"
 #include "List.H"

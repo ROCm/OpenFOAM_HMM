@@ -118,13 +118,13 @@ public:
 
     // Member Functions
 
-        //- Access to the value
+        //- Return the value
         operator Scalar() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
+        //- Access the value
         operator Scalar&() noexcept
         {
             return p_;
@@ -215,15 +215,17 @@ besselFunc2(jn)
 besselFunc2(yn)
 
 
-inline Scalar& setComponent(Scalar& s, const direction)
+//- Non-const access to scalar-type (has no components)
+inline Scalar& setComponent(Scalar& val, const direction) noexcept
 {
-    return s;
+    return val;
 }
 
 
-inline Scalar component(const Scalar s, const direction)
+//- Return scalar value (has no components)
+inline constexpr Scalar component(const Scalar val, const direction) noexcept
 {
-    return s;
+    return val;
 }
 
 

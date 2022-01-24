@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uint_H
-#define uint_H
+#ifndef Foam_primitives_uint_H
+#define Foam_primitives_uint_H
 
 #include "uint8.H"
 #include "uint16.H"

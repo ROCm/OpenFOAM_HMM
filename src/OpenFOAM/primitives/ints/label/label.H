@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef label_H
-#define label_H
+#ifndef Foam_primitives_label_H
+#define Foam_primitives_label_H
 
 #include "int.H"
 #include "labelFwd.H"
@@ -119,15 +119,16 @@ label pow(label a, label b);
 //- Evaluate n! : 0 < n <= 12
 label factorial(label n);
 
-
-inline label& setComponent(label& l, const direction)
+//- Non-const access to integer-type (has no components)
+inline label& setComponent(label& val, const direction) noexcept
 {
-    return l;
+    return val;
 }
 
-inline label component(const label l, const direction)
+//- Return integer value (has no components)
+inline constexpr label component(const label val, const direction) noexcept
 {
-    return l;
+    return val;
 }
 
 

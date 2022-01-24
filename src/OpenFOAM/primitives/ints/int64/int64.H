@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef int64_H
-#define int64_H
+#ifndef Foam_primitives_int64_H
+#define Foam_primitives_int64_H
 
 #include <cstdint>
 #include <climits>
@@ -182,13 +182,13 @@ public:
 
     // Member Functions
 
-        //- Access to the value
+        //- Return the value
         operator int64_t() const noexcept
         {
             return p_;
         }
 
-        //- Access to the value
+        //- Access the value
         operator int64_t&() noexcept
         {
             return p_;
