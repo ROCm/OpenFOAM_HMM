@@ -59,10 +59,9 @@ triSurface/patches/surfacePatch.C
 
 writers = writers
 
-$(writers)/surfaceWriter.C
-$(writers)/caching/surfaceWriterCaching.C
+$(writers)/common/surfaceWriter.C
 $(writers)/abaqus/abaqusSurfaceWriter.C
-$(writers)/boundaryData/boundaryDataSurfaceWriter.C
+$(writers)/boundary/boundaryDataSurfaceWriter.C
 $(writers)/ensight/ensightSurfaceWriter.C
 $(writers)/foam/foamSurfaceWriter.C
 $(writers)/nastran/nastranSurfaceWriter.C

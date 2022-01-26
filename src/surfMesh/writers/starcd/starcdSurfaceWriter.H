@@ -76,8 +76,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef starcdSurfaceWriter_H
-#define starcdSurfaceWriter_H
+#ifndef Foam_surfaceWriters_starcdWriter_H
+#define Foam_surfaceWriters_starcdWriter_H
 
 #include "surfaceWriter.H"
 

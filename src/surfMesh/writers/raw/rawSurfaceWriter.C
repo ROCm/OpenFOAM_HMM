@@ -75,8 +75,8 @@ Foam::surfaceWriters::rawWriter::rawWriter
     surfaceWriter(options),
     streamOpt_
     (
-        IOstream::ASCII,
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::ASCII,
+        IOstreamOption::compressionEnum("compression", options)
     ),
     precision_
     (

@@ -74,8 +74,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkSurfaceWriter_H
-#define vtkSurfaceWriter_H
+#ifndef Foam_surfaceWriters_vtkWriter_H
+#define Foam_surfaceWriters_vtkWriter_H
 
 #include "surfaceWriter.H"
 

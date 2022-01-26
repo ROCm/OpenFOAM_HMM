@@ -82,8 +82,8 @@ Foam::surfaceWriters::starcdWriter::starcdWriter
     surfaceWriter(options),
     streamOpt_
     (
-        IOstream::ASCII,
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::ASCII,
+        IOstreamOption::compressionEnum("compression", options)
     ),
     fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
@@ -273,6 +273,8 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
     return outputFile;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::starcdWriter);

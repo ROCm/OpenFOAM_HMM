@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ensightCase::options::options(IOstream::streamFormat format)
+Foam::ensightCase::options::options(IOstreamOption::streamFormat format)
 :
     format_(format),
     overwrite_(false),
@@ -45,18 +45,6 @@ Foam::ensightCase::options::options(IOstream::streamFormat format)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::IOstream::streamFormat Foam::ensightCase::options::format() const
-{
-    return format_;
-}
-
-
-const Foam::word& Foam::ensightCase::options::mask() const
-{
-    return mask_;
-}
-
-
 Foam::word Foam::ensightCase::options::padded(const label i) const
 {
     // As per word::printf(), but with fixed length
@@ -67,12 +55,6 @@ Foam::word Foam::ensightCase::options::padded(const label i) const
 
     // No stripping required
     return word(buf, false);
-}
-
-
-Foam::label Foam::ensightCase::options::width() const
-{
-    return width_;
 }
 
 
@@ -89,42 +71,6 @@ void Foam::ensightCase::options::width(const label n)
 
     // Appropriate printf format
     printf_ = "%0" + std::to_string(n) + "d";
-}
-
-
-bool Foam::ensightCase::options::overwrite() const
-{
-    return overwrite_;
-}
-
-
-void Foam::ensightCase::options::overwrite(bool b)
-{
-    overwrite_ = b;
-}
-
-
-bool Foam::ensightCase::options::nodeValues() const
-{
-    return nodeValues_;
-}
-
-
-void Foam::ensightCase::options::nodeValues(bool b)
-{
-    nodeValues_ = b;
-}
-
-
-bool Foam::ensightCase::options::separateCloud() const
-{
-    return separateCloud_;
-}
-
-
-void Foam::ensightCase::options::separateCloud(bool b)
-{
-    separateCloud_ = b;
 }
 
 

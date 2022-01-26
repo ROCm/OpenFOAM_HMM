@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,132 +50,12 @@ namespace surfaceWriters
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-void Foam::surfaceWriters::ensightWriter::printTimeset
-(
-    OSstream& os,
-    const label ts,
-    const scalar timeValue
-)
-{
-    os
-        << "time set:               " << ts << nl
-        << "number of steps:        " << 1 << nl;
-
-    // Single value - starts at index 0
-    os  << "filename start number:  0" << nl
-        << "filename increment:     1" << nl
-        << "time values:" << nl;
-
-    os  << "    " << timeValue
-        << nl << nl;
-}
-
-
-void Foam::surfaceWriters::ensightWriter::printTimeset
-(
-    OSstream& os,
-    const label ts,
-    const UList<scalar>& values
-)
-{
-    label pos_;
-
-    os
-        << "time set:               " << ts << nl
-        << "number of steps:        " << values.size() << nl;
-
-    // Assume contiguous numbering - starts at index 0
-    os  << "filename start number:  0" << nl
-        << "filename increment:     1" << nl;
-
-
-    os  << "time values:" << nl;
-    pos_ = 0;
-    for (const scalar& val : values)
-    {
-        if (pos_ == 6)
-        {
-            os  << nl;
-            pos_ = 0;
-        }
-        ++pos_;
-
-        os  << ' ' << setf(ios_base::right) << setw(12) << val;
-    }
-    os  << nl << nl;
-}
-
-
-void Foam::surfaceWriters::ensightWriter::printTimeset
-(
-    OSstream& os,
-    const label ts,
-    const UList<scalar>& values,
-    const bitSet& indices
-)
-{
-    label pos_;
-
-    // Check if continuous numbering can be used
-    if
-    (
-        values.empty()
-     || (indices.size() == values.size() && indices.all())
-    )
-    {
-        // Can simply emit as 0-based with increment
-        printTimeset(os, ts, values);
-        return;
-    }
-
-
-    // Generate time set
-    os
-        << "time set:               " << ts << nl
-        << "number of steps:        " << indices.count() << nl;
-
-
-    os  << "filename numbers:" << nl;
-    pos_ = 0;
-    for (const label& idx : indices)
-    {
-        if (pos_ == 6)
-        {
-            os  << nl;
-            pos_ = 0;
-        }
-        ++pos_;
-
-        os  << ' ' << setf(ios_base::right) << setw(8) << idx;
-    }
-    os  << nl;
-
-
-    os  << "time values:" << nl;
-    pos_ = 0;
-    for (const label& idx : indices)
-    {
-        if (pos_ == 6)
-        {
-            os  << nl;
-            pos_ = 0;
-        }
-        ++pos_;
-
-        os  << ' ' << setf(ios_base::right) << setw(12) << values[idx];
-    }
-    os  << nl << nl;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfaceWriters::ensightWriter::ensightWriter()
 :
     surfaceWriter(),
-    writeFormat_(IOstream::ASCII),
+    writeFormat_(IOstreamOption::ASCII),
     collateTimes_(true),
     caching_("fieldsDict")  // Historic name
 {}
@@ -189,7 +69,7 @@ Foam::surfaceWriters::ensightWriter::ensightWriter
     surfaceWriter(options),
     writeFormat_
     (
-        IOstreamOption::formatEnum("format", options, IOstream::ASCII)
+        IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII)
     ),
     collateTimes_(options.getOrDefault("collateTimes", true)),
     caching_("fieldsDict")  // Historic name

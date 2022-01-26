@@ -183,8 +183,8 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
 
     writeOpts_.ascii
     (
-        IOstream::ASCII
-     == IOstream::formatEnum("format", dict, IOstream::BINARY)
+        IOstreamOption::ASCII
+     == IOstreamOption::formatEnum("format", dict, IOstreamOption::BINARY)
     );
 
     writeOpts_.legacy(dict.getOrDefault("legacy", false));

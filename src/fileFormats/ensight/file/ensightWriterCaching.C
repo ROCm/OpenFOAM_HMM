@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceWriterCaching.H"
+#include "ensightWriterCaching.H"
 #include "ListOps.H"
 #include "Fstream.H"
 
@@ -67,7 +67,7 @@ static label findTimeIndex(const UList<scalar>& list, const scalar val)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceWriters::writerCaching::writerCaching(const word& cacheFileName)
+Foam::ensightOutput::writerCaching::writerCaching(const word& cacheFileName)
 :
     dictName_(cacheFileName)
 {}
@@ -75,7 +75,7 @@ Foam::surfaceWriters::writerCaching::writerCaching(const word& cacheFileName)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::dictionary& Foam::surfaceWriters::writerCaching::fieldsDict() const
+const Foam::dictionary& Foam::ensightOutput::writerCaching::fieldsDict() const
 {
     const dictionary* dictptr = cache_.findDict("fields", keyType::LITERAL);
 
@@ -88,7 +88,7 @@ const Foam::dictionary& Foam::surfaceWriters::writerCaching::fieldsDict() const
 }
 
 
-Foam::dictionary& Foam::surfaceWriters::writerCaching::fieldDict
+Foam::dictionary& Foam::ensightOutput::writerCaching::fieldDict
 (
     const word& fieldName
 )
@@ -100,7 +100,7 @@ Foam::dictionary& Foam::surfaceWriters::writerCaching::fieldDict
 }
 
 
-bool Foam::surfaceWriters::writerCaching::remove(const word& fieldName)
+bool Foam::ensightOutput::writerCaching::remove(const word& fieldName)
 {
     dictionary* dictptr = cache_.findDict("fields", keyType::LITERAL);
 
@@ -113,7 +113,7 @@ bool Foam::surfaceWriters::writerCaching::remove(const word& fieldName)
 }
 
 
-void Foam::surfaceWriters::writerCaching::clear()
+void Foam::ensightOutput::writerCaching::clear()
 {
     times_.clear();
     geoms_.clear();
@@ -123,7 +123,7 @@ void Foam::surfaceWriters::writerCaching::clear()
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::surfaceWriters::writerCaching::readPreviousTimes
+Foam::label Foam::ensightOutput::writerCaching::readPreviousTimes
 (
     const fileName& dictFile,
     const scalar timeValue
@@ -184,9 +184,40 @@ Foam::label Foam::surfaceWriters::writerCaching::readPreviousTimes
 }
 
 
+Foam::label Foam::ensightOutput::writerCaching::latestTimeIndex() const
+{
+    return max(0, times_.size()-1);
+}
+
+Foam::label Foam::ensightOutput::writerCaching::latestGeomIndex() const
+{
+    return max(0, geoms_.find_last());
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+int Foam::ensightOutput::writerCaching::geometryTimeset() const
+{
+    if (geoms_.count() <= 1)
+    {
+        // Static
+        return 0;
+    }
+    if (geoms_.size() == times_.size() && geoms_.all())
+    {
+        // Geometry changing is identical to fields changing
+        return 1;
+    }
+
+    // Geometry changing differently from fields
+    return 2;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::surfaceWriters::writerCaching::update
+bool Foam::ensightOutput::writerCaching::update
 (
     const fileName& baseDir,
     const scalar timeValue,
@@ -262,7 +293,7 @@ bool Foam::surfaceWriters::writerCaching::update
     if (stateChanged)
     {
         OFstream os(dictFile);
-        os << "// State file for surface writer output" << nl << nl;
+        os << "// State file for writer output" << nl << nl;
         cache_.write(os, false);
 
         os << nl << "// End" << nl;

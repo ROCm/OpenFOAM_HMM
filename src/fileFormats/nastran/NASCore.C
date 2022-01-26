@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,21 @@ Foam::fileFormats::NASCore::loadFormatNames
     { loadFormat::PLOAD2, "PLOAD2" },
     { loadFormat::PLOAD4, "PLOAD4" },
 });
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+template<class Type>
+static inline void putValue(Ostream& os, const Type& value, const int width)
+{
+    if (width) os << setw(width);
+    os  << value;
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -133,10 +148,10 @@ void Foam::fileFormats::NASCore::setPrecision
     const fieldFormat format
 )
 {
-    os.setf(ios_base::scientific);
+    os.setf(std::ios_base::scientific);
 
     // Capitalise the E marker
-    os.setf(ios_base::uppercase);
+    os.setf(std::ios_base::uppercase);
 
     const label offset = 7;
 
@@ -168,7 +183,7 @@ Foam::Ostream& Foam::fileFormats::NASCore::writeKeyword
     const fieldFormat format
 )
 {
-    os.setf(ios_base::left);
+    os.setf(std::ios_base::left);
 
     switch (format)
     {
@@ -177,13 +192,11 @@ Foam::Ostream& Foam::fileFormats::NASCore::writeKeyword
             os  << setw(8) << keyword;
             break;
         }
-
         case fieldFormat::LONG :
         {
             os  << setw(8) << word(keyword + '*');
             break;
         }
-
         case fieldFormat::FREE :
         {
             os  << keyword;
@@ -191,9 +204,75 @@ Foam::Ostream& Foam::fileFormats::NASCore::writeKeyword
         }
     }
 
-    os.unsetf(ios_base::left);
+    os.unsetf(std::ios_base::left);
 
     return os;
+}
+
+
+void Foam::fileFormats::NASCore::writeCoord
+(
+    Ostream& os,
+    const point& p,
+    const label pointId,  // zero-based
+    const fieldFormat format
+)
+{
+    // Field width (SHORT, LONG formats)
+    const int width =
+    (
+        format == fieldFormat::SHORT ? 8
+      : format == fieldFormat::LONG ? 16
+      : 0
+    );
+
+    // Separator char (FREE format)
+    const char sep = (format == fieldFormat::FREE ? ',' : '\0');
+
+
+    // Fixed short/long formats:
+    // 1 GRID
+    // 2 ID   : point ID - requires starting index of 1
+    // 3 CP   : coordinate system ID                (blank)
+    // 4 X1   : point x coordinate
+    // 5 X2   : point x coordinate
+    // 6 X3   : point x coordinate
+    // 7 CD   : coordinate system for displacements (blank)
+    // 8 PS   : single point constraints            (blank)
+    // 9 SEID : super-element ID
+
+    writeKeyword(os, "GRID", format);
+    if (sep) os << sep;
+
+    os.setf(std::ios_base::right);
+
+    // Point ID (from 0-based to 1-based)
+    putValue(os, (pointId+1), width);
+    if (sep) os << sep;
+
+    // Coordinate system ID (blank)
+    putValue(os, "", width);
+    if (sep) os << sep;
+
+    putValue(os, p.x(), width);
+    if (sep) os << sep;
+
+    putValue(os, p.y(), width);
+    if (sep) os << sep;
+
+    if (format == fieldFormat::LONG)
+    {
+        // Continuation
+        os.unsetf(std::ios_base::right);
+        os << nl;
+        writeKeyword(os, "", format);
+        os.setf(std::ios_base::right);
+    }
+
+    putValue(os, p.z(), width);
+    os << nl;
+
+    os.unsetf(std::ios_base::right);
 }
 
 

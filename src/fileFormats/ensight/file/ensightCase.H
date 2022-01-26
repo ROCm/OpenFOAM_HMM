@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,15 +38,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightCase_H
-#define ensightCase_H
+#ifndef Foam_ensightCase_H
+#define Foam_ensightCase_H
 
 #include "autoPtr.H"
 #include "HashSet.H"
 #include "InfoProxy.H"
 #include "Map.H"
 #include "HashSet.H"
-#include "OSspecific.H"
 #include "Pstream.H"
 #include "ensightGeoFile.H"
 #include <memory>
@@ -57,8 +56,10 @@ namespace Foam
 {
 
 // Forward Declarations
+class bitSet;
 class ensightCase;
 class instant;
+class OSstream;
 class Time;
 
 /*---------------------------------------------------------------------------*\
@@ -217,7 +218,7 @@ public:
         (
             const fileName& ensightDir,
             const word& caseName,
-            const IOstream::streamFormat format = IOstream::BINARY
+            const IOstreamOption::streamFormat format = IOstreamOption::BINARY
         );
 
 
@@ -233,10 +234,10 @@ public:
         inline const ensightCase::options& option() const;
 
         //- The output file format (ascii/binary)
-        inline IOstream::streamFormat format() const;
+        inline IOstreamOption::streamFormat format() const;
 
         //- The nominal path to the case file
-        inline const fileName& path() const;
+        inline const fileName& path() const noexcept;
 
         //- The output '*' mask
         inline const word& mask() const;
@@ -322,8 +323,59 @@ public:
 
         //- Print some general information.
         Ostream& printInfo(Ostream& os) const;
+
+
+    // Output Helpers
+
+        //- Print time-set for ensight case file with a single time
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const scalar timeValue
+        );
+
+        //- Print time-set for ensight case file, with N times and 0-based
+        //- file numbering
+        //
+        //  \verbatim
+        //  TIME
+        //  time set: ts
+        //  number of steps: ns
+        //  filename start number: 0
+        //  filename increment: 1
+        //  time values: time_1 time_2 ... time_ns
+        //  \endverbatim
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const UList<scalar>& times
+        );
+
+        //- Print time-set for ensight case file, with N times, 0-based
+        //- file numbering but perhaps non-contiguous
+        //
+        //  \verbatim
+        //  TIME
+        //  time set: ts
+        //  number of steps: ns
+        //  filename numbers: idx_1 idx_2 ... idx_ns
+        //  time values: time_1 time_2 ... time_ns
+        //  \endverbatim
+        static void printTimeset
+        (
+            OSstream& os,
+            const label ts,
+            const UList<scalar>& times,
+            const bitSet& indices
+        );
 };
 
+
+/*---------------------------------------------------------------------------*\
+                    Class ensightCase::options Declaration
+\*---------------------------------------------------------------------------*/
 
 //- Configuration options for the ensightCase
 class ensightCase::options
@@ -331,7 +383,7 @@ class ensightCase::options
     // Private Data
 
         //- Ascii/Binary file output
-        IOstream::streamFormat format_;
+        IOstreamOption::streamFormat format_;
 
         //- Remove existing directory and sub-directories on creation
         bool overwrite_;
@@ -357,7 +409,7 @@ public:
     // Constructors
 
         //- Construct with the specified format (default is binary)
-        options(IOstream::streamFormat format = IOstream::BINARY);
+        options(IOstreamOption::streamFormat format = IOstreamOption::BINARY);
 
 
     // Member Functions
@@ -365,22 +417,22 @@ public:
     // Access
 
         //- Ascii/Binary file output
-        IOstream::streamFormat format() const;
+        IOstreamOption::streamFormat format() const noexcept { return format_; }
 
         //- The '*' mask appropriate for sub-directories
-        const word& mask() const;
+        const word& mask() const noexcept { return mask_; }
 
         //- Consistent zero-padded integer value
         word padded(const label i) const;
 
         //- Return current width of mask and padded.
-        label width() const;
+        label width() const noexcept { return width_; }
 
         //- Remove existing directory and sub-directories on creation
-        bool overwrite() const;
+        bool overwrite() const noexcept { return overwrite_; }
 
         //- Write clouds into their own directory instead in "data" directory
-        bool separateCloud() const;
+        bool separateCloud() const noexcept { return separateCloud_; }
 
 
     // Edit
@@ -390,22 +442,22 @@ public:
         void width(const label i);
 
         //- Remove existing directory and sub-directories on creation
-        void overwrite(bool);
+        void overwrite(bool on) noexcept { overwrite_ = on; }
 
         //- Write clouds into their own directory instead in "data" directory
-        void separateCloud(bool);
+        void separateCloud(bool on) noexcept { separateCloud_ = on; }
 
 
     // Housekeeping
 
-        //- Force use of values per node instead of per element
-        bool nodeValues() const;
+        //- Forced use of values per node instead of per element
+        bool nodeValues() const noexcept { return nodeValues_; }
 
         //- Force use of values per node instead of per element
         //  Deprecated(2020-02) - The newData() method with a second parameter
         //  is more flexible.
         //  \deprecated(2020-02) - newData() with second parameter
-        void nodeValues(bool);
+        void nodeValues(bool on) noexcept { nodeValues_ = on; }
 };
 
 

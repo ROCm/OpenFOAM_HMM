@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,30 +25,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-int Foam::surfaceWriters::ensightWriter::geometryTimeset() const
-{
-    const scalarList& times = caching_.times();
-    const bitSet& geoms = caching_.geometries();
-
-    if (geoms.count() <= 1)
-    {
-        // Static
-        return 0;
-    }
-
-    if (geoms.size() == times.size() && geoms.all())
-    {
-        // Geometry changing is the same as fields changing
-        return 1;
-    }
-
-    // Geometry changing differently from fields
-    return 2;
-}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -169,7 +145,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             // 1: moving, with the same frequency as the data
             // 2: moving, with different frequency as the data
 
-            const label tsGeom = geometryTimeset();
+            const label tsGeom = caching_.geometryTimeset();
 
             osCase
                 << "FORMAT" << nl
@@ -228,10 +204,10 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                 << nl
                 << "TIME" << nl;
 
-            printTimeset(osCase, 1, caching_.times());
+            ensightCase::printTimeset(osCase, 1, caching_.times());
             if (tsGeom == 2)
             {
-                printTimeset
+                ensightCase::printTimeset
                 (
                     osCase,
                     tsGeom,

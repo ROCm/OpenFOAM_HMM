@@ -99,8 +99,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nastranSurfaceWriter_H
-#define nastranSurfaceWriter_H
+#ifndef Foam_surfaceWriters_nastranWriter_H
+#define Foam_surfaceWriters_nastranWriter_H
 
 #include "surfaceWriter.H"
 #include "NASCore.H"
@@ -149,7 +149,7 @@ private:
         //- Output field scaling
         const dictionary fieldScale_;
 
-        //- Separator used for free format
+        //- Separator (used for free format)
         word separator_;
 
 
@@ -159,8 +159,8 @@ private:
         void writeCoord
         (
             Ostream& os,
-            const point& pt,
-            const label pointI      //!< 0-based Point Id
+            const point& p,
+            const label pointId     //!< 0-based Point Id
         ) const;
 
         //- Write a face element (CTRIA3 or CQUAD4)

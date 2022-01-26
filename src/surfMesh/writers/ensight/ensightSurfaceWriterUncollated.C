@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +32,13 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
 {
     checkOpen();
 
-    const ensight::FileName surfName(outputPath_.name());
+    const ensight::FileName baseName(outputPath_.name());
 
 
     // Uncollated
     // ==========
-    // CaseFile:  rootdir/<TIME>/surfaceName.case
-    // Geometry:  rootdir/<TIME>/surfaceName.00000000.mesh
+    // CaseFile:  rootdir/<TIME>/NAME.case
+    // Geometry:  rootdir/<TIME>/NAME.00000000.mesh
 
     fileName outputDir;
     if (useTimeDir() && !timeName().empty())
@@ -51,7 +51,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
         outputDir = outputPath_.path();
     }
 
-    const fileName outputFile = outputDir / surfName + ".case";
+    const fileName outputFile = outputDir / baseName + ".case";
 
     if (verbose_)
     {
@@ -72,7 +72,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
         ensightGeoFile osGeom
         (
             outputDir,
-            surfName + ".00000000.mesh",
+            baseName + ".00000000.mesh",
             writeFormat_
         );
 
@@ -85,7 +85,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
             << nl
             << "TIME" << nl;
 
-        printTimeset(osCase, 1, scalar(0));
+        ensightCase::printTimeset(osCase, 1, scalar(0));
 
         ensightOutputSurface part
         (
@@ -110,24 +110,24 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
 {
     checkOpen();
 
-    const ensight::FileName surfName(outputPath_.name());
+    const ensight::FileName baseName(outputPath_.name());
     const ensight::VarName  varName(fieldName);
 
 
     // Uncollated
     // ==========
-    // CaseFile:  rootdir/time/<field>/surfaceName.case
-    // Geometry:  rootdir/time/<field>/surfaceName.<index>.mesh
-    // Field:     rootdir/time/<field>/surfaceName.<index>.<field>
+    // CaseFile:  rootdir/time/<field>/NAME.case
+    // Geometry:  rootdir/time/<field>/NAME.<index>.mesh
+    // Field:     rootdir/time/<field>/NAME.<index>.<field>
 
     // Variable name as sub-directory for results. Eg,
-    // - VAR1/SURF1.case
-    // - VAR1/SURF1.00000000.mesh
-    // - VAR1/SURF1.00000001.VAR1
+    // - VAR1/NAME1.case
+    // - VAR1/NAME1.00000000.mesh
+    // - VAR1/NAME1.00000001.VAR1
     // and
-    // - VAR2/SURF1.case
-    // - VAR2/SURF1.00000000.mesh
-    // - VAR2/SURF1.00000001.VAR2
+    // - VAR2/NAME1.case
+    // - VAR2/NAME1.00000000.mesh
+    // - VAR2/NAME1.00000001.VAR2
 
     fileName outputDir;
     if (useTimeDir() && !timeName().empty())
@@ -144,7 +144,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
     const word   timeDir = timeName();
     const scalar timeValue = currTime_.value();
 
-    const fileName outputFile = baseDir / surfName + ".case";
+    const fileName outputFile = baseDir / baseName + ".case";
 
     if (verbose_)
     {
@@ -175,13 +175,13 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         ensightGeoFile osGeom
         (
             baseDir,
-            surfName + ".00000000.mesh",
+            baseName + ".00000000.mesh",
             writeFormat_
         );
         ensightFile osField
         (
             baseDir,
-            surfName + ".00000000." + varName,
+            baseName + ".00000000." + varName,
             writeFormat_
         );
 
@@ -201,13 +201,13 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
               : " per element: 1  "  // time-set 1
             )
             << setw(15) << varName << ' '
-            << surfName.c_str() << ".********." << varName << nl;
+            << baseName.c_str() << ".********." << varName << nl;
 
         osCase
             << nl
             << "TIME" << nl;
 
-        printTimeset(osCase, 1, timeValue);
+        ensightCase::printTimeset(osCase, 1, timeValue);
         osCase << "# end" << nl;
 
 

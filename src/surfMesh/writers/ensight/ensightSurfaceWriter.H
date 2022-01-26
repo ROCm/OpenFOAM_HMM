@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,11 +57,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightSurfaceWriter_H
-#define ensightSurfaceWriter_H
+#ifndef Foam_surfaceWriters_ensightWriter_H
+#define Foam_surfaceWriters_ensightWriter_H
 
 #include "surfaceWriter.H"
-#include "surfaceWriterCaching.H"
+#include "ensightWriterCaching.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,70 +80,17 @@ class ensightWriter
 {
     // Private Data
 
-        //- Output format option (default: IOstream::ASCII)
-        IOstream::streamFormat writeFormat_;
+        //- Output format option (default: ASCII)
+        IOstreamOption::streamFormat writeFormat_;
 
         //- Collate times (default: true)
         bool collateTimes_;
 
         //- Cached information for times, geometry, fields (collated)
-        writerCaching caching_;
+        ensightOutput::writerCaching caching_;
 
 
     // Private Member Functions
-
-        //- The geometry can be any of the following:
-        //
-        // 0: constant/static
-        // 1: moving, with the same frequency as the data
-        // 2: moving, with different frequency as the data
-        int geometryTimeset() const;
-
-        //- Print time-set for ensight case file with a single time
-        static void printTimeset
-        (
-            OSstream& os,
-            const label ts,
-            const scalar timeValue
-        );
-
-        //- Print time-set for ensight case file, with N times and 0-based
-        //- file numbering
-        //
-        //  \verbatim
-        //  TIME
-        //  time set: ts
-        //  number of steps: ns
-        //  filename start number: 0
-        //  filename increment: 1
-        //  time values: time_1 time_2 ... time_ns
-        //  \endverbatim
-        static void printTimeset
-        (
-            OSstream& os,
-            const label ts,
-            const UList<scalar>& times
-        );
-
-
-        //- Print time-set for ensight case file, with N times, 0-based
-        //- file numbering but perhaps non-contiguous
-        //
-        //  \verbatim
-        //  TIME
-        //  time set: ts
-        //  number of steps: ns
-        //  filename numbers: idx_1 idx_2 ... idx_ns
-        //  time values: time_1 time_2 ... time_ns
-        //  \endverbatim
-        static void printTimeset
-        (
-            OSstream& os,
-            const label ts,
-            const UList<scalar>& times,
-            const bitSet& indices
-        );
-
 
         //- Write geometry
         fileName writeCollated();

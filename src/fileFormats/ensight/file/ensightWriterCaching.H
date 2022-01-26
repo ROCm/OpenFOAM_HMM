@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,22 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceWriters::writerCaching
+    Foam::ensightOutput::writerCaching
 
 Description
-    Information for surface writers with collated times.
+    State information for writers with collated times.
 
     The class maintains an internal list of the known times
     as well as a file-cached version with the field information.
     The information is used for restarts.
 
 SourceFiles
-    surfaceWriterCaching.C
+    ensightWriterCaching.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriters_writerCaching_H
-#define surfaceWriters_writerCaching_H
+#ifndef Foam_ensightOutput_writerCaching_H
+#define Foam_ensightOutput_writerCaching_H
 
 #include "bitSet.H"
 #include "dictionary.H"
@@ -50,7 +50,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace surfaceWriters
+namespace ensightOutput
 {
 
 /*---------------------------------------------------------------------------*\
@@ -106,28 +106,30 @@ public:
     // Member Functions
 
         //- The output times for fields
-        const scalarList& times() const
+        const scalarList& times() const noexcept
         {
             return times_;
         }
 
         //- Indices in times() when geometry (mesh) has been written
-        const bitSet& geometries() const
+        const bitSet& geometries() const noexcept
         {
             return geoms_;
         }
 
         //- The most current time index
-        label latestTimeIndex() const
-        {
-            return max(0, times_.size()-1);
-        }
+        label latestTimeIndex() const;
 
         //- The most current geometry index
-        label latestGeomIndex() const
-        {
-            return max(0, geoms_.find_last());
-        }
+        label latestGeomIndex() const;
+
+        //- Expected timeset for the geometry.
+        //  Can be any of the following:
+        //
+        // 0: constant/static
+        // 1: moving, with the same frequency as the data
+        // 2: moving, with different frequency as the data
+        int geometryTimeset() const;
 
         //- Get or create the 'fields' information dictionary.
         const dictionary& fieldsDict() const;
@@ -141,7 +143,7 @@ public:
         //      geometry change or a new time interval
         bool update
         (
-            const fileName& baseDir,    //!< Directory containing the cache file
+            const fileName& baseDir,    //!< Directory containing cache file
             const scalar timeValue,     //!< The current time value
             const bool geomChanged,     //!< Monitored geometry changed
             const word& fieldName,      //!< Name of field
@@ -153,7 +155,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceWriters
+} // End namespace ensightOutput
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

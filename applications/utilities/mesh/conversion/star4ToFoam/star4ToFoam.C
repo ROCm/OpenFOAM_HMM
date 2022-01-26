@@ -96,11 +96,11 @@ int main(int argc, char *argv[])
     Time runTime(args.rootPath(), args.caseName());
 
     // Binary output, unless otherwise specified
-    const IOstream::streamFormat format =
+    const IOstreamOption::streamFormat format =
     (
         args.found("ascii")
-      ? IOstream::ASCII
-      : IOstream::BINARY
+      ? IOstreamOption::ASCII
+      : IOstreamOption::BINARY
     );
 
     // Increase the precision of the points data

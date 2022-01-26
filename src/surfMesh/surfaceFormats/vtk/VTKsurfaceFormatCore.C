@@ -42,8 +42,8 @@ Foam::fileFormats::VTKsurfaceFormatCore::formatOptions
 
     opts.ascii
     (
-        IOstream::ASCII
-     == IOstream::formatEnum("format", dict, IOstream::ASCII)
+        IOstreamOption::ASCII
+     == IOstreamOption::formatEnum("format", dict, IOstreamOption::ASCII)
     );
 
     opts.precision

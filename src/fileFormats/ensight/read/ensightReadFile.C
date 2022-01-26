@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::Istream& Foam::ensightReadFile::read
 
 Foam::Istream& Foam::ensightReadFile::read(string& value)
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         auto& iss = stdStream();
 
@@ -101,7 +101,7 @@ Foam::Istream& Foam::ensightReadFile::read(label& value)
 {
     int ivalue;
 
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         read
         (
@@ -123,7 +123,7 @@ Foam::Istream& Foam::ensightReadFile::read(scalar& value)
 {
     float fvalue;
 
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         read
         (
@@ -151,7 +151,7 @@ Foam::Istream& Foam::ensightReadFile::readKeyword(string& key)
 
 Foam::Istream& Foam::ensightReadFile::readBinaryHeader()
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         string buffer;
         read(buffer);

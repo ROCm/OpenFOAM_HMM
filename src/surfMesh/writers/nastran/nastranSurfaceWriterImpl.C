@@ -26,9 +26,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OFstream.H"
 #include "IOmanip.H"
 #include "ListOps.H"
+#include "OFstream.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -62,8 +62,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef x3dSurfaceWriter_H
-#define x3dSurfaceWriter_H
+#ifndef Foam_surfaceWriters_x3dWriter_H
+#define Foam_surfaceWriters_x3dWriter_H
 
 #include "surfaceWriter.H"
 #include "X3DsurfaceFormatCore.H"

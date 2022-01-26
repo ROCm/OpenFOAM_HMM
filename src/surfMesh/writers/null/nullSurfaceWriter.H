@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nullSurfaceWriter_H
-#define nullSurfaceWriter_H
+#ifndef Foam_surfaceWriters_nullWriter_H
+#define Foam_surfaceWriters_nullWriter_H
 
 #include "surfaceWriter.H"
 

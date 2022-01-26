@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,8 +68,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriter_H
-#define surfaceWriter_H
+#ifndef Foam_surfaceWriter_H
+#define Foam_surfaceWriter_H
 
 #include <functional>
 #include "typeInfo.H"
@@ -160,7 +160,7 @@ protected:
     // Protected Member Functions
 
         //- Verify that the outputPath_ has been set or FatalError
-        bool checkOpen() const;
+        void checkOpen() const;
 
         //- Merge surfaces if they are not already upToDate (parallel)
         //- or simply mark the surface as being up-to-date
@@ -263,23 +263,6 @@ public:
         //- Default construct with specified options
         explicit surfaceWriter(const dictionary& options);
 
-        //- Construct from components
-        explicit surfaceWriter
-        (
-            const meshedSurf& surf,
-            bool parallel = Pstream::parRun(),
-            const dictionary& options = dictionary()
-        );
-
-        //- Construct from components
-        surfaceWriter
-        (
-            const pointField& points,
-            const faceList& faces,
-            bool parallel = Pstream::parRun(),
-            const dictionary& options = dictionary()
-        );
-
 
     //- Destructor. Calls close()
     virtual ~surfaceWriter();
@@ -368,6 +351,9 @@ public:
 
     // Queries, Access
 
+        //- Test if outputPath has been set
+        inline bool is_open() const noexcept;
+
         //- Writer is associated with a surface
         bool hasSurface() const;
 
@@ -379,40 +365,40 @@ public:
 
         //- The number of expected output fields.
         //  Currently only used by the legacy VTK format.
-        inline label nFields() const;
+        inline label nFields() const noexcept;
 
         //- Set the number of expected output fields
         //  Currently only used by the legacy VTK format.
         //  \return old value
-        inline label nFields(const label n);
+        inline label nFields(const label n) noexcept;
 
         //- Are the field data to be treated as point data?
-        inline bool isPointData() const;
+        inline bool isPointData() const noexcept;
 
         //- Set handling of field data to face/point data
         //  \return old value
-        inline bool isPointData(const bool on);
+        inline bool isPointData(const bool on) noexcept;
 
         //- Should a time directory be spliced into the output path?
-        inline bool useTimeDir() const;
+        inline bool useTimeDir() const noexcept;
 
         //- Enable/disable use of spliced output path
         //  \return old value
-        inline bool useTimeDir(const bool on);
+        inline bool useTimeDir(const bool on) noexcept;
 
         //- Get output verbosity
-        inline bool verbose() const;
+        inline bool verbose() const noexcept;
 
         //- Enable/disable verbose output
         //  \return old value
-        inline bool verbose(const bool on);
+        inline bool verbose(const bool on) noexcept;
 
         //- The current value of the point merge dimension (metre)
-        inline scalar mergeDim() const;
+        inline scalar mergeDim() const noexcept;
 
         //- Change the point merge dimension (metre)
         //  \return old value
-        inline scalar mergeDim(const scalar dist);
+        inline scalar mergeDim(const scalar dist) noexcept;
 
 
     // Time

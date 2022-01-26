@@ -87,8 +87,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamSurfaceWriter_H
-#define foamSurfaceWriter_H
+#ifndef Foam_surfaceWriters_foamWriter_H
+#define Foam_surfaceWriters_foamWriter_H
 
 #include "surfaceWriter.H"
 
@@ -109,7 +109,7 @@ class foamWriter
 {
     // Private Data
 
-        //- Output stream option (default: IOstream::ASCII, uncompressed)
+        //- Output stream option (default: ASCII, uncompressed)
         IOstreamOption streamOpt_;
 
         //- Output field scaling

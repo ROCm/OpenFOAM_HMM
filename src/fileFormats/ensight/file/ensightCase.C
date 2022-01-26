@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,132 @@ License
 #include "Time.H"
 #include "cloud.H"
 #include "IOmanip.H"
+#include "OSstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* Foam::ensightCase::dataDirName  = "data";
 const char* Foam::ensightCase::geometryName = "geometry";
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::ensightCase::printTimeset
+(
+    OSstream& os,
+    const label ts,
+    const scalar timeValue
+)
+{
+    os
+        << "time set:               " << ts << nl
+        << "number of steps:        " << 1 << nl;
+
+    // Single value - starts at index 0
+    os  << "filename start number:  0" << nl
+        << "filename increment:     1" << nl
+        << "time values:" << nl;
+
+    os  << "    " << timeValue
+        << nl << nl;
+}
+
+
+void Foam::ensightCase::printTimeset
+(
+    OSstream& os,
+    const label ts,
+    const UList<scalar>& values
+)
+{
+    label pos_(0);
+
+    os
+        << "time set:               " << ts << nl
+        << "number of steps:        " << values.size() << nl;
+
+    // Assume contiguous numbering - starts at index 0
+    os  << "filename start number:  0" << nl
+        << "filename increment:     1" << nl;
+
+
+    os  << "time values:" << nl;
+    pos_ = 0;
+    for (const scalar val : values)
+    {
+        if (pos_ == 6)
+        {
+            os  << nl;
+            pos_ = 0;
+        }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(12) << val;
+    }
+    os  << nl << nl;
+}
+
+
+void Foam::ensightCase::printTimeset
+(
+    OSstream& os,
+    const label ts,
+    const UList<scalar>& values,
+    const bitSet& indices
+)
+{
+    label pos_(0);
+
+    // Check if continuous numbering can be used
+    if
+    (
+        values.empty()
+     || (indices.size() == values.size() && indices.all())
+    )
+    {
+        // Can simply emit as 0-based with increment
+        printTimeset(os, ts, values);
+        return;
+    }
+
+
+    // Generate time set
+    os
+        << "time set:               " << ts << nl
+        << "number of steps:        " << indices.count() << nl;
+
+
+    os  << "filename numbers:" << nl;
+    pos_ = 0;
+    for (const label idx : indices)
+    {
+        if (pos_ == 6)
+        {
+            os  << nl;
+            pos_ = 0;
+        }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(8) << idx;
+    }
+    os  << nl;
+
+
+    os  << "time values:" << nl;
+    pos_ = 0;
+    for (const label idx : indices)
+    {
+        if (pos_ == 6)
+        {
+            os  << nl;
+            pos_ = 0;
+        }
+        ++pos_;
+
+        os  << ' ' << setf(ios_base::right) << setw(12) << values[idx];
+    }
+    os  << nl << nl;
+}
 
 
 // * * * * * * * * * * * * * Private Functions * * * * * * * * * * * * * * //
@@ -73,7 +194,7 @@ void Foam::ensightCase::initialize()
         mkDir(dataDir());
 
         // The case file is always ASCII
-        os_.reset(new OFstream(ensightDir_/caseName_, IOstream::ASCII));
+        os_.reset(new OFstream(ensightDir_/caseName_, IOstreamOption::ASCII));
 
         // Format options
         os_->setf(ios_base::left);
@@ -405,7 +526,7 @@ Foam::ensightCase::ensightCase
 (
     const fileName& ensightDir,
     const word& caseName,
-    const IOstream::streamFormat format
+    const IOstreamOption::streamFormat format
 )
 :
     options_(new options(format)),

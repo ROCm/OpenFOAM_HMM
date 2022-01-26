@@ -76,24 +76,10 @@ void Foam::nastranSetWriter<Type>::write
 
     forAll(points, pointi)
     {
-        fileFormats::NASCore::writeKeyword(os, "GRID", fieldFormat::FREE);
-
-        const point& pt = points[pointi];
-
-        //os.setf(std::ios_base::right);
-        //os  << setw(8) << pointi+1
-        //    << setw(8) << ' '
-        //    << setw(8) << float(pt.x())
-        //    << setw(8) << float(pt.y())
-        //    << setw(8) << float(pt.z())
-        //    << nl;
-        //os.unsetf(std::ios_base::right);
-        os  << ',' << pointi+1
-            << ','
-            << ',' << float(pt.x())
-            << ',' << float(pt.y())
-            << ',' << float(pt.z())
-            << nl;
+        fileFormats::NASCore::writeCoord
+        (
+            os, points[pointi], pointi, fieldFormat::FREE
+        );
     }
 
     if (false)
@@ -109,12 +95,15 @@ void Foam::nastranSetWriter<Type>::write
                 fieldFormat::FREE
             );
 
+            // fieldFormat::SHORT
             //os.setf(std::ios_base::right);
             //os  << setw(8) << edgei+1
             //    << setw(8) << edgei+1
             //    << setw(8) << edgei+2
             //    << nl;
             //os.unsetf(std::ios_base::right);
+
+            // fieldFormat::FREE
             os  << ',' << edgei+1
                 << ',' << edgei+1
                 << ',' << edgei+2
@@ -162,27 +151,16 @@ void Foam::nastranSetWriter<Type>::write
 //        nPoints += tracks[i].size();
 //    }
 
-    label globalPti = 0;
+    label globalPointi = 0;
     for (const coordSet& points : tracks)
     {
-        for (const point& pt : points)
+        for (const point& p : points)
         {
-            fileFormats::NASCore::writeKeyword(os, "GRID", fieldFormat::FREE);
-
-            //os.setf(std::ios_base::right);
-            //os  << setw(8) << globalPti++
-            //    << setw(8) << ' '
-            //    << setw(8) << float(pt.x())
-            //    << setw(8) << float(pt.y())
-            //    << setw(8) << float(pt.z())
-            //    << nl;
-            //os.unsetf(std::ios_base::right);
-            os  << ',' << globalPti++
-                << ','
-                << ',' << float(pt.x())
-                << ',' << float(pt.y())
-                << ',' << float(pt.z())
-                << nl;
+            fileFormats::NASCore::writeCoord
+            (
+                os, p, globalPointi, fieldFormat::FREE
+            );
+            ++globalPointi;
         }
     }
 
@@ -203,6 +181,7 @@ void Foam::nastranSetWriter<Type>::write
                     fieldFormat::FREE
                 );
 
+                // fieldFormat::SHORT
                 //os.setf(std::ios_base::right);
                 //os  << setw(8) << globalEdgei+1
                 //    << setw(8) << globalPointi+1
@@ -210,12 +189,14 @@ void Foam::nastranSetWriter<Type>::write
                 //    << nl;
                 //os.unsetf(std::ios_base::right);
 
+                // fieldFormat::FREE
                 os  << ',' << globalEdgei+1
                     << ',' << globalPointi+1
                     << ',' << globalPointi+2
                     << nl;
-                globalEdgei++;
-                globalPointi++;
+
+                ++globalEdgei;
+                ++globalPointi;
             }
         }
     }

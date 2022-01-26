@@ -63,8 +63,8 @@ Foam::surfaceWriters::foamWriter::foamWriter
     surfaceWriter(options),
     streamOpt_
     (
-        IOstream::formatEnum("format", options, IOstream::ASCII),
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII),
+        IOstreamOption::compressionEnum("compression", options)
     ),
     fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
@@ -234,6 +234,8 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
     return outputFile;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::foamWriter);

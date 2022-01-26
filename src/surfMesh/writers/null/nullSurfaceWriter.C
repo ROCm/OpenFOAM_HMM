@@ -129,6 +129,8 @@ Foam::fileName Foam::surfaceWriters::nullWriter::write()
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::nullWriter);
 

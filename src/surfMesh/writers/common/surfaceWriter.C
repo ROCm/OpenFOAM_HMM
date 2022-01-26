@@ -166,33 +166,6 @@ Foam::surfaceWriter::surfaceWriter(const dictionary& options)
 }
 
 
-Foam::surfaceWriter::surfaceWriter
-(
-    const meshedSurf& surf,
-    bool parallel,
-    const dictionary& options
-)
-:
-    surfaceWriter(options)
-{
-    setSurface(surf, parallel);
-}
-
-
-Foam::surfaceWriter::surfaceWriter
-(
-    const pointField& points,
-    const faceList& faces,
-    bool parallel,
-    const dictionary& options
-)
-:
-    surfaceWriter(options)
-{
-    setSurface(points, faces, parallel);
-}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::surfaceWriter::~surfaceWriter()
@@ -430,16 +403,14 @@ Foam::label Foam::surfaceWriter::size() const
 }
 
 
-bool Foam::surfaceWriter::checkOpen() const
+void Foam::surfaceWriter::checkOpen() const
 {
-    if (outputPath_.empty())
+    if (!is_open())
     {
         FatalErrorInFunction
             << type() << " : Attempted to write without a path" << nl
             << exit(FatalError);
     }
-
-    return !outputPath_.empty();
 }
 
 

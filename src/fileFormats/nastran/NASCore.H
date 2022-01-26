@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NASCore_H
-#define NASCore_H
+#ifndef Foam_fileFormats_NASCore_H
+#define Foam_fileFormats_NASCore_H
 
 #include "scalar.H"
 #include "string.H"
@@ -118,6 +118,15 @@ public:
         (
             Ostream& os,
             const word& keyword,
+            const fieldFormat format
+        );
+
+        //- Write a GRID point
+        static void writeCoord
+        (
+            Ostream& os,
+            const point& p,
+            const label pointId,        //!< 0-based Point Id
             const fieldFormat format
         );
 

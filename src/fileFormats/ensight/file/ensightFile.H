@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightFile_H
-#define ensightFile_H
+#ifndef Foam_ensightFile_H
+#define Foam_ensightFile_H
 
 #include "OFstream.H"
 #include "ensightFileName.H"
@@ -105,7 +105,7 @@ public:
         explicit ensightFile
         (
             const fileName& pathname,
-            IOstream::streamFormat format=IOstream::BINARY
+            IOstreamOption::streamFormat format = IOstreamOption::BINARY
         );
 
         //- Construct from path and name.
@@ -114,7 +114,7 @@ public:
         (
             const fileName& path,
             const fileName& name,
-            IOstream::streamFormat format=IOstream::BINARY
+            IOstreamOption::streamFormat format = IOstreamOption::BINARY
         );
 
 

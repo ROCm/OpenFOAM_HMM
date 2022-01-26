@@ -62,8 +62,8 @@ Foam::surfaceWriters::proxyWriter::proxyWriter
     fileExtension_(fileExt),
     streamOpt_
     (
-        IOstream::formatEnum("format", options, IOstream::ASCII),
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII),
+        IOstreamOption::compressionEnum("compression", options)
     ),
     options_(options)
 {}
@@ -147,6 +147,8 @@ Foam::fileName Foam::surfaceWriters::proxyWriter::write()
     return outputFile;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::proxyWriter);

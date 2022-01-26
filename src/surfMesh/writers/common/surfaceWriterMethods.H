@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceWriterMethods_H
-#define surfaceWriterMethods_H
+#ifndef Foam_surfaceWriterMethods_H
+#define Foam_surfaceWriterMethods_H
 
 namespace Foam
 {

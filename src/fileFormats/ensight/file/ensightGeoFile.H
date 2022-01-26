@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightGeoFile_H
-#define ensightGeoFile_H
+#ifndef Foam_ensightGeoFile_H
+#define Foam_ensightGeoFile_H
 
 #include "ensightFile.H"
 
@@ -80,7 +80,7 @@ public:
         explicit ensightGeoFile
         (
             const fileName& pathname,
-            IOstream::streamFormat format=IOstream::BINARY
+            IOstreamOption::streamFormat format = IOstreamOption::BINARY
         );
 
         //- Construct from path and name.
@@ -89,7 +89,7 @@ public:
         (
             const fileName& path,
             const fileName& name,
-            IOstream::streamFormat format=IOstream::BINARY
+            IOstreamOption::streamFormat format = IOstreamOption::BINARY
         );
 
 

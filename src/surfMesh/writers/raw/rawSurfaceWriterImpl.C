@@ -26,9 +26,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "IOmanip.H"
 #include "OFstream.H"
 #include "OSspecific.H"
-#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 

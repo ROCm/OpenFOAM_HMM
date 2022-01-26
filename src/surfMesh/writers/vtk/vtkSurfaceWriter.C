@@ -108,8 +108,8 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
 
     opts.ascii
     (
-        IOstream::ASCII
-     == IOstream::formatEnum("format", options, IOstream::BINARY)
+        IOstreamOption::ASCII
+     == IOstreamOption::formatEnum("format", options, IOstreamOption::BINARY)
     );
 
     opts.legacy(options.getOrDefault("legacy", false));
@@ -347,6 +347,8 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::writeTemplate
     return outputFile;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::vtkWriter);

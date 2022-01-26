@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,13 +33,13 @@ inline const Foam::ensightCase::options& Foam::ensightCase::option() const
 }
 
 
-inline Foam::IOstream::streamFormat Foam::ensightCase::format() const
+inline Foam::IOstreamOption::streamFormat Foam::ensightCase::format() const
 {
     return options_->format();
 }
 
 
-inline const Foam::fileName& Foam::ensightCase::path() const
+inline const Foam::fileName& Foam::ensightCase::path() const noexcept
 {
     return ensightDir_;
 }

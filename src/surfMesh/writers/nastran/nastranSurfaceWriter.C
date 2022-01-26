@@ -70,58 +70,11 @@ Foam::Ostream& Foam::surfaceWriters::nastranWriter::writeKeyword
 void Foam::surfaceWriters::nastranWriter::writeCoord
 (
     Ostream& os,
-    const point& pt,
-    const label pointI
+    const point& p,
+    const label pointId
 ) const
 {
-    // Fixed short/long formats:
-    // 1 GRID
-    // 2 ID   : point ID - requires starting index of 1
-    // 3 CP   : coordinate system ID                (blank)
-    // 4 X1   : point x coordinate
-    // 5 X2   : point x coordinate
-    // 6 X3   : point x coordinate
-    // 7 CD   : coordinate system for displacements (blank)
-    // 8 PS   : single point constraints            (blank)
-    // 9 SEID : super-element ID
-
-    writeKeyword(os, "GRID")    << separator_;
-
-    os.setf(std::ios_base::right);
-
-    writeValue(os, pointI+1)    << separator_;
-    writeValue(os, "")          << separator_;
-    writeValue(os, pt.x())      << separator_;
-    writeValue(os, pt.y())      << separator_;
-
-    switch (writeFormat_)
-    {
-        case fieldFormat::SHORT :
-        {
-            os  << setw(8) << pt.z() << nl;
-            os.unsetf(std::ios_base::right);
-            break;
-        }
-
-        case fieldFormat::LONG :
-        {
-            os  << nl;
-            os.unsetf(std::ios_base::right);
-            writeKeyword(os, "");
-            os.setf(std::ios_base::right);
-
-            writeValue(os, pt.z())  << nl;
-            break;
-        }
-
-        case fieldFormat::FREE :
-        {
-            writeValue(os, pt.z())  << nl;
-            break;
-        }
-    }
-
-    os.unsetf(std::ios_base::right);
+    fileFormats::NASCore::writeCoord(os, p, pointId, writeFormat_);
 }
 
 
@@ -360,7 +313,12 @@ Foam::surfaceWriters::nastranWriter::nastranWriter()
     geometryScale_(1),
     fieldScale_(),
     separator_()
-{}
+{
+    // if (writeFormat_ == fieldFormat::FREE)
+    // {
+    //     separator_ = ",";
+    // }
+}
 
 
 Foam::surfaceWriters::nastranWriter::nastranWriter

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ void Foam::ensightGeoFile::initialize()
 Foam::ensightGeoFile::ensightGeoFile
 (
     const fileName& pathname,
-    IOstream::streamFormat format
+    IOstreamOption::streamFormat format
 )
 :
     ensightFile(pathname, format)
@@ -69,7 +69,7 @@ Foam::ensightGeoFile::ensightGeoFile
 (
     const fileName& path,
     const fileName& name,
-    IOstream::streamFormat format
+    IOstreamOption::streamFormat format
 )
 :
     ensightFile(path, name, format)

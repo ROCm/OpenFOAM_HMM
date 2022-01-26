@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,7 @@ void Foam::ensightFile::initialize()
 Foam::ensightFile::ensightFile
 (
     const fileName& pathname,
-    IOstream::streamFormat format
+    IOstreamOption::streamFormat format
 )
 :
     OFstream(ensight::FileName(pathname), format)
@@ -132,7 +132,7 @@ Foam::ensightFile::ensightFile
 (
     const fileName& path,
     const fileName& name,
-    IOstream::streamFormat format
+    IOstreamOption::streamFormat format
 )
 :
     OFstream(path/ensight::FileName(name), format)
@@ -176,7 +176,7 @@ Foam::Ostream& Foam::ensightFile::writeString(const char* str)
     char buf[80+1];
     strncpy(buf, str, 80); // max 80 chars or padded with nul if smaller
 
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         write(buf, 80);
     }
@@ -227,7 +227,7 @@ Foam::Ostream& Foam::ensightFile::write
 
 Foam::Ostream& Foam::ensightFile::write(const int32_t val)
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         write
         (
@@ -255,7 +255,7 @@ Foam::Ostream& Foam::ensightFile::write(const int64_t val)
 
 Foam::Ostream& Foam::ensightFile::write(const floatScalar val)
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         write
         (
@@ -287,7 +287,7 @@ Foam::Ostream& Foam::ensightFile::write
     const label fieldWidth
 )
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         write(value);
     }
@@ -303,7 +303,7 @@ Foam::Ostream& Foam::ensightFile::write
 
 void Foam::ensightFile::newline()
 {
-    if (format() == IOstream::ASCII)
+    if (format() == IOstreamOption::ASCII)
     {
         stdStream() << nl;
     }
@@ -338,7 +338,7 @@ Foam::Ostream& Foam::ensightFile::writeKeyword(const keyType& key)
 
 Foam::Ostream& Foam::ensightFile::writeBinaryHeader()
 {
-    if (format() == IOstream::BINARY)
+    if (format() == IOstreamOption::BINARY)
     {
         writeString("C Binary");
     }

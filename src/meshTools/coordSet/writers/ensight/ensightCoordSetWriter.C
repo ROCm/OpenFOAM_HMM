@@ -29,6 +29,7 @@ License
 #include "ensightSetWriter.H"
 #include "coordSet.H"
 #include "IOmanip.H"
+#include "ensightCase.H"
 #include "ensightGeoFile.H"
 #include "ensightPTraits.H"
 #include "addToRunTimeSelectionTable.H"

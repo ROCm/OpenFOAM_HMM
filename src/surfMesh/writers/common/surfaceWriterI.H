@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,13 +27,19 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::surfaceWriter::nFields() const
+inline bool Foam::surfaceWriter::is_open() const noexcept
+{
+    return !outputPath_.empty();
+}
+
+
+inline Foam::label Foam::surfaceWriter::nFields() const noexcept
 {
     return nFields_;
 }
 
 
-inline Foam::label Foam::surfaceWriter::nFields(const label n)
+inline Foam::label Foam::surfaceWriter::nFields(const label n) noexcept
 {
     label old(nFields_);
     nFields_ = n;
@@ -41,13 +47,13 @@ inline Foam::label Foam::surfaceWriter::nFields(const label n)
 }
 
 
-inline bool Foam::surfaceWriter::isPointData() const
+inline bool Foam::surfaceWriter::isPointData() const noexcept
 {
     return isPointData_;
 }
 
 
-inline bool Foam::surfaceWriter::isPointData(const bool on)
+inline bool Foam::surfaceWriter::isPointData(const bool on) noexcept
 {
     bool old(isPointData_);
     isPointData_ = on;
@@ -55,13 +61,13 @@ inline bool Foam::surfaceWriter::isPointData(const bool on)
 }
 
 
-inline bool Foam::surfaceWriter::useTimeDir() const
+inline bool Foam::surfaceWriter::useTimeDir() const noexcept
 {
     return useTimeDir_;
 }
 
 
-inline bool Foam::surfaceWriter::useTimeDir(const bool on)
+inline bool Foam::surfaceWriter::useTimeDir(const bool on) noexcept
 {
     bool old(useTimeDir_);
     useTimeDir_ = on;
@@ -69,13 +75,13 @@ inline bool Foam::surfaceWriter::useTimeDir(const bool on)
 }
 
 
-inline bool Foam::surfaceWriter::verbose() const
+inline bool Foam::surfaceWriter::verbose() const noexcept
 {
     return verbose_;
 }
 
 
-inline bool Foam::surfaceWriter::verbose(const bool on)
+inline bool Foam::surfaceWriter::verbose(const bool on) noexcept
 {
     bool old(verbose_);
     verbose_ = on;
@@ -83,13 +89,13 @@ inline bool Foam::surfaceWriter::verbose(const bool on)
 }
 
 
-inline Foam::scalar Foam::surfaceWriter::mergeDim() const
+inline Foam::scalar Foam::surfaceWriter::mergeDim() const noexcept
 {
     return mergeDim_;
 }
 
 
-inline Foam::scalar Foam::surfaceWriter::mergeDim(const scalar dist)
+inline Foam::scalar Foam::surfaceWriter::mergeDim(const scalar dist) noexcept
 {
     scalar old(mergeDim_);
     mergeDim_ = dist;

@@ -125,8 +125,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryDataSurfaceWriter_H
-#define boundaryDataSurfaceWriter_H
+#ifndef Foam_surfaceWriters_boundaryDataWriter_H
+#define Foam_surfaceWriters_boundaryDataWriter_H
 
 #include "surfaceWriter.H"
 

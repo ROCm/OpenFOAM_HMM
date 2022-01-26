@@ -308,11 +308,11 @@ int main(int argc, char *argv[])
     // Configuration
 
     // Default to binary output, unless otherwise specified
-    const IOstream::streamFormat format =
+    const IOstreamOption::streamFormat format =
     (
         args.found("ascii")
-      ? IOstream::ASCII
-      : IOstream::BINARY
+      ? IOstreamOption::ASCII
+      : IOstreamOption::BINARY
     );
 
     const bool doBoundary    = !args.found("no-boundary");

@@ -191,11 +191,11 @@ int main(int argc, char *argv[])
     const scalar scaleFactor = args.getOrDefault<scalar>("scale", 1);
 
     // Default to binary output, unless otherwise specified
-    const IOstream::streamFormat format =
+    const IOstreamOption::streamFormat format =
     (
         args.found("ascii")
-      ? IOstream::ASCII
-      : IOstream::BINARY
+      ? IOstreamOption::ASCII
+      : IOstreamOption::BINARY
     );
 
     // Increase the precision of the points data

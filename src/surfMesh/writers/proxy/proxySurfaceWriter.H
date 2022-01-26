@@ -59,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef proxySurfaceWriter_H
-#define proxySurfaceWriter_H
+#ifndef Foam_surfaceWriters_proxyWriter_H
+#define Foam_surfaceWriters_proxyWriter_H
 
 #include "surfaceWriter.H"
 

@@ -120,8 +120,8 @@ Foam::surfaceWriters::x3dWriter::x3dWriter
     surfaceWriter(options),
     streamOpt_
     (
-        IOstream::ASCII,
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::ASCII,
+        IOstreamOption::compressionEnum("compression", options)
     ),
     range_(),
     colourTablePtr_(nullptr)
@@ -367,6 +367,8 @@ Foam::fileName Foam::surfaceWriters::x3dWriter::writeTemplate
     return outputFile;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::x3dWriter);

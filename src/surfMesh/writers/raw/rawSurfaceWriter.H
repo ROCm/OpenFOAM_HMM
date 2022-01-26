@@ -84,8 +84,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rawSurfaceWriter_H
-#define rawSurfaceWriter_H
+#ifndef Foam_surfaceWriters_rawWriter_H
+#define Foam_surfaceWriters_rawWriter_H
 
 #include "surfaceWriter.H"
 

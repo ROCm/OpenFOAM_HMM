@@ -70,8 +70,8 @@ Foam::surfaceWriters::boundaryDataWriter::boundaryDataWriter
     header_(options.getOrDefault("header", true)),
     streamOpt_
     (
-        IOstream::formatEnum("format", options, IOstream::ASCII),
-        IOstream::compressionEnum("compression", options)
+        IOstreamOption::formatEnum("format", options, IOstreamOption::ASCII),
+        IOstreamOption::compressionEnum("compression", options)
     ),
     fieldScale_(options.subOrEmptyDict("fieldScale"))
 {}
@@ -302,6 +302,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
     return surfaceDir;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::boundaryDataWriter);
