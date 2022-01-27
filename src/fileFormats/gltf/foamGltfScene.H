@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,9 +38,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foam_gltf_scene_H
-#define foam_gltf_scene_H
+#ifndef Foam_gltf_scene_H
+#define Foam_gltf_scene_H
 
+#include "fileName.H"
 #include "foamGltfList.H"
 #include "foamGltfObject.H"
 #include "foamGltfMesh.H"
@@ -49,12 +50,15 @@ SourceFiles
 #include "foamGltfAnimation.H"
 #include "scalarField.H"
 #include "vectorField.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+class OFstream;
+
 namespace glTF
 {
 
@@ -83,6 +87,13 @@ class scene
 
         //- Accumulative size in bytes
         label bytes_;
+
+
+    // Private Member Functions
+
+        //- Non-const access to mesh at index (can be -1 for last mesh)
+        //  FatalError for out-of-bounds
+        mesh& getMesh(label meshi);
 
 
 public:
@@ -114,16 +125,19 @@ public:
         (
             const Type& fld,
             const word& name,
-            const label meshi
+            const label meshId
         );
 
-        //- Returns accessor index
+        //- Add a colour field to the mesh, optionally with an alpha channel.
+        //  A constant alpha value can be specified as a field of size 1.
+        //
+        //  \returns accessor index
         label addColourToMesh
         (
-            const vectorField& fld,
+            const vectorField& fld,             //!< RGB colour field
             const word& name,
-            const label meshi,
-            const scalarField& alpha = scalarField()
+            const label meshId,
+            const scalarField& alpha = scalarField::null()  //!< Alpha channel
         );
 
         //- Returns index of last animation
@@ -139,7 +153,13 @@ public:
             const string& interpolation = "LINEAR"
         );
 
-        //- Write to stream (JSON and binary data)
+
+    // Write
+
+        //- Write to file pair (.gltf, .bin)
+        void write(const fileName& outputFile);
+
+        //- Write JSON (.gltf) to stream with auxiliary binary data (.bin)
         void write(Ostream& os);
 };
 

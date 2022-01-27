@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamGltfScene.H"
-#include "fileName.H"
+#include "OFstream.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,6 +44,26 @@ Foam::glTF::scene::scene()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::glTF::mesh& Foam::glTF::scene::getMesh(label meshi)
+{
+    const label lastMeshi = (meshes_.size() - 1);
+
+    if (meshi < 0)
+    {
+        meshi = (lastMeshi < 0 ? static_cast<label>(0) : lastMeshi);
+    }
+
+    if (meshi > lastMeshi)
+    {
+        FatalErrorInFunction
+            << "Mesh " << meshi << " out of range: " << lastMeshi
+            << abort(FatalError);
+    }
+
+    return meshes_[meshi];
+}
+
+
 Foam::label Foam::glTF::scene::addColourToMesh
 (
     const vectorField& fld,
@@ -51,13 +72,7 @@ Foam::label Foam::glTF::scene::addColourToMesh
     const scalarField& alpha
 )
 {
-    if (meshi > meshes_.size() - 1)
-    {
-        FatalErrorInFunction
-            << "Mesh " << meshi << " out of range "
-            << (meshes_.size() - 1)
-            << abort(FatalError);
-    }
+    auto& gmesh = getMesh(meshi);
 
     auto& bv = bufferViews_.create(name);
     bv.byteOffset() = bytes_;
@@ -71,21 +86,29 @@ Foam::label Foam::glTF::scene::addColourToMesh
 
     auto& obj = objects_.create(name);
 
-    if (alpha.size())
+    if (alpha.empty())
+    {
+        obj.addData(fld);
+    }
+    else
     {
         bv.byteLength() += fld.size()*sizeof(float);
         bytes_ += fld.size()*sizeof(float);
 
         acc.type() = "VEC4";
 
-        obj.addData(fld, alpha);
-    }
-    else
-    {
-        obj.addData(fld);
+        // Support uniform alpha vs full alpha field
+        tmp<scalarField> talpha(alpha);
+
+        if (alpha.size() == 1 && alpha.size() < fld.size())
+        {
+            talpha = tmp<scalarField>::New(fld.size(), alpha[0]);
+        }
+
+        obj.addData(fld, talpha());
     }
 
-    meshes_[meshi].addColour(acc.id());
+    gmesh.addColour(acc.id());
 
     return acc.id();
 }
@@ -136,13 +159,27 @@ void Foam::glTF::scene::addToAnimation
 }
 
 
+void Foam::glTF::scene::write(const fileName& outputFile)
+{
+    fileName jsonFile(outputFile.lessExt());
+    jsonFile.ext("gltf");
+
+    // Note: called on master only
+
+    if (!isDir(jsonFile.path()))
+    {
+        mkDir(jsonFile.path());
+    }
+
+    OFstream os(jsonFile);
+    write(os);
+}
+
+
 void Foam::glTF::scene::write(Ostream& os)
 {
-    const fileName base(os.name().lessExt());
-    const fileName binFile
-    (
-        fileName::concat(base.path(), fileName::name(base) + ".bin")
-    );
+    fileName binFile(os.name().lessExt());
+    binFile.ext("bin");
 
     // Write binary file
     // Note: using stdStream

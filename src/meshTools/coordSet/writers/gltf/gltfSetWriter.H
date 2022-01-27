@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +60,11 @@ Description
                 min             0;
                 max             1;
 
-                // Alpha channel [optional] (uniform | field)
-                alpha           uniform;
-                alphaValue      0.5;
+                // Alpha channel [optional] (<scalar> | uniform | field)
+                alpha           0.5;
+
+                //alpha           uniform;
+                //alphaValue      0.5;
 
                 //alpha           field;
                 //alphaField      T;
@@ -89,9 +91,11 @@ Description
             // Colour map [optional]
             colourMap       <colourMap>;
 
-            // Colour [optional] (uniform | field)
-            colour          uniform;
-            colourValue     (1 0 0); // RGB in range [0-1]
+            // Colour [optional] (<vector> | uniform | field)
+            colour          (1 0 0); // RGB in range [0-1]
+
+            //colour          uniform;
+            //colourValue     (1 0 0); // RGB in range [0-1]
 
             //colour          field;
             //colourField     d;
@@ -102,9 +106,11 @@ Description
             min             0;
             max             1;
 
-            // Alpha channel [optional] (uniform | field)
-            alpha           uniform;
-            alphaValue      0.5;
+            // Alpha channel [optional] (<scalar> | uniform | field)
+            alpha           0.5;
+
+            //alpha           uniform;
+            //alphaValue      0.5;
 
             //alpha           field;
             //alphaField      T;
@@ -131,6 +137,7 @@ SourceFiles
 
 #include "writer.H"
 #include "colourTable.H"
+#include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -151,10 +158,11 @@ public:
     // Enumerations
 
         //- Field option used for colours
-        enum class fieldOption
+        enum class fieldOption : char
         {
+            NONE,       //!< Placeholder type (unnamed)
             UNIFORM,    //!< Uniform value
-            FIELD       //!< field value
+            FIELD       //!< Field value
         };
 
 
@@ -187,11 +195,8 @@ private:
         //- Return the colour table corresponding to the colour map
         const colourTable& getColourTable(const dictionary& dict) const;
 
-        //- Return the field minimum value
-        scalar getFieldMin(const word& fieldName) const;
-
-        //- Return the field maximum value
-        scalar getFieldMax(const word& fieldName) const;
+        //- Return the named min/max field limits (from sub-dictionary)
+        scalarMinMax getFieldLimits(const word& fieldName) const;
 
         //- Return the alpha field for mesh values
         tmp<scalarField> getAlphaField
@@ -218,9 +223,6 @@ private:
             const List<List<Field<Type>>>& valueSets,
             const label tracki
         ) const;
-
-        //- Return track orientation/dirrections
-        tmp<vectorField> directions(const coordSet& points) const;
 
 
 public:

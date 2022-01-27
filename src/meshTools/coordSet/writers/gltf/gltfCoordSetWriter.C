@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ template<class Type>
 const Foam::Enum<typename Foam::gltfSetWriter<Type>::fieldOption>
 Foam::gltfSetWriter<Type>::fieldOptionNames_
 ({
+    // No naming for NONE
     { fieldOption::UNIFORM, "uniform" },
     { fieldOption::FIELD, "field" },
 });
@@ -70,26 +71,19 @@ const Foam::colourTable& Foam::gltfSetWriter<Type>::getColourTable
 
 
 template<class Type>
-Foam::scalar Foam::gltfSetWriter<Type>::getFieldMin
+Foam::scalarMinMax Foam::gltfSetWriter<Type>::getFieldLimits
 (
     const word& fieldName
 ) const
 {
     const dictionary fieldDict = fieldInfoDict_.subOrEmptyDict(fieldName);
 
-    return fieldDict.getOrDefault("min", -GREAT);
-}
+    scalarMinMax limits;
 
+    fieldDict.readIfPresent("min", limits.min());
+    fieldDict.readIfPresent("max", limits.max());
 
-template<class Type>
-Foam::scalar Foam::gltfSetWriter<Type>::getFieldMax
-(
-    const word& fieldName
-) const
-{
-    const dictionary fieldDict = fieldInfoDict_.subOrEmptyDict(fieldName);
-
-    return fieldDict.getOrDefault("max", GREAT);
+    return limits;
 }
 
 
@@ -101,69 +95,39 @@ Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getAlphaField
     const List<const Field<Type>*>& valueSets
 ) const
 {
-    if (dict.found("alpha"))
+    // Fallback value
+    scalar alphaValue(1);
+
+    const entry* eptr = dict.findEntry("alpha", keyType::LITERAL);
+
+    if (!eptr)
     {
-        const auto option = fieldOptionNames_.get("alpha", dict);
-
-        switch (option)
-        {
-            case fieldOption::UNIFORM:
-            {
-                const scalar value = dict.getScalar("alphaValue");
-                return tmp<scalarField>::New(valueSets[0]->size(), value);
-            }
-            case fieldOption::FIELD:
-            {
-                const word alphaFieldName = dict.get<word>("alphaField");
-                const bool normalise = dict.get<bool>("normalise");
-                const label i = valueSetNames.find(alphaFieldName);
-                if (i == -1)
-                {
-                    FatalErrorInFunction
-                        << "Unable to find field " << alphaFieldName
-                        << ". Valid field names are:" << valueSetNames
-                        << exit(FatalError);
-                }
-
-                auto tresult =
-                    tmp<scalarField>::New(valueSets[i]->component(0));
-
-                if (normalise)
-                {
-                    tresult.ref() /= mag(tresult() + ROOTVSMALL);
-                }
-
-                return tresult;
-            }
-        }
+        // Not specified
     }
-
-    return tmp<scalarField>::New(valueSets[0]->size(), Zero);
-}
-
-
-template<class Type>
-Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getTrackAlphaField
-(
-    const dictionary& dict,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    const label tracki
-) const
-{
-    if (dict.found("alpha"))
+    else if (!eptr->stream().peek().isString())
     {
+        // Value specified
+
+        ITstream& is = eptr->stream();
+        is >> alphaValue;
+        dict.checkITstream(is, "alpha");
+    }
+    else
+    {
+        // Enumeration
+
         const auto option = fieldOptionNames_.get("alpha", dict);
 
         switch (option)
         {
+            case fieldOption::NONE:
+            {
+                break;
+            }
             case fieldOption::UNIFORM:
             {
-                const scalar value = dict.getScalar("alphaValue");
-                return tmp<scalarField>::New
-                (
-                    valueSets[0][tracki].size(), value
-                );
+                dict.readEntry("alphaValue", alphaValue);
+                break;
             }
             case fieldOption::FIELD:
             {
@@ -178,12 +142,9 @@ Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getTrackAlphaField
                         << exit(FatalError);
                 }
 
-                // Note: selecting the first component!
-                auto tresult =
-                    tmp<scalarField>::New
-                    (
-                        valueSets[fieldi][tracki].component(0)
-                    );
+                const Field<Type>& alphaFld = *(valueSets[fieldi]);
+
+                auto tresult = tmp<scalarField>::New(alphaFld.component(0));
 
                 if (normalise)
                 {
@@ -195,7 +156,82 @@ Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getTrackAlphaField
         }
     }
 
-    return tmp<scalarField>::New(valueSets[0][tracki].size(), Zero);
+    return tmp<scalarField>::New(1, alphaValue);
+}
+
+
+template<class Type>
+Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getTrackAlphaField
+(
+    const dictionary& dict,
+    const wordList& valueSetNames,
+    const List<List<Field<Type>>>& valueSets,
+    const label tracki
+) const
+{
+    // Fallback value
+    scalar alphaValue(1);
+
+    const entry* eptr = dict.findEntry("alpha", keyType::LITERAL);
+
+    if (!eptr)
+    {
+        // Not specified
+    }
+    else if (!eptr->stream().peek().isString())
+    {
+        // Value specified
+
+        ITstream& is = eptr->stream();
+        is >> alphaValue;
+        dict.checkITstream(is, "alpha");
+    }
+    else
+    {
+        // Enumeration
+
+        const auto option = fieldOptionNames_.get("alpha", dict);
+
+        switch (option)
+        {
+            case fieldOption::NONE:
+            {
+                break;
+            }
+            case fieldOption::UNIFORM:
+            {
+                dict.readEntry("alphaValue", alphaValue);
+                break;
+            }
+            case fieldOption::FIELD:
+            {
+                const word alphaFieldName = dict.get<word>("alphaField");
+                const bool normalise = dict.get<bool>("normalise");
+                const label fieldi = valueSetNames.find(alphaFieldName);
+                if (fieldi == -1)
+                {
+                    FatalErrorInFunction
+                        << "Unable to find field " << alphaFieldName
+                        << ". Valid field names are:" << valueSetNames
+                        << exit(FatalError);
+                }
+
+                const Field<Type>& alphaFld = valueSets[fieldi][tracki];
+
+                // Note: selecting the first component!
+                auto tresult = tmp<scalarField>::New(alphaFld.component(0));
+
+                if (normalise)
+                {
+                    tresult.ref() /= mag(tresult() + ROOTVSMALL);
+                }
+
+                return tresult;
+            }
+        }
+    }
+
+    return tmp<scalarField>::New(1, alphaValue);
 }
 
 
@@ -215,72 +251,92 @@ Foam::vector Foam::gltfSetWriter<Type>::getTrackAnimationColour
             << abort(FatalError);
     }
 
-    const auto option = fieldOptionNames_.get("colour", animationDict_);
+    const dictionary& dict = animationDict_;
 
-    switch (option)
+    // Fallback value
+    vector colourValue(Zero);
+
+    const entry* eptr = dict.findEntry("colour", keyType::LITERAL);
+
+    if (!eptr || !eptr->isStream())
     {
-        case fieldOption::UNIFORM:
+        FatalIOErrorInFunction(dict)
+            << "Missing 'colour' entry"
+            << exit(FatalIOError);
+    }
+    else if (!eptr->stream().peek().isString())
+    {
+        // Value specified
+
+        ITstream& is = eptr->stream();
+        is >> colourValue;
+        dict.checkITstream(is, "colour");
+    }
+    else
+    {
+        // Enumeration
+
+        const auto option = fieldOptionNames_.get("colour", dict);
+
+        switch (option)
         {
-            return animationDict_.get<vector>("colourValue");
-        }
-        case fieldOption::FIELD:
-        {
-            const word fieldName = animationDict_.get<word>("colourField");
-            const label fieldi = valueSetNames.find(fieldName);
-            if (fieldi == -1)
+            case fieldOption::NONE:
             {
-                FatalErrorInFunction
-                    << "Unable to find field " << fieldName
-                    << ". Valid field names are:" << valueSetNames
-                    << exit(FatalError);
+                break;
             }
-
-            // Note: selecting the first component!
-
-            scalar minValue;
-            scalar maxValue;
-            if (!animationDict_.readIfPresent("min", minValue))
+            case fieldOption::UNIFORM:
             {
-                minValue = min(valueSets[fieldi][tracki].component(0));
+                dict.readEntry("colourValue", colourValue);
+                break;
             }
-            if (!animationDict_.readIfPresent("max", maxValue))
+            case fieldOption::FIELD:
             {
-                maxValue = max(valueSets[fieldi][tracki].component(0));
-            }
-            const scalar refValue = component(valueSets[fieldi][tracki][0], 0);
-            const scalar fraction =
-                (refValue - minValue)/(maxValue - minValue + ROOTVSMALL);
+                const word fieldName = dict.get<word>("colourField");
+                const label fieldi = valueSetNames.find(fieldName);
+                if (fieldi == -1)
+                {
+                    FatalErrorInFunction
+                        << "Unable to find field " << fieldName
+                        << ". Valid field names are:" << valueSetNames
+                        << exit(FatalError);
+                }
 
-            return (colours.value(max(0, min(1, fraction))));
+                const Field<Type>& colourFld = valueSets[fieldi][tracki];
+
+
+                scalar refValue(0);
+                scalarMinMax valLimits;
+
+                if (pTraits<Type>::nComponents == 1)
+                {
+                    MinMax<Type> scanned(minMax(colourFld));
+
+                    refValue = scalar(component(colourFld[0], 0));
+                    valLimits.min() = scalar(component(scanned.min(), 0));
+                    valLimits.max() = scalar(component(scanned.max(), 0));
+                }
+                else
+                {
+                    // Use mag() for multiple components
+                    refValue = mag(colourFld[0]);
+                    valLimits = minMaxMag(colourFld);
+                }
+
+                dict.readIfPresent("min", valLimits.min());
+                dict.readIfPresent("max", valLimits.max());
+
+                const scalar fraction =
+                (
+                    (refValue - valLimits.min())
+                  / (valLimits.max() - valLimits.min() + ROOTVSMALL)
+                );
+
+                return colours.value(fraction);  // 0-1 clipped by value()
+            }
         }
     }
 
-    return vector::zero;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::vectorField> Foam::gltfSetWriter<Type>::directions
-(
-    const coordSet& points
-) const
-{
-    auto tresult = tmp<vectorField>::New(points.size(), Zero);
-    auto& result = tresult.ref();
-
-    if (points.size() > 1)
-    {
-        for (label i = 1; i < points.size(); ++i)
-        {
-            result[i-1] = points[i] - points[i-1];
-            result[i-1].normalise();
-        }
-
-        result.last() = result[points.size()-2];
-    }
-
-
-    return tresult;
+    return colourValue;
 }
 
 
@@ -313,8 +369,7 @@ Foam::gltfSetWriter<Type>::gltfSetWriter(const dictionary& dict)
     //         colourMap       coolToWarm; // others...
     //         min             10;
     //         max             100;
-    //         alpha           field; // uniform|field
-    //         alphaField      ageOfAir;
+    //         alpha           0.5;
     //     }
     // }
 }
@@ -363,43 +418,59 @@ void Foam::gltfSetWriter<Type>::write
         {
             const auto& field = *valueSets[fieldi];
             const word& fieldName = valueSetNames[fieldi];
+
             const dictionary dict = fieldInfoDict_.subOrEmptyDict(fieldName);
             const auto& colours = getColourTable(dict);
 
-            const auto talpha =
-                 getAlphaField(dict, valueSetNames, valueSets);
+            const auto talpha = getAlphaField(dict, valueSetNames, valueSets);
             const scalarField& alpha = talpha();
 
-            const Type maxValue = max(field);
-            const Type minValue = min(field);
+            const scalarMinMax valLimits = getFieldLimits(fieldName);
 
-            const scalar minValueLimit = getFieldMin(fieldName);
-            const scalar maxValueLimit = getFieldMax(fieldName);
+            // Generated field colours
+            vectorField fieldColour(field.size());
 
-            for (direction cmpti=0; cmpti < pTraits<Type>::nComponents; ++cmpti)
+            scalarMinMax fldLimits;
+
+            if (pTraits<Type>::nComponents == 1)
             {
-                vectorField fieldColour(field.size());
+                MinMax<Type> scanned(minMax(field));
 
-                forAll(field, i)
-                {
-                    const Type& v = field[i];
-                    float f = component(v, cmpti);
-                    float minf = max(component(minValue, cmpti), minValueLimit);
-                    float maxf = min(component(maxValue, cmpti), maxValueLimit);
-                    float deltaf = (maxf - minf + SMALL);
-
-                    fieldColour[i] =
-                        colours.value(min(max((f - minf)/deltaf, 0), 1));
-                }
-
-                scene.addColourToMesh
-                (
-                    fieldColour,
-                    "Colour:" + fieldName + Foam::name(cmpti),
-                    meshi,
-                    alpha
-                );
+                fldLimits.min() = scalar(component(scanned.min(), 0));
+                fldLimits.max() = scalar(component(scanned.max(), 0));
             }
+            else
+            {
+                // Use mag() for multiple components
+                fldLimits = minMaxMag(field);
+            }
+
+            const scalar minf = max(fldLimits.min(), valLimits.min());
+            const scalar maxf = min(fldLimits.max(), valLimits.max());
+            const scalar deltaf = (maxf - minf + SMALL);
+
+            forAll(field, i)
+            {
+                const Type& val = field[i];
+
+                const scalar f =
+                (
+                    pTraits<Type>::nComponents == 1
+                  ? scalar(component(val, 0))
+                  : scalar(mag(val))
+                );
+
+                // 0-1 clipped by value()
+                fieldColour[i] = colours.value((f - minf)/deltaf);
+            }
+
+            scene.addColourToMesh
+            (
+                fieldColour,
+                "Colour:" + fieldName,
+                meshi,
+                alpha
+            );
         }
     }
 
@@ -482,6 +553,7 @@ void Foam::gltfSetWriter<Type>::writeStaticTracks
             {
                 const auto& field = valueSets[fieldi][tracki];
                 const word& fieldName = valueSetNames[fieldi];
+
                 const dictionary dict =
                     fieldInfoDict_.subOrEmptyDict(fieldName);
                 const auto& colours = getColourTable(dict);
@@ -490,43 +562,53 @@ void Foam::gltfSetWriter<Type>::writeStaticTracks
                     getTrackAlphaField(dict, valueSetNames, valueSets, tracki);
                 const scalarField& alpha = talpha();
 
-                const Type maxValue = max(field);
-                const Type minValue = min(field);
+                const scalarMinMax valLimits = getFieldLimits(fieldName);
 
-                const scalar minValueLimit = getFieldMin(fieldName);
-                const scalar maxValueLimit = getFieldMax(fieldName);
 
-                for
-                (
-                    direction cmpti=0;
-                    cmpti < pTraits<Type>::nComponents;
-                    ++cmpti
-                )
+                // Generated field colours
+                vectorField fieldColour(field.size());
+
+                scalarMinMax fldLimits;
+
+                if (pTraits<Type>::nComponents == 1)
                 {
-                    vectorField fieldColour(field.size(), Zero);
+                    MinMax<Type> scanned(minMax(field));
 
-                    forAll(field, i)
-                    {
-                        const Type& v = field[i];
-                        float f = component(v, cmpti);
-                        float minf =
-                            max(component(minValue, cmpti), minValueLimit);
-                        float maxf =
-                            min(component(maxValue, cmpti), maxValueLimit);
-                        float deltaf = (maxf - minf + SMALL);
-
-                        fieldColour[i] =
-                           colours.value(min(max((f - minf)/deltaf, 0), 1));
-                    }
-
-                    scene.addColourToMesh
-                    (
-                        fieldColour,
-                        "Colour:" + fieldName + Foam::name(cmpti),
-                        meshi,
-                        alpha
-                    );
+                    fldLimits.min() = scalar(component(scanned.min(), 0));
+                    fldLimits.max() = scalar(component(scanned.max(), 0));
                 }
+                else
+                {
+                    // Use mag() for multiple components
+                    fldLimits = minMaxMag(field);
+                }
+
+                const scalar minf = max(fldLimits.min(), valLimits.min());
+                const scalar maxf = min(fldLimits.max(), valLimits.max());
+                const scalar deltaf = (maxf - minf + SMALL);
+
+                forAll(field, i)
+                {
+                    const Type& val = field[i];
+
+                    const scalar f =
+                    (
+                        pTraits<Type>::nComponents == 1
+                      ? scalar(component(val, 0))
+                      : scalar(mag(val))
+                    );
+
+                    // 0-1 clipped by value()
+                    fieldColour[i] = colours.value((f - minf)/deltaf);
+                }
+
+                scene.addColourToMesh
+                (
+                    fieldColour,
+                    "Colour:" + fieldName,
+                    meshi,
+                    alpha
+                );
             }
         }
     }
@@ -611,7 +693,7 @@ void Foam::gltfSetWriter<Type>::writeAnimateTracks
             scene.addColourToMesh
             (
                 vectorField(1, colour),
-                "Colour:fixed",
+                "Colour:fixed",  // ... or "Colour:constant"
                 meshi,
                 scalarField(1, alpha[0])
             );

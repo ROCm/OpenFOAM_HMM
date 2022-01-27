@@ -28,15 +28,14 @@ License
 template<class Type>
 void Foam::glTF::object::addData(const Type& fld)
 {
-    const label nComponents =
-        pTraits<typename Type::value_type>::nComponents;
+    const direction nCmpts = pTraits<typename Type::value_type>::nComponents;
 
     label count = data_.size();
-    data_.setSize(data_.size() + fld.size()*nComponents);
+    data_.resize(data_.size() + fld.size()*nCmpts);
 
     forAll(fld, fieldi)
     {
-        for (direction d = 0; d < nComponents; ++d)
+        for (direction d = 0; d < nCmpts; ++d)
         {
             data_[count++] = component(fld[fieldi], d);
         }
@@ -45,7 +44,7 @@ void Foam::glTF::object::addData(const Type& fld)
 
 
 template<class Type1, class Type2>
-void Foam::glTF::object::addData(const Type1& fld1, const Type2&fld2)
+void Foam::glTF::object::addData(const Type1& fld1, const Type2& fld2)
 {
     if (fld1.size() != fld2.size())
     {
@@ -55,26 +54,20 @@ void Foam::glTF::object::addData(const Type1& fld1, const Type2&fld2)
             << abort(FatalError);
     }
 
-    const label nComponents1 =
-        pTraits<typename Type1::value_type>::nComponents;
-
-    const label nComponents2 =
-        pTraits<typename Type2::value_type>::nComponents;
+    const direction nCmpts1 = pTraits<typename Type1::value_type>::nComponents;
+    const direction nCmpts2 = pTraits<typename Type2::value_type>::nComponents;
 
     label count = data_.size();
-    data_.setSize
-    (
-        data_.size() + fld1.size()*(nComponents1 + nComponents2)
-    );
+    data_.resize(data_.size() + fld1.size()*(nCmpts1 + nCmpts2));
 
     forAll(fld1, fieldi)
     {
-        for (direction d = 0; d < nComponents1; ++d)
+        for (direction d = 0; d < nCmpts1; ++d)
         {
             data_[count++] = component(fld1[fieldi], d);
         }
 
-        for (direction d = 0; d < nComponents2; ++d)
+        for (direction d = 0; d < nCmpts2; ++d)
         {
             data_[count++] = component(fld2[fieldi], d);
         }

@@ -178,7 +178,7 @@ public:
         //- Predefined tables
         static const HashPtrTable<colourTable>& tables();
 
-        //- Return the colour at x (within 0-1 range)
+        //- Return the colour at x. The input is clipped to 0-1 range.
         vector value(const scalar x) const;
 
         //- Return a discrete lookup table of colours

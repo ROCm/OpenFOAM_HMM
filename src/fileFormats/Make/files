@@ -36,6 +36,7 @@ gltf/foamGltfBufferView.C
 gltf/foamGltfMesh.C
 gltf/foamGltfObject.C
 gltf/foamGltfScene.C
+gltf/foamGltfSceneWriter.C
 
 starcd/STARCDCore.C
 stl/STLCore.C

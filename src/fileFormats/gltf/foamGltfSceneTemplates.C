@@ -33,11 +33,11 @@ Foam::label Foam::glTF::scene::addField
     const label target
 )
 {
-    const label nComponents = pTraits<typename Type::value_type>::nComponents;
+    const direction nCmpts = pTraits<typename Type::value_type>::nComponents;
 
     auto& bv = bufferViews_.create(name);
     bv.byteOffset() = bytes_;
-    bv.byteLength() = fld.size()*nComponents*sizeof(float);
+    bv.byteLength() = fld.size()*nCmpts*sizeof(float);
     if (target != -1)
     {
         bv.target() = target;
@@ -61,8 +61,8 @@ Foam::label Foam::glTF::scene::addMesh(const Type& fld, const word& name)
     const label accessorId =
         addField(fld, name, key(targetTypes::ARRAY_BUFFER));
 
-    auto& mesh = meshes_.create(name);
-    mesh.accessorId() = accessorId;
+    auto& gmesh = meshes_.create(name);
+    gmesh.accessorId() = accessorId;
 
     return meshes_.size() - 1;
 }
@@ -76,17 +76,11 @@ Foam::label Foam::glTF::scene::addFieldToMesh
     const label meshi
 )
 {
-    if (meshi > meshes_.size() - 1)
-    {
-        FatalErrorInFunction
-            << "Mesh " << meshi << " out of range "
-            << (meshes_.size() - 1)
-            << abort(FatalError);
-    }
+    auto& gmesh = getMesh(meshi);
 
     const label accessorId = addField(fld, name);
 
-    meshes_[meshi].addField(name, accessorId);
+    gmesh.addField(name, accessorId);
 
     return accessorId;
 }
