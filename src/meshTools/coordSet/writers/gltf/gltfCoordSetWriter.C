@@ -90,9 +90,7 @@ Foam::scalarMinMax Foam::gltfSetWriter<Type>::getFieldLimits
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getAlphaField
 (
-    const dictionary& dict,
-    const wordList& valueSetNames,
-    const List<const Field<Type>*>& valueSets
+    const dictionary& dict
 ) const
 {
     // Fallback value
@@ -131,102 +129,10 @@ Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getAlphaField
             }
             case fieldOption::FIELD:
             {
-                const word alphaFieldName = dict.get<word>("alphaField");
-                const bool normalise = dict.get<bool>("normalise");
-                const label fieldi = valueSetNames.find(alphaFieldName);
-                if (fieldi == -1)
-                {
-                    FatalErrorInFunction
-                        << "Unable to find field " << alphaFieldName
-                        << ". Valid field names are:" << valueSetNames
-                        << exit(FatalError);
-                }
-
-                const Field<Type>& alphaFld = *(valueSets[fieldi]);
-
-                auto tresult = tmp<scalarField>::New(alphaFld.component(0));
-
-                if (normalise)
-                {
-                    tresult.ref() /= mag(tresult() + ROOTVSMALL);
-                }
-
-                return tresult;
-            }
-        }
-    }
-
-    return tmp<scalarField>::New(1, alphaValue);
-}
-
-
-template<class Type>
-Foam::tmp<Foam::scalarField> Foam::gltfSetWriter<Type>::getTrackAlphaField
-(
-    const dictionary& dict,
-    const wordList& valueSetNames,
-    const List<List<Field<Type>>>& valueSets,
-    const label tracki
-) const
-{
-    // Fallback value
-    scalar alphaValue(1);
-
-    const entry* eptr = dict.findEntry("alpha", keyType::LITERAL);
-
-    if (!eptr)
-    {
-        // Not specified
-    }
-    else if (!eptr->stream().peek().isString())
-    {
-        // Value specified
-
-        ITstream& is = eptr->stream();
-        is >> alphaValue;
-        dict.checkITstream(is, "alpha");
-    }
-    else
-    {
-        // Enumeration
-
-        const auto option = fieldOptionNames_.get("alpha", dict);
-
-        switch (option)
-        {
-            case fieldOption::NONE:
-            {
+                WarningInFunction
+                    << "Unsupported 'field' specification for alpha values"
+                    << endl;
                 break;
-            }
-            case fieldOption::UNIFORM:
-            {
-                dict.readEntry("alphaValue", alphaValue);
-                break;
-            }
-            case fieldOption::FIELD:
-            {
-                const word alphaFieldName = dict.get<word>("alphaField");
-                const bool normalise = dict.get<bool>("normalise");
-                const label fieldi = valueSetNames.find(alphaFieldName);
-                if (fieldi == -1)
-                {
-                    FatalErrorInFunction
-                        << "Unable to find field " << alphaFieldName
-                        << ". Valid field names are:" << valueSetNames
-                        << exit(FatalError);
-                }
-
-                const Field<Type>& alphaFld = valueSets[fieldi][tracki];
-
-                // Note: selecting the first component!
-                auto tresult = tmp<scalarField>::New(alphaFld.component(0));
-
-                if (normalise)
-                {
-                    tresult.ref() /= mag(tresult() + ROOTVSMALL);
-                }
-
-                return tresult;
             }
         }
     }
@@ -422,7 +328,7 @@ void Foam::gltfSetWriter<Type>::write
             const dictionary dict = fieldInfoDict_.subOrEmptyDict(fieldName);
             const auto& colours = getColourTable(dict);
 
-            const auto talpha = getAlphaField(dict, valueSetNames, valueSets);
+            const auto talpha = getAlphaField(dict);
             const scalarField& alpha = talpha();
 
             const scalarMinMax valLimits = getFieldLimits(fieldName);
@@ -558,8 +464,7 @@ void Foam::gltfSetWriter<Type>::writeStaticTracks
                     fieldInfoDict_.subOrEmptyDict(fieldName);
                 const auto& colours = getColourTable(dict);
 
-                const auto talpha =
-                    getTrackAlphaField(dict, valueSetNames, valueSets, tracki);
+                const auto talpha = getAlphaField(dict);
                 const scalarField& alpha = talpha();
 
                 const scalarMinMax valLimits = getFieldLimits(fieldName);
@@ -679,14 +584,7 @@ void Foam::gltfSetWriter<Type>::writeAnimateTracks
                     tracki
                 );
 
-            const auto talpha =
-                getTrackAlphaField
-                (
-                    animationDict_,
-                    valueSetNames,
-                    valueSets,
-                    tracki
-                );
+            const auto talpha = getAlphaField(animationDict_);
 
             const scalarField& alpha = talpha();
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2112                                 |
+|  \\    /   O peration     | Version:  v2206                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -33,14 +33,10 @@ formatOptions
     {
         d
         {
-            colourMap       rainbow;
-            min             0;
-            max             0.001;
-
-            alpha           field; // uniform | field;
-            //alphaValue      0.1; // uniform alpha value
-            alphaField      d;
-            normalise       yes;
+            colourMap   rainbow;
+            min         0;
+            max         0.001;
+            //alpha       1.0;
         }
     }
 }

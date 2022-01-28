@@ -18,12 +18,8 @@ sample1
         {
             T
             {
-                colourMap       fire;
-
-                alpha           field; // uniform | field;
-                //alphaValue      0.1; // uniform alpha value
-                alphaField      T;
-                normalise       yes;
+                colourMap   fire;
+                //alpha       1.0;
             }
         }
     }

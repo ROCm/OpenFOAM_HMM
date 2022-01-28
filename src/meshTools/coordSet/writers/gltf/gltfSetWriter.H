@@ -60,15 +60,8 @@ Description
                 min             0;
                 max             1;
 
-                // Alpha channel [optional] (<scalar> | uniform | field)
+                // Alpha channel [optional] (<scalar>)
                 alpha           0.5;
-
-                //alpha           uniform;
-                //alphaValue      0.5;
-
-                //alpha           field;
-                //alphaField      T;
-                //normalise       yes;
             }
         }
     }
@@ -106,15 +99,8 @@ Description
             min             0;
             max             1;
 
-            // Alpha channel [optional] (<scalar> | uniform | field)
+            // Alpha channel [optional] (<scalar>)
             alpha           0.5;
-
-            //alpha           uniform;
-            //alphaValue      0.5;
-
-            //alpha           field;
-            //alphaField      T;
-            //normalise       yes;
         }
     }
     \endverbatim
@@ -199,21 +185,7 @@ private:
         scalarMinMax getFieldLimits(const word& fieldName) const;
 
         //- Return the alpha field for mesh values
-        tmp<scalarField> getAlphaField
-        (
-            const dictionary& dict,
-            const wordList& valueSetNames,
-            const List<const Field<Type>*>& valueSets
-        ) const;
-
-        //- Return the alpha field for tracks
-        tmp<scalarField> getTrackAlphaField
-        (
-            const dictionary& dict,
-            const wordList& valueSetNames,
-            const List<List<Field<Type>>>& valueSets,
-            const label tracki
-        ) const;
+        tmp<scalarField> getAlphaField(const dictionary& dict) const;
 
         //- Return the animation colour when animating tracks
         vector getTrackAnimationColour
