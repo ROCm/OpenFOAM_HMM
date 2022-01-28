@@ -349,6 +349,9 @@ class STDMD
             //- to 'G' if '(ezNorm/zNorm > minBasis)'
             void expand(const RMatrix& ez, const scalar ezNorm);
 
+            //- Update 'G' before the potential orthonormal basis compression
+            void updateG(const RMatrix& z);
+
             //- Compress orthonormal basis for 'Q' and 'G' if '(Q.n()>maxRank)'
             void compress();
 

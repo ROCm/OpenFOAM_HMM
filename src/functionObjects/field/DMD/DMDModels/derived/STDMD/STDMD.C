@@ -82,13 +82,34 @@ Foam::RectangularMatrix<Foam::scalar> Foam::DMDModels::STDMD::orthonormalise
     RMatrix ez
 ) const
 {
-    RMatrix dz(Q_.n(), 1, Zero);
+    List<scalar> dz(Q_.n());
+    const label sz0 = ez.m();
+    const label sz1 = dz.size();
 
     for (label i = 0; i < nGramSchmidt_; ++i)
     {
-        dz = Q_ & ez;
-        reduce(dz, sumOp<RMatrix>());
-        ez -= Q_*dz;
+        // dz = Q_ & ez;
+        dz = Zero;
+        for (label i = 0; i < sz0; ++i)
+        {
+            for (label j = 0; j < sz1; ++j)
+            {
+                dz[j] += Q_(i,j)*ez(i,0);
+            }
+        }
+
+        reduce(dz, sumOp<List<scalar>>());
+
+        // ez -= Q_*dz;
+        for (label i = 0; i < sz0; ++i)
+        {
+            scalar t = 0;
+            for (label j = 0; j < sz1; ++j)
+            {
+                t += Q_(i,j)*dz[j];
+            }
+            ez(i,0) -= t;
+        }
     }
 
     return ez;
@@ -106,6 +127,34 @@ void Foam::DMDModels::STDMD::expand(const RMatrix& ez, const scalar ezNorm)
 
     // Stack a row (Zero) and column (Zero) to "G"
     G_.resize(G_.m() + 1);
+}
+
+
+void Foam::DMDModels::STDMD::updateG(const RMatrix& z)
+{
+    List<scalar> zTilde(Q_.n(), Zero);
+    const label sz0 = z.m();
+    const label sz1 = zTilde.size();
+
+    // zTilde = Q_ & z;
+    for (label i = 0; i < sz0; ++i)
+    {
+        for (label j = 0; j < sz1; ++j)
+        {
+            zTilde[j] += Q_(i,j)*z(i,0);
+        }
+    }
+
+    reduce(zTilde, sumOp<List<scalar>>());
+
+    // G_ += SMatrix(zTilde^zTilde);
+    for (label i = 0; i < G_.m(); ++i)
+    {
+        for (label j = 0; j < G_.n(); ++j)
+        {
+            G_(i, j) += zTilde[i]*zTilde[j];
+        }
+    }
 }
 
 
@@ -234,9 +283,10 @@ reducedKoopmanOperator()
                 // on Rx of receiver subset masters
                 QRMatrix<RMatrix> QRM
                 (
-                    Rx,
                     QRMatrix<RMatrix>::modes::ECONOMY,
-                    QRMatrix<RMatrix>::outputs::ONLY_R
+                    QRMatrix<RMatrix>::outputs::ONLY_R,
+                    QRMatrix<RMatrix>::pivoting::FALSE,
+                    Rx
                 );
                 RMatrix& R = QRM.R();
                 Rx.transfer(R);
@@ -257,6 +307,7 @@ reducedKoopmanOperator()
         }
 
         pBufs.finishedSends();
+
 
         // Receive interim Rx by the master, and apply final operations
         if (Pstream::master())
@@ -289,9 +340,10 @@ reducedKoopmanOperator()
             {
                 QRMatrix<RMatrix> QRM
                 (
-                    Rx,
                     QRMatrix<RMatrix>::modes::ECONOMY,
-                    QRMatrix<RMatrix>::outputs::ONLY_R
+                    QRMatrix<RMatrix>::outputs::ONLY_R,
+                    QRMatrix<RMatrix>::pivoting::FALSE,
+                    Rx
                 );
                 RMatrix& R = QRM.R();
                 Rx.transfer(R);
@@ -410,8 +462,6 @@ bool Foam::DMDModels::STDMD::eigendecomposition(SMatrix& Atilde)
     Pstream::scatter(evals_);
     Pstream::scatter(evecs_);
 
-    Atilde.clear();
-
     return true;
 }
 
@@ -460,7 +510,7 @@ void Foam::DMDModels::STDMD::frequencies()
 
 void Foam::DMDModels::STDMD::amplitudes()
 {
-    const IOField<scalar> snapshot0
+    IOField<scalar> snapshot0
     (
         IOobject
         (
@@ -473,29 +523,47 @@ void Foam::DMDModels::STDMD::amplitudes()
         )
     );
 
-    RMatrix snapshot(1, 1, Zero);
-    if (!empty_)
-    {
-        snapshot.resize(Qupper_.m(), 1);
-        std::copy(snapshot0.cbegin(), snapshot0.cend(), snapshot.begin());
-    }
+    // RxInv^T*(Qupper^T*snapshot0)
+    // tmp = (Qupper^T*snapshot0)
+    List<scalar> tmp(Qupper_.n(), Zero);
+    const label sz0 = snapshot0.size();
+    const label sz1 = tmp.size();
 
-    RMatrix R((RxInv_.T()^Qupper_)*snapshot);
-    reduce(R, sumOp<RMatrix>());
+    for (label i = 0; i < sz0; ++i)
+    {
+        for (label j = 0; j < sz1; ++j)
+        {
+            tmp[j] += Qupper_(i,j)*snapshot0[i];
+        }
+    }
+    snapshot0.clear();
+
+    // R = RxInv^T*tmp
+    List<scalar> R(Qupper_.n(), Zero);
+    for (label i = 0; i < sz1; ++i)
+    {
+        for (label j = 0; j < R.size(); ++j)
+        {
+            R[j] += RxInv_(i,j)*tmp[i];
+        }
+    }
+    tmp.clear();
+
+    reduce(R, sumOp<List<scalar>>());
 
     if (Pstream::master())
     {
         Info<< tab << "Computing amplitudes" << endl;
 
-        amps_.resize(R.m());
+        amps_.resize(R.size());
         const RCMatrix pEvecs(MatrixTools::pinv(evecs_));
 
         // amps_ = pEvecs*R;
         for (label i = 0; i < amps_.size(); ++i)
         {
-            for (label j = 0; j < R.m(); ++j)
+            for (label j = 0; j < R.size(); ++j)
             {
-                amps_[i] += pEvecs(i, j)*R(j, 0);
+                amps_[i] += pEvecs(i,j)*R[j];
             }
         }
     }
@@ -634,6 +702,8 @@ bool Foam::DMDModels::STDMD::dynamics()
     {
         return false;
     }
+
+    Atilde.clear();
 
     frequencies();
 
@@ -945,12 +1015,7 @@ bool Foam::DMDModels::STDMD::update(const RMatrix& z)
     }
 
     // Update "G" before the potential orthonormal basis compression
-    {
-        RMatrix zTilde(Q_ & z);
-        reduce(zTilde, sumOp<RMatrix>());
-
-        G_ += SMatrix(zTilde^zTilde);
-    }
+    updateG(z);
 
     // Compress the orthonormal basis if required
     if (Q_.n() >= maxRank_)
