@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,23 +25,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::nastranSetWriter
+    Foam::rawSetWriter
 
 Description
-    Line format in Nastran (currently hardcoded to 'free' format)
-
-    Does not do field data.
 
 SourceFiles
-    nastranSetWriter.C
+    rawCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nastranSetWriter_H
-#define nastranSetWriter_H
+#ifndef Foam_coordSetWriters_rawWriter_H
+#define Foam_coordSetWriters_rawWriter_H
 
 #include "writer.H"
-#include "NASCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,45 +45,31 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class nastranSetWriter Declaration
+                       Class rawSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class nastranSetWriter
+class rawSetWriter
 :
     public writer<Type>
 {
-    // Private Member Functions
-
-        //- Write the formatted keyword to the output stream
-        Ostream& writeKeyword
-        (
-            Ostream& os,
-            const word& keyword
-        ) const;
-
-
 public:
 
-    //- File field formats
-    using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
-
-
     //- Runtime type information
-    TypeName("nastran");
+    TypeName("raw");
 
 
     // Constructors
 
         //- Default construct
-        nastranSetWriter();
+        rawSetWriter();
 
         //- Construct with dictionary
-        explicit nastranSetWriter(const dictionary& dict);
+        explicit rawSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~nastranSetWriter() = default;
+    virtual ~rawSetWriter() = default;
 
 
     // Member Functions
@@ -124,7 +107,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "nastranSetWriter.C"
+    #include "rawCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2018-2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +24,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::gnuplotSetWriter
+    Foam::nastranSetWriter
 
 Description
+    Line format in Nastran (currently hardcoded to 'free' format)
+
+    Does not do field data.
 
 SourceFiles
-    gnuplotSetWriter.C
+    nastranCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef gnuplotSetWriter_H
-#define gnuplotSetWriter_H
+#ifndef Foam_coordSetWriters_nastranWriter_H
+#define Foam_coordSetWriters_nastranWriter_H
 
 #include "writer.H"
+#include "NASCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,31 +48,45 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class gnuplotSetWriter Declaration
+                     Class nastranSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class gnuplotSetWriter
+class nastranSetWriter
 :
     public writer<Type>
 {
+    // Private Member Functions
+
+        //- Write the formatted keyword to the output stream
+        Ostream& writeKeyword
+        (
+            Ostream& os,
+            const word& keyword
+        ) const;
+
+
 public:
 
+    //- File field formats
+    using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
+
+
     //- Runtime type information
-    TypeName("gnuplot");
+    TypeName("nastran");
 
 
     // Constructors
 
         //- Default construct
-        gnuplotSetWriter();
+        nastranSetWriter();
 
         //- Construct with dictionary
-        explicit gnuplotSetWriter(const dictionary& dict);
+        explicit nastranSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~gnuplotSetWriter() = default;
+    virtual ~nastranSetWriter() = default;
 
 
     // Member Functions
@@ -107,7 +124,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "gnuplotSetWriter.C"
+    #include "nastranCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

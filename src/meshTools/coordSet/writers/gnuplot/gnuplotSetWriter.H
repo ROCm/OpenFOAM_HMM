@@ -25,17 +25,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::xmgraceSetWriter
+    Foam::gnuplotSetWriter
 
 Description
 
 SourceFiles
-    xmgraceSetWriter.C
+    gnuplotCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef xmgraceSetWriter_H
-#define xmgraceSetWriter_H
+#ifndef Foam_coordSetWriters_gnuplotWriter_H
+#define Foam_coordSetWriters_gnuplotWriter_H
 
 #include "writer.H"
 
@@ -45,31 +45,31 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class xmgraceSetWriter Declaration
+                     Class gnuplotSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class xmgraceSetWriter
+class gnuplotSetWriter
 :
     public writer<Type>
 {
 public:
 
     //- Runtime type information
-    TypeName("xmgr");
+    TypeName("gnuplot");
 
 
     // Constructors
 
         //- Default construct
-        xmgraceSetWriter();
+        gnuplotSetWriter();
 
         //- Construct with dictionary
-        explicit xmgraceSetWriter(const dictionary& dict);
+        explicit gnuplotSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~xmgraceSetWriter() = default;
+    virtual ~gnuplotSetWriter() = default;
 
 
     // Member Functions
@@ -107,7 +107,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "xmgraceSetWriter.C"
+    #include "gnuplotCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

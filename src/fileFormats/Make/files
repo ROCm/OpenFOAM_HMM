@@ -71,18 +71,5 @@ vtk/write/foamVtkLineWriter.C
 vtk/write/foamVtkPolyWriter.C
 vtk/write/foamVtkSurfaceWriter.C
 
-coordSet/coordSet.C
-
-setWriters = sampledSetWriters
-
-$(setWriters)/writers.C
-$(setWriters)/csv/csvSetWriterRunTime.C
-$(setWriters)/ensight/ensightSetWriterRunTime.C
-$(setWriters)/gltf/gltfSetWriterRunTime.C
-$(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
-$(setWriters)/nastran/nastranSetWriterRunTime.C
-$(setWriters)/raw/rawSetWriterRunTime.C
-$(setWriters)/vtk/vtkSetWriterRunTime.C
-$(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 
 LIB = $(FOAM_LIBBIN)/libfileFormats

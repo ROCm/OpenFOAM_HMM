@@ -25,18 +25,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::csvSetWriter
+    Foam::vtkSetWriter
 
 Description
-    Write set in csv format
+
+Note
+    The output order of symmTensor is incorrect.
 
 SourceFiles
-    csvSetWriter.C
+    vtkCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef csvSetWriter_H
-#define csvSetWriter_H
+#ifndef Foam_coordSetWriters_vtkWriter_H
+#define Foam_coordSetWriters_vtkWriter_H
 
 #include "writer.H"
 
@@ -46,44 +48,31 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class csvSetWriter Declaration
+                     Class vtkSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class csvSetWriter
+class vtkSetWriter
 :
     public writer<Type>
 {
-
-    // Private Member Functions
-
-        void writeCoordHeader(const coordSet&, Ostream&) const;
-
-        void writeHeader(const coordSet&, const wordList&, Ostream&) const;
-
-
-protected:
-
-    virtual void writeSeparator(Ostream&) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("csv");
+    TypeName("vtk");
 
 
     // Constructors
 
         //- Default construct
-        csvSetWriter();
+        vtkSetWriter();
 
         //- Construct with dictionary
-        explicit csvSetWriter(const dictionary& dict);
+        explicit vtkSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~csvSetWriter() = default;
+    virtual ~vtkSetWriter() = default;
 
 
     // Member Functions
@@ -121,7 +110,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "csvSetWriter.C"
+    #include "vtkCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

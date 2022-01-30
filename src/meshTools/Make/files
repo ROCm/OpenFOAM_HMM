@@ -132,7 +132,22 @@ searchableSurfaces/searchableSurfaceWithGaps/searchableSurfaceWithGaps.C
 searchableSurfaces/subTriSurfaceMesh/subTriSurfaceMesh.C
 searchableSurfaces/triSurfaceMesh/triSurfaceMesh.C
 
-topoSets = sets/topoSets
+coordSet/coordSet.C
+
+setWriters = coordSet/writers
+
+$(setWriters)/common/writers.C
+$(setWriters)/csv/csvSetWriterRunTime.C
+$(setWriters)/ensight/ensightSetWriterRunTime.C
+$(setWriters)/gltf/gltfSetWriterRunTime.C
+$(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
+$(setWriters)/nastran/nastranSetWriterRunTime.C
+$(setWriters)/raw/rawSetWriterRunTime.C
+$(setWriters)/vtk/vtkSetWriterRunTime.C
+$(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
+
+
+topoSets = topoSet/topoSets
 $(topoSets)/cellBitSet.C
 $(topoSets)/cellSet.C
 $(topoSets)/cellZoneSet.C
@@ -147,9 +162,9 @@ $(topoSets)/topoBoolSet.C
 $(topoSets)/topoBitSet.C
 $(topoSets)/topoSet.C
 
-sets/topoSetSource/topoSetSource.C
+topoSet/topoSetSource/topoSetSource.C
 
-cellSources = sets/cellSources
+cellSources = topoSet/cellSources
 $(cellSources)/topoSetCellSource/topoSetCellSource.C
 $(cellSources)/boundaryToCell/boundaryToCell.C
 $(cellSources)/boxToCell/boxToCell.C
@@ -174,7 +189,7 @@ $(cellSources)/surfaceToCell/surfaceToCell.C
 $(cellSources)/targetVolumeToCell/targetVolumeToCell.C
 $(cellSources)/zoneToCell/zoneToCell.C
 
-faceSources = sets/faceSources
+faceSources = topoSet/faceSources
 $(faceSources)/topoSetFaceSource/topoSetFaceSource.C
 $(faceSources)/boundaryToFace/boundaryToFace.C
 $(faceSources)/boxToFace/boxToFace.C
@@ -191,7 +206,7 @@ $(faceSources)/searchableSurfaceToFace/searchableSurfaceToFace.C
 $(faceSources)/sphereToFace/sphereToFace.C
 $(faceSources)/zoneToFace/zoneToFace.C
 
-pointSources = sets/pointSources
+pointSources = topoSet/pointSources
 $(pointSources)/topoSetPointSource/topoSetPointSource.C
 $(pointSources)/boxToPoint/boxToPoint.C
 $(pointSources)/cellToPoint/cellToPoint.C
@@ -205,7 +220,7 @@ $(pointSources)/sphereToPoint/sphereToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
 
-faceZoneSources = sets/faceZoneSources
+faceZoneSources = topoSet/faceZoneSources
 $(faceZoneSources)/topoSetFaceZoneSource/topoSetFaceZoneSource.C
 $(faceZoneSources)/faceZoneToFaceZone/faceZoneToFaceZone.C
 $(faceZoneSources)/setsToFaceZone/setsToFaceZone.C
@@ -214,11 +229,11 @@ $(faceZoneSources)/setAndNormalToFaceZone/setAndNormalToFaceZone.C
 $(faceZoneSources)/searchableSurfaceToFaceZone/searchableSurfaceToFaceZone.C
 $(faceZoneSources)/planeToFaceZone/planeToFaceZone.C
 
-cellZoneSources = sets/cellZoneSources
+cellZoneSources = topoSet/cellZoneSources
 $(cellZoneSources)/topoSetCellZoneSource/topoSetCellZoneSource.C
 $(cellZoneSources)/setToCellZone/setToCellZone.C
 
-pointZoneSources = sets/pointZoneSources
+pointZoneSources = topoSet/pointZoneSources
 $(pointZoneSources)/topoSetPointZoneSource/topoSetPointZoneSource.C
 $(pointZoneSources)/setToPointZone/setToPointZone.C
 

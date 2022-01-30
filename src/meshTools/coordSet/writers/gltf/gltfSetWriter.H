@@ -122,12 +122,12 @@ Note
     https://www.khronos.org/registry/glTF/
 
 SourceFiles
-    gltfSetWriter.C
+    gltfCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writers_gltfSetWriter_H
-#define writers_gltfSetWriter_H
+#ifndef Foam_coordSetWriters_gltfWriter_H
+#define Foam_coordSetWriters_gltfWriter_H
 
 #include "writer.H"
 #include "colourTable.H"
@@ -302,7 +302,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "gltfSetWriter.C"
+    #include "gltfCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

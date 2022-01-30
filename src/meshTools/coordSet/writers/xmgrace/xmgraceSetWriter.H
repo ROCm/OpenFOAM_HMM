@@ -25,17 +25,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ensightSetWriter
+    Foam::xmgraceSetWriter
 
 Description
 
 SourceFiles
-    ensightSetWriter.C
+    xmgraceCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightSetWriter_H
-#define ensightSetWriter_H
+#ifndef Foam_coordSetWriters_xmgraceWriter_H
+#define Foam_coordSetWriters_xmgraceWriter_H
 
 #include "writer.H"
 
@@ -45,32 +45,31 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class ensightSetWriter Declaration
+                     Class xmgraceSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class ensightSetWriter
+class xmgraceSetWriter
 :
     public writer<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("ensight");
+    TypeName("xmgr");
 
 
     // Constructors
 
         //- Default construct
-        ensightSetWriter();
+        xmgraceSetWriter();
 
         //- Construct with dictionary
-        explicit ensightSetWriter(const dictionary& dict);
+        explicit xmgraceSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~ensightSetWriter() = default;
+    virtual ~xmgraceSetWriter() = default;
 
 
     // Member Functions
@@ -108,7 +107,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "ensightSetWriter.C"
+    #include "xmgraceCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

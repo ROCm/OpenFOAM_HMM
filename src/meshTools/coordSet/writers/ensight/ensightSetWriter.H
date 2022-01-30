@@ -25,17 +25,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rawSetWriter
+    Foam::ensightSetWriter
 
 Description
 
 SourceFiles
-    rawSetWriter.C
+    ensightCoordSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rawSetWriter_H
-#define rawSetWriter_H
+#ifndef Foam_coordSetWriters_ensightWriter_H
+#define Foam_coordSetWriters_ensightWriter_H
 
 #include "writer.H"
 
@@ -45,31 +45,32 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class rawSetWriter Declaration
+                     Class ensightSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class rawSetWriter
+class ensightSetWriter
 :
     public writer<Type>
 {
+
 public:
 
     //- Runtime type information
-    TypeName("raw");
+    TypeName("ensight");
 
 
     // Constructors
 
         //- Default construct
-        rawSetWriter();
+        ensightSetWriter();
 
         //- Construct with dictionary
-        explicit rawSetWriter(const dictionary& dict);
+        explicit ensightSetWriter(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~rawSetWriter() = default;
+    virtual ~ensightSetWriter() = default;
 
 
     // Member Functions
@@ -107,7 +108,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "rawSetWriter.C"
+    #include "ensightCoordSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
