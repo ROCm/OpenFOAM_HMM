@@ -33,6 +33,7 @@ License
 #include "typeInfo.H"
 #include "addToRunTimeSelectionTable.H"
 #include "boundaryRadiationProperties.H"
+#include "lduCalculatedProcessorField.H"
 
 using namespace Foam::constant;
 
@@ -77,6 +78,8 @@ void Foam::radiation::viewFactor::initialise()
     DebugInFunction
         << "Total number of clusters : " << totalNCoarseFaces_ << endl;
 
+    useDirect_ = coeffs_.getOrDefault<bool>("useDirectSolver", true);
+
     map_.reset
     (
         new IOmapDistribute
@@ -93,94 +96,385 @@ void Foam::radiation::viewFactor::initialise()
         )
     );
 
-    scalarListIOList FmyProc
+    FmyProc_.reset
     (
-        IOobject
+        new scalarListIOList
         (
-            "F",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject
+            (
+                "F",
+                mesh_.facesInstance(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
         )
     );
 
-    labelListIOList globalFaceFaces
+    globalFaceFaces_.reset
     (
-        IOobject
+        new labelListIOList
         (
-            "globalFaceFaces",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject
+            (
+                "globalFaceFaces",
+                mesh_.facesInstance(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
         )
     );
 
-    List<labelListList> globalFaceFacesProc(Pstream::nProcs());
-    globalFaceFacesProc[Pstream::myProcNo()] = globalFaceFaces;
-    Pstream::gatherList(globalFaceFacesProc);
-
-    List<scalarListList> F(Pstream::nProcs());
-    F[Pstream::myProcNo()] = FmyProc;
-    Pstream::gatherList(F);
 
     globalIndex globalNumbering(nLocalCoarseFaces_);
 
-    if (Pstream::master())
+    // Size coarse qr
+    qrBandI_.setSize(nBands_);
+    forAll (qrBandI_, bandI)
     {
-        Fmatrix_.reset
-        (
-            new scalarSquareMatrix(totalNCoarseFaces_, Zero)
-        );
+        qrBandI_[bandI].setSize(nLocalCoarseFaces_, 0.0);
+    }
 
-        DebugInFunction
-            << "Insert elements in the matrix..." << endl;
+    if (!useDirect_)
+    {
+        DynamicList<label> dfaceJ;
 
-        for (const int procI : Pstream::allProcs())
+        // Per processor to owner (local)/neighbour (remote)
+        List<DynamicList<label>> procOwner(Pstream::nProcs());
+        List<DynamicList<label>> dynProcNeighbour(Pstream::nProcs());
+
+        forAll (globalFaceFaces_(), iFace)
         {
-            insertMatrixElements
-            (
-                globalNumbering,
-                procI,
-                globalFaceFacesProc[procI],
-                F[procI],
-                Fmatrix_()
-            );
-        }
-
-
-        if (coeffs_.get<bool>("smoothing"))
-        {
-            DebugInFunction << "Smoothing the matrix..." << endl;
-
-            for (label i=0; i<totalNCoarseFaces_; i++)
+            const labelList& visFaces = globalFaceFaces_()[iFace];
+            forAll (visFaces, j)
             {
-                scalar sumF = 0.0;
-                for (label j=0; j<totalNCoarseFaces_; j++)
-                {
-                    sumF += Fmatrix_()(i, j);
-                }
+                label gFacej = visFaces[j];
+                label proci = globalNumbering.whichProcID(gFacej);
+                label faceJ = globalNumbering.toLocal(proci, gFacej);
 
-                const scalar delta = sumF - 1.0;
-                for (label j=0; j<totalNCoarseFaces_; j++)
+                if (Pstream::myProcNo() == proci)
                 {
-                    Fmatrix_()(i, j) *= (1.0 - delta/(sumF + 0.001));
+                    edge e(iFace, faceJ);
+                    if (rays_.insert(e))
+                    {
+                        dfaceJ.append(j);
+                    }
+                }
+                else
+                {
+                    label gFaceI =
+                        globalNumbering.toGlobal(Pstream::myProcNo(), iFace);
+
+                    label proci = globalNumbering.whichProcID(gFacej);
+
+                    label facei =
+                        globalNumbering.toLocal(Pstream::myProcNo(), gFaceI);
+
+                    label remoteFacei = globalNumbering.toLocal(proci, gFacej);
+
+                    procOwner[proci].append(facei);
+                    dynProcNeighbour[proci].append(remoteFacei);
                 }
             }
         }
 
-        coeffs_.readEntry("constantEmissivity", constEmissivity_);
-        if (constEmissivity_)
+        mapRayToFmy_.transfer(dfaceJ);
+
+        labelList upper(rays_.size(), -1);
+        labelList lower(rays_.size(), -1);
+
+        const edgeList& raysLst = rays_.sortedToc();
+        label rayI = 0;
+        for (const auto& e : raysLst)
         {
-            CLU_.reset
+            label faceI = e.start();
+            label faceJ = e.end();
+            upper[rayI] = max(faceI, faceJ);
+            lower[rayI] = min(faceI, faceJ);
+            rayI++;
+        }
+
+        labelListList procNeighbour(dynProcNeighbour.size());
+        forAll(procNeighbour, i)
+        {
+            procNeighbour[i] = std::move(dynProcNeighbour[i]);
+        }
+        labelListList mySendCells;
+        Pstream::exchange<labelList, label>(procNeighbour, mySendCells);
+
+        label nbri = 0;
+        forAll(procOwner, proci)
+        {
+            if (procOwner[proci].size())
+            {
+                nbri++;
+            }
+            if (mySendCells[proci].size())
+            {
+                nbri++;
+            }
+        }
+
+        DebugInFunction<< "Number of procBound : " <<  nbri << endl;
+
+        PtrList<const lduPrimitiveProcessorInterface> primitiveInterfaces;
+
+        primitiveInterfaces.setSize(nbri);
+        internalCoeffs_.setSize(0);
+        boundaryCoeffs_.setSize(nbri);
+
+        nbri = 0;
+
+        procToInterface_.setSize(Pstream::nProcs(), -1);
+
+        forAll(procOwner, proci)
+        {
+            if (proci < Pstream::myProcNo() && procOwner[proci].size())
+            {
+                if (debug)
+                {
+                    Pout<< "Adding interface " << nbri
+                        << " to receive my " << procOwner[proci].size()
+                        << " from " << proci << endl;
+                }
+                procToInterface_[proci] = nbri;
+                primitiveInterfaces.set
+                (
+                    nbri++,
+                    new lduPrimitiveProcessorInterface
+                    (
+                        procOwner[proci],
+                        Pstream::myProcNo(),
+                        proci,
+                        tensorField(0),
+                        Pstream::msgType()+2
+                    )
+                );
+            }
+            else if (proci > Pstream::myProcNo() && mySendCells[proci].size())
+            {
+                if (debug)
+                {
+                    Pout<< "Adding interface " << nbri
+                        << " to send my " << mySendCells[proci].size()
+                        << " to " << proci << endl;
+                }
+                primitiveInterfaces.set
+                (
+                    nbri++,
+                    new lduPrimitiveProcessorInterface
+                    (
+                        mySendCells[proci],
+                        Pstream::myProcNo(),
+                        proci,
+                        tensorField(0),
+                        Pstream::msgType()+2
+                    )
+                );
+            }
+        }
+        forAll(procOwner, proci)
+        {
+            if (proci > Pstream::myProcNo() && procOwner[proci].size())
+            {
+                if (debug)
+                {
+                    Pout<< "Adding interface " << nbri
+                        << " to receive my " << procOwner[proci].size()
+                        << " from " << proci << endl;
+                }
+                procToInterface_[proci] = nbri;
+                primitiveInterfaces.set
+                (
+                    nbri++,
+                    new lduPrimitiveProcessorInterface
+                    (
+                        procOwner[proci],
+                        Pstream::myProcNo(),
+                        proci,
+                        tensorField(0),
+                        Pstream::msgType()+3
+                    )
+                );
+            }
+            else if (proci < Pstream::myProcNo() && mySendCells[proci].size())
+            {
+                if (debug)
+                {
+                    Pout<< "Adding interface " << nbri
+                        << " to send my " << mySendCells[proci].size()
+                        << " to " << proci << endl;
+                }
+                primitiveInterfaces.set
+                (
+                    nbri++,
+                    new lduPrimitiveProcessorInterface
+                    (
+                        mySendCells[proci],
+                        Pstream::myProcNo(),
+                        proci,
+                        tensorField(0),
+                        Pstream::msgType()+3
+                    )
+                );
+            }
+        }
+
+        forAll (boundaryCoeffs_, proci)
+        {
+            boundaryCoeffs_.set
+            (
+                proci,
+                new Field<scalar>
+                (
+                    primitiveInterfaces[proci].faceCells().size(),
+                    Zero
+                )
+            );
+        }
+
+        lduInterfacePtrsList allInterfaces;
+        allInterfaces.setSize(primitiveInterfaces.size());
+
+        forAll(primitiveInterfaces, i)
+        {
+            const lduPrimitiveProcessorInterface& pp = primitiveInterfaces[i];
+
+            allInterfaces.set(i, &pp);
+        }
+
+        const lduSchedule ps
+        (
+            lduPrimitiveMesh::nonBlockingSchedule
+                <lduPrimitiveProcessorInterface>(allInterfaces)
+        );
+
+        PtrList<const lduInterface> allInterfacesPtr(allInterfaces.size());
+        forAll (allInterfacesPtr, i)
+        {
+            const lduPrimitiveProcessorInterface& pp = primitiveInterfaces[i];
+
+            allInterfacesPtr.set
+            (
+                i,
+                new lduPrimitiveProcessorInterface(pp)
+            );
+        }
+
+        lduPtr_.reset
+        (
+            new lduPrimitiveMesh
+            (
+                rays_.size(),
+                lower,
+                upper,
+                allInterfacesPtr,
+                ps,
+                UPstream::worldComm
+            )
+        );
+
+        // Set size for local lduMatrix
+        matrixPtr_.reset(new lduMatrix(lduPtr_()));
+
+        scalarListList& myF = FmyProc_();
+
+        if (coeffs_.get<bool>("smoothing"))
+        {
+            scalar maxDelta = 0;
+            scalar totalDelta = 0;
+            forAll (myF, i)
+            {
+                scalar sumF = 0.0;
+                scalarList& myFij = myF[i];
+                forAll (myFij, j)
+                {
+                    sumF += myFij[j];
+                }
+                const scalar delta = sumF - 1.0;
+                forAll (myFij, j)
+                {
+                    myFij[j] *= (1.0 - delta/(sumF + 0.001));
+                }
+                totalDelta += delta;
+                if (delta > maxDelta)
+                {
+                    maxDelta = delta;
+                }
+            }
+            totalDelta /= myF.size();
+            reduce(totalDelta, sumOp<scalar>());
+            reduce(maxDelta, maxOp<scalar>());
+            Info << "Smoothng average delta : " << totalDelta << endl;
+            Info << "Smoothng maximum delta : " << maxDelta << nl << endl;
+        }
+    }
+
+    if (useDirect_)
+    {
+        List<labelListList> globalFaceFacesProc(Pstream::nProcs());
+        globalFaceFacesProc[Pstream::myProcNo()] = globalFaceFaces_();
+        Pstream::gatherList(globalFaceFacesProc);
+
+        List<scalarListList> F(Pstream::nProcs());
+        F[Pstream::myProcNo()] = FmyProc_();
+        Pstream::gatherList(F);
+
+        if (Pstream::master())
+        {
+            Fmatrix_.reset
             (
                 new scalarSquareMatrix(totalNCoarseFaces_, Zero)
             );
 
-            pivotIndices_.setSize(CLU_().m());
+            DebugInFunction
+                << "Insert elements in the matrix..." << endl;
+
+            for (const int procI : Pstream::allProcs())
+            {
+                insertMatrixElements
+                (
+                    globalNumbering,
+                    procI,
+                    globalFaceFacesProc[procI],
+                    F[procI],
+                    Fmatrix_()
+                );
+            }
+
+            if (coeffs_.get<bool>("smoothing"))
+            {
+                DebugInFunction << "Smoothing the matrix..." << endl;
+
+                for (label i=0; i<totalNCoarseFaces_; i++)
+                {
+                    scalar sumF = 0.0;
+                    for (label j=0; j<totalNCoarseFaces_; j++)
+                    {
+                        sumF += Fmatrix_()(i, j);
+                    }
+
+                    const scalar delta = sumF - 1.0;
+                    for (label j=0; j<totalNCoarseFaces_; j++)
+                    {
+                        Fmatrix_()(i, j) *= (1.0 - delta/(sumF + 0.001));
+                    }
+                }
+            }
+
+            coeffs_.readEntry("constantEmissivity", constEmissivity_);
+            if (constEmissivity_)
+            {
+                CLU_.reset
+                (
+                    new scalarSquareMatrix(totalNCoarseFaces_, Zero)
+                );
+
+                pivotIndices_.setSize(CLU_().m());
+            }
         }
     }
 
@@ -258,7 +552,8 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
     pivotIndices_(0),
     useSolarLoad_(false),
     solarLoad_(),
-    nBands_(coeffs_.getOrDefault<label>("nBands", 1))
+    nBands_(coeffs_.getOrDefault<label>("nBands", 1)),
+    FmyProc_()
 {
     initialise();
 }
@@ -320,7 +615,8 @@ Foam::radiation::viewFactor::viewFactor
     pivotIndices_(0),
     useSolarLoad_(false),
     solarLoad_(),
-    nBands_(coeffs_.getOrDefault<label>("nBands", 1))
+    nBands_(coeffs_.getOrDefault<label>("nBands", 1)),
+    FmyProc_()
 {
     initialise();
 }
@@ -372,8 +668,13 @@ void Foam::radiation::viewFactor::calculate()
         solarLoad_->calculate();
     }
 
-     // Net radiation
-    scalarField q(totalNCoarseFaces_, 0.0);
+    // Global net radiation
+    scalarField qNet(totalNCoarseFaces_, 0.0);
+
+    // Local net radiation
+    scalarField qTotalCoarse(nLocalCoarseFaces_, 0.0);
+
+    // Referen to fvMesh qr field
     volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
 
     globalIndex globalNumbering(nLocalCoarseFaces_);
@@ -383,6 +684,9 @@ void Foam::radiation::viewFactor::calculate()
 
     for (label bandI = 0; bandI < nBands_; bandI++)
     {
+        // Global bandI radiation
+        scalarField qBandI(totalNCoarseFaces_, 0.0);
+
         scalarField compactCoarseT4(map_->constructSize(), 0.0);
         scalarField compactCoarseE(map_->constructSize(), 0.0);
         scalarField compactCoarseHo(map_->constructSize(), 0.0);
@@ -467,6 +771,7 @@ void Foam::radiation::viewFactor::calculate()
         SubList<scalar>(compactCoarseHo, nLocalCoarseFaces_) =
             localCoarseHoave;
 
+
         // Distribute data
         map_->distribute(compactCoarseT4);
         map_->distribute(compactCoarseE);
@@ -487,123 +792,260 @@ void Foam::radiation::viewFactor::calculate()
 
         map_->distribute(compactGlobalIds);
 
-        // Create global size vectors
-        scalarField T4(totalNCoarseFaces_, 0.0);
-        scalarField E(totalNCoarseFaces_, 0.0);
-        scalarField qrExt(totalNCoarseFaces_, 0.0);
-
-        // Fill lists from compact to global indexes.
-        forAll(compactCoarseT4, i)
+        if (!useDirect_)
         {
-            T4[compactGlobalIds[i]] = compactCoarseT4[i];
-            E[compactGlobalIds[i]] = compactCoarseE[i];
-            qrExt[compactGlobalIds[i]] = compactCoarseHo[i];
-        }
+            const labelList globalToCompact
+            (
+                invert(totalNCoarseFaces_, compactGlobalIds)
+            );
 
-        Pstream::listCombineAllGather(T4, maxEqOp<scalar>());
-        Pstream::listCombineAllGather(E, maxEqOp<scalar>());
-        Pstream::listCombineAllGather(qrExt, maxEqOp<scalar>());
+            scalarField& diag = matrixPtr_->diag(localCoarseEave.size());
+            scalarField& upper = matrixPtr_->upper(rays_.size());
+            scalarField& lower = matrixPtr_->lower(rays_.size());
 
-        if (Pstream::master())
-        {
-            // Variable emissivity
-            if (!constEmissivity_)
+            scalarField source(nLocalCoarseFaces_, 0);
+
+
+            // Local diag and source
+            forAll(source, i)
             {
-                scalarSquareMatrix C(totalNCoarseFaces_, 0.0);
+                const scalar sigmaT4 =
+                    physicoChemical::sigma.value()*localCoarseT4ave[i];
 
-                for (label i=0; i<totalNCoarseFaces_; i++)
+                diag[i] = 1/localCoarseEave[i];
+
+                source[i] += -sigmaT4 + localCoarseHoave[i];
+            }
+
+            // Local matrix coefficients
+            if (!constEmissivity_ || iterCounter_ == 0)
+            {
+                const edgeList& raysLst = rays_.sortedToc();
+
+                label rayI = 0;
+                for (const auto& e : raysLst)
                 {
-                    for (label j=0; j<totalNCoarseFaces_; j++)
+                    label facelJ = e.end();
+                    label faceI = e.start();
+
+                    label faceJ = mapRayToFmy_[rayI];
+
+                    lower[rayI] =
+                        (1-1/localCoarseEave[faceI])*FmyProc_()[faceI][faceJ];
+
+                    upper[rayI] =
+                        (1-1/localCoarseEave[facelJ])*FmyProc_()[faceI][faceJ];
+
+                    rayI++;
+                }
+                iterCounter_++;
+            }
+
+            // Extra local contribution to the source and extra matrix coefs
+            // from other procs (boundaryCoeffs)
+            label nInterfaces = lduPtr_().interfaces().size();
+            labelList boundCoeffI(nInterfaces, Zero);
+            forAll (globalFaceFaces_(), iFace)
+            {
+                const labelList& visFaces = globalFaceFaces_()[iFace];
+                forAll (visFaces, jFace)
+                {
+                    label gFacej = visFaces[jFace];
+                    label proci = globalNumbering.whichProcID(gFacej);
+                    if (Pstream::myProcNo() == proci)
                     {
-                        const scalar invEj = 1.0/E[j];
+                        label lFacej =
+                            globalNumbering.toLocal
+                            (
+                                Pstream::myProcNo(),
+                                gFacej
+                            );
+
                         const scalar sigmaT4 =
-                            physicoChemical::sigma.value()*T4[j];
+                            physicoChemical::sigma.value()
+                            *localCoarseT4ave[lFacej];
 
-                        if (i==j)
-                        {
-                            C(i, j) = invEj - (invEj - 1.0)*Fmatrix_()(i, j);
-                            q[i] +=
-                                (Fmatrix_()(i, j) - 1.0)*sigmaT4 + qrExt[j];
-                        }
-                        else
-                        {
-                            C(i, j) = (1.0 - invEj)*Fmatrix_()(i, j);
-                            q[i] += Fmatrix_()(i, j)*sigmaT4;
-                        }
+                        source[iFace] += FmyProc_()[iFace][jFace]*sigmaT4;
+                    }
+                    else
+                    {
+                        label compactFaceJ = globalToCompact[gFacej];
+                        const scalar sigmaT4 =
+                            physicoChemical::sigma.value()
+                            *compactCoarseT4[compactFaceJ];
 
+                        source[iFace] += FmyProc_()[iFace][jFace]*sigmaT4;
+
+                        label interfaceI = procToInterface_[proci];
+
+                        boundaryCoeffs_
+                            [interfaceI][boundCoeffI[interfaceI]++] =
+                                -(1-1/compactCoarseE[compactFaceJ])
+                                *FmyProc_()[iFace][jFace];
                     }
                 }
-
-                Info<< "Solving view factor equations for band :"
-                    << bandI << endl;
-
-                // Negative coming into the fluid
-                LUsolve(C, q);
             }
-            else //Constant emissivity
+
+            PtrList<const lduInterfaceField> interfaces(nInterfaces);
+            for(label i = 0; i < interfaces.size(); i++)
             {
-                // Initial iter calculates CLU and caches it
-                if (iterCounter_ == 0)
+                interfaces.set
+                (
+                    i,
+                    new lduCalculatedProcessorField<scalar>
+                    (
+                        lduPtr_().interfaces()[i],
+                        qrBandI_[bandI]
+                    )
+                );
+            }
+
+            const dictionary& solverControls =
+                qr_.mesh().solverDict
+                (
+                    qr_.select
+                    (
+                        qr_.mesh().data::template getOrDefault<bool>
+                        ("finalIteration", false)
+                    )
+                );
+
+            // Solver call
+            solverPerformance solverPerf = lduMatrix::solver::New
+            (
+                "qr",
+                matrixPtr_(),
+                boundaryCoeffs_,
+                internalCoeffs_,
+                interfaces,
+                solverControls
+            )->solve(qrBandI_[bandI], source);
+
+            solverPerf.print(Info.masterStream(qr_.mesh().comm()));
+
+            qTotalCoarse += qrBandI_[bandI];
+        }
+
+        if (useDirect_)
+        {
+            // Create global size vectors
+            scalarField T4(totalNCoarseFaces_, 0.0);
+            scalarField E(totalNCoarseFaces_, 0.0);
+            scalarField qrExt(totalNCoarseFaces_, 0.0);
+
+            // Fill lists from compact to global indexes.
+            forAll(compactCoarseT4, i)
+            {
+                T4[compactGlobalIds[i]] = compactCoarseT4[i];
+                E[compactGlobalIds[i]] = compactCoarseE[i];
+                qrExt[compactGlobalIds[i]] = compactCoarseHo[i];
+            }
+
+            Pstream::listCombineGather(T4, maxEqOp<scalar>());
+            Pstream::listCombineGather(E, maxEqOp<scalar>());
+            Pstream::listCombineGather(qrExt, maxEqOp<scalar>());
+
+            Pstream::listCombineScatter(T4);
+            Pstream::listCombineScatter(E);
+            Pstream::listCombineScatter(qrExt);
+
+            if (Pstream::master())
+            {
+                // Variable emissivity
+                if (!constEmissivity_)
                 {
+                    scalarSquareMatrix C(totalNCoarseFaces_, 0.0);
+
                     for (label i=0; i<totalNCoarseFaces_; i++)
                     {
                         for (label j=0; j<totalNCoarseFaces_; j++)
                         {
                             const scalar invEj = 1.0/E[j];
+                            const scalar sigmaT4 =
+                                physicoChemical::sigma.value()*T4[j];
+
                             if (i==j)
                             {
-                                CLU_()(i, j) =
-                                    invEj-(invEj-1.0)*Fmatrix_()(i, j);
+                                C(i, j) = invEj;
+                                qBandI[i] += -sigmaT4 +  qrExt[j];
                             }
                             else
                             {
-                                CLU_()(i, j) = (1.0 - invEj)*Fmatrix_()(i, j);
+                                C(i, j) = (1.0 - invEj)*Fmatrix_()(i, j);
+                                qBandI[i] += Fmatrix_()(i, j)*sigmaT4;
                             }
                         }
                     }
 
-                    DebugInFunction << "\nDecomposing C matrix..." << endl;
+                    Info<< "Solving view factor equations for band :"
+                        << bandI << endl;
 
-                    LUDecompose(CLU_(), pivotIndices_);
+                    // Negative coming into the fluid
+                    LUsolve(C, qBandI);
                 }
-
-                for (label i=0; i<totalNCoarseFaces_; i++)
+                else //Constant emissivity
                 {
-                    for (label j=0; j<totalNCoarseFaces_; j++)
+                    // Initial iter calculates CLU and caches it
+                    if (iterCounter_ == 0)
                     {
-                        const scalar sigmaT4 =
-                            constant::physicoChemical::sigma.value()*T4[j];
-
-                        if (i==j)
+                        for (label i=0; i<totalNCoarseFaces_; i++)
                         {
-                            q[i] +=
-                            (Fmatrix_()(i, j) - 1.0)*sigmaT4  + qrExt[j];
+                            for (label j=0; j<totalNCoarseFaces_; j++)
+                            {
+                                const scalar invEj = 1.0/E[j];
+                                if (i==j)
+                                {
+                                    CLU_()(i, j) = invEj;
+                                }
+                                else
+                                {
+                                    CLU_()(i, j) =
+                                        (1.0-invEj)*Fmatrix_()(i, j);
+                                }
+                            }
                         }
-                        else
+
+                        DebugInFunction << "\nDecomposing C matrix..." << endl;
+
+                        LUDecompose(CLU_(), pivotIndices_);
+                    }
+
+                    for (label i=0; i<totalNCoarseFaces_; i++)
+                    {
+                        for (label j=0; j<totalNCoarseFaces_; j++)
                         {
-                            q[i] += Fmatrix_()(i, j)*sigmaT4;
+                            const scalar sigmaT4 =
+                                constant::physicoChemical::sigma.value()*T4[j];
+
+                            if (i==j)
+                            {
+                                qBandI[i] += -sigmaT4 + qrExt[j];
+                            }
+                            else
+                            {
+                                qBandI[i] += Fmatrix_()(i, j)*sigmaT4;
+                            }
                         }
                     }
+
+                    Info<< "Solving view factor equations for band : "
+                        << bandI  << endl;
+
+                    LUBacksubstitute(CLU_(), pivotIndices_, qBandI);
+                    iterCounter_ ++;
                 }
-
-
-                Info<< "Solving view factor equations for band : "
-                    << bandI  << endl;
-
-
-                LUBacksubstitute(CLU_(), pivotIndices_, q);
-                iterCounter_ ++;
             }
-        }
+            // Broadcast qBandI and fill qr
+            Pstream::broadcast(qBandI);
 
+            qNet += qBandI;
+        }
     }
-    // Broadcast q and fill qr
-    Pstream::broadcast(q);
 
     label globCoarseId = 0;
     for (const label patchID : selectedPatches_)
     {
-        const polyPatch& pp = mesh_.boundaryMesh()[patchID];
+        const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
 
         if (pp.size() > 0)
         {
@@ -617,22 +1059,31 @@ void Foam::radiation::viewFactor::calculate()
             const labelList& coarsePatchFace =
                 coarseMesh_.patchFaceMap()[patchID];
 
-            /// scalar heatFlux = 0.0;
+            //scalar heatFlux = 0.0;
             forAll(coarseToFine, coarseI)
             {
-                label globalCoarse =
-                    globalNumbering.toGlobal
-                    (Pstream::myProcNo(), globCoarseId);
+                label globalCoarse = globalNumbering.toGlobal
+                (
+                    Pstream::myProcNo(),
+                    globCoarseId
+                );
 
                 const label coarseFaceID = coarsePatchFace[coarseI];
                 const labelList& fineFaces = coarseToFine[coarseFaceID];
 
                 for (const label facei : fineFaces)
                 {
-                    qrp[facei] = q[globalCoarse];
-                    /// heatFlux += qrp[facei]*sf[facei];
+                    if (useDirect_)
+                    {
+                        qrp[facei] = qNet[globalCoarse];
+                    }
+                    else
+                    {
+                        qrp[facei] = qTotalCoarse[globCoarseId];
+                    }
+                    //heatFlux += qrp[facei]*sf[facei];
                 }
-                globCoarseId ++;
+                globCoarseId++;
             }
         }
     }
@@ -645,8 +1096,7 @@ void Foam::radiation::viewFactor::calculate()
             const scalarField& magSf = mesh_.magSf().boundaryField()[patchID];
             const scalar heatFlux = gSum(qrp*magSf);
 
-            InfoInFunction
-                << "Total heat transfer rate at patch: "
+            Info<< "Total heat transfer rate at patch: "
                 << patchID << " "
                 << heatFlux << endl;
         }

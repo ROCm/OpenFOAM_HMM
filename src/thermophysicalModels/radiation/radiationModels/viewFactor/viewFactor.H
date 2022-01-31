@@ -60,6 +60,10 @@ SourceFiles
 #include "IOmapDistribute.H"
 #include "solarLoad.H"
 
+#include "lduPrimitiveMesh.H"
+#include "lduPrimitiveProcessorInterface.H"
+#include "lduMatrix.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -108,11 +112,17 @@ protected:
         //- Net radiative heat flux [W/m2]
         volScalarField qr_;
 
+        //- Coarse radiative heat flux
+        List<scalarField> qrBandI_;
+
         //- View factor matrix
         autoPtr<scalarSquareMatrix> Fmatrix_;
 
         //- Inverse of C matrix
         autoPtr<scalarSquareMatrix> CLU_;
+
+        //- Visible global faces
+        autoPtr<labelListIOList> globalFaceFaces_;
 
         //- Selected patches
         labelList selectedPatches_;
@@ -140,6 +150,35 @@ protected:
 
         //-Number of bands
         label nBands_;
+
+        //- Primitive addressing for lduMatrix
+        autoPtr<lduPrimitiveMesh> lduPtr_;
+
+        //- Matrix formed from view factors
+        autoPtr<lduMatrix> matrixPtr_;
+
+        //- Boundary scalar field containing pseudo-matrix coeffs
+        //- for internal cells
+        FieldField<Field, scalar> internalCoeffs_;
+
+        //- Boundary scalar field containing pseudo-matrix coeffs
+        //- for boundary cells
+        FieldField<Field, scalar> boundaryCoeffs_;
+
+        //- Rays on local proc
+        edgeHashSet rays_;
+
+        //- Map local-ray to j-column for F
+        List<label> mapRayToFmy_;
+
+        //- Local view factors
+        autoPtr<scalarListIOList> FmyProc_;
+
+        //- Map from proc to interafce
+        labelList procToInterface_;
+
+        //- Use direct or iterative solver
+        bool useDirect_;
 
 
     // Private Member Functions

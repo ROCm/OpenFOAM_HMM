@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,20 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::lduPrimitiveProcessorInterface::lduPrimitiveProcessorInterface
+(
+    const lduPrimitiveProcessorInterface& p
+)
+:
+    faceCells_(p.faceCells()),
+    myProcNo_(p.myProcNo()),
+    neighbProcNo_(p.neighbProcNo()),
+    forwardT_(p.forwardT()),
+    tag_(p.tag()),
+    comm_(p.comm())
+{}
+
 
 Foam::lduPrimitiveProcessorInterface::lduPrimitiveProcessorInterface
 (
