@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,16 +44,10 @@ namespace Foam
     template<class Type>
     static inline void writeData(Ostream& os, const Type& val)
     {
-        for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+        for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
         {
-            os  << ' ' << component(val, i);
+            os  << ' ' << component(val, d);
         }
-    }
-
-    // Write x/y/z header. Must be called first
-    static inline void writeHeaderXYZ(Ostream& os)
-    {
-        os  << "# x y z";
     }
 
     // Write area header
@@ -62,44 +56,26 @@ namespace Foam
         os  << "  area_x area_y area_z";
     }
 
+    // Write field name, use named components for VectorSpace
     template<class Type>
     static inline void writeHeader(Ostream& os, const word& fieldName)
     {
-        os  << "  " << fieldName;
-    }
-
-    template<class Type>
-    void writeHeaderComponents(Ostream& os, const word& fieldName)
-    {
         os  << ' ';
-        for (direction i=0; i < pTraits<Type>::nComponents; ++i)
+
+        const auto nCmpts(pTraits<Type>::nComponents);
+
+        if (pTraits<Type>::rank || nCmpts > 1)
         {
-            os  << ' ' << fieldName << '_' << Type::componentNames[i];
+            for (direction d = 0; d < nCmpts; ++d)
+            {
+                os  << ' ' << fieldName
+                    << '_' << pTraits<Type>::componentNames[d];
+            }
         }
-    }
-
-    template<>
-    void writeHeader<vector>(Ostream& os, const word& fieldName)
-    {
-        writeHeaderComponents<vector>(os, fieldName);
-    }
-
-    template<>
-    void writeHeader<sphericalTensor>(Ostream& os, const word& fieldName)
-    {
-        writeHeaderComponents<sphericalTensor>(os, fieldName);
-    }
-
-    template<>
-    void writeHeader<symmTensor>(Ostream& os, const word& fieldName)
-    {
-        writeHeaderComponents<symmTensor>(os, fieldName);
-    }
-
-    template<>
-    void writeHeader<tensor>(Ostream& os, const word& fieldName)
-    {
-        writeHeaderComponents<tensor>(os, fieldName);
+        else
+        {
+            os  << ' ' << fieldName;
+        }
     }
 
 } // End namespace Foam
@@ -184,13 +160,13 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
             }
             os << values.size() << nl;
 
-            writeHeaderXYZ(os);
+            os  << "# x y z";
             writeHeader<Type>(os, fieldName);
             if (withFaceNormal)
             {
                 writeHeaderArea(os);
             }
-            os << nl;
+            os  << nl;
         }
 
 

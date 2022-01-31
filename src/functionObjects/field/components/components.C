@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,18 +41,23 @@ namespace functionObjects
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Implementation
+#include "componentsImpl.C"
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::functionObjects::components::calc()
 {
-    bool processed = false;
-
-    processed = processed || calcComponents<vector>();
-    processed = processed || calcComponents<sphericalTensor>();
-    processed = processed || calcComponents<symmTensor>();
-    processed = processed || calcComponents<tensor>();
-
-    return processed;
+    return
+    (
+        calcComponents<vector>()
+     || calcComponents<sphericalTensor>()
+     || calcComponents<symmTensor>()
+     || calcComponents<tensor>()
+    );
 }
 
 

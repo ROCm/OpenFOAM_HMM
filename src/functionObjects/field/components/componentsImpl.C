@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,19 +32,20 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class GeoFieldType>
-bool Foam::functionObjects::components::calcFieldComponents()
+bool Foam::functionObjects::components::calcComponents
+(
+    const GeoFieldType& field
+)
 {
     typedef typename GeoFieldType::value_type Type;
 
-    const GeoFieldType& field = lookupObject<GeoFieldType>(fieldName_);
-
-    resultNames_.setSize(Type::nComponents);
+    resultNames_.resize(pTraits<Type>::nComponents);
 
     bool stored = true;
 
-    for (direction i = 0; i < Type::nComponents; ++i)
+    for (direction i = 0; i < pTraits<Type>::nComponents; ++i)
     {
-        resultName_ = fieldName_ + word(Type::componentNames[i]);
+        resultName_ = fieldName_ + word(pTraits<Type>::componentNames[i]);
         resultNames_[i] = resultName_;
 
         stored = stored && store(resultName_, field.component(i));
@@ -57,16 +58,16 @@ bool Foam::functionObjects::components::calcFieldComponents()
 template<class Type>
 bool Foam::functionObjects::components::calcComponents()
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
-    typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-
-    if (foundObject<VolFieldType>(fieldName_, false))
+    const auto* vfield = cfindObject<VolumeField<Type>>(fieldName_);
+    if (vfield)
     {
-        return calcFieldComponents<VolFieldType>();
+        return calcComponents(*vfield);
     }
-    else if (foundObject<SurfaceFieldType>(fieldName_, false))
+
+    const auto* sfield = cfindObject<SurfaceField<Type>>(fieldName_);
+    if (sfield)
     {
-        return calcFieldComponents<SurfaceFieldType>();
+        return calcComponents(*sfield);
     }
 
     return false;

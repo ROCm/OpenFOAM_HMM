@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,8 +103,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_components_H
-#define functionObjects_components_H
+#ifndef Foam_functionObjects_components_H
+#define Foam_functionObjects_components_H
 
 #include "fieldExpression.H"
 
@@ -134,14 +134,15 @@ class components
         //- Calculate the components of the field with the specified type
         //- and register the result
         template<class GeoFieldType>
-        bool calcFieldComponents();
+        bool calcComponents(const GeoFieldType& field);
 
         //- Calculate the components of the field with the specified
         //- element type and register the result
         template<class Type>
         bool calcComponents();
 
-        //- Calculate the components of the field and return true if successful
+        //- Calculate the components of the field
+        //  \return True if successful
         virtual bool calc();
 
 
@@ -186,12 +187,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "componentsTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
