@@ -1020,9 +1020,9 @@ operator&
         Zero
     );
 
-    for (label i = 0; i < AB.m(); ++i)
+    for (label k = 0; k < B.m(); ++k)
     {
-        for (label k = 0; k < B.m(); ++k)
+        for (label i = 0; i < AB.m(); ++i)
         {
             for (label j = 0; j < AB.n(); ++j)
             {
@@ -1065,9 +1065,9 @@ operator^
 
     for (label i = 0; i < AB.m(); ++i)
     {
-        for (label k = 0; k < BT.n(); ++k)
+        for (label j = 0; j < AB.n(); ++j)
         {
-            for (label j = 0; j < AB.n(); ++j)
+            for (label k = 0; k < BT.n(); ++k)
             {
                 AB(i, j) += A(i, k)*Detail::conj(BT(j, k));
             }
