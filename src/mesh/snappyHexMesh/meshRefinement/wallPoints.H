@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2020,2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ SourceFiles
 #include "tensor.H"
 #include "DynamicList.H"
 #include "labelList.H"
+#include "scalarList.H"
 #include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -72,9 +73,17 @@ public:
         //- Per face whether the face should not be walked through
         const bitSet& isBlockedFace_;
 
-        trackData(const bitSet& isBlockedFace)
+        //- Per surface, per region the blockSize
+        const List<scalarList>& regionToBlockSize_;
+
+        trackData
+        (
+            const bitSet& isBlockedFace,
+            const List<scalarList>& regionToBlockSize
+        )
         :
-            isBlockedFace_(isBlockedFace)
+            isBlockedFace_(isBlockedFace),
+            regionToBlockSize_(regionToBlockSize)
         {}
     };
 

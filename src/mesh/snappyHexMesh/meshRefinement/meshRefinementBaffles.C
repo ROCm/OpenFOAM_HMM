@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,7 @@ License
 
 #include "FaceCellWave.H"
 #include "wallPoints.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -2409,8 +2410,21 @@ void Foam::meshRefinement::growCellZone
 
     List<wallPoints> allFaceInfo(mesh_.nFaces());
 
+    // No blocked faces, limitless gap size
     const bitSet isBlockedFace(mesh_.nFaces());
-    wallPoints::trackData td(isBlockedFace);
+    List<scalarList> regionToBlockSize(surfaces_.surfaces().size());
+    {
+        forAll(surfaces_.surfaces(), surfi)
+        {
+            const label geomi = surfaces_.surfaces()[surfi];
+            const auto& s = surfaces_.geometry()[geomi];
+            const label nRegions = s.regions().size();
+            regionToBlockSize[surfi].setSize(nRegions, Foam::sqr(GREAT));
+        }
+    }
+
+
+    wallPoints::trackData td(isBlockedFace, regionToBlockSize);
     FaceCellWave<wallPoints, wallPoints::trackData> wallDistCalc
     (
         mesh_,

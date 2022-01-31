@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,26 +202,54 @@ inline bool Foam::wallPoints::updateCell
     const point& cc = mesh.cellCentres()[thisCelli];
 
     bool hasChanged = false;
+
     forAll(neighbourInfo.surface_, i)
     {
         const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
 
-        // Find in my surfaces
-        label index = surface_.find(nbrSurface);
-        if (index == -1)
+        // Check distance from nbr origin to cc against max walking distance
+        const scalar blockSize =
+            td.regionToBlockSize_[nbrSurface[0]][nbrSurface[1]];
+
+        const scalar d2 = magSqr(cc-neighbourInfo.origin_[i]);
+
+        if (d2 < Foam::sqr(3*blockSize))
         {
-            // Append
-            origin_.append(neighbourInfo.origin_[i]);
-            distSqr_.append(magSqr(cc-neighbourInfo.origin_[i]));
-            surface_.append(nbrSurface);
-            //normal_.append(neighbourInfo.normal_[i]);
-            hasChanged = true;
+            // Real distance less than max gap distance. Note that it should
+            // be at least 2 * blockSize (since gap is two cells across).
+            // Should be
+            // a little bit more to account for castellated path walk. Bit
+            // heuristic - try 3. Should be as low as possible to kill off
+            // unnecessary waves asap.
+
+            // Find in my surfaces
+            label index = surface_.find(nbrSurface);
+            if (index == -1)
+            {
+                // Append
+                origin_.append(neighbourInfo.origin_[i]);
+                distSqr_.append(d2);
+                surface_.append(nbrSurface);
+                //normal_.append(neighbourInfo.normal_[i]);
+                hasChanged = true;
+            }
+            else
+            {
+                hasChanged =
+                    update(cc, index, neighbourInfo, i, tol, td)
+                 || hasChanged;
+            }
         }
         else
         {
-            hasChanged =
-                update(cc, index, neighbourInfo, i, tol, td)
-             || hasChanged;
+            // Real distance more than gap distance so ignore
+            //Pout<< "at cell:" << cc << " ignoring nbr info:"
+            //    << neighbourInfo.origin_[i]
+            //    << " from surface:" << nbrSurface[0]
+            //    << " from region:" << nbrSurface[1]
+            //    << " bloxkSize:" << blockSize
+            //    << " distance:" << Foam::sqrt(d2)
+            //    << endl;
         }
     }
 
@@ -252,22 +280,44 @@ inline bool Foam::wallPoints::updateFace
         {
             const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
 
-            // Find in my surfaces
-            label index = surface_.find(nbrSurface);
-            if (index == -1)
+            // Check distance from nbr origin to cc against max walking distance
+            const scalar blockSize =
+                td.regionToBlockSize_[nbrSurface[0]][nbrSurface[1]];
+
+            const scalar d2 = magSqr(fc-neighbourInfo.origin_[i]);
+
+            if (d2 < Foam::sqr(3*blockSize))
             {
-                // Append
-                origin_.append(neighbourInfo.origin_[i]);
-                distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
-                surface_.append(nbrSurface);
-                //normal_.append(neighbourInfo.normal_[i]);
-                hasChanged = true;
+                // Real distance less than max gap distance
+
+                // Find in my surfaces
+                label index = surface_.find(nbrSurface);
+                if (index == -1)
+                {
+                    // Append
+                    origin_.append(neighbourInfo.origin_[i]);
+                    distSqr_.append(d2);
+                    surface_.append(nbrSurface);
+                    //normal_.append(neighbourInfo.normal_[i]);
+                    hasChanged = true;
+                }
+                else
+                {
+                    hasChanged =
+                        update(fc, index, neighbourInfo, i, tol, td)
+                     || hasChanged;
+                }
             }
             else
             {
-                hasChanged =
-                    update(fc, index, neighbourInfo, i, tol, td)
-                 || hasChanged;
+                // Real distance more than gap distance so ignore
+                //Pout<< "at face:" << fc << " ignoring nbr info:"
+                //    << neighbourInfo.origin_[i]
+                //    << " from surface:" << nbrSurface[0]
+                //    << " from region:" << nbrSurface[1]
+                //    << " bloxkSize:" << blockSize
+                //    << " distance:" << Foam::sqrt(d2)
+                //    << endl;
             }
         }
     }
@@ -298,22 +348,44 @@ inline bool Foam::wallPoints::updateFace
         {
             const FixedList<label, 3>& nbrSurface = neighbourInfo.surface_[i];
 
-            // Find in my surfaces
-            const label index = surface_.find(nbrSurface);
-            if (index == -1)
+            // Check distance from nbr origin to cc against max walking distance
+            const scalar blockSize =
+                td.regionToBlockSize_[nbrSurface[0]][nbrSurface[1]];
+
+            const scalar d2 = magSqr(fc-neighbourInfo.origin_[i]);
+
+            if (d2 < Foam::sqr(3*blockSize))
             {
-                // Append
-                origin_.append(neighbourInfo.origin_[i]);
-                distSqr_.append(magSqr(fc-neighbourInfo.origin_[i]));
-                surface_.append(nbrSurface);
-                //normal_.append(neighbourInfo.normal_[i]);
-                hasChanged = true;
+                // Real distance less than max gap distance
+
+                // Find in my surfaces
+                const label index = surface_.find(nbrSurface);
+                if (index == -1)
+                {
+                    // Append
+                    origin_.append(neighbourInfo.origin_[i]);
+                    distSqr_.append(d2);
+                    surface_.append(nbrSurface);
+                    //normal_.append(neighbourInfo.normal_[i]);
+                    hasChanged = true;
+                }
+                else
+                {
+                    hasChanged =
+                        update(fc, index, neighbourInfo, i, tol, td)
+                     || hasChanged;
+                }
             }
             else
             {
-                hasChanged =
-                    update(fc, index, neighbourInfo, i, tol, td)
-                 || hasChanged;
+                // Real distance more than gap distance so ignore
+                //Pout<< "at face:" << fc << " ignoring nbr info:"
+                //    << neighbourInfo.origin_[i]
+                //    << " from surface:" << nbrSurface[0]
+                //    << " from region:" << nbrSurface[1]
+                //    << " bloxkSize:" << blockSize
+                //    << " distance:" << Foam::sqrt(d2)
+                //    << endl;
             }
         }
     }
