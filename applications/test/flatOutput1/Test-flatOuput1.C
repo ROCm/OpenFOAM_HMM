@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +32,13 @@ Description
 #include "ListOps.H"
 #include "FlatOutput.H"
 #include "IOstreams.H"
-#include "macros.H"
 
 using namespace Foam;
 
 // For testing various pre-defined formatting
-#define printFlatOutput(Content, Format) \
-    STRINGIFY(Format) << ": " << flatOutput(Content, FlatOutput::Format{})
+#define printFlatOutput(Content, Format)                      \
+    Info<< nl << #Format << ": "                              \
+        << flatOutput(Content, FlatOutput::Format{}) << nl
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,20 +77,20 @@ int main(int argc, char *argv[])
         Info<< nl << "write: ";
         flatOutput(words1).write(Info) << nl;
 
-        Info<< nl << printFlatOutput(words1, BareComma) << nl;
-        Info<< nl << printFlatOutput(words1, BareSpace) << nl;
+        printFlatOutput(words1, BareComma);
+        printFlatOutput(words1, BareSpace);
 
-        Info<< nl << printFlatOutput(words1, BraceComma) << nl;
-        Info<< nl << printFlatOutput(words1, BraceSpace) << nl;
+        printFlatOutput(words1, BraceComma);
+        printFlatOutput(words1, BraceSpace);
 
-        Info<< nl << printFlatOutput(words1, ParenComma) << nl;
-        Info<< nl << printFlatOutput(words1, ParenSpace) << nl;
+        printFlatOutput(words1, ParenComma);
+        printFlatOutput(words1, ParenSpace);
 
-        Info<< nl << printFlatOutput(words1, PointyComma) << nl;
-        Info<< nl << printFlatOutput(words1, PointySpace) << nl;
+        printFlatOutput(words1, PointyComma);
+        printFlatOutput(words1, PointySpace);
 
-        Info<< nl << printFlatOutput(words1, SquareComma) << nl;
-        Info<< nl << printFlatOutput(words1, SquareSpace) << nl;
+        printFlatOutput(words1, SquareComma);
+        printFlatOutput(words1, SquareSpace);
     }
 
 

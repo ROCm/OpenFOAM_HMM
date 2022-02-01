@@ -126,10 +126,14 @@ int main(int argc, char *argv[])
     argList::noParallel();
     timeSelector::addOptions();
     #include "addRegionOption.H"
-    #include "addDictOption.H"
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "Alternative particleTrackDict dictionary"
+    );
 
     #include "setRootCase.H"
-
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"

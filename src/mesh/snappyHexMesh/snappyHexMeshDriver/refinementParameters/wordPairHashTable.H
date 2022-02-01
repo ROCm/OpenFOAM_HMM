@@ -1,14 +1,1 @@
-/*---------------------------------------------------------------------------*\
-Description
-    Compatibility include.
-
-\*---------------------------------------------------------------------------*/
-
-#ifndef wordPairHashTable_H
-#define wordPairHashTable_H
-
-#include "wordPairHashes.H"
-
-#endif
-
-// ************************************************************************* //
+#warning File removed - left for old dependency check only

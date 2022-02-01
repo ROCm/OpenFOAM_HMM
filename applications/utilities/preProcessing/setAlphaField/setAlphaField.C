@@ -145,7 +145,12 @@ int main(int argc, char *argv[])
         "implicit function."
     );
 
-    #include "addDictOption.H"
+    argList::addOption
+    (
+        "dict",
+        "file",
+        "Alternative setAlphaFieldDict dictionary"
+    );
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"

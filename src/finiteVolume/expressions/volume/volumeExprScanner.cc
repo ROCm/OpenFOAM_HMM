@@ -7,7 +7,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ Description
 #include "volumeExprLemonParser.h"
 #include "volumeExprParser.H"
 #include "Enum.H"
-#include "macros.H"
+//#include "macros.H"
 
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #pragma GCC diagnostic ignored "-Wunused-const-variable"
@@ -314,7 +314,7 @@ static int driverTokenType
 
 #define EMIT_TOKEN(T)                                                         \
     driver_.parsePosition() = (ts-buf);                                       \
-    DebugInfo<< STRINGIFY(T) << " at " << driver_.parsePosition() << nl;      \
+    DebugInfo<< #T << " at " << driver_.parsePosition() << nl;                \
     parser_->parse(TOKEN_OF(T));                                              \
     driver_.parsePosition() = (p-buf);
 

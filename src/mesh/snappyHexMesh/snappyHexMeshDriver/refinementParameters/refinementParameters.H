@@ -41,7 +41,7 @@ SourceFiles
 #include "dictionary.H"
 #include "pointField.H"
 #include "Switch.H"
-#include "wordPairHashTable.H"
+#include "wordPairHashes.H"
 #include "surfaceZonesInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Class forward declarations
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -58,7 +58,7 @@ class polyMesh;
 
 class refinementParameters
 {
-    // Private data
+    // Private Data
 
         //- Total number of cells
         const label maxGlobalCells_;

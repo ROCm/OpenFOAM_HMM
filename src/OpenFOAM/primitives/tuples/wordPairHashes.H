@@ -42,8 +42,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordPairHashes_H
-#define wordPairHashes_H
+#ifndef Foam_wordPairHashes_H
+#define Foam_wordPairHashes_H
 
 #include "wordPair.H"
 #include "HashSet.H"
