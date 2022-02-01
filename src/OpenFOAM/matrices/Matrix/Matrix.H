@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -372,8 +372,11 @@ public:
 
     // Operations
 
-        //- Return (conjugate) transpose of Matrix
+        //- Return conjugate transpose of Matrix
         Form T() const;
+
+        //- Return non-conjugate transpose of Matrix
+        Form transpose() const;
 
         //- Right-multiply Matrix by a column vector (A * x)
         inline tmp<Field<Type>> Amul(const UList<Type>& x) const;
