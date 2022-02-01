@@ -31,7 +31,6 @@ License
 #include "surfaceFields.H"
 #include "polySurface.H"
 #include "polySurfaceFields.H"
-#include "polySurfacePointFields.H"
 #include "surfMesh.H"
 #include "surfGeoMesh.H"
 

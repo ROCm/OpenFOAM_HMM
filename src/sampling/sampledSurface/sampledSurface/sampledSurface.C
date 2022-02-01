@@ -38,16 +38,6 @@ namespace Foam
 }
 
 
-const Foam::wordList Foam::sampledSurface::surfaceFieldTypes
-({
-    "surfaceScalarField",
-    "surfaceVectorField",
-    "surfaceSphericalTensorField",
-    "surfaceSymmTensorField",
-    "surfaceTensorField"
-});
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledSurface::clearGeom() const

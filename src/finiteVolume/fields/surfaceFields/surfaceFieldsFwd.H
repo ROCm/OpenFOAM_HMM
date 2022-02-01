@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceFieldsFwd_H
-#define surfaceFieldsFwd_H
+#ifndef Foam_surfaceFieldsFwd_H
+#define Foam_surfaceFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -43,15 +44,21 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricField;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations
 class surfaceMesh;
-
 template<class Type> class fvsPatchField;
 
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
+
+//- A (volume) surface field for a given type
+template<class Type>
+using SurfaceField = GeometricField<Type, fvsPatchField, surfaceMesh>;
+
 
 // Typedefs
 
@@ -62,6 +69,19 @@ typedef GeometricField<sphericalTensor, fvsPatchField, surfaceMesh>
 typedef GeometricField<symmTensor, fvsPatchField, surfaceMesh>
     surfaceSymmTensorField;
 typedef GeometricField<tensor, fvsPatchField, surfaceMesh> surfaceTensorField;
+
+
+/*---------------------------------------------------------------------------*\
+                       Namespace fieldTypes Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace fieldTypes
+{
+    //- Standard surface field types (scalar, vector, tensor, etc)
+    extern const wordList surface;
+
+} // End namespace fieldTypes
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

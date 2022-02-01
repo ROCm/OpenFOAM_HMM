@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,5 +71,20 @@ defineTemplateTypeNameAndDebug(surfaceTensorField, 0);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
+
+// Note hard-coded values are more reliable than other alternatives
+
+const Foam::wordList Foam::fieldTypes::surface
+({
+    "surfaceScalarField",
+    "surfaceVectorField",
+    "surfaceSphericalTensorField",
+    "surfaceSymmTensorField",
+    "surfaceTensorField"
+});
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

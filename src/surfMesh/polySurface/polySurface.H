@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,14 +38,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polySurface_H
-#define polySurface_H
+#ifndef Foam_polySurface_H
+#define Foam_polySurface_H
 
 #include "objectRegistry.H"
 #include "PrimitivePatch.H"
 #include "meshedSurf.H"
 #include "polySurfaceFieldsFwd.H"
-#include "polySurfacePointFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

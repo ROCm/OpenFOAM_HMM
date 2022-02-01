@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointFieldsFwd_H
-#define pointFieldsFwd_H
+#ifndef Foam_pointFieldsFwd_H
+#define Foam_pointFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -45,15 +45,26 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type, class GeoMesh> class DimensionedField;
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricField;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations
 class pointMesh;
-
 template<class Type> class pointPatchField;
 
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
+
+//- A point field for a given type
+template<class Type>
+using PointField = GeometricField<Type, pointPatchField, pointMesh>;
+
+//- A point internal field for a given type
+template<class Type>
+using PointInternalField = DimensionedField<Type, pointMesh>;
+
 
 // Typedefs
 

@@ -50,8 +50,6 @@ SourceFiles
 #include "edgeFieldsFwd.H"
 #include "calculatedFaePatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

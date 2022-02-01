@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyGeoMesh_H
-#define polyGeoMesh_H
+#ifndef Foam_polyGeoMesh_H
+#define Foam_polyGeoMesh_H
 
 #include "GeoMesh.H"
 #include "polyMesh.H"

@@ -28,15 +28,13 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedVolFields_H
-#define slicedVolFields_H
+#ifndef Foam_slicedVolFields_H
+#define Foam_slicedVolFields_H
 
 #include "SlicedGeometricField.H"
 #include "slicedFvPatchField.H"
 #include "volMesh.H"
 #include "slicedVolFieldsFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

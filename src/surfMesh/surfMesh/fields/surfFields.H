@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,14 +35,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfFields_H
-#define surfFields_H
+#ifndef Foam_surfFields_H
+#define Foam_surfFields_H
 
 #include "DimensionedField.H"
 #include "surfGeoMesh.H"
+#include "surfPointGeoMesh.H"
 #include "surfFieldsFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

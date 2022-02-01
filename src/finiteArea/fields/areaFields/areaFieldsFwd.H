@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef areaFieldsFwd_H
-#define areaFieldsFwd_H
+#ifndef Foam_areaFieldsFwd_H
+#define Foam_areaFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -42,15 +42,25 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type, class GeoMesh> class DimensionedField;
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricField;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations
 class areaMesh;
-
 template<class Type> class faPatchField;
 
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
+
+//- An area field for a given type
+template<class Type>
+using AreaField = GeometricField<Type, faPatchField, areaMesh>;
+
+//- An area internal field for a given type
+template<class Type>
+using AreaInternalField = DimensionedField<Type, areaMesh>;
+
 
 // Typedefs
 

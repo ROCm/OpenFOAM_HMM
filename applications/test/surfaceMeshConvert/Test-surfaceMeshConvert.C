@@ -62,7 +62,6 @@ Note
 #include "triSurface.H"
 #include "surfMesh.H"
 #include "surfFields.H"
-#include "surfPointFields.H"
 
 #include "MeshedSurfaces.H"
 #include "ModifiableMeshedSurface.H"

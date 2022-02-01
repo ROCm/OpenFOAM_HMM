@@ -98,16 +98,6 @@ class sampledSurface
 :
     public meshedSurf
 {
-public:
-
-    // Public Static Data
-
-        //- Class names for surface field types
-        static const wordList surfaceFieldTypes;
-
-
-private:
-
     // Private Data
 
         //- The name of the sample surface

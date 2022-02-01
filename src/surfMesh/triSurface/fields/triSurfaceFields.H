@@ -34,15 +34,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurfaceFields_H
-#define triSurfaceFields_H
+#ifndef Foam_triSurfaceFields_H
+#define Foam_triSurfaceFields_H
 
 #include "DimensionedField.H"
 #include "triSurfaceGeoMesh.H"
 #include "triSurfacePointGeoMesh.H"
 #include "triSurfaceFieldsFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

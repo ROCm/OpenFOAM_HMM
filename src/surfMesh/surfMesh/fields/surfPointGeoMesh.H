@@ -34,8 +34,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfPointGeoMesh_H
-#define surfPointGeoMesh_H
+#ifndef Foam_surfPointGeoMesh_H
+#define Foam_surfPointGeoMesh_H
 
 #include "GeoMesh.H"
 #include "surfMesh.H"

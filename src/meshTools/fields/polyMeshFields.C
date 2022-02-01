@@ -25,12 +25,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polyFields.H"
+#include "polyMeshFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // Naming to shadow volScalarField::Internal etc.
 // keep synchronized with finiteVolume volFields.C
@@ -69,5 +69,6 @@ const word DimensionedField<tensor, polyGeoMesh>::typeName
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // ************************************************************************* //

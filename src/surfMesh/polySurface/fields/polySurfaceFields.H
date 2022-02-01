@@ -27,21 +27,20 @@ InClass
     Foam::polySurfaceFields
 
 Description
-    Fields for polySurface
+    Fields (face and point) for polySurface
 
 SourceFiles
     polySurfaceFields.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polySurfaceFields_H
-#define polySurfaceFields_H
+#ifndef Foam_polySurfaceFields_H
+#define Foam_polySurfaceFields_H
 
 #include "DimensionedField.H"
 #include "polySurfaceGeoMesh.H"
+#include "polySurfacePointGeoMesh.H"
 #include "polySurfaceFieldsFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

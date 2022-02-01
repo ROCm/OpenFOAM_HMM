@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,36 +23,32 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::polyFields
-
-Description
-    A polyMesh-based naming and storage for internal volume fields when a
-    Foam::fvMesh is unavailable.  Use sparingly.
-
-SourceFields
-    polyFields.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyFields_H
-#define polyFields_H
+#ifndef Foam_polyMeshFieldsFwd_H
+#define Foam_polyMeshFieldsFwd_H
 
-#include "DimensionedField.H"
-#include "polyGeoMesh.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type, class GeoMesh> class DimensionedField;
 
-typedef DimensionedField<scalar,polyGeoMesh> polyScalarField;
-typedef DimensionedField<vector,polyGeoMesh> polyVectorField;
-typedef DimensionedField<sphericalTensor,polyGeoMesh> polySphericalTensorField;
-typedef DimensionedField<symmTensor,polyGeoMesh> polySymmTensorField;
-typedef DimensionedField<tensor,polyGeoMesh> polyTensorField;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Internal (volume) fields on a polyMesh
+
+class polyGeoMesh;
+
+typedef DimensionedField<scalar, polyGeoMesh> polyMeshScalarField;
+typedef DimensionedField<vector, polyGeoMesh> polyMeshVectorField;
+typedef DimensionedField<sphericalTensor, polyGeoMesh>
+    polyMeshSphericalTensorField;
+typedef DimensionedField<symmTensor, polyGeoMesh> polyMeshSymmTensorField;
+typedef DimensionedField<tensor, polyGeoMesh> polyMeshTensorField;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

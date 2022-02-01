@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,44 +23,25 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+InClass
+    Foam::polyMeshFields
+
+Description
+    A polyMesh-based naming and storage for internal volume fields when a
+    Foam::fvMesh is unavailable.  Use sparingly.
+
+SourceFields
+    polyMeshFields.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "polySurfacePointFields.H"
+#ifndef Foam_polyMeshFields_H
+#define Foam_polyMeshFields_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "DimensionedField.H"
+#include "polyGeoMesh.H"
+#include "polyMeshFieldsFwd.H"
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<>
-const word polySurfacePointLabelField::typeName
-("polySurfacePointLabelField");
-
-template<>
-const word polySurfacePointScalarField::typeName
-("polySurfacePointScalarField");
-
-template<>
-const word polySurfacePointVectorField::typeName
-("polySurfacePointVectorField");
-
-template<>
-const word polySurfacePointSphericalTensorField::typeName
-("polySurfacePointSphericalTensorField");
-
-template<>
-const word polySurfacePointSymmTensorField::typeName
-("polySurfacePointSymmTensorField");
-
-template<>
-const word polySurfacePointTensorField::typeName
-("polySurfacePointTensorField");
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //

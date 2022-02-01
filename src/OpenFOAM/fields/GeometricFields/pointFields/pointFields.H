@@ -41,8 +41,6 @@ SourceFiles
 #include "pointPatchFields.H"
 #include "pointFieldsFwd.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #endif
 
 // ************************************************************************* //

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +29,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedSurfaceFieldsFwd_H
-#define slicedSurfaceFieldsFwd_H
+#ifndef Foam_slicedSurfaceFieldsFwd_H
+#define Foam_slicedSurfaceFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -37,16 +38,6 @@ InClass
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-class surfaceMesh;
-
-template<class Type>
-class fvsPatchField;
-
-template<class Type>
-class slicedFvsPatchField;
 
 template
 <
@@ -56,6 +47,23 @@ template
     class GeoMesh
 >
 class SlicedGeometricField;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Forward Declarations
+class surfaceMesh;
+template<class Type> class fvsPatchField;
+template<class Type> class slicedFvsPatchField;
+
+
+//- A (volume) surface field slice for a given type
+template<class Type>
+using SurfaceSliceField =
+SlicedGeometricField<Type, fvsPatchField, slicedFvsPatchField, surfaceMesh>;
+
+
+// Typedefs
 
 typedef
 SlicedGeometricField<scalar, fvsPatchField, slicedFvsPatchField, surfaceMesh>
@@ -88,6 +96,7 @@ SlicedGeometricField
 typedef
 SlicedGeometricField<tensor, fvsPatchField, slicedFvsPatchField, surfaceMesh>
     slicedSurfaceTensorField;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

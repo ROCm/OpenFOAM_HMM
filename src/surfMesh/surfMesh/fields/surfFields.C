@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,34 +27,36 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfFields.H"
+#include "className.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// Face fields
 
-template<>
-const word surfLabelField::typeName("surfLabelField");
+defineTemplateTypeName(surfLabelField);
+defineTemplateTypeName(surfScalarField);
+defineTemplateTypeName(surfVectorField);
+defineTemplateTypeName(surfSphericalTensorField);
+defineTemplateTypeName(surfSymmTensorField);
+defineTemplateTypeName(surfTensorField);
 
-template<>
-const word surfScalarField::typeName("surfScalarField");
 
-template<>
-const word surfVectorField::typeName("surfVectorField");
+// Point fields
 
-template<>
-const word surfSphericalTensorField::typeName("surfSphericalTensorField");
+defineTemplateTypeName(surfPointLabelField);
+defineTemplateTypeName(surfPointScalarField);
+defineTemplateTypeName(surfPointVectorField);
+defineTemplateTypeName(surfPointSphericalTensorField);
+defineTemplateTypeName(surfPointSymmTensorField);
+defineTemplateTypeName(surfPointTensorField);
 
-template<>
-const word surfSymmTensorField::typeName("surfSymmTensorField");
-
-template<>
-const word surfTensorField::typeName("surfTensorField");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // ************************************************************************* //

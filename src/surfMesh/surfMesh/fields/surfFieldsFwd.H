@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfFieldsFwd_H
-#define surfFieldsFwd_H
+#ifndef Foam_surfFieldsFwd_H
+#define Foam_surfFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -35,19 +36,58 @@ License
 namespace Foam
 {
 
+template<class Type, class GeoMesh> class DimensionedField;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Face Fields
 
 class surfGeoMesh;
 
-template<class Type, class GeoMesh>
-class DimensionedField;
+// Typedefs
+typedef DimensionedField<label, surfGeoMesh>
+    surfLabelField;
 
-typedef DimensionedField<label, surfGeoMesh>  surfLabelField;
-typedef DimensionedField<scalar, surfGeoMesh> surfScalarField;
-typedef DimensionedField<vector, surfGeoMesh> surfVectorField;
-typedef DimensionedField<sphericalTensor, surfGeoMesh> surfSphericalTensorField;
-typedef DimensionedField<symmTensor, surfGeoMesh> surfSymmTensorField;
-typedef DimensionedField<tensor, surfGeoMesh> surfTensorField;
+typedef DimensionedField<scalar, surfGeoMesh>
+    surfScalarField;
+
+typedef DimensionedField<vector, surfGeoMesh>
+    surfVectorField;
+
+typedef DimensionedField<sphericalTensor, surfGeoMesh>
+    surfSphericalTensorField;
+
+typedef DimensionedField<symmTensor, surfGeoMesh>
+    surfSymmTensorField;
+
+typedef DimensionedField<tensor, surfGeoMesh>
+    surfTensorField;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Point Fields
+
+class surfPointGeoMesh;
+
+// Typedefs
+typedef DimensionedField<label, surfPointGeoMesh>
+    surfPointLabelField;
+
+typedef DimensionedField<scalar, surfPointGeoMesh>
+    surfPointScalarField;
+
+typedef DimensionedField<vector, surfPointGeoMesh>
+    surfPointVectorField;
+
+typedef DimensionedField<sphericalTensor, surfPointGeoMesh>
+    surfPointSphericalTensorField;
+
+typedef DimensionedField<symmTensor, surfPointGeoMesh>
+    surfPointSymmTensorField;
+
+typedef DimensionedField<tensor, surfPointGeoMesh>
+    surfPointTensorField;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

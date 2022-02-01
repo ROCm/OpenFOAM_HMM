@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,41 +26,36 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "polySurfaceFields.H"
+#include "className.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// Face fields
 
-template<>
-const word polySurfaceLabelField::typeName
-("polySurfaceLabelField");
+defineTemplateTypeName(polySurfaceLabelField);
+defineTemplateTypeName(polySurfaceScalarField);
+defineTemplateTypeName(polySurfaceVectorField);
+defineTemplateTypeName(polySurfaceSphericalTensorField);
+defineTemplateTypeName(polySurfaceSymmTensorField);
+defineTemplateTypeName(polySurfaceTensorField);
 
-template<>
-const word polySurfaceScalarField::typeName
-("polySurfaceScalarField");
 
-template<>
-const word polySurfaceVectorField::typeName
-("polySurfaceVectorField");
+// Point fields
 
-template<>
-const word polySurfaceSphericalTensorField::typeName
-("polySurfaceSphericalTensorField");
-
-template<>
-const word polySurfaceSymmTensorField::typeName
-("polySurfaceSymmTensorField");
-
-template<>
-const word polySurfaceTensorField::typeName
-("polySurfaceTensorField");
+defineTemplateTypeName(polySurfacePointLabelField);
+defineTemplateTypeName(polySurfacePointScalarField);
+defineTemplateTypeName(polySurfacePointVectorField);
+defineTemplateTypeName(polySurfacePointSphericalTensorField);
+defineTemplateTypeName(polySurfacePointSymmTensorField);
+defineTemplateTypeName(polySurfacePointTensorField);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // ************************************************************************* //

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceFields_H
-#define surfaceFields_H
+#ifndef Foam_surfaceFields_H
+#define Foam_surfaceFields_H
 
 #include "GeometricFields.H"
 #include "surfaceMesh.H"
@@ -43,8 +43,6 @@ SourceFiles
 #include "fvsPatchFields.H"
 #include "surfaceFieldsFwd.H"
 #include "calculatedFvsPatchFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

@@ -28,8 +28,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedSurfaceFields_H
-#define slicedSurfaceFields_H
+#ifndef Foam_slicedSurfaceFields_H
+#define Foam_slicedSurfaceFields_H
 
 #include "SlicedGeometricField.H"
 #include "slicedFvsPatchField.H"

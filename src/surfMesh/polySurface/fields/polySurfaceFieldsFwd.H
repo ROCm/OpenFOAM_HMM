@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,24 +25,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polySurfacePointFieldsFwd_H
-#define polySurfacePointFieldsFwd_H
+#ifndef Foam_polySurfaceFieldsFwd_H
+#define Foam_polySurfaceFieldsFwd_H
 
 #include "fieldTypes.H"
-#include "polySurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type, class GeoMesh> class DimensionedField;
 
-template<class Type, class GeoMesh>
-class DimensionedField;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Face Fields
 
 class polySurfaceGeoMesh;
 
+//- A field on polySurface faces for a given type
+template<class Type>
+using PolyFaceField = DimensionedField<Type, polySurfaceGeoMesh>;
+
+
+// Typedefs
 typedef DimensionedField<label, polySurfaceGeoMesh>
     polySurfaceLabelField;
 
@@ -62,8 +68,17 @@ typedef Foam::DimensionedField<tensor, polySurfaceGeoMesh>
     polySurfaceTensorField;
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Point Fields
+
 class polySurfacePointGeoMesh;
 
+//- A field on polySurface face points for a given type
+template<class Type>
+using PolyPointField = DimensionedField<Type, polySurfacePointGeoMesh>;
+
+
+// Typedefs
 typedef Foam::DimensionedField<label, polySurfacePointGeoMesh>
     polySurfacePointLabelField;
 

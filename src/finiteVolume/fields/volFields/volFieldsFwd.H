@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,26 +35,36 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef volFieldsFwd_H
-#define volFieldsFwd_H
+#ifndef Foam_volFieldsFwd_H
+#define Foam_volFieldsFwd_H
 
 #include "fieldTypes.H"
-#include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+template<class Type, class GeoMesh> class DimensionedField;
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricField;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations
 class volMesh;
-
 template<class Type> class fvPatchField;
 
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
+
+//- A volume field for a given type
+template<class Type>
+using VolumeField = GeometricField<Type, fvPatchField, volMesh>;
+
+//- A volume internal field for a given Type
+template<class Type>
+using VolumeInternalField = DimensionedField<Type, volMesh>;
+
 
 // Typedefs
 

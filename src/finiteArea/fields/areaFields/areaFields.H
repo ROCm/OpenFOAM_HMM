@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef areaFields_H
-#define areaFields_H
+#ifndef Foam_areaFields_H
+#define Foam_areaFields_H
 
 #include "objectRegistry.H"
 #include "GeometricFields.H"

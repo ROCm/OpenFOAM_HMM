@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +29,8 @@ InClass
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedVolFieldsFwd_H
-#define slicedVolFieldsFwd_H
+#ifndef Foam_slicedVolFieldsFwd_H
+#define Foam_slicedVolFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -37,16 +38,6 @@ InClass
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-class volMesh;
-
-template<class Type>
-class fvPatchField;
-
-template<class Type>
-class slicedFvPatchField;
 
 template
 <
@@ -56,6 +47,22 @@ template
     class GeoMesh
 >
 class SlicedGeometricField;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Forward Declarations
+class volMesh;
+template<class Type> class fvPatchField;
+template<class Type> class slicedFvPatchField;
+
+//- A volume field slice for a given type
+template<class Type>
+using VolumeSliceField =
+SlicedGeometricField<Type, fvPatchField, slicedFvPatchField, volMesh>;
+
+
+// Typedefs
 
 typedef
 SlicedGeometricField<scalar, fvPatchField, slicedFvPatchField, volMesh>

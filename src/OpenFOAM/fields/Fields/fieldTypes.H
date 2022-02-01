@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldTypes_H
-#define fieldTypes_H
+#ifndef Foam_fieldTypes_H
+#define Foam_fieldTypes_H
 
 #include "label.H"
 #include "scalar.H"
@@ -40,9 +40,11 @@ Description
 #include "tensor.H"
 #include "triad.H"
 #include "macros.H"
+#include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define CAPITALIZE_label Label
 #define CAPITALIZE_scalar Scalar
 #define CAPITALIZE_vector Vector
 #define CAPITALIZE_sphericalTensor SphericalTensor

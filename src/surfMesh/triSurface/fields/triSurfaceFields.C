@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,58 +27,34 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurfaceFields.H"
+#include "className.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<>
-const word triSurfaceLabelField::typeName("triSurfaceLabelField");
-
-template<>
-const word triSurfaceScalarField::typeName("triSurfaceScalarField");
-
-template<>
-const word triSurfaceVectorField::typeName("triSurfaceVectorField");
-
-template<>
-const word triSurfaceSphericalTensorField::typeName
-("triSurfaceSphericalTensorField");
-
-template<>
-const word triSurfaceSymmTensorField::typeName
-("triSurfaceSymmTensorField");
-
-template<>
-const word triSurfaceTensorField::typeName("triSurfaceTensorField");
+// Face fields
+defineTemplateTypeName(triSurfaceLabelField);
+defineTemplateTypeName(triSurfaceScalarField);
+defineTemplateTypeName(triSurfaceVectorField);
+defineTemplateTypeName(triSurfaceSphericalTensorField);
+defineTemplateTypeName(triSurfaceSymmTensorField);
+defineTemplateTypeName(triSurfaceTensorField);
 
 
-template<>
-const word triSurfacePointLabelField::typeName("triSurfacePointLabelField");
+// Point fields
 
-template<>
-const word triSurfacePointScalarField::typeName("triSurfacePointScalarField");
-
-template<>
-const word triSurfacePointVectorField::typeName("triSurfacePointVectorField");
-
-template<>
-const word triSurfacePointSphericalTensorField::typeName
-("triSurfacePointSphericalTensorField");
-
-template<>
-const word triSurfacePointSymmTensorField::typeName
-("triSurfacePointSymmTensorField");
-
-template<>
-const word triSurfacePointTensorField::typeName("triSurfacePointTensorField");
-
+defineTemplateTypeName(triSurfacePointLabelField);
+defineTemplateTypeName(triSurfacePointScalarField);
+defineTemplateTypeName(triSurfacePointVectorField);
+defineTemplateTypeName(triSurfacePointSphericalTensorField);
+defineTemplateTypeName(triSurfacePointSymmTensorField);
+defineTemplateTypeName(triSurfacePointTensorField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // ************************************************************************* //

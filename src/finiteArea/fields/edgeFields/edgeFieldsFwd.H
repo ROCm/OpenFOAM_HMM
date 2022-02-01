@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeFieldsFwd_H
-#define edgeFieldsFwd_H
+#ifndef Foam_edgeFieldsFwd_H
+#define Foam_edgeFieldsFwd_H
 
 #include "fieldTypes.H"
 
@@ -41,15 +41,21 @@ Description
 namespace Foam
 {
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+class GeometricField;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward Declarations
 class edgeMesh;
-
 template<class Type> class faePatchField;
 
-template<class Type, template<class> class PatchField, class GeoMesh>
-class GeometricField;
+
+/// Future? (TBD)
+/// //- An (area) edge field for a given type
+/// template<class Type>
+/// using EdgeField = GeometricField<Type, faePatchField, edgeMesh>;
+
 
 // Typedefs
 
@@ -59,6 +65,7 @@ typedef GeometricField<sphericalTensor, faePatchField, edgeMesh>
     edgeSphericalTensorField;
 typedef GeometricField<symmTensor, faePatchField, edgeMesh> edgeSymmTensorField;
 typedef GeometricField<tensor, faePatchField, edgeMesh> edgeTensorField;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -27,7 +27,6 @@ License
 
 #include "polySurface.H"
 #include "polySurfaceFields.H"
-#include "polySurfacePointFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

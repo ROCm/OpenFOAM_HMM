@@ -31,6 +31,7 @@ License
 
 #include "mapPolyMesh.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 #include "HashOps.H"
 #include "ListOps.H"
 #include "Time.H"
@@ -159,7 +160,7 @@ Foam::IOobjectList Foam::sampledSurfaces::preCheckFields()
         {
             nVolumeFields += n;
         }
-        else if (sampledSurface::surfaceFieldTypes.found(clsName))
+        else if (fieldTypes::surface.found(clsName))
         {
             nSurfaceFields += n;
         }
