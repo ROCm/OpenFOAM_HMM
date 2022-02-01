@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,20 +140,15 @@ void Foam::vtk::writeValueParallel
     }
 
     // Gather [count, value] tuples, including from master
-    const List<std::pair<label, Type>> countValues
-    (
-        UPstream::listGatherValues<std::pair<label, Type>>
-        (
-            std::pair<label, Type>(count, val)
-        )
-    );
+    const List<label> counts(UPstream::listGatherValues(count));
+    const List<Type> values(UPstream::listGatherValues(val));
 
     if (Pstream::master())
     {
-        for (const auto& countVal : countValues)
+        forAll(counts, i)
         {
             // Write [count, value] tuple
-            vtk::write(fmt, countVal.first, countVal.second);
+            vtk::write(fmt, counts[i], values[i]);
         }
     }
 }

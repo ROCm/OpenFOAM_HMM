@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,6 +179,36 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    // This will likely fail - not declared as is_contiguous
+    // Cannot even catch since it triggers an abort()
+
+    #if 0
+    {
+        std::pair<label,vector> sendData(Pstream::myProcNo(), vector::one);
+
+        const bool oldThrowingError = FatalError.throwing(true);
+
+        try
+        {
+            List<std::pair<label,vector>> countValues
+            (
+                UPstream::listGatherValues<std::pair<label, vector>>
+                (
+                    sendData
+                )
+            );
+
+            Pout<< "listGather: " << flatOutput(countValues) << nl;
+        }
+        catch (const Foam::error& err)
+        {
+            Info<< err.message().c_str() << nl;
+        }
+
+        FatalError.throwing(oldThrowingError);
+    }
+    #endif
 
     Info<< "\nEnd\n" << endl;
 

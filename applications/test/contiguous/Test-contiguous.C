@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
     printInfo<FixedList<word, 2>>();
     printInfo<Pair<word>>();
 
+    printInfo<std::pair<int, vector>>();
+
     printInfo<FixedList<FixedList<int, 2>, 2>>();
     printInfo<segment>();
 
