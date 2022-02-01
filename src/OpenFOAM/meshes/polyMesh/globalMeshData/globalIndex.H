@@ -54,7 +54,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class globalIndex;
 class labelRange;
 
@@ -86,12 +85,25 @@ class globalIndex
             DynamicList<label>& validBins
         );
 
+        //- Report overflow at specified index
+        static void reportOverflowAndExit
+        (
+            const label idx,
+            const labelUList& localSizes
+        );
+
 public:
 
     // Public Data Types
 
         //- Disambiguation tag (list construction dispatch)
         enum accessType : char { OFFSETS, SIZES };
+
+        //- Dispatch tag
+        struct gatherOnly{};
+
+        //- Dispatch tag
+        struct gatherNone{};
 
 
     // Constructors
@@ -119,6 +131,26 @@ public:
         //  Communication with default communicator and message tag.
         inline explicit globalIndex(const label localSize);
 
+        //- Construct by gathering local sizes without rescattering.
+        //- This 'one-sided' globalIndex will be empty on non-master processes.
+        //
+        //  \note can be used when Pstream::parRun() is false.
+        inline globalIndex
+        (
+            const label localSize,
+            const globalIndex::gatherOnly,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
+
+        //- Construct with a single size entry.
+        //- No communication required
+        inline globalIndex
+        (
+            const label localSize,
+            const globalIndex::gatherNone,
+            const label comm = -1   //!< dummy communicator
+        );
+
         //- Construct from local size.
         //  Communication with given communicator and message tag,
         //  unless parallel == false
@@ -140,8 +172,11 @@ public:
         //- Check for default constructed or global sum == 0
         inline bool empty() const;
 
-        //- Global sum of localSizes
+        //- Global sum of localSizes. Same as totalSize()
         inline label size() const;
+
+        //- Global sum of localSizes. Same as size()
+        inline label totalSize() const;
 
         //- The local sizes
         labelList sizes() const;
@@ -176,6 +211,17 @@ public:
         //- Reset from local size.
         //  Does communication with default communicator and message tag.
         void reset(const label localSize);
+
+        //- Reset by gathering local sizes without rescattering.
+        //- This 'one-sided' globalIndex will be empty on non-master processes.
+        //
+        //  \note can be used when Pstream::parRun() is false.
+        void reset
+        (
+            const label localSize,
+            const globalIndex::gatherOnly,
+            const label comm = UPstream::worldComm  //!< communicator
+        );
 
         //- Reset from local size.
         //  Does communication with given communicator and message tag,

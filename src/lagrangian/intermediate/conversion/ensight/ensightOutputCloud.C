@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,12 +107,8 @@ bool Foam::ensightOutput::writeCloudPositions
     }
 
 
-    // Size information (offsets are irrelevant)
-    const globalIndex procAddr
-    (
-        UPstream::listGatherValues<label>(nLocalParcels),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(nLocalParcels, globalIndex::gatherOnly{});
 
 
     DynamicList<point> positions;
@@ -193,7 +189,7 @@ bool Foam::ensightOutput::writeCloudPositions
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             positions.cdata_bytes(),
             positions.size_bytes()
         );

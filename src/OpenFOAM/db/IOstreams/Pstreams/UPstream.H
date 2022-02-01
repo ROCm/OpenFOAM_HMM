@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UPstream_H
-#define UPstream_H
+#ifndef Foam_UPstream_H
+#define Foam_UPstream_H
 
 #include "labelList.H"
 #include "DynamicList.H"
@@ -645,8 +645,10 @@ public:
 
     // Gather single, contiguous value(s)
 
-        //- Individual values into list locations.
-        //  On master list length == nProcs, otherwise zero length
+        //- Gather individual values into list locations.
+        //  On master list length == nProcs, otherwise zero length.
+        //  If called in non-parallel mode,
+        //  the returned list length is 1 with localValue.
         template<class T>
         static List<T> listGatherValues
         (
@@ -654,8 +656,10 @@ public:
             const label communicator = worldComm
         );
 
-        //- Individual values into list locations.
-        //  On master list length == nProcs, otherwise zero length
+        //- Scatter individual values from list locations.
+        //  On master input list length == nProcs, ignored on other procs.
+        //  If called in non-parallel mode,
+        //  returns the first list element (or zero).
         template<class T>
         static T listScatterValues
         (

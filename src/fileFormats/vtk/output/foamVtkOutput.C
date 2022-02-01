@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,13 +129,8 @@ void Foam::vtk::writeListParallel
     const globalIndex& procOffset
 )
 {
-    // Gather sizes - master information, offsets are irrelevant
-    const globalIndex procAddr
-    (
-        UPstream::listGatherValues<label>(values.size()),
-        globalIndex::SIZES
-    );
-
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(values.size(), globalIndex::gatherOnly{});
 
     if (Pstream::master())
     {
@@ -174,7 +169,7 @@ void Foam::vtk::writeListParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             values.cdata_bytes(),
             values.size_bytes()
         );

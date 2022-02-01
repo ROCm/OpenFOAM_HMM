@@ -170,12 +170,8 @@ void Foam::vtk::writeListParallel
     }
 
 
-    // Gather sizes - master information, offsets are irrelevant
-    const globalIndex procAddr
-    (
-        UPstream::listGatherValues<label>(values.size()),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(values.size(), globalIndex::gatherOnly{});
 
 
     if (Pstream::master())
@@ -205,7 +201,7 @@ void Foam::vtk::writeListParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             values.cdata_bytes(),
             values.size_bytes()
         );
@@ -236,12 +232,8 @@ void Foam::vtk::writeListParallel
         sendData = UIndirectList<Type>(values, addressing);
     }
 
-    // Gather sizes - master information, offsets are irrelevant
-    const globalIndex procAddr
-    (
-        UPstream::listGatherValues<label>(sendData.size()),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(sendData.size(), globalIndex::gatherOnly{});
 
 
     if (Pstream::master())
@@ -270,7 +262,7 @@ void Foam::vtk::writeListParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             sendData.cdata_bytes(),
             sendData.size_bytes()
         );
@@ -301,12 +293,8 @@ void Foam::vtk::writeListParallel
         sendData = subset(selected, values);
     }
 
-    // Gather sizes - master information, offsets are irrelevant
-    const globalIndex procAddr
-    (
-        UPstream::listGatherValues<label>(sendData.size()),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(sendData.size(), globalIndex::gatherOnly{});
 
 
     if (Pstream::master())
@@ -335,7 +323,7 @@ void Foam::vtk::writeListParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             sendData.cdata_bytes(),
             sendData.size_bytes()
         );
@@ -360,17 +348,9 @@ void Foam::vtk::writeListsParallel
     }
 
 
-    // Gather sizes - master information and offsets are irrelevant
-    const globalIndex procAddr1
-    (
-        UPstream::listGatherValues<label>(values1.size()),
-        globalIndex::SIZES
-    );
-    const globalIndex procAddr2
-    (
-        UPstream::listGatherValues<label>(values2.size()),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr1(values1.size(), globalIndex::gatherOnly{});
+    const globalIndex procAddr2(values2.size(), globalIndex::gatherOnly{});
 
 
     if (Pstream::master())
@@ -415,7 +395,7 @@ void Foam::vtk::writeListsParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             values1.cdata_bytes(),
             values1.size_bytes()
         );
@@ -423,7 +403,7 @@ void Foam::vtk::writeListsParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             values2.cdata_bytes(),
             values2.size_bytes()
         );
@@ -456,17 +436,9 @@ void Foam::vtk::writeListsParallel
     }
 
 
-    // Gather sizes - master information, offsets are irrelevant
-    const globalIndex procAddr1
-    (
-        UPstream::listGatherValues<label>(values1.size()),
-        globalIndex::SIZES
-    );
-    const globalIndex procAddr2
-    (
-        UPstream::listGatherValues<label>(sendData2.size()),
-        globalIndex::SIZES
-    );
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr1(values1.size(), globalIndex::gatherOnly{});
+    const globalIndex procAddr2(sendData2.size(), globalIndex::gatherOnly{});
 
 
     if (Pstream::master())
@@ -512,7 +484,7 @@ void Foam::vtk::writeListsParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             values1.cdata_bytes(),
             values1.size_bytes()
         );
@@ -520,7 +492,7 @@ void Foam::vtk::writeListsParallel
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             sendData2.cdata_bytes(),
             sendData2.size_bytes()
         );

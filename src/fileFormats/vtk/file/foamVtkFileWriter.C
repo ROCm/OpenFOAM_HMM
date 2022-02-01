@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -565,14 +565,14 @@ bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
     }
 
 
-    const globalIndex procSizes
+    const globalIndex procAddr
     (
         parallel_
-      ? globalIndex(nValues)
-      : globalIndex()
+      ? globalIndex(nValues, globalIndex::gatherOnly{})
+      : globalIndex(nValues, globalIndex::gatherNone{})
     );
 
-    const label totalCount = (parallel_ ? procSizes.size() : nValues);
+    const label totalCount = procAddr.totalSize();
 
     this->beginDataArray<label>("procID", totalCount);
 
@@ -583,9 +583,9 @@ bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
         if (Pstream::master())
         {
             // Per-processor ids
-            for (const int proci : Pstream::allProcs())
+            for (const label proci : procAddr.allProcs())
             {
-                vtk::write(format(), label(proci), procSizes.localSize(proci));
+                vtk::write(format(), proci, procAddr.localSize(proci));
             }
             good = true;
         }

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,17 +78,8 @@ bool Foam::ensightOutput::writeCloudField
         return false;
     }
 
-    // Size information (offsets are irrelevant)
-    globalIndex procAddr;
-    if (Pstream::parRun())
-    {
-        procAddr.reset(UPstream::listGatherValues<label>(field.size()));
-    }
-    else
-    {
-        procAddr.reset(labelList(Foam::one{}, field.size()));
-    }
-
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr(field.size(), globalIndex::gatherOnly{});
 
     if (Pstream::master())
     {
@@ -137,7 +128,7 @@ bool Foam::ensightOutput::writeCloudField
         UOPstream::write
         (
             UPstream::commsTypes::scheduled,
-            Pstream::masterNo(),
+            UPstream::masterNo(),
             field.cdata_bytes(),
             field.size_bytes()
         );

@@ -519,11 +519,8 @@ void Foam::globalIndex::mpiGatherOp
     if (UPstream::parRun())
     {
         // Gather sizes - only needed on master
-        globalIndex
-        (
-            UPstream::listGatherValues(sendData.size(), comm),
-            accessType::SIZES
-        ).mpiGather(sendData, allData, comm);
+        globalIndex(sendData.size(), globalIndex::gatherOnly{}, comm)
+            .mpiGather(sendData, allData, comm);
     }
     else
     {
@@ -584,11 +581,8 @@ void Foam::globalIndex::gatherOp
     if (UPstream::parRun())
     {
         // Gather sizes - only needed on master
-        globalIndex
-        (
-            UPstream::listGatherValues(sendData.size(), comm),
-            accessType::SIZES
-        ).gather(sendData, allData, tag, commsType, comm);
+        globalIndex(sendData.size(), globalIndex::gatherOnly{}, comm)
+            .gather(sendData, allData, tag, commsType, comm);
     }
     else
     {
@@ -611,11 +605,8 @@ void Foam::globalIndex::gatherOp
     if (UPstream::parRun())
     {
         // Gather sizes - only needed on master
-        globalIndex
-        (
-            UPstream::listGatherValues(sendData.size(), comm),
-            accessType::SIZES
-        ).gather(sendData, allData, tag, commsType, comm);
+        globalIndex(sendData.size(), globalIndex::gatherOnly{}, comm)
+            .gather(sendData, allData, tag, commsType, comm);
     }
     else
     {
@@ -667,11 +658,8 @@ void Foam::globalIndex::gatherInplaceOp
     if (UPstream::parRun())
     {
         // Gather sizes - only needed on master
-        globalIndex
-        (
-            UPstream::listGatherValues(fld.size(), comm),
-            accessType::SIZES
-        ).gather(fld, tag, commsType, comm);
+        globalIndex(fld.size(), globalIndex::gatherOnly{}, comm)
+            .gather(fld, tag, commsType, comm);
     }
     // Serial: (no-op)
 }

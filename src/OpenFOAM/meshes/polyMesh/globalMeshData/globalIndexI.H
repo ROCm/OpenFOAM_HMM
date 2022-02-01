@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,6 +86,32 @@ inline Foam::globalIndex::globalIndex(const label localSize)
 inline Foam::globalIndex::globalIndex
 (
     const label localSize,
+    const globalIndex::gatherOnly,
+    const label comm
+)
+{
+    // Gather sizes (one-sided)
+    reset(UPstream::listGatherValues(localSize, comm));
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    const label localSize,
+    const globalIndex::gatherNone,
+    const label /* comm (ignored) */
+)
+:
+    offsets_(2)
+{
+    offsets_[0] = 0;
+    offsets_[1] = localSize;
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    const label localSize,
     const int tag,
     const label comm,
     const bool parallel
@@ -100,6 +126,19 @@ inline Foam::globalIndex::globalIndex
 inline bool Foam::globalIndex::empty() const
 {
     return offsets_.empty() || offsets_.last() == 0;
+}
+
+
+inline Foam::label Foam::globalIndex::totalSize() const
+{
+    const label len = (offsets_.size() - 1);
+    return (len < 1) ? static_cast<label>(0) : offsets_[len];
+}
+
+
+inline Foam::label Foam::globalIndex::size() const
+{
+    return totalSize();
 }
 
 
@@ -145,12 +184,6 @@ inline const Foam::labelUList Foam::globalIndex::localStarts() const
     if (len < 1) return labelUList::null();
 
     return labelList::subList(offsets_, len);
-}
-
-
-inline Foam::label Foam::globalIndex::size() const
-{
-    return offsets_.empty() ? static_cast<label>(0) : offsets_.last();
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,17 +68,13 @@ void Foam::ensightOutput::Detail::writeFieldContent
     // already checked prior to calling, but extra safety
     parallel = parallel && Pstream::parRun();
 
-    // Size information (offsets are irrelevant)
-    globalIndex procAddr;
-    if (parallel)
-    {
-        procAddr.reset(UPstream::listGatherValues<label>(fld.size()));
-    }
-    else
-    {
-        // Master size
-        procAddr.reset(labelList(Foam::one{}, fld.size()));
-    }
+    // Gather sizes (offsets irrelevant)
+    const globalIndex procAddr
+    (
+        parallel
+      ? globalIndex(fld.size(), globalIndex::gatherOnly{})
+      : globalIndex(fld.size(), globalIndex::gatherNone{})
+    );
 
 
     if (Pstream::master())
@@ -122,7 +118,7 @@ void Foam::ensightOutput::Detail::writeFieldContent
             UOPstream::write
             (
                 UPstream::commsTypes::scheduled,
-                Pstream::masterNo(),
+                UPstream::masterNo(),
                 cmptBuffer.cdata_bytes(),
                 cmptBuffer.size_bytes()
             );
